@@ -25,7 +25,7 @@ $newstub = '<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
 try {
     $phar->setStub($newstub);
 } catch(exception $e) {
-    echo 'Exception: ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($phar->getStub());
@@ -44,7 +44,7 @@ __HALT_COMPILER();
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 bool(true)
-Exception: illegal stub for tar-based phar "%sphar_stub_error.phar.tar"
+PharException: illegal stub for tar-based phar "%sphar_stub_error.phar.tar"
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 bool(true)

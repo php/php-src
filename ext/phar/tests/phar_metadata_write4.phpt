@@ -55,7 +55,7 @@ var_dump($phar['a']->getMetadata(['allowed_classes' => true]));
 try {
     var_dump($phar['a']->setMetadata(new ThrowsOnSerialize()));
 } catch (RuntimeException $e) {
-    echo "Caught {$e->getMessage()} at {$e->getFile()}:{$e->getLine()}\n";
+    echo $e::class, ': ', $e->getMessage(), ' in ', $e->getFile(), ' on line ', $e->getLine(), PHP_EOL;
     unset($e);
 }
 var_dump($phar['a']->getMetadata([]));
@@ -90,7 +90,7 @@ In __wakeup 2
 object(EchoesOnWakeup)#2 (0) {
 }
 In __destruct 2
-Caught In sleep at %sphar_metadata_write4.php:12
+RuntimeException: In sleep in %sphar_metadata_write4.php on line 12
 In __wakeup 3
 object(EchoesOnWakeup)#3 (0) {
 }

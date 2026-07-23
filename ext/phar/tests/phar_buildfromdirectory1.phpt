@@ -12,10 +12,8 @@ try {
     ini_set('phar.readonly', 1);
     $phar->buildFromDirectory(1);
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-%s(24) "UnexpectedValueException"
-Cannot write to archive - write operations restricted by INI setting
+UnexpectedValueException: Cannot write to archive - write operations restricted by INI setting

@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - basic - URL contains null byte
 try {
     new Uri\WhatWg\Url("https://exam\0ple.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

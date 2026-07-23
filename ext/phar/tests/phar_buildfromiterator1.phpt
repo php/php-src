@@ -13,10 +13,8 @@ try {
 
     $phar->buildFromIterator(new ArrayIterator([]));
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-%s(24) "UnexpectedValueException"
-Cannot write out phar archive, phar is read-only
+UnexpectedValueException: Cannot write out phar archive, phar is read-only

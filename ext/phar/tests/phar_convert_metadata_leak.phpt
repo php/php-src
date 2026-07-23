@@ -15,10 +15,10 @@ $phar['x'] = 'hi';
 try {
     $phar->convertToData(Phar::ZIP, Phar::NONE, 'phar.zip');
 } catch (BadMethodCallException $e) {
-    echo $e->getMessage(),"\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');?>
 --EXPECTF--
-data phar "%s" has invalid extension phar.zip
+BadMethodCallException: data phar "%s" has invalid extension phar.zip

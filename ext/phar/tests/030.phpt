@@ -29,7 +29,7 @@ var_dump(isset($p['.phar/test']));
 try {
 $p['.phar/test'];
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -43,4 +43,4 @@ This is b/c
 This is b/d
 This is e
 bool(false)
-Cannot directly get any files or directories in magic ".phar" directory
+BadMethodCallException: Cannot directly get any files or directories in magic ".phar" directory

@@ -12,28 +12,28 @@ $p = new Phar($fname);
 try {
     $p->setAlias('hi/');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $p->setAlias('hi\\l');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $p->setAlias('hil;');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $p->setAlias(':hil');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-Invalid alias "hi/" specified for phar "%sinvalid_alias.phar"
-Invalid alias "hi\l" specified for phar "%sinvalid_alias.phar"
-Invalid alias "hil;" specified for phar "%sinvalid_alias.phar"
-Invalid alias ":hil" specified for phar "%sinvalid_alias.phar"
+UnexpectedValueException: Invalid alias "hi/" specified for phar "%sinvalid_alias.phar"
+UnexpectedValueException: Invalid alias "hi\l" specified for phar "%sinvalid_alias.phar"
+UnexpectedValueException: Invalid alias "hil;" specified for phar "%sinvalid_alias.phar"
+UnexpectedValueException: Invalid alias ":hil" specified for phar "%sinvalid_alias.phar"

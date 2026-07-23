@@ -32,7 +32,7 @@ try
 }
 catch(Exception $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ini_set('phar.readonly',1);
 $p2 = new Phar($fname2);
@@ -48,7 +48,7 @@ echo 'c: ' ,file_get_contents($p2['c']->getPathName());
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar.php'); ?>
 --EXPECTF--
 hihibool(true)
-file "/error/.." contains invalid characters upper directory reference, cannot be copied from "a" in phar %s
+UnexpectedValueException: file "/error/.." contains invalid characters upper directory reference, cannot be copied from "a" in phar %s
 bool(true)
 
 a: hib: hic: hi===DONE===

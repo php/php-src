@@ -6,7 +6,7 @@ Test Uri\Rfc3986\Uri parsing - scheme - percent encoded character
 try {
     new Uri\Rfc3986\Uri("http%2F://example.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

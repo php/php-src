@@ -23,7 +23,7 @@ include __DIR__.'/files/phar_test.inc';
 try {
     new Phar($fname);
 } catch (UnexpectedValueException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -33,4 +33,4 @@ try {
 @rmdir(__DIR__.'/gh20302');
 ?>
 --EXPECTF--
-Cannot open archive "%sgh20302.phar", alias is already in use by existing archive
+UnexpectedValueException: Cannot open archive "%sgh20302.phar", alias is already in use by existing archive

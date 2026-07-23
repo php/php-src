@@ -17,7 +17,7 @@ $b = $phar['a/b'];
 try {
 $phar['a']->chmod(066);
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 lstat($pname . '/a/b'); // sets BG(CurrentLStatFile)
 $b->chmod(0666);
@@ -25,4 +25,4 @@ $b->chmod(0666);
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECT--
-Phar entry "a" is a temporary directory (not an actual entry in the archive), cannot chmod
+BadMethodCallException: Phar entry "a" is a temporary directory (not an actual entry in the archive), cannot chmod

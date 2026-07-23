@@ -22,7 +22,7 @@ try {
     $phar = new Phar($fname);
     var_dump($phar->getStub());
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 copy($fname, $fname2);
@@ -31,7 +31,7 @@ try {
     $phar = new PharData($fname2);
     var_dump($phar->getStub());
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -41,6 +41,6 @@ try {
 @unlink(__DIR__ . '/tar_nostub.tar');
 ?>
 --EXPECTF--
-RecursiveDirectoryIterator::__construct(phar://%star_nostub.phar.tar/): Failed to open directory: '%star_nostub.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive
+UnexpectedValueException: RecursiveDirectoryIterator::__construct(phar://%star_nostub.phar.tar/): Failed to open directory: '%star_nostub.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive
 phar url "phar://%star_nostub.phar.tar/" is unknown
 string(0) ""

@@ -19,12 +19,12 @@ ini_set("intl.use_exceptions", 1);
 try {
 	UConverter::transcode("\x0a", 'nein!!', 'UTF-8');
 } catch (IntlException $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	UConverter::transcode("\x0a", 'UTF-16BE', 'da!');
 } catch (IntlException $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
@@ -33,5 +33,5 @@ Deprecated: ini_set(): Using a value different than 0 for intl.error_level is de
 Warning: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR in %s on line %d
 
 Warning: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR in %s on line %d
-UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR
-UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR
+IntlException: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR
+IntlException: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR

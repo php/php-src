@@ -9,10 +9,10 @@ try {
 $phar = new PharData('bug72928.zip');
 var_dump($phar);
 } catch(UnexpectedValueException $e) {
-    print $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 DONE
 --EXPECTF--
-phar error: signature cannot be read in zip-based phar "%sbug72928.zip"
+UnexpectedValueException: phar error: signature cannot be read in zip-based phar "%sbug72928.zip"
 DONE

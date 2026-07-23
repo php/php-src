@@ -41,8 +41,7 @@ try {
     var_dump($phar->buildFromIterator(new myIterator(array('a' => $a = fopen(basename(__FILE__, 'php') . 'phpt', 'r')))));
     fclose($a);
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--

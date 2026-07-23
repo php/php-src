@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - port - negative value
 try {
     new Uri\WhatWg\Url("http://example.com:-1");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

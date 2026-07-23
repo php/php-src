@@ -16,7 +16,7 @@ $a->close();
 try {
     $p = new PharData($fname);
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -25,4 +25,4 @@ try {
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECTF--
-phar error: "%sbadchecksum.tar" is a corrupted tar file (checksum mismatch of file "hithere")
+UnexpectedValueException: phar error: "%sbadchecksum.tar" is a corrupted tar file (checksum mismatch of file "hithere")

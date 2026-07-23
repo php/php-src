@@ -6,7 +6,7 @@ Test Uri\Rfc3986\Uri parsing - userinfo - reserved character
 try {
     new Uri\Rfc3986\Uri("http://us[er]:pass@example.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

@@ -13,7 +13,7 @@ $referenceRandomizer = new Randomizer(new PcgOneseq128XslRr64(1234));
 try {
     $randomizer->engine = new Xoshiro256StarStar(1234);
 } catch (Throwable $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 for ($i = 0; $i < 10_000; $i++) {
@@ -26,5 +26,5 @@ die('success');
 
 ?>
 --EXPECT--
-Cannot modify readonly property Random\Randomizer::$engine
+Error: Cannot modify readonly property Random\Randomizer::$engine
 success

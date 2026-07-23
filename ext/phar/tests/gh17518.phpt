@@ -12,7 +12,7 @@ $phar['a'] = 'b';
 try {
     $phar->extractTo(__DIR__ . '/gh17518', '');
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--

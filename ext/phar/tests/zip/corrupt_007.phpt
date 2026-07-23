@@ -7,8 +7,8 @@ phar
 try {
     new PharData(__DIR__ . '/files/truncfilename.zip');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-phar error: corrupted central directory entry, no magic signature in zip-based phar "%struncfilename.zip"
+UnexpectedValueException: phar error: corrupted central directory entry, no magic signature in zip-based phar "%struncfilename.zip"

@@ -30,7 +30,7 @@ copy($fname, $fname_new);
 try {
   new Phar($fname_new);
 } catch (UnexpectedValueException $e) {
-  echo $e->getMessage(), "\n";
+  echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXTENSIONS--
@@ -44,4 +44,4 @@ unlink(__DIR__ . '/gh13833.phar.copy.phar');
 Yuancheng Jiang <yuancheng@comp.nus.edu.sg>
 Felix De Vliegher <felix.devliegher@gmail.com>
 --EXPECTF--
-internal corruption of phar "%sgh13833.phar.copy.phar" (trying to read past buffer end)
+UnexpectedValueException: internal corruption of phar "%sgh13833.phar.copy.phar" (trying to read past buffer end)

@@ -47,8 +47,7 @@ try {
             '.phar/oops' => basename(__FILE__, 'php') . 'phpt',
         ))));
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--

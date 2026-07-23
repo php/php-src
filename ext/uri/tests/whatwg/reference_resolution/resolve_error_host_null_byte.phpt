@@ -10,7 +10,7 @@ $url = Uri\WhatWg\Url::parse("https://example.com");
 try {
     $url->resolve("https://ex\0mple.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

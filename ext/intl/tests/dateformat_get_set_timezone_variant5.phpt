@@ -55,4 +55,3 @@ string(12) "Europe/Paris"
 domingo, 1 de janeiro de 2012 às 01:00:00 Hor%s padrão %Sda Europa Central
 string(16) "Europe/Amsterdam"
 string(16) "Europe/Amsterdam"
-

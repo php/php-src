@@ -9,7 +9,7 @@ phar.require_hash=0
 try {
     $p = new PharData(__DIR__ . '/files/tinylink.tar');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo $p['file.txt']->getContent();
 echo $p['link.txt']->getContent();

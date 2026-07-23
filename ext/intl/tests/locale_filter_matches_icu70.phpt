@@ -72,13 +72,13 @@ function ut_main()
     try {
 	    ut_loc_locale_filter_matches("de\0-DE", "de-DE", false);
     } catch (\ValueError $e) {
-	    echo $e->getMessage(). PHP_EOL;
+	    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     try {
 	    ut_loc_locale_filter_matches("de-DE", "d\0e-DE", false);
     } catch (\ValueError $e) {
-	    echo $e->getMessage(). PHP_EOL;
+	    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     $res_str .= "\n";
@@ -91,10 +91,10 @@ ut_run();
 
 ?>
 --EXPECT--
-Locale::filterMatches(): Argument #1 ($languageTag) must not contain any null bytes
-Locale::filterMatches(): Argument #2 ($locale) must not contain any null bytes
-locale_filter_matches(): Argument #1 ($languageTag) must not contain any null bytes
-locale_filter_matches(): Argument #2 ($locale) must not contain any null bytes
+ValueError: Locale::filterMatches(): Argument #1 ($languageTag) must not contain any null bytes
+ValueError: Locale::filterMatches(): Argument #2 ($locale) must not contain any null bytes
+ValueError: locale_filter_matches(): Argument #1 ($languageTag) must not contain any null bytes
+ValueError: locale_filter_matches(): Argument #2 ($locale) must not contain any null bytes
 --------------
 loc_range:de-de matches lang_tag de-DEVA ? NO
 loc_range:de_DE canonically matches lang_tag de_Deva ? NO

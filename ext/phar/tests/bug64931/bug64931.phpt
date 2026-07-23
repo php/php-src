@@ -15,31 +15,31 @@ $phar->addFile(__DIR__."/src/.pharignore", ".pharignore");
 try {
     $phar->addFile(__DIR__."/src/.pharignore", ".phar/gotcha");
 } catch (Exception $e) {
-    echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $phar->addFromString(".phar", "gotcha");
 } catch (Exception $e) {
-    echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $phar->addFromString(".phar//", "gotcha");
 } catch (Exception $e) {
-    echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $phar->addFromString(".phar\\", "gotcha");
 } catch (Exception $e) {
-    echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $phar->addFromString(".phar\0", "gotcha");
 } catch (ValueError $e) {
-    echo "CAUGHT: ". $e->getMessage() ."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -49,8 +49,8 @@ try {
 ?>
 --EXPECT--
 Test
-CAUGHT: Cannot create any files in magic ".phar" directory
-CAUGHT: Cannot create any files in magic ".phar" directory
-CAUGHT: Cannot create any files in magic ".phar" directory
-CAUGHT: Cannot create any files in magic ".phar" directory
-CAUGHT: Phar::addFromString(): Argument #1 ($localName) must not contain any null bytes
+BadMethodCallException: Cannot create any files in magic ".phar" directory
+BadMethodCallException: Cannot create any files in magic ".phar" directory
+BadMethodCallException: Cannot create any files in magic ".phar" directory
+BadMethodCallException: Cannot create any files in magic ".phar" directory
+ValueError: Phar::addFromString(): Argument #1 ($localName) must not contain any null bytes

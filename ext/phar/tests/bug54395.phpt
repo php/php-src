@@ -8,9 +8,9 @@ phar
 try {
     phar::mount(1,1);
 } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-string(25) "Mounting of 1 to 1 failed"
+PharException: Mounting of 1 to 1 failed

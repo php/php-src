@@ -8,8 +8,8 @@ uri
 try {
     var_dump(new Uri\Rfc3986\Uri('foo', new Uri\Rfc3986\Uri('bar')));
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-The specified base URI must be absolute
+Uri\InvalidUriException: The specified base URI must be absolute

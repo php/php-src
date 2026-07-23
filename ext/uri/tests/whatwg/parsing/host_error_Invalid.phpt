@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - host - invalid code point
 try {
     new Uri\WhatWg\Url("https://ex[a]mple.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

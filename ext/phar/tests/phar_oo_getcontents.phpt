@@ -16,12 +16,12 @@ echo $phar['a/b']->getContent() . "\n";
 try {
 echo $phar['a']->getContent(), "\n";
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 echo $phar['hi']->getContent(), "\n";
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -32,5 +32,5 @@ __halt_compiler();
 --EXPECTF--
 file contents
 this works
-phar error: Cannot retrieve contents, "a" in phar "%sphar_oo_getcontents.phar.php" is a directory
-phar error: Cannot retrieve contents, "hi" in phar "%sphar_oo_getcontents.phar.php" is a directory
+BadMethodCallException: phar error: Cannot retrieve contents, "a" in phar "%sphar_oo_getcontents.phar.php" is a directory
+BadMethodCallException: phar error: Cannot retrieve contents, "hi" in phar "%sphar_oo_getcontents.phar.php" is a directory

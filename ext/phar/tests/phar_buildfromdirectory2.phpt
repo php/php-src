@@ -15,10 +15,8 @@ try {
     $phar = new Phar(__DIR__ . '/buildfromdirectory2.phar');
     $phar->buildFromDirectory(1);
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-%s(24) "UnexpectedValueException"
-RecursiveDirectoryIterator::__construct(1): Failed to open directory: No such file or directory
+UnexpectedValueException: RecursiveDirectoryIterator::__construct(1): Failed to open directory: No such file or directory

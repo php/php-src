@@ -55,7 +55,7 @@ foreach($checks as $check)
     }
     catch (ValueError $e)
     {
-        echo 'Exception: ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -78,4 +78,4 @@ string(5) "query"
 11:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
 12:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
 13:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
-Exception: Phar::offsetSet(): Argument #1 ($localName) must not contain any null bytes
+ValueError: Phar::offsetSet(): Argument #1 ($localName) must not contain any null bytes

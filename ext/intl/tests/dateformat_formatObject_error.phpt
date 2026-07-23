@@ -18,7 +18,7 @@ try {
     var_dump(IntlDateFormatter::formatObject(new B));
     var_dump(intl_get_error_message());
 } catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump(IntlDateFormatter::formatObject(new stdclass));

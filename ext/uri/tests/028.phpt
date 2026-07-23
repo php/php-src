@@ -28,13 +28,13 @@ var_dump($uri5->getPath());
 try {
     $uri5->withPath("test");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $uri5->withPath("/#");
 } catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $uri1 = Uri\Rfc3986\Uri::parse("/foo");
@@ -75,8 +75,8 @@ string(10) "/foo%2Fbar"
 string(10) "/foo%2Fbar"
 string(0) ""
 string(0) ""
-The specified path is malformed
-The specified path is malformed
+Uri\InvalidUriException: The specified path is malformed
+Uri\InvalidUriException: The specified path is malformed
 string(4) "/foo"
 string(3) "bar"
 string(9) "/foo/bar/"

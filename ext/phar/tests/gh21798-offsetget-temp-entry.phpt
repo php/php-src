@@ -16,24 +16,24 @@ $phar = new Phar($fname);
 try {
     $phar->offsetGet('.phar/stub.php');
 } catch (BadMethodCallException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $phar->offsetGet('.phar/alias.txt');
 } catch (BadMethodCallException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $phar->offsetGet('.phar/internal');
 } catch (BadMethodCallException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo "no crash\n";
 ?>
 --CLEAN--
 <?php @unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECT--
-Entry .phar/stub.php does not exist
-Entry .phar/alias.txt does not exist
-Entry .phar/internal does not exist
+BadMethodCallException: Entry .phar/stub.php does not exist
+BadMethodCallException: Entry .phar/alias.txt does not exist
+BadMethodCallException: Entry .phar/internal does not exist
 no crash

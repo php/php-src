@@ -13,8 +13,8 @@ $num = "1\xc2\xa0$";
 try {
     numfmt_parse_currency($fmt, $num, $test->prop);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Cannot assign string to reference held by property Test::$prop of type int
+TypeError: Cannot assign string to reference held by property Test::$prop of type int

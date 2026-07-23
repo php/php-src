@@ -26,7 +26,7 @@ try
 }
 catch (BadMethodCallException $e)
 {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -36,4 +36,4 @@ unlink(__DIR__ . '/files/phar_oo_012b.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--
-Exception: Write operations disabled by the php.ini setting phar.readonly
+BadMethodCallException: Write operations disabled by the php.ini setting phar.readonly

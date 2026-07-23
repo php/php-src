@@ -34,7 +34,7 @@ var_dump($phar->getAlias());
 try {
     $phar['.phar/alias.txt'] = 'pinocchio';
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($phar->getAlias());
 
@@ -53,6 +53,6 @@ string(%d) "%sgetalias.phar.zip"
 string(%d) "%sgetalias.phar.zip"
 string(13) "jiminycricket"
 string(13) "jiminycricket"
-Cannot set alias ".phar/alias.txt" directly in phar "%sgetalias.phar.zip", use setAlias
+BadMethodCallException: Cannot set alias ".phar/alias.txt" directly in phar "%sgetalias.phar.zip", use setAlias
 string(13) "jiminycricket"
 string(9) "pinocchio"

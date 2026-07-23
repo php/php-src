@@ -9,8 +9,8 @@ $formatter = new IntlListFormatter('en_US');
 try {
     $formatter->__construct('en_US');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-IntlListFormatter object is already constructed
+Error: IntlListFormatter object is already constructed

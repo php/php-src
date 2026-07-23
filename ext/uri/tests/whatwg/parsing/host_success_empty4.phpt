@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - host - empty
 try {
     new Uri\WhatWg\Url("///");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

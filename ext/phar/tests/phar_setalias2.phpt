@@ -27,12 +27,12 @@ $phar = new Phar(__DIR__ . '/notphar.phar');
 try {
     $phar->setAlias('test');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $b = new Phar(__DIR__ . '/nope.phar', 0, 'test');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -42,5 +42,5 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 --EXPECTF--
 hio
 test
-alias "test" is already used for archive "%sphar_setalias2.phar.php" and cannot be used for other archives
-alias "test" is already used for archive "%sphar_setalias2.phar.php" cannot be overloaded with "%snope.phar"
+PharException: alias "test" is already used for archive "%sphar_setalias2.phar.php" and cannot be used for other archives
+UnexpectedValueException: alias "test" is already used for archive "%sphar_setalias2.phar.php" cannot be overloaded with "%snope.phar"

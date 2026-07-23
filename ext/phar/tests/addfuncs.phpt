@@ -16,27 +16,27 @@ echo file_get_contents($pname . '/b') . "\n";
 try {
 $phar->addFile($pname . '/a');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 $phar->addFile($pname . '/a', 'a');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 $phar->addFile(__DIR__ . '/does/not/exist');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 $phar->addFile($pname . '/a', '.phar/stub.php');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 $phar->addFromString('.phar/stub.php', 'hi');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -44,8 +44,8 @@ echo $e->getMessage() . "\n";
 --EXPECTF--
 hi
 hi
-Entry phar://%saddfuncs.phar.php/a does not exist and cannot be created: phar error: invalid path "phar://%saddfuncs.phar.php/a" contains double slash
-Entry a does not exist and cannot be created: phar error: file "a" in phar "%saddfuncs.phar.php" cannot be opened for writing, readable file pointers are open
-phar error: unable to open file "%s/does/not/exist" to add to phar archive
-Cannot create any files in magic ".phar" directory
-Cannot create any files in magic ".phar" directory
+BadMethodCallException: Entry phar://%saddfuncs.phar.php/a does not exist and cannot be created: phar error: invalid path "phar://%saddfuncs.phar.php/a" contains double slash
+BadMethodCallException: Entry a does not exist and cannot be created: phar error: file "a" in phar "%saddfuncs.phar.php" cannot be opened for writing, readable file pointers are open
+RuntimeException: phar error: unable to open file "%s/does/not/exist" to add to phar archive
+BadMethodCallException: Cannot create any files in magic ".phar" directory
+BadMethodCallException: Cannot create any files in magic ".phar" directory

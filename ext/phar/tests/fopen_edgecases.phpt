@@ -119,4 +119,3 @@ Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/
 Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/hi" to "phar://%sfopen_edgecases.phar.php/there": invalid or non-writable url "phar://%sfopen_edgecases.phar.php/hi" in %sfopen_edgecases.php on line %d
 
 Warning: fopen(./notfound.php): Failed to open stream: No such file or directory in phar://%sfopen_edgecases.phar.php/test.php on line %d
-

@@ -33,7 +33,7 @@ $phar = new Phar(__DIR__ . '/notphar.phar');
 try {
     $phar->setAlias('test');
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -44,4 +44,4 @@ __HALT_COMPILER();
 --EXPECTF--
 hio
 test
-alias "test" is already used for archive "%sphar_setalias2.phar.zip" and cannot be used for other archives
+PharException: alias "test" is already used for archive "%sphar_setalias2.phar.zip" and cannot be used for other archives

@@ -19,8 +19,7 @@ try {
     asort($a);
     var_dump($a);
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump(file_exists(__DIR__ . '/buildfromdirectory5.phar'));

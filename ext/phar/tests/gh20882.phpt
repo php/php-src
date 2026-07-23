@@ -15,8 +15,8 @@ try {
         null
     );
 } catch (BadMethodCallException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Iterator RecursiveIteratorIterator returns an SplFileInfo object, so base directory must be specified
+BadMethodCallException: Iterator RecursiveIteratorIterator returns an SplFileInfo object, so base directory must be specified

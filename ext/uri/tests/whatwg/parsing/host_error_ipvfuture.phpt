@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - host - IPvFuture
 try {
     new Uri\WhatWg\Url("https://[v7.host]");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

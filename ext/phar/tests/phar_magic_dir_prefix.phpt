@@ -43,13 +43,13 @@ var_dump($subdir);
 try {
     $phar->addFromString('.phar/still-magic.txt', 'no');
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $phar->addEmptyDir('/.phar');
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -76,5 +76,5 @@ array(3) {
   [2]=>
   string(15) "from-string.txt"
 }
-Cannot create any files in magic ".phar" directory
-Cannot create a directory in magic ".phar" directory
+BadMethodCallException: Cannot create any files in magic ".phar" directory
+BadMethodCallException: Cannot create a directory in magic ".phar" directory

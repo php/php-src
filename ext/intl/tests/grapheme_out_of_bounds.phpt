@@ -38,42 +38,42 @@ echo "\n";
 try {
     var_dump(grapheme_strpos("foo", "bar", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_stripos("foo", "bar", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strrpos("foo", "bar", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strripos("foo", "bar", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strpos("äöü", "bar", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_stripos("äöü", "bar", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strrpos("äöü", "bar", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strripos("äöü", "bar", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo "\n";
 
@@ -81,42 +81,42 @@ echo "\n";
 try {
     var_dump(grapheme_strpos("foo", "bar", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_stripos("foo", "bar", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strrpos("foo", "bar", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strripos("foo", "bar", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strpos("äöü", "bar", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_stripos("äöü", "bar", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strrpos("äöü", "bar", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strripos("äöü", "bar", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo "\n";
 
@@ -124,42 +124,42 @@ echo "\n";
 try {
     var_dump(grapheme_strpos("äöü", "", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_stripos("äöü", "", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strrpos("äöü", "", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strripos("äöü", "", 4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strpos("äöü", "", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_stripos("äöü", "", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strrpos("äöü", "", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(grapheme_strripos("äöü", "", -4));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo "\n";
 
@@ -208,32 +208,32 @@ bool(false)
 bool(false)
 bool(false)
 
-grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
-grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
-grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: grapheme_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 string(0) ""
 string(3) "foo"

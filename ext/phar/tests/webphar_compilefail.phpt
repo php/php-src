@@ -9,9 +9,9 @@ phar.readonly=1
 try {
 Phar::webPhar('oopsiedaisy.phar', '/index.php');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-internal corruption of phar "%swebphar_compilefail.php" (truncated manifest at manifest length)
+PharException: internal corruption of phar "%swebphar_compilefail.php" (truncated manifest at manifest length)

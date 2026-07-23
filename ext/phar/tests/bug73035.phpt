@@ -9,10 +9,10 @@ try {
 $phar = new PharData('bug73035.tar');
 var_dump($phar);
 } catch(UnexpectedValueException $e) {
-    print $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 DONE
 --EXPECTF--
-phar error: tar-based phar "%sbug73035.tar" signature cannot be read
+UnexpectedValueException: phar error: tar-based phar "%sbug73035.tar" signature cannot be read
 DONE

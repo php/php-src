@@ -40,8 +40,7 @@ try {
     $phar = new Phar(__DIR__ . '/buildfromiterator.phar.tar');
     var_dump($phar->buildFromIterator(new myIterator(array(basename(__FILE__, 'php') . 'phpt'))));
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
@@ -49,5 +48,4 @@ rewind
 valid
 current
 key
-%s(24) "UnexpectedValueException"
-Iterator myIterator returned an invalid key (must return a string)
+UnexpectedValueException: Iterator myIterator returned an invalid key (must return a string)

@@ -11,7 +11,7 @@ phar.readonly=0
 try {
 Phar::unlinkArchive("");
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
@@ -20,18 +20,18 @@ $pdname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 try {
 Phar::unlinkArchive($fname);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 file_put_contents($pdname, 'blahblah');
 try {
 Phar::unlinkArchive($pdname);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     Phar::unlinkArchive(array());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $pname = 'phar://' . $fname;
@@ -53,7 +53,7 @@ var_dump($phar->getStub());
 try {
 Phar::unlinkArchive($fname);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $phar = $phar->convertToExecutable(Phar::ZIP);
 var_dump($phar->isFileFormat(Phar::ZIP));
@@ -89,13 +89,13 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-Unknown phar archive ""
-Unknown phar archive "%sphar_unlinkarchive.phar"
-Unknown phar archive "%sphar_unlinkarchive.phar.tar": internal corruption of phar "%sphar_unlinkarchive.phar.tar" (truncated entry)
-Phar::unlinkArchive(): Argument #1 ($filename) must be of type string, array given
+PharException: Unknown phar archive ""
+PharException: Unknown phar archive "%sphar_unlinkarchive.phar"
+PharException: Unknown phar archive "%sphar_unlinkarchive.phar.tar": internal corruption of phar "%sphar_unlinkarchive.phar.tar" (truncated entry)
+TypeError: Phar::unlinkArchive(): Argument #1 ($filename) must be of type string, array given
 bool(false)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
-phar archive "%sphar_unlinkarchive.phar" has open file handles or objects.  fclose() all file handles, and unset() all objects prior to calling unlinkArchive()
+PharException: phar archive "%sphar_unlinkarchive.phar" has open file handles or objects.  fclose() all file handles, and unset() all objects prior to calling unlinkArchive()
 bool(true)
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"

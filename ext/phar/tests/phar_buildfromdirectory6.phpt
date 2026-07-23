@@ -17,8 +17,7 @@ try {
     $phar = new Phar(__DIR__ . '/buildfromdirectory6.phar');
     var_dump($phar->buildFromDirectory(__DIR__ . '/testdir6', '/\.php$/'));
 } catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump(file_exists(__DIR__ . '/buildfromdirectory6.phar'));

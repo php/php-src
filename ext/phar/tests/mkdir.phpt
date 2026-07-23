@@ -22,12 +22,12 @@ $a->addEmptyDir('bb');
 try {
 $a->addEmptyDir('.phar');
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 $a->addEmptyDir('/.phar');
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $a->addEmptyDir('/.pharx');
 var_dump(is_dir($pname . '/.pharx'));
@@ -49,6 +49,6 @@ Warning: rmdir(): phar error: cannot remove directory "phar://", no phar archive
 Warning: rmdir(): phar error: cannot remove directory "" in phar "foo.phar", directory does not exist in %smkdir.php on line %d
 
 Warning: rmdir(): phar error: cannot remove directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is a not a directory in %smkdir.php on line %d
-Cannot create a directory in magic ".phar" directory
-Cannot create a directory in magic ".phar" directory
+BadMethodCallException: Cannot create a directory in magic ".phar" directory
+BadMethodCallException: Cannot create a directory in magic ".phar" directory
 bool(true)

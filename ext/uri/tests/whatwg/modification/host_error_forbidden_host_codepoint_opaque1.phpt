@@ -10,7 +10,7 @@ $url = Uri\WhatWg\Url::parse("foo://example.com");
 try {
     $url = $url->withHost("ex@mple.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

@@ -12,8 +12,8 @@ function __construct() {}
 try {
 	intlcal_create_instance(new X, NULL);
 } catch (IntlException $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-intlcal_create_instance(): passed IntlTimeZone is not properly constructed
+IntlException: intlcal_create_instance(): passed IntlTimeZone is not properly constructed

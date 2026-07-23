@@ -25,7 +25,7 @@ $a = fopen($pname . '/file1.txt', 'r'); // this works because there are no refer
 try {
 $phar2 = new Phar($fname2); // fails because references open to $fname
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 fclose($a);
 $phar2 = new Phar($fname2); // succeeds because all refs are closed
@@ -37,7 +37,7 @@ $a = file_get_contents($pname . '/file1.txt'); // this fails because $fname2 ref
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
 --EXPECTF--
-Cannot open archive "%stest_alias_unset.2.phar.php", alias is already in use by existing archive
+UnexpectedValueException: Cannot open archive "%stest_alias_unset.2.phar.php", alias is already in use by existing archive
 string(5) "first"
 
 Warning: file_get_contents(phar://%sfile1.txt): Failed to open stream: Cannot open archive "%stest_alias_unset.phar.php", alias is already in use by existing archive in %stest_alias_unset.php on line %d
