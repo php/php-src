@@ -321,6 +321,15 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 		Z_PARAM_ARRAY_OR_NULL(options)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (current_object != NULL) {
+		pdo_dbh_t *existing_dbh = php_pdo_dbh_fetch_inner(current_object);
+		if (existing_dbh->driver != NULL || existing_dbh->is_constructing) {
+			zend_throw_error(NULL, "%s object is already constructed", ZSTR_VAL(called_scope->name));
+			RETURN_THROWS();
+		}
+		existing_dbh->is_constructing = 1;
+	}
+
 	/* parse the data source name */
 	colon = strchr(data_source, ':');
 
@@ -374,6 +383,7 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 
 	if (new_zval_object) {
 		dbh = Z_PDO_DBH_P(new_zval_object);
+		dbh->is_constructing = 1;
 	} else {
 		dbh = php_pdo_dbh_fetch_inner(current_object);
 	}
@@ -427,6 +437,7 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 
 				pdbh->refcount = 1;
 				pdbh->is_persistent = 1;
+				pdbh->is_constructing = dbh->is_constructing;
 				pdbh->persistent_id = pemalloc(plen + 1, 1);
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
 				pdbh->persistent_id_len = plen;
@@ -493,6 +504,7 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 		}
 
 		dbh->driver = driver;
+		dbh->is_constructing = 0;
 options:
 		if (options) {
 			zval *attr_value;
