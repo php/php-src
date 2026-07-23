@@ -3728,7 +3728,7 @@ ZEND_METHOD(ReflectionMethod, getPrototype)
 
 	if (!mptr->common.prototype) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Method %s::%s does not have a prototype", ZSTR_VAL(intern->ce->name), ZSTR_VAL(mptr->common.function_name));
+			"Method %s::%s() does not have a prototype", ZSTR_VAL(intern->ce->name), ZSTR_VAL(mptr->common.function_name));
 		RETURN_THROWS();
 	}
 
@@ -4195,7 +4195,7 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 	if (!variable_ptr) {
 		zend_clear_exception();
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		RETURN_THROWS();
 	}
 
@@ -6039,7 +6039,7 @@ static zend_result reflection_property_check_lazy_compatible(
 {
 	if (!prop) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use %s on dynamic property %s::$%s",
+				"Cannot use %s() on dynamic property %s::$%s",
 				method, ZSTR_VAL(scope->name),
 				ZSTR_VAL(unmangled_name));
 		return FAILURE;
@@ -6047,7 +6047,7 @@ static zend_result reflection_property_check_lazy_compatible(
 
 	if (prop->flags & ZEND_ACC_STATIC) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use %s on static property %s::$%s",
+				"Cannot use %s() on static property %s::$%s",
 				method, ZSTR_VAL(prop->ce->name),
 				ZSTR_VAL(unmangled_name));
 		return FAILURE;
@@ -6055,7 +6055,7 @@ static zend_result reflection_property_check_lazy_compatible(
 
 	if (prop->flags & ZEND_ACC_VIRTUAL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use %s on virtual property %s::$%s",
+				"Cannot use %s() on virtual property %s::$%s",
 				method, ZSTR_VAL(prop->ce->name),
 				ZSTR_VAL(unmangled_name));
 		return FAILURE;
@@ -6065,7 +6065,7 @@ static zend_result reflection_property_check_lazy_compatible(
 		&& !zend_class_can_be_lazy(object->ce)
 	) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use %s on internal class %s",
+				"Cannot use %s() on internal class %s",
 				method, ZSTR_VAL(object->ce->name));
 		return FAILURE;
 	}
