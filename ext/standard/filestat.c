@@ -339,11 +339,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				value = &group_long;
 			}
 
-			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
+			RETURN_BOOL(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL));
 		} else {
 #ifndef PHP_WIN32
 /* On Windows, we expect regular chgrp to fail silently by default */
@@ -480,11 +476,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 				value = &user_long;
 			}
 
-			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
+			RETURN_BOOL(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL));
 		} else {
 #ifndef PHP_WIN32
 /* On Windows, we expect regular chown to fail silently by default */
@@ -638,11 +630,7 @@ PHP_FUNCTION(touch)
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
 		if(wrapper && wrapper->wops->stream_metadata) {
-			if(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_TOUCH, newtime, NULL)) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
+			RETURN_BOOL(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_TOUCH, newtime, NULL));
 		} else {
 			php_stream *stream;
 			if(!filetime_is_null || !fileatime_is_null) {
