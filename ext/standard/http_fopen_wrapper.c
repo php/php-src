@@ -139,10 +139,9 @@ static zend_result php_stream_handle_proxy_authorization_header(const char *s, s
 typedef struct _php_stream_http_response_header_info {
 	php_stream_filter *transfer_encoding;
 	size_t file_size;
+	zend_string *location;
 	bool error;
 	bool follow_location;
-	char *location;
-	size_t location_len;
 } php_stream_http_response_header_info;
 
 static void php_stream_http_response_header_info_init(
@@ -281,13 +280,11 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 			zend_string_efree(last_header_line);
 			return NULL;
 		}
-		if (header_info->location_len == 0) {
-			header_info->location = emalloc(last_header_value_len + 1);
-		} else if (header_info->location_len <= last_header_value_len) {
-			header_info->location = erealloc(header_info->location, last_header_value_len + 1);
+		/* Previous location header encountered */
+		if (UNEXPECTED(header_info->location )) {
+			zend_string_release_ex(header_info->location, false);
 		}
-		header_info->location_len = last_header_value_len;
-		memcpy(header_info->location, last_header_value, last_header_value_len + 1);
+		header_info->location = zend_string_init(last_header_value, last_header_value_len, false);
 	} else if (zend_string_starts_with_literal_ci(last_header_line, "Content-Type:")) {
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, last_header_value, 0);
 	} else if (zend_string_starts_with_literal_ci(last_header_line, "Content-Length:")) {
@@ -1037,7 +1034,7 @@ finish:
 		}
 
 		if (header_info.location != NULL)
-			php_stream_notify_info(context, PHP_STREAM_NOTIFY_REDIRECTED, header_info.location, 0);
+			php_stream_notify_info(context, PHP_STREAM_NOTIFY_REDIRECTED, ZSTR_VAL(header_info.location), 0);
 
 		php_stream_close(stream);
 		stream = NULL;
@@ -1048,52 +1045,55 @@ finish:
 		}
 
 		if (header_info.location != NULL) {
+			zend_string *new_path = NULL;
 
-			char *new_path = NULL;
+			/* Redirection location must be a URI with schema,
+			 * if we don't have a schema, the location is within the existing schema and host */
+			if (ZSTR_LEN(header_info.location) < 8 ||
+					(!zend_string_starts_with_literal_ci(header_info.location, "http://") &&
+					!zend_string_starts_with_literal_ci(header_info.location, "https://") &&
+					!zend_string_starts_with_literal_ci(header_info.location, "ftp://") &&
+					!zend_string_starts_with_literal_ci(header_info.location, "ftps://"))
+			) {
+				zend_string *loc_path = NULL;
 
-			if (strlen(header_info.location) < 8 ||
-					(strncasecmp(header_info.location, "http://", sizeof("http://")-1) &&
-							strncasecmp(header_info.location, "https://", sizeof("https://")-1) &&
-							strncasecmp(header_info.location, "ftp://", sizeof("ftp://")-1) &&
-							strncasecmp(header_info.location, "ftps://", sizeof("ftps://")-1)))
-			{
-				char *loc_path = NULL;
-				if (*header_info.location != '/') {
-					if (*(header_info.location+1) != '\0' && resource->path) {
+				/* if we don't have an absolute location we need to determine it */
+				if (ZSTR_VAL(header_info.location)[0] != '/') {
+					if (ZSTR_VAL(header_info.location)[1] != '\0' && resource->path) {
+						/* find last '/' to determine relative path */
 						char *s = strrchr(ZSTR_VAL(resource->path), '/');
 						if (!s) {
-							s = ZSTR_VAL(resource->path);
-							if (!ZSTR_LEN(resource->path)) {
-								zend_string_release_ex(resource->path, 0);
-								resource->path = ZSTR_INIT_LITERAL("/", 0);
-								s = ZSTR_VAL(resource->path);
-							} else {
-								*s = '/';
-							}
-						}
-						s[1] = '\0';
-						if (resource->path &&
-							ZSTR_VAL(resource->path)[0] == '/' &&
-							ZSTR_VAL(resource->path)[1] == '\0') {
-							spprintf(&loc_path, 0, "%s%s", ZSTR_VAL(resource->path), header_info.location);
+							/* No path segment, just prefix relative location with '/' */
+							loc_path = zend_string_concat2(
+								ZEND_STRL("/"),
+								ZSTR_VAL(header_info.location), ZSTR_LEN(header_info.location)
+							);
 						} else {
-							spprintf(&loc_path, 0, "%s/%s", ZSTR_VAL(resource->path), header_info.location);
+							size_t offset_to_last_slash = s - ZSTR_VAL(resource->path);
+							ZEND_ASSERT(ZSTR_VAL(resource->path)[offset_to_last_slash] == '/');
+							loc_path = zend_string_concat2(
+								ZSTR_VAL(resource->path), offset_to_last_slash + 1,
+								ZSTR_VAL(header_info.location), ZSTR_LEN(header_info.location)
+							);
 						}
 					} else {
-						spprintf(&loc_path, 0, "/%s", header_info.location);
+						loc_path = zend_string_concat2(
+							ZEND_STRL("/"),
+							ZSTR_VAL(header_info.location), ZSTR_LEN(header_info.location)
+						);
 					}
 				} else {
 					loc_path = header_info.location;
 					header_info.location = NULL;
 				}
 				if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80)) {
-					spprintf(&new_path, 0, "%s://%s:" ZEND_LONG_FMT "%s", ZSTR_VAL(resource->scheme),
-							ZSTR_VAL(resource->host), resource->port, loc_path);
+					new_path = zend_strpprintf(0, "%s://%s:" ZEND_LONG_FMT "%s", ZSTR_VAL(resource->scheme),
+							ZSTR_VAL(resource->host), resource->port, ZSTR_VAL(loc_path));
 				} else {
-					spprintf(&new_path, 0, "%s://%s%s", ZSTR_VAL(resource->scheme),
-							ZSTR_VAL(resource->host), loc_path);
+					new_path = zend_strpprintf(0, "%s://%s%s", ZSTR_VAL(resource->scheme),
+							ZSTR_VAL(resource->host), ZSTR_VAL(loc_path));
 				}
-				efree(loc_path);
+				zend_string_release_ex(loc_path, false);
 			} else {
 				new_path = header_info.location;
 				header_info.location = NULL;
@@ -1101,10 +1101,10 @@ finish:
 
 			php_uri_struct_free(resource);
 			/* check for invalid redirection URLs */
-			if ((resource = php_uri_parse_to_struct(uri_parser, new_path, strlen(new_path), PHP_URI_COMPONENT_READ_MODE_RAW, true)) == NULL) {
+			if ((resource = php_uri_parse_to_struct(uri_parser, ZSTR_VAL(new_path), ZSTR_LEN(new_path), PHP_URI_COMPONENT_READ_MODE_RAW, true)) == NULL) {
 				php_stream_wrapper_log_warn(wrapper, context, options, InvalidUrl,
-					"Invalid redirect URL! %s", new_path);
-				efree(new_path);
+					"Invalid redirect URL! %s", ZSTR_VAL(new_path));
+				zend_string_release_ex(new_path, false);
 				goto out;
 			}
 
@@ -1116,7 +1116,7 @@ finish:
 		while (s < e) { \
 			if (iscntrl(*s)) { \
 				php_stream_wrapper_log_warn(wrapper, context, options, InvalidUrl, \
-					"Invalid redirect URL! %s", new_path); \
+					"Invalid redirect URL! %s", ZSTR_VAL(new_path)); \
 				efree(new_path); \
 				goto out; \
 			} \
@@ -1125,7 +1125,7 @@ finish:
 	} \
 }
 			/* check for control characters in login, password & path */
-			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
+			if (zend_string_starts_with_literal_ci(new_path, "http://") || zend_string_starts_with_literal_ci(new_path, "https://")) {
 				CHECK_FOR_CNTRL_CHARS(resource->user);
 				CHECK_FOR_CNTRL_CHARS(resource->password);
 				CHECK_FOR_CNTRL_CHARS(resource->path);
@@ -1138,9 +1138,9 @@ finish:
 				new_flags |= HTTP_WRAPPER_KEEP_METHOD;
 			}
 			stream = php_stream_url_wrap_http_ex(
-				wrapper, new_path, mode, options, opened_path, context,
+				wrapper, ZSTR_VAL(new_path), mode, options, opened_path, context,
 				--redirect_max, new_flags, response_header STREAMS_CC);
-			efree(new_path);
+			zend_string_release_ex(new_path, false);
 		} else {
 			php_stream_wrapper_log_warn(wrapper, context, options, ProtocolError,
 				"HTTP request failed! %s", tmp_line);
@@ -1155,7 +1155,7 @@ out:
 	}
 
 	if (header_info.location != NULL) {
-		efree(header_info.location);
+		zend_string_release_ex(header_info.location, false);
 	}
 
 	if (resource) {
