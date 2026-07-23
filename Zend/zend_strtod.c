@@ -3700,6 +3700,15 @@ zend_freedtoa(char *s)
  *	   calculation.
  */
 
+/* trunc(dval(&u)) keeps the per-digit remainder chain in the FP unit instead of a
+ * FP->int->FP round-trip, cutting the digit loop's critical-path latency and
+ * speeding up fixed-precision float->string ((string)/echo/printf/number_format).
+ * Only a win where trunc() lowers to one instruction (aarch64 frintz, x86
+ * roundsd), elsewhere it's a call, so keep (Long)(dval(&u)). */
+#if defined(__SSE4_1__) || defined(__aarch64__)
+# define FAST_TRUNC
+#endif
+
 ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sign, char **rve)
 {
  /*	Arguments ndigits, decpt, sign are similar to those
@@ -3747,6 +3756,9 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sig
 	Bigint *b, *b1, *delta, *mlo, *mhi, *S;
 	U d2, eps, u;
 	double ds;
+#ifdef FAST_TRUNC
+	double tr;
+#endif
 	char *s, *s0;
 #ifndef No_leftright
 #ifdef IEEE_Arith
@@ -4047,9 +4059,16 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sig
 			/* Generate ilim digits, then fix them up. */
 			dval(&eps) *= tens[ilim-1];
 			for(i = 1;; i++, dval(&u) *= 10.) {
+#ifdef FAST_TRUNC
+				tr = trunc(dval(&u));
+				L = (Long)tr;
+				if (!(dval(&u) -= tr))
+					ilim = i;
+#else
 				L = (Long)(dval(&u));
 				if (!(dval(&u) -= L))
 					ilim = i;
+#endif
 				*s++ = '0' + (int)L;
 				if (i == ilim) {
 					if (dval(&u) > 0.5 + dval(&eps))
@@ -4084,8 +4103,14 @@ ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sig
 			goto one_digit;
 			}
 		for(i = 1;; i++, dval(&u) *= 10.) {
+#ifdef FAST_TRUNC
+			tr = trunc(dval(&u) / ds);
+			L = (Long)tr;
+			dval(&u) -= tr*ds;
+#else
 			L = (Long)(dval(&u) / ds);
 			dval(&u) -= L*ds;
+#endif
 #ifdef Check_FLT_ROUNDS
 			/* If FLT_ROUNDS == 2, L will usually be high by 1 */
 			if (dval(&u) < 0) {
