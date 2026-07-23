@@ -4136,7 +4136,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result phar_extract_file(bool overwrite, phar
 	}
 
 	if (php_check_open_basedir(fullpath)) {
-		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", openbasedir/safe mode restrictions in effect", ZSTR_VAL(entry->filename), fullpath);
+		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", open_basedir restrictions in effect", ZSTR_VAL(entry->filename), fullpath);
 		efree(fullpath);
 		efree(new_state.cwd);
 		return FAILURE;
