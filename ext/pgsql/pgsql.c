@@ -6366,6 +6366,21 @@ PHP_FUNCTION(pg_socket_poll)
 	RETURN_LONG((zend_long)PQsocketPoll(socket, (int)read, (int)write, (int)ts));
 }
 
+PHP_FUNCTION(pg_set_single_row_mode)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	RETURN_BOOL(PQsetSingleRowMode(link->conn));
+}
+
 #if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
 PHP_FUNCTION(pg_set_chunked_rows_size)
 {

@@ -243,6 +243,11 @@ namespace {
      * @cvalue PGRES_TUPLES_OK
      */
     const PGSQL_TUPLES_OK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_SINGLE_TUPLE
+     */
+    const PGSQL_SINGLE_TUPLE = UNKNOWN;
 #ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
     /**
      * @var int
@@ -951,6 +956,8 @@ namespace {
      * @param resource $socket
      */
     function pg_socket_poll($socket, int $read, int $write, int $timeout = -1): int {}
+
+    function pg_set_single_row_mode(Pgsql\Connection $connection): bool {}
 
 #ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
     function pg_set_chunked_rows_size(PgSql\Connection $connection, int $size): bool {}
