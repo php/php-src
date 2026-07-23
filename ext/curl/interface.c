@@ -1774,7 +1774,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_MAXAGE_CONN:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074500 /* Available since 7.69.0 */
-		case CURLOPT_MAIL_RCPT_ALLLOWFAILS:
+		case CURLOPT_MAIL_RCPT_ALLOWFAILS:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
 		case CURLOPT_HSTS_CTRL:
@@ -1796,6 +1796,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 #if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0 */
 		case CURLOPT_CA_CACHE_TIMEOUT:
 		case CURLOPT_QUICK_EXIT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080600 /* Available since 8.6.0 */
+		case CURLOPT_SERVER_RESPONSE_TIMEOUT_MS:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x080900 /* Available since 8.9.0 */
 		case CURLOPT_TCP_KEEPCNT:
@@ -1893,6 +1896,12 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 #if LIBCURL_VERSION_NUM >= 0x075500 /* Available since 7.85.0 */
 		case CURLOPT_PROTOCOLS_STR:
 		case CURLOPT_REDIR_PROTOCOLS_STR:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080200 /* Available since 8.2.0 */
+		case CURLOPT_HAPROXY_CLIENT_IP:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080800 /* Available since 8.8.0 */
+		case CURLOPT_ECH:
 #endif
 		{
 			zend_string *tmp_str;
