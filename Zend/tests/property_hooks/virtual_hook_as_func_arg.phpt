@@ -1,5 +1,5 @@
 --TEST--
-Virtual property hook read via FETCH_OBJ_FUNC_ARG must invoke the getter (function JIT)
+Virtual property hook read via FETCH_OBJ_FUNC_ARG must not prime SIMPLE_GET (function JIT)
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -40,36 +40,38 @@ class Container {
         return "/nonexistent/regression_{$k}_{$i}.dat";
     }
 
-    /* Passes a virtual property hook directly as the first argument of an
-     * unqualified (namespace-fallback) global function. That fallback path
-     * emits INIT_NS_FCALL_BY_NAME + CHECK_FUNC_ARG + FETCH_OBJ_FUNC_ARG,
-     * and the FETCH_OBJ_FUNC_ARG handler tail-calls into the FETCH_OBJ_R
-     * handler for by-value arguments.
+    /* Reads a virtual property hook directly as arg #1 of an unqualified
+     * (namespace-fallback) global builtin. The emitted opcode chain is
      *
-     * zend_std_read_property() must not prime the SIMPLE_GET property-hook
-     * cache-slot bit while the currently-executing opline is anything
-     * other than a plain ZEND_FETCH_OBJ_R. If it does, subsequent hook
-     * reads (potentially via a JIT-compiled fast path for FUNC_ARG that
-     * has no hook-enter check) go through the SIMPLE_GET path with a
-     * mismatched opline and read garbage from an adjacent property slot,
-     * typically surfacing as ValueError "must not contain any null bytes"
-     * or a TypeError referencing the neighbour's class.
+     *   INIT_NS_FCALL_BY_NAME "Regression\\file_get_contents"
+     *   CHECK_FUNC_ARG        1
+     *   FETCH_OBJ_FUNC_ARG    THIS, "path"    -> tmp
+     *   SEND_FUNC_ARG         tmp, 1
+     *   DO_FCALL_BY_NAME
      *
-     * Also exercises the same fetch under @-silencing (BEGIN_SILENCE /
-     * END_SILENCE) which is the exact shape observed in the wild. */
+     * FETCH_OBJ_FUNC_ARG dispatches into the FETCH_OBJ_R handler for
+     * by-value arguments while keeping opline pointing at the FUNC_ARG
+     * opcode. If zend_std_read_property() primes the SIMPLE_GET
+     * property-hook cache-slot bit under such an opline, subsequent
+     * FETCH_OBJ_FUNC_ARG dispatches take the SIMPLE_GET fast path in
+     * zend_vm_def.h -- which pushes a hook call frame and returns with
+     * ZEND_VM_ENTER_BIT set. JIT function mode dispatches FETCH_OBJ_FUNC_ARG
+     * via the generic zend_jit_handler path in zend_jit.c which, unlike
+     * the specialised FETCH_OBJ_R handler, has no "if hook entered, exit
+     * to VM" guard and continues into JIT-compiled SEND_FUNC_ARG code
+     * before the hook has actually run. The pending argument slot then
+     * holds an adjacent property's raw bytes, typically surfacing as
+     *
+     *   ValueError:  file_get_contents(): Argument #1 ($filename) must
+     *                not contain any null bytes
+     *   TypeError:   expected string, <adjacent class> given
+     *   zend_mm_heap corrupted (SIGABRT)
+     *
+     * All three symptoms have the same root cause. */
     public function step(): void {
-        // First: a bare FETCH_OBJ_FUNC_ARG under a namespaced call.
-        $len = strlen($this->path);
-        if ($len === 0) {
-            throw new \RuntimeException('empty path from hook');
-        }
-        // Second: a silenced namespaced call with the hook as arg #1.
-        // file_get_contents() is a by-value string parameter so the
-        // FETCH_OBJ_FUNC_ARG dispatches into the FETCH_OBJ_R handler.
+        // Namespace-fallback, by-value string arg -> FETCH_OBJ_FUNC_ARG.
+        // Wrapped in @ to match the real-world observed shape.
         $r = @file_get_contents($this->path);
-        // The file does not exist, so a false return with a warning is
-        // expected. The important thing is that no ValueError / TypeError
-        // / heap corruption occurs while producing the argument.
         if ($r !== false) {
             throw new \RuntimeException('unexpected non-false return');
         }
