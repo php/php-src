@@ -223,6 +223,8 @@ PHP                                                                        NEWS
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
   . Fix wordwrap() ignoring an existing break at the end of the string
     (Nicolas Grekas)
+  . Fixed convert.quoted-printable-decode decoding lowercase hex digits to
+    the wrong byte. (Ilia Alshanetsky)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
