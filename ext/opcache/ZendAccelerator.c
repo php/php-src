@@ -78,7 +78,12 @@ typedef int gid_t;
 #endif
 #include <fcntl.h>
 #include <signal.h>
+
+#ifndef PHP_WIN32
 #include <time.h>
+#else
+#include "win32/time.h"
+#endif
 
 #ifndef ZEND_WIN32
 # include <sys/types.h>
@@ -1164,13 +1169,32 @@ zend_result validate_timestamp_and_record(zend_persistent_script *persistent_scr
 {
 	if (persistent_script->timestamp == 0) {
 		return SUCCESS; /* Don't check timestamps of preloaded scripts */
-	} else if (ZCG(accel_directives).revalidate_freq &&
-	    persistent_script->dynamic_members.revalidate >= ZCG(request_time)) {
+	}
+
+	double revalidate_reference_time = 0.0;
+
+	if (ZCG(cli_mode)) {
+#if HAVE_GETTIMEOFDAY
+		struct timeval tp = {0};
+
+		if (UNEXPECTED(gettimeofday(&tp, NULL) != 0)) {
+			revalidate_reference_time = (double)time(NULL);
+		} else {
+			revalidate_reference_time = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);
+		}
+#else
+		revalidate_reference_time = (double)time(NULL);
+#endif
+	} else {
+		revalidate_reference_time = (double)ZCG(request_time);
+	}
+
+	if (ZCG(accel_directives).revalidate_freq && persistent_script->dynamic_members.revalidate >= revalidate_reference_time) {
 		return SUCCESS;
 	} else if (do_validate_timestamps(persistent_script, file_handle) == FAILURE) {
 		return FAILURE;
 	} else {
-		persistent_script->dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;
+		persistent_script->dynamic_members.revalidate = revalidate_reference_time + ZCG(accel_directives).revalidate_freq;
 		return SUCCESS;
 	}
 }
@@ -2834,6 +2858,7 @@ static inline zend_result accel_find_sapi(void)
 		if (ZCG(accel_directives).enable_cli && (
 		    strcmp(sapi_module.name, "cli") == 0
 		  || strcmp(sapi_module.name, "phpdbg") == 0)) {
+			ZCG(cli_mode) = true;
 			return SUCCESS;
 		}
 	}
