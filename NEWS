@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed header injection through the Content-Type context option, the
     soapaction and the cookie names and values. (David Carlier)
 
+- MBString:
+  . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
+    offset in a non-UTF-8 encoding). (Eyüp Can Akman)
+
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
