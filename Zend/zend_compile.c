@@ -1027,6 +1027,58 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 }
 /* }}} */
 
+static zend_ast *zend_ast_prepend_primary_ctor(zend_ast *stmt_list, zend_ast *params, zend_ast *parent_args, uint32_t lineno, zend_string *doc_comment)
+{
+	zend_ast *body;
+	zend_string *construct_name = ZSTR_INIT_LITERAL("__construct", 0);
+
+	if (parent_args) {
+		zval parent_zv, method_zv;
+		ZVAL_INTERNED_STR(&parent_zv, ZSTR_KNOWN(ZEND_STR_PARENT));
+		ZVAL_STR(&method_zv, zend_string_copy(construct_name));
+		zend_ast *class_ast = zend_ast_create_zval_ex(&parent_zv, ZEND_NAME_NOT_FQ);
+		zend_ast *method_ast = zend_ast_create_zval(&method_zv);
+		zend_ast *call_ast = zend_ast_create(ZEND_AST_STATIC_CALL, class_ast, method_ast, parent_args);
+		body = zend_ast_create_list(1, ZEND_AST_STMT_LIST, call_ast);
+	} else {
+		body = zend_ast_create_list(0, ZEND_AST_STMT_LIST);
+	}
+
+	zend_ast *ctor_ast = zend_ast_create_decl(
+		ZEND_AST_METHOD, ZEND_ACC_PUBLIC, lineno, doc_comment,
+		construct_name, params, NULL, body, NULL, NULL);
+
+	return zend_ast_list_prepend(stmt_list, ctor_ast);
+}
+
+zend_ast *zend_ast_create_class_decl(
+	uint32_t flags, uint32_t start_lineno, zend_string *doc_comment, zend_string *name,
+	zend_ast *extends, zend_ast *parent_args, zend_ast *implements,
+	zend_ast *params, zend_ast *stmts)
+{
+	bool invalid_parent_ctor_call = false;
+
+	if (params) {
+		stmts = zend_ast_prepend_primary_ctor(stmts, params, parent_args, start_lineno,
+			doc_comment ? zend_string_copy(doc_comment) : NULL);
+	} else if (parent_args) {
+		const char *message = zend_ast_get_list(parent_args)->children
+			? "Cannot pass arguments to the parent constructor without a primary constructor"
+			: "Cannot call the parent constructor without a primary constructor";
+		zend_throw_exception(zend_ce_compile_error, message, 0);
+		zend_ast_destroy(parent_args);
+		invalid_parent_ctor_call = true;
+	}
+
+	zend_ast *ast = zend_ast_create_decl(ZEND_AST_CLASS, flags, start_lineno, doc_comment, name,
+		extends, implements, stmts, NULL, NULL);
+	if (UNEXPECTED(invalid_parent_ctor_call)) {
+		zend_ast_destroy(ast);
+		return NULL;
+	}
+	return ast;
+}
+
 uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag)
 {
 	uint32_t new_flags = flags | new_flag;

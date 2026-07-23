@@ -48,6 +48,10 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %expect 0
 
 %destructor { zend_ast_destroy($$); } <ast>
+%destructor {
+	zend_ast_destroy($$.class_name);
+	zend_ast_destroy($$.ctor_args);
+} <extends_info>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
 %precedence T_THROW
@@ -258,7 +262,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type_without_static argument argument_no_expr global_var
+%type <ast> parameter optional_type_without_static argument argument_no_expr global_var
+%type <extends_info> extends_from
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_dereferenceable new_non_dereferenceable anonymous_class class_name class_name_reference simple_variable
@@ -602,11 +607,11 @@ is_variadic:
 
 class_declaration_statement:
 		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL, NULL); }
+		T_STRING backup_doc_comment optional_parameter_list extends_from implements_list '{' class_statement_list '}'
+			{ $$ = zend_ast_create_class_decl($1, $<num>3, $5, zend_ast_get_str($4), $7.class_name, $7.ctor_args, $8, $6, $10); $7.class_name = $7.ctor_args = NULL; if (!$$) { YYERROR; } }
 	|	T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
+		T_STRING backup_doc_comment optional_parameter_list extends_from implements_list '{' class_statement_list '}'
+			{ $$ = zend_ast_create_class_decl(0, $<num>2, $4, zend_ast_get_str($3), $6.class_name, $6.ctor_args, $7, $5, $9); $6.class_name = $6.ctor_args = NULL; if (!$$) { YYERROR; } }
 ;
 
 class_modifiers:
@@ -667,8 +672,12 @@ enum_case_expr:
 ;
 
 extends_from:
-		%empty				{ $$ = NULL; }
-	|	T_EXTENDS class_name	{ $$ = $2; }
+		%empty
+			{ $$.class_name = NULL; $$.ctor_args = NULL; }
+	|	T_EXTENDS class_name
+			{ $$.class_name = $2; $$.ctor_args = NULL; }
+	|	T_EXTENDS class_name argument_list
+			{ $$.class_name = $2; $$.ctor_args = $3; }
 ;
 
 interface_extends_list:
@@ -1228,9 +1237,11 @@ non_empty_for_exprs:
 anonymous_class:
 		anonymous_class_modifiers_optional T_CLASS { $<num>$ = CG(zend_lineno); } ctor_arguments
 		extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
-			zend_ast *decl = zend_ast_create_decl(
-				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS | $1, $<num>3, $7, NULL,
-				$5, $6, $9, NULL, NULL);
+			zend_ast *decl = zend_ast_create_class_decl(
+				ZEND_ACC_ANON_CLASS | $1, $<num>3, $7, NULL,
+				$5.class_name, $5.ctor_args, $6, NULL, $9);
+			$5.class_name = $5.ctor_args = NULL;
+			if (!decl) { zend_ast_destroy($4); YYERROR; }
 			$$ = zend_ast_create(ZEND_AST_NEW, decl, $4);
 		}
 ;
