@@ -810,6 +810,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
 	executor_globals->in_autoload = NULL;
 	executor_globals->current_execute_data = NULL;
+	executor_globals->frameless_reentry_copies = NULL;
 	executor_globals->current_module = NULL;
 	executor_globals->exit_status = 0;
 #if XPFPA_HAVE_CW

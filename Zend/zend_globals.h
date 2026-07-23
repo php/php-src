@@ -74,6 +74,7 @@ typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
+typedef struct _zend_frameless_reentry_copies zend_frameless_reentry_copies;
 
 typedef enum {
 	ZEND_MEMOIZE_NONE,
@@ -215,6 +216,7 @@ struct _zend_executor_globals {
 
 	zend_atomic_bool vm_interrupt;
 	zend_atomic_bool timed_out;
+	zend_frameless_reentry_copies *frameless_reentry_copies;
 
 	HashTable *in_autoload;
 
