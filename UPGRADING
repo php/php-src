@@ -261,6 +261,16 @@ PHP 8.6 UPGRADE NOTES
     failing with CURLE_SEND_FAIL_REWIND. The callback receives the CurlHandle,
     offset and origin, and must return one of CURL_SEEKFUNC_OK,
     CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK.
+  . Added the CURLOPT_SOCKOPTFUNCTION, CURLOPT_OPENSOCKETFUNCTION and
+    CURLOPT_CLOSESOCKETFUNCTION options, which let userland hook into libcurl's
+    socket creation, configuration and teardown. The callbacks exchange
+    ext/sockets Socket objects, e.g. to validate the resolved address before
+    connecting (SSRF protection) or to set low-level socket options. Setting
+    one of these three options requires the sockets extension to be loaded
+    (otherwise an Error is thrown); the rest of ext/curl keeps working without
+    it. The new CURL_SOCKOPT_OK, CURL_SOCKOPT_ERROR,
+    CURL_SOCKOPT_ALREADY_CONNECTED, CURLSOCKTYPE_IPCXN and CURLSOCKTYPE_ACCEPT
+    constants are defined alongside them.
 
 - Fileinfo:
   . finfo_file() now works with remote streams.
