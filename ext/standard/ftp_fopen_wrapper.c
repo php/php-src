@@ -127,8 +127,6 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	php_uri *resource = NULL;
 	int result, use_ssl, use_ssl_on_data = 0;
 	char tmp_line[512];
-	char *transport;
-	int transport_len;
 
 	const php_uri_parser *uri_parser = php_stream_context_get_uri_parser("ftp", context);
 	if (uri_parser == NULL) {
@@ -150,7 +148,8 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	if (resource->port == 0)
 		resource->port = 21;
 
-	transport_len = (int)spprintf(&transport, 0, "tcp://%s:" ZEND_LONG_FMT, ZSTR_VAL(resource->host), resource->port);
+	char *transport;
+	size_t transport_len = spprintf(&transport, 0, "tcp://%s:" ZEND_LONG_FMT, ZSTR_VAL(resource->host), resource->port);
 	stream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
 	efree(transport);
 	if (stream == NULL) {
@@ -420,8 +419,6 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	zval *tmpzval;
 	bool allow_overwrite = false;
 	int8_t read_write = 0;
-	char *transport;
-	int transport_len;
 	zend_string *error_message = NULL;
 
 	tmp_line[0] = '\0';
@@ -554,7 +551,9 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	if (hoststart == NULL) {
 		hoststart = ZSTR_VAL(resource->host);
 	}
-	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
+
+	char *transport;
+	size_t transport_len = spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
 	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, &error_message, NULL);
 	efree(transport);
 	if (datastream == NULL) {
