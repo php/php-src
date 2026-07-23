@@ -4685,6 +4685,12 @@ static const zend_frameless_function_info *find_frameless_function_info(zend_ast
 	return NULL;
 }
 
+static bool zend_is_trivial_frameless_arg(const zend_ast *ast)
+{
+	return ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONST
+		|| (ast->kind == ZEND_AST_VAR && ast->child[0]->kind == ZEND_AST_ZVAL);
+}
+
 static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *args, zend_function *fbc, const zend_frameless_function_info *frameless_function_info, uint32_t type)
 {
 	int lineno = CG(zend_lineno);
@@ -4693,6 +4699,14 @@ static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *ar
 	znode arg_zvs[3];
 	for (uint32_t i = 0; i < num_args; i++) {
 		if (i < args->children) {
+			if (!zend_is_trivial_frameless_arg(args->child[i])) {
+				/* Frameless calls have no SEND opcodes to preserve earlier CV arguments. */
+				for (uint32_t j = 0; j < i; j++) {
+					if (arg_zvs[j].op_type == IS_CV) {
+						zend_emit_op_tmp(&arg_zvs[j], ZEND_QM_ASSIGN, &arg_zvs[j], NULL);
+					}
+				}
+			}
 			zend_compile_expr(&arg_zvs[i], args->child[i]);
 		} else {
 			zend_internal_arg_info *arg_info = (zend_internal_arg_info *)&fbc->common.arg_info[i];
