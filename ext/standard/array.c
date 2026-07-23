@@ -5048,6 +5048,18 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 		}
 	}
 
+	/* Later operands may only be checked when no data comparison is performed. */
+	if (data_compare_type == INTERSECT_COMP_DATA_NONE) {
+		for (i = 0; i < argc; i++) {
+			if (zend_hash_num_elements(Z_ARRVAL(args[i])) == 0) {
+				RETURN_EMPTY_ARRAY();
+			}
+		}
+	} else if (zend_hash_num_elements(Z_ARRVAL(args[0])) == 0 ||
+		(argc > 1 && zend_hash_num_elements(Z_ARRVAL(args[1])) == 0)) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	array_init(return_value);
 
 	/* Iterate over keys of the first array, to compute keys that are in all of the other arrays. */
