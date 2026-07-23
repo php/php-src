@@ -1249,14 +1249,14 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* Check for unserialize callback */
-		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
+		if (PG(unserialize_callback_func) == NULL) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
 		}
 
 		/* Call unserialize callback */
-		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
+		ZVAL_STR(&user_func, PG(unserialize_callback_func));
 
 		ZVAL_STR(&args[0], class_name);
 		BG(serialize_lock)++;

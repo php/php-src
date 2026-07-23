@@ -81,7 +81,7 @@ PHPDBG_INFO(error) /* {{{ */
 {
 	if (PG(last_error_message)) {
 		phpdbg_try_access {
-			phpdbg_writeln("Last error: %s at %s line %d",
+			phpdbg_writeln("Last error: %s at %s line %" PRIu32,
 			    ZSTR_VAL(PG(last_error_message)),
 			    ZSTR_VAL(PG(last_error_file)),
 			    PG(last_error_lineno));
