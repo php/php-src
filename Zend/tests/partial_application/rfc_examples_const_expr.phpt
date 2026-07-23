@@ -1,7 +1,5 @@
 --TEST--
 PFA RFC examples: "Constant expressions" section
---XFAIL--
-PFA in constant expressions not implemented yet
 --FILE--
 <?php
 

@@ -1121,7 +1121,6 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_THROW_IS_EXPR 1u
 
 #define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS (1<<0)
-#define ZEND_FCALL_USES_VARIADIC_PLACEHOLDER   (1<<1)
 
 /* The send mode, the is_variadic, the is_promoted, and the is_tentative flags are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT

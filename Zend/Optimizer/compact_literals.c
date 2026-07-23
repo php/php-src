@@ -26,6 +26,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 #include "zend_extensions.h"
+#include "zend_partial.h"
 
 #define DEBUG_COMPACT_LITERALS 0
 
@@ -747,7 +748,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_CALLABLE_CONVERT_PARTIAL:
-					opline->op1.num = cache_size;
+					opline->extended_value = cache_size | (opline->extended_value & ZEND_PARTIAL_FLAGS);
 					cache_size += 2 * sizeof(void *);
 					break;
 			}
