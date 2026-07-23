@@ -6,6 +6,17 @@ PHP                                                                        NEWS
   . Implemented partial function application RFC. (Arnaud)
   . Fixed bug GH-22263 (reset typed property default on every unserialize
     failure path). (David Carlier)
+  . Fixed zend_std_read_property() priming the SIMPLE_GET property-hook
+    cache-slot bit while the currently-executing opline was anything
+    other than a plain ZEND_FETCH_OBJ_R (in particular
+    ZEND_FETCH_OBJ_FUNC_ARG, which dispatches into the same handler for
+    by-value argument fetches). Once primed, subsequent hook reads went
+    through the SIMPLE_GET fast path with a mismatched opline and read
+    garbage from an adjacent property slot, typically surfacing as a
+    ValueError "must not contain any null bytes", a TypeError
+    referencing the neighbouring slot's class, or a heap-corruption
+    abort. Mirrors the opline check already used for SIMPLE_READ.
+    (coderzhao)
 
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD

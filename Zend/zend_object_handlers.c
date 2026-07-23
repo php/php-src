@@ -863,7 +863,23 @@ try_again:
 			goto try_again;
 		}
 
+		/* Only prime the SIMPLE_GET fast path for a plain ZEND_FETCH_OBJ_R
+		 * opline. ZEND_FETCH_OBJ_FUNC_ARG dispatches into this same handler
+		 * for by-value argument fetches, but its opline->extended_value can
+		 * carry the ZEND_FETCH_REF bit and its result slot lives inside the
+		 * pending call frame -- neither of which is accounted for by the
+		 * SIMPLE_GET fast path in zend_vm_def.h. Caching the bit under a
+		 * FETCH_OBJ_FUNC_ARG opline would let a later FETCH_OBJ_R (or a
+		 * JIT-compiled FUNC_ARG that has no hook-enter check) hit that fast
+		 * path with a mismatched opline and read garbage from the adjacent
+		 * property slot -- typically surfacing as a "must not contain any
+		 * null bytes" ValueError, an "expected string, got <Class>"
+		 * TypeError, or a heap corruption abort. Mirrors the opline check
+		 * already used for SIMPLE_READ above. */
+		const zend_execute_data *execute_data = EG(current_execute_data);
 		if (EXPECTED(cache_slot
+		 && EX(opline)
+		 && EX(opline)->opcode == ZEND_FETCH_OBJ_R
 		 && zend_execute_ex == execute_ex
 		 && ce->default_object_handlers->read_property == zend_std_read_property
 		 && !ce->create_object
