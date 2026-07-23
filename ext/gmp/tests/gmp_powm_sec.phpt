@@ -22,12 +22,16 @@ foreach ([0, -1] as $exp) {
     }
 }
 
-foreach ([0, 496] as $modulus) {
-    try {
-        var_dump(gmp_powm_sec(4, 13, $modulus));
-    } catch (\ValueError $e) {
-        echo $e->getMessage(), \PHP_EOL;
-    }
+try {
+    var_dump(gmp_powm_sec(4, 13, 0));
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
+
+try {
+    var_dump(gmp_powm_sec(4, 13, 496));
+} catch (\ValueError $e) {
+    echo $e->getMessage(), \PHP_EOL;
 }
 
 echo "Done\n";
@@ -37,6 +41,6 @@ string(3) "445"
 string(1) "5"
 gmp_powm_sec(): Argument #2 ($exponent) must be greater than 0
 gmp_powm_sec(): Argument #2 ($exponent) must be greater than 0
-gmp_powm_sec(): Argument #3 ($modulus) must be odd
+gmp_powm_sec(): Argument #3 ($modulus) Modulo by zero
 gmp_powm_sec(): Argument #3 ($modulus) must be odd
 Done

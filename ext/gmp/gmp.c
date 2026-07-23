@@ -1206,7 +1206,11 @@ ZEND_FUNCTION(gmp_powm_sec)
 		RETURN_THROWS();
 	}
 
-	/* Zero is not odd, so this also rejects a zero modulus. */
+	if (!mpz_cmp_ui(gmpnum_mod, 0)) {
+		zend_argument_error(zend_ce_division_by_zero_error, 3, "Modulo by zero");
+		RETURN_THROWS();
+	}
+
 	if (!mpz_odd_p(gmpnum_mod)) {
 		zend_argument_value_error(3, "must be odd");
 		RETURN_THROWS();
