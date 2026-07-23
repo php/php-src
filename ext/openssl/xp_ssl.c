@@ -1131,7 +1131,9 @@ static void php_openssl_limit_handshake_reneg(const SSL *ssl) /* {{{ */
 
 	elapsed_time = (now.tv_sec - sslsock->reneg->prev_handshake);
 	sslsock->reneg->prev_handshake = now.tv_sec;
-	sslsock->reneg->tokens -= (elapsed_time * (sslsock->reneg->limit / sslsock->reneg->window));
+	if (sslsock->reneg->window > 0) {
+		sslsock->reneg->tokens -= ((double)elapsed_time * (double)sslsock->reneg->limit) / (double)sslsock->reneg->window;
+	}
 
 	if (sslsock->reneg->tokens < 0) {
 		sslsock->reneg->tokens = 0;
