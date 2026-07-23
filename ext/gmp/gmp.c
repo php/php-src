@@ -1189,6 +1189,39 @@ ZEND_FUNCTION(gmp_powm)
 }
 /* }}} */
 
+#ifdef HAVE___GMPZ_POWM_SEC
+/* {{{ Raise base to power exp and take result modulo mod using a side-channel quiet algorithm */
+ZEND_FUNCTION(gmp_powm_sec)
+{
+	mpz_ptr gmpnum_base, gmpnum_exp, gmpnum_mod, gmpnum_result;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_base)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_exp)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_mod)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (mpz_sgn(gmpnum_exp) <= 0) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (!mpz_cmp_ui(gmpnum_mod, 0)) {
+		zend_argument_error(zend_ce_division_by_zero_error, 3, "Modulo by zero");
+		RETURN_THROWS();
+	}
+
+	if (!mpz_odd_p(gmpnum_mod)) {
+		zend_argument_value_error(3, "must be odd");
+		RETURN_THROWS();
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	mpz_powm_sec(gmpnum_result, gmpnum_base, gmpnum_exp, gmpnum_mod);
+}
+/* }}} */
+#endif
+
 /* {{{ Takes integer part of square root of a */
 ZEND_FUNCTION(gmp_sqrt)
 {
