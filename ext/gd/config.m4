@@ -394,6 +394,14 @@ if test "$PHP_GD" != "no"; then
     AC_DEFINE([HAVE_GD_PNG_GET_VERSION_STRING], [1],
       [Define to 1 if GD library has the 'gdPngGetVersionString' function.])
 
+    dnl Some systems (e.g. Solaris) declare iconv_t in <iconv.h> as something
+    dnl other than 'void *'. The bundled libgd/gdkanji.c only falls back to its
+    dnl own 'typedef void *iconv_t' when HAVE_ICONV_T_DEF is undefined, so detect
+    dnl the system definition to avoid a conflicting typedef.
+    AC_EGREP_HEADER([typedef.*iconv_t], [iconv.h],
+      [AC_DEFINE([HAVE_ICONV_T_DEF], [1],
+        [Define to 1 if <iconv.h> defines iconv_t.])])
+
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
     PHP_GD_PNG
