@@ -24,6 +24,9 @@ $functions1 = [
     'gmp_com',
     'gmp_nextprime',
 ];
+if (function_exists('gmp_prevprime')) {
+    $functions1[] = 'gmp_prevprime';
+}
 $functions1_need_int_2 = [
     'gmp_testbit',
     'gmp_scan0',

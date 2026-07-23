@@ -1,5 +1,5 @@
 /* This is a generated file, edit gmp.stub.php instead.
- * Stub hash: 3aabd5a5d2db0df15b249a425465ae718c13ab6b */
+ * Stub hash: 9d651cc4ba238a496ebe8302fe3e0f985d48d769 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -179,6 +179,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gmp_nextprime arginfo_gmp_neg
 
+#if defined(HAVE___GMPZ_PREVPRIME)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_prevprime, 0, 1, GMP, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, num, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_binomial, 0, 2, GMP, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, n, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, k, IS_LONG, 0)
@@ -245,6 +251,9 @@ ZEND_FUNCTION(gmp_scan1);
 ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 ZEND_FUNCTION(gmp_nextprime);
+#if defined(HAVE___GMPZ_PREVPRIME)
+ZEND_FUNCTION(gmp_prevprime);
+#endif
 ZEND_FUNCTION(gmp_binomial);
 ZEND_METHOD(GMP, __construct);
 ZEND_METHOD(GMP, __serialize);
@@ -301,6 +310,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gmp_popcount, arginfo_gmp_popcount)
 	ZEND_FE(gmp_hamdist, arginfo_gmp_hamdist)
 	ZEND_FE(gmp_nextprime, arginfo_gmp_nextprime)
+#if defined(HAVE___GMPZ_PREVPRIME)
+	ZEND_FE(gmp_prevprime, arginfo_gmp_prevprime)
+#endif
 	ZEND_FE(gmp_binomial, arginfo_gmp_binomial)
 	ZEND_FE_END
 };

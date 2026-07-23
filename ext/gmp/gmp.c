@@ -1082,6 +1082,37 @@ GMP_UNARY_OP_FUNCTION(com);
 /* {{{ Finds next prime of a */
 GMP_UNARY_OP_FUNCTION(nextprime);
 
+#ifdef HAVE___GMPZ_PREVPRIME
+/* {{{ Finds previous prime of a */
+ZEND_FUNCTION(gmp_prevprime)
+{
+	mpz_ptr gmpnum_a, gmpnum_result;
+	int res;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (mpz_cmp_ui(gmpnum_a, 2) <= 0) {
+		/*
+		 * mpz_prevprime() returns 0 when no previous prime exists, which happens
+		 * for operands not greater than 2.
+		 * https://gmplib.org/manual/Number-Theoretic-Functions#index-mpz_005fprevprime
+		 * However. since returning a prime number smaller than 2 is mathemeticaly
+		 * impossible, throwing a ValueError instead is a more widely used solution
+		 * throughout the php code base.
+		 */
+		zend_argument_value_error(1, "must be greater than 2");
+		RETURN_THROWS();
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	res = mpz_prevprime(gmpnum_result, gmpnum_a);
+	ZEND_ASSERT(res);
+}
+/* }}} */
+#endif
+
 /* Add a and b */
 GMP_BINARY_OP_FUNCTION(add);
 /* Subtract b from a */
