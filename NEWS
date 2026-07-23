@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22763 (JIT fails to clear ZREG_TYPE_ONLY after setting reg).
     (Arnaud)
 
+- MBString:
+  . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
+    offset in a non-UTF-8 encoding). (Eyüp Can Akman)
+
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     SO_LINGER options. (Weilin Du)
