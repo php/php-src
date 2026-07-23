@@ -288,6 +288,8 @@ PHP 8.6 UPGRADE NOTES
 - JSON:
   . Added extra info about error location to the JSON error messages returned
     from json_last_error_msg() and JsonException message.
+  . Added JSON_DUPLICATE_KEY_MERGE and JSON_DUPLICATE_KEY_ARRAY flags to
+    json_decode() for duplicate object key handling.
 
 - OpenSSL:
   . Added TLS session resumption support for streams with new stream context

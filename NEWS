@@ -322,6 +322,8 @@ PHP                                                                        NEWS
 - JSON:
   . Enriched JSON last error / exception message with error location.
     (Juan Morales)
+  . Added JSON_DUPLICATE_KEY_MERGE and JSON_DUPLICATE_KEY_ARRAY flags to
+    json_decode() to control handling of duplicate object keys. (PurHur)
 
 - Fibers:
   . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI small

@@ -322,6 +322,11 @@ PHP_FUNCTION(json_decode)
 		RETURN_THROWS();
 	}
 
+	if ((options & PHP_JSON_DUPLICATE_KEY_MERGE) && (options & PHP_JSON_DUPLICATE_KEY_ARRAY)) {
+		zend_argument_value_error(4, "cannot combine JSON_DUPLICATE_KEY_MERGE and JSON_DUPLICATE_KEY_ARRAY");
+		RETURN_THROWS();
+	}
+
 	/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */
 	if (!assoc_null) {
 		if (assoc) {
