@@ -17,11 +17,14 @@ $with_end_curly2 = "{foo}bar}";
 // 2. See $with_end_curly2; should_quote doesn't care about if the string is already quoted.
 $with_end_curly3 = "{foo}}bar}";
 // 1. No, it's not quoted.
-// 2. It doesn't need to be quoted because of no s
+// 2. It doesn't need to be quoted because of no special characters.
 $with_no_end_curly1 = "foobar";
 // 1. Yes, it is quoted and any characters are properly escaped.
 // 2. See $with_end_curly2.
 $with_no_end_curly2 = "{foobar}";
+// 1. No, it's not quoted.
+// 2. Yes, spaces should be quoted, as drivers can interpret them differently.
+$with_spaces = "  foobar  ";
 
 echo "# Is quoted?\n";
 echo "With end curly brace 1: ";
@@ -34,6 +37,8 @@ echo "Without end curly brace 1: ";
 var_dump(odbc_connection_string_is_quoted($with_no_end_curly1));
 echo "Without end curly brace 2: ";
 var_dump(odbc_connection_string_is_quoted($with_no_end_curly2));
+echo "With spaces: ";
+var_dump(odbc_connection_string_is_quoted($with_spaces));
 
 echo "# Should quote?\n";
 echo "With end curly brace 1: ";
@@ -46,6 +51,8 @@ echo "Without end curly brace 1: ";
 var_dump(odbc_connection_string_should_quote($with_no_end_curly1));
 echo "Without end curly brace 2: ";
 var_dump(odbc_connection_string_should_quote($with_no_end_curly2));
+echo "With spaces: ";
+var_dump(odbc_connection_string_should_quote($with_spaces));
 
 echo "# Quote?\n";
 echo "With end curly brace 1: ";
@@ -58,6 +65,8 @@ echo "Without end curly brace 1: ";
 var_dump(odbc_connection_string_quote($with_no_end_curly1));
 echo "Without end curly brace 2: ";
 var_dump(odbc_connection_string_quote($with_no_end_curly2));
+echo "With spaces: ";
+var_dump(odbc_connection_string_quote($with_spaces));
 
 ?>
 --EXPECTF--
@@ -67,15 +76,18 @@ With end curly brace 2: bool(false)
 With end curly brace 3: bool(true)
 Without end curly brace 1: bool(false)
 Without end curly brace 2: bool(true)
+With spaces: bool(false)
 # Should quote?
 With end curly brace 1: bool(true)
 With end curly brace 2: bool(true)
 With end curly brace 3: bool(true)
 Without end curly brace 1: bool(false)
 Without end curly brace 2: bool(true)
+With spaces: bool(true)
 # Quote?
 With end curly brace 1: string(10) "{foo}}bar}"
 With end curly brace 2: string(13) "{{foo}}bar}}}"
 With end curly brace 3: string(15) "{{foo}}}}bar}}}"
 Without end curly brace 1: string(8) "{foobar}"
 Without end curly brace 2: string(11) "{{foobar}}}"
+With spaces: string(12) "{  foobar  }"
