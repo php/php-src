@@ -206,7 +206,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 
 		/* Process folding headers if starting with a space or a tab. */
 		if (header_line && (*header_line == ' ' || *header_line == '\t')) {
-			char *http_folded_header_line = header_line;
+			const char *http_folded_header_line = header_line;
 			size_t http_folded_header_line_length = *header_line_length;
 			/* Remove the leading white spaces. */
 			while (*http_folded_header_line == ' ' || *http_folded_header_line == '\t') {
@@ -232,7 +232,7 @@ static zend_string *php_stream_http_response_headers_parse(php_stream_wrapper *w
 	char *last_header_value = memchr(last_header_line, ':', last_header_line_length);
 	if (last_header_value) {
 		/* Verify there is no space in header name */
-		char *last_header_name = last_header_line + 1;
+		const char *last_header_name = last_header_line + 1;
 		while (last_header_name < last_header_value) {
 			if (*last_header_name == ' ' || *last_header_name == '\t') {
 				header_info->error = true;
