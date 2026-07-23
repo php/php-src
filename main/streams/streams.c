@@ -2029,21 +2029,25 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 	path_to_open = path;
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options);
-
-	if (wrapper && wrapper->wops->dir_opener) {
-		stream = wrapper->wops->dir_opener(wrapper,
-				path_to_open, "r", options & ~REPORT_ERRORS, NULL,
-				context STREAMS_REL_CC);
-
-		if (stream) {
-			stream->wrapper = wrapper;
-			stream->flags |= PHP_STREAM_FLAG_NO_BUFFER | PHP_STREAM_FLAG_IS_DIR;
-		}
-	} else if (wrapper) {
-		php_stream_wrapper_log_warn(wrapper, context, options & ~REPORT_ERRORS,
-				NoOpener, "not implemented");
+	if (UNEXPECTED(wrapper == NULL)) {
+		php_stream_wrapper_warn_name(PHP_STREAM_ERROR_WRAPPER_DEFAULT_NAME, context, options, OpenFailed,
+			"Failed to open directory");
+		return NULL;
 	}
-	if (stream == NULL && (options & REPORT_ERRORS)) {
+
+	if (UNEXPECTED(!wrapper->wops->dir_opener)) {
+		php_stream_wrapper_warn(wrapper, context, options, NoOpener, "Failed to open directory: not implemented");
+		return NULL;
+	}
+
+	stream = wrapper->wops->dir_opener(wrapper,
+			path_to_open, "r", options & ~REPORT_ERRORS, NULL,
+			context STREAMS_REL_CC);
+
+	if (stream) {
+		stream->wrapper = wrapper;
+		stream->flags |= PHP_STREAM_FLAG_NO_BUFFER | PHP_STREAM_FLAG_IS_DIR;
+	} else if (options & REPORT_ERRORS) {
 		php_stream_display_wrapper_errors(wrapper, context, PHP_STREAM_EC(OpenFailed),
 				"Failed to open directory");
 	}
