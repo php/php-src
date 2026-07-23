@@ -42,7 +42,7 @@ BEGIN_EXTERN_C()
 typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
 # ifdef ZEND_TLS_DIRECT
 extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
-/* See zenc.c: zend_win_tsrm_cache_init */
+/* See zend.c: zend_win_tsrm_cache_init */
 #  if defined(_WIN64)
 extern ZEND_TLS_API unsigned long zend_win_tsrm_cache_slot;
 #   define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(0x1480 + zend_win_tsrm_cache_slot * 8))
