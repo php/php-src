@@ -207,6 +207,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-22187 (Memory corruption (zend_mm_heap corrupted) in
     openssl_encrypt with AES-WRAP-PAD). (CVE-2026-14355) (David Carlier)
 
+- Opcache:
+  . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
+    ZTS thread; the directive is also reported as 0 in worker threads).
+    (Daisuke Komazaki)
+
 - Phar:
   . Fixed a bypass of the magic ".phar" directory protection in
     Phar::addEmptyDir() for paths starting with "/.phar", while allowing
