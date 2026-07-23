@@ -98,6 +98,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-11310 (__debugInfo does nothing on userland classes extending
     Date classes). (Derick)
 
+- Phar:
+  . Fixed bug GH-22556 (OOM DoS via oversized ././@LongLink entry in TAR phar).
+    (crystarm)
+
 - DBA:
   . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
 
