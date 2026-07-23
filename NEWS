@@ -132,6 +132,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
     ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
 
+- Zip:
+  . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
+    is freed while the stream is still open). (Eyüp Can Akman)
+
 02 Jul 2026, PHP 8.4.23
 
 - Core:
