@@ -33,7 +33,7 @@ $_main:
 0005 INIT_FCALL 2 %d string("array_map")
 0006 INIT_FCALL 0 %d string("plusn")
 0007 SEND_VAL int(2) string("n")
-0008 T2 = CALLABLE_CONVERT_PARTIAL 2
+0008 T2 = CALLABLE_CONVERT_PARTIAL %d string("{closure:%s}")
 0009 SEND_VAL T2 1
 0010 SEND_VAR CV0($array) 2
 0011 T2 = DO_ICALL

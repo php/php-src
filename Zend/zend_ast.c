@@ -25,6 +25,7 @@
 #include "zend_closures.h"
 #include "zend_constants.h"
 #include "zend_enum.h"
+#include "zend_partial.h"
 
 ZEND_API zend_ast_process_t zend_ast_process = NULL;
 
@@ -60,6 +61,8 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(zend_ast *args) {
 	ast->kind = ZEND_AST_CALLABLE_CONVERT;
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
+	ast->filename = NULL;
+	ast->name = NULL;
 	ast->args = args;
 	ZEND_MAP_PTR_INIT(ast->fptr, NULL);
 
@@ -671,6 +674,80 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
 	return r;
 }
 
+static zend_execute_data *zend_ast_evaluate_arg_list(
+	zend_function *func,
+	zend_ast_list *args_ast,
+	zend_class_entry *scope,
+	bool *short_circuited_ptr,
+	zend_ast_evaluate_ctx *ctx,
+	zend_array **named_positions_ptr,
+	bool *uses_variadic_placeholder
+) {
+	zend_execute_data *frame = zend_vm_stack_push_call_frame_ex(
+			zend_vm_calc_used_stack(args_ast->children, func),
+			0, func, 0, NULL);
+
+	for (uint32_t i = 0; i < args_ast->children; i++) {
+		zend_ast *arg_ast = args_ast->child[i];
+		uint32_t arg_num = i + 1;
+		zval *arg;
+		zend_string *arg_name = NULL;
+
+		if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
+			void *cache_slot[2] = {0};
+			arg_name = zend_ast_get_str(arg_ast->child[0]);
+			arg = zend_handle_named_arg(&frame, arg_name, &arg_num, (void**)&cache_slot);
+			if (!arg) {
+				goto fail;
+			}
+			if (named_positions_ptr) {
+				if (!*named_positions_ptr) {
+					*named_positions_ptr = zend_new_array(0);
+				}
+				zval tmp;
+				ZVAL_LONG(&tmp, zend_hash_num_elements(*named_positions_ptr));
+				zend_hash_add(*named_positions_ptr, arg_name, &tmp);
+			}
+			arg_ast = arg_ast->child[1];
+		} else {
+			arg = ZEND_CALL_VAR_NUM(frame, ZEND_CALL_NUM_ARGS(frame));
+		}
+
+		if (arg_ast->kind == ZEND_AST_PLACEHOLDER_ARG) {
+			if (arg_ast->attr == ZEND_PLACEHOLDER_VARIADIC) {
+				if (uses_variadic_placeholder) {
+					*uses_variadic_placeholder = true;
+				}
+				continue;
+			} else {
+				Z_TYPE_INFO_P(arg) = _IS_PLACEHOLDER;
+			}
+		} else {
+			if (zend_ast_evaluate_ex(arg, arg_ast, scope, short_circuited_ptr, ctx) == FAILURE) {
+				goto fail;
+			}
+		}
+		if (!arg_name) {
+			ZEND_CALL_NUM_ARGS(frame)++;
+		}
+	}
+
+	return frame;
+
+fail:
+	for (uint32_t i = 0, num_args = ZEND_CALL_NUM_ARGS(frame); i < num_args; i++) {
+		zval_ptr_dtor(ZEND_CALL_VAR_NUM(frame, i));
+	}
+	if (ZEND_CALL_INFO(frame) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_array_destroy(frame->extra_named_params);
+	}
+	zend_vm_stack_free_call_frame(frame);
+	if (named_positions_ptr && *named_positions_ptr) {
+		zend_array_destroy(*named_positions_ptr);
+	}
+	return NULL;
+}
+
 static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 	zval *result,
 	zend_ast *ast,
@@ -1155,10 +1232,6 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 			zend_ast_list *args = zend_ast_get_list(fcc_ast->args);
 			ZEND_ASSERT(args->children > 0);
-			if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
-				/* TODO: PFAs */
-				zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
-			}
 
 			switch (ast->kind) {
 				case ZEND_AST_CALL: {
@@ -1248,9 +1321,49 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 				default: ZEND_UNREACHABLE();
 			}
 
-			zend_create_fake_closure(result, fptr, fptr->common.scope, called_scope, NULL);
+			bool is_fcc = args->children == 1 && args->child[0]->attr == ZEND_PLACEHOLDER_VARIADIC;
 
-			return SUCCESS;
+			if (is_fcc) {
+				zend_create_fake_closure(result, fptr, fptr->common.scope, called_scope, NULL);
+				return SUCCESS;
+			}
+
+			zend_array *named_positions = NULL;
+			bool uses_variadic_placeholder = false;
+			zend_execute_data *frame = zend_ast_evaluate_arg_list(
+					fptr, args, scope, short_circuited_ptr, ctx,
+					&named_positions, &uses_variadic_placeholder);
+			if (!frame) {
+				ZEND_ASSERT(EG(exception));
+				return FAILURE;
+			}
+
+			zval this_ptr;
+			ZVAL_UNDEF(&this_ptr);
+			Z_PTR(this_ptr) = NULL;
+			void *cache_slot[2] = {0};
+			zend_array *extra_named_params = ZEND_CALL_INFO(frame) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS
+						? frame->extra_named_params
+						: NULL;
+			uint32_t flags = (fcc_ast->attr & ZEND_PARTIAL_CACHEABLE_IN_SHM);
+			if (uses_variadic_placeholder) {
+				flags |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
+			}
+			zend_partial_create(result, &this_ptr, fptr,
+					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),
+					extra_named_params, named_positions,
+					fcc_ast->filename, &ast->lineno,
+					(void**)cache_slot, fcc_ast->name, flags, 0);
+
+			if (named_positions) {
+				zend_array_release(named_positions);
+			}
+			if (extra_named_params) {
+				zend_array_release(extra_named_params);
+			}
+			zend_vm_stack_free_call_frame(frame);
+
+			return EG(exception) ? FAILURE : SUCCESS;
 		}
 		case ZEND_AST_OP_ARRAY:
 		{
@@ -1425,6 +1538,16 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->kind = old->kind;
 		new->attr = old->attr;
 		new->lineno = old->lineno;
+		if (old->filename) {
+			new->filename = zend_string_copy(old->filename);
+		} else {
+			new->filename = NULL;
+		}
+		if (old->name) {
+			new->name = zend_string_copy(old->name);
+		} else {
+			new->name = NULL;
+		}
 		ZEND_MAP_PTR_INIT(new->fptr, ZEND_MAP_PTR(old->fptr));
 		buf = (void*)((char*)buf + sizeof(zend_ast_fcc));
 		new->args = buf;
@@ -1525,6 +1648,12 @@ tail_call:
 	} else if (EXPECTED(ast->kind == ZEND_AST_CALLABLE_CONVERT)) {
 		zend_ast_fcc *fcc_ast = (zend_ast_fcc*) ast;
 
+		if (fcc_ast->filename) {
+			zend_string_release_ex(fcc_ast->filename, 0);
+		}
+		if (fcc_ast->name) {
+			zend_string_release_ex(fcc_ast->name, 0);
+		}
 		ast = fcc_ast->args;
 		goto tail_call;
 	}
@@ -1543,6 +1672,9 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *contex
 		for (i = 0; i < list->children; ++i) {
 			fn(&list->child[i], context);
 		}
+	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+		zend_ast_fcc *fcc_ast = (zend_ast_fcc*)ast;
+		fn(&fcc_ast->args, context);
 	} else if (zend_ast_is_decl(ast)) {
 		/* Not implemented. */
 		ZEND_UNREACHABLE();

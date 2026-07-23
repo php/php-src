@@ -469,6 +469,34 @@ static uint32_t zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 					}
 				}
 			}
+
+			if (call_info->caller_call_opline && call_info->caller_call_opline->opcode == ZEND_CALLABLE_CONVERT_PARTIAL) {
+				/* Build a bitset of constant pre-bound PFA args: These are args whose value is alway the same for all
+				 * instances of a PFA. */
+				uint32_t const_args = 0;
+				for (uint32_t i = 0, l = MIN(sizeof(const_args)*CHAR_BIT, call_info->num_args); i < l; i++) {
+					zend_op *send_opline = call_info->arg_info[i].opline;
+					if (send_opline->op1_type == IS_CONST) {
+						zval *value = CT_CONSTANT_EX(op_array, send_opline->op1.constant);
+						if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
+							/* Const exprs can evaluate to non-cont zvals (e.g. objects), and are not idempotent */
+							continue;
+						}
+						const_args |= (1 << i);
+					}
+				}
+
+				/* Pass the bitset to the ZEND_CALLABLE_CONVERT_PARTIAL opline. */
+				zend_op *call_opline = call_info->caller_call_opline;
+				if (call_opline->op2_type == IS_UNUSED) {
+					call_opline->op2.num = const_args;
+				} else {
+					ZEND_ASSERT(call_opline->op2_type == IS_CONST);
+					zval *zv = CT_CONSTANT_EX(op_array, call_opline->op2.constant);
+					Z_EXTRA_P(zv) = const_args;
+				}
+			}
+
 			call_info = call_info->next_callee;
 		} while (call_info);
 	}

@@ -4273,45 +4273,6 @@ recv_init_check_type:
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	SAVE_OPLINE();
-
-	zend_execute_data *call = EX(call);
-	void **cache_slot = CACHE_ADDR(opline->op1.num);
-	zval *named_positions = RT_CONSTANT(opline, opline->op2);
-
-	zend_partial_create(EX_VAR(opline->result.var),
-		&call->This, call->func,
-		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
-			call->extra_named_params : NULL,
-		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		&EX(func)->op_array, opline, cache_slot,
-		opline->extended_value & ZEND_FCALL_USES_VARIADIC_PLACEHOLDER);
-
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-		zend_array_release(call->extra_named_params);
-	}
-
-	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		zend_free_trampoline(call->func);
-	}
-
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
-		OBJ_RELEASE(Z_OBJ(call->This));
-	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
-		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
-	}
-
-	EX(call) = call->prev_execute_data;
-
-	zend_vm_stack_free_call_frame(call);
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_DYNAMIC_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -4452,45 +4413,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_RECV_VARIADIC
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	SAVE_OPLINE();
-
-	zend_execute_data *call = EX(call);
-	void **cache_slot = CACHE_ADDR(opline->op1.num);
-	zval *named_positions = NULL;
-
-	zend_partial_create(EX_VAR(opline->result.var),
-		&call->This, call->func,
-		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
-			call->extra_named_params : NULL,
-		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		&EX(func)->op_array, opline, cache_slot,
-		opline->extended_value & ZEND_FCALL_USES_VARIADIC_PLACEHOLDER);
-
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-		zend_array_release(call->extra_named_params);
-	}
-
-	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		zend_free_trampoline(call->func);
-	}
-
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
-		OBJ_RELEASE(Z_OBJ(call->This));
-	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
-		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
-	}
-
-	EX(call) = call->prev_execute_data;
-
-	zend_vm_stack_free_call_frame(call);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -8741,6 +8663,53 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_
 	ZEND_VM_SMART_BRANCH(0, 1);
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_execute_data *call = EX(call);
+	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
+	zval *named_positions = RT_CONSTANT(opline, opline->op2);
+	zend_string *pfa_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	uint32_t const_args;
+
+	if (IS_CONST == IS_UNUSED) {
+		const_args = opline->op2.num;
+	} else {
+		const_args = Z_EXTRA_P(named_positions);
+	}
+
+	zend_partial_create(EX_VAR(opline->result.var),
+		&call->This, call->func,
+		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
+			call->extra_named_params : NULL,
+		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
+		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_array_release(call->extra_named_params);
+	}
+
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_free_trampoline(call->func);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
+	}
+
+	EX(call) = call->prev_execute_data;
+
+	zend_vm_stack_free_call_frame(call);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ADD_SPEC_CONST_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -12067,6 +12036,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FUNC_GET_ARGS
 }
 
 /* Contrary to what its name indicates, ZEND_COPY_TMP may receive and define references. */
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_execute_data *call = EX(call);
+	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
+	zval *named_positions = NULL;
+	zend_string *pfa_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	uint32_t const_args;
+
+	if (IS_UNUSED == IS_UNUSED) {
+		const_args = opline->op2.num;
+	} else {
+		const_args = Z_EXTRA_P(named_positions);
+	}
+
+	zend_partial_create(EX_VAR(opline->result.var),
+		&call->This, call->func,
+		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
+			call->extra_named_params : NULL,
+		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
+		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_array_release(call->extra_named_params);
+	}
+
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_free_trampoline(call->func);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
+	}
+
+	EX(call) = call->prev_execute_data;
+
+	zend_vm_stack_free_call_frame(call);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -57089,45 +57105,6 @@ recv_init_check_type:
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	SAVE_OPLINE();
-
-	zend_execute_data *call = EX(call);
-	void **cache_slot = CACHE_ADDR(opline->op1.num);
-	zval *named_positions = RT_CONSTANT(opline, opline->op2);
-
-	zend_partial_create(EX_VAR(opline->result.var),
-		&call->This, call->func,
-		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
-			call->extra_named_params : NULL,
-		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		&EX(func)->op_array, opline, cache_slot,
-		opline->extended_value & ZEND_FCALL_USES_VARIADIC_PLACEHOLDER);
-
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-		zend_array_release(call->extra_named_params);
-	}
-
-	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		zend_free_trampoline(call->func);
-	}
-
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
-		OBJ_RELEASE(Z_OBJ(call->This));
-	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
-		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
-	}
-
-	EX(call) = call->prev_execute_data;
-
-	zend_vm_stack_free_call_frame(call);
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_DYNAMIC_CALL_SPEC_TMP_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -57268,45 +57245,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_RECV_VARIADIC_SPEC
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	SAVE_OPLINE();
-
-	zend_execute_data *call = EX(call);
-	void **cache_slot = CACHE_ADDR(opline->op1.num);
-	zval *named_positions = NULL;
-
-	zend_partial_create(EX_VAR(opline->result.var),
-		&call->This, call->func,
-		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
-		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
-			call->extra_named_params : NULL,
-		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
-		&EX(func)->op_array, opline, cache_slot,
-		opline->extended_value & ZEND_FCALL_USES_VARIADIC_PLACEHOLDER);
-
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
-		zend_array_release(call->extra_named_params);
-	}
-
-	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		zend_free_trampoline(call->func);
-	}
-
-	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
-		OBJ_RELEASE(Z_OBJ(call->This));
-	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
-		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
-	}
-
-	EX(call) = call->prev_execute_data;
-
-	zend_vm_stack_free_call_frame(call);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -61557,6 +61495,53 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_IN_AR
 	ZEND_VM_SMART_BRANCH(0, 1);
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_execute_data *call = EX(call);
+	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
+	zval *named_positions = RT_CONSTANT(opline, opline->op2);
+	zend_string *pfa_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	uint32_t const_args;
+
+	if (IS_CONST == IS_UNUSED) {
+		const_args = opline->op2.num;
+	} else {
+		const_args = Z_EXTRA_P(named_positions);
+	}
+
+	zend_partial_create(EX_VAR(opline->result.var),
+		&call->This, call->func,
+		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
+			call->extra_named_params : NULL,
+		IS_CONST == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
+		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_array_release(call->extra_named_params);
+	}
+
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_free_trampoline(call->func);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
+	}
+
+	EX(call) = call->prev_execute_data;
+
+	zend_vm_stack_free_call_frame(call);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ADD_SPEC_CONST_TMPVARCV_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -64781,6 +64766,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FUNC_GET_ARGS_SPEC
 }
 
 /* Contrary to what its name indicates, ZEND_COPY_TMP may receive and define references. */
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_execute_data *call = EX(call);
+	void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_PARTIAL_FLAGS);
+	zval *named_positions = NULL;
+	zend_string *pfa_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	uint32_t const_args;
+
+	if (IS_UNUSED == IS_UNUSED) {
+		const_args = opline->op2.num;
+	} else {
+		const_args = Z_EXTRA_P(named_positions);
+	}
+
+	zend_partial_create(EX_VAR(opline->result.var),
+		&call->This, call->func,
+		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
+			call->extra_named_params : NULL,
+		IS_UNUSED == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
+		EX(func)->op_array.filename, &opline->lineno, cache_slot,
+		pfa_name, opline->extended_value & ZEND_PARTIAL_FLAGS, const_args);
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_array_release(call->extra_named_params);
+	}
+
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_free_trampoline(call->func);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
+	}
+
+	EX(call) = call->prev_execute_data;
+
+	zend_vm_stack_free_call_frame(call);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -109528,10 +109560,10 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_LABEL,
 			(void*)&&ZEND_DECLARE_ATTRIBUTED_CONST_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_TYPE_ASSERT_SPEC_CONST_LABEL,
-			(void*)&&ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_LABEL,
+			(void*)&&ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED_LABEL,
+			(void*)&&ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_PLACEHOLDER_SPEC_UNUSED_CONST_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -110942,11 +110974,6 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_RECV_INIT_SPEC_CONST)
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST):
-				VM_TRACE(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST)
-				ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				VM_TRACE_OP_END(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST)
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_DYNAMIC_CALL_SPEC_TMP):
 				VM_TRACE(ZEND_INIT_DYNAMIC_CALL_SPEC_TMP)
 				ZEND_INIT_DYNAMIC_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -110961,11 +110988,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_RECV_VARIADIC_SPEC_UNUSED)
 				ZEND_RECV_VARIADIC_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_RECV_VARIADIC_SPEC_UNUSED)
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED):
-				VM_TRACE(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED)
-				ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				VM_TRACE_OP_END(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FRAMELESS_ICALL_1_SPEC_UNUSED):
 				VM_TRACE(ZEND_FRAMELESS_ICALL_1_SPEC_UNUSED)
@@ -111566,6 +111588,11 @@ zend_leave_helper_SPEC_LABEL:
 				ZEND_IN_ARRAY_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_IN_ARRAY_SPEC_CONST_CONST)
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST):
+				VM_TRACE(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST)
+				ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST)
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_SPEC_CONST_TMPVARCV):
 				VM_TRACE(ZEND_ADD_SPEC_CONST_TMPVARCV)
 				ZEND_ADD_SPEC_CONST_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -111925,6 +111952,11 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSED)
 				ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSED)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED):
+				VM_TRACE(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED)
+				ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED)
@@ -118496,10 +118528,10 @@ void zend_vm_init(void)
 		ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_HANDLER,
 		ZEND_DECLARE_ATTRIBUTED_CONST_SPEC_CONST_CONST_HANDLER,
 		ZEND_TYPE_ASSERT_SPEC_CONST_HANDLER,
-		ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_HANDLER,
+		ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED_HANDLER,
+		ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_PLACEHOLDER_SPEC_UNUSED_CONST_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -121984,10 +122016,10 @@ void zend_vm_init(void)
 		ZEND_INIT_PARENT_PROPERTY_HOOK_CALL_SPEC_CONST_UNUSED_TAILCALL_HANDLER,
 		ZEND_DECLARE_ATTRIBUTED_CONST_SPEC_CONST_CONST_TAILCALL_HANDLER,
 		ZEND_TYPE_ASSERT_SPEC_CONST_TAILCALL_HANDLER,
-		ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_TAILCALL_HANDLER,
+		ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_CONST_TAILCALL_HANDLER,
 		ZEND_NULL_TAILCALL_HANDLER,
 		ZEND_NULL_TAILCALL_HANDLER,
-		ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_UNUSED_TAILCALL_HANDLER,
+		ZEND_CALLABLE_CONVERT_PARTIAL_SPEC_CONST_UNUSED_TAILCALL_HANDLER,
 		ZEND_NULL_TAILCALL_HANDLER,
 		ZEND_SEND_PLACEHOLDER_SPEC_UNUSED_CONST_TAILCALL_HANDLER,
 		ZEND_NULL_TAILCALL_HANDLER,
