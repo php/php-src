@@ -58,6 +58,14 @@ $f = $cache->fetch('fs');
 var_dump(serialize($f) === serialize($fs));
 var_dump($f->format('%d %h'));
 
+/* --- relative-spec from_string interval (special/weekday rel fields) --- */
+$rel = DateInterval::createFromDateString('last day of next month');
+$cache->store('rel', $rel);
+$rl = $cache->fetch('rel');
+var_dump(serialize($rl) === serialize($rel));
+$base = new DateTimeImmutable('2026-07-23');
+var_dump($base->add($rl)->format('Y-m-d') === $base->add($rel)->format('Y-m-d'));
+
 /* --- subclass with extra state, no __serialize override => safe-direct --- */
 $tagged = new TaggedInterval('P10DT12H');
 $tagged->tag('window', 9);
@@ -79,6 +87,8 @@ string(13) "73 days 10:30"
 int(1)
 bool(true)
 string(3) "2 4"
+bool(true)
+bool(true)
 bool(true)
 string(6) "window"
 string(8) "window:9"
