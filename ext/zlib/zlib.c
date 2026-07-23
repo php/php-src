@@ -27,6 +27,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
+#include "Zend/zend_virtual_cwd.h"
 #include "php_zlib.h"
 #include "zlib_arginfo.h"
 
@@ -677,7 +678,7 @@ PHP_FUNCTION(readgzfile)
 	size_t filename_len;
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
-	size_t size;
+	ssize_t size;
 	bool use_include_path = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &filename, &filename_len, &use_include_path) == FAILURE) {
@@ -694,8 +695,20 @@ PHP_FUNCTION(readgzfile)
 		RETURN_FALSE;
 	}
 	size = php_stream_passthru(stream);
+	/* On Windows, corrupt gzip may yield 0 from passthru; stream eof is already set so a further read returns 0 (not -1). Treat 0 bytes read from a non-empty file as error. */
+	if (size == 0) {
+		char buf[1];
+		if (php_stream_read(stream, buf, 1) < 0) {
+			size = -1;
+		} else {
+			zend_stat_t st = {0};
+			if (VCWD_STAT(filename, &st) == 0 && st.st_size > 0) {
+				size = -1;
+			}
+		}
+	}
 	php_stream_close(stream);
-	RETURN_LONG(size);
+	RETURN_LONG((zend_long) size);
 }
 /* }}} */
 
