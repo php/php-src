@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Ilija Tovilo <ilutov@php.net>                               |
    +----------------------------------------------------------------------+
@@ -91,24 +90,23 @@ static void zend_verify_enum_properties(const zend_class_entry *ce)
 
 static void zend_verify_enum_magic_methods(const zend_class_entry *ce)
 {
-	// Only __get, __call and __invoke are allowed
+	// Only __get, __call, __debugInfo and __invoke are allowed
 
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(constructor, "__construct");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(destructor, "__destruct");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(clone, "__clone");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__get, "__get");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__set, "__set");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unset, "__unset");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__isset, "__isset");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, "__toString");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__debugInfo, "__debugInfo");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, "__serialize");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, "__unserialize");
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(constructor, ZEND_CONSTRUCTOR_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(destructor, ZEND_DESTRUCTOR_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(clone, ZEND_CLONE_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__get, ZEND_GET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__set, ZEND_SET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unset, ZEND_UNSET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__isset, ZEND_ISSET_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, ZEND_TOSTRING_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, ZEND_SERIALIZE_FUNC_NAME);
+	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, ZEND_UNSERIALIZE_FUNC_NAME);
 
 	static const char *const forbidden_methods[] = {
-		"__sleep",
-		"__wakeup",
-		"__set_state",
+		ZEND_SLEEP_FUNC_NAME,
+		ZEND_WAKEUP_FUNC_NAME,
+		ZEND_SET_STATE_FUNC_NAME,
 	};
 
 	uint32_t forbidden_methods_length = sizeof(forbidden_methods) / sizeof(forbidden_methods[0]);
@@ -177,7 +175,7 @@ void zend_register_enum_ce(void)
 	zend_ce_backed_enum->interface_gets_implemented = zend_implement_backed_enum;
 
 	memcpy(&zend_enum_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	zend_enum_object_handlers.offset = XtOffsetOf(zend_enum_obj, std);
+	zend_enum_object_handlers.offset = offsetof(zend_enum_obj, std);
 	zend_enum_object_handlers.clone_obj = NULL;
 	zend_enum_object_handlers.compare = zend_objects_not_comparable;
 }
@@ -672,6 +670,11 @@ ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name
 
 ZEND_API zend_object *zend_enum_get_case_cstr(zend_class_entry *ce, const char *name) {
 	zend_class_constant *c = zend_hash_str_find_ptr(CE_CONSTANTS_TABLE(ce), name, strlen(name));
+	return zend_enum_case_from_class_constant(c);
+}
+
+ZEND_API zend_object *zend_enum_get_case_by_id(zend_class_entry *ce, int id) {
+	zend_class_constant *c = Z_PTR(CE_CONSTANTS_TABLE(ce)->arData[id - 1].val);
 	return zend_enum_case_from_class_constant(c);
 }
 

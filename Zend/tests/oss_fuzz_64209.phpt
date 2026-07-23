@@ -5,7 +5,7 @@ oss-fuzz #64209: Fix in-place modification of filename in php_message_handler_fo
 require '://@';
 ?>
 --EXPECTF--
-Warning: require(://@): Failed to open stream: No such file or directory in %s on line %d
+Warning: require(): Failed to open stream: No such file or directory in %s on line %d
 
 Fatal error: Uncaught Error: Failed opening required '://@' (include_path='%s') in %s:%d
 Stack trace:

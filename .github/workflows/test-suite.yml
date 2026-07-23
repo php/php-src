@@ -16,6 +16,7 @@ jobs:
     name: LINUX_PPC64_ASAN_DEBUG_ZTS
     # This runs on a self-hosted runner; see https://wiki.php.net/systems/ci
     runs-on: [self-hosted, gentoo, ppc64]
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -55,6 +56,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.ALPINE }}
     name: ALPINE_X64_ASAN_DEBUG_ZTS
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
     container:
       image: 'alpine:3.22'
     steps:
@@ -130,6 +132,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X64.matrix }}
     name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -166,7 +169,7 @@ jobs:
             ${{ matrix.variation && 'CFLAGS="-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE"' || '' }}
             ${{ (matrix.variation && fromJson(inputs.branch).jobs.LINUX_X64.config.variation_enable_zend_max_execution_timers) && '--enable-zend-max-execution-timers' || '' }}
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
-            ${{ matrix.debug && 'CXXFLAGS="-D_GLIBCXX_ASSERTIONS"' || '' }}
+            ${{ (matrix.variation || matrix.debug) && format('CXXFLAGS="{0} {1}"', matrix.variation && '-DZEND_VERIFY_TYPE_INFERENCE' || '', matrix.debug && '-D_GLIBCXX_ASSERTIONS' || '') || '' }}
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
           asan: ${{ matrix.asan && 'true' || 'false' }}
           skipSlow: ${{ (matrix.asan && !inputs.all_variations) && 'true' || 'false' }}
@@ -228,6 +231,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X32.matrix }}
     name: "LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     container:
       image: ubuntu:${{ fromJson(inputs.branch).config.ubuntu_version }}
     env:
@@ -309,6 +313,7 @@ jobs:
       matrix: ${{ fromJson(inputs.branch).jobs.MACOS.matrix }}
     name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: macos-${{ matrix.arch == 'X64' && '15-intel' || fromJson(inputs.branch).jobs.MACOS.config.arm64_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -340,18 +345,18 @@ jobs:
         if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-macos
       - name: Test Tracing JIT
-        if: ${{ matrix.arch == 'X64' || !matrix.zts }}
+        if: ${{ matrix.jit }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
           jitType: tracing
       - name: Test OpCache
-        if: ${{ inputs.all_variations || (matrix.arch == 'ARM64' && matrix.zts) }}
+        if: ${{ inputs.all_variations }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
       - name: Test Function JIT
-        if: ${{ inputs.all_variations && (matrix.arch == 'X64' || !matrix.zts) }}
+        if: ${{ inputs.all_variations && matrix.jit }}
         uses: ./.github/actions/test-macos
         with:
           enableOpcache: true
@@ -386,6 +391,7 @@ jobs:
           FIREBIRD_USER: test
           FIREBIRD_PASSWORD: test
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -413,10 +419,15 @@ jobs:
         with:
           enableOpcache: true
           jitType: tracing
-      - uses: codecov/codecov-action@v5
+      - name: Generate coverage report
+        if: ${{ !cancelled() }}
+        run: make gcovr-xml
+      - uses: codecov/codecov-action@v6
         if: ${{ !cancelled() }}
         with:
+          disable_search: true
           fail_ci_if_error: true
+          files: gcovr.xml
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
   COMMUNITY:
@@ -506,7 +517,8 @@ jobs:
       - name: Test Laravel
         if: ${{ !cancelled() }}
         run: |
-          git clone https://github.com/laravel/framework.git --depth=1
+          branch=${{ fromJson(inputs.branch).jobs.COMMUNITY.config.laravel_version }}
+          git clone https://github.com/laravel/framework.git --depth=1 ${branch:+--branch="$branch"}
           cd framework
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+
@@ -551,7 +563,8 @@ jobs:
       - name: Test Symfony
         if: ${{ !cancelled() }}
         run: |
-          git clone https://github.com/symfony/symfony.git --depth=1 --branch="${{ fromJson(inputs.branch).jobs.COMMUNITY.config.symfony_version }}"
+          branch=${{ fromJson(inputs.branch).jobs.COMMUNITY.config.symfony_version }}
+          git clone https://github.com/symfony/symfony.git --depth=1 ${branch:+--branch="$branch"}
           cd symfony
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-req=php+
@@ -635,6 +648,7 @@ jobs:
           FIREBIRD_PASSWORD: test
     name: OPCACHE_VARIATION
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -698,6 +712,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.MSAN }}
     name: MSAN
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -789,6 +804,7 @@ jobs:
     if: ${{ fromJson(inputs.branch).jobs.LIBMYSQLCLIENT }}
     name: LIBMYSQLCLIENT
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
+    timeout-minutes: 180
     steps:
       - name: git checkout
         uses: actions/checkout@v6
@@ -820,126 +836,19 @@ jobs:
         uses: ./.github/actions/test-libmysqlclient
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-  PECL:
-    if: ${{ fromJson(inputs.branch).jobs.PECL }}
-    runs-on: ubuntu-24.04
-    steps:
-      - name: git checkout PHP
-        uses: actions/checkout@v6
-        with:
-          path: php
-          ref: ${{ fromJson(inputs.branch).ref }}
-      # Used for ccache action
-      - name: Move .github
-        run: mv php/.github .
-      - name: git checkout apcu
-        uses: actions/checkout@v6
-        with:
-          repository: krakjoe/apcu
-          path: apcu
-      - name: git checkout imagick
-        uses: actions/checkout@v6
-        with:
-          repository: Imagick/imagick
-          path: imagick
-      - name: git checkout memcached
-        uses: actions/checkout@v6
-        with:
-          repository: php-memcached-dev/php-memcached
-          path: memcached
-      - name: git checkout redis
-        if: ${{ false }}
-        uses: actions/checkout@v6
-        with:
-          repository: phpredis/phpredis
-          path: redis
-      - name: git checkout xdebug
-        uses: actions/checkout@v6
-        with:
-          repository: xdebug/xdebug
-          path: xdebug
-      - name: git checkout yaml
-        uses: actions/checkout@v6
-        with:
-          repository: php/pecl-file_formats-yaml
-          path: yaml
-      - name: apt
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            ccache \
-            libmemcached-dev \
-            imagemagick \
-            libmagickwand-dev \
-            bison \
-            re2c
-      - name: ccache
-        uses: ./.github/actions/ccache
-        with:
-          name: "${{ github.job }}"
-          php_directory: php
-      - name: build PHP
-        run: |
-          cd php
-          ./buildconf --force
-          ./configure \
-            --enable-option-checking=fatal \
-            --prefix=/opt/php \
-            --enable-cli \
-            --disable-all \
-            --enable-session \
-            --enable-werror
-          make -j$(/usr/bin/nproc)
-          sudo make install
-      - name: build apcu
-        run: |
-          cd apcu
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build imagick
-        run: |
-          cd imagick
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build memcached
-        run: |
-          cd memcached
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build redis
-        if: ${{ false }}
-        run: |
-          cd redis
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build xdebug
-        run: |
-          cd xdebug
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
-      - name: build yaml
-        run: |
-          cd yaml
-          /opt/php/bin/phpize
-          ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
-          make -j$(/usr/bin/nproc)
   WINDOWS:
     if: ${{ fromJson(inputs.branch).jobs.WINDOWS }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.WINDOWS.matrix }}
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}"
-    runs-on: windows-2022
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}"
+    runs-on: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.runs_on }}
+    timeout-minutes: 180
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.5.0
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.7.1
       PHP_BUILD_CRT: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
@@ -947,6 +856,7 @@ jobs:
       PARALLEL: -j2
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
       ASAN: "${{ matrix.asan && '1' || '0' }}"
+      CLANG_TOOLSET: "${{ matrix.clang && '1' || '0' }}"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf

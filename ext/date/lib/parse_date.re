@@ -516,7 +516,7 @@ static timelib_sll timelib_get_nr(const char **ptr, int max_length)
 
 static void timelib_skip_day_suffix(const char **ptr)
 {
-	if (isspace(**ptr)) {
+	if (isspace((unsigned char)**ptr)) {
 		return;
 	}
 	if (!timelib_strncasecmp(*ptr, "nd", 2) || !timelib_strncasecmp(*ptr, "rd", 2) ||!timelib_strncasecmp(*ptr, "st", 2) || !timelib_strncasecmp(*ptr, "th", 2)) {
@@ -555,7 +555,6 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 	int len = 0;
 
 	/* Skip over non-numeric chars */
-
 	while (((**ptr < '0') || (**ptr > '9')) && (**ptr != '+') && (**ptr != '-')) {
 		if (**ptr == '\0') {
 			add_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Found unexpected data");
@@ -568,6 +567,7 @@ static timelib_ull timelib_get_signed_nr(Scanner *s, const char **ptr, int max_l
 	str = timelib_calloc(1, max_length + 2);
 	str[0] = '+'; /* First position is the sign */
 	str_ptr = str + 1;
+
 
 	while ((**ptr == '+') || (**ptr == '-')) {
 		if (**ptr == '-') {
@@ -857,7 +857,7 @@ static timelib_long timelib_parse_tz_cor(const char **ptr, int *tz_not_found)
 
 	*tz_not_found = 1;
 
-	while (isdigit(**ptr) || **ptr == ':') {
+	while (isdigit((unsigned char)**ptr) || **ptr == ':') {
 		++*ptr;
 	}
 	end = *ptr;
@@ -922,7 +922,7 @@ static timelib_long timelib_parse_tz_minutes(const char **ptr, timelib_time *t)
 	}
 
 	++*ptr;
-	while (isdigit(**ptr)) {
+	while (isdigit((unsigned char)**ptr)) {
 		++*ptr;
 	}
 
@@ -2020,7 +2020,7 @@ timelib_time *timelib_strtotime(const char *s, size_t len, timelib_error_contain
 	in.errors->error_messages = NULL;
 
 	if (len > 0) {
-		while (isspace((unsigned char)*s) && s < e) {
+		while (isspace((unsigned char)*s) && s <= e) {
 			s++;
 		}
 		while (isspace((unsigned char)*e) && e > s) {

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -297,12 +295,14 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
 	rounding_mode_ce = register_class_RoundingMode();
+	sort_direction_ce = register_class_SortDirection();
 
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)
 	BASIC_MINIT_SUBMODULE(browscap)
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
+	BASIC_MINIT_SUBMODULE(poll)
 	BASIC_MINIT_SUBMODULE(password)
 	BASIC_MINIT_SUBMODULE(image)
 
@@ -336,6 +336,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 	BASIC_MINIT_SUBMODULE(exec)
 
+	BASIC_MINIT_SUBMODULE(stream_errors)
 	BASIC_MINIT_SUBMODULE(user_streams)
 
 	php_register_url_stream_wrapper("php", &php_stream_php_wrapper);
@@ -599,6 +600,20 @@ PHP_FUNCTION(ip2long)
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
+#ifdef _AIX
+	/*
+	AIX accepts IP strings with extraneous 0 (192.168.042.42 will be treated as
+	192.168.42.42), while Linux doesn't.
+	For consistency, we convert back the IP to a string and check if it is equal to
+	the original string. If not, the IP should be considered invalid.
+	*/
+	char str[INET_ADDRSTRLEN];
+	const char* result = inet_ntop(AF_INET, &ip, str, sizeof(str));
+	ZEND_ASSERT(result != NULL);
+	if (strcmp(addr, result) != 0) {
+		RETURN_FALSE;
+	}
+#endif
 	RETURN_LONG(ntohl(ip.s_addr));
 }
 /* }}} */
@@ -697,7 +712,7 @@ PHP_FUNCTION(getenv)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(str, str_len)
+		Z_PARAM_PATH_OR_NULL(str, str_len)
 		Z_PARAM_BOOL(local_only)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -740,7 +755,7 @@ PHP_FUNCTION(putenv)
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(setting, setting_len)
+		Z_PARAM_PATH(setting, setting_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (setting_len == 0 || setting[0] == '=') {
@@ -1108,13 +1123,18 @@ PHP_FUNCTION(flush)
 PHP_FUNCTION(sleep)
 {
 	zend_long num;
+#ifdef PHP_WIN32
+	const unsigned int max = UINT_MAX / 1000;
+#else
+	const unsigned int max = UINT_MAX;
+#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
+	if (num < 0 || (zend_ulong) num > max) {
+		zend_argument_value_error(1, "must be between 0 and %u", max);
 		RETURN_THROWS();
 	}
 
@@ -1131,8 +1151,8 @@ PHP_FUNCTION(usleep)
 		Z_PARAM_LONG(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (num < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
+	if (num < 0 || (zend_ulong) num > UINT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1282,9 +1302,9 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 	zend_string *key;
 	zval *zv;
 
-	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv)
+	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv) {
 		add_config_entry(h, key, zv, return_value);
-	ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1717,11 +1737,11 @@ PHPAPI bool append_user_shutdown_function(php_shutdown_function_entry *shutdown_
 
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini) /* {{{ */
 {
-	syntax_highlighter_ini->highlight_comment = INI_STR("highlight.comment");
-	syntax_highlighter_ini->highlight_default = INI_STR("highlight.default");
-	syntax_highlighter_ini->highlight_html    = INI_STR("highlight.html");
-	syntax_highlighter_ini->highlight_keyword = INI_STR("highlight.keyword");
-	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
+	syntax_highlighter_ini->highlight_comment = zend_ini_string_literal("highlight.comment");
+	syntax_highlighter_ini->highlight_default = zend_ini_string_literal("highlight.default");
+	syntax_highlighter_ini->highlight_html    = zend_ini_string_literal("highlight.html");
+	syntax_highlighter_ini->highlight_keyword = zend_ini_string_literal("highlight.keyword");
+	syntax_highlighter_ini->highlight_string  = zend_ini_string_literal("highlight.string");
 }
 /* }}} */
 
@@ -1942,6 +1962,12 @@ PHP_FUNCTION(ini_get_all)
 					add_assoc_null(&option, "local_value");
 				}
 
+				if (ini_entry->def->value) {
+					add_assoc_stringl(&option, "builtin_default_value", ini_entry->def->value, ini_entry->def->value_length);
+				} else {
+					add_assoc_null(&option, "builtin_default_value");
+				}
+
 				add_assoc_long(&option, "access", ini_entry->modifiable);
 
 				zend_symtable_update(Z_ARRVAL_P(return_value), ini_entry->name, &option);
@@ -2029,17 +2055,16 @@ PHP_FUNCTION(ini_restore)
 PHP_FUNCTION(set_include_path)
 {
 	zend_string *new_value;
-	char *old_value;
 	zend_string *key;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
+	zend_string *old_value = zend_ini_str_literal("include_path");
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
-		RETVAL_STRING(old_value);
+		RETVAL_STR_COPY(old_value);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2059,7 +2084,7 @@ PHP_FUNCTION(get_include_path)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_string *str = zend_ini_str("include_path", sizeof("include_path") - 1, 0);
+	zend_string *str = zend_ini_str_literal("include_path");
 
 	if (str == NULL) {
 		RETURN_FALSE;

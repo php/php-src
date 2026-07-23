@@ -100,7 +100,8 @@ class ServerClientTestCase
             $ini = php_ini_loaded_file();
             $cmd = sprintf(
                 '%s %s "%s" %s',
-                PHP_BINARY, $ini ? "-n -c $ini" : "",
+                // XXX: TEST_PHP_EXTRA_ARGS for run-test values won't work here?
+                PHP_BINARY, $ini ? "-n -c $ini -d error_include_args=0" : "",
                 __FILE__,
                 WORKER_ARGV_VALUE
             );
@@ -128,6 +129,10 @@ class ServerClientTestCase
     private function cleanupWorkerProcess($worker)
     {
         fclose($this->workerStdIn[$worker]);
+        /* Drain stdout to EOF before closing it, so late worker writes (e.g.
+         * buffered error output) don't fail and abort the worker mid-output. */
+        stream_set_blocking($this->workerStdOut[$worker], true);
+        stream_get_contents($this->workerStdOut[$worker]);
         fclose($this->workerStdOut[$worker]);
         proc_close($this->workerHandle[$worker]);
     }
@@ -179,6 +184,9 @@ class ServerClientTestCase
                 if (empty($addr)) {
                     throw new \Exception("Failed server start");
                 }
+				if (strpos($addr, 'SERVER_EXCEPTION') !== false) {
+					echo $addr;
+				}
                 if ($code === false) {
                     $clientCode = preg_replace('/{{\s*ADDR\s*}}/', $addr, $clientCode);
                 } else {

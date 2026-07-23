@@ -61,7 +61,6 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     $test_macos = in_array('CI: macOS', $labels, true);
     $test_msan = in_array('CI: MSAN', $labels, true);
     $test_opcache_variation = in_array('CI: Opcache Variation', $labels, true);
-    $test_pecl = in_array('CI: PECL', $labels, true);
     $test_solaris = in_array('CI: Solaris', $labels, true);
     $test_windows = in_array('CI: Windows', $labels, true);
 
@@ -80,7 +79,14 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
             ? ['type' => ['asan', 'verify_type_inference']]
             : ['type' => ['asan']];
-        $jobs['COMMUNITY']['config']['symfony_version'] = version_compare($php_version, '8.4', '>=') ? '8.1' : '7.4';
+        $jobs['COMMUNITY']['config']['symfony_version'] = match (true) {
+            version_compare($php_version, '8.3', '<=') => '7.4',
+            default => '',
+        };
+        $jobs['COMMUNITY']['config']['laravel_version'] = match (true) {
+            version_compare($php_version, '8.2', '<=') => '12.x',
+            default => '',
+        };
     }
     if (($all_jobs && $ref === 'master') || $test_coverage) {
         $jobs['COVERAGE'] = true;
@@ -121,7 +127,19 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         $test_arm = version_compare($php_version, '8.4', '>=');
         $jobs['MACOS']['matrix'] = $all_variations
             ? ['arch' => $test_arm ? ['X64', 'ARM64'] : ['X64'], 'debug' => [true, false], 'zts' => [true, false]]
-            : ['include' => [['arch' => $test_arm ? 'ARM64' : 'X64', 'debug' => true, 'zts' => false]]];
+            : ['include' => [['arch' => $test_arm ? 'ARM64' : 'X64', 'debug' => true, 'zts' => false, 'jit' => true]]];
+        if ($all_variations) {
+            // Set the jit variable on X64 jobs
+            $jobs['MACOS']['matrix']['include'][] = ['arch' => 'X64', 'jit' => true];
+            if ($test_arm) {
+                // Set the jit variable on ARM64 NTS jobs
+                $jobs['MACOS']['matrix']['include'][] = ['arch' => 'ARM64', 'zts' => false, 'jit' => true];
+                // Set the jit variable on ARM64 ZTS jobs on 8.6+
+                if (version_compare($php_version, '8.6', '>=')) {
+                    $jobs['MACOS']['matrix']['include'][] = ['arch' => 'ARM64', 'zts' => true, 'jit' => true];
+                }
+            }
+        }
         $jobs['MACOS']['config']['arm64_version'] = version_compare($php_version, '8.4', '>=') ? '15' : '14';
     }
     if ($all_jobs || $test_msan) {
@@ -130,22 +148,24 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     if ($all_jobs || $test_opcache_variation) {
         $jobs['OPCACHE_VARIATION'] = true;
     }
-    if (($all_jobs && $ref === 'master') || $test_pecl) {
-        $jobs['PECL'] = true;
-    }
     if (version_compare($php_version, '8.6', '>=') && ($all_jobs || $test_solaris)) {
         $jobs['SOLARIS'] = true;
     }
     if ($all_jobs || !$no_jobs || $test_windows) {
-        $jobs['WINDOWS']['matrix'] = $all_variations
-            ? ['include' => [
-                ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true],
-                ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false],
-            ]]
-            : ['include' => [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]]];
-        $jobs['WINDOWS']['config'] = version_compare($php_version, '8.4', '>=')
-            ? ['vs_crt_version' => 'vs17']
-            : ['vs_crt_version' => 'vs16'];
+        $matrix = [['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true]];
+        if ($all_variations) {
+            $matrix[] = ['asan' => true, 'opcache' => true, 'x64' => true, 'zts' => true];
+            $matrix[] = ['asan' => false, 'opcache' => false, 'x64' => false, 'zts' => false];
+            if (version_compare($php_version, '8.6', '>=')) {
+                $matrix[] = ['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true, 'clang' => true];
+            }
+        }
+        $jobs['WINDOWS']['matrix'] = ['include' => $matrix];
+        $jobs['WINDOWS']['config'] = match (true) {
+            version_compare($php_version, '8.6', '>=') => ['vs_crt_version' => 'vs18', 'runs_on' => 'windows-2025-vs2026'],
+            version_compare($php_version, '8.4', '>=') => ['vs_crt_version' => 'vs17', 'runs_on' => 'windows-2022'],
+            default => ['vs_crt_version' => 'vs16', 'runs_on' => 'windows-2022'],
+        };
     }
     if ($all_jobs || !$no_jobs || $test_freebsd) {
         $jobs['FREEBSD']['matrix'] = $all_variations && version_compare($php_version, '8.3', '>=')

@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -194,14 +193,14 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 	return object;
 }
 
-ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
+ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, const zend_object *old_object)
 {
 	bool has_clone_method = old_object->ce->clone != NULL;
 
 	if (old_object->ce->default_properties_count) {
-		zval *src = old_object->properties_table;
+		const zval *src = old_object->properties_table;
 		zval *dst = new_object->properties_table;
-		zval *end = src + old_object->ce->default_properties_count;
+		const zval *end = src + old_object->ce->default_properties_count;
 
 		do {
 			i_zval_ptr_dtor(dst);
@@ -322,6 +321,14 @@ ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const
 		} ZEND_HASH_FOREACH_END();
 
 		EG(fake_scope) = old_scope;
+
+		/* Lock readonly properties once more. */
+		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
+			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
+				zval* prop = OBJ_PROP_NUM(new_object, i);
+				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
+			}
+		}
 	}
 
 	return new_object;

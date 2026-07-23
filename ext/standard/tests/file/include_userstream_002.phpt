@@ -101,8 +101,8 @@ include "test2://hello";
 
 Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_include=0 in %sinclude_userstream_002.php on line 11
 
-Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_002.php on line 11
+Warning: fopen(): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_002.php on line 11
 
-Warning: include(test2://hello): Failed to open stream: "test::stream_open" call failed in %sinclude_userstream_002.php on line 90
+Warning: include(): Failed to open stream: "test::stream_open" call failed in %sinclude_userstream_002.php on line 90
 
 Warning: include(): Failed opening 'test2://hello' for inclusion (include_path='%s') in %sinclude_userstream_002.php on line 90

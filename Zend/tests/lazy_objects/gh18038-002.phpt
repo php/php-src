@@ -34,5 +34,4 @@ var_dump($obj->prop);
 --EXPECT--
 init
 string(19) "RealInstance::__set"
-string(12) "Proxy::__set"
 int(2)

@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend JIT                                                             |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -1976,7 +1974,7 @@ static bool ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_arg_info *arg
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
 	bool ret = zend_check_user_type_slow(
-		&arg_info->type, arg, /* ref */ NULL, /* is_return_type */ false);
+		&arg_info->type, arg, /* ref */ NULL, /* current_frame */ false);
 	if (UNEXPECTED(!ret)) {
 		zend_verify_arg_error(EX(func), arg_info, opline->op1.num, arg);
 		return false;
@@ -1993,7 +1991,7 @@ static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_a
 		}
 	}
 	if (UNEXPECTED(!zend_check_user_type_slow(
-			&arg_info->type, arg, /* ref */ NULL, /* is_return_type */ true))) {
+			&arg_info->type, arg, /* ref */ NULL, /* current_frame */ true))) {
 		zend_verify_return_error((zend_function*)op_array, arg);
 	}
 }
@@ -2285,7 +2283,7 @@ static zend_never_inline bool zend_handle_fetch_obj_flags(
 				}
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	return 1;
 }

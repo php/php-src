@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -106,7 +105,10 @@
 # define ZEND_ASSUME(c)
 #endif
 
-#if ZEND_DEBUG
+#ifdef HAVE_GCOV
+/* Disable assert() when compiling with gcov to avoid untested branch warning. */
+# define ZEND_ASSERT(c) ((void)sizeof(c))
+#elif ZEND_DEBUG
 # define ZEND_ASSERT(c)	assert(c)
 #else
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
@@ -128,15 +130,13 @@
 #endif
 
 /* pseudo fallthrough keyword; */
-#if defined(__GNUC__) && __GNUC__ >= 7
+#if __STDC_VERSION__ >= 202311L || defined(__cplusplus)
+# define ZEND_FALLTHROUGH [[fallthrough]]
+#elif defined(__GNUC__) && __GNUC__ >= 7
 # define ZEND_FALLTHROUGH __attribute__((__fallthrough__))
 #else
 # define ZEND_FALLTHROUGH ((void)0)
 #endif
-
-/* Only use this macro if you know for sure that all of the switches values
-   are covered by its case statements */
-#define EMPTY_SWITCH_DEFAULT_CASE() default: ZEND_UNREACHABLE(); break;
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 # define ZEND_IGNORE_VALUE(x) (({ __typeof__ (x) __x = (x); (void) __x; }))
@@ -272,7 +272,7 @@ char *alloca();
 # define ZEND_ATTRIBUTE_NODISCARD
 #endif
 
-#if ZEND_GCC_VERSION >= 3000
+#if ZEND_GCC_VERSION >= 3000 || __has_attribute(const)
 # define ZEND_ATTRIBUTE_CONST __attribute__((const))
 #else
 # define ZEND_ATTRIBUTE_CONST
@@ -314,22 +314,21 @@ char *alloca();
 # define ZEND_ATTRIBUTE_NONNULL_ARGS(...)
 #endif
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
+#if (defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_attribute(cold)
 # define ZEND_COLD __attribute__((cold))
-# ifdef __OPTIMIZE__
-#  define ZEND_OPT_SIZE  __attribute__((optimize("Os")))
-#  define ZEND_OPT_SPEED __attribute__((optimize("Ofast")))
-# else
-#  define ZEND_OPT_SIZE
-#  define ZEND_OPT_SPEED
-# endif
 #else
 # define ZEND_COLD
+#endif
+
+#if ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_attribute(optimize)) && defined(__OPTIMIZE__)
+# define ZEND_OPT_SIZE  __attribute__((optimize("Os")))
+# define ZEND_OPT_SPEED __attribute__((optimize("Ofast")))
+#else
 # define ZEND_OPT_SIZE
 # define ZEND_OPT_SPEED
 #endif
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 5000
+#if (defined(__GNUC__) && ZEND_GCC_VERSION >= 5000)
 # define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((unused));
 # define ZEND_ATTRIBUTE_COLD_LABEL __attribute__((cold));
 #else
@@ -388,6 +387,34 @@ char *alloca();
 #define ZEND_ELEMENT_COUNT(m)
 #endif
 
+#if __cplusplus
+extern "C++" {
+# include <cstddef>
+	template<typename T, typename M>
+	const T* zend_container_of(const M *ptr, size_t offset) {
+		return reinterpret_cast<const T*>(reinterpret_cast<const char*>(ptr) - offset);
+	}
+	template<typename T, typename M>
+	T* zend_container_of(M *ptr, size_t offset) {
+		return reinterpret_cast<T*>(reinterpret_cast<char*>(ptr) - offset);
+	}
+
+# define ZEND_CONTAINER_OF(ptr, Type, member) zend_container_of<Type, decltype(Type::member)>(ptr, offsetof(Type, member))
+}
+#elif __STDC_VERSION__ >= 202311L || ZEND_GCC_VERSION
+/* typeof is C23 or a GCC extension */
+# define ZEND_CONTAINER_OF(ptr, Type, member) \
+	_Generic( \
+		(ptr), \
+		const typeof(((Type*)0)->member) *: ((const Type*)((char*)(ptr) - offsetof(Type, member))), \
+		typeof(((Type*)0)->member) *: ((Type*)((char*)(ptr) - offsetof(Type, member))) \
+	)
+#else
+/* Define a variant that does not keep const-ness for older compilers. Mismatches
+ * are expected to be caught by CI running modern compilers. */
+# define ZEND_CONTAINER_OF(ptr, Type, member) ((Type*)((char*)(ptr) - offsetof(Type, member)))
+#endif
+
 #ifdef HAVE_BUILTIN_CONSTANT_P
 # define ZEND_CONST_COND(_condition, _default) \
 	(__builtin_constant_p(_condition) ? (_condition) : (_default))
@@ -431,10 +458,6 @@ char *alloca();
 #else
 # define EXPECTED(condition)   (condition)
 # define UNEXPECTED(condition) (condition)
-#endif
-
-#ifndef XtOffsetOf
-# define XtOffsetOf(s_type, field) offsetof(s_type, field)
 #endif
 
 #ifndef ZEND_WIN32
@@ -653,8 +676,8 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if defined(ZEND_INTRIN_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
-/* __builtin_cpu_supports has pclmul from gcc9 */
+#if defined(ZEND_INTRIN_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (defined(__clang__) && __clang_major__ >= 19) || (ZEND_GCC_VERSION >= 9000))
+/* __builtin_cpu_supports has pclmul from gcc9 and clang 19 */
 # define ZEND_INTRIN_PCLMUL_FUNC_PROTO 1
 #elif defined(ZEND_INTRIN_PCLMUL_RESOLVER)
 # define ZEND_INTRIN_PCLMUL_FUNC_PTR 1
@@ -679,8 +702,8 @@ extern "C++" {
 #endif
 
 /* Do not use for conditional declaration of API functions! */
-#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
-/* __builtin_cpu_supports has pclmul from gcc9 */
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER) && defined(ZEND_INTRIN_HAVE_IFUNC_TARGET) && (!defined(__GNUC__) || (defined(__clang__) && __clang_major__ >= 19) || (ZEND_GCC_VERSION >= 9000))
+/* __builtin_cpu_supports has pclmul from gcc9 and clang 19 */
 # define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PROTO 1
 #elif defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 # define ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR 1

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
@@ -95,6 +93,8 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		errmsgsize = 0;
+	} else if ((size_t) errmsgsize >= sizeof(einfo->last_err_msg)) {
+		errmsgsize = sizeof(einfo->last_err_msg) - 1;
 	}
 
 	einfo->last_err_msg[errmsgsize] = '\0';
@@ -550,9 +550,9 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			if (use_uid_arg) {
 				should_quote_uid = !php_odbc_connstr_is_quoted(dbh->username) && php_odbc_connstr_should_quote(dbh->username);
 				if (should_quote_uid) {
-					size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->username);
-					uid = emalloc(estimated_length);
-					php_odbc_connstr_quote(uid, dbh->username, estimated_length);
+					size_t quoted_length = php_odbc_connstr_get_quoted_length(dbh->username);
+					uid = emalloc(quoted_length);
+					php_odbc_connstr_quote(uid, dbh->username, quoted_length);
 				} else {
 					uid = dbh->username;
 				}
@@ -567,9 +567,9 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			if (use_pwd_arg) {
 				should_quote_pwd = !php_odbc_connstr_is_quoted(dbh->password) && php_odbc_connstr_should_quote(dbh->password);
 				if (should_quote_pwd) {
-					size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->password);
-					pwd = emalloc(estimated_length);
-					php_odbc_connstr_quote(pwd, dbh->password, estimated_length);
+					size_t quoted_length = php_odbc_connstr_get_quoted_length(dbh->password);
+					pwd = emalloc(quoted_length);
+					php_odbc_connstr_quote(pwd, dbh->password, quoted_length);
 				} else {
 					pwd = dbh->password;
 				}
@@ -605,7 +605,11 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 				dsnbuf, sizeof(dsnbuf)-1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
 	}
 	if (!use_direct) {
-		rc = SQLConnect(H->dbc, (SQLCHAR *) dbh->data_source, SQL_NTS, (SQLCHAR *) dbh->username, SQL_NTS, (SQLCHAR *) dbh->password, SQL_NTS);
+		/* unixODBC pooling strcmp()s the credentials when matching a cached
+		 * connection and crashes on a NULL username/password, so pass "". */
+		rc = SQLConnect(H->dbc, (SQLCHAR *) dbh->data_source, SQL_NTS,
+			(SQLCHAR *) (dbh->username ? dbh->username : ""), SQL_NTS,
+			(SQLCHAR *) (dbh->password ? dbh->password : ""), SQL_NTS);
 	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {

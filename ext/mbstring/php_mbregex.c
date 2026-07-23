@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>              |
    +----------------------------------------------------------------------+
@@ -409,8 +407,13 @@ int php_mb_regex_set_mbctype(const char *encname)
 	if (mbctype == ONIG_ENCODING_UNDEF) {
 		return FAILURE;
 	}
+	const mbfl_encoding *mbfl_enc = mbfl_name2encoding(encname);
+	if (mbfl_enc == NULL) {
+		/* Encoding supported by Oniguruma but not by mbfl */
+		return FAILURE;
+	}
 	MBREX(current_mbctype) = mbctype;
-	MBREX(current_mbctype_mbfl_encoding) = mbfl_name2encoding(encname);
+	MBREX(current_mbctype_mbfl_encoding) = mbfl_enc;
 	return SUCCESS;
 }
 /* }}} */
@@ -779,7 +782,7 @@ static inline void mb_regex_substitute(
 						continue;
 					}
 					if (name_end[0] == delim) break;
-					if (maybe_num && !isdigit(name_end[0])) maybe_num = 0;
+					if (maybe_num && !isdigit((unsigned char)name_end[0])) maybe_num = 0;
 					name_end++;
 				}
 				p = name_end + 1;
@@ -1103,7 +1106,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				if (zend_call_function(&arg_replace_fci, &arg_replace_fci_cache) == SUCCESS &&
 						!Z_ISUNDEF(retval)) {
 					convert_to_string(&retval);
-					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
+					smart_str_append(&out_buf, Z_STR(retval));
 					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);
 				}

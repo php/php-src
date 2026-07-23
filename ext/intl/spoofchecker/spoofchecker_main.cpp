@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Scott MacVicar <scottmac@php.net>                           |
    +----------------------------------------------------------------------+
@@ -43,21 +43,14 @@ U_CFUNC PHP_METHOD(Spoofchecker, isSuspicious)
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-	ret = uspoof_check2UTF8(co->uspoof, ZSTR_VAL(text), ZSTR_LEN(text), co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
-#else
-	ret = uspoof_checkUTF8(co->uspoof, ZSTR_VAL(text), ZSTR_LEN(text), NULL, SPOOFCHECKER_ERROR_CODE_P(co));
-#endif
+	ret = intl_icu_compat_uspoof_check_utf8(co->uspoof, ZSTR_VAL(text), ZSTR_LEN(text), co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-		errmask = uspoof_getCheckResultChecks(co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
 
-		if (errmask != ret) {
+		if (intl_icu_compat_uspoof_check_result_mismatch(co->uspoofres, ret, &errmask, SPOOFCHECKER_ERROR_CODE_P(co))) {
 			php_error_docref(NULL, E_WARNING, "unexpected error (%d), does not relate to the flags passed to setChecks (%d)", ret, errmask);
 		}
-#endif
 		RETURN_TRUE;
 	}
 
@@ -84,7 +77,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, areConfusable)
 	ZEND_PARSE_PARAMETERS_END();
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
-	if(ZSTR_LEN(s1) > INT32_MAX || ZSTR_LEN(s2) > INT32_MAX) {
+	if (UNEXPECTED(ZSTR_LEN(s1) > INT32_MAX || ZSTR_LEN(s2) > INT32_MAX)) {
 		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
 	} else {
 		ret = uspoof_areConfusableUTF8(co->uspoof, ZSTR_VAL(s1), (int32_t)ZSTR_LEN(s1), ZSTR_VAL(s2), (int32_t)ZSTR_LEN(s2), SPOOFCHECKER_ERROR_CODE_P(co));
@@ -142,7 +135,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
+/* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
 U_CFUNC PHP_METHOD(Spoofchecker, setRestrictionLevel)
 {
@@ -170,7 +163,6 @@ U_CFUNC PHP_METHOD(Spoofchecker, setRestrictionLevel)
 	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);
 }
 /* }}} */
-#endif
 
 U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 {
@@ -187,7 +179,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 	ZEND_PARSE_PARAMETERS_END();
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
-	if (ZSTR_LEN(pattern) > INT32_MAX) {
+	if (UNEXPECTED(ZSTR_LEN(pattern) > INT32_MAX)) {
 		zend_argument_value_error(1, "must be less than or equal to " ZEND_LONG_FMT " bytes long", INT32_MAX);
 		RETURN_THROWS();
 	}
@@ -207,19 +199,8 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 	USet *set = uset_openEmpty();
 
 	/* pattern is either USE_IGNORE_SPACE alone or in conjunction with the following flags (but mutually exclusive) */
-	if (pattern_option &&
-            pattern_option != USET_IGNORE_SPACE &&
-#if U_ICU_VERSION_MAJOR_NUM >= 73
-            pattern_option != (USET_IGNORE_SPACE|USET_SIMPLE_CASE_INSENSITIVE) &&
-#endif
-            pattern_option != (USET_IGNORE_SPACE|USET_CASE_INSENSITIVE) &&
-            pattern_option != (USET_IGNORE_SPACE|USET_ADD_CASE_MAPPINGS)) {
-		zend_argument_value_error(2, "must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::USET_CASE_INSENSITIVE or SpoofChecker::USET_ADD_CASE_MAPPINGS"
-#if U_ICU_VERSION_MAJOR_NUM >= 73
-				" or SpoofChecker::USET_SIMPLE_CASE_INSENSITIVE"
-#endif
-				"))"
-		);
+	if (!intl_icu_compat_uspoof_is_allowed_chars_pattern_option(pattern_option)) {
+		zend_argument_value_error(2, "%s", intl_icu_compat_uspoof_allowed_chars_pattern_option_error_message());
 		uset_close(set);
 		efree(upattern);
 		RETURN_THROWS();

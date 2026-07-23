@@ -2,6 +2,10 @@
 Pdo\Sqlite create through PDO::connect and function define.
 --EXTENSIONS--
 pdo_sqlite
+--SKIPIF--
+<?php
+if (!defined('Pdo\Sqlite::DETERMINISTIC')) die('skip Pdo\Sqlite::DETERMINISTIC requires SQLite library >= 3.8.3');
+?>
 --FILE--
 <?php
 
@@ -11,8 +15,8 @@ if (!$db instanceof Pdo\Sqlite) {
 }
 
 $db->query('CREATE TABLE pdosqlite_002 (id INT AUTO INCREMENT, name TEXT)');
-$db->query('INSERT INTO pdosqlite_002 VALUES (NULL, "PHP")');
-$db->query('INSERT INTO pdosqlite_002 VALUES (NULL, "PHP6")');
+$db->query("INSERT INTO pdosqlite_002 VALUES (NULL, 'PHP')");
+$db->query("INSERT INTO pdosqlite_002 VALUES (NULL, 'PHP6')");
 
 $db->createFunction('testing', function($v) { return strtolower($v); }, 1, Pdo\Sqlite::DETERMINISTIC);
 

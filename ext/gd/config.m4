@@ -20,6 +20,13 @@ PHP_ARG_WITH([avif],
   [no],
   [no])
 
+PHP_ARG_WITH([uhdr],
+  [for libuhdr],
+  [AS_HELP_STRING([--with-uhdr],
+    [GD: Enable UltraHDR support (only for bundled libgd)])],
+  [no],
+  [no])
+
 PHP_ARG_WITH([webp],
   [for libwebp],
   [AS_HELP_STRING([--with-webp],
@@ -55,6 +62,27 @@ PHP_ARG_ENABLE([gd-jis-conv],
   [no],
   [no])
 
+PHP_ARG_WITH([heif],
+  [for libheif],
+  [AS_HELP_STRING([--with-heif],
+    [GD: Enable HEIF support (only for bundled libgd)])],
+  [no],
+  [no])
+
+PHP_ARG_WITH([imagequant],
+  [for libimagequant],
+  [AS_HELP_STRING([--with-imagequant],
+    [GD: Enable libimagequant support (only for bundled libgd)])],
+  [no],
+  [no])
+
+PHP_ARG_WITH([tiff],
+  [for libtiff],
+  [AS_HELP_STRING([--with-tiff],
+    [GD: Enable TIFF support (only for bundled libgd)])],
+  [no],
+  [no])
+
 dnl
 dnl Checks for the configure options
 dnl
@@ -70,7 +98,7 @@ AC_DEFUN([PHP_GD_PNG],[
 
 AC_DEFUN([PHP_GD_AVIF], [
   AS_VAR_IF([PHP_AVIF], [no],, [
-    PKG_CHECK_MODULES([AVIF], [libavif >= 0.8.2])
+    PKG_CHECK_MODULES([AVIF], [libavif >= 1.0.0])
     PHP_EVAL_LIBLINE([$AVIF_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$AVIF_CFLAGS])
     AC_DEFINE([HAVE_LIBAVIF], [1],
@@ -80,9 +108,39 @@ AC_DEFUN([PHP_GD_AVIF], [
   ])
 ])
 
+AC_DEFUN([PHP_GD_HEIF], [
+  AS_VAR_IF([PHP_HEIF], [no],, [
+    PKG_CHECK_MODULES([HEIF], [libheif >= 1.7.0])
+    PHP_EVAL_LIBLINE([$HEIF_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$HEIF_CFLAGS])
+    AC_DEFINE([HAVE_LIBHEIF], [1],
+      [Define to 1 if you have the libheif library.])
+    AC_DEFINE([HAVE_GD_HEIF], [1],
+      [Define to 1 if gd extension has HEIF support.])
+  ])
+])
+
+AC_DEFUN([PHP_GD_UHDR], [
+  AS_VAR_IF([PHP_UHDR], [no],, [
+    PKG_CHECK_MODULES([UHDR], [libuhdr >= 1.4.0])
+    PHP_EVAL_LIBLINE([$UHDR_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$UHDR_CFLAGS])
+
+    PKG_CHECK_VAR([UHDR_WRITE_XMP], [libuhdr], [UHDR_WRITE_XMP])
+    AS_VAR_IF([UHDR_WRITE_XMP], [], [],
+      [AC_MSG_ERROR([libuhdr was compiled with UHDR_WRITE_XMP enabled, but this extension requires it to be OFF.])])
+
+    AC_DEFINE([HAVE_LIBUHDR], [1],
+      [Define to 1 if you have the libuhdr library.])
+    AC_DEFINE([HAVE_GD_UHDR], [1],
+      [Define to 1 if gd extension has UltraHDR support.])
+  ])
+])
+
 AC_DEFUN([PHP_GD_WEBP],[
   AS_VAR_IF([PHP_WEBP], [no],, [
-    PKG_CHECK_MODULES([WEBP], [libwebp >= 0.2.0])
+    PKG_CHECK_MODULES([WEBP],
+      [libwebp >= 0.2.0 libwebpdemux libwebpmux])
     PHP_EVAL_LIBLINE([$WEBP_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$WEBP_CFLAGS])
     AC_DEFINE([HAVE_LIBWEBP], [1],
@@ -110,6 +168,7 @@ AC_DEFUN([PHP_GD_XPM],[
     PHP_EVAL_LIBLINE([$XPM_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$XPM_CFLAGS])
     AC_DEFINE([HAVE_XPM], [1], [Define to 1 if you have the xpm library.])
+    AC_DEFINE([HAVE_LIBXPM], [1], [Define to 1 if you have the xpm library.])
     AC_DEFINE([HAVE_GD_XPM], [1],
       [Define to 1 if gd extension has XPM support.])
   ])
@@ -133,6 +192,35 @@ AC_DEFUN([PHP_GD_JISX0208],[
       [Define to 1 if gd extension has JIS-mapped Japanese font support.])
     AC_DEFINE([JISX0208], [1],
       [Define to 1 if GD library has JIS-mapped Japanese font support.])
+  ])
+])
+
+AC_DEFUN([PHP_GD_IMAGEQUANT], [
+  AS_VAR_IF([PHP_IMAGEQUANT], [no],, [
+    AC_CHECK_HEADER([libimagequant.h], [],
+      [AC_MSG_ERROR([libimagequant header not found])])
+    PHP_CHECK_LIBRARY([imagequant], [liq_attr_create],
+      [
+        PHP_ADD_LIBRARY([imagequant], [], [GD_SHARED_LIBADD])
+        AC_DEFINE([HAVE_LIBIMAGEQUANT], [1],
+          [Define to 1 if you have the libimagequant library.])
+        AC_DEFINE([HAVE_GD_IMAGEQUANT], [1],
+          [Define to 1 if gd extension has libimagequant support.])
+      ],
+      [AC_MSG_ERROR([libimagequant library not found])],
+      [-limagequant])
+  ])
+])
+
+AC_DEFUN([PHP_GD_TIFF], [
+  AS_VAR_IF([PHP_TIFF], [no],, [
+    PKG_CHECK_MODULES([TIFF], [libtiff-4])
+    PHP_EVAL_LIBLINE([$TIFF_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$TIFF_CFLAGS])
+    AC_DEFINE([HAVE_LIBTIFF], [1],
+      [Define to 1 if you have the libtiff library.])
+    AC_DEFINE([HAVE_GD_TIFF], [1],
+      [Define to 1 if gd extension has TIFF support.])
   ])
 ])
 
@@ -194,6 +282,7 @@ AS_VAR_POPDEF([php_var])
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_GD_CHECK_FORMAT([Png],  [AC_DEFINE([HAVE_GD_PNG], [1])])
   PHP_GD_CHECK_FORMAT([Avif], [AC_DEFINE([HAVE_GD_AVIF], [1])])
+  PHP_GD_CHECK_FORMAT([Heif], [AC_DEFINE([HAVE_GD_HEIF], [1])])
   PHP_GD_CHECK_FORMAT([Webp], [AC_DEFINE([HAVE_GD_WEBP], [1])])
   PHP_GD_CHECK_FORMAT([Jpeg], [AC_DEFINE([HAVE_GD_JPG], [1])])
   PHP_GD_CHECK_FORMAT([Xpm],  [AC_DEFINE([HAVE_GD_XPM], [1])])
@@ -204,6 +293,11 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY([gd], [gdVersionString],
     [AC_DEFINE([HAVE_GD_LIBVERSION], [1],
       [Define to 1 if GD library has the 'gdVersionString' function.])],
+    [],
+    [$GD_SHARED_LIBADD])
+  PHP_CHECK_LIBRARY([gd], [gdPngGetVersionString],
+    [AC_DEFINE([HAVE_GD_PNG_GET_VERSION_STRING], [1],
+      [Define to 1 if GD library has the 'gdPngGetVersionString' function.])],
     [],
     [$GD_SHARED_LIBADD])
   PHP_CHECK_LIBRARY([gd], [gdImageGetInterpolationMethod],
@@ -237,6 +331,7 @@ if test "$PHP_GD" != "no"; then
       libgd/gd_io.c
       libgd/gd_jpeg.c
       libgd/gd_matrix.c
+      libgd/gd_metadata.c
       libgd/gd_png.c
       libgd/gd_rotate.c
       libgd/gd_security.c
@@ -260,6 +355,33 @@ if test "$PHP_GD" != "no"; then
       libgd/gdtables.c
       libgd/gdxpm.c
       libgd/wbmp.c
+      libgd/gd_qoi.c
+      libgd/gd_jxl.c
+      libgd/gd_color_map.c
+      libgd/gd_heif.c
+      libgd/gd_uhdr.c
+      libgd/gd_nnquant.c
+      libgd/gd_color.c
+      libgd/gd_tiff.c
+      libgd/gd_readimage.c
+      libgd/gd_filename.c
+      libgd/ftraster/gd_ft_math.c
+      libgd/ftraster/gd_ft_raster.c
+      libgd/ftraster/gd_ft_stroker.c
+      libgd/gd_array.c
+      libgd/gd_span_rle.c
+	    libgd/gd_surface.c
+      libgd/gd_version.c
+      libgd/gd_compositor.c
+      libgd/gd_gradient.c
+      libgd/gd_path.c
+      libgd/gd_path_arc.c
+      libgd/gd_path_dash.c
+      libgd/gd_path_matrix.c
+      libgd/gd_path_stroke.c
+      libgd/gd_draw.c
+      libgd/gd_draw_blend.c
+      libgd/gd_perceptual_diff.c
     "])
 
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
@@ -269,21 +391,29 @@ if test "$PHP_GD" != "no"; then
       [Define to 1 if GD library has the 'gdImageGetInterpolationMethod'
       function.])
 
+    AC_DEFINE([HAVE_GD_PNG_GET_VERSION_STRING], [1],
+      [Define to 1 if GD library has the 'gdPngGetVersionString' function.])
+
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
     PHP_GD_PNG
     PHP_GD_AVIF
+    PHP_GD_HEIF
+    PHP_GD_UHDR
     PHP_GD_WEBP
     PHP_GD_JPEG
     PHP_GD_XPM
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
+    PHP_GD_IMAGEQUANT
+    PHP_GD_TIFF
 
     PHP_NEW_EXTENSION([gd],
       [gd.c $extra_sources],
       [$ext_shared],,
       [-Wno-strict-prototypes -I@ext_srcdir@/libgd])
     PHP_ADD_BUILD_DIR([$ext_builddir/libgd])
+    PHP_ADD_BUILD_DIR([$ext_builddir/libgd/ftraster])
 
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
 

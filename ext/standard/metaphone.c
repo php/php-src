@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Thies C. Arntzen <thies@thieso.net>                          |
    +----------------------------------------------------------------------+
@@ -80,7 +78,7 @@ static const char _codes[26] =
 
 /* Note: these functions require an uppercase letter input! */
 static zend_always_inline char encode(char c) {
-	if (isalpha(c)) {
+	if (isalpha((unsigned char)c)) {
 		ZEND_ASSERT(c >= 'A' && c <= 'Z');
 		return _codes[(c - 'A')];
 	} else {
@@ -107,9 +105,9 @@ static zend_always_inline char encode(char c) {
 /*----------------------------- */
 
 /* I suppose I could have been using a character pointer instead of
- * accesssing the array directly... */
+ * accessing the array directly... */
 
-#define Convert_Raw(c) toupper(c)
+#define Convert_Raw(c) toupper((unsigned char)c)
 /* Look at the next letter in the word */
 #define Read_Raw_Next_Letter (word[w_idx+1])
 #define Read_Next_Letter (Convert_Raw(Read_Raw_Next_Letter))
@@ -123,14 +121,14 @@ static zend_always_inline char encode(char c) {
 /* Look two letters down.  It makes sure you don't walk off the string. */
 #define Read_After_Next_Letter	(Read_Raw_Next_Letter != '\0' ? Convert_Raw(word[w_idx+2]) \
 											     : '\0')
-#define Look_Ahead_Letter(n) (toupper(Lookahead((char *) word+w_idx, n)))
+#define Look_Ahead_Letter(n) (toupper((unsigned char)Lookahead((char *) word+w_idx, n)))
 
 
 /* Allows us to safely look ahead an arbitrary # of letters */
 /* I probably could have just used strlen... */
-static char Lookahead(char *word, int how_far)
+static char Lookahead(char *word, size_t how_far)
 {
-	int idx;
+	size_t idx;
 	for (idx = 0; word[idx] != '\0' && idx < how_far; idx++);
 	/* Edge forward in the string... */
 
@@ -165,12 +163,12 @@ static char Lookahead(char *word, int how_far)
 #define Phone_Len	(p_idx)
 
 /* Note is a letter is a 'break' in the word */
-#define Isbreak(c)  (!isalpha(c))
+#define Isbreak(c)  (!isalpha((unsigned char)(c)))
 
 /* {{{ metaphone */
 static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
 {
-	int w_idx = 0;				/* point in the phonization we're at. */
+	size_t w_idx = 0;				/* point in the phonization we're at. */
 	size_t p_idx = 0;				/* end of the phoned phrase */
 	size_t max_buffer_len = 0;		/* maximum length of the destination buffer */
 	char curr_letter;
@@ -189,7 +187,7 @@ static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonem
 
 /*-- The first phoneme has to be processed specially. --*/
 	/* Find our first letter */
-	for (; !isalpha(curr_letter = Read_Raw_Curr_Letter); w_idx++) {
+	for (; !isalpha((unsigned char)(curr_letter = Read_Raw_Curr_Letter)); w_idx++) {
 		/* On the off chance we were given nothing but crap... */
 		if (curr_letter == '\0') {
 			End_Phoned_Word();
@@ -264,7 +262,7 @@ static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonem
 	for (; (curr_letter = Read_Raw_Curr_Letter) != '\0' &&
 		 (max_phonemes == 0 || Phone_Len < (size_t)max_phonemes);
 		 w_idx++) {
-		/* How many letters to skip because an eariler encoding handled
+		/* How many letters to skip because an earlier encoding handled
 		 * multiple letters */
 		unsigned short int skip_letter = 0;
 
@@ -277,7 +275,7 @@ static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonem
 		 */
 
 		/* Ignore non-alphas */
-		if (!isalpha(curr_letter))
+		if (!isalpha((unsigned char)curr_letter))
 			continue;
 
 		curr_letter = Convert_Raw(curr_letter);

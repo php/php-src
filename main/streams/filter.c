@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Wez Furlong <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -216,7 +214,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
  * match. If that fails, we try "convert.charset.*", then "convert.*"
  * This means that we don't need to clog up the hashtable with a zillion
  * charsets (for example) but still be able to provide them all as filters */
-PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	const php_stream_filter_factory *factory = NULL;
@@ -260,7 +258,9 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	return filter;
 }
 
-PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC)
+PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
+		void *abstract, bool persistent, php_stream_filter_seekable_t read_seekable,
+		php_stream_filter_seekable_t write_seekable STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -268,10 +268,57 @@ PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *
 	memset(filter, 0, sizeof(php_stream_filter));
 
 	filter->fops = fops;
+	filter->read_seekable = read_seekable;
+	filter->write_seekable = write_seekable;
 	Z_PTR(filter->abstract) = abstract;
 	filter->is_persistent = persistent;
 
 	return filter;
+}
+
+PHPAPI zend_result php_stream_filter_parse_write_seek_mode(
+		const zval *filterparams,
+		php_stream_filter_seekable_t *write_seekable)
+{
+	*write_seekable = PSFS_SEEKABLE_ALWAYS;
+
+	if (filterparams == NULL) {
+		return SUCCESS;
+	}
+	if (Z_TYPE_P(filterparams) != IS_ARRAY) {
+		return SUCCESS;
+	}
+
+	const zval *write_seek_mode = zend_hash_str_find(Z_ARR_P(filterparams), ZEND_STRL("write_seek_mode"));
+	if (write_seek_mode == NULL) {
+		return SUCCESS;
+	}
+
+	zend_string *tmp_str;
+	const zend_string *str = zval_get_tmp_string(write_seek_mode, &tmp_str);
+	zend_result result = SUCCESS;
+
+	if (zend_string_equals_literal(str, "preserve")) {
+		*write_seekable = PSFS_SEEKABLE_ALWAYS;
+	} else if (zend_string_equals_literal(str, "reset")) {
+		*write_seekable = PSFS_SEEKABLE_START;
+	} else if (zend_string_equals_literal(str, "strict")) {
+		*write_seekable = PSFS_SEEKABLE_NEVER;
+	} else {
+		php_error_docref(NULL, E_WARNING,
+			"\"write_seek_mode\" filter parameter must be one of "
+			"\"preserve\", \"reset\", or \"strict\"");
+		result = FAILURE;
+	}
+
+	zend_tmp_string_release(tmp_str);
+	return result;
+}
+
+PHPAPI int php_stream_filter_get_chain_type(php_stream *stream, php_stream_filter *filter)
+{
+	return filter->chain == &stream->readfilters ?
+			PHP_STREAM_FILTER_READ : PHP_STREAM_FILTER_WRITE;
 }
 
 PHPAPI void php_stream_filter_free(php_stream_filter *filter)
@@ -343,7 +390,8 @@ PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, p
 					php_stream_bucket_unlink(bucket);
 					php_stream_bucket_delref(bucket);
 				}
-				php_error_docref(NULL, E_WARNING, "Filter failed to process pre-buffered data");
+				php_stream_warn(stream, FilterFailed,
+						"Filter failed to process pre-buffered data");
 				return FAILURE;
 			case PSFS_FEED_ME:
 				/* We don't actually need data yet,

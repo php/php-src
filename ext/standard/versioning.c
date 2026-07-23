@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Stig Sæther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
@@ -45,8 +43,8 @@ php_canonicalize_version(const char *version)
  *  s/([^\d\.])([^\D\.])/$1.$2/g;
  *  s/([^\D\.])([^\d\.])/$1.$2/g;
  */
-#define isdig(x) (isdigit(x)&&(x)!='.')
-#define isndig(x) (!isdigit(x)&&(x)!='.')
+#define isdig(x) (isdigit((unsigned char)(x))&&(x)!='.')
+#define isndig(x) (!isdigit((unsigned char)(x))&&(x)!='.')
 #define isspecialver(x) ((x)=='-'||(x)=='_'||(x)=='+')
 
 		lq = *(q - 1);
@@ -59,7 +57,7 @@ php_canonicalize_version(const char *version)
 				*q++ = '.';
 			}
 			*q++ = *p;
-		} else if (!isalnum(*p)) {
+		} else if (!isalnum((unsigned char)*p)) {
 			if (lq != '.') {
 				*q++ = '.';
 			}
@@ -68,7 +66,15 @@ php_canonicalize_version(const char *version)
 		}
 		lp = *p++;
 	}
-	*q++ = '\0';
+
+	/* Check if the last component is empty (i.e. the last character is a dot)
+	 * and remove it if it is. */
+	if (*(q - 1) == '.') {
+		*(q - 1) = '\0';
+	} else {
+		*q = '\0';
+	}
+
 	return buf;
 }
 
@@ -152,17 +158,17 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 		if ((n2 = strchr(p2, '.')) != NULL) {
 			*n2 = '\0';
 		}
-		if (isdigit(*p1) && isdigit(*p2)) {
+		if (isdigit((unsigned char)*p1) && isdigit((unsigned char)*p2)) {
 			/* compare element numerically */
 			l1 = strtol(p1, NULL, 10);
 			l2 = strtol(p2, NULL, 10);
 			compare = ZEND_NORMALIZE_BOOL(l1 - l2);
-		} else if (!isdigit(*p1) && !isdigit(*p2)) {
+		} else if (!isdigit((unsigned char)*p1) && !isdigit((unsigned char)*p2)) {
 			/* compare element names */
 			compare = compare_special_version_forms(p1, p2);
 		} else {
 			/* mix of names and numbers */
-			if (isdigit(*p1)) {
+			if (isdigit((unsigned char)*p1)) {
 				compare = compare_special_version_forms("#N#", p2);
 			} else {
 				compare = compare_special_version_forms(p1, "#N#");
@@ -180,13 +186,13 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	}
 	if (compare == 0) {
 		if (n1 != NULL) {
-			if (isdigit(*p1)) {
+			if (isdigit((unsigned char)*p1)) {
 				compare = 1;
 			} else {
 				compare = php_version_compare(p1, "#N#");
 			}
 		} else if (n2 != NULL) {
-			if (isdigit(*p2)) {
+			if (isdigit((unsigned char)*p2)) {
 				compare = -1;
 			} else {
 				compare = php_version_compare("#N#", p2);

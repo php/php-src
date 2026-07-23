@@ -1,5 +1,5 @@
 --TEST--
-XMLReader: Expand into existing DOM documet
+XMLReader: Expand into existing DOM document
 --EXTENSIONS--
 xmlreader
 dom

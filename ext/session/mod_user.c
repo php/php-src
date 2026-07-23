@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
@@ -22,7 +20,6 @@ const ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
 };
 
-
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
 	int i;
@@ -30,16 +27,16 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 		PS(in_save_handler) = false;
 		ZVAL_UNDEF(retval);
 		php_error_docref(NULL, E_WARNING, "Cannot call session save handler in a recursive manner");
-		return;
+	} else {
+		PS(in_save_handler) = true;
+		if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
+			zval_ptr_dtor(retval);
+			ZVAL_UNDEF(retval);
+		} else if (Z_ISUNDEF_P(retval)) {
+			ZVAL_NULL(retval);
+		}
+		PS(in_save_handler) = false;
 	}
-	PS(in_save_handler) = true;
-	if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
-		zval_ptr_dtor(retval);
-		ZVAL_UNDEF(retval);
-	} else if (Z_ISUNDEF_P(retval)) {
-		ZVAL_NULL(retval);
-	}
-	PS(in_save_handler) = false;
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
 	}
@@ -47,7 +44,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 
 #define PSF(a) PS(mod_user_names).ps_##a
 
-static zend_result verify_bool_return_type_userland_calls(const zval* value)
+static zend_result verify_bool_return_type_userland_calls(const zval *value)
 {
 	/* Exit or exception in userland call */
 	if (Z_TYPE_P(value) == IS_UNDEF) {
@@ -75,8 +72,8 @@ static zend_result verify_bool_return_type_userland_calls(const zval* value)
 	}
 	if (!EG(exception)) {
 		zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value)); \
-    }
-    return FAILURE;
+	}
+	return FAILURE;
 }
 
 PS_OPEN_FUNC(user)
@@ -217,6 +214,7 @@ PS_GC_FUNC(user)
 		/* Anything else is some kind of error */
 		*nrdels = -1; // Error
 	}
+	zval_ptr_dtor(&retval);
 	return *nrdels;
 }
 

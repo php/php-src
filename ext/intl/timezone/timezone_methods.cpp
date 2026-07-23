@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -176,7 +176,7 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 		RETURN_FALSE;
 	}
 
-	int32_t result = TimeZone::countEquivalentIDs(id);
+	const int32_t result = TimeZone::countEquivalentIDs(id);
 	RETURN_LONG((zend_long)result);
 }
 
@@ -279,7 +279,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 		RETURN_FALSE;
 	}
 
-	int32_t region_len = TimeZone::getRegion(id, outbuf, sizeof(outbuf), status);
+	const int32_t region_len = TimeZone::getRegion(id, outbuf, sizeof(outbuf), status);
 	INTL_CHECK_STATUS(status, "error obtaining region");
 
 	RETURN_STRINGL(outbuf, region_len);
@@ -483,21 +483,22 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 		RETURN_THROWS();
 	}
 
+	TIMEZONE_METHOD_FETCH_OBJECT;
+
 	bool found = false;
 	for (int i = 0; !found && i < sizeof(display_types)/sizeof(*display_types); i++) {
 		if (display_types[i] == display_type)
 			found = true;
 	}
 	if (!found) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "wrong display type");
+		intl_errors_set(TIMEZONE_ERROR_P(to), U_ILLEGAL_ARGUMENT_ERROR,
+			"wrong display type");
 		RETURN_FALSE;
 	}
 
 	if (!locale_str) {
 		locale_str = intl_locale_get_default();
 	}
-
-	TIMEZONE_METHOD_FETCH_OBJECT;
 
 	UnicodeString result;
 	to->utimezone->getDisplayName((UBool)daylight, (TimeZone::EDisplayType)display_type,

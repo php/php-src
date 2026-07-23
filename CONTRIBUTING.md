@@ -27,6 +27,7 @@ had several contributions accepted, commit privileges are often quickly granted.
 * [Git commit rules](#git-commit-rules)
 * [Copyright and license headers](#copyright-and-license-headers)
 * [NEWS file](#news)
+* [LLM usage in GitHub comments](#llm-usage-in-github-comments)
 
 ## Pull requests
 
@@ -36,8 +37,8 @@ implement RFCs. Please be sure to include tests as appropriate!
 By submitting a pull request, you certify that you have the necessary rights
 to submit the work, that the work does not violate any third-party rights
 (including those of your employer, if applicable), and that you license your
-contribution under the PHP License or under another license if explicitly
-accepted by the PHP project maintainers.
+contribution under the [Modified BSD License](LICENSE) or under another license
+if explicitly accepted by the PHP project maintainers.
 
 If you are fixing a bug, then please submit your PR against the lowest actively
 supported branch of PHP that the bug affects (only green branches on
@@ -90,7 +91,7 @@ repository. Mailing list subscription is explained on the
 [mailing lists page](https://www.php.net/mailing-lists.php).
 
 You may also want to read
-[The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/post/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
+[The Mysterious PHP RFC Process](https://web.archive.org/web/20210621140006/https://blogs.oracle.com/opal/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
 for additional notes on the best way to approach submitting an RFC.
 
 ## Technical resources
@@ -151,9 +152,8 @@ about what you're working on, you can contact us via the
 issues.
 
 Although not a formal channel, you can also find a number of core developers on
-the #php.pecl channel on [EFnet](http://www.efnet.org/). Similarly, many
-documentation writers can be found on #php.doc. Windows development IRC channel
-is available at #winphp-dev on FreeNode.
+the [php community discord server](https://phpc.chat/) (`#php-internals` channel)
+where many people are eager to help.
 
 ## PHP source code directory structure
 
@@ -176,6 +176,7 @@ locations.
     ├─ config.guess                 # https://git.savannah.gnu.org/cgit/config.git
     ├─ config.sub                   # https://git.savannah.gnu.org/cgit/config.git
     ├─ libtool.m4                   # https://git.savannah.gnu.org/cgit/libtool.git
+    ├─ lt*.m4                       # https://git.savannah.gnu.org/cgit/libtool.git
     ├─ ltmain.sh                    # https://git.savannah.gnu.org/cgit/libtool.git
     ├─ pkg.m4                       # https://gitlab.freedesktop.org/pkg-config/pkg-config
     ├─ shtool                       # https://www.gnu.org/software/shtool/
@@ -354,30 +355,21 @@ Having said that, here are the organizational rules:
    `--enable-zts` switch to ensure your code handles TSRM correctly and doesn't
    break for those who need that.
 
-Currently, we have the following branches in use:
+The master branch is an active development branch for the newest version of PHP,
+which is open for backwards incompatible changes and major internal API changes.
 
-| Branch    |           |
-| --------- | --------- |
-| master    | Active development branch for PHP 8.6, which is open for backwards incompatible changes and major internal API changes. |
-| PHP-8.5   | Is used to release the PHP 8.5.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-8.4   | Is used to release the PHP 8.4.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-8.3   | Is used to release the PHP 8.3.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-8.2   | Is used to release the PHP 8.2.x series. This is an old stable version and is open for security fixes only. |
-| PHP-8.1   | Is used to release the PHP 8.1.x series. This is an old stable version and is open for security fixes only. |
-| PHP-8.0   | This branch is closed. |
-| PHP-7.4   | This branch is closed. |
-| PHP-7.3   | This branch is closed. |
-| PHP-7.2   | This branch is closed. |
-| PHP-7.1   | This branch is closed. |
-| PHP-7.0   | This branch is closed. |
-| PHP-5.6   | This branch is closed. |
-| PHP-5.5   | This branch is closed. |
-| PHP-5.4   | This branch is closed. |
-| PHP-5.3   | This branch is closed. |
-| PHP-5.2   | This branch is closed. |
-| PHP-5.1   | This branch is closed. |
-| PHP-4.4   | This branch is closed. |
-| PHP-X.Y.Z | These branches are used for the release managers for tagging the releases, hence they are closed to the general public. |
+For PHP-X.Y branches, they are used to release the PHP X.Y.z series. Please see
+the [supported versions page](https://www.php.net/supported-versions.php) to get
+the status of each version.
+
+If a version is described as "Active support", the corresponding branch is a
+current stable version and is open for bugfixes only. If a version is described
+as "Security fixes only", the corresponding branch is an old stable version
+and is open for security fixes only. If a version is described as "End of life",
+the corresponding branch is closed.
+
+Note that PHP-X.Y.Z branches are used for the release managers for tagging the
+releases, hence they are closed to the general public.
 
 The next few rules are more of a technical nature:
 
@@ -437,15 +429,13 @@ New source code files should include the following header block:
 ```c
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author:                                                              |
   +----------------------------------------------------------------------+
@@ -535,6 +525,12 @@ been created.
 If for some reason a feature is introduced in a branch lower than master,
 although this is strictly prohibited by other policies, then the entry must
 also be in master.
+
+## LLM usage in GitHub comments
+
+When using LLMs to generate comments to maintainers for any purpose other than
+direct translation, we would highly appreciate it if you disclosed the relevant
+paragraphs as such via markdown quote.
 
 ## Thanks
 

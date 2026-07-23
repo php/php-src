@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Steffan Esser <sesser@php.net>                              |
   |          Sara Golemon <pollita@php.net>                              |
@@ -75,7 +73,8 @@ const php_hash_ops php_hash_sha1_ops = {
 	20,
 	64,
 	sizeof(PHP_SHA1_CTX),
-	1
+	1,
+	0
 };
 
 /* sha224/sha256 */
@@ -92,7 +91,8 @@ const php_hash_ops php_hash_sha256_ops = {
 	32,
 	64,
 	sizeof(PHP_SHA256_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_sha224_ops = {
@@ -107,7 +107,8 @@ const php_hash_ops php_hash_sha224_ops = {
 	28,
 	64,
 	sizeof(PHP_SHA224_CTX),
-	1
+	1,
+	0
 };
 
 #define ROTR32(b,x)		((x >> b) | (x << (32 - b)))
@@ -624,7 +625,8 @@ const php_hash_ops php_hash_sha384_ops = {
 	48,
 	128,
 	sizeof(PHP_SHA384_CTX),
-	1
+	1,
+	0
 };
 
 /* {{{ PHP_SHA512InitArgs
@@ -803,7 +805,8 @@ const php_hash_ops php_hash_sha512_ops = {
 	64,
 	128,
 	sizeof(PHP_SHA512_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_sha512_256_ops = {
@@ -818,7 +821,8 @@ const php_hash_ops php_hash_sha512_256_ops = {
 	32,
 	128,
 	sizeof(PHP_SHA512_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_sha512_224_ops = {
@@ -833,5 +837,6 @@ const php_hash_ops php_hash_sha512_224_ops = {
 	28,
 	128,
 	sizeof(PHP_SHA512_CTX),
-	1
+	1,
+	0
 };

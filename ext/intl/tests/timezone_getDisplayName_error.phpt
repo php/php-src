@@ -8,8 +8,12 @@ intl
 $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getDisplayName(false, -1));
 echo intl_get_error_message(), PHP_EOL;
+var_dump($tz->getErrorCode());
+echo $tz->getErrorMessage(), PHP_EOL;
 
 ?>
 --EXPECT--
 bool(false)
+IntlTimeZone::getDisplayName(): wrong display type: U_ILLEGAL_ARGUMENT_ERROR
+int(1)
 IntlTimeZone::getDisplayName(): wrong display type: U_ILLEGAL_ARGUMENT_ERROR

@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 8d1c2a735f412f8571675c6b025c3a418b68fb65
+ * Stub hash: 3b1649a3abb3cfb5cb39d93f30a97765fe862d67
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -346,7 +346,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "ARRAY_FILTER_USE_KEY")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "ARRAY_FILTER_USE_VALUE")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_find, 0, 2, IS_MIXED, 0)
@@ -839,7 +839,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trim, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 0, "\" \\n\\r\\t\\v\\x00\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 0, "\" \\f\\n\\r\\t\\v\\x00\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_rtrim arginfo_trim
@@ -1823,6 +1823,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG
 	ZEND_ARG_TYPE_INFO(1, except, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microseconds, IS_LONG, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
@@ -1925,6 +1926,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_enable_crypto, 0, 
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, session_stream, "null")
 ZEND_END_ARG_INFO()
 
+#define arginfo_stream_socket_get_crypto_status arginfo_fpassthru
+
 #if defined(HAVE_SHUTDOWN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_socket_shutdown, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
@@ -1937,6 +1940,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_pair, 0, 3, MAY_BE
 	ZEND_ARG_TYPE_INFO(0, domain, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_LONG, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -1945,6 +1949,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_copy_to_stream, 0, 2, MAY
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_get_contents, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -1987,9 +1992,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_stream_get_wrappers arginfo_ob_list_handlers
 
+#define arginfo_stream_last_errors arginfo_ob_list_handlers
+
+#define arginfo_stream_clear_errors arginfo_flush
+
 #define arginfo_stream_get_transports arginfo_ob_list_handlers
 
-#define arginfo_stream_is_local arginfo_rewind
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_is_local, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_stream_isatty arginfo_rewind
 
@@ -2813,6 +2825,7 @@ ZEND_FUNCTION(stream_socket_get_name);
 ZEND_FUNCTION(stream_socket_recvfrom);
 ZEND_FUNCTION(stream_socket_sendto);
 ZEND_FUNCTION(stream_socket_enable_crypto);
+ZEND_FUNCTION(stream_socket_get_crypto_status);
 #if defined(HAVE_SHUTDOWN)
 ZEND_FUNCTION(stream_socket_shutdown);
 #endif
@@ -2829,6 +2842,8 @@ ZEND_FUNCTION(stream_get_meta_data);
 ZEND_FUNCTION(stream_get_line);
 ZEND_FUNCTION(stream_resolve_include_path);
 ZEND_FUNCTION(stream_get_wrappers);
+ZEND_FUNCTION(stream_last_errors);
+ZEND_FUNCTION(stream_clear_errors);
 ZEND_FUNCTION(stream_get_transports);
 ZEND_FUNCTION(stream_is_local);
 ZEND_FUNCTION(stream_isatty);
@@ -2944,8 +2959,16 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(array_walk_recursive, arginfo_array_walk_recursive)
 	ZEND_RAW_FENTRY("in_array", zif_in_array, arginfo_in_array, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_in_array, NULL)
 	ZEND_RAW_FENTRY("array_search", zif_array_search, arginfo_array_search, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_FE(extract, arginfo_extract)
-	ZEND_FE(compact, arginfo_compact)
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("extract", zif_extract, arginfo_extract, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("extract", zif_extract, arginfo_extract, 0, NULL, NULL)
+#endif
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("compact", zif_compact, arginfo_compact, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("compact", zif_compact, arginfo_compact, 0, NULL, NULL)
+#endif
 	ZEND_FE(array_fill, arginfo_array_fill)
 	ZEND_FE(array_fill_keys, arginfo_array_fill_keys)
 	ZEND_FE(range, arginfo_range)
@@ -3418,6 +3441,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_socket_recvfrom, arginfo_stream_socket_recvfrom)
 	ZEND_FE(stream_socket_sendto, arginfo_stream_socket_sendto)
 	ZEND_FE(stream_socket_enable_crypto, arginfo_stream_socket_enable_crypto)
+	ZEND_FE(stream_socket_get_crypto_status, arginfo_stream_socket_get_crypto_status)
 #if defined(HAVE_SHUTDOWN)
 	ZEND_FE(stream_socket_shutdown, arginfo_stream_socket_shutdown)
 #endif
@@ -3437,6 +3461,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_get_line, arginfo_stream_get_line)
 	ZEND_FE(stream_resolve_include_path, arginfo_stream_resolve_include_path)
 	ZEND_FE(stream_get_wrappers, arginfo_stream_get_wrappers)
+	ZEND_FE(stream_last_errors, arginfo_stream_last_errors)
+	ZEND_FE(stream_clear_errors, arginfo_stream_clear_errors)
 	ZEND_FE(stream_get_transports, arginfo_stream_get_transports)
 	ZEND_FE(stream_is_local, arginfo_stream_is_local)
 	ZEND_FE(stream_isatty, arginfo_stream_isatty)
@@ -3978,6 +4004,17 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	ZVAL_STR_COPY(&attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].value, attribute_Deprecated_const_ASSERT_ACTIVE_0_arg1_str);
 	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+}
+
+static zend_class_entry *register_class_SortDirection(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("SortDirection", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Ascending", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Descending", NULL);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)

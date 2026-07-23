@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend JIT                                                             |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -18,6 +16,13 @@
 
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
+
+#if defined(__APPLE__) && defined(__aarch64__) && defined(ZTS)
+# ifndef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+#  error "Apple Silicon ZTS JIT requires pthread_jit_write_protect_np()"
+# endif
+# define ZEND_JIT_USE_APPLE_MAP_JIT 1
+#endif
 
 #if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
 # define ZEND_JIT_TARGET_X86   1

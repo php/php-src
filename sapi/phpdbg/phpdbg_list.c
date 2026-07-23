@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -90,15 +88,12 @@ PHPDBG_LIST(method) /* {{{ */
 
 	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce) == SUCCESS) {
 		zend_function *function;
-		char *lcname = zend_str_tolower_dup(param->method.name, strlen(param->method.name));
 
-		if ((function = zend_hash_str_find_ptr(&ce->function_table, lcname, strlen(lcname)))) {
+		if ((function = zend_hash_str_find_ptr_lc(&ce->function_table, param->method.name, strlen(param->method.name)))) {
 			phpdbg_list_function(function);
 		} else {
 			phpdbg_error("Could not find %s::%s", param->method.class, param->method.name);
 		}
-
-		efree(lcname);
 	} else {
 		phpdbg_error("Could not find the class %s", param->method.class);
 	}

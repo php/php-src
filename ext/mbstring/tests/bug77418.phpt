@@ -12,5 +12,8 @@ mb_regex_encoding("UTF-32");
 
 var_dump(mb_split("\x00\x00\x00\x5c\x00\x00\x00B","000000000000000000000000000000"));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)

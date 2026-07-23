@@ -48,6 +48,6 @@ bzopen(): Argument #2 ($mode) must be either "r" or "w"
 bzopen(): Argument #2 ($mode) must be either "r" or "w"
 bzopen(): Argument #2 ($mode) must be either "r" or "w"
 
-Warning: bzopen(no_such_file): Failed to open stream: No such file or directory in %s on line %d
+Warning: bzopen(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 resource(%d) of type (stream)

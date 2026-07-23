@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -171,7 +171,7 @@ static void _breakiter_no_args_ret_int32(
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	int32_t res = (bio->biter->*func)();
+	const int32_t res = (bio->biter->*func)();
 
 	RETURN_LONG((zend_long)res);
 }
@@ -195,7 +195,7 @@ static void _breakiter_int32_ret_int32(
 		RETURN_THROWS();
 	}
 
-	int32_t res = (bio->biter->*func)((int32_t)arg);
+	const int32_t res = (bio->biter->*func)((int32_t)arg);
 
 	RETURN_LONG((zend_long)res);
 }
@@ -246,7 +246,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, current)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	int32_t res = bio->biter->current();
+	const int32_t res = bio->biter->current();
 
 	RETURN_LONG((zend_long)res);
 }
@@ -282,7 +282,7 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, isBoundary)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	UBool res = bio->biter->isBoundary((int32_t)offset);
+	const UBool res = bio->biter->isBoundary((int32_t)offset);
 
 	RETURN_BOOL((zend_long)res);
 }
@@ -297,11 +297,9 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getLocale)
 		Z_PARAM_LONG(locale_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* TODO: Change to ValueError? */
 	if (locale_type != ULOC_ACTUAL_LOCALE && locale_type != ULOC_VALID_LOCALE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"invalid locale type");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be either Locale::ACTUAL_LOCALE or Locale::VALID_LOCALE");
+		RETURN_THROWS();
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;

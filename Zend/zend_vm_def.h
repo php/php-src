@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -4154,11 +4153,15 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 		if (should_throw) {
 			zend_internal_call_arginfo_violation(call->func);
 		}
-		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, ret));
+		if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			bool result = zend_verify_internal_return_type(call->func, ret);
+			ZEND_ASSERT(result);
+		}
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 		zend_verify_internal_func_info(call->func, ret);
+		ZEND_ASSERT(!(ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
+				|| !(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
 	}
 #endif
 	ZEND_OBSERVER_FCALL_END(call, EG(exception) ? NULL : ret);
@@ -4283,11 +4286,15 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL,OBSERVER))
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			ZEND_ASSERT(!(ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
+					|| !(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -4412,11 +4419,15 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			ZEND_ASSERT(!(ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
+					|| !(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
 		}
 		ZEND_ASSERT(opline->result_type != IS_TMP_VAR || !Z_ISREF_P(ret));
 #endif
@@ -4480,7 +4491,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
+		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ref)))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -4508,6 +4519,9 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 					ZVAL_COPY(retval_ref, retval_ptr);
 				}
 				retval_ptr = retval_ref;
+			}
+			if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr)))) {
+				ZEND_VM_NEXT_OPCODE();
 			}
 		}
 
@@ -5708,6 +5722,30 @@ ZEND_VM_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
 	if (UNEXPECTED(!zend_verify_recv_arg_type(EX(func), opline->op1.num, op_1))) {
 		HANDLE_EXCEPTION();
 	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(213, ZEND_SEND_PLACEHOLDER, UNUSED, CONST|UNUSED|NUM)
+{
+	zval *arg;
+
+	if (OP2_TYPE == IS_CONST) {
+		/* Named placeholder */
+		USE_OPLINE
+		SAVE_OPLINE();
+		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		uint32_t arg_num;
+		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
+		if (UNEXPECTED(!arg)) {
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		/* Positional placeholder */
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	}
+
+	Z_TYPE_INFO_P(arg) = _IS_PLACEHOLDER;
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -8309,7 +8347,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	val   = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_CONSTANT(c.value)) {
+	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 			zval_ptr_dtor_nogc(&c.value);
 			FREE_OP1();
@@ -8341,7 +8379,7 @@ ZEND_VM_HANDLER(210, ZEND_DECLARE_ATTRIBUTED_CONST, CONST, CONST)
 	val   = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	ZVAL_COPY(&c.value, val);
-	if (Z_OPT_CONSTANT(c.value)) {
+	if (Z_OPT_TYPE(c.value) == IS_CONSTANT_AST) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
 			zval_ptr_dtor_nogc(&c.value);
 			FREE_OP1();
@@ -8832,7 +8870,7 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMP|CV, ANY)
 				}
 
 				ZVAL_COPY(&tmp, value);
-				if (zend_parse_arg_str_weak(&tmp, &str, 1)) {
+				if ((str = zend_parse_arg_str_weak(&tmp, 1)) != NULL) {
 					ZVAL_LONG(EX_VAR(opline->result.var), ZSTR_LEN(str));
 					zval_ptr_dtor(&tmp);
 					break;
@@ -8907,9 +8945,10 @@ ZEND_VM_HOT_HANDLER(211, ZEND_TYPE_ASSERT, CONST, ANY, NUM)
 		zend_arg_info *arginfo = &fbc->common.arg_info[argno - 1];
 
 		if (!zend_check_type(&arginfo->type, value, /* is_return_type */ false, /* is_internal */ true)) {
-			const char *param_name = get_function_arg_name(fbc, argno);
 			zend_string *expected = zend_type_to_string(arginfo->type);
-			zend_type_error("%s(): Argument #%d%s%s%s must be of type %s, %s given", ZSTR_VAL(fbc->common.function_name), argno, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : "", ZSTR_VAL(expected), zend_zval_value_name(value));
+			zend_argument_type_error_ex(fbc, argno,
+					"must be of type %s, %s given",
+					ZSTR_VAL(expected), zend_zval_value_name(value));
 			zend_string_release(expected);
 		}
 	}
@@ -9012,7 +9051,7 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, CV|TMP|UNUSED|CLASS_FETCH, ANY)
 			}
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), called_scope->name);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -9119,11 +9158,15 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY, SPEC(OBSERVER))
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, ret));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, ret);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
 			zend_verify_internal_func_info(call->func, ret);
+			ZEND_ASSERT(!(ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
+					|| !(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
 		}
 #endif
 		ZEND_OBSERVER_FCALL_END(call, EG(exception) ? NULL : ret);
@@ -9572,7 +9615,9 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMP|CV, UNUSED)
 				zval retval;
 
 				zend_function *count_fn = zend_hash_find_ptr(&zobj->ce->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
+				GC_ADDREF(zobj);
 				zend_call_known_instance_method_with_0_params(count_fn, zobj, &retval);
+				OBJ_RELEASE(zobj);
 				count = zval_get_long(&retval);
 				zval_ptr_dtor(&retval);
 				break;
@@ -9819,6 +9864,45 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED, NUM|CACHE_SLOT)
 	zend_vm_stack_free_call_frame(call);
 
 	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(212, ZEND_CALLABLE_CONVERT_PARTIAL, CACHE_SLOT, CONST|UNUSED, NUM)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_execute_data *call = EX(call);
+	void **cache_slot = CACHE_ADDR(opline->op1.num);
+	zval *named_positions = GET_OP2_ZVAL_PTR();
+
+	zend_partial_create(EX_VAR(opline->result.var),
+		&call->This, call->func,
+		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
+		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
+			call->extra_named_params : NULL,
+		OP2_TYPE == IS_CONST ? Z_ARRVAL_P(named_positions) : NULL,
+		&EX(func)->op_array, opline, cache_slot,
+		opline->extended_value & ZEND_FCALL_USES_VARIADIC_PLACEHOLDER);
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_array_release(call->extra_named_params);
+	}
+
+	if ((call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		zend_free_trampoline(call->func);
+	}
+
+	if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
+		OBJ_RELEASE(Z_OBJ(call->This));
+	} else if (ZEND_CALL_INFO(call) & ZEND_CALL_CLOSURE) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(call->func));
+	}
+
+	EX(call) = call->prev_execute_data;
+
+	zend_vm_stack_free_call_frame(call);
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(208, ZEND_JMP_FRAMELESS, CONST, JMP_ADDR, NUM|CACHE_SLOT)
@@ -10607,7 +10691,12 @@ ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);
 ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 {
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
+#if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+	/* opline is &call_interrupt_op. Load orig opline. */
+	LOAD_OPLINE();
+#else
 	SAVE_OPLINE();
+#endif
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {

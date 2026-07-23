@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: krakjoe@php.net                                             |
    +----------------------------------------------------------------------+
@@ -60,10 +58,10 @@ static zend_class_entry *zend_ce_weakmap;
 static zend_object_handlers zend_weakref_handlers;
 static zend_object_handlers zend_weakmap_handlers;
 
-#define zend_weakref_from(o) ((zend_weakref*)(((char*) o) - XtOffsetOf(zend_weakref, std)))
+#define zend_weakref_from(o) (ZEND_CONTAINER_OF(o, zend_weakref, std))
 #define zend_weakref_fetch(z) zend_weakref_from(Z_OBJ_P(z))
 
-#define zend_weakmap_from(o) ((zend_weakmap*)(((char*) o) - XtOffsetOf(zend_weakmap, std)))
+#define zend_weakmap_from(o) (ZEND_CONTAINER_OF(o, zend_weakmap, std))
 #define zend_weakmap_fetch(z) zend_weakmap_from(Z_OBJ_P(z))
 
 static inline void zend_weakref_unref_single(
@@ -109,15 +107,15 @@ static void zend_weakref_register(zend_object *object, void *payload) {
 	void *tagged_ptr = Z_PTR_P(zv);
 	if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_HT) {
 		HashTable *ht = ZEND_WEAKREF_GET_PTR(tagged_ptr);
-		zend_hash_index_add_new_ptr(ht, (zend_ulong) payload, payload);
+		zend_hash_index_add_new_ptr(ht, (zend_ulong)(uintptr_t) payload, payload);
 		return;
 	}
 
 	/* Convert simple pointer to hashtable. */
 	HashTable *ht = emalloc(sizeof(HashTable));
 	zend_hash_init(ht, 0, NULL, NULL, 0);
-	zend_hash_index_add_new_ptr(ht, (zend_ulong) tagged_ptr, tagged_ptr);
-	zend_hash_index_add_new_ptr(ht, (zend_ulong) payload, payload);
+	zend_hash_index_add_new_ptr(ht, (zend_ulong)(uintptr_t) tagged_ptr, tagged_ptr);
+	zend_hash_index_add_new_ptr(ht, (zend_ulong)(uintptr_t) payload, payload);
 	/* Replace the single WeakMap or WeakReference entry in EG(weakrefs) with a HashTable with 2 entries in place. */
 	ZVAL_PTR(zv, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_HT));
 }
@@ -146,11 +144,11 @@ static void zend_weakref_unregister(zend_object *object, void *payload, bool wea
 
 	HashTable *ht = ptr;
 #if ZEND_DEBUG
-	void *old_payload = zend_hash_index_find_ptr(ht, (zend_ulong) payload);
+	void *old_payload = zend_hash_index_find_ptr(ht, (zend_ulong)(uintptr_t) payload);
 	ZEND_ASSERT(old_payload && "Weakref not registered?");
 	ZEND_ASSERT(old_payload == payload);
 #endif
-	zend_hash_index_del(ht, (zend_ulong) payload);
+	zend_hash_index_del(ht, (zend_ulong)(uintptr_t) payload);
 	if (zend_hash_num_elements(ht) == 0) {
 		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
 		zend_hash_destroy(ht);
@@ -798,7 +796,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_ce_weakref->default_object_handlers = &zend_weakref_handlers;
 
 	memcpy(&zend_weakref_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zend_weakref_handlers.offset = XtOffsetOf(zend_weakref, std);
+	zend_weakref_handlers.offset = offsetof(zend_weakref, std);
 
 	zend_weakref_handlers.free_obj = zend_weakref_free;
 	zend_weakref_handlers.get_debug_info = zend_weakref_get_debug_info;
@@ -811,7 +809,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_ce_weakmap->default_object_handlers = &zend_weakmap_handlers;
 
 	memcpy(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zend_weakmap_handlers.offset = XtOffsetOf(zend_weakmap, std);
+	zend_weakmap_handlers.offset = offsetof(zend_weakmap, std);
 	zend_weakmap_handlers.free_obj = zend_weakmap_free_obj;
 	zend_weakmap_handlers.read_dimension = zend_weakmap_read_dimension;
 	zend_weakmap_handlers.write_dimension = zend_weakmap_write_dimension;

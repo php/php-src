@@ -2,15 +2,13 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Gregory Beaver <cellog@php.net>                             |
   |          Marcus Boerger <helly@php.net>                              |
@@ -40,10 +38,6 @@
 #define PHAR_API_MAJORVER_MASK    0xF000
 #define PHAR_API_VER_MASK         0xFFF0
 
-#define PHAR_HDR_COMPRESSION_MASK 0x0000F000
-#define PHAR_HDR_COMPRESSED_NONE  0x00000000
-#define PHAR_HDR_COMPRESSED_GZ    0x00001000
-#define PHAR_HDR_COMPRESSED_BZ2   0x00002000
 #define PHAR_HDR_SIGNATURE        0x00010000
 
 /* flags for defining that the entire file should be compressed */
@@ -148,10 +142,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	char        *openssl_privatekey;
 	uint32_t    openssl_privatekey_len;
 	/* phar_get_archive cache */
-	char*       last_phar_name;
-	uint32_t    last_phar_name_len;
+	const zend_string *last_phar_name;
 	uint32_t    last_alias_len;
-	char*       last_alias;
+	const char* last_alias;
 	phar_archive_data* last_phar;
 	HashTable mime_types;
 ZEND_END_MODULE_GLOBALS(phar)
@@ -219,7 +212,7 @@ typedef struct _phar_entry_info {
 	unsigned int             fileinfo_lock_count;
 	char                     *tmp;
 	phar_archive_data        *phar;
-	char                     *link; /* symbolic link to another file */
+	zend_string              *symlink;
 	char                     tar_type;
 	/* position in the manifest */
 	uint32_t                     manifest_pos;
@@ -245,11 +238,10 @@ typedef struct _phar_entry_info {
 
 /* information about a phar file (the archive itself) */
 struct _phar_archive_data {
-	char                     *fname;
-	uint32_t                 fname_len;
-	/* for phar_detect_fname_ext, this stores the location of the file extension within fname */
+	zend_string             *fname;
+	/* The ext field stores the location of the file extension from the fname field, and thus should never be freed. */
 	uint32_t                 ext_len;
-	char                     *ext;
+	const char               *ext;
 	char                     *alias;
 	uint32_t                 alias_len;
 	char                     version[12];
@@ -380,27 +372,51 @@ static inline bool phar_validate_alias(const char *alias, size_t alias_len) /* {
 }
 /* }}} */
 
-static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
+static inline bool phar_path_is_magic_phar_ex(const char *path, size_t path_len) /* {{{ */
 {
-	char tmp[MAXPATHLEN];
-	size_t tmp_len;
-	size_t len1, len2;
-
-	tmp_len = MIN(MAXPATHLEN, ZSTR_LEN(entry->filename) + entry->phar->fname_len);
-
-	len1 = MIN(entry->phar->fname_len, tmp_len);
-	if (entry->phar->fname) {
-		memcpy(tmp, entry->phar->fname, len1);
+	if (path_len > 0 && path[0] == '/') {
+		path++;
+		path_len--;
 	}
 
-	len2 = MIN(tmp_len - len1, ZSTR_LEN(entry->filename));
-	memcpy(tmp + len1, entry->filename, len2);
+	if (path_len < sizeof(".phar") - 1 || memcmp(path, ".phar", sizeof(".phar") - 1) != 0) {
+		return false;
+	}
 
-	entry->inode = (unsigned short) zend_hash_func(tmp, tmp_len);
+	if (path_len == sizeof(".phar") - 1) {
+		return true;
+	}
+
+	return path[sizeof(".phar") - 1] == '/' || path[sizeof(".phar") - 1] == '\\';
 }
 /* }}} */
 
-static inline bool phar_entry_can_remove(phar_entry_info *entry)
+static inline bool phar_is_magic_phar(const zend_string *path) /* {{{ */
+{
+	return phar_path_is_magic_phar_ex(ZSTR_VAL(path), ZSTR_LEN(path));
+}
+/* }}} */
+
+static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
+{
+	if (entry->phar->fname) {
+		char tmp[MAXPATHLEN];
+		size_t tmp_len = MIN(MAXPATHLEN, ZSTR_LEN(entry->filename) + ZSTR_LEN(entry->phar->fname));
+
+		size_t len1 = MIN(ZSTR_LEN(entry->phar->fname), tmp_len);
+		memcpy(tmp, ZSTR_VAL(entry->phar->fname), len1);
+
+		size_t len2 = MIN(tmp_len - len1, ZSTR_LEN(entry->filename));
+		memcpy(tmp + len1, entry->filename, len2);
+
+		entry->inode = (unsigned short) zend_hash_func(tmp, tmp_len);
+	} else {
+		entry->inode = (unsigned short) zend_string_hash_val(entry->filename);
+	}
+}
+/* }}} */
+
+static inline bool phar_entry_can_remove(const phar_entry_info *entry)
 {
 	return entry->fp_refcount == 0 && entry->fileinfo_lock_count == 0;
 }
@@ -411,25 +427,25 @@ void phar_object_init(void);
 void phar_destroy_phar_data(phar_archive_data *phar);
 
 ZEND_ATTRIBUTE_NONNULL zend_result phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
-zend_result phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-ZEND_ATTRIBUTE_NONNULL_ARGS(3) zend_result phar_open_executed_filename(char *alias, size_t alias_len, char **error);
-zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len);
-zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error);
-zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error);
-ZEND_ATTRIBUTE_NONNULL zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);
+zend_result phar_open_from_filename(char *fname, size_t fname_len, /* copyable & hash update */ zend_string *alias, uint32_t options, phar_archive_data** pphar, char **error);
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_filename(zend_string *fname, /* copyable & hash update */ zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_create_or_parse_filename(zend_string *fname, /* copyable & hash update */ zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result phar_open_executed_filename(/* copyable & hash update */ zend_string *alias, char **error);
+zend_result phar_free_alias(const phar_archive_data *phar);
+phar_archive_data* phar_get_archive(const char *fname, size_t fname_len, const char *alias, size_t alias_len, char **error);
+zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, const char *sig, size_t sig_len, const char *fname, char **signature, size_t *signature_len, char **error);
+ZEND_ATTRIBUTE_NONNULL zend_string* phar_create_signature(phar_archive_data *phar, php_stream *fp, char **error);
 
 /* utility functions */
 zend_string *phar_create_default_stub(const zend_string *php_index_str, const zend_string *web_index_str, char **error);
-const char *phar_decompress_filter(const phar_entry_info *entry, bool return_unknown);
-const char *phar_compress_filter(const phar_entry_info *entry, bool return_unknown);
+const char *phar_get_decompress_filter_name(const phar_entry_info *entry);
+const char *phar_get_compress_filter_name(const phar_entry_info *entry);
 
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
-void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len);
-zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len);
-zend_string *phar_find_in_include_path(zend_string *file, phar_archive_data **pphar);
-char *phar_fix_filepath(char *path, size_t *new_len, bool use_cwd);
+void phar_add_virtual_dirs(phar_archive_data *phar, const char *filename, size_t filename_len);
+zend_result phar_mount_entry(phar_archive_data *phar, const char *filename, size_t filename_len, char *path, size_t path_len);
+	zend_string *phar_find_in_include_path(const zend_string *file);
+zend_string* phar_fix_filepath(const char *path, size_t path_length, bool use_cwd);
 ZEND_ATTRIBUTE_NONNULL phar_entry_info * phar_open_jit(const phar_archive_data *phar, phar_entry_info *entry, char **error);
 void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, bool persistent);
 bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, bool persistent);
@@ -450,13 +466,13 @@ zend_result phar_copy_on_write(phar_archive_data **pphar);
 
 /* tar functions in tar.c */
 bool phar_is_tar(const char *buf, const char *fname);
-zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error);
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_parse_tarfile(php_stream* fp, const char *fname, size_t fname_len, /* copyable & hash update */ zend_string *alias, phar_archive_data** pphar, uint32_t compression, char **error);
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_tar(zend_string *fname, /* copyable & hash update */ zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_tar_flush(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error);
 
 /* zip functions in zip.c */
-zend_result phar_parse_zipfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, char **error);
-ZEND_ATTRIBUTE_NONNULL_ARGS(1, 7, 8) zend_result phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+zend_result phar_parse_zipfile(php_stream *fp, const char *fname, size_t fname_len, /* copyable & hash update */ zend_string *alias, phar_archive_data** pphar, char **error);
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 5, 6) zend_result phar_open_or_create_zip(zend_string *fname, /* copyable & hash update */ zend_string *alias, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_zip_flush(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 
 #ifdef PHAR_MAIN
@@ -471,12 +487,13 @@ void phar_entry_delref(phar_entry_data *idata);
 
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, bool security);
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, bool security);
-ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp);
-ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security);
+ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(zend_string *fname, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp);
+ZEND_ATTRIBUTE_NONNULL zend_result phar_get_entry_data(phar_entry_data **ret, const zend_string *fname, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security);
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 4) int phar_flush_ex(phar_archive_data *archive, zend_string *user_stub, bool is_default_stub, char **error);
 ZEND_ATTRIBUTE_NONNULL int phar_flush(phar_archive_data *archive, char **error);
 zend_result phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const char **ext_str, size_t *ext_len, int executable, int for_create, bool is_complete);
-zend_result phar_split_fname(const char *filename, size_t filename_len, char **arch, size_t *arch_len, char **entry, size_t *entry_len, int executable, int for_create);
+zend_string* phar_split_fname_ex(const char *filename, size_t filename_len, zend_string **entry, int executable, int for_create, const char **error);
+zend_string* phar_split_fname(const char *filename, size_t filename_len, zend_string **entry, int executable, int for_create);
 
 typedef enum {
 	pcr_use_query,

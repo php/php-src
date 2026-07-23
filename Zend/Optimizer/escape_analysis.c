@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache, Escape Analysis                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -78,7 +76,7 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
 	zend_ssa_phi *p;
-	int i, j;
+	int i;
 	int *size;
 	ALLOCA_FLAG(use_heap)
 
@@ -94,7 +92,7 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 			if (p->pi >= 0) {
 				union_find_unite(parent, size, i, p->sources[0]);
 			} else {
-				for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
+				for (uint32_t j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
 					union_find_unite(parent, size, i, p->sources[j]);
 				}
 			}

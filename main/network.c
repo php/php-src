@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Stig Venaas <venaas@uninett.no>                              |
    | Streams work by Wez Furlong <wez@thebrainroom.com>                   |
@@ -26,10 +24,6 @@
 #ifdef PHP_WIN32
 # include <Ws2tcpip.h>
 # include "win32/winutil.h"
-# define O_RDONLY _O_RDONLY
-# include "win32/param.h"
-#else
-#include <sys/param.h>
 #endif
 
 #include <sys/types.h>
@@ -46,7 +40,7 @@
 #endif
 #ifdef HAVE_POLL_H
 #include <poll.h>
-#elif HAVE_SYS_POLL_H
+#elif defined(HAVE_SYS_POLL_H)
 #include <sys/poll.h>
 #endif
 
@@ -1461,7 +1455,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 
 	if (*hstbuflen == 0) {
 		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	}
 
 	while (( res =
@@ -1469,7 +1463,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
 		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+		*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 	}
 
 	if (res != 0) {
@@ -1487,7 +1481,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 
 	if (*hstbuflen == 0) {
 		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	}
 
 	while ((NULL == ( hp =
@@ -1495,7 +1489,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
 		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
+		*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 	}
 	return hp;
 }
@@ -1505,11 +1499,11 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 {
 	if (*hstbuflen == 0) {
 		*hstbuflen = sizeof(struct hostent_data);
-		*tmphstbuf = (char *)malloc (*hstbuflen);
+		*tmphstbuf = (char *)pemalloc(*hstbuflen, true);
 	} else {
 		if (*hstbuflen < sizeof(struct hostent_data)) {
 			*hstbuflen = sizeof(struct hostent_data);
-			*tmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
+			*tmphstbuf = (char *)perealloc(*tmphstbuf, *hstbuflen, true);
 		}
 	}
 	memset((void *)(*tmphstbuf),0,*hstbuflen);

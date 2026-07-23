@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -117,6 +115,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
     xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper);
     xmlNsPtr xlink_ns = NULL;
+    xmlNsPtr xml_ns = NULL;
     xmlNsPtr prefixed_xmlns_ns = NULL;
 
     lexbor_array_obj_t work_list;
@@ -256,6 +255,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                         xlink_ns->_private = (void *) php_dom_ns_is_xlink_magic_token;
                     }
                     lxml_attr->ns = xlink_ns;
+                } else if (attr->node.ns == LXB_NS_XML) {
+                    if (xml_ns == NULL) {
+                        xml_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xml", DOM_XML_NS_URI);
+                        xml_ns->_private = (void *) php_dom_ns_is_xml_magic_token;
+                    }
+                    lxml_attr->ns = xml_ns;
                 }
 
                 if (last_added_attr == NULL) {
@@ -455,7 +460,7 @@ static php_libxml_quirks_mode dom_translate_quirks_mode(lxb_dom_document_cmode_t
 		case LXB_DOM_DOCUMENT_CMODE_NO_QUIRKS: return PHP_LIBXML_NO_QUIRKS;
 		case LXB_DOM_DOCUMENT_CMODE_LIMITED_QUIRKS: return PHP_LIBXML_LIMITED_QUIRKS;
 		case LXB_DOM_DOCUMENT_CMODE_QUIRKS: return PHP_LIBXML_QUIRKS;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 

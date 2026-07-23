@@ -57,7 +57,7 @@
 												efree(response); \
 											} \
 										}
-#define SMTP_SKIP_SPACE(str)	{ while (isspace(*str)) { str++; } }
+#define SMTP_SKIP_SPACE(str)	{ while (isspace((unsigned char)*(str))) { (str)++; } }
 
 
 char seps[] = " ,\t\n";
@@ -216,8 +216,8 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
-	if (INI_STR("sendmail_from")) {
-		RPath = estrdup(INI_STR("sendmail_from"));
+	if (zend_ini_string_literal("sendmail_from")) {
+		RPath = estrdup(zend_ini_string_literal("sendmail_from"));
 	} else if (headers_lc) {
 		int found = 0;
 		const char *lookup = ZSTR_VAL(headers_lc);
@@ -276,7 +276,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 		snprintf(*error_message, HOST_NAME_LEN + 128,
 			"Failed to connect to mailserver at \"%s\" port " ZEND_ULONG_FMT ", verify your \"SMTP\" "
 			"and \"smtp_port\" setting in php.ini or use ini_set()",
-			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
+			PW32G(mail_host), !zend_ini_long_literal("smtp_port") ? 25 : zend_ini_long_literal("smtp_port"));
 		return FAILURE;
 	} else {
 		ret = SendText(RPath, Subject, mailTo, data, headers_trim, headers_lc, error_message);
@@ -783,13 +783,13 @@ return 0;
 
 	/* Resolve the servers IP */
 	/*
-	if (!isdigit(PW32G(mail_host)[0])||!gethostbyname(PW32G(mail_host)))
+	if (!isdigit((unsigned char)PW32G(mail_host)[0])||!gethostbyname(PW32G(mail_host)))
 	{
 		return (FAILED_TO_RESOLVE_HOST);
 	}
 	*/
 
-	portnum = (short) INI_INT("smtp_port");
+	portnum = (short) zend_ini_long_literal("smtp_port");
 	if (!portnum) {
 		portnum = 25;
 	}

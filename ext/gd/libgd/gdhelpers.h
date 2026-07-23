@@ -1,32 +1,41 @@
 #ifndef GDHELPERS_H
 #define GDHELPERS_H 1
 
-#include <sys/types.h>
 #include "php.h"
+#include <sys/types.h>
 
 /* TBB: strtok_r is not universal; provide an implementation of it. */
 
-extern char *gd_strtok_r(char *s, char *sep, char **state);
+char *gd_strtok_r(char *s, const char *sep, char **state);
 
 /* These functions wrap memory management. gdFree is
-	in gd.h, where callers can utilize it to correctly
-	free memory allocated by these functions with the
-	right version of free(). */
-#define gdCalloc(nmemb, size)	ecalloc(nmemb, size)
-#define gdMalloc(size)		emalloc(size)
-#define gdRealloc(ptr, size)	erealloc(ptr, size)
-#define gdEstrdup(ptr)		estrdup(ptr)
-#define gdFree(ptr)		efree(ptr)
-#define gdPMalloc(ptr)		pemalloc(ptr, 1)
-#define gdPFree(ptr)		pefree(ptr, 1)
-#define gdPEstrdup(ptr)		pestrdup(ptr, 1)
+        in gd.h, where callers can utilize it to correctly
+        free memory allocated by these functions with the
+        right version of free(). */
+#define gdCalloc(nmemb, size) ecalloc((nmemb), (size))
+#define gdMalloc(size) emalloc(size)
+#define gdRealloc(ptr, size) erealloc(ptr, size)
+#define gdEstrdup(ptr) estrdup(ptr)
+#define gdFree(ptr) efree(ptr)
+#define gdPMalloc(ptr) pemalloc(ptr, 1)
+#define gdPFree(ptr) pefree(ptr, 1)
+#define gdPEstrdup(ptr) pestrdup(ptr, 1)
+
+/* The extended version of gdReallocEx will free *ptr if the
+ * realloc fails. */
+void *gdReallocEx(void *ptr, size_t size);
+
+/* Internal deterministic allocation hook used by the vector2d failure tests. */
+void *gdVector2dMalloc(size_t size);
+void gdVector2dTestSetAllocationFailureCountdown(int countdown);
 
 /* Returns nonzero if multiplying the two quantities will
-	result in integer overflow. Also returns nonzero if
-	either quantity is negative. By Phil Knirsch based on
-	netpbm fixes by Alan Cox. */
+        result in integer overflow. Also returns nonzero if
+        either quantity is negative. By Phil Knirsch based on
+        netpbm fixes by Alan Cox. */
 
 int overflow2(int a, int b);
+int overflowMul3(int a, int b, int c);
 
 #ifdef ZTS
 #define gdMutexDeclare(x) MUTEX_T x
@@ -42,10 +51,9 @@ int overflow2(int a, int b);
 #define gdMutexUnlock(x)
 #endif
 
-#define DPCM2DPI(dpcm) (unsigned int)((dpcm)*2.54 + 0.5)
-#define DPM2DPI(dpm)   (unsigned int)((dpm)*0.0254 + 0.5)
-#define DPI2DPCM(dpi)  (unsigned int)((dpi)/2.54 + 0.5)
-#define DPI2DPM(dpi)   (unsigned int)((dpi)/0.0254 + 0.5)
+#define DPCM2DPI(dpcm) (unsigned int)((dpcm) * 2.54 + 0.5)
+#define DPM2DPI(dpm) (unsigned int)((dpm) * 0.0254 + 0.5)
+#define DPI2DPCM(dpi) (unsigned int)((dpi) / 2.54 + 0.5)
+#define DPI2DPM(dpi) (unsigned int)((dpi) / 0.0254 + 0.5)
 
 #endif /* GDHELPERS_H */
-

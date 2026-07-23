@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -22,7 +21,7 @@
 #include <zend.h>
 #include <zend_vm_opcodes.h>
 
-static const char *zend_vm_opcodes_names[212] = {
+static const char *zend_vm_opcodes_names[214] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -235,9 +234,11 @@ static const char *zend_vm_opcodes_names[212] = {
 	"ZEND_INIT_PARENT_PROPERTY_HOOK_CALL",
 	"ZEND_DECLARE_ATTRIBUTED_CONST",
 	"ZEND_TYPE_ASSERT",
+	"ZEND_CALLABLE_CONVERT_PARTIAL",
+	"ZEND_SEND_PLACEHOLDER",
 };
 
-static uint32_t zend_vm_opcodes_flags[212] = {
+static uint32_t zend_vm_opcodes_flags[214] = {
 	0x00000000,
 	0x00000b0b,
 	0x00000b0b,
@@ -450,6 +451,8 @@ static uint32_t zend_vm_opcodes_flags[212] = {
 	0x01001103,
 	0x00000303,
 	0x01000003,
+	0x010003a0,
+	0x00001301,
 };
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode) {

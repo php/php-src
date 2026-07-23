@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Paul Panotzki - Bunyip Information Systems                  |
    |          Jim Winstead <jimw@php.net>                                 |
@@ -22,6 +20,7 @@
 #include <stddef.h>
 #include "php_network.h"
 #include "file.h"
+#include "streams/php_streams_int.h"
 
 static size_t php_fsockopen_format_host_port(char **message, const char *prefix, size_t prefix_len,
 	const char *host, size_t host_len, zend_long port)
@@ -84,8 +83,9 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (persistent) {
-		php_fsockopen_format_host_port(&hashkey, "pfsockopen__", strlen("pfsockopen__"), host,
-				host_len, port);
+		zend_string *escaped = php_stream_escape_persistent_key(host, host_len);
+		spprintf(&hashkey, 0, "pfsockopen__%s:"  ZEND_LONG_FMT, ZSTR_VAL(escaped), port);
+		zend_string_release_ex(escaped, false);
 	}
 
 	if (port > 0) {

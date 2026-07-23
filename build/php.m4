@@ -127,6 +127,13 @@ AS_VAR_IF([CFLAGS],, [auto_cflags=1])
 dnl Required programs.
 PHP_PROG_AWK
 
+dnl Check for obsolete configure options. The --with-pic configure option is
+dnl obsolete as of Libtool 2.5.3 in favor of the --enable-pic.
+AS_VAR_IF([with_pic], [], [], [AC_MSG_ERROR(m4_text_wrap([
+  The Libtool --with-pic/--without-pic configure option is obsolete. Use
+  --enable-pic/--disable-pic instead.
+]))])
+
 abs_srcdir=$(cd $srcdir && pwd)
 abs_builddir=$(pwd)
 
@@ -794,7 +801,7 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   php_cxx_post=
   php_lo=lo
 
-  case $with_pic in
+  case $enable_pic in
     yes) pic_setting='-prefer-pic';;
     no)  pic_setting='-prefer-non-pic';;
   esac
@@ -931,10 +938,14 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
 
   ifelse($5,,ac_extra=,[ac_extra=$(echo "m4_normalize(m4_expand([$5]))"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g)])
 
+  dnl Statically linked extensions share the engine's _tsrm_ls_cache symbol,
+  dnl so in ZTS builds they can read the TSRMLS cache directly.
+  ac_extra_static="$ac_extra -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
-    PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
+    PHP_ADD_SOURCES($ext_dir,$2,$ac_extra_static,)
     EXT_STATIC="$EXT_STATIC $1;$ext_dir"
     if test "$3" != "nocli"; then
       EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
@@ -955,11 +966,11 @@ dnl ---------------------------------------------- CLI static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
     case "$PHP_SAPI" in
       cgi|embed|phpdbg[)]
-        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
+        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra_static,)
         EXT_STATIC="$EXT_STATIC $1;$ext_dir"
         ;;
       *[)]
-        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,cli)
+        PHP_ADD_SOURCES($ext_dir,$2,$ac_extra_static,cli)
         ;;
     esac
     EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
@@ -1373,6 +1384,54 @@ int main(void) {
     [AC_DEFINE([COOKIE_SEEKER_USES_OFF64_T], [1],
       [Define to 1 if fopencookie seeker uses off64_t.])])
 ])
+])
+
+AC_DEFUN([PHP_POLL_MECHANISMS],
+[
+  AC_MSG_CHECKING([for polling mechanisms])
+  poll_mechanisms=""
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+    #include <sys/epoll.h>
+  ], [
+    int fd = epoll_create(1);
+    return fd;
+  ])], [
+    AC_DEFINE([HAVE_EPOLL], [1], [Define if epoll is available])
+    poll_mechanisms="$poll_mechanisms epoll"
+
+    AC_CHECK_FUNCS([epoll_pwait2], [],
+      [AC_CHECK_DECL([epoll_pwait2],
+        [AC_DEFINE([HAVE_EPOLL_PWAIT2], [1])],
+        [],
+        [#include <sys/epoll.h>])])
+  ])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+    #include <sys/event.h>
+    #include <sys/time.h>
+  ], [
+    int kq = kqueue();
+    return kq;
+  ])], [
+    AC_DEFINE([HAVE_KQUEUE], [1], [Define if kqueue is available])
+    poll_mechanisms="$poll_mechanisms kqueue"
+  ])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+    #include <port.h>
+  ], [
+    int port = port_create();
+    return port;
+  ])], [
+    AC_DEFINE([HAVE_EVENT_PORTS], [1], [Define if event ports are available])
+    poll_mechanisms="$poll_mechanisms eventport"
+  ])
+
+  dnl Set poll mechanisms including poll that is always available
+  poll_mechanisms="$poll_mechanisms poll"
+
+  AC_MSG_RESULT([$poll_mechanisms])
 ])
 
 dnl ----------------------------------------------------------------------------

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Christian Cartus <cartus@atrior.de>                          |
    +----------------------------------------------------------------------+
@@ -35,9 +33,7 @@
 zend_class_entry *sysvshm_ce;
 static zend_object_handlers sysvshm_object_handlers;
 
-static inline sysvshm_shm *sysvshm_from_obj(zend_object *obj) {
-	return (sysvshm_shm *)((char *)(obj) - XtOffsetOf(sysvshm_shm, std));
-}
+#define sysvshm_from_obj(obj) ZEND_CONTAINER_OF(obj, sysvshm_shm, std)
 
 #define Z_SYSVSHM_P(zv) sysvshm_from_obj(Z_OBJ_P(zv))
 
@@ -102,7 +98,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 	sysvshm_ce->default_object_handlers = &sysvshm_object_handlers;
 
 	memcpy(&sysvshm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	sysvshm_object_handlers.offset = XtOffsetOf(sysvshm_shm, std);
+	sysvshm_object_handlers.offset = offsetof(sysvshm_shm, std);
 	sysvshm_object_handlers.free_obj = sysvshm_free_obj;
 	sysvshm_object_handlers.get_constructor = sysvshm_get_constructor;
 	sysvshm_object_handlers.clone_obj = NULL;
@@ -130,10 +126,17 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
-	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
+	zend_long shm_key_arg, shm_id, shm_size, shm_flag = 0666;
+	key_t shm_key;
 	bool shm_size_is_null = true;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key, &shm_size, &shm_size_is_null, &shm_flag)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key_arg, &shm_size, &shm_size_is_null, &shm_flag)) {
+		RETURN_THROWS();
+	}
+
+	shm_key = (key_t) shm_key_arg;
+	if ((zend_long) shm_key != shm_key_arg) {
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -149,17 +152,17 @@ PHP_FUNCTION(shm_attach)
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < (zend_long)sizeof(sysvshm_chunk_head)) {
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key_arg);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key_arg, strerror(errno));
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
-		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key_arg, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -311,11 +314,13 @@ PHP_FUNCTION(shm_get_var)
 	shm_data = &shm_var->mem;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash) != 1) {
-		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
-		RETVAL_FALSE;
-	}
+	int res = php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (res != 1) {
+		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
+		zval_ptr_dtor(return_value);
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 

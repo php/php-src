@@ -49,7 +49,7 @@ if test "$PHP_ZIP" != "no"; then
   AC_DEFINE([HAVE_ZIP], [1],
     [Define to 1 if the PHP extension 'zip' is available.])
 
-  PHP_NEW_EXTENSION([zip], [php_zip.c zip_stream.c], [$ext_shared])
+  PHP_NEW_EXTENSION([zip], [php_zip.c zip_source.c zip_stream.c], [$ext_shared])
   PHP_ADD_EXTENSION_DEP(zip, pcre)
 
   PHP_SUBST([ZIP_SHARED_LIBADD])

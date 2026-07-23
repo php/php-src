@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
@@ -19,6 +19,8 @@
 #include <unicode/utf16.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
+
+#include "../intl_icu_compat.h"
 
 extern "C" {
 #include "converter.h"
@@ -37,7 +39,7 @@ typedef struct _php_converter_object {
 
 
 static inline php_converter_object *php_converter_fetch_object(zend_object *obj) {
-	return (php_converter_object *)((char*)(obj) - XtOffsetOf(php_converter_object, obj));
+	return (php_converter_object *)((char*)(obj) - offsetof(php_converter_object, obj));
 }
 #define Z_INTL_CONVERTER_P(zv) php_converter_fetch_object(Z_OBJ_P(zv))
 
@@ -159,17 +161,17 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 			return;
 		case IS_LONG:
 		{
-			zend_long lval = Z_LVAL_P(val);
-			if ((lval < 0) || (lval > 0x10FFFF)) {
+			const zend_long lval = Z_LVAL_P(val);
+			if (UNEXPECTED((lval < 0) || (lval > 0x10FFFF))) {
 				php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR, "Invalid codepoint U+%04lx", lval);
 				return;
 			}
 			if (lval > 0xFFFF) {
 				/* Supplemental planes U+010000 - U+10FFFF */
 				if (TARGET_CHECK(args, 2)) {
-					/* TODO: Find the ICU call which does this properly */
-					*(args->target++) = (UChar)(((lval - 0x10000) >> 10)   | 0xD800);
-					*(args->target++) = (UChar)(((lval - 0x10000) & 0x3FF) | 0xDC00);
+					int32_t offset = 0;
+					U16_APPEND_UNSAFE(args->target, offset, lval);
+					args->target += offset;
 				}
 				return;
 			}
@@ -265,7 +267,7 @@ static void php_converter_append_fromUnicode_target(zval *val, UConverterFromUni
 			return;
 		case IS_STRING:
 		{
-			size_t vallen = Z_STRLEN_P(val);
+			const size_t vallen = Z_STRLEN_P(val);
 			if (TARGET_CHECK(args, vallen)) {
 				args->target = reinterpret_cast<char *>(zend_mempcpy(args->target, Z_STRVAL_P(val), vallen));
 			}
@@ -634,7 +636,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	zend_string	*ret;
 	UChar		*temp;
 
-	if (!src_cnv || !dest_cnv) {
+	if (UNEXPECTED(!src_cnv || !dest_cnv)) {
 		php_converter_throw_failure(objval, U_INVALID_STATE_ERROR,
 		                            "Internal converters not initialized");
 		return nullptr;
@@ -681,6 +683,16 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	return ret;
 }
 /* }}} */
+
+static void php_converter_set_subst_chars(UConverter *cnv, const zend_string *subst, UErrorCode *error)
+{
+	if (UNEXPECTED(ZSTR_LEN(subst) > SCHAR_MAX)) {
+		*error = U_ILLEGAL_ARGUMENT_ERROR;
+		return;
+	}
+
+	ucnv_setSubstChars(cnv, ZSTR_VAL(subst), (int8_t) ZSTR_LEN(subst), error);
+}
 
 /* {{{ */
 #define UCNV_REASON_CASE(v) case (UCNV_ ## v) : RETURN_STRINGL( "REASON_" #v , sizeof( "REASON_" #v ) - 1);
@@ -761,13 +773,13 @@ PHP_METHOD(UConverter, transcode) {
 				(tmpzval = zend_hash_str_find_deref(Z_ARRVAL_P(options), "from_subst", sizeof("from_subst") - 1)) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
-				ucnv_setSubstChars(src_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
+				php_converter_set_subst_chars(src_cnv, Z_STR_P(tmpzval), &error);
 			}
 			if (U_SUCCESS(error) &&
 				(tmpzval = zend_hash_str_find_deref(Z_ARRVAL_P(options), "to_subst", sizeof("to_subst") - 1)) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
-				ucnv_setSubstChars(dest_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
+				php_converter_set_subst_chars(dest_cnv, Z_STR_P(tmpzval), &error);
 			}
 		}
 
@@ -934,22 +946,15 @@ static zend_object *php_converter_create_object(zend_class_entry *ce) {
 }
 
 static zend_object *php_converter_clone_object(zend_object *object) {
-	php_converter_object *objval, *oldobj = php_converter_fetch_object(object);
+	const php_converter_object *oldobj = php_converter_fetch_object(object);
+	php_converter_object *objval;
 	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 
-#if U_ICU_VERSION_MAJOR_NUM > 70
-	objval->src = ucnv_clone(oldobj->src, &error);
-#else
-	objval->src = ucnv_safeClone(oldobj->src, NULL, NULL, &error);
-#endif
+	objval->src = intl_icu_compat_ucnv_clone(oldobj->src, &error);
 	if (U_SUCCESS(error)) {
 		error = U_ZERO_ERROR;
-#if U_ICU_VERSION_MAJOR_NUM > 70
-		objval->dest = ucnv_clone(oldobj->dest, &error);
-#else
-		objval->dest = ucnv_safeClone(oldobj->dest, NULL, NULL, &error);
-#endif
+		objval->dest = intl_icu_compat_ucnv_clone(oldobj->dest, &error);
 	}
 
 	if (U_FAILURE(error)) {
@@ -975,7 +980,7 @@ U_CFUNC int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce->create_object = php_converter_create_object;
 	php_converter_ce->default_object_handlers = &php_converter_object_handlers;
 	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
+	php_converter_object_handlers.offset = offsetof(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
 	php_converter_object_handlers.free_obj = php_converter_free_object;
 

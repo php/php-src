@@ -20,6 +20,18 @@
         - scripts/**/*
         - win32/build/**/*
 
+"Category: CI":
+  - changed-files:
+      - any-glob-to-any-file:
+        - .circleci/*
+        - .github/actions/**/*
+        - .github/scripts/**/*
+        - .github/workflows/*
+        - .github/CODEOWNERS
+        - .github/labeler.yml
+        - .github/setup_hmailserver.php
+        - .github/matrix.php
+
 "Extension: bcmath":
   - changed-files:
       - any-glob-to-any-file:

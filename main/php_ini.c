@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -39,7 +37,7 @@
 		char *tmp = path; \
 		while (*tmp) { \
 			if (*tmp == '\\') *tmp = '/'; \
-			else *tmp = tolower(*tmp); \
+			else *tmp = tolower((unsigned char)*tmp); \
 				tmp++; \
 		} \
 	}
@@ -334,7 +332,7 @@ static void php_load_zend_extension_cb(void *arg)
 	} else {
 		DL_HANDLE handle;
 		char *libpath;
-		char *extension_dir = INI_STR("extension_dir");
+		const char *extension_dir = zend_ini_string_literal("extension_dir");
 		int slash_suffix = 0;
 		char *err1, *err2;
 
@@ -696,7 +694,7 @@ void php_init_config(void)
 
 		if (total_l) {
 			size_t php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
-			php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
+			php_ini_scanned_files = (char *) perealloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1, true);
 			if (!php_ini_scanned_files_len) {
 				*php_ini_scanned_files = '\0';
 			}

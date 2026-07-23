@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -398,13 +396,13 @@ static bool variable_defined_or_used_in_range(zend_ssa *ssa, int var, int start,
 	return false;
 }
 
-int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
+static uint32_t zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 {
-	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
-	int removed_ops = 0;
+	const zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+	uint32_t removed_ops = 0;
 
 	if (func_info->callee_info) {
-		zend_call_info *call_info = func_info->callee_info;
+		const zend_call_info *call_info = func_info->callee_info;
 
 		do {
 			zend_op *op = call_info->caller_init_opline;
@@ -413,7 +411,6 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 			  || (op->opcode == ZEND_FRAMELESS_ICALL_3 && (op + 1)->op1_type == IS_CONST))
 			 && call_info->callee_func
 			 && zend_string_equals_literal_ci(call_info->callee_func->common.function_name, "in_array")) {
-
 				bool strict = false;
 				bool has_opdata = op->opcode == ZEND_FRAMELESS_ICALL_3;
 				ZEND_ASSERT(!call_info->is_prototype);
@@ -428,7 +425,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 				 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op->op2.constant)) == IS_ARRAY) {
 					bool ok = true;
 
-					HashTable *src = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, op->op2.constant));
+					const HashTable *src = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, op->op2.constant));
 					HashTable *dst;
 					zval *val, tmp;
 					zend_ulong idx;
@@ -479,7 +476,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 	return removed_ops;
 }
 
-static zend_always_inline void take_successor_0(zend_ssa *ssa, int block_num, zend_basic_block *block)
+static zend_always_inline void take_successor_0(zend_ssa *ssa, uint32_t block_num, zend_basic_block *block)
 {
 	if (block->successors_count == 2) {
 		if (block->successors[1] != block->successors[0]) {
@@ -489,7 +486,7 @@ static zend_always_inline void take_successor_0(zend_ssa *ssa, int block_num, ze
 	}
 }
 
-static zend_always_inline void take_successor_1(zend_ssa *ssa, int block_num, zend_basic_block *block)
+static zend_always_inline void take_successor_1(zend_ssa *ssa, uint32_t block_num, zend_basic_block *block)
 {
 	if (block->successors_count == 2) {
 		if (block->successors[1] != block->successors[0]) {
@@ -500,11 +497,9 @@ static zend_always_inline void take_successor_1(zend_ssa *ssa, int block_num, ze
 	}
 }
 
-static zend_always_inline void take_successor_ex(zend_ssa *ssa, int block_num, zend_basic_block *block, int target_block)
+static zend_always_inline void take_successor_ex(zend_ssa *ssa, uint32_t block_num, zend_basic_block *block, int target_block)
 {
-	int i;
-
-	for (i = 0; i < block->successors_count; i++) {
+	for (uint32_t i = 0; i < block->successors_count; i++) {
 		if (block->successors[i] != target_block) {
 			zend_ssa_remove_predecessor(ssa, block_num, block->successors[i]);
 		}
@@ -531,10 +526,9 @@ static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int n
 	int *predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
 	zend_ssa_phi *phi;
 
-	int i;
 	int old_pred_idx = -1;
 	int new_pred_idx = -1;
-	for (i = 0; i < block->predecessors_count; i++) {
+	for (uint32_t i = 0; i < block->predecessors_count; i++) {
 		if (predecessors[i] == old_pred) {
 			old_pred_idx = i;
 		}
@@ -582,10 +576,9 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 	zend_basic_block *src = &ssa->cfg.blocks[from];
 	zend_basic_block *old = &ssa->cfg.blocks[to];
 	zend_basic_block *dst = &ssa->cfg.blocks[new_to];
-	int i;
 	zend_op *opline;
 
-	for (i = 0; i < src->successors_count; i++) {
+	for (uint32_t i = 0; i < src->successors_count; i++) {
 		if (src->successors[i] == to) {
 			src->successors[i] = new_to;
 		}
@@ -650,10 +643,10 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 	replace_predecessor(ssa, new_to, to, from);
 }
 
-static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_basic_block *block, int block_num)
+static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_basic_block *block, uint32_t block_num)
 {
 	if (block->predecessors_count == 1 && ssa->blocks[block_num].phis == NULL) {
-		int *predecessors, i;
+		int *predecessors;
 		zend_basic_block *fe_fetch_block = NULL;
 
 		ZEND_ASSERT(block->successors_count == 1);
@@ -669,7 +662,7 @@ static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_b
 			    }
 			}
 		}
-		for (i = 0; i < block->predecessors_count; i++) {
+		for (uint32_t i = 0; i < block->predecessors_count; i++) {
 			zend_ssa_replace_control_link(op_array, ssa, predecessors[i], block_num, block->successors[0]);
 		}
 		zend_ssa_remove_block(op_array, ssa, block_num);
@@ -686,7 +679,7 @@ static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_b
 static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 {
 	int removed_ops = 0;
-	int block_num = 0;
+	uint32_t block_num = 0;
 
 	for (block_num = 1; block_num < ssa->cfg.blocks_count; block_num++) {
 		zend_basic_block *block = &ssa->cfg.blocks[block_num];
@@ -706,7 +699,7 @@ static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 		block_num++;
 	}
 	while (block_num < ssa->cfg.blocks_count) {
-		int next_block_num = block_num + 1;
+		uint32_t next_block_num = block_num + 1;
 		zend_basic_block *block = &ssa->cfg.blocks[block_num];
 		uint32_t op_num;
 		zend_op *opline;
@@ -941,11 +934,13 @@ optimize_nop:
 						if (block_num > 0) {
 							zend_ssa_unlink_block(op_array, ssa, block, block_num);
 							/* backtrack to previous basic block */
+							int backtracking_block_num = block_num;
 							do {
-								block_num--;
-							} while (block_num >= 0
-								&& !(ssa->cfg.blocks[block_num].flags & ZEND_BB_REACHABLE));
-							if (block_num >= 0) {
+								backtracking_block_num--;
+							} while (backtracking_block_num >= 0
+								&& !(ssa->cfg.blocks[backtracking_block_num].flags & ZEND_BB_REACHABLE));
+							if (backtracking_block_num >= 0) {
+								block_num = backtracking_block_num;
 								continue;
 							}
 						}

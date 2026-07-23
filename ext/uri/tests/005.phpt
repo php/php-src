@@ -1,7 +1,5 @@
 --TEST--
 Parse multibyte URLs
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

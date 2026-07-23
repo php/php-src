@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -138,7 +136,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		case XML_TEXT_NODE:
 			ZVAL_STRING(retval, "#text");
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return SUCCESS;
@@ -972,7 +970,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			xmlAttrPtr lastattr;
 
 			if (child->ns == NULL)
-				lastattr = xmlHasProp(refp->parent, child->name);
+				lastattr = xmlHasNsProp(refp->parent, child->name, NULL);
 			else
 				lastattr = xmlHasNsProp(refp->parent, child->name, child->ns->href);
 			if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
@@ -1019,7 +1017,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			xmlAttrPtr lastattr;
 
 			if (child->ns == NULL)
-				lastattr = xmlHasProp(parentp, child->name);
+				lastattr = xmlHasNsProp(parentp, child->name, NULL);
 			else
 				lastattr = xmlHasNsProp(parentp, child->name, child->ns->href);
 			if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
@@ -1381,7 +1379,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 		xmlAttrPtr lastattr;
 
 		if (child->ns == NULL)
-			lastattr = xmlHasProp(nodep, child->name);
+			lastattr = xmlHasNsProp(nodep, child->name, NULL);
 		else
 			lastattr = xmlHasNsProp(nodep, child->name, child->ns->href);
 		if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
@@ -2103,97 +2101,6 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
-static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
-{
-	if (node->type == XML_ELEMENT_NODE) {
-		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
-			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
-				xmlNsPtr ns = xmlMalloc(sizeof(*ns));
-				if (!ns) {
-					return;
-				}
-
-				zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
-				if (Z_ISNULL_P(zv)) {
-					ZVAL_LONG(zv, 1);
-				} else {
-					Z_LVAL_P(zv)++;
-				}
-
-				bool should_free;
-				xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
-
-				memset(ns, 0, sizeof(*ns));
-				ns->type = XML_LOCAL_NAMESPACE;
-				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
-				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
-				ns->next = node->nsDef;
-				node->nsDef = ns;
-
-				ns->_private = attr;
-				if (attr->prev) {
-					attr->prev = attr->next;
-				} else {
-					node->properties = attr->next;
-				}
-				if (attr->next) {
-					attr->next->prev = attr->prev;
-				}
-			}
-		}
-
-		/* The default namespace is handled separately from the other namespaces in C14N.
-		 * The default namespace is explicitly looked up while the other namespaces are
-		 * deduplicated and compared to a list of visible namespaces. */
-		if (node->ns && !node->ns->prefix) {
-			/* Workaround for the behaviour where the xmlSearchNs() call inside c14n.c
-			 * can return the current namespace. */
-			zend_hash_index_add_new_ptr(links, (zend_ulong) node | 1, node->ns);
-			node->ns = xmlSearchNs(node->doc, node, NULL);
-		}
-	}
-}
-
-static void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
-{
-	dom_relink_ns_decls_element(links, root);
-
-	xmlNodePtr base = root;
-	xmlNodePtr node = base->children;
-	while (node != NULL) {
-		dom_relink_ns_decls_element(links, node);
-		node = php_dom_next_in_tree_order(node, base);
-	}
-}
-
-static void dom_unlink_ns_decls(HashTable *links)
-{
-	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(links, zend_ulong h, zval *data) {
-		if (h & 1) {
-			xmlNodePtr node = (xmlNodePtr) (h ^ 1);
-			node->ns = Z_PTR_P(data);
-		} else {
-			xmlNodePtr node = (xmlNodePtr) h;
-			while (Z_LVAL_P(data)-- > 0) {
-				xmlNsPtr ns = node->nsDef;
-				node->nsDef = ns->next;
-
-				xmlAttrPtr attr = ns->_private;
-				if (attr->prev) {
-					attr->prev->next = attr;
-				} else {
-					node->properties = attr;
-				}
-				if (attr->next) {
-					attr->next->prev = attr;
-				}
-
-				xmlFreeNs(ns);
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-}
-
 static int dom_canonicalize_node_parent_lookup_cb(void *user_data, xmlNodePtr node, xmlNodePtr parent)
 {
 	xmlNodePtr root = user_data;
@@ -2263,7 +2170,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 
 		zend_hash_init(&links, 0, NULL, NULL, false);
-		dom_relink_ns_decls(&links, xmlDocGetRootElement(docp));
+		xmlNodePtr root_element = xmlDocGetRootElement(docp);
+
+		if (root_element) {
+			dom_relink_ns_decls(&links, root_element);
+		}
 	} else if (!docp) {
 		/* Note: not triggerable with modern DOM */
 		zend_throw_error(NULL, "Node must be associated with a document");

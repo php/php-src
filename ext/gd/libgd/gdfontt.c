@@ -1,5 +1,3 @@
-
-
 /*
    This is a header file for gd font, generated using
    bdftogd version 0.5 by Jan Pazdziora, adelton@fi.muni.cz
@@ -10,11 +8,18 @@
    "Libor Skarvada, libor@informatics.muni.cz"
  */
 
-
+/**
+ * File: Tiny Font
+ *
+ * A very small ISO-8859-2 raster font (5x8 pixels).
+ *
+ * The font is supposed to be used with <gdImageChar> and <gdImageString>
+ * and their variants.
+ */
 #include "gdfontt.h"
 
-static const char gdFontTinyData[] =
-{
+// clang-format off
+char gdFontTinyData[] = {
 /* Char 0 */
   0, 0, 0, 0, 0,
   0, 0, 0, 0, 0,
@@ -2574,24 +2579,19 @@ static const char gdFontTinyData[] =
   0, 0, 0, 0, 0,
   0, 0, 0, 0, 0,
   0, 0, 0, 0, 0,
-
-
 };
+// clang-format on
 
-gdFont gdFontTinyRep =
-{
-  256,
-  0,
-  5,
-  8,
-  (char*)gdFontTinyData
-};
+gdFont gdFontTinyRep = {256, 0, 5, 8, gdFontTinyData};
 
-gdFontPtr gdFontTiny = &gdFontTinyRep;
+BGD_EXPORT_DATA_PROT gdFontPtr gdFontTiny = &gdFontTinyRep;
 
-gdFontPtr gdFontGetTiny(void)
-{
-	return gdFontTiny;
-}
+/**
+ * Function: gdFontGetTiny
+ *
+ * Returns the built-in tiny font.
+ */
+BGD_DECLARE(gdFontPtr)
+gdFontGetTiny(void) { return gdFontTiny; }
 
 /* This file has not been truncated. */

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
@@ -35,7 +33,7 @@
 #include <fcntl.h>
 #endif
 
-#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP
+#if defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP) || defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
 /* Only defined on glibc >= 2.29, FreeBSD CURRENT, musl >= 1.1.24,
  * MacOS Catalina or later..
  * It should be possible to modify this so it is also
@@ -44,7 +42,24 @@
  * to be really buggy.
  */
 #include <spawn.h>
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#endif
 #define USE_POSIX_SPAWN
+
+/* The non-_np variant is in macOS 26 (and _np deprecated). On Apple, it has to be selected by the
+ * deployment target rather than the configure check: the link check passes whenever the SDK
+ * exports the symbol even if the running system is older, in which case the weakly linked
+ * reference resolves to NULL at runtime. */
+#if defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 260000
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
+#elif defined(__APPLE__)
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
+#elif defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
+#else
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
+#endif
 #endif
 
 /* This symbol is defined in ext/standard/config.m4.
@@ -261,7 +276,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	php_process_handle *proc = (php_process_handle*)rsrc->ptr;
 #ifdef PHP_WIN32
 	DWORD wstatus;
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	int wstatus;
 	int waitpid_options = 0;
 	pid_t wait_pid;
@@ -292,7 +307,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	}
 	CloseHandle(proc->childHandle);
 
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	if (!FG(pclose_wait)) {
 		waitpid_options = WNOHANG;
 	}
@@ -384,7 +399,7 @@ PHP_FUNCTION(proc_get_status)
 	php_process_handle *proc;
 #ifdef PHP_WIN32
 	DWORD wstatus;
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	int wstatus;
 	pid_t wait_pid;
 #endif
@@ -413,7 +428,7 @@ PHP_FUNCTION(proc_get_status)
 	 * even if the child has already exited. This is because the result stays available
 	 * until the child handle is closed. Hence no caching is used on Windows. */
 	add_assoc_bool(return_value, "cached", false);
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	wait_pid = waitpid_cached(proc, &wstatus, WNOHANG|WUNTRACED);
 
 	if (wait_pid == proc->child) {
@@ -1017,7 +1032,7 @@ static zend_result redirect_proc_descriptor(descriptorspec_item *desc, int targe
 			case 0: redirect_to = GetStdHandle(STD_INPUT_HANDLE); break;
 			case 1: redirect_to = GetStdHandle(STD_OUTPUT_HANDLE); break;
 			case 2: redirect_to = GetStdHandle(STD_ERROR_HANDLE); break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 #endif
 	}
@@ -1235,7 +1250,7 @@ PHP_FUNCTION(proc_open)
 		Z_PARAM_ARRAY_HT(descriptorspec)
 		Z_PARAM_ZVAL(pipes)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(cwd, cwd_len)
+		Z_PARAM_PATH_OR_NULL(cwd, cwd_len)
 		Z_PARAM_ARRAY_HT_OR_NULL(environment)
 		Z_PARAM_ARRAY_OR_NULL(other_options)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1372,7 +1387,6 @@ PHP_FUNCTION(proc_open)
 
 	if (newprocok == FALSE) {
 		DWORD dw = GetLastError();
-		close_all_descriptors(descriptors, ndesc);
 		char *msg = php_win32_error_to_msg(dw);
 		php_error_docref(NULL, E_WARNING, "CreateProcess failed: %s", msg);
 		php_win32_error_msg_free(msg);
@@ -1389,14 +1403,13 @@ PHP_FUNCTION(proc_open)
 
 	if (close_parentends_of_pipes(&factions, descriptors, ndesc) == FAILURE) {
 		posix_spawn_file_actions_destroy(&factions);
-		close_all_descriptors(descriptors, ndesc);
 		goto exit_fail;
 	}
 
 	if (cwd) {
-		r = posix_spawn_file_actions_addchdir_np(&factions, cwd);
+		r = POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR(&factions, cwd);
 		if (r != 0) {
-			php_error_docref(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np() failed: %s", strerror(r));
+			php_error_docref(NULL, E_WARNING, ZEND_TOSTR(POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR) "() failed: %s", strerror(r));
 		}
 	}
 
@@ -1409,7 +1422,6 @@ PHP_FUNCTION(proc_open)
 	}
 	posix_spawn_file_actions_destroy(&factions);
 	if (r != 0) {
-		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
 		goto exit_fail;
 	}
@@ -1451,7 +1463,6 @@ PHP_FUNCTION(proc_open)
 		_exit(127);
 	} else if (child < 0) {
 		/* Failed to fork() */
-		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "Fork failed: %s", strerror(errno));
 		goto exit_fail;
 	}
@@ -1541,6 +1552,9 @@ PHP_FUNCTION(proc_open)
 	} else {
 exit_fail:
 		_php_free_envp(env);
+		if (descriptors) {
+			close_all_descriptors(descriptors, ndesc);
+		}
 		RETVAL_FALSE;
 	}
 

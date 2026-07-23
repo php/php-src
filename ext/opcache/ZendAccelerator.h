@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -335,6 +333,16 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
+
+const zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
+		const zend_op *declaring_opline,
+		const zend_function *called_function);
+
+zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
+		const zend_op_array *declaring_op_array,
+		const zend_op *declaring_opline,
+		const zend_function *called_function,
+		zend_string *pfa_func_name);
 
 END_EXTERN_C()
 

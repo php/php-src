@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Remi Collet <remi@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -51,6 +49,7 @@ ZEND_EXTERN_MODULE_GLOBALS(openssl)
 static inline zend_result get_options(zend_array *options, uint32_t *memlimit, uint32_t *iterlimit, uint32_t *threads)
 {
 	zval *opt;
+	zend_long sthreads;
 
 	*iterlimit = PHP_OPENSSL_PWHASH_ITERLIMIT;
 	*memlimit  = PHP_OPENSSL_PWHASH_MEMLIMIT;
@@ -76,8 +75,7 @@ static inline zend_result get_options(zend_array *options, uint32_t *memlimit, u
 		}
 		*iterlimit = siterlimit;
 	}
-	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && (zval_get_long(opt) != 1)) {
-		zend_long sthreads = zval_get_long(opt);
+	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && ((sthreads = zval_get_long(opt)) != 1)) {
 		if ((sthreads < PHP_OPENSSL_THREADS_MIN) || (sthreads > PHP_OPENSSL_THREADS_MAX)) {
 			zend_value_error("Invalid number of threads");
 			return FAILURE;
@@ -331,7 +329,7 @@ PHP_FUNCTION(openssl_password_hash)
 		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (strcmp(ZSTR_VAL(algo), "argon2i") && strcmp(ZSTR_VAL(algo), "argon2id")) {
+	if (!zend_string_equals_literal(algo, "argon2i") && !zend_string_equals_literal(algo, "argon2id")) {
 		zend_argument_value_error(1, "must be a valid password openssl hashing algorithm");
 		RETURN_THROWS();
 	}
@@ -357,7 +355,7 @@ PHP_FUNCTION(openssl_password_verify)
 		Z_PARAM_STR(digest)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (strcmp(ZSTR_VAL(algo), "argon2i") && strcmp(ZSTR_VAL(algo), "argon2id")) {
+	if (!zend_string_equals_literal(algo, "argon2i") && !zend_string_equals_literal(algo, "argon2id")) {
 		zend_argument_value_error(1, "must be a valid password openssl hashing algorithm");
 		RETURN_THROWS();
 	}

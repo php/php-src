@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Bogdan Ungureanu <bogdanungureanu21@gmail.com>              |
    +----------------------------------------------------------------------+
@@ -22,6 +22,7 @@ extern "C" {
 #include <unicode/numberrangeformatter.h>
 #include <unicode/numberformatter.h>
 #include <unicode/unistr.h>
+#include <unicode/locid.h>
 #include "../intl_convertcpp.h"
 
 extern "C" {
@@ -30,7 +31,6 @@ extern "C" {
     #include "../intl_data.h"
     #include "rangeformatter_arginfo.h"
     #include "rangeformatter_class.h"
-    #include "intl_convert.h"
 }
 
 using icu::number::NumberRangeFormatter;
@@ -60,6 +60,19 @@ zend_object *IntlNumberRangeFormatter_object_create(zend_class_entry *ce)
     return &intern->zo;
 }
 
+static icu::Formattable rangeformatter_create_formattable(const zval *number)
+{
+    icu::Formattable formattable;
+
+    if (Z_TYPE_P(number) == IS_DOUBLE) {
+        formattable.setDouble(Z_DVAL_P(number));
+    } else {
+        formattable.setInt64(static_cast<int64_t>(Z_LVAL_P(number)));
+    }
+
+    return formattable;
+}
+
 U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, __construct)
 {
     ZEND_PARSE_PARAMETERS_NONE();
@@ -86,12 +99,12 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
         locale = (char *)intl_locale_get_default();
     }
 
-    if (locale_len > INTL_MAX_LOCALE_LEN) {
+    if (UNEXPECTED(locale_len > INTL_MAX_LOCALE_LEN)) {
         zend_argument_value_error(2, "must be no longer than %d characters", INTL_MAX_LOCALE_LEN);
         RETURN_THROWS();
     }
 
-    if (strlen(uloc_getISO3Language(locale)) == 0) {
+    if (icu::Locale(locale).getISO3Language()[0] == '\0') {
         zend_argument_value_error(2, "\"%s\" is invalid", locale);
         RETURN_THROWS();
     }
@@ -154,8 +167,8 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
 
     UErrorCode error = U_ZERO_ERROR;
 
-    icu::Formattable start_formattable(Z_TYPE_P(start) == IS_DOUBLE ? Z_DVAL_P(start) : Z_LVAL_P(start));
-    icu::Formattable end_formattable(Z_TYPE_P(end) == IS_DOUBLE ? Z_DVAL_P(end) : Z_LVAL_P(end));
+    icu::Formattable start_formattable = rangeformatter_create_formattable(start);
+    icu::Formattable end_formattable = rangeformatter_create_formattable(end);
 
     UnicodeString result = RANGEFORMATTER_OBJECT(obj)->formatFormattableRange(start_formattable, end_formattable, error).toString(error);
 
@@ -219,7 +232,7 @@ void rangeformatter_register_class(void)
     class_entry_IntlNumberRangeFormatter->create_object = IntlNumberRangeFormatter_object_create;
 
     memcpy(&rangeformatter_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    rangeformatter_handlers.offset = XtOffsetOf(IntlNumberRangeFormatter_object, zo);
+    rangeformatter_handlers.offset = offsetof(IntlNumberRangeFormatter_object, zo);
     rangeformatter_handlers.free_obj = IntlNumberRangeFormatter_object_free;
     rangeformatter_handlers.clone_obj = NULL;
 }

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Dmitry Stogov <dmitry@zend.com>                              |
    +----------------------------------------------------------------------+
@@ -36,11 +34,9 @@
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
-#include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()  php_win_err()
 #else
-#include <sys/param.h>
 #define GET_DL_ERROR()  DL_ERROR()
 #endif
 #endif
@@ -950,6 +946,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	fci.object = NULL;
 	fci.param_count = callback_data->arg_count;
 	fci.named_params = NULL;
+	fci.consumed_args = 0;
 
 	if (callback_data->type->func.args) {
 		int n = 0;
@@ -1253,10 +1250,8 @@ static zval *zend_ffi_cdata_read_field(zend_object *obj, zend_string *field_name
 			type = ZEND_FFI_TYPE(type->pointer.type);
 		}
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-				zend_throw_error(zend_ffi_exception_ce, "Attempt to read field '%s' of non C struct/union", ZSTR_VAL(field_name));
-				return &EG(uninitialized_zval);
-			}
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to read field '%s' of non C struct/union", ZSTR_VAL(field_name));
+			return &EG(uninitialized_zval);
 		}
 
 		field = zend_hash_find_ptr(&type->record.fields, field_name);
@@ -1331,10 +1326,8 @@ static zval *zend_ffi_cdata_write_field(zend_object *obj, zend_string *field_nam
 			type = ZEND_FFI_TYPE(type->pointer.type);
 		}
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-				zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' of non C struct/union", ZSTR_VAL(field_name));
-				return value;
-			}
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' of non C struct/union", ZSTR_VAL(field_name));
+			return value;
 		}
 
 		field = zend_hash_find_ptr(&type->record.fields, field_name);
@@ -2090,7 +2083,6 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 			zend_hash_str_add(ht, "cdata", sizeof("cdata")-1, &tmp);
 			*is_temp = 1;
 			return ht;
-			break;
 		case ZEND_FFI_TYPE_POINTER:
 			if (*(void**)ptr == NULL) {
 				ZVAL_NULL(&tmp);
@@ -2145,7 +2137,6 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 			// TODO: function name ???
 			*is_temp = 1;
 			return ht;
-			break;
 		default:
 			ZEND_UNREACHABLE();
 			break;
@@ -3107,17 +3098,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 		FFI_G(default_type_attr) = ZEND_FFI_ATTR_STORED;
 
 		if (zend_ffi_parse_decl(ZSTR_VAL(code), ZSTR_LEN(code)) == FAILURE) {
-			if (FFI_G(symbols)) {
-				zend_hash_destroy(FFI_G(symbols));
-				efree(FFI_G(symbols));
-				FFI_G(symbols) = NULL;
-			}
-			if (FFI_G(tags)) {
-				zend_hash_destroy(FFI_G(tags));
-				efree(FFI_G(tags));
-				FFI_G(tags) = NULL;
-			}
-			RETURN_THROWS();
+			goto cleanup;
 		}
 
 		if (FFI_G(symbols)) {
@@ -3130,7 +3111,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 					addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(name));
 					if (!addr) {
 						zend_throw_error(zend_ffi_exception_ce, "Failed resolving C variable '%s'", ZSTR_VAL(name));
-						RETURN_THROWS();
+						goto cleanup;
 					}
 					sym->addr = addr;
 				} else if (sym->kind == ZEND_FFI_SYM_FUNC) {
@@ -3140,7 +3121,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 					zend_string_release(mangled_name);
 					if (!addr) {
 						zend_throw_error(zend_ffi_exception_ce, "Failed resolving C function '%s'", ZSTR_VAL(name));
-						RETURN_THROWS();
+						goto cleanup;
 					}
 					sym->addr = addr;
 				}
@@ -3157,6 +3138,22 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	FFI_G(tags) = NULL;
 
 	RETURN_OBJ(&ffi->std);
+
+cleanup:
+	if (lib && handle) {
+		DL_UNLOAD(handle);
+	}
+	if (FFI_G(symbols)) {
+		zend_hash_destroy(FFI_G(symbols));
+		efree(FFI_G(symbols));
+		FFI_G(symbols) = NULL;
+	}
+	if (FFI_G(tags)) {
+		zend_hash_destroy(FFI_G(tags));
+		efree(FFI_G(tags));
+		FFI_G(tags) = NULL;
+	}
+	RETURN_THROWS();
 }
 /* }}} */
 
@@ -7084,7 +7081,6 @@ static zend_result zend_ffi_nested_type(zend_ffi_type *type, zend_ffi_type *nest
 			nested_type->size = nested_type->array.length * ZEND_FFI_TYPE(nested_type->array.type)->size;
 			nested_type->align = ZEND_FFI_TYPE(nested_type->array.type)->align;
 			return SUCCESS;
-			break;
 		case ZEND_FFI_TYPE_FUNC:
 			/* "char" is used as a terminator of nested declaration */
 			if (nested_type->func.ret_type == &zend_ffi_type_char) {

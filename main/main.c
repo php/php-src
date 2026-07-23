@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
@@ -64,6 +62,7 @@
 #include "win32/php_registry.h"
 #include "ext/standard/flock_compat.h"
 #endif
+#include "Zend/zend_builtin_functions.h"
 #include "Zend/zend_exceptions.h"
 
 #if PHP_SIGCHILD
@@ -147,7 +146,7 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 		" GCOV"
 #endif
 	);
-	smart_string_appends(&version_info, "Copyright (c) The PHP Group\n");
+	smart_string_appends(&version_info, "Copyright © The PHP Group and Contributors\n");
 
 	const char *build_provider = php_build_provider();
 	if (build_provider) {
@@ -803,6 +802,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("display_errors",		"1",		PHP_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"1",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("error_include_args",	"0",	PHP_INI_ALL,		OnUpdateBool,			error_include_args,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_root", 			"", 		PHP_INI_ALL,		OnUpdateString,			docref_root,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("docref_ext",				"",			PHP_INI_ALL,		OnUpdateString,			docref_ext,				php_core_globals,	core_globals)
@@ -839,7 +839,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("error_log",				NULL,			PHP_INI_ALL,		OnUpdateErrorLog,				error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("error_log_mode",			"0644",			PHP_INI_ALL,		OnUpdateLong,					error_log_mode,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStrNotEmpty,	sys_temp_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("max_execution_time",			"30",		PHP_INI_ALL,			OnUpdateTimeout)
 	STD_PHP_INI_ENTRY("open_basedir",			NULL,		PHP_INI_ALL,		OnUpdateBaseDir,			open_basedir,			php_core_globals,	core_globals)
@@ -1134,7 +1134,14 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* if we still have memory then format the origin */
 	if (is_function) {
-		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+		zend_string *dynamic_params = NULL;
+		if (PG(error_include_args)) {
+			dynamic_params = zend_trace_current_function_args_string();
+		}
+		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, dynamic_params ? ZSTR_VAL(dynamic_params) : params);
+		if (dynamic_params) {
+			zend_string_release(dynamic_params);
+		}
 	} else {
 		origin_len = strlen(function);
 		origin = estrndup(function, origin_len);
@@ -1250,56 +1257,6 @@ PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, c
 	php_error_docref_impl(docref, type, format);
 }
 /* }}} */
-
-/* {{{ php_error_docref1 */
-/* See: CODING_STANDARDS.md for details. */
-PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
-{
-	va_list args;
-
-	va_start(args, format);
-	php_verror(docref, param1, type, format, args);
-	va_end(args);
-}
-/* }}} */
-
-/* {{{ php_error_docref2 */
-/* See: CODING_STANDARDS.md for details. */
-PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
-{
-	char *params;
-	va_list args;
-
-	spprintf(&params, 0, "%s,%s", param1, param2);
-	va_start(args, format);
-	php_verror(docref, params ? params : "...", type, format, args);
-	va_end(args);
-	if (params) {
-		efree(params);
-	}
-}
-/* }}} */
-
-#ifdef PHP_WIN32
-PHPAPI ZEND_COLD void php_win32_docref1_from_error(DWORD error, const char *param1) {
-	char *buf = php_win32_error_to_msg(error);
-	size_t buf_len;
-
-	buf_len = strlen(buf);
-	if (buf_len >= 2) {
-		buf[buf_len - 1] = '\0';
-		buf[buf_len - 2] = '\0';
-	}
-	php_error_docref1(NULL, param1, E_WARNING, "%s (code: %lu)", buf, error);
-	php_win32_error_msg_free(buf);
-}
-
-PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
-	char *buf = php_win32_error_to_msg(error);
-	php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", buf, error);
-	php_win32_error_msg_free(buf);
-}
-#endif
 
 /* {{{ php_html_puts */
 PHPAPI void php_html_puts(const char *str, size_t size)
@@ -1471,8 +1428,8 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 			if (PG(xmlrpc_errors)) {
 				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>" ZEND_LONG_FMT "</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %" PRIu32 "%s%s</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, ZSTR_LEN(backtrace) ? "\nStack trace:\n" : "", ZSTR_VAL(backtrace));
 			} else {
-				char *prepend_string = INI_STR("error_prepend_string");
-				char *append_string = INI_STR("error_append_string");
+				const char *prepend_string = zend_ini_string_literal("error_prepend_string");
+				const char *append_string = zend_ini_string_literal("error_append_string");
 
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
@@ -2257,7 +2214,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
 
-#if HAVE_TZSET
+#ifdef HAVE_TZSET
 	tzset();
 #endif
 
@@ -2325,10 +2282,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	/* initialize stream wrappers registry
 	 * (this uses configuration parameters from php.ini)
 	 */
-	if (php_init_stream_wrappers(module_number) == FAILURE)	{
-		fprintf(stderr, "PHP:  Unable to initialize stream url wrappers.\n");
-		return FAILURE;
-	}
+	php_init_stream_wrappers(module_number);
 
 	zuv.html_errors = 1;
 	php_startup_auto_globals();
@@ -2374,7 +2328,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	}
 
 	/* disable certain functions as requested by php.ini */
-	zend_disable_functions(INI_STR("disable_functions"));
+	zend_disable_functions(zend_ini_string_literal("disable_functions"));
 
 	/* make core report what it should */
 	if ((module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core")-1)) != NULL) {
@@ -2638,7 +2592,7 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 #ifdef PHP_WIN32
 			zend_unset_timeout();
 #endif
-			zend_set_timeout(INI_INT("max_execution_time"), 0);
+			zend_set_timeout(zend_ini_long_literal("max_execution_time"), false);
 		}
 
 		if (prepend_file_p && result) {
@@ -2812,13 +2766,11 @@ PHPAPI void php_reserve_tsrm_memory(void)
 	tsrm_reserve(
 		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)) +
-		TSRM_ALIGNED_SIZE(sizeof(zend_php_scanner_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_ini_scanner_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(virtual_cwd_globals)) +
 #ifdef ZEND_SIGNALS
 		TSRM_ALIGNED_SIZE(sizeof(zend_signal_globals_t)) +
 #endif
-		TSRM_ALIGNED_SIZE(zend_mm_globals_size()) +
 		TSRM_ALIGNED_SIZE(zend_gc_globals_size()) +
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
@@ -2835,6 +2787,10 @@ PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 {
 	bool ret = tsrm_startup(expected_threads, 1, 0, NULL);
 	php_reserve_tsrm_memory();
+	/* Must cover the total size of every ZEND_*_OFFSET global, or the furthest underflows the block. */
+	tsrm_reserve_fast_front(
+		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
+		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)));
 	(void)ts_resource(0);
 	return ret;
 }

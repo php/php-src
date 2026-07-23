@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
@@ -1526,22 +1524,22 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 	char *in, *buf;
 
 	f = open(fn, O_RDONLY|O_BINARY);
-	if (f < 0) {
+	if (UNEXPECTED(f < 0)) {
 		return NULL;
 	}
-	if (fstat(f, &st) != 0) {
+	if (UNEXPECTED(fstat(f, &st) != 0)) {
 		close(f);
 		return NULL;
 	}
 	buf = in = emalloc(st.st_size);
-	if (read(f, in, st.st_size) != st.st_size) {
+	if (UNEXPECTED(read(f, in, st.st_size) != st.st_size)) {
 		close(f);
 		efree(in);
 		return NULL;
 	}
 	close(f);
 
-	if (strncmp(in,"wsdl",4) != 0 || in[4] != WSDL_CACHE_VERSION || in[5] != '\0') {
+	if (UNEXPECTED(strncmp(in,"wsdl",4) != 0 || in[4] != WSDL_CACHE_VERSION || in[5] != '\0')) {
 		unlink(fn);
 		efree(buf);
 		return NULL;
@@ -2098,7 +2096,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	zend_string *temp_file_path;
 	f = php_open_temporary_fd_ex(SOAP_GLOBAL(cache_dir), "tmp.wsdl.", &temp_file_path, PHP_TMP_FILE_SILENT);
 
-	if (f < 0) {return;}
+	if (UNEXPECTED(f < 0)) {return;}
 
 	zend_hash_init(&tmp_types, 0, NULL, NULL, 0);
 	zend_hash_init(&tmp_encoders, 0, NULL, NULL, 0);
@@ -2433,7 +2431,6 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(headers, key, tmp) {
 		pheader = malloc(sizeof(sdlSoapBindingFunctionHeader));
-		memset(pheader, 0, sizeof(sdlSoapBindingFunctionHeader));
 		*pheader = *tmp;
 
 		if (pheader->name) {
@@ -2497,7 +2494,6 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(params, key, tmp) {
 		pparam = malloc(sizeof(sdlParam));
-		memset(pparam, 0, sizeof(sdlParam));
 		*pparam = *tmp;
 
 		if (pparam->paramName) {
@@ -2539,7 +2535,6 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(faults, key, tmp) {
 		pfault = malloc(sizeof(sdlFault));
-		memset(pfault, 0, sizeof(sdlFault));
 		*pfault = *tmp;
 
 		if (pfault->name) {
@@ -3243,7 +3238,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
 			smart_str_appends(&headers, "User-Agent: ");
-			smart_str_appends(&headers, Z_STRVAL_P(tmp));
+			smart_str_append(&headers, Z_STR_P(tmp));
 			smart_str_appends(&headers, "\r\n");
 		}
 
@@ -3253,7 +3248,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			zval str_proxy;
 			smart_str proxy = {0};
 			smart_str_appends(&proxy,"tcp://");
-			smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
+			smart_str_append(&proxy, Z_STR_P(proxy_host));
 			smart_str_appends(&proxy,":");
 			smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
 			ZVAL_STR(&str_proxy, smart_str_extract(&proxy));
@@ -3365,7 +3360,7 @@ cache_in_memory:
 
 			zend_hash_str_update_mem(SOAP_GLOBAL(mem_cache), uri,
 											uri_len, &p, sizeof(sdl_cache_bucket));
-			/* remove non-persitent sdl structure */
+			/* remove non-persistent sdl structure */
 			delete_sdl_impl(sdl);
 			/* and replace it with persistent one */
 			sdl = psdl;

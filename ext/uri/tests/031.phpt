@@ -1,11 +1,9 @@
 --TEST--
 Test serialization and unserialization
---EXTENSIONS--
-uri
 --FILE--
 <?php
 
-$uri1 = new Uri\Rfc3986\Uri("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+$uri1 = new Uri\Rfc3986\Uri("https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 $serializedUri1 = serialize($uri1);
 $uri2 = unserialize($serializedUri1);
 
@@ -60,7 +58,7 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-$url1 = new Uri\WhatWg\Url("https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
+$url1 = new Uri\WhatWg\Url("https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
 $serializedUrl1 = serialize($url1);
 $url2 = unserialize($serializedUrl1);
 
@@ -123,7 +121,7 @@ try {
 
 ?>
 --EXPECTF--
-string(163) "O:15:"Uri\Rfc3986\Uri":2:{i:0;a:1:{s:3:"uri";s:98:"https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists";}i:1;a:0:{}}"
+string(164) "O:15:"Uri\Rfc3986\Uri":2:{i:0;a:1:{s:3:"uri";s:99:"https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists";}i:1;a:0:{}}"
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -132,7 +130,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["password"]=>
   string(8) "password"
   ["host"]=>
-  string(14) "www.google.com"
+  string(15) "www.example.com"
   ["port"]=>
   int(8080)
   ["path"]=>
@@ -150,7 +148,7 @@ Invalid serialization data for Uri\Rfc3986\Uri object
 Invalid serialization data for Uri\Rfc3986\Uri object
 Invalid serialization data for Uri\Rfc3986\Uri object
 Invalid serialization data for Uri\Rfc3986\Uri object
-string(162) "O:14:"Uri\WhatWg\Url":2:{i:0;a:1:{s:3:"uri";s:98:"https://username:password@www.google.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists";}i:1;a:0:{}}"
+string(163) "O:14:"Uri\WhatWg\Url":2:{i:0;a:1:{s:3:"uri";s:99:"https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists";}i:1;a:0:{}}"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -159,7 +157,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["password"]=>
   string(8) "password"
   ["host"]=>
-  string(14) "www.google.com"
+  string(15) "www.example.com"
   ["port"]=>
   int(8080)
   ["path"]=>

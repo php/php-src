@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Derick Rethans <derick@php.net>                             |
   |          Pierre-A. Joye <pierre@php.net>                             |
@@ -535,21 +533,21 @@ static bool php_filter_validate_domain_ex(const zend_string *domain, zend_long f
 	}
 
 	/* First char must be alphanumeric */
-	if(*s == '.' || (hostname && !isalnum((int)*(unsigned char *)s))) {
+	if(*s == '.' || (hostname && !isalnum((unsigned char)*s))) {
 		return false;
 	}
 
 	while (s < e) {
 		if (*s == '.') {
 			/* The first and the last character of a label must be alphanumeric */
-			if (*(s + 1) == '.' || (hostname && (!isalnum((int)*(unsigned char *)(s - 1)) || !isalnum((int)*(unsigned char *)(s + 1))))) {
+			if (*(s + 1) == '.' || (hostname && (!isalnum((unsigned char)s[-1]) || !isalnum((unsigned char)s[1])))) {
 				return false;
 			}
 
 			/* Reset label length counter */
 			i = 1;
 		} else {
-			if (i > 63 || (hostname && (*s != '-' || *(s + 1) == '\0') && !isalnum((int)*(unsigned char *)s))) {
+			if (i > 63 || (hostname && (*s != '-' || *(s + 1) == '\0') && !isalnum((unsigned char)*s))) {
 				return false;
 			}
 
@@ -577,9 +575,9 @@ static bool is_userinfo_valid(const zend_string *str)
 	const char *p = ZSTR_VAL(str);
 	while (p - ZSTR_VAL(str) < ZSTR_LEN(str)) {
 		static const char *valid = "-._~!$&'()*+,;=:";
-		if (isalpha(*p) || isdigit(*p) || strchr(valid, *p)) {
+		if (isalpha((unsigned char)*p) || isdigit((unsigned char)*p) || strchr(valid, *p)) {
 			p++;
-		} else if (*p == '%' && p - ZSTR_VAL(str) <= ZSTR_LEN(str) - 3 && isdigit(*(p+1)) && isxdigit(*(p+2))) {
+		} else if (*p == '%' && p - ZSTR_VAL(str) <= ZSTR_LEN(str) - 3 && isdigit((unsigned char)p[1]) && isxdigit((unsigned char)p[2])) {
 			p += 3;
 		} else {
 			return false;

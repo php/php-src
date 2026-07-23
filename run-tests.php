@@ -2,15 +2,13 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Ilia Alshanetsky <iliaa@php.net>                            |
    |          Preston L. Bannister <pbannister@php.net>                   |
@@ -275,6 +273,7 @@ function main(): void
         'fatal_error_backtraces=Off',
         'display_errors=1',
         'display_startup_errors=1',
+        'error_include_args=0',
         'log_errors=0',
         'html_errors=0',
         'track_errors=0',
@@ -304,6 +303,7 @@ function main(): void
         'zend.exception_ignore_args=0',
         'zend.exception_string_param_max_len=15',
         'short_open_tag=0',
+        'date.timezone=UTC',
     ];
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
@@ -1052,6 +1052,32 @@ function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false)
     }
 
     closedir($o);
+}
+
+function rmdir_recursive($dir)
+{
+    if (!file_exists($dir)) {
+        return;
+    }
+    if (!is_dir($dir)) {
+        unlink($dir);
+        return;
+    }
+
+    $dh = opendir($dir);
+    if (!$dh) {
+        return;
+    }
+
+    while (($entry = readdir($dh)) !== false) {
+        if ($entry === '.' || $entry === '..') {
+            continue;
+        }
+        rmdir_recursive($dir . DIRECTORY_SEPARATOR . $entry);
+    }
+
+    closedir($dh);
+    rmdir($dir);
 }
 
 /**
@@ -2065,7 +2091,11 @@ TEST $file
     $orig_ini_settings = settings2params($ini_settings);
 
     if ($file_cache !== null) {
-        $ini_settings['opcache.file_cache'] = '/tmp';
+        $ini_settings['opcache.file_cache'] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'php-run-tests-file-cache';
+        if ($file_cache === 'prime') {
+            rmdir_recursive($ini_settings['opcache.file_cache']);
+            mkdir($ini_settings['opcache.file_cache'], recursive: true);
+        }
         // Make sure warnings still show up on the second run.
         $ini_settings['opcache.record_warnings'] = '1';
         // File cache is currently incompatible with JIT.

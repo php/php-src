@@ -14,7 +14,7 @@ $cert = "file://" . __DIR__ . "/cert.crt";
 $bert = "file://" . __DIR__ . "/bug41033.pem";
 $sert = "file://" . __DIR__ . "/san-cert.pem";
 $cpca = __DIR__ . "/san-cert.pem";
-$utfl = __DIR__ . "/sni_server_uk.pem";
+$utfl = __DIR__ . "/sni_server.pem";
 $rcrt = openssl_x509_read($cert);
 
 /*  int openssl_x509_checkpurpose ( mixed $x509cert , int $purpose);   */

@@ -57,8 +57,7 @@ if test "$PHP_EXTERNAL_PCRE" != "no"; then
 
   PHP_NEW_EXTENSION([pcre],
     [php_pcre.c],
-    [no],,
-    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+    [no])
   PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h])
 else
   AC_MSG_CHECKING([for PCRE library to use])
@@ -101,7 +100,6 @@ else
     $PHP_PCRE_CFLAGS
     -DHAVE_CONFIG_H
     -DHAVE_MEMMOVE
-    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
     -I@ext_srcdir@/pcre2lib
   "])
 

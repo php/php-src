@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
   |         Marcus Boerger <helly@php.net>                               |
@@ -148,7 +146,7 @@ bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 					stmt->columns[col].name = zend_string_toupper(orig_name);
 					zend_string_release(orig_name);
 					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
+				default: ZEND_UNREACHABLE();
 			}
 		}
 
@@ -823,7 +821,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			 * However, if we fetch a group key we will have over allocated. */
 			fetch_function_params = safe_emalloc(sizeof(zval), stmt->column_count, 0);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (group_key) {
@@ -918,7 +916,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			case PDO_FETCH_FUNC:
 				ZVAL_COPY_VALUE(&fetch_function_params[fetch_function_param_num++], &val);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 	}
 
@@ -1181,7 +1179,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			zend_class_entry *fetch_class = NULL;
 			if (arg2) {
 				if (Z_TYPE_P(arg2) != IS_STRING) {
-					zend_argument_type_error(2, "must be of type string, %s given", zend_zval_value_name(arg2));
+					zend_wrong_parameter_type_error(2, Z_EXPECTED_STRING, arg2);
 					RETURN_THROWS();
 				}
 				fetch_class = zend_lookup_class(Z_STR_P(arg2));
@@ -1230,7 +1228,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			if (arg2) {
 				// Reuse convert_to_long(arg2); ?
 				if (Z_TYPE_P(arg2) != IS_LONG) {
-					zend_argument_type_error(2, "must be of type int, %s given", zend_zval_value_name(arg2));
+					zend_wrong_parameter_type_error(2, Z_EXPECTED_LONG, arg2);
 					RETURN_THROWS();
 				}
 				if (Z_LVAL_P(arg2) < 0) {
@@ -1700,7 +1698,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					return false;
 				}
 				if (Z_TYPE(args[0]) != IS_STRING) {
-					zend_argument_type_error(arg1_arg_num, "must be of type string, %s given", zend_zval_value_name(&args[0]));
+					zend_wrong_parameter_type_error(arg1_arg_num, Z_EXPECTED_STRING, &args[0]);
 					return false;
 				}
 				cep = zend_lookup_class(Z_STR(args[0]));
@@ -1712,8 +1710,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				/* TODO: Improve logic? */
 				if (variadic_num_args == 2) {
 					if (Z_TYPE(args[1]) != IS_NULL && Z_TYPE(args[1]) != IS_ARRAY) {
-						zend_argument_type_error(constructor_arg_num, "must be of type ?array, %s given",
-							zend_zval_value_name(&args[1]));
+						zend_wrong_parameter_type_error(constructor_arg_num, Z_EXPECTED_ARRAY_OR_NULL, &args[1]);
 						return false;
 					}
 					if (Z_TYPE(args[1]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[1]))) {
@@ -1738,7 +1735,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				return false;
 			}
 			if (Z_TYPE(args[0]) != IS_OBJECT) {
-				zend_argument_type_error(arg1_arg_num, "must be of type object, %s given", zend_zval_value_name(&args[0]));
+				zend_wrong_parameter_type_error(arg1_arg_num, Z_EXPECTED_OBJECT, &args[0]);
 				return false;
 			}
 
@@ -1916,9 +1913,7 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 
 PHP_METHOD(PDOStatement, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
@@ -2424,7 +2419,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_ce->default_object_handlers = &pdo_dbstmt_object_handlers;
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
+	pdo_dbstmt_object_handlers.offset = offsetof(pdo_stmt_t, std);
 	pdo_dbstmt_object_handlers.free_obj = pdo_dbstmt_free_storage;
 	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
 	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
@@ -2438,7 +2433,7 @@ void pdo_stmt_init(void)
 	pdo_row_ce->default_object_handlers = &pdo_row_object_handlers;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_row_object_handlers.offset = XtOffsetOf(pdo_row_t, std);
+	pdo_row_object_handlers.offset = offsetof(pdo_row_t, std);
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
 	pdo_row_object_handlers.clone_obj = NULL;
 	pdo_row_object_handlers.get_property_ptr_ptr = pdo_row_get_property_ptr_ptr;

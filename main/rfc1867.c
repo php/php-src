@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jani Taskinen <jani@php.net>                                |
@@ -392,7 +390,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 		}
 
 		/* space in the beginning means same header */
-		if (!isspace(line[0])) {
+		if (!isspace((unsigned char)line[0])) {
 			value = strchr(line, ':');
 		}
 
@@ -408,7 +406,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 			}
 
 			*value = '\0';
-			do { value++; } while (isspace(*value));
+			do { value++; } while (isspace((unsigned char)*value));
 
 			key = estrdup(line);
 			smart_string_appends(&buf_value, value);
@@ -505,7 +503,7 @@ static char *substring_conf(char *start, int len, char quote)
 
 static char *php_ap_getword_conf(const zend_encoding *encoding, char *str)
 {
-	while (*str && isspace(*str)) {
+	while (*str && isspace((unsigned char)*str)) {
 		++str;
 	}
 
@@ -521,7 +519,7 @@ static char *php_ap_getword_conf(const zend_encoding *encoding, char *str)
 	} else {
 		char *strend = str;
 
-		while (*strend && !isspace(*strend)) {
+		while (*strend && !isspace((unsigned char)*strend)) {
 			++strend;
 		}
 		return substring_conf(str, strend - str, 0);
@@ -665,8 +663,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	zend_llist header;
 	void *event_extra_data = NULL;
 	unsigned int llen = 0;
-	zend_long upload_cnt = REQUEST_PARSE_BODY_OPTION_GET(max_file_uploads, INI_INT("max_file_uploads"));
-	zend_long body_parts_cnt = REQUEST_PARSE_BODY_OPTION_GET(max_multipart_body_parts, INI_INT("max_multipart_body_parts"));
+	zend_long upload_cnt = REQUEST_PARSE_BODY_OPTION_GET(max_file_uploads, zend_ini_long_literal("max_file_uploads"));
+	zend_long body_parts_cnt = REQUEST_PARSE_BODY_OPTION_GET(max_multipart_body_parts, zend_ini_long_literal("max_multipart_body_parts"));
 	zend_long post_max_size = REQUEST_PARSE_BODY_OPTION_GET(post_max_size, SG(post_max_size));
 	zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
 	zend_long upload_max_filesize = REQUEST_PARSE_BODY_OPTION_GET(upload_max_filesize, PG(upload_max_filesize));
@@ -797,7 +795,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				goto fileupload_done;
 			}
 
-			while (isspace(*cd)) {
+			while (isspace((unsigned char)*cd)) {
 				++cd;
 			}
 
@@ -805,7 +803,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			{
 				char *key = NULL, *word = pair;
 
-				while (isspace(*cd)) {
+				while (isspace((unsigned char)*cd)) {
 					++cd;
 				}
 

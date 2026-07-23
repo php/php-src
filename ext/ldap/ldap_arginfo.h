@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 9e47a0d85336f0e149abbdf56468513c5d31780f */
+ * Stub hash: 0dde8fd813f43640dee842c03365d7431858a56d */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -75,7 +75,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ldap_search arginfo_ldap_read
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_free_result, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_free_result, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, result, LDAP\\Result, 0)
 ZEND_END_ARG_INFO()
 

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Georg Richter <georg@php.net>                               |
   |          Andrey Hristov <andrey@php.net>                             |
@@ -965,8 +963,8 @@ PHP_FUNCTION(mysqli_get_charset)
 {
 	MY_MYSQL				*mysql;
 	zval					*mysql_link;
-	const char 				*name = NULL, *collation = NULL, *dir = NULL, *comment = NULL;
-	uint32_t				minlength, maxlength, number, state;
+	const char 				*name = NULL, *collation = NULL;
+	uint32_t				minlength, maxlength;
 	const MYSQLND_CHARSET	*cs;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
@@ -984,19 +982,15 @@ PHP_FUNCTION(mysqli_get_charset)
 	collation = cs->collation;
 	minlength = cs->char_minlen;
 	maxlength = cs->char_maxlen;
-	number = cs->nr;
-	comment = cs->comment;
-	state = 1;	/* all charsets are compiled in */
 	object_init(return_value);
 
 	add_property_string(return_value, "charset", (name) ? (char *)name : "");
 	add_property_string(return_value, "collation",(collation) ? (char *)collation : "");
-	add_property_string(return_value, "dir", (dir) ? (char *)dir : "");
+	add_property_string(return_value, "dir", ""); /* Kept for backward compatibility */
 	add_property_long(return_value, "min_length", minlength);
 	add_property_long(return_value, "max_length", maxlength);
-	add_property_long(return_value, "number", number);
-	add_property_long(return_value, "state", state);
-	add_property_string(return_value, "comment", (comment) ? (char *)comment : "");
+	add_property_long(return_value, "number", 0); /* Kept for backward compatibility */
+	add_property_long(return_value, "state", 1); /* Kept for backward compatibility */
 }
 /* }}} */
 

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -44,6 +42,8 @@
 # define PHP_OS_FAMILY			"Darwin"
 #elif defined(__sun__)
 # define PHP_OS_FAMILY			"Solaris"
+#elif defined(_AIX)
+# define PHP_OS_FAMILY			"AIX"
 #elif defined(__linux__)
 # define PHP_OS_FAMILY			"Linux"
 #else
@@ -207,12 +207,8 @@ typedef unsigned int socklen_t;
 #include <string.h>
 
 #ifdef HAVE_PWD_H
-# ifdef PHP_WIN32
-#include "win32/param.h"
-# else
-#include <pwd.h>
-#include <sys/param.h>
-# endif
+# include <pwd.h>
+# include <sys/param.h>
 #endif
 
 #include <limits.h>
@@ -309,14 +305,6 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...);
-PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
-PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
-#ifdef PHP_WIN32
-PHPAPI ZEND_COLD void php_win32_docref1_from_error(DWORD error, const char *param1);
-PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
-#endif
 END_EXTERN_C()
 
 #define zenderror phperror

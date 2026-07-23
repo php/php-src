@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -82,10 +80,10 @@ PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
 		return 0;
 
 	for (; *str; str++) {
-		if (isspace(*str) || *str == '-') {
+		if (isspace((unsigned char)*str) || *str == '-') {
 			continue;
 		}
-		return isdigit(*str);
+		return isdigit((unsigned char)*str);
 	}
 	return 0;
 } /* }}} */
@@ -96,7 +94,7 @@ PHPDBG_API int phpdbg_is_empty(const char *str) /* {{{ */
 		return 1;
 
 	for (; *str; str++) {
-		if (isspace(*str)) {
+		if (isspace((unsigned char)*str)) {
 			continue;
 		}
 		return 0;
@@ -199,12 +197,12 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 	const char *p = str;
 	char *new = NULL;
 
-	while (isspace(*p)) {
+	while (isspace((unsigned char)*p)) {
 		++p;
 		--len;
 	}
 
-	while (*p && isspace(*(p + len -1))) {
+	while (*p && isspace((unsigned char)p[len - 1])) {
 		--len;
 	}
 
@@ -397,29 +395,20 @@ PHPDBG_API void phpdbg_set_async_io(int fd) {
 
 int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry **ce) {
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		char *lc_name, *lc_free;
-		int lc_length;
-
 		if (name == NULL || !name_length) {
 			return FAILURE;
 		}
 
-		lc_free = lc_name = emalloc(name_length + 1);
-		zend_str_tolower_copy(lc_name, name, name_length);
-		lc_length = name_length + 1;
-
-		if (lc_name[0] == '\\') {
-			lc_name += 1;
-			lc_length -= 1;
+		if (name[0] == '\\') {
+			name += 1;
+			name_length -= 1;
 		}
 
 		phpdbg_try_access {
-			*ce = zend_hash_str_find_ptr(EG(class_table), lc_name, lc_length);
+			*ce = zend_hash_str_find_ptr_lc(EG(class_table), name, name_length);
 		} phpdbg_catch_access {
 			phpdbg_error("Could not fetch class %.*s, invalid data source", name_length, name);
 		} phpdbg_end_try_access();
-
-		efree(lc_free);
 	} else {
 		zend_string *str_name = zend_string_init(name, name_length, 0);
 		*ce = zend_lookup_class(str_name);

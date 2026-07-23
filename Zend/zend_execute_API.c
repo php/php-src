@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -39,6 +38,7 @@
 #include "zend_observer.h"
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
+#include "zend_partial.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -192,8 +192,7 @@ void init_executor(void) /* {{{ */
 	EG(get_gc_buffer).start = EG(get_gc_buffer).end = EG(get_gc_buffer).cur = NULL;
 
 	EG(record_errors) = false;
-	EG(num_errors) = 0;
-	EG(errors) = NULL;
+	memset(&EG(errors), 0, sizeof(EG(errors)));
 
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
@@ -203,6 +202,7 @@ void init_executor(void) /* {{{ */
 	zend_weakrefs_init();
 
 	zend_hash_init(&EG(callable_convert_cache), 8, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&EG(partial_function_application_cache), 8, NULL, zend_partial_op_array_dtor, 0);
 
 	EG(active) = 1;
 }
@@ -420,6 +420,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 		zend_hash_clean(&EG(callable_convert_cache));
+		zend_hash_clean(&EG(partial_function_application_cache));
 
 #if ZEND_DEBUG
 		if (!CG(unclean_shutdown)) {
@@ -516,6 +517,7 @@ void shutdown_executor(void) /* {{{ */
 		}
 
 		zend_hash_destroy(&EG(callable_convert_cache));
+		zend_hash_destroy(&EG(partial_function_application_cache));
 	}
 
 #if ZEND_DEBUG
@@ -797,6 +799,7 @@ zend_result _call_user_function_impl(zval *object, zval *function_name, zval *re
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.named_params = named_params;
+	fci.consumed_args = 0;
 
 	return zend_call_function(&fci, NULL);
 }
@@ -862,8 +865,19 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		}
 	}
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		zend_release_fcall_info_cache(fci_cache);
+		return SUCCESS;
+	}
+#endif
+
 	call = zend_vm_stack_push_call_frame(call_info,
 		func, fci->param_count, object_or_called_scope);
+	uint32_t consumed_args = fci->param_count ? fci->consumed_args : 0;
+
+	ZEND_ASSERT((consumed_args & (consumed_args - 1)) == 0);
 
 	for (uint32_t i = 0; i < fci->param_count; i++) {
 		zval *param = ZEND_CALL_ARG(call, i+1);
@@ -905,7 +919,15 @@ cleanup_args:
 		}
 
 		if (EXPECTED(!must_wrap)) {
-			ZVAL_COPY(param, arg);
+			if (EXPECTED(consumed_args == 0)
+					|| !zend_fci_is_consumed_arg(consumed_args, i)
+					|| Z_ISREF_P(arg)
+					|| arg != &fci->params[i]) {
+				ZVAL_COPY(param, arg);
+			} else {
+				ZVAL_COPY_VALUE(param, arg);
+				ZVAL_UNDEF(arg);
+			}
 		} else {
 			Z_TRY_ADDREF_P(arg);
 			ZVAL_NEW_REF(param, arg);
@@ -1026,10 +1048,13 @@ cleanup_args:
 			if (should_throw) {
 				zend_internal_call_arginfo_violation(call->func);
 			}
-			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				zend_verify_internal_return_type(call->func, fci->retval));
+			if (call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+				bool result = zend_verify_internal_return_type(call->func, fci->retval);
+				ZEND_ASSERT(result);
+			}
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(fci->retval) : !Z_ISREF_P(fci->retval));
+			ZEND_ASSERT(!(call->func->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS));
 		}
 #endif
 		ZEND_OBSERVER_FCALL_END(call, fci->retval);
@@ -1091,6 +1116,7 @@ ZEND_API void zend_call_known_function(
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.named_params = named_params;
+	fci.consumed_args = 0;
 	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
 	fcic.function_handler = fn;
@@ -1207,7 +1233,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 					ALLOC_HASHTABLE(CG(unlinked_uses));
 					zend_hash_init(CG(unlinked_uses), 0, NULL, NULL, 0);
 				}
-				zend_hash_index_add_empty_element(CG(unlinked_uses), (zend_long)(uintptr_t)ce);
+				zend_hash_index_add_empty_element(CG(unlinked_uses), (zend_ulong)(uintptr_t)ce);
 				return ce;
 			}
 			return NULL;
@@ -1765,7 +1791,7 @@ zend_class_entry *zend_fetch_class_with_scope(
 		case 0:
 			break;
 		/* Other fetch types are not supported by this function. */
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);

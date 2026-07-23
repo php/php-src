@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Alexander Borisov
+ * Copyright (C) 2020-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -35,7 +35,7 @@ extern "C" {
 
 LXB_API lxb_status_t
 lxb_css_make_data(lxb_css_parser_t *parser, lexbor_str_t *str,
-                  uintptr_t begin, uintptr_t end);
+                  size_t begin, size_t end);
 
 LXB_API lxb_char_t *
 lxb_css_serialize_char_handler(const void *style, lxb_css_style_serialize_f cb,

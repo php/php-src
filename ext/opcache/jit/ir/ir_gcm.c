@@ -148,7 +148,7 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 }
 
 #if IR_GCM_SPLIT
-/* Partially Dead Code Elimination through splitting the node and sunking the clones
+/* Partially Dead Code Elimination through splitting the node and sinking the clones
  *
  * This code is based on the Benedikt Meurer's idea first implemented in V8.
  * See: https://codereview.chromium.org/899433005
@@ -309,6 +309,7 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	struct {
 		ir_ref   ref;
 		uint32_t block;
+		uint32_t lca;
 		uint32_t use_count;
 		uint32_t use;
 	} *clones = ir_mem_malloc(sizeof(*clones) * use_list->count);
@@ -344,8 +345,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 						clone = clones_count++;
 						ir_hashtab_add(&hash, j, clone);
 						clones[clone].block = j;
+						clones[clone].lca = i;
 						clones[clone].use_count = 0;
 						clones[clone].use = (uint32_t)-1;
+					} else {
+						clones[clone].lca = ir_gcm_find_lca(ctx, clones[clone].lca, i);
 					}
 					uses[uses_count].ref = use;
 					uses[uses_count].block = i;
@@ -367,8 +371,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 				clone = clones_count++;
 				ir_hashtab_add(&hash, j, clone);
 				clones[clone].block = j;
+				clones[clone].lca = i;
 				clones[clone].use_count = 0;
 				clones[clone].use = -1;
+			} else {
+				clones[clone].lca = ir_gcm_find_lca(ctx, clones[clone].lca, i);
 			}
 			uses[uses_count].ref = use;
 			uses[uses_count].block = i;
@@ -377,6 +384,42 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 			clones[clone].use = uses_count++;
 		}
 	}
+
+	/* Select best blocks to insert clones */
+	for (i = 0; i < clones_count; i++) {
+		uint32_t b0 = clones[i].block;
+		uint32_t lca = clones[i].lca;
+
+		if (b0 != lca) {
+			ir_block *bb = &ctx->cfg_blocks[lca];
+			uint32_t loop_depth = bb->loop_depth;
+
+			if (loop_depth) {
+				uint32_t b;
+				uint32_t best;
+
+				best = b = lca;
+				do {
+					b = bb->dom_parent;
+					bb = &ctx->cfg_blocks[b];
+					if (bb->loop_depth < loop_depth) {
+						if (!bb->loop_depth) {
+							best = b;
+							break;
+						}
+						loop_depth = bb->loop_depth;
+						best = b;
+					}
+				} while (b != b0);
+				lca = best;
+			}
+			clones[i].block = lca;
+		}
+	}
+
+	// TODO: instead of inserting clone into the block where the expressin is partially available,
+	//       we should insert PHI and the actual clones into the block sources where it's not available
+	//       (similar to SSAPRE)
 
 #ifdef IR_DEBUG
 	if (ctx->flags & IR_DEBUG_GCM_SPLIT) {
@@ -408,8 +451,6 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	}
 
 	/* Reconstruct IR: Update DEF->USE lists, CFG mapping and etc */
-	ctx->use_lists = ir_mem_realloc(ctx->use_lists, ctx->insns_count * sizeof(ir_use_list));
-	ctx->cfg_map = ir_mem_realloc(ctx->cfg_map, ctx->insns_count * sizeof(uint32_t));
 	n = ctx->use_lists[ref].refs;
 	for (i = 0; i < clones_count; i++) {
 		clone = clones[i].ref;
@@ -428,6 +469,7 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 
 		uint32_t u = clones[i].use;
 		while (u != (uint32_t)-1) {
+			uint32_t src = uses[u].block;
 			use = uses[u].ref;
 			ctx->use_edges[n++] = use;
 			u = uses[u].next;
@@ -437,9 +479,11 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 				ir_ref k, l = insn->inputs_count;
 
 				if (insn->op == IR_PHI) {
-					for (k = 1; k <= l; k++) {
-						if (ir_insn_op(insn, k) == ref) {
-							j = ctx->cfg_map[ir_insn_op(&ctx->ir_base[insn->op1], k - 1)];
+					ir_insn *merge = &ctx->ir_base[insn->op1];
+					for (k = 2; k <= l; k++) {
+						j = ctx->cfg_map[ir_insn_op(merge, k - 1)];
+						if (j == src) {
+							IR_ASSERT(ir_insn_op(insn, k) == ref);
 							if (j != clones[i].block) {
 								uint32_t dom_depth = ctx->cfg_blocks[clones[i].block].dom_depth;
 								while (ctx->cfg_blocks[j].dom_depth > dom_depth) {
@@ -1169,11 +1213,11 @@ int ir_schedule(ir_ctx *ctx)
 					ir_ref use = *p;
 					ir_insn *use_insn = &ctx->ir_base[use];
 					if (!_xlat[use] && ctx->cfg_map[use]) {
-						IR_ASSERT(ctx->cfg_map[use] == b);
 						if (use_insn->op == IR_PARAM
 						 || use_insn->op == IR_VAR
 						 || use_insn->op == IR_PI
 						 || use_insn->op == IR_PHI) {
+							IR_ASSERT(ctx->cfg_map[use] == b);
 							if (_prev[use] != phis) {
 								/* remove "use" */
 								_prev[_next[use]] = _prev[use];

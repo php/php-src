@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: George Schlossnagle <george@omniti.com>                     |
    +----------------------------------------------------------------------+
@@ -51,6 +49,27 @@ extern PHPAPI zend_class_entry *reflection_fiber_ptr;
 extern PHPAPI zend_class_entry *reflection_lazy_object_ptr;
 
 PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
+
+/* Sets the value of a property, bypassing a set hook if defined.
+ * 'prop': The property to set
+ * 'unmangled_name': The name of the property
+ * 'cache_slot': An opaque pointer used as an internal cache. The same
+ * cache_slot can be used again with the same 'unmangled_name' and 'scope'.
+ * Must be zeroed on first use. May be NULL.
+ * 'scope': The scope from which to set the property
+ * 'object': The object to set the value on
+ * 'value': The value to set
+ */
+PHPAPI void zend_reflection_property_set_raw_value(
+		zend_property_info *prop, zend_string *unmangled_name,
+		void *cache_slot[3], const zend_class_entry *scope,
+		zend_object *object, zval *value);
+
+/* Same as zend_reflection_property_set_raw_value(), but skips lazy object initialization. */
+PHPAPI void zend_reflection_property_set_raw_value_without_lazy_initialization(
+		zend_property_info *prop, zend_string *unmangled_name,
+		void *cache_slot[3], const zend_class_entry *scope,
+		zend_object *object, zval *value);
 
 END_EXTERN_C()
 

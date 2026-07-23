@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
@@ -158,14 +156,18 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream)))) {
 				php_stream_filter_append(&stream->readfilters, temp_filter);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Unable to create filter (%s)", p);
+				php_stream_wrapper_warn_nt(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
+					CreateFailed,
+					"Unable to create filter (%s)", p);
 			}
 		}
 		if (write_chain) {
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream)))) {
 				php_stream_filter_append(&stream->writefilters, temp_filter);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Unable to create filter (%s)", p);
+				php_stream_wrapper_warn_nt(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
+					CreateFailed,
+					"Unable to create filter (%s)", p);
 			}
 		}
 		p = php_strtok_r(NULL, "|", &token);
@@ -219,7 +221,9 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
+				php_stream_wrapper_warn(wrapper, context, options,
+					Disabled,
+					"URL file-access is disabled in the server configuration");
 			}
 			return NULL;
 		}
@@ -238,7 +242,9 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 	if (!strcasecmp(path, "stdin")) {
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
+				php_stream_wrapper_warn(wrapper, context, options,
+					Disabled,
+					"URL file-access is disabled in the server configuration");
 			}
 			return NULL;
 		}
@@ -297,14 +303,18 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 
 		if (strcmp(sapi_module.name, "cli")) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "Direct access to file descriptors is only available from command-line PHP");
+				php_stream_wrapper_warn(wrapper, context, options,
+					Disabled,
+					"Direct access to file descriptors is only available from command-line PHP");
 			}
 			return NULL;
 		}
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
+				php_stream_wrapper_warn(wrapper, context, options,
+					Disabled,
+					"URL file-access is disabled in the server configuration");
 			}
 			return NULL;
 		}
@@ -312,7 +322,8 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		start = &path[3];
 		fildes_ori = ZEND_STRTOL(start, &end, 10);
 		if (end == start || *end != '\0') {
-			php_stream_wrapper_log_error(wrapper, options,
+			php_stream_wrapper_log_warn(wrapper, context, options,
+				InvalidUrl,
 				"php://fd/ stream must be specified in the form php://fd/<orig fd>");
 			return NULL;
 		}
@@ -324,14 +335,16 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 #endif
 
 		if (fildes_ori < 0 || fildes_ori >= dtablesize) {
-			php_stream_wrapper_log_error(wrapper, options,
+			php_stream_wrapper_log_warn(wrapper, context, options,
+				InvalidParam,
 				"The file descriptors must be non-negative numbers smaller than %d", dtablesize);
 			return NULL;
 		}
 
 		fd = dup((int)fildes_ori);
 		if (fd == -1) {
-			php_stream_wrapper_log_error(wrapper, options,
+			php_stream_wrapper_log_warn(wrapper, context, options,
+				DupFailed,
 				"Error duping file descriptor " ZEND_LONG_FMT "; possibly it doesn't exist: "
 				"[%d]: %s", fildes_ori, errno, strerror(errno));
 			return NULL;
@@ -380,7 +393,8 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		return stream;
 	} else {
 		/* invalid php://thingy */
-		php_error_docref(NULL, E_WARNING, "Invalid php:// URL specified");
+		php_stream_wrapper_warn(wrapper, context, options,
+				InvalidUrl, "Invalid php:// URL specified");
 		return NULL;
 	}
 

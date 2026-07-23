@@ -1,19 +1,17 @@
 /*
- *  +----------------------------------------------------------------------+
- *  | Zend JIT                                                             |
- *  +----------------------------------------------------------------------+
- *  | Copyright (c) The PHP Group                                          |
- *  +----------------------------------------------------------------------+
- *  | This source file is subject to version 3.01 of the PHP license,      |
- *  | that is bundled with this package in the file LICENSE, and is        |
- *  | available through the world-wide-web at the following url:           |
- *  | https://www.php.net/license/3_01.txt                                 |
- *  | If you did not receive a copy of the PHP license and are unable to   |
- *  | obtain it through the world-wide-web, please send a note to          |
- *  | license@php.net so we can mail you a copy immediately.               |
- *  +----------------------------------------------------------------------+
- *  | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
- *  +----------------------------------------------------------------------+
+   +----------------------------------------------------------------------+
+   | Zend JIT                                                             |
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
+   +----------------------------------------------------------------------+
  */
 
 #include "zend_portability.h"
@@ -102,10 +100,18 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 		"leaq   _tsrm_ls_cache@tlsgd(%%rip), %%rdi\n"
 		".word  0x6666\n"
 		"rex64\n"
-		"call   __tls_get_addr\n"
+		"call   __tls_get_addr@PLT\n"
 		/* Load thread pointer address */
 		"movq   %%fs:0, %%rsi\n"
 		: "=a" (addr), "=b" (code), "=S" (thread_pointer)
+		:
+		/* call may clobber volatile registers */
+		: "rcx", "rdx", "rdi",
+		  "r8", "r9", "r10", "r11",
+		  "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)",
+		  "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
+		  "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15",
+		  "cc", "memory"
 	);
 
 	ZEND_ASSERT(addr == &_tsrm_ls_cache);

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sascha Schumann <sascha@schumann.cx>                         |
   |         Yasuo Ohgaki <yohgaki@ohgaki.net>                            |
@@ -85,7 +83,7 @@ static zend_result php_ini_on_update_tags(zend_ini_entry *entry, zend_string *ne
 
 			*val++ = '\0';
 			for (q = key; *q; q++) {
-				*q = tolower(*q);
+				*q = tolower((unsigned char)*q);
 			}
 			keylen = q - key;
 			str = zend_string_init(key, keylen, 1);
@@ -137,7 +135,7 @@ static zend_result php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *n
 		char *q;
 
 		for (q = key; *q; q++) {
-			*q = tolower(*q);
+			*q = tolower((unsigned char)*q);
 		}
 		keylen = q - key;
 		if (keylen > 0) {
@@ -245,32 +243,32 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	}
 
 	if (url_parts->scheme) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->scheme));
+		smart_str_append(dest, url_parts->scheme);
 		smart_str_appends(dest, "://");
 	} else if (*(ZSTR_VAL(url->s)) == '/' && *(ZSTR_VAL(url->s)+1) == '/') {
 		smart_str_appends(dest, "//");
 	}
 	if (url_parts->user) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->user));
+		smart_str_append(dest, url_parts->user);
 		if (url_parts->pass) {
-			smart_str_appends(dest, ZSTR_VAL(url_parts->pass));
+			smart_str_append(dest, url_parts->pass);
 			smart_str_appendc(dest, ':');
 		}
 		smart_str_appendc(dest, '@');
 	}
 	if (url_parts->host) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->host));
+		smart_str_append(dest, url_parts->host);
 	}
 	if (url_parts->port) {
 		smart_str_appendc(dest, ':');
 		smart_str_append_unsigned(dest, (long)url_parts->port);
 	}
 	if (url_parts->path) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->path));
+		smart_str_append(dest, url_parts->path);
 	}
 	smart_str_appendc(dest, '?');
 	if (url_parts->query) {
-		smart_str_appends(dest, ZSTR_VAL(url_parts->query));
+		smart_str_append(dest, url_parts->query);
 		smart_str_append(dest, separator);
 		smart_str_append_smart_str(dest, url_app);
 	} else {
@@ -278,7 +276,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	}
 	if (url_parts->fragment) {
 		smart_str_appendc(dest, '#');
-		smart_str_appends(dest, ZSTR_VAL(url_parts->fragment));
+		smart_str_append(dest, url_parts->fragment);
 	}
 	php_url_free(url_parts);
 }
@@ -463,7 +461,7 @@ static inline void handle_tag(STD_PARA)
 	}
 	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);
 	for (i = 0; i < ZSTR_LEN(ctx->tag.s); i++)
-		ZSTR_VAL(ctx->tag.s)[i] = tolower((int)(unsigned char)ZSTR_VAL(ctx->tag.s)[i]);
+		ZSTR_VAL(ctx->tag.s)[i] = tolower((unsigned char)ZSTR_VAL(ctx->tag.s)[i]);
     /* intentionally using str_find here, in case the hash value is set, but the string val is changed later */
 	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ZSTR_VAL(ctx->tag.s), ZSTR_LEN(ctx->tag.s))) != NULL) {
 		ok = 1;
@@ -601,7 +599,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 
 	if (encode) {
 		encoded = php_raw_url_encode(name, strlen(name));
-		smart_str_appendl(&url_app, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&url_app, encoded);
 		zend_string_free(encoded);
 	} else {
 		smart_str_appends(&url_app, name);
@@ -609,7 +607,7 @@ PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, co
 	smart_str_appendc(&url_app, '=');
 	if (encode) {
 		encoded = php_raw_url_encode(value, strlen(value));
-		smart_str_appendl(&url_app, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&url_app, encoded);
 		zend_string_free(encoded);
 	} else {
 		smart_str_appends(&url_app, value);
@@ -663,7 +661,7 @@ static void php_url_scanner_ex_activate(bool is_session)
 		ctx = &BG(url_adapt_output_ex);
 	}
 
-	memset(ctx, 0, XtOffsetOf(url_adapt_state_ex_t, tags));
+	memset(ctx, 0, offsetof(url_adapt_state_ex_t, tags));
 }
 
 static void php_url_scanner_ex_deactivate(bool is_session)
@@ -760,13 +758,13 @@ static inline void php_url_scanner_add_var_impl(const char *name, size_t name_le
 
 	if (encode) {
 		encoded = php_raw_url_encode(name, name_len);
-		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&sname, encoded); zend_string_free(encoded);
 		encoded = php_raw_url_encode(value, value_len);
-		smart_str_appendl(&svalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&svalue, encoded); zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) name, name_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, NULL, /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&hname, encoded); zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) value, value_len, 0, ENT_QUOTES|ENT_SUBSTITUTE, NULL, /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hvalue, ZSTR_VAL(encoded), ZSTR_LEN(encoded)); zend_string_free(encoded);
+		smart_str_append(&hvalue, encoded); zend_string_free(encoded);
 	} else {
 		smart_str_appendl(&sname, name, name_len);
 		smart_str_appendl(&svalue, value, value_len);
@@ -867,14 +865,14 @@ static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int 
 
 	if (encode) {
 		encoded = php_raw_url_encode(ZSTR_VAL(name), ZSTR_LEN(name));
-		smart_str_appendl(&sname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&sname, encoded);
 		zend_string_free(encoded);
 		encoded = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(name), ZSTR_LEN(name), 0, ENT_QUOTES|ENT_SUBSTITUTE, SG(default_charset), /* double_encode */ 0, /* quiet */ 1);
-		smart_str_appendl(&hname, ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+		smart_str_append(&hname, encoded);
 		zend_string_free(encoded);
 	} else {
-		smart_str_appendl(&sname, ZSTR_VAL(name), ZSTR_LEN(name));
-		smart_str_appendl(&hname, ZSTR_VAL(name), ZSTR_LEN(name));
+		smart_str_append(&sname, name);
+		smart_str_append(&hname, name);
 	}
 	smart_str_0(&sname);
 	smart_str_0(&hname);

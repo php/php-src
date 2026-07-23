@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - fragment - only a hashmark character
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

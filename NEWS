@@ -1,6 +1,207 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0alpha1
+?? ??? ????, PHP 8.6.0alpha3
+
+- Core:
+  . Implemented partial function application RFC. (Arnaud)
+  . Fixed bug GH-22263 (reset typed property default on every unserialize
+    failure path). (David Carlier)
+
+- DOM:
+  . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
+    declares a default value for the attribute). (iliaal)
+
+- GMP:
+  . Fixed GMP power and shift operators to reject GMP right operands outside
+    the unsigned long range instead of silently truncating them. (Weilin Du)
+  . Fixed GMP integer string parsing to reject strings containing NUL bytes
+    instead of silently truncating them. (Weilin Du)
+  . Fixed GMP error messages that referenced outdated parameter names.
+    (Weilin Du)
+
+- Intl:
+  . Fixed grammatical issues in Normalizer invalid form and IntlCalendar time
+    zone offset error messages. (Weilin Du)
+
+- ODBC:
+  . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+
+- Opcache:
+  . Re-enable JIT for ZTS builds on Apple Silicon. (realFlowControl)
+
+- PDO_ODBC:
+  . Fixed bug GH-22667 (Heap buffer over-read when a column value exceeds the
+    driver-reported display size). (iliaal)
+  . Fixed bug GH-22666 (Heap buffer overflow when an output parameter value is
+    longer than the declared maxlen). (iliaal)
+  . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
+    diagnostic message length beyond the error buffer). (iliaal)
+
+- Reflection:
+  . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
+    (DanielEScherzer)
+
+- SOAP:
+  . Fixed header injection through the Content-Type context option, the
+    soapaction and the cookie names and values. (David Carlier)
+
+- MBString:
+  . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
+    offset in a non-UTF-8 encoding). (Eyüp Can Akman)
+
+- Sockets:
+  . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
+    TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
+  . Fixed various memory related issues in ext/sockets. (David Carlier)
+
+- Streams:
+  . Added a new IO copy API used by php_stream_copy_to_stream_ex() that
+    leverages platform primitives (sendfile, splice, copy_file_range,
+    TransmitFile) for faster stream copying. (Jakub Zelenka, David Carlier)
+
+16 Jul 2026, PHP 8.6.0alpha2
+
+- Core:
+  . Sync Boost.Context assembly with 1.91.0. (kn1g78)
+  . Fixed bug GH-22387 (AST pretty-printing drops meaningful parentheses around
+    RHS of instanceof). (timwolla)
+  . Fixed bug GH-15672 and GH-15911 (Stack overflow when an internal function
+    recurses through zend_call_function, such as a self-attached SPL
+    iterator). (iliaal)
+  . Lock unmodified readonly properties for modification after clone-with.
+    (NickSdot)
+  . abort() instead of exit() on hard OOM. (realFlowControl)
+  . perf: ZTS: move AG and SCNG into native __thread storage. (henderkes)
+
+- Calendar:
+  . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
+    INT_MAX year). (arshidkv12)
+
+- Curl:
+  . Added CURLOPT_SEEKFUNCTION and the CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL
+    and CURL_SEEKFUNC_CANTSEEK constants, letting libcurl rewind a streamed
+    request body to resend it on a redirect, multi-pass authentication or a
+    retried reused connection. (GrahamCampbell)
+
+- Date:
+  . Update timelib to 2022.17. (Derick)
+  . Fixed bug GH-19803 (Parsing a string with a single white space does create
+    an error). (Derick)
+  . Fixed Unix timestamps in February of the year 0 are misparsed with
+    @-notation. (LukasGelbmann)
+  . Fixed bug GH-11368 (idate() doesn't work for the year -1). (Derick)
+  . Fixed bug GH-11310 (__debugInfo does nothing on userland classes extending
+    Date classes). (Derick)
+
+- DBA:
+  . Fixed OOB read on malformed length field in dba flatfile handler. (alhudz)
+
+- DOM:
+  . Fixed bug GH-22570 (Stack overflow when serializing a deeply nested
+    Dom\XMLDocument). (iliaal)
+  . Fixed Dom\DtdNamedNodeMap integer dimension access so negative indexes
+    return NULL and indexes outside the int range throw ValueError instead of
+    returning the first entity or notation. (Weilin Du)
+  . Fixed bug GH-22623 (use after free with namespace nodes from
+    XSLTProcessor::registerFunctions())/ (David Carlier)
+  . Fixed bug GH-22554 (use-after-free with XPath callback returning a node
+    from a foreign document). (David Carlier)
+
+- Exif:
+  . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
+    warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
+
+- GMP:
+  . Fixed bug GH-22549 (Assertion failure / UB on a compound GMP power or shift
+    assignment with a negative exponent). (iliaal)
+
+- Intl:
+  . Fixed NumberFormatter::parse() and NumberFormatter::parseCurrency() to
+    reject offset values outside the 32-bit range instead of silently
+    truncating them. (Weilin Du)
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise TypeError
+    when the offset argument is not of type int. (Weilin Du)
+
+- JSON:
+  . Report unterminated JSON strings as syntax errors. (timwolla)
+  . Improve performance error position tracking during JSON decoding.
+    (henderkes)
+  . Fixed bug GH-22514 (Incorrect error column in PHP 8.6 JSON parser).
+    (henderkes, timwolla)
+
+- Opcache:
+  . Fixed bug GH-21770 (Infinite recursion in property hook getter in opcache
+    preloaded trait). (iliaal)
+
+- OpenSSL:
+  . Added $salt_length parameter to openssl_sign() and openssl_verify() with
+    new OPENSSL_RSA_PSS_SALTLEN_* constants. (Jakub Zelenka)
+  . Fixed timeout for supplemental read at end of a blocking stream in SSL
+    stream wrapper. (ilutov)
+  . Fixed stream_socket_get_crypto_status() after supplemental read. (ilutov)
+
+- PDO_ODBC:
+  . Fixed bug GH-20726 (Crash with ODBC connection pooling when the DSN
+    carries no credentials). (iliaal)
+
+- PHPDBG:
+  . Fixed fleaked lowercased lookup keys in phpdbg_resolve_opline_break.
+    (jorgsowa)
+  . Fixed off-by-one in phpdbg_safe_class_lookup() causing class lookups to
+    always fail during phpdbg's signal-safe interruption path. (jorgsowa)
+
+- Reflection:
+  . Fixed bug GH-22683 (Reflection(Class)Constant::__toString() should not warn
+    on NAN conversions). (Khaled Alam)
+  . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
+    (DanielEScherzer)
+
+- Session:
+  . Fixed bug GH-21314 (Different session garbage collector behavior between
+    PHP 8.3 and PHP 8.5). (jorgsowa)
+
+- SOAP:
+  . Fixed bug GH-22585 (OOM on bailout with uninitialized
+    do_request() parameters). (David Carlier)
+  . Fixed xsd:hexBinary decoding to reject odd-length values instead of
+    silently truncating the last nibble. (Weilin Du)
+  . Made SOAP encoding errors report the affected type or failing operation
+    instead of the generic "Violation of encoding rules" message. (Weilin Du)
+
+- Standard:
+  . Fixed sleep() and usleep() to reject values that overflow the underlying
+    unsigned int timeout. (Weilin Du)
+  . Fixed bug GH-22671 (assert.bail aborts the process when the assert callback
+    throws an exception whose reporting re-throws). (iliaal)
+  . Fixed bug GH-22678 (Use-after-free in array_multisort() when the comparator
+    mutates the array being sorted). (azchin, iliaal)
+
+- Streams:
+  . Fixed bug GH-21468 (Segfault in file_get_contents w/ a https URL
+    and a proxy set). (CVE-2026-12184) (ndossche)
+
+- URI:
+  . Fixed bug GH-22628 (Percent-encoding of caret in WHATWG URL paths is not
+    performed). (kocsismate)
+  . Fixed bug GH-22629 (WHATWG Validation error incorrect with empty host and
+    non-empty userinfo). (kocsismate)
+
+- Zip:
+  . Fixed bug GH-22649 (ZipArchive::setCommentName() and setCommentIndex()
+    could crash after overwriting an entry and resetting its inherited
+    unchanged comment). (Weilin Du)
+  . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
+    ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
+  . Fixed bug GH-22176 (memory leak with ZipArchive::registerCancelBack()
+    is used with reference returning function during shutdown).
+    (David Carlier)
+  . ZipArchive::addGlob() and ZipArchive::addPattern() now raise a TypeError
+    for invalid "remove_all_path", "comp_method", "comp_flags", and
+    "enc_method" options instead of emitting a warning. (David Carlier)
+
+02 Jul 2026, PHP 8.6.0alpha1
 
 - Core:
   . Added first-class callable cache to share instances for the duration of the
@@ -16,39 +217,118 @@ PHP                                                                        NEWS
   . Fixed bug GH-20174 (Assertion failure in
     ReflectionProperty::skipLazyInitialization after failed LazyProxy
     initialization). (Arnaud)
+  . Enabled the TAILCALL VM on Windows when compiling with Clang >= 19 x86_64.
+    (henderkes)
+  . Deprecate specifying a nullable return type for __debugInfo(). (timwolla)
+  . Fixed bug GH-22142 (Assertion failure in zendi_try_get_long() on IS_UNDEF).
+    (David Carlier)
+  . Fixed bug GH-22046 (The unserialize function can lead to segfault when
+    non-Serializable internal classes are serialized back with the C format).
+    (kocsismate)
+  . Fixed bug GH-22292 (AST pretty printing does not correctly handle invalid
+    variable names). (timwolla)
+  . Fixed bug GH-22291 (AST pretty printing does not correctly handle braces in
+    string interpolation). (timwolla)
+  . Fixed bug GH-22373 (AST pretty-printing drops meaningful parentheses
+    surrounding property access). (timwolla)
+  . Fixed GH-22422 (zend_arena layout mismatch leaked memory in separately
+    built extensions under AddressSanitizer). (iliaal)
+  . TSRM: use local-exec TLS in PIE executables. (henderkes)
+  . perf: make all static extensions use TSRMG_STATIC. (henderkes)
+  . Fixed bug GH-22257 (type confusion in Exception::getTraceAsString()).
+    (David Carlier)
+  . TSRM: make CG, EG, SCNG and AG compile-time offsets. (henderkes)
+  . Deprecate returning values from __construct() and __destruct(). (timwolla)
+
+- BCMath:
+  . Added NUL-byte validation to BCMath functions. (jorgsowa)
+
+- BZ2:
+  . Reject oversized input in bzdecompress(). (arshidkv12)
+
+- Curl:
+  . Add support for CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0). (Ayesh)
 
 - Date:
   . Update timelib to 2022.16. (Derick)
 
 - DOM:
-  . Removed LIBXML_XINCLUDE from valid options for XMLDocument,
-    as it was a no-op. (ndossche)
+  . Removed LIBXML_XINCLUDE from valid options for XMLDocument, as it was a
+    no-op. (ndossche)
+  . Readonly DOM properties are now declared with asymmetric visibility
+    (public private(set)). ReflectionProperty::isWritable() reports them
+    correctly, and external writes raise "Cannot modify private(set)
+    property" instead of the previous readonly modification error.
+    (David Carlier)
+  . Fixed Dom\Notation nodes missing tree connection, so that ownerDocument,
+    parentNode, isConnected and baseURI now return correct values, and
+    textContent returns NULL per the DOM specification. (jordikroon)
+
+- EXIF:
+  . Added support for reading EXIF metadata from WebP images (GH-19904).
+    (iliaal)
 
 - Fileinfo:
   . Fixed bug GH-20679 (finfo_file() doesn't work on remote resources).
     (ndossche)
+  . Fixed bug #66095 (Hide libmagic dynamic symbols). (orlitzky)
+
+- GD:
+  . imagesetstyle()/imagefilter()/imagecrop() check array argument entries
+    types. (David Carlier)
+
+- GMP:
+  . gmp_fact() reject values larger than unsigned long. (David Carlier)
+  . gmp_pow/binomial/root/rootrem and shift/pow operators reject values larger
+    than unsigned long. (David Carlier)
+  . GMP exponentiation and shift operators now emit a deprecation warning
+    when converting a float right operand to int loses precision. (Weilin Du)
 
 - Hash:
   . Upgrade xxHash to 0.8.2. (timwolla)
 
 - Intl:
+  . Fixed malformed ResourceBundle::get() error message when fallback is
+    disabled. (Weilin Du)
+  . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),
+    with the alias of locale_get_display_keyword() and
+    locale_get_display_keyword_value() respectively. (Weilin Du)
+  . Fix incorrect argument positions for invalid start/end arguments in
+    transliterator_transliterate(). (Weilin Du)
+  . Fixed IntlTimeZone::getDisplayName() to synchronize object error state
+    for invalid display types. (Weilin Du)
+  . Fixed Locale::lookup() and locale_lookup() to return NULL instead of the
+    fallback locale when a language tag cannot be canonicalized. (Weilin Du)
   . Added IntlNumberRangeFormatter class to format an interval of two numbers
     with a given skeleton, locale, collapse type and identity fallback.
     (BogdanUngureanu)
   . Fixed bug GH-20426 (Spoofchecker::setRestrictionLevel() error message
     suggests missing constants). (DanielEScherzer)
   . Added grapheme_strrev (Yuya Hamada)
+  . Passing a non-stringable object as a time zone to Intl time zone
+    argument handling now raises TypeError instead of Error. (Weilin Du)
+  . IntlBreakIterator::getLocale() now raises ValueError for invalid locale
+    types. (Weilin Du)
+  . Fixed MessageFormatter::parse() and parseMessage() returning PHP_INT_MIN
+    as float rather than int on 64-bit platforms. (Weilin Du)
+  . Fixed UConverter::transcode() silently truncating from_subst and to_subst
+    option lengths greater than 127 bytes. (Weilin Du)
+  . Fixed IntlIterator::current() to return NULL instead of an undefined value
+    when the iterator is not positioned on a valid element. (Weilin Du)
+
+- IO:
+  . Added new polling API. (Jakub Zelenka)
 
 - JSON:
   . Enriched JSON last error / exception message with error location.
     (Juan Morales)
 
 - Fibers:
-  . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI
-    small value). (David Carlier)
+  . Fixed bug GH-20483 (ASAN stack overflow with fiber.stack_size INI small
+    value). (David Carlier)
 
 - Mail:
-  . Fixed bug GH-20862 (null pointer dereference in 
+  . Fixed bug GH-20862 (null pointer dereference in
     php_mail_detect_multiple_crlf via error_log (jordikroon)
 
 - Mbstring:
@@ -59,27 +339,62 @@ PHP                                                                        NEWS
     recursive array references). (alexandre-daubois)
   . Fixed bug GH-21223; mb_guess_encoding no longer crashes when passed huge
     list of candidate encodings (with 200,000+ entries). (Jordi Kroon)
+  . mbregex has been deprecated. (youkidearitai)
+
+- Mysqli:
+  . Added mysqli_quote_string() and mysqli::quote_string(). (Kamil Tekiela)
 
 - Opcache:
   . Fixed bug GH-20051 (apache2 shutdowns when restart is requested during
     preloading). (Arnaud, welcomycozyhom)
 
 - OpenSSL:
+  . Added AES-SIV support. (jordikroon)
   . Implemented GH-20310 (No critical extension indication in
     openssl_x509_parse() output). (StephenWall)
+  . Added TLS session resumption support for streams with new context options
+    and Openssl\Session class. (Jakub Zelenka)
+  . Added TLS external PSK support for streams with new context options and
+    Openssl\Psk class. (Jakub Zelenka)
+  . Added stream crypto status for exposing OpenSSL WANT_READ / WANT_WRITE.
+    (Jakub Zelenka)
+
+- PCNTL:
+  . pcntl_exec() now throws a ValueError if the $args array is not a list
+    array. (Weilin Du)
+
+- PDO_DBLIB:
+  . Added dblib_handle_check_liveness handler. (freddy77)
 
 - PDO_PGSQL:
   . Clear session-local state disconnect-equivalent processing.
     (KentarouTakeda)
 
+- PGSQL:
+  . Enabled 64 bits support for pg_lo_truncate()/pg_lo_tell() if the server
+    supports it. (KentarouTakeda)
+  . pg_fetch_object() now surfaces non-instantiable class errors before
+    fetching, resolves the constructor via the get_constructor handler, and
+    reports the empty-constructor ValueError on the $constructor_args argument.
+    (David Carlier)
+
 - Phar:
   . Support reference values in Phar::mungServer(). (ndossche)
   . Invalid values now throw in Phar::mungServer() instead of being silently
     ignored. (ndossche)
+  . Fixed a bypass of the magic ".phar" directory protection in
+    Phar::addEmptyDir() for paths starting with "/.phar". (Weilin Du)
+  . Fixed an integer underflow when parsing ZIP extra fields. (Weilin Du)
+  . Phar::addEmptyDir() now allows non-magic directory names that merely
+    share the ".phar" prefix. (Weilin Du)
   . Support overridden methods in SplFileInfo for getMTime() and getPathname()
     when building a phar. (ndossche)
   . Mark Phar::buildFromIterator() base directory argument as a path.
     (ndossche)
+
+- phpdbg:
+  . Fixed GH-22480 (Use-after-free when re-watching an already-watched
+    variable). (iliaal)
 
 - Posix:
   . Added validity check to the flags argument for posix_access(). (arshidkv12)
@@ -88,16 +403,37 @@ PHP                                                                        NEWS
   . Fixed bug GH-20217 (ReflectionClass::isIterable() incorrectly returns true
     for classes with property hooks). (alexandre-daubois)
   . Added ReflectionConstant::inNamespace(). (Khaled Alam)
-  . Added ReflectionProperty::isReadable() and ReflectionProperty::isWritable().
-    (ilutov)
+  . Added ReflectionProperty::isReadable() and ::isWritable(). (ilutov)
+  . Fixed bug GH-21362 (ReflectionMethod::invoke/invokeArgs() did not verify
+    Closure instance identity for Closure::__invoke()). (Ilia Alshanetsky)
+  . Added ReflectionParameter::getDocComment(). (chschneider)
 
 - Session:
   . Fixed bug 71162 (updateTimestamp never called when session data is empty).
     (Girgias)
+  . Null bytes in session.cookie_path, session.cookie_domain, and
+    session.cache_limiter are now rejected with a warning. (jorgsowa)
+  . session.cookie_samesite now rejects invalid values with a warning; only
+    "Strict", "Lax", "None", or "" are accepted. (jorgsowa)
+  . session.cookie_lifetime now rejects non-integer and out-of-range values
+    with a warning. (jorgsowa)
+  . Session file GC now recursively cleans nested subdirectories when
+    session.save_path uses the dirdepth prefix. (jorgsowa)
+  . Changed defaults of session.use_strict_mode (now 1), session.cookie_httponly
+    (now 1) and session.cookie_samesite (now "Lax"). (jorgsowa)
+
+- Shmop:
+  . Fixed bug GH-9945 (shmop_open() silently truncates keys outside the key_t
+    range). (Weilin Du)
 
 - Soap:
   . Soap::__setCookie() when cookie name is a digit is now not stored and
     represented as a string anymore but a int. (David Carlier)
+  . Fixed bug GH-21421 (SoapClient typemap property breaks engine assumptions).
+    (ndossche)
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well. (Weilin Du)
 
 - Sockets:
   . Added the TCP_USER_TIMEOUT constant for Linux to set the maximum time in
@@ -106,13 +442,27 @@ PHP                                                                        NEWS
     AF_INET* family only. (David Carlier)
   . Fixed GH-20532 (socket_addrinfo_lookup gives the error code with a new
     optional parameter). (David Carlier)
+  . Added AF_PACKET support completion for socket_sendto()/socket_recvfrom().
+    (David Carlier)
 
 - Sodium:
   . Added support for libsodium 1.0.21 IPcrypt and XOF APIs. (jedisct1)
+  . pwhash argument-validation errors now throw ValueError instead of
+    SodiumException. (iliaal)
 
 - SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
+  . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free with
+    re-entrant getHash()). (Pratik Bhujel)
+  . Fix bugs GH-8561, GH-8562, GH-8563, and GH-8564 (Fixing various
+    SplFileObject iterator desync bugs). (iliaal)
+  . Fix bug GH-22062 (SplDoublyLinkedList iterator UAF via destructor releasing
+    next node). (David Carlier)
+
+- Sysvshm:
+  . Fixed shm_attach() to throw ValueError for keys outside the key_t range.
+    (Weilin Du)
 
 - Sqlite3:
   . Fix NUL byte truncation in sqlite3 TEXT column handling. (ndossche)
@@ -120,26 +470,83 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-19926 (reset internal pointer earlier while splicing array
     while COW violation flag is still set). (alexandre-daubois)
+  . Added form feed (\f) in the default trimmed characters of trim(), rtrim()
+    and ltrim(). (Weilin Du)
   . Invalid mode values now throw in array_filter() instead of being silently
     defaulted to 0. (Jorg Sowa)
   . Fixed bug GH-21058 (error_log() crashes with message_type 3 and
     null destination). (David Carlier)
   . Fixed bug GH-13204 (glob() fails if square bracket is in current directory).
     (ndossche)
+  . Add array size maximum to array_diff(). (ndossche)
+  . Add enum SortDirection. (timwolla)
+  . pathinfo() raises a ValueError with an invalid $flags argument.
+    (David Carlier)
+  . Passing an invalid flag value to the second argument of scandir() will now
+    throw a ValueError. (alexandre-daubois)
+  . array_change_key_case() now raises a ValueError when an invalid $case
+    argument value is passed. (Girgias)
+  . linkinfo() now raises a ValueError when the argument is an empty string.
+    (Weilin Du)
+  . getenv() and putenv() now raises a ValueError when the first argument
+    contains NUL bytes. (Weilin Du)
+  . dl() now raises a ValueError when the $extension_filename argument contains
+    NUL bytes. (Weilin Du)
+  . openlog() now raises a ValueError when the $prefix argument contains NUL
+    bytes. (Weilin Du)
+  . parse_str() now raises a ValueError when the $string argument contains NUL
+    bytes. (Weilin Du)
+  . proc_open() now raises a ValueError when the $cwd argument contains NUL
+    bytes. (Weilin Du)
+  . ini_get_all() now includes the built-in default value in the details.
+    (sebastian)
+  . Fixed bug GH-22171 (Invalid auth header generation in http(s) stream
+    wrapper). (David Carlier)
+  . Fixed bug GH-17384 (number_format() may exhaust memory with decimals
+    outside the range from -2147483648 to 2147483647). (Weilin Du)
 
 - Streams:
+  . Added new stream errors API including new StreamException, StreamError
+    classes, StreamErrorStore, StreamErrorMode, StreamErrorCode enums,
+    stream_last_errors() and stream_clear_errors() functions, error_mode,
+    error_store and error_handler stream context options and extending some
+    stream functions with context param. (Jakub Zelenka)
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
-    socket context options.
+    socket context options. (Jakub Zelenka)
   . Added so_reuseaddr streams context socket option that allows disabling
-    address resuse.
+    address reuse. (Jakub Zelenka)
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
+  . Fixed bug GH-21221 (Prevent closing of innerstream of php://temp stream).
+    (ilutov)
+  . Improved stream_socket_server() bind failure error reporting. (ilutov)
+  . Fixed bug #49874 (ftell() and fseek() inconsistency when using stream
+    filters). (Jakub Zelenka)
+
+- URI:
+  . Added Uri\Rfc3986\Uri::getUriType() and Uri\WhatWg\Url::isSpecialScheme().
+    (kocsismate)
+  . Added Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType().
+    (kocsismate)
+  . Added Uri\Rfc3986\UriBuilder. (kocsismate)
 
 - Zip:
+  . Fixed bug GH-21682 (ZipArchive instances should not be serializable).
+    serialize()/unserialize() now throw unless a subclass overrides
+    __serialize()/__unserialize(). (iliaal)
   . Fixed ZipArchive callback being called after executor has shut down.
     (ilutov)
   . Support minimum version for libzip dependency updated to 1.0.0.
     (David Carlier)
+  . Added ZipArchive::openString() method.
+    (Tim Starling, Soner Sayakci, Ghaith Olabi)
+
+- Zlib:
+  . deflate_init() now raises a TypeError when the value for option
+    "level", "memory", "window", or "strategy" is not of type int.
+    (Weilin Du)
+  . inflate_init() now raises a TypeError when the value for option
+    "window" is not of type int. (Weilin Du)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

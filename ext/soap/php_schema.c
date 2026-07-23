@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
@@ -53,6 +51,28 @@ static bool node_is_equal_xsd(xmlNodePtr node, const char *name)
 	};
 
 	return node_is_equal_ex_one_of(node, name, ns);
+}
+
+static int schema_parse_int(const xmlChar *value, const char *name, bool allow_negative)
+{
+	const char *str = (const char *) value;
+	zend_long lval = 0;
+	int oflow_info = 0;
+	uint8_t type = is_numeric_string_ex(str, strlen(str), &lval, NULL, true, &oflow_info, NULL);
+
+	if (type != IS_LONG) {
+		errno = 0;
+		lval = ZEND_STRTOL(str, NULL, 10);
+		if (UNEXPECTED(oflow_info || (errno == ERANGE && lval != 0))) {
+			soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
+		}
+	}
+
+	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(lval) || (!allow_negative && lval < 0))) {
+		soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
+	}
+
+	return (int) lval;
 }
 
 static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *ns, const xmlChar *type)
@@ -856,7 +876,7 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 		soap_error0(E_ERROR, "Parsing Schema: missing restriction value");
 	}
 
-	(*valptr)->value = atoi((char*)value->children->content);
+	(*valptr)->value = schema_parse_int(value->children->content, (const char *) val->name, true);
 
 	return TRUE;
 }
@@ -1018,7 +1038,7 @@ void schema_min_max(xmlNodePtr node, sdlContentModelPtr model)
 	xmlAttrPtr attr = get_attribute(node->properties, "minOccurs");
 
 	if (attr) {
-		model->min_occurs = atoi((char*)attr->children->content);
+		model->min_occurs = schema_parse_int(attr->children->content, "minOccurs", false);
 	} else {
 		model->min_occurs = 1;
 	}
@@ -1028,7 +1048,7 @@ void schema_min_max(xmlNodePtr node, sdlContentModelPtr model)
 		if (!strncmp((char*)attr->children->content, "unbounded", sizeof("unbounded"))) {
 			model->max_occurs = -1;
 		} else {
-			model->max_occurs = atoi((char*)attr->children->content);
+			model->max_occurs = schema_parse_int(attr->children->content, "maxOccurs", false);
 		}
 	} else {
 		model->max_occurs = 1;

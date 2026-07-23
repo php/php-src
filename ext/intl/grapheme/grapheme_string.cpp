@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Ed Batutis <ed@batutis.com>								  |
    +----------------------------------------------------------------------+
@@ -104,7 +104,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strpos)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
+	if (UNEXPECTED(OUTSIDE_STRING(loffset, haystack_len))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -158,7 +158,7 @@ U_CFUNC PHP_FUNCTION(grapheme_stripos)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
+	if (UNEXPECTED(OUTSIDE_STRING(loffset, haystack_len))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -224,7 +224,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrpos)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
+	if (UNEXPECTED(OUTSIDE_STRING(loffset, haystack_len))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -283,7 +283,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strripos)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
+	if (UNEXPECTED(OUTSIDE_STRING(loffset, haystack_len))) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
@@ -345,7 +345,6 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 	int32_t start = 0;
 	int iter_val;
 	UErrorCode status;
-	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = nullptr;
 	int sub_str_start_pos, sub_str_end_pos;
 	int32_t (*iter_func)(UBreakIterator *);
@@ -359,7 +358,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (lstart < INT32_MIN || lstart > INT32_MAX) {
+	if (UNEXPECTED(lstart < INT32_MIN || lstart > INT32_MAX)) {
 		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
@@ -370,7 +369,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 		length = str_len;
 	}
 
-	if (length < INT32_MIN || length > INT32_MAX) {
+	if (UNEXPECTED(length < INT32_MIN || length > INT32_MAX)) {
 		zend_argument_value_error(3, "is too large");
 		RETURN_THROWS();
 	}
@@ -407,7 +406,7 @@ U_CFUNC PHP_FUNCTION(grapheme_substr)
 		RETURN_FALSE;
 	}
 
-	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &status );
+	bi = grapheme_get_break_iterator(&status);
 
 	if( U_FAILURE(status) ) {
 		RETURN_FALSE;
@@ -729,7 +728,6 @@ U_CFUNC PHP_FUNCTION(grapheme_extract)
 	int32_t start = 0;
 	zend_long extract_type = GRAPHEME_EXTRACT_TYPE_COUNT;
 	UErrorCode status;
-	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = nullptr;
 	int ret_pos;
 	zval *next = nullptr; /* return offset of next part of the string */
@@ -760,17 +758,17 @@ U_CFUNC PHP_FUNCTION(grapheme_extract)
 		RETURN_THROWS();
 	}
 
-	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
+	if (UNEXPECTED(lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len)) {
 		intl_error_set( nullptr, U_ILLEGAL_ARGUMENT_ERROR, "start not contained in string");
 		RETURN_FALSE;
 	}
 
-	if (size < 0) {
+	if (UNEXPECTED(size < 0)) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
-	if (size > INT32_MAX) {
+	if (UNEXPECTED(size > INT32_MAX)) {
 		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
@@ -829,7 +827,7 @@ U_CFUNC PHP_FUNCTION(grapheme_extract)
 
 	bi = nullptr;
 	status = U_ZERO_ERROR;
-	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status );
+	bi = grapheme_get_break_iterator(&status);
 
 	ubrk_setUText(bi, &ut, &status);
 	/* if the caller put us in the middle of a grapheme, we can't detect it in all cases since we
@@ -855,7 +853,6 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 	zend_string *str;
 	zend_long split_len = 1;
 
-	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UErrorCode ustatus = U_ZERO_ERROR;
 	int32_t pos, current, i, end_len = 0;
 	UBreakIterator* bi;
@@ -867,7 +864,7 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 		Z_PARAM_LONG(split_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (split_len <= 0 || split_len > UINT_MAX / 4) {
+	if (UNEXPECTED(split_len <= 0 || split_len > UINT_MAX / 4)) {
 		zend_argument_value_error(2, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
 		RETURN_THROWS();
 	}
@@ -891,7 +888,7 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 
 	bi = nullptr;
 	ustatus = U_ZERO_ERROR;
-	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &ustatus );
+	bi = grapheme_get_break_iterator(&ustatus);
 
 	if( U_FAILURE(ustatus) ) {
 		RETURN_FALSE;
@@ -946,17 +943,17 @@ U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
 		Z_PARAM_PATH(locale, locale_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (cost_ins <= 0 || cost_ins > UINT_MAX / 4) {
+	if (UNEXPECTED(cost_ins <= 0 || cost_ins > UINT_MAX / 4)) {
 		zend_argument_value_error(3, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
 		RETURN_THROWS();
 	}
 
-	if (cost_rep <= 0 || cost_rep > UINT_MAX / 4) {
+	if (UNEXPECTED(cost_rep <= 0 || cost_rep > UINT_MAX / 4)) {
 		zend_argument_value_error(4, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
 		RETURN_THROWS();
 	}
 
-	if (cost_del <= 0 || cost_del > UINT_MAX / 4) {
+	if (UNEXPECTED(cost_del <= 0 || cost_del > UINT_MAX / 4)) {
 		zend_argument_value_error(5, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
 		RETURN_THROWS();
 	}
@@ -1031,9 +1028,7 @@ U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
 		goto out_ustring2;
 	}
 
-	unsigned char u_break_iterator_buffer1[U_BRK_SAFECLONE_BUFFERSIZE];
-	unsigned char u_break_iterator_buffer2[U_BRK_SAFECLONE_BUFFERSIZE];
-	bi1 = grapheme_get_break_iterator(u_break_iterator_buffer1, &ustatus);
+	bi1 = grapheme_get_break_iterator(&ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 		intl_error_set_custom_msg(NULL, "Error on grapheme_get_break_iterator for argument #1 ($string1)");
@@ -1041,7 +1036,7 @@ U_CFUNC PHP_FUNCTION(grapheme_levenshtein)
 		goto out_bi1;
 	}
 
-	bi2 = grapheme_get_break_iterator(u_break_iterator_buffer2, &ustatus);
+	bi2 = grapheme_get_break_iterator(&ustatus);
 	if (U_FAILURE(ustatus)) {
 		intl_error_set_code(NULL, ustatus);
 		intl_error_set_custom_msg(NULL, "Error on grapheme_get_break_iterator for argument #2 ($string2)");
@@ -1144,7 +1139,6 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 	char *pstr, *end, *p;
 	zend_string *ret;
 	int32_t pos = 0, current = 0, end_len = 0;
-	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(string)
@@ -1168,7 +1162,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 	bi = nullptr;
 	ustatus = U_ZERO_ERROR;
 
-	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &ustatus );
+	bi = grapheme_get_break_iterator(&ustatus);
 	ret = zend_string_alloc(ZSTR_LEN(string), 0);
 	p = ZSTR_VAL(ret);
 

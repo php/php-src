@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -346,59 +344,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
-#if 0
-		/* pre-evaluate functions:
-		   constant(x)
-		   function_exists(x)
-		   extension_loaded(x)
-		   BAD: interacts badly with Accelerator
-		*/
-		if((opline->op1_type & IS_VAR) &&
-		   VAR_SOURCE(opline->op1) && VAR_SOURCE(opline->op1)->opcode == ZEND_DO_CF_FCALL &&
-		   VAR_SOURCE(opline->op1)->extended_value == 1) {
-			zend_op *fcall = VAR_SOURCE(opline->op1);
-			zend_op *sv = fcall-1;
-			if(sv >= block->start_opline && sv->opcode == ZEND_SEND_VAL &&
-			   sv->op1_type == IS_CONST && Z_TYPE(OPLINE_OP1_LITERAL(sv)) == IS_STRING &&
-			   Z_LVAL(OPLINE_OP2_LITERAL(sv)) == 1
-			   ) {
-				zval *arg = &OPLINE_OP1_LITERAL(sv);
-				char *fname = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].function_name;
-				size_t flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
-				if((flen == sizeof("function_exists")-1 && zend_binary_strcasecmp(fname, flen, "function_exists", sizeof("function_exists")-1) == 0) ||
-						  (flen == sizeof("is_callable")-1 && zend_binary_strcasecmp(fname, flen, "is_callable", sizeof("is_callable")-1) == 0)
-						  ) {
-					zend_function *function;
-					if((function = zend_hash_find_ptr(EG(function_table), Z_STR_P(arg))) != NULL) {
-						literal_dtor(arg);
-						MAKE_NOP(sv);
-						MAKE_NOP(fcall);
-						LITERAL_BOOL(opline->op1, 1);
-						opline->op1_type = IS_CONST;
-					}
-				} else if(flen == sizeof("constant")-1 && zend_binary_strcasecmp(fname, flen, "constant", sizeof("constant")-1) == 0) {
-					zval c;
-					if (zend_optimizer_get_persistent_constant(Z_STR_P(arg), &c, true ELS_CC)) {
-						literal_dtor(arg);
-						MAKE_NOP(sv);
-						MAKE_NOP(fcall);
-						ZEND_OP1_LITERAL(opline) = zend_optimizer_add_literal(op_array, &c);
-						/* no copy ctor - get already copied it */
-						opline->op1_type = IS_CONST;
-					}
-				} else if(flen == sizeof("extension_loaded")-1 && zend_binary_strcasecmp(fname, flen, "extension_loaded", sizeof("extension_loaded")-1) == 0) {
-					if(zend_hash_exists(&module_registry, Z_STR_P(arg))) {
-						literal_dtor(arg);
-						MAKE_NOP(sv);
-						MAKE_NOP(fcall);
-						LITERAL_BOOL(opline->op1, 1);
-						opline->op1_type = IS_CONST;
-					}
-				}
-			}
-		}
-#endif
-
 			case ZEND_FETCH_LIST_R:
 			case ZEND_FETCH_LIST_W:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
@@ -703,7 +648,7 @@ optimize_type_check:
 					} else if (opline->op1_type == IS_TMP_VAR &&
 					           !zend_bitset_in(used_ext, VAR_NUM(opline->op1.var))) {
 						src = VAR_SOURCE(opline->op1);
-						if (src) {
+						if (src && (src->op1_type != IS_VAR)) {
 							if (src->opcode == ZEND_BOOL_NOT) {
 								VAR_SOURCE(opline->op1) = NULL;
 								COPY_NODE(opline->op1, src->op1);
@@ -747,7 +692,7 @@ optimize_type_check:
 					           (!zend_bitset_in(used_ext, VAR_NUM(opline->op1.var)) ||
 					            opline->result.var == opline->op1.var)) {
 						src = VAR_SOURCE(opline->op1);
-						if (src) {
+						if (src && (src->op1_type != IS_VAR)) {
 							if (src->opcode == ZEND_BOOL ||
 							    src->opcode == ZEND_QM_ASSIGN) {
 								VAR_SOURCE(opline->op1) = NULL;
@@ -1185,7 +1130,7 @@ static void assemble_code_blocks(const zend_cfg *cfg, zend_op_array *op_array, z
 
 	/* rebuild map (just for printing) */
 	memset(cfg->map, -1, sizeof(int) * op_array->last);
-	for (int n = 0; n < cfg->blocks_count; n++) {
+	for (uint32_t n = 0; n < cfg->blocks_count; n++) {
 		if (cfg->blocks[n].flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			cfg->map[cfg->blocks[n].start] = n;
 		}
@@ -1493,7 +1438,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
  * defined. We won't apply some optimization patterns for such variables. */
 static void zend_t_usage(const zend_cfg *cfg, const zend_op_array *op_array, zend_bitset used_ext, zend_optimizer_ctx *ctx)
 {
-	int n;
+	uint32_t n;
 	zend_basic_block *block, *next_block;
 	uint32_t var_num;
 	uint32_t bitset_len;
@@ -1697,11 +1642,10 @@ static void zend_t_usage(const zend_cfg *cfg, const zend_op_array *op_array, zen
 
 static void zend_merge_blocks(const zend_op_array *op_array, const zend_cfg *cfg, uint32_t *opt_count)
 {
-	int i;
 	zend_basic_block *b, *bb;
 	zend_basic_block *prev = NULL;
 
-	for (i = 0; i < cfg->blocks_count; i++) {
+	for (uint32_t i = 0; i < cfg->blocks_count; i++) {
 		b = cfg->blocks + i;
 		if (b->flags & ZEND_BB_REACHABLE) {
 			if ((b->flags & ZEND_BB_FOLLOW) &&

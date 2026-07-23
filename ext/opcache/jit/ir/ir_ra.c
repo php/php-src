@@ -799,6 +799,34 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					ir_add_use(ctx, ival, 0, IR_DEF_LIVE_POS_FROM_REF(ref), IR_REG_NONE, IR_USE_SHOULD_BE_IN_REG, 0);
 					continue;
 				}
+			} else if (def_flags & IR_EXTEND_INPUTS_TO_NEXT) {
+				ir_ref next = ir_next_control(ctx, ref);
+				ir_live_pos use_pos;
+
+				IR_ASSERT(insn->op == IR_SNAPSHOT);
+				j = 2;
+				p = insn->ops + 2;
+				for (; j <= insn->inputs_count; j++, p++) {
+					ir_ref input = *p;
+					uint32_t v;
+
+					if (input > 0) {
+						v = ctx->vregs[input];
+						IR_ASSERT(v);
+						use_pos = IR_USE_LIVE_POS_FROM_REF(next);
+						if (!ir_bitset_in(live, v)) {
+							/* live.add(opd) */
+							ir_bitset_incl(live, v);
+							/* intervals[opd].addRange(b.from, op.id) */
+							ival = ir_add_live_range(ctx, v, IR_START_LIVE_POS_FROM_REF(bb->start), use_pos);
+						} else {
+							ival = ctx->live_intervals[v];
+						}
+						use_pos = IR_USE_LIVE_POS_FROM_REF(ref);
+						ir_add_use(ctx, ival, j, use_pos, IR_REG_NONE, 0, IR_UNUSED);
+					}
+				}
+				continue;
 			}
 
 			IR_ASSERT(insn->op != IR_PHI && (!ctx->rules || !(ctx->rules[ref] & (IR_FUSED|IR_SKIPPED))));
@@ -1418,6 +1446,34 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					ir_add_use(ctx, ival, 0, IR_DEF_LIVE_POS_FROM_REF(ref), IR_REG_NONE, IR_USE_SHOULD_BE_IN_REG, 0);
 					continue;
 				}
+			} else if (def_flags & IR_EXTEND_INPUTS_TO_NEXT) {
+				ir_ref next = ir_next_control(ctx, ref);
+				ir_live_pos use_pos;
+
+				IR_ASSERT(insn->op == IR_SNAPSHOT);
+				j = 2;
+				p = insn->ops + 2;
+				for (; j <= insn->inputs_count; j++, p++) {
+					ir_ref input = *p;
+					uint32_t v;
+
+					if (input > 0) {
+						v = ctx->vregs[input];
+						IR_ASSERT(v);
+						use_pos = IR_USE_LIVE_POS_FROM_REF(next);
+						if (!IS_LIVE_IN_BLOCK(v, b)) {
+							/* live.add(opd) */
+							SET_LIVE_IN_BLOCK(v, b);
+							/* intervals[opd].addRange(b.from, op.id) */
+							ival = ir_add_live_range(ctx, v, IR_START_LIVE_POS_FROM_REF(bb->start), use_pos);
+						} else {
+							ival = ctx->live_intervals[v];
+						}
+						use_pos = IR_USE_LIVE_POS_FROM_REF(ref);
+						ir_add_use(ctx, ival, j, use_pos, IR_REG_NONE, 0, IR_UNUSED);
+					}
+				}
+				continue;
 			}
 
 			IR_ASSERT(insn->op != IR_PHI && (!ctx->rules || !(ctx->rules[ref] & (IR_FUSED|IR_SKIPPED))));
@@ -3004,6 +3060,7 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 {
 	ir_live_pos nextUsePos[IR_REG_NUM];
 	ir_live_pos blockPos[IR_REG_NUM];
+	int score, best_score, scores[IR_REG_NUM];
 	int i, reg;
 	ir_live_pos pos, next_use_pos;
 	ir_live_interval *other, *prev;
@@ -3032,6 +3089,7 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 		for (i = IR_REG_FP_FIRST; i <= IR_REG_FP_LAST; i++) {
 			nextUsePos[i] = 0x7fffffff;
 			blockPos[i] = 0x7fffffff;
+			scores[i] = 0;
 		}
 	} else {
 		available = IR_REGSET_GP;
@@ -3050,6 +3108,7 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 		for (i = IR_REG_GP_FIRST; i <= IR_REG_GP_LAST; i++) {
 			nextUsePos[i] = 0x7fffffff;
 			blockPos[i] = 0x7fffffff;
+			scores[i] = 0;
 		}
 	}
 
@@ -3080,6 +3139,8 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 					IR_USE_MUST_BE_IN_REG | IR_USE_SHOULD_BE_IN_REG);
 				if (pos < nextUsePos[reg]) {
 					nextUsePos[reg] = pos;
+						/* Prefer splitting interval that was already splitted before */
+					scores[reg] = (other->flags & IR_LIVE_INTERVAL_SPLIT_CHILD) ? 1 : 0;
 				}
 			}
 		}
@@ -3100,6 +3161,7 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 				IR_REGSET_FOREACH(regset, reg) {
 					if (overlap < nextUsePos[reg]) {
 						nextUsePos[reg] = overlap;
+						scores[reg] = 0;
 					}
 					if (overlap < blockPos[reg]) {
 						blockPos[reg] = overlap;
@@ -3113,6 +3175,7 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 				if (other->flags & (IR_LIVE_INTERVAL_FIXED|IR_LIVE_INTERVAL_TEMP)) {
 					if (overlap < nextUsePos[reg]) {
 						nextUsePos[reg] = overlap;
+						scores[reg] = 0;
 					}
 					if (overlap < blockPos[reg]) {
 						blockPos[reg] = overlap;
@@ -3122,6 +3185,8 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 						IR_USE_MUST_BE_IN_REG | IR_USE_SHOULD_BE_IN_REG);
 					if (pos < nextUsePos[reg]) {
 						nextUsePos[reg] = pos;
+						/* Prefer splitting interval that was already splitted before */
+						scores[reg] = (other->flags & IR_LIVE_INTERVAL_SPLIT_CHILD) ? 1 : 0;
 					}
 				}
 			}
@@ -3141,12 +3206,17 @@ select_register:
 
 	/* reg = register with highest nextUsePos */
 	pos = nextUsePos[reg];
+	best_score = (scores[reg] << 28) + nextUsePos[reg];
 	tmp_regset = available;
 	IR_REGSET_EXCL(tmp_regset, reg);
 	IR_REGSET_FOREACH(tmp_regset, i) {
 		if (nextUsePos[i] > pos) {
 			pos = nextUsePos[i];
+		}
+		score = (scores[i] << 28) + nextUsePos[i];
+		if (score > best_score) {
 			reg = i;
+			best_score = score;
 		}
 	} IR_REGSET_FOREACH_END();
 
@@ -3190,6 +3260,7 @@ select_register:
 			return IR_REG_NONE;
 		}
 		if (split_pos >= blockPos[reg]) {
+try_next_available_register:
 			IR_REGSET_EXCL(available, reg);
 			if (IR_REGSET_IS_EMPTY(available)) {
 				fprintf(stderr, "LSRA Internal Error: Unsolvable conflict. Allocation is not possible\n");
@@ -3222,31 +3293,33 @@ select_register:
 				IR_LOG_LSRA_CONFLICT("      ---- Conflict with active", other, overlap);
 
 				split_pos = ir_last_use_pos_before(other, ival->range.start, IR_USE_MUST_BE_IN_REG | IR_USE_SHOULD_BE_IN_REG);
-				if (split_pos == 0) {
-					split_pos = ival->range.start;
-				}
-				split_pos = ir_find_optimal_split_position(ctx, other, split_pos, ival->range.start, 1);
-				if (split_pos > other->range.start) {
-					child = ir_split_interval_at(ctx, other, split_pos);
-					if (prev) {
-						prev->list_next = other->list_next;
+				if (split_pos) {
+					split_pos = ir_find_optimal_split_position(ctx, other, split_pos, ival->range.start, 1);
+					if (split_pos > other->range.start) {
+						child = ir_split_interval_at(ctx, other, split_pos);
+						if (prev) {
+							prev->list_next = other->list_next;
+						} else {
+							*active = other->list_next;
+						}
+						IR_LOG_LSRA("      ---- Finish", other, "");
 					} else {
-						*active = other->list_next;
+						goto try_next_available_register;
 					}
-					IR_LOG_LSRA("      ---- Finish", other, "");
 				} else {
 					child = other;
-					other->reg = IR_REG_NONE;
-					if (prev) {
-						prev->list_next = other->list_next;
-					} else {
-						*active = other->list_next;
-					}
-					IR_LOG_LSRA("      ---- Spill and Finish", other, " (it must not be in reg)");
 				}
 
 				split_pos = ir_first_use_pos_after(child, ival->range.start, IR_USE_MUST_BE_IN_REG | IR_USE_SHOULD_BE_IN_REG) - 1; // TODO: ???
 				if (split_pos > child->range.start && split_pos < child->end) {
+					if (child == other) {
+						other->reg = IR_REG_NONE;
+						if (prev) {
+							prev->list_next = other->list_next;
+						} else {
+							*active = other->list_next;
+						}
+					}
 					ir_live_pos opt_split_pos = ir_find_optimal_split_position(ctx, child, ival->range.start, split_pos, 1);
 					if (opt_split_pos > child->range.start) {
 						split_pos = opt_split_pos;
@@ -3259,6 +3332,8 @@ select_register:
 					// TODO: this may cause endless loop
 					ir_add_to_unhandled(unhandled, child);
 					IR_LOG_LSRA("      ---- Queue", child, "");
+				} else {
+					goto try_next_available_register;
 				}
 			}
 			break;

@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -21,6 +21,8 @@
 #include <unicode/unistr.h>
 #endif
 
+#include <unicode/uenum.h>
+
 extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
@@ -31,7 +33,7 @@ extern "C" {
 
 #include <zend_exceptions.h>
 
-static int create_transliterator( char *str_id, size_t str_id_len, zend_long direction, zval *object )
+static int create_transliterator( const char *str_id, size_t str_id_len, zend_long direction, zval *object )
 {
 	Transliterator_object *to;
 	UChar	              *ustr_id    = nullptr;
@@ -226,6 +228,7 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 	UEnumeration  *en;
 	const UChar	  *elem;
 	int32_t		  elem_len;
+	int32_t		  count;
 	UErrorCode	  status = U_ZERO_ERROR;
 
 	intl_error_reset( nullptr );
@@ -236,7 +239,14 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 	INTL_CHECK_STATUS( status,
 		"Failed to obtain registered transliterators" );
 
-	array_init( return_value );
+	count = uenum_count( en, &status );
+	if( U_FAILURE( status ) )
+	{
+		count = 0;
+		status = U_ZERO_ERROR;
+	}
+
+	array_init_size( return_value, count );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
 		zend_string *el = intl_convert_utf16_to_utf8(elem, elem_len, &status );
@@ -276,14 +286,16 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 	zend_long	start		= 0,
 				limit		= -1;
 	int			success     = 0;
+	bool		is_method;
 	zval 		tmp_object;
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
 	object = getThis();
+	is_method = object != NULL;
 
 	ZVAL_UNDEF(&tmp_object);
 
-	if (object == nullptr) {
+	if (!is_method) {
 		/* in non-OOP version, accept both a transliterator and a string */
 		zend_string *arg1_str;
 		zend_object *arg1_obj;
@@ -319,18 +331,18 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 		RETURN_THROWS();
 	}
 
-	if (limit < -1) {
-		zend_argument_value_error(object ? 3 : 4, "must be greater than or equal to -1");
+	if (UNEXPECTED(limit < -1)) {
+		zend_argument_value_error(is_method ? 3 : 4, "must be greater than or equal to -1");
 		goto cleanup_object;
 	}
 
-	if (start < 0) {
-		zend_argument_value_error(object ? 2 : 3, "must be greater than or equal to 0");
+	if (UNEXPECTED(start < 0)) {
+		zend_argument_value_error(is_method ? 2 : 3, "must be greater than or equal to 0");
 		goto cleanup_object;
 	}
 
-	if (limit != -1 && start > limit) {
-		zend_argument_value_error(object ? 2 : 3, "must be less than or equal to argument #%d ($end)", object ? 3 : 4);
+	if (UNEXPECTED(limit != -1 && start > limit)) {
+		zend_argument_value_error(is_method ? 2 : 3, "must be less than or equal to argument #%d ($end)", is_method ? 3 : 4);
 		goto cleanup_object;
 	}
 
@@ -343,7 +355,7 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 
 	/* we've started allocating resources, goto from now on */
 
-	if( ( start > ustr_len ) || (( limit != -1 ) && (limit > ustr_len ) ) )
+	if (UNEXPECTED((start > ustr_len) || ((limit != -1) && (limit > ustr_len))))
 	{
 		char *msg;
 		spprintf( &msg, 0,

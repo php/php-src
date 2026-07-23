@@ -118,7 +118,7 @@ dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
 dnl
 AC_DEFUN([ZEND_DLSYM_CHECK], [dnl
 AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
-_LT_AC_TRY_DLOPEN_SELF([AC_MSG_RESULT([no])], [
+_LT_TRY_DLOPEN_SELF([AC_MSG_RESULT([no])], [
   AC_MSG_RESULT([yes])
   AC_DEFINE([DLSYM_NEEDS_UNDERSCORE], [1],
     [Define to 1 if 'dlsym()' requires a leading underscore in symbol names.])
@@ -317,6 +317,7 @@ int emu(const opcode_handler_t *ip, void *fp) {
   while ((*ip)());
   FP = orig_fp;
   IP = orig_ip;
+  return 0;
 }], [])],
   [php_cv_have_global_register_vars=yes],
   [php_cv_have_global_register_vars=no])

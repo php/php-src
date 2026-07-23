@@ -1,7 +1,5 @@
 --TEST--
 Test property mutation - userinfo
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

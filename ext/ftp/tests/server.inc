@@ -290,7 +290,7 @@ if ($pid) {
             }
 
             if (empty($m[1]) || $m[1] !== 'emptydir') {
-                fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
+                fputs($fs, $nlst_data ?? "file1\r\nfile1\r\nfile\nb0rk\r\n");
             }
 
             fputs($s, "226 Closing data Connection.\r\n");
@@ -390,6 +390,27 @@ if ($pid) {
                 case "gh10521":
                     // Just a side channel for getting the received file size.
                     fputs($s, "425 Can't open data connection (".$GLOBALS['rest_pos'].").\r\n");
+                    break;
+                case "crlf_boundary":
+                    // A CRLF whose CR lands on the final byte of the first
+                    // FTP_BUFSIZE (4096) read, so the LF arrives in the next read.
+                    fputs($s, "150 File status okay; about to open data connection.\r\n");
+                    fputs($fs, str_repeat("A", 4095) . "\r\n" . str_repeat("B", 10));
+                    fputs($s, "226 Closing data Connection.\r\n");
+                    break;
+                case "bare_cr":
+                    // A bare CR (not part of CRLF) mid-stream, plus a bare CR on
+                    // the final byte of the first FTP_BUFSIZE (4096) read followed
+                    // by a non-LF byte in the next read.
+                    fputs($s, "150 File status okay; about to open data connection.\r\n");
+                    fputs($fs, "line1\r\nba\rre\r\nend" . str_repeat("X", 4078) . "\r" . str_repeat("Y", 10));
+                    fputs($s, "226 Closing data Connection.\r\n");
+                    break;
+                case "trailing_cr":
+                    // The whole transfer ends on a bare CR.
+                    fputs($s, "150 File status okay; about to open data connection.\r\n");
+                    fputs($fs, "trail\r");
+                    fputs($s, "226 Closing data Connection.\r\n");
                     break;
 
                 default:

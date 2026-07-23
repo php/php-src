@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
@@ -735,6 +733,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_SEND_VAR_NO_REF_EX:
 				case ZEND_SEND_REF:
 				case ZEND_SEND_FUNC_ARG:
+				case ZEND_SEND_PLACEHOLDER:
 				case ZEND_CHECK_FUNC_ARG:
 					if (opline->op2_type == IS_CONST) {
 						opline->result.num = cache_size;
@@ -746,6 +745,10 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						opline->extended_value = cache_size;
 						cache_size += sizeof(void *);
 					}
+					break;
+				case ZEND_CALLABLE_CONVERT_PARTIAL:
+					opline->op1.num = cache_size;
+					cache_size += 2 * sizeof(void *);
 					break;
 			}
 			opline++;

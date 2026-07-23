@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -197,6 +195,9 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		node = (zend_ast *) copy;
 	} else if (ast->kind == ZEND_AST_CALLABLE_CONVERT) {
 		zend_ast_fcc *copy = zend_shared_memdup(ast, sizeof(zend_ast_fcc));
+		if (!ZCG(current_persistent_script)->corrupted) {
+			ZEND_MAP_PTR_NEW(copy->fptr);
+		}
 		copy->args = zend_persist_ast(copy->args);
 		node = (zend_ast *) copy;
 	} else if (zend_ast_is_decl(ast)) {
@@ -544,9 +545,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		zend_op *new_opcodes = zend_shared_memdup_put(op_array->opcodes, sizeof(zend_op) * op_array->last);
 		zend_op *opline = new_opcodes;
 		zend_op *end = new_opcodes + op_array->last;
-		int offset = 0;
 
-		for (; opline < end ; opline++, offset++) {
+		for (; opline < end ; opline++) {
 #if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				opline->op1.zv = (zval*)((char*)opline->op1.zv + ((char*)op_array->literals - (char*)orig_literals));
@@ -652,6 +652,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				zend_accel_store_interned_string(arg_info[i].name);
 			}
 			zend_persist_type(&arg_info[i].type);
+			if (arg_info[i].doc_comment) {
+				zend_accel_store_interned_string(arg_info[i].doc_comment);
+			}
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info++;

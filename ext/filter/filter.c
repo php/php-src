@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
   |          Derick Rethans <derick@php.net>                             |
@@ -298,10 +296,10 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 				filter_func.name,
 				ZSTR_VAL(copy_for_throwing)
 			);
-			zend_string_delref(copy_for_throwing);
+			zend_string_release(copy_for_throwing);
 			return;
 		}
-		zend_string_delref(copy_for_throwing);
+		zend_string_release(copy_for_throwing);
 		copy_for_throwing = NULL;
 	}
 
@@ -380,15 +378,18 @@ static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t
 	}
 
 	if (retval) {
+		zend_string *tmp_str;
+		zend_string *str = zval_get_tmp_string(&new_var, &tmp_str);
 		if (new_val_len) {
-			*new_val_len = Z_STRLEN(new_var);
+			*new_val_len = ZSTR_LEN(str);
 		}
 		efree(*val);
-		if (Z_STRLEN(new_var)) {
-			*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var));
+		if (ZSTR_LEN(str)) {
+			*val = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
 		} else {
 			*val = estrdup("");
 		}
+		zend_tmp_string_release(tmp_str);
 		zval_ptr_dtor(&new_var);
 	}
 

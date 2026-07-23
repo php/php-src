@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Stefan Röhrich <sr@linux.de>                                |
@@ -49,9 +47,7 @@ ZEND_DECLARE_MODULE_GLOBALS(zlib)
 zend_class_entry *inflate_context_ce;
 static zend_object_handlers inflate_context_object_handlers;
 
-static inline php_zlib_context *inflate_context_from_obj(zend_object *obj) {
-	return (php_zlib_context *)((char *)(obj) - XtOffsetOf(php_zlib_context, std));
-}
+#define inflate_context_from_obj(obj) ZEND_CONTAINER_OF(obj, php_zlib_context, std)
 
 #define Z_INFLATE_CONTEXT_P(zv) inflate_context_from_obj(Z_OBJ_P(zv))
 
@@ -87,9 +83,7 @@ static void inflate_context_free_obj(zend_object *object)
 zend_class_entry *deflate_context_ce;
 static zend_object_handlers deflate_context_object_handlers;
 
-static inline php_zlib_context *deflate_context_from_obj(zend_object *obj) {
-	return (php_zlib_context *)((char *)(obj) - XtOffsetOf(php_zlib_context, std));
-}
+#define deflate_context_from_obj(obj) ZEND_CONTAINER_OF(obj, php_zlib_context, std)
 
 #define Z_DEFLATE_CONTEXT_P(zv) deflate_context_from_obj(Z_OBJ_P(zv))
 
@@ -856,6 +850,30 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 	return true;
 }
 
+ZEND_ATTRIBUTE_NONNULL static bool zlib_get_long_option(HashTable *options, const char *option_name, size_t option_name_len, zend_long *value)
+{
+	bool failed = false;
+	zval *option_buffer = zend_hash_str_find(options, option_name, option_name_len);
+
+	if (!option_buffer) {
+		return true;
+	}
+
+	/* The |H ZPP specifier may leave HashTable entries wrapped in IS_INDIRECT. */
+	ZVAL_DEINDIRECT(option_buffer);
+	*value = zval_try_get_long(option_buffer, &failed);
+	if (UNEXPECTED(failed)) {
+		zend_argument_type_error(
+			2,
+			"the value for option \"%.*s\" must be of type int, %s given",
+			(int) option_name_len, option_name, zend_zval_value_name(option_buffer)
+		);
+		return false;
+	}
+
+	return true;
+}
+
 /* {{{ Initialize an incremental inflate context with the specified encoding */
 PHP_FUNCTION(inflate_init)
 {
@@ -863,16 +881,14 @@ PHP_FUNCTION(inflate_init)
 	zend_long encoding, window = 15;
 	char *dict = NULL;
 	size_t dictlen = 0;
-	HashTable *options = NULL;
-	zval *option_buffer;
+	HashTable *options = (HashTable *) &zend_empty_array;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
 		RETURN_THROWS();
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
-		ZVAL_DEINDIRECT(option_buffer);
-		window = zval_get_long(option_buffer);
+	if (!zlib_get_long_option(options, ZEND_STRL("window"), &window)) {
+		RETURN_THROWS();
 	}
 	if (window < 8 || window > 15) {
 		zend_value_error("zlib window size (logarithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
@@ -909,6 +925,7 @@ PHP_FUNCTION(inflate_init)
 	}
 
 	if (inflateInit2(&ctx->Z, encoding) != Z_OK) {
+		/* dict is stored in the ctx in the object and will thus be freed by zval_ptr_dtor(). */
 		zval_ptr_dtor(return_value);
 		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.inflate context");
 		RETURN_FALSE;
@@ -925,7 +942,7 @@ PHP_FUNCTION(inflate_init)
 				efree(ctx->inflateDict);
 				ctx->inflateDict = NULL;
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	}
 }
@@ -1022,10 +1039,11 @@ PHP_FUNCTION(inflate_add)
 							zend_string_release_ex(out, 0);
 							php_error_docref(NULL, E_WARNING, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
 							RETURN_FALSE;
-						EMPTY_SWITCH_DEFAULT_CASE()
+						default: ZEND_UNREACHABLE();
 					}
 					break;
 				} else {
+					zend_string_release_ex(out, false);
 					php_error_docref(NULL, E_WARNING, "Inflating this data requires a preset dictionary, please specify it in the options array of inflate_init()");
 					RETURN_FALSE;
 				}
@@ -1082,43 +1100,38 @@ PHP_FUNCTION(deflate_init)
 	zend_long encoding, level = -1, memory = 8, window = 15, strategy = Z_DEFAULT_STRATEGY;
 	char *dict = NULL;
 	size_t dictlen = 0;
-	HashTable *options = NULL;
-	zval *option_buffer;
+	HashTable *options = (HashTable*)&zend_empty_array;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
 		RETURN_THROWS();
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("level"))) != NULL) {
-		ZVAL_DEINDIRECT(option_buffer);
-		level = zval_get_long(option_buffer);
+	if (!zlib_get_long_option(options, ZEND_STRL("level"), &level)) {
+		RETURN_THROWS();
 	}
 	if (level < -1 || level > 9) {
 		zend_value_error("deflate_init(): \"level\" option must be between -1 and 9");
 		RETURN_THROWS();
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("memory"))) != NULL) {
-		ZVAL_DEINDIRECT(option_buffer);
-		memory = zval_get_long(option_buffer);
+	if (!zlib_get_long_option(options, ZEND_STRL("memory"), &memory)) {
+		RETURN_THROWS();
 	}
 	if (memory < 1 || memory > 9) {
 		zend_value_error("deflate_init(): \"memory\" option must be between 1 and 9");
 		RETURN_THROWS();
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
-		ZVAL_DEINDIRECT(option_buffer);
-		window = zval_get_long(option_buffer);
+	if (!zlib_get_long_option(options, ZEND_STRL("window"), &window)) {
+		RETURN_THROWS();
 	}
 	if (window < 8 || window > 15) {
 		zend_value_error("deflate_init(): \"window\" option must be between 8 and 15");
 		RETURN_THROWS();
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("strategy"))) != NULL) {
-		ZVAL_DEINDIRECT(option_buffer);
-		strategy = zval_get_long(option_buffer);
+	if (!zlib_get_long_option(options, ZEND_STRL("strategy"), &strategy)) {
+		RETURN_THROWS();
 	}
 	switch (strategy) {
 		case Z_FILTERED:
@@ -1159,6 +1172,7 @@ PHP_FUNCTION(deflate_init)
 	}
 
 	if (deflateInit2(&ctx->Z, level, Z_DEFLATED, encoding, memory, strategy) != Z_OK) {
+		efree(dict);
 		zval_ptr_dtor(return_value);
 		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.deflate context");
 		RETURN_FALSE;
@@ -1239,13 +1253,11 @@ PHP_FUNCTION(deflate_add)
 			ZSTR_LEN(out) = (char *) ctx->Z.next_out - ZSTR_VAL(out);
 			ZSTR_VAL(out)[ZSTR_LEN(out)] = 0;
 			RETURN_STR(out);
-			break;
 		case Z_STREAM_END:
 			ZSTR_LEN(out) = (char *) ctx->Z.next_out - ZSTR_VAL(out);
 			ZSTR_VAL(out)[ZSTR_LEN(out)] = 0;
 			deflateReset(&ctx->Z);
 			RETURN_STR(out);
-			break;
 		default:
 			zend_string_release_ex(out, 0);
 			php_error_docref(NULL, E_WARNING, "zlib error (%s)", zError(status));
@@ -1265,7 +1277,6 @@ ZEND_GET_MODULE(php_zlib)
 static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
 	int int_value;
-	char *ini_value;
 	if (new_value == NULL) {
 		return FAILURE;
 	}
@@ -1277,9 +1288,9 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	} else {
 		int_value = (int) zend_ini_parse_quantity_warn(new_value, entry->name);
 	}
-	ini_value = zend_ini_string("output_handler", sizeof("output_handler") - 1, 0);
+	const zend_string *ini_value = zend_ini_str_literal("output_handler");
 
-	if (ini_value && *ini_value && int_value) {
+	if (ini_value && ZSTR_LEN(ini_value) > 0 && int_value) {
 		php_error_docref("ref.outcontrol", E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
 		return FAILURE;
 	}
@@ -1341,7 +1352,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	inflate_context_ce->default_object_handlers = &inflate_context_object_handlers;
 
 	memcpy(&inflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	inflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
+	inflate_context_object_handlers.offset = offsetof(php_zlib_context, std);
 	inflate_context_object_handlers.free_obj = inflate_context_free_obj;
 	inflate_context_object_handlers.get_constructor = inflate_context_get_constructor;
 	inflate_context_object_handlers.clone_obj = NULL;
@@ -1352,7 +1363,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	deflate_context_ce->default_object_handlers = &deflate_context_object_handlers;
 
 	memcpy(&deflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	deflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
+	deflate_context_object_handlers.offset = offsetof(php_zlib_context, std);
 	deflate_context_object_handlers.free_obj = deflate_context_free_obj;
 	deflate_context_object_handlers.get_constructor = deflate_context_get_constructor;
 	deflate_context_object_handlers.clone_obj = NULL;

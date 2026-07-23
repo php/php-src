@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Thies C. Arntzen <thies@thieso.net>                         |
@@ -972,6 +970,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			handler->func.user->fci.param_count = 2;
 			handler->func.user->fci.params = ob_args;
 			handler->func.user->fci.retval = &retval;
+			handler->func.user->fci.consumed_args = zend_fci_consumed_arg(0);
 
 			if (SUCCESS == zend_call_function(&handler->func.user->fci, &handler->func.user->fcc) && Z_TYPE(retval) != IS_UNDEF) {
 				if (handler->flags & PHP_OUTPUT_HANDLER_PRODUCED_OUTPUT) {
@@ -1393,9 +1392,7 @@ PHP_FUNCTION(ob_start)
 /* {{{ Flush (send) contents of the output buffer. The last buffer content is sent to next buffer */
 PHP_FUNCTION(ob_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to flush buffer. No buffer to flush");
@@ -1413,9 +1410,7 @@ PHP_FUNCTION(ob_flush)
 /* {{{ Clean (delete) the current output buffer */
 PHP_FUNCTION(ob_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
@@ -1433,9 +1428,7 @@ PHP_FUNCTION(ob_clean)
 /* {{{ Flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete and flush buffer. No buffer to delete or flush");
@@ -1449,9 +1442,7 @@ PHP_FUNCTION(ob_end_flush)
 /* {{{ Clean the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_end_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!OG(active)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete buffer. No buffer to delete");
@@ -1465,9 +1456,7 @@ PHP_FUNCTION(ob_end_clean)
 /* {{{ Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_contents(return_value) == FAILURE) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to delete and flush buffer. No buffer to delete or flush");
@@ -1483,9 +1472,7 @@ PHP_FUNCTION(ob_get_flush)
 /* {{{ Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!OG(active)) {
 		RETURN_FALSE;
@@ -1505,9 +1492,7 @@ PHP_FUNCTION(ob_get_clean)
 /* {{{ Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_contents(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1518,9 +1503,7 @@ PHP_FUNCTION(ob_get_contents)
 /* {{{ Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(php_output_get_level());
 }
@@ -1529,9 +1512,7 @@ PHP_FUNCTION(ob_get_level)
 /* {{{ Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_output_get_length(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -1542,9 +1523,7 @@ PHP_FUNCTION(ob_get_length)
 /* {{{ List all output_buffers in an array */
 PHP_FUNCTION(ob_list_handlers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1595,9 +1574,7 @@ PHP_FUNCTION(ob_implicit_flush)
 /* {{{ Reset(clear) URL rewriter values */
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (php_url_scanner_reset_vars() == SUCCESS) {
 		RETURN_TRUE;

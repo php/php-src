@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
@@ -111,7 +109,7 @@ void inifile_free(inifile *dba, int persistent)
 key_type inifile_key_split(const char *group_name)
 {
 	key_type key;
-	char *name;
+	const char *name;
 
 	if (group_name[0] == '[' && (name = strchr(group_name, ']')) != NULL) {
 		key.group = estrndup(group_name+1, name - (group_name + 1));
@@ -249,7 +247,7 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip) {
 		ln.key.group = estrdup(dba->next.key.group);
 	} else {
 		/* specific instance or not same key -> restart search */
-		/* the slow way: restart and seacrch */
+		/* the slow way: restart and search */
 		php_stream_rewind(dba->fp);
 		inifile_line_free(&dba->next);
 	}
@@ -471,7 +469,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 	 * 8) Append temporary stream
 	 */
 
-	assert(!append || (key->name && value)); /* missuse */
+	assert(!append || (key->name && value)); /* misuse */
 
 	/* 1 - 3 */
 	inifile_find_group(dba, key, &pos_grp_start);

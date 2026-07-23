@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
    +----------------------------------------------------------------------+
@@ -73,8 +73,8 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message);
 			efree(message);
 		} else {
-			if (Z_LVAL_P(ele_value) > INT32_MAX ||
-					Z_LVAL_P(ele_value) < INT32_MIN) {
+			if (UNEXPECTED(Z_LVAL_P(ele_value) > INT32_MAX ||
+					Z_LVAL_P(ele_value) < INT32_MIN)) {
 				spprintf(&message, 0, "value " ZEND_LONG_FMT " is out of "
 						"bounds for a 32-bit integer in key '%s'",
 						Z_LVAL_P(ele_value), key_name);

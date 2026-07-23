@@ -8,7 +8,7 @@ pdo_sqlite
 $db = new Pdo\Sqlite('sqlite::memory:');
 
 $db->query('CREATE TABLE test_busy (a string);');
-$db->query('INSERT INTO test_busy VALUES ("interleaved"), ("statements")');
+$db->query("INSERT INTO test_busy VALUES ('interleaved'), ('statements')");
 $st = $db->prepare('SELECT a FROM test_busy');
 var_dump($st->getAttribute(Pdo\Sqlite::ATTR_BUSY_STATEMENT));
 $st->execute();

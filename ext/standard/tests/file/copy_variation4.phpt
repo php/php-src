@@ -91,7 +91,7 @@ Destination file name => %s/
 Size of source file => int(1500)
 Size of destination file => int(%d)
 
-Warning: unlink(%s): %s
+Warning: unlink(): %s
 
 -- Iteration 2 --
 Existence of destination file before copy => bool(true)
@@ -103,7 +103,7 @@ Destination file name => %s/
 Size of source file => int(1500)
 Size of destination file => int(%d)
 
-Warning: unlink(%s): %s
+Warning: unlink(): %s
 
 -- Iteration 3 --
 Existence of destination file before copy => bool(true)
@@ -115,7 +115,7 @@ Destination file name => %s/
 Size of source file => int(1500)
 Size of destination file => int(%d)
 
-Warning: unlink(%s): %s
+Warning: unlink(): %s
 
 -- Iteration 4 --
 Existence of destination file before copy => bool(true)
@@ -127,7 +127,7 @@ Destination file name => %s/
 Size of source file => int(1500)
 Size of destination file => int(%d)
 
-Warning: unlink(%s): %s
+Warning: unlink(): %s
 
 -- Iteration 5 --
 Existence of destination file before copy => bool(false)

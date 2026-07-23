@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: 267472e2b726ca5e788eb5cc3e946bc9aa7c9c41
+ * Stub hash: c80946cc8c8215bb6527e09bb71b3a97a76a6a98
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
@@ -526,6 +526,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter___toString arginfo_class_ReflectionFunction___toString
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionParameter_getDocComment, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_ReflectionParameter_getName arginfo_class_ReflectionFunctionAbstract_getName
 
 #define arginfo_class_ReflectionParameter_isPassedByReference arginfo_class_ReflectionFunctionAbstract_inNamespace
@@ -721,13 +724,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionConstant_isDeprecated arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_ReflectionConstant_getFileName, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionConstant_getFileName arginfo_class_ReflectionParameter_getDocComment
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionConstant_getExtension, 0, 0, ReflectionExtension, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionConstant_getExtensionName arginfo_class_ReflectionConstant_getFileName
+#define arginfo_class_ReflectionConstant_getExtensionName arginfo_class_ReflectionParameter_getDocComment
 
 #define arginfo_class_ReflectionConstant___toString arginfo_class_ReflectionFunction___toString
 
@@ -921,6 +923,7 @@ ZEND_METHOD(ReflectionClassConstant, hasType);
 ZEND_METHOD(ReflectionClassConstant, getType);
 ZEND_METHOD(ReflectionParameter, __construct);
 ZEND_METHOD(ReflectionParameter, __toString);
+ZEND_METHOD(ReflectionParameter, getDocComment);
 ZEND_METHOD(ReflectionParameter, getName);
 ZEND_METHOD(ReflectionParameter, isPassedByReference);
 ZEND_METHOD(ReflectionParameter, canBePassedByValue);
@@ -1237,6 +1240,7 @@ static const zend_function_entry class_ReflectionParameter_methods[] = {
 	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionParameter___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionParameter, __construct, arginfo_class_ReflectionParameter___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, __toString, arginfo_class_ReflectionParameter___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionParameter, getDocComment, arginfo_class_ReflectionParameter_getDocComment, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, getName, arginfo_class_ReflectionParameter_getName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, isPassedByReference, arginfo_class_ReflectionParameter_isPassedByReference, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, canBePassedByValue, arginfo_class_ReflectionParameter_canBePassedByValue, ZEND_ACC_PUBLIC)

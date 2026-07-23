@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stig Venaas <venaas@php.net>                                |
    |          Wez Furlong <wez@thebrainroom.com>                          |
@@ -57,6 +55,10 @@
 ZEND_DECLARE_MODULE_GLOBALS(openssl)
 
 #include "openssl_arginfo.h"
+
+/* OpenSSLException class */
+
+zend_class_entry *php_openssl_exception_ce;
 
 /* OpenSSLCertificate class */
 
@@ -167,6 +169,376 @@ static void php_openssl_pkey_free_obj(zend_object *object)
 	zend_object_std_dtor(&key_object->std);
 }
 
+/* Openssl\Psk class */
+
+zend_class_entry *php_openssl_psk_ce;
+
+static zend_object_handlers php_openssl_psk_object_handlers;
+
+bool php_openssl_is_psk_ce(zval *val)
+{
+	return Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val) == php_openssl_psk_ce;
+}
+
+zend_string *php_openssl_psk_get_psk(zval *psk_zv)
+{
+	zval rv;
+	zval *prop = zend_read_property(php_openssl_psk_ce, Z_OBJ_P(psk_zv), ZEND_STRL("psk"), 0, &rv);
+	if (UNEXPECTED(Z_TYPE_P(prop) != IS_STRING)) {
+		return NULL;
+	}
+	return Z_STR_P(prop);
+}
+
+zend_string *php_openssl_psk_get_identity(zval *psk_zv)
+{
+	zval rv;
+	zval *prop = zend_read_property(php_openssl_psk_ce, Z_OBJ_P(psk_zv),
+			ZEND_STRL("identity"), 0, &rv);
+	if (Z_TYPE_P(prop) == IS_NULL) {
+		return NULL;
+	}
+	if (UNEXPECTED(Z_TYPE_P(prop) != IS_STRING)) {
+		return NULL;
+	}
+	return Z_STR_P(prop);
+}
+
+PHP_METHOD(Openssl_Psk, __construct)
+{
+	zend_string *psk;
+	zend_string *identity = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(psk)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(identity)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(psk) == 0) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+	if (ZSTR_LEN(psk) > PHP_OPENSSL_PSK_MAX_PSK_LEN) {
+		zend_argument_value_error(1, "must not exceed %d bytes", PHP_OPENSSL_PSK_MAX_PSK_LEN);
+		RETURN_THROWS();
+	}
+	if (identity != NULL && ZSTR_LEN(identity) > PHP_OPENSSL_PSK_MAX_IDENTITY_LEN) {
+		zend_argument_value_error(2, "must not exceed %d bytes", PHP_OPENSSL_PSK_MAX_IDENTITY_LEN);
+		RETURN_THROWS();
+	}
+
+	zend_update_property_str(php_openssl_psk_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("psk"), psk);
+
+	if (identity != NULL) {
+		zend_update_property_str(php_openssl_psk_ce, Z_OBJ_P(ZEND_THIS),
+				ZEND_STRL("identity"), identity);
+	} else {
+		zend_update_property_null(php_openssl_psk_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("identity"));
+	}
+}
+
+/* Openssl\Session class */
+
+zend_class_entry *php_openssl_session_ce;
+
+static zend_object_handlers php_openssl_session_object_handlers;
+
+bool php_openssl_is_session_ce(zval *val)
+{
+	return Z_TYPE_P(val) == IS_OBJECT && Z_OBJCE_P(val) == php_openssl_session_ce;
+}
+
+SSL_SESSION *php_openssl_session_from_zval(zval *zv)
+{
+	if (!php_openssl_is_session_ce(zv)) {
+		return NULL;
+	}
+	return Z_OPENSSL_SESSION_P(zv)->session;
+}
+
+void php_openssl_session_object_init(zval *zv, SSL_SESSION *session)
+{
+	object_init_ex(zv, php_openssl_session_ce);
+	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(zv);
+	obj->session = session;
+
+	unsigned int id_len = 0;
+	const unsigned char *id = SSL_SESSION_get_id(session, &id_len);
+	zend_update_property_stringl(php_openssl_session_ce, Z_OBJ_P(zv),
+			ZEND_STRL("id"), (char *)id, id_len);
+}
+
+static zend_object *php_openssl_session_create_object(zend_class_entry *class_type)
+{
+	php_openssl_session_object *intern = zend_object_alloc(sizeof(php_openssl_session_object), class_type);
+
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+
+	return &intern->std;
+}
+
+static zend_function *php_openssl_session_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL,
+		"Cannot directly construct OpenSSLSession, use OpenSSLSession::import() or TLS session callbacks");
+	return NULL;
+}
+
+static void php_openssl_session_free_obj(zend_object *object)
+{
+	php_openssl_session_object *session_object = php_openssl_session_from_obj(object);
+
+	if (session_object->session) {
+		SSL_SESSION_free(session_object->session);
+		session_object->session = NULL;
+	}
+	zend_object_std_dtor(&session_object->std);
+}
+
+#define PHP_OPENSSL_SESSION_CHECK() \
+	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS); \
+	if (!obj->session) { \
+		zend_throw_exception(php_openssl_exception_ce, "Session is not valid", 0); \
+		RETURN_THROWS(); \
+	}
+
+PHP_METHOD(Openssl_Session, export)
+{
+	zend_long format = ENCODING_PEM;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(format)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHP_OPENSSL_SESSION_CHECK();
+
+	if (format == ENCODING_DER) {
+		int len = i2d_SSL_SESSION(obj->session, NULL);
+		if (len <= 0) {
+			zend_throw_exception(php_openssl_exception_ce, "Failed to export session", 0);
+			RETURN_THROWS();
+		}
+
+		zend_string *result = zend_string_alloc(len, 0);
+		unsigned char *p = (unsigned char *)ZSTR_VAL(result);
+		i2d_SSL_SESSION(obj->session, &p);
+		ZSTR_VAL(result)[len] = '\0';
+
+		RETURN_NEW_STR(result);
+	}
+
+	if (format == ENCODING_PEM) {
+		BIO *bio = BIO_new(BIO_s_mem());
+		if (!bio) {
+			zend_throw_exception(php_openssl_exception_ce, "Failed to create BIO", 0);
+			RETURN_THROWS();
+		}
+
+		if (!PEM_write_bio_SSL_SESSION(bio, obj->session)) {
+			BIO_free(bio);
+			zend_throw_exception(php_openssl_exception_ce, "Failed to export session as PEM", 0);
+			RETURN_THROWS();
+		}
+
+		char *data;
+		long len = BIO_get_mem_data(bio, &data);
+		zend_string *result = zend_string_init(data, len, 0);
+		BIO_free(bio);
+
+		RETURN_NEW_STR(result);
+	}
+
+	zend_argument_value_error(1, "must be OPENSSL_ENCODING_DER or OPENSSL_ENCODING_PEM");
+	RETURN_THROWS();
+}
+
+PHP_METHOD(Openssl_Session, import)
+{
+	zend_string *data;
+	zend_long format = ENCODING_PEM;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(data)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(format)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SSL_SESSION *session = NULL;
+
+	if (format == ENCODING_DER) {
+		const unsigned char *p = (const unsigned char *)ZSTR_VAL(data);
+		session = d2i_SSL_SESSION(NULL, &p, ZSTR_LEN(data));
+	} else if (format == ENCODING_PEM) {
+		BIO *bio = BIO_new_mem_buf(ZSTR_VAL(data), ZSTR_LEN(data));
+		if (bio) {
+			session = PEM_read_bio_SSL_SESSION(bio, NULL, NULL, NULL);
+			BIO_free(bio);
+		}
+	} else {
+		zend_argument_value_error(2, "must be OPENSSL_ENCODING_DER or OPENSSL_ENCODING_PEM");
+		RETURN_THROWS();
+	}
+
+	if (!session) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to import session data", 0);
+		RETURN_THROWS();
+	}
+
+	php_openssl_session_object_init(return_value, session);
+}
+
+PHP_METHOD(Openssl_Session, isResumable)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	RETURN_BOOL(SSL_SESSION_is_resumable(obj->session));
+}
+
+PHP_METHOD(Openssl_Session, getTimeout)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+	RETURN_LONG((zend_long)SSL_SESSION_get_timeout(obj->session));
+}
+
+PHP_METHOD(Openssl_Session, getCreatedAt)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+#if PHP_OPENSSL_API_VERSION >= 0x30300
+	RETURN_LONG((zend_long)SSL_SESSION_get_time_ex(obj->session));
+#else
+	RETURN_LONG((zend_long)SSL_SESSION_get_time(obj->session));
+#endif
+}
+
+PHP_METHOD(Openssl_Session, getProtocol)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	int version = SSL_SESSION_get_protocol_version(obj->session);
+
+	switch (version) {
+		case TLS1_3_VERSION:
+			RETURN_STRING("TLSv1.3");
+		case TLS1_2_VERSION:
+			RETURN_STRING("TLSv1.2");
+		case TLS1_1_VERSION:
+			RETURN_STRING("TLSv1.1");
+		case TLS1_VERSION:
+			RETURN_STRING("TLSv1.0");
+		default:
+			RETURN_NULL();
+	}
+}
+
+PHP_METHOD(Openssl_Session, getCipher)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	const SSL_CIPHER *cipher = SSL_SESSION_get0_cipher(obj->session);
+	if (!cipher) {
+		RETURN_NULL();
+	}
+
+	RETURN_STRING(SSL_CIPHER_get_name(cipher));
+}
+
+PHP_METHOD(Openssl_Session, hasTicket)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	RETURN_BOOL(SSL_SESSION_has_ticket(obj->session));
+}
+
+PHP_METHOD(Openssl_Session, getTicketLifetimeHint)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PHP_OPENSSL_SESSION_CHECK();
+
+	if (!SSL_SESSION_has_ticket(obj->session)) {
+		RETURN_NULL();
+	}
+
+	RETURN_LONG((zend_long)SSL_SESSION_get_ticket_lifetime_hint(obj->session));
+}
+PHP_METHOD(Openssl_Session, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	PHP_OPENSSL_SESSION_CHECK();
+
+	BIO *bio = BIO_new(BIO_s_mem());
+	if (!bio) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to serialize session", 0);
+		RETURN_THROWS();
+	}
+
+	if (!PEM_write_bio_SSL_SESSION(bio, obj->session)) {
+		BIO_free(bio);
+		zend_throw_exception(php_openssl_exception_ce, "Failed to serialize session", 0);
+		RETURN_THROWS();
+	}
+
+	char *data;
+	long len = BIO_get_mem_data(bio, &data);
+	zend_string *pem = zend_string_init(data, len, 0);
+	BIO_free(bio);
+
+	array_init(return_value);
+	add_assoc_str(return_value, "pem", pem);
+}
+
+PHP_METHOD(Openssl_Session, __unserialize)
+{
+	HashTable *data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_openssl_session_object *obj = Z_OPENSSL_SESSION_P(ZEND_THIS);
+	if (obj->session != NULL) {
+		zend_throw_error(NULL, "Cannot call Openssl\\Session::__unserialize() on an already-initialized session");
+		RETURN_THROWS();
+	}
+
+	zval *pem_zv = zend_hash_str_find(data, ZEND_STRL("pem"));
+	if (!pem_zv || Z_TYPE_P(pem_zv) != IS_STRING) {
+		zend_throw_exception(php_openssl_exception_ce, "Invalid serialization data", 0);
+		RETURN_THROWS();
+	}
+
+	BIO *bio = BIO_new_mem_buf(Z_STRVAL_P(pem_zv), Z_STRLEN_P(pem_zv));
+	if (!bio) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to unserialize session", 0);
+		RETURN_THROWS();
+	}
+
+	SSL_SESSION *session = PEM_read_bio_SSL_SESSION(bio, NULL, NULL, NULL);
+	BIO_free(bio);
+
+	if (!session) {
+		zend_throw_exception(php_openssl_exception_ce, "Failed to unserialize session", 0);
+		RETURN_THROWS();
+	}
+
+	obj->session = session;
+
+	/* Populate id property */
+	unsigned int id_len = 0;
+	const unsigned char *id = SSL_SESSION_get_id(session, &id_len);
+	zend_update_property_stringl(php_openssl_session_ce, Z_OBJ_P(ZEND_THIS),
+		ZEND_STRL("id"), (char *)id, id_len);
+}
+
 #if defined(HAVE_OPENSSL_ARGON2)
 static const zend_module_dep openssl_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
@@ -218,9 +590,9 @@ void php_openssl_store_errors(void)
 	errors = OPENSSL_G(errors);
 
 	do {
-		errors->top = (errors->top + 1) % ERR_NUM_ERRORS;
+		errors->top = (errors->top + 1) % PHP_OPENSSL_ERR_BUFFER_SIZE;
 		if (errors->top == errors->bottom) {
-			errors->bottom = (errors->bottom + 1) % ERR_NUM_ERRORS;
+			errors->bottom = (errors->bottom + 1) % PHP_OPENSSL_ERR_BUFFER_SIZE;
 		}
 		errors->buffer[errors->top] = error_code;
 	} while ((error_code = ERR_get_error()));
@@ -268,7 +640,7 @@ static void php_openssl_check_path_error(uint32_t arg_num, int type, const char 
 	va_start(va, format);
 
 	if (type == E_ERROR) {
-		zend_argument_error_variadic(zend_ce_value_error, arg_num, format, va);
+		zend_argument_error_variadic(zend_ce_value_error, zend_active_function(), arg_num, format, va);
 	} else {
 		arg_name = get_active_function_arg_name(arg_num);
 		php_verror(NULL, arg_name, type, format, va);
@@ -279,7 +651,8 @@ static void php_openssl_check_path_error(uint32_t arg_num, int type, const char 
 /* openssl file path check extended */
 bool php_openssl_check_path_ex(
 		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num,
-		bool contains_file_protocol, bool is_from_array, const char *option_name)
+		bool contains_file_protocol, bool is_from_array, const char *option_name,
+		php_stream *stream)
 {
 	const char *fs_file_path;
 	size_t fs_file_path_len;
@@ -314,8 +687,13 @@ bool php_openssl_check_path_ex(
 		if (arg_num == 0) {
 			const char *option_title = option_name ? option_name : "unknown";
 			const char *option_label = is_from_array ? "array item" : "option";
-			php_error_docref(NULL, E_WARNING, "Path for %s %s %s",
-					option_title, option_label, error_msg);
+			if (stream != NULL) {
+				php_stream_warn(stream, InvalidPath, "Path for %s %s %s",
+						option_title, option_label, error_msg);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Path for %s %s %s",
+						option_title, option_label, error_msg);
+			}
 		} else if (is_from_array && option_name != NULL) {
 			php_openssl_check_path_error(
 					arg_num, error_type, "option %s array item %s", option_name, error_msg);
@@ -383,12 +761,14 @@ PHP_INI_END()
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(openssl)
 {
+	php_openssl_exception_ce = register_class_Openssl_OpensslException(zend_ce_exception);
+
 	php_openssl_certificate_ce = register_class_OpenSSLCertificate();
 	php_openssl_certificate_ce->create_object = php_openssl_certificate_create_object;
 	php_openssl_certificate_ce->default_object_handlers = &php_openssl_certificate_object_handlers;
 
 	memcpy(&php_openssl_certificate_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_openssl_certificate_object_handlers.offset = XtOffsetOf(php_openssl_certificate_object, std);
+	php_openssl_certificate_object_handlers.offset = offsetof(php_openssl_certificate_object, std);
 	php_openssl_certificate_object_handlers.free_obj = php_openssl_certificate_free_obj;
 	php_openssl_certificate_object_handlers.get_constructor = php_openssl_certificate_get_constructor;
 	php_openssl_certificate_object_handlers.clone_obj = NULL;
@@ -399,7 +779,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_request_ce->default_object_handlers = &php_openssl_request_object_handlers;
 
 	memcpy(&php_openssl_request_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_openssl_request_object_handlers.offset = XtOffsetOf(php_openssl_request_object, std);
+	php_openssl_request_object_handlers.offset = offsetof(php_openssl_request_object, std);
 	php_openssl_request_object_handlers.free_obj = php_openssl_request_free_obj;
 	php_openssl_request_object_handlers.get_constructor = php_openssl_request_get_constructor;
 	php_openssl_request_object_handlers.clone_obj = NULL;
@@ -410,11 +790,27 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_pkey_ce->default_object_handlers = &php_openssl_pkey_object_handlers;
 
 	memcpy(&php_openssl_pkey_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	php_openssl_pkey_object_handlers.offset = XtOffsetOf(php_openssl_pkey_object, std);
+	php_openssl_pkey_object_handlers.offset = offsetof(php_openssl_pkey_object, std);
 	php_openssl_pkey_object_handlers.free_obj = php_openssl_pkey_free_obj;
 	php_openssl_pkey_object_handlers.get_constructor = php_openssl_pkey_get_constructor;
 	php_openssl_pkey_object_handlers.clone_obj = NULL;
 	php_openssl_pkey_object_handlers.compare = zend_objects_not_comparable;
+
+	php_openssl_psk_ce = register_class_Openssl_Psk();
+	php_openssl_psk_ce->default_object_handlers = &php_openssl_psk_object_handlers;
+
+	memcpy(&php_openssl_psk_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+
+	php_openssl_session_ce = register_class_Openssl_Session();
+	php_openssl_session_ce->create_object = php_openssl_session_create_object;
+	php_openssl_session_ce->default_object_handlers = &php_openssl_session_object_handlers;
+
+	memcpy(&php_openssl_session_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	php_openssl_session_object_handlers.offset = offsetof(php_openssl_session_object, std);
+	php_openssl_session_object_handlers.free_obj = php_openssl_session_free_obj;
+	php_openssl_session_object_handlers.get_constructor = php_openssl_session_get_constructor;
+	php_openssl_session_object_handlers.clone_obj = NULL;
+	php_openssl_session_object_handlers.compare = zend_objects_not_comparable;
 
 	register_openssl_symbols(module_number);
 
@@ -425,7 +821,7 @@ PHP_MINIT_FUNCTION(openssl)
 	ssl_stream_data_index = SSL_get_ex_new_index(0, "PHP stream index", NULL, NULL, NULL);
 
 	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory);
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 	php_stream_xport_register("sslv3", php_openssl_ssl_socket_factory);
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory);
@@ -499,7 +895,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_unregister_url_stream_wrapper("ftps");
 
 	php_stream_xport_unregister("ssl");
-#ifndef OPENSSL_NO_SSL3
+#if OPENSSL_VERSION_NUMBER < 0x40000000L && !defined(OPENSSL_NO_SSL3)
 	php_stream_xport_unregister("sslv3");
 #endif
 	php_stream_xport_unregister("tls");
@@ -562,14 +958,11 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (bio_out) {
-		if (!notext && !X509_print(bio_out, cert)) {
+		if ((notext || X509_print(bio_out, cert)) && PEM_write_bio_X509(bio_out, cert)) {
+			RETVAL_TRUE;
+		} else {
 			php_openssl_store_errors();
 		}
-		if (!PEM_write_bio_X509(bio_out, cert)) {
-			php_openssl_store_errors();
-		}
-
-		RETVAL_TRUE;
 	} else {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "Error opening file %s", file_path);
@@ -864,8 +1257,7 @@ PHP_FUNCTION(openssl_x509_export)
 	}
 	if (!notext && !X509_print(bio_out, cert)) {
 		php_openssl_store_errors();
-	}
-	if (PEM_write_bio_X509(bio_out, cert)) {
+	} else if (PEM_write_bio_X509(bio_out, cert)) {
 		BUF_MEM *bio_buf;
 
 		BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -908,7 +1300,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 		RETURN_FALSE;
 	}
 
-	fingerprint = php_openssl_x509_fingerprint(cert, method, raw_output);
+	fingerprint = php_openssl_x509_fingerprint(cert, method, raw_output, NULL);
 	if (fingerprint) {
 		RETVAL_STR(fingerprint);
 	} else {
@@ -1003,8 +1395,8 @@ PHP_FUNCTION(openssl_x509_parse)
 	zval subitem;
 	zval critext;
 	int critcount = 0;
-	X509_EXTENSION *extension;
-	X509_NAME *subject_name;
+	PHP_OPENSSL_X509_EXTENSION *extension;
+	const X509_NAME *subject_name;
 	char *cert_name;
 	char *extname;
 	BIO *bio_out;
@@ -1069,6 +1461,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	str_serial = i2s_ASN1_INTEGER(NULL, asn1_serial);
 	/* Can return NULL on error or memory allocation failure */
 	if (!str_serial) {
+		OPENSSL_free(hex_serial);
 		php_openssl_store_errors();
 		goto err;
 	}
@@ -1102,7 +1495,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	for (i = 0; i < X509_PURPOSE_get_count(); i++) {
 		int id, purpset;
 		char * pname;
-		X509_PURPOSE * purp;
+		const X509_PURPOSE * purp;
 		zval subsub;
 
 		array_init(&subsub);
@@ -1156,7 +1549,7 @@ PHP_FUNCTION(openssl_x509_parse)
 				goto err_subitem;
 			}
 		}
-		else if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
+		else if (X509V3_EXT_print(bio_out, extension, 0, 0) > 0) {
 			BIO_get_mem_ptr(bio_out, &bio_buf);
 			add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 		} else {
@@ -1177,6 +1570,7 @@ PHP_FUNCTION(openssl_x509_parse)
 
 err_subitem:
 	zval_ptr_dtor(&subitem);
+	zval_ptr_dtor(&critext);
 err:
 	zend_array_destroy(Z_ARR_P(return_value));
 	if (cert_str) {
@@ -1264,9 +1658,20 @@ PHP_FUNCTION(openssl_x509_read)
 		RETURN_FALSE;
 	}
 
+	X509 *obj_x509;
+	if (cert_obj) {
+		obj_x509 = X509_dup(cert);
+		if (!obj_x509) {
+			php_error_docref(NULL, E_WARNING, "X.509 Certificate could not be duplicated");
+			RETURN_FALSE;
+		}
+	} else {
+		obj_x509 = cert;
+	}
+
 	object_init_ex(return_value, php_openssl_certificate_ce);
 	x509_cert_obj = Z_OPENSSL_CERTIFICATE_P(return_value);
-	x509_cert_obj->x509 = cert_obj ? X509_dup(cert) : cert;
+	x509_cert_obj->x509 = obj_x509;
 }
 /* }}} */
 
@@ -1452,7 +1857,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 
 	if (p12 != NULL) {
 		bio_out = BIO_new(BIO_s_mem());
-		if (i2d_PKCS12_bio(bio_out, p12)) {
+		if (bio_out && i2d_PKCS12_bio(bio_out, p12)) {
 			BUF_MEM *bio_buf;
 
 			BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1512,12 +1917,13 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		zout = zend_try_array_init(zout);
 		if (!zout) {
+			sk_X509_pop_free(ca, X509_free);
 			goto cleanup;
 		}
 
 		if (cert) {
 			bio_out = BIO_new(BIO_s_mem());
-			if (PEM_write_bio_X509(bio_out, cert)) {
+			if (bio_out && PEM_write_bio_X509(bio_out, cert)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
@@ -1530,6 +1936,10 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		if (pkey) {
 			bio_out = BIO_new(BIO_s_mem());
+			if (!bio_out) {
+				goto cleanup;
+			}
+
 			if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1544,13 +1954,16 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		cert_num = sk_X509_num(ca);
 		if (ca && cert_num) {
 			array_init(&zextracerts);
+			bio_out = BIO_new(BIO_s_mem());
+			if (!bio_out) {
+				goto cleanup;
+			}
 
 			for (i = 0; i < cert_num; i++) {
 				zval zextracert;
 				X509* aCA = sk_X509_pop(ca);
 				if (!aCA) break;
 
-				bio_out = BIO_new(BIO_s_mem());
 				if (PEM_write_bio_X509(bio_out, aCA)) {
 					BUF_MEM *bio_buf;
 					BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1558,9 +1971,10 @@ PHP_FUNCTION(openssl_pkcs12_read)
 					add_index_zval(&zextracerts, i, &zextracert);
 				}
 
+				(void)BIO_reset(bio_out);
 				X509_free(aCA);
-				BIO_free(bio_out);
 			}
+			BIO_free(bio_out);
 
 			sk_X509_free(ca);
 			add_assoc_zval(zout, "extracerts", &zextracerts);
@@ -1619,9 +2033,9 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	bio_out = BIO_new_file(file_path, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (bio_out != NULL) {
 		if (!notext && !X509_REQ_print(bio_out, csr)) {
+			/* TODO: warn? */
 			php_openssl_store_errors();
-		}
-		if (!PEM_write_bio_X509_REQ(bio_out, csr)) {
+		} else if (!PEM_write_bio_X509_REQ(bio_out, csr)) {
 			php_error_docref(NULL, E_WARNING, "Error writing PEM to file %s", file_path);
 			php_openssl_store_errors();
 		} else {
@@ -1670,9 +2084,7 @@ PHP_FUNCTION(openssl_csr_export)
 	bio_out = BIO_new(BIO_s_mem());
 	if (!notext && !X509_REQ_print(bio_out, csr)) {
 		php_openssl_store_errors();
-	}
-
-	if (PEM_write_bio_X509_REQ(bio_out, csr)) {
+	} else if (PEM_write_bio_X509_REQ(bio_out, csr)) {
 		BUF_MEM *bio_buf;
 
 		BIO_get_mem_ptr(bio_out, &bio_buf);
@@ -1812,10 +2224,17 @@ PHP_FUNCTION(openssl_csr_sign)
 			goto cleanup;
 		}
 	} else {
-		PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+		if (!PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial)) {
+			php_openssl_store_errors();
+			php_error_docref(NULL, E_WARNING, "Error setting serial number");
+			goto cleanup;
+		}
 	}
 
-	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
+	if (!X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr))) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
 
 	if (cert == NULL) {
 		cert = new_cert;
@@ -1824,8 +2243,11 @@ PHP_FUNCTION(openssl_csr_sign)
 		php_openssl_store_errors();
 		goto cleanup;
 	}
-	X509_gmtime_adj(X509_getm_notBefore(new_cert), 0);
-	X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days);
+	if (!X509_gmtime_adj(X509_getm_notBefore(new_cert), 0)
+		|| !X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days)) {
+		php_openssl_store_errors();
+		goto cleanup;
+	}
 	i = X509_set_pubkey(new_cert, key);
 	if (!i) {
 		php_openssl_store_errors();
@@ -1961,7 +2383,7 @@ PHP_FUNCTION(openssl_csr_get_subject)
 	zend_object *csr_obj;
 	zend_string *csr_str;
 	bool use_shortnames = 1;
-	X509_NAME *subject;
+	const X509_NAME *subject;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
@@ -2215,6 +2637,10 @@ PHP_FUNCTION(openssl_pkey_export)
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS) {
 		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			php_openssl_store_errors();
+			goto cleanup;
+		}
 
 		if (passphrase && req.priv_key_encrypt) {
 			if (req.priv_key_encrypt_cipher) {
@@ -2243,6 +2669,7 @@ PHP_FUNCTION(openssl_pkey_export)
 			php_openssl_store_errors();
 		}
 	}
+cleanup:
 	EVP_PKEY_free(key);
 	BIO_free(bio_out);
 	PHP_SSL_REQ_DISPOSE(&req);
@@ -2318,7 +2745,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	EVP_PKEY *pkey = Z_OPENSSL_PKEY_P(key)->pkey;
 
 	BIO *out = BIO_new(BIO_s_mem());
-	if (!PEM_write_bio_PUBKEY(out, pkey)) {
+	if (!out || !PEM_write_bio_PUBKEY(out, pkey)) {
 		BIO_free(out);
 		php_openssl_store_errors();
 		RETURN_FALSE;
@@ -2459,12 +2886,14 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)ZSTR_VAL(out_buffer)) == 1) {
 		ZSTR_VAL(out_buffer)[key_length] = 0;
-		RETURN_NEW_STR(out_buffer);
+		RETVAL_NEW_STR(out_buffer);
 	} else {
 		php_openssl_store_errors();
 		zend_string_release_ex(out_buffer, 0);
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+
+	php_openssl_release_evp_md(digest);
 }
 /* }}} */
 
@@ -2712,16 +3141,21 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	/* tack on extra headers */
 	if (zheaders) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
+			int ret;
 			zend_string *str = zval_try_get_string(zcertval);
 			if (UNEXPECTED(!str)) {
 				goto clean_exit;
 			}
 			if (strindex) {
-				BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), ZSTR_VAL(str));
+				ret = BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), ZSTR_VAL(str));
 			} else {
-				BIO_printf(outfile, "%s\n", ZSTR_VAL(str));
+				ret = BIO_printf(outfile, "%s\n", ZSTR_VAL(str));
 			}
 			zend_string_release(str);
+			if (ret < 0) {
+				php_openssl_store_errors();
+				goto clean_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -2806,33 +3240,41 @@ PHP_FUNCTION(openssl_pkcs7_read)
 	}
 
 	if (certs != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
 		for (i = 0; i < sk_X509_num(certs); i++) {
 			X509* ca = sk_X509_value(certs, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509(bio_out, ca)) {
+			if (PEM_write_bio_X509(bio_out, ca)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			(void)BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	if (crls != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
 		for (i = 0; i < sk_X509_CRL_num(crls); i++) {
 			X509_CRL* crl = sk_X509_CRL_value(crls, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509_CRL(bio_out, crl)) {
+			if (PEM_write_bio_X509_CRL(bio_out, crl)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			(void)BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	RETVAL_TRUE;
@@ -2941,6 +3383,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 			zend_string_release(str);
 			if (ret < 0) {
 				php_openssl_store_errors();
+				goto clean_exit;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -3341,16 +3784,21 @@ PHP_FUNCTION(openssl_cms_encrypt)
 	/* tack on extra headers */
 	if (zheaders && encoding == ENCODING_SMIME) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
+			int ret;
 			zend_string *str = zval_try_get_string(zcertval);
 			if (UNEXPECTED(!str)) {
 				goto clean_exit;
 			}
 			if (strindex) {
-				BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), ZSTR_VAL(str));
+				ret = BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), ZSTR_VAL(str));
 			} else {
-				BIO_printf(outfile, "%s\n", ZSTR_VAL(str));
+				ret = BIO_printf(outfile, "%s\n", ZSTR_VAL(str));
 			}
 			zend_string_release(str);
+			if (ret < 0) {
+				php_openssl_store_errors();
+				goto clean_exit;
+			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -3467,33 +3915,43 @@ PHP_FUNCTION(openssl_cms_read)
 	}
 
 	if (certs != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
+
 		for (i = 0; i < sk_X509_num(certs); i++) {
 			X509* ca = sk_X509_value(certs, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509(bio_out, ca)) {
+			if (PEM_write_bio_X509(bio_out, ca)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			(void)BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	if (crls != NULL) {
+		bio_out = BIO_new(BIO_s_mem());
+		if (!bio_out) {
+			goto clean_exit;
+		}
+
 		for (i = 0; i < sk_X509_CRL_num(crls); i++) {
 			X509_CRL* crl = sk_X509_CRL_value(crls, i);
 
-			bio_out = BIO_new(BIO_s_mem());
-			if (bio_out && PEM_write_bio_X509_CRL(bio_out, crl)) {
+			if (PEM_write_bio_X509_CRL(bio_out, crl)) {
 				BUF_MEM *bio_buf;
 				BIO_get_mem_ptr(bio_out, &bio_buf);
 				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
 				add_index_zval(zout, i, &zcert);
 			}
-			BIO_free(bio_out);
+			(void)BIO_reset(bio_out);
 		}
+		BIO_free(bio_out);
 	}
 
 	RETVAL_TRUE;
@@ -3631,6 +4089,7 @@ PHP_FUNCTION(openssl_cms_sign)
 			zend_string_release(str);
 			if (ret < 0) {
 				php_openssl_store_errors();
+				goto clean_exit;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -4030,7 +4489,7 @@ PHP_FUNCTION(openssl_error_string)
 		RETURN_FALSE;
 	}
 
-	OPENSSL_G(errors)->bottom = (OPENSSL_G(errors)->bottom + 1) % ERR_NUM_ERRORS;
+	OPENSSL_G(errors)->bottom = (OPENSSL_G(errors)->bottom + 1) % PHP_OPENSSL_ERR_BUFFER_SIZE;
 	val = OPENSSL_G(errors)->buffer[OPENSSL_G(errors)->bottom];
 
 	if (val) {
@@ -4066,6 +4525,27 @@ static zend_result php_openssl_setup_rsa_padding(EVP_PKEY_CTX *pctx, EVP_PKEY *p
 	return SUCCESS;
 }
 
+static zend_result php_openssl_setup_rsa_pss_salt_length(EVP_PKEY_CTX *pctx, EVP_PKEY *pkey, zend_long padding, zend_long salt_length)
+{
+	/* Only apply if using PSS padding */
+	if (padding != RSA_PKCS1_PSS_PADDING) {
+		return SUCCESS;
+	}
+
+	/* Only apply to RSA keys */
+	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA && EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA_PSS) {
+		return SUCCESS;
+	}
+
+	if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pctx, (int)salt_length) <= 0) {
+		php_openssl_store_errors();
+		php_error_docref(NULL, E_WARNING, "Could not set RSA-PSS salt length");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 /* {{{ Signs data */
 PHP_FUNCTION(openssl_sign)
 {
@@ -4079,16 +4559,18 @@ PHP_FUNCTION(openssl_sign)
 	zend_long method_long = OPENSSL_ALGO_SHA1;
 	const EVP_MD *mdtype;
 	zend_long padding = 0;
+	zend_long salt_length = RSA_PSS_SALTLEN_AUTO;
 	EVP_PKEY_CTX *pctx;
 	bool can_default_digest = ZEND_THREEWAY_COMPARE(PHP_OPENSSL_API_VERSION, 0x30000) >= 0;
 
-	ZEND_PARSE_PARAMETERS_START(3, 5)
+	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_ZVAL(signature)
 		Z_PARAM_ZVAL(key)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG(method_str, method_long)
 		Z_PARAM_LONG(padding)
+		Z_PARAM_LONG(salt_length)
 	ZEND_PARSE_PARAMETERS_END();
 
 	pkey = php_openssl_pkey_from_zval(key, 0, "", 0, 3);
@@ -4109,12 +4591,14 @@ PHP_FUNCTION(openssl_sign)
 		php_error_docref(NULL, E_WARNING, "Unknown digest algorithm");
 		RETURN_FALSE;
 	}
+	PHP_OPENSSL_CHECK_LONG_TO_INT(salt_length, salt_length, 6);
 
 	md_ctx = EVP_MD_CTX_create();
 	size_t siglen;
 	if (md_ctx != NULL &&
 			EVP_DigestSignInit(md_ctx, &pctx, mdtype, NULL, pkey) &&
 			php_openssl_setup_rsa_padding(pctx, pkey, padding) == SUCCESS &&
+			php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == SUCCESS &&
 			EVP_DigestSign(md_ctx, NULL, &siglen, (unsigned char*)data, data_len) &&
 			(sigbuf = zend_string_alloc(siglen, 0)) != NULL &&
 			EVP_DigestSign(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, (unsigned char*)data, data_len)) {
@@ -4148,19 +4632,22 @@ PHP_FUNCTION(openssl_verify)
 	zend_string *method_str = NULL;
 	zend_long method_long = OPENSSL_ALGO_SHA1;
 	zend_long padding = 0;
+	zend_long salt_length = RSA_PSS_SALTLEN_AUTO;
 	EVP_PKEY_CTX *pctx;
 	bool can_default_digest = ZEND_THREEWAY_COMPARE(PHP_OPENSSL_API_VERSION, 0x30000) >= 0;
 
-	ZEND_PARSE_PARAMETERS_START(3, 5)
+	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_STRING(signature, signature_len)
 		Z_PARAM_ZVAL(key)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG(method_str, method_long)
 		Z_PARAM_LONG(padding)
+		Z_PARAM_LONG(salt_length)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(signature_len, signature, 2);
+	PHP_OPENSSL_CHECK_LONG_TO_INT(salt_length, salt_length, 6);
 
 	if (method_str) {
 		mdtype = php_openssl_get_evp_md_by_name(ZSTR_VAL(method_str));
@@ -4189,7 +4676,8 @@ PHP_FUNCTION(openssl_verify)
 	}
 
 	if (!EVP_DigestVerifyInit(md_ctx, &pctx, mdtype, NULL, pkey) ||
-			php_openssl_setup_rsa_padding(pctx, pkey, padding) == FAILURE) {
+			php_openssl_setup_rsa_padding(pctx, pkey, padding) == FAILURE ||
+			php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == FAILURE) {
 		php_openssl_store_errors();
 		err = -1;
 		goto cleanup;
@@ -4245,6 +4733,7 @@ PHP_FUNCTION(openssl_seal)
 
 	iv_len = EVP_CIPHER_iv_length(cipher);
 	if (!iv && iv_len > 0) {
+		php_openssl_release_evp_cipher(cipher);
 		zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
 		RETURN_THROWS();
 	}
@@ -4331,6 +4820,7 @@ clean_exit:
 	efree(eks);
 	efree(eksl);
 	efree(pkeys);
+	php_openssl_release_evp_cipher(cipher);
 }
 /* }}} */
 
@@ -4369,18 +4859,20 @@ PHP_FUNCTION(openssl_open)
 	cipher = php_openssl_get_evp_cipher_by_name(method);
 	if (!cipher) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out_pkey;
 	}
 
 	cipher_iv_len = EVP_CIPHER_iv_length(cipher);
 	if (cipher_iv_len > 0) {
 		if (!iv) {
 			zend_argument_value_error(6, "cannot be null for the chosen cipher algorithm");
-			RETURN_THROWS();
+			goto out_pkey;
 		}
 		if ((size_t)cipher_iv_len != iv_len) {
 			php_error_docref(NULL, E_WARNING, "IV length is invalid");
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto out_pkey;
 		}
 		iv_buf = (unsigned char *)iv;
 	} else {
@@ -4402,8 +4894,10 @@ PHP_FUNCTION(openssl_open)
 	}
 
 	efree(buf);
-	EVP_PKEY_free(pkey);
 	EVP_CIPHER_CTX_free(ctx);
+out_pkey:
+	EVP_PKEY_free(pkey);
+	php_openssl_release_evp_cipher(cipher);
 }
 /* }}} */
 
@@ -4483,7 +4977,8 @@ PHP_FUNCTION(openssl_digest)
 	sigbuf = zend_string_alloc(siglen, 0);
 
 	md_ctx = EVP_MD_CTX_create();
-	if (EVP_DigestInit(md_ctx, mdtype) &&
+	if (md_ctx &&
+			EVP_DigestInit(md_ctx, mdtype) &&
 			EVP_DigestUpdate(md_ctx, (unsigned char *)data, data_len) &&
 			EVP_DigestFinal (md_ctx, (unsigned char *)ZSTR_VAL(sigbuf), &siglen)) {
 		if (raw_output) {
@@ -4519,7 +5014,7 @@ PHP_FUNCTION(openssl_encrypt)
 	zend_string *ret;
 	zval *tag = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lszsl", &data, &data_len, &method, &method_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lszs!l", &data, &data_len, &method, &method_len,
 					&password, &password_len, &options, &iv, &iv_len, &tag, &aad, &aad_len, &tag_len) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -4541,7 +5036,7 @@ PHP_FUNCTION(openssl_decrypt)
 	size_t data_len, method_len, password_len, iv_len = 0, tag_len = 0, aad_len = 0;
 	zend_string *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lss!s", &data, &data_len, &method, &method_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|lss!s!", &data, &data_len, &method, &method_len,
 					&password, &password_len, &options, &iv, &iv_len, &tag, &tag_len, &aad, &aad_len) == FAILURE) {
 		RETURN_THROWS();
 	}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit soap.stub.php instead.
- * Stub hash: 24e266bf0933d5622f2a341db5b694ecb1740f13 */
+ * Stub hash: 14c74a5d6f547837f536920d5abb741e2b6e4373 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -574,12 +574,6 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string *property_sdl_class_Soap_Sdl = zend_string_init("Soap\\Sdl", sizeof("Soap\\Sdl")-1, 1);
 	zend_declare_typed_property(class_entry, property_sdl_name, &property_sdl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_sdl_class_Soap_Sdl, 0, MAY_BE_NULL));
 	zend_string_release_ex(property_sdl_name, true);
-
-	zval property_typemap_default_value;
-	ZVAL_NULL(&property_typemap_default_value);
-	zend_string *property_typemap_name = zend_string_init("typemap", sizeof("typemap") - 1, true);
-	zend_declare_typed_property(class_entry, property_typemap_name, &property_typemap_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
-	zend_string_release_ex(property_typemap_name, true);
 
 	zval property_httpsocket_default_value;
 	ZVAL_NULL(&property_httpsocket_default_value);

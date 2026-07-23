@@ -1,13 +1,27 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 3c228f4227e7543be5c12c99074789d92c27ab99 */
+ * Stub hash: bfd9247fa79baf877d600134c9ef615ec5ca9cea */
 
-#ifndef ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H
-#define ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H
+#ifndef ZEND_PHP_URI_DECL_bfd9247fa79baf877d600134c9ef615ec5ca9cea_H
+#define ZEND_PHP_URI_DECL_bfd9247fa79baf877d600134c9ef615ec5ca9cea_H
 
 typedef enum zend_enum_Uri_UriComparisonMode {
 	ZEND_ENUM_Uri_UriComparisonMode_IncludeFragment = 1,
 	ZEND_ENUM_Uri_UriComparisonMode_ExcludeFragment = 2,
 } zend_enum_Uri_UriComparisonMode;
+
+typedef enum zend_enum_Uri_Rfc3986_UriType {
+	ZEND_ENUM_Uri_Rfc3986_UriType_AbsolutePathReference = 1,
+	ZEND_ENUM_Uri_Rfc3986_UriType_RelativePathReference = 2,
+	ZEND_ENUM_Uri_Rfc3986_UriType_NetworkPathReference = 3,
+	ZEND_ENUM_Uri_Rfc3986_UriType_Uri = 4,
+} zend_enum_Uri_Rfc3986_UriType;
+
+typedef enum zend_enum_Uri_Rfc3986_UriHostType {
+	ZEND_ENUM_Uri_Rfc3986_UriHostType_IPv4 = 1,
+	ZEND_ENUM_Uri_Rfc3986_UriHostType_IPv6 = 2,
+	ZEND_ENUM_Uri_Rfc3986_UriHostType_IPvFuture = 3,
+	ZEND_ENUM_Uri_Rfc3986_UriHostType_RegisteredName = 4,
+} zend_enum_Uri_Rfc3986_UriHostType;
 
 typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_DomainToAscii = 1,
@@ -41,4 +55,12 @@ typedef enum zend_enum_Uri_WhatWg_UrlValidationErrorType {
 	ZEND_ENUM_Uri_WhatWg_UrlValidationErrorType_FileInvalidWindowsDriveLetterHost = 29,
 } zend_enum_Uri_WhatWg_UrlValidationErrorType;
 
-#endif /* ZEND_PHP_URI_DECL_3c228f4227e7543be5c12c99074789d92c27ab99_H */
+typedef enum zend_enum_Uri_WhatWg_UrlHostType {
+	ZEND_ENUM_Uri_WhatWg_UrlHostType_IPv4 = 1,
+	ZEND_ENUM_Uri_WhatWg_UrlHostType_IPv6 = 2,
+	ZEND_ENUM_Uri_WhatWg_UrlHostType_Domain = 3,
+	ZEND_ENUM_Uri_WhatWg_UrlHostType_Opaque = 4,
+	ZEND_ENUM_Uri_WhatWg_UrlHostType_Empty = 5,
+} zend_enum_Uri_WhatWg_UrlHostType;
+
+#endif /* ZEND_PHP_URI_DECL_bfd9247fa79baf877d600134c9ef615ec5ca9cea_H */

@@ -521,6 +521,8 @@ IR_NEVER_INLINE void __jit_debug_register_code(void)
 static bool ir_gdb_register_code(const void *object, size_t size)
 {
 	ir_gdbjit_code_entry *entry;
+	ir_elf_header *elf_header;
+	ir_elf_sectheader *elf_section, *elf_section_end;
 
 	entry = malloc(sizeof(ir_gdbjit_code_entry) + size);
 	if (entry == NULL) {
@@ -531,6 +533,17 @@ static bool ir_gdb_register_code(const void *object, size_t size)
 	entry->symfile_size = size;
 
 	memcpy((char *)entry->symfile_addr, object, size);
+
+	elf_header = (ir_elf_header*)entry->symfile_addr;
+	elf_section = (ir_elf_sectheader*)(entry->symfile_addr + elf_header->shofs);
+	elf_section_end = (ir_elf_sectheader*)((char*)elf_section + (elf_header->shentsize * elf_header->shnum));
+
+	while (elf_section < elf_section_end) {
+		if ((elf_section->flags & ELFSECT_FLAGS_ALLOC) && elf_section->addr == 0) {
+			elf_section->addr = (uintptr_t)(entry->symfile_addr + elf_section->ofs);
+		}
+		elf_section = (ir_elf_sectheader*)((char*)elf_section + elf_header->shentsize);
+	}
 
 	entry->prev_entry = NULL;
 	entry->next_entry = __jit_debug_descriptor.first_entry;

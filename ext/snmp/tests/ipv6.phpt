@@ -13,6 +13,8 @@ if (@inet_ntop($packed) === false) {
     die("skip no IPv6 support");
 }
 ?>
+--XFAIL--
+SNMP tests might possibly fail on Windows
 --FILE--
 <?php
 require_once(__DIR__.'/snmp_include.inc');
@@ -22,10 +24,12 @@ snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 var_dump(snmpget($hostname6_port, $community, '.1.3.6.1.2.1.1.1.0'));
-var_dump(snmpget('[dead:beef::', $community, '.1.3.6.1.2.1.1.1.0'));
+try {
+    var_dump(snmpget('[dead:beef::', $community, '.1.3.6.1.2.1.1.1.0'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECTF--
 string(%d) "%s"
-
-Warning: snmpget(): Malformed IPv6 address, closing square bracket missing in %s on line %d
-bool(false)
+snmpget(): Argument #1 ($hostname) has a malformed IPv6 address, closing square bracket missing

@@ -13,7 +13,6 @@ We will describe now how to create these and how to put things together.
 While the result will run on any system, a developer's setup needs these tools:
 
 * GNU autoconf
-* GNU libtool
 * GNU m4
 
 All of these are available from

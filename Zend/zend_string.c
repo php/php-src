@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -18,6 +17,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_multiply.h"
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
@@ -52,6 +52,17 @@ ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
 
+/* this is read-only, so it's ok */
+ZEND_SET_ALIGNED(16, static const char zend_hexconvtab[]) = "0123456789abcdef";
+
+static zend_always_inline void zend_bin2hex_impl(char *out, const unsigned char *in, size_t in_len, const char *hexconvtab)
+{
+	for (size_t i = 0; i < in_len; i++) {
+		out[i * 2] = hexconvtab[in[i] >> 4];
+		out[i * 2 + 1] = hexconvtab[in[i] & 0x0f];
+	}
+}
+
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str)
 {
 	return ZSTR_H(str) = zend_hash_func(ZSTR_VAL(str), ZSTR_LEN(str));
@@ -60,6 +71,21 @@ ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str)
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len)
 {
 	return zend_inline_hash_func(str, len);
+}
+
+ZEND_API void ZEND_FASTCALL zend_bin2hex(char *out, const unsigned char *in, size_t in_len)
+{
+	zend_bin2hex_impl(out, in, in_len, zend_hexconvtab);
+}
+
+ZEND_API zend_string *zend_bin2hex_str(const unsigned char *in, size_t in_len)
+{
+	zend_string *result = zend_string_safe_alloc(in_len, 2 * sizeof(char), 0, 0);
+
+	zend_bin2hex(ZSTR_VAL(result), in, in_len);
+	ZSTR_VAL(result)[in_len * 2] = '\0';
+
+	return result;
 }
 
 static void _str_dtor(zval *zv)
@@ -474,12 +500,12 @@ ZEND_API zend_string *zend_string_concat2(
 		const char *str1, size_t str1_len,
 		const char *str2, size_t str2_len)
 {
-	size_t len = str1_len + str2_len;
-	zend_string *res = zend_string_alloc(len, 0);
+	zend_string *res = zend_string_safe_alloc(1, str1_len, str2_len, 0);
 
-	memcpy(ZSTR_VAL(res), str1, str1_len);
-	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
-	ZSTR_VAL(res)[len] = '\0';
+	char *p = ZSTR_VAL(res);
+	p = zend_mempcpy(p, str1, str1_len);
+	p = zend_mempcpy(p, str2, str2_len);
+	*p++ = '\0';
 
 	return res;
 }
@@ -489,13 +515,15 @@ ZEND_API zend_string *zend_string_concat3(
 		const char *str2, size_t str2_len,
 		const char *str3, size_t str3_len)
 {
-	size_t len = str1_len + str2_len + str3_len;
+	size_t tmp_len = zend_safe_address_guarded(1, str1_len, str2_len);
+	size_t len = zend_safe_address_guarded(1, tmp_len, str3_len);
 	zend_string *res = zend_string_alloc(len, 0);
 
-	memcpy(ZSTR_VAL(res), str1, str1_len);
-	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
-	memcpy(ZSTR_VAL(res) + str1_len + str2_len, str3, str3_len);
-	ZSTR_VAL(res)[len] = '\0';
+	char *p = ZSTR_VAL(res);
+	p = zend_mempcpy(p, str1, str1_len);
+	p = zend_mempcpy(p, str2, str2_len);
+	p = zend_mempcpy(p, str3, str3_len);
+	*p++ = '\0';
 
 	return res;
 }

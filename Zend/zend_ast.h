@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Bob Weinand <bwoebi@php.net>                                |
    |          Dmitry Stogov <dmitry@php.net>                              |
@@ -144,7 +143,7 @@ enum _zend_ast_kind {
 	ZEND_AST_DECLARE,
 	ZEND_AST_USE_TRAIT,
 	ZEND_AST_TRAIT_PRECEDENCE,
-	ZEND_AST_METHOD_REFERENCE,
+	ZEND_AST_TRAIT_METHOD_REFERENCE,
 	ZEND_AST_NAMESPACE,
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
@@ -153,7 +152,6 @@ enum _zend_ast_kind {
 	ZEND_AST_MATCH,
 	ZEND_AST_MATCH_ARM,
 	ZEND_AST_NAMED_ARG,
-	ZEND_AST_PARENT_PROPERTY_HOOK_CALL,
 	ZEND_AST_PIPE,
 
 	/* 3 child nodes */
@@ -352,7 +350,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *ast, zend_class_entry *scope, bool *short_circuited_ptr, zend_ast_evaluate_ctx *ctx);
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
+/* Copies 'ast' to the heap, returns a refcounted AST reference */
 ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);
+/* Duplicates 'ast' on the arena */
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_dup(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
@@ -360,7 +361,7 @@ typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr, void *context);
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *context);
 
 static zend_always_inline size_t zend_ast_size(uint32_t children) {
-	return XtOffsetOf(zend_ast, child) + (sizeof(zend_ast *) * children);
+	return offsetof(zend_ast, child) + (sizeof(zend_ast *) * children);
 }
 
 static zend_always_inline bool zend_ast_is_special(const zend_ast *ast) {
@@ -441,5 +442,8 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr);
 
 zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast);
+
+/* Recognize parent::$prop::get() pattern. */
+bool zend_ast_is_parent_hook_call(const zend_ast *ast);
 
 #endif

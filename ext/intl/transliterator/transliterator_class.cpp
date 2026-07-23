@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -80,7 +80,7 @@ static void transliterator_object_init( Transliterator_object* to )
 /* }}} */
 
 /* {{{ void transliterator_object_destroy( Transliterator_object* to )
- * Clean up mem allocted by internals of Transliterator_object
+ * Clean up mem allocated by internals of Transliterator_object
  */
 static void transliterator_object_destroy( Transliterator_object* to )
 {
@@ -130,7 +130,7 @@ static zend_object *Transliterator_object_create( zend_class_entry *ce )
 /* {{{ clone handler for Transliterator */
 static zend_object *Transliterator_clone_obj( zend_object *object )
 {
-	Transliterator_object *to_orig = php_intl_transliterator_fetch_object(object);
+	const Transliterator_object *to_orig = php_intl_transliterator_fetch_object(object);
 	zend_object           *ret_val = Transliterator_ce_ptr->create_object(object->ce);
 	Transliterator_object  *to_new = php_intl_transliterator_fetch_object(ret_val);
 
@@ -167,7 +167,7 @@ U_CFUNC void transliterator_register_Transliterator_class( void )
 	Transliterator_ce_ptr->create_object = Transliterator_object_create;
 	Transliterator_ce_ptr->default_object_handlers = &Transliterator_handlers;
 	memcpy( &Transliterator_handlers, &std_object_handlers, sizeof Transliterator_handlers );
-	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
+	Transliterator_handlers.offset = offsetof(Transliterator_object, zo);
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
 }

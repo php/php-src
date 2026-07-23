@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Omar Kilani <omar@php.net>                                   |
   |         Jakub Zelenka <bukka@php.net>                                |
@@ -54,6 +52,7 @@ static inline void php_json_pretty_print_char(smart_str *buf, int options, char 
 static inline void php_json_pretty_print_indent(smart_str *buf, int options, const php_json_encoder *encoder) /* {{{ */
 {
 	if (options & PHP_JSON_PRETTY_PRINT) {
+		smart_str_alloc(buf, encoder->depth * 4, 0);
 		for (int i = 0; i < encoder->depth; ++i) {
 			smart_str_appendl(buf, "    ", 4);
 		}
@@ -578,6 +577,11 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 
 	ZEND_GUARD_PROTECT_RECURSION(guard, JSON);
 
+	/* jsonSerialize() may drop the last reference to the object, e.g. by
+	 * nulling a reference that aliases the encoded array slot; keep it alive
+	 * so the recursion guard and the identity check below stay valid. */
+	GC_ADDREF(obj);
+
 	zend_function *json_serialize_method = zend_hash_str_find_ptr(&ce->function_table, ZEND_STRL("jsonserialize"));
 	ZEND_ASSERT(json_serialize_method != NULL && "This should be guaranteed prior to calling this function");
 	zend_call_known_function(json_serialize_method, obj, ce, &retval, 0, NULL, NULL);
@@ -587,6 +591,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 			smart_str_appendl(buf, "null", 4);
 		}
 		ZEND_GUARD_UNPROTECT_RECURSION(guard, JSON);
+		OBJ_RELEASE(obj);
 		return FAILURE;
 	}
 
@@ -601,6 +606,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 	}
 
 	zval_ptr_dtor(&retval);
+	OBJ_RELEASE(obj);
 
 	return return_code;
 }

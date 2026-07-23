@@ -4,15 +4,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jani Taskinen <jani@php.net>                                |
@@ -57,7 +56,7 @@ static int get_int_val(zval *op) {
 			zend_string_free(Z_STR_P(op));
 			return val;
 		}
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -152,7 +151,7 @@ static void zend_ini_get_constant(zval *result, zval *name)
 		   	&& (c = zend_get_constant(Z_STR_P(name))) != 0) {
 		if (Z_TYPE_P(c) != IS_STRING) {
 			ZVAL_COPY_OR_DUP(&tmp, c);
-			if (Z_OPT_CONSTANT(tmp)) {
+			if (Z_OPT_TYPE(tmp) == IS_CONSTANT_AST) {
 				zval_update_constant_ex(&tmp, NULL);
 			}
 			convert_to_string(&tmp);

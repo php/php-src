@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Sparse Conditional Data Flow Propagation Framework      |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
@@ -254,9 +252,8 @@ static uint32_t cleanup_loop_var_free_block(const scdf_ctx *scdf, const zend_bas
  * unreachable. Blocks already marked unreachable are not removed. */
 uint32_t scdf_remove_unreachable_blocks(const scdf_ctx *scdf) {
 	zend_ssa *ssa = scdf->ssa;
-	int i;
 	uint32_t removed_ops = 0;
-	for (i = 0; i < ssa->cfg.blocks_count; i++) {
+	for (uint32_t i = 0; i < ssa->cfg.blocks_count; i++) {
 		const zend_basic_block *block = &ssa->cfg.blocks[i];
 		if (!zend_bitset_in(scdf->executable_blocks, i) && (block->flags & ZEND_BB_REACHABLE)) {
 			if (!kept_alive_by_loop_var_free(scdf, block)) {
