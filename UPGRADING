@@ -622,6 +622,8 @@ PHP 8.6 UPGRADE NOTES
   . Reduced temporary allocations when iterating Phar directories.
 
 - Standard:
+  . Improved performance of array_diff() for integer-only arrays with densely
+    distributed values.
   . Improved performance of array_fill_keys().
   . Improved performance of array_map() with multiple arrays passed.
   . Improved performance of array_sum() and array_product() for
