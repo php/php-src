@@ -123,7 +123,7 @@ std:
 	EXP     = ( INT | FLOAT ) [eE] [+-]? DIGIT+ ;
 	NL      = "\r"? "\n" ;
 	WS      = [ \t\r]+ ;
-	CMT_SL  = "//" [^\n\x00]* ;
+	CMT_SL  = "//" [^\r\n\x00]* ;
 	CMT_ML  = "/*" ( [^*\x00] | ( "*"+ [^*/\x00] ) )* "*"+ "/" ;
 	EOI     = "\000";
 	CTRL    = [\x00-\x1F] ;

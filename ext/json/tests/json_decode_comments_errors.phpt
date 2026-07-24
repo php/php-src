@@ -27,6 +27,8 @@ decode_dump("// x\n");
 // comments separate tokens but do not join values
 decode_dump("1 2", 0);
 decode_dump("1/*c*/2");
+// a comment does not replace a required colon
+decode_dump("{\"a\" /*c*/ 1}");
 
 try {
     json_decode("/*", true, 512, JSON_ALLOW_COMMENTS | JSON_THROW_ON_ERROR);
@@ -62,4 +64,6 @@ NULL
 4: Syntax error near location 1:3
 NULL
 4: Syntax error near location 1:7
+NULL
+4: Syntax error near location 1:12
 JsonException: 4 Syntax error near location 1:1

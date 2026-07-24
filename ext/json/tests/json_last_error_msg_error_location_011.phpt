@@ -41,6 +41,10 @@ json_validate_trycatchdump($json, 512, JSON_ALLOW_COMMENTS);
 echo "\nError on line 1, column 13:\n";
 json_validate_trycatchdump("[1, /* x */ ,]", 512, JSON_ALLOW_COMMENTS | JSON_ALLOW_TRAILING_COMMAS);
 
+// CRLF line endings inside a block comment count as one line each.
+echo "\nError on line 3, column 8:\n";
+json_validate_trycatchdump("[\r\n/* x\r\ny */ 1 2]", 512, JSON_ALLOW_COMMENTS);
+
 ?>
 --EXPECT--
 Error on line 4, column 20:
@@ -72,3 +76,8 @@ Error on line 1, column 13:
 bool(false)
 int(4)
 string(31) "Syntax error near location 1:13"
+
+Error on line 3, column 8:
+bool(false)
+int(4)
+string(30) "Syntax error near location 3:8"

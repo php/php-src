@@ -122,7 +122,9 @@ members:
 	|	member ','
 			{
 				if (!(parser->scanner.options & PHP_JSON_ALLOW_TRAILING_COMMAS)) {
-					parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+					if (!parser->scanner.errcode) {
+						parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+					}
 					zval_ptr_dtor_nogc(&$1);
 					YYERROR;
 				}
@@ -187,7 +189,9 @@ elements:
 	|	element ','
 			{
 				if (!(parser->scanner.options & PHP_JSON_ALLOW_TRAILING_COMMAS)) {
-					parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+					if (!parser->scanner.errcode) {
+						parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+					}
 					zval_ptr_dtor_nogc(&$1);
 					YYERROR;
 				}
