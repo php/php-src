@@ -1,11 +1,12 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setPassword() - error - missing host
+Test Uri\WhatWg\UrlBuilder::setPort() - error - file scheme with host and port
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setScheme("https");
-$builder->setPassword("pass");
+$builder->setScheme("file");
+$builder->setHost("example.com");
+$builder->setPort(123);
 
 try {
     $builder->build();

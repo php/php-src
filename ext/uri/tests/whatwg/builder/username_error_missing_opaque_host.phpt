@@ -1,11 +1,11 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setPassword() - error - missing host
+Test Uri\WhatWg\UrlBuilder::setUsername() - error - missing opaque host
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setScheme("https");
-$builder->setPassword("pass");
+$builder->setScheme("scheme");
+$builder->setUsername("user");
 
 try {
     $builder->build();

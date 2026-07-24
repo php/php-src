@@ -3,9 +3,9 @@ Test Uri\WhatWg\UrlBuilder::setHost() - success - IPv4 address
 --FILE--
 <?php
 
-$builder = new Uri\WhatWg\UrlBuilder()
-    ->setScheme("https")
-    ->setHost("192.168.0.1");
+$builder = new Uri\WhatWg\UrlBuilder();
+$builder->setScheme("https");
+$builder->setHost("192.168.0.1");
 $url = $builder->build();
 
 var_dump($url->toAsciiString());

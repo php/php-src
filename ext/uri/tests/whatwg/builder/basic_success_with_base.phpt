@@ -3,8 +3,8 @@ Test Uri\WhatWg\UrlBuilder basic - success - with base URL
 --FILE--
 <?php
 
-$builder = new Uri\WhatWg\UrlBuilder()
-    ->setPath("/foo/bar/baz");
+$builder = new Uri\WhatWg\UrlBuilder();
+$builder->setPath("/foo/bar/baz");
 $url = $builder->build(new Uri\WhatWg\Url("https://example.com"));
 
 var_dump($url->toAsciiString());

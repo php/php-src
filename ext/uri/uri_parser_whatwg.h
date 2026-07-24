@@ -27,6 +27,7 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_none(const zend_string *component);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_scheme(const zend_string *scheme);
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_host(const zend_string *host);
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_port(zend_long port);
 
 PHP_RINIT_FUNCTION(uri_parser_whatwg);

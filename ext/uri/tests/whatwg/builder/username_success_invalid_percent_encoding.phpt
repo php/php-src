@@ -1,12 +1,12 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setUsername() - success - invalid percent encoding
+Test Uri\WhatWg\UrlBuilder::setUsername() - success - invalid percent encoding is untouched
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("https");
 $builder->setHost("example.com");
-$builder->setUsername("%3"); /* TODO double check why does it work? */
+$builder->setUsername("%3");
 $url = $builder->build();
 
 var_dump($url->toAsciiString());

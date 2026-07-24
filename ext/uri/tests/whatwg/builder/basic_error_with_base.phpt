@@ -3,8 +3,8 @@ Test Uri\WhatWg\UrlBuilder basic - error - with base URL
 --FILE--
 <?php
 
-$builder = new Uri\WhatWg\UrlBuilder()
-    ->setPath("/foo/bar/baz");
+$builder = new Uri\WhatWg\UrlBuilder();
+$builder->setPath("/foo/bar/baz");
 
 try {
     $builder->build(new Uri\WhatWg\Url("/foo/bar"));

@@ -4,13 +4,34 @@ Test Uri\WhatWg\UrlBuilder::setFragment() - error - contains Unicode character
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
+$builder->setScheme("https");
+$builder->setHost("example.com");
+$builder->setFragment("főő");
+$url = $builder->build();
 
-try {
-    $builder->setFragment("főő");
-} catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
-}
+var_dump($url->toAsciiString());
+var_dump($url);
+var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
---EXPECT--
-
+--EXPECTF--
+string(34) "https://example.com/#f%C5%91%C5%91"
+object(Uri\WhatWg\Url)#%d (%d) {
+  ["scheme"]=>
+  string(5) "https"
+  ["username"]=>
+  NULL
+  ["password"]=>
+  NULL
+  ["host"]=>
+  string(11) "example.com"
+  ["port"]=>
+  NULL
+  ["path"]=>
+  string(1) "/"
+  ["query"]=>
+  NULL
+  ["fragment"]=>
+  string(13) "f%C5%91%C5%91"
+}
+bool(true)
