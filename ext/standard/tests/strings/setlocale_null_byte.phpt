@@ -27,19 +27,19 @@ try {
 }
 
 try {
-    var_dump(setlocale(LC_ALL, ["en_US.invalid", "C\0locale"]));
+    var_dump(setlocale(LC_ALL, ["zz_ZZ.nope", "C\0locale"]));
 } catch (ValueError $e) {
     echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
 }
 
 try {
-    var_dump(setlocale(LC_ALL, "invalid", ["C\0locale"]));
+    var_dump(setlocale(LC_ALL, "zz_ZZ.nope", ["C\0locale"]));
 } catch (TypeError $e) {
     echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
 }
 
 try {
-    var_dump(setlocale(LC_ALL, "invalid", new NullByteStringable()));
+    var_dump(setlocale(LC_ALL, "zz_ZZ.nope", new NullByteStringable()));
 } catch (ValueError $e) {
     echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
 }
