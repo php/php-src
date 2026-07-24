@@ -28,6 +28,8 @@
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
 
+ZEND_TSRMLS_CACHE_DEFINE()
+
 static const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"implicit_flush=1\n"
@@ -151,6 +153,15 @@ int fuzzer_init_php(const char *extra_ini)
 	__lsan_disable();
 #endif
 
+#ifdef ZTS
+	php_tsrm_startup();
+# ifdef PHP_WIN32
+	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
+#endif
+
+	zend_signal_startup();
+
 	sapi_startup(&fuzzer_module);
 	fuzzer_module.phpinfo_as_text = 1;
 
@@ -251,6 +262,10 @@ int fuzzer_shutdown_php(void)
 {
 	php_module_shutdown();
 	sapi_shutdown();
+
+#ifdef ZTS
+	tsrm_shutdown();
+#endif
 
 	free((void *)fuzzer_module.ini_entries);
 	return SUCCESS;
