@@ -208,6 +208,7 @@ PHP                                                                        NEWS
 02 Jul 2026, PHP 8.6.0alpha1
 
 - Core:
+  . Fixed bug GH-21824 (Crash in unserialize()). (Pratik Bhujel)
   . Added first-class callable cache to share instances for the duration of the
     request. (ilutov)
   . It is now possible to use reference assign on WeakMap without the key
