@@ -299,6 +299,11 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/tls_session_resumption
   . Added TLS external PSK support for streams with new strem context options:
     psk_client_cb and psk_server_cb. This allows setting and receiving PSK.
+  . Added TLS 1.3 early data (0-RTT) support for streams. Clients send early
+    data with the early_data context option; servers accept it with
+    max_early_data and receive it through the early_data_cb callback. The
+    outcome is reported as 'accepted', 'rejected' or 'not_sent' in the
+    early_data key of the crypto stream_get_meta_data() array.
 
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
