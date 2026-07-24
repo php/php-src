@@ -1058,7 +1058,7 @@ static zend_string *escape_html(const char *buffer, size_t buffer_len) {
  * html error messages if corresponding ini setting (html_errors) is activated.
  * See: CODING_STANDARDS.md for details.
  */
-PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
+PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *format, va_list args)
 {
 	zend_string *replace_origin = NULL;
 	char *docref_buf = NULL, *target = NULL;
@@ -1138,7 +1138,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		if (PG(error_include_args)) {
 			dynamic_params = zend_trace_current_function_args_string();
 		}
-		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, dynamic_params ? ZSTR_VAL(dynamic_params) : params);
+		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, dynamic_params ? ZSTR_VAL(dynamic_params) : "");
 		if (dynamic_params) {
 			zend_string_release(dynamic_params);
 		}
@@ -1243,7 +1243,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 #define php_error_docref_impl(docref, type, format) do {\
 		va_list args; \
 		va_start(args, format); \
-		php_verror(docref, "", type, format, args); \
+		php_verror(docref, type, format, args); \
 		va_end(args); \
 	} while (0)
 
