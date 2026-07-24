@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setFragment() - error - contains Unicode character
+Test Uri\WhatWg\UrlBuilder::setFragment() - success - contains Unicode character
 --FILE--
 <?php
 
