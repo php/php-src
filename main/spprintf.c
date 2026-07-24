@@ -88,7 +88,7 @@
 #include <locale.h>
 #ifdef ZTS
 #include "ext/standard/php_string.h"
-#define LCONV_DECIMAL_POINT (*lconv.decimal_point)
+#define LCONV_DECIMAL_POINT localeconv_decimal_point()
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
 #endif
@@ -196,9 +196,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
-#ifdef ZTS
-	struct lconv lconv;
-#else
+#ifndef ZTS
 	struct lconv *lconv = NULL;
 #endif
 
@@ -556,9 +554,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 						s = "inf";
 						s_len = 3;
 					} else {
-#ifdef ZTS
-						localeconv_r(&lconv);
-#else
+#ifndef ZTS
 						if (!lconv) {
 							lconv = localeconv();
 						}
@@ -614,9 +610,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-#ifdef ZTS
-					localeconv_r(&lconv);
-#else
+#ifndef ZTS
 					if (!lconv) {
 						lconv = localeconv();
 					}
