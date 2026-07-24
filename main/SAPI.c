@@ -369,10 +369,10 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len)
 	if (*mimetype != NULL) {
 		if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
 			newlen = len + (sizeof(";charset=")-1) + strlen(charset);
-			newtype = emalloc(newlen + 1);
-	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
-			strlcat(newtype, ";charset=", newlen + 1);
-			strlcat(newtype, charset, newlen + 1);
+			newtype = zend_cstr_concat3(
+				*mimetype, len,
+				";charset=", sizeof(";charset=")-1,
+				charset, strlen(charset));
 			efree(*mimetype);
 			*mimetype = newtype;
 			return newlen;
@@ -878,10 +878,9 @@ SAPI_API int sapi_send_headers(void)
 			SG(sapi_headers).mimetype = default_mimetype;
 
 			default_header.header_len = sizeof("Content-type: ") - 1 + len;
-			default_header.header = emalloc(default_header.header_len + 1);
-
-			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
-			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+			default_header.header = zend_cstr_concat(
+				"Content-type: ", sizeof("Content-type: ") - 1,
+				SG(sapi_headers).mimetype, len);
 
 			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
 		} else {

@@ -633,9 +633,9 @@ PHP_METHOD(Phar, webPhar)
 				IS_STRING == Z_TYPE_P(z_path_info)) {
 				entry_len = Z_STRLEN_P(z_path_info);
 				entry = estrndup(Z_STRVAL_P(z_path_info), entry_len);
-				path_info = emalloc(Z_STRLEN_P(z_script_name) + entry_len + 1);
-				memcpy(path_info, Z_STRVAL_P(z_script_name), Z_STRLEN_P(z_script_name));
-				memcpy(path_info + Z_STRLEN_P(z_script_name), entry, entry_len + 1);
+				path_info = zend_cstr_concat(
+					Z_STRVAL_P(z_script_name), Z_STRLEN_P(z_script_name),
+					entry, entry_len);
 				free_pathinfo = 1;
 			} else {
 				entry_len = 0;

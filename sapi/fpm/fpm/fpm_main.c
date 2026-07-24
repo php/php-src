@@ -568,15 +568,10 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
 
 		php_self_len = script_name_len + path_info_len;
-		php_self = emalloc(php_self_len + 1);
-
 		/* Concat script_name and path_info into php_self */
-		if (script_name) {
-			memcpy(php_self, script_name, script_name_len + 1);
-		}
-		if (path_info) {
-			memcpy(php_self + script_name_len, path_info, path_info_len + 1);
-		}
+		php_self = zend_cstr_concat(
+			script_name, script_name_len,
+			path_info, path_info_len);
 
 		/* Build the special-case PHP_SELF variable for the CGI version */
 		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len)) {
@@ -1235,12 +1230,9 @@ static void init_request_info(void)
 
 								/* PATH_TRANSLATED = DOCUMENT_ROOT + PATH_INFO */
 								path_translated_len = l + (env_path_info ? strlen(env_path_info) : 0);
-								path_translated = (char *) emalloc(path_translated_len + 1);
-								memcpy(path_translated, env_document_root, l);
-								if (env_path_info) {
-									memcpy(path_translated + l, env_path_info, (path_translated_len - l));
-								}
-								path_translated[path_translated_len] = '\0';
+								path_translated = zend_cstr_concat(
+									env_document_root, l,
+									env_path_info, path_translated_len - l);
 								if (orig_path_translated) {
 									FCGI_PUTENV(request, "ORIG_PATH_TRANSLATED", orig_path_translated);
 								}
@@ -1254,12 +1246,9 @@ static void init_request_info(void)
 								int path_translated_len = ptlen + (env_path_info ? strlen(env_path_info) : 0);
 								char *path_translated = NULL;
 
-								path_translated = (char *) emalloc(path_translated_len + 1);
-								memcpy(path_translated, pt, ptlen);
-								if (env_path_info) {
-									memcpy(path_translated + ptlen, env_path_info, path_translated_len - ptlen);
-								}
-								path_translated[path_translated_len] = '\0';
+								path_translated = zend_cstr_concat(
+									pt, ptlen,
+									env_path_info, path_translated_len - ptlen);
 								if (orig_path_translated) {
 									FCGI_PUTENV(request, "ORIG_PATH_TRANSLATED", orig_path_translated);
 								}
