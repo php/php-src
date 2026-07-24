@@ -2008,6 +2008,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_JMPNZ_EX:
 				case ZEND_BOOL:
 				case ZEND_BOOL_NOT:
+				case ZEND_BW_NOT:
 					ADD_OP1_TRACE_GUARD();
 					break;
 				case ZEND_ISSET_ISEMPTY_CV:
@@ -4463,6 +4464,22 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD)
 						 && !(res_info & MAY_BE_STRING)) {
 							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+						}
+						goto done;
+					case ZEND_BW_NOT:
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
+						/* Only the definitely-LONG fast path; otherwise fall back
+						 * to the VM handler (its previous behaviour). */
+						if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_LONG) {
+							break;
+						}
+						res_info = RES_INFO();
+						res_addr = RES_REG_ADDR();
+						if (!zend_jit_bw_not(&ctx, opline,
+								op1_info, OP1_REG_ADDR(),
+								res_info, res_addr)) {
+							goto jit_failure;
 						}
 						goto done;
 					case ZEND_BW_OR:
