@@ -27,7 +27,7 @@ try {
 }
 
 try {
-    var_dump(setlocale(LC_ALL, ["invalid", "C\0locale"]));
+    var_dump(setlocale(LC_ALL, ["en_US.invalid", "C\0locale"]));
 } catch (ValueError $e) {
     echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
 }
