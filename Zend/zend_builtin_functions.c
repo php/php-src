@@ -1937,6 +1937,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		/* For frameless calls we add an additional frame for the call itself. */
 		if (ZEND_USER_CODE(call->func->type)) {
 			const zend_op *opline = call->opline;
+			if (UNEXPECTED(!opline)) {
+				goto not_frameless_call; 
+			}
 			if (!ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) {
 				goto not_frameless_call;
 			}
