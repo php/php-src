@@ -10,7 +10,7 @@ opcache
 --FILE--
 <?php
 // Skip when JIT was completely disabled at runtime.
-if (ini_get('opcache.jit') !== 'disable') {
+if (($status = opcache_get_status()) === false || $status['jit']['enabled']) {
     ini_set('opcache.jit', 'tracing');
 }
 ?>
