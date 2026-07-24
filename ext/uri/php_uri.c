@@ -1305,7 +1305,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setHost)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("host"),
-		php_uri_parser_whatwg_validate_none
+		php_uri_parser_whatwg_validate_host
 	);
 }
 

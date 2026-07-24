@@ -53,6 +53,100 @@ ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_long_or_null_to_lexbo
 	}
 }
 
+ZEND_ATTRIBUTE_NONNULL static bool get_reason_from_error_type(const lxb_url_error_type_t error_type, const char **error_str)
+{
+	switch (error_type) {
+		case LXB_URL_ERROR_TYPE_DOMAIN_TO_ASCII:
+			*error_str = "DomainToAscii";
+			return true;
+		case LXB_URL_ERROR_TYPE_DOMAIN_TO_UNICODE:
+			*error_str = "DomainToUnicode";
+			return false;
+		case LXB_URL_ERROR_TYPE_DOMAIN_INVALID_CODE_POINT:
+			*error_str = "DomainInvalidCodePoint";
+			return true;
+		case LXB_URL_ERROR_TYPE_HOST_INVALID_CODE_POINT:
+			*error_str = "HostInvalidCodePoint";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_EMPTY_PART:
+			*error_str = "Ipv4EmptyPart";
+			return false;
+		case LXB_URL_ERROR_TYPE_IPV4_TOO_MANY_PARTS:
+			*error_str = "Ipv4TooManyParts";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_NON_NUMERIC_PART:
+			*error_str = "Ipv4NonNumericPart";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_NON_DECIMAL_PART:
+			*error_str = "Ipv4NonDecimalPart";
+			return false;
+		case LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART:
+			*error_str = "Ipv4OutOfRangePart";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_UNCLOSED:
+			*error_str = "Ipv6Unclosed";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_INVALID_COMPRESSION:
+			*error_str = "Ipv6InvalidCompression";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_TOO_MANY_PIECES:
+			*error_str = "Ipv6TooManyPieces";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_MULTIPLE_COMPRESSION:
+			*error_str = "Ipv6MultipleCompression";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_INVALID_CODE_POINT:
+			*error_str = "Ipv6InvalidCodePoint";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_TOO_FEW_PIECES:
+			*error_str = "Ipv6TooFewPieces";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_MANY_PIECES:
+			*error_str = "Ipv4InIpv6TooManyPieces";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_INVALID_CODE_POINT:
+			*error_str = "Ipv4InIpv6InvalidCodePoint";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_OUT_OF_RANGE_PART:
+			*error_str = "Ipv4InIpv6OutOfRangePart";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_FEW_PARTS:
+			*error_str = "Ipv4InIpv6TooFewParts";
+			return true;
+		case LXB_URL_ERROR_TYPE_INVALID_URL_UNIT:
+			*error_str = "InvalidUrlUnit";
+			return false;
+		case LXB_URL_ERROR_TYPE_SPECIAL_SCHEME_MISSING_FOLLOWING_SOLIDUS:
+			*error_str = "SpecialSchemeMissingFollowingSolidus";
+			return false;
+		case LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL:
+			*error_str = "MissingSchemeNonRelativeUrl";
+			return true;
+		case LXB_URL_ERROR_TYPE_INVALID_REVERSE_SOLIDUS:
+			*error_str = "InvalidReverseSoldius";
+			return false;
+		case LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS:
+			*error_str = "InvalidCredentials";
+			return false;
+		case LXB_URL_ERROR_TYPE_HOST_MISSING:
+			*error_str = "HostMissing";
+			return true;
+		case LXB_URL_ERROR_TYPE_PORT_OUT_OF_RANGE:
+			*error_str = "PortOutOfRange";
+			return true;
+		case LXB_URL_ERROR_TYPE_PORT_INVALID:
+			*error_str = "PortInvalid";
+			return true;
+		case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER:
+			*error_str = "FileInvalidWindowsDriveLetter";
+			return false;
+		case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST:
+			*error_str = "FileInvalidWindowsDriveLetterHost";
+			return false;
+		default: ZEND_UNREACHABLE();
+	}
+}
+
 /**
  * Creates a Uri\WhatWg\UrlValidationError class by mapping error codes listed in
  * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum.
@@ -70,125 +164,8 @@ ZEND_ATTRIBUTE_NONNULL static const char *fill_errors_inner(zval *errors)
 
 		const char *error_str;
 		zval failure;
-		switch (lxb_error->id) {
-			case LXB_URL_ERROR_TYPE_DOMAIN_TO_ASCII:
-				error_str = "DomainToAscii";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_DOMAIN_TO_UNICODE:
-				error_str = "DomainToUnicode";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_DOMAIN_INVALID_CODE_POINT:
-				error_str = "DomainInvalidCodePoint";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_HOST_INVALID_CODE_POINT:
-				error_str = "HostInvalidCodePoint";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_EMPTY_PART:
-				error_str = "Ipv4EmptyPart";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_TOO_MANY_PARTS:
-				error_str = "Ipv4TooManyParts";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_NON_NUMERIC_PART:
-				error_str = "Ipv4NonNumericPart";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_NON_DECIMAL_PART:
-				error_str = "Ipv4NonDecimalPart";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART:
-				error_str = "Ipv4OutOfRangePart";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_UNCLOSED:
-				error_str = "Ipv6Unclosed";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_INVALID_COMPRESSION:
-				error_str = "Ipv6InvalidCompression";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_TOO_MANY_PIECES:
-				error_str = "Ipv6TooManyPieces";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_MULTIPLE_COMPRESSION:
-				error_str = "Ipv6MultipleCompression";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_INVALID_CODE_POINT:
-				error_str = "Ipv6InvalidCodePoint";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_TOO_FEW_PIECES:
-				error_str = "Ipv6TooFewPieces";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_MANY_PIECES:
-				error_str = "Ipv4InIpv6TooManyPieces";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_INVALID_CODE_POINT:
-				error_str = "Ipv4InIpv6InvalidCodePoint";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_OUT_OF_RANGE_PART:
-				error_str = "Ipv4InIpv6OutOfRangePart";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_FEW_PARTS:
-				error_str = "Ipv4InIpv6TooFewParts";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_INVALID_URL_UNIT:
-				error_str = "InvalidUrlUnit";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_SPECIAL_SCHEME_MISSING_FOLLOWING_SOLIDUS:
-				error_str = "SpecialSchemeMissingFollowingSolidus";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL:
-				error_str = "MissingSchemeNonRelativeUrl";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_INVALID_REVERSE_SOLIDUS:
-				error_str = "InvalidReverseSoldius";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS:
-				error_str = "InvalidCredentials";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_HOST_MISSING:
-				error_str = "HostMissing";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_PORT_OUT_OF_RANGE:
-				error_str = "PortOutOfRange";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_PORT_INVALID:
-				error_str = "PortInvalid";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER:
-				error_str = "FileInvalidWindowsDriveLetter";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST:
-				error_str = "FileInvalidWindowsDriveLetterHost";
-				ZVAL_FALSE(&failure);
-				break;
-			default: ZEND_UNREACHABLE();
-		}
+
+		ZVAL_BOOL(&failure, get_reason_from_error_type(lxb_error->id, &error_str));
 
 		zval error_type;
 		ZVAL_OBJ(&error_type, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_validation_error_type, error_str));
@@ -683,13 +660,23 @@ static void php_uri_parser_whatwg_destroy(void *uri)
 	lxb_url_destroy(lexbor_uri);
 }
 
-static zend_always_inline zend_result php_uri_parser_whatwg_validate_component_result(const bool well_formed, const char *component_name)
-{
-	if (well_formed) {
-		return SUCCESS;
+ZEND_ATTRIBUTE_NONNULL static zend_always_inline zend_result php_uri_parser_whatwg_component_error(
+	const char *component_name, const lxb_url_error_type_t error_type
+) {
+	const char *reason = "";
+	if (error_type != LXB_URL_ERROR_TYPE__LAST_ENTRY) {
+		get_reason_from_error_type(error_type, &reason);
 	}
 
-	zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified %s is malformed", component_name);
+	zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception,
+		0,
+		"The specified %s is malformed%s%s%s",
+		component_name,
+		reason ? " (" : "",
+		reason ? reason : "",
+		reason ? ")" : ""
+	);
+
 	return FAILURE;
 }
 
@@ -733,38 +720,106 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_scheme(const z
 
 		if (!seen_first) {
 			if (!php_uri_parser_whatwg_is_alpha(uc)) {
-				return php_uri_parser_whatwg_validate_component_result(false, "scheme");
+				return php_uri_parser_whatwg_component_error("scheme", LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
 			}
 			seen_first = true;
 		} else {
 			if (!php_uri_parser_whatwg_is_alpha(uc) && !php_uri_parser_whatwg_is_digit(uc) && uc != '+' && uc != '-' && uc != '.') {
-				return php_uri_parser_whatwg_validate_component_result(false, "scheme");
+				return php_uri_parser_whatwg_component_error("scheme", LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
 			}
 		}
 	}
 
 	if (!seen_first) {
-		return php_uri_parser_whatwg_validate_component_result(false, "scheme");
+		return php_uri_parser_whatwg_component_error("scheme", LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
 	}
 
-	return true;
+	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_host(const zend_string *host)
+{
+	if (ZSTR_LEN(host) == 0) {
+		/* Skip validation - an empty string may or may not be a valid host depending on whether the URL is special */
+		return SUCCESS;
+	}
+
+	const char *first = ZSTR_VAL(host);
+	const char *last = ZSTR_VAL(host) + ZSTR_LEN(host) - 1;
+
+	while (first <= last && php_uri_whatwg_is_ascii_tab_or_newline((unsigned char) *first)) {
+		first++;
+	}
+
+	if (*first != '[') {
+		/* Skip validation - The host is not an IPv6 address */
+		return SUCCESS;
+	}
+
+	while (first <= last && php_uri_whatwg_is_ascii_tab_or_newline((unsigned char) *last)) {
+		last--;
+	}
+
+	if (*last != ']') {
+		return php_uri_parser_whatwg_component_error("host", LXB_URL_ERROR_TYPE_IPV6_UNCLOSED);
+	}
+
+	lxb_char_t *stripped_host = emalloc(last - first);
+	size_t stripped_host_len = 0;
+
+	for (const char *i = first + 1; i < last; i++) {
+		const unsigned char uc = (unsigned char) *i;
+
+		if (!php_uri_whatwg_is_ascii_tab_or_newline(uc)) {
+			stripped_host[stripped_host_len++] = (lxb_char_t) uc;
+		}
+	}
+	stripped_host[stripped_host_len] = '\0';
+
+	uint16_t ipv6[8];
+	const lxb_status_t result = lxb_url_ipv6_parse(
+		&lexbor_parser,
+		stripped_host,
+		stripped_host + stripped_host_len,
+		ipv6
+	);
+
+	efree(stripped_host);
+
+	if (result != LXB_STATUS_OK) {
+		lexbor_plog_entry_t *lxb_error;
+
+		if (lexbor_parser.log != NULL && (lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
+			return php_uri_parser_whatwg_component_error("host", lxb_error->id);
+		} else {
+			return php_uri_parser_whatwg_component_error("host", LXB_URL_ERROR_TYPE__LAST_ENTRY);
+		}
+	}
+
+	return SUCCESS;
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_port(const zend_long port)
 {
-	const bool well_formed = port >= 0 && port <= 65535;
+	if (port  < 0) {
+		return php_uri_parser_whatwg_component_error("port", LXB_URL_ERROR_TYPE_PORT_INVALID);
+	}
 
-	return php_uri_parser_whatwg_validate_component_result(well_formed, "port");
+	if (port > 65535) {
+		return php_uri_parser_whatwg_component_error("port", LXB_URL_ERROR_TYPE_PORT_OUT_OF_RANGE);
+	}
+
+	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NONNULL static bool php_uri_parser_whatwg_is_special_scheme(const zend_string *scheme)
+ZEND_ATTRIBUTE_NONNULL static lxb_url_scheme_type_t php_uri_parser_whatwg_get_special_scheme(const zend_string *scheme)
 {
     const char *p = ZSTR_VAL(scheme);
     const char *end = p + ZSTR_LEN(scheme);
 
     /*
-     * Create a normalized buffer from the rest of the characters, leaving out tab and newline characters.
-     * The longest special scheme "https" is 5 characters, therefore 6 bytes is enough.
+     * Create a normalized buffer from the scheme by leaving out tab and newline characters.
+     * The longest special scheme "https" is 5 characters, therefore 6 bytes is enough to store.
      */
     char buf[6];
     size_t buf_len = 0;
@@ -785,17 +840,41 @@ ZEND_ATTRIBUTE_NONNULL static bool php_uri_parser_whatwg_is_special_scheme(const
     }
 
     switch (buf_len) {
-        case 2:
-            return memcmp(buf, "ws", 2) == 0;
+    	case 2:
+    		if (memcmp(buf, "ws", 2) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_WS;
+    		}
+
+    		break;
         case 3:
-            return memcmp(buf, "ftp", 3) == 0 || memcmp(buf, "wss", 3) == 0;
-        case 4:
-            return memcmp(buf, "http", 4) == 0 || memcmp(buf, "file", 4) == 0;
+    		if (memcmp(buf, "ftp", 3) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_FTP;
+    		}
+
+    		if (memcmp(buf, "wss", 3) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_WSS;
+    		}
+
+    		break;
+    	case 4:
+    		if (memcmp(buf, "http", 4) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_HTTP;
+    		}
+
+    		if (memcmp(buf, "file", 4) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_FILE;
+    		}
+
+            break;
         case 5:
-            return memcmp(buf, "https", 5) == 0;
-        default:
-            return false;
-    }
+    		if (memcmp(buf, "https", 5) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_HTTPS;
+    		}
+
+    		break;
+	}
+
+	return LXB_URL_SCHEMEL_TYPE__UNDEF;
 }
 
 ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors(zval *errors)
@@ -819,6 +898,16 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	const zval *host, const zval *port, const zval *path, const zval *query, const zval *fragment,
 	zval *errors_zv
 ) {
+	if (Z_TYPE_P(host) == IS_NULL ||
+		Z_STRLEN_P(host) == 0 ||
+		php_uri_parser_whatwg_get_special_scheme(Z_STR_P(scheme)) == LXB_URL_SCHEMEL_TYPE_FILE
+	) {
+		if (Z_TYPE_P(username) != IS_NULL || Z_TYPE_P(password) != IS_NULL || Z_TYPE_P(port) != IS_NULL) {
+			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URI is malformed");
+			return NULL;
+		}
+	}
+
 	lxb_url_parser_clean(&lexbor_parser);
 
 	lxb_url_t *lexbor_url = lexbor_mraw_calloc(lexbor_parser.mraw, sizeof(*lexbor_url));
@@ -833,7 +922,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	 * The URL is initialized as LXB_URL_SCHEMEL_TYPE__UNDEF but this would prevent the scheme to be updated
 	 * in case of non-special schemes due to https://github.com/php/php-src/blob/27d7b799c0a13578ee0506b428b8ddc209ffb010/ext/lexbor/lexbor/url/url.c#L1402
 	 */
-	if (!php_uri_parser_whatwg_is_special_scheme(Z_STR_P(scheme))) {
+	if (php_uri_parser_whatwg_get_special_scheme(Z_STR_P(scheme)) == LXB_URL_SCHEMEL_TYPE__UNDEF) {
 		lexbor_url->scheme.type = LXB_URL_SCHEMEL_TYPE__UNKNOWN;
 	}
 

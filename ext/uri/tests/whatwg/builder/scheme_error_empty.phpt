@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\WhatWg\InvalidUrlException: The specified scheme is malformed
+Uri\WhatWg\InvalidUrlException: The specified scheme is malformed (MissingSchemeNonRelativeUrl)

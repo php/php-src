@@ -197,6 +197,14 @@ typedef lexbor_action_t
 (*lxb_url_search_params_match_f)(lxb_url_search_params_t *sp,
                                  lxb_url_search_entry_t *entry, void *ctx);
 
+/*
+ * Parse an IPv6 address,
+ *
+ * @return lxb_status_t LXB_STATUS_OK if successful, otherwise NULL.
+ */
+lxb_status_t
+lxb_url_ipv6_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
+                   const lxb_char_t *end, uint16_t *ipv6);
 
 /*
  * Create lxb_url_parser_t object.

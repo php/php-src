@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setScheme() - success - contains leading and trailing C0 control and space characters
+Test Uri\WhatWg\UrlBuilder::setScheme() - error - contains leading and trailing C0 control and space characters
 --FILE--
 <?php
 
@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\WhatWg\InvalidUrlException: The specified scheme is malformed
+Uri\WhatWg\InvalidUrlException: The specified scheme is malformed (MissingSchemeNonRelativeUrl)

@@ -596,10 +596,6 @@ lxb_url_is_ipv4(lxb_url_parser_t *parser, const lxb_char_t *data,
                 const lxb_char_t *end);
 
 static lxb_status_t
-lxb_url_ipv6_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
-                   const lxb_char_t *end, uint16_t *ipv6);
-
-static lxb_status_t
 lxb_url_ipv4_in_ipv6_parse(lxb_url_parser_t *parser, const lxb_char_t **data,
                            const lxb_char_t *end, uint16_t **pieces);
 
@@ -3752,7 +3748,7 @@ lxb_url_is_ipv4(lxb_url_parser_t *parser, const lxb_char_t *data,
     return status != LXB_STATUS_ERROR;
 }
 
-static lxb_status_t
+lxb_status_t
 lxb_url_ipv6_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
                    const lxb_char_t *end, uint16_t *ipv6)
 {

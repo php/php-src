@@ -1,12 +1,11 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setPassword() - success - empty opaque host
+Test Uri\WhatWg\UrlBuilder::setHost() - success - file scheme
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setScheme("scheme");
-$builder->setHost("");
-$builder->setPassword("user");
+$builder->setScheme("file");
+$builder->setHost("example.com");
 $url = $builder->build();
 
 var_dump($url->toAsciiString());
@@ -15,23 +14,24 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(9) "scheme://"
+string(19) "file://example.com/"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
-  string(6) "scheme"
+  string(4) "file"
   ["username"]=>
   NULL
   ["password"]=>
   NULL
   ["host"]=>
-  string(0) ""
+  string(11) "example.com"
   ["port"]=>
   NULL
   ["path"]=>
-  string(0) ""
+  string(1) "/"
   ["query"]=>
   NULL
   ["fragment"]=>
   NULL
 }
 bool(true)
+

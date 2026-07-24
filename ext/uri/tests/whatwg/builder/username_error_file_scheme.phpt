@@ -1,10 +1,11 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setUsername() - error - missing host
+Test Uri\WhatWg\UrlBuilder::setUsername() - error - file scheme
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setScheme("https");
+$builder->setScheme("file");
+$builder->setPath("C:/a.txt");
 $builder->setUsername("user");
 
 try {
@@ -15,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\WhatWg\InvalidUrlException: The specified host is malformed (HostMissing)
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed

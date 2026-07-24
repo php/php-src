@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\WhatWg\InvalidUrlException: The specified port is malformed
+Uri\WhatWg\InvalidUrlException: The specified port is malformed (PortInvalid)
