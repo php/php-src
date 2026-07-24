@@ -132,6 +132,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21705 (ZipArchive::getFromIndex() ignores
     ZipArchive::FL_UNCHANGED for deleted entries). (Weilin Du)
 
+- Streams:
+  . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
+    $this->stream during the close flush). (iliaal)
+
 02 Jul 2026, PHP 8.4.23
 
 - Core:
