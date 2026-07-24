@@ -29,6 +29,7 @@
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_weakrefs.h"
 #include "php_memory_streams.h"
 #include "pdo_stmt_arginfo.h"
 
@@ -38,6 +39,42 @@
 		zend_throw_error(NULL, "%s object is uninitialized", ZSTR_VAL(Z_OBJ(EX(This))->ce->name)); \
 		RETURN_THROWS(); \
 	} \
+
+static bool pdo_stmt_enter_operation(pdo_stmt_t *stmt)
+{
+	if (UNEXPECTED(stmt->in_operation)) {
+		zend_throw_error(NULL, "Cannot perform another operation on this PDOStatement while an operation is in progress");
+		return false;
+	}
+
+	stmt->in_operation = true;
+	return true;
+}
+
+static void pdo_stmt_leave_operation(pdo_stmt_t *stmt)
+{
+	stmt->in_fetch = false;
+	stmt->in_operation = false;
+}
+
+static void pdo_stmt_call_operation(pdo_stmt_t *stmt, zif_handler operation, INTERNAL_FUNCTION_PARAMETERS)
+{
+	if (!pdo_stmt_enter_operation(stmt)) {
+		return;
+	}
+
+	bool bailout = false;
+	zend_try {
+		operation(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+
+	pdo_stmt_leave_operation(stmt);
+	if (bailout) {
+		zend_bailout();
+	}
+}
 
 static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_param_data *param) /* {{{ */
 {
@@ -377,7 +414,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 /* }}} */
 
 /* {{{ Execute a prepared statement, optionally binding parameters */
-PHP_METHOD(PDOStatement, execute)
+static ZEND_NAMED_FUNCTION(pdo_stmt_execute)
 {
 	zval *input_params = NULL;
 	int ret = 1;
@@ -477,6 +514,12 @@ PHP_METHOD(PDOStatement, execute)
 	RETURN_FALSE;
 }
 /* }}} */
+
+PHP_METHOD(PDOStatement, execute)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_execute, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 
 static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo_param_type *type_override) /* {{{ */
 {
@@ -611,11 +654,14 @@ static bool do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, ze
 
 static bool pdo_do_key_pair_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset, HashTable *container)
 {
+	stmt->in_fetch = true;
 	if (!do_fetch_common(stmt, ori, offset)) {
+		stmt->in_fetch = false;
 		return false;
 	}
 	if (stmt->column_count != 2) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns.");
+		stmt->in_fetch = false;
 		return false;
 	}
 
@@ -630,6 +676,7 @@ static bool pdo_do_key_pair_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation o
 		zend_symtable_update(container, Z_STR(key), &val);
 	}
 	zval_ptr_dtor(&key);
+	stmt->in_fetch = false;
 	return true;
 }
 
@@ -667,6 +714,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	int column_index_to_fetch = 0;
 	zval *fetch_function_params = NULL;
 	uint32_t fetch_function_param_num = 0;
+	stmt->in_fetch = true;
 
 	if (how == PDO_FETCH_USE_DEFAULT) {
 		how = stmt->default_fetch_type;
@@ -675,16 +723,18 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 	how = how & ~PDO_FETCH_FLAGS;
 
 	if (!do_fetch_common(stmt, ori, offset)) {
-		return false;
+		goto in_fetch_error;
 	}
 
 	if (how == PDO_FETCH_BOUND) {
 		RETVAL_TRUE;
+		stmt->in_fetch = false;
 		return true;
 	}
 
 	if (how == PDO_FETCH_LAZY) {
 		pdo_get_lazy_object(stmt, return_value);
+		stmt->in_fetch = false;
 		return true;
 	}
 
@@ -698,12 +748,12 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 		if (colno < 0 ) {
 			zend_value_error("Column index must be greater than or equal to 0");
-			return false;
+			goto in_fetch_error;
 		}
 
 		if (colno >= stmt->column_count) {
 			zend_value_error("Invalid column index");
-			return false;
+			goto in_fetch_error;
 		}
 
 		if (flags == PDO_FETCH_GROUP && stmt->fetch.column == -1) {
@@ -722,10 +772,10 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 			}
 			convert_to_string(group_key);
 		}
+		stmt->in_fetch = false;
 		return true;
 	}
 
-	stmt->in_fetch = true;
 	switch (how) {
 		case PDO_FETCH_USE_DEFAULT:
 		case PDO_FETCH_ASSOC:
@@ -944,6 +994,28 @@ in_fetch_error:
 }
 /* }}} */
 
+static bool pdo_stmt_do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how,
+	enum pdo_fetch_orientation ori, zend_long offset, zval *group_key)
+{
+	if (!pdo_stmt_enter_operation(stmt)) {
+		return false;
+	}
+
+	bool bailout = false;
+	bool result = false;
+	zend_try {
+		result = do_fetch(stmt, return_value, how, ori, offset, group_key);
+	} zend_catch {
+		bailout = true;
+	} zend_end_try();
+
+	pdo_stmt_leave_operation(stmt);
+	if (bailout) {
+		zend_bailout();
+	}
+	return result;
+}
+
 
 // TODO Error on the following cases:
 // Combining PDO_FETCH_UNIQUE and PDO_FETCH_GROUP
@@ -1026,7 +1098,7 @@ static bool pdo_verify_fetch_mode(uint32_t default_mode_and_flags, zend_long mod
 /* }}} */
 
 /* {{{ Fetches the next row and returns it, or false if there are no more rows */
-PHP_METHOD(PDOStatement, fetch)
+static ZEND_NAMED_FUNCTION(pdo_stmt_fetch)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
 	zend_long ori = PDO_FETCH_ORI_NEXT;
@@ -1064,8 +1136,14 @@ PHP_METHOD(PDOStatement, fetch)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, fetch)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_fetch, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* {{{ Fetches the next row and returns it as an object. */
-PHP_METHOD(PDOStatement, fetchObject)
+static ZEND_NAMED_FUNCTION(pdo_stmt_fetch_object)
 {
 	zend_class_entry *ce = NULL;
 	zend_class_entry *old_ce;
@@ -1104,8 +1182,14 @@ PHP_METHOD(PDOStatement, fetchObject)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, fetchObject)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_fetch_object, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* {{{ Returns a data of the specified column in the result set. */
-PHP_METHOD(PDOStatement, fetchColumn)
+static ZEND_NAMED_FUNCTION(pdo_stmt_fetch_column)
 {
 	zend_long col_n = 0;
 
@@ -1117,14 +1201,23 @@ PHP_METHOD(PDOStatement, fetchColumn)
 	PHP_STMT_GET_OBJ;
 	PDO_STMT_CLEAR_ERR();
 
+	stmt->in_fetch = true;
 	if (!do_fetch_common(stmt, PDO_FETCH_ORI_NEXT, 0)) {
+		stmt->in_fetch = false;
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
 
 	fetch_value(stmt, return_value, col_n, NULL);
+	stmt->in_fetch = false;
 }
 /* }}} */
+
+PHP_METHOD(PDOStatement, fetchColumn)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_fetch_column, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 
 static bool pdo_get_fcc_from_zval(zend_fcall_info_cache *fcc, zval *callable) {
 	if (callable == NULL) {
@@ -1147,7 +1240,7 @@ static bool pdo_get_fcc_from_zval(zend_fcall_info_cache *fcc, zval *callable) {
 }
 
 /* {{{ Returns an array of all of the results. */
-PHP_METHOD(PDOStatement, fetchAll)
+static ZEND_NAMED_FUNCTION(pdo_stmt_fetch_all)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
 	zval *arg2 = NULL;
@@ -1304,6 +1397,12 @@ PHP_METHOD(PDOStatement, fetchAll)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, fetchAll)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_fetch_all, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* {{{ */
 {
 	struct pdo_bound_param_data param;
@@ -1355,7 +1454,7 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 } /* }}} */
 
 /* {{{ bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
-PHP_METHOD(PDOStatement, bindValue)
+static ZEND_NAMED_FUNCTION(pdo_stmt_bind_value)
 {
 	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
@@ -1398,19 +1497,37 @@ PHP_METHOD(PDOStatement, bindValue)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, bindValue)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_bind_value, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* {{{ bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
-PHP_METHOD(PDOStatement, bindParam)
+static ZEND_NAMED_FUNCTION(pdo_stmt_bind_param)
 {
 	register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, bindParam)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_bind_param, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* {{{ bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
-PHP_METHOD(PDOStatement, bindColumn)
+static ZEND_NAMED_FUNCTION(pdo_stmt_bind_column)
 {
 	register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
+
+PHP_METHOD(PDOStatement, bindColumn)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_bind_column, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 
 /* {{{ Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
 PHP_METHOD(PDOStatement, rowCount)
@@ -1469,7 +1586,7 @@ PHP_METHOD(PDOStatement, errorInfo)
 /* }}} */
 
 /* {{{ Set an attribute */
-PHP_METHOD(PDOStatement, setAttribute)
+static ZEND_NAMED_FUNCTION(pdo_stmt_set_attribute)
 {
 	zend_long attr;
 	zval *value = NULL;
@@ -1498,6 +1615,12 @@ PHP_METHOD(PDOStatement, setAttribute)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, setAttribute)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_set_attribute, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* {{{ Get an attribute */
 
 static bool generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long attr)
@@ -1510,7 +1633,7 @@ static bool generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_lon
 	return false;
 }
 
-PHP_METHOD(PDOStatement, getAttribute)
+static ZEND_NAMED_FUNCTION(pdo_stmt_get_attribute)
 {
 	zend_long attr;
 
@@ -1549,6 +1672,12 @@ PHP_METHOD(PDOStatement, getAttribute)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, getAttribute)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_get_attribute, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* {{{ Returns the number of columns in the result set */
 PHP_METHOD(PDOStatement, columnCount)
 {
@@ -1560,7 +1689,7 @@ PHP_METHOD(PDOStatement, columnCount)
 /* }}} */
 
 /* {{{ Returns meta data for a numbered column */
-PHP_METHOD(PDOStatement, getColumnMeta)
+static ZEND_NAMED_FUNCTION(pdo_stmt_get_column_meta)
 {
 	zend_long colno;
 	struct pdo_column_data *col;
@@ -1593,6 +1722,12 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 	add_assoc_long(return_value, "precision", col->precision);
 }
 /* }}} */
+
+PHP_METHOD(PDOStatement, getColumnMeta)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_get_column_meta, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 
 void pdo_stmt_free_default_fetch_mode(pdo_stmt_t *stmt)
 {
@@ -1752,7 +1887,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 	return true;
 }
 
-PHP_METHOD(PDOStatement, setFetchMode)
+static ZEND_NAMED_FUNCTION(pdo_stmt_set_fetch_mode)
 {
 	zend_long fetch_mode;
 	zval *args = NULL;
@@ -1764,10 +1899,6 @@ PHP_METHOD(PDOStatement, setFetchMode)
 
 	PHP_STMT_GET_OBJ;
 
-	if (stmt->in_fetch) {
-		zend_throw_error(NULL, "Cannot change default fetch mode while fetching");
-		RETURN_THROWS();
-	}
 	if (!pdo_stmt_setup_fetch_mode(stmt, fetch_mode, 1, args, num_args)) {
 		RETURN_THROWS();
 	}
@@ -1776,6 +1907,16 @@ PHP_METHOD(PDOStatement, setFetchMode)
 	RETURN_TRUE;
 }
 /* }}} */
+
+PHP_METHOD(PDOStatement, setFetchMode)
+{
+	PHP_STMT_GET_OBJ;
+	if (stmt->in_fetch) {
+		zend_throw_error(NULL, "Cannot change default fetch mode while fetching");
+		RETURN_THROWS();
+	}
+	pdo_stmt_call_operation(stmt, pdo_stmt_set_fetch_mode, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 
 /* {{{ Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
 
@@ -1794,7 +1935,7 @@ static bool pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 	return true;
 }
 
-PHP_METHOD(PDOStatement, nextRowset)
+static ZEND_NAMED_FUNCTION(pdo_stmt_next_rowset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1815,8 +1956,14 @@ PHP_METHOD(PDOStatement, nextRowset)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, nextRowset)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_next_rowset, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* {{{ Closes the cursor, leaving the statement ready for re-execution. */
-PHP_METHOD(PDOStatement, closeCursor)
+static ZEND_NAMED_FUNCTION(pdo_stmt_close_cursor)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1850,8 +1997,14 @@ PHP_METHOD(PDOStatement, closeCursor)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, closeCursor)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_close_cursor, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* {{{ A utility for internals hackers to debug parameter internals */
-PHP_METHOD(PDOStatement, debugDumpParams)
+static ZEND_NAMED_FUNCTION(pdo_stmt_debug_dump_params)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1910,6 +2063,12 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 	php_stream_close(out);
 }
 /* }}} */
+
+PHP_METHOD(PDOStatement, debugDumpParams)
+{
+	PHP_STMT_GET_OBJ;
+	pdo_stmt_call_operation(stmt, pdo_stmt_debug_dump_params, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 
 PHP_METHOD(PDOStatement, getIterator)
 {
@@ -2012,6 +2171,12 @@ zend_object_handlers pdo_row_object_handlers;
 
 PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 {
+	stmt->in_operation = true;
+	if (UNEXPECTED(GC_FLAGS(&stmt->std) & IS_OBJ_WEAKLY_REFERENCED)) {
+		zend_weakrefs_notify(&stmt->std);
+		GC_DEL_FLAGS(&stmt->std, IS_OBJ_WEAKLY_REFERENCED);
+	}
+
 	if (stmt->bound_params) {
 		zend_hash_destroy(stmt->bound_params);
 		FREE_HASHTABLE(stmt->bound_params);
@@ -2126,7 +2291,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 		ZVAL_UNDEF(&I->fetch_ahead);
 	}
 
-	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
+	if (!pdo_stmt_do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
 			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
@@ -2168,7 +2333,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 	Z_ADDREF_P(object);
 	ZVAL_OBJ(&I->iter.data, Z_OBJ_P(object));
 
-	if (!do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
+	if (!pdo_stmt_do_fetch(stmt, &I->fetch_ahead, PDO_FETCH_USE_DEFAULT,
 			PDO_FETCH_ORI_NEXT, /* offset */ 0, NULL)) {
 		PDO_HANDLE_STMT_ERR();
 		I->key = (zend_ulong)-1;
