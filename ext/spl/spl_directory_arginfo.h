@@ -1,5 +1,5 @@
 /* This is a generated file, edit spl_directory.stub.php instead.
- * Stub hash: 802429d736404c2d66601f640942c827b6e6e94b */
+ * Stub hash: fee85b1938fe217aba54b1d6438dbe9034f6bbb1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -103,10 +103,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_valid arginfo_class_SplFileInfo_isWritable
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_key, 0, 0, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DirectoryIterator_key, 0, 0, MAY_BE_LONG|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DirectoryIterator_current arginfo_class_DirectoryIterator_key
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DirectoryIterator_current, 0, 0, SplFileInfo|RecursiveDirectoryIterator, MAY_BE_STRING)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_next arginfo_class_DirectoryIterator_rewind
 
