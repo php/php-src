@@ -472,6 +472,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			}
 
 			/* wind the handle... */
+			stream->readfilters.in_iteration++;
 			for (filter = stream->readfilters.head; filter; filter = filter->next) {
 				status = filter->fops->filter(stream, filter, brig_inp, brig_outp, NULL, flags);
 
@@ -487,6 +488,7 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				brig_outp = brig_swap;
 				memset(brig_outp, 0, sizeof(*brig_outp));
 			}
+			stream->readfilters.in_iteration--;
 
 			switch (status) {
 				case PSFS_PASS_ON:
@@ -1125,6 +1127,7 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 		php_stream_bucket_append(&brig_in, bucket);
 	}
 
+	stream->writefilters.in_iteration++;
 	for (php_stream_filter *filter = stream->writefilters.head; filter; filter = filter->next) {
 		/* for our return value, we are interested in the number of bytes consumed from
 		 * the first filter in the chain */
@@ -1142,6 +1145,7 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 		brig_outp = brig_swap;
 		memset(brig_outp, 0, sizeof(*brig_outp));
 	}
+	stream->writefilters.in_iteration--;
 
 	switch (status) {
 		case PSFS_PASS_ON:
@@ -1273,6 +1277,10 @@ static bool php_stream_are_filters_seekable(php_stream_filter *filter, bool is_s
 static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter *filter,
 		bool is_start_seeking, zend_off_t offset, int whence, int chain_type)
 {
+	php_stream_filter_chain *chain = filter ? filter->chain : NULL;
+	if (chain) {
+		chain->in_iteration++;
+	}
 	while (filter) {
 		php_stream_filter_seekable_t seekable = (chain_type == PHP_STREAM_FILTER_READ) ?
 				filter->read_seekable : filter->write_seekable;
@@ -1280,9 +1288,15 @@ static zend_result php_stream_filters_seek(php_stream *stream, php_stream_filter
 				seekable == PSFS_SEEKABLE_CHECK) &&
 				filter->fops->seek(stream, filter, offset, whence) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Stream filter seeking for %s failed", filter->fops->label);
+			if (chain) {
+				chain->in_iteration--;
+			}
 			return FAILURE;
 		}
 		filter = filter->next;
+	}
+	if (chain) {
+		chain->in_iteration--;
 	}
 	return SUCCESS;
 }
