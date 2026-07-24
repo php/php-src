@@ -9,9 +9,11 @@ opcache.jit_buffer_size=32M
 opcache
 --FILE--
 <?php
-ini_set('opcache.jit', 'tracing');
+// Skip when JIT was completely disabled at runtime.
+if (ini_get('opcache.jit') !== 'disable') {
+    ini_set('opcache.jit', 'tracing');
+}
 ?>
 ===DONE===
---EXPECTREGEX--
-^(?:Warning: Cannot change opcache\.jit setting at run-time \(JIT is disabled\) in .+ on line 2
-)?===DONE===$
+--EXPECT--
+===DONE===
