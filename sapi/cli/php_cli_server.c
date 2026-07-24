@@ -174,6 +174,7 @@ typedef struct php_cli_server_client {
 	zend_string *addr_str;
 	php_http_parser parser;
 	bool request_read;
+	bool too_large_post;
 	zend_string *current_header_name;
 	zend_string *current_header_value;
 	enum { HEADER_NONE=0, HEADER_FIELD, HEADER_VALUE } last_header_element;
@@ -209,6 +210,7 @@ static const php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 405, "<h1>%s</h1><p>Requested method not allowed.</p>" },
+	{ 413, "<h1>%s</h1><p>The request body exceeds the configured <code>post_max_size</code> of " ZEND_LONG_FMT " bytes.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
@@ -1779,6 +1781,16 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 		break;
 	}
 	client->last_header_element = HEADER_NONE;
+
+	if (parser->content_length > 0
+			&& SG(post_max_size) > 0
+			&& (zend_long) parser->content_length > SG(post_max_size)) {
+		client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
+		client->too_large_post = true;
+		client->request_read = true;
+		return 2;
+	}
+
 	return 0;
 }
 
@@ -1866,7 +1878,7 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	}
 	client->parser.data = client;
 	nbytes_consumed = php_http_parser_execute(&client->parser, &settings, buf, nbytes_read);
-	if (nbytes_consumed != (size_t)nbytes_read) {
+	if (nbytes_consumed != (size_t)nbytes_read && !client->too_large_post) {
 		if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
 			if ((buf[0] & 0x80) /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
 				*errstr = estrdup("Unsupported SSL request");
@@ -1960,6 +1972,7 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = false;
+	client->too_large_post = false;
 
 	client->last_header_element = HEADER_NONE;
 	client->current_header_name = NULL;
@@ -2038,11 +2051,20 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
 		{
-			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
-			if (!chunk) {
-				goto fail;
+			php_cli_server_chunk *chunk;
+			if (status == 413) {
+				chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + strlen(status_string) + MAX_LENGTH_OF_LONG + 1);
+				if (!chunk) {
+					goto fail;
+				}
+				snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, SG(post_max_size));
+			} else {
+				chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
+				if (!chunk) {
+					goto fail;
+				}
+				snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
 			}
-			snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
 			chunk->data.heap.len = strlen(chunk->data.heap.p);
 			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
@@ -2640,6 +2662,9 @@ static zend_result php_cli_server_recv_event_read_request(php_cli_server *server
 		case 1:
 			if (client->request.request_method == PHP_HTTP_NOT_IMPLEMENTED) {
 				return php_cli_server_send_error_page(server, client, 501);
+			}
+			if (client->too_large_post) {
+				return php_cli_server_send_error_page(server, client, 413);
 			}
 			php_cli_server_poller_remove(&server->poller, POLLIN, client->sock);
 			return php_cli_server_dispatch(server, client);
