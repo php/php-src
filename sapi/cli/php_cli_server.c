@@ -74,17 +74,14 @@
 
 #include "php_getopt.h"
 
+#include "php_poll.h"
 #ifndef PHP_WIN32
-# define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 # define SOCK_EINVAL EINVAL
 # define SOCK_EAGAIN EAGAIN
-# define SOCK_EINTR EINTR
 # define SOCK_EADDRINUSE EADDRINUSE
 #else
-# include "win32/select.h"
 # define SOCK_EINVAL WSAEINVAL
 # define SOCK_EAGAIN WSAEWOULDBLOCK
-# define SOCK_EINTR WSAEINTR
 # define SOCK_EADDRINUSE WSAEADDRINUSE
 #endif
 
@@ -117,11 +114,9 @@ static zend_long php_cli_server_workers_max;
 static zend_string* cli_concat_persistent_zstr_with_char(zend_string *old_str, const char *at, size_t length);
 
 typedef struct php_cli_server_poller {
-	fd_set rfds, wfds;
-	struct {
-		fd_set rfds, wfds;
-	} active;
-	php_socket_t max_fd;
+	php_poll_ctx *poll_ctx;
+	php_poll_event *events;
+	int count;
 } php_cli_server_poller;
 
 typedef struct php_cli_server_request {
@@ -821,112 +816,48 @@ sapi_module_struct cli_server_sapi_module = {
 
 static void php_cli_server_poller_ctor(php_cli_server_poller *poller) /* {{{ */
 {
-	FD_ZERO(&poller->rfds);
-	FD_ZERO(&poller->wfds);
-	poller->max_fd = -1;
+	uint32_t flags = PHP_POLL_FLAG_PERSISTENT | PHP_POLL_FLAG_RAW_EVENTS;
+	php_poll_register_backends();
+	poller->poll_ctx = php_poll_create(PHP_POLL_BACKEND_AUTO, flags);
+	php_poll_init(poller->poll_ctx);
+	poller->count = php_poll_get_suitable_max_events(poller->poll_ctx);
+	poller->events = pecalloc(poller->count, sizeof(php_poll_event), 1);
 } /* }}} */
 
 static void php_cli_server_poller_add(php_cli_server_poller *poller, int mode, php_socket_t fd) /* {{{ */
 {
-	if (mode & POLLIN) {
-		PHP_SAFE_FD_SET(fd, &poller->rfds);
-	}
-	if (mode & POLLOUT) {
-		PHP_SAFE_FD_SET(fd, &poller->wfds);
-	}
-	if (fd > poller->max_fd) {
-		poller->max_fd = fd;
-	}
+	php_poll_add(poller->poll_ctx, fd, mode, NULL);
 } /* }}} */
 
 static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode, php_socket_t fd) /* {{{ */
 {
-	if (mode & POLLIN) {
-		PHP_SAFE_FD_CLR(fd, &poller->rfds);
-	}
-	if (mode & POLLOUT) {
-		PHP_SAFE_FD_CLR(fd, &poller->wfds);
-	}
-#ifndef PHP_WIN32
-	if (fd == poller->max_fd) {
-		while (fd > 0) {
-			fd--;
-			if (PHP_SAFE_FD_ISSET(fd, &poller->rfds) || PHP_SAFE_FD_ISSET(fd, &poller->wfds)) {
-				break;
-			}
-		}
-		poller->max_fd = fd;
-	}
-#endif
+	/* XXX: Should be modify if mode is different from what was added? */
+	php_poll_remove(poller->poll_ctx, fd);
 } /* }}} */
 
 static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct timeval *tv) /* {{{ */
 {
-	memmove(&poller->active.rfds, &poller->rfds, sizeof(poller->rfds));
-	memmove(&poller->active.wfds, &poller->wfds, sizeof(poller->wfds));
-	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, tv);
+	struct timespec ts;
+	TIMEVAL_TO_TIMESPEC(tv, &ts);
+	return php_poll_wait(poller->poll_ctx, poller->events, poller->count, &ts);
 } /* }}} */
 
 static zend_result php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, zend_result(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
 {
 	zend_result retval = SUCCESS;
-#ifdef PHP_WIN32
-	struct socket_entry {
-		SOCKET fd;
-		int events;
-	} entries[FD_SETSIZE * 2];
-	size_t i;
-	struct socket_entry *n = entries, *m;
-
-	for (i = 0; i < poller->active.rfds.fd_count; i++) {
-		n->events = POLLIN;
-		n->fd = poller->active.rfds.fd_array[i];
-		n++;
-	}
-
-	m = n;
-	for (i = 0; i < poller->active.wfds.fd_count; i++) {
-		struct socket_entry *e;
-		SOCKET fd = poller->active.wfds.fd_array[i];
-		for (e = entries; e < m; e++) {
-			if (e->fd == fd) {
-				e->events |= POLLOUT;
+	for (int i = 0; i < poller->count; i++) {
+		int fd = poller->events[i].fd;
+		if (poller->events[i].revents & PHP_POLL_READ) {
+			if (SUCCESS != callback(opaque, fd, PHP_POLL_READ)) {
+				retval = FAILURE;
 			}
 		}
-		if (e == m) {
-			assert(n < entries + FD_SETSIZE * 2);
-			n->events = POLLOUT;
-			n->fd = fd;
-			n++;
-		}
-	}
-
-	{
-		struct socket_entry *e = entries;
-		for (; e < n; e++) {
-			if (SUCCESS != callback(opaque, e->fd, e->events)) {
+		if (poller->events[i].revents & PHP_POLL_WRITE) {
+			if (SUCCESS != callback(opaque, fd, PHP_POLL_WRITE)) {
 				retval = FAILURE;
 			}
 		}
 	}
-
-#else
-	php_socket_t fd;
-	const php_socket_t max_fd = poller->max_fd;
-
-	for (fd=0 ; fd<=max_fd ; fd++)  {
-		if (PHP_SAFE_FD_ISSET(fd, &poller->active.rfds)) {
-				if (SUCCESS != callback(opaque, fd, POLLIN)) {
-					retval = FAILURE;
-				}
-		}
-		if (PHP_SAFE_FD_ISSET(fd, &poller->active.wfds)) {
-				if (SUCCESS != callback(opaque, fd, POLLOUT)) {
-					retval = FAILURE;
-				}
-		}
-	}
-#endif
 	return retval;
 } /* }}} */
 
@@ -1901,7 +1832,7 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 		if (nbytes_sent < 0) {
 			int err = php_socket_errno();
 			if (err == SOCK_EAGAIN) {
-				int nfds = php_pollfd_for(client->sock, POLLOUT, &tv);
+				int nfds = php_pollfd_for(client->sock, PHP_POLL_WRITE, &tv);
 				if (nfds > 0) {
 					continue;
 				} else {
@@ -2090,7 +2021,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 	}
 
 	php_cli_server_log_response(client, status, errstr ? errstr : "?");
-	php_cli_server_poller_add(&server->poller, POLLOUT, client->sock);
+	php_cli_server_poller_add(&server->poller, PHP_POLL_WRITE, client->sock);
 	if (errstr) {
 		pefree(errstr, 1);
 	}
@@ -2203,7 +2134,7 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
 	php_cli_server_log_response(client, 200, NULL);
-	php_cli_server_poller_add(&server->poller, POLLOUT, client->sock);
+	php_cli_server_poller_add(&server->poller, PHP_POLL_WRITE, client->sock);
 	return SUCCESS;
 }
 /* }}} */
@@ -2405,7 +2336,7 @@ static void php_cli_server_client_dtor_wrapper(zval *zv) /* {{{ */
 
 	shutdown(p->sock, SHUT_RDWR);
 	closesocket(p->sock);
-	php_cli_server_poller_remove(&p->server->poller, POLLIN | POLLOUT, p->sock);
+	php_cli_server_poller_remove(&p->server->poller, PHP_POLL_READ | PHP_POLL_WRITE, p->sock);
 	php_cli_server_client_dtor(p);
 	pefree(p, 1);
 } /* }}} */
@@ -2575,7 +2506,7 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 
 	php_cli_server_poller_ctor(&server->poller);
 
-	php_cli_server_poller_add(&server->poller, POLLIN, server_sock);
+	php_cli_server_poller_add(&server->poller, PHP_POLL_READ, server_sock);
 
 	server->host = host;
 	server->port = port;
@@ -2641,10 +2572,10 @@ static zend_result php_cli_server_recv_event_read_request(php_cli_server *server
 			if (client->request.request_method == PHP_HTTP_NOT_IMPLEMENTED) {
 				return php_cli_server_send_error_page(server, client, 501);
 			}
-			php_cli_server_poller_remove(&server->poller, POLLIN, client->sock);
+			php_cli_server_poller_remove(&server->poller, PHP_POLL_READ, client->sock);
 			return php_cli_server_dispatch(server, client);
 		case 0:
-			php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
+			php_cli_server_poller_add(&server->poller, PHP_POLL_READ, client->sock);
 			return SUCCESS;
 		default: ZEND_UNREACHABLE();
 	}
@@ -2724,14 +2655,14 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 
 		zend_hash_index_update_ptr(&server->clients, client_sock, client);
 
-		php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
+		php_cli_server_poller_add(&server->poller, PHP_POLL_READ, client->sock);
 	} else {
 		php_cli_server_client *client;
 		if (NULL != (client = zend_hash_index_find_ptr(&server->clients, fd))) {
-			if (event & POLLIN) {
+			if (event & PHP_POLL_READ) {
 				params->rhandler(server, client);
 			}
-			if (event & POLLOUT) {
+			if (event & PHP_POLL_WRITE) {
 				params->whandler(server, client);
 			}
 		}
@@ -2767,12 +2698,11 @@ static zend_result php_cli_server_do_event_loop(php_cli_server *server) /* {{{ *
 		} else if (n == 0) {
 			/* do nothing */
 		} else {
-			int err = php_socket_errno();
-			if (err != SOCK_EINTR) {
+			php_poll_error err = php_poll_get_error(server->poller.poll_ctx);
+			if (err != PHP_POLL_ERR_INTERRUPTED) {
 				if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
-					char *errstr = php_socket_strerror(err, NULL, 0);
-					php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "%s", errstr);
-					efree(errstr);
+					const char *errstr = php_poll_error_string(err);
+					php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Poll error: %s", errstr);
 				}
 				retval = FAILURE;
 				goto out;
