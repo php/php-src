@@ -1070,7 +1070,6 @@ flf_clean:;
 
 static zend_always_inline void _class_exists_impl(zval *return_value, zend_string *name, bool autoload, int flags, int skip_flags) /* {{{ */
 {
-	zend_string *lcname;
 	const zend_class_entry *ce;
 
 	if (ZSTR_HAS_CE_CACHE(name)) {
@@ -1083,14 +1082,10 @@ static zend_always_inline void _class_exists_impl(zval *return_value, zend_strin
 	if (!autoload) {
 		if (ZSTR_VAL(name)[0] == '\\') {
 			/* Ignore leading "\" */
-			lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+			ce = zend_hash_str_find_ptr_lc(EG(class_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
 		} else {
-			lcname = zend_string_tolower(name);
+			ce = zend_hash_find_ptr_lc(EG(class_table), name);
 		}
-
-		ce = zend_hash_find_ptr(EG(class_table), lcname);
-		zend_string_release_ex(lcname, 0);
 	} else {
 		ce = zend_lookup_class(name);
 	}
@@ -1172,7 +1167,6 @@ ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
 	bool exists;
-	zend_string *lcname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(name)
@@ -1180,14 +1174,10 @@ ZEND_FUNCTION(function_exists)
 
 	if (ZSTR_VAL(name)[0] == '\\') {
 		/* Ignore leading "\" */
-		lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-		zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+		exists = zend_hash_str_find_ptr_lc(EG(function_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1) != NULL;
 	} else {
-		lcname = zend_string_tolower(name);
+		exists = zend_hash_find_ptr_lc(EG(function_table), name) != NULL;
 	}
-
-	exists = zend_hash_exists(EG(function_table), lcname);
-	zend_string_release_ex(lcname, 0);
 
 	RETURN_BOOL(exists);
 }

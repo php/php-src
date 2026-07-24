@@ -185,9 +185,9 @@ static zend_always_inline uint32_t prop_get_flags(const property_reference *ref)
 	return ref->prop ? ref->prop->flags : ZEND_ACC_PUBLIC;
 }
 
-static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_string *lcname) {
+static inline bool is_closure_invoke(const zend_class_entry *ce, const zend_string *name) {
 	return ce == zend_ce_closure
-		&& zend_string_equals(lcname, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
+		&& zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
 }
 
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
@@ -4408,9 +4408,8 @@ ZEND_METHOD(ReflectionClass, hasMethod)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	zend_string *lc_name = zend_string_tolower(name);
-	RETVAL_BOOL(zend_hash_exists(&ce->function_table, lc_name) || is_closure_invoke(ce, lc_name));
-	zend_string_release(lc_name);
+	RETVAL_BOOL(zend_hash_find_ptr_lc(&ce->function_table, name) != NULL
+		|| is_closure_invoke(ce, name));
 }
 /* }}} */
 
@@ -4426,28 +4425,27 @@ ZEND_METHOD(ReflectionClass, getMethod)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	zend_string *lc_name = zend_string_tolower(name);
 	zend_function *mptr;
 	zval obj_tmp;
-	if (!Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, lc_name)
+	bool is_invoke = is_closure_invoke(ce, name);
+	if (!Z_ISUNDEF(intern->obj) && is_invoke
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj))) != NULL)
 	{
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value);
-	} else if (Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, lc_name)
+	} else if (Z_ISUNDEF(intern->obj) && is_invoke
 		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp))) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value);
 		zval_ptr_dtor(&obj_tmp);
-	} else if ((mptr = zend_hash_find_ptr(&ce->function_table, lc_name)) != NULL) {
+	} else if ((mptr = zend_hash_find_ptr_lc(&ce->function_table, name)) != NULL) {
 		reflection_method_factory(ce, mptr, NULL, return_value);
 	} else {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
-	zend_string_release(lc_name);
 }
 /* }}} */
 
