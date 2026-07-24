@@ -239,7 +239,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, size_t name_length)
 /* {{{ php_info_print_style */
 PHPAPI ZEND_COLD void ZEND_COLD php_info_print_style(void)
 {
-	php_info_printf("<style type=\"text/css\">\n");
+	php_info_printf("<style>\n");
 	php_info_print_css();
 	php_info_printf("</style>\n");
 }
@@ -735,12 +735,13 @@ PHPAPI zend_string *php_get_uname(char mode)
 /* {{{ php_print_info_htmlhead */
 PHPAPI ZEND_COLD void php_print_info_htmlhead(void)
 {
-	php_info_print("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">\n");
-	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
+	php_info_print("<!DOCTYPE html>\n");
+	php_info_print("<html lang=\"en\">");
 	php_info_print("<head>\n");
+	php_info_print("<meta charset=\"utf-8\">");
+	php_info_print("<meta name=\"robots\" content=\"noindex,nofollow,noarchive\">");
 	php_info_print_style();
 	php_info_printf("<title>PHP %s - phpinfo()</title>", PHP_VERSION);
-	php_info_print("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
 	php_info_print("</head>\n");
 	php_info_print("<body><div class=\"center\">\n");
 }
@@ -785,9 +786,9 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 
 			php_info_print("<a href=\"https://www.php.net/\"><img src=\"");
 	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
-		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
+		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\"></a>");
 	        } else {
-		        php_info_print(PHP_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
+		        php_info_print(PHP_LOGO_DATA_URI "\" alt=\"PHP logo\"></a>");
 			}
 		}
 
@@ -907,10 +908,10 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 		php_info_print_box_start(0);
 		if (!sapi_module.phpinfo_as_text) {
 			php_info_print("<a href=\"https://www.zend.com/\"><img src=\"");
-			php_info_print(ZEND_LOGO_DATA_URI "\" alt=\"Zend logo\" /></a>\n");
+			php_info_print(ZEND_LOGO_DATA_URI "\" alt=\"Zend logo\"></a>\n");
 		}
 		php_info_print("This program makes use of the Zend Scripting Language Engine:");
-		php_info_print(!sapi_module.phpinfo_as_text?"<br />":"\n");
+		php_info_print(!sapi_module.phpinfo_as_text?"<br>":"\n");
 		if (sapi_module.phpinfo_as_text) {
 			php_info_print(zend_version);
 		} else {
@@ -1148,7 +1149,7 @@ PHPAPI ZEND_COLD void php_info_print_box_end(void) /* {{{ */
 PHPAPI ZEND_COLD void php_info_print_hr(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
-		php_info_print("<hr />\n");
+		php_info_print("<hr>\n");
 	} else {
 		php_info_print("\n\n _______________________________________________________________________\n\n");
 	}
