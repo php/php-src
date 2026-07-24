@@ -79,9 +79,18 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 			// TODO (??) libpq does not support close statement protocol < postgres 17
 			// check if we can circumvent this.
 			char *q = NULL;
-			spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
-			res = PQexec(H->server, q);
-			efree(q);
+			PGTransactionStatusType tstatus = PQtransactionStatus(H->server);
+
+			if (tstatus == PQTRANS_IDLE) {
+				spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
+				res = PQexec(H->server, q);
+				efree(q);
+			} else {
+				/* Outside PQTRANS_IDLE, skip DEALLOCATE: on libpq < 17 some servers
+				 * (e.g. Aurora DSQL) reject it and poison the tx (GH-21869). The
+				 * statement is session-scoped, so it's freed on disconnect. */
+				res = NULL;
+			}
 #else
 			res = PQclosePrepared(H->server, S->stmt_name);
 #endif
