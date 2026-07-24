@@ -376,6 +376,8 @@ if (VS_TOOLSET) {
 	AC_DEFINE("PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_ssubll_overflow'.");
 	AC_DEFINE("PHP_HAVE_BUILTIN_SMULL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_smull_overflow '.");
 	AC_DEFINE("PHP_HAVE_BUILTIN_SMULLL_OVERFLOW", 1, "Define to 1 if the compiler supports '__builtin_smulll_overflow'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_ALIGN_DOWN", 1, "Define to 1 if the compiler supports '__builtin_align_down'.");
+	AC_DEFINE("PHP_HAVE_BUILTIN_ALIGN_UP", 1, "Define to 1 if the compiler supports '__builtin_align_up'.");
 
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 500) {

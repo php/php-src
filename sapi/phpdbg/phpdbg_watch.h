@@ -135,7 +135,11 @@ void phpdbg_watch_efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 static long phpdbg_pagesize;
 
 static zend_always_inline void *phpdbg_get_page_boundary(void *addr) {
+#ifdef PHP_HAVE_BUILTIN_ALIGN_DOWN
+	return __builtin_align_down(addr, phpdbg_pagesize);
+#else
 	return (void *) ((size_t) addr & ~(phpdbg_pagesize - 1));
+#endif
 }
 
 static zend_always_inline size_t phpdbg_get_total_page_size(void *addr, size_t size) {
