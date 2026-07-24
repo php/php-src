@@ -7,11 +7,14 @@ opcache.jit=off
 opcache.jit_buffer_size=32M
 --EXTENSIONS--
 opcache
+--SKIPIF--
+<?php
+if (!(opcache_get_status()['jit']['enabled'] ?? false)) die('skip JIT is not available');
+?>
 --FILE--
 <?php
 ini_set('opcache.jit', 'tracing');
 ?>
 ===DONE===
---EXPECTREGEX--
-^(?:Warning: Cannot change opcache\.jit setting at run-time \(JIT is disabled\) in .+ on line 2
-)?===DONE===$
+--EXPECT--
+===DONE===
