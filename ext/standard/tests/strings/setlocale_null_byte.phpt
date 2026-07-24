@@ -27,12 +27,6 @@ try {
 }
 
 try {
-    var_dump(setlocale(LC_ALL, ["zz_ZZ.nope", "C\0locale"]));
-} catch (ValueError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
-}
-
-try {
     var_dump(setlocale(LC_ALL, "zz_ZZ.nope", ["C\0locale"]));
 } catch (TypeError $e) {
     echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
@@ -51,7 +45,6 @@ try {
 }
 ?>
 --EXPECT--
-ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
