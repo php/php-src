@@ -797,16 +797,28 @@ HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n)
 	}
 	zend_get_gc_buffer_add_zval(gc_buffer, &info->u.initializer.zv);
 
-	/* Uninitialized lazy objects can not have dynamic properties, so we can
-	 * ignore zobj->properties. */
-	zval *prop = zobj->properties_table;
-	zval *end = prop + zobj->ce->default_properties_count;
-	for ( ; prop < end; prop++) {
-		zend_get_gc_buffer_add_zval(gc_buffer, prop);
+	/* Lazy objects may have a properties ht in two cases:
+	 * - After fetching debug infos
+	 * - After lazy init failed in zend_std_get_properties()
+	 *
+	 * In the latter case zobj->properties is an empty ht. We should ignore it,
+	 * otherwise we may mask references to the GC. In the former case we must
+	 * return it, otherwise the GC may traverse properties twice in case the ht
+	 * it a root by itself. */
+	zend_array *ht;
+	if (zobj->properties && zend_hash_num_elements(zobj->properties) > 0) {
+		ht = zobj->properties;
+	} else {
+		zval *prop = zobj->properties_table;
+		zval *end = prop + zobj->ce->default_properties_count;
+		for ( ; prop < end; prop++) {
+			zend_get_gc_buffer_add_zval(gc_buffer, prop);
+		}
+		ht = NULL;
 	}
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
-	return NULL;
+	return ht;
 }
 
 zend_property_info *zend_lazy_object_get_property_info_for_slot(zend_object *obj, zval *slot)
