@@ -213,6 +213,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     The same information is present in conn->options and should be used
     instead.
   . Removed charsets plugin.
+  . Dropped unused protocol element from st_mysqlnd_session_options.
 
 - ext/session:
   . php_session_flush() now returns a bool rather than a zend_result.
