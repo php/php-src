@@ -1,5 +1,10 @@
 --TEST--
 PFA receives variadic param by ref if the actual function does
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.optimization_level=-1
+opcache.file_update_protection=0
 --FILE--
 <?php
 

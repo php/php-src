@@ -1,5 +1,10 @@
 --TEST--
 PFA variation: variadics, internal function
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.optimization_level=-1
+opcache.file_update_protection=0
 --FILE--
 <?php
 $sprintf = sprintf("%d %d %d", 100, ...);

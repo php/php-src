@@ -1,5 +1,10 @@
 --TEST--
 PFA variation: var_dump(), user function
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.optimization_level=-1
+opcache.file_update_protection=0
 --ENV--
 A=20
 --FILE--
