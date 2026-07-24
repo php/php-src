@@ -108,7 +108,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 	return SUCCESS;
 }
 
-static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_optimizer_ctx *ctx)
+static void zend_ssa_remove_nops(zend_op_array *op_array, const zend_ssa *ssa, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_basic_block *blocks_end = blocks + ssa->cfg.blocks_count;
@@ -290,9 +290,9 @@ static inline bool can_elide_list_type(
 }
 
 static inline bool can_elide_return_type_check(
-		const zend_script *script, zend_op_array *op_array, zend_ssa *ssa, zend_ssa_op *ssa_op) {
-	zend_arg_info *arg_info = &op_array->arg_info[-1];
-	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
+		const zend_script *script, const zend_op_array *op_array, const zend_ssa *ssa, const zend_ssa_op *ssa_op) {
+	const zend_arg_info *arg_info = &op_array->arg_info[-1];
+	const zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
 	uint32_t use_type = use_info->type & (MAY_BE_ANY|MAY_BE_UNDEF);
 	if (use_type & MAY_BE_REF) {
 		return false;
@@ -317,7 +317,7 @@ static inline bool can_elide_return_type_check(
 }
 
 static bool opline_supports_assign_contraction(
-		zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int src_var, uint32_t cv_var) {
+		const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, int src_var, uint32_t cv_var) {
 	if (opline->opcode == ZEND_NEW) {
 		/* see Zend/tests/generators/aborted_yield_during_new.phpt */
 		return false;
@@ -378,7 +378,7 @@ static bool opline_supports_assign_contraction(
 	return true;
 }
 
-static bool variable_defined_or_used_in_range(zend_ssa *ssa, int var, int start, int end)
+static bool variable_defined_or_used_in_range(const zend_ssa *ssa, int var, int start, int end)
 {
 	while (start < end) {
 		const zend_ssa_op *ssa_op = &ssa->ops[start];
@@ -571,11 +571,11 @@ static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int n
 	}
 }
 
-static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa, int from, int to, int new_to)
+static void zend_ssa_replace_control_link(const zend_op_array *op_array, zend_ssa *ssa, int from, int to, int new_to)
 {
-	zend_basic_block *src = &ssa->cfg.blocks[from];
-	zend_basic_block *old = &ssa->cfg.blocks[to];
-	zend_basic_block *dst = &ssa->cfg.blocks[new_to];
+	const zend_basic_block *src = &ssa->cfg.blocks[from];
+	const zend_basic_block *old = &ssa->cfg.blocks[to];
+	const zend_basic_block *dst = &ssa->cfg.blocks[new_to];
 	zend_op *opline;
 
 	for (uint32_t i = 0; i < src->successors_count; i++) {
@@ -643,7 +643,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 	replace_predecessor(ssa, new_to, to, from);
 }
 
-static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_basic_block *block, uint32_t block_num)
+static void zend_ssa_unlink_block(const zend_op_array *op_array, zend_ssa *ssa, const zend_basic_block *block, uint32_t block_num)
 {
 	if (block->predecessors_count == 1 && ssa->blocks[block_num].phis == NULL) {
 		int *predecessors;
@@ -837,7 +837,7 @@ optimize_jmpnz:
 					break;
 				case ZEND_COALESCE:
 				{
-					zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
+					const zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
 					if (opline->op1_type == IS_CONST
 							&& var->use_chain < 0 && var->phi_use_chain == NULL) {
 						if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op1.constant)) == IS_NULL) {
@@ -859,7 +859,7 @@ optimize_jmpnz:
 				}
 				case ZEND_JMP_NULL:
 				{
-					zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
+					const zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
 					if (opline->op1_type == IS_CONST
 							&& var->use_chain < 0 && var->phi_use_chain == NULL) {
 						if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op1.constant)) == IS_NULL) {
@@ -904,8 +904,8 @@ optimize_jmpnz:
 
 						uint32_t target;
 						if (correct_type) {
-							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
-							zval *jmp_zv = type == IS_LONG
+							const HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
+							const zval *jmp_zv = type == IS_LONG
 								? zend_hash_index_find(jmptable, Z_LVAL_P(zv))
 								: zend_hash_find(jmptable, Z_STR_P(zv));
 
@@ -957,7 +957,7 @@ optimize_nop:
 	return removed_ops;
 }
 
-static bool zend_dfa_try_to_replace_result(zend_op_array *op_array, zend_ssa *ssa, int def, int cv_var)
+static bool zend_dfa_try_to_replace_result(const zend_op_array *op_array, const zend_ssa *ssa, int def, int cv_var)
 {
 	int result_var = ssa->ops[def].result_def;
 	uint32_t cv = EX_NUM_TO_VAR(ssa->vars[cv_var].var);
