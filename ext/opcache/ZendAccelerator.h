@@ -51,6 +51,7 @@
 #include "zend_extensions.h"
 #include "zend_compile.h"
 #include "zend_API.h"
+#include "zend_atomic.h"
 
 #include "Optimizer/zend_optimizer.h"
 #include "zend_accelerator_hash.h"
@@ -197,6 +198,9 @@ typedef struct _zend_accel_directives {
 
 typedef struct _zend_accel_globals {
 	bool               counted;   /* the process uses shared memory */
+#if defined(ZTS) && !defined(ZEND_WIN32)
+	bool               reader_counted; /* this request is counted in accel_active_readers */
+#endif
 	bool               enabled;
 	bool               locked;    /* thread obtained exclusive lock */
 	bool               accelerator_enabled; /* accelerator enabled for current request */
@@ -265,7 +269,11 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_restart_reason restart_reason;
 	bool       cache_status_before_restart;
 #ifdef ZEND_WIN32
-	LONGLONG   mem_usage;
+	/* Count of requests currently reading SHM. Windows threaded SAPIs run in a
+	 * single process, so this atomic counter alone tells us when it is safe to
+	 * restart (see accel_is_inactive()). POSIX uses fcntl() locks instead, with
+	 * an additional process-local counter under ZTS (see accel_active_readers). */
+	zend_atomic_int mem_usage;
 	LONGLONG   restart_in;
 #endif
 	bool       restart_in_progress;
