@@ -4073,11 +4073,19 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_I
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
 		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-		}
-		fbc = Z_FUNC_P(func);
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
+			SAVE_OPLINE();
+			fbc = zend_lookup_function(Z_STR_P(function_name), Z_STR_P(function_name+1));
+			if (UNEXPECTED(fbc == NULL)) {
+				if (EG(exception)) {
+					HANDLE_EXCEPTION();
+				}
+				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+			}
+		} else {
+			fbc = Z_FUNC_P(func);
+			if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+				init_func_run_time_cache(&fbc->op_array);
+			}
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -4158,7 +4166,17 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_I
 		if (func == NULL) {
 			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
 			if (UNEXPECTED(func == NULL)) {
-				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+				/* Autoload with the fully qualified name */
+				SAVE_OPLINE();
+				fbc = zend_lookup_function(Z_STR_P(func_name), Z_STR_P(func_name + 1));
+				if (UNEXPECTED(fbc == NULL)) {
+					if (EG(exception)) {
+						HANDLE_EXCEPTION();
+					}
+					ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+				}
+				CACHE_PTR(opline->result.num, fbc);
+				goto ns_fcall_init;
 			}
 		}
 		fbc = Z_FUNC_P(func);
@@ -4168,6 +4186,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_I
 		CACHE_PTR(opline->result.num, fbc);
 	}
 
+ns_fcall_init:
 	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, NULL);
 	call->prev_execute_data = EX(call);
@@ -56889,11 +56908,19 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_F
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
 		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-		}
-		fbc = Z_FUNC_P(func);
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache(&fbc->op_array);
+			SAVE_OPLINE();
+			fbc = zend_lookup_function(Z_STR_P(function_name), Z_STR_P(function_name+1));
+			if (UNEXPECTED(fbc == NULL)) {
+				if (EG(exception)) {
+					HANDLE_EXCEPTION();
+				}
+				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+			}
+		} else {
+			fbc = Z_FUNC_P(func);
+			if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+				init_func_run_time_cache(&fbc->op_array);
+			}
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -56974,7 +57001,17 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_N
 		if (func == NULL) {
 			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
 			if (UNEXPECTED(func == NULL)) {
-				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+				/* Autoload with the fully qualified name */
+				SAVE_OPLINE();
+				fbc = zend_lookup_function(Z_STR_P(func_name), Z_STR_P(func_name + 1));
+				if (UNEXPECTED(fbc == NULL)) {
+					if (EG(exception)) {
+						HANDLE_EXCEPTION();
+					}
+					ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+				}
+				CACHE_PTR(opline->result.num, fbc);
+				goto ns_fcall_init;
 			}
 		}
 		fbc = Z_FUNC_P(func);
@@ -56984,6 +57021,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_N
 		CACHE_PTR(opline->result.num, fbc);
 	}
 
+ns_fcall_init:
 	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, NULL);
 	call->prev_execute_data = EX(call);

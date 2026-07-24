@@ -227,6 +227,7 @@ struct _zend_executor_globals {
 	zend_atomic_bool timed_out;
 
 	HashTable autoload_current_classnames;
+	HashTable autoload_current_functionnames;
 
 	zend_long hard_timeout;
 	void *stack_base;
