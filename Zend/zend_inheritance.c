@@ -1471,6 +1471,20 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 						ZSTR_VAL(ce->name), ZSTR_VAL(key));
 				}
 			}
+			if (parent_info->hooks
+			 && parent_info->hooks[ZEND_PROPERTY_HOOK_SET]
+			 && parent_info->hooks[ZEND_PROPERTY_HOOK_SET]->common.fn_flags & ZEND_ACC_ABSTRACT
+			 && child_info->flags & ZEND_ACC_READONLY
+			 && !property_has_operation(child_info, ZEND_PROPERTY_HOOK_SET)) {
+				zend_error_noreturn(
+					E_COMPILE_ERROR,
+					"Readonly property %s::$%s cannot implement set hook required by %s %s::$%s",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(key),
+					zend_get_object_type_case(parent_info->ce, false),
+					ZSTR_VAL(parent_info->ce->name),
+					ZSTR_VAL(key));
+			}
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_PPP_SET_MASK))
 			 /* Get-only virtual properties have no set visibility, so any child visibility is fine. */
 			 && !(parent_info->hooks && (parent_info->flags & ZEND_ACC_VIRTUAL) && !parent_info->hooks[ZEND_PROPERTY_HOOK_SET])) {

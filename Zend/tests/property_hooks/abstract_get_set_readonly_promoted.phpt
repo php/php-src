@@ -1,15 +1,12 @@
 --TEST--
-Readonly property cannot implement set hook of get/set abstract property
+Readonly promoted property cannot implement set hook of get/set abstract property
 --FILE--
 <?php
 abstract class A {
     protected abstract int $prop { get; set; }
 }
 class C extends A {
-    protected readonly int $prop;
-    public function __construct(int $prop) {
-        $this->prop = $prop;
-    }
+    public function __construct(protected readonly int $prop) {}
 }
 ?>
 --EXPECTF--
