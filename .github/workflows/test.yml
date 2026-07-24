@@ -58,7 +58,13 @@ jobs:
             nightly-
       - name: Generate Matrix
         id: set-matrix
-        run: php .github/matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.event_name == 'pull_request' && github.ref || github.ref_name }}" '${{ toJSON(github.event.pull_request.labels) }}' "${{ github.repository }}"
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          REF: ${{ github.event_name == 'pull_request' && github.ref || github.ref_name }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels) }}
+          REPOSITORY: ${{ github.repository }}
+        run: php .github/matrix.php "$EVENT_NAME" "$RUN_ATTEMPT" "$REF" "$PR_LABELS" "$REPOSITORY"
   TEST:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
