@@ -63,6 +63,7 @@ if test "$PHP_FUZZER" != "no"; then
   PHP_FUZZER_TARGET([unserialize], [PHP_FUZZER_UNSERIALIZE_OBJS])
   PHP_FUZZER_TARGET([unserializehash], [PHP_FUZZER_UNSERIALIZEHASH_OBJS])
   PHP_FUZZER_TARGET([json], [PHP_FUZZER_JSON_OBJS])
+  PHP_FUZZER_TARGET([bcmath], [PHP_FUZZER_BCMATH_OBJS])
 
   if test -n "$enable_exif" && test "$enable_exif" != "no"; then
     PHP_FUZZER_TARGET([exif], [PHP_FUZZER_EXIF_OBJS])
