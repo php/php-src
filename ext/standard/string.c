@@ -4946,7 +4946,6 @@ PHP_FUNCTION(setlocale)
 					ZEND_NUM_ARGS());
 				goto out;
 			}
-			num_args = 1;
 			break;
 		}
 		if (UNEXPECTED(!zend_parse_arg_path_str(&args[i], &strings[i], true, i + 2))) {

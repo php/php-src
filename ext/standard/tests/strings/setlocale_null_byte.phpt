@@ -55,6 +55,6 @@ ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
-TypeError: setlocale(): Argument #3 must be of type array|string|null, int given
+TypeError: setlocale(): Argument #3 must be of type ?string, array given
 ValueError: setlocale(): Argument #3 must not contain any null bytes
 ArgumentCountError: setlocale() expects exactly 2 arguments when argument #2 ($locales) is an array, 3 given
