@@ -26,7 +26,7 @@ move 40 bytes
 tell=int(40)
 move to the end
 
-Warning: gzseek(): SEEK_END is not supported in %s on line %d
+Warning: gzseek(): SEEK_END is not supported on this stream in %s on line %d
 int(-1)
 tell=int(40)
 eof=bool(false)
