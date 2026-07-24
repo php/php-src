@@ -29,6 +29,7 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 #include "php.h"
+#include "SAPI.h"
 
 #ifndef ZEND_OPTIMIZER_MAX_REGISTERED_PASSES
 # define ZEND_OPTIMIZER_MAX_REGISTERED_PASSES 32
@@ -782,6 +783,9 @@ static bool zend_optimizer_ignore_class(zval *ce_zv, const zend_string *filename
 			return false;
 		}
 	}
+	if (sapi_is_single_request()) {
+		return false;
+	}
 	return ce->type == ZEND_USER_CLASS
 		&& (!ce->info.user.filename || ce->info.user.filename != filename);
 }
@@ -802,6 +806,9 @@ static bool zend_optimizer_ignore_function(zval *fbc_zv, const zend_string *file
 			if (offset < EG(persistent_functions_count)) {
 				return false;
 			}
+		}
+		if (sapi_is_single_request()) {
+			return false;
 		}
 		return !fbc->op_array.filename || fbc->op_array.filename != filename;
 	} else {
@@ -894,6 +901,10 @@ const zend_class_constant *zend_fetch_class_const_info(
 	}
 	*is_prototype = is_static_reference
 		&& !(const_info->ce->ce_flags & ZEND_ACC_FINAL) && !(ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_FINAL);
+
+	if (Z_TYPE(const_info->value) > IS_ARRAY) {
+		return NULL;
+	}
 
 	return const_info;
 }

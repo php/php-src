@@ -167,6 +167,7 @@ SAPI_API void sapi_deactivate_destroy(void);
 SAPI_API void sapi_deactivate(void);
 SAPI_API void sapi_initialize_empty_request(void);
 SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
+SAPI_API bool sapi_is_single_request(void);
 END_EXTERN_C()
 
 /*
@@ -290,6 +291,8 @@ struct _sapi_module_struct {
 	unsigned int (*input_filter_init)(void);
 
 	int (*pre_request_init)(void); /* called before activate and before the post data read - used for .user.ini */
+
+	bool (*is_single_request)(void); /* Whether the SAPI will only handle a single request. This implies all script structures are immutable. */
 };
 
 struct _sapi_post_entry {
@@ -341,6 +344,7 @@ END_EXTERN_C()
 	NULL, /* ini_entries;            */ \
 	NULL, /* additional_functions    */ \
 	NULL, /* input_filter_init       */ \
-	NULL  /* pre_request_init        */
+	NULL, /* pre_request_init        */ \
+	NULL  /* is_single_request       */
 
 #endif /* SAPI_H */
