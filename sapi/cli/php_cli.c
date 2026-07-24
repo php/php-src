@@ -78,12 +78,6 @@
 #include "php_cli_process_title.h"
 #include "php_cli_process_title_arginfo.h"
 
-#ifndef PHP_WIN32
-# define php_select(m, r, w, e, t)	select(m, r, w, e, t)
-#else
-# include "win32/select.h"
-#endif
-
 #if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
 #endif
@@ -218,20 +212,8 @@ static void print_extensions(void) /* {{{ */
 #ifdef PHP_WRITE_STDOUT
 static inline bool sapi_cli_select(php_socket_t fd)
 {
-	fd_set wfd;
-	struct timeval tv;
-	int ret;
-
-	FD_ZERO(&wfd);
-
-	PHP_SAFE_FD_SET(fd, &wfd);
-
-	tv.tv_sec = (long)FG(default_socket_timeout);
-	tv.tv_usec = 0;
-
-	ret = php_select(fd+1, NULL, &wfd, NULL, &tv);
-
-	return ret != -1;
+	int timeout = FG(default_socket_timeout) * 1000;
+	return php_pollfd_for_ms(fd, POLLOUT, timeout) != -1;
 }
 #endif
 
