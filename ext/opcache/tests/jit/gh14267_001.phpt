@@ -12,5 +12,6 @@ opcache
 ini_set('opcache.jit', 'tracing');
 ?>
 ===DONE===
---EXPECT--
-===DONE===
+--EXPECTREGEX--
+^(?:Warning: Cannot change opcache\.jit setting at run-time \(JIT is disabled\) in .+ on line 2
+)?===DONE===$
