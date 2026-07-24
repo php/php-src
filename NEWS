@@ -8,6 +8,9 @@ PHP                                                                        NEWS
     failure path). (David Carlier)
   . Fixed bug GH-18985 (Wrong line numbers for match with constant arms).
     (ilutov)
+  . Fixed bug GH-18847 (SEGV in zend_fetch_debug_backtrace() when the memory
+    limit is reached while the tracing JIT enters a call frame). (Arnaud,
+    iliaal)
 
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD

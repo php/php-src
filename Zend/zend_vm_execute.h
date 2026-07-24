@@ -4082,7 +4082,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_I
 		CACHE_PTR(opline->result.num, fbc);
 	}
 	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
+		fbc, opline->extended_value, NULL EXECUTE_DATA_CC OPLINE_CC);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -4169,7 +4169,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_I
 	}
 
 	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
+		fbc, opline->extended_value, NULL EXECUTE_DATA_CC OPLINE_CC);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -4198,7 +4198,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_I
 
 	call = _zend_vm_stack_push_call_frame_ex(
 		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
+		fbc, opline->extended_value, NULL EXECUTE_DATA_CC OPLINE_CC);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -4217,7 +4217,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_I
 	}
 	call = _zend_vm_stack_push_call_frame_ex(
 		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
+		fbc, opline->extended_value, NULL EXECUTE_DATA_CC OPLINE_CC);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
@@ -56898,7 +56898,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_F
 		CACHE_PTR(opline->result.num, fbc);
 	}
 	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
+		fbc, opline->extended_value, NULL EXECUTE_DATA_CC OPLINE_CC);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -56985,7 +56985,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_N
 	}
 
 	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
+		fbc, opline->extended_value, NULL EXECUTE_DATA_CC OPLINE_CC);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -57014,7 +57014,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_F
 
 	call = _zend_vm_stack_push_call_frame_ex(
 		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
+		fbc, opline->extended_value, NULL EXECUTE_DATA_CC OPLINE_CC);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -57033,7 +57033,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_INIT_F
 	}
 	call = _zend_vm_stack_push_call_frame_ex(
 		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL);
+		fbc, opline->extended_value, NULL EXECUTE_DATA_CC OPLINE_CC);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
