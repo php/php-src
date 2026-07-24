@@ -166,6 +166,7 @@ struct _zend_compiler_globals {
 	zend_stack short_circuiting_opnums;
 #ifdef ZTS
 	uint32_t copied_functions_count;
+	uint32_t copied_classes_count;
 #endif
 };
 

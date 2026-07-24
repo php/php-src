@@ -70,33 +70,10 @@ void free_zend_constant(zval *zv)
 
 
 #ifdef ZTS
-static void copy_zend_constant(zval *zv)
-{
-	zend_constant *c = Z_PTR_P(zv);
-
-	ZEND_ASSERT(ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
-	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), 1);
-	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
-
-	c = Z_PTR_P(zv);
-	c->name = zend_string_copy(c->name);
-	if (c->filename != NULL) {
-		c->filename = zend_string_copy(c->filename);
-	}
-	if (c->attributes != NULL) {
-		// Use the same attributes table
-		GC_ADDREF(c->attributes);
-	}
-	if (Z_TYPE(c->value) == IS_STRING) {
-		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
-	}
-}
-
-
-void zend_copy_constants(HashTable *target, HashTable *source)
-{
-	zend_hash_copy(target, source, copy_zend_constant);
-}
+/* Persistent constants live only in this shared table. Per-thread
+ * EG(zend_constants) holds runtime-defined constants. During startup the
+ * main thread's EG(zend_constants) aliases this table. */
+ZEND_API HashTable *zend_global_constants_table = NULL;
 #endif
 
 
@@ -265,10 +242,25 @@ ZEND_API bool zend_verify_const_access(const zend_class_constant *c, const zend_
 
 static zend_constant *zend_get_constant_str_impl(const char *name, size_t name_len)
 {
+#ifdef ZTS
+	/* Skip the per-thread table while no run-time constant has been
+	 * defined (the common case); persistent constants live only in the
+	 * shared global table. */
+	zend_constant *c = zend_hash_num_elements(EG(zend_constants))
+		? zend_hash_str_find_ptr(EG(zend_constants), name, name_len) : NULL;
+	if (c) {
+		return c;
+	}
+	c = zend_hash_str_find_ptr(zend_global_constants_table, name, name_len);
+	if (c) {
+		return c;
+	}
+#else
 	zend_constant *c = zend_hash_str_find_ptr(EG(zend_constants), name, name_len);
 	if (c) {
 		return c;
 	}
+#endif
 
 	c = zend_get_halt_offset_constant(name, name_len);
 	if (c) {
@@ -289,10 +281,22 @@ ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 
 ZEND_API zend_constant *zend_get_constant_ptr(zend_string *name)
 {
+#ifdef ZTS
+	zend_constant *c = zend_hash_num_elements(EG(zend_constants))
+		? zend_hash_find_ptr(EG(zend_constants), name) : NULL;
+	if (c) {
+		return c;
+	}
+	c = zend_hash_find_ptr(zend_global_constants_table, name);
+	if (c) {
+		return c;
+	}
+#else
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
 		return c;
 	}
+#endif
 
 	c = zend_get_halt_offset_constant(ZSTR_VAL(name), ZSTR_LEN(name));
 	if (c) {
@@ -458,6 +462,11 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, const zend_class_entry *
 		memcpy(lcname + prefix_len + 1, constant_name, const_name_len + 1);
 
 		c = zend_hash_str_find_ptr(EG(zend_constants), lcname, lcname_len);
+#ifdef ZTS
+		if (!c) {
+			c = zend_hash_str_find_ptr(zend_global_constants_table, lcname, lcname_len);
+		}
+#endif
 		free_alloca(lcname, use_heap);
 
 		if (!c) {
@@ -541,6 +550,10 @@ ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 	/* Check if the user is trying to define any special constant */
 	if (zend_string_equals_literal(name, "__COMPILER_HALT_OFFSET__")
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
+#ifdef ZTS
+		|| (EG(zend_constants) != zend_global_constants_table
+			&& zend_hash_exists(zend_global_constants_table, name))
+#endif
 		|| (ret = zend_hash_add_constant(EG(zend_constants), name, c)) == NULL
 	) {
 		zend_error(E_WARNING, "Constant %s already defined, this will be an error in PHP 9", ZSTR_VAL(name));

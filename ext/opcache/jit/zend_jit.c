@@ -553,11 +553,21 @@ static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
 
 	/* null/true/false are resolved during compilation, so don't check for them here. */
 	zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
+#ifdef ZTS
+	if (!zv) {
+		zv = zend_hash_find_known_hash(zend_global_constants_table, Z_STR_P(key));
+	}
+#endif
 	if (zv) {
 		c = (zend_constant*)Z_PTR_P(zv);
 	} else if (flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
 		key++;
 		zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
+#ifdef ZTS
+		if (!zv) {
+			zv = zend_hash_find_known_hash(zend_global_constants_table, Z_STR_P(key));
+		}
+#endif
 		if (zv) {
 			c = (zend_constant*)Z_PTR_P(zv);
 		}
