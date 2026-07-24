@@ -24,7 +24,7 @@ var_dump($config['directives']['opcache.max_accelerated_files']);
 
 %s: Warning opcache.max_wasted_percentage must be set between 1 and 50.
 
-%r(?:.*: Warning Apple Silicon ZTS JIT requires pthread_jit_write_protect_np\(\) support\. JIT disabled\.\n)?%rstring(1) "5"
+string(1) "5"
 float(0.05)
 string(3) "128"
 int(134217728)

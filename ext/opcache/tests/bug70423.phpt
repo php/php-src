@@ -54,8 +54,8 @@ $fn2(); // 5
 $fn1(); // 1
 $fn2(); // 6
 ?>
---EXPECTF--
-%r(?:.*: Warning Apple Silicon ZTS JIT requires pthread_jit_write_protect_np\(\) support\. JIT disabled\.\n)?%r1
+--EXPECT--
+1
 1
 1
 1

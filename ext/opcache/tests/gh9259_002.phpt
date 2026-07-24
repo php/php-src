@@ -15,4 +15,4 @@ echo 'OK';
 --EXPECTF--
 %sWarning opcache.interned_strings_buffer must be greater than or equal to 0, -1 given%s
 
-%r(?:.*: Warning Apple Silicon ZTS JIT requires pthread_jit_write_protect_np\(\) support\. JIT disabled\.\n)?%rOK
+OK
