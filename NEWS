@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed grammatical issues in Normalizer invalid form and IntlCalendar time
     zone offset error messages. (Weilin Du)
 
+- MySQLi:
+  . Fixed bug GH-22854 (Assertion failure when reading the errno/error
+    property of a mysqli object whose connection failed). (Khaled Alam)
+
 - ODBC:
   . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
     driver-reported display size). (iliaal)
