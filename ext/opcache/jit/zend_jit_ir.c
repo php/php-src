@@ -16134,9 +16134,11 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
 				prop_info_ref = ir_LOAD_L(
 					ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2));
-				if_typed = ir_IF(ir_AND_U32(
-					ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
-					ir_CONST_U32(_ZEND_TYPE_MASK)));
+				if_typed = ir_IF(ir_OR_U32(
+						ir_AND_U32(
+							ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
+							ir_CONST_U32(_ZEND_TYPE_MASK)),
+						ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.kind)))));
 				ir_IF_FALSE(if_typed);
 				ir_END_list(merge);
 				ir_IF_TRUE(if_typed);
@@ -16163,9 +16165,11 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 				// JIT: if (ZEND_TYPE_IS_SET(property_info->type))
 				prop_info_ref = ir_LOAD_L(
 					ir_ADD_OFFSET(ir_LOAD_A(jit_EX(run_time_cache)), cache_slot + sizeof(void*) * 2));
-				if_typed = ir_IF(ir_AND_U32(
-					ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
-					ir_CONST_U32(_ZEND_TYPE_MASK)));
+				if_typed = ir_IF(ir_OR_U32(
+						ir_AND_U32(
+							ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.type_mask))),
+							ir_CONST_U32(_ZEND_TYPE_MASK)),
+						ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, type.kind)))));
 				ir_IF_FALSE(if_typed);
 				ir_END_list(merge);
 				ir_IF_TRUE(if_typed);
