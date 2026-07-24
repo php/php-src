@@ -30,6 +30,25 @@
 
 static const char digits[] = "0123456789abcdef";
 
+static zend_always_inline void php_json_append_quoted(smart_str *buf, const char *s, size_t len)
+{
+	char *dst = smart_str_extend(buf, len + 2);
+	dst[0] = '"';
+	memcpy(dst + 1, s, len);
+	dst[len + 1] = '"';
+}
+
+static zend_always_inline void php_json_append_unicode_escape(smart_str *buf, unsigned int us)
+{
+	char *dst = smart_str_extend(buf, 6);
+	dst[0] = '\\';
+	dst[1] = 'u';
+	dst[2] = digits[(us >> 12) & 0xf];
+	dst[3] = digits[(us >> 8) & 0xf];
+	dst[4] = digits[(us >> 4) & 0xf];
+	dst[5] = digits[us & 0xf];
+}
+
 static zend_always_inline bool php_json_check_stack_limit(void)
 {
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -105,6 +124,96 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 		} \
 	} while (0)
 
+/* encode a PHP identifier (property name) as a JSON string key.
+ * PHP identifiers cannot contain ASCII characters that require JSON escaping,
+ * so the fast path only scans for multi-byte UTF-8 sequences (bytes >= 0x80). */
+static zend_result php_json_encode_identifier(
+		smart_str *buf, const char *s, size_t len,
+		int options, php_json_encoder *encoder)
+{
+	size_t pos, checkpoint;
+
+	/* fast path: no characters require escaping (PHP identifiers contain no JSON-special ASCII bytes) */
+	pos = 0;
+	while (pos < len && (unsigned char)s[pos] < 0x80) {
+		pos++;
+	}
+	if (EXPECTED(pos == len)) {
+		php_json_append_quoted(buf, s, len);
+		return SUCCESS;
+	}
+
+	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
+	smart_str_alloc(buf, len + 2, 0);
+	smart_str_appendc(buf, '"');
+
+	/* flush the clean ASCII prefix found by the fast path scan */
+	if (pos) {
+		smart_str_appendl(buf, s, pos);
+		s += pos;
+		len -= pos;
+	}
+	pos = 0;
+	do {
+		unsigned int us = (unsigned char)s[pos];
+		if (EXPECTED(us < 0x80)) {
+			pos++;
+			len--;
+			if (len == 0) {
+				smart_str_appendl(buf, s, pos);
+				break;
+			}
+		} else {
+			if (pos) {
+				smart_str_appendl(buf, s, pos);
+				s += pos;
+				pos = 0;
+			}
+			zend_result status;
+			us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
+
+			if (UNEXPECTED(status != SUCCESS)) {
+				if (options & PHP_JSON_INVALID_UTF8_IGNORE) {
+					/* ignore invalid UTF-8 byte */
+				} else if (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+					if (options & PHP_JSON_UNESCAPED_UNICODE) {
+						smart_str_appendl(buf, "\xef\xbf\xbd", 3);
+					} else {
+						smart_str_appendl(buf, "\\ufffd", 6);
+					}
+				} else {
+					ZSTR_LEN(buf->s) = checkpoint;
+					encoder->error_code = PHP_JSON_ERROR_UTF8;
+					if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+						smart_str_appendl(buf, "null", 4);
+					}
+					return FAILURE;
+				}
+			} else if ((options & PHP_JSON_UNESCAPED_UNICODE)
+					&& ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
+						|| us < 0x2028 || us > 0x2029)) {
+				smart_str_appendl(buf, s, pos);
+			} else {
+				if (us >= 0x10000) {
+					unsigned int next_us;
+					us -= 0x10000;
+					next_us = (unsigned short)((us & 0x3ff) | 0xdc00);
+					us = (unsigned short)((us >> 10) | 0xd800);
+					php_json_append_unicode_escape(buf, us);
+					us = next_us;
+				}
+				php_json_append_unicode_escape(buf, us);
+			}
+			s += pos;
+			len -= pos;
+			pos = 0;
+		}
+	} while (len);
+
+	smart_str_appendc(buf, '"');
+	return SUCCESS;
+}
+
 static zend_result php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
 	bool encode_as_object = options & PHP_JSON_FORCE_OBJECT;
@@ -162,7 +271,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			php_json_pretty_print_char(buf, options, '\n');
 			php_json_pretty_print_indent(buf, options, encoder);
 
-			if (php_json_escape_string(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name),
+			if (php_json_encode_identifier(buf, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name),
 					options & ~PHP_JSON_NUMERIC_CHECK, encoder) == FAILURE &&
 					(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) &&
 					buf->s) {
@@ -350,6 +459,9 @@ zend_result php_json_escape_string(
 		smart_str *buf, const char *s, size_t len,
 		int options, php_json_encoder *encoder) /* {{{ */
 {
+	static const uint32_t charmap[8] = {
+		0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
+		0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
 	size_t pos, checkpoint;
 	char *dst;
 
@@ -374,19 +486,31 @@ zend_result php_json_escape_string(
 		}
 
 	}
+	/* fast path: no characters in the string require escaping allows us to single alloc and memcpy */
+	pos = 0;
+	while (pos < len && !ZEND_BIT_TEST(charmap, (unsigned char)s[pos])) {
+		pos++;
+	}
+	if (EXPECTED(pos == len)) {
+		php_json_append_quoted(buf, s, len);
+		return SUCCESS;
+	}
+
 	checkpoint = buf->s ? ZSTR_LEN(buf->s) : 0;
 
 	/* pre-allocate for string length plus 2 quotes */
 	smart_str_alloc(buf, len+2, 0);
 	smart_str_appendc(buf, '"');
 
+	/* flush the clean ASCII prefix found by the fast path scan */
+	if (pos) {
+		smart_str_appendl(buf, s, pos);
+		s += pos;
+		len -= pos;
+	}
 	pos = 0;
 
 	do {
-		static const uint32_t charmap[8] = {
-			0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
-			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
-
 		unsigned int us = (unsigned char)s[pos];
 		if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
 			pos++;
@@ -441,22 +565,10 @@ zend_result php_json_escape_string(
 						us -= 0x10000;
 						next_us = (unsigned short)((us & 0x3ff) | 0xdc00);
 						us = (unsigned short)((us >> 10) | 0xd800);
-						dst = smart_str_extend(buf, 6);
-						dst[0] = '\\';
-						dst[1] = 'u';
-						dst[2] = digits[(us >> 12) & 0xf];
-						dst[3] = digits[(us >> 8) & 0xf];
-						dst[4] = digits[(us >> 4) & 0xf];
-						dst[5] = digits[us & 0xf];
+						php_json_append_unicode_escape(buf, us);
 						us = next_us;
 					}
-					dst = smart_str_extend(buf, 6);
-					dst[0] = '\\';
-					dst[1] = 'u';
-					dst[2] = digits[(us >> 12) & 0xf];
-					dst[3] = digits[(us >> 8) & 0xf];
-					dst[4] = digits[(us >> 4) & 0xf];
-					dst[5] = digits[us & 0xf];
+					php_json_append_unicode_escape(buf, us);
 				}
 				s += pos;
 				len -= pos;
