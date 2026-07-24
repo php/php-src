@@ -13,5 +13,9 @@ try {
 	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
---EXPECT--
-Exception: Using null as an array offset is deprecated, use an empty string instead
+--EXPECTF--
+Fatal error: Uncaught Exception: Using null as an array offset is deprecated, use an empty string instead in %s:%d
+Stack trace:
+#0 %s(%d): {closure:%s:%d}(%d, 'Using null as a...', '%s', %d)
+#1 {main}
+  thrown in %s on line %d

@@ -18,15 +18,15 @@ var_dump($ary);
 
 ?>
 --EXPECT--
-Undefined array key "foobar"
 array(1) {
   ["foobar"]=>
   int(1)
 }
-Undefined array key "foobarbaz"
+Undefined array key "foobar"
 array(2) {
   ["foobar"]=>
   int(1)
   ["foobarbaz"]=>
   int(1)
 }
+Undefined array key "foobarbaz"

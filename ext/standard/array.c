@@ -680,19 +680,20 @@ PHP_FUNCTION(natcasesort)
 typedef bucket_compare_func_t(*get_compare_function)(zend_long);
 
 static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compare_function get_cmp, bool renumber) {
-	HashTable *array;
+	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY_HT_EX(array, 0, 1)
+		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
 	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = get_cmp(sort_type);
 
-	zend_array_sort(array, cmp, renumber);
+	SEPARATE_ARRAY(array);
+	zend_array_sort(Z_ARRVAL_P(array), cmp, renumber);
 
 	RETURN_TRUE;
 }
@@ -911,22 +912,25 @@ PHP_FUNCTION(uksort)
 }
 /* }}} */
 
-static inline HashTable *get_ht_for_iap(zval *zv, bool separate) {
+static inline HashTable *get_ht_for_iap(zval *zv, bool separate, zend_object **objp) {
+	*objp = NULL;
 	if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
 		return Z_ARRVAL_P(zv);
 	}
 
 	ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
+	zend_object *zobj = Z_OBJ_P(zv);
+	GC_ADDREF(zobj);
 	php_error_docref(NULL, E_DEPRECATED,
 		"Calling %s() on an object is deprecated", get_active_function_name());
 
-	zend_object *zobj = Z_OBJ_P(zv);
 	if (separate && zobj->properties && UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 		if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
 			GC_DELREF(zobj->properties);
 		}
 		zobj->properties = zend_array_dup(zobj->properties);
 	}
+	*objp = zobj;
 	return zobj->handlers->get_properties(zobj);
 }
 
@@ -979,15 +983,19 @@ PHP_FUNCTION(end)
 		Z_PARAM_ARRAY_OR_OBJECT_EX(array_zv, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true);
-	if (zend_hash_num_elements(array) == 0) {
+	zend_object *iap_obj;
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true, &iap_obj);
+	if (zend_hash_num_elements(array) != 0) {
+		zend_hash_internal_pointer_end(array);
+		if (USED_RET()) {
+			php_array_iter_return_current(return_value, array, false);
+		}
+	} else {
 		/* array->nInternalPointer is already 0 if the array is empty, even after removing elements */
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
-	zend_hash_internal_pointer_end(array);
-
-	if (USED_RET()) {
-		php_array_iter_return_current(return_value, array, false);
+	if (iap_obj) {
+		OBJ_RELEASE(iap_obj);
 	}
 }
 /* }}} */
@@ -1001,15 +1009,19 @@ PHP_FUNCTION(prev)
 		Z_PARAM_ARRAY_OR_OBJECT_EX(array_zv, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true);
-	if (zend_hash_num_elements(array) == 0) {
+	zend_object *iap_obj;
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true, &iap_obj);
+	if (zend_hash_num_elements(array) != 0) {
+		zend_hash_move_backwards(array);
+		if (USED_RET()) {
+			php_array_iter_return_current(return_value, array, false);
+		}
+	} else {
 		/* array->nInternalPointer is already 0 if the array is empty, even after removing elements */
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
-	zend_hash_move_backwards(array);
-
-	if (USED_RET()) {
-		php_array_iter_return_current(return_value, array, false);
+	if (iap_obj) {
+		OBJ_RELEASE(iap_obj);
 	}
 }
 /* }}} */
@@ -1023,15 +1035,19 @@ PHP_FUNCTION(next)
 		Z_PARAM_ARRAY_OR_OBJECT_EX(array_zv, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true);
-	if (zend_hash_num_elements(array) == 0) {
+	zend_object *iap_obj;
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true, &iap_obj);
+	if (zend_hash_num_elements(array) != 0) {
+		zend_hash_move_forward(array);
+		if (USED_RET()) {
+			php_array_iter_return_current(return_value, array, true);
+		}
+	} else {
 		/* array->nInternalPointer is already 0 if the array is empty, even after removing elements */
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
-	zend_hash_move_forward(array);
-
-	if (USED_RET()) {
-		php_array_iter_return_current(return_value, array, true);
+	if (iap_obj) {
+		OBJ_RELEASE(iap_obj);
 	}
 }
 /* }}} */
@@ -1045,15 +1061,19 @@ PHP_FUNCTION(reset)
 		Z_PARAM_ARRAY_OR_OBJECT_EX(array_zv, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true);
-	if (zend_hash_num_elements(array) == 0) {
+	zend_object *iap_obj;
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ true, &iap_obj);
+	if (zend_hash_num_elements(array) != 0) {
+		zend_hash_internal_pointer_reset(array);
+		if (USED_RET()) {
+			php_array_iter_return_current(return_value, array, true);
+		}
+	} else {
 		/* array->nInternalPointer is already 0 if the array is empty, even after removing elements */
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
-	zend_hash_internal_pointer_reset(array);
-
-	if (USED_RET()) {
-		php_array_iter_return_current(return_value, array, true);
+	if (iap_obj) {
+		OBJ_RELEASE(iap_obj);
 	}
 }
 /* }}} */
@@ -1067,8 +1087,12 @@ PHP_FUNCTION(current)
 		Z_PARAM_ARRAY_OR_OBJECT(array_zv)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false);
+	zend_object *iap_obj;
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false, &iap_obj);
 	php_array_iter_return_current(return_value, array, true);
+	if (iap_obj) {
+		OBJ_RELEASE(iap_obj);
+	}
 }
 /* }}} */
 
@@ -1081,10 +1105,14 @@ PHP_FUNCTION(key)
 		Z_PARAM_ARRAY_OR_OBJECT(array_zv)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false);
+	zend_object *iap_obj;
+	HashTable *array = get_ht_for_iap(array_zv, /* separate */ false, &iap_obj);
 	zval *entry = php_array_iter_seek_current(array, true);
 	if (EXPECTED(entry)) {
 		zend_hash_get_current_key_zval(array, return_value);
+	}
+	if (iap_obj) {
+		OBJ_RELEASE(iap_obj);
 	}
 }
 /* }}} */

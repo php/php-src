@@ -15,5 +15,5 @@ $my_var .= $GLOBALS["arr"];
 var_dump($my_var);
 ?>
 --EXPECT--
-error
 string(6) "aArray"
+error

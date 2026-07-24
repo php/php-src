@@ -14,5 +14,5 @@ var_dump(\array_key_exists(1.0E+42, $ary));
 
 ?>
 --EXPECT--
+bool(true)
 The float 1.0E+42 is not representable as an int, cast occurred
-bool(false)

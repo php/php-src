@@ -18,7 +18,11 @@ try {
 }
 ?>
 DONE
---EXPECT--
+--EXPECTF--
 Err: Automatic conversion of false to array is deprecated
-Exception: Cannot use a scalar value as an array
-DONE
+
+Fatal error: Uncaught Error: Cannot use a scalar value as an array in %s:%d
+Stack trace:
+#0 %s(%d): {closure:%s:%d}(8192, 'Automatic conve...', '%s', %d)
+#1 {main}
+  thrown in %s on line %d

@@ -17,5 +17,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 Undefined variable $b
