@@ -119,6 +119,15 @@ members:
 				}
 			}
 	|	member
+	|	member ','
+			{
+				if (!(parser->scanner.options & PHP_JSON_ALLOW_TRAILING_COMMAS)) {
+					parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+					zval_ptr_dtor_nogc(&$1);
+					YYERROR;
+				}
+				ZVAL_COPY_VALUE(&$$, &$1);
+			}
 ;
 
 member:
@@ -175,6 +184,15 @@ elements:
 				}
 			}
 	|	element
+	|	element ','
+			{
+				if (!(parser->scanner.options & PHP_JSON_ALLOW_TRAILING_COMMAS)) {
+					parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
+					zval_ptr_dtor_nogc(&$1);
+					YYERROR;
+				}
+				ZVAL_COPY_VALUE(&$$, &$1);
+			}
 ;
 
 element:

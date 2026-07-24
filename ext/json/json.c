@@ -351,8 +351,8 @@ PHP_FUNCTION(json_validate)
 	ZEND_PARSE_PARAMETERS_END();
 
 
-	if ((options != 0) && (options != PHP_JSON_INVALID_UTF8_IGNORE)) {
-		zend_argument_value_error(3, "must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)");
+	if ((options & ~(PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS)) != 0) {
+		zend_argument_value_error(3, "must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)");
 		RETURN_THROWS();
 	}
 

@@ -15,6 +15,12 @@ json_validate_trycatchdump("-", 512, JSON_BIGINT_AS_STRING);
 json_validate_trycatchdump("-", 512, JSON_BIGINT_AS_STRING | JSON_INVALID_UTF8_IGNORE);
 json_validate_trycatchdump("-", 512, JSON_INVALID_UTF8_IGNORE);
 json_validate_trycatchdump("{}", 512, JSON_INVALID_UTF8_IGNORE);
+json_validate_trycatchdump("[1,] // ok", 512, JSON_ALLOW_COMMENTS | JSON_ALLOW_TRAILING_COMMAS);
+json_validate_trycatchdump("// c\n{}", 512, JSON_ALLOW_COMMENTS);
+json_validate_trycatchdump("[1,]", 512, JSON_ALLOW_TRAILING_COMMAS);
+json_validate_trycatchdump("[1,]", 512, JSON_ALLOW_COMMENTS);
+json_validate_trycatchdump("// c\n{}", 512, JSON_ALLOW_TRAILING_COMMAS);
+json_validate_trycatchdump("{}", 512, JSON_ALLOW_COMMENTS | JSON_BIGINT_AS_STRING);
 
 ?>
 --EXPECTF--
@@ -36,10 +42,10 @@ string(8) "No error"
 Error: 0 json_validate(): Argument #2 ($depth) must be greater than 0
 int(0)
 string(8) "No error"
-Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)
+Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)
 int(0)
 string(8) "No error"
-Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)
+Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)
 int(0)
 string(8) "No error"
 bool(false)
@@ -48,3 +54,21 @@ string(30) "Syntax error near location 1:1"
 bool(true)
 int(0)
 string(8) "No error"
+bool(true)
+int(0)
+string(8) "No error"
+bool(true)
+int(0)
+string(8) "No error"
+bool(true)
+int(0)
+string(8) "No error"
+bool(false)
+int(4)
+string(30) "Syntax error near location 1:4"
+bool(false)
+int(4)
+string(30) "Syntax error near location 1:1"
+Error: 0 json_validate(): Argument #3 ($flags) must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE, JSON_ALLOW_COMMENTS, JSON_ALLOW_TRAILING_COMMAS)
+int(4)
+string(30) "Syntax error near location 1:1"

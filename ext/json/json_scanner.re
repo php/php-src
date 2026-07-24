@@ -123,6 +123,8 @@ std:
 	EXP     = ( INT | FLOAT ) [eE] [+-]? DIGIT+ ;
 	NL      = "\r"? "\n" ;
 	WS      = [ \t\r]+ ;
+	CMT_SL  = "//" [^\n\x00]* ;
+	CMT_ML  = "/*" ( [^*\x00] | ( "*"+ [^*/\x00] ) )* "*"+ "/" ;
 	EOI     = "\000";
 	CTRL    = [\x00-\x1F] ;
 	UTF8T   = [\x80-\xBF] ;
@@ -203,6 +205,27 @@ std:
 		goto std;
 	}
 	<JS>WS                   { goto std; }
+	<JS>CMT_SL               {
+		if (!(s->options & PHP_JSON_ALLOW_COMMENTS)) {
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+			return PHP_JSON_T_ERROR;
+		}
+		goto std;
+	}
+	<JS>CMT_ML               {
+		php_json_ctype *p;
+		if (!(s->options & PHP_JSON_ALLOW_COMMENTS)) {
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+			return PHP_JSON_T_ERROR;
+		}
+		for (p = s->token; p < s->cursor; p++) {
+			if (*p == '\n') {
+				s->line++;
+				s->line_start = p + 1;
+			}
+		}
+		goto std;
+	}
 	<JS>EOI                  {
 		if (s->limit < s->cursor) {
 			return PHP_JSON_T_EOI;
