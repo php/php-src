@@ -9891,6 +9891,20 @@ link_unbound:
 		}
 	}
 
+	/* When compiling without execution (opcache_compile_file), link simple
+	 * classes so opcache can early-bind them from cache. Skip preloading. */
+	if (!ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
+#ifdef ZEND_OPCACHE_SHM_REATTACHMENT
+	 && !ce->num_hooked_props
+#endif
+	 && !extends_ast
+	 && (CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION)
+	 && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
+		zend_build_properties_info_table(ce);
+		zend_inheritance_check_override(ce);
+		ce->ce_flags |= ZEND_ACC_LINKED;
+	}
+
 	opline = get_next_op();
 
 	if (ce->parent_name) {
