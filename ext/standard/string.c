@@ -4909,6 +4909,11 @@ static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv) {
 	if (UNEXPECTED(loc_str == NULL)) {
 		return NULL;
 	}
+	if (zend_str_has_nul_byte(loc_str)) {
+		zend_argument_value_error(2, "must not contain any null bytes");
+		zend_tmp_string_release(tmp_loc_str);
+		return NULL;
+	}
 	zend_string *result = try_setlocale_str(cat, loc_str);
 	zend_tmp_string_release(tmp_loc_str);
 	return result;
@@ -4930,8 +4935,11 @@ PHP_FUNCTION(setlocale)
 	zend_string **strings = do_alloca(sizeof(zend_string *) * num_args, use_heap);
 
 	for (uint32_t i = 0; i < num_args; i++) {
-		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], true, i + 2))) {
-			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING_OR_NULL, &args[i]);
+		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_path_str(&args[i], &strings[i], true, i + 2))) {
+			zend_wrong_parameter_type_error(
+				i + 2,
+				Z_TYPE(args[i]) == IS_STRING ? Z_EXPECTED_PATH : Z_EXPECTED_ARRAY_OR_STRING_OR_NULL,
+				&args[i]);
 			goto out;
 		}
 	}
