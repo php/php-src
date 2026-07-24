@@ -3186,6 +3186,47 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 
 		/* We will throw if $this doesn't exist, so there's no need to emit a JMP_NULL
 		 * check for a nullsafe access. */
+	} else if (obj_ast->kind == ZEND_AST_CONST
+			&& (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET
+				|| type == BP_VAR_FUNC_ARG)) {
+		zend_ast *name_ast = obj_ast->child[0];
+		bool is_fully_qualified;
+		zend_string *orig_name = zend_ast_get_str(name_ast);
+		zend_string *resolved_name = zend_resolve_const_name(
+			orig_name, name_ast->attr, &is_fully_qualified);
+
+		opline = zend_emit_op(&obj_node, ZEND_FETCH_CONSTANT, NULL, NULL);
+		opline->op2_type = IS_CONST;
+
+		if (is_fully_qualified || !FC(current_namespace)) {
+			opline->op1.num = 0;
+			opline->op2.constant = zend_add_const_name_literal(
+				resolved_name, false);
+		} else {
+			opline->op1.num = IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE;
+			opline->op2.constant = zend_add_const_name_literal(
+				resolved_name, true);
+		}
+		opline->extended_value = zend_alloc_cache_slot();
+	} else if (obj_ast->kind == ZEND_AST_CLASS_CONST
+			&& (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET
+				|| type == BP_VAR_FUNC_ARG)) {
+		/* Like global constants, fetch the class constant at runtime so the
+		 * write operates on the actual object rather than a compile-time
+		 * temporary. */
+		zend_ast *class_ast = obj_ast->child[0];
+		zend_ast *const_ast = obj_ast->child[1];
+		znode class_node, const_node;
+
+		zend_compile_class_ref(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
+		zend_compile_expr(&const_node, const_ast);
+
+		opline = zend_emit_op(&obj_node, ZEND_FETCH_CLASS_CONSTANT, NULL, &const_node);
+		zend_set_class_name_op1(opline, &class_node);
+
+		if (opline->op1_type == IS_CONST || opline->op2_type == IS_CONST) {
+			opline->extended_value = zend_alloc_cache_slots(2);
+		}
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, false);
