@@ -86,26 +86,6 @@ memory_limit=-1
         return true;
     }
 
-    function parse_memory_limit($limit) {
-
-        $val = trim($limit);
-        $last = strtolower($val[strlen($val)-1]);
-
-        switch($last) {
-                // The 'G' modifier is available since PHP 5.1.0
-                case 'g':
-                    $val *= 1024;
-                case 'm':
-                    $val *= 1024;
-                case 'k':
-                    $val *= 1024;
-                default:
-                    break;
-        }
-            return $val;
-    }
-
-
     function test_fetch($host, $user, $passwd, $db, $port, $socket, $engine, $flags = null) {
 
         $link = mysqli_init();
@@ -123,7 +103,7 @@ memory_limit=-1
 
         $package_size = 524288;
         $offset = 3;
-        $limit = (ini_get('memory_limit') > 0) ? parse_memory_limit(ini_get('memory_limit')) : pow(2, 32);
+        $limit = (ini_get('memory_limit') > 0) ? ini_parse_quantity(ini_get('memory_limit')) : pow(2, 32);
 
         /* try to respect php.ini but make run time a soft limit */
         $max_runtime = (ini_get('max_execution_time') > 0) ? ini_get('max_execution_time') : 30;

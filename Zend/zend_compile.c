@@ -6725,6 +6725,7 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 	jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
 	for (i = 0; i < cases->children; ++i) {
 		zend_ast *case_ast = cases->child[i];
+		ZEND_ASSERT(case_ast->kind == ZEND_AST_SWITCH_CASE);
 		zend_ast *cond_ast = case_ast->child[0];
 		znode cond_node;
 
@@ -6768,8 +6769,9 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < cases->children; ++i) {
 		zend_ast *case_ast = cases->child[i];
+		ZEND_ASSERT(case_ast->kind == ZEND_AST_SWITCH_CASE);
 		zend_ast *cond_ast = case_ast->child[0];
-		zend_ast *stmt_ast = case_ast->child[1];
+		zend_ast_list *stmt_ast = zend_ast_get_list(case_ast->child[1]);
 
 		if (cond_ast) {
 			zend_update_jump_target_to_next(jmpnz_opnums[i]);
@@ -6797,7 +6799,27 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 			}
 		}
 
-		zend_compile_stmt(stmt_ast);
+		if (stmt_ast->children > 0 && i < (cases->children - 1)) {
+			zend_ast *last_stmt = stmt_ast->child[stmt_ast->children - 1];
+			while (last_stmt && last_stmt->kind == ZEND_AST_STMT_LIST) {
+				zend_ast_list *list = zend_ast_get_list(last_stmt);
+				last_stmt = list->child[list->children - 1];
+			}
+			if (last_stmt == NULL
+				|| (last_stmt->kind != ZEND_AST_BREAK
+					&& last_stmt->kind != ZEND_AST_CONTINUE
+					&& last_stmt->kind != ZEND_AST_RETURN
+					&& last_stmt->kind != ZEND_AST_THROW
+					&& last_stmt->kind != ZEND_AST_GOTO)) {
+				if (!(last_stmt->kind == ZEND_AST_CONST && zend_string_equals_literal(zend_ast_get_str(last_stmt->child[0]), "fallthrough"))) {
+					CG(zend_lineno) = case_ast->lineno;
+					zend_error(E_WARNING,
+						"Non-empty case falls through to the next case, terminate the case with \"fallthrough;\" if this is intentional");
+				}
+			}
+		}
+
+		zend_compile_stmt((zend_ast*)stmt_ast);
 	}
 
 	if (!has_default_case) {
