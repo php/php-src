@@ -4733,7 +4733,7 @@ static void php_date_interval_initialize_from_hash(php_interval_obj *intobj, con
 	PHP_DATE_INTERVAL_READ_PROPERTY("s", s, timelib_sll, -1)
 	{
 		const zval *z_arg = zend_hash_str_find(myht, "f", sizeof("f") - 1);
-		if (z_arg) {
+		if (z_arg && Z_TYPE_P(z_arg) <= IS_STRING) {
 			intobj->diff->us = zend_dval_to_lval(zval_get_double(z_arg) * 1000000.0);
 		}
 	}
@@ -4749,7 +4749,7 @@ static void php_date_interval_initialize_from_hash(php_interval_obj *intobj, con
 	{
 		const zval *z_arg = zend_hash_str_find(myht, "civil_or_wall", sizeof("civil_or_wall") - 1);
 		intobj->civil_or_wall = PHP_DATE_CIVIL;
-		if (z_arg) {
+		if (z_arg && Z_TYPE_P(z_arg) <= IS_STRING) {
 			zend_long val = zval_get_long(z_arg);
 			intobj->civil_or_wall = val;
 		}
