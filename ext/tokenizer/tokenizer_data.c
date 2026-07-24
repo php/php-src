@@ -131,6 +131,7 @@ char *get_token_type_name(int token_type)
 		case T_SL_EQUAL: return "T_SL_EQUAL";
 		case T_SR_EQUAL: return "T_SR_EQUAL";
 		case T_COALESCE_EQUAL: return "T_COALESCE_EQUAL";
+		case T_PIPE_EQUAL: return "T_PIPE_EQUAL";
 		case T_BOOLEAN_OR: return "T_BOOLEAN_OR";
 		case T_BOOLEAN_AND: return "T_BOOLEAN_AND";
 		case T_IS_EQUAL: return "T_IS_EQUAL";

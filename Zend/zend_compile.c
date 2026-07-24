@@ -6949,6 +6949,35 @@ static zend_ast *zend_partial_apply(zend_ast *callable_ast, zend_ast *pipe_arg)
 	return new_arg_list;
 }
 
+static zend_ast *zend_pipe_build_fcall(zend_ast *callable_ast, zend_ast *pipe_arg)
+{
+	zend_ast *pfa_arg_list_ast = NULL;
+
+	if ((pfa_arg_list_ast = zend_partial_apply(callable_ast, pipe_arg))) {
+		switch (callable_ast->kind) {
+			case ZEND_AST_CALL:
+				return zend_ast_create(ZEND_AST_CALL,
+						callable_ast->child[0], pfa_arg_list_ast);
+			case ZEND_AST_STATIC_CALL:
+				return zend_ast_create(ZEND_AST_STATIC_CALL,
+						callable_ast->child[0], callable_ast->child[1],
+						pfa_arg_list_ast);
+			case ZEND_AST_METHOD_CALL:
+				return zend_ast_create(ZEND_AST_METHOD_CALL,
+						callable_ast->child[0], callable_ast->child[1],
+						pfa_arg_list_ast);
+			default:
+				ZEND_UNREACHABLE();
+		}
+	}
+
+	zend_ast *arg_list_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, pipe_arg);
+	znode callable_result;
+	zend_compile_expr(&callable_result, callable_ast);
+	return zend_ast_create(ZEND_AST_CALL,
+		zend_ast_create_znode(&callable_result), arg_list_ast);
+}
+
 static void zend_compile_pipe(znode *result, zend_ast *ast, uint32_t type)
 {
 	zend_ast *operand_ast = ast->child[0];
@@ -6972,41 +7001,8 @@ static void zend_compile_pipe(znode *result, zend_ast *ast, uint32_t type)
 		wrapped_operand_result = operand_result;
 	}
 
-	/* Turn the operand into a function parameter list. */
-	zend_ast *arg = zend_ast_create_znode(&wrapped_operand_result);
-
-	zend_ast *fcall_ast;
-	znode callable_result;
-	zend_ast *pfa_arg_list_ast = NULL;
-
-	/* Turn $foo |> PFA into plain function call if possible */
-	if ((pfa_arg_list_ast = zend_partial_apply(callable_ast, arg))) {
-		switch (callable_ast->kind) {
-			case ZEND_AST_CALL:
-				fcall_ast = zend_ast_create(ZEND_AST_CALL,
-						callable_ast->child[0], pfa_arg_list_ast);
-				break;
-			case ZEND_AST_STATIC_CALL:
-				fcall_ast = zend_ast_create(ZEND_AST_STATIC_CALL,
-						callable_ast->child[0], callable_ast->child[1],
-						pfa_arg_list_ast);
-				break;
-			case ZEND_AST_METHOD_CALL:
-				fcall_ast = zend_ast_create(ZEND_AST_METHOD_CALL,
-						callable_ast->child[0], callable_ast->child[1],
-						pfa_arg_list_ast);
-				break;
-			default:
-				ZEND_UNREACHABLE();
-		}
-	/* Turn $foo |> $expr into ($expr)($foo) */
-	} else {
-		zend_ast *arg_list_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, arg);
-		zend_compile_expr(&callable_result, callable_ast);
-		callable_ast = zend_ast_create_znode(&callable_result);
-		fcall_ast = zend_ast_create(ZEND_AST_CALL,
-			callable_ast, arg_list_ast);
-	}
+	zend_ast *pipe_arg = zend_ast_create_znode(&wrapped_operand_result);
+	zend_ast *fcall_ast = zend_pipe_build_fcall(callable_ast, pipe_arg);
 
 	zend_do_extended_stmt(&operand_result);
 
@@ -11205,6 +11201,115 @@ static void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+/* Recursively compile a pipe chain for |>=, processing steps left-to-right.
+ * Walks the left spine of the PIPE tree via recursion, which naturally
+ * gives left-to-right ordering without needing to collect into an array. */
+static void zend_compile_assign_pipe_chain(znode *current, zend_ast *callable_ast)
+{
+	zend_ast *step;
+
+	if (callable_ast->kind == ZEND_AST_PIPE) {
+		/* Recurse into the left child first (processes left-to-right). */
+		zend_compile_assign_pipe_chain(current, callable_ast->child[0]);
+
+		/* Wrap intermediate result to prevent references. */
+		if (current->op_type & (IS_CV|IS_VAR)) {
+			znode wrapped;
+			zend_emit_op_tmp(&wrapped, ZEND_QM_ASSIGN, current, NULL);
+			*current = wrapped;
+		}
+		step = callable_ast->child[1];
+	} else {
+		step = callable_ast;
+	}
+
+	if (step->kind == ZEND_AST_ARROW_FUNC
+		&& !(step->attr & ZEND_PARENTHESIZED_ARROW_FUNC)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Arrow functions on the right hand side of |>= must be parenthesized");
+	}
+
+	zend_ast *pipe_arg = zend_ast_create_znode(current);
+	zend_ast *fcall = zend_pipe_build_fcall(step, pipe_arg);
+
+	zend_do_extended_stmt(current);
+	zend_compile_var(current, fcall, BP_VAR_R, false);
+}
+
+static void zend_compile_assign_pipe(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *var_ast = ast->child[0];
+	zend_ast *callable_ast = ast->child[1];
+
+	znode var_node_r, var_node_w, pipe_result;
+	zend_op *opline;
+
+	/* Use memoization to avoid double-evaluating sub-expressions in the LHS variable. */
+	HashTable *orig_memoized_exprs = CG(memoized_exprs);
+	const zend_memoize_mode orig_memoize_mode = CG(memoize_mode);
+
+	zend_ensure_writable_variable(var_ast);
+	if (is_this_fetch(var_ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
+	}
+
+	ALLOC_HASHTABLE(CG(memoized_exprs));
+	zend_hash_init(CG(memoized_exprs), 0, NULL, znode_dtor, 0);
+
+	CG(memoize_mode) = ZEND_MEMOIZE_COMPILE;
+	zend_compile_var(&var_node_r, var_ast, BP_VAR_R, false);
+	CG(memoize_mode) = ZEND_MEMOIZE_NONE;
+
+	/* Wrap initial value in QM_ASSIGN to prevent references. */
+	if (var_node_r.op_type & (IS_CV|IS_VAR)) {
+		zend_emit_op_tmp(&pipe_result, ZEND_QM_ASSIGN, &var_node_r, NULL);
+	} else {
+		pipe_result = var_node_r;
+	}
+
+	zend_compile_assign_pipe_chain(&pipe_result, callable_ast);
+
+	CG(memoize_mode) = ZEND_MEMOIZE_FETCH;
+	zend_compile_var(&var_node_w, var_ast, BP_VAR_W, false);
+
+	opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+	zend_ast_kind kind = is_global_var_fetch(var_ast) ? ZEND_AST_VAR : var_ast->kind;
+	switch (kind) {
+		case ZEND_AST_VAR:
+			zend_emit_op_tmp(result, ZEND_ASSIGN, &var_node_w, &pipe_result);
+			break;
+		case ZEND_AST_STATIC_PROP:
+			opline->opcode = ZEND_ASSIGN_STATIC_PROP;
+			opline->result_type = IS_TMP_VAR;
+			var_node_w.op_type = IS_TMP_VAR;
+			zend_emit_op_data(&pipe_result);
+			*result = var_node_w;
+			break;
+		case ZEND_AST_DIM:
+			opline->opcode = ZEND_ASSIGN_DIM;
+			opline->result_type = IS_TMP_VAR;
+			var_node_w.op_type = IS_TMP_VAR;
+			zend_emit_op_data(&pipe_result);
+			*result = var_node_w;
+			break;
+		case ZEND_AST_PROP:
+		case ZEND_AST_NULLSAFE_PROP:
+			opline->opcode = ZEND_ASSIGN_OBJ;
+			opline->result_type = IS_TMP_VAR;
+			var_node_w.op_type = IS_TMP_VAR;
+			zend_emit_op_data(&pipe_result);
+			*result = var_node_w;
+			break;
+		default: ZEND_UNREACHABLE();
+	}
+
+	zend_hash_destroy(CG(memoized_exprs));
+	FREE_HASHTABLE(CG(memoized_exprs));
+	CG(memoized_exprs) = orig_memoized_exprs;
+	CG(memoize_mode) = orig_memoize_mode;
+}
+/* }}} */
+
 static void zend_compile_print(znode *result, const zend_ast *ast) /* {{{ */
 {
 	zend_op *opline;
@@ -12412,6 +12517,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_ASSIGN_COALESCE:
 			zend_compile_assign_coalesce(result, ast);
+			return;
+		case ZEND_AST_ASSIGN_PIPE:
+			zend_compile_assign_pipe(result, ast);
 			return;
 		case ZEND_AST_PRINT:
 			zend_compile_print(result, ast);
