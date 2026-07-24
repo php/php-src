@@ -267,6 +267,60 @@ static void pgsql_lob_free_obj(zend_object *obj)
 
 /* Compatibility definitions */
 
+static zend_result build_tablename(smart_str *querystr, PGconn *pg_link, const zend_string *table);
+
+static bool pgsql_copy_table_name_is_simple(const char *s, size_t len)
+{
+	if (len == 0) {
+		return false;
+	}
+	size_t i = 0;
+	if (!(isalpha((unsigned char) s[i]) || s[i] == '_')) {
+		return false;
+	}
+	i++;
+	while (i < len && (isalnum((unsigned char) s[i]) || s[i] == '_')) {
+		i++;
+	}
+	if (i == len) {
+		return true;
+	}
+	if (s[i] != '.') {
+		return false;
+	}
+	i++;
+	if (i >= len || !(isalpha((unsigned char) s[i]) || s[i] == '_')) {
+		return false;
+	}
+	i++;
+	while (i < len && (isalnum((unsigned char) s[i]) || s[i] == '_')) {
+		i++;
+	}
+	return i == len;
+}
+
+static bool pgsql_copy_query_form_balanced(const char *s, size_t len)
+{
+	if (len < 2 || s[0] != '(' || s[len - 1] != ')') {
+		return false;
+	}
+	int depth = 0;
+	for (size_t i = 0; i < len; i++) {
+		if (s[i] == '(') {
+			depth++;
+		} else if (s[i] == ')') {
+			depth--;
+			if (depth < 0) {
+				return false;
+			}
+			if (depth == 0 && i != len - 1) {
+				return false;
+			}
+		}
+	}
+	return depth == 0;
+}
+
 static zend_string *_php_pgsql_trim_message(const char *message)
 {
 	size_t i = strlen(message);
@@ -3341,9 +3395,8 @@ PHP_FUNCTION(pg_copy_to)
 	pgsql_link_handle *link;
 	zend_string *table_name;
 	zend_string *pg_delimiter = NULL;
-	char *pg_null_as = "\\\\N";
-	size_t pg_null_as_len = 0;
-	char *query;
+	char *pg_null_as = "\\N";
+	size_t pg_null_as_len = sizeof("\\N") - 1;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
 	ExecStatusType status;
@@ -3367,14 +3420,55 @@ PHP_FUNCTION(pg_copy_to)
 		zend_argument_value_error(3, "must be one character");
 		RETURN_THROWS();
 	}
+	bool is_query_form = ZSTR_LEN(table_name) > 0 && ZSTR_VAL(table_name)[0] == '(';
+	if (is_query_form) {
+		if (!pgsql_copy_query_form_balanced(ZSTR_VAL(table_name), ZSTR_LEN(table_name))) {
+			php_error_docref(NULL, E_WARNING, "Invalid query source '%s': must be a single balanced parenthesised expression", ZSTR_VAL(table_name));
+			RETURN_FALSE;
+		}
+	} else if (!pgsql_copy_table_name_is_simple(ZSTR_VAL(table_name), ZSTR_LEN(table_name))) {
+		php_error_docref(NULL, E_WARNING, "Invalid table_name '%s': must be a plain identifier or schema.table", ZSTR_VAL(table_name));
+		RETURN_FALSE;
+	}
 
-	spprintf(&query, 0, "COPY %s TO STDOUT DELIMITER E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), pg_null_as);
+	smart_str querystr = {0};
+	smart_str_appends(&querystr, "COPY ");
+	if (is_query_form) {
+		smart_str_appendc(&querystr, '(');
+		smart_str_append(&querystr, table_name);
+		smart_str_appendc(&querystr, ')');
+	} else if (build_tablename(&querystr, pgsql, table_name) == FAILURE) {
+		smart_str_free(&querystr);
+		RETURN_FALSE;
+	}
+
+	char *escaped_delimiter = PQescapeLiteral(pgsql, ZSTR_VAL(pg_delimiter), 1);
+	if (!escaped_delimiter) {
+		zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
+		php_error_docref(NULL, E_WARNING, "Failed to escape delimiter '%c': %s", *ZSTR_VAL(pg_delimiter), ZSTR_VAL(msgbuf));
+		zend_string_release(msgbuf);
+		smart_str_free(&querystr);
+		RETURN_FALSE;
+	}
+	char *escaped_null_as = PQescapeLiteral(pgsql, pg_null_as, pg_null_as_len);
+	if (!escaped_null_as) {
+		zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
+		php_error_docref(NULL, E_WARNING, "Failed to escape null_as '%s': %s", pg_null_as, ZSTR_VAL(msgbuf));
+		zend_string_release(msgbuf);
+		PQfreemem(escaped_delimiter);
+		smart_str_free(&querystr);
+		RETURN_FALSE;
+	}
+	smart_str_append_printf(&querystr, " TO STDOUT DELIMITER %s NULL AS %s", escaped_delimiter, escaped_null_as);
+	smart_str_0(&querystr);
+	PQfreemem(escaped_delimiter);
+	PQfreemem(escaped_null_as);
 
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 	}
-	pgsql_result = PQexec(pgsql, query);
-	efree(query);
+	pgsql_result = PQexec(pgsql, ZSTR_VAL(querystr.s));
+	smart_str_free(&querystr);
 
 	if (pgsql_result) {
 		status = PQresultStatus(pgsql_result);
@@ -3456,9 +3550,8 @@ PHP_FUNCTION(pg_copy_from)
 	zval *value;
 	zend_string *table_name;
 	zend_string *pg_delimiter = NULL;
-	char *pg_null_as = "\\\\N";
-	size_t pg_null_as_len;
-	char *query;
+	char *pg_null_as = "\\N";
+	size_t pg_null_as_len = sizeof("\\N") - 1;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
 	ExecStatusType status;
@@ -3482,14 +3575,46 @@ PHP_FUNCTION(pg_copy_from)
 		zend_argument_value_error(4, "must be one character");
 		RETURN_THROWS();
 	}
+	if (!pgsql_copy_table_name_is_simple(ZSTR_VAL(table_name), ZSTR_LEN(table_name))) {
+		php_error_docref(NULL, E_WARNING, "Invalid table_name '%s': must be a plain identifier or schema.table", ZSTR_VAL(table_name));
+		RETURN_FALSE;
+	}
 
-	spprintf(&query, 0, "COPY %s FROM STDIN DELIMITER E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), pg_null_as);
+	smart_str querystr = {0};
+	smart_str_appends(&querystr, "COPY ");
+	if (build_tablename(&querystr, pgsql, table_name) == FAILURE) {
+		smart_str_free(&querystr);
+		RETURN_FALSE;
+	}
+
+	char *escaped_delimiter = PQescapeLiteral(pgsql, ZSTR_VAL(pg_delimiter), 1);
+	if (!escaped_delimiter) {
+		zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
+		php_error_docref(NULL, E_WARNING, "Failed to escape delimiter '%c': %s", *ZSTR_VAL(pg_delimiter), ZSTR_VAL(msgbuf));
+		zend_string_release(msgbuf);
+		smart_str_free(&querystr);
+		RETURN_FALSE;
+	}
+	char *escaped_null_as = PQescapeLiteral(pgsql, pg_null_as, pg_null_as_len);
+	if (!escaped_null_as) {
+		zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pgsql));
+		php_error_docref(NULL, E_WARNING, "Failed to escape null_as '%s': %s", pg_null_as, ZSTR_VAL(msgbuf));
+		zend_string_release(msgbuf);
+		PQfreemem(escaped_delimiter);
+		smart_str_free(&querystr);
+		RETURN_FALSE;
+	}
+	smart_str_append_printf(&querystr, " FROM STDIN DELIMITER %s NULL AS %s", escaped_delimiter, escaped_null_as);
+	smart_str_0(&querystr);
+	PQfreemem(escaped_delimiter);
+	PQfreemem(escaped_null_as);
+
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 	}
-	pgsql_result = PQexec(pgsql, query);
+	pgsql_result = PQexec(pgsql, ZSTR_VAL(querystr.s));
 
-	efree(query);
+	smart_str_free(&querystr);
 
 	if (pgsql_result) {
 		status = PQresultStatus(pgsql_result);
@@ -5557,7 +5682,7 @@ static bool do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link,
 }
 /* }}} */
 
-static inline zend_result build_tablename(smart_str *querystr, PGconn *pg_link, const zend_string *table) /* {{{ */
+static zend_result build_tablename(smart_str *querystr, PGconn *pg_link, const zend_string *table) /* {{{ */
 {
 	/* schema.table should be "schema"."table" */
 	const char *dot = memchr(ZSTR_VAL(table), '.', ZSTR_LEN(table));
@@ -5568,7 +5693,9 @@ static inline zend_result build_tablename(smart_str *querystr, PGconn *pg_link, 
 	} else {
 		char *escaped = PQescapeIdentifier(pg_link, ZSTR_VAL(table), len);
 		if (escaped == NULL) {
-			php_error_docref(NULL, E_NOTICE, "Failed to escape table name '%s'", ZSTR_VAL(table));
+			zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pg_link));
+			php_error_docref(NULL, E_WARNING, "Failed to escape table name '%s': %s", ZSTR_VAL(table), ZSTR_VAL(msgbuf));
+			zend_string_release(msgbuf);
 			return FAILURE;
 		}
 		smart_str_appends(querystr, escaped);
@@ -5584,7 +5711,9 @@ static inline zend_result build_tablename(smart_str *querystr, PGconn *pg_link, 
 		} else {
 			char *escaped = PQescapeIdentifier(pg_link, after_dot, len);
 			if (escaped == NULL) {
-				php_error_docref(NULL, E_NOTICE, "Failed to escape table name '%s'", ZSTR_VAL(table));
+				zend_string *msgbuf = _php_pgsql_trim_message(PQerrorMessage(pg_link));
+				php_error_docref(NULL, E_WARNING, "Failed to escape table name '%s': %s", ZSTR_VAL(table), ZSTR_VAL(msgbuf));
+				zend_string_release(msgbuf);
 				return FAILURE;
 			}
 			smart_str_appendc(querystr, '.');
