@@ -8449,6 +8449,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				scope, name, &default_value,
 				property_flags | (zend_property_is_virtual(scope, name, hooks_ast) ? ZEND_ACC_VIRTUAL : 0) | ZEND_ACC_PROMOTED,
 				doc_comment, type);
+			prop->line = param_ast->lineno;
 			if (hooks_ast) {
 				const zend_ast_list *hooks = zend_ast_get_list(hooks_ast);
 				zend_compile_property_hooks(prop, name, type_ast, hooks);
@@ -9446,6 +9447,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		}
 
 		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
+		info->line = prop_ast->lineno;
 
 		if (hooks_ast) {
 			zend_compile_property_hooks(info, name, type_ast, zend_ast_get_list(hooks_ast));
@@ -9532,6 +9534,7 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		}
 
 		c = zend_declare_typed_class_constant(ce, name, &value_zv, flags, doc_comment, type);
+		c->line = const_ast->lineno;
 
 		if (attr_ast) {
 			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
@@ -10002,6 +10005,7 @@ static void zend_compile_enum_case(zend_ast *ast)
 
 	zend_class_constant *c = zend_declare_class_constant_ex(enum_class, enum_case_name, &value_zv, ZEND_ACC_PUBLIC, doc_comment);
 	ZEND_CLASS_CONST_FLAGS(c) |= ZEND_CLASS_CONST_IS_CASE;
+	c->line = ast->lineno;
 	zend_ast_destroy(const_enum_init_ast);
 
 	zend_ast *attr_ast = ast->child[3];
