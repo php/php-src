@@ -672,10 +672,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			/* Make sure it looks like a float */
 			if (zend_finite(Z_DVAL_P(zv)) && !strchr(decode, '.')) {
 				size_t len = strlen(decode);
-				char *decode2 = zend_cstr_concat3(
-					decode, len,
-					".", 1,
-					"0", 1);
+				char *decode2 = zend_cstr_concat(decode, len, ".0", strlen(".0"));
 				efree(decode);
 				decode = decode2;
 			}
