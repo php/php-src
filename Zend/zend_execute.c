@@ -1070,16 +1070,20 @@ ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_in
 	return i_zend_verify_property_type(info, property, strict);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+static zend_always_inline zval* zend_assign_to_typed_prop_ex(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr, bool check_set_access EXECUTE_DATA_DC)
 {
 	zval tmp;
+	const uint32_t guard_mask =
+		ZEND_ACC_READONLY | (check_set_access ? ZEND_ACC_PPP_SET_MASK : 0);
 
-	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+	if (UNEXPECTED(info->flags & guard_mask)) {
 		if ((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)) {
 			zend_readonly_property_modification_error(info);
 			return &EG(uninitialized_zval);
 		}
-		if (info->flags & ZEND_ACC_PPP_SET_MASK && !zend_asymmetric_property_has_set_access(info)) {
+		if (check_set_access
+		 && (info->flags & ZEND_ACC_PPP_SET_MASK)
+		 && !zend_asymmetric_property_has_set_access(info)) {
 			zend_asymmetric_visibility_property_modification_error(info, "modify");
 			return &EG(uninitialized_zval);
 		}
@@ -1096,6 +1100,24 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 	Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
 
 	return zend_assign_to_variable_ex(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES(), garbage_ptr);
+}
+
+static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+{
+	return zend_assign_to_typed_prop_ex(info, property_val, value, garbage_ptr, true EXECUTE_DATA_CC);
+}
+
+/* For write sites whose runtime cache slot produced `info`: the slot is only
+ * populated when set access was verified at resolution time
+ * (zend_get_property_offset()), so the per-write asymmetric visibility check
+ * is redundant. */
+static zend_never_inline zval* zend_assign_to_typed_prop_granted(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+{
+	ZEND_ASSERT(!(info->flags & ZEND_ACC_PPP_SET_MASK)
+		|| (info->flags & ZEND_ACC_PUBLIC_SET)
+		|| zend_asymmetric_property_has_set_access(info));
+
+	return zend_assign_to_typed_prop_ex(info, property_val, value, garbage_ptr, false EXECUTE_DATA_CC);
 }
 
 static zend_always_inline bool zend_value_instanceof_static(const zval *zv) {
