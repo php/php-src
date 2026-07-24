@@ -61,8 +61,8 @@ fscanf(): supplied resource is not a valid File-Handle resource
 Different numbers of variable names and field specifiers
 array(0) {
 }
-Bad scan conversion character "
-Bad scan conversion character "
+Bad scan conversion character ""
+Bad scan conversion character ""
 Bad scan conversion character "."
 Bad scan conversion character "m"
 
