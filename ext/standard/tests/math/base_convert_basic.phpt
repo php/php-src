@@ -22,256 +22,130 @@ for ($f= 0; $f < count($frombase); $f++) {
     for ($t= 0; $t < count($tobase); $t++) {
         echo "......to base is ", $tobase[$t], "\n";
         for ($i =0; $i < count($values); $i++){
-            $res = base_convert($values[$i],$frombase[$f],$tobase[$t]);
-            echo ".........value= ", $values[$i], " res = ", $res, "\n";
+            try {
+                $res = base_convert($values[$i],$frombase[$f],$tobase[$t]);
+                echo ".........value= ", $values[$i], " res = ", $res, "\n";
+            } catch (ValueError $e) {
+                echo "E........exc= ", $e->getMessage(), "\n";
+            }
         }
     }
 }
 ?>
---EXPECTF--
+--EXPECT--
 ...from base is 2
 ......to base is 2
 .........value= 10 res = 10
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 10
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 8
 .........value= 10 res = 2
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 2
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 10
 .........value= 10 res = 2
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 2
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 16
 .........value= 10 res = 2
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 2
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 36
 .........value= 10 res = 2
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 2
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 27 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 0
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 0
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 ...from base is 8
 ......to base is 2
 .........value= 10 res = 1000
 .........value= 27 res = 10111
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 11
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 3 res = 11
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 101
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 1000
 .........value= 27 res = 10111
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 11
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 101
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 11
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 8
 .........value= 10 res = 10
 .........value= 27 res = 27
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 3 res = 3
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 5
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 10
 .........value= 27 res = 27
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 3
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 5
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 10
 .........value= 10 res = 8
 .........value= 27 res = 23
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 3 res = 3
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 5
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 8
 .........value= 27 res = 23
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 3
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 5
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 16
 .........value= 10 res = 8
 .........value= 27 res = 17
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 3 res = 3
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 5
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 8
 .........value= 27 res = 17
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 3
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 5
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 36
 .........value= 10 res = 8
 .........value= 27 res = n
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 3 res = 3
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 95 res = 5
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 .........value= 10 res = 8
 .........value= 27 res = n
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 39 res = 3
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 5
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 ...from base is 10
 ......to base is 2
@@ -283,12 +157,8 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 10 res = 1010
 .........value= 27 res = 11011
 .........value= 39 res = 100111
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 101
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 11
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 8
 .........value= 10 res = 12
 .........value= 27 res = 33
@@ -298,12 +168,8 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 10 res = 12
 .........value= 27 res = 33
 .........value= 39 res = 47
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 5
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 10
 .........value= 10 res = 10
 .........value= 27 res = 27
@@ -313,12 +179,8 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 10 res = 10
 .........value= 27 res = 27
 .........value= 39 res = 39
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 5
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 16
 .........value= 10 res = a
 .........value= 27 res = 1b
@@ -328,12 +190,8 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 10 res = a
 .........value= 27 res = 1b
 .........value= 39 res = 27
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 5
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 36
 .........value= 10 res = a
 .........value= 27 res = r
@@ -343,12 +201,8 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 10 res = a
 .........value= 27 res = r
 .........value= 39 res = 13
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 5F res = 5
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 ...from base is 16
 ......to base is 2
@@ -361,9 +215,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 27 res = 100111
 .........value= 39 res = 111001
 .........value= 5F res = 1011111
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 11
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 8
 .........value= 10 res = 20
 .........value= 27 res = 47
@@ -374,9 +226,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 27 res = 47
 .........value= 39 res = 71
 .........value= 5F res = 137
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 10
 .........value= 10 res = 16
 .........value= 27 res = 39
@@ -387,9 +237,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 27 res = 39
 .........value= 39 res = 57
 .........value= 5F res = 95
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 16
 .........value= 10 res = 10
 .........value= 27 res = 27
@@ -400,9 +248,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 27 res = 27
 .........value= 39 res = 39
 .........value= 5F res = 5f
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 ......to base is 36
 .........value= 10 res = g
 .........value= 27 res = 13
@@ -413,9 +259,7 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 .........value= 27 res = 13
 .........value= 39 res = 1l
 .........value= 5F res = 2n
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-.........value= 3XYZ res = 3
+E........exc= base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
 
 ...from base is 36
 ......to base is 2
