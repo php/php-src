@@ -62,7 +62,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed setlocale() to reject locale names containing NUL bytes instead of
     silently truncating them, and to reject arrays passed after the $locales
-    argument. (Weilin Du)
+    argument or additional arguments passed after an array $locales argument.
+    (Weilin Du)
 
 - Streams:
   . Added a new IO copy API used by php_stream_copy_to_stream_ex() that

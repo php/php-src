@@ -44,13 +44,17 @@ try {
     echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
 }
 
-var_dump(setlocale(LC_ALL, [], new NullByteStringable()));
+try {
+    var_dump(setlocale(LC_ALL, [], new NullByteStringable()));
+} catch (ArgumentCountError $e) {
+    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+}
 ?>
 --EXPECT--
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
 ValueError: setlocale(): Argument #2 ($locales) must not contain any null bytes
-TypeError: setlocale(): Argument #3 must be of type ?string, array given
+TypeError: setlocale(): Argument #3 must be of type array|string|null, int given
 ValueError: setlocale(): Argument #3 must not contain any null bytes
-bool(false)
+ArgumentCountError: setlocale() expects exactly 2 arguments when argument #2 ($locales) is an array, 3 given

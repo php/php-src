@@ -4903,14 +4903,14 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 	return zend_string_init(retval, strlen(retval), 0);
 }
 
-static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv, uint32_t arg_num) {
+static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv) {
 	zend_string *tmp_loc_str;
 	zend_string *loc_str = zval_try_get_tmp_string(loc_zv, &tmp_loc_str);
 	if (UNEXPECTED(loc_str == NULL)) {
 		return NULL;
 	}
 	if (zend_str_has_nul_byte(loc_str)) {
-		zend_argument_value_error(arg_num, "must not contain any null bytes");
+		zend_argument_value_error(2, "must not contain any null bytes");
 		zend_tmp_string_release(tmp_loc_str);
 		return NULL;
 	}
@@ -4940,6 +4940,12 @@ PHP_FUNCTION(setlocale)
 				zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_STRING_OR_NULL, &args[i]);
 				goto out;
 			}
+			if (UNEXPECTED(num_args > 1)) {
+				zend_argument_count_error(
+					"setlocale() expects exactly 2 arguments when argument #2 ($locales) is an array, %d given",
+					ZEND_NUM_ARGS());
+				goto out;
+			}
 			num_args = 1;
 			break;
 		}
@@ -4959,7 +4965,7 @@ PHP_FUNCTION(setlocale)
 		if (Z_TYPE(args[i]) == IS_ARRAY) {
 			zval *elem;
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), elem) {
-				result = try_setlocale_zval(cat, elem, i + 2);
+				result = try_setlocale_zval(cat, elem);
 				if (EG(exception)) {
 					goto out;
 				}
