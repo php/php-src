@@ -835,11 +835,9 @@ static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode
 	php_poll_remove(poller->poll_ctx, fd);
 } /* }}} */
 
-static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct timeval *tv) /* {{{ */
+static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct timespec *ts) /* {{{ */
 {
-	struct timespec ts;
-	TIMEVAL_TO_TIMESPEC(tv, &ts);
-	return php_poll_wait(poller->poll_ctx, poller->events, poller->count, &ts);
+	return php_poll_wait(poller->poll_ctx, poller->events, poller->count, ts);
 } /* }}} */
 
 static zend_result php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, zend_result(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
@@ -2689,8 +2687,8 @@ static zend_result php_cli_server_do_event_loop(php_cli_server *server) /* {{{ *
 {
 	zend_result retval = SUCCESS;
 	while (server->is_running) {
-		struct timeval tv = { 1, 0 };
-		int n = php_cli_server_poller_poll(&server->poller, &tv);
+		struct timespec ts = { 1, 0 };
+		int n = php_cli_server_poller_poll(&server->poller, &ts);
 		if (n > 0) {
 			php_cli_server_do_event_for_each_fd(server,
 					php_cli_server_recv_event_read_request,
