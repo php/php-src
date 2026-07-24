@@ -34,6 +34,8 @@
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
 
+ZEND_TLS uint32_t delayed_autoloads_depth = 0;
+
 /* Unresolved means that class declarations that are currently not available are needed to
  * determine whether the inheritance is valid or not. At runtime UNRESOLVED should be treated
  * as an ERROR. */
@@ -3298,6 +3300,8 @@ static void load_delayed_classes(zend_class_entry *ce) {
 	 * this triggers linking, then the remaining classes may get loaded when linking the newly
 	 * loaded class. This is important, as otherwise necessary dependencies may not be available
 	 * if the new class is lower in the hierarchy than the current one. */
+	delayed_autoloads_depth++;
+	uint32_t consecutive_failures = 0;
 	HashPosition pos = 0;
 	zend_string *name;
 	zend_ulong idx;
@@ -3306,13 +3310,31 @@ static void load_delayed_classes(zend_class_entry *ce) {
 		zend_string_addref(name);
 		zend_hash_del(delayed_autoloads, name);
 		zend_lookup_class(name);
-		zend_string_release(name);
 		if (EG(exception)) {
+			if (delayed_autoloads_depth > 1) {
+				zend_string *lc_name = zend_string_tolower(name);
+				bool class_was_loaded = zend_hash_exists(CG(class_table), lc_name);
+				zend_string_release(lc_name);
+				if (!class_was_loaded) {
+					zend_clear_exception();
+					zend_hash_add_empty_element(delayed_autoloads, name);
+					zend_string_release(name);
+					consecutive_failures++;
+					if (consecutive_failures >= zend_hash_num_elements(delayed_autoloads)) {
+						break;
+					}
+					continue;
+				}
+			}
+			delayed_autoloads_depth--;
 			zend_exception_uncaught_error(
 				"During inheritance of %s, while autoloading %s",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
+		zend_string_release(name);
+		consecutive_failures = 0;
 	}
+	delayed_autoloads_depth--;
 }
 
 static void resolve_delayed_variance_obligations(zend_class_entry *ce) {
