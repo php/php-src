@@ -140,6 +140,12 @@ static void xsl_add_ns_def(xmlNodePtr node)
 				ns->type = XML_LOCAL_NAMESPACE;
 				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
 				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
+
+				if (UNEXPECTED(ns->href == NULL || (attr->ns->prefix != NULL && ns->prefix == NULL))) {
+					xmlFreeNs(ns);
+					return;
+				}
+
 				ns->next = node->nsDef;
 				node->nsDef = ns;
 			}
@@ -350,6 +356,9 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	php_libxml_increment_doc_ref(intern->doc, doc);
 
 	ctxt = xsltNewTransformContext(style, doc);
+	if (UNEXPECTED(ctxt == NULL)) {
+		goto out;
+	}
 	ctxt->_private = (void *) intern;
 
 	if (intern->parameter) {
