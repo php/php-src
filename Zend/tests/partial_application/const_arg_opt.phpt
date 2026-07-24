@@ -51,7 +51,7 @@ $f(2);
 echo "# Constant pre-bound argument (inverted):\n";
 $f = f(?, 2);
 print_lexical_vars($f);
-$f(2);
+$f(1);
 
 echo "# Inlined pre-bound argument:\n";
 $f = f(g(), ?);
@@ -106,7 +106,7 @@ array(2) {
 no lexical vars
 array(2) {
   [0]=>
-  int(2)
+  int(1)
   [1]=>
   int(2)
 }

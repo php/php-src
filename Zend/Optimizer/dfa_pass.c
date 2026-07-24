@@ -479,7 +479,7 @@ static uint32_t zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 					if (send_opline->op1_type == IS_CONST) {
 						zval *value = CT_CONSTANT_EX(op_array, send_opline->op1.constant);
 						if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-							/* Const exprs can evaluate to non-cont zvals (e.g. objects), and are not idempotent */
+							/* Const exprs can evaluate to non-const zvals (e.g. objects), and are not idempotent */
 							continue;
 						}
 						const_args |= (1 << i);
