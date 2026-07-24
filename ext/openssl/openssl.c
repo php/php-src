@@ -3904,6 +3904,10 @@ PHP_FUNCTION(openssl_cms_read)
 		case NID_pkcs7_signedAndEnveloped:
 			certs = CMS_get1_certs(cms);
 			crls = CMS_get1_crls(cms);
+			if ((!certs || !crls) && ERR_peek_error() != 0) {
+				php_openssl_store_errors();
+				goto clean_exit;
+			}
 			break;
 		default:
 			break;
