@@ -482,7 +482,7 @@ static uint32_t zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 							/* Const exprs can evaluate to non-const zvals (e.g. objects), and are not idempotent */
 							continue;
 						}
-						const_args |= (1 << i);
+						const_args |= (UINT32_C(1) << i);
 					}
 				}
 

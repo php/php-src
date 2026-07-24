@@ -69,7 +69,7 @@ static zend_always_inline bool zp_is_non_static_closure(const zend_function *fun
 /* Whether argument at offset 'offset' is const. Such arguments can be burned into the generated op_array */
 static inline bool zp_is_const_arg(uint32_t const_args, uint32_t offset) {
 	if (offset < sizeof(const_args) * CHAR_BIT) {
-		return const_args & (1 << offset);
+		return const_args & (UINT32_C(1) << offset);
 	}
 	return false;
 }
