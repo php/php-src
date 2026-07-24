@@ -80,6 +80,7 @@
 #define ZEND_DUMP_DFA_SSA           (1<<27)
 #define ZEND_DUMP_DFA_SSA_VARS      (1<<28)
 #define ZEND_DUMP_SCCP              (1<<29)
+#define ZEND_DUMP_LINE_NUMBERS_PASSTHRU (1<<30)
 
 typedef struct _zend_script {
 	zend_string   *filename;
