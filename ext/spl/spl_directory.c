@@ -1240,6 +1240,17 @@ PHP_METHOD(SplFileInfo, getRealPath)
 		filename = intern->file_name ? ZSTR_VAL(intern->file_name) : NULL;
 	}
 
+	if (filename) {
+		const char *path_to_open = filename;
+		php_stream_wrapper *wrapper = php_stream_locate_url_wrapper(filename, &path_to_open, 0);
+		if (wrapper && wrapper != &php_plain_files_wrapper && !wrapper->is_url && wrapper->wops && wrapper->wops->url_stat) {
+			php_stream_statbuf ssb;
+			if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL) == 0) {
+				RETURN_STRING(filename);
+			}
+			RETURN_FALSE;
+		}
+	}
 
 	if (filename && VCWD_REALPATH(filename, buff)) {
 #ifdef ZTS
