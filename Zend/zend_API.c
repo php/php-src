@@ -3859,6 +3859,7 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 			scope = get_scope(frame);
 		}
 
+		zend_string *held_callable = zend_string_copy(callable);
 		zend_string *class_name = zend_string_init_interned(ZSTR_VAL(callable), class_name_len, 0);
 		if (ZSTR_HAS_CE_CACHE(class_name) && ZSTR_GET_CE_CACHE(class_name)) {
 			fcc->calling_scope = ZSTR_GET_CE_CACHE(class_name);
@@ -3879,6 +3880,7 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 			strict_class = true;
 		} else if (!zend_is_callable_check_class(class_name, scope, frame, fcc, &strict_class, error, suppress_deprecation || ce_org != NULL)) {
 			zend_string_release_ex(class_name, 0);
+			zend_string_release(held_callable);
 			return 0;
 		}
 		zend_string_release_ex(class_name, 0);
@@ -3886,6 +3888,7 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 		ftable = &fcc->calling_scope->function_table;
 		if (ce_org && !instanceof_function(ce_org, fcc->calling_scope)) {
 			if (error) zend_spprintf(error, 0, "class %s is not a subclass of %s", ZSTR_VAL(ce_org->name), ZSTR_VAL(fcc->calling_scope->name));
+			zend_string_release(held_callable);
 			return 0;
 		}
 		if (ce_org && !suppress_deprecation) {
@@ -3894,6 +3897,7 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 				ZSTR_VAL(ce_org->name), ZSTR_VAL(callable));
 		}
 		mname = zend_string_init(ZSTR_VAL(callable) + class_name_len + 2, mlen, 0);
+		zend_string_release(held_callable);
 	} else if (ce_org) {
 		/* Try to fetch find static method of given class. */
 		mname = callable;
@@ -4216,12 +4220,17 @@ again:
 					return 0;
 				}
 
+				zend_string *method_name;
+
 				if (Z_TYPE_P(obj) == IS_STRING) {
 					if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 						return 1;
 					}
 
+					method_name = zend_string_copy(Z_STR_P(method));
+
 					if (!zend_is_callable_check_class(Z_STR_P(obj), get_scope(frame), frame, fcc, &strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS)) {
+						zend_string_release(method_name);
 						return 0;
 					}
 				} else {
@@ -4233,9 +4242,12 @@ again:
 						fcc->called_scope = fcc->calling_scope;
 						return 1;
 					}
+
+					method_name = zend_string_copy(Z_STR_P(method));
 				}
 
-				ret = zend_is_method_callable(Z_STR_P(method), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+				ret = zend_is_method_callable(method_name, frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+				zend_string_release(method_name);
 				break;
 			}
 

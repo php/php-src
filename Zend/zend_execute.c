@@ -5259,23 +5259,27 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(const z
 		}
 
 		if (Z_TYPE_P(obj) == IS_STRING) {
+			zend_string *method_name = zend_string_copy(Z_STR_P(method));
 			zend_class_entry *called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 
 			if (UNEXPECTED(called_scope == NULL)) {
+				zend_string_release(method_name);
 				return NULL;
 			}
 
 			if (called_scope->get_static_method) {
-				fbc = called_scope->get_static_method(called_scope, Z_STR_P(method));
+				fbc = called_scope->get_static_method(called_scope, method_name);
 			} else {
-				fbc = zend_std_get_static_method(called_scope, Z_STR_P(method), NULL);
+				fbc = zend_std_get_static_method(called_scope, method_name, NULL);
 			}
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_undefined_method(called_scope, Z_STR_P(method));
+					zend_undefined_method(called_scope, method_name);
 				}
+				zend_string_release(method_name);
 				return NULL;
 			}
+			zend_string_release(method_name);
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 				zend_non_static_method_call(fbc);
 				if (fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
