@@ -31,7 +31,11 @@ var_dump( copy($file, $dir."/copy_copy_variation15.tmp") );
 var_dump( file_exists($dir."/copy_copy_variation15_dir.tmp") );
 var_dump( filesize($file) );  //size of source
 
-chmod($dir, $old_perms);
+try {
+  chmod($dir, $old_perms);
+} catch (TypeError|ValueError $e) {
+  echo $e->getMessage(), "\n";
+}
 
 echo "*** Done ***\n";
 ?>
@@ -46,4 +50,5 @@ Warning: copy(): %s
 bool(false)
 bool(false)
 int(300)
+chmod(): Argument #2 ($permissions) Invalid mode value (must be between 0 and 07777)
 *** Done ***

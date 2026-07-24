@@ -215,6 +215,7 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty);
 /* zend_string* versions */
 ZEND_API ZEND_INI_MH(OnUpdateStr);
 ZEND_API ZEND_INI_MH(OnUpdateStrNotEmpty);
+ZEND_API ZEND_INI_MH(OnUpdateFilePermission);
 END_EXTERN_C()
 
 #define ZEND_INI_DISPLAY_ORIG	1
