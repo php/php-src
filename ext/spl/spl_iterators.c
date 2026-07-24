@@ -76,6 +76,7 @@ typedef struct _spl_recursive_it_object {
 	int                      flags;
 	int                      max_depth;
 	bool                in_iteration;
+	bool                in_progress;
 	zend_function            *beginIteration;
 	zend_function            *endIteration;
 	zend_function            *callHasChildren;
@@ -255,6 +256,11 @@ static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object, zv
 	zend_result               valid_result;
 	bool                      reentered;
 
+	if (object->in_progress) {
+		zend_throw_error(NULL, "Cannot advance a RecursiveIteratorIterator from within hasChildren() or getChildren()");
+		return;
+	}
+
 	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
 	while (!EG(exception)) {
@@ -291,15 +297,22 @@ next_step:
 				/* TODO: Check this is correct */
 				ZEND_FALLTHROUGH;
 			case RS_TEST:
-				if (object->callHasChildren) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callHasChildren, "callHasChildren", &retval);
-				} else {
-					zend_class_entry *ce = object->iterators[object->level].ce;
-					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
-					zend_function **cache = &object->iterators[object->level].haschildren;
+				object->in_progress = true;
+				zend_try {
+					if (object->callHasChildren) {
+						zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callHasChildren, "callHasChildren", &retval);
+					} else {
+						zend_class_entry *ce = object->iterators[object->level].ce;
+						zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
+						zend_function **cache = &object->iterators[object->level].haschildren;
 
-					zend_call_method_with_0_params(obj, ce, cache, "haschildren", &retval);
-				}
+						zend_call_method_with_0_params(obj, ce, cache, "haschildren", &retval);
+					}
+				} zend_catch {
+					object->in_progress = false;
+					zend_bailout();
+				} zend_end_try();
+				object->in_progress = false;
 				if (EG(exception)) {
 					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
 						object->iterators[object->level].state = RS_NEXT;
@@ -355,15 +368,22 @@ next_step:
 				}
 				return /* self */;
 			case RS_CHILD:
-				if (object->callGetChildren) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callGetChildren, "callGetChildren", &child);
-				} else {
-					zend_class_entry *ce = object->iterators[object->level].ce;
-					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
-					zend_function **cache = &object->iterators[object->level].getchildren;
+				object->in_progress = true;
+				zend_try {
+					if (object->callGetChildren) {
+						zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callGetChildren, "callGetChildren", &child);
+					} else {
+						zend_class_entry *ce = object->iterators[object->level].ce;
+						zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
+						zend_function **cache = &object->iterators[object->level].getchildren;
 
-					zend_call_method_with_0_params(obj, ce, cache, "getchildren", &child);
-				}
+						zend_call_method_with_0_params(obj, ce, cache, "getchildren", &child);
+					}
+				} zend_catch {
+					object->in_progress = false;
+					zend_bailout();
+				} zend_end_try();
+				object->in_progress = false;
 
 				if (EG(exception)) {
 					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
@@ -448,6 +468,11 @@ next_step:
 static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zthis)
 {
 	zend_object_iterator *sub_iter;
+
+	if (object->in_progress) {
+		zend_throw_error(NULL, "Cannot rewind a RecursiveIteratorIterator from within hasChildren() or getChildren()");
+		return;
+	}
 
 	SPL_FETCH_SUB_ITERATOR(sub_iter, object);
 
@@ -623,6 +648,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->flags = (int)flags;
 	intern->max_depth = -1;
 	intern->in_iteration = false;
+	intern->in_progress = false;
 	intern->ce = Z_OBJCE_P(object);
 
 	intern->beginIteration = zend_hash_str_find_ptr(&intern->ce->function_table, "beginiteration", sizeof("beginiteration") - 1);
