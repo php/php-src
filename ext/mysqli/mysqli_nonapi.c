@@ -173,14 +173,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 							mysql->mysql = zend_ptr_stack_pop(&plist->free_links);
 
 							MyG(num_inactive_persistent)--;
-							/* reset variables */
 
-#ifndef MYSQLI_NO_CHANGE_USER_ON_PCONNECT
-							if (!mysqli_change_user_silent(mysql->mysql, username, passwd, dbname, passwd_len)) {
-#else
-							if (!mysql_ping(mysql->mysql)) {
-#endif
-								mysqlnd_restart_psession(mysql->mysql);
+							if (!mysqlnd_restart_psession(mysql->mysql)) {
 								MyG(num_active_persistent)++;
 
 								/* clear error */
