@@ -28,6 +28,7 @@ if test "$PHP_EMBED" != "no"; then
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
 
     dnl Include CLI sources for do_php_cli() in libphp.
+    dnl We rebuild them here because cli isn't guaranteed to compile with -fPIC
     PHP_ADD_SOURCES([sapi/cli],
       [php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c],
       [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
