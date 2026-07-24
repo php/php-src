@@ -4903,14 +4903,14 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 	return zend_string_init(retval, strlen(retval), 0);
 }
 
-static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv) {
+static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv, uint32_t arg_num) {
 	zend_string *tmp_loc_str;
 	zend_string *loc_str = zval_try_get_tmp_string(loc_zv, &tmp_loc_str);
 	if (UNEXPECTED(loc_str == NULL)) {
 		return NULL;
 	}
 	if (zend_str_has_nul_byte(loc_str)) {
-		zend_argument_value_error(2, "must not contain any null bytes");
+		zend_argument_value_error(arg_num, "must not contain any null bytes");
 		zend_tmp_string_release(tmp_loc_str);
 		return NULL;
 	}
@@ -4935,10 +4935,20 @@ PHP_FUNCTION(setlocale)
 	zend_string **strings = do_alloca(sizeof(zend_string *) * num_args, use_heap);
 
 	for (uint32_t i = 0; i < num_args; i++) {
-		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_path_str(&args[i], &strings[i], true, i + 2))) {
+		if (Z_TYPE(args[i]) == IS_ARRAY) {
+			if (UNEXPECTED(i != 0)) {
+				zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_STRING_OR_NULL, &args[i]);
+				goto out;
+			}
+			num_args = 1;
+			break;
+		}
+		if (UNEXPECTED(!zend_parse_arg_path_str(&args[i], &strings[i], true, i + 2))) {
 			zend_wrong_parameter_type_error(
 				i + 2,
-				Z_TYPE(args[i]) == IS_STRING ? Z_EXPECTED_PATH : Z_EXPECTED_ARRAY_OR_STRING_OR_NULL,
+				Z_TYPE(args[i]) == IS_STRING
+					? Z_EXPECTED_PATH
+					: (i == 0 ? Z_EXPECTED_ARRAY_OR_STRING_OR_NULL : Z_EXPECTED_STRING_OR_NULL),
 				&args[i]);
 			goto out;
 		}
@@ -4949,7 +4959,7 @@ PHP_FUNCTION(setlocale)
 		if (Z_TYPE(args[i]) == IS_ARRAY) {
 			zval *elem;
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), elem) {
-				result = try_setlocale_zval(cat, elem);
+				result = try_setlocale_zval(cat, elem, i + 2);
 				if (EG(exception)) {
 					goto out;
 				}
