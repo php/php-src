@@ -408,9 +408,8 @@ PHPAPI php_stream_dirent *php_stream_readdir(php_stream *dirstream, php_stream_d
 PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b);
 PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string **b);
 
-PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], int flags, php_stream_context *context,
+PHPAPI int php_stream_scandir(const char *dirname, zend_string **namelist[], php_stream_context *context,
 			int (*compare) (const zend_string **a, const zend_string **b));
-#define php_stream_scandir(dirname, namelist, context, compare) _php_stream_scandir((dirname), (namelist), 0, (context), (compare))
 
 PHPAPI int php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam);
 
