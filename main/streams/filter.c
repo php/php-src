@@ -30,7 +30,7 @@ PHPAPI HashTable *php_get_stream_filters_hash_global(void)
 }
 
 /* Normal hash selection/retrieval call */
-PHPAPI HashTable *_php_get_stream_filters_hash(void)
+PHPAPI HashTable *php_get_stream_filters_hash(void)
 {
 	return (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 }
@@ -342,7 +342,7 @@ PHPAPI void php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_str
 	filter->chain = chain;
 }
 
-PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	php_stream_filter_prepend_ex(chain, filter);
 }
@@ -434,7 +434,7 @@ PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, p
 	return SUCCESS;
 }
 
-PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI void php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter)
 {
 	if (php_stream_filter_append_ex(chain, filter) != SUCCESS) {
 		if (chain->head == filter) {
@@ -447,7 +447,7 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 	}
 }
 
-PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish)
+PHPAPI zend_result php_stream_filter_flush(php_stream_filter *filter, bool finish)
 {
 	php_stream_bucket_brigade brig_a = { NULL, NULL }, brig_b = { NULL, NULL }, *inp = &brig_a, *outp = &brig_b, *brig_temp;
 	php_stream_bucket *bucket;
