@@ -249,6 +249,7 @@ static int _php_stream_free_persistent(zval *zv, void *pStream)
 	return le->ptr == pStream;
 }
 
+static int php_stream_flush_ex(php_stream *stream, bool closing);
 
 PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 {
@@ -336,7 +337,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 	if (stream->flags & PHP_STREAM_FLAG_WAS_WRITTEN || stream->writefilters.head) {
 		/* make sure everything is saved */
-		_php_stream_flush(stream, 1);
+		php_stream_flush_ex(stream, true);
 	}
 
 	/* If not called from the resource dtor, remove the stream from the resource list. */
@@ -1183,7 +1184,7 @@ static ssize_t php_stream_write_filtered(php_stream *stream, const char *buf, si
 	return consumed;
 }
 
-PHPAPI int _php_stream_flush(php_stream *stream, int closing)
+static int php_stream_flush_ex(php_stream *stream, bool closing)
 {
 	int ret = 0;
 
@@ -1198,6 +1199,10 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 	}
 
 	return ret;
+}
+
+PHPAPI int php_stream_flush(php_stream *stream) {
+	return php_stream_flush_ex(stream, false);
 }
 
 PHPAPI ssize_t php_stream_write(php_stream *stream, const char *buf, size_t count)
@@ -1324,7 +1329,7 @@ PHPAPI int php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 	bool is_start_seeking = whence == SEEK_SET && offset == 0;
 
 	if (stream->writefilters.head) {
-		_php_stream_flush(stream, 0);
+		php_stream_flush(stream);
 		if (!php_stream_are_filters_seekable(stream->writefilters.head, is_start_seeking,
 				PHP_STREAM_FILTER_WRITE)) {
 			return -1;
