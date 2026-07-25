@@ -117,16 +117,15 @@ PHP_FUNCTION(header_register_callback)
 
 	if (ZEND_FCC_INITIALIZED(SG(send_header_fcc))) {
 		zend_fcc_dtor(&SG(send_header_fcc));
-		SG(send_header_fcc) = empty_fcall_info_cache;
 	}
 
 	/* Don't store callback if headers have already been sent:
 	 * It won't get used and we won't have a chance to release it. */
 	if (UNEXPECTED(SG(headers_sent))) {
 		zend_release_fcall_info_cache(&fcc);
+	} else {
+		zend_fcc_dup(&SG(send_header_fcc), &fcc);
 	}
-
-	zend_fcc_dup(&SG(send_header_fcc), &fcc);
 	RETURN_TRUE;
 }
 /* }}} */
