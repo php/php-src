@@ -377,8 +377,7 @@ PHPAPI int php_stream_getc(php_stream *stream);
 
 PHPAPI int php_stream_putc(php_stream *stream, int c);
 
-PHPAPI int _php_stream_flush(php_stream *stream, int closing);
-#define php_stream_flush(stream)	_php_stream_flush((stream), 0)
+PHPAPI int php_stream_flush(php_stream *stream);
 
 PHPAPI int php_stream_sync(php_stream *stream, bool data_only);
 
