@@ -8,7 +8,7 @@ opcache.jit_buffer_size=64M
 --FILE--
 <?php
 // Skip when JIT was completely disabled at runtime.
-if (($status = opcache_get_status()) === false || $status['jit']['enabled']) {
+if (($status = opcache_get_status()) === false || ($status['jit']['enabled'] ?? true)) {
     ini_set('opcache.jit', 'tracing');
 }
 class Test {
