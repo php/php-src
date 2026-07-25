@@ -2330,6 +2330,7 @@ PHP_METHOD(SoapClient, __construct)
 	}
 
 finish:
+	;
 	SOAP_CLIENT_END_CODE();
 }
 /* }}} */
