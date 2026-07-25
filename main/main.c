@@ -1658,7 +1658,7 @@ PHPAPI zend_result php_stream_open_for_zend_ex(zend_file_handle *handle, int mod
 		handle->filename = filename;
 		handle->opened_path = opened_path;
 		handle->handle.stream.handle  = stream;
-		handle->handle.stream.reader  = (zend_stream_reader_t)_php_stream_read;
+		handle->handle.stream.reader  = (zend_stream_reader_t)php_stream_read;
 		handle->handle.stream.fsizer  = php_zend_stream_fsizer;
 		handle->handle.stream.isatty  = 0;
 		handle->handle.stream.closer = php_zend_stream_closer;
