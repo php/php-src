@@ -2245,7 +2245,11 @@ PHP_METHOD(SoapClient, __construct)
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
 			if (UNEXPECTED(!soap_class_map_has_only_string_keys(Z_ARRVAL_P(tmp)))) {
-				php_error_docref(NULL, E_ERROR, "'classmap' option must be an associative array");
+				zend_argument_value_error(2, "\"classmap\" option must be an associative array");
+				if (context) {
+					zend_list_delete(context->res);
+				}
+				goto finish;
 			}
 			ZVAL_COPY(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);
 		}
@@ -2324,6 +2328,8 @@ PHP_METHOD(SoapClient, __construct)
 	if (typemap_ht) {
 		soap_client_object_fetch(Z_OBJ_P(this_ptr))->typemap = soap_create_typemap(sdl, typemap_ht);
 	}
+
+finish:
 	SOAP_CLIENT_END_CODE();
 }
 /* }}} */

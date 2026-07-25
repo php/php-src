@@ -52,7 +52,8 @@ PHP                                                                        NEWS
   . Fixed header injection through the Content-Type context option, the
     soapaction and the cookie names and values. (David Carlier)
   . Fixed the SoapClient and SoapServer "classmap" option to reject arrays
-    containing integer keys. (Weilin Du, David Carlier)
+    containing integer keys, and made SoapClient throw ValueError for invalid
+    "classmap" options. (Weilin Du, David Carlier)
 
 - MBString:
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative

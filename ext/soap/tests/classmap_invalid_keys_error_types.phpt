@@ -1,5 +1,5 @@
 --TEST--
-SoapClient and SoapServer report an invalid classmap option differently
+SoapClient and SoapServer report an invalid classmap option as ValueError
 --EXTENSIONS--
 soap
 --FILE--
@@ -28,5 +28,5 @@ try {
 
 ?>
 --EXPECT--
-SoapClient: SoapFault: SoapClient::__construct(): 'classmap' option must be an associative array
+SoapClient: ValueError: SoapClient::__construct(): Argument #2 ($options) "classmap" option must be an associative array
 SoapServer: ValueError: SoapServer::__construct(): Argument #2 ($options) "classmap" option must be an associative array
