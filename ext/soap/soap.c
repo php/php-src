@@ -930,6 +930,18 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 }
 /* }}} */
 
+static bool soap_class_map_has_only_string_keys(const HashTable *class_map)
+{
+	zend_string *key;
+	ZEND_HASH_FOREACH_STR_KEY(class_map, key) {
+		if (UNEXPECTED(key == NULL)) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
+}
+
 /* {{{ SoapServer constructor */
 PHP_METHOD(SoapServer, __construct)
 {
@@ -1007,8 +1019,7 @@ PHP_METHOD(SoapServer, __construct)
 				zend_argument_type_error(2, "\"classmap\" option must be of type array, %s given", zend_zval_type_name(class_map_zv));
 				goto cleanup;
 			}
-			// TODO: this still accepts mixed keys arrays and not all numerically indexed arrays are packed
-			if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(class_map_zv)))) {
+			if (UNEXPECTED(!soap_class_map_has_only_string_keys(Z_ARRVAL_P(class_map_zv)))) {
 				zend_argument_value_error(2, "\"classmap\" option must be an associative array");
 				goto cleanup;
 			}
@@ -2233,7 +2244,7 @@ PHP_METHOD(SoapClient, __construct)
 		}
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(tmp)))) {
+			if (UNEXPECTED(!soap_class_map_has_only_string_keys(Z_ARRVAL_P(tmp)))) {
 				php_error_docref(NULL, E_ERROR, "'classmap' option must be an associative array");
 			}
 			ZVAL_COPY(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);

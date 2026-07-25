@@ -155,6 +155,9 @@ PHP 8.6 UPGRADE NOTES
     system.
 
 - SOAP:
+  . The "classmap" option of SoapClient and SoapServer now rejects arrays
+    containing integer keys. Previously, sparse integer-keyed and mixed-keyed
+    arrays could be accepted.
   . WSDL/XML Schema parsing now rejects out-of-range integer values for
     occurrence constraints and integer restriction facets. Negative minOccurs
     and maxOccurs values are rejected as well.
