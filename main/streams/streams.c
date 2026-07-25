@@ -2371,8 +2371,7 @@ PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string
 }
 /* }}} */
 
-/* {{{ php_stream_scandir */
-PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], int flags, php_stream_context *context,
+PHPAPI int php_stream_scandir(const char *dirname, zend_string **namelist[], php_stream_context *context,
 			  int (*compare) (const zend_string **a, const zend_string **b))
 {
 	php_stream *stream;
@@ -2427,4 +2426,3 @@ overflow:
 	efree(vector);
 	return -1;
 }
-/* }}} */
