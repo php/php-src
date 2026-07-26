@@ -1,5 +1,5 @@
 /* This is a generated file, edit user_cache.stub.php instead.
- * Stub hash: b8be7cb1df9773c913f73583906d434b343175b5
+ * Stub hash: a6dda55168da82cd81c09e3e738834267b4eb75e
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UserCache_CacheStatus___construct, 0, 0, 0)
@@ -26,6 +26,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_UserCache_CacheStatus_getTombstoneCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
 
 #define arginfo_class_UserCache_CacheStatus_getExpungeCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
+#define arginfo_class_UserCache_CacheStatus_getEvictionCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
 
 #define arginfo_class_UserCache_CacheStatus_getStoreFailureCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
 
@@ -137,6 +139,7 @@ ZEND_METHOD(UserCache_CacheStatus, getEntryCount);
 ZEND_METHOD(UserCache_CacheStatus, getEntryCapacity);
 ZEND_METHOD(UserCache_CacheStatus, getTombstoneCount);
 ZEND_METHOD(UserCache_CacheStatus, getExpungeCount);
+ZEND_METHOD(UserCache_CacheStatus, getEvictionCount);
 ZEND_METHOD(UserCache_CacheStatus, getStoreFailureCount);
 ZEND_METHOD(UserCache_CacheStatus, getGraphPinSlotsInUse);
 ZEND_METHOD(UserCache_CacheStatus, getGraphPinnedReferences);
@@ -181,6 +184,7 @@ static const zend_function_entry class_UserCache_CacheStatus_methods[] = {
 	ZEND_ME(UserCache_CacheStatus, getEntryCapacity, arginfo_class_UserCache_CacheStatus_getEntryCapacity, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getTombstoneCount, arginfo_class_UserCache_CacheStatus_getTombstoneCount, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getExpungeCount, arginfo_class_UserCache_CacheStatus_getExpungeCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CacheStatus, getEvictionCount, arginfo_class_UserCache_CacheStatus_getEvictionCount, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getStoreFailureCount, arginfo_class_UserCache_CacheStatus_getStoreFailureCount, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getGraphPinSlotsInUse, arginfo_class_UserCache_CacheStatus_getGraphPinSlotsInUse, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getGraphPinnedReferences, arginfo_class_UserCache_CacheStatus_getGraphPinnedReferences, ZEND_ACC_PUBLIC)
