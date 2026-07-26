@@ -1401,13 +1401,12 @@ outexcept:
 
 } /* }}} */
 
-/* {{{ */
-PHP_METHOD(ArrayObject, __serialize)
+/* Builds the state array shared by __serialize() and the user-cache safe-direct
+ * path. The members slot only exists in the __serialize() format. */
+static void spl_array_object_serialize_state(zval *object, zval *return_value, bool with_members)
 {
-	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
+	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zval tmp;
-
-	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1424,9 +1423,16 @@ PHP_METHOD(ArrayObject, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
 	/* members */
-	ZVAL_ARR(&tmp, zend_proptable_to_symtable(
-		zend_std_get_properties(&intern->std), /* always_duplicate */ 1));
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+	if (with_members) {
+		ZVAL_ARR(
+			&tmp,
+			zend_proptable_to_symtable(
+				zend_std_get_properties(&intern->std),
+				/* always_duplicate */ 1
+			)
+		);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+	}
 
 	/* iterator class */
 	if (intern->ce_get_iterator == spl_ce_ArrayIterator) {
@@ -1434,137 +1440,34 @@ PHP_METHOD(ArrayObject, __serialize)
 	} else {
 		ZVAL_STR_COPY(&tmp, intern->ce_get_iterator->name);
 	}
+
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 }
-/* }}} */
 
-
-/* {{{ */
-PHP_METHOD(ArrayObject, __unserialize)
+/* Restores the state array built above. Throws and returns false on malformed
+ * data; the caller decides how to propagate the failure. */
+static PHP_USER_CACHE_HOT bool spl_array_object_unserialize_state(zval *object, HashTable *data, bool with_members)
 {
-	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
-	HashTable *data;
-	zval *flags_zv, *storage_zv, *members_zv, *iterator_class_zv;
+	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zend_long flags;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
-		RETURN_THROWS();
-	}
+	zend_class_entry *ce;
+	zval *flags_zv, *storage_zv, *members_zv, *iterator_class_zv;
 
 	flags_zv          = zend_hash_index_find(data, 0);
 	storage_zv        = zend_hash_index_find(data, 1);
-	members_zv        = zend_hash_index_find(data, 2);
-	iterator_class_zv = zend_hash_index_find(data, 3);
+	members_zv        = with_members ? zend_hash_index_find(data, 2) : NULL;
+	iterator_class_zv = zend_hash_index_find(data, with_members ? 3 : 2);
 
-	if (!flags_zv || !storage_zv || !members_zv ||
-			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(members_zv) != IS_ARRAY ||
-			(iterator_class_zv && (Z_TYPE_P(iterator_class_zv) != IS_NULL &&
-				Z_TYPE_P(iterator_class_zv) != IS_STRING))) {
-		zend_throw_exception(spl_ce_UnexpectedValueException,
-			"Incomplete or ill-typed serialization data", 0);
-		RETURN_THROWS();
-	}
-
-	flags = Z_LVAL_P(flags_zv);
-	intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
-	intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
-
-	if (flags & SPL_ARRAY_IS_SELF) {
-		zval_ptr_dtor(&intern->array);
-		ZVAL_UNDEF(&intern->array);
-	} else {
-		if (Z_TYPE_P(storage_zv) != IS_OBJECT && Z_TYPE_P(storage_zv) != IS_ARRAY) {
-			/* TODO Use UnexpectedValueException instead? And better error message? */
-			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
-			RETURN_THROWS();
-		}
-		spl_array_set_array(ZEND_THIS, intern, storage_zv, 0L, true);
-	}
-
-	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
-	if (EG(exception)) {
-		RETURN_THROWS();
-	}
-
-	if (iterator_class_zv && Z_TYPE_P(iterator_class_zv) == IS_STRING) {
-		zend_class_entry *ce = zend_lookup_class(Z_STR_P(iterator_class_zv));
-
-		if (!ce) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Cannot deserialize ArrayObject with iterator class '%s'; no such class exists",
-				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
-			RETURN_THROWS();
-		}
-
-		if (!instanceof_function(ce, spl_ce_ArrayIterator)) {
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Cannot deserialize ArrayObject with iterator class '%s'; this class is not derived from ArrayIterator",
-				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
-			RETURN_THROWS();
-		}
-
-		intern->ce_get_iterator = ce;
-	}
-}
-/* }}} */
-
-/* Serializes ArrayObject state without dynamic members; used by the user-cache
- * safe-direct path only (the regular __serialize includes members). */
-static void spl_array_object_user_cache_serialize_state(zval *object, zval *return_value)
-{
-	spl_array_object *intern = Z_SPLARRAY_P(object);
-	zval tmp;
-
-	array_init(return_value);
-
-	/* flags */
-	ZVAL_LONG(&tmp, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
-
-	/* storage */
-	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
-		ZVAL_NULL(&tmp);
-	} else {
-		ZVAL_COPY(&tmp, &intern->array);
-	}
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
-
-	/* iterator class */
-	if (intern->ce_get_iterator == spl_ce_ArrayIterator) {
-		ZVAL_NULL(&tmp);
-	} else {
-		ZVAL_STR_COPY(&tmp, intern->ce_get_iterator->name);
-	}
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
-}
-
-static void spl_array_object_user_cache_unserialize_state(zval *object, HashTable *data)
-{
-	spl_array_object *intern = Z_SPLARRAY_P(object);
-	zend_class_entry *ce;
-	zval *flags_zv, *storage_zv, *iterator_class_zv;
-	zend_long flags;
-
-	flags_zv = zend_hash_index_find(data, 0);
-	storage_zv = zend_hash_index_find(data, 1);
-	iterator_class_zv = zend_hash_index_find(data, 2);
-
-	if (!flags_zv || !storage_zv ||
+	if (!flags_zv || !storage_zv || (with_members && !members_zv) ||
 		Z_TYPE_P(flags_zv) != IS_LONG ||
-		(iterator_class_zv &&
-			(
-				Z_TYPE_P(iterator_class_zv) != IS_NULL &&
-				Z_TYPE_P(iterator_class_zv) != IS_STRING
-			)
-		)
+		(with_members && Z_TYPE_P(members_zv) != IS_ARRAY) ||
+		(iterator_class_zv && (Z_TYPE_P(iterator_class_zv) != IS_NULL && Z_TYPE_P(iterator_class_zv) != IS_STRING))
 	) {
-		zend_throw_exception(
-			spl_ce_UnexpectedValueException,
-			"Incomplete or ill-typed serialization data",
-			0
+		zend_throw_exception(spl_ce_UnexpectedValueException,
+			"Incomplete or ill-typed serialization data", 0
 		);
 
-		return;
+		return false;
 	}
 
 	flags = Z_LVAL_P(flags_zv);
@@ -1579,40 +1482,69 @@ static void spl_array_object_user_cache_unserialize_state(zval *object, HashTabl
 		if (Z_TYPE_P(storage_zv) != IS_OBJECT && Z_TYPE_P(storage_zv) != IS_ARRAY) {
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
 
-			return;
+			return false;
 		}
 
 		spl_array_set_array(object, intern, storage_zv, 0L, true);
+	}
+
+	if (with_members) {
+		object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
+		if (EG(exception)) {
+			return false;
+		}
 	}
 
 	if (iterator_class_zv && Z_TYPE_P(iterator_class_zv) == IS_STRING) {
 		ce = zend_lookup_class(Z_STR_P(iterator_class_zv));
 
 		if (!ce) {
-			zend_throw_exception_ex(
-				spl_ce_UnexpectedValueException,
-				0,
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot deserialize ArrayObject with iterator class '%s'; no such class exists",
 				ZSTR_VAL(Z_STR_P(iterator_class_zv))
 			);
 
-			return;
+			return false;
 		}
 
 		if (!instanceof_function(ce, spl_ce_ArrayIterator)) {
-			zend_throw_exception_ex(
-				spl_ce_UnexpectedValueException,
-				0,
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot deserialize ArrayObject with iterator class '%s'; this class is not derived from ArrayIterator",
 				ZSTR_VAL(Z_STR_P(iterator_class_zv))
 			);
 
-			return;
+			return false;
 		}
 
 		intern->ce_get_iterator = ce;
 	}
+
+	return true;
 }
+
+/* {{{ */
+PHP_METHOD(ArrayObject, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_array_object_serialize_state(ZEND_THIS, return_value, /* with_members */ true);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(ArrayObject, __unserialize)
+{
+	HashTable *data;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!spl_array_object_unserialize_state(ZEND_THIS, data, /* with_members */ true)) {
+		RETURN_THROWS();
+	}
+}
+/* }}} */
 
 static bool spl_array_object_copy_user_cache_state(
 		void *ctx,
@@ -1689,7 +1621,7 @@ static bool spl_array_object_serialize_user_cache_state(zval *state, const zval 
 {
 	ZVAL_UNDEF(state);
 
-	spl_array_object_user_cache_serialize_state((zval *) object, state);
+	spl_array_object_serialize_state((zval *) object, state, /* with_members */ false);
 
 	if (EG(exception) || Z_TYPE_P(state) != IS_ARRAY) {
 		if (Z_TYPE_P(state) != IS_UNDEF) {
@@ -1704,15 +1636,14 @@ static bool spl_array_object_serialize_user_cache_state(zval *state, const zval 
 	return true;
 }
 
-static bool spl_array_object_unserialize_user_cache_state(zval *object, zval *state)
+static PHP_USER_CACHE_HOT bool spl_array_object_unserialize_user_cache_state(zval *object, zval *state)
 {
 	if (Z_TYPE_P(state) != IS_ARRAY) {
 		return false;
 	}
 
-	spl_array_object_user_cache_unserialize_state(object, Z_ARRVAL_P(state));
-
-	return !EG(exception);
+	return spl_array_object_unserialize_state(object, Z_ARRVAL_P(state), /* with_members */ false)
+		&& !EG(exception);
 }
 
 static const php_user_cache_safe_direct_handlers spl_array_user_cache_handlers = {
@@ -2101,7 +2032,6 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	php_user_cache_safe_direct_register_class(spl_ce_ArrayObject, &spl_array_user_cache_handlers);
 	php_user_cache_safe_direct_register_class(spl_ce_ArrayIterator, &spl_array_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(spl_ce_RecursiveArrayIterator, &spl_array_user_cache_handlers);
 
 	return SUCCESS;
 }
