@@ -28,6 +28,7 @@
 #include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include "ext/uri/php_uri.h"
+#include "ext/standard/io_poll.h"
 #include <stddef.h>
 #include <fcntl.h>
 #include "php_streams_int.h"
@@ -361,6 +362,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			 */
 			stream->in_free = 0;
 			return fclose(stream->stdiocast);
+		}
+
+		if (stream->poll_watchers) {
+			php_io_poll_stream_notify_close(stream);
 		}
 
 		ret = stream->ops->close(stream, preserve_handle ? 0 : 1);

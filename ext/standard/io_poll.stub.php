@@ -159,7 +159,7 @@ namespace {
         /** @param resource $stream */
         public function __construct($stream) {}
 
-        /** @return resource */
+        /** @return resource|null */
         public function getStream() {}
 
         public function isValid(): bool {}
