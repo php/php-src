@@ -51,6 +51,10 @@ typedef struct {
 	smart_str buf;
 	HashTable seen;
 	HashTable strings;
+	/* Keep-alive pins for every registered container: user code invoked
+	 * mid-encode (__sleep/__serialize) may otherwise free a container the
+	 * encoder still walks. Mirrors native serialize()'s var_hash pinning. */
+	HashTable pins;
 	uint32_t string_count;
 	const char *failure_message;
 } php_user_cache_serdes_encoder;
@@ -150,9 +154,10 @@ static zend_always_inline void user_cache_serdes_patch_u32(
 static zend_always_inline bool user_cache_serdes_encode_backref_or_register(
 		php_user_cache_serdes_encoder *enc,
 		const void *container,
+		zval *container_zv,
 		bool *is_backref)
 {
-	zval *slot;
+	zval *slot, pin;
 	uintptr_t id;
 
 	slot = zend_hash_index_lookup(&enc->seen, (zend_ulong) (uintptr_t) container);
@@ -176,6 +181,11 @@ static zend_always_inline bool user_cache_serdes_encode_backref_or_register(
 	}
 
 	ZVAL_PTR(slot, (void *) id);
+
+	ZVAL_COPY(&pin, container_zv);
+	if (zend_hash_next_index_insert(&enc->pins, &pin) == NULL) {
+		zval_ptr_dtor(&pin);
+	}
 
 	return true;
 }
@@ -756,7 +766,7 @@ static bool user_cache_serdes_encode_object(
 		return false;
 	}
 
-	if (!user_cache_serdes_encode_backref_or_register(enc, obj, &is_backref)) {
+	if (!user_cache_serdes_encode_backref_or_register(enc, obj, value, &is_backref)) {
 		return false;
 	}
 
@@ -787,8 +797,8 @@ static bool user_cache_serdes_encode_array(
 		php_user_cache_serdes_encoder *enc,
 		zval *value)
 {
-	zend_string *key;
 	zend_ulong h;
+	zend_string *key;
 	zval *elem;
 	HashTable *arr = Z_ARRVAL_P(value);
 	uint32_t count = zend_hash_num_elements(arr);
@@ -800,7 +810,7 @@ static bool user_cache_serdes_encode_array(
 		return true;
 	}
 
-	if (!user_cache_serdes_encode_backref_or_register(enc, arr, &is_backref)) {
+	if (!user_cache_serdes_encode_backref_or_register(enc, arr, value, &is_backref)) {
 		return false;
 	}
 
@@ -896,7 +906,7 @@ static bool user_cache_serdes_encode_value(
 		case IS_REFERENCE:
 			ref = Z_REF_P(value);
 
-			if (!user_cache_serdes_encode_backref_or_register(enc, ref, &is_backref)) {
+			if (!user_cache_serdes_encode_backref_or_register(enc, ref, value, &is_backref)) {
 				return false;
 			}
 
@@ -939,6 +949,7 @@ static void *user_cache_serdes_registry_reserve(
 	new_cap = *cap * 2;
 	if (items == inline_items) {
 		new_items = safe_emalloc(new_cap, elem_size, 0);
+
 		memcpy(new_items, inline_items, count * elem_size);
 	} else {
 		new_items = safe_erealloc(items, new_cap, elem_size, 0);
@@ -1010,6 +1021,7 @@ static zend_class_entry *user_cache_serdes_decode_class(
 	}
 
 	ce = zend_lookup_class(class_name);
+
 	zend_string_release(class_name);
 
 	return ce;
@@ -1020,8 +1032,8 @@ static bool user_cache_serdes_decode_object_properties(
 		bool call_wakeup,
 		zval *dst)
 {
-	zend_class_entry *ce = Z_OBJCE_P(dst);
 	zend_string *prop_name;
+	zend_class_entry *ce = Z_OBJCE_P(dst);
 	zval *wakeup_zv, prop_val, retval;
 	uint32_t count, i, prop_idx_plus_one;
 
@@ -1044,6 +1056,7 @@ static bool user_cache_serdes_decode_object_properties(
 
 		if (!user_cache_serdes_decode_value(dec, &prop_val)) {
 			zval_ptr_dtor(&prop_val);
+
 			zend_string_release(prop_name);
 
 			return false;
@@ -1058,6 +1071,7 @@ static bool user_cache_serdes_decode_object_properties(
 				)
 			) {
 				zval_ptr_dtor(&prop_val);
+
 				zend_string_release(prop_name);
 
 				return false;
@@ -1188,17 +1202,25 @@ static bool user_cache_serdes_decode_array(
 		}
 	}
 
-	if (UNEXPECTED((zend_long) next_free < 0)) {
+	/* The wire value is a bit-preserved zend_long: negative next-free indexes
+	 * are legitimate (all-negative-key arrays), so reject only values that
+	 * cannot fit a zend_long on this ABI. */
+	if (UNEXPECTED(
+			(int64_t) next_free > (int64_t) ZEND_LONG_MAX ||
+			(int64_t) next_free < (int64_t) ZEND_LONG_MIN
+		)
+	) {
 		goto failure;
 	}
 
-	Z_ARRVAL_P(dst)->nNextFreeElement = (zend_long) next_free;
+	Z_ARRVAL_P(dst)->nNextFreeElement = (zend_long) (int64_t) next_free;
 	PHP_USER_CACHE_HT_DISALLOW_COW_VIOLATION(Z_ARRVAL_P(dst));
 
 	return true;
 
 failure:
 	zval_ptr_dtor(dst);
+
 	ZVAL_UNDEF(dst);
 
 	return false;
@@ -1258,6 +1280,7 @@ static bool user_cache_serdes_decode_serialized_object(
 	}
 
 	ZVAL_UNDEF(&state);
+
 	if (!user_cache_serdes_decode_value(dec, &state) ||
 		Z_TYPE(state) != IS_ARRAY
 	) {
@@ -1521,7 +1544,7 @@ bool php_user_cache_serdes_get_sleep_state(
 {
 	zend_object *obj = Z_OBJ_P(obj_zv);
 	zend_class_entry *ce = obj->ce;
-	zval *sleep_zv, retval;
+	zval *sleep_zv, obj_holder, retval;
 	bool result;
 
 	ZVAL_UNDEF(state);
@@ -1535,12 +1558,14 @@ bool php_user_cache_serdes_get_sleep_state(
 		return false;
 	}
 
+	/* Held across the property walk too: __sleep() may drop the caller's
+	 * last reference, and the walk keeps dereferencing the object. */
 	GC_ADDREF(obj);
 	zend_call_known_instance_method(Z_FUNC_P(sleep_zv), obj, &retval, 0, NULL);
-	OBJ_RELEASE(obj);
 
 	if (Z_ISUNDEF(retval) || EG(exception)) {
 		zval_ptr_dtor(&retval);
+		OBJ_RELEASE(obj);
 
 		return false;
 	}
@@ -1557,11 +1582,17 @@ bool php_user_cache_serdes_get_sleep_state(
 			*failure_msg = "__sleep() did not return an array of member names; the object cannot be stored in the user cache";
 		}
 
+		OBJ_RELEASE(obj);
+
 		return false;
 	}
 
+	/* Walk from the pinned object, never from obj_zv again: __sleep() may
+	 * have overwritten the caller's slot (e.g. a parent property) already. */
+	ZVAL_OBJ(&obj_holder, obj);
+
 	/* Failure may leave a partially initialized state array. */
-	result = user_cache_serdes_get_sleep_props(obj_zv, Z_ARRVAL(retval), state);
+	result = user_cache_serdes_get_sleep_props(&obj_holder, Z_ARRVAL(retval), state);
 	zval_ptr_dtor(&retval);
 
 	if (!result) {
@@ -1570,31 +1601,37 @@ bool php_user_cache_serdes_get_sleep_state(
 		ZVAL_UNDEF(state);
 	}
 
+	OBJ_RELEASE(obj);
+
 	return result;
 }
 
 bool php_user_cache_serdes_call_magic_serialize(zend_object *obj, zval *state)
 {
+	bool result = true;
+
+	/* __serialize() may drop the caller's last reference to obj. */
+	GC_ADDREF(obj);
 	zend_call_known_instance_method_with_0_params(obj->ce->__serialize, obj, state);
 	if (EG(exception)) {
 		zval_ptr_dtor(state);
 
 		ZVAL_UNDEF(state);
 
-		return false;
-	}
-
-	if (Z_TYPE_P(state) != IS_ARRAY) {
+		result = false;
+	} else if (Z_TYPE_P(state) != IS_ARRAY) {
 		zval_ptr_dtor(state);
 
 		ZVAL_UNDEF(state);
 
 		zend_type_error("%s::__serialize() must return an array", ZSTR_VAL(obj->ce->name));
 
-		return false;
+		result = false;
 	}
 
-	return true;
+	OBJ_RELEASE(obj);
+
+	return result;
 }
 
 bool php_user_cache_serdes_encode(zval *value, smart_str *buf, const char **failure_msg)
@@ -1612,9 +1649,11 @@ bool php_user_cache_serdes_encode(zval *value, smart_str *buf, const char **fail
 
 	zend_hash_init(&enc.seen, 8, NULL, NULL, 0);
 	zend_hash_init(&enc.strings, 32, NULL, NULL, 0);
+	zend_hash_init(&enc.pins, 8, NULL, ZVAL_PTR_DTOR, 0);
 
 	result = user_cache_serdes_encode_value(&enc, value);
 
+	zend_hash_destroy(&enc.pins);
 	zend_hash_destroy(&enc.strings);
 	zend_hash_destroy(&enc.seen);
 
