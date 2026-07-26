@@ -5880,6 +5880,31 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, con
 #define PHP_DATE_USER_CACHE_STATE_CTIME			"ctime"
 #define PHP_DATE_USER_CACHE_STATE_CTIME_LEN		(sizeof(PHP_DATE_USER_CACHE_STATE_CTIME) - 1)
 
+/* Zero first so struct padding (e.g. the hole before special.amount) never
+ * reaches the stored snapshot; a compiler-emitted struct copy would carry
+ * the source padding verbatim. */
+static void php_date_user_cache_copy_rel_time_snapshot(timelib_rel_time *dst, const timelib_rel_time *src)
+{
+	memset(dst, 0, sizeof(*dst));
+
+	dst->y = src->y;
+	dst->m = src->m;
+	dst->d = src->d;
+	dst->h = src->h;
+	dst->i = src->i;
+	dst->s = src->s;
+	dst->us = src->us;
+	dst->weekday = src->weekday;
+	dst->weekday_behavior = src->weekday_behavior;
+	dst->first_last_day_of = src->first_last_day_of;
+	dst->invert = src->invert;
+	dst->days = src->days;
+	dst->special.type = src->special.type;
+	dst->special.amount = src->special.amount;
+	dst->have_weekday_relative = src->have_weekday_relative;
+	dst->have_special_relative = src->have_special_relative;
+}
+
 /* The snapshot is stored verbatim as a binary string and memcpy'd back on
  * restore, so it is only valid within an identical struct layout. Pointer
  * fields (tz_info, tz_abbr) stay NULL and are re-resolved from the
@@ -5897,7 +5922,7 @@ static void php_date_user_cache_copy_time_snapshot(timelib_time *dst, const time
 	dst->us = src->us;
 	dst->z = src->z;
 	dst->dst = src->dst;
-	dst->relative = src->relative;
+	php_date_user_cache_copy_rel_time_snapshot(&dst->relative, &src->relative);
 	dst->sse = src->sse;
 	dst->have_time = src->have_time;
 	dst->have_date = src->have_date;
@@ -6198,7 +6223,13 @@ static timelib_time *php_date_user_cache_time_from_hash(
 
 static bool php_date_serialize_datetime_user_cache_state(php_date_obj *dateobj, zval *state)
 {
-	if (dateobj->time == NULL || !dateobj->time->is_localtime) {
+	if (dateobj->time == NULL) {
+		date_throw_uninitialized_error(dateobj->std.ce);
+
+		return false;
+	}
+
+	if (!dateobj->time->is_localtime) {
 		return false;
 	}
 
@@ -6208,9 +6239,11 @@ static bool php_date_serialize_datetime_user_cache_state(php_date_obj *dateobj, 
 			dateobj->time,
 			Z_ARRVAL_P(state),
 			PHP_DATE_USER_CACHE_STATE_CTIME, PHP_DATE_USER_CACHE_STATE_CTIME_LEN,
-			PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN)
+			PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN
+		)
 	) {
 		zval_ptr_dtor(state);
+
 		ZVAL_UNDEF(state);
 
 		return false;
@@ -6221,9 +6254,12 @@ static bool php_date_serialize_datetime_user_cache_state(php_date_obj *dateobj, 
 
 static bool php_date_serialize_interval_user_cache_state(php_interval_obj *intervalobj, zval *state)
 {
+	timelib_rel_time rel_snapshot;
 	zval zv;
 
 	if (!intervalobj->initialized || intervalobj->diff == NULL) {
+		date_throw_uninitialized_error(intervalobj->std.ce);
+
 		return false;
 	}
 
@@ -6233,7 +6269,9 @@ static bool php_date_serialize_interval_user_cache_state(php_interval_obj *inter
 
 	array_init_size(state, 4);
 
-	ZVAL_STRINGL(&zv, (const char *) intervalobj->diff, sizeof(timelib_rel_time));
+	php_date_user_cache_copy_rel_time_snapshot(&rel_snapshot, intervalobj->diff);
+
+	ZVAL_STRINGL(&zv, (const char *) &rel_snapshot, sizeof(timelib_rel_time));
 	zend_hash_str_update(Z_ARRVAL_P(state), "rel", sizeof("rel") - 1, &zv);
 
 	ZVAL_LONG(&zv, (zend_long) intervalobj->civil_or_wall);
@@ -6252,6 +6290,7 @@ static bool php_date_serialize_interval_user_cache_state(php_interval_obj *inter
 
 static bool php_date_serialize_period_user_cache_state(php_period_obj *periodobj, zval *state)
 {
+	timelib_rel_time rel_snapshot;
 	zval zv;
 
 	if (!periodobj->initialized ||
@@ -6259,6 +6298,8 @@ static bool php_date_serialize_period_user_cache_state(php_period_obj *periodobj
 		periodobj->start_ce == NULL ||
 		periodobj->interval == NULL
 	) {
+		date_throw_uninitialized_error(periodobj->std.ce);
+
 		return false;
 	}
 
@@ -6266,7 +6307,8 @@ static bool php_date_serialize_period_user_cache_state(php_period_obj *periodobj
 
 	if (!php_date_user_cache_time_to_hash(periodobj->start, Z_ARRVAL_P(state),
 			"start_ctime", sizeof("start_ctime") - 1,
-			"start_tz", sizeof("start_tz") - 1)
+			"start_tz", sizeof("start_tz") - 1
+		)
 	) {
 		goto fail;
 	}
@@ -6274,7 +6316,8 @@ static bool php_date_serialize_period_user_cache_state(php_period_obj *periodobj
 	if (periodobj->current != NULL &&
 		!php_date_user_cache_time_to_hash(periodobj->current, Z_ARRVAL_P(state),
 			"current_ctime", sizeof("current_ctime") - 1,
-			"current_tz", sizeof("current_tz") - 1)
+			"current_tz", sizeof("current_tz") - 1
+		)
 	) {
 		goto fail;
 	}
@@ -6282,12 +6325,15 @@ static bool php_date_serialize_period_user_cache_state(php_period_obj *periodobj
 	if (periodobj->end != NULL &&
 		!php_date_user_cache_time_to_hash(periodobj->end, Z_ARRVAL_P(state),
 			"end_ctime", sizeof("end_ctime") - 1,
-			"end_tz", sizeof("end_tz") - 1)
+			"end_tz", sizeof("end_tz") - 1
+		)
 	) {
 		goto fail;
 	}
 
-	ZVAL_STRINGL(&zv, (const char *) periodobj->interval, sizeof(timelib_rel_time));
+	php_date_user_cache_copy_rel_time_snapshot(&rel_snapshot, periodobj->interval);
+
+	ZVAL_STRINGL(&zv, (const char *) &rel_snapshot, sizeof(timelib_rel_time));
 	zend_hash_str_update(Z_ARRVAL_P(state), "interval_rel", sizeof("interval_rel") - 1, &zv);
 
 	ZVAL_LONG(&zv, (zend_long) periodobj->recurrences);
@@ -6306,6 +6352,7 @@ static bool php_date_serialize_period_user_cache_state(php_period_obj *periodobj
 
 fail:
 	zval_ptr_dtor(state);
+
 	ZVAL_UNDEF(state);
 
 	return false;
@@ -6327,6 +6374,8 @@ static bool php_date_serialize_user_cache_state(zval *state, const zval *object)
 		tzobj = Z_PHPTIMEZONE_P((zval *) object);
 
 		if (!tzobj->initialized) {
+			date_throw_uninitialized_error(tzobj->std.ce);
+
 			return false;
 		}
 
@@ -6355,7 +6404,8 @@ static bool php_date_unserialize_datetime_user_cache_state(zval *object, zval *s
 	time = php_date_user_cache_time_from_hash(
 		Z_ARRVAL_P(state),
 		PHP_DATE_USER_CACHE_STATE_CTIME, PHP_DATE_USER_CACHE_STATE_CTIME_LEN,
-		PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN);
+		PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN
+	);
 	if (time == NULL) {
 		return false;
 	}
@@ -6364,6 +6414,7 @@ static bool php_date_unserialize_datetime_user_cache_state(zval *object, zval *s
 	if (dateobj->time != NULL) {
 		timelib_time_dtor(dateobj->time);
 	}
+
 	dateobj->time = time;
 
 	return true;
@@ -6373,8 +6424,8 @@ static bool php_date_unserialize_interval_user_cache_state(zval *object, zval *s
 {
 	php_interval_obj *intervalobj;
 	timelib_rel_time *rel;
-	zend_string *date_string;
 	zend_long civil_or_wall, from_string;
+	zend_string *date_string;
 	zval *z_rel;
 
 	z_rel = zend_hash_str_find(Z_ARRVAL_P(state), "rel", sizeof("rel") - 1);
@@ -6390,6 +6441,7 @@ static bool php_date_unserialize_interval_user_cache_state(zval *object, zval *s
 	if (rel == NULL) {
 		return false;
 	}
+
 	memcpy(rel, Z_STRVAL_P(z_rel), sizeof(timelib_rel_time));
 
 	intervalobj = Z_PHPINTERVAL_P(object);
@@ -6402,6 +6454,7 @@ static bool php_date_unserialize_interval_user_cache_state(zval *object, zval *s
 
 	if (intervalobj->date_string != NULL) {
 		zend_string_release(intervalobj->date_string);
+
 		intervalobj->date_string = NULL;
 	}
 
@@ -6419,9 +6472,9 @@ static bool php_date_unserialize_interval_user_cache_state(zval *object, zval *s
 static bool php_date_unserialize_period_user_cache_state(zval *object, zval *state)
 {
 	php_period_obj *periodobj;
+	zend_long recurrences, include_start, include_end;
 	zend_class_entry *start_ce;
 	zend_string *start_ce_name;
-	zend_long recurrences, include_start, include_end;
 	zval *z_rel;
 
 	if (!php_date_user_cache_state_get_str(Z_ARRVAL_P(state), "start_ce", sizeof("start_ce") - 1, &start_ce_name) ||
@@ -6448,9 +6501,11 @@ static bool php_date_unserialize_period_user_cache_state(zval *object, zval *sta
 	if (periodobj->start != NULL) {
 		timelib_time_dtor(periodobj->start);
 	}
+
 	periodobj->start = php_date_user_cache_time_from_hash(Z_ARRVAL_P(state),
 		"start_ctime", sizeof("start_ctime") - 1,
-		"start_tz", sizeof("start_tz") - 1);
+		"start_tz", sizeof("start_tz") - 1
+	);
 	if (periodobj->start == NULL) {
 		return false;
 	}
@@ -6461,7 +6516,8 @@ static bool php_date_unserialize_period_user_cache_state(zval *object, zval *sta
 		}
 		periodobj->current = php_date_user_cache_time_from_hash(Z_ARRVAL_P(state),
 			"current_ctime", sizeof("current_ctime") - 1,
-			"current_tz", sizeof("current_tz") - 1);
+			"current_tz", sizeof("current_tz") - 1
+		);
 		if (periodobj->current == NULL) {
 			return false;
 		}
@@ -6473,7 +6529,8 @@ static bool php_date_unserialize_period_user_cache_state(zval *object, zval *sta
 		}
 		periodobj->end = php_date_user_cache_time_from_hash(Z_ARRVAL_P(state),
 			"end_ctime", sizeof("end_ctime") - 1,
-			"end_tz", sizeof("end_tz") - 1);
+			"end_tz", sizeof("end_tz") - 1
+		);
 		if (periodobj->end == NULL) {
 			return false;
 		}
@@ -6493,6 +6550,7 @@ static bool php_date_unserialize_period_user_cache_state(zval *object, zval *sta
 	if (periodobj->interval == NULL) {
 		return false;
 	}
+
 	memcpy(periodobj->interval, Z_STRVAL_P(z_rel), sizeof(timelib_rel_time));
 
 	periodobj->start_ce = start_ce;

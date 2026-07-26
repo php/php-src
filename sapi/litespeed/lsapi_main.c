@@ -65,7 +65,6 @@ typedef struct _user_config_cache_entry {
     time_t expires;
     HashTable user_config;
 } user_config_cache_entry;
-
 static HashTable user_config_cache;
 
 static int  lsapi_mode       = 0;
