@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed grammatical issues in Normalizer invalid form and IntlCalendar time
     zone offset error messages. (Weilin Du)
+  . Removed the dependency on the ICU IO library. (Weilin Du)
 
 - ODBC:
   . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
