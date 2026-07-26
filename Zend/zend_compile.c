@@ -12215,7 +12215,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	CG(zend_lineno) = ast->lineno;
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
 
 	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) && !zend_is_unticked_stmt(ast)) {
 		zend_do_extended_stmt(NULL);
