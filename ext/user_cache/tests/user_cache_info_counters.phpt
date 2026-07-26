@@ -5,6 +5,7 @@ user_cache.enable=1
 user_cache.enable_cli=1
 opcache.file_cache_only=0
 user_cache.shm_size=2M
+user_cache.eviction_policy=clear
 --FILE--
 <?php
 $cache = UserCache\Cache::getPool('counters');
