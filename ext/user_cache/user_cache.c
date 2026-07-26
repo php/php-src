@@ -31,7 +31,7 @@
 #include "SAPI.h"
 
 #define PHP_USER_CACHE_API_VALUE_TYPE			"object|array|string|int|float|bool|null"
-#define PHP_USER_CACHE_STORAGE_KEY_CACHE_MAX	4096U
+#define PHP_USER_CACHE_STORAGE_KEY_CACHE_SLOTS	256U
 #define PHP_USER_CACHE_MAX_BOUNDARY_PARTITIONS	32U
 
 #define PHP_USER_CACHE_DEFINE_OBJ_FROM_STD(type) \
@@ -65,11 +65,19 @@
 		RETURN_LONG(status->stats.field); \
 	}
 
+/* Direct-mapped, evict-on-collision: bounds the per-pool key cache to a
+ * few KiB where the previous HashTable grew to ~4096 pinned entries. */
+typedef struct {
+	zend_string *key;
+	zend_string *storage_key;
+} php_user_cache_storage_key_slot;
+
 typedef struct {
 	zend_string *scope;
 	zend_string *scope_prefix;
 	php_user_cache_context *context;
-	HashTable *storage_key_cache;
+	/* Lazily allocated PHP_USER_CACHE_STORAGE_KEY_CACHE_SLOTS slots. */
+	php_user_cache_storage_key_slot *storage_key_cache;
 	zend_object std;
 } php_user_cache_object;
 
@@ -179,20 +187,6 @@ static void user_cache_pool_status_object_free(zend_object *obj);
 static zend_object *user_cache_pool_status_object_create(zend_class_entry *ce);
 static zend_object *user_cache_status_object_create(zend_class_entry *ce);
 
-#ifndef ZEND_WIN32
-static void user_cache_pid_atfork_child(void)
-{
-	user_cache_self_pid = 0;
-}
-#endif
-
-static bool user_cache_user_key_is_valid(zend_string *key)
-{
-	return ZSTR_LEN(key) != 0 &&
-		memchr(ZSTR_VAL(key), PHP_USER_CACHE_KEY_DELIMITER_CHAR, ZSTR_LEN(key)) == NULL
-	;
-}
-
 static zend_always_inline void user_cache_ensure_ready(void)
 {
 	php_user_cache_context *ctx = php_user_cache_active_context();
@@ -205,6 +199,20 @@ static zend_always_inline void user_cache_ensure_ready(void)
 	}
 
 	php_user_cache_ensure_ready_impl();
+}
+
+#ifndef ZEND_WIN32
+static void user_cache_pid_atfork_child(void)
+{
+	user_cache_self_pid = 0;
+}
+#endif
+
+static bool user_cache_user_key_is_valid(zend_string *key)
+{
+	return ZSTR_LEN(key) != 0 &&
+		memchr(ZSTR_VAL(key), PHP_USER_CACHE_KEY_DELIMITER_CHAR, ZSTR_LEN(key)) == NULL
+	;
 }
 
 static bool user_cache_validate_delimiter_free(zend_string *str, uint32_t arg_num, const char *empty_error)
@@ -509,7 +517,7 @@ static bool user_cache_validate_non_negative(zend_long value, uint32_t arg_num)
 	return true;
 }
 
-static bool user_cache_can_read(void)
+static PHP_USER_CACHE_HOT bool user_cache_can_read(void)
 {
 	user_cache_ensure_ready();
 
@@ -598,7 +606,7 @@ static bool user_cache_clear_scope_prevalidated(
 	return true;
 }
 
-static bool user_cache_fetch_if_present_api(
+static PHP_USER_CACHE_HOT bool user_cache_fetch_if_present_api(
 		zend_string *key,
 		zval *return_value)
 {
@@ -777,30 +785,34 @@ static void user_cache_finish_fetch_multiple(
 	}
 }
 
-static zend_string *user_cache_storage_key_cache_lookup(
+static PHP_USER_CACHE_HOT zend_string *user_cache_storage_key_cache_lookup(
 		php_user_cache_object *cache,
 		zend_string *key)
 {
-	zval *cached;
+	php_user_cache_storage_key_slot *slot;
 
 	if (cache->storage_key_cache == NULL) {
 		return NULL;
 	}
 
-	cached = zend_hash_find(cache->storage_key_cache, key);
-	if (cached == NULL) {
+	slot = &cache->storage_key_cache[
+		zend_string_hash_val(key) & (PHP_USER_CACHE_STORAGE_KEY_CACHE_SLOTS - 1)
+	];
+	if (slot->key == NULL ||
+		(slot->key != key && !zend_string_equals(slot->key, key))
+	) {
 		return NULL;
 	}
 
-	return zend_string_copy(Z_STR_P(cached));
+	return zend_string_copy(slot->storage_key);
 }
 
 static zend_string *user_cache_storage_key_build(
 		php_user_cache_object *cache,
 		zend_string *key)
 {
+	php_user_cache_storage_key_slot *slot;
 	zend_string *storage_key;
-	zval cache_zv;
 
 	storage_key = zend_string_concat2(
 		ZSTR_VAL(cache->scope_prefix),
@@ -812,14 +824,22 @@ static zend_string *user_cache_storage_key_build(
 	zend_string_hash_val(storage_key);
 
 	if (cache->storage_key_cache == NULL) {
-		ALLOC_HASHTABLE(cache->storage_key_cache);
-		zend_hash_init(cache->storage_key_cache, 8, NULL, ZVAL_PTR_DTOR, 0);
+		cache->storage_key_cache = ecalloc(
+			PHP_USER_CACHE_STORAGE_KEY_CACHE_SLOTS,
+			sizeof(*cache->storage_key_cache)
+		);
 	}
 
-	if (zend_hash_num_elements(cache->storage_key_cache) < PHP_USER_CACHE_STORAGE_KEY_CACHE_MAX) {
-		ZVAL_STR_COPY(&cache_zv, storage_key);
-		zend_hash_add(cache->storage_key_cache, key, &cache_zv);
+	slot = &cache->storage_key_cache[
+		zend_string_hash_val(key) & (PHP_USER_CACHE_STORAGE_KEY_CACHE_SLOTS - 1)
+	];
+	if (slot->key != NULL) {
+		zend_string_release(slot->key);
+		zend_string_release(slot->storage_key);
 	}
+
+	slot->key = zend_string_copy(key);
+	slot->storage_key = zend_string_copy(storage_key);
 
 	return storage_key;
 }
@@ -837,7 +857,7 @@ static zend_string *user_cache_storage_key(
 	return user_cache_storage_key_build(cache, key);
 }
 
-static zend_string *user_cache_validated_storage_key(
+static PHP_USER_CACHE_HOT zend_string *user_cache_validated_storage_key(
 		php_user_cache_object *cache,
 		zend_string *key,
 		uint32_t arg_num)
@@ -944,6 +964,7 @@ static zend_result user_cache_fetch_multiple_api(
 				}
 			} zend_catch {
 				php_user_cache_unlock_if_held();
+
 				zend_bailout();
 			} zend_end_try();
 
@@ -960,6 +981,7 @@ static zend_result user_cache_fetch_multiple_api(
 	if (EG(exception)) {
 		for (i = 0; i < count; i++) {
 			zval_ptr_dtor(&vals[i]);
+
 			zend_string_release(storage_keys[i]);
 		}
 
@@ -1205,7 +1227,7 @@ static void user_cache_collect_info_stats(php_user_cache_info_stats *stats)
 
 static zend_object *user_cache_availability_enum_case(php_user_cache_reason reason)
 {
-	int case_id = ZEND_ENUM_UserCache_CacheAvailability_UnavailableByUnknownReason;
+	zend_enum_UserCache_CacheAvailability case_id = ZEND_ENUM_UserCache_CacheAvailability_UnavailableByUnknownReason;
 
 	switch (reason) {
 		case PHP_USER_CACHE_REASON_NONE:
@@ -1447,6 +1469,7 @@ static void user_cache_return_pool_status(
 static void user_cache_object_free(zend_object *obj)
 {
 	php_user_cache_object *cache = php_user_cache_object_from_obj(obj);
+	uint32_t i;
 
 	if (cache->scope != NULL) {
 		zend_string_release(cache->scope);
@@ -1457,8 +1480,14 @@ static void user_cache_object_free(zend_object *obj)
 	}
 
 	if (cache->storage_key_cache != NULL) {
-		zend_hash_destroy(cache->storage_key_cache);
-		FREE_HASHTABLE(cache->storage_key_cache);
+		for (i = 0; i < PHP_USER_CACHE_STORAGE_KEY_CACHE_SLOTS; i++) {
+			if (cache->storage_key_cache[i].key != NULL) {
+				zend_string_release(cache->storage_key_cache[i].key);
+				zend_string_release(cache->storage_key_cache[i].storage_key);
+			}
+		}
+
+		efree(cache->storage_key_cache);
 	}
 
 	zend_object_std_dtor(&cache->std);
@@ -3373,6 +3402,12 @@ static bool user_cache_invoke_remember_callback(
 		return true;
 	}
 
+	/* A by-ref callback returns IS_REFERENCE; unwrap so validation, the
+	 * store and the method return value all see the plain value. */
+	if (Z_ISREF_P(result)) {
+		zend_unwrap_reference(result);
+	}
+
 	if (!user_cache_validate_remember_value(result)) {
 		return false;
 	}
@@ -3438,7 +3473,7 @@ ZEND_METHOD(UserCache_Cache, remember)
 	found = user_cache_fetch_if_present_api(storage_key, return_value);
 	if (found) {
 		if (locked) {
-			locked = user_cache_unlock_api(storage_key);
+			(void) user_cache_unlock_api(storage_key);
 		}
 
 		zend_string_release(storage_key);
@@ -3448,7 +3483,7 @@ ZEND_METHOD(UserCache_Cache, remember)
 
 	if (EG(exception)) {
 		if (locked) {
-			locked = user_cache_unlock_api(storage_key);
+			(void) user_cache_unlock_api(storage_key);
 		}
 
 		zend_string_release(storage_key);
@@ -3462,7 +3497,7 @@ ZEND_METHOD(UserCache_Cache, remember)
 		);
 	} zend_catch {
 		if (locked) {
-			locked = user_cache_unlock_api(storage_key);
+			(void) user_cache_unlock_api(storage_key);
 		}
 
 		zend_string_release(storage_key);
@@ -3474,7 +3509,7 @@ ZEND_METHOD(UserCache_Cache, remember)
 		zval_ptr_dtor(&result);
 
 		if (locked) {
-			locked = user_cache_unlock_api(storage_key);
+			(void) user_cache_unlock_api(storage_key);
 		}
 
 		zend_string_release(storage_key);
@@ -3483,7 +3518,7 @@ ZEND_METHOD(UserCache_Cache, remember)
 	}
 
 	if (locked) {
-		locked = user_cache_unlock_api(storage_key);
+		(void) user_cache_unlock_api(storage_key);
 	}
 
 	zend_string_release(storage_key);
@@ -3538,6 +3573,15 @@ static ZEND_INI_MH(OnUpdateUserCacheShmSize)
 		size = (zend_long) (UINT32_MAX - ZEND_MM_ALIGNMENT);
 
 		zend_error(E_WARNING, "user_cache.shm_size is limited to slightly under 4096M; clamping");
+	}
+
+	if (size != 0 && (size_t) size <= PHP_USER_CACHE_SHM_SIZE_FLOOR) {
+		zend_error(
+			E_WARNING,
+			"user_cache.shm_size (" ZEND_LONG_FMT ") cannot hold the minimum cache layout (%zu bytes); the cache will be unavailable",
+			size,
+			PHP_USER_CACHE_SHM_SIZE_FLOOR
+		);
 	}
 
 	*p = size;
