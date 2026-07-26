@@ -32,15 +32,18 @@ typedef struct {
 static int user_cache_alloc_posix_create_segments(size_t requested_size, php_user_cache_shm_segment_posix ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	php_user_cache_shm_segment_posix *shared_segment;
-	char shared_segment_name[sizeof("/php_user_cache.") + 20];
 	int shared_segment_flags = O_RDWR | O_CREAT | O_TRUNC;
+	char shared_segment_name[sizeof("/php_user_cache.") + 20];
 	mode_t shared_segment_mode = 0600;
 
 #if defined(HAVE_SHM_CREATE_LARGEPAGE)
-	/* Prefer the largest compatible page size. */
-	size_t i, shared_segment_sizes = 0, shared_segment_lg_index = 0;
-	size_t shared_segment_sindexes[3] = {0};
+	/* Prefer the largest compatible page size. Capture the getpagesizes()
+	 * result as a signed int: its -1 error return in a size_t would pass
+	 * the > 0 guard and index far outside the array (see the equivalent
+	 * upstream fix in ext/opcache/shared_alloc_posix.c, GH-22429). */
 	const size_t entries = sizeof(shared_segment_sindexes) / sizeof(shared_segment_sindexes[0]);
+	 size_t shared_segment_lg_index = 0, shared_segment_sindexes[3] = {0};
+	int i, shared_segment_sizes;
 
 	shared_segment_sizes = getpagesizes(shared_segment_sindexes, entries);
 
@@ -77,6 +80,7 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 	shared_segment->shm_fd = shm_open(shared_segment_name, shared_segment_flags, shared_segment_mode);
 	if (shared_segment->shm_fd == -1) {
 		*error_in = "shm_open";
+
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
@@ -85,6 +89,7 @@ truncate_segment:
 #endif /* HAVE_SHM_CREATE_LARGEPAGE */
 	if (ftruncate(shared_segment->shm_fd, requested_size) != 0) {
 		*error_in = "ftruncate";
+
 		close(shared_segment->shm_fd);
 		shm_unlink(shared_segment_name);
 
@@ -94,6 +99,7 @@ truncate_segment:
 	shared_segment->common.p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED, shared_segment->shm_fd, 0);
 	if (shared_segment->common.p == MAP_FAILED) {
 		*error_in = "mmap";
+
 		close(shared_segment->shm_fd);
 		shm_unlink(shared_segment_name);
 
@@ -115,15 +121,9 @@ static int user_cache_alloc_posix_detach_segment(php_user_cache_shm_segment_posi
 	return 0;
 }
 
-static size_t user_cache_alloc_posix_segment_type_size(void)
-{
-	return sizeof(php_user_cache_shm_segment_posix);
-}
-
 const php_user_cache_shm_handlers php_user_cache_alloc_posix_handlers = {
 	(php_user_cache_create_segments_t)user_cache_alloc_posix_create_segments,
-	(php_user_cache_detach_segment_t)user_cache_alloc_posix_detach_segment,
-	user_cache_alloc_posix_segment_type_size
+	(php_user_cache_detach_segment_t)user_cache_alloc_posix_detach_segment
 };
 
 #endif /* PHP_USER_CACHE_USE_SHM_OPEN */

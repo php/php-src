@@ -19,11 +19,7 @@
 #include "Zend/zend_enum.h"
 #include "Zend/zend_operators.h"
 
-#if (defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_attribute(hot)
-# define PHP_USER_CACHE_DECODE_HOT __attribute__((hot))
-#else
-# define PHP_USER_CACHE_DECODE_HOT
-#endif
+#define PHP_USER_CACHE_DECODE_HOT PHP_USER_CACHE_HOT
 
 #define PHP_USER_CACHE_GRAPH_PIN_OWNER_RECLAIMING (-1)
 
@@ -64,6 +60,13 @@
 		return zend_hash_index_find_ptr(UC_G(decode_##name##_map), offset); \
 	}
 
+typedef bool (*php_user_cache_shared_graph_state_getter_t)(
+	const zval *value,
+	HashTable *state_memo,
+	zval **state_ptr,
+	zval *owned_state
+);
+
 /* CALC and COPY must use the same route precedence. */
 typedef enum {
 	PHP_USER_CACHE_OBJECT_ROUTE_UNSTORABLE = 0,
@@ -83,13 +86,6 @@ typedef enum {
 	PHP_USER_CACHE_COPY_OBJECT_REF_ERROR
 } php_user_cache_copy_object_ref_result;
 
-typedef bool (*php_user_cache_shared_graph_state_getter_t)(
-	const zval *value,
-	HashTable *state_memo,
-	zval **state_ptr,
-	zval *owned_state
-);
-
 typedef struct {
 	size_t size;
 	HashTable seen_arrays;
@@ -100,6 +96,8 @@ typedef struct {
 	HashTable state_schema_dedup;
 	HashTable direct_array_dedup;
 	HashTable direct_verdicts;
+	/* Enum cases are per-case singletons: one node per case. */
+	HashTable enum_dedup;
 	bool verbatim_arrays_allowed;
 	/* Distinguishes a sizing failure from an ineligible node. */
 	bool reserve_failed;
@@ -125,6 +123,8 @@ typedef struct {
 	HashTable state_schema_dedup;
 	HashTable direct_array_dedup;
 	HashTable direct_verdicts;
+	/* Enum case address to emitted node offset. */
+	HashTable enum_dedup;
 	bool has_shared_identity;
 	bool has_object;
 	bool prefers_prototype;
@@ -393,10 +393,12 @@ static zend_always_inline void user_cache_shared_graph_calc_init(php_user_cache_
 	zend_hash_init(&ctx->state_schema_dedup, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->direct_array_dedup, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->direct_verdicts, 8, NULL, NULL, 0);
+	zend_hash_init(&ctx->enum_dedup, 8, NULL, NULL, 0);
 }
 
 static zend_always_inline void user_cache_shared_graph_calc_destroy(php_user_cache_shared_graph_calc_context *ctx)
 {
+	zend_hash_destroy(&ctx->enum_dedup);
 	zend_hash_destroy(&ctx->direct_verdicts);
 	zend_hash_destroy(&ctx->direct_array_dedup);
 	zend_hash_destroy(&ctx->state_schema_dedup);
@@ -448,6 +450,49 @@ static zend_always_inline bool user_cache_shared_graph_calc_reserve_string(
 static zend_always_inline void user_cache_shared_graph_key_append_u32(smart_str *key, uint32_t value)
 {
 	smart_str_appendl(key, (const char *) &value, sizeof(value));
+}
+
+/* nNextFreeElement is a zend_long; the 4-byte node field covers [0, UINT32_MAX]
+ * and everything else goes to an out-of-line int64 (WIDE_NEXT_FREE). */
+static zend_always_inline bool user_cache_shared_graph_next_free_is_wide(zend_long next_free)
+{
+	return next_free < 0 || (zend_ulong) next_free > (zend_ulong) UINT32_MAX;
+}
+
+static zend_always_inline bool user_cache_shared_graph_decode_array_next_free(
+	const uint8_t *buf,
+	size_t buf_len,
+	const php_user_cache_shared_graph_array *graph_array,
+	zend_long *next_free
+)
+{
+	int64_t wide;
+
+	if (!(graph_array->reserved & PHP_USER_CACHE_SHARED_GRAPH_ARRAY_FLAG_WIDE_NEXT_FREE)) {
+#if SIZEOF_ZEND_LONG < 8
+		if ((uint64_t) graph_array->next_free > (uint64_t) ZEND_LONG_MAX) {
+			return false;
+		}
+#endif
+
+		*next_free = (zend_long) graph_array->next_free;
+
+		return true;
+	}
+
+	if (!user_cache_decode_range_ok(buf_len, graph_array->next_free, sizeof(wide))) {
+		return false;
+	}
+
+	memcpy(&wide, buf + graph_array->next_free, sizeof(wide));
+
+	if (wide > (int64_t) ZEND_LONG_MAX || wide < (int64_t) ZEND_LONG_MIN) {
+		return false;
+	}
+
+	*next_free = (zend_long) wide;
+
+	return true;
 }
 
 static zend_always_inline bool user_cache_shared_graph_array_has_shape(const HashTable *arr)
@@ -925,6 +970,33 @@ static bool user_cache_shared_graph_state_array_fits_schema(const HashTable *arr
 	return result;
 }
 
+/* Memoize the schema-fit verdict keyed by the (pointer-stable, memoized)
+ * state array so COPY reuses CALC's answer instead of re-walking the whole
+ * state. Lives in state_memo: object-keyed entries there are states/blobs
+ * (IS_ARRAY/IS_STRING), array-keyed verdicts are IS_TRUE/IS_FALSE. */
+static bool user_cache_shared_graph_state_array_fits_schema_memo(
+		HashTable *state_memo,
+		const HashTable *arr)
+{
+	zval *verdict, verdict_zv;
+
+	if (state_memo == NULL) {
+		return user_cache_shared_graph_state_array_fits_schema(arr);
+	}
+
+	verdict = zend_hash_index_find(state_memo, (zend_ulong) (uintptr_t) arr);
+	if (verdict != NULL &&
+		(Z_TYPE_P(verdict) == IS_TRUE || Z_TYPE_P(verdict) == IS_FALSE)
+	) {
+		return Z_TYPE_P(verdict) == IS_TRUE;
+	}
+
+	ZVAL_BOOL(&verdict_zv, user_cache_shared_graph_state_array_fits_schema(arr));
+	zend_hash_index_add(state_memo, (zend_ulong) (uintptr_t) arr, &verdict_zv);
+
+	return Z_TYPE(verdict_zv) == IS_TRUE;
+}
+
 static bool user_cache_shared_graph_calc_shaped_state_object(
 	php_user_cache_shared_graph_calc_context *ctx,
 	zend_class_entry *ce,
@@ -1226,6 +1298,15 @@ static bool user_cache_shared_graph_produce_safe_direct_state(const zval *value,
 			ZVAL_UNDEF(state);
 		}
 
+		/* Deterministic error policy: a handler that declines without its
+		 * own exception must still surface a throw, never a silent false. */
+		if (!EG(exception)) {
+			zend_type_error(
+				"the %s object's state cannot be stored in the user cache",
+				ZSTR_VAL(Z_OBJCE_P(value)->name)
+			);
+		}
+
 		return false;
 	}
 
@@ -1322,6 +1403,7 @@ static bool user_cache_shared_graph_get_memoized_state(
 		zval *owned_state)
 {
 	zend_ulong memo_key;
+	zend_object *obj;
 	zval *memo_state;
 
 	ZVAL_UNDEF(owned_state);
@@ -1332,7 +1414,8 @@ static bool user_cache_shared_graph_get_memoized_state(
 		return false;
 	}
 
-	memo_key = (zend_ulong) (uintptr_t) Z_OBJ_P(value);
+	obj = Z_OBJ_P(value);
+	memo_key = (zend_ulong) (uintptr_t) obj;
 	memo_state = zend_hash_index_find(state_memo, memo_key);
 	if (memo_state != NULL) {
 		if (Z_TYPE_P(memo_state) != IS_ARRAY) {
@@ -1344,7 +1427,15 @@ static bool user_cache_shared_graph_get_memoized_state(
 		return true;
 	}
 
+	/* Pin the object for the memo's lifetime: __sleep()/__serialize() may
+	 * drop the last external reference while both graph passes keep using
+	 * the raw pointer (native serialize() pins through its var_hash for
+	 * the same reason). Released in php_user_cache_destroy_prepared_value(). */
+	GC_ADDREF(obj);
+
 	if (!produce_state(value, owned_state)) {
+		OBJ_RELEASE(obj);
+
 		if (!Z_ISUNDEF_P(owned_state)) {
 			zval_ptr_dtor(owned_state);
 
@@ -1356,6 +1447,8 @@ static bool user_cache_shared_graph_get_memoized_state(
 
 	memo_state = zend_hash_index_add(state_memo, memo_key, owned_state);
 	if (memo_state == NULL) {
+		OBJ_RELEASE(obj);
+
 		zval_ptr_dtor(owned_state);
 
 		ZVAL_UNDEF(owned_state);
@@ -1496,12 +1589,20 @@ static bool user_cache_shared_graph_get_serdes_blob(
 		return true;
 	}
 
+	/* Pin before the encoder runs user code: serialize() may drop the
+	 * caller's last reference while the object is still being walked. On
+	 * success the pin lives as the memo key, released in
+	 * php_user_cache_destroy_prepared_value(). */
+	GC_ADDREF(obj);
+
 	if (!php_user_cache_serdes_encode((zval *) value, &buf, &msg)) {
 		if (msg != NULL) {
 			zend_type_error("%s", msg);
 		}
 
 		smart_str_free(&buf);
+
+		OBJ_RELEASE(obj);
 
 		return false;
 	}
@@ -1510,6 +1611,8 @@ static bool user_cache_shared_graph_get_serdes_blob(
 	if (ZSTR_LEN(blob) == 0 || ZSTR_LEN(blob) > UINT32_MAX) {
 		zend_string_release(blob);
 
+		OBJ_RELEASE(obj);
+
 		return false;
 	}
 
@@ -1517,6 +1620,8 @@ static bool user_cache_shared_graph_get_serdes_blob(
 	memo_state = zend_hash_index_add(state_memo, memo_key, &blob_zv);
 	if (memo_state == NULL) {
 		zend_string_release(blob);
+
+		OBJ_RELEASE(obj);
 
 		return false;
 	}
@@ -1551,7 +1656,8 @@ static bool user_cache_shared_graph_calc_magic_state_object(
 	php_user_cache_object_route route)
 {
 	php_user_cache_shared_graph_state_getter_t get_state;
-	zval *state_ptr, state;
+	HashTable *state_ht;
+	zval *state_ptr, state, state_zv;
 	bool result;
 
 	if (!php_user_cache_seen_test_and_add(&ctx->seen_objects, obj)) {
@@ -1563,17 +1669,22 @@ static bool user_cache_shared_graph_calc_magic_state_object(
 		return false;
 	}
 
-	if (user_cache_shared_graph_state_array_fits_schema(Z_ARRVAL_P(state_ptr))) {
+	/* state_ptr may dangle once the memo resizes (schema verdicts insert
+	 * into the same table); keep the stable array pointer instead. */
+	state_ht = Z_ARRVAL_P(state_ptr);
+
+	if (user_cache_shared_graph_state_array_fits_schema_memo(ctx->state_memo, state_ht)) {
 		result = user_cache_shared_graph_calc_shaped_state_object(
 			ctx,
 			obj->ce,
-			Z_ARRVAL_P(state_ptr)
+			state_ht
 		);
 	} else {
+		ZVAL_ARR(&state_zv, state_ht);
 		result = user_cache_shared_graph_calc_reserve(ctx,
 			sizeof(php_user_cache_shared_graph_safe_direct_object)) &&
 			user_cache_shared_graph_calc_reserve_string(ctx, obj->ce->name) &&
-			user_cache_shared_graph_calc_value(ctx, state_ptr)
+			user_cache_shared_graph_calc_value(ctx, &state_zv)
 		;
 	}
 
@@ -1608,7 +1719,7 @@ static bool user_cache_shared_graph_calc_sleep_state_object(
 	}
 
 	props = Z_ARRVAL_P(state_ptr);
-	if (user_cache_shared_graph_state_array_fits_schema(props)) {
+	if (user_cache_shared_graph_state_array_fits_schema_memo(ctx->state_memo, props)) {
 		result = user_cache_shared_graph_calc_shaped_state_object(
 			ctx,
 			obj->ce,
@@ -1662,9 +1773,9 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 	const zval *value,
 	zend_object *obj)
 {
+	const HashTable *state_ht;
 	zend_string *prop_name;
 	zval *prop_val, *src_val, *state_ptr, state;
-	const HashTable *state_ht;
 	HashTable *props;
 	uint32_t prop_count;
 	bool result;
@@ -1697,8 +1808,33 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 		goto cleanup;
 	}
 
+	/* Count the properties that will actually be emitted: state-shadowed
+	 * ones are skipped entirely instead of occupying zeroed slots. */
 	props = zend_std_get_properties(obj);
-	prop_count = props != NULL ? props->nNumOfElements : 0;
+	prop_count = 0;
+	result = true;
+	if (props != NULL) {
+		ZEND_HASH_FOREACH_STR_KEY(props, prop_name) {
+			if (prop_name == NULL) {
+				result = false;
+
+				break;
+			}
+
+			if (!user_cache_shared_graph_safe_direct_property_shadows_state(
+					prop_name,
+					state_ht
+				)
+			) {
+				prop_count++;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (!result) {
+		goto cleanup;
+	}
+
 	if (prop_count != 0 &&
 		!user_cache_shared_graph_calc_reserve(
 			ctx,
@@ -1710,9 +1846,9 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 		goto cleanup;
 	}
 
-	result = true;
 	if (props != NULL) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(props, prop_name, prop_val) {
+			/* calc_value() may run user code that mutates the table. */
 			if (prop_name == NULL) {
 				result = false;
 
@@ -1845,6 +1981,11 @@ static bool user_cache_shared_graph_calc_object(
 	}
 
 	if (ce->ce_flags & ZEND_ACC_ENUM) {
+		/* Enum cases are singletons: repeated occurrences share one node. */
+		if (!php_user_cache_seen_test_and_add(&ctx->enum_dedup, obj)) {
+			return true;
+		}
+
 		case_name = Z_STR_P(zend_enum_fetch_case_name(obj));
 
 		return user_cache_shared_graph_calc_reserve(
@@ -1916,8 +2057,11 @@ static bool user_cache_shared_graph_calc_array(
 
 	if (arr->nNumOfElements == 0) {
 		if (arr->nNextFreeElement != 0) {
-			return user_cache_shared_graph_calc_reserve(ctx,
-				sizeof(php_user_cache_shared_graph_array))
+			return user_cache_shared_graph_calc_reserve(ctx, sizeof(php_user_cache_shared_graph_array)) &&
+					(
+						!user_cache_shared_graph_next_free_is_wide(arr->nNextFreeElement) ||
+						user_cache_shared_graph_calc_reserve(ctx, sizeof(int64_t))
+					)
 			;
 		}
 
@@ -1932,7 +2076,10 @@ static bool user_cache_shared_graph_calc_array(
 		verdict = NULL;
 
 		if (ctx->shared_verdicts != NULL &&
-			(ctx->state_memo == NULL || zend_hash_num_elements(ctx->state_memo) == 0)
+			(
+				ctx->state_memo == NULL ||
+				zend_hash_num_elements(ctx->state_memo) == 0
+			)
 		) {
 			verdict = zend_hash_index_find(ctx->shared_verdicts, (zend_ulong) (uintptr_t) arr);
 		}
@@ -1995,6 +2142,10 @@ static bool user_cache_shared_graph_calc_array(
 		!user_cache_shared_graph_calc_reserve(
 			ctx,
 			(size_t) arr->nNumOfElements * sizeof(php_user_cache_shared_graph_array_element)
+		) ||
+		(
+			user_cache_shared_graph_next_free_is_wide(arr->nNextFreeElement) &&
+			!user_cache_shared_graph_calc_reserve(ctx, sizeof(int64_t))
 		)
 	) {
 		result = false;
@@ -2091,6 +2242,7 @@ static void user_cache_shared_graph_copy_init(
 	zend_hash_init(&ctx->state_schema_dedup, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->direct_array_dedup, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->direct_verdicts, 8, NULL, NULL, 0);
+	zend_hash_init(&ctx->enum_dedup, 8, NULL, NULL, 0);
 
 	ctx->has_shared_identity = false;
 	ctx->has_object = false;
@@ -2109,6 +2261,7 @@ static void user_cache_shared_graph_copy_destroy(php_user_cache_shared_graph_cop
 		ctx->fixup_offsets = NULL;
 	}
 
+	zend_hash_destroy(&ctx->enum_dedup);
 	zend_hash_destroy(&ctx->direct_verdicts);
 	zend_hash_destroy(&ctx->direct_array_dedup);
 	zend_hash_destroy(&ctx->state_schema_dedup);
@@ -2358,6 +2511,7 @@ static bool user_cache_shared_graph_copy_state_schema(
 	cached = zend_hash_find(&ctx->state_schema_dedup, schema_key);
 	if (cached != NULL) {
 		*offset = (uint32_t) Z_LVAL_P(cached);
+
 		zend_string_release(shape_key);
 		zend_string_release(schema_key);
 
@@ -2672,7 +2826,8 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 	php_user_cache_shared_graph_safe_direct_object *graph_safe_direct;
 	php_user_cache_copy_object_ref_result ref_result;
 	php_user_cache_shared_graph_state_getter_t get_state;
-	zval *sd_state_ptr, sd_state;
+	HashTable *sd_state_ht;
+	zval *sd_state_ptr, sd_state, sd_state_zv;
 	uint32_t sd_offset, sd_class_offset;
 	bool result;
 
@@ -2688,11 +2843,15 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 		return false;
 	}
 
-	if (user_cache_shared_graph_state_array_fits_schema(Z_ARRVAL_P(sd_state_ptr))) {
+	/* sd_state_ptr may dangle once the memo resizes (schema verdicts insert
+	 * into the same table); keep the stable array pointer instead. */
+	sd_state_ht = Z_ARRVAL_P(sd_state_ptr);
+
+	if (user_cache_shared_graph_state_array_fits_schema_memo(ctx->state_memo, sd_state_ht)) {
 		result = user_cache_shared_graph_copy_shaped_state_object(
 			ctx,
 			obj,
-			Z_ARRVAL_P(sd_state_ptr),
+			sd_state_ht,
 			PHP_USER_CACHE_SHARED_GRAPH_VALUE_SERIALIZED_SHAPED_OBJECT,
 			dst
 		);
@@ -2729,7 +2888,8 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 	graph_safe_direct->properties_offset = 0;
 	graph_safe_direct->reserved = 0;
 
-	if (!user_cache_shared_graph_copy_value(ctx, sd_state_ptr, &graph_safe_direct->state)) {
+	ZVAL_ARR(&sd_state_zv, sd_state_ht);
+	if (!user_cache_shared_graph_copy_value(ctx, &sd_state_zv, &graph_safe_direct->state)) {
 		result = false;
 
 		goto cleanup;
@@ -2785,7 +2945,7 @@ static bool user_cache_shared_graph_copy_sleep_state_object(
 	}
 
 	props = Z_ARRVAL_P(state_ptr);
-	if (user_cache_shared_graph_state_array_fits_schema(props)) {
+	if (user_cache_shared_graph_state_array_fits_schema_memo(ctx->state_memo, props)) {
 		result = user_cache_shared_graph_copy_shaped_state_object(
 			ctx,
 			obj,
@@ -2971,11 +3131,35 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 		goto cleanup;
 	}
 
+	/* Mirror CALC: count only the emitted (non-shadowed) properties so
+	 * shadowed ones cost no slot. */
 	props = zend_std_get_properties(obj);
-	prop_count = props != NULL ? props->nNumOfElements : 0;
+	prop_count = 0;
+	result = true;
+	if (props != NULL) {
+		ZEND_HASH_FOREACH_STR_KEY(props, prop_name) {
+			if (prop_name == NULL) {
+				result = false;
+
+				break;
+			}
+
+			if (!user_cache_shared_graph_safe_direct_property_shadows_state(
+					prop_name,
+					sd_state_ht
+				)
+			) {
+				prop_count++;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (!result) {
+		goto cleanup;
+	}
+
 	graph_safe_direct->property_count = prop_count;
 	graph_safe_direct->properties_offset = 0;
-	result = true;
 
 	if (prop_count != 0) {
 		if (!user_cache_shared_graph_copy_alloc(
@@ -2994,9 +3178,6 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 		prop_idx = 0;
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(props, prop_name, prop_val) {
-			/* Zero the skipped slot; copy_alloc() only clears alignment padding. */
-			memset(&graph_properties[prop_idx], 0, sizeof(graph_properties[prop_idx]));
-
 			if (prop_name == NULL) {
 				result = false;
 
@@ -3013,10 +3194,11 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 					sd_state_ht
 				)
 			) {
-				++prop_idx;
-
 				continue;
 			}
+
+			/* copy_alloc() only clears alignment padding. */
+			memset(&graph_properties[prop_idx], 0, sizeof(graph_properties[prop_idx]));
 
 			if (!user_cache_shared_graph_copy_string(ctx, prop_name, &string_offset)) {
 				result = false;
@@ -3244,6 +3426,17 @@ static bool user_cache_shared_graph_copy_enum(
 	zend_class_entry *ce;
 	zend_string *case_name;
 	uint32_t enum_offset, enum_class_offset, enum_case_offset;
+	void *seen_offset;
+
+	/* Singleton case objects dedup by identity; the decoder is stateless,
+	 * so aliased slots pointing at one node decode identically. */
+	seen_offset = zend_hash_index_find_ptr(&ctx->enum_dedup, (zend_ulong) (uintptr_t) Z_OBJ_P(src));
+	if (seen_offset != NULL) {
+		dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_ENUM;
+		dst->payload.offset = (uint32_t) (uintptr_t) seen_offset;
+
+		return true;
+	}
 
 	ce = Z_OBJCE_P(src);
 	case_name = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(src)));
@@ -3259,6 +3452,12 @@ static bool user_cache_shared_graph_copy_enum(
 	graph_enum = (php_user_cache_shared_graph_enum *) (ctx->buffer + enum_offset);
 	graph_enum->class_name_offset = enum_class_offset;
 	graph_enum->case_name_offset = enum_case_offset;
+
+	zend_hash_index_add_ptr(
+		&ctx->enum_dedup,
+		(zend_ulong) (uintptr_t) Z_OBJ_P(src),
+		(void *) (uintptr_t) enum_offset
+	);
 
 	dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_ENUM;
 	dst->payload.offset = enum_offset;
@@ -3344,8 +3543,9 @@ static bool user_cache_shared_graph_copy_array(
 	uint32_t elem_idx,
 		array_offset, elems_offset, key_offset,
 		shape_offset, values_offset,
-		shared_offset
+		shared_offset, wide_next_free_offset
 	;
+	int64_t wide_next_free;
 	bool result, verbatim;
 	void *seen_offset;
 
@@ -3368,9 +3568,23 @@ static bool user_cache_shared_graph_copy_array(
 
 		graph_array = (php_user_cache_shared_graph_array *) (ctx->buffer + array_offset);
 		graph_array->count = 0;
-		graph_array->next_free = (uint32_t) Z_ARRVAL_P(src)->nNextFreeElement;
 		graph_array->elements_offset = 0;
 		graph_array->reserved = 0;
+
+		if (UNEXPECTED(user_cache_shared_graph_next_free_is_wide(Z_ARRVAL_P(src)->nNextFreeElement))) {
+			wide_next_free = (int64_t) Z_ARRVAL_P(src)->nNextFreeElement;
+
+			if (!user_cache_shared_graph_copy_alloc(ctx, sizeof(wide_next_free), &wide_next_free_offset)) {
+				return false;
+			}
+
+			memcpy(ctx->buffer + wide_next_free_offset, &wide_next_free, sizeof(wide_next_free));
+
+			graph_array->next_free = wide_next_free_offset;
+			graph_array->reserved |= PHP_USER_CACHE_SHARED_GRAPH_ARRAY_FLAG_WIDE_NEXT_FREE;
+		} else {
+			graph_array->next_free = (uint32_t) Z_ARRVAL_P(src)->nNextFreeElement;
+		}
 
 		dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY;
 		dst->payload.offset = array_offset;
@@ -3418,6 +3632,9 @@ static bool user_cache_shared_graph_copy_array(
 	seen_offset = zend_hash_index_find_ptr(&ctx->seen_arrays, arr_key);
 	if (seen_offset != NULL) {
 		shared_offset = (uint32_t) (uintptr_t) seen_offset;
+		/* seen_arrays also receives empty-element markers from the verbatim
+		 * walkers; a real offset entry must stay inside the buffer. */
+		ZEND_ASSERT((uintptr_t) seen_offset < ctx->size);
 		/* reserved lives at the same offset in shaped and plain array nodes,
 		 * so the SHARED flag can be set through the plain-array cast
 		 * regardless of which kind was seen. */
@@ -3481,7 +3698,7 @@ static bool user_cache_shared_graph_copy_array(
 		goto done;
 	}
 
-	if (!uçser_cache_shared_graph_copy_alloc(ctx, sizeof(*graph_array), &array_offset) ||
+	if (!user_cache_shared_graph_copy_alloc(ctx, sizeof(*graph_array), &array_offset) ||
 		!user_cache_shared_graph_copy_alloc(
 			ctx,
 			(size_t) Z_ARRVAL_P(src)->nNumOfElements * sizeof(*graph_elems),
@@ -3495,13 +3712,29 @@ static bool user_cache_shared_graph_copy_array(
 
 	graph_array = (php_user_cache_shared_graph_array *) (ctx->buffer + array_offset);
 	graph_array->count = Z_ARRVAL_P(src)->nNumOfElements;
-	graph_array->next_free = (uint32_t) Z_ARRVAL_P(src)->nNextFreeElement;
 	graph_array->elements_offset = elems_offset;
 	graph_array->reserved =
 		(HT_IS_PACKED(Z_ARRVAL_P(src)) && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(src))) ?
 		PHP_USER_CACHE_SHARED_GRAPH_ARRAY_FLAG_PACKED :
 		0
 	;
+
+	if (UNEXPECTED(user_cache_shared_graph_next_free_is_wide(Z_ARRVAL_P(src)->nNextFreeElement))) {
+		wide_next_free = (int64_t) Z_ARRVAL_P(src)->nNextFreeElement;
+
+		if (!user_cache_shared_graph_copy_alloc(ctx, sizeof(wide_next_free), &wide_next_free_offset)) {
+			result = false;
+
+			goto done;
+		}
+
+		memcpy(ctx->buffer + wide_next_free_offset, &wide_next_free, sizeof(wide_next_free));
+
+		graph_array->next_free = wide_next_free_offset;
+		graph_array->reserved |= PHP_USER_CACHE_SHARED_GRAPH_ARRAY_FLAG_WIDE_NEXT_FREE;
+	} else {
+		graph_array->next_free = (uint32_t) Z_ARRVAL_P(src)->nNextFreeElement;
+	}
 
 	if (zend_hash_index_add_ptr(&ctx->seen_arrays, arr_key, (void *) (uintptr_t) array_offset) == NULL) {
 		result = false;
@@ -3985,6 +4218,12 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_shaped_arra
 	graph_vals = (const php_user_cache_shared_graph_value *) (buf + values_offset);
 	bucket = Z_ARRVAL_P(dst)->arData;
 	for (i = 0; i < count; i++) {
+		/* UNDEF is only a property skip marker; in an array position it
+		 * would corrupt nNumOfElements accounting. */
+		if (UNEXPECTED(graph_vals[i].type == PHP_USER_CACHE_SHARED_GRAPH_VALUE_UNDEF)) {
+			return user_cache_decode_fail_zval(dst);
+		}
+
 		if (user_cache_shared_graph_decode_simple_value(buf, buf_len, &graph_vals[i], &bucket[i].val)) {
 			continue;
 		}
@@ -4012,6 +4251,7 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 {
 	const php_user_cache_shared_graph_array *graph_array;
 	const php_user_cache_shared_graph_array_element *graph_elems, *graph_elem;
+	zend_long next_free;
 	zend_string *key;
 	zval val;
 	uint32_t i;
@@ -4068,7 +4308,11 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 			}
 		}
 
-		Z_ARRVAL_P(dst)->nNextFreeElement = graph_array->next_free;
+		if (!user_cache_shared_graph_decode_array_next_free(buf, buf_len, graph_array, &next_free)) {
+			return user_cache_decode_fail_zval(dst);
+		}
+
+		Z_ARRVAL_P(dst)->nNextFreeElement = next_free;
 
 		PHP_USER_CACHE_HT_DISALLOW_COW_VIOLATION(Z_ARRVAL_P(dst));
 
@@ -4110,7 +4354,11 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 		}
 	}
 
-	Z_ARRVAL_P(dst)->nNextFreeElement = graph_array->next_free;
+	if (!user_cache_shared_graph_decode_array_next_free(buf, buf_len, graph_array, &next_free)) {
+		return user_cache_decode_fail_zval(dst);
+	}
+
+	Z_ARRVAL_P(dst)->nNextFreeElement = next_free;
 	PHP_USER_CACHE_HT_DISALLOW_COW_VIOLATION(Z_ARRVAL_P(dst));
 
 	return true;
@@ -4849,7 +5097,7 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_value(
 	}
 }
 
-static php_user_cache_shared_graph_header *user_cache_shared_graph_payload_header(uint32_t payload_offset)
+static PHP_USER_CACHE_DECODE_HOT php_user_cache_shared_graph_header *user_cache_shared_graph_payload_header(uint32_t payload_offset)
 {
 	const uint8_t *graph_buf;
 	php_user_cache_shared_graph_header *header;
@@ -5346,7 +5594,7 @@ static uint32_t user_cache_shared_graph_snapshot_live_offsets_locked(
 
 	entries = php_user_cache_entries_ptr(header);
 	offsets = emalloc(
-		((size_t) header->capacity * 2 + PHP_USER_CACHE_ENTRY_LOCK_TABLE_SIZE) * sizeof(*offsets)
+		((size_t) header->capacity * 2 + header->entry_lock_capacity) * sizeof(*offsets)
 	);
 	count = 0;
 
@@ -5368,8 +5616,8 @@ static uint32_t user_cache_shared_graph_snapshot_live_offsets_locked(
 	/* Entry-lock key blocks hold user-controlled bytes outside the entry
 	 * table; without them in the snapshot a crafted key that parses as a
 	 * retired graph header could be freed out from under its record. */
-	for (i = 0; i < PHP_USER_CACHE_ENTRY_LOCK_TABLE_SIZE; i++) {
-		lock_record = &header->entry_lock_records[i];
+	for (i = 0; i < header->entry_lock_capacity; i++) {
+		lock_record = &php_user_cache_entry_lock_records_ptr(header)[i];
 		if (lock_record->state == PHP_USER_CACHE_ENTRY_LOCK_USED &&
 			lock_record->key_offset != 0
 		) {
@@ -5633,6 +5881,57 @@ static zend_ulong user_cache_shared_graph_ref_index_key(
 	return ((zend_ulong) (uintptr_t) ctx) ^ (zend_ulong) payload_offset;
 }
 
+/* Returns true only when this drops the last reference of an already-retired
+ * payload, signaling the caller to free it. */
+static bool user_cache_shared_graph_release_ref_locked(uint32_t payload_offset)
+{
+	php_user_cache_shared_graph_header *header = user_cache_shared_graph_payload_header(payload_offset);
+	php_user_cache_header *cache_header = php_user_cache_header_ptr();
+	int32_t pin_slot = -1;
+	bool released = false, bit_cleared = false;
+	int state, refcount, expected, desired = 0;
+
+	if (header == NULL) {
+		return false;
+	}
+
+	/* Clear the owner bit before the refcount: a crash between the two steps
+	 * must leave a leaked reference, never a bit the dead-owner sweep would
+	 * turn into a second decrement. */
+	if (cache_header != NULL) {
+		pin_slot = user_cache_graph_pin_slot_find(cache_header, false);
+		if (pin_slot >= 0) {
+			bit_cleared = user_cache_graph_pin_bit_clear(header, (uint32_t) pin_slot);
+		}
+	}
+
+	for (;;) {
+		state = zend_atomic_int_load_ex(&header->ref_state);
+		refcount = state & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK;
+		expected = state;
+
+		if (refcount == 0) {
+			break;
+		}
+
+		desired = (state & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) | (refcount - 1);
+		if (zend_atomic_int_compare_exchange_ex(&header->ref_state, &expected, desired)) {
+			released = true;
+
+			break;
+		}
+	}
+
+	if (bit_cleared) {
+		user_cache_graph_pin_count_add(&cache_header->graph_pin_slots[pin_slot], -1);
+	}
+
+	return released &&
+		(desired & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) != 0 &&
+		(desired & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK) == 0
+	;
+}
+
 PHP_USER_CACHE_DECODE_HOT bool php_user_cache_shared_graph_update_object_property(
 	zval *obj_zv,
 	zend_string *prop_name,
@@ -5757,57 +6056,6 @@ PHP_USER_CACHE_DECODE_HOT bool php_user_cache_shared_graph_update_object_propert
 		prop_name,
 		prop_val
 	);
-}
-
-/* Returns true only when this drops the last reference of an already-retired
- * payload, signaling the caller to free it. */
-static bool user_cache_shared_graph_release_ref_locked(uint32_t payload_offset)
-{
-	php_user_cache_shared_graph_header *header = user_cache_shared_graph_payload_header(payload_offset);
-	php_user_cache_header *cache_header = php_user_cache_header_ptr();
-	int32_t pin_slot = -1;
-	bool released = false, bit_cleared = false;
-	int state, refcount, expected, desired = 0;
-
-	if (header == NULL) {
-		return false;
-	}
-
-	/* Clear the owner bit before the refcount: a crash between the two steps
-	 * must leave a leaked reference, never a bit the dead-owner sweep would
-	 * turn into a second decrement. */
-	if (cache_header != NULL) {
-		pin_slot = user_cache_graph_pin_slot_find(cache_header, false);
-		if (pin_slot >= 0) {
-			bit_cleared = user_cache_graph_pin_bit_clear(header, (uint32_t) pin_slot);
-		}
-	}
-
-	for (;;) {
-		state = zend_atomic_int_load_ex(&header->ref_state);
-		refcount = state & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK;
-		expected = state;
-
-		if (refcount == 0) {
-			break;
-		}
-
-		desired = (state & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) | (refcount - 1);
-		if (zend_atomic_int_compare_exchange_ex(&header->ref_state, &expected, desired)) {
-			released = true;
-
-			break;
-		}
-	}
-
-	if (bit_cleared) {
-		user_cache_graph_pin_count_add(&cache_header->graph_pin_slots[pin_slot], -1);
-	}
-
-	return released &&
-		(desired & PHP_USER_CACHE_SHARED_GRAPH_RETIRED) != 0 &&
-		(desired & PHP_USER_CACHE_SHARED_GRAPH_REFCOUNT_MASK) == 0
-	;
 }
 
 void php_user_cache_decode_resolve_cache_release(void)
@@ -6181,7 +6429,7 @@ bool php_user_cache_shared_graph_copy_fits_buffer(
 	;
 }
 
-bool php_user_cache_shared_graph_decode(
+PHP_USER_CACHE_DECODE_HOT bool php_user_cache_shared_graph_decode(
 	const uint8_t *buf,
 	size_t buf_len,
 	zval *dst
@@ -6746,6 +6994,15 @@ bool php_user_cache_release_request_shared_graph_refs(void)
 	user_cache_shared_graph_refs_check_fork();
 
 	if (UC_G(shared_graph_ref_count) == 0) {
+		/* The buffer is request memory: leaving it registered would carry a
+		 * dangling pointer (and a non-zero capacity) into the next request. */
+		if (UC_G(shared_graph_refs) != NULL) {
+			efree(UC_G(shared_graph_refs));
+
+			UC_G(shared_graph_refs) = NULL;
+			UC_G(shared_graph_ref_capacity) = 0;
+		}
+
 		user_cache_destroy_shared_graph_ref_index();
 
 		return false;

@@ -99,6 +99,7 @@ final class Cache
 
 	public function add(string $key, null|bool|int|float|string|array|object $value, int $ttl = 0): bool {}
 
+	/** @param array<string, mixed> $values */
 	public function storeMultiple(array $values, int $ttl = 0): bool {}
 
 	public function increment(string $key, int $step = 1, int $ttl = 0): ?int {}
@@ -107,10 +108,12 @@ final class Cache
 
 	public function fetch(string $key, mixed $default = null): mixed {}
 
+	/** @param list<string> $keys */
 	public function fetchMultiple(array $keys, mixed $default = null): array {}
 
 	public function delete(string $key): bool {}
 
+	/** @param list<string> $keys */
 	public function deleteMultiple(array $keys): bool {}
 
 	public function clear(): bool {}
