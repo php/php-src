@@ -46,11 +46,9 @@ final readonly class CacheStatus
 
 	public function getTombstoneCount(): int {}
 
-	/**
-	 * Number of times memory pressure forced a full cache wipe. Routine
-	 * removal of expired entries is not counted.
-	 */
 	public function getExpungeCount(): int {}
+
+	public function getEvictionCount(): int {}
 
 	public function getStoreFailureCount(): int {}
 
