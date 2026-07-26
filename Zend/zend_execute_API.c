@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
+#include "zend_extension_methods.h"
 #include "zend_API.h"
 #include "zend_stack.h"
 #include "zend_constants.h"
@@ -155,6 +156,7 @@ void init_executor(void) /* {{{ */
 
 	zend_hash_init(&EG(included_files), 8, NULL, NULL, 0);
 	zend_hash_init(&EG(autoload_current_classnames), 8, NULL, NULL, 0);
+	EG(extension_method_registry) = NULL;
 
 	EG(ticks_count) = 0;
 
@@ -502,6 +504,7 @@ void shutdown_executor(void) /* {{{ */
 
 		zend_hash_destroy(&EG(included_files));
 		zend_hash_destroy(&EG(autoload_current_classnames));
+		zend_extension_methods_request_shutdown();
 
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
 		zend_stack_destroy(&EG(user_error_handlers));

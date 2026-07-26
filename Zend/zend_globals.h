@@ -231,6 +231,11 @@ struct _zend_executor_globals {
 
 	HashTable autoload_current_classnames;
 
+	/* Extension-method registry: lc target name -> HashTable of lc method
+	 * name -> zend_function* (borrowed). Lazily allocated per request; one
+	 * per thread under ZTS. See zend_extension_methods.c. */
+	HashTable *extension_method_registry;
+
 	zend_long hard_timeout;
 	void *stack_base;
 	void *stack_limit;

@@ -9653,14 +9653,11 @@ static void zend_compile_extension_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ext_ce = zend_compile_class_decl(&class_node, class_ast, false);
 	CG(extension_receiver) = orig_extension_receiver;
 
-	/* Keep extension methods out of the polymorphic inline cache for the
-	 * prototype (correctness over speed; the cached path + JIT support is
-	 * future work). Must happen at compile time: under opcache the CE is
-	 * persisted to (protected) shared memory and is immutable at runtime. */
-	zend_function *ext_fn;
-	ZEND_HASH_MAP_FOREACH_PTR(&ext_ce->function_table, ext_fn) {
-		ext_fn->common.fn_flags |= ZEND_ACC_NEVER_CACHE;
-	} ZEND_HASH_FOREACH_END();
+	/* Extension methods ride the ordinary polymorphic inline cache: a call
+	 * site belongs to exactly one file, and registration is monotonic with
+	 * first-wins conflicts within a request, so a resolution cached at a
+	 * site can never go stale. (The phase-1 prototype excluded them via
+	 * ZEND_ACC_NEVER_CACHE, costing a registry walk on every call.) */
 
 	/* Runtime registration once the synthetic CE is declared. */
 	opline = zend_emit_op(NULL, ZEND_BIND_EXTENSION, &class_node, NULL);

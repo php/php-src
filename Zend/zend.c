@@ -1061,7 +1061,6 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_interned_strings_init();
 	zend_object_handlers_startup();
 	zend_startup_builtin_functions();
-	zend_extension_methods_startup();
 	zend_register_standard_constants();
 	zend_register_auto_global(zend_string_init_interned("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
 
@@ -1194,7 +1193,6 @@ void zend_shutdown(void) /* {{{ */
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 
-	zend_extension_methods_shutdown();
 	zend_shutdown_extensions();
 	free(zend_version_info);
 
