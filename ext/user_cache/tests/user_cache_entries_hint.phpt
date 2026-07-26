@@ -21,10 +21,19 @@ echo shell_exec("$php $args -d user_cache.entries_hint=0 -r " . escapeshellarg($
 echo shell_exec("$php $args -d user_cache.entries_hint=-1 -r " . escapeshellarg($code) . " 2>&1"), "\n";
 
 /* A hint the segment cannot index is clamped with a warning. */
-echo shell_exec("$php $args -d user_cache.entries_hint=16777213 -r " . escapeshellarg($code) . " 2>&1"), "\n";
+$out = shell_exec("$php $args -d user_cache.entries_hint=16777213 -r " . escapeshellarg($code) . " 2>&1");
+echo $out, "\n";
+
+/* The clamped table plus its per-key lock region (1024 records * 40 bytes
+ * at this scale) must still leave half the segment for value data. */
+preg_match('/(\d+)\s*$/', $out, $m);
+$cap = (int) $m[1];
+var_dump($cap >= 100000, $cap * (48 + 4) + 1024 * 40 <= 8 * 1024 * 1024);
 ?>
 --EXPECTF--
 int(1361)
 10937
 %Auser_cache.entries_hint must be greater than or equal to 0, -1 given%A10937
 %Auser_cache.entries_hint (16777213) exceeds what user_cache.shm_size can index; clamping capacity to %d%A
+bool(true)
+bool(true)
