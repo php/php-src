@@ -143,8 +143,7 @@ typedef struct _sapi_globals_struct {
 	bool sapi_started;
 	double global_request_time;
 	HashTable known_post_content_types;
-	zval callback_func;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache send_header_fcc;
 	sapi_request_parse_body_context request_parse_body_context;
 } sapi_globals_struct;
 
