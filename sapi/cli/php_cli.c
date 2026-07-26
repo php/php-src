@@ -379,14 +379,13 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 
 static int php_cli_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	int result;
-
-	result = php_module_startup(sapi_module_ptr, NULL);
-	if (result == SUCCESS) {
-		php_user_cache_opt_in();
+	if (php_module_startup(sapi_module_ptr, NULL) == FAILURE) {
+		return FAILURE;
 	}
 
-	return result;
+	php_user_cache_opt_in();
+
+	return SUCCESS;
 }
 /* }}} */
 

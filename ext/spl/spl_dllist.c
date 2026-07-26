@@ -1042,14 +1042,13 @@ error:
 
 } /* }}} */
 
-/* {{{ */
-PHP_METHOD(SplDoublyLinkedList, __serialize)
+/* Builds the state array shared by __serialize() and the user-cache safe-direct
+ * path. The members slot only exists in the __serialize() format. */
+static void spl_dllist_object_serialize_state(zval *object, zval *return_value, bool with_members)
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
+	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
 	spl_ptr_llist_element *current = intern->llist->head;
 	zval tmp;
-
-	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1067,9 +1066,22 @@ PHP_METHOD(SplDoublyLinkedList, __serialize)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
 	/* members */
-	ZVAL_ARR(&tmp, zend_proptable_to_symtable(
-		zend_std_get_properties(&intern->std), /* always_duplicate */ 1));
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+	if (with_members) {
+		ZVAL_ARR(&tmp, zend_proptable_to_symtable(
+			zend_std_get_properties(&intern->std),
+			/* always_duplicate */ 1)
+		);
+
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+	}
+}
+
+/* {{{ */
+PHP_METHOD(SplDoublyLinkedList, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_dllist_object_serialize_state(ZEND_THIS, return_value, /* with_members */ true);
 } /* }}} */
 
 /* {{{ */
@@ -1086,10 +1098,13 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 	storage_zv = zend_hash_index_find(data, 1);
 	members_zv = zend_hash_index_find(data, 2);
 	if (!flags_zv || !storage_zv || !members_zv ||
-			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY ||
-			Z_TYPE_P(members_zv) != IS_ARRAY) {
+		Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY ||
+		Z_TYPE_P(members_zv) != IS_ARRAY
+	) {
 		zend_throw_exception(spl_ce_UnexpectedValueException,
-			"Incomplete or ill-typed serialization data", 0);
+			"Incomplete or ill-typed serialization data", 0
+		);
+
 		RETURN_THROWS();
 	}
 
@@ -1101,29 +1116,6 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 } /* }}} */
-
-/* Serializes list state without dynamic members; used by the user-cache
- * safe-direct path only. */
-static void spl_dllist_object_user_cache_serialize_state(zval *object, zval *return_value)
-{
-	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
-	spl_ptr_llist_element *current = intern->llist->head;
-	zval tmp;
-
-	array_init(return_value);
-
-	ZVAL_LONG(&tmp, intern->flags);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
-
-	array_init_size(&tmp, intern->llist->count);
-	while (current) {
-		zend_hash_next_index_insert(Z_ARRVAL(tmp), &current->data);
-		Z_TRY_ADDREF(current->data);
-		current = current->next;
-	}
-
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
-}
 
 /* Strict restore for the machine-written user-cache state: validates the flags
  * value and requires an empty list. Returns false on malformed data. */
@@ -1227,7 +1219,7 @@ static bool spl_dllist_object_user_cache_state_has_unstorable(
 
 static bool spl_dllist_object_serialize_user_cache_state(zval *state, const zval *object)
 {
-	spl_dllist_object_user_cache_serialize_state((zval *) object, state);
+	spl_dllist_object_serialize_state((zval *) object, state, /* with_members */ false);
 
 	return true;
 }
@@ -1367,8 +1359,6 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_ce_SplStack->get_iterator = spl_dllist_get_iterator;
 
 	php_user_cache_safe_direct_register_class(spl_ce_SplDoublyLinkedList, &spl_dllist_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(spl_ce_SplQueue, &spl_dllist_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(spl_ce_SplStack, &spl_dllist_user_cache_handlers);
 
 	return SUCCESS;
 }

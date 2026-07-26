@@ -79,7 +79,6 @@ typedef struct _php_user_cache_win32_segment {
 	php_user_cache_shm_segment segment;
 	HANDLE memfile;
 	void *mapping_base;
-	size_t mapping_size;
 } php_user_cache_win32_segment;
 #endif
 

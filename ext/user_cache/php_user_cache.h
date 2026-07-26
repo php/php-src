@@ -17,6 +17,15 @@
 
 #include "php.h"
 
+/* Keeps the per-fetch hot path (key lookup, graph decode, safe-direct
+ * handlers) clustered in .text.hot: the repeated-fetch working set spans
+ * several translation units and is sensitive to I-cache placement. */
+#if (defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_attribute(hot)
+# define PHP_USER_CACHE_HOT __attribute__((hot))
+#else
+# define PHP_USER_CACHE_HOT
+#endif
+
 /* Public API for extensions, SAPIs and embedders. */
 /* Keep in sync with user_cache_availability_enum_case(). */
 typedef enum {
