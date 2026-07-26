@@ -262,13 +262,21 @@ static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_c
 }
 /* }}} */
 
+static void spl_ptr_heap_grow(spl_ptr_heap *heap) { /* {{{ */
+	size_t alloc_size = heap->max_size * heap->elem_size;
+
+	/* need to allocate more memory */
+	heap->elements  = safe_erealloc(heap->elements, 2, alloc_size, 0);
+
+	memset((char *) heap->elements + alloc_size, 0, alloc_size);
+
+	heap->max_size *= 2;
+}
+/* }}} */
+
 static void spl_ptr_heap_insert(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
 	if (heap->count+1 > heap->max_size) {
-		size_t alloc_size = heap->max_size * heap->elem_size;
-		/* we need to allocate more memory */
-		heap->elements  = safe_erealloc(heap->elements, 2, alloc_size, 0);
-		memset((char *) heap->elements + alloc_size, 0, alloc_size);
-		heap->max_size *= 2;
+		spl_ptr_heap_grow(heap);
 	}
 
 	heap->flags |= SPL_HEAP_WRITE_LOCKED;
@@ -1265,20 +1273,14 @@ static bool spl_heap_object_is_pqueue(zend_class_entry *ce)
 	return instanceof_function(ce, spl_ce_SplPriorityQueue);
 }
 
-static void spl_heap_user_cache_ensure_capacity(spl_ptr_heap *heap, size_t count)
+static PHP_USER_CACHE_HOT void spl_heap_user_cache_ensure_capacity(spl_ptr_heap *heap, size_t count)
 {
-	size_t alloc_size;
-
 	while (count > heap->max_size) {
-		alloc_size = heap->max_size * heap->elem_size;
-
-		heap->elements  = safe_erealloc(heap->elements, 2, alloc_size, 0);
-		memset((char *) heap->elements + alloc_size, 0, alloc_size);
-		heap->max_size *= 2;
+		spl_ptr_heap_grow(heap);
 	}
 }
 
-static void spl_heap_object_user_cache_append_zval(spl_heap_object *intern, zval *value)
+static PHP_USER_CACHE_HOT void spl_heap_object_user_cache_append_zval(spl_heap_object *intern, zval *value)
 {
 	zval *target;
 
@@ -1290,7 +1292,7 @@ static void spl_heap_object_user_cache_append_zval(spl_heap_object *intern, zval
 	ZVAL_COPY(target, value);
 }
 
-static void spl_heap_object_user_cache_append_pqueue_elem(spl_heap_object *intern, zval *data, zval *priority)
+static PHP_USER_CACHE_HOT void spl_heap_object_user_cache_append_pqueue_elem(spl_heap_object *intern, zval *data, zval *priority)
 {
 	spl_pqueue_elem *target;
 
@@ -1458,7 +1460,7 @@ static bool spl_heap_object_serialize_user_cache_state(zval *state, const zval *
 	return true;
 }
 
-static bool spl_heap_object_unserialize_user_cache_state(zval *object, zval *state)
+static PHP_USER_CACHE_HOT bool spl_heap_object_unserialize_user_cache_state(zval *object, zval *state)
 {
 	spl_heap_object *intern;
 	zend_long flags;
@@ -1628,8 +1630,6 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplPriorityQueue.free_obj = spl_heap_object_free_storage;
 
 	php_user_cache_safe_direct_register_class(spl_ce_SplHeap, &spl_heap_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(spl_ce_SplMinHeap, &spl_heap_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(spl_ce_SplMaxHeap, &spl_heap_user_cache_handlers);
 	php_user_cache_safe_direct_register_class(spl_ce_SplPriorityQueue, &spl_heap_user_cache_handlers);
 
 	return SUCCESS;

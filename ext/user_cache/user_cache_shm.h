@@ -92,7 +92,6 @@ typedef int (*php_user_cache_detach_segment_t)(php_user_cache_shm_segment *share
 typedef struct {
 	php_user_cache_create_segments_t create_segments;
 	php_user_cache_detach_segment_t detach_segment;
-	size_t (*segment_type_size)(void);
 } php_user_cache_shm_handlers;
 
 typedef struct {
