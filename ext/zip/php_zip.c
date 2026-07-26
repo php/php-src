@@ -64,25 +64,106 @@ static int le_zip_entry;
 	}
 /* }}} */
 
+/* {{{ Bookkeeping of the entries libzip has copied the central directory record of.
+ * Modifying an entry makes libzip copy its central directory record, and the copy
+ * shares the comment string with the record of the entry. As zip_file_set_comment()
+ * frees that string unconditionally, setting the comment of a modified entry leaves
+ * the entry with a dangling comment: a use-after-free, and a double free when the
+ * archive is closed. The comment of such an entry cannot be replaced from the
+ * outside either, because libzip only keeps an unchanged comment as the shared
+ * string, so ext/zip tracks the modified entries and refuses instead.
+ * Fixed upstream by nih-at/libzip@17f10b9, unreleased as of libzip 1.11.4; this
+ * can go once that is the minimum supported version. */
+static void php_zip_mark_entry_modified(ze_zip_object *obj, zip_int64_t index)
+{
+	if (index < 0) {
+		return;
+	}
+
+	if (!obj->modified_entries) {
+		ALLOC_HASHTABLE(obj->modified_entries);
+		zend_hash_init(obj->modified_entries, 0, NULL, NULL, false);
+	}
+
+	zend_hash_index_add_empty_element(obj->modified_entries, (zend_ulong) index);
+}
+
+static void php_zip_unmark_entry_modified(ze_zip_object *obj, zip_int64_t index)
+{
+	if (obj->modified_entries && index >= 0) {
+		zend_hash_index_del(obj->modified_entries, (zend_ulong) index);
+	}
+}
+
+static void php_zip_forget_modified_entries(ze_zip_object *obj)
+{
+	if (obj->modified_entries) {
+		zend_hash_destroy(obj->modified_entries);
+		FREE_HASHTABLE(obj->modified_entries);
+		obj->modified_entries = NULL;
+	}
+}
+
+/* Whether the comment of the entry is the string shared with the copy of its record. */
+static bool php_zip_entry_shares_comment(ze_zip_object *obj, zip_uint64_t index)
+{
+	zip_error_t *err;
+	int zip_err, sys_err;
+	zip_uint32_t comment_len = 0;
+	bool shared;
+
+	if (!obj->modified_entries || !zend_hash_index_exists(obj->modified_entries, (zend_ulong) index)) {
+		return false;
+	}
+
+	/* Only a comment the entry was read with is shared. */
+	err = zip_get_error(obj->za);
+	zip_err = zip_error_code_zip(err);
+	sys_err = zip_error_code_system(err);
+
+	shared = zip_file_get_comment(obj->za, index, &comment_len, ZIP_FL_UNCHANGED | ZIP_FL_ENC_RAW) != NULL
+			&& comment_len > 0;
+
+	zip_error_set(err, zip_err, sys_err);
+
+	return shared;
+}
+/* }}} */
+
 /* {{{ php_zip_set_file_comment */
-static bool php_zip_set_file_comment(struct zip *za, zip_uint64_t index, const char *comment, size_t comment_len)
+static bool php_zip_set_file_comment(ze_zip_object *obj, zip_uint64_t index, const char *comment, size_t comment_len)
 {
 	zip_uint32_t current_comment_len;
-	const char *current_comment = zip_file_get_comment(za, index, &current_comment_len, ZIP_FL_ENC_RAW);
+	const char *current_comment = zip_file_get_comment(obj->za, index, &current_comment_len, ZIP_FL_ENC_RAW);
 
-	/* Avoid a libzip use-after-free when resetting an unchanged inherited comment. */
+	/* Setting the comment an entry already has is a no-op. */
 	if (current_comment && current_comment_len == comment_len
 			&& memcmp(current_comment, comment, comment_len) == 0) {
 		return true;
 	}
 
-	if (comment_len == 0) {
-		/* Passing NULL removes the existing comment. */
-		return zip_file_set_comment(za, index, NULL, 0, 0) == 0;
+	if (php_zip_entry_shares_comment(obj, index)) {
+		php_error_docref(NULL, E_WARNING, "Cannot set the comment of an entry that has been modified, "
+				"set the comment before modifying the entry");
+		return false;
 	}
 
-	ZEND_ASSERT(comment_len <= 0xffff);
-	return zip_file_set_comment(za, index, comment, (zip_uint16_t) comment_len, 0) == 0;
+	if (comment_len == 0) {
+		/* Passing NULL removes the existing comment. */
+		if (zip_file_set_comment(obj->za, index, NULL, 0, 0) != 0) {
+			return false;
+		}
+	} else {
+		ZEND_ASSERT(comment_len <= 0xffff);
+		if (zip_file_set_comment(obj->za, index, comment, (zip_uint16_t) comment_len, 0) != 0) {
+			return false;
+		}
+	}
+
+	/* The comment of the entry is no longer shared with the copy of its record. */
+	php_zip_unmark_entry_modified(obj, (zip_int64_t) index);
+
+	return true;
 }
 /* }}} */
 
@@ -338,6 +419,7 @@ static int php_zip_add_file(ze_zip_object *obj, const char *filename, size_t fil
 			zip_source_free(zs);
 			return -1;
 		}
+		php_zip_mark_entry_modified(obj, replace);
 		zip_error_clear(obj->za);
 		return 1;
 	}
@@ -347,6 +429,7 @@ static int php_zip_add_file(ze_zip_object *obj, const char *filename, size_t fil
 		zip_source_free(zs);
 		return -1;
 	}
+	php_zip_mark_entry_modified(obj, obj->last_id);
 	zip_error_clear(obj->za);
 	return 1;
 }
@@ -1072,6 +1155,9 @@ static void php_zip_object_free_storage(zend_object *object) /* {{{ */
 	if (!intern) {
 		return;
 	}
+
+	php_zip_forget_modified_entries(intern);
+
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(intern->za));
@@ -1509,6 +1595,7 @@ PHP_METHOD(ZipArchive, open)
 			RETURN_FALSE;
 		}
 		ze_obj->za = NULL;
+		php_zip_forget_modified_entries(ze_obj);
 	}
 	if (ze_obj->filename) {
 		efree(ze_obj->filename);
@@ -1587,6 +1674,8 @@ PHP_METHOD(ZipArchive, close)
 	ZIP_FROM_OBJECT(intern, self);
 
 	ze_obj = Z_ZIP_P(self);
+
+	php_zip_forget_modified_entries(ze_obj);
 
 	err = zip_close(intern);
 	if (err) {
@@ -1740,6 +1829,7 @@ PHP_METHOD(ZipArchive, addEmptyDir)
 	if ((Z_ZIP_P(self)->last_id = zip_dir_add(intern, (const char *)s, flags)) == -1) {
 		RETVAL_FALSE;
 	} else {
+		php_zip_mark_entry_modified(Z_ZIP_P(self), Z_ZIP_P(self)->last_id);
 		zip_error_clear(intern);
 		RETVAL_TRUE;
 	}
@@ -1999,6 +2089,7 @@ PHP_METHOD(ZipArchive, addFromString)
 		zip_source_free(zs);
 		RETURN_FALSE;
 	} else {
+		php_zip_mark_entry_modified(ze_obj, ze_obj->last_id);
 		zip_error_clear(intern);
 		RETURN_TRUE;
 	}
@@ -2217,7 +2308,7 @@ PHP_METHOD(ZipArchive, setCommentName)
 	if (idx < 0) {
 		RETURN_FALSE;
 	}
-	RETURN_BOOL(php_zip_set_file_comment(intern, (zip_uint64_t) idx, comment, comment_len));
+	RETURN_BOOL(php_zip_set_file_comment(Z_ZIP_P(self), (zip_uint64_t) idx, comment, comment_len));
 }
 /* }}} */
 
@@ -2247,7 +2338,7 @@ PHP_METHOD(ZipArchive, setCommentIndex)
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
 	idx = (zip_uint64_t) index;
 
-	RETURN_BOOL(php_zip_set_file_comment(intern, idx, comment, comment_len));
+	RETURN_BOOL(php_zip_set_file_comment(Z_ZIP_P(self), idx, comment, comment_len));
 }
 /* }}} */
 
@@ -2285,6 +2376,8 @@ PHP_METHOD(ZipArchive, setExternalAttributesName)
 			(zip_uint8_t)(opsys&0xff), (zip_uint32_t)attr) < 0) {
 		RETURN_FALSE;
 	}
+
+	php_zip_mark_entry_modified(Z_ZIP_P(self), idx);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2309,6 +2402,8 @@ PHP_METHOD(ZipArchive, setExternalAttributesIndex)
 			(zip_flags_t)flags, (zip_uint8_t)(opsys&0xff), (zip_uint32_t)attr) < 0) {
 		RETURN_FALSE;
 	}
+
+	php_zip_mark_entry_modified(Z_ZIP_P(self), (zip_int64_t)index);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2418,6 +2513,8 @@ PHP_METHOD(ZipArchive, setEncryptionName)
 	if (zip_file_set_encryption(intern, idx, (zip_uint16_t)method, password)) {
 		RETURN_FALSE;
 	}
+
+	php_zip_mark_entry_modified(Z_ZIP_P(self), idx);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2446,6 +2543,8 @@ PHP_METHOD(ZipArchive, setEncryptionIndex)
 	if (zip_file_set_encryption(intern, index, (zip_uint16_t)method, password)) {
 		RETURN_FALSE;
 	}
+
+	php_zip_mark_entry_modified(Z_ZIP_P(self), (zip_int64_t)index);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2541,6 +2640,8 @@ PHP_METHOD(ZipArchive, setCompressionName)
 			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) != 0) {
 		RETURN_FALSE;
 	}
+
+	php_zip_mark_entry_modified(Z_ZIP_P(this), idx);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2564,6 +2665,8 @@ PHP_METHOD(ZipArchive, setCompressionIndex)
 			(zip_int32_t)comp_method, (zip_uint32_t)comp_flags) != 0) {
 		RETURN_FALSE;
 	}
+
+	php_zip_mark_entry_modified(Z_ZIP_P(this), (zip_int64_t)index);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2601,6 +2704,8 @@ PHP_METHOD(ZipArchive, setMtimeName)
 			(time_t)mtime, (zip_uint32_t)flags) != 0) {
 		RETURN_FALSE;
 	}
+
+	php_zip_mark_entry_modified(Z_ZIP_P(this), idx);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2624,6 +2729,8 @@ PHP_METHOD(ZipArchive, setMtimeIndex)
 			(time_t)mtime, (zip_uint32_t)flags) != 0) {
 		RETURN_FALSE;
 	}
+
+	php_zip_mark_entry_modified(Z_ZIP_P(this), (zip_int64_t)index);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2709,6 +2816,8 @@ PHP_METHOD(ZipArchive, renameIndex)
 		RETURN_FALSE;
 	}
 
+	php_zip_mark_entry_modified(Z_ZIP_P(self), (zip_int64_t)index);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2739,6 +2848,8 @@ PHP_METHOD(ZipArchive, renameName)
 		RETURN_FALSE;
 	}
 
+	php_zip_mark_entry_modified(Z_ZIP_P(self), (zip_int64_t)sb.index);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2762,9 +2873,10 @@ PHP_METHOD(ZipArchive, unchangeIndex)
 
 	if (zip_unchange(intern, index) != 0) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	php_zip_unmark_entry_modified(Z_ZIP_P(self), (zip_int64_t)index);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2791,9 +2903,10 @@ PHP_METHOD(ZipArchive, unchangeName)
 
 	if (zip_unchange(intern, sb.index) != 0) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	php_zip_unmark_entry_modified(Z_ZIP_P(self), (zip_int64_t)sb.index);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2811,9 +2924,10 @@ PHP_METHOD(ZipArchive, unchangeAll)
 
 	if (zip_unchange_all(intern) != 0) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	php_zip_forget_modified_entries(Z_ZIP_P(self));
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2829,6 +2943,7 @@ PHP_METHOD(ZipArchive, unchangeArchive)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	/* Only the archive level changes are reverted, the entries stay modified. */
 	if (zip_unchange_archive(intern) != 0) {
 		RETURN_FALSE;
 	} else {

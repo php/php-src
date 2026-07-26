@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
     $this->stream during the close flush). (iliaal)
 
+- Zip:
+  . Fixed bug GH-22885 (SEGV when setting the comment of an entry that has been
+    modified). (Khaled Alam)
+
 30 Jul 2026, PHP 8.4.24
 
 - Calendar:

@@ -74,6 +74,11 @@ typedef struct _ze_zip_object {
 	int filename_len;
 	int buffers_cnt;
 	zip_int64_t last_id;
+	/* Indices of the entries libzip has copied the central directory record of,
+	 * because they were modified. Such a copy shares its comment with the record
+	 * of the entry, which makes setting the comment unsafe. Lazily allocated,
+	 * see php_zip_set_file_comment(). */
+	HashTable *modified_entries;
 	int err_zip;
 	int err_sys;
 #ifdef HAVE_PROGRESS_CALLBACK
