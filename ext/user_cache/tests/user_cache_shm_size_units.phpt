@@ -9,5 +9,6 @@ user_cache.shm_size=16
 <?php
 var_dump(UserCache\Cache::getStatus()->getConfiguredMemory());
 ?>
---EXPECT--
+--EXPECTF--
+Warning: user_cache.shm_size (16) cannot hold the minimum cache layout (%d bytes); the cache will be unavailable in Unknown on line 0
 int(16)

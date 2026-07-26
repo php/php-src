@@ -548,7 +548,7 @@ class Tester
 
         $this->masterProcess = proc_open($cmd, $desc, $pipes, null, $envVars);
         register_shutdown_function(
-            static function ($masterProcess) use ($configFile) {
+            function ($masterProcess) use ($configFile) {
                 @unlink($configFile);
                 if (is_resource($masterProcess)) {
                     @proc_terminate($masterProcess);

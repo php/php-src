@@ -505,14 +505,13 @@ const zend_function_entry server_additional_functions[] = {
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	int result;
-
-	result = php_module_startup(sapi_module_ptr, &cli_server_module_entry);
-	if (result == SUCCESS) {
-		php_user_cache_opt_in();
+	if (php_module_startup(sapi_module_ptr, &cli_server_module_entry) == FAILURE) {
+		return FAILURE;
 	}
 
-	return result;
+	php_user_cache_opt_in();
+
+	return SUCCESS;
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
