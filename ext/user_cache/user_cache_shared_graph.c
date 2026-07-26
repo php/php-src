@@ -489,7 +489,6 @@ static zend_always_inline bool user_cache_shared_graph_can_restore_direct(zend_c
 static zend_always_inline bool user_cache_shared_graph_can_use_verbatim_arrays(void)
 {
 #ifdef ZEND_WIN32
-	/* Verbatim arrays contain absolute pointers and cannot cross mapping bases. */
 	return false;
 #else
 	return !php_user_cache_active_context()->boundary_shared;
@@ -684,6 +683,7 @@ static zend_string *user_cache_shared_graph_array_shape_key(const HashTable *arr
 
 	count = (uint32_t) arr->nNumOfElements;
 	smart_str_appendl(&shape_key, "ucshape", sizeof("ucshape") - 1);
+
 	user_cache_shared_graph_key_append_u32(&shape_key, count);
 
 	ZEND_HASH_FOREACH_STR_KEY((HashTable *) arr, key) {
@@ -869,6 +869,7 @@ static bool user_cache_shared_graph_state_value_fits_schema(
 			}
 
 			arr_key = (zend_ulong) (uintptr_t) Z_ARRVAL_P(value);
+
 			if (!php_user_cache_seen_test_and_add(seen_arrs, Z_ARRVAL_P(value))) {
 				return true;
 			}
@@ -991,7 +992,6 @@ static php_user_cache_object_route user_cache_shared_graph_classify_object_route
 	return PHP_USER_CACHE_OBJECT_ROUTE_PLAIN;
 }
 
-/* The route is immutable per class and cached for the request. */
 static php_user_cache_object_route user_cache_shared_graph_classify_object_route(zend_class_entry *ce)
 {
 	zval *cached, route_zv;
@@ -1020,6 +1020,7 @@ static void user_cache_shared_graph_object_route_memo_release(void)
 {
 	if (UC_G(object_route_memo) != NULL) {
 		zend_hash_destroy(UC_G(object_route_memo));
+
 		efree(UC_G(object_route_memo));
 
 		UC_G(object_route_memo) = NULL;
@@ -1313,7 +1314,6 @@ static bool user_cache_shared_graph_extract_unserialize_route_snapshot(const zva
 	return user_cache_shared_graph_extract_property_snapshot(value, state);
 }
 
-/* A NULL memo means the write lock is held, so state hooks may not run. */
 static bool user_cache_shared_graph_get_memoized_state(
 		const zval *value,
 		HashTable *state_memo,
@@ -1325,6 +1325,7 @@ static bool user_cache_shared_graph_get_memoized_state(
 	zval *memo_state;
 
 	ZVAL_UNDEF(owned_state);
+
 	*state_ptr = NULL;
 
 	if (state_memo == NULL) {
@@ -1346,6 +1347,7 @@ static bool user_cache_shared_graph_get_memoized_state(
 	if (!produce_state(value, owned_state)) {
 		if (!Z_ISUNDEF_P(owned_state)) {
 			zval_ptr_dtor(owned_state);
+
 			ZVAL_UNDEF(owned_state);
 		}
 
@@ -1355,6 +1357,7 @@ static bool user_cache_shared_graph_get_memoized_state(
 	memo_state = zend_hash_index_add(state_memo, memo_key, owned_state);
 	if (memo_state == NULL) {
 		zval_ptr_dtor(owned_state);
+
 		ZVAL_UNDEF(owned_state);
 
 		return false;
@@ -1385,11 +1388,13 @@ static bool user_cache_shared_graph_get_safe_direct_state(
 	}
 
 	ZVAL_UNDEF(owned_state);
+
 	*state_ptr = NULL;
 
 	if (!user_cache_shared_graph_produce_safe_direct_state(value, owned_state)) {
 		if (!Z_ISUNDEF_P(owned_state)) {
 			zval_ptr_dtor(owned_state);
+
 			ZVAL_UNDEF(owned_state);
 		}
 
@@ -1475,7 +1480,6 @@ static bool user_cache_shared_graph_get_serdes_blob(
 
 	*blob_ptr = NULL;
 
-	/* Serialization may invoke user code and is forbidden under the write lock. */
 	if (state_memo == NULL) {
 		return false;
 	}
@@ -1550,7 +1554,6 @@ static bool user_cache_shared_graph_calc_magic_state_object(
 	zval *state_ptr, state;
 	bool result;
 
-	/* Reserve shared objects only once. */
 	if (!php_user_cache_seen_test_and_add(&ctx->seen_objects, obj)) {
 		return true;
 	}
@@ -1627,7 +1630,6 @@ static bool user_cache_shared_graph_calc_sleep_state_object(
 		;
 
 		if (result) {
-			/* Native serialization restores integer keys as property names. */
 			ZEND_HASH_FOREACH_KEY_VAL(props, num_key, prop_name, prop_val) {
 				resolved_name = prop_name != NULL
 					? zend_string_copy(prop_name)
@@ -1677,10 +1679,8 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 		return false;
 	}
 
-	/* state_ptr may dangle once recursion resizes the memo; keep the array. */
 	state_ht = Z_TYPE_P(state_ptr) == IS_ARRAY ? Z_ARRVAL_P(state_ptr) : NULL;
 
-	/* Reserve shared objects only once. */
 	if (!php_user_cache_seen_test_and_add(&ctx->seen_objects, obj)) {
 		result = true;
 
@@ -1929,8 +1929,8 @@ static bool user_cache_shared_graph_calc_array(
 			return user_cache_shared_graph_calc_verbatim_value(ctx, value);
 		}
 
-		/* A state hook may free an array keyed by address in the verdict map. */
 		verdict = NULL;
+
 		if (ctx->shared_verdicts != NULL &&
 			(ctx->state_memo == NULL || zend_hash_num_elements(ctx->state_memo) == 0)
 		) {
@@ -2119,7 +2119,6 @@ static void user_cache_shared_graph_copy_destroy(php_user_cache_shared_graph_cop
 	zend_hash_destroy(&ctx->seen_arrays);
 }
 
-/* Pack the flags displacement into the two free alignment bits. */
 static bool user_cache_shared_graph_seen_record_object_offsets(
 	php_user_cache_shared_graph_copy_context *ctx,
 	const zend_object *obj,
@@ -2187,7 +2186,6 @@ static php_user_cache_copy_object_ref_result user_cache_shared_graph_copy_emit_o
 	return PHP_USER_CACHE_COPY_OBJECT_REF_EMITTED;
 }
 
-/* Callers must initialize the full unaligned region. */
 static bool user_cache_shared_graph_copy_alloc(
 	php_user_cache_shared_graph_copy_context *ctx,
 	size_t amount,
@@ -2212,7 +2210,6 @@ static bool user_cache_shared_graph_copy_alloc(
 	return true;
 }
 
-/* Copy a string into the buffer, returning the existing offset for repeats. */
 static bool user_cache_shared_graph_copy_string(
 	php_user_cache_shared_graph_copy_context *ctx,
 	const zend_string *str,
@@ -3158,6 +3155,7 @@ static bool user_cache_shared_graph_copy_plain_object(
 	props = zend_get_properties_for((zval *) src, ZEND_PROP_PURPOSE_SERIALIZE);
 	prop_count = props != NULL ? props->nNumOfElements : 0;
 	properties_offset = 0;
+
 	if (prop_count != 0 &&
 		!user_cache_shared_graph_copy_alloc(
 			ctx,
@@ -3483,7 +3481,7 @@ static bool user_cache_shared_graph_copy_array(
 		goto done;
 	}
 
-	if (!user_cache_shared_graph_copy_alloc(ctx, sizeof(*graph_array), &array_offset) ||
+	if (!uçser_cache_shared_graph_copy_alloc(ctx, sizeof(*graph_array), &array_offset) ||
 		!user_cache_shared_graph_copy_alloc(
 			ctx,
 			(size_t) Z_ARRVAL_P(src)->nNumOfElements * sizeof(*graph_elems),
@@ -4029,7 +4027,6 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 
 	array_init_size(dst, graph_array->count);
 
-	/* Initialize before identity registration raises the array refcount. */
 	if (graph_array->count > 0) {
 		if (graph_array->reserved & PHP_USER_CACHE_SHARED_GRAPH_ARRAY_FLAG_PACKED) {
 			zend_hash_real_init_packed(Z_ARRVAL_P(dst));
@@ -4066,11 +4063,13 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 
 			if (zend_hash_next_index_insert_new(Z_ARRVAL_P(dst), &val) == NULL) {
 				zval_ptr_dtor(&val);
+
 				return user_cache_decode_fail_zval(dst);
 			}
 		}
 
 		Z_ARRVAL_P(dst)->nNextFreeElement = graph_array->next_free;
+
 		PHP_USER_CACHE_HT_DISALLOW_COW_VIOLATION(Z_ARRVAL_P(dst));
 
 		return true;
@@ -4091,6 +4090,7 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 			key = user_cache_decode_string_at(buf, buf_len, graph_elem->key_offset);
 			if (key == NULL) {
 				zval_ptr_dtor(&val);
+
 				return user_cache_decode_fail_zval(dst);
 			}
 
@@ -4160,6 +4160,7 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_apply_prope
 
 	if (!result) {
 		zval_ptr_dtor(prop_val);
+
 		return user_cache_decode_fail_zval(dst);
 	}
 
@@ -4278,8 +4279,8 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_object(
 	if (class_name == NULL) {
 		return false;
 	}
-	ce = user_cache_decode_lookup_class(class_name);
 
+	ce = user_cache_decode_lookup_class(class_name);
 	if (ce == NULL) {
 		return false;
 	}
@@ -6235,6 +6236,18 @@ bool php_user_cache_shared_graph_decode(
 	}
 
 	return result;
+}
+
+/* Cheap advisory probe for eviction victim scans: a payload with live
+ * references would be retired instead of freed, so evicting its entry
+ * reclaims no space (and the references mean it is in active use anyway). */
+bool php_user_cache_shared_graph_payload_has_refs_locked(uint32_t payload_offset)
+{
+	php_user_cache_shared_graph_header *header =
+		user_cache_shared_graph_payload_header(payload_offset)
+	;
+
+	return header != NULL && zend_atomic_int_load_ex(&header->ref_state) != 0;
 }
 
 bool php_user_cache_shared_graph_can_overwrite_payload_locked(uint32_t payload_offset)

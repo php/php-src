@@ -47,7 +47,9 @@
 #define PHP_USER_CACHE_MAGIC 		0xCAC17E01U
 #define PHP_USER_CACHE_VERSION 		1U
 #define PHP_USER_CACHE_MIN_CAPACITY 127U
-#define PHP_USER_CACHE_SLOT_BYTES	256U
+/* Auto entries hint density: one expected entry per 2KB of segment. */
+#define PHP_USER_CACHE_AUTO_ENTRY_BYTES		2048U
+#define PHP_USER_CACHE_ENTRIES_HINT_MAX		16777213
 
 #define PHP_USER_CACHE_KEY_DELIMITER		"\x1f"
 #define PHP_USER_CACHE_KEY_DELIMITER_CHAR	'\x1f'
@@ -123,6 +125,22 @@
  * that are never read again would otherwise wait for allocation pressure. */
 #define PHP_USER_CACHE_EXPUNGE_WRITE_OP_INTERVAL	64U
 #define PHP_USER_CACHE_EXPUNGE_SCAN_MAX				4096U
+
+/* Advisory access-stamp clock: refreshing at most once per interval keeps the
+ * hot read path free of clock reads while bounding staleness in long-lived
+ * requests. */
+#define PHP_USER_CACHE_ACCESS_NOW_REFRESH_INTERVAL	1024U
+
+/* LRU eviction: victims per window scan, victims per store attempt, and the
+ * slot-scan bound that keeps a sparse table from degenerating into a full
+ * table walk under the write lock. */
+#define PHP_USER_CACHE_EVICTION_WINDOW			32U
+#define PHP_USER_CACHE_EVICTION_MAX_VICTIMS		64U
+#define PHP_USER_CACHE_EVICTION_SCAN_MAX		4096U
+
+#define PHP_USER_CACHE_EVICTION_POLICY_LRU		0
+#define PHP_USER_CACHE_EVICTION_POLICY_CLEAR	1
+#define PHP_USER_CACHE_EVICTION_POLICY_NONE		2
 
 #define PHP_USER_CACHE_ENTRY_LOCK_TABLE_SIZE		1024U
 #define PHP_USER_CACHE_ENTRY_LOCK_WAIT_TIMEOUT_US	(10U * 1000U * 1000U)
@@ -205,6 +223,10 @@
 	((void) _InterlockedExchange((volatile long *) (target), (long) (value)))
 # define PHP_USER_CACHE_ATOMIC_CAS_32(target, expected, desired) \
 	((uint32_t) _InterlockedCompareExchange((volatile long *) (target), (long) (desired), (long) (expected)) == (expected))
+# define PHP_USER_CACHE_ATOMIC_LOAD_32_RELAXED(target) \
+	(*(volatile uint32_t *) (target))
+# define PHP_USER_CACHE_ATOMIC_STORE_32_RELAXED(target, value) \
+	((void) (*(volatile uint32_t *) (target) = (value)))
 # define PHP_USER_CACHE_ATOMIC_FENCE_SEQ_CST()	MemoryBarrier()
 # define PHP_USER_CACHE_ATOMIC_FENCE_ACQUIRE()	MemoryBarrier()
 #else
@@ -220,6 +242,10 @@
 	__atomic_store_n((target), (value), __ATOMIC_RELEASE)
 # define PHP_USER_CACHE_ATOMIC_CAS_32(target, expected, desired) \
 	__atomic_compare_exchange_n((target), &(expected), (desired), false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)
+# define PHP_USER_CACHE_ATOMIC_LOAD_32_RELAXED(target) \
+	__atomic_load_n((target), __ATOMIC_RELAXED)
+# define PHP_USER_CACHE_ATOMIC_STORE_32_RELAXED(target, value) \
+	__atomic_store_n((target), (value), __ATOMIC_RELAXED)
 # define PHP_USER_CACHE_ATOMIC_FENCE_SEQ_CST()	__atomic_thread_fence(__ATOMIC_SEQ_CST)
 # define PHP_USER_CACHE_ATOMIC_FENCE_ACQUIRE()	__atomic_thread_fence(__ATOMIC_ACQUIRE)
 #endif /* PHP_USER_CACHE_OPTIMISTIC_MSVC */
@@ -236,6 +262,8 @@
 # define PHP_USER_CACHE_ATOMIC_STORE_32(target, value) ((void) (*(target) = (value)))
 # define PHP_USER_CACHE_ATOMIC_CAS_32(target, expected, desired) \
 	(*(target) == (expected) ? ((*(target) = (desired)), true) : false)
+# define PHP_USER_CACHE_ATOMIC_LOAD_32_RELAXED(target) (*(target))
+# define PHP_USER_CACHE_ATOMIC_STORE_32_RELAXED(target, value) ((void) (*(target) = (value)))
 # define PHP_USER_CACHE_ATOMIC_FENCE_SEQ_CST()	((void) 0)
 # define PHP_USER_CACHE_ATOMIC_FENCE_ACQUIRE()	((void) 0)
 #endif /* PHP_USER_CACHE_HAVE_OPTIMISTIC */
@@ -292,7 +320,6 @@ typedef struct {
 #ifndef ZEND_WIN32
 	const char *sem_filename_prefix;
 #endif
-	bool clear_on_pressure;
 	bool boundary_shared;
 	const char *boundary_identity;
 	size_t boundary_identity_len;
@@ -362,6 +389,7 @@ typedef struct {
 	uint64_t write_seq;
 	uint64_t expunge_count;
 	uint64_t store_failure_count;
+	uint64_t eviction_count;
 	/* Cumulative dead-pin recovery statistics: owners whose slots the sweep
 	 * reclaimed, and payload references stripped from them. */
 	uint64_t graph_dead_pin_owners_reclaimed;
@@ -369,6 +397,8 @@ typedef struct {
 	uint32_t tombstone_count;
 	uint32_t lock_model;
 	uint32_t orphaned_graphs_saturated;
+	/* Shared clock hand for LRU victim scans; fairness only, never trusted. */
+	uint32_t eviction_hand;
 	uint8_t boundary_identity_digest[32];
 	uint32_t boundary_identity_digest_set;
 	uint32_t orphaned_graphs[PHP_USER_CACHE_ORPHANED_GRAPH_SLOTS];
@@ -399,8 +429,11 @@ typedef struct {
 	uint8_t state;
 	uint8_t value_type;
 	uint16_t reserved;
-	zend_long long_value;
-	double double_value;
+	/* Discriminated by value_type. */
+	union {
+		zend_long long_value;
+		double double_value;
+	};
 } php_user_cache_entry;
 
 typedef struct {
@@ -417,8 +450,11 @@ typedef struct {
 	uint8_t value_type;
 	uint8_t reserved[2];
 	zend_string *key;
-	zend_long long_value;
-	double double_value;
+	/* Discriminated by value_type. */
+	union {
+		zend_long long_value;
+		double double_value;
+	};
 } php_user_cache_lookup_entry;
 
 typedef struct {
@@ -430,8 +466,11 @@ typedef struct {
 	zend_string *owned_string;
 	/* Owned by the prepared value. */
 	uint32_t *fixup_offsets;
-	zend_long long_value;
-	double double_value;
+	/* Discriminated by value_type. */
+	union {
+		zend_long long_value;
+		double double_value;
+	};
 	HashTable *state_memo;
 	uint32_t value_len;
 	uint32_t fixup_count;
@@ -662,6 +701,10 @@ typedef struct {
 	uint32_t expunge_write_ops;
 	/* Process-local resume point for bounded expiry scans. */
 	uint32_t expired_expunge_cursor;
+	/* Request-lazy coarse clock for access stamps; refreshed opportunistically
+	 * and every PHP_USER_CACHE_ACCESS_NOW_REFRESH_INTERVAL touches. */
+	uint32_t access_now;
+	uint32_t access_now_touches;
 	uint64_t entry_lock_owner_probe_pid;
 	uint64_t entry_lock_owner_probe_start_time;
 	uint64_t entry_lock_owner_probe_at;
@@ -672,6 +715,8 @@ typedef struct {
 	bool enable;
 	bool enable_cli;
 	zend_long shm_size;
+	zend_long entries_hint;
+	zend_long eviction_policy;
 	char *lockfile_path;
 	char *memory_model;
 } php_user_cache_globals;
@@ -712,6 +757,7 @@ bool php_user_cache_request_owns_entry_lock(zend_string *key);
 bool php_user_cache_acquire_entry_locks(zend_string **keys, bool *acquired, uint32_t count);
 void php_user_cache_release_entry_locks(zend_string **keys, const bool *acquired, uint32_t count);
 bool php_user_cache_entry_locks_allow_clear_locked(void);
+bool php_user_cache_entry_key_lock_active_locked(php_user_cache_header *header, zend_ulong hash, uint32_t key_offset, uint32_t key_len, uint64_t *now);
 void php_user_cache_release_request_entry_locks(void);
 #ifdef ZTS
 void php_user_cache_free_thread_deferred_entry_lock_releases(php_user_cache_globals *globals);
@@ -777,6 +823,7 @@ void php_user_cache_decode_resolve_cache_release(void);
 void php_user_cache_decode_shape_prototype_cache_release(void);
 void php_user_cache_decode_maps_teardown(void);
 bool php_user_cache_shared_graph_can_overwrite_payload_locked(uint32_t payload_offset);
+bool php_user_cache_shared_graph_payload_has_refs_locked(uint32_t payload_offset);
 bool php_user_cache_shared_graph_publish_copied_payload_locked(
 	uint8_t *dst_buf,
 	size_t dst_buf_len,
