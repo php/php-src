@@ -133,7 +133,7 @@ typedef struct _sapi_globals_struct {
 	sapi_headers_struct sapi_headers;
 	int64_t read_post_bytes;
 	bool post_read;
-	unsigned char headers_sent;
+	bool headers_sent;
 	zend_stat_t global_stat;
 	char *default_mimetype;
 	char *default_charset;

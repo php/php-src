@@ -2263,7 +2263,7 @@ parent_loop_end:
 					}
 					fcgi_shutdown();
 					no_headers = 1;
-					SG(headers_sent) = 1;
+					SG(headers_sent) = true;
 					php_cgi_usage(argv[0]);
 					php_output_end_all();
 					exit_status = 0;
@@ -2325,7 +2325,7 @@ parent_loop_end:
 								return FAILURE;
 							}
 							if (no_headers) {
-								SG(headers_sent) = 1;
+								SG(headers_sent) = true;
 								SG(request_info).no_headers = 1;
 							}
 							php_print_info(0xFFFFFFFF);
@@ -2343,7 +2343,7 @@ parent_loop_end:
 							if (script_file) {
 								efree(script_file);
 							}
-							SG(headers_sent) = 1;
+							SG(headers_sent) = true;
 							php_printf("[PHP Modules]\n");
 							print_modules();
 							php_printf("\n[Zend Modules]\n");
@@ -2369,7 +2369,7 @@ parent_loop_end:
 								free(bindpath);
 								return FAILURE;
 							}
-							SG(headers_sent) = 1;
+							SG(headers_sent) = true;
 							SG(request_info).no_headers = 1;
 							php_print_version(&cgi_sapi_module);
 							php_request_shutdown((void *) 0);
@@ -2406,7 +2406,7 @@ do_repeat:
 				}
 
 				if (no_headers) {
-					SG(headers_sent) = 1;
+					SG(headers_sent) = true;
 					SG(request_info).no_headers = 1;
 				}
 
@@ -2466,7 +2466,7 @@ do_repeat:
 				return FAILURE;
 			}
 			if (no_headers) {
-				SG(headers_sent) = 1;
+				SG(headers_sent) = true;
 				SG(request_info).no_headers = 1;
 			}
 

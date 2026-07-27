@@ -409,7 +409,7 @@ SAPI_API void sapi_activate(void)
 	*/
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
-	SG(headers_sent) = 0;
+	SG(headers_sent) = false;
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
@@ -517,7 +517,7 @@ SAPI_API void sapi_deactivate_destroy(void)
 	}
 	sapi_send_headers_free();
 	SG(sapi_started) = 0;
-	SG(headers_sent) = 0;
+	SG(headers_sent) = false;
 	SG(request_info).headers_read = 0;
 	SG(global_request_time) = 0;
 }
@@ -871,7 +871,7 @@ SAPI_API int sapi_send_headers(void)
 		zend_fcc_dtor(&fcc);
 	}
 
-	SG(headers_sent) = 1;
+	SG(headers_sent) = true;
 
 	if (sapi_module.send_headers) {
 		retval = sapi_module.send_headers(&SG(sapi_headers));
@@ -908,7 +908,7 @@ SAPI_API int sapi_send_headers(void)
 			ret = SUCCESS;
 			break;
 		case SAPI_HEADER_SEND_FAILED:
-			SG(headers_sent) = 0;
+			SG(headers_sent) = false;
 			ret = FAILURE;
 			break;
 	}
