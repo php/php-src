@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
     offset in a non-UTF-8 encoding). (Eyüp Can Akman)
 
+- PCRE:
+  . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
+    now forbidden. (Arnaud)
+
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     SO_LINGER options. (Weilin Du)

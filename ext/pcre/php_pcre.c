@@ -725,6 +725,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 #ifdef PCRE2_UCP
 						coptions |= PCRE2_UCP;
 #endif
+						/* The \C escape sequence is unsafe in PCRE2_UTF mode */
+						coptions |= PCRE2_NEVER_BACKSLASH_C;
 				break;
 			case 'J':	coptions |= PCRE2_DUPNAMES;		break;
 
@@ -778,8 +780,13 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		pcre2_get_error_message(errnumber, error, sizeof(error));
-		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", error, erroffset);
+		const char *err_msg = (const char*) error;
+		if (errnumber == PCRE2_ERROR_BACKSLASH_C_CALLER_DISABLED) {
+			err_msg = "using \\C is incompatible with the 'u' modifier";
+		} else {
+			pcre2_get_error_message(errnumber, error, sizeof(error));
+		}
+		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", err_msg, erroffset);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		efree(pattern);
 		return NULL;
