@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21097 (Accessing Dom\Node properties can can throw TypeError).
     (ndossche)
 
+- PCRE:
+  . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
+    now forbidden. (Arnaud)
+
 - PDO_PGSQL:
   . Fixed bug GH-21055 (connection attribute status typo for GSS negotiation).
     (lsaos)
