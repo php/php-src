@@ -91,7 +91,7 @@ C23_ENUM(php_stream_error_mode, uint8_t) {
 };
 
 /* Error store context options (internal C constants) */
-C23_ENUM(php_stream_error_store_mode, uint8_t) {
+C23_ENUM(php_stream_error_store, uint8_t) {
 	PHP_STREAM_ERROR_STORE_AUTO = 0,
 	PHP_STREAM_ERROR_STORE_NONE = 1,
 	PHP_STREAM_ERROR_STORE_NON_TERM = 2,
@@ -99,7 +99,7 @@ C23_ENUM(php_stream_error_store_mode, uint8_t) {
 	PHP_STREAM_ERROR_STORE_ALL = 4
 };
 
-static php_stream_error_store_mode php_stream_auto_decide_error_store_mode(php_stream_error_mode error_mode)
+static php_stream_error_store php_stream_auto_decide_error_store_mode(php_stream_error_mode error_mode)
 {
 	switch (error_mode) {
 		case PHP_STREAM_ERROR_MODE_ERROR:
@@ -142,7 +142,7 @@ static php_stream_error_mode php_stream_get_error_mode(php_stream_context *conte
 	return PHP_STREAM_ERROR_MODE_ERROR;
 }
 
-static php_stream_error_store_mode php_stream_get_error_store_mode(
+static php_stream_error_store php_stream_get_error_store_mode(
 	php_stream_context *context, php_stream_error_mode error_mode)
 {
 	if (!context) {
@@ -456,7 +456,7 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 		}
 
 		php_stream_error_mode error_mode = php_stream_get_error_mode(context);
-		php_stream_error_store_mode store_mode = php_stream_get_error_store_mode(context, error_mode);
+		php_stream_error_store store_mode = php_stream_get_error_store_mode(context, error_mode);
 
 		bool is_terminating = php_stream_has_terminating_error(op);
 
