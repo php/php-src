@@ -4193,6 +4193,55 @@ uint32_t php_user_cache_alloc_locked(size_t size, const void *src)
 	return user_cache_alloc_from_tail_locked(header, size, total_size, src);
 }
 
+bool php_user_cache_alloc_can_satisfy_locked(size_t size, size_t key_size)
+{
+	php_user_cache_header *header = php_user_cache_header_ptr();
+	uint32_t free_offset;
+	size_t value_total, key_total, region, largest, second = 0;
+
+	if (!header || size == 0 || size > UINT32_MAX - sizeof(php_user_cache_block)) {
+		return false;
+	}
+
+	value_total = PHP_USER_CACHE_ALIGNED_SIZE(sizeof(php_user_cache_block) + size);
+	key_total = key_size != 0
+		? PHP_USER_CACHE_ALIGNED_SIZE(sizeof(php_user_cache_block) + key_size)
+		: 0
+	;
+	if (value_total > UINT32_MAX || key_total > UINT32_MAX - value_total) {
+		return false;
+	}
+
+	region = header->next_free <= header->data_size
+		? header->data_size - header->next_free
+		: 0
+	;
+	largest = region;
+
+	for (free_offset = header->free_list;
+		free_offset != 0;
+		free_offset = php_user_cache_block_ptr(free_offset)->next_free
+	) {
+		region = php_user_cache_block_ptr(free_offset)->size;
+
+		if (region >= value_total + key_total) {
+			return true;
+		}
+
+		if (region > largest) {
+			second = largest;
+			largest = region;
+		} else if (region > second) {
+			second = region;
+		}
+	}
+
+
+	return largest >= value_total + key_total ||
+		(largest >= value_total && (key_total == 0 || second >= key_total))
+	;
+}
+
 bool php_user_cache_startup_storage_before_request(void)
 {
 	php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
