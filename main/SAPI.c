@@ -217,7 +217,7 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 	}
 	if (read_bytes < buflen) {
 		/* done */
-		SG(post_read) = 1;
+		SG(post_read) = true;
 	}
 
 	return read_bytes;
@@ -418,7 +418,7 @@ SAPI_API void sapi_activate(void)
 	SG(request_info).post_entry = NULL;
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
 	SG(global_request_time) = 0;
-	SG(post_read) = 0;
+	SG(post_read) = false;
 	SG(send_header_fcc) = empty_fcall_info_cache;
 	/* It's possible to override this general case in the activate() callback, if necessary. */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
