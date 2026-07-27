@@ -134,13 +134,13 @@ typedef struct _sapi_globals_struct {
 	int64_t read_post_bytes;
 	bool post_read;
 	bool headers_sent;
+	bool sapi_started;
+	int options;
 	zend_stat_t global_stat;
 	char *default_mimetype;
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
 	zend_long post_max_size;
-	int options;
-	bool sapi_started;
 	double global_request_time;
 	HashTable known_post_content_types;
 	zend_fcall_info_cache send_header_fcc;
