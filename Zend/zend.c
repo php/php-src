@@ -12,7 +12,8 @@
    | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
-   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>         
+   |          Bernard Lulu <bernlulu20@php.net>
    +----------------------------------------------------------------------+
 */
 
