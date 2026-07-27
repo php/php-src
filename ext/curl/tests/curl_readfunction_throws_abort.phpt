@@ -16,7 +16,7 @@ $host = curl_cli_server_start();
 $ch = curl_init("{$host}/get.inc");
 
 $file = new CURLFile(__DIR__ . '/curl_testdata1.txt');
-curl_setopt($ch, CURLOPT_POST, ['file' => $file]);
+curl_setopt($ch, CURLOPT_POST, 1);
 
 curl_setopt($ch, CURLOPT_READFUNCTION,
     function (): int {
