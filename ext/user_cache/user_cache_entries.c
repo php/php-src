@@ -2388,24 +2388,7 @@ static bool user_cache_publish_prepared_shared_graph_locked(
 	);
 }
 
-static size_t user_cache_entry_storage_footprint_locked(const php_user_cache_entry *entry)
-{
-	size_t footprint = 0;
-
-	if (entry->value_offset != 0 && user_cache_value_uses_offset(entry->value_type)) {
-		footprint += php_user_cache_block_payload_capacity(entry->value_offset);
-	}
-
-	if (entry->key_offset != 0 &&
-		(entry->reserved & PHP_USER_CACHE_ENTRY_RESERVED_COMBINED_VALUE_KEY) == 0
-	) {
-		footprint += php_user_cache_block_payload_capacity(entry->key_offset);
-	}
-
-	return footprint;
-}
-
-static bool user_cache_evict_lru_locked(size_t needed_size)
+static bool user_cache_evict_lru_locked(size_t needed_size, size_t needed_key_size)
 {
 	php_user_cache_header *header = php_user_cache_header_ptr();
 	php_user_cache_entry *entries, *entry;
@@ -2413,7 +2396,6 @@ static bool user_cache_evict_lru_locked(size_t needed_size)
 	uint32_t hand, slot, scanned, collected, stamp, best_slot,
 		best_stamp = 0, victims = 0, *stamps
 	;
-	size_t freed = 0;
 	int8_t graph_quiescent = -1;
 	bool evicted_any = false;
 
@@ -2425,7 +2407,6 @@ static bool user_cache_evict_lru_locked(size_t needed_size)
 	stamps = php_user_cache_access_stamps_ptr(header);
 	hand = header->eviction_hand % header->capacity;
 	lock_now = (uint64_t) time(NULL);
-	/* The lock probe compares time_base-relative lease deadlines. */
 	lock_now_rel = php_user_cache_time_rel(header, lock_now);
 
 	user_cache_access_note_time(lock_now);
@@ -2455,9 +2436,6 @@ static bool user_cache_evict_lru_locked(size_t needed_size)
 					continue;
 				}
 
-				/* An undrained reader set would orphan the payload instead
-				 * of freeing it, so its bytes must not count toward freed;
-				 * probe lazily so graph-free scans never pay the drain wait. */
 				if (graph_quiescent < 0) {
 					graph_quiescent = php_user_cache_quiesce_graph_payloads_locked() ? 1 : 0;
 				}
@@ -2467,10 +2445,6 @@ static bool user_cache_evict_lru_locked(size_t needed_size)
 				}
 			}
 
-			/* Both skips are load-bearing: evicting a per-key-locked entry
-			 * would break the writer serialization contract, and counting a
-			 * pinned graph payload as freed makes the retry fail into the
-			 * full-clear fallback. */
 			if (php_user_cache_entry_key_lock_active_locked(
 					header,
 					entry->hash,
@@ -2496,7 +2470,6 @@ static bool user_cache_evict_lru_locked(size_t needed_size)
 		}
 
 		entry = &entries[best_slot];
-		freed += user_cache_entry_storage_footprint_locked(entry);
 
 		user_cache_delete_entry_locked(header, entry);
 
@@ -2504,7 +2477,9 @@ static bool user_cache_evict_lru_locked(size_t needed_size)
 		victims++;
 		evicted_any = true;
 
-		if (needed_size == 0 || freed >= needed_size) {
+		if (needed_size == 0 ||
+			php_user_cache_alloc_can_satisfy_locked(needed_size, needed_key_size)
+		) {
 			break;
 		}
 	}
@@ -2517,6 +2492,7 @@ static bool user_cache_evict_lru_locked(size_t needed_size)
 static bool user_cache_reclaim_space_for_store_locked(
 		bool can_reclaim,
 		size_t needed_size,
+		size_t needed_key_size,
 		bool *expired_retry_used,
 		bool *evict_retry_used,
 		bool *clear_retry_used)
@@ -2545,7 +2521,7 @@ static bool user_cache_reclaim_space_for_store_locked(
 	) {
 		*evict_retry_used = true;
 
-		if (user_cache_evict_lru_locked(needed_size)) {
+		if (user_cache_evict_lru_locked(needed_size, needed_key_size)) {
 			return true;
 		}
 	}
@@ -2621,6 +2597,7 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 		if (options->retry_after_memory_pressure &&
 			user_cache_reclaim_space_for_store_locked(
 				true,
+				0,
 				0,
 				expired_retry_used,
 				evict_retry_used,
@@ -2833,6 +2810,7 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 					user_cache_reclaim_space_for_store_locked(
 						true,
 						prepared->payload_size + key_size,
+						0,
 						expired_retry_used,
 						evict_retry_used,
 						clear_retry_used
@@ -2878,6 +2856,7 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 					user_cache_reclaim_space_for_store_locked(
 						true,
 						prepared->payload_size,
+						0,
 						expired_retry_used,
 						evict_retry_used,
 						clear_retry_used
@@ -2969,7 +2948,14 @@ failure:
 	if (options->retry_after_memory_pressure &&
 		user_cache_reclaim_space_for_store_locked(
 			can_reclaim,
-			prepared->payload_size + key_size,
+			use_combined_publish
+				? prepared->payload_size + key_size
+				: prepared->payload_size
+			,
+			use_combined_publish
+				? 0
+				: key_size
+			,
 			expired_retry_used,
 			evict_retry_used,
 			clear_retry_used
