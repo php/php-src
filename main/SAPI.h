@@ -198,25 +198,25 @@ typedef enum {					/* Parameter: 			*/
 } sapi_header_op_enum;
 
 BEGIN_EXTERN_C()
-SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg);
+SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg);
 
 SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, bool duplicate, bool replace);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1)
 
 
-SAPI_API int sapi_send_headers(void);
+SAPI_API zend_result sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
 SAPI_API void sapi_read_post_data(void);
 SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
-SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entry);
-SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry);
+SAPI_API zend_result sapi_register_post_entries(const sapi_post_entry *post_entry);
+SAPI_API zend_result sapi_register_post_entry(const sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry);
-SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void));
-SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray));
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
+SAPI_API zend_result sapi_register_default_post_reader(void (*default_post_reader)(void));
+SAPI_API zend_result sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray));
+SAPI_API zend_result sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
 
-SAPI_API int sapi_flush(void);
+SAPI_API zend_result sapi_flush(void);
 SAPI_API zend_stat_t *sapi_get_stat(void);
 SAPI_API char *sapi_getenv(const char *name, size_t name_len);
 

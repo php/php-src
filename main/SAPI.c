@@ -646,7 +646,7 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 	}
 }
 
-SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
+SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 {
 	sapi_header_struct sapi_header;
 	char *colon_offset;
@@ -830,10 +830,10 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 }
 
 
-SAPI_API int sapi_send_headers(void)
+SAPI_API zend_result sapi_send_headers(void)
 {
 	int retval;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 
 	if (SG(headers_sent) || SG(request_info).no_headers) {
 		return SUCCESS;
@@ -919,7 +919,7 @@ SAPI_API int sapi_send_headers(void)
 }
 
 
-SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entries)
+SAPI_API zend_result sapi_register_post_entries(const sapi_post_entry *post_entries)
 {
 	const sapi_post_entry *p=post_entries;
 
@@ -933,16 +933,15 @@ SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entries)
 }
 
 
-SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry)
+SAPI_API zend_result sapi_register_post_entry(const sapi_post_entry *post_entry)
 {
-	int ret;
 	zend_string *key;
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
 	}
 	key = zend_string_init(post_entry->content_type, post_entry->content_type_len, 1);
 	GC_MAKE_PERSISTENT_LOCAL(key);
-	ret = zend_hash_add_mem(&SG(known_post_content_types), key,
+	zend_result ret = zend_hash_add_mem(&SG(known_post_content_types), key,
 			(void *) post_entry, sizeof(sapi_post_entry)) ? SUCCESS : FAILURE;
 	zend_string_release_ex(key, 1);
 	return ret;
@@ -958,7 +957,7 @@ SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry)
 }
 
 
-SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void))
+SAPI_API zend_result sapi_register_default_post_reader(void (*default_post_reader)(void))
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
@@ -968,7 +967,7 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void)
 }
 
 
-SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray))
+SAPI_API zend_result sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray))
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
@@ -977,7 +976,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 	return SUCCESS;
 }
 
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void))
+SAPI_API zend_result sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void))
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
@@ -987,7 +986,7 @@ SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, co
 	return SUCCESS;
 }
 
-SAPI_API int sapi_flush(void)
+SAPI_API zend_result sapi_flush(void)
 {
 	if (sapi_module.flush) {
 		sapi_module.flush(SG(server_context));
