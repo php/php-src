@@ -201,6 +201,12 @@ PHP 8.6 UPGRADE NOTES
     bytes.
   . parse_str() now raises a ValueError when the $string argument contains NUL
     bytes.
+  . setlocale() now raises a ValueError when a locale name contains NUL bytes,
+    instead of silently truncating it.
+    Arrays are now accepted only for the $locales argument. Passing an array as
+    a later variadic locale argument now throws a TypeError. Passing any
+    additional locale arguments when $locales is an array now throws an
+    ArgumentCountError.
   . linkinfo() now raises a ValueError when the $path argument is empty.
   . pathinfo() now raises a ValueError when an invalid $flag argument value is
     passed.
