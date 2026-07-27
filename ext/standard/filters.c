@@ -949,7 +949,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					goto out;
 				}
 
-				if (!isxdigit((int) *ps)) {
+				if (!isxdigit(*ps)) {
 					err = PHP_CONV_ERR_INVALID_SEQ;
 					goto out;
 				}
@@ -1519,7 +1519,7 @@ static php_stream_filter_status_t strfilter_convert_filter(
 		php_stream_bucket_delref(bucket);
 	}
 
-	if (flags != PSFS_FLAG_NORMAL) {
+	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
 		if (strfilter_convert_append_bucket(inst, stream, thisfilter,
 				buckets_out, NULL, 0, &consumed,
 				php_stream_is_persistent(stream)) != SUCCESS) {
@@ -1559,7 +1559,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 	php_convert_filter *inst;
 	php_stream_filter *retval = NULL;
 
-	char *dot;
+	const char *dot;
 	int conv_mode = 0;
 
 	if (filterparams != NULL && Z_TYPE_P(filterparams) != IS_ARRAY) {
@@ -1715,12 +1715,14 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 				data->chunk_size = 0;
 			case CHUNK_SIZE:
 				while (p < end) {
+					size_t digit;
+
 					if (*p >= '0' && *p <= '9') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - '0');
+						digit = *p - '0';
 					} else if (*p >= 'A' && *p <= 'F') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - 'A' + 10);
+						digit = *p - 'A' + 10;
 					} else if (*p >= 'a' && *p <= 'f') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - 'a' + 10);
+						digit = *p - 'a' + 10;
 					} else if (data->state == CHUNK_SIZE_START) {
 						data->state = CHUNK_ERROR;
 						break;
@@ -1728,6 +1730,11 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 						data->state = CHUNK_SIZE_EXT;
 						break;
 					}
+					if (data->chunk_size > (SIZE_MAX / 16)) {
+						data->state = CHUNK_ERROR;
+						break;
+					}
+					data->chunk_size = (data->chunk_size * 16) + digit;
 					data->state = CHUNK_SIZE;
 					p++;
 				}

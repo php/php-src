@@ -51,7 +51,7 @@ extern "C" {
 #define LXB_ENCODING_SINGLE_HASH_WINDOWS_874_SIZE 359
 #define LXB_ENCODING_SINGLE_HASH_X_MAC_CYRILLIC_SIZE 373
 
-
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
 LXB_EXTERN const lxb_encoding_single_index_t lxb_encoding_single_index_ibm866[128];
 LXB_EXTERN const lxb_encoding_single_index_t lxb_encoding_single_index_iso_8859_10[128];
 LXB_EXTERN const lxb_encoding_single_index_t lxb_encoding_single_index_iso_8859_13[128];
@@ -107,6 +107,7 @@ LXB_EXTERN const lexbor_shs_hash_t lxb_encoding_single_hash_windows_1257[356];
 LXB_EXTERN const lexbor_shs_hash_t lxb_encoding_single_hash_windows_1258[406];
 LXB_EXTERN const lexbor_shs_hash_t lxb_encoding_single_hash_windows_874[360];
 LXB_EXTERN const lexbor_shs_hash_t lxb_encoding_single_hash_x_mac_cyrillic[374];
+#endif /* !LEXBOR_DISABLE_INTERNAL_EXTERN */
 
 
 #ifdef __cplusplus

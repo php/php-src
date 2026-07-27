@@ -210,6 +210,7 @@ typedef enum _ir_type {
  * arg - argument reference CALL/TAILCALL/CARG->CARG
  * src - reference to a previous control region (IF, IF_TRUE, IF_FALSE, MERGE, LOOP_BEGIN, LOOP_END, RETURN)
  * reg - data-control dependency on region (PHI, VAR, PARAM)
+ * grd - optional data-control dependency guard (DIV, MOD)
  * ret - reference to a previous RETURN instruction (RETURN)
  * str - string: variable/argument name (VAR, PARAM, CALL, TAILCALL)
  * num - number: argument number (PARAM)
@@ -265,8 +266,8 @@ typedef enum _ir_type {
 	_(ADD,          d2C,  def, def, ___) /* addition                    */ \
 	_(SUB,          d2,   def, def, ___) /* subtraction (must be ADD+1) */ \
 	_(MUL,          d2C,  def, def, ___) /* multiplication              */ \
-	_(DIV,          d2,   def, def, ___) /* division                    */ \
-	_(MOD,          d2,   def, def, ___) /* modulo                      */ \
+	_(DIV,          d3,   def, def, grd) /* division                    */ \
+	_(MOD,          d3,   def, def, grd) /* modulo                      */ \
 	_(NEG,          d1,   def, ___, ___) /* change sign                 */ \
 	_(ABS,          d1,   def, ___, ___) /* absolute value              */ \
 	/* (LDEXP, MIN, MAX, FPMATH)                                        */ \
@@ -382,6 +383,14 @@ typedef enum _ir_type {
 	_(IJMP,         T2X1, src, def, ret) /* computed goto (terminating) */ \
 	_(RETURN,       T2X1, src, def, ret) /* function return             */ \
 	_(UNREACHABLE,  T1X2, src, ___, ret) /* unreachable (tailcall, etc) */ \
+	\
+	/* inline assembler                                                 */ \
+	_(ASM,          xN,   src, def, def) /* GCC inline assembler        */ \
+	                                     /* op2 - asm template string   */ \
+	                                     /* op3 - asm constraint string */ \
+	                                     /* opN - asm input argument    */ \
+	_(ASM_OUT,      x1,   src, ___, ___) /* ASM data output projection  */ \
+	_(ASM_GOTO,     E1,   src, ___, ___) /* ASM goto (bb end after ASM) */ \
 	\
 	/* deoptimization helper                                            */ \
 	_(EXITCALL,     x2,   src, def, ___) /* save CPU regs and call op2  */ \
@@ -569,8 +578,6 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_OPT_CFG             (1<<21) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
 #define IR_OPT_MEM2SSA         (1<<22)
 #define IR_OPT_CODEGEN         (1<<23)
-#define IR_GEN_NATIVE          (1<<24)
-#define IR_GEN_CODE            (1<<25)
 
 /* debug related */
 #ifdef IR_DEBUG
@@ -771,7 +778,7 @@ ir_ref ir_emit3(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
 ir_ref ir_emit_N(ir_ctx *ctx, uint32_t opt, int32_t count);
 void   ir_set_op(ir_ctx *ctx, ir_ref ref, int32_t n, ir_ref val);
-ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n);
+ir_ref ir_get_op(const ir_ctx *ctx, ir_ref ref, int32_t n);
 
 IR_ALWAYS_INLINE void ir_set_op1(ir_ctx *ctx, ir_ref ref, ir_ref val)
 {
@@ -865,13 +872,13 @@ int ir_reg_alloc(ir_ctx *ctx);
 int ir_regs_number(void);
 bool ir_reg_is_int(int32_t reg);
 const char *ir_reg_name(int8_t reg, ir_type type);
-int32_t ir_get_spill_slot_offset(ir_ctx *ctx, ir_ref ref);
+int32_t ir_get_spill_slot_offset(const ir_ctx *ctx, ir_ref ref);
 
 /* Target CPU instruction selection and code generation (see ir_x86.c) */
 int ir_match(ir_ctx *ctx);
 void *ir_emit_code(ir_ctx *ctx, size_t *size);
 
-bool ir_needs_thunk(ir_code_buffer *code_buffer, void *addr);
+bool ir_needs_thunk(const ir_code_buffer *code_buffer, void *addr);
 void *ir_emit_thunk(ir_code_buffer *code_buffer, void *addr, size_t *size_ptr);
 void ir_fix_thunk(void *thunk_entry, void *addr);
 
@@ -947,13 +954,14 @@ int ir_load_llvm_asm(ir_loader *loader, const char *filename);
 #define IR_SAVE_REGS       (1<<4) /* add info about selected registers */
 #define IR_SAVE_SAFE_NAMES (1<<5) /* add '@' prefix to symbol names */
 
+void ir_print_func_proto(const ir_ctx *ctx, const char *name, bool prefix, FILE *f);
 void ir_print_proto(const ir_ctx *ctx, ir_ref proto, FILE *f);
 void ir_print_proto_ex(uint8_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f);
 void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f);
 
 /* IR debug dump API (implementation in ir_dump.c) */
 void ir_dump(const ir_ctx *ctx, FILE *f);
-void ir_dump_dot(const ir_ctx *ctx, const char *name, FILE *f);
+void ir_dump_dot(const ir_ctx *ctx, const char *name, const char *comments, FILE *f);
 void ir_dump_use_lists(const ir_ctx *ctx, FILE *f);
 void ir_dump_cfg(ir_ctx *ctx, FILE *f);
 void ir_dump_cfg_map(const ir_ctx *ctx, FILE *f);

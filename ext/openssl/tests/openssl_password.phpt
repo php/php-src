@@ -5,7 +5,10 @@ openssl
 --SKIPIF--
 <?php
 if (!function_exists('openssl_password_hash')) {
-    echo "skip - No openssl_password_hash";
+    die("skip No openssl_password_hash");
+}
+if (!defined('PASSWORD_ARGON2_PROVIDER')) {
+    die("skip No openssl argon2 support");
 }
 ?>
 --FILE--

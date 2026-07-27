@@ -678,8 +678,8 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 
 	/* strtol allows whitespace and other stuff in the beginning
 		* we're not interested */
-	if ((hexadecimal && !isxdigit(**buf)) ||
-			(!hexadecimal && !isdigit(**buf))) {
+	if ((hexadecimal && !isxdigit((unsigned char)**buf)) ||
+			(!hexadecimal && !isdigit((unsigned char)**buf))) {
 		return FAILURE;
 	}
 

@@ -105,7 +105,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 		p = s;
 		while (p < e) {
 			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
-			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
+			if (!isalpha((unsigned char)*p) && !isdigit((unsigned char)*p) && *p != '+' && *p != '.' && *p != '-') {
 				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
 					goto parse_port;
 				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
@@ -134,7 +134,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			 * correctly parse things like a.com:80
 			 */
 			p = e + 1;
-			while (p < ue && isdigit(*p)) {
+			while (p < ue && isdigit((unsigned char)*p)) {
 				p++;
 			}
 
@@ -174,7 +174,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 		p = e + 1;
 		pp = p;
 
-		while (pp < ue && pp - p < 6 && isdigit(*pp)) {
+		while (pp < ue && pp - p < 6 && isdigit((unsigned char)*pp)) {
 			pp++;
 		}
 
@@ -417,12 +417,12 @@ static int php_htoi(char *s)
 	int value;
 	int c;
 
-	c = ((unsigned char *)s)[0];
+	c = (unsigned char)s[0];
 	if (isupper(c))
 		c = tolower(c);
 	value = (c >= '0' && c <= '9' ? c - '0' : c - 'a' + 10) * 16;
 
-	c = ((unsigned char *)s)[1];
+	c = (unsigned char)s[1];
 	if (isupper(c))
 		c = tolower(c);
 	value += c >= '0' && c <= '9' ? c - '0' : c - 'a' + 10;
@@ -588,8 +588,8 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
 		if (*data == '+') {
 			*dest = ' ';
 		}
-		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1))
-				 && isxdigit((int) *(data + 2))) {
+		else if (*data == '%' && len >= 2 && isxdigit((unsigned char)data[1])
+				 && isxdigit((unsigned char)data[2])) {
 			*dest = (char) php_htoi(data + 1);
 			data += 2;
 			len -= 2;
@@ -647,8 +647,8 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 	char *data = str;
 
 	while (len--) {
-		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1))
-			&& isxdigit((int) *(data + 2))) {
+		if (*data == '%' && len >= 2 && isxdigit((unsigned char)data[1])
+			&& isxdigit((unsigned char)data[2])) {
 			*dest = (char) php_htoi(data + 1);
 			data += 2;
 			len -= 2;
@@ -709,7 +709,7 @@ no_name_header:
 				c = *p;
 				*p = '\0';
 				s = p + 1;
-				while (isspace((int)*(unsigned char *)s)) {
+				while (isspace((unsigned char)*s)) {
 					s++;
 				}
 

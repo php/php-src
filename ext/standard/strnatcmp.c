@@ -40,12 +40,12 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 	   both numbers to know that they have the same magnitude, so we
 	   remember it in BIAS. */
 	for(;; (*a)++, (*b)++) {
-		if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
-			(*b == bend || !isdigit((int)(unsigned char)**b)))
+		if ((*a == aend || !isdigit((unsigned char)**a)) &&
+			(*b == bend || !isdigit((unsigned char)**b)))
 			return bias;
-		else if (*a == aend || !isdigit((int)(unsigned char)**a))
+		else if (*a == aend || !isdigit((unsigned char)**a))
 			return -1;
-		else if (*b == bend || !isdigit((int)(unsigned char)**b))
+		else if (*b == bend || !isdigit((unsigned char)**b))
 			return +1;
 		else if (**a < **b) {
 			if (!bias)
@@ -67,12 +67,12 @@ compare_left(char const **a, char const *aend, char const **b, char const *bend)
 	/* Compare two left-aligned numbers: the first to have a
 	   different value wins. */
 	for(;; (*a)++, (*b)++) {
-		if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
-			(*b == bend || !isdigit((int)(unsigned char)**b)))
+		if ((*a == aend || !isdigit((unsigned char)**a)) &&
+			(*b == bend || !isdigit((unsigned char)**b)))
 			return 0;
-		else if (*a == aend || !isdigit((int)(unsigned char)**a))
+		else if (*a == aend || !isdigit((unsigned char)**a))
 			return -1;
-		else if (*b == bend || !isdigit((int)(unsigned char)**b))
+		else if (*b == bend || !isdigit((unsigned char)**b))
 			return +1;
 		 else if (**a < **b)
 			 return -1;
@@ -103,27 +103,27 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 	ca = *ap; cb = *bp;
 
 	/* skip over leading zeros */
-	while (ca == '0' && (ap+1 < aend) && isdigit((int)(unsigned char)*(ap+1))) {
+	while (ca == '0' && (ap+1 < aend) && isdigit((unsigned char)ap[1])) {
 		ca = *++ap;
 	}
 
-	while (cb == '0' && (bp+1 < bend) && isdigit((int)(unsigned char)*(bp+1))) {
+	while (cb == '0' && (bp+1 < bend) && isdigit((unsigned char)bp[1])) {
 		cb = *++bp;
 	}
 
 	while (1) {
 
 		/* Skip consecutive whitespace */
-		while (isspace((int)(unsigned char)ca)) {
+		while (isspace(ca)) {
 			ca = *++ap;
 		}
 
-		while (isspace((int)(unsigned char)cb)) {
+		while (isspace(cb)) {
 			cb = *++bp;
 		}
 
 		/* process run of digits */
-		if (isdigit((int)(unsigned char)ca)  &&  isdigit((int)(unsigned char)cb)) {
+		if (isdigit(ca)  &&  isdigit(cb)) {
 			fractional = (ca == '0' || cb == '0');
 
 			if (fractional)
@@ -147,8 +147,8 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 		}
 
 		if (is_case_insensitive) {
-			ca = toupper((int)(unsigned char)ca);
-			cb = toupper((int)(unsigned char)cb);
+			ca = toupper(ca);
+			cb = toupper(cb);
 		}
 
 		if (ca < cb)

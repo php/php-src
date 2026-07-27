@@ -23,7 +23,21 @@ $certificateGenerator->saveNewCertAndKey('gh9310', $certFile, $pkFile);
 
 copy($certFile, $baseDirCertFile);
 copy($pkFile, $baseDirPkFile);
-copy(__DIR__ . '/sni_server_uk_cert.pem', $baseDir . '/sni_server_uk_cert.pem');
+
+$sniCaFile = __DIR__ . '/gh9310_sni_ca.pem.tmp';
+$sniCsFile = __DIR__ . '/gh9310_sni_cs.pem.tmp';
+$sniUkCertFile = __DIR__ . '/gh9310_sni_uk_cert.pem.tmp';
+$sniUkKeyFile = __DIR__ . '/gh9310_sni_uk_key.pem.tmp';
+$sniUsCertFile = __DIR__ . '/gh9310_sni_us_cert.pem.tmp';
+$sniUsKeyFile = __DIR__ . '/gh9310_sni_us_key.pem.tmp';
+$baseDirSniUkCertFile = $baseDir . '/sni_uk_cert.pem';
+
+$certificateGenerator->saveCaCert($sniCaFile);
+$certificateGenerator->saveNewCertAsFileWithKey('cs.php.net', $sniCsFile);
+$certificateGenerator->saveNewCertAndKey('uk.php.net', $sniUkCertFile, $sniUkKeyFile);
+$certificateGenerator->saveNewCertAndKey('us.php.net', $sniUsCertFile, $sniUsKeyFile);
+
+copy($sniUkCertFile, $baseDirSniUkCertFile);
 
 
 $serverCodeTemplate = <<<'CODE'
@@ -60,7 +74,7 @@ $sniServerCodeV1 = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'SNI_server_certs' => [
-            "cs.php.net" => __DIR__ . "/sni_server_cs.pem",
+            "cs.php.net" => '%s',
         ]
     ]]);
 
@@ -69,6 +83,7 @@ $sniServerCodeV1 = <<<'CODE'
 
     stream_socket_accept($server);
 CODE;
+$sniServerCodeV1 = sprintf($sniServerCodeV1, $sniCsFile);
 
 $sniServerCodeV2 = <<<'CODE'
     ini_set('log_errors', 'On');
@@ -77,8 +92,8 @@ $sniServerCodeV2 = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'SNI_server_certs' => [
             "uk.php.net" => [
-                'local_cert' => __DIR__ . '/gh9310/sni_server_uk_cert.pem',
-                'local_pk' => __DIR__ . '/sni_server_uk_key.pem',
+                'local_cert' => '%s',
+                'local_pk' => '%s',
             ]
         ]
     ]]);
@@ -88,6 +103,7 @@ $sniServerCodeV2 = <<<'CODE'
 
     stream_socket_accept($server);
 CODE;
+$sniServerCodeV2 = sprintf($sniServerCodeV2, $baseDirSniUkCertFile, $sniUkKeyFile);
 
 $sniServerCodeV3 = <<<'CODE'
     ini_set('log_errors', 'On');
@@ -96,8 +112,8 @@ $sniServerCodeV3 = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'SNI_server_certs' => [
             "us.php.net" => [
-                'local_cert' => __DIR__ . '/sni_server_us_cert.pem',
-                'local_pk' => __DIR__ . '/sni_server_us_key.pem',
+                'local_cert' => '%s',
+                'local_pk' => '%s',
             ]
         ]
     ]]);
@@ -107,14 +123,15 @@ $sniServerCodeV3 = <<<'CODE'
 
     stream_socket_accept($server);
 CODE;
+$sniServerCodeV3 = sprintf($sniServerCodeV3, $sniUsCertFile, $sniUsKeyFile);
 
 $sniClientCodeTemplate = <<<'CODE'
     $flags = STREAM_CLIENT_CONNECT;
     $ctxArr = [
-        'cafile' => __DIR__ . '/sni_server_ca.pem',
+        'cafile' => '%s',
+        'peer_name' => '%s',
     ];
 
-    $ctxArr['peer_name'] = '%s';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
     @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
 CODE;
@@ -131,13 +148,13 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 $serverCode = sprintf($serverCodeTemplate, $baseDirCertFile, $pkFile);
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 
-$sniClientCode = sprintf($sniClientCodeTemplate, 'cs.php.net');
+$sniClientCode = sprintf($sniClientCodeTemplate, $sniCaFile, 'cs.php.net');
 ServerClientTestCase::getInstance()->run($sniClientCode, $sniServerCodeV1);
 
-$sniClientCode = sprintf($sniClientCodeTemplate, 'uk.php.net');
+$sniClientCode = sprintf($sniClientCodeTemplate, $sniCaFile, 'uk.php.net');
 ServerClientTestCase::getInstance()->run($sniClientCode, $sniServerCodeV2);
 
-$sniClientCode = sprintf($sniClientCodeTemplate, 'us.php.net');
+$sniClientCode = sprintf($sniClientCodeTemplate, $sniCaFile, 'us.php.net');
 ServerClientTestCase::getInstance()->run($sniClientCode, $sniServerCodeV3);
 
 ?>
@@ -149,7 +166,13 @@ $baseDir = __DIR__ . '/gh9310';
 @unlink(__DIR__ . '/gh9310.key');
 @unlink($baseDir . '/cert.crt');
 @unlink($baseDir . '/private.key');
-@unlink($baseDir . '/sni_server_uk_cert.pem');
+@unlink($baseDir . '/sni_uk_cert.pem');
+@unlink(__DIR__ . '/gh9310_sni_ca.pem.tmp');
+@unlink(__DIR__ . '/gh9310_sni_cs.pem.tmp');
+@unlink(__DIR__ . '/gh9310_sni_uk_cert.pem.tmp');
+@unlink(__DIR__ . '/gh9310_sni_uk_key.pem.tmp');
+@unlink(__DIR__ . '/gh9310_sni_us_cert.pem.tmp');
+@unlink(__DIR__ . '/gh9310_sni_us_key.pem.tmp');
 @rmdir($baseDir);
 ?>
 --EXPECTF--
@@ -169,15 +192,15 @@ PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%
 PHP Warning:  stream_socket_accept(): Unable to get real path of private key file `%sgh9310.key' in %s
 PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s
 PHP Warning:  stream_socket_accept(): Accept failed: %s
-PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%ssni_server_cs.pem) is not within the allowed path(s): (%sgh9310) in %s
-PHP Warning:  stream_socket_accept(): Failed setting local cert chain file `%ssni_server_cs.pem'; file not found in %s
+PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%sgh9310_sni_cs.pem.tmp) is not within the allowed path(s): (%sgh9310) in %s
+PHP Warning:  stream_socket_accept(): Failed setting local cert chain file `%sgh9310_sni_cs.pem.tmp'; file not found in %s
 PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s
 PHP Warning:  stream_socket_accept(): Accept failed: %s
-PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%ssni_server_uk_key.pem) is not within the allowed path(s): (%sgh9310) in %s
-PHP Warning:  stream_socket_accept(): Failed setting local private key file `%ssni_server_uk_key.pem';  could not open file in %s
+PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%sgh9310_sni_uk_key.pem.tmp) is not within the allowed path(s): (%sgh9310) in %s
+PHP Warning:  stream_socket_accept(): Failed setting local private key file `%sgh9310_sni_uk_key.pem.tmp';  could not open file in %s
 PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s
 PHP Warning:  stream_socket_accept(): Accept failed: %s
-PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%ssni_server_us_cert.pem) is not within the allowed path(s): (%sgh9310) in %s
-PHP Warning:  stream_socket_accept(): Failed setting local cert chain file `%ssni_server_us_cert.pem'; could not open file in %s
+PHP Warning:  stream_socket_accept(): open_basedir restriction in effect. File(%sgh9310_sni_us_cert.pem.tmp) is not within the allowed path(s): (%sgh9310) in %s
+PHP Warning:  stream_socket_accept(): Failed setting local cert chain file `%sgh9310_sni_us_cert.pem.tmp'; could not open file in %s
 PHP Warning:  stream_socket_accept(): Failed to enable crypto in %s
 PHP Warning:  stream_socket_accept(): Accept failed: %s

@@ -1257,10 +1257,8 @@ static zval *zend_ffi_cdata_read_field(zend_object *obj, zend_string *field_name
 			type = ZEND_FFI_TYPE(type->pointer.type);
 		}
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-				zend_throw_error(zend_ffi_exception_ce, "Attempt to read field '%s' of non C struct/union", ZSTR_VAL(field_name));
-				return &EG(uninitialized_zval);
-			}
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to read field '%s' of non C struct/union", ZSTR_VAL(field_name));
+			return &EG(uninitialized_zval);
 		}
 
 		field = zend_hash_find_ptr(&type->record.fields, field_name);
@@ -1334,10 +1332,8 @@ static zval *zend_ffi_cdata_write_field(zend_object *obj, zend_string *field_nam
 			type = ZEND_FFI_TYPE(type->pointer.type);
 		}
 		if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-			if (UNEXPECTED(type->kind != ZEND_FFI_TYPE_STRUCT)) {
-				zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' of non C struct/union", ZSTR_VAL(field_name));
-				return value;
-			}
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' of non C struct/union", ZSTR_VAL(field_name));
+			return value;
 		}
 
 		field = zend_hash_find_ptr(&type->record.fields, field_name);
@@ -3069,17 +3065,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 		FFI_G(default_type_attr) = ZEND_FFI_ATTR_STORED;
 
 		if (zend_ffi_parse_decl(ZSTR_VAL(code), ZSTR_LEN(code)) == FAILURE) {
-			if (FFI_G(symbols)) {
-				zend_hash_destroy(FFI_G(symbols));
-				efree(FFI_G(symbols));
-				FFI_G(symbols) = NULL;
-			}
-			if (FFI_G(tags)) {
-				zend_hash_destroy(FFI_G(tags));
-				efree(FFI_G(tags));
-				FFI_G(tags) = NULL;
-			}
-			RETURN_THROWS();
+			goto cleanup;
 		}
 
 		if (FFI_G(symbols)) {
@@ -3091,7 +3077,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 					addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(name));
 					if (!addr) {
 						zend_throw_error(zend_ffi_exception_ce, "Failed resolving C variable '%s'", ZSTR_VAL(name));
-						RETURN_THROWS();
+						goto cleanup;
 					}
 					sym->addr = addr;
 				} else if (sym->kind == ZEND_FFI_SYM_FUNC) {
@@ -3101,7 +3087,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 					zend_string_release(mangled_name);
 					if (!addr) {
 						zend_throw_error(zend_ffi_exception_ce, "Failed resolving C function '%s'", ZSTR_VAL(name));
-						RETURN_THROWS();
+						goto cleanup;
 					}
 					sym->addr = addr;
 				}
@@ -3118,6 +3104,22 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	FFI_G(tags) = NULL;
 
 	RETURN_OBJ(&ffi->std);
+
+cleanup:
+	if (lib && handle) {
+		DL_UNLOAD(handle);
+	}
+	if (FFI_G(symbols)) {
+		zend_hash_destroy(FFI_G(symbols));
+		efree(FFI_G(symbols));
+		FFI_G(symbols) = NULL;
+	}
+	if (FFI_G(tags)) {
+		zend_hash_destroy(FFI_G(tags));
+		efree(FFI_G(tags));
+		FFI_G(tags) = NULL;
+	}
+	RETURN_THROWS();
 }
 /* }}} */
 

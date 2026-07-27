@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2023 Alexander Borisov
+ * Copyright (C) 2021-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -46,9 +46,6 @@ struct lxb_css_rule {
     lxb_css_rule_t      *prev;
     lxb_css_rule_t      *parent;
 
-    const lxb_char_t    *begin;
-    const lxb_char_t    *end;
-
     lxb_css_memory_t    *memory;
     size_t              ref_count;
 };
@@ -68,10 +65,15 @@ struct lxb_css_rule_at {
     union {
         lxb_css_at_rule__undef_t    *undef;
         lxb_css_at_rule__custom_t   *custom;
+        lxb_css_at_rule_font_face_t *font_face;
         lxb_css_at_rule_media_t     *media;
         lxb_css_at_rule_namespace_t *ns;
         void                        *user;
     } u;
+
+    size_t         name_begin;
+    size_t         prelude_begin;
+    size_t         prelude_end;
 };
 
 struct lxb_css_rule_style {
@@ -79,6 +81,10 @@ struct lxb_css_rule_style {
 
     lxb_css_selector_list_t         *selector;
     lxb_css_rule_declaration_list_t *declarations;
+    lxb_css_rule_list_t             *child;
+
+    size_t                          prelude_begin;
+    size_t                          prelude_end;
 };
 
 struct lxb_css_rule_bad_style {
@@ -86,6 +92,10 @@ struct lxb_css_rule_bad_style {
 
     lexbor_str_t                    selectors;
     lxb_css_rule_declaration_list_t *declarations;
+    lxb_css_rule_list_t             *child;
+
+    size_t                          prelude_begin;
+    size_t                          prelude_end;
 };
 
 struct lxb_css_rule_declaration_list {
@@ -96,6 +106,16 @@ struct lxb_css_rule_declaration_list {
 
     size_t         count;
 };
+
+typedef struct {
+    size_t name_begin;
+    size_t name_end;
+    size_t value_begin;
+    size_t value_end;
+    size_t important_begin;
+    size_t important_end;
+}
+lxb_css_rule_declaration_offset_t;
 
 struct lxb_css_rule_declaration {
     lxb_css_rule_t rule;
@@ -204,7 +224,9 @@ struct lxb_css_rule_declaration {
         void                                     *user;
     } u;
 
-    bool            important;
+    lxb_css_rule_declaration_offset_t offset;
+
+    bool                              important;
 };
 
 

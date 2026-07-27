@@ -39,6 +39,6 @@ try {
 bool(true)
 bool(false)
 bool(false)
-Spoofchecker::setAllowedChars(): Argument #2 ($patternOptions) must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::USET_CASE_INSENSITIVE%s))
+Spoofchecker::setAllowedChars(): Argument #2 ($patternOptions) must be a valid pattern option, 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::CASE_INSENSITIVE%s))
 Spoofchecker::setAllowedChars(): Argument #1 ($pattern) must be a valid regular expression character set pattern
 Spoofchecker::setAllowedChars(): Argument #1 ($pattern) must be a valid regular expression character set pattern

@@ -114,7 +114,8 @@ lxb_html_tree_appropriate_place_inserting_node(lxb_html_tree_t *tree,
 
 LXB_API lxb_html_element_t *
 lxb_html_tree_insert_foreign_element(lxb_html_tree_t *tree,
-                                     lxb_html_token_t *token, lxb_ns_id_t ns);
+                                     lxb_html_token_t *token, lxb_ns_id_t ns,
+                                     bool only_add_stack);
 
 LXB_API lxb_html_element_t *
 lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
@@ -200,6 +201,9 @@ lxb_html_tree_element_in_scope_tbody_thead_tfoot(lxb_html_tree_t *tree);
 
 LXB_API lxb_dom_node_t *
 lxb_html_tree_element_in_scope_td_th(lxb_html_tree_t *tree);
+
+LXB_API lxb_dom_node_t *
+lxb_html_tree_element_in_scope_option_optgroup(lxb_html_tree_t *tree);
 
 LXB_API bool
 lxb_html_tree_check_scope_element(lxb_html_tree_t *tree);
@@ -307,7 +311,8 @@ lxb_inline lxb_html_element_t *
 lxb_html_tree_insert_html_element(lxb_html_tree_t *tree,
                                   lxb_html_token_t *token)
 {
-    return lxb_html_tree_insert_foreign_element(tree, token, LXB_NS_HTML);
+    return lxb_html_tree_insert_foreign_element(tree, token, LXB_NS_HTML,
+                                                false);
 }
 
 lxb_inline void
@@ -374,6 +379,21 @@ lxb_html_tree_attach_document(lxb_html_tree_t *tree, lxb_html_document_t *doc)
     tree->document = doc;
 }
 
+lxb_inline bool
+lxb_html_tree_is_fragment(lxb_html_tree_t *tree)
+{
+    return tree->fragment != NULL;
+}
+
+lxb_inline bool
+lxb_html_tree_is_fragment_element(lxb_html_tree_t *tree,
+                                  lxb_tag_id_t tag_id, lxb_ns_id_t ns)
+{
+    lxb_dom_node_t *fragment = tree->fragment;
+
+    return lxb_html_tree_is_fragment(tree)
+            && fragment->local_name == tag_id && fragment->ns == ns;
+}
 
 #ifdef __cplusplus
 } /* extern "C" */

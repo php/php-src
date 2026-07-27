@@ -611,7 +611,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 	} else {
 		/* error already emitted, but let's emit another more relevant */
 		do_from_zval_err(ctx, "could not resolve address '%s' to get an AF_INET6 "
-				"address", Z_STRVAL_P(zaddr_str));
+				"address", ZSTR_VAL(addr_str));
 	}
 
 	zend_tmp_string_release(tmp_addr_str);
@@ -1206,6 +1206,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	if (iovlen > UINT_MAX) {
 		do_to_zval_err(ctx, "unexpectedly large value for iov_len: %lu",
 				(unsigned long)iovlen);
+		return;
 	}
 	array_init_size(zv, (uint32_t)iovlen);
 
@@ -1385,7 +1386,7 @@ static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, se
 			return;
 		}
 
-		iarr[i] = sock->bsd_socket;
+		iarr[i - 1] = sock->bsd_socket;
 		return;
 	}
 

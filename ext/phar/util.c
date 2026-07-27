@@ -64,24 +64,34 @@ phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 {
 	phar_entry_info *link_entry;
 	char *link;
+	uint32_t depth = 0, max_depth;
 
 	if (!entry->link) {
 		return entry;
 	}
 
-	link = phar_get_link_location(entry);
-	if (NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->link, strlen(entry->link))) ||
-		NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), link, strlen(link)))) {
-		if (link != entry->link) {
-			efree(link);
+	max_depth = zend_hash_num_elements(&(entry->phar->manifest));
+
+	while (entry->link) {
+		if (UNEXPECTED(++depth > max_depth)) {
+			return NULL;
 		}
-		return phar_get_link_source(link_entry);
-	} else {
-		if (link != entry->link) {
-			efree(link);
+		link = phar_get_link_location(entry);
+
+		if (NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->link, strlen(entry->link))) ||
+			NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), link, strlen(link)))) {
+			if (link != entry->link) {
+				efree(link);
+			}
+			entry = link_entry;
+		} else {
+			if (link != entry->link) {
+				efree(link);
+			}
+			return NULL;
 		}
-		return NULL;
 	}
+	return entry;
 }
 /* }}} */
 
@@ -198,7 +208,7 @@ zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t fil
 		return FAILURE;
 	}
 
-	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (phar_path_is_magic_phar_ex(path, path_len)) {
 		/* no creating magic phar files by mounting them */
 		return FAILURE;
 	}
@@ -1280,7 +1290,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 		*error = NULL;
 	}
 
-	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (security && phar_path_is_magic_phar_ex(path, path_len)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
 		}
@@ -1640,6 +1650,7 @@ zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t s
 				if (md_ctx) {
 					EVP_MD_CTX_destroy(md_ctx);
 				}
+				EVP_PKEY_free(key);
 				if (error) {
 					spprintf(error, 0, "openssl signature could not be verified");
 				}

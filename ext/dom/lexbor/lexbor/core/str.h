@@ -21,7 +21,6 @@ extern "C" {
 #define lexbor_str_len(str) lexbor_str_get(str, length)
 #define lexbor_str(p) {.data = (lxb_char_t *) (p), sizeof(p) - 1}
 
-
 #define lexbor_str_check_size_arg_m(str, size, mraw, plus_len, return_fail)    \
     do {                                                                       \
         void *tmp;                                                             \
@@ -117,6 +116,12 @@ lexbor_str_whitespace_from_begin(lexbor_str_t *target);
 LXB_API size_t
 lexbor_str_whitespace_from_end(lexbor_str_t *target);
 
+LXB_API lxb_char_t *
+lexbor_str_copy_to(lexbor_str_t *str, const lxb_char_t *buff, size_t length);
+
+LXB_API lxb_char_t *
+lexbor_str_copy_to_with_null(lexbor_str_t *str,
+                             const lxb_char_t *buff, size_t length);
 
 /* Data utils */
 /*

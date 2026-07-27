@@ -345,7 +345,7 @@ static void _php_intlcal_before_after(
 
 	when_co = Z_INTL_CALENDAR_P(when_object);
 	if (when_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 
@@ -391,8 +391,8 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	}
 
 	for (int i = 0; i < arg_num; i++) {
-		/* Arguments start at 1 */
-		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(args[i], i + 1);
+		/* Count from intlcal_set($calendar, ...), so date/time arguments start at #2. */
+		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(args[i], i + 2);
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
@@ -427,9 +427,10 @@ U_CFUNC PHP_METHOD(IntlCalendar, setDate)
 		RETURN_THROWS();
 	}
 
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
+	/* These method-only APIs parse the object first, so the API argument positions are offset by +1. */
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 2);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 3);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 4);
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
@@ -450,18 +451,19 @@ U_CFUNC PHP_METHOD(IntlCalendar, setDateTime)
 		RETURN_THROWS();
 	}
 
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(hour, 4);
-	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(minute, 5);
+	/* These method-only APIs parse the object first, so the API argument positions are offset by +1. */
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 2);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 3);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 4);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(hour, 5);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(minute, 6);
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
 	if (second_is_null) {
 		co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute);
 	} else {
-		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(second, 6);
+		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(second, 7);
 		co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute, (int32_t) second);
 	}
 }
@@ -772,7 +774,7 @@ U_CFUNC PHP_FUNCTION(intlcal_is_equivalent_to)
 
 	other_co = Z_INTL_CALENDAR_P(other_object);
 	if (other_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 
@@ -910,7 +912,7 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	CALENDAR_METHOD_FETCH_OBJECT;
 	other_co = Z_INTL_CALENDAR_P(other_object);
 	if (other_co->ucal == NULL) {
-		zend_argument_error(NULL, 2, "is uninitialized");
+		zend_argument_error(NULL, hasThis() ? 1 : 2, "is uninitialized");
 		RETURN_THROWS();
 	}
 

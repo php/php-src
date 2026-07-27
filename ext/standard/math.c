@@ -24,6 +24,7 @@
 #include "zend_exceptions.h"
 #include "zend_multiply.h"
 #include "zend_portability.h"
+#include "zend_strtod.h"
 
 #include <float.h>
 #include <math.h>
@@ -807,9 +808,9 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	e = s + ZSTR_LEN(str);
 
 	/* Skip leading whitespace */
-	while (s < e && isspace(*s)) s++;
+	while (s < e && isspace((unsigned char)*s)) s++;
 	/* Skip trailing whitespace */
-	while (s < e && isspace(*(e-1))) e--;
+	while (s < e && isspace((unsigned char)e[-1])) e--;
 
 	if (e - s >= 2) {
 		if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
@@ -949,7 +950,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 	if (Z_TYPE_P(arg) == IS_DOUBLE) {
 		double fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
 		char *ptr, *end;
-		char buf[(sizeof(double) << 3) + 1];
+		char buf[ZEND_DOUBLE_MAX_LENGTH];
 
 		/* Don't try to convert +/- infinity */
 		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
@@ -1122,7 +1123,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	tmpbuf = strpprintf(0, "%.*F", dec, d);
 	if (tmpbuf == NULL) {
 		return NULL;
-	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
+	} else if (!isdigit((unsigned char)ZSTR_VAL(tmpbuf)[0])) {
 		return tmpbuf;
 	}
 

@@ -3,7 +3,7 @@
 setlocal enabledelayedexpansion
 
 if "%~1"=="" (
-  echo ERROR: Usage: %~nx0 [vc14^|vc15^|vs16^|vs17]
+  echo ERROR: Usage: %~nx0 [vc14^|vc15^|vs16^|vs17^|vs18]
   exit /b 1
 )
 
@@ -11,6 +11,7 @@ set "toolsets_vc14=14.0"
 set "toolsets_vc15="
 set "toolsets_vs16="
 set "toolsets_vs17="
+set "toolsets_vs18="
 
 
 for /f "usebackq tokens=*" %%I in (`vswhere.exe -latest -find "VC\Tools\MSVC"`) do set "MSVCDIR=%%I"
@@ -30,8 +31,10 @@ for /f "delims=" %%D in ('dir /b /ad "%MSVCDIR%"') do (
         set "toolsets_vc15=%%D"
       ) else if !min! LEQ 29 (
         set "toolsets_vs16=%%D"
-      ) else (
+      ) else if !min! LEQ 49 (
         set "toolsets_vs17=%%D"
+      ) else (
+        set "toolsets_vs18=%%D"
       )
     )
   )

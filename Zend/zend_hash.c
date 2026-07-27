@@ -169,7 +169,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 	void *data;
 	uint32_t nSize = ht->nTableSize;
 
-	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 	if (UNEXPECTED(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
 		data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), 1);
@@ -351,7 +351,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 	uint32_t i;
 	uint32_t nSize = ht->nTableSize;
 
-	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 	HT_ASSERT_RC1(ht);
 	// Alloc before assign to avoid inconsistencies on OOM
@@ -399,7 +399,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool
 
 	if (nSize == 0) return;
 
-	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 	if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 		if (nSize > ht->nTableSize) {
@@ -1318,7 +1318,7 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 		uint32_t nSize = ht->nTableSize + ht->nTableSize;
 		Bucket *old_buckets = ht->arData;
 
-		ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
+		ZEND_ASSERT(HT_SIZE_TO_MASK(nSize) != 0);
 
 		new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 		ht->nTableSize = nSize;

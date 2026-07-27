@@ -32,6 +32,7 @@ const php_hash_ops php_hash_fnv132_ops = {
 	4,
 	4,
 	sizeof(PHP_FNV132_CTX),
+	0,
 	0
 };
 
@@ -47,6 +48,7 @@ const php_hash_ops php_hash_fnv1a32_ops = {
 	4,
 	4,
 	sizeof(PHP_FNV132_CTX),
+	0,
 	0
 };
 
@@ -62,6 +64,7 @@ const php_hash_ops php_hash_fnv164_ops = {
 	8,
 	4,
 	sizeof(PHP_FNV164_CTX),
+	0,
 	0
 };
 
@@ -77,6 +80,7 @@ const php_hash_ops php_hash_fnv1a64_ops = {
 	8,
 	4,
 	sizeof(PHP_FNV164_CTX),
+	0,
 	0
 };
 

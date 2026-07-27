@@ -215,7 +215,7 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 
 	state->line++;
 
-	while (cmd_len > 0L && isspace(cmd[cmd_len-1])) {
+	while (cmd_len > 0L && isspace((unsigned char)cmd[cmd_len-1])) {
 		cmd_len--;
 	}
 

@@ -392,7 +392,7 @@ static void php_hash_do_hash(
 		}
 		php_stream_close(stream);
 		if (n < 0) {
-			efree(context);
+			php_hash_free_context(ops, context);
 			RETURN_FALSE;
 		}
 	} else {
@@ -401,7 +401,7 @@ static void php_hash_do_hash(
 
 	digest = zend_string_alloc(ops->digest_size, 0);
 	ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
-	efree(context);
+	php_hash_free_context(ops, context);
 
 	if (raw_output) {
 		ZSTR_VAL(digest)[ops->digest_size] = 0;
@@ -540,7 +540,7 @@ static void php_hash_do_hash_hmac(
 		}
 		php_stream_close(stream);
 		if (n < 0) {
-			efree(context);
+			php_hash_free_context(ops, context);
 			efree(K);
 			zend_string_release(digest);
 			RETURN_FALSE;
@@ -558,7 +558,7 @@ static void php_hash_do_hash_hmac(
 	/* Zero the key */
 	ZEND_SECURE_ZERO(K, ops->block_size);
 	efree(K);
-	efree(context);
+	php_hash_free_context(ops, context);
 
 	if (raw_output) {
 		ZSTR_VAL(digest)[ops->digest_size] = 0;
@@ -817,7 +817,7 @@ PHP_FUNCTION(hash_final)
 	ZSTR_VAL(digest)[digest_len] = 0;
 
 	/* Invalidate the object from further use */
-	efree(hash->context);
+	php_hash_free_context(hash->ops, hash->context);
 	hash->context = NULL;
 
 	if (raw_output) {
@@ -975,7 +975,7 @@ PHP_FUNCTION(hash_hkdf)
 	ZEND_SECURE_ZERO(digest, ops->digest_size);
 	ZEND_SECURE_ZERO(prk, ops->digest_size);
 	efree(K);
-	efree(context);
+	php_hash_free_context(ops, context);
 	efree(prk);
 	efree(digest);
 	ZSTR_VAL(returnval)[length] = 0;
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	efree(K1);
 	efree(K2);
 	efree(computed_salt);
-	efree(context);
+	php_hash_free_context(ops, context);
 	efree(digest);
 	efree(temp);
 
@@ -1347,7 +1347,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 				RETVAL_STRINGL(key, bytes);
 				ZEND_SECURE_ZERO(key, bytes);
 				efree(digest);
-				efree(context);
+				php_hash_free_context(ops, context);
 				efree(key);
 			}
 		}
@@ -1377,7 +1377,7 @@ static void php_hashcontext_dtor(zend_object *obj) {
 	php_hashcontext_object *hash = php_hashcontext_from_object(obj);
 
 	if (hash->context) {
-		efree(hash->context);
+		php_hash_free_context(hash->ops, hash->context);
 		hash->context = NULL;
 	}
 
@@ -1413,7 +1413,7 @@ static zend_object *php_hashcontext_clone(zend_object *zobj) {
 	newobj->ops->hash_init(newobj->context, NULL);
 
 	if (SUCCESS != newobj->ops->hash_copy(newobj->ops, oldobj->context, newobj->context)) {
-		efree(newobj->context);
+		php_hash_free_context(newobj->ops, newobj->context);
 		newobj->context = NULL;
 		return znew;
 	}

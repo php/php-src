@@ -617,7 +617,7 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 
 static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *portno, int get_err, zend_string **err)
 {
-	char *colon;
+	const char *colon;
 	char *host = NULL;
 
 	if (memchr(str, '\0', str_len)) {
@@ -628,7 +628,7 @@ static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *po
 #ifdef HAVE_IPV6
 	if (*(str) == '[' && str_len > 1) {
 		/* IPV6 notation to specify raw address with port (i.e. [fe80::1]:80) */
-		char *p = memchr(str + 1, ']', str_len - 2);
+		const char *p = memchr(str + 1, ']', str_len - 2);
 		if (!p || *(p + 1) != ':') {
 			if (get_err) {
 				*err = strpprintf(0, "Failed to parse IPv6 address \"%s\"", str);

@@ -74,9 +74,9 @@ array(1) {
 ========== not in auto commit mode ==========
 auto commit mode OFF
 insert, expect error
-SQLSTATE[08003]: Connection does not exist: %s
+%r(SQLSTATE\[08003\]: Connection does not exist|SQLSTATE\[HY000\]: General error)%r: %s
 
 select, expect error
-SQLSTATE[08003]: Connection does not exist: %s
+%r(SQLSTATE\[08003\]: Connection does not exist|SQLSTATE\[HY000\]: General error)%r: %s
 
 done!

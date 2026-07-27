@@ -6,6 +6,7 @@ memory_limit=-1
 gd
 --SKIPIF--
 <?php
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstream fix not yet released');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (substr(PHP_OS, 0, 3) == 'WIN' && PHP_INT_SIZE === 4) die("skip not for Windows x86");

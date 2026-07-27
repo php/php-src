@@ -191,7 +191,7 @@ void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out)
 	} else {
 		for (i=0; i<l; i++) {
 			/* only in C-locale isalnum() would work */
-			if (!isupper(name[i]) && !islower(name[i]) && !isdigit(name[i])) {
+			if (!isupper((unsigned char)name[i]) && !islower((unsigned char)name[i]) && !isdigit((unsigned char)name[i])) {
 				name[i] = '_';
 			}
 		}

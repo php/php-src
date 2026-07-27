@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.4.19-dev"
+#define ZEND_VERSION "4.4.25-dev"
 
 #define ZEND_ENGINE_3
 
@@ -275,7 +275,9 @@ typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 		EG(bailout) = &__bailout;								\
 		if (SETJMP(__bailout)==0) {
 #define zend_catch												\
+			ZEND_ASSERT(EG(bailout) == &__bailout);				\
 		} else {												\
+			ZEND_ASSERT(EG(bailout) == &__bailout);				\
 			EG(bailout) = __orig_bailout;
 #define zend_end_try()											\
 		}														\

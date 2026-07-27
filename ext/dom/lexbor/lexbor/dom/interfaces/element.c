@@ -581,6 +581,18 @@ lxb_dom_element_is_set(lxb_dom_element_t *element,
     return LXB_STATUS_OK;
 }
 
+lxb_dom_element_t *
+lxb_dom_element_by_id(lxb_dom_element_t *root,
+                      const lxb_char_t *qualified_name, size_t len)
+{
+    lxb_dom_node_t *node;
+
+    node = lxb_dom_node_by_id(lxb_dom_interface_node(root),
+                              qualified_name, len);
+
+    return lxb_dom_interface_element(node);
+}
+
 lxb_status_t
 lxb_dom_elements_by_tag_name(lxb_dom_element_t *root,
                              lxb_dom_collection_t *collection,

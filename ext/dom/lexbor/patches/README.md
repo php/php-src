@@ -1,7 +1,10 @@
 # Lexbor patches
 
+> [!IMPORTANT]
+> This process was largely automated in update-lexbor.sh.
+
 Upon syncing the Lexbor sources, the patches in this directory need to be applied.
-The current Lexbor version is 2.5.0.
+The current Lexbor version is 2.7.0.
 
 ## Overview
 

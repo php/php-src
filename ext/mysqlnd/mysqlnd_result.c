@@ -994,8 +994,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	array_init_size(return_value, array_size);
 
 	HashTable *row_ht = Z_ARRVAL_P(return_value);
-	MYSQLND_FIELD *field = meta->fields;
-	for (unsigned i = 0; i < meta->field_count; i++, field++) {
+	for (unsigned i = 0; i < meta->field_count; i++) {
 		zval *data = &row_data[i];
 
 		if (flags & MYSQLND_FETCH_NUM) {
@@ -1038,10 +1037,9 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 	mysqlnd_result_free_prev_data(result);
 	if (result->m.fetch_row(result, &row_data, 0, &fetched_anything) == PASS && fetched_anything) {
 		unsigned field_count = result->field_count;
-		MYSQLND_FIELD *field = result->meta->fields;
 
 		ret = mnd_emalloc(field_count * sizeof(char *));
-		for (unsigned i = 0; i < field_count; i++, field++) {
+		for (unsigned i = 0; i < field_count; i++) {
 			zval *data = &row_data[i];
 			if (Z_TYPE_P(data) != IS_NULL) {
 				convert_to_string(data);

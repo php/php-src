@@ -457,5 +457,6 @@ const php_hash_ops php_hash_whirlpool_ops = {
 	64,
 	64,
 	sizeof(PHP_WHIRLPOOL_CTX),
-	1
+	1,
+	0
 };

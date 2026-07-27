@@ -25,6 +25,7 @@ runs:
         # Slow tests criteron is doubled because this runner isn't as fast as others
         export SKIP_IO_CAPTURE_TESTS=1
         export STACK_LIMIT_DEFAULTS_CHECK=1
+        export RUN_RESOURCE_HEAVY_TESTS=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -j$(nproc) \
           -g FAIL,BORK,LEAK,XLEAK \

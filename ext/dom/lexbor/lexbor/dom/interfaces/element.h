@@ -135,6 +135,10 @@ LXB_API lxb_status_t
 lxb_dom_element_is_set(lxb_dom_element_t *element,
                        const lxb_char_t *is, size_t is_len);
 
+LXB_API lxb_dom_element_t *
+lxb_dom_element_by_id(lxb_dom_element_t *root,
+                      const lxb_char_t *qualified_name, size_t len);
+
 LXB_API lxb_status_t
 lxb_dom_elements_by_tag_name(lxb_dom_element_t *root,
                              lxb_dom_collection_t *collection,

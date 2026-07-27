@@ -43,7 +43,7 @@ runs:
           --enable-pcntl \
           --with-readline \
           --enable-mbstring \
-          --with-iconv=/usr \
+          --with-iconv \
           --with-curl \
           --with-gettext \
           --enable-sockets \

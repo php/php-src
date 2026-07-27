@@ -156,7 +156,11 @@ static php_stream_filter_status_t userfilter_filter(
 	bool stream_property_exists = Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL);
 	if (stream_property_exists) {
 		zval stream_zval;
-		php_stream_to_zval(stream, &stream_zval);
+		if (EXPECTED(stream->res && stream->res->type >= 0)) {
+			php_stream_to_zval(stream, &stream_zval);
+		} else {
+			ZVAL_NULL(&stream_zval);
+		}
 		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &stream_zval);
 		/* If property update threw an exception, skip filter execution */
 		if (EG(exception)) {
@@ -259,8 +263,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	len = strlen(filtername);
 
 	/* determine the classname/class entry */
-	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), (char*)filtername, len))) {
-		char *period;
+	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), filtername, len))) {
+		const char *period;
 
 		/* Userspace Filters using ambiguous wildcards could cause problems.
            i.e.: myfilter.foo.bar will always call into myfilter.foo.*
@@ -272,16 +276,16 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 			/* Search for wildcard matches instead */
 			memcpy(wildcard, filtername, len + 1); /* copy \0 */
-			period = wildcard + (period - filtername);
-			while (period) {
-				ZEND_ASSERT(period[0] == '.');
-				period[1] = '*';
-				period[2] = '\0';
+			char *new_period = wildcard + (period - filtername);
+			while (new_period) {
+				ZEND_ASSERT(new_period[0] == '.');
+				new_period[1] = '*';
+				new_period[2] = '\0';
 				if (NULL != (fdat = zend_hash_str_find_ptr(BG(user_filter_map), wildcard, strlen(wildcard)))) {
-					period = NULL;
+					new_period = NULL;
 				} else {
-					*period = '\0';
-					period = strrchr(wildcard, '.');
+					*new_period = '\0';
+					new_period = strrchr(wildcard, '.');
 				}
 			}
 			efree(wildcard);
@@ -311,7 +315,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	/* filtername */
-	add_property_string(&obj, "filtername", (char*)filtername);
+	add_property_string(&obj, "filtername", filtername);
 
 	/* and the parameters, if any */
 	if (filterparams) {

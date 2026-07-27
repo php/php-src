@@ -1,5 +1,7 @@
 --TEST--
 Bug GH-10519 (Array Data Address Reference Issue)
+--XFAIL--
+The fix for this was bad
 --FILE--
 <?php
 interface DataInterface extends JsonSerializable, RecursiveIterator, Iterator

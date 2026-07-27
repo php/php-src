@@ -798,15 +798,16 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_THROWS();
 	}
 
-	/* Add the function name to our signal table */
-	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
-	Z_TRY_ADDREF_P(handle);
-
+	/* Register with the OS first so that on failure we don't record a handler that was never installed */
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
+
+	/* Add the function name to our signal table */
+	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
+	Z_TRY_ADDREF_P(handle);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1342,6 +1343,7 @@ void pcntl_signal_dispatch(void)
 
 	queue = PCNTL_G(head);
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
+	PCNTL_G(tail) = NULL;
 
 	/* Allocate */
 	while (queue) {
@@ -1363,9 +1365,20 @@ void pcntl_signal_dispatch(void)
 #ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
 #endif
+				if (EG(exception)) {
+					break;
+				}
 			}
 		}
 
+		next = queue->next;
+		queue->next = PCNTL_G(spares);
+		PCNTL_G(spares) = queue;
+		queue = next;
+	}
+
+	/* drain the remaining in case of exception thrown */
+	while (queue) {
 		next = queue->next;
 		queue->next = PCNTL_G(spares);
 		PCNTL_G(spares) = queue;
@@ -1584,7 +1597,7 @@ PHP_FUNCTION(pcntl_setns)
 
 	pid = pid_is_null ? getpid() : pid;
 	fd = syscall(SYS_pidfd_open, pid, 0);
-	if (errno) {
+	if (fd == -1) {
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case EINVAL:
@@ -1610,11 +1623,12 @@ PHP_FUNCTION(pcntl_setns)
 		RETURN_FALSE;
 	}
 	ret = setns(fd, (int)nstype);
+	int setns_errno = errno;
 	close(fd);
 
 	if (ret == -1) {
-		PCNTL_G(last_error) = errno;
-		switch (errno) {
+		PCNTL_G(last_error) = setns_errno;
+		switch (setns_errno) {
 			case ESRCH:
 				zend_argument_value_error(1, "process no longer available (" ZEND_LONG_FMT ")", pid);
 				RETURN_THROWS();
@@ -1624,11 +1638,11 @@ PHP_FUNCTION(pcntl_setns)
 				RETURN_THROWS();
 
 			case EPERM:
-				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", errno);
+				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", setns_errno);
 				break;
 
 			default:
-			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+			        php_error_docref(NULL, E_WARNING, "Error %d", setns_errno);
 		}
 		RETURN_FALSE;
 	} else {
@@ -1733,6 +1747,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 		if (cpu < 0 || cpu >= maxcpus) {
 			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			PCNTL_CPU_DESTROY(mask);
 			RETURN_THROWS();
 		}
 

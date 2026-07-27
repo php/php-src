@@ -8,12 +8,18 @@ ini_set("intl.error_level", E_WARNING);
 
 $tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump($tz->getDisplayName(false, -1));
+echo intl_get_error_message(), PHP_EOL;
+var_dump($tz->getErrorCode());
+echo $tz->getErrorMessage(), PHP_EOL;
 
 var_dump(intltz_get_display_name(null, IntlTimeZone::DISPLAY_SHORT, false, 'pt_PT'));
 ?>
 --EXPECTF--
 Warning: IntlTimeZone::getDisplayName(): wrong display type in %s on line %d
 bool(false)
+wrong display type: U_ILLEGAL_ARGUMENT_ERROR
+int(1)
+wrong display type: U_ILLEGAL_ARGUMENT_ERROR
 
 Fatal error: Uncaught TypeError: intltz_get_display_name(): Argument #1 ($timezone) must be of type IntlTimeZone, null given in %s:%d
 Stack trace:

@@ -70,5 +70,6 @@ const php_hash_ops php_hash_adler32_ops = {
 	4, /* what to say here? */
 	4,
 	sizeof(PHP_ADLER32_CTX),
+	0,
 	0
 };

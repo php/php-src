@@ -4,6 +4,7 @@ Bug GH-20620 (bzcompress with large source)
 bz2
 --SKIPIF--
 <?php 
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 if (PHP_INT_SIZE != 8) die('skip this test is for 64bit platforms only'); 
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 ?>

@@ -2,6 +2,7 @@
 Test file_put_contents() and file_get_contents() functions with 5GB string
 --SKIPIF--
 <?php
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 if (PHP_INT_SIZE < 5) {
     // 4=4gb, 5=549gb, 8=9exabytes
     die("skip PHP_INT_SIZE<5 will not fit test string in RAM");

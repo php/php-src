@@ -172,18 +172,18 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 		return;
 	}
 
-	/* first initialization */
-	if (array->size == 0) {
-		spl_fixedarray_init(array, size);
-		return;
-	}
-
 	if (UNEXPECTED(array->cached_resize >= 0)) {
 		/* We're already resizing, so just remember the desired size.
 		 * The resize will happen later. */
 		array->cached_resize = size;
 		return;
 	}
+	/* first initialization */
+	if (array->size == 0) {
+		spl_fixedarray_init(array, size);
+		return;
+	}
+
 	array->cached_resize = size;
 
 	/* clearing the array */

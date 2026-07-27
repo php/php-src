@@ -15,6 +15,7 @@ runs:
         release: '13.5'
         usesh: true
         copyback: false
+        disable-cache: true
         # Temporarily disable sqlite, as FreeBSD ships it with disabled double quotes. We'll need to fix our tests.
         # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269889
         prepare: |
@@ -106,6 +107,7 @@ runs:
           export SKIP_IO_CAPTURE_TESTS=1
           export CI_NO_IPV6=1
           export STACK_LIMIT_DEFAULTS_CHECK=1
+          export RUN_RESOURCE_HEAVY_TESTS=1
           sapi/cli/php run-tests.php \
             -P -q -j2 \
             -g FAIL,BORK,LEAK,XLEAK \

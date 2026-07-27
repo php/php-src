@@ -161,6 +161,8 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 		case IR_CHAR:
 			if (insn->val.c == '\\') {
 				fprintf(f, "'\\\\'");
+			} else if (insn->val.c == '\'') {
+				fprintf(f, "'\\\''");
 			} else if (insn->val.c >= ' ') {
 				fprintf(f, "'%c'", insn->val.c);
 			} else if (insn->val.c == '\t') {
@@ -283,6 +285,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_kind_src     IR_OPND_CONTROL
 #define ir_op_kind_reg     IR_OPND_CONTROL_DEP
 #define ir_op_kind_ret     IR_OPND_CONTROL_REF
+#define ir_op_kind_grd     IR_OPND_CONTROL_GUARD
 #define ir_op_kind_str     IR_OPND_STR
 #define ir_op_kind_num     IR_OPND_NUM
 #define ir_op_kind_fld     IR_OPND_STR
@@ -858,7 +861,7 @@ ir_ref ir_emit3(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3)
 static ir_ref _ir_fold_cse(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3)
 {
 	ir_ref ref = ctx->prev_insn_chain[opt & IR_OPT_OP_MASK];
-	ir_insn *insn;
+	const ir_insn *insn;
 
 	if (ref) {
 		ir_ref limit = ctx->fold_cse_limit;
@@ -954,7 +957,8 @@ IR_ALWAYS_INLINE ir_ref _ir_fold_cast(ir_ctx *ctx, ir_ref ref, ir_type type)
  * ANY and UNUSED ops are represented by 0
  */
 
-ir_ref ir_folding(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3, ir_insn *op1_insn, ir_insn *op2_insn, ir_insn *op3_insn)
+ir_ref ir_folding(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3,
+                  const ir_insn *op1_insn, const ir_insn *op2_insn, const ir_insn *op3_insn)
 {
 	uint8_t op;
 	ir_ref ref;
@@ -1136,9 +1140,9 @@ void ir_set_op(ir_ctx *ctx, ir_ref ref, int32_t n, ir_ref val)
 	ir_insn_set_op(insn, n, val);
 }
 
-ir_ref ir_get_op(ir_ctx *ctx, ir_ref ref, int32_t n)
+ir_ref ir_get_op(const ir_ctx *ctx, ir_ref ref, int32_t n)
 {
-	ir_insn *insn = &ctx->ir_base[ref];
+	const ir_insn *insn = &ctx->ir_base[ref];
 
 #ifdef IR_DEBUG
 	if (n > 3) {
@@ -1419,36 +1423,26 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
 		if (old_size < new_size) {
 			/* Reallocate the whole edges buffer (this is inefficient) */
 			ctx->use_edges = ir_mem_realloc(ctx->use_edges, new_size);
+			if (n == ctx->use_edges_count) {
+				ctx->use_edges[n] = ref;
+				use_list->count++;
+				ctx->use_edges_count++;
+				return 1;
+			}
 		} else if (n == ctx->use_edges_count) {
 			ctx->use_edges[n] = ref;
 			use_list->count++;
 			ctx->use_edges_count++;
 			return 0;
 		}
-		memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
+		if (use_list->count) {
+			memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
+		}
 		use_list->refs = ctx->use_edges_count;
 		ctx->use_edges[use_list->refs + use_list->count] = ref;
 		use_list->count++;
 		ctx->use_edges_count += use_list->count;
 		return 1;
-	}
-}
-
-static int ir_ref_cmp(const void *p1, const void *p2)
-{
-	return *(ir_ref*)p1 - *(ir_ref*)p2;
-}
-
-void ir_use_list_sort(ir_ctx *ctx, ir_ref ref)
-{
-	ir_use_list *use_list;
-	uint32_t n;
-
-	IR_ASSERT(ref > 0);
-	use_list = &ctx->use_lists[ref];
-	n = use_list->count;
-	if (n > 1) {
-		qsort(ctx->use_edges + use_list->refs, n, sizeof(ir_ref), ir_ref_cmp);
 	}
 }
 
@@ -1852,7 +1846,7 @@ int ir_mem_unprotect(void *ptr, size_t size)
 
 int ir_mem_flush(void *ptr, size_t size)
 {
-	return 1;
+	return FlushInstructionCache(GetCurrentProcess(), ptr, size) == TRUE ? 1 : 0;
 }
 #else
 
@@ -2025,7 +2019,7 @@ static ir_alias ir_check_aliasing(ir_ctx *ctx, ir_ref addr1, ir_ref addr2)
 
 ir_alias ir_check_partial_aliasing(const ir_ctx *ctx, ir_ref addr1, ir_ref addr2, ir_type type1, ir_type type2)
 {
-	ir_insn *insn1, *insn2;
+	const ir_insn *insn1, *insn2;
 	ir_ref base1, base2, off1, off2;
 
 	/* this must be already check */
@@ -2117,9 +2111,9 @@ ir_alias ir_check_partial_aliasing(const ir_ctx *ctx, ir_ref addr1, ir_ref addr2
 	return IR_MAY_ALIAS;
 }
 
-IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr, ir_ref limit)
+IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(const ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr, ir_ref limit)
 {
-	ir_insn *insn;
+	const ir_insn *insn;
 	uint32_t modified_regset = 0;
 
 	while (ref > limit) {
@@ -2159,7 +2153,7 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(ir_ctx *ctx, ir_ref ref, ir_type
 		} else if (insn->op == IR_RSTORE) {
 			modified_regset |= (1 << insn->op3);
 		} else if (insn->op == IR_CALL) {
-			ir_insn *func = &ctx->ir_base[insn->op2];
+			const ir_insn *func = &ctx->ir_base[insn->op2];
 			ir_ref func_proto;
 			const ir_proto_t *proto;
 
@@ -2177,7 +2171,10 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(ir_ctx *ctx, ir_ref ref, ir_type
 			if (!(proto->flags & (IR_CONST_FUNC|IR_PURE_FUNC))) {
 				break;
 			}
-		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_VSTORE) {
+		} else if (insn->op == IR_MERGE
+				|| insn->op == IR_LOOP_BEGIN
+				|| insn->op == IR_VSTORE
+				|| (insn->op == IR_BEGIN && insn->op2)) {
 			return IR_UNUSED;
 		}
 		ref = insn->op1;
@@ -2186,14 +2183,14 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_load_i(ir_ctx *ctx, ir_ref ref, ir_type
 	return IR_UNUSED;
 }
 
-ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr)
+ir_ref ir_find_aliasing_load(const ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref addr)
 {
 	return ir_find_aliasing_load_i(ctx, ref, type, addr, (addr > 0 && addr < ref) ? addr : 1);
 }
 
-IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var)
+IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(const ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var)
 {
-	ir_insn *insn;
+	const ir_insn *insn;
 
 	while (ref > var) {
 		insn = &ctx->ir_base[ref];
@@ -2224,7 +2221,7 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(ir_ctx *ctx, ir_ref ref, ir_typ
 				}
 			}
 		} else if (insn->op == IR_CALL) {
-			ir_insn *func = &ctx->ir_base[insn->op2];
+			const ir_insn *func = &ctx->ir_base[insn->op2];
 			ir_ref func_proto;
 			const ir_proto_t *proto;
 
@@ -2242,7 +2239,10 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(ir_ctx *ctx, ir_ref ref, ir_typ
 			if (!(proto->flags & (IR_CONST_FUNC|IR_PURE_FUNC))) {
 				break;
 			}
-		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_STORE) {
+		} else if (insn->op == IR_MERGE
+				|| insn->op == IR_LOOP_BEGIN
+				|| insn->op == IR_STORE
+				|| (insn->op == IR_BEGIN && insn->op2)) {
 			break;
 		}
 		ref = insn->op1;
@@ -2251,7 +2251,7 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vload_i(ir_ctx *ctx, ir_ref ref, ir_typ
 	return IR_UNUSED;
 }
 
-ir_ref ir_find_aliasing_vload(ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var)
+ir_ref ir_find_aliasing_vload(const ir_ctx *ctx, ir_ref ref, ir_type type, ir_ref var)
 {
 	return ir_find_aliasing_vload_i(ctx, ref, type, var);
 }
@@ -2335,7 +2335,15 @@ check_aliasing:
 			}
 		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
 			guarded = 1;
-		} else if (insn->op >= IR_START || insn->op == IR_CALL) {
+		} else if (insn->op >= IR_START) {
+			if (insn->op == IR_BEGIN && insn->op1 && !insn->op2) {
+				/* skip END */
+				ref = insn->op1;
+				insn = &ctx->ir_base[ref];
+			} else {
+				break;
+			}
+		} else if (insn->op == IR_CALL) {
 			break;
 		}
 		next = ref;
@@ -2416,7 +2424,15 @@ IR_ALWAYS_INLINE ir_ref ir_find_aliasing_vstore_i(ir_ctx *ctx, ir_ref ref, ir_re
 			}
 		} else if (insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
 			guarded = 1;
-		} else if (insn->op >= IR_START || insn->op == IR_CALL || insn->op == IR_LOAD || insn->op == IR_STORE) {
+		} else if (insn->op >= IR_START) {
+			if (insn->op == IR_BEGIN && insn->op1 && !insn->op2) {
+				/* skip END */
+				ref = insn->op1;
+				insn = &ctx->ir_base[ref];
+			} else {
+				break;
+			}
+		} else if (insn->op == IR_CALL || insn->op == IR_LOAD || insn->op == IR_STORE) {
 			break;
 		}
 		next = ref;
@@ -2431,6 +2447,37 @@ ir_ref ir_find_aliasing_vstore(ir_ctx *ctx, ir_ref ref, ir_ref var, ir_ref val)
 }
 
 /* IR Construction API */
+static ir_ref ir_last_guard(ir_ctx *ctx)
+{
+	ir_ref ref;
+	ir_insn *insn;
+
+	IR_ASSERT(ctx->control);
+	ref = ctx->control;
+	while (1) {
+		insn = &ctx->ir_base[ref];
+		if (IR_IS_BB_START(insn->op) || insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
+			if (insn->op == IR_START) ref = IR_UNUSED;
+			break;
+		}
+		ref = insn->op1;
+	}
+	return ref;
+}
+
+ir_ref _ir_DIV(ir_ctx *ctx, ir_type type, ir_ref op1, ir_ref op2)
+{
+	ir_ref guard = (IR_IS_TYPE_FP(type) || (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 != 0)) ?
+		IR_UNUSED : ir_last_guard(ctx);
+	return ir_fold3(ctx, IR_OPT(IR_DIV, type), op1, op2, guard);
+}
+
+ir_ref _ir_MOD(ir_ctx *ctx, ir_type type, ir_ref op1, ir_ref op2)
+{
+	ir_ref guard = (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 != 0) ?
+		IR_UNUSED : ir_last_guard(ctx);
+	return ir_fold3(ctx, IR_OPT(IR_MOD, type), op1, op2, guard);
+}
 
 ir_ref _ir_PARAM(ir_ctx *ctx, ir_type type, const char* name, ir_ref num)
 {
@@ -2547,12 +2594,12 @@ void _ir_BEGIN(ir_ctx *ctx, ir_ref src)
 	}
 }
 
-static ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
+static ir_ref _ir_fold_condition(const ir_ctx *ctx, ir_ref ref)
 {
-	ir_insn *insn = &ctx->ir_base[ref];
+	const ir_insn *insn = &ctx->ir_base[ref];
 
 	if (insn->op == IR_NE && IR_IS_CONST_REF(insn->op2)) {
-		ir_insn *op2_insn = &ctx->ir_base[insn->op2];
+		const ir_insn *op2_insn = &ctx->ir_base[insn->op2];
 
 		if (IR_IS_TYPE_INT(op2_insn->type) && op2_insn->val.u64 == 0) {
 			ref = insn->op1;
@@ -2565,7 +2612,7 @@ static ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
 		ref = insn->op1;
 		insn = &ctx->ir_base[ref];
 	} else if (insn->op == IR_EQ && insn->op2 == IR_NULL) {
-		ir_insn *op1_insn = &ctx->ir_base[insn->op1];
+		const ir_insn *op1_insn = &ctx->ir_base[insn->op1];
 		if (op1_insn->op == IR_ALLOCA || op1_insn->op == IR_VADDR) {
 			return IR_FALSE;
 		}
@@ -2577,10 +2624,10 @@ static ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
 	return ref;
 }
 
-IR_ALWAYS_INLINE ir_ref ir_check_dominating_predicates_i(ir_ctx *ctx, ir_ref ref, ir_ref condition, ir_ref limit)
+IR_ALWAYS_INLINE ir_ref ir_check_dominating_predicates_i(const ir_ctx *ctx, ir_ref ref, ir_ref condition, ir_ref limit)
 {
-	ir_insn *prev = NULL;
-	ir_insn *insn;
+	const ir_insn *prev = NULL;
+	const ir_insn *insn;
 
 	while (ref > limit) {
 		insn = &ctx->ir_base[ref];
@@ -2610,7 +2657,7 @@ IR_ALWAYS_INLINE ir_ref ir_check_dominating_predicates_i(ir_ctx *ctx, ir_ref ref
 	return condition;
 }
 
-ir_ref ir_check_dominating_predicates(ir_ctx *ctx, ir_ref ref, ir_ref condition)
+ir_ref ir_check_dominating_predicates(const ir_ctx *ctx, ir_ref ref, ir_ref condition)
 {
 	IR_ASSERT(!IR_IS_CONST_REF(condition));
 	return ir_check_dominating_predicates_i(ctx, ref, condition, (condition < ref) ? condition : 1);
@@ -2751,7 +2798,7 @@ void _ir_MERGE_LIST(ir_ctx *ctx, ir_ref list)
 
 		/* count inputs count */
 		do {
-			ir_insn *insn = &ctx->ir_base[ref];
+			const ir_insn *insn = &ctx->ir_base[ref];
 
 			IR_ASSERT(insn->op == IR_END);
 			ref = insn->op2;
@@ -2781,8 +2828,10 @@ void _ir_MERGE_LIST(ir_ctx *ctx, ir_ref list)
 
 ir_ref _ir_PHI_LIST(ir_ctx *ctx, ir_ref list)
 {
-	ir_insn *merge, *end;
-	ir_ref phi, *ops, i;
+	const ir_insn *merge;
+	const ir_ref *ops;
+	ir_insn *end;
+	ir_ref phi, i;
 	ir_type type;
 
 	if (list == IR_UNUSED) {
@@ -3246,7 +3295,8 @@ ir_ref _ir_VLOAD(ir_ctx *ctx, ir_type type, ir_ref var)
 	if (EXPECTED(ctx->flags & IR_OPT_FOLDING)) {
 		ref = ir_find_aliasing_vload_i(ctx, ctx->control, type, var);
 		if (ref) {
-			ir_insn *insn = &ctx->ir_base[ref];
+			const ir_insn *insn = &ctx->ir_base[ref];
+
 			if (insn->type == type) {
 				return ref;
 			} else if (ir_type_size[insn->type] == ir_type_size[type]) {
@@ -3312,7 +3362,8 @@ ir_ref _ir_LOAD(ir_ctx *ctx, ir_type type, ir_ref addr)
 		}
 		ref = ir_find_aliasing_load_i(ctx, ctx->control, type, addr, (addr > 0) ? addr : 1);
 		if (ref) {
-			ir_insn *insn = &ctx->ir_base[ref];
+			const ir_insn *insn = &ctx->ir_base[ref];
+
 			if (insn->type == type) {
 				return ref;
 			} else if (ir_type_size[insn->type] == ir_type_size[type]) {

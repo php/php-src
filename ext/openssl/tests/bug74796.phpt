@@ -12,13 +12,24 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$caFile = __DIR__ . '/bug74796_ca.pem.tmp';
+$csFile = __DIR__ . '/bug74796_cs.pem.tmp';
+$ukFile = __DIR__ . '/bug74796_uk.pem.tmp';
+$usFile = __DIR__ . '/bug74796_us.pem.tmp';
+$certificateGenerator->saveCaCert($caFile);
+$certificateGenerator->saveNewCertAsFileWithKey('cs.php.net', $csFile);
+$certificateGenerator->saveNewCertAsFileWithKey('uk.php.net', $ukFile);
+$certificateGenerator->saveNewCertAsFileWithKey('us.php.net', $usFile);
+
 $serverCode = <<<'CODE'
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'SNI_server_certs' => [
-            "cs.php.net" => __DIR__ . "/sni_server_cs.pem",
-            "uk.php.net" => __DIR__ . "/sni_server_uk.pem",
-            "us.php.net" => __DIR__ . "/sni_server_us.pem"
+            "cs.php.net" => '%s',
+            "uk.php.net" => '%s',
+            "us.php.net" => '%s',
         ]
     ]]);
 
@@ -33,6 +44,7 @@ $serverCode = <<<'CODE'
 
     phpt_wait();
 CODE;
+$serverCode = sprintf($serverCode, $csFile, $ukFile, $usFile);
 
 $proxyCode = <<<'CODE'
     function parse_sni_from_client_hello($data) {
@@ -134,7 +146,7 @@ CODE;
 $clientCode = <<<'CODE'
     $clientCtx = stream_context_create([
         'ssl' => [
-            'cafile' => __DIR__ . '/sni_server_ca.pem',
+            'cafile' => '%s',
             'verify_peer' => true,
             'verify_peer_name' => true,
         ],
@@ -155,16 +167,21 @@ $clientCode = <<<'CODE'
 
     phpt_notify('server');
 CODE;
+$clientCode = sprintf($clientCode, $caFile);
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, [
-    'server' => $serverCode,
-    'proxy' => $proxyCode,
+        'server' => $serverCode,
+        'proxy' => $proxyCode,
 ]);
 ?>
 --CLEAN--
 <?php
 @unlink(__DIR__ . "/bug74796_proxy_sni.log");
+@unlink(__DIR__ . '/bug74796_ca.pem.tmp');
+@unlink(__DIR__ . '/bug74796_cs.pem.tmp');
+@unlink(__DIR__ . '/bug74796_uk.pem.tmp');
+@unlink(__DIR__ . '/bug74796_us.pem.tmp');
 ?>
 --EXPECT--
 string(19) "Hello from server 0"

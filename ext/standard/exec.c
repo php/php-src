@@ -81,7 +81,7 @@ PHP_MINIT_FUNCTION(exec)
 
 static size_t strip_trailing_whitespace(char *buf, size_t bufl) {
 	size_t l = bufl;
-	while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
+	while (l-- > 0 && isspace((unsigned char)buf[l]));
 	if (l != (bufl - 1)) {
 		bufl = l + 1;
 		buf[bufl] = '\0';
@@ -282,7 +282,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const zend_string *unescaped_cmd)
 	size_t x, y;
 	zend_string *cmd;
 #ifndef PHP_WIN32
-	char *p = NULL;
+	const char *p = NULL;
 #endif
 
 	ZEND_ASSERT(ZSTR_LEN(unescaped_cmd) == strlen(ZSTR_VAL(unescaped_cmd)) && "Must be a binary safe string");
