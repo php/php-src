@@ -1,8 +1,20 @@
 --TEST--
 PFA variation: var_dump(), internal function
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.optimization_level=-1
+opcache.file_update_protection=0
+--ENV--
+A=1
 --FILE--
 <?php
-var_dump(array_map(?, [1, 2, 3], [4, 5, 6], four: new stdClass, ...));
+
+function notconst($value) {
+    return getenv('A') ? $value : null;
+}
+
+var_dump(array_map(?, notconst([1, 2, 3]), notconst([4, 5, 6]), four: new stdClass, ...));
 ?>
 --EXPECTF--
 object(Closure)#%d (5) {
@@ -11,7 +23,7 @@ object(Closure)#%d (5) {
   ["file"]=>
   string(%d) "%svariation_debug_002.php"
   ["line"]=>
-  int(2)
+  int(7)
   ["static"]=>
   array(3) {
     ["array"]=>

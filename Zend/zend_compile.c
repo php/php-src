@@ -4162,6 +4162,8 @@ static void zend_compile_call_partial(znode *result, zend_ast_fcc *fcc_ast, uint
 	if (!Z_ISUNDEF_P(named_positions)) {
 		opline->op2.constant = zend_add_literal(named_positions);
 		opline->op2_type = IS_CONST;
+	} else {
+		opline->op2.num = 0;
 	}
 }
 
