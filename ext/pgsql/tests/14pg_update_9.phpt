@@ -26,6 +26,6 @@ echo pg_update($db, $table_name, $fields, $ids, PGSQL_DML_STRING|PGSQL_DML_ESCAP
 echo "Ok\n";
 ?>
 --EXPECT--
-UPDATE "php_pgsql_test" SET "num"=1234,"str"=E'ABC',"bin"=E'\\x58595a' WHERE "num"=1234;
+UPDATE "php_pgsql_test" SET "num"=1234,"str"='ABC',"bin"='\\x58595a' WHERE "num"=1234;
 UPDATE "php_pgsql_test" SET "num"='1234',"str"='ABC',"bin"='XYZ' WHERE "num"='1234';
 Ok
