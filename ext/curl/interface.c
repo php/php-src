@@ -411,7 +411,6 @@ static zend_object *curl_clone_obj(zend_object *object) {
 
 	clone_object = curl_create_object(curl_ce);
 	clone_ch = curl_from_obj(clone_object);
-	init_curl_handle(clone_ch);
 
 	ch = curl_from_obj(object);
 	cp = curl_easy_duphandle(ch->cp);
@@ -420,6 +419,7 @@ static zend_object *curl_clone_obj(zend_object *object) {
 		return &clone_ch->std;
 	}
 
+	init_curl_handle(clone_ch);
 	clone_ch->cp = cp;
 	_php_setup_easy_copy_handlers(clone_ch, ch);
 
