@@ -41,8 +41,8 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 	 * result as a signed int: its -1 error return in a size_t would pass
 	 * the > 0 guard and index far outside the array (see the equivalent
 	 * upstream fix in ext/opcache/shared_alloc_posix.c, GH-22429). */
+	size_t shared_segment_lg_index = 0, shared_segment_sindexes[3] = {0};
 	const size_t entries = sizeof(shared_segment_sindexes) / sizeof(shared_segment_sindexes[0]);
-	 size_t shared_segment_lg_index = 0, shared_segment_sindexes[3] = {0};
 	int i, shared_segment_sizes;
 
 	shared_segment_sizes = getpagesizes(shared_segment_sindexes, entries);
@@ -52,6 +52,7 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 			if (shared_segment_sindexes[i] != 0 &&
 			    !(requested_size % shared_segment_sindexes[i])) {
 				shared_segment_lg_index = i;
+
 				break;
 			}
 		}
@@ -62,6 +63,7 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 	*shared_segments_p = (php_user_cache_shm_segment_posix **) calloc(1, sizeof(php_user_cache_shm_segment_posix) + sizeof(void *));
 	if (!*shared_segments_p) {
 		*error_in = "calloc";
+
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 	shared_segment = (php_user_cache_shm_segment_posix *)((char *)(*shared_segments_p) + sizeof(void *));

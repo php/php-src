@@ -764,6 +764,7 @@ bool php_user_cache_header_init_locked(void);
 bool php_user_cache_header_adoptable_locked(void);
 void php_user_cache_free_locked(uint32_t payload_offset);
 uint32_t php_user_cache_alloc_locked(size_t size, const void *src);
+bool php_user_cache_alloc_can_satisfy_locked(size_t size, size_t key_size);
 bool php_user_cache_startup_storage_before_request(void);
 void php_user_cache_shutdown_storage(void);
 void php_user_cache_ensure_ready_impl(void);

@@ -9,6 +9,10 @@ user_cache.shm_size=16M
 <?php
 $cache = UserCache\Cache::getPool('remember-by-ref');
 
+/* Drop leftovers so a --repeat re-run in the same process misses again. */
+$cache->delete('by-ref');
+$cache->delete('plain');
+
 $g = 42;
 $byRef = function &(string $key) use (&$g) {
     return $g;
