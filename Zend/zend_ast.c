@@ -678,6 +678,7 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 	zend_function *func,
 	zend_ast_list *args_ast,
 	zend_class_entry *scope,
+	void *object_or_called_scope,
 	bool *short_circuited_ptr,
 	zend_ast_evaluate_ctx *ctx,
 	zend_array **named_positions_ptr,
@@ -685,7 +686,7 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 ) {
 	zend_execute_data *frame = zend_vm_stack_push_call_frame_ex(
 			zend_vm_calc_used_stack(args_ast->children, func),
-			0, func, 0, NULL);
+			0, func, 0, object_or_called_scope);
 
 	for (uint32_t i = 0; i < args_ast->children; i++) {
 		zend_ast *arg_ast = args_ast->child[i];
@@ -1332,16 +1333,13 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			zend_array *named_positions = NULL;
 			bool uses_variadic_placeholder = false;
 			zend_execute_data *frame = zend_ast_evaluate_arg_list(
-					fptr, args, scope, short_circuited_ptr, ctx,
+					fptr, args, scope, called_scope, short_circuited_ptr, ctx,
 					&named_positions, &uses_variadic_placeholder);
 			if (!frame) {
 				ZEND_ASSERT(EG(exception));
 				return FAILURE;
 			}
 
-			zval this_ptr;
-			ZVAL_UNDEF(&this_ptr);
-			Z_PTR(this_ptr) = NULL;
 			void *cache_slot[2] = {0};
 			zend_array *extra_named_params = ZEND_CALL_INFO(frame) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS
 						? frame->extra_named_params
@@ -1350,7 +1348,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (uses_variadic_placeholder) {
 				flags |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 			}
-			zend_partial_create(result, &this_ptr, fptr,
+			zend_partial_create(result, &frame->This, fptr,
 					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),
 					extra_named_params, named_positions,
 					fcc_ast->filename, &ast->lineno,
