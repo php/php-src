@@ -283,7 +283,7 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 
 	if (state->operation_depth >= PHP_STREAM_ERROR_MAX_DEPTH) {
 		php_error_docref(NULL, E_WARNING,
-				"Stream error operation depth exceeded (%u), possible infinite recursion",
+				"Stream error operation depth exceeded (%"PRIu32"), possible infinite recursion",
 				state->operation_depth);
 		return NULL;
 	}
