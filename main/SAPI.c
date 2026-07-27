@@ -370,7 +370,6 @@ SAPI_API void sapi_activate_headers_only(void)
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
-	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
 	SG(request_info).post_entry = NULL;
 	SG(global_request_time) = 0;
@@ -413,7 +412,6 @@ SAPI_API void sapi_activate(void)
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
-	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
 	SG(request_info).post_entry = NULL;
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
@@ -499,7 +497,7 @@ SAPI_API void sapi_deactivate_module(void)
 		efree(SG(request_info).content_type_dup);
 	}
 	if (SG(request_info).current_user) {
-		efree(SG(request_info).current_user);
+		zend_string_release_ex(SG(request_info).current_user, false);
 	}
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate();
