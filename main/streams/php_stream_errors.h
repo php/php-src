@@ -21,18 +21,6 @@
 
 BEGIN_EXTERN_C()
 
-/* Error mode context options (internal C constants) */
-#define PHP_STREAM_ERROR_MODE_ERROR 0
-#define PHP_STREAM_ERROR_MODE_EXCEPTION 1
-#define PHP_STREAM_ERROR_MODE_SILENT 2
-
-/* Error store context options (internal C constants) */
-#define PHP_STREAM_ERROR_STORE_AUTO 0
-#define PHP_STREAM_ERROR_STORE_NONE 1
-#define PHP_STREAM_ERROR_STORE_NON_TERM 2
-#define PHP_STREAM_ERROR_STORE_TERMINAL 3
-#define PHP_STREAM_ERROR_STORE_ALL 4
-
 /* Maximum operation nesting depth */
 #define PHP_STREAM_ERROR_MAX_DEPTH 1000
 /* Operations pool size to prevent extra allocations */

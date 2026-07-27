@@ -83,8 +83,23 @@ static void php_stream_error_create_array(zval *zv, php_stream_error_entry *firs
 }
 
 /* Context option helpers */
+/* Error mode context options (internal C constants) */
+C23_ENUM(php_stream_error_mode, uint8_t) {
+	PHP_STREAM_ERROR_MODE_ERROR = 0,
+	PHP_STREAM_ERROR_MODE_EXCEPTION = 1,
+	PHP_STREAM_ERROR_MODE_SILENT = 2
+};
 
-static int php_stream_auto_decide_error_store_mode(int error_mode)
+/* Error store context options (internal C constants) */
+C23_ENUM(php_stream_error_store, uint8_t) {
+	PHP_STREAM_ERROR_STORE_AUTO = 0,
+	PHP_STREAM_ERROR_STORE_NONE = 1,
+	PHP_STREAM_ERROR_STORE_NON_TERM = 2,
+	PHP_STREAM_ERROR_STORE_TERMINAL = 3,
+	PHP_STREAM_ERROR_STORE_ALL = 4
+};
+
+static php_stream_error_store php_stream_auto_decide_error_store_mode(php_stream_error_mode error_mode)
 {
 	switch (error_mode) {
 		case PHP_STREAM_ERROR_MODE_ERROR:
@@ -98,7 +113,7 @@ static int php_stream_auto_decide_error_store_mode(int error_mode)
 	}
 }
 
-static int php_stream_get_error_mode(php_stream_context *context)
+static php_stream_error_mode php_stream_get_error_mode(php_stream_context *context)
 {
 	if (!context) {
 		return PHP_STREAM_ERROR_MODE_ERROR;
@@ -127,7 +142,8 @@ static int php_stream_get_error_mode(php_stream_context *context)
 	return PHP_STREAM_ERROR_MODE_ERROR;
 }
 
-static int php_stream_get_error_store_mode(php_stream_context *context, int error_mode)
+static php_stream_error_store php_stream_get_error_store_mode(
+	php_stream_context *context, php_stream_error_mode error_mode)
 {
 	if (!context) {
 		return php_stream_auto_decide_error_store_mode(error_mode);
@@ -386,7 +402,7 @@ static void php_stream_throw_exception_with_errors(php_stream_error_operation *o
 }
 
 static void php_stream_report_errors(php_stream_context *context, php_stream_error_operation *op,
-		int error_mode, bool is_terminating)
+		php_stream_error_mode error_mode, bool is_terminating)
 {
 	switch (error_mode) {
 		case PHP_STREAM_ERROR_MODE_ERROR: {
@@ -439,8 +455,8 @@ PHPAPI void php_stream_error_operation_end(php_stream_context *context)
 			context = FG(default_context);
 		}
 
-		int error_mode = php_stream_get_error_mode(context);
-		int store_mode = php_stream_get_error_store_mode(context, error_mode);
+		php_stream_error_mode error_mode = php_stream_get_error_mode(context);
+		php_stream_error_store store_mode = php_stream_get_error_store_mode(context, error_mode);
 
 		bool is_terminating = php_stream_has_terminating_error(op);
 
