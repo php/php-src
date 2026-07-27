@@ -724,6 +724,7 @@ static zend_execute_data *zend_ast_evaluate_arg_list(
 			}
 		} else {
 			if (zend_ast_evaluate_ex(arg, arg_ast, scope, short_circuited_ptr, ctx) == FAILURE) {
+				ZVAL_UNDEF(arg);
 				goto fail;
 			}
 		}
