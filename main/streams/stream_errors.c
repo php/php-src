@@ -69,7 +69,7 @@ static void php_stream_error_create_object(zval *zv, php_stream_error_entry *ent
 }
 
 /* Create array of StreamError objects from error chain */
-PHPAPI void php_stream_error_create_array(zval *zv, php_stream_error_entry *first)
+static void php_stream_error_create_array(zval *zv, php_stream_error_entry *first)
 {
 	array_init(zv);
 
