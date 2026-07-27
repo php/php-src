@@ -111,50 +111,24 @@ PHP_FUNCTION(header_register_callback)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "F", &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
-		zval_ptr_dtor(&SG(callback_func));
-		SG(fci_cache) = empty_fcall_info_cache;
+	if (ZEND_FCC_INITIALIZED(SG(send_header_fcc))) {
+		zend_fcc_dtor(&SG(send_header_fcc));
 	}
 
 	/* Don't store callback if headers have already been sent:
 	 * It won't get used and we won't have a chance to release it. */
-	if (!SG(headers_sent)) {
-		ZVAL_COPY(&SG(callback_func), &fci.function_name);
+	if (UNEXPECTED(SG(headers_sent))) {
+		zend_release_fcall_info_cache(&fcc);
+	} else {
+		zend_fcc_dup(&SG(send_header_fcc), &fcc);
 	}
-
 	RETURN_TRUE;
 }
 /* }}} */
-
-static void sapi_run_header_callback(zval *callback)
-{
-	int   error;
-	zend_fcall_info fci;
-	char *callback_error = NULL;
-	zval retval;
-
-	if (zend_fcall_info_init(callback, 0, &fci, &SG(fci_cache), NULL, &callback_error) == SUCCESS) {
-		fci.retval = &retval;
-
-		error = zend_call_function(&fci, &SG(fci_cache));
-		if (error == FAILURE) {
-			goto callback_failed;
-		} else {
-			zval_ptr_dtor(&retval);
-		}
-	} else {
-callback_failed:
-		php_error_docref(NULL, E_WARNING, "Could not call the sapi_header_callback");
-	}
-
-	if (callback_error) {
-		efree(callback_error);
-	}
-}
 
 SAPI_API void sapi_handle_post(void *arg)
 {
@@ -369,10 +343,10 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len)
 	if (*mimetype != NULL) {
 		if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
 			newlen = len + (sizeof(";charset=")-1) + strlen(charset);
-			newtype = emalloc(newlen + 1);
-	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
-			strlcat(newtype, ";charset=", newlen + 1);
-			strlcat(newtype, charset, newlen + 1);
+			newtype = zend_cstr_concat3(
+				*mimetype, len,
+				";charset=", sizeof(";charset=")-1,
+				charset, strlen(charset));
 			efree(*mimetype);
 			*mimetype = newtype;
 			return newlen;
@@ -436,7 +410,6 @@ SAPI_API void sapi_activate(void)
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(headers_sent) = 0;
-	ZVAL_UNDEF(&SG(callback_func));
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
@@ -446,6 +419,7 @@ SAPI_API void sapi_activate(void)
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
 	SG(global_request_time) = 0;
 	SG(post_read) = 0;
+	SG(send_header_fcc) = empty_fcall_info_cache;
 	/* It's possible to override this general case in the activate() callback, if necessary. */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
@@ -878,10 +852,9 @@ SAPI_API int sapi_send_headers(void)
 			SG(sapi_headers).mimetype = default_mimetype;
 
 			default_header.header_len = sizeof("Content-type: ") - 1 + len;
-			default_header.header = emalloc(default_header.header_len + 1);
-
-			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
-			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+			default_header.header = zend_cstr_concat(
+				"Content-type: ", sizeof("Content-type: ") - 1,
+				SG(sapi_headers).mimetype, len);
 
 			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
 		} else {
@@ -890,12 +863,12 @@ SAPI_API int sapi_send_headers(void)
 		SG(sapi_headers).send_default_content_type = 0;
 	}
 
-	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
-		zval cb;
-		ZVAL_COPY_VALUE(&cb, &SG(callback_func));
-		ZVAL_UNDEF(&SG(callback_func));
-		sapi_run_header_callback(&cb);
-		zval_ptr_dtor(&cb);
+	if (ZEND_FCC_INITIALIZED(SG(send_header_fcc))) {
+		zend_fcall_info_cache fcc = SG(send_header_fcc);
+		/* Prevent triggering the callback multiple times */
+		SG(send_header_fcc) = empty_fcall_info_cache;
+		zend_call_known_fcc(&fcc, NULL, 0, NULL, NULL);
+		zend_fcc_dtor(&fcc);
 	}
 
 	SG(headers_sent) = 1;

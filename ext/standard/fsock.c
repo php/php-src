@@ -29,17 +29,10 @@ static size_t php_fsockopen_format_host_port(char **message, const char *prefix,
     int portlen = snprintf(portbuf, sizeof(portbuf), ":" ZEND_LONG_FMT, port);
     size_t total_len = prefix_len + host_len + portlen;
 
-    char *result = emalloc(total_len + 1); 
-
-	if (prefix_len > 0) {
-    	memcpy(result, prefix, prefix_len);
-	}
-    memcpy(result + prefix_len, host, host_len);
-    memcpy(result + prefix_len + host_len, portbuf, portlen);
-
-    result[total_len] = '\0';
-
-    *message = result;
+    *message = zend_cstr_concat3(
+        prefix, prefix_len,
+        host, host_len,
+        portbuf, portlen);
 
 	return total_len;
 }

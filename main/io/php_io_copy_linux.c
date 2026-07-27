@@ -54,13 +54,9 @@ static inline int php_io_linux_wait_for_data(php_io_fd *fd)
 		timeout_ms = ptimeout->tv_sec * 1000 + ptimeout->tv_usec / 1000;
 	}
 
-	struct pollfd pfd;
-	pfd.fd = fd->fd;
-	pfd.events = POLLIN;
-
 	int ret;
 	do {
-		ret = poll(&pfd, 1, timeout_ms);
+		ret = php_pollfd_for_ms(fd->fd, POLLIN, timeout_ms);
 	} while (ret == -1 && errno == EINTR);
 
 	return ret;

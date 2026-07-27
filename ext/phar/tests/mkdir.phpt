@@ -42,13 +42,13 @@ Warning: mkdir(): phar error: cannot create directory "phar://", no phar archive
 
 Warning: mkdir(): phar error: cannot create directory "" in phar "foo.phar", phar error: invalid path "" must not be empty in %smkdir.php on line %d
 
-Warning: mkdir(): phar error: cannot create directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is a not a directory in %smkdir.php on line %d
+Warning: mkdir(): phar error: cannot create directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is not a directory in %smkdir.php on line %d
 
 Warning: rmdir(): phar error: cannot remove directory "phar://", no phar archive specified, or phar archive does not exist in %smkdir.php on line %d
 
 Warning: rmdir(): phar error: cannot remove directory "" in phar "foo.phar", directory does not exist in %smkdir.php on line %d
 
-Warning: rmdir(): phar error: cannot remove directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is a not a directory in %smkdir.php on line %d
+Warning: rmdir(): phar error: cannot remove directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is not a directory in %smkdir.php on line %d
 Cannot create a directory in magic ".phar" directory
 Cannot create a directory in magic ".phar" directory
 bool(true)

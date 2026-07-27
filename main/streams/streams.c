@@ -54,7 +54,7 @@ PHPAPI int php_file_le_stream_filter(void)
 	return le_stream_filter;
 }
 
-PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(void)
+PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash(void)
 {
 	return (FG(stream_wrappers) ? FG(stream_wrappers) : &url_stream_wrappers_hash);
 }
@@ -215,7 +215,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 }
 /* }}} */
 
-PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options) /* {{{ */
+PHPAPI int php_stream_free_enclosed(php_stream *stream_enclosed, int close_options) /* {{{ */
 {
 	return php_stream_free(stream_enclosed,
 		close_options | PHP_STREAM_FREE_IGNORE_ENCLOSING);
@@ -249,8 +249,9 @@ static int _php_stream_free_persistent(zval *zv, void *pStream)
 	return le->ptr == pStream;
 }
 
+static int php_stream_flush_ex(php_stream *stream, bool closing);
 
-PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
+PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 {
 	int ret = 1;
 	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
@@ -336,7 +337,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 	if (stream->flags & PHP_STREAM_FLAG_WAS_WRITTEN || stream->writefilters.head) {
 		/* make sure everything is saved */
-		_php_stream_flush(stream, 1);
+		php_stream_flush_ex(stream, true);
 	}
 
 	/* If not called from the resource dtor, remove the stream from the resource list. */
@@ -431,7 +432,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 /* {{{ generic stream operations */
 
-PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
+PHPAPI zend_result php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
 	/* allocate/fill the buffer */
 
@@ -603,7 +604,7 @@ out_is_eof:
 	return retval;
 }
 
-PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
+PHPAPI ssize_t php_stream_read(php_stream *stream, char *buf, size_t size)
 {
 	ssize_t toread = 0, didread = 0;
 
@@ -707,7 +708,7 @@ PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len)
 	return str;
 }
 
-PHPAPI bool _php_stream_eof(php_stream *stream)
+PHPAPI bool php_stream_eof(php_stream *stream)
 {
 	/* if there is data in the buffer, it's not EOF */
 	if (stream->writepos - stream->readpos > 0) {
@@ -724,7 +725,7 @@ PHPAPI bool _php_stream_eof(php_stream *stream)
 	return stream->eof;
 }
 
-PHPAPI int _php_stream_putc(php_stream *stream, int c)
+PHPAPI int php_stream_putc(php_stream *stream, int c)
 {
 	unsigned char buf = c;
 
@@ -734,7 +735,7 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c)
 	return EOF;
 }
 
-PHPAPI int _php_stream_getc(php_stream *stream)
+PHPAPI int php_stream_getc(php_stream *stream)
 {
 	char buf;
 
@@ -744,7 +745,7 @@ PHPAPI int _php_stream_getc(php_stream *stream)
 	return EOF;
 }
 
-PHPAPI bool _php_stream_puts(php_stream *stream, const char *buf)
+PHPAPI bool php_stream_puts(php_stream *stream, const char *buf)
 {
 	size_t len;
 	char newline[2] = "\n"; /* is this OK for Win? */
@@ -756,7 +757,7 @@ PHPAPI bool _php_stream_puts(php_stream *stream, const char *buf)
 	return 0;
 }
 
-PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
+PHPAPI int php_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 {
 	memset(ssb, 0, sizeof(*ssb));
 
@@ -818,7 +819,7 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf)
 /* If buf == NULL, the buffer will be allocated automatically and will be of an
  * appropriate length to hold the line, regardless of the line length, memory
  * permitting */
-PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
+PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 		size_t *returned_len)
 {
 	size_t avail = 0;
@@ -1056,7 +1057,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 }
 
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
-static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_stream_write_buffer(php_stream *stream, const char *buf, size_t count)
 {
 	ssize_t didwrite = 0;
 	ssize_t retval;
@@ -1112,7 +1113,7 @@ out:
  * This may trigger a real write to the stream.
  * Returns the number of bytes consumed from buf by the first filter in the chain.
  * */
-static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags)
+static ssize_t php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags)
 {
 	size_t consumed = 0;
 	php_stream_bucket *bucket;
@@ -1149,7 +1150,7 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 			 * underlying stream */
 			while (brig_inp->head) {
 				bucket = brig_inp->head;
-				if (_php_stream_write_buffer(stream, bucket->buf, bucket->buflen) < 0) {
+				if (php_stream_write_buffer(stream, bucket->buf, bucket->buflen) < 0) {
 					consumed = (ssize_t) -1;
 				}
 
@@ -1183,12 +1184,12 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 	return consumed;
 }
 
-PHPAPI int _php_stream_flush(php_stream *stream, int closing)
+static int php_stream_flush_ex(php_stream *stream, bool closing)
 {
 	int ret = 0;
 
 	if (stream->writefilters.head && stream->ops->write) {
-		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC );
+		php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC );
 	}
 
 	stream->flags &= ~PHP_STREAM_FLAG_WAS_WRITTEN;
@@ -1200,7 +1201,11 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 	return ret;
 }
 
-PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t count)
+PHPAPI int php_stream_flush(php_stream *stream) {
+	return php_stream_flush_ex(stream, false);
+}
+
+PHPAPI ssize_t php_stream_write(php_stream *stream, const char *buf, size_t count)
 {
 	ssize_t bytes;
 
@@ -1215,9 +1220,9 @@ PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t cou
 	}
 
 	if (stream->writefilters.head) {
-		bytes = _php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL);
+		bytes = php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL);
 	} else {
-		bytes = _php_stream_write_buffer(stream, buf, count);
+		bytes = php_stream_write_buffer(stream, buf, count);
 	}
 
 	if (bytes) {
@@ -1227,7 +1232,7 @@ PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t cou
 	return bytes;
 }
 
-PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
+PHPAPI ssize_t php_stream_printf(php_stream *stream, const char *fmt, ...)
 {
 	ssize_t count;
 	char *buf;
@@ -1247,7 +1252,7 @@ PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
 	return count;
 }
 
-PHPAPI zend_off_t _php_stream_tell(const php_stream *stream)
+PHPAPI zend_off_t php_stream_tell(const php_stream *stream)
 {
 	return stream->position;
 }
@@ -1302,9 +1307,14 @@ static zend_result php_stream_filters_seek_all(php_stream *stream, bool is_start
 	return SUCCESS;
 }
 
+static bool php_stream_has_notifier(php_stream *stream)
+{
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+	/* The fd-level copy cannot emit progress notifications. */
+	return context && context->notifier;
+}
 
-
-PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
+PHPAPI int php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 		/* flush can call seek internally so we need to prevent an infinite loop */
@@ -1319,7 +1329,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 	bool is_start_seeking = whence == SEEK_SET && offset == 0;
 
 	if (stream->writefilters.head) {
-		_php_stream_flush(stream, 0);
+		php_stream_flush(stream);
 		if (!php_stream_are_filters_seekable(stream->writefilters.head, is_start_seeking,
 				PHP_STREAM_FILTER_WRITE)) {
 			return -1;
@@ -1411,7 +1421,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 	return -1;
 }
 
-PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam)
+PHPAPI int php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam)
 {
 	int ret = PHP_STREAM_OPTION_RETURN_NOTIMPL;
 
@@ -1445,7 +1455,7 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 	return ret;
 }
 
-PHPAPI int _php_stream_sync(php_stream *stream, bool data_only)
+PHPAPI int php_stream_sync(php_stream *stream, bool data_only)
 {
 	int op = PHP_STREAM_SYNC_FSYNC;
 	if (data_only) {
@@ -1454,7 +1464,7 @@ PHPAPI int _php_stream_sync(php_stream *stream, bool data_only)
 	return php_stream_set_option(stream, PHP_STREAM_OPTION_SYNC_API, op, NULL);
 }
 
-PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize)
+PHPAPI int php_stream_truncate_set_size(php_stream *stream, size_t newsize)
 {
 	return php_stream_set_option(stream, PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SET_SIZE, &newsize);
 }
@@ -1655,7 +1665,8 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 	 * are empty, so the fd offsets match the logical stream positions */
 	if (!php_stream_is(src, PHP_STREAM_IS_USERSPACE) && !php_stream_is(dest, PHP_STREAM_IS_USERSPACE) &&
 			src->writepos == src->readpos && dest->writepos == dest->readpos &&
-			!php_stream_is_filtered(src) && !php_stream_is_filtered(dest)) {
+			!php_stream_is_filtered(src) && !php_stream_is_filtered(dest) &&
+			!php_stream_has_notifier(src) && !php_stream_has_notifier(dest)) {
 		php_io_fd src_copy_fd, dest_copy_fd;
 
 		if (php_stream_cast(src, PHP_STREAM_AS_FD_FOR_COPY, (void *) &src_copy_fd, 0) == SUCCESS &&
@@ -1970,8 +1981,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 }
 /* }}} */
 
-/* {{{ _php_stream_mkdir */
-PHPAPI int _php_stream_mkdir(const char *path, int mode, int options, php_stream_context *context)
+PHPAPI int php_stream_mkdir(const char *path, int mode, int options, php_stream_context *context)
 {
 	php_stream_wrapper *wrapper = NULL;
 
@@ -1982,10 +1992,8 @@ PHPAPI int _php_stream_mkdir(const char *path, int mode, int options, php_stream
 
 	return wrapper->wops->stream_mkdir(wrapper, path, mode, options, context);
 }
-/* }}} */
 
-/* {{{ _php_stream_rmdir */
-PHPAPI int _php_stream_rmdir(const char *path, int options, php_stream_context *context)
+PHPAPI int php_stream_rmdir(const char *path, int options, php_stream_context *context)
 {
 	php_stream_wrapper *wrapper = NULL;
 
@@ -1996,10 +2004,8 @@ PHPAPI int _php_stream_rmdir(const char *path, int options, php_stream_context *
 
 	return wrapper->wops->stream_rmdir(wrapper, path, options, context);
 }
-/* }}} */
 
-/* {{{ _php_stream_stat_path */
-PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context)
+PHPAPI int php_stream_stat_path_ex(const char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context)
 {
 	php_stream_wrapper *wrapper = NULL;
 	const char *path_to_open = path;
@@ -2012,7 +2018,6 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 	}
 	return -1;
 }
-/* }}} */
 
 /* {{{ php_stream_opendir */
 PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
@@ -2053,8 +2058,7 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 }
 /* }}} */
 
-/* {{{ _php_stream_readdir */
-PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent)
+PHPAPI php_stream_dirent *php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent)
 {
 
 	if (sizeof(php_stream_dirent) == php_stream_read(dirstream, (char*)ent, sizeof(php_stream_dirent))) {
@@ -2063,7 +2067,6 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 
 	return NULL;
 }
-/* }}} */
 
 /* {{{ php_stream_open_wrapper_ex */
 PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options,
@@ -2373,8 +2376,7 @@ PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string
 }
 /* }}} */
 
-/* {{{ php_stream_scandir */
-PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], int flags, php_stream_context *context,
+PHPAPI int php_stream_scandir(const char *dirname, zend_string **namelist[], php_stream_context *context,
 			  int (*compare) (const zend_string **a, const zend_string **b))
 {
 	php_stream *stream;
@@ -2429,4 +2431,3 @@ overflow:
 	efree(vector);
 	return -1;
 }
-/* }}} */

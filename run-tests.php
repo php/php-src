@@ -700,6 +700,12 @@ function main(): void
     verify_config($php);
     write_information($user_tests, $phpdbg);
 
+    if ($file_cache === 'prime') {
+        $cache_dir = get_file_cache_dir();
+        rmdir_recursive($cache_dir);
+        mkdir($cache_dir, recursive: true);
+    }
+
     if ($test_cnt) {
         $exts_tested = [];
         $exts_skipped = [];
@@ -1052,6 +1058,11 @@ function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false)
     }
 
     closedir($o);
+}
+
+function get_file_cache_dir(): string
+{
+    return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'php-run-tests-file-cache';
 }
 
 function rmdir_recursive($dir)
@@ -2091,11 +2102,7 @@ TEST $file
     $orig_ini_settings = settings2params($ini_settings);
 
     if ($file_cache !== null) {
-        $ini_settings['opcache.file_cache'] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'php-run-tests-file-cache';
-        if ($file_cache === 'prime') {
-            rmdir_recursive($ini_settings['opcache.file_cache']);
-            mkdir($ini_settings['opcache.file_cache'], recursive: true);
-        }
+        $ini_settings['opcache.file_cache'] = get_file_cache_dir();
         // Make sure warnings still show up on the second run.
         $ini_settings['opcache.record_warnings'] = '1';
         // File cache is currently incompatible with JIT.

@@ -6,6 +6,11 @@ PHP                                                                        NEWS
   . Implemented partial function application RFC. (Arnaud)
   . Fixed bug GH-22263 (reset typed property default on every unserialize
     failure path). (David Carlier)
+  . Fixed bug GH-18985 (Wrong line numbers for match with constant arms).
+    (ilutov)
+  . Fixed bug GH-18847 (SEGV in zend_fetch_debug_backtrace() when the memory
+    limit is reached while the tracing JIT enters a call frame). (Arnaud,
+    iliaal)
 
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
@@ -22,6 +27,7 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed grammatical issues in Normalizer invalid form and IntlCalendar time
     zone offset error messages. (Weilin Du)
+  . Removed the dependency on the ICU IO library. (Weilin Du)
 
 - ODBC:
   . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
@@ -37,6 +43,10 @@ PHP                                                                        NEWS
     longer than the declared maxlen). (iliaal)
   . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
     diagnostic message length beyond the error buffer). (iliaal)
+
+- Phar:
+  . Fixed grammatical issues and outdated terminology in Phar error messages.
+    (Weilin Du)
 
 - Reflection:
   . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
@@ -59,6 +69,10 @@ PHP                                                                        NEWS
   . Added a new IO copy API used by php_stream_copy_to_stream_ex() that
     leverages platform primitives (sendfile, splice, copy_file_range,
     TransmitFile) for faster stream copying. (Jakub Zelenka, David Carlier)
+  . Fixed bug GH-22841 (php_stream_copy_to_stream_ex() drops progress
+    notifications when using the copy fast path). (David Carlier)
+  . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
+    $this->stream during the close flush). (iliaal)
 
 16 Jul 2026, PHP 8.6.0alpha2
 
@@ -212,7 +226,7 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #429429090 (Failed assertion on unset() with uninitialized
     container). (ilutov)
   . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
-  . Fix deprecation now showing when accessing null key of an array with JIT.
+  . Fix deprecation not showing when accessing null key of an array with JIT.
     (alexandre-daubois)
   . Fixed bug GH-20174 (Assertion failure in
     ReflectionProperty::skipLazyInitialization after failed LazyProxy
@@ -356,6 +370,8 @@ PHP                                                                        NEWS
     and Openssl\Session class. (Jakub Zelenka)
   . Added TLS external PSK support for streams with new context options and
     Openssl\Psk class. (Jakub Zelenka)
+  . Added TLS 1.3 early data (0-RTT) support for streams with new context
+    options early_data, max_early_data and early_data_cb. (Jakub Zelenka)
   . Added stream crypto status for exposing OpenSSL WANT_READ / WANT_WRITE.
     (Jakub Zelenka)
 

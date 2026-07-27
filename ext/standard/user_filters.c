@@ -143,7 +143,11 @@ static zend_result userfilter_assign_stream(php_stream *stream, zval *obj,
 	bool stream_property_exists = Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL);
 	if (stream_property_exists) {
 		zval stream_zval;
-		php_stream_to_zval(stream, &stream_zval);
+		if (EXPECTED(stream->res && stream->res->type >= 0)) {
+			php_stream_to_zval(stream, &stream_zval);
+		} else {
+			ZVAL_NULL(&stream_zval);
+		}
 		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &stream_zval);
 		/* If property update threw an exception, skip filter execution */
 		if (EG(exception)) {

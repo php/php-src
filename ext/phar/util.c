@@ -1226,7 +1226,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 		if (!entry->is_dir && dir == 2) {
 			/* user requested a directory, we must return one */
 			if (error) {
-				spprintf(error, 4096, "phar error: path \"%s\" exists and is a not a directory", path);
+				spprintf(error, 4096, "phar error: path \"%s\" exists and is not a directory", path);
 			}
 			return NULL;
 		}
@@ -1290,7 +1290,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 					efree(test);
 					/* user requested a directory, we must return one */
 					if (error) {
-						spprintf(error, 4096, "phar error: path \"%s\" exists and is a not a directory", path);
+						spprintf(error, 4096, "phar error: path \"%s\" exists and is not a directory", path);
 					}
 					return NULL;
 				}

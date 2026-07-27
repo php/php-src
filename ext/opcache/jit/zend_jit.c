@@ -3724,6 +3724,16 @@ int zend_jit_check_support(void)
 {
 	int i;
 
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+	if (!pthread_jit_write_protect_supported_np()) {
+		zend_accel_error(ACCEL_LOG_WARNING,
+			"Apple Silicon ZTS JIT requires pthread_jit_write_protect_np() support. JIT disabled.");
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
+		return FAILURE;
+	}
+#endif
+
 	if (zend_execute_ex != execute_ex) {
 		if (zend_dtrace_enabled) {
 			zend_error(E_WARNING, "JIT is incompatible with DTrace. JIT disabled.");
@@ -3791,11 +3801,6 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
 			"Unable to share JIT buffer across fork using minherit(): %s (%d)",
 			strerror(error), error);
-	}
-	if (!pthread_jit_write_protect_supported_np()) {
-		munmap(buf, size);
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
-			"Apple Silicon ZTS JIT requires pthread_jit_write_protect_np() support");
 	}
 #endif
 

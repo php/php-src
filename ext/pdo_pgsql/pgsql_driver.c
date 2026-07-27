@@ -392,11 +392,10 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 				return NULL;
 			}
 			quotedlen = tmp_len + 1;
-			quoted = emalloc(quotedlen + 1);
-			memcpy(quoted+1, escaped, quotedlen-2);
-			quoted[0] = '\'';
-			quoted[quotedlen-1] = '\'';
-			quoted[quotedlen] = '\0';
+			quoted = zend_cstr_concat3(
+				"'", 1,
+				(const char *) escaped, quotedlen - 2,
+				"'", 1);
 			PQfreemem(escaped);
 			break;
 		default:

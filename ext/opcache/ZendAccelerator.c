@@ -1943,10 +1943,10 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 					/* ext/phar has to load phar's metadata into memory */
 					if (persistent_script->is_phar) {
 						php_stream_statbuf ssb;
-						char *fname = emalloc(sizeof("phar://") + ZSTR_LEN(persistent_script->script.filename));
-
-						memcpy(fname, "phar://", sizeof("phar://") - 1);
-						memcpy(fname + sizeof("phar://") - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename) + 1);
+						char *fname = zend_cstr_concat(
+							"phar://", sizeof("phar://") - 1,
+							ZSTR_VAL(persistent_script->script.filename),
+							ZSTR_LEN(persistent_script->script.filename));
 						php_stream_stat_path(fname, &ssb);
 						efree(fname);
 					}
@@ -2457,10 +2457,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 					/* ext/phar has to load phar's metadata into memory */
 					if (persistent_script->is_phar) {
 						php_stream_statbuf ssb;
-						char *fname = emalloc(sizeof("phar://") + ZSTR_LEN(persistent_script->script.filename));
-
-						memcpy(fname, "phar://", sizeof("phar://") - 1);
-						memcpy(fname + sizeof("phar://") - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename) + 1);
+						char *fname = zend_cstr_concat(
+							"phar://", sizeof("phar://") - 1,
+							ZSTR_VAL(persistent_script->script.filename),
+							ZSTR_LEN(persistent_script->script.filename));
 						php_stream_stat_path(fname, &ssb);
 						efree(fname);
 					}

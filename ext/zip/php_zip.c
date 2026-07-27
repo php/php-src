@@ -1765,10 +1765,7 @@ PHP_METHOD(ZipArchive, addEmptyDir)
 	}
 
 	if (dirname[dirname_len-1] != '/') {
-		s=(char *)safe_emalloc(dirname_len, 1, 2);
-		strcpy(s, dirname);
-		s[dirname_len] = '/';
-		s[dirname_len+1] = '\0';
+		s = zend_cstr_append_char(dirname, dirname_len, '/');
 	} else {
 		s = dirname;
 	}

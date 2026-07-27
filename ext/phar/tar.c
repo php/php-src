@@ -815,7 +815,7 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 
 	if (sizeof(header) != php_stream_write(fp->new, (const char *) &header, sizeof(header))) {
 		if (fp->error) {
-			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, header for  file \"%s\" could not be written", ZSTR_VAL(entry->phar->fname), ZSTR_VAL(entry->filename));
+			spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, header for file \"%s\" could not be written", ZSTR_VAL(entry->phar->fname), ZSTR_VAL(entry->filename));
 		}
 		return ZEND_HASH_APPLY_STOP;
 	}
