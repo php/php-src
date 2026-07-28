@@ -4,7 +4,7 @@ imagecreatefromwbmp with invalid wbmp
 gd
 --FILE--
 <?php
-$filename = __DIR__ . '/_tmp.wbmp';
+$filename = __DIR__ . '/_tmp_createfromwbmp2_extern.wbmp';
 $fp = fopen($filename,"wb");
 if (!$fp) {
     exit("Failed to create <$filename>");
@@ -41,4 +41,4 @@ unlink($filename);
 --EXPECTF--
 Warning: imagecreatefromwbmp(): %croduct of memory allocation multiplication would exceed INT_MAX, failing operation gracefully%win %s on line %d
 
-Warning: imagecreatefromwbmp(): "%s_tmp.wbmp" is not a valid WBMP file in %s on line %d
+Warning: imagecreatefromwbmp(): "%s_tmp_createfromwbmp2_extern.wbmp" is not a valid WBMP file in %s on line %d
