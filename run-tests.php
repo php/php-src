@@ -1307,7 +1307,12 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
     }
 
     /* Ignore -jN if there is only one file to analyze. */
-    if ($workers !== null && count($test_files) > 1 && !$workerID) {
+    if (
+        $workers !== null
+        && count($test_files) > 1
+        && !$workerID
+        && $redir_tested === null
+    ) {
         run_all_tests_parallel($test_files, $env, $redir_tested);
         return;
     }
@@ -1362,7 +1367,7 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
 
 function run_all_tests_parallel(array $test_files, array $env, ?string $redir_tested): void
 {
-    global $workers, $test_idx, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $valgrind, $show_progress;
+    global $workers, $test_cnt, $test_idx, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $valgrind, $show_progress;
 
     global $junit;
 
@@ -1544,6 +1549,9 @@ escape:
                     }
 
                     switch ($message["type"]) {
+                        case "test_count_delta":
+                            $test_cnt += $message["delta"];
+                            break;
                         case "tests_finished":
                             $testsInProgress--;
                             foreach ($activeConflicts as $key => $workerId) {
@@ -1846,7 +1854,7 @@ function run_test(string $php, $file, array $env): string
     global $preload, $file_cache;
     global $num_repeats;
     // Parallel testing
-    global $workerID;
+    global $workerID, $workerSock;
     global $show_progress;
 
     // Temporary
@@ -2255,7 +2263,14 @@ TEST $file
                     $test_files[] = [$f, $file];
                 }
             }
-            $test_cnt += count($test_files) - 1;
+            $testCountDelta = count($test_files) - 1;
+            $test_cnt += $testCountDelta;
+            if ($workerID && $testCountDelta !== 0) {
+                send_message($workerSock, [
+                    "type" => "test_count_delta",
+                    "delta" => $testCountDelta,
+                ]);
+            }
             $test_idx--;
 
             show_redirect_start($IN_REDIRECT['TESTS'], $tested, $tested_file);
