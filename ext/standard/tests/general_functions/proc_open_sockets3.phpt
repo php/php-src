@@ -40,6 +40,7 @@ $proc = proc_open($cmd, $spec, $pipes);
 var_dump(stream_set_blocking($pipes[1], false));
 
 printf("STDOUT << %s\n", read_pipe($pipes[1]));
+fwrite($pipes[0], "continue\n");
 printf("STDOUT << %s\n", read_pipe($pipes[1]));
 
 fwrite($pipes[0], 'done');
