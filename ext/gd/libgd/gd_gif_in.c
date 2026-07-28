@@ -1308,7 +1308,7 @@ static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_c
         }
 
         for (; i < (1 << MAX_LWZ_BITS); ++i) {
-            sd->table[0][i] = sd->table[1][0] = 0;
+            sd->table[0][i] = sd->table[1][i] = 0;
         }
 
         sd->sp = sd->stack;
@@ -1363,6 +1363,8 @@ static int LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_c
             if (count != 0) {
                 return -2;
             }
+
+            return -2;
         }
 
         incode = code;
@@ -1443,7 +1445,7 @@ static int ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned c
     unsigned char c;
     int xpos = 0, ypos = 0, pass = 0;
     int v, i;
-    LZW_STATIC_DATA sd;
+    LZW_STATIC_DATA sd = {0};
 
     /* Initialize the Compression routines */
     if (!ReadOK(fd, &c, 1)) {
