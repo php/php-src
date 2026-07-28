@@ -688,6 +688,9 @@ An alternative to have a ``--CONFLICTS--`` section is to add a file named ``CONF
 directory containing the tests. The contents of the ``CONFLICTS`` file must have the same format as
 the contents of the ``--CONFLICTS--`` section.
 
+Unlike a ``SCOPED_CONFLICTS`` file, a ``CONFLICTS`` file also prevents tests in its own directory
+from running concurrently, regardless of whether the directory has a ``MAX_CONCURRENCY`` file.
+
 **Required:** No.
 
 **Format:** One conflict key per line. Comment lines starting with # are also allowed.
@@ -700,6 +703,33 @@ Example 1 (snippet):
    server
 
 Example 1 (full): :ref:`conflicts_1.phpt`
+
+``SCOPED_CONFLICTS`` file
+-------------------------
+
+**Description:** This file is only relevant for parallel test execution. It specifies directory
+conflict keys that tests in the same directory may share. Tests outside the directory that use the
+same key remain mutually exclusive with the directory. Use this when a directory may run internally
+in parallel but must not overlap another user of the same shared resource.
+
+This does not limit concurrency within the directory. Add a ``MAX_CONCURRENCY`` file separately if a
+numerical cap is also required.
+
+**Required:** No.
+
+**Format:** One conflict key per line. Comment lines starting with # are also allowed.
+
+``MAX_CONCURRENCY`` file
+------------------------
+
+**Description:** This file is only relevant for parallel test execution. It limits how many workers
+may simultaneously execute tests from its directory. It does not change the behavior of
+``CONFLICTS`` or ``SCOPED_CONFLICTS``. This allows a bounded amount of parallelism for tests that
+are safe to overlap but would otherwise contend excessively for a shared resource.
+
+**Required:** No.
+
+**Format:** A positive integer. Comment lines starting with # are also allowed.
 
 ``--WHITESPACE_SENSITIVE--``
 ----------------------------
