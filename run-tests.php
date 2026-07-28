@@ -232,6 +232,20 @@ function main(): void
         }
     }
 
+    // Tests may use this private directory to share results within this run.
+    unset($environment['TEST_PHP_SHARED_CACHE_DIR']);
+    $sharedCacheDirectory = getenv('TEST_PHP_SHARED_CACHE') !== '0'
+        ? create_shared_test_cache_directory()
+        : null;
+    if ($sharedCacheDirectory !== null) {
+        $environment['TEST_PHP_SHARED_CACHE_DIR'] = $sharedCacheDirectory;
+        register_shutdown_function(static function () use ($sharedCacheDirectory): void {
+            if (is_dir($sharedCacheDirectory)) {
+                rmdir_recursive($sharedCacheDirectory);
+            }
+        });
+    }
+
     if (IS_WINDOWS && empty($environment["SystemRoot"])) {
         $environment["SystemRoot"] = getenv("SystemRoot");
     }
@@ -1073,13 +1087,33 @@ function get_file_cache_dir(): string
     return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'php-run-tests-file-cache';
 }
 
+function create_shared_test_cache_directory(): ?string
+{
+    $temporaryDirectory = sys_get_temp_dir();
+    if ($temporaryDirectory === '') {
+        return null;
+    }
+
+    for ($attempt = 0; $attempt < 3; $attempt++) {
+        $directory = $temporaryDirectory
+            . DIRECTORY_SEPARATOR
+            . 'php-run-tests-'
+            . bin2hex(random_bytes(8));
+        if (@mkdir($directory, 0700)) {
+            return $directory;
+        }
+    }
+
+    return null;
+}
+
 function rmdir_recursive($dir)
 {
-    if (!file_exists($dir)) {
+    if (!file_exists($dir) && !is_link($dir)) {
         return;
     }
-    if (!is_dir($dir)) {
-        unlink($dir);
+    if (is_link($dir) || !is_dir($dir)) {
+        @unlink($dir);
         return;
     }
 

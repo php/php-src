@@ -5,7 +5,7 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
-getDbConnection();
+skipIfNoDbConnection();
 ?>
 --CONFLICTS--
 all

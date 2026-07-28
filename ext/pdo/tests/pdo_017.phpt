@@ -9,7 +9,7 @@ if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 
-$db = PDOTest::factory();
+$db = PDOTest::factoryForSkip();
 try {
   $db->beginTransaction();
   $db->rollback();
