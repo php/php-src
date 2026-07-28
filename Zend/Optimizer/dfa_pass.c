@@ -471,7 +471,7 @@ static uint32_t zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 			}
 
 			if (call_info->caller_call_opline && call_info->caller_call_opline->opcode == ZEND_CALLABLE_CONVERT_PARTIAL) {
-				/* Build a bitset of constant pre-bound PFA args: These are args whose value is alway the same for all
+				/* Build a bitset of constant pre-bound PFA args: These are args whose value is always the same for all
 				 * instances of a PFA. */
 				uint32_t const_args = 0;
 				for (uint32_t i = 0, l = MIN(sizeof(const_args)*CHAR_BIT, call_info->num_args); i < l; i++) {
