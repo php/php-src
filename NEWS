@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0alpha3
+?? ??? ????, PHP 8.6.0beta1
+
+
+30 Jul 2026, PHP 8.6.0alpha3
 
 - Core:
   . Implemented partial function application RFC. (Arnaud)
