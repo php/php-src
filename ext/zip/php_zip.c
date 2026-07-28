@@ -1823,12 +1823,11 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		ze_zip_object *ze_obj = Z_ZIP_P(self);
 
 		for (int i = 0; i < found; i++) {
-			char *file_stripped, *entry_name;
-			size_t entry_name_len, file_stripped_len;
-			char entry_name_buf[MAXPATHLEN];
 			zend_string *basename = NULL;
 
 			if ((zval_file = zend_hash_index_find(Z_ARRVAL_P(return_value), i)) != NULL) {
+				const char *file_stripped;
+				size_t file_stripped_len;
 				if (opts.remove_all_path) {
 					basename = php_basename(Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), NULL, 0);
 					file_stripped = ZSTR_VAL(basename);
@@ -1846,6 +1845,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					file_stripped_len = Z_STRLEN_P(zval_file);
 				}
 
+				zend_string *entry_name;
 				if (opts.add_path) {
 					if ((ZSTR_LEN(opts.add_path) + file_stripped_len) > MAXPATHLEN) {
 						if (basename) {
@@ -1856,20 +1856,25 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}
-					snprintf(entry_name_buf, MAXPATHLEN, "%s%s", ZSTR_VAL(opts.add_path), file_stripped);
+					entry_name = zend_string_concat2(
+						ZSTR_VAL(opts.add_path), ZSTR_LEN(opts.add_path),
+						file_stripped, file_stripped_len
+					);
 				} else {
-					snprintf(entry_name_buf, MAXPATHLEN, "%s", file_stripped);
+					entry_name = zend_string_init(file_stripped, file_stripped_len, false);
 				}
+				ZEND_ASSERT(ZSTR_LEN(entry_name) <= MAXPATHLEN);
 
-				entry_name = entry_name_buf;
-				entry_name_len = strlen(entry_name);
 				if (basename) {
 					zend_string_release_ex(basename, false);
 					basename = NULL;
 				}
 
-				if (php_zip_add_file(ze_obj, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
-					entry_name, entry_name_len, 0, 0, -1, opts.flags) == FAILURE) {
+				const zend_result status = php_zip_add_file(ze_obj, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
+					ZSTR_VAL(entry_name), ZSTR_LEN(entry_name), 0, 0, -1, opts.flags);
+
+				zend_string_release_ex(entry_name, false);
+				if (status == FAILURE) {
 					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;
 				}
