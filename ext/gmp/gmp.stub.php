@@ -188,7 +188,8 @@ function gmp_hamdist(GMP|int|string $num1, GMP|int|string $num2): int {}
 function gmp_nextprime(GMP|int|string $num): GMP {}
 
 #ifdef HAVE___GMPZ_PREVPRIME
-function gmp_prevprime(GMP|int|string $num): GMP {}
+/** @param bool $definitely_prime */
+function gmp_prevprime(GMP|int|string $num, &$definitely_prime = null): GMP {}
 #endif
 
 function gmp_binomial(GMP|int|string $n, int $k): GMP {}

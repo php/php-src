@@ -1,5 +1,5 @@
 /* This is a generated file, edit gmp.stub.php instead.
- * Stub hash: 57d016aed930bb41ff4357917e3ae8abd612e973 */
+ * Stub hash: 743a4be1078abfa29294336564126ace8c194cbe */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -190,6 +190,7 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE___GMPZ_PREVPRIME)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_prevprime, 0, 1, GMP, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, num, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, definitely_prime, "null")
 ZEND_END_ARG_INFO()
 #endif
 

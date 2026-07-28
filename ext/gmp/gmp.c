@@ -1087,10 +1087,13 @@ GMP_UNARY_OP_FUNCTION(nextprime);
 ZEND_FUNCTION(gmp_prevprime)
 {
 	mpz_ptr gmpnum_a, gmpnum_result;
+	zval *definitely_prime = NULL;
 	int res;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(definitely_prime)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mpz_cmp_ui(gmpnum_a, 2) <= 0) {
@@ -1106,6 +1109,9 @@ ZEND_FUNCTION(gmp_prevprime)
 	INIT_GMP_RETVAL(gmpnum_result);
 	res = mpz_prevprime(gmpnum_result, gmpnum_a);
 	ZEND_ASSERT(res);
+	if (definitely_prime) {
+		ZEND_TRY_ASSIGN_REF_BOOL(definitely_prime, res == 2);
+	}
 }
 /* }}} */
 #endif
