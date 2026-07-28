@@ -6,7 +6,7 @@ pdo_dblib
 <?php
 if (getenv('SKIP_REPEAT')) die('skip May fail on repeat');
 require __DIR__ . '/config.inc';
-getDbConnection();
+skipIfNoDbConnection();
 ?>
 --CONFLICTS--
 all

@@ -16,26 +16,31 @@ if (getenv('PDOTEST_DSN') === false) {
 }
 
 class PDOTest {
+    private static function getAttributes(string $environmentVariable): ?array {
+        $attributes = getenv($environmentVariable);
+        if (is_string($attributes) && strlen($attributes)) {
+            return unserialize($attributes);
+        }
+        return null;
+    }
+
     // create an instance of the PDO driver, based on
     // the current environment
-    static function factory($classname = PDO::class, bool $useConnectMethod = false) {
+    static function factory($classname = PDO::class, bool $useConnectMethod = false, ?array $attributes = null) {
         $dsn = getenv('PDOTEST_DSN');
         $user = getenv('PDOTEST_USER');
         $pass = getenv('PDOTEST_PASS');
-        $attr = getenv('PDOTEST_ATTR');
-        if (is_string($attr) && strlen($attr)) {
-            $attr = unserialize($attr);
-        } else {
-            $attr = null;
+        if ($attributes === null) {
+            $attributes = self::getAttributes('PDOTEST_ATTR');
         }
 
         if ($user === false) $user = NULL;
         if ($pass === false) $pass = NULL;
 
         if ($useConnectMethod) {
-            $db = $classname::connect($dsn, $user, $pass, $attr);
+            $db = $classname::connect($dsn, $user, $pass, $attributes);
         } else {
-            $db = new $classname($dsn, $user, $pass, $attr);
+            $db = new $classname($dsn, $user, $pass, $attributes);
         }
 
         if (!$db) {
@@ -50,11 +55,74 @@ class PDOTest {
         return $db;
     }
 
-    static function skip() {
+    private static function getSkipCacheFile(): ?string {
+        $directory = getenv('TEST_PHP_SHARED_CACHE_DIR');
+        if (!is_string($directory) || !is_dir($directory)) {
+            return null;
+        }
+
+        $configuration = [
+            getenv('PDOTEST_DSN'),
+            getenv('PDOTEST_USER'),
+            getenv('PDOTEST_PASS'),
+            getenv('PDOTEST_ATTR'),
+            getenv('PDOTEST_SKIP_ATTR'),
+        ];
+        return $directory . DIRECTORY_SEPARATOR . 'pdo-' . hash('sha256', serialize($configuration));
+    }
+
+    static function factoryForSkip() {
+        $attributes = self::getAttributes('PDOTEST_ATTR');
+        $skipAttributes = self::getAttributes('PDOTEST_SKIP_ATTR');
+        if ($skipAttributes !== null) {
+            $attributes = $skipAttributes + ($attributes ?? []);
+        }
+        return PDOTest::factory(PDO::class, false, $attributes);
+    }
+
+    private static function connectOrSkip(): void {
         try {
-            $db = PDOTest::factory();
+            self::factoryForSkip();
         } catch (PDOException $e) {
             die("skip " . $e->getMessage());
+        }
+    }
+
+    static function skip() {
+        $cacheFile = self::getSkipCacheFile();
+        if ($cacheFile === null) {
+            self::connectOrSkip();
+            return;
+        }
+
+        $cache = @fopen($cacheFile, 'c+');
+        if ($cache === false || !flock($cache, LOCK_EX)) {
+            if (is_resource($cache)) {
+                fclose($cache);
+            }
+            self::connectOrSkip();
+            return;
+        }
+
+        $cached = stream_get_contents($cache);
+        $reason = $cached !== '' ? $cached : null;
+        if ($reason === null) {
+            // Only failures are shared; successful checks still create their own connection.
+            try {
+                self::factoryForSkip();
+            } catch (PDOException $e) {
+                $reason = $e->getMessage();
+                rewind($cache);
+                ftruncate($cache, 0);
+                fwrite($cache, $reason);
+                fflush($cache);
+            }
+        }
+
+        flock($cache, LOCK_UN);
+        fclose($cache);
+        if (is_string($reason)) {
+            die("skip $reason");
         }
     }
 
