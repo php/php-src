@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.33
+30 Jul 2026, PHP 8.2.33
 
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
