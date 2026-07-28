@@ -272,6 +272,8 @@ PHP 8.6 UPGRADE NOTES
   . finfo_file() now works with remote streams.
 
 - GMP:
+  . Added gmp_powm_sec() for side-channel quiet modular exponentiation.
+    Requires GNU MP 5.0.0 or later.
   . Added gmp_prevprime() to get the largest prime smaller than the given
     number. A ValueError is thrown if no such prime exists. This function is
     available only when PHP is built against GNU MP 6.3.0 or later; it is not
@@ -428,6 +430,7 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - GMP:
+  . gmp_powm_sec()
   . gmp_prevprime()
 
 - Intl:
