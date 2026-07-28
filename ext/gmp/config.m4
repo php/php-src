@@ -22,6 +22,7 @@ if test "$PHP_GMP" != "no"; then
   LIBS="$LIBS $GMP_LIBS"
   gmp_check=no
   AC_CHECK_HEADER([gmp.h], [AC_CHECK_FUNC([__gmpz_rootrem], [gmp_check=yes])])
+  AC_CHECK_FUNCS([__gmpz_prevprime])
   CFLAGS=$CFLAGS_SAVED
   LIBS=$LIBS_SAVED
 
