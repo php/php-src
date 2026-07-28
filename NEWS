@@ -5,6 +5,17 @@ PHP                                                                        NEWS
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
+- GD:
+  . Upgrade libgd. (CVE-2026-9672) (Pierre Joye)
+
+- PGSQL:
+  . Fixed GHSA-7qpv-r5mr-78m4 (SQL injection via E'...' backslash breakout).
+    (CVE-2026-17543) (ilutov)
+
+- Phar:
+  . Fixed GHSA-vc5h-9ppw-p5f3 (Crash via recursive symlinks). (CVE-2026-7260)
+    (Jakub Zelenka)
+
 02 Jul 2026, PHP 8.2.32
 
 - OpenSSL:
