@@ -47,6 +47,6 @@ is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>
 --EXPECT--
-curl_setopt(): The provided file handle must be writable
+curl_setopt(): The file handle provided for CURLOPT_FILE must be writable
 Hello World!
 Hello World!

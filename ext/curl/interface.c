@@ -2039,7 +2039,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 						ch->handlers.write->method = PHP_CURL_FILE;
 						ZVAL_COPY(&ch->handlers.write->stream, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						zend_value_error("%s(): The file handle provided for CURLOPT_FILE must be writable", get_active_function_name());
 						return FAILURE;
 					}
 					break;
@@ -2057,7 +2057,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 						ch->handlers.write_header->method = PHP_CURL_FILE;
 						ZVAL_COPY(&ch->handlers.write_header->stream, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						zend_value_error("%s(): The file handle provided for CURLOPT_WRITEHEADER must be writable", get_active_function_name());
 						return FAILURE;
 					}
 					break;
@@ -2086,7 +2086,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 						zval_ptr_dtor(&ch->handlers.std_err);
 						ZVAL_COPY(&ch->handlers.std_err, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						zend_value_error("%s(): The file handle provided for CURLOPT_STDERR must be writable", get_active_function_name());
 						return FAILURE;
 					}
 					ZEND_FALLTHROUGH;
