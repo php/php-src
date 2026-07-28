@@ -795,12 +795,15 @@ static bool zend_call_stack_get_aix_pthread(zend_call_stack *stack)
 #ifdef HAVE_PTHREAD_GETTHRDS_NP
 	pthread_t pt = pthread_self();
 	struct __pthrdsinfo thread_info;
-	/* This buffer needs to exist sadly */
-	char reg[256];
-	int regsz = sizeof(reg);
+	/*
+	 * We don't need the register buffer since we only call the function
+	 * on our own thread, and since the register buffer is only used for
+	 * suspended threads...
+	 */
+	int regsz = 0;
 
 	if (pthread_getthrds_np(&pt, PTHRDSINFO_QUERY_ALL, &thread_info,
-				sizeof(thread_info), &reg, &regsz)) {
+				sizeof(thread_info), NULL, &regsz)) {
 		return false;
 	}
 
