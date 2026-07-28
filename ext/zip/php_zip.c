@@ -354,8 +354,7 @@ static zend_result php_zip_add_file(ze_zip_object *obj, const char *filename, si
 typedef struct {
 	zend_long    remove_all_path;
 	const zend_string *remove_path;
-	char        *add_path;
-	size_t       add_path_len;
+	const zend_string *add_path;
 	zip_flags_t  flags;
 	zip_int32_t  comp_method;
 	zip_uint32_t comp_flags;
@@ -469,8 +468,7 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 			zend_value_error("Option \"add_path\" must be less than %d bytes", MAXPATHLEN - 1);
 			return FAILURE;
 		}
-		opts->add_path_len = Z_STRLEN_P(option);
-		opts->add_path = Z_STRVAL_P(option);
+		opts->add_path = Z_STR_P(option);
 	}
 
 	if ((option = zend_hash_str_find(options, "flags", sizeof("flags") - 1)) != NULL) {
@@ -1849,16 +1847,16 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				}
 
 				if (opts.add_path) {
-					if ((opts.add_path_len + file_stripped_len) > MAXPATHLEN) {
+					if ((ZSTR_LEN(opts.add_path) + file_stripped_len) > MAXPATHLEN) {
 						if (basename) {
 							zend_string_release_ex(basename, false);
 						}
-						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %zd given)",
-						MAXPATHLEN - 1, (opts.add_path_len + file_stripped_len));
+						php_error_docref(NULL, E_WARNING, "Entry name too long (max: %d, %zu given)",
+						MAXPATHLEN - 1, (ZSTR_LEN(opts.add_path) + file_stripped_len));
 						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}
-					snprintf(entry_name_buf, MAXPATHLEN, "%s%s", opts.add_path, file_stripped);
+					snprintf(entry_name_buf, MAXPATHLEN, "%s%s", ZSTR_VAL(opts.add_path), file_stripped);
 				} else {
 					snprintf(entry_name_buf, MAXPATHLEN, "%s", file_stripped);
 				}
