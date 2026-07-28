@@ -385,8 +385,8 @@ static void php_stream_throw_exception_with_errors(php_stream_error_operation *o
 	object_init_ex(&ex, php_ce_stream_exception);
 
 	/* Set message from first error */
-	zend_update_property_string(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("message"),
-			ZSTR_VAL(op->first_error->message));
+	zend_update_property_str(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("message"),
+			op->first_error->message);
 
 	/* Set code from first error */
 	zend_update_property_long(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("code"),
