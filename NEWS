@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0beta1
 
+- GMP:
+  . Added gmp_powm_sec(). (Weilin Du)
 
 30 Jul 2026, PHP 8.6.0alpha3
 
@@ -23,7 +25,6 @@ PHP                                                                        NEWS
   . Made php-cli functionality available in embed builds. (henderkes)
 
 - GMP:
-  . Added gmp_powm_sec(). (Weilin Du)
   . Added gmp_prevprime(). (Weilin Du, David Carlier)
   . Fixed GMP power and shift operators to reject GMP right operands outside
     the unsigned long range instead of silently truncating them. (Weilin Du)
