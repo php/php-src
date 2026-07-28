@@ -605,14 +605,14 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 static int curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = 1;
+	int rval = 1; // error
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_progress() called\n");
 	fprintf(stderr, "clientp = %p, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
-		return rval;
+		return 0; // ok
 	}
 
 	zval args[5];
@@ -633,7 +633,7 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		/* TODO Check callback returns an int or something castable to int */
 		if (0 == php_curl_get_long(&retval)) {
-			rval = 0;
+			rval = 0; // ok
 		}
 	}
 
@@ -646,14 +646,14 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = 1;
+	int rval = 1; // error
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_xferinfo() called\n");
 	fprintf(stderr, "clientp = %p, dltotal = %ld, dlnow = %ld, ultotal = %ld, ulnow = %ld\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
-	if (!ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
-		return rval;
+	if (UNEXPECTED(!ZEND_FCC_INITIALIZED(ch->handlers.xferinfo))) {
+		return 0; // ok
 	}
 
 	zval argv[5];
@@ -674,7 +674,7 @@ static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, cu
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		/* TODO Check callback returns an int or something castable to int */
 		if (0 == php_curl_get_long(&retval)) {
-			rval = 0;
+			rval = 0; // ok
 		}
 	}
 
@@ -692,7 +692,7 @@ static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_
 	// when CURLOPT_PREREQFUNCTION is set to null, curl_prereqfunction still
 	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
 	// zend_call_known_fcc() with an uninitialized FCC.
-	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
+	if (UNEXPECTED(!ZEND_FCC_INITIALIZED(ch->handlers.prereq))) {
 		return CURL_PREREQFUNC_OK;
 	}
 

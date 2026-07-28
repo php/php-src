@@ -18,6 +18,7 @@ $ch = curl_init("{$host}/get.inc");
 $file = new CURLFile(__DIR__ . '/curl_testdata1.txt');
 curl_setopt($ch, CURLOPT_POST, 1);
 
+echo "Test: read function throws exception\n";
 curl_setopt($ch, CURLOPT_READFUNCTION,
     function (): int {
         throw new Exception('read exception');
@@ -32,7 +33,16 @@ try {
 
 var_dump(curl_errno($ch) === CURLE_ABORTED_BY_CALLBACK);
 
+echo "Test: read function is null\n";
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_READFUNCTION, null);
+curl_exec($ch);
+var_dump(curl_errno($ch) === CURLE_OK);
+
 ?>
 --EXPECTF--
+Test: read function throws exception
 read exception
+bool(true)
+Test: read function is null
 bool(true)
