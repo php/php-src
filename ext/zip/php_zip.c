@@ -353,8 +353,7 @@ static zend_result php_zip_add_file(ze_zip_object *obj, const char *filename, si
 
 typedef struct {
 	zend_long    remove_all_path;
-	char        *remove_path;
-	size_t       remove_path_len;
+	const zend_string *remove_path;
 	char        *add_path;
 	size_t       add_path_len;
 	zip_flags_t  flags;
@@ -450,8 +449,8 @@ static zend_result php_zip_parse_options(HashTable *options, zip_options *opts)
 			zend_value_error("Option \"remove_path\" must be less than %d bytes", MAXPATHLEN - 1);
 			return FAILURE;
 		}
-		opts->remove_path_len = Z_STRLEN_P(option);
-		opts->remove_path = Z_STRVAL_P(option);
+		/* No need to copy the string as it's only ever used to check the paths after parsing the options */
+		opts->remove_path = Z_STR_P(option);
 	}
 
 	if ((option = zend_hash_str_find(options, "add_path", sizeof("add_path") - 1)) != NULL) {
@@ -1836,13 +1835,13 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					basename = php_basename(Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), NULL, 0);
 					file_stripped = ZSTR_VAL(basename);
 					file_stripped_len = ZSTR_LEN(basename);
-				} else if (opts.remove_path && Z_STRLEN_P(zval_file) > opts.remove_path_len && !memcmp(Z_STRVAL_P(zval_file), opts.remove_path, opts.remove_path_len)) {
-					if (IS_SLASH(Z_STRVAL_P(zval_file)[opts.remove_path_len])) {
-						file_stripped = Z_STRVAL_P(zval_file) + opts.remove_path_len + 1;
-						file_stripped_len = Z_STRLEN_P(zval_file) - opts.remove_path_len - 1;
+				} else if (opts.remove_path && zend_string_starts_with(Z_STR_P(zval_file), opts.remove_path)) {
+					if (IS_SLASH(Z_STRVAL_P(zval_file)[ZSTR_LEN(opts.remove_path)])) {
+						file_stripped = Z_STRVAL_P(zval_file) + ZSTR_LEN(opts.remove_path) + 1;
+						file_stripped_len = Z_STRLEN_P(zval_file) - ZSTR_LEN(opts.remove_path) - 1;
 					} else {
-						file_stripped = Z_STRVAL_P(zval_file) + opts.remove_path_len;
-						file_stripped_len = Z_STRLEN_P(zval_file) - opts.remove_path_len;
+						file_stripped = Z_STRVAL_P(zval_file) + ZSTR_LEN(opts.remove_path);
+						file_stripped_len = Z_STRLEN_P(zval_file) - ZSTR_LEN(opts.remove_path);
 					}
 				} else {
 					file_stripped = Z_STRVAL_P(zval_file);
