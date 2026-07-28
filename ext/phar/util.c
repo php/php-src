@@ -71,15 +71,11 @@ static phar_entry_info *phar_follow_one_link(phar_entry_info *entry)
 	link = phar_get_link_location(entry);
 	if (NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), entry->symlink)) ||
 		NULL != (link_entry = zend_hash_find_ptr(&(entry->phar->manifest), link))) {
-		if (link != entry->symlink) {
-			efree(link);
-		}
+		zend_string_release(link);
 		return link_entry;
 	}
 
-	if (link != entry->symlink) {
-		efree(link);
-	}
+	zend_string_release(link);
 	return NULL;
 }
 
