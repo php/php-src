@@ -62,11 +62,38 @@ ZEND_DECLARE_MODULE_GLOBALS(curl)
 # define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
+// php_curl_option_get_name(CURLOPT_HTTPHEADER) -> "HTTPHEADER"
+static const char * php_curl_option_get_name(zend_long option) {
+#if LIBCURL_VERSION_NUM >= 0x074900
+	const struct curl_easyoption * opt = curl_easy_option_by_id(option);
+	if (EXPECTED(opt != NULL)) {
+		return opt->name;
+	}
+#else
+	const char * prefix = "CURLOPT_";
+	const size_t prefix_len = sizeof(prefix) - 1;
+	zend_string *key;
+	zend_constant *constant;
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(zend_constants), key, constant) {
+		if (!key
+			|| Z_TYPE(constant->value) != IS_LONG
+			|| strncmp(ZSTR_VAL(key), prefix, prefix_len) != 0) {
+			continue;
+		}
+
+		if (Z_LVAL(constant->value) == option) {
+			return ZSTR_VAL(key) + prefix_len;
+		}
+	} ZEND_HASH_FOREACH_END();
+#endif
+	return "UNKNOWN_OPTION";
+}
+
 static zend_result php_curl_option_str(php_curl *ch, zend_long option, const char *str, const size_t len)
 {
 	if (zend_char_has_nul_byte(str, len)) {
-		const struct curl_easyoption *option_info = curl_easy_option_by_id(option);
-		zend_value_error("%s(): cURL option CURLOPT_%s must not contain any null bytes", get_active_function_name(), option_info->name);
+		zend_value_error("%s(): cURL option CURLOPT_%s must not contain any null bytes", get_active_function_name(), php_curl_option_get_name(option));
 		return FAILURE;
 	}
 
@@ -2088,8 +2115,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			struct curl_slist *slist = NULL;
 
 			if (Z_TYPE_P(zvalue) != IS_ARRAY) {
-				const struct curl_easyoption *option_info = curl_easy_option_by_id(option);
-				zend_type_error("%s(): The CURLOPT_%s option must have an array value", get_active_function_name(), option_info->name);
+				zend_type_error("%s(): The CURLOPT_%s option must have an array value", get_active_function_name(), php_curl_option_get_name(option));
 				return FAILURE;
 			}
 
@@ -2101,8 +2127,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				if (zend_str_has_nul_byte(val)) {
 					curl_slist_free_all(slist);
 					zend_tmp_string_release(tmp_val);
-					const struct curl_easyoption *option_info = curl_easy_option_by_id(option);
-					zend_value_error("%s(): cURL option CURLOPT_%s must not contain any null bytes", get_active_function_name(), option_info->name);
+					zend_value_error("%s(): cURL option CURLOPT_%s must not contain any null bytes", get_active_function_name(), php_curl_option_get_name(option));
 					return FAILURE;
 				}
 
