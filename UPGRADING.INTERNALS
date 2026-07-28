@@ -191,6 +191,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     strings from one or more buffers.
   . Added zend_string_ends_with() and related variants.
   . Added trait support for internal classes.
+  . Added do_php_cli().
 
 ========================
 2. Build system changes
@@ -226,6 +227,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     preprocessor macros anymore.
   . Added a new function CHECK_HEADER() which is intended to be used instead of
     the CHECK_HEADER_ADD_INCLUDE().
+
+- Embed:
+  . The CLI SAPI can not be disabled when building the embed SAPI
+    (--enable-embed is incompatible with --disable-cli).
 
 ========================
 3. Module changes
@@ -307,3 +312,6 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 
 - AG and SCNG are now allocated with ts_allocate_tls_id() and live in native
   __thread storage on ZTS builds.
+
+- php-cli functionality is now available in embed builds via the do_php_cli()
+  function.

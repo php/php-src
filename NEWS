@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
 
+- Embed:
+  . Made php-cli functionality available in embed builds. (henderkes)
+
 - GMP:
   . Added gmp_prevprime(). (Weilin Du, David Carlier)
   . Fixed GMP power and shift operators to reject GMP right operands outside
