@@ -1681,10 +1681,10 @@ escape:
                             // - If this is running a small enough number of tests,
                             //   reduce the batch size to give batches to more workers.
                             $files = [];
-                            $maxBatchSize = $valgrind ? 1 : ($shuffle ? 4 : 32);
+                            $maxBatchSize = $valgrind ? 1 : 4;
                             $averageFilesPerWorker = max(1, (int) ceil($totalFileCount / count($workerProcs)));
                             $batchSize = min($maxBatchSize, $averageFilesPerWorker);
-                            while (count($files) <= $batchSize && $file = array_pop($test_files)) {
+                            while (count($files) < $batchSize && $file = array_pop($test_files)) {
                                 foreach ($fileConflictsWith[$file] as $conflictKey) {
                                     if (isset($activeConflicts[$conflictKey])) {
                                         $waitingTests[$conflictKey][] = $file;
