@@ -149,7 +149,7 @@ function main(): void
            $ignored_by_ext, $ini_overwrites, $colorize,
            $cli_opcache_enabled,
            $log_format, $no_clean, $no_file_cache,
-           $pass_options, $php, $php_cgi, $preload,
+           $pass_options, $pass_options_args, $php, $php_cgi, $preload,
            $result_tests_file, $slow_min_ms, $start_time,
            $temp_source, $temp_target, $test_cnt,
            $test_files, $test_idx, $test_results, $testfile,
@@ -343,6 +343,7 @@ function main(): void
     $failed_tests_file = false;
     $pass_option_n = false;
     $pass_options = '';
+    $pass_options_args = [];
 
     $output_file = INIT_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
 
@@ -490,11 +491,13 @@ function main(): void
                 case 'n':
                     if (!$pass_option_n) {
                         $pass_options .= ' -n';
+                        $pass_options_args[] = '-n';
                     }
                     $pass_option_n = true;
                     break;
                 case 'e':
                     $pass_options .= ' -e';
+                    $pass_options_args[] = '-e';
                     break;
                 case '--preload':
                     $preload = true;
@@ -713,8 +716,13 @@ function main(): void
     if ($conf_passed !== null) {
         if (IS_WINDOWS) {
             $pass_options .= " -c " . escapeshellarg($conf_passed);
+            $pass_options_args[] = '-c';
+            $pass_options_args[] = $conf_passed;
         } else {
-            $pass_options .= " -c '" . realpath($conf_passed) . "'";
+            $configurationFile = realpath($conf_passed);
+            $pass_options .= " -c '" . $configurationFile . "'";
+            $pass_options_args[] = '-c';
+            $pass_options_args[] = (string) $configurationFile;
         }
     }
 
@@ -1275,19 +1283,20 @@ function error_report(string $testname, string $logname, string $tested): void
  * @return false|string
  */
 function system_with_timeout(
-    string $commandline,
+    string|array $commandline,
     ?array $env = null,
     ?string $stdin = null,
     bool $captureStdIn = true,
     bool $captureStdOut = true,
-    bool $captureStdErr = true
+    bool $captureStdErr = true,
+    bool $mergeStdErr = false
 ) {
     global $valgrind;
 
     // when proc_open cmd is passed as a string (without bypass_shell=true option) the cmd goes thru shell
     // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
     // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
-    if (IS_WINDOWS) {
+    if (IS_WINDOWS && is_string($commandline)) {
         $commandline = 'start "" /b /wait ' . $commandline . ' & exit';
     }
 
@@ -1306,7 +1315,9 @@ function system_with_timeout(
         $descriptorspec[1] = ['pipe', 'w'];
     }
     if ($captureStdErr) {
-        $descriptorspec[2] = ['pipe', 'w'];
+        $descriptorspec[2] = $mergeStdErr
+            ? ['redirect', 1]
+            : ['pipe', 'w'];
     }
     $proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, ['suppress_errors' => true]);
 
@@ -1652,6 +1663,49 @@ function has_only_fork_safe_ini_settings(TestFile $test): bool
     }
 
     return true;
+}
+
+function can_run_with_structured_test_command(TestFile $test): bool
+{
+    global $preload, $valgrind;
+
+    return !$valgrind
+        && !$preload
+        && !$test->hasAnySections(
+            'ARGS',
+            'CAPTURE_STDIO',
+            'DEFLATE_POST',
+            'GZIP_POST',
+            'POST',
+            'POST_RAW',
+            'PUT',
+        );
+}
+
+function create_structured_test_command(
+    string $php,
+    array $sapiOptionArgs,
+    array $passOptionArgs,
+    array $iniSettings,
+    string $testFile,
+    int $numRepeats
+): array {
+    $command = [
+        $php,
+        ...$sapiOptionArgs,
+        ...$passOptionArgs,
+    ];
+    if ($numRepeats > 1) {
+        $command[] = '--repeat';
+        $command[] = (string) $numRepeats;
+    }
+
+    return [
+        ...$command,
+        ...settings2arguments($iniSettings),
+        '-f',
+        $testFile,
+    ];
 }
 
 function test_fork_server_cache_key(
@@ -2391,7 +2445,7 @@ function skip_test(string $tested, string $tested_file, string $shortname, strin
 function run_test(string $php, $file, array $env): string
 {
     global $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
-    global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
+    global $pass_options, $pass_options_args, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
     global $valgrind, $temp_source, $temp_target, $cfg, $environment;
     global $no_clean;
     global $SHOW_ONLY_GROUPS;
@@ -2413,6 +2467,9 @@ function run_test(string $php, $file, array $env): string
         $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
+    $originalPhpExecutable = $php;
+    $phpExecutable = $php;
+    $sapiOptionArgs = [];
     $php = escapeshellarg($php);
     $orig_php = $php;
 
@@ -2484,6 +2541,8 @@ TEST $file
         if (!$php_cgi) {
             return skip_test($tested, $tested_file, $shortname, 'CGI not available');
         }
+        $phpExecutable = $php_cgi;
+        $sapiOptionArgs[] = '-C';
         $php = escapeshellarg($php_cgi) . ' -C ';
         $uses_cgi = true;
         if ($num_repeats > 1) {
@@ -2493,13 +2552,17 @@ TEST $file
 
     /* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
     $extra_options = '';
+    $extraOptionArgs = [];
     if ($test->hasSection('PHPDBG')) {
         if (isset($phpdbg)) {
+            $phpExecutable = $phpdbg;
+            $sapiOptionArgs[] = '-qIb';
             $php = escapeshellarg($phpdbg) . ' -qIb';
 
             // Additional phpdbg command line options for sections that need to
             // be run straight away. For example, EXTENSIONS, SKIPIF, CLEAN.
             $extra_options = '-rr';
+            $extraOptionArgs[] = '-rr';
         } else {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
         }
@@ -2653,6 +2716,7 @@ TEST $file
     //$ini_overwrites[] = 'setting=value';
     settings2array($ini_overwrites, $ini_settings);
 
+    $orig_ini_settings_args = settings2arguments($ini_settings);
     $orig_ini_settings = settings2params($ini_settings);
 
     if ($file_cache !== null) {
@@ -2700,6 +2764,7 @@ TEST $file
         }
     }
 
+    $testIniSettings = $ini_settings;
     $ini_settings = settings2params($ini_settings);
 
     $env['TEST_PHP_EXTRA_ARGS'] = $pass_options . ' ' . $ini_settings;
@@ -2710,8 +2775,6 @@ TEST $file
 
     if ($test->sectionNotEmpty('SKIPIF')) {
         show_file_block('skip', $test->getSection('SKIPIF'));
-        $extra = !IS_WINDOWS ?
-            "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 
         if ($valgrind) {
             $env['USE_ZEND_ALLOC'] = '0';
@@ -2721,7 +2784,22 @@ TEST $file
         $junit->startTimer($shortname);
 
         $startTime = microtime(true);
-        $commandLine = "$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0";
+        $commandLine = [
+            $phpExecutable,
+            ...$sapiOptionArgs,
+            ...$pass_options_args,
+            ...$extraOptionArgs,
+            '-q',
+            ...$orig_ini_settings_args,
+            '-d',
+            'opcache.file_cache=',
+            '-d',
+            'opcache.file_cache_only=0',
+            '-d',
+            'display_errors=1',
+            '-d',
+            'display_startup_errors=0',
+        ];
         $output = $skipCache->checkSkip(
             $commandLine,
             $test->getSection('SKIPIF'),
@@ -3081,7 +3159,26 @@ COMMAND $cmd
         );
     }
     if ($out === null) {
-        $out = system_with_timeout($cmd, $env, $stdin, $captureStdIn, $captureStdOut, $captureStdErr);
+        $useStructuredCommand = can_run_with_structured_test_command($test);
+        $testCommand = $useStructuredCommand
+            ? create_structured_test_command(
+                $phpExecutable,
+                $sapiOptionArgs,
+                $pass_options_args,
+                $testIniSettings,
+                $test_file,
+                $num_repeats,
+            )
+            : $cmd;
+        $out = system_with_timeout(
+            $testCommand,
+            $env,
+            $stdin,
+            $captureStdIn,
+            $captureStdOut,
+            $captureStdErr,
+            $useStructuredCommand && $captureStdOut && $captureStdErr,
+        );
     }
 
     $junit->stopTimer($shortname);
@@ -3104,9 +3201,16 @@ COMMAND $cmd
         save_text($test_clean, trim($test->getSection('CLEAN')), $temp_clean);
 
         if (!$no_clean) {
-            $extra = !IS_WINDOWS ?
-                "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-            $cleanCommand = "$extra $orig_php $pass_options -q $orig_ini_settings $no_file_cache";
+            $cleanCommand = [
+                $originalPhpExecutable,
+                ...$pass_options_args,
+                '-q',
+                ...$orig_ini_settings_args,
+                '-d',
+                'opcache.file_cache=',
+                '-d',
+                'opcache.file_cache_only=0',
+            ];
             $cleanEnv = $env;
             if (!IS_WINDOWS) {
                 unset(
@@ -3129,7 +3233,8 @@ COMMAND $cmd
                 );
             }
             if ($clean_output === null) {
-                $clean_output = system_with_timeout("$cleanCommand \"$test_clean\"", $cleanEnv);
+                $cleanCommand[] = $test_clean;
+                $clean_output = system_with_timeout($cleanCommand, $cleanEnv);
             }
         }
 
@@ -3639,6 +3744,20 @@ function settings2params(array $ini_settings): string
     }
 
     return $settings;
+}
+
+function settings2arguments(array $ini_settings): array
+{
+    $arguments = [];
+
+    foreach ($ini_settings as $name => $value) {
+        foreach ((array) $value as $item) {
+            $arguments[] = '-d';
+            $arguments[] = "$name=$item";
+        }
+    }
+
+    return $arguments;
 }
 
 function compute_summary(): void
@@ -4250,7 +4369,7 @@ class SkipCache
     }
 
     public function checkSkip(
-        string $php,
+        string|array $command,
         string $code,
         string $checkFile,
         string $tempFile,
@@ -4261,7 +4380,7 @@ class SkipCache
         // Extension tests frequently use something like <?php require 'skipif.inc';
         // for skip checks. This forces us to cache per directory to avoid pollution.
         $dir = dirname($checkFile);
-        $key = "$php => $dir";
+        $key = (is_array($command) ? implode("\0", $command) : $command) . " => $dir";
 
         if (isset($this->skips[$key][$code])) {
             $this->hits++;
@@ -4275,7 +4394,7 @@ class SkipCache
         $result = null;
         if ($useForkServer) {
             $result = system_with_test_fork_server(
-                $php,
+                $command,
                 $checkFile,
                 $env,
                 channel: 'skip',
@@ -4285,7 +4404,12 @@ class SkipCache
             );
         }
         if ($result === null) {
-            $result = system_with_timeout("$php \"$checkFile\"", $env);
+            if (is_array($command)) {
+                $command[] = $checkFile;
+            } else {
+                $command .= " \"$checkFile\"";
+            }
+            $result = system_with_timeout($command, $env);
         }
         $result = trim($result);
         if (strpos($result, 'nocache') === 0) {
