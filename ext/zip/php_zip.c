@@ -651,7 +651,7 @@ static bool php_zipobj_close(ze_zip_object *obj, zend_string **out_str) /* {{{ *
 }
 /* }}} */
 
-int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_value) /* {{{ */
+static int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_value) /* {{{ */
 {
 	int cwd_skip = 0;
 #ifdef ZTS
@@ -755,7 +755,7 @@ int php_zip_glob(zend_string *spattern, zend_long flags, zval *return_value) /* 
 }
 /* }}} */
 
-int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_value) /* {{{ */
+static int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_value) /* {{{ */
 {
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
