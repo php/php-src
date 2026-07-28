@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Lock unmodified readonly properties for modification after clone-with.
     (NickSdot)
 
+- BCMath:
+  . Fixed GHSA-x692-q9x7-8c3f (Out-of-bounds write in bccomp()).
+    (CVE-2026-17544) (Recep Asan)
+
 - Calendar:
   . Fixed bug GH-22602 (gregoriantojd() and juliantojd() integer overflow with
     INT_MAX year). (arshidkv12)
@@ -70,6 +74,9 @@ PHP                                                                        NEWS
 - Exif:
   . Fixed bug GH-11020 (exif_read_data() emits a spurious "Illegal IFD size"
     warning when an IFD is not followed by a next-IFD offset). (Eyüp Can Akman)
+
+- GD:
+  . Upgrade libgd. (CVE-2026-9672) (Pierre Joye)
 
 - Hash:
   . Fixed bug GH-18173 (ext/hash relies on implementation-defined malloc
@@ -112,12 +119,18 @@ PHP                                                                        NEWS
   . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
     diagnostic message length beyond the error buffer). (iliaal)
 
+- PGSQL:
+  . Fixed GHSA-7qpv-r5mr-78m4 (SQL injection via E'...' backslash breakout).
+    (CVE-2026-17543) (ilutov)
+
 - Phar:
   . Fixed inconsistent handling of the magic ".phar" directory. Paths such as
     "/.phar" remain protected, while non-magic paths that merely start with
     ".phar" are handled consistently across file and directory creation,
     copying, ArrayAccess, stream lookup, directory iteration and extraction.
     (Weilin Du)
+  . Fixed GHSA-vc5h-9ppw-p5f3 (Crash via recursive symlinks). (CVE-2026-7260)
+    (Jakub Zelenka)
 
 - PHPDBG:
   . Fixed bug GH-17387 (Trivial crash in phpdbg lexer). (iliaal)
