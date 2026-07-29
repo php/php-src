@@ -2115,6 +2115,20 @@ PHP_METHOD(SoapClient, __construct)
 		RETURN_THROWS();
 	}
 
+	if (options != NULL) {
+		zval *classmap = zend_hash_str_find(Z_ARRVAL_P(options), "classmap", sizeof("classmap")-1);
+		if (classmap != NULL) {
+			if (UNEXPECTED(Z_TYPE_P(classmap) != IS_ARRAY)) {
+				zend_argument_type_error(2, "\"classmap\" option must be of type array, %s given", zend_zval_type_name(classmap));
+				RETURN_THROWS();
+			}
+			if (UNEXPECTED(!soap_class_map_has_only_string_keys(Z_ARRVAL_P(classmap)))) {
+				zend_argument_value_error(2, "\"classmap\" option must be an associative array");
+				RETURN_THROWS();
+			}
+		}
+	}
+
 	SOAP_CLIENT_BEGIN_CODE();
 
 	cache_wsdl = SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0;
@@ -2225,10 +2239,6 @@ PHP_METHOD(SoapClient, __construct)
 		}
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			if (UNEXPECTED(!soap_class_map_has_only_string_keys(Z_ARRVAL_P(tmp)))) {
-				zend_argument_value_error(2, "\"classmap\" option must be an associative array");
-				goto finish;
-			}
 			ZVAL_COPY(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);
 		}
 
@@ -2327,8 +2337,6 @@ PHP_METHOD(SoapClient, __construct)
 		soap_client_object_fetch(Z_OBJ_P(this_ptr))->typemap = soap_create_typemap(sdl, typemap_ht);
 	}
 
-finish:
-	;
 	SOAP_CLIENT_END_CODE();
 }
 /* }}} */
