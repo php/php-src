@@ -3827,7 +3827,7 @@ static zend_always_inline bool zend_is_string_callable(zend_string *callable, co
 	const char *colon;
 	size_t clen;
 	HashTable *ftable;
-	int call_via_handler = 0;
+	bool call_via_handler = false;
 	zend_class_entry *scope;
 	zval *zv;
 
@@ -3959,7 +3959,7 @@ get_function_via_handler:
 		if (fcc->object && fcc->calling_scope == ce_org) {
 			if (strict_class && ce_org->__call) {
 				fcc->function_handler = zend_get_call_trampoline_func(ce_org->__call, mname);
-				call_via_handler = 1;
+				call_via_handler = true;
 				retval = true;
 			} else {
 				fcc->function_handler = fcc->object->handlers->get_method(&fcc->object, mname, NULL);
