@@ -76,6 +76,11 @@ PHP 8.6 UPGRADE NOTES
     IntlDateFormatter::localtime()/datefmt_localtime() now raise a TypeError
     when the offset argument is not of type int instead of silently converting
     the value.
+  . Collator::sort(), collator_sort(), Collator::asort(), and
+    collator_asort() now report UTF-8/UTF-16 conversion failures during
+    comparison through the intl error mechanism and return false. With
+    intl.use_exceptions enabled, these failures throw IntlException. Previously,
+    these paths emitted a warning and compared the value as an empty string.
 
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is

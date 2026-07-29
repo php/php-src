@@ -45,6 +45,7 @@ extern zend_module_entry intl_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(intl)
 	struct UCollator *current_collator;
+	intl_error *current_collator_error;
 	char* default_locale;
 	collator_compare_func_t compare_func;
 	UBreakIterator* grapheme_iterator;
