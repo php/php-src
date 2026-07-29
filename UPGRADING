@@ -226,6 +226,8 @@ PHP 8.6 UPGRADE NOTES
     UINT_MAX instead of allowing the value to overflow.
   . proc_open() now raises a ValueError when the $cwd argument contains NUL
     bytes.
+  . base_convert(), bindex(), hexdec() and octdec() now raise a notice when
+    they cannot precisely convert the given number.
 
 - Sysvshm:
   . shm_attach() now raises a ValueError when the $key argument is outside the
