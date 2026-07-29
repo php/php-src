@@ -29,7 +29,7 @@ foreach ($cases as $name => $classmap) {
         ]);
         echo "SoapClient: OK\n";
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     try {
@@ -39,7 +39,7 @@ foreach ($cases as $name => $classmap) {
         ]);
         echo "SoapServer: OK\n";
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
