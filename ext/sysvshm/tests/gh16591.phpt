@@ -13,11 +13,15 @@ class C {
     }
 }
 
-$mem = shm_attach(1);
+$key = ftok(__FILE__, 't');
+$mem = shm_attach($key);
+$cleanup = shm_attach($key);
 try {
     shm_put_var($mem, 1, new C);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
+} finally {
+    shm_remove($cleanup);
 }
 
 ?>
