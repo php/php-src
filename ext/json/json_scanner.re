@@ -295,7 +295,7 @@ std:
 	<STR_P1>ANY              {
 		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
 			if (s->options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
-				if (s->utf8_invalid_count > INT_MAX - 2) {
+				if (s->utf8_invalid_count > PTRDIFF_MAX - 2) {
 					s->errcode = PHP_JSON_ERROR_UTF8;
 					return PHP_JSON_T_ERROR;
 				}
