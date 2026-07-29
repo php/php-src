@@ -276,6 +276,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . TSRM: make CG, EG, SCNG and AG compile-time offsets. (henderkes)
   . Deprecate returning values from __construct() and __destruct(). (timwolla)
+  . base_convert, bindex, hexdec and octdec now raise a notice when they cannot
+    precisely convert the given number. (Sjoerd Langkemper)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
