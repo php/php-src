@@ -80,7 +80,7 @@ foreach($encoding as $enc) {
     try {
         var_dump(mb_regex_encoding($enc));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     var_dump(mb_regex_encoding());
     $iterator++;
@@ -107,7 +107,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(5) "UCS-4"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-4BE" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-4BE" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(5) "UCS-4"
@@ -129,7 +129,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(7) "UCS-4LE"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(7) "UCS-4LE"
@@ -140,7 +140,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(7) "UCS-4LE"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2BE" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2BE" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(7) "UCS-4LE"
@@ -151,7 +151,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(7) "UCS-4LE"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2LE" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UCS-2LE" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(7) "UCS-4LE"
@@ -228,7 +228,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(8) "UTF-16LE"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UTF-7" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UTF-7" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(8) "UTF-16LE"
@@ -239,7 +239,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(8) "UTF-16LE"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UTF7-IMAP" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UTF7-IMAP" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(8) "UTF-16LE"
@@ -316,7 +316,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(4) "SJIS"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "ISO-2022-JP" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "ISO-2022-JP" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(4) "SJIS"
@@ -327,7 +327,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(4) "SJIS"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "JIS" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "JIS" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(4) "SJIS"
@@ -481,7 +481,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(11) "ISO-8859-15"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte2be" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte2be" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(11) "ISO-8859-15"
@@ -492,7 +492,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(11) "ISO-8859-15"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte2le" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte2le" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(11) "ISO-8859-15"
@@ -503,7 +503,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(11) "ISO-8859-15"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte4be" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte4be" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(11) "ISO-8859-15"
@@ -514,7 +514,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(11) "ISO-8859-15"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte4le" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "byte4le" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(11) "ISO-8859-15"
@@ -525,7 +525,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(11) "ISO-8859-15"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "BASE64" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "BASE64" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(11) "ISO-8859-15"
@@ -536,7 +536,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(11) "ISO-8859-15"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "HTML-ENTITIES" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "HTML-ENTITIES" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(11) "ISO-8859-15"
@@ -547,7 +547,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(11) "ISO-8859-15"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "7bit" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "7bit" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(11) "ISO-8859-15"
@@ -558,7 +558,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(11) "ISO-8859-15"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "8bit" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "8bit" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(11) "ISO-8859-15"
@@ -580,7 +580,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(6) "EUC-CN"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP936" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP936" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "EUC-CN"
@@ -591,7 +591,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(6) "EUC-CN"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "HZ" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "HZ" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "EUC-CN"
@@ -613,7 +613,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(6) "EUC-TW"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP950" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP950" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "EUC-TW"
@@ -646,7 +646,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(6) "EUC-KR"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UHC" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "UHC" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "EUC-KR"
@@ -657,7 +657,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(6) "EUC-KR"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "ISO-2022-KR" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "ISO-2022-KR" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "EUC-KR"
@@ -668,7 +668,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(6) "EUC-KR"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "Windows-1251" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "Windows-1251" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "EUC-KR"
@@ -679,7 +679,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(6) "EUC-KR"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "Windows-1252" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "Windows-1252" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "EUC-KR"
@@ -690,7 +690,7 @@ Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the un
 string(6) "EUC-KR"
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP866" given
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "CP866" given
 
 Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "EUC-KR"
