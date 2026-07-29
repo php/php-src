@@ -70,7 +70,7 @@ static const char * php_curl_option_get_name(zend_long option) {
 		return opt->name;
 	}
 #else
-	const char * prefix = "CURLOPT_";
+	const char prefix[] = "CURLOPT_";
 	const size_t prefix_len = sizeof(prefix) - 1;
 	zend_string *key;
 	zend_constant *constant;
