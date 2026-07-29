@@ -121,6 +121,12 @@ PHP 8.6 UPGRADE NOTES
     unchanged. Previously, NUL bytes were silently accepted: for cookie_path
     and cookie_domain this caused the SAPI to drop the Set-Cookie header; for
     cache_limiter the value was silently truncated at the NUL byte.
+  . Setting session.cookie_path or session.cookie_domain to a value containing
+    one of ",; \t\r\n\013\014" now emits a warning and leaves the setting
+    unchanged, matching the validation setcookie() already applies to its
+    $path and $domain options. Previously such a value was appended to the
+    Set-Cookie header verbatim, which let an application terminate one
+    attribute and append further ones.
   . A ValueError is not thrown if $name is a string containing NUL bytes in
     session_module_name().
   . session_encode() now returns an empty string instead of false for empty
