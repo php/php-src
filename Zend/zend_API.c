@@ -3822,10 +3822,8 @@ static zend_always_inline bool zend_is_string_callable(zend_string *callable, co
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	bool retval = false;
-	zend_string *mname, *cname;
-	zend_string *lmname;
+	zend_string *mname;
 	const char *colon;
-	size_t clen;
 	HashTable *ftable;
 	bool call_via_handler = false;
 	zend_class_entry *scope;
@@ -3849,8 +3847,9 @@ static zend_always_inline bool zend_is_string_callable(zend_string *callable, co
 		size_t mlen;
 
 		colon--;
-		clen = colon - ZSTR_VAL(callable);
-		mlen = ZSTR_LEN(callable) - clen - 2;
+
+		size_t class_name_len = colon - ZSTR_VAL(callable);
+		mlen = ZSTR_LEN(callable) - class_name_len - 2;
 
 		if (colon == ZSTR_VAL(callable)) {
 			if (error) *error = estrdup("invalid function name");
@@ -3865,9 +3864,9 @@ static zend_always_inline bool zend_is_string_callable(zend_string *callable, co
 			scope = get_scope(frame);
 		}
 
-		cname = zend_string_init_interned(ZSTR_VAL(callable), clen, 0);
-		if (ZSTR_HAS_CE_CACHE(cname) && ZSTR_GET_CE_CACHE(cname)) {
-			fcc->calling_scope = ZSTR_GET_CE_CACHE(cname);
+		zend_string *class_name = zend_string_init_interned(ZSTR_VAL(callable), class_name_len, 0);
+		if (ZSTR_HAS_CE_CACHE(class_name) && ZSTR_GET_CE_CACHE(class_name)) {
+			fcc->calling_scope = ZSTR_GET_CE_CACHE(class_name);
 			if (scope && !fcc->object) {
 				zend_object *object = zend_get_this_object(frame);
 
@@ -3883,11 +3882,11 @@ static zend_always_inline bool zend_is_string_callable(zend_string *callable, co
 				fcc->called_scope = fcc->object ? fcc->object->ce : fcc->calling_scope;
 			}
 			strict_class = true;
-		} else if (!zend_is_callable_check_class(cname, scope, frame, fcc, &strict_class, error, suppress_deprecation || ce_org != NULL)) {
-			zend_string_release_ex(cname, 0);
+		} else if (!zend_is_callable_check_class(class_name, scope, frame, fcc, &strict_class, error, suppress_deprecation || ce_org != NULL)) {
+			zend_string_release_ex(class_name, 0);
 			return 0;
 		}
-		zend_string_release_ex(cname, 0);
+		zend_string_release_ex(class_name, 0);
 
 		ftable = &fcc->calling_scope->function_table;
 		if (ce_org && !instanceof_function(ce_org, fcc->calling_scope)) {
@@ -3899,7 +3898,7 @@ static zend_always_inline bool zend_is_string_callable(zend_string *callable, co
 				"Callables of the form [\"%s\", \"%s\"] are deprecated",
 				ZSTR_VAL(ce_org->name), ZSTR_VAL(callable));
 		}
-		mname = zend_string_init(ZSTR_VAL(callable) + clen + 2, mlen, 0);
+		mname = zend_string_init(ZSTR_VAL(callable) + class_name_len + 2, mlen, 0);
 	} else if (ce_org) {
 		/* Try to fetch find static method of given class. */
 		mname = callable;
@@ -3914,7 +3913,7 @@ static zend_always_inline bool zend_is_string_callable(zend_string *callable, co
 		return 0;
 	}
 
-	lmname = zend_string_tolower(mname);
+	zend_string *lmname = zend_string_tolower(mname);
 	if (strict_class &&
 	    fcc->calling_scope &&
 		zend_string_equals_literal(lmname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
