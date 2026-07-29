@@ -64,12 +64,14 @@ ZEND_DECLARE_MODULE_GLOBALS(curl)
 
 // php_curl_option_get_name(CURLOPT_HTTPHEADER) -> "HTTPHEADER"
 static const char * php_curl_option_get_name(zend_long option) {
+
 #if LIBCURL_VERSION_NUM >= 0x074900
 	const struct curl_easyoption * opt = curl_easy_option_by_id(option);
 	if (EXPECTED(opt != NULL)) {
 		return opt->name;
 	}
-#else
+#endif
+
 	const char prefix[] = "CURLOPT_";
 	const size_t prefix_len = sizeof(prefix) - 1;
 	zend_string *key;
@@ -86,7 +88,6 @@ static const char * php_curl_option_get_name(zend_long option) {
 			return ZSTR_VAL(key) + prefix_len;
 		}
 	} ZEND_HASH_FOREACH_END();
-#endif
 	return "UNKNOWN_OPTION";
 }
 
