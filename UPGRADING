@@ -157,7 +157,7 @@ PHP 8.6 UPGRADE NOTES
 - Standard:
   . metaphone() is deprecated.
     Please use a userland phonetic matching library instead.
-    RFC: https://wiki.php.net/rfc/deprecate-metaphone
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_metaphone_function
 
 ========================================
 5. Changed Functions
