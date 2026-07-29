@@ -75,7 +75,7 @@ string(2) "14"
 
 -- Iteration 4 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(2) "14"
 
 -- Iteration 5 --
@@ -83,27 +83,27 @@ string(11) "17777777777"
 
 -- Iteration 6 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(3) "151"
 
 -- Iteration 7 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(3) "151"
 
 -- Iteration 8 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(7) "4553207"
 
 -- Iteration 9 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(7) "4553207"
 
 -- Iteration 10 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "5"
 
 -- Iteration 11 --
@@ -129,17 +129,17 @@ base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 18 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
 
 -- Iteration 19 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
 
 -- Iteration 20 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: base_convert(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
 
 -- Iteration 21 --
