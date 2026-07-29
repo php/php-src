@@ -7,6 +7,12 @@ PHP                                                                        NEWS
     (Weilin Du)
   . Added gmp_powm_sec(). (Weilin Du)
 
+- Intl:
+  . Fixed Collator::sort(), collator_sort(), Collator::asort(), and
+    collator_asort() to report UTF-8/UTF-16 conversion errors through the intl
+    error handler instead of emitting a warning and continuing with an empty
+    string. (Weilin Du)
+
 30 Jul 2026, PHP 8.6.0alpha3
 
 - Core:
