@@ -794,7 +794,7 @@ static bool zend_call_stack_get_aix_pthread(zend_call_stack *stack)
 {
 #ifdef HAVE_PTHREAD_GETTHRDS_NP
 	pthread_t pt = pthread_self();
-	struct __pthrdsinfo thread_info;
+	struct __pthrdsinfo thread_info = {0};
 	/*
 	 * We don't need the register buffer since we only call the function
 	 * on our own thread, and since the register buffer is only used for
@@ -808,12 +808,21 @@ static bool zend_call_stack_get_aix_pthread(zend_call_stack *stack)
 	}
 
 	/*
+	 * These can be null in rare situations, allegedly with user-provided
+	 * stacks with pthread (according to OpenJDK)
+	 */
+	if (!(thread_info.__pi_stackend && thread_info.__pi_stackaddr)) {
+		return false;
+	}
+
+	/*
 	 * The top of the stack (stackend) is not page aligned, there's some
 	 * internal stuff above it. Thankfully, we don't need page alignment.
 	 *
 	 * The size is a little weird. The stacksize field is smaller than
 	 * subtracting the bottom (stackaddr) from the top; it's about 0x888
-	 * to 0x1888 above stackaddr.
+	 * to 0x1888 above stackaddr. I'm assuming it rounds the bottom of the
+	 * stack to page alignment?
 	 *
 	 * A somewhat crude diagram is available here:
 	 * https://www.ibm.com/docs/en/aix/7.2.0?topic=tuning-thread-environment-variables
