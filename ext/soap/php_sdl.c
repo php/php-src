@@ -3190,13 +3190,13 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		PHP_MD5Update(&md5_context, ids, sizeof(ids));
 		PHP_MD5Final(digest, &md5_context);
 		make_digest(md5str, digest);
-		key = emalloc(len+sizeof("/wsdl-")-1+ZSTR_LEN(user)+2+sizeof(md5str));
+		key = emalloc(len+sizeof("/wsdl-")-1+ZSTR_LEN(user)+1+2+sizeof(md5str));
 		memcpy(key,SOAP_GLOBAL(cache_dir),len);
 		memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
 		len += sizeof("/wsdl-")-1;
 		if (ZSTR_LEN(user)) {
-			memcpy(key+len, ZSTR_VAL(user), ZSTR_LEN(user)-1);
-			len += ZSTR_LEN(user)-1;
+			memcpy(key+len, ZSTR_VAL(user), ZSTR_LEN(user));
+			len += ZSTR_LEN(user);
 			key[len++] = '-';
 		}
 		if (WSDL_CACHE_VERSION <= 0x9f) {
