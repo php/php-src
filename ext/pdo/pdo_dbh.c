@@ -345,7 +345,7 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 	}
 
 	if (!strncmp(data_source, "uri:", sizeof("uri:")-1)) {
-		zend_error(E_DEPRECATED, "Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs");
+		php_error_docref(NULL, E_DEPRECATED, "Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs");
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
