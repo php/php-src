@@ -9,7 +9,7 @@ $r->getAttributes("foo\0bar", ReflectionAttribute::IS_INSTANCEOF);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Class "foo" not found in %s:%d
+Fatal error: Uncaught Error: Class "foo%0bar" not found in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->getAttributes('foo\x00bar', 2)
 #1 {main}

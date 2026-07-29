@@ -10,7 +10,7 @@ $r->getProperty("Base::foo\0bar");
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ReflectionException: Fully qualified property name Base::$foo does not specify a base class of Demo in %s:%d
+Fatal error: Uncaught ReflectionException: Fully qualified property name Base::$foo%0bar does not specify a base class of Demo in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->getProperty('Base::foo\x00bar')
 #1 {main}

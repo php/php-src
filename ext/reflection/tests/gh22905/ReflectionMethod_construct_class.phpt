@@ -7,7 +7,7 @@ new ReflectionMethod("foo\0bar", "");
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ReflectionException: Class "foo" does not exist in %s:%d
+Fatal error: Uncaught ReflectionException: Class "foo%0bar" does not exist in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionMethod->__construct('foo\x00bar', '')
 #1 {main}

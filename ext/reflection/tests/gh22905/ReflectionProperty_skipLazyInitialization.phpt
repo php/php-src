@@ -9,7 +9,7 @@ $r->skipLazyInitialization($o);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ReflectionException: Can not use skipLazyInitialization on dynamic property stdClass::$foo in %s:%d
+Fatal error: Uncaught ReflectionException: Can not use skipLazyInitialization on dynamic property stdClass::$foo%0bar in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionProperty->skipLazyInitialization(Object(stdClass))
 #1 {main}

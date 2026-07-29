@@ -8,7 +8,7 @@ new ReflectionParameter([Demo::class, "foo\0bar"], 0);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ReflectionException: Method Demo::foo() does not exist in %s:%d
+Fatal error: Uncaught ReflectionException: Method Demo::foo%0bar() does not exist in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionParameter->__construct(Array, 0)
 #1 {main}

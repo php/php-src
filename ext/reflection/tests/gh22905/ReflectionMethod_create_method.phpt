@@ -8,7 +8,7 @@ ReflectionMethod::createFromMethodName("Demo::foo\0bar");
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ReflectionException: Method Demo::foo() does not exist in %s:%d
+Fatal error: Uncaught ReflectionException: Method Demo::foo%0bar() does not exist in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionMethod::createFromMethodName('Demo::foo\x00bar')
 #1 {main}

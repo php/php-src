@@ -9,7 +9,7 @@ $r->getCase("foo\0bar");
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ReflectionException: Case Demo::foo does not exist in %s:%d
+Fatal error: Uncaught ReflectionException: Case Demo::foo%0bar does not exist in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionEnum->getCase('foo\x00bar')
 #1 {main}

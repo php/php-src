@@ -9,7 +9,7 @@ $r->setRawValueWithoutLazyInitialization($o, 123);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ReflectionException: Can not use setRawValueWithoutLazyInitialization on dynamic property stdClass::$foo in %s:%d
+Fatal error: Uncaught ReflectionException: Can not use setRawValueWithoutLazyInitialization on dynamic property stdClass::$foo%0bar in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionProperty->setRawValueWithoutLazyInitialization(Object(stdClass), 123)
 #1 {main}
