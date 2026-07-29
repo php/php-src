@@ -35,7 +35,7 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
 		/* Group */
 
 		php_info_print_table_start();
-		php_info_print_table_header(1, "PHP Group");
+		php_info_print_table_colspan_header(1, "PHP Group");
 		php_info_print_table_row(1, "Thies C. Arntzen, Stig Bakken, Shane Caraveo, Andi Gutmans, Rasmus Lerdorf, Sam Ruby, Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski");
 		php_info_print_table_end();
 	}
@@ -44,9 +44,9 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
 		/* Design & Concept */
 		php_info_print_table_start();
 		if (!sapi_module.phpinfo_as_text) {
-			php_info_print_table_header(1, "Language Design &amp; Concept");
+			php_info_print_table_colspan_header(1, "Language Design &amp; Concept");
 		} else {
-			php_info_print_table_header(1, "Language Design & Concept");
+			php_info_print_table_colspan_header(1, "Language Design & Concept");
 		}
 		php_info_print_table_row(1, "Andi Gutmans, Rasmus Lerdorf, Zeev Suraski, Marcus Boerger");
 		php_info_print_table_end();
