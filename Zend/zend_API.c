@@ -1058,21 +1058,8 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				zend_fcall_info *fci = va_arg(*va, zend_fcall_info *);
 				zend_fcall_info_cache *fcc = va_arg(*va, zend_fcall_info_cache *);
 				char *is_callable_error = NULL;
-
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
-					fci->size = 0;
-					fcc->function_handler = 0;
-					break;
-				}
-
-				if (zend_fcall_info_init(arg, 0, fci, fcc, NULL, &is_callable_error) == SUCCESS) {
+				if (EXPECTED(zend_parse_arg_func(arg, fci, fcc, check_null, &is_callable_error, c == 'f'))) {
 					ZEND_ASSERT(!is_callable_error);
-					if (c == 'f') {
-						/* Release call trampolines: The function may not get called, in which case
-						 * the trampoline will leak. Force it to be refetched during
-						 * zend_call_function instead. */
-						zend_release_fcall_info_cache(fcc);
-					}
 					break;
 				}
 
