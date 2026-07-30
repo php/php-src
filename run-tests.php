@@ -850,11 +850,13 @@ function get_default_worker_count(): ?int
 
 function parse_default_worker_count(string $workerCount): ?int
 {
-    $workerCount = filter_var(trim($workerCount), FILTER_VALIDATE_INT, [
-        'options' => ['min_range' => 2],
-    ]);
+    $workerCount = trim($workerCount);
+    if (preg_match('/^[0-9]+$/D', $workerCount) !== 1) {
+        return null;
+    }
 
-    return $workerCount !== false ? min($workerCount, 10) : null;
+    $workerCount = (int) $workerCount;
+    return $workerCount >= 2 ? min($workerCount, 10) : null;
 }
 
 function can_create_parallel_worker_socket(): bool
