@@ -272,6 +272,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						if (EG(exception)) {
 							PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
 							zend_release_properties(prop_ht);
+							zval_ptr_dtor(&tmp);
 							return FAILURE;
 						}
 					}
