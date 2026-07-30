@@ -666,11 +666,22 @@ format_zend_string:;
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
-					/* %p{Letter} extensions */
+					/* %p[alnum]+ extensions */
 					switch (*(fmt+1)) {
 						case 'S':
+							/* zend_string* */
 							fmt++;
 							goto format_zend_string;
+						case 'p':
+							/* pointer */
+							fmt++;
+							break;
+						default:
+							if (isalnum(*(fmt+1))) {
+								zend_error_noreturn(E_CORE_ERROR,
+									"Invalid printf specifier \"p%c\"", *(fmt+1));
+							}
+							break;
 					}
 					/* Normal %p */
 					if (sizeof(char *) <= sizeof(uint64_t)) {
