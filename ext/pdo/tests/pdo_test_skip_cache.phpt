@@ -46,24 +46,26 @@ unset($environment['PDOTEST_ATTR']);
 $helperDirectory = getenv('REDIR_TEST_DIR') ?: __DIR__;
 $helper = var_export($helperDirectory . '/pdo_test.inc', true);
 $code = "require $helper; PDOTest::skip();";
-try {
-    $first = run_pdo_skip_check($code, $environment);
+$first = run_pdo_skip_check($code, $environment);
 
-    $cacheFiles = glob($cacheDirectory . '/pdo-*');
-    if (count($cacheFiles) !== 1) {
-        throw new Exception('Expected exactly one cache file');
-    }
-    $cacheFile = $cacheFiles[0];
-    $cachedReason = file_get_contents($cacheFile);
-    file_put_contents($cacheFile, 'cached connection failure');
+$cacheFiles = glob($cacheDirectory . '/pdo-*');
+if (count($cacheFiles) !== 1) {
+    throw new Exception('Expected exactly one cache file');
+}
+$cacheFile = $cacheFiles[0];
+$cachedReason = file_get_contents($cacheFile);
+file_put_contents($cacheFile, 'cached connection failure');
 
-    $second = run_pdo_skip_check($code, $environment);
-    echo "$first\n$cachedReason\n$second\n";
-} finally {
-    foreach (glob($cacheDirectory . '/*') as $file) {
-        unlink($file);
+$second = run_pdo_skip_check($code, $environment);
+echo "$first\n$cachedReason\n$second\n";
+?>
+--CLEAN--
+<?php
+foreach (glob(__DIR__ . '/pdo_test_skip_cache_*') ?: [] as $directory) {
+    foreach (glob($directory . '/*') ?: [] as $file) {
+        @unlink($file);
     }
-    rmdir($cacheDirectory);
+    @rmdir($directory);
 }
 ?>
 --EXPECT--

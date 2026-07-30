@@ -44,26 +44,28 @@ $environment['TEST_PHP_SHARED_CACHE_DIR'] = $cacheDirectory;
 
 $helper = var_export(__DIR__ . '/skipif.inc', true);
 $code = "require $helper; echo \"available\\n\";";
-try {
-    $first = run_snmp_skip_check($code, $environment);
+$first = run_snmp_skip_check($code, $environment);
 
-    $cacheFiles = glob($cacheDirectory . '/snmp-*');
-    if (count($cacheFiles) !== 1) {
-        throw new Exception('Expected exactly one cache file');
-    }
-    $cacheFile = $cacheFiles[0];
-    $cachedReason = file_get_contents($cacheFile);
-    file_put_contents($cacheFile, 'cached agent failure');
+$cacheFiles = glob($cacheDirectory . '/snmp-*');
+if (count($cacheFiles) !== 1) {
+    throw new Exception('Expected exactly one cache file');
+}
+$cacheFile = $cacheFiles[0];
+$cachedReason = file_get_contents($cacheFile);
+file_put_contents($cacheFile, 'cached agent failure');
 
-    $second = run_snmp_skip_check($code, $environment);
-    echo "$first\n";
-    echo "$cachedReason\n";
-    echo $second;
-} finally {
-    foreach (glob($cacheDirectory . '/*') as $file) {
-        unlink($file);
+$second = run_snmp_skip_check($code, $environment);
+echo "$first\n";
+echo "$cachedReason\n";
+echo $second;
+?>
+--CLEAN--
+<?php
+foreach (glob(__DIR__ . '/snmp_skip_cache_*') ?: [] as $directory) {
+    foreach (glob($directory . '/*') ?: [] as $file) {
+        @unlink($file);
     }
-    rmdir($cacheDirectory);
+    @rmdir($directory);
 }
 ?>
 --EXPECT--
