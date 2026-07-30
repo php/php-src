@@ -613,8 +613,9 @@ PHP_FUNCTION(stream_filter_register)
 		zend_hash_init(BG(user_filter_map), 8, NULL, NULL, 0);
 	}
 
-	/* The factory has just been (re)registered, so keep the map in sync. */
-	zend_hash_update_ptr(BG(user_filter_map), filtername, ce);
+	/* The factory registration above already rejected a duplicate name, so the
+	 * filter name cannot be present in the map either. */
+	zend_hash_add_new_ptr(BG(user_filter_map), filtername, ce);
 
 	RETURN_TRUE;
 }
