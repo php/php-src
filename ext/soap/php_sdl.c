@@ -191,7 +191,7 @@ static int is_wsdl_element(xmlNodePtr node)
 		     attr->children && attr->children->content &&
 		     (strcmp((char*)attr->children->content, "1") == 0 ||
 		      strcmp((char*)attr->children->content, "true") == 0)) {
-			soap_error(E_ERROR, "Parsing WSDL: Unknown required WSDL extension '%s'", node->ns->href);
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unknown required WSDL extension '%s'", node->ns->href);
 		}
 		return 0;
 	}
@@ -310,9 +310,9 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 		const xmlError *xmlErrorPtr = xmlGetLastError();
 
 		if (xmlErrorPtr) {
-			soap_error(E_ERROR, "Parsing WSDL: Couldn't load from '%s' : %s", struri, xmlErrorPtr->message);
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Couldn't load from '%s' : %s", struri, xmlErrorPtr->message);
 		} else {
-			soap_error(E_ERROR, "Parsing WSDL: Couldn't load from '%s'", struri);
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Couldn't load from '%s'", struri);
 		}
 	}
 
@@ -328,7 +328,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 				return;
 			}
 		}
-		soap_error(E_ERROR, "Parsing WSDL: Couldn't find <definitions> in '%s'", struri);
+		php_error_docref(NULL, E_ERROR, "Parsing WSDL: Couldn't find <definitions> in '%s'", struri);
 	}
 
 	if (!include) {
@@ -352,7 +352,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 				if (node_is_equal_ex(trav2, "schema", XSD_NAMESPACE)) {
 					load_schema(ctx, trav2);
 				} else if (is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
-					soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", SAFE_STR(trav2->name));
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", SAFE_STR(trav2->name));
 				}
 				trav2 = trav2->next;
 			}
@@ -369,43 +369,43 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, bool include
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
 				if (zend_hash_str_add_ptr(&ctx->messages, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: <message> '%s' already defined", name->children->content);
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: <message> '%s' already defined", name->children->content);
 				}
 			} else {
-				soap_error(E_ERROR, "Parsing WSDL: <message> has no name attribute");
+				php_error_docref(NULL, E_ERROR, "Parsing WSDL: <message> has no name attribute");
 			}
 
 		} else if (node_is_equal(trav,"portType")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
 				if (zend_hash_str_add_ptr(&ctx->portTypes, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: <portType> '%s' already defined", name->children->content);
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: <portType> '%s' already defined", name->children->content);
 				}
 			} else {
-				soap_error(E_ERROR, "Parsing WSDL: <portType> has no name attribute");
+				php_error_docref(NULL, E_ERROR, "Parsing WSDL: <portType> has no name attribute");
 			}
 
 		} else if (node_is_equal(trav,"binding")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
 				if (zend_hash_str_add_ptr(&ctx->bindings, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: <binding> '%s' already defined", name->children->content);
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: <binding> '%s' already defined", name->children->content);
 				}
 			} else {
-				soap_error(E_ERROR, "Parsing WSDL: <binding> has no name attribute");
+				php_error_docref(NULL, E_ERROR, "Parsing WSDL: <binding> has no name attribute");
 			}
 
 		} else if (node_is_equal(trav,"service")) {
 			xmlAttrPtr name = get_attribute(trav->properties, "name");
 			if (name && name->children && name->children->content) {
 				if (zend_hash_str_add_ptr(&ctx->services, (char*)name->children->content, xmlStrlen(name->children->content), trav) == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: <service> '%s' already defined", name->children->content);
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: <service> '%s' already defined", name->children->content);
 				}
 			} else {
-				soap_error(E_ERROR, "Parsing WSDL: <service> has no name attribute");
+				php_error_docref(NULL, E_ERROR, "Parsing WSDL: <service> has no name attribute");
 			}
 		} else if (!node_is_equal(trav,"documentation")) {
-			soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		trav = trav->next;
 	}
@@ -420,7 +420,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 
 	tmp = get_attribute(header->properties, "message");
 	if (!tmp) {
-		soap_error(E_ERROR, "Parsing WSDL: Missing message attribute for <header>");
+		php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing message attribute for <header>");
 	}
 
 	ctype = strrchr((char*)tmp->children->content,':');
@@ -430,16 +430,16 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 		++ctype;
 	}
 	if ((message = zend_hash_str_find_ptr(&ctx->messages, ctype, strlen(ctype))) == NULL) {
-		soap_error(E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
+		php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
 	}
 
 	tmp = get_attribute(header->properties, "part");
 	if (!tmp) {
-		soap_error(E_ERROR, "Parsing WSDL: Missing part attribute for <header>");
+		php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing part attribute for <header>");
 	}
 	part = get_node_with_attribute_ex(message->children, "part", WSDL_NAMESPACE, "name", (char*)tmp->children->content, NULL);
 	if (!part) {
-		soap_error(E_ERROR, "Parsing WSDL: Missing part '%s' in <message>", tmp->children->content);
+		php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing part '%s' in <message>", tmp->children->content);
 	}
 
 	h = emalloc(sizeof(sdlSoapBindingFunctionHeader));
@@ -466,10 +466,10 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 			} else if (strncmp((char*)tmp->children->content, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
 				h->encodingStyle = SOAP_ENCODING_1_2;
 			} else {
-				soap_error(E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", tmp->children->content);
+				php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", tmp->children->content);
 			}
 		} else {
-			soap_error(E_ERROR, "Parsing WSDL: Unspecified encodingStyle");
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unspecified encodingStyle");
 		}
 	}
 
@@ -515,7 +515,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 				}
 				smart_str_free(&key);
 			} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-				soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
+				php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 			}
 			trav = trav->next;
 		}
@@ -572,7 +572,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 						}
 					} ZEND_HASH_FOREACH_END();
 					if (!found) {
-						soap_error(E_ERROR, "Parsing WSDL: Missing part '%s' in <message>", parts);
+						php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing part '%s' in <message>", parts);
 					}
 					parts += strlen(parts);
 					if (end) *end = ' ';
@@ -589,10 +589,10 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 					} else if (strncmp((char*)encodingStyleAttribute->children->content, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
 						binding->encodingStyle = SOAP_ENCODING_1_2;
 					} else {
-						soap_error(E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", encodingStyleAttribute->children->content);
+						php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", encodingStyleAttribute->children->content);
 					}
 				} else {
-					soap_error(E_ERROR, "Parsing WSDL: Unspecified encodingStyle");
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unspecified encodingStyle");
 				}
 			}
 		} else if (node_is_equal_ex(trav, "header", wsdl_soap_namespace)) {
@@ -615,7 +615,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			}
 			smart_str_free(&key);
 		} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-			soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		trav = trav->next;
 	}
@@ -634,7 +634,7 @@ static HashTable* wsdl_message(const sdlCtx *ctx, const xmlChar* message_name)
 
 	xmlNodePtr message = zend_hash_str_find_ptr(&ctx->messages, ctype, strlen(ctype));
 	if (message == NULL) {
-		soap_error(E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", (const char*)message_name);
+		php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing <message> with name '%s'", (const char*)message_name);
 	}
 
 	parameters = emalloc(sizeof(HashTable));
@@ -646,14 +646,14 @@ static HashTable* wsdl_message(const sdlCtx *ctx, const xmlChar* message_name)
 		sdlParamPtr param;
 
 		if (trav->ns != NULL && strcmp((char*)trav->ns->href, WSDL_NAMESPACE) != 0) {
-			soap_error(E_ERROR, "Parsing WSDL: Unexpected extensibility element <%s>",  SAFE_STR(trav->name));
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected extensibility element <%s>",  SAFE_STR(trav->name));
 		}
 		if (node_is_equal(trav,"documentation")) {
 			trav = trav->next;
 			continue;
 		}
 		if (!node_is_equal(trav,"part")) {
-			soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		xmlNodePtr part = trav;
 		param = emalloc(sizeof(sdlParam));
@@ -662,7 +662,7 @@ static HashTable* wsdl_message(const sdlCtx *ctx, const xmlChar* message_name)
 
 		name = get_attribute(part->properties, "name");
 		if (name == NULL) {
-			soap_error(E_ERROR, "Parsing WSDL: No name associated with <part> '%s'",  SAFE_STR(message->name));
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: No name associated with <part> '%s'",  SAFE_STR(message->name));
 		}
 
 		param->paramName = estrdup((char*)name->children->content);
@@ -708,7 +708,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 		uint32_t n = zend_hash_num_elements(&ctx.services);
 		if (n == 0) {
-			soap_error(E_ERROR, "Parsing WSDL: Couldn't bind to service");
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Couldn't bind to service");
 		}
 
 		zend_hash_internal_pointer_reset(&ctx.services);
@@ -733,7 +733,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					continue;
 				}
 				if (!node_is_equal(trav,"port")) {
-					soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 				}
 
 				port = trav;
@@ -743,7 +743,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 				bindingAttr = get_attribute(port->properties, "binding");
 				if (bindingAttr == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: No binding associated with <port>");
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: No binding associated with <port>");
 				}
 
 				/* find address and figure out binding type */
@@ -772,7 +772,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						}
 					}
 					if (trav2 != address && is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
-						soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
+						php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
 					}
 				  trav2 = trav2->next;
 				}
@@ -782,14 +782,14 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						trav = trav->next;
 						continue;
 					} else if (!address) {
-						soap_error(E_ERROR, "Parsing WSDL: No address associated with <port>");
+						php_error_docref(NULL, E_ERROR, "Parsing WSDL: No address associated with <port>");
 					}
 				}
 				has_soap_port = true;
 
 				location = get_attribute(address->properties, "location");
 				if (!location) {
-					soap_error(E_ERROR, "Parsing WSDL: No location associated with <port>");
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: No location associated with <port>");
 				}
 
 				tmpbinding->location = estrdup((char*)location->children->content);
@@ -801,7 +801,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					++ctype;
 				}
 				if ((tmp = zend_hash_str_find_ptr(&ctx.bindings, ctype, strlen(ctype))) == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: No <binding> element with name '%s'", ctype);
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: No <binding> element with name '%s'", ctype);
 				}
 				binding = tmp;
 
@@ -839,13 +839,13 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 				name = get_attribute(binding->properties, "name");
 				if (name == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: Missing 'name' attribute for <binding>");
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing 'name' attribute for <binding>");
 				}
 				tmpbinding->name = estrdup((char*)name->children->content);
 
 				type = get_attribute(binding->properties, "type");
 				if (type == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: Missing 'type' attribute for <binding>");
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing 'type' attribute for <binding>");
 				}
 
 				ctype = strchr((char*)type->children->content,':');
@@ -855,7 +855,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					++ctype;
 				}
 				if ((tmp = zend_hash_str_find_ptr(&ctx.portTypes, ctype, strlen(ctype))) == NULL) {
-					soap_error(E_ERROR, "Parsing WSDL: Missing <portType> with name '%s'", name->children->content);
+					php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing <portType> with name '%s'", name->children->content);
 				}
 				portType = tmp;
 
@@ -873,14 +873,14 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						continue;
 					}
 					if (!node_is_equal(trav2,"operation")) {
-						soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
+						php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
 					}
 
 					operation = trav2;
 
 					op_name = get_attribute(operation->properties, "name");
 					if (op_name == NULL) {
-						soap_error(E_ERROR, "Parsing WSDL: Missing 'name' attribute for <operation>");
+						php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing 'name' attribute for <operation>");
 					}
 
 					trav3 = operation->children;
@@ -892,14 +892,14 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						           !node_is_equal(trav3,"output") &&
 						           !node_is_equal(trav3,"fault") &&
 						           !node_is_equal(trav3,"documentation")) {
-							soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav3->name));
+							php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav3->name));
 						}
 						trav3 = trav3->next;
 					}
 
 					portTypeOperation = get_node_with_attribute_ex(portType->children, "operation", WSDL_NAMESPACE, "name", (char*)op_name->children->content, NULL);
 					if (portTypeOperation == NULL) {
-						soap_error(E_ERROR, "Parsing WSDL: Missing <portType>/<operation> with name '%s'", op_name->children->content);
+						php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing <portType>/<operation> with name '%s'", op_name->children->content);
 					}
 
 					function = emalloc(sizeof(sdlFunction));
@@ -944,7 +944,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 						message = get_attribute(input->properties, "message");
 						if (message == NULL) {
-							soap_error(E_ERROR, "Parsing WSDL: Missing name for <input> of '%s'", op_name->children->content);
+							php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing name for <input> of '%s'", op_name->children->content);
 						}
 						function->requestParameters = wsdl_message(&ctx, message->children->content);
 
@@ -973,7 +973,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 						message = get_attribute(output->properties, "message");
 						if (message == NULL) {
-							soap_error(E_ERROR, "Parsing WSDL: Missing name for <output> of '%s'", op_name->children->content);
+							php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing name for <output> of '%s'", op_name->children->content);
 						}
 						function->responseParameters = wsdl_message(&ctx, message->children->content);
 
@@ -1014,11 +1014,11 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 							xmlAttrPtr faultNameAttribute = get_attribute(fault->properties, "name");
 							if (faultNameAttribute == NULL) {
-								soap_error(E_ERROR, "Parsing WSDL: Missing name for <fault> of '%s'", op_name->children->content);
+								php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing name for <fault> of '%s'", op_name->children->content);
 							}
 							message = get_attribute(fault->properties, "message");
 							if (message == NULL) {
-								soap_error(E_ERROR, "Parsing WSDL: Missing name for <output> of '%s'", op_name->children->content);
+								php_error_docref(NULL, E_ERROR, "Parsing WSDL: Missing name for <output> of '%s'", op_name->children->content);
 							}
 
 							f = emalloc(sizeof(sdlFault));
@@ -1027,7 +1027,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 							f->name = estrdup((char*)faultNameAttribute->children->content);
 							f->details = wsdl_message(&ctx, message->children->content);
 							if (f->details == NULL || zend_hash_num_elements(f->details) > 1) {
-								soap_error(E_ERROR, "Parsing WSDL: The fault message '%s' must have a single part", message->children->content);
+								php_error_docref(NULL, E_ERROR, "Parsing WSDL: The fault message '%s' must have a single part", message->children->content);
 							}
 
 							if (tmpbinding->bindingType == BINDING_SOAP) {
@@ -1061,14 +1061,14 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 													} else if (strncmp((char*)faultEncodingStyleAttribute->children->content, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
 														faultBinding->encodingStyle = SOAP_ENCODING_1_2;
 													} else {
-														soap_error(E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", faultEncodingStyleAttribute->children->content);
+														php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unknown encodingStyle '%s'", faultEncodingStyleAttribute->children->content);
 													}
 												} else {
-													soap_error(E_ERROR, "Parsing WSDL: Unspecified encodingStyle");
+													php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unspecified encodingStyle");
 												}
 											}
 										} else if (is_wsdl_element(faultNodes) && !node_is_equal(faultNodes,"documentation")) {
-											soap_error(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(faultNodes->name));
+											php_error_docref(NULL, E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(faultNodes->name));
 										}
 										faultNodes = faultNodes->next;
 									}
@@ -1079,7 +1079,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 								zend_hash_init(function->faults, 0, NULL, delete_fault, 0);
 							}
 							if (zend_hash_str_add_ptr(function->faults, f->name, strlen(f->name), f) == NULL) {
-								soap_error(E_ERROR, "Parsing WSDL: <fault> with name '%s' already defined in '%s'", f->name, op_name->children->content);
+								php_error_docref(NULL, E_ERROR, "Parsing WSDL: <fault> with name '%s' already defined in '%s'", f->name, op_name->children->content);
 							}
 						}
 						fault = fault->next;
@@ -1126,7 +1126,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 		}
 
 		if (ctx.sdl->bindings == NULL || ctx.sdl->bindings->nNumOfElements == 0) {
-			soap_error(E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
+			php_error_docref(NULL, E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
 		}
 
 	} zend_catch {

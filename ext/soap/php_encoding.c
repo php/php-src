@@ -376,7 +376,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 
 		zval *ztype = Z_VAR_ENC_TYPE_P(data);
 		if (Z_TYPE_P(ztype) != IS_LONG) {
-			soap_error(E_ERROR, "Encoding: SoapVar has no 'enc_type' property");
+			php_error_docref(NULL, E_ERROR, "Encoding: SoapVar has no 'enc_type' property");
 		}
 
 		zval *zstype = Z_VAR_ENC_STYPE_P(data);
@@ -591,7 +591,7 @@ xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style, xmlNodePtr par
 		ZVAL_NULL(&return_value);
 
 		if (call_user_function(NULL, NULL, &type->map->to_xml, &return_value, 1, data) == FAILURE) {
-			soap_error(E_ERROR, "Encoding: Error calling to_xml callback");
+			php_error_docref(NULL, E_ERROR, "Encoding: Error calling to_xml callback");
 		}
 		if (Z_TYPE(return_value) == IS_STRING) {
 			xmlDocPtr doc = soap_xmlParseMemory(Z_STRVAL(return_value), Z_STRLEN(return_value));
@@ -628,7 +628,7 @@ zval *to_zval_user(zval *ret, encodeTypePtr type, xmlNodePtr node)
 		xmlFreeNode(copy);
 
 		if (call_user_function(NULL, NULL, &type->map->to_zval, ret, 1, &data) == FAILURE) {
-			soap_error(E_ERROR, "Encoding: Error calling from_xml callback");
+			php_error_docref(NULL, E_ERROR, "Encoding: Error calling from_xml callback");
 		} else if (EG(exception)) {
 			ZVAL_NULL(ret);
 		}
@@ -665,7 +665,7 @@ static zval *to_zval_string(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			ZVAL_STRING(ret, (char*)data->children->content);
 		} else {
-			soap_error(E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
+			php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
 		}
 	} else {
 		ZVAL_EMPTY_STRING(ret);
@@ -698,7 +698,7 @@ static zval *to_zval_stringr(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			ZVAL_STRING(ret, (char*)data->children->content);
 		} else {
-			soap_error(E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
+			php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
 		}
 	} else {
 		ZVAL_EMPTY_STRING(ret);
@@ -731,7 +731,7 @@ static zval *to_zval_stringc(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			ZVAL_STRING(ret, (char*)data->children->content);
 		} else {
-			soap_error(E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
+			php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
 		}
 	} else {
 		ZVAL_EMPTY_STRING(ret);
@@ -750,17 +750,17 @@ static zval *to_zval_base64(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			whiteSpace_collapse(data->children->content);
 			str = php_base64_decode(data->children->content, strlen((char*)data->children->content));
 			if (!str) {
-				soap_error(E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
+				php_error_docref(NULL, E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
 			}
 			ZVAL_STR(ret, str);
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
 			str = php_base64_decode(data->children->content, strlen((char*)data->children->content));
 			if (!str) {
-				soap_error(E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
+				php_error_docref(NULL, E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
 			}
 			ZVAL_STR(ret, str);
 		} else {
-			soap_error(E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
+			php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
 		}
 	} else {
 		ZVAL_EMPTY_STRING(ret);
@@ -781,12 +781,12 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
 			whiteSpace_collapse(data->children->content);
 		} else if (data->children->type != XML_CDATA_SECTION_NODE || data->children->next != NULL) {
-			soap_error(E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
+			php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
 			return ret;
 		}
 		content_len = strlen((char*) data->children->content);
 		if (content_len % 2 != 0) {
-			soap_error(E_ERROR, "Encoding: Type '%s' value must contain an even number of hexadecimal digits", soap_type_name(type));
+			php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain an even number of hexadecimal digits", soap_type_name(type));
 			return ret;
 		}
 		str = zend_string_alloc(content_len / 2, 0);
@@ -799,7 +799,7 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			} else if (c >= 'A' && c <= 'F') {
 				ZSTR_VAL(str)[i] = (c - 'A' + 10) << 4;
 			} else {
-				soap_error(E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
+				php_error_docref(NULL, E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
 			}
 			c = data->children->content[j++];
 			if (c >= '0' && c <= '9') {
@@ -809,7 +809,7 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			} else if (c >= 'A' && c <= 'F') {
 				ZSTR_VAL(str)[i] |= c - 'A' + 10;
 			} else {
-				soap_error(E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
+				php_error_docref(NULL, E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
 			}
 		}
 		ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
@@ -928,7 +928,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 			err[i++] = 0;
 		}
 
-		soap_error(E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", err);
+		php_error_docref(NULL, E_ERROR,  "Encoding: string '%s' is not a valid utf-8 string", err);
 	}
 
 	text = xmlNewTextLen(BAD_CAST(str), new_len);
@@ -1030,11 +1030,11 @@ static zval *to_zval_double(zval *ret, encodeTypePtr type, xmlNodePtr data)
 					} else if (strncasecmp((char*)data->children->content, "-INF", sizeof("-INF")-1) == 0) {
 						ZVAL_DOUBLE(ret, -php_get_inf());
 					} else {
-						soap_error(E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
+						php_error_docref(NULL, E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
 					}
 			}
 		} else {
-			soap_error(E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
+			php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
 		}
 	} else {
 		ZVAL_NULL(ret);
@@ -1063,10 +1063,10 @@ static zval *to_zval_long(zval *ret, encodeTypePtr type, xmlNodePtr data)
 					ZVAL_DOUBLE(ret, dval);
 					break;
 				default:
-					soap_error(E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
+					php_error_docref(NULL, E_ERROR, "Encoding: Invalid value for type '%s'", soap_type_name(type));
 			}
 		} else {
-			soap_error(E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
+			php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
 		}
 	} else {
 		ZVAL_NULL(ret);
@@ -1132,7 +1132,7 @@ static zval *to_zval_bool(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	}
 	if (data->children->type != XML_TEXT_NODE || data->children->next != NULL) {
 		// TODO Convert to exception?
-		soap_error(E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
+		php_error_docref(NULL, E_ERROR, "Encoding: Type '%s' value must contain a single text or CDATA node", soap_type_name(type));
 	}
 
 	whiteSpace_collapse(data->children->content);
@@ -1314,7 +1314,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 					r_node = check_and_resolve_href(node);
 					if (r_node && r_node->children && r_node->children->content) {
 						if (model->u.element->fixed && strcmp(model->u.element->fixed, (char*)r_node->children->content) != 0) {
-							soap_error(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, r_node->children->content);
+							php_error_docref(NULL, E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, r_node->children->content);
 						}
 						master_to_zval(&val, model->u.element->encode, r_node);
 					} else if (model->u.element->fixed) {
@@ -1339,7 +1339,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 							ZVAL_NULL(&val);
 							if (node && node->children && node->children->content) {
 								if (model->u.element->fixed && strcmp(model->u.element->fixed, (char*)node->children->content) != 0) {
-									soap_error(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, node->children->content);
+									php_error_docref(NULL, E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, node->children->content);
 								}
 								master_to_zval(&val, model->u.element->encode, node);
 							} else if (model->u.element->fixed) {
@@ -1542,7 +1542,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 					if (val && val->children && val->children->content) {
 						str_val = (char*)val->children->content;
 						if (attr->fixed && strcmp(attr->fixed, str_val) != 0) {
-							soap_error(E_ERROR, "Encoding: Attribute '%s' has fixed value '%s' (value '%s' is not allowed)", attr->name, attr->fixed, str_val);
+							php_error_docref(NULL, E_ERROR, "Encoding: Attribute '%s' has fixed value '%s' (value '%s' is not allowed)", attr->name, attr->fixed, str_val);
 						}
 					} else if (attr->fixed) {
 						str_val = attr->fixed;
@@ -1665,7 +1665,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 							property = master_to_xml(enc, val, style, node);
 							if (property->children && property->children->content &&
 							    model->u.element->fixed && strcmp(model->u.element->fixed, (char*)property->children->content) != 0) {
-								soap_error(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, property->children->content);
+								php_error_docref(NULL, E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, property->children->content);
 							}
 						}
 						xmlNodeSetName(property, BAD_CAST(model->u.element->name));
@@ -1687,7 +1687,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 						property = master_to_xml(enc, data, style, node);
 						if (property->children && property->children->content &&
 						    model->u.element->fixed && strcmp(model->u.element->fixed, (char*)property->children->content) != 0) {
-							soap_error(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, property->children->content);
+							php_error_docref(NULL, E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, property->children->content);
 						}
 					}
 					xmlNodeSetName(property, BAD_CAST(model->u.element->name));
@@ -1714,7 +1714,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				return 2;
 			} else {
 				if (strict) {
-					soap_error(E_ERROR,  "Encoding: object has no '%s' property", model->u.element->name);
+					php_error_docref(NULL, E_ERROR,  "Encoding: object has no '%s' property", model->u.element->name);
 				}
 				return 0;
 			}
@@ -1745,7 +1745,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 				return 2;
 			} else {
 				if (strict) {
-					soap_error(E_ERROR,  "Encoding: object has no 'any' property");
+					php_error_docref(NULL, E_ERROR,  "Encoding: object has no 'any' property");
 				}
 				return 0;
 			}
@@ -1950,7 +1950,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 							dummy = master_to_xml(attr->encode, zattr, SOAP_LITERAL, xmlParam);
 							if (dummy->children && dummy->children->content) {
 								if (attr->fixed && strcmp(attr->fixed, (char*)dummy->children->content) != 0) {
-									soap_error(E_ERROR, "Encoding: Attribute '%s' has fixed value '%s' (value '%s' is not allowed)", attr->name, attr->fixed, dummy->children->content);
+									php_error_docref(NULL, E_ERROR, "Encoding: Attribute '%s' has fixed value '%s' (value '%s' is not allowed)", attr->name, attr->fixed, dummy->children->content);
 								}
 								/* we need to handle xml: namespace specially, since it is
 								   an implicit schema. Otherwise, use form.
@@ -2052,7 +2052,7 @@ static int calc_dimension_12(const char* str)
 			flag = 1;
 		}
 	  } else if (*str == '*') {
-			soap_error(E_ERROR, "Encoding: '*' may only be first arraySize value in list");
+			php_error_docref(NULL, E_ERROR, "Encoding: '*' may only be first arraySize value in list");
 		} else {
 			flag = 0;
 		}
@@ -2064,7 +2064,7 @@ static int calc_dimension_12(const char* str)
 static void soap_array_position_add_digit(int *position, int digit)
 {
 	if (UNEXPECTED(*position > (INT_MAX - digit) / 10)) {
-		soap_error(E_ERROR, "Encoding: array index out of range");
+		php_error_docref(NULL, E_ERROR, "Encoding: array index out of range");
 	}
 
 	*position = (*position * 10) + digit;
@@ -2092,7 +2092,7 @@ static int* get_position_12(int dimension, const char* str)
 			}
 			soap_array_position_add_digit(&pos[i], *str - '0');
 		} else if (*str == '*') {
-			soap_error(E_ERROR, "Encoding: '*' may only be first arraySize value in list");
+			php_error_docref(NULL, E_ERROR, "Encoding: '*' may only be first arraySize value in list");
 		} else {
 		  flag = 0;
 		}
@@ -2713,7 +2713,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 					efree(pos);
 					zval_ptr_dtor(ret);
 					ZVAL_UNDEF(ret);
-					soap_error(E_ERROR, "Encoding: array index out of range");
+					php_error_docref(NULL, E_ERROR, "Encoding: array index out of range");
 				}
 				pos[i]++;
 				if (pos[i] < dims[i]) {
@@ -2806,12 +2806,12 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		FOREACHNODE(trav, "item", item) {
 			xmlKey = get_node(item->children, "key");
 			if (!xmlKey) {
-				soap_error(E_ERROR,  "Encoding: Can't decode apache map, missing key");
+				php_error_docref(NULL, E_ERROR,  "Encoding: Can't decode apache map, missing key");
 			}
 
 			xmlValue = get_node(item->children, "value");
 			if (!xmlValue) {
-				soap_error(E_ERROR,  "Encoding: Can't decode apache map, missing value");
+				php_error_docref(NULL, E_ERROR,  "Encoding: Can't decode apache map, missing value");
 			}
 
 			ZVAL_NULL(&key);
@@ -2824,7 +2824,7 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			} else if (Z_TYPE(key) == IS_LONG) {
 				zend_hash_index_update(Z_ARRVAL_P(ret), Z_LVAL(key), &value);
 			} else {
-				soap_error(E_ERROR,  "Encoding: Can't decode apache map, only Strings or Longs are allowed as keys");
+				php_error_docref(NULL, E_ERROR,  "Encoding: Can't decode apache map, only Strings or Longs are allowed as keys");
 			}
 			zval_ptr_dtor(&key);
 		}
@@ -2956,7 +2956,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 		ta = php_localtime_r(&timestamp, &tmbuf);
 		/*ta = php_gmtime_r(&timestamp, &tmbuf);*/
 		if (!ta) {
-			soap_error(E_ERROR, "Encoding: Invalid timestamp " ZEND_LONG_FMT, Z_LVAL_P(data));
+			php_error_docref(NULL, E_ERROR, "Encoding: Invalid timestamp " ZEND_LONG_FMT, Z_LVAL_P(data));
 		}
 
 		buf = (char *) emalloc(buf_len);
@@ -3001,7 +3001,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 				xmlNodeSetContentLen(xmlParam, BAD_CAST(ZSTR_VAL(formatted_date_string)), ZSTR_LEN(formatted_date_string));
 				zend_string_release_ex(formatted_date_string, false);
 			} else {
-				soap_error(E_ERROR, "Encoding: Invalid DateTimeInterface");
+				php_error_docref(NULL, E_ERROR, "Encoding: Invalid DateTimeInterface");
 			}
 		}
 	}
@@ -3101,7 +3101,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 				}
 				smart_str_appends(&list, (char*)dummy->children->content);
 			} else {
-				soap_error(E_ERROR,
+				php_error_docref(NULL, E_ERROR,
 					"Encoding: Failed to encode list item of type '%s' for list type '%s'",
 					soap_type_name(&list_enc->details), soap_type_name(enc));
 			}
@@ -3145,7 +3145,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 				}
 				smart_str_appends(&list, (char*)dummy->children->content);
 			} else {
-				soap_error(E_ERROR,
+				php_error_docref(NULL, E_ERROR,
 					"Encoding: Failed to encode list item of type '%s' for list type '%s'",
 					soap_type_name(&list_enc->details), soap_type_name(enc));
 			}
@@ -3273,20 +3273,20 @@ zval *sdl_guess_convert_zval(zval *ret, encodeTypePtr enc, xmlNodePtr data)
 		}
 		if (type->restrictions->enumeration) {
 			if (!zend_hash_exists(type->restrictions->enumeration,data->children->content,strlen(data->children->content)+1)) {
-				soap_error(E_WARNING, "Encoding: Restriction: invalid enumeration value \"%s\"", data->children->content);
+				php_error_docref(NULL, E_WARNING, "Encoding: Restriction: invalid enumeration value \"%s\"", data->children->content);
 			}
 		}
 		if (type->restrictions->minLength &&
 		    strlen(data->children->content) < type->restrictions->minLength->value) {
-		  soap_error(E_WARNING, "Encoding: Restriction: length less than 'minLength'");
+		  php_error_docref(NULL, E_WARNING, "Encoding: Restriction: length less than 'minLength'");
 		}
 		if (type->restrictions->maxLength &&
 		    strlen(data->children->content) > type->restrictions->maxLength->value) {
-		  soap_error(E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
+		  php_error_docref(NULL, E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
 		}
 		if (type->restrictions->length &&
 		    strlen(data->children->content) != type->restrictions->length->value) {
-		  soap_error(E_WARNING, "Encoding: Restriction: length is not equal to 'length'");
+		  php_error_docref(NULL, E_WARNING, "Encoding: Restriction: length is not equal to 'length'");
 		}
 	}
 */
@@ -3312,7 +3312,7 @@ zval *sdl_guess_convert_zval(zval *ret, encodeTypePtr enc, xmlNodePtr data)
 			}
 			return to_zval_object(ret, enc, data);
 		default:
-			soap_error(E_ERROR, "Encoding: Internal Error");
+			php_error_docref(NULL, E_ERROR, "Encoding: Internal Error");
 			return guess_zval_convert(ret, enc, data);
 	}
 }
@@ -3336,20 +3336,20 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 		if (type->restrictions && Z_TYPE_P(data) == IS_STRING) {
 			if (type->restrictions->enumeration) {
 				if (!zend_hash_exists(type->restrictions->enumeration,Z_STRVAL_P(data),Z_STRLEN_P(data)+1)) {
-					soap_error(E_WARNING, "Encoding: Restriction: invalid enumeration value \"%s\".", Z_STRVAL_P(data));
+					php_error_docref(NULL, E_WARNING, "Encoding: Restriction: invalid enumeration value \"%s\".", Z_STRVAL_P(data));
 				}
 			}
 			if (type->restrictions->minLength &&
 			    Z_STRLEN_P(data) < type->restrictions->minLength->value) {
-			soap_error(E_WARNING, "Encoding: Restriction: length less than 'minLength'");
+			php_error_docref(NULL, E_WARNING, "Encoding: Restriction: length less than 'minLength'");
 			}
 			if (type->restrictions->maxLength &&
 			    Z_STRLEN_P(data) > type->restrictions->maxLength->value) {
-			soap_error(E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
+			php_error_docref(NULL, E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
 			}
 			if (type->restrictions->length &&
 			    Z_STRLEN_P(data) != type->restrictions->length->value) {
-			soap_error(E_WARNING, "Encoding: Restriction: length is not equal to 'length'");
+			php_error_docref(NULL, E_WARNING, "Encoding: Restriction: length is not equal to 'length'");
 			}
 		}
 	}
@@ -3380,7 +3380,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 			}
 			break;
 		default:
-		soap_error(E_ERROR, "Encoding: Internal Error");
+		php_error_docref(NULL, E_ERROR, "Encoding: Internal Error");
 			break;
 	}
 	if (style == SOAP_ENCODED) {
@@ -3398,12 +3398,12 @@ static xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 			if (href->children->content[0] == '#') {
 				xmlNodePtr ret = get_node_with_attribute_recursive(data->doc->children, NULL, "id", (char*)&href->children->content[1]);
 				if (!ret) {
-					soap_error(E_ERROR, "Encoding: Unresolved reference '%s'", href->children->content);
+					php_error_docref(NULL, E_ERROR, "Encoding: Unresolved reference '%s'", href->children->content);
 				}
 				return ret;
 			} else {
 				/*  TODO: External href....? */
-				soap_error(E_ERROR, "Encoding: External reference '%s'", href->children->content);
+				php_error_docref(NULL, E_ERROR, "Encoding: External reference '%s'", href->children->content);
 			}
 		}
 		/* SOAP 1.2 enc:id enc:ref */
@@ -3419,9 +3419,9 @@ static xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 			}
 			ret = get_node_with_attribute_recursive_ex(data->doc->children, NULL, NULL, "id", (char*)id, SOAP_1_2_ENC_NAMESPACE);
 			if (!ret) {
-				soap_error(E_ERROR, "Encoding: Unresolved reference '%s'", href->children->content);
+				php_error_docref(NULL, E_ERROR, "Encoding: Unresolved reference '%s'", href->children->content);
 			} else if (ret == data) {
-				soap_error(E_ERROR, "Encoding: Violation of id and ref information items '%s'", href->children->content);
+				php_error_docref(NULL, E_ERROR, "Encoding: Violation of id and ref information items '%s'", href->children->content);
 			}
 			return ret;
 		}
@@ -3570,7 +3570,7 @@ encodePtr get_conversion(int encode)
 	encodePtr enc;
 
 	if ((enc = zend_hash_index_find_ptr(&php_soap_defEncIndex, encode)) == NULL) {
-		soap_error(E_ERROR,  "Encoding: Cannot find encoding");
+		php_error_docref(NULL, E_ERROR,  "Encoding: Cannot find encoding");
 		return NULL;
 	} else {
 		return enc;
@@ -3600,7 +3600,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 		    Z_OBJCE_P(tmp) == soap_var_class_entry) {
 			zval *ztype = Z_VAR_ENC_TYPE_P(tmp);
 			if (Z_TYPE_P(ztype) != IS_LONG) {
-				soap_error(E_ERROR,  "Encoding: SoapVar has no 'enc_type' property");
+				php_error_docref(NULL, E_ERROR,  "Encoding: SoapVar has no 'enc_type' property");
 			}
 			cur_type = Z_LVAL_P(ztype);
 			if (cur_type == UNKNOWN_TYPE) {
