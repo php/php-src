@@ -4187,10 +4187,7 @@ again:
 			}
 
 			ret = zend_is_string_callable(Z_STR_P(callable), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
-			if (fcc == &fcc_local) {
-				zend_release_fcall_info_cache(fcc);
-			}
-			return ret;
+			break;
 
 		case IS_ARRAY:
 			{
@@ -4238,23 +4235,18 @@ again:
 				}
 
 				ret = zend_is_string_callable(Z_STR_P(method), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
-				if (fcc == &fcc_local) {
-					zend_release_fcall_info_cache(fcc);
-				}
-				return ret;
+				break;
 			}
 
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == SUCCESS) {
-				fcc->called_scope = fcc->calling_scope;
-				fcc->closure = Z_OBJ_P(callable);
-				if (fcc == &fcc_local) {
-					zend_release_fcall_info_cache(fcc);
-				}
-				return 1;
+			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == FAILURE) {
+				if (error) *error = estrdup("no array or string given");
+				return 0;
 			}
-			if (error) *error = estrdup("no array or string given");
-			return 0;
+			fcc->called_scope = fcc->calling_scope;
+			fcc->closure = Z_OBJ_P(callable);
+			ret = true;
+			break;
 		case IS_REFERENCE:
 			callable = Z_REFVAL_P(callable);
 			goto again;
@@ -4262,6 +4254,11 @@ again:
 			if (error) *error = estrdup("no array or string given");
 			return 0;
 	}
+
+	if (fcc == &fcc_local) {
+		zend_release_fcall_info_cache(fcc);
+	}
+	return ret;
 }
 /* }}} */
 
