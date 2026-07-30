@@ -362,6 +362,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					break;
 				}
 				case 'S': {
+format_zend_string:;
 					zend_string *str = va_arg(ap, zend_string*);
 					s_len = ZSTR_LEN(str);
 					s = ZSTR_VAL(str);
@@ -665,6 +666,13 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
+					/* %p{Letter} extensions */
+					switch (*(fmt+1)) {
+						case 'S':
+							fmt++;
+							goto format_zend_string;
+					}
+					/* Normal %p */
 					if (sizeof(char *) <= sizeof(uint64_t)) {
 						ui_num = (uint64_t)((size_t) va_arg(ap, char *));
 						s = ap_php_conv_p2(ui_num, 4, 'x',
