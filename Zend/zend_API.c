@@ -4186,7 +4186,6 @@ again:
 				return 1;
 			}
 
-check_func:
 			ret = zend_is_string_callable(Z_STR_P(callable), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
 			if (fcc == &fcc_local) {
 				zend_release_fcall_info_cache(fcc);
@@ -4238,10 +4237,13 @@ check_func:
 					}
 				}
 
-				callable = method;
-				goto check_func;
+				ret = zend_is_string_callable(Z_STR_P(method), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+				if (fcc == &fcc_local) {
+					zend_release_fcall_info_cache(fcc);
+				}
+				return ret;
 			}
-			return 0;
+
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
