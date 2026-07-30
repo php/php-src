@@ -3377,13 +3377,13 @@ function parse_max_concurrency(string $text, string $file): int
 {
     // Strip comments
     $text = trim(preg_replace('/#.*/', '', $text));
-    $maxConcurrency = filter_var($text, FILTER_VALIDATE_INT, [
-        'options' => ['min_range' => 1],
-    ]);
-    if ($maxConcurrency === false) {
+    if (
+        preg_match('/^[1-9][0-9]*$/D', $text) !== 1
+        || (string) (int) $text !== $text
+    ) {
         error("Invalid positive integer in $file");
     }
-    return $maxConcurrency;
+    return (int) $text;
 }
 
 function show_result(
