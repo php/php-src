@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
     offset in a non-UTF-8 encoding). (Eyüp Can Akman)
+  . Fixed bug GH-21036 (mb_ereg_search_getregs() crashes after mb_eregi()
+    invalidates the regex cache). (Matthias Goergens)
 
 - PCRE:
   . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
