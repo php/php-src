@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
 
+- Curl:
+  . Improved cURL option validation errors to include the option name.
+    (Sjoerd Langkemper)
+
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
     (Weilin Du)
@@ -56,10 +60,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-18847 (SEGV in zend_fetch_debug_backtrace() when the memory
     limit is reached while the tracing JIT enters a call frame). (Arnaud,
     iliaal)
-
-- Curl:
-  . Improved cURL option validation errors to include the option name.
-    (Sjoerd Langkemper)
 
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
