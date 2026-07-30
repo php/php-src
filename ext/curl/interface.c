@@ -1637,8 +1637,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_USERPWD:
 		case CURLOPT_XOAUTH2_BEARER:
 			EG(current_execute_data)->sensitive_args |= (1u << 2);
-		default:
-			// do nothing
 	}
 
 	switch (option) {
