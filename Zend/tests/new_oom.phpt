@@ -17,11 +17,11 @@ function getOomProcessCount(): int
         return 1;
     }
 
-    $processCount = filter_var(trim($processCount), FILTER_VALIDATE_INT, [
-        'options' => ['min_range' => 1],
-    ]);
-
-    return $processCount === false ? 1 : min($processCount, 4);
+    $processCount = trim($processCount);
+    if (preg_match('/^[1-9][0-9]*$/D', $processCount) !== 1) {
+        return 1;
+    }
+    return min((int) $processCount, 4);
 }
 
 function startOomTest(string $php, string $file, string $class): ?array
