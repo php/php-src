@@ -97,8 +97,7 @@ typedef struct {
 	/* this is necessary for the CGI SAPI module */
 	char *argv0;
 
-	char *current_user;
-	int current_user_length;
+	zend_string *current_user;
 
 	/* this is necessary for CLI module */
 	int argc;

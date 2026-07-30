@@ -1509,7 +1509,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 /* }}} */
 
 /* {{{ php_get_current_user */
-PHPAPI char *php_get_current_user(void)
+PHPAPI zend_string *php_get_current_user(void)
 {
 	zend_stat_t *pstat = NULL;
 
@@ -1524,19 +1524,15 @@ PHPAPI char *php_get_current_user(void)
 	pstat = sapi_get_stat();
 
 	if (!pstat) {
-		return "";
+		return ZSTR_EMPTY_ALLOC();
 	} else {
 #ifdef PHP_WIN32
 		char *name = php_win32_get_username();
-		int len;
 
 		if (!name) {
-			return "";
+			return ZSTR_EMPTY_ALLOC();
 		}
-		len = (int)strlen(name);
-		name[len] = '\0';
-		SG(request_info).current_user_length = len;
-		SG(request_info).current_user = estrndup(name, len);
+		SG(request_info).current_user = zend_string_init(name, strlen(name), false);
 		free(name);
 		return SG(request_info).current_user;
 #else
@@ -1566,20 +1562,19 @@ try_again:
 				goto try_again;
 			}
 			efree(pwbuf);
-			return "";
+			return ZSTR_EMPTY_ALLOC();
 		}
 		if (retpwptr == NULL) {
 			efree(pwbuf);
-			return "";
+			return ZSTR_EMPTY_ALLOC();
 		}
 		pwd = &_pw;
 #else
 		if ((pwd=getpwuid(pstat->st_uid))==NULL) {
-			return "";
+			return ZSTR_EMPTY_ALLOC();
 		}
 #endif
-		SG(request_info).current_user_length = strlen(pwd->pw_name);
-		SG(request_info).current_user = estrndup(pwd->pw_name, SG(request_info).current_user_length);
+		SG(request_info).current_user = zend_string_init(pwd->pw_name, strlen(pwd->pw_name), false);
 #if defined(ZTS) && defined(HAVE_GETPWUID_R) && defined(_SC_GETPW_R_SIZE_MAX)
 		efree(pwbuf);
 #endif
