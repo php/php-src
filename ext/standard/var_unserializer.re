@@ -1256,7 +1256,7 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* Call unserialize callback */
-		ZVAL_STR_COPY(&user_func, PG(unserialize_callback_func));
+		ZVAL_STR(&user_func, zend_string_dup(PG(unserialize_callback_func), false));
 
 		ZVAL_STR(&args[0], class_name);
 		BG(serialize_lock)++;
