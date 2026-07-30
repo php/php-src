@@ -1689,8 +1689,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	  cur_type->form = XSD_FORM_DEFAULT;
 	}
 	if (cur_type->form == XSD_FORM_DEFAULT) {
- 		xmlNodePtr parent = element->parent;
- 		while (parent) {
+		xmlNodePtr parent = element->parent;
+		while (parent) {
 			if (node_is_equal_xsd(parent, "schema")) {
 				xmlAttrPtr def;
 				def = get_attribute(parent->properties, "elementFormDefault");
@@ -1702,7 +1702,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 				break;
 			}
 			parent = parent->parent;
-  		}
+		}
 		if (parent == NULL) {
 			cur_type->form = XSD_FORM_UNQUALIFIED;
 		}
