@@ -1688,7 +1688,7 @@ PHP_METHOD(SoapServer, handle)
 			}
 		}
 	} else {
-		php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
+		php_error_docref(NULL, E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
 	}
 
 	if (EG(exception)) {
@@ -4099,7 +4099,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		ns = xmlNewNs(envelope, BAD_CAST(SOAP_1_2_ENV_NAMESPACE), BAD_CAST(SOAP_1_2_ENV_NS_PREFIX));
 		xmlSetNs(envelope, ns);
 	} else {
-		soap_error(E_ERROR, "Unknown SOAP version");
+		php_error_docref(NULL, E_ERROR, "Unknown SOAP version");
 	}
 	xmlDocSetRootElement(doc, envelope);
 
