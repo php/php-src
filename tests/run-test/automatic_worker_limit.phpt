@@ -83,14 +83,18 @@ var_dump(str_contains($output, 'Spawning 10 workers...'));
 [$exitCode, $output] = $runTests(['--asan', '-j3']);
 var_dump($exitCode);
 var_dump(str_contains($output, 'Spawning 3 workers...'));
-
-foreach ($testFiles as $file) {
-    unlink($file);
+?>
+--CLEAN--
+<?php
+foreach (glob(__DIR__ . '/automatic_worker_limit_*') ?: [] as $root) {
+    foreach (glob($root . '/tests/*.phpt') ?: [] as $file) {
+        unlink($file);
+    }
+    @unlink($root . '/bin/nproc');
+    @rmdir($root . '/tests');
+    @rmdir($root . '/bin');
+    @rmdir($root);
 }
-unlink($nproc);
-rmdir($tests);
-rmdir($bin);
-rmdir($root);
 ?>
 --EXPECT--
 int(0)
