@@ -1660,7 +1660,7 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 					break;
 
 				default:
-					php_sqlite3_error(stmt_obj->db_obj, 0, "Unknown parameter type: %pd for parameter %pd", param->type, param->param_number);
+					php_sqlite3_error(stmt_obj->db_obj, 0, "Unknown parameter type: " ZEND_LONG_FMT " for parameter " ZEND_LONG_FMT, param->type, param->param_number);
 					return FAILURE;
 			}
 		} ZEND_HASH_FOREACH_END();
