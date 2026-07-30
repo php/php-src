@@ -618,7 +618,6 @@ PHP_FUNCTION(stream_filter_register)
 		RETURN_THROWS();
 	}
 
-
 	/* Register the factory first; if that fails, don't (re)create the map,
 	 * which would leak during shutdown re-registration. */
 	if (php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == FAILURE) {
@@ -633,7 +632,9 @@ PHP_FUNCTION(stream_filter_register)
 	fdat = ecalloc(1, sizeof(struct php_user_filter_data));
 	fdat->classname = zend_string_copy(classname);
 
-	zend_hash_add_ptr(BG(user_filter_map), filtername, fdat);
+	/* The factory registration above already rejected a duplicate name, so the
+	 * filter name cannot be present in the map either. */
+	zend_hash_add_new_ptr(BG(user_filter_map), filtername, fdat);
 
 	RETURN_TRUE;
 }
