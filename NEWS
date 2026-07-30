@@ -57,6 +57,10 @@ PHP                                                                        NEWS
     limit is reached while the tracing JIT enters a call frame). (Arnaud,
     iliaal)
 
+- Curl:
+  . Improved cURL option validation errors to include the option name.
+    (Sjoerd Langkemper)
+
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
@@ -161,8 +165,6 @@ PHP                                                                        NEWS
     and CURL_SEEKFUNC_CANTSEEK constants, letting libcurl rewind a streamed
     request body to resend it on a redirect, multi-pass authentication or a
     retried reused connection. (GrahamCampbell)
-  . Improved cURL option validation errors to include the option name.
-    (Sjoerd Langkemper)
 
 - Date:
   . Update timelib to 2022.17. (Derick)
