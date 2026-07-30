@@ -90,14 +90,18 @@ if ($parallelExitCode !== 0) {
 var_dump($parallelExitCode);
 var_dump(str_contains($parallelOutput, 'TEST 3/3'));
 var_dump(str_contains($parallelOutput, 'TEST 3/2'));
-
-foreach (glob($targets . '/*') as $file) {
-    unlink($file);
+?>
+--CLEAN--
+<?php
+foreach (glob(__DIR__ . '/redirected_parallel_*') ?: [] as $root) {
+    foreach (glob($root . '/targets/*') ?: [] as $file) {
+        unlink($file);
+    }
+    @rmdir($root . '/targets');
+    @unlink($root . '/redirect.phpt');
+    @unlink($root . '/companion.phpt');
+    @rmdir($root);
 }
-rmdir($targets);
-unlink($root . '/redirect.phpt');
-unlink($root . '/companion.phpt');
-rmdir($root);
 ?>
 --EXPECT--
 int(0)
