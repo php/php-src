@@ -4104,7 +4104,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		ns = xmlNewNs(envelope, BAD_CAST(SOAP_1_2_ENV_NAMESPACE), BAD_CAST(SOAP_1_2_ENV_NS_PREFIX));
 		xmlSetNs(envelope, ns);
 	} else {
-		soap_error0(E_ERROR, "Unknown SOAP version");
+		soap_error(E_ERROR, "Unknown SOAP version");
 	}
 	xmlDocSetRootElement(doc, envelope);
 

@@ -197,17 +197,8 @@ extern HashTable php_soap_defEncNs, php_soap_defEnc, php_soap_defEncIndex;
 
 void add_soap_fault(zval *obj, const char *fault_code, const char *fault_string, zend_string *fault_actor, zval *fault_detail, zend_string *lang);
 
-#define soap_error0(severity, format) \
-	php_error(severity, "SOAP-ERROR: " format)
-
-#define soap_error1(severity, format, param1) \
-	php_error(severity, "SOAP-ERROR: " format, param1)
-
-#define soap_error2(severity, format, param1, param2) \
-	php_error(severity, "SOAP-ERROR: " format, param1, param2)
-
-#define soap_error3(severity, format, param1, param2, param3) \
-	php_error(severity, "SOAP-ERROR: " format, param1, param2, param3)
+#define soap_error(severity, format, ...) \
+	php_error(severity, "SOAP-ERROR: " format, ## __VA_ARGS__)
 
 static zend_always_inline zval *php_soap_deref(zval *zv) {
 	if (UNEXPECTED(Z_TYPE_P(zv) == IS_REFERENCE)) {
