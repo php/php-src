@@ -166,7 +166,7 @@ static inline void *php_hash_alloc_context(const php_hash_ops *ops) {
 	/* Zero out context memory so serialization doesn't expose internals */
 	if (ops->context_align > 0) {
 		size_t align = ops->context_align;
-		char *base = ecalloc(1, ops->context_size + align);
+		char *base = (char *) ecalloc(1, ops->context_size + align);
 		size_t offset = align - ((uintptr_t)base & (align - 1));
 		char *ptr = base + offset;
 		ptr[-1] = (char)offset;
