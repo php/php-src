@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fixed bug GH-22763 (JIT fails to clear ZREG_TYPE_ONLY after setting reg).
     (Arnaud)
+  . Fixed bug GH-22857 (Function JIT emits wrong code for FETCH_OBJ_FUNC_ARG on
+    a property hook getter, losing register-held variables). (Zhao Hao)
 
 - MBString:
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
