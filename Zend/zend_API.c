@@ -3818,7 +3818,7 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	}
 }
 
-static zend_always_inline bool zend_is_string_callable(zend_string *callable, const zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
+static zend_always_inline bool zend_is_method_callable(zend_string *callable, const zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	bool retval = false;
@@ -3830,14 +3830,6 @@ static zend_always_inline bool zend_is_string_callable(zend_string *callable, co
 	zval *zv;
 
 	fcc->calling_scope = NULL;
-
-	if (!ce_org) {
-		zend_function *func = zend_fetch_function(callable);
-		if (EXPECTED(func != NULL)) {
-			fcc->function_handler = func;
-			return 1;
-		}
-	}
 
 	/* Split name into class/namespace and method/function names */
 	if ((colon = zend_memrchr(ZSTR_VAL(callable), ':', ZSTR_LEN(callable))) != NULL &&
@@ -4176,17 +4168,29 @@ ZEND_API bool zend_is_callable_at_frame(
 again:
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
-			if (object) {
+			/* First check for a normal function */
+			if (!object) {
+				if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
+					return true;
+				}
+
+				zend_function *func = zend_fetch_function(Z_STR_P(callable));
+				if (EXPECTED(func != NULL)) {
+					fcc->function_handler = func;
+					return true;
+				}
+				/* Might be a static method */
+			} else {
 				fcc->object = object;
 				fcc->calling_scope = object->ce;
 			}
 
 			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 				fcc->called_scope = fcc->calling_scope;
-				return 1;
+				return true;
 			}
 
-			ret = zend_is_string_callable(Z_STR_P(callable), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+			ret = zend_is_method_callable(Z_STR_P(callable), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
 			break;
 
 		case IS_ARRAY:
@@ -4234,7 +4238,7 @@ again:
 					}
 				}
 
-				ret = zend_is_string_callable(Z_STR_P(method), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+				ret = zend_is_method_callable(Z_STR_P(method), frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
 				break;
 			}
 
