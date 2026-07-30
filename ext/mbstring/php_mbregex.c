@@ -481,6 +481,10 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t p
 		if (rc == MBREX(search_re)) {
 			/* reuse the new rc? see bug #72399 */
 			MBREX(search_re) = NULL;
+			if (MBREX(search_regs) != NULL) {
+				onig_region_free(MBREX(search_regs), 1);
+				MBREX(search_regs) = NULL;
+			}
 		}
 		zend_hash_str_update_ptr(&MBREX(ht_rc), (char *)pattern, patlen, retval);
 	} else {
