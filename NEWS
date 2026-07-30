@@ -13,6 +13,11 @@ PHP                                                                        NEWS
     error handler instead of emitting a warning and continuing with an empty
     string. (Weilin Du)
 
+- Reflection:
+  . Added ReflectionAttribute::inNamespace(),
+    ReflectionAttribute::getNamespaceName(), and
+    ReflectionAttribute::getShortName(). (Girgias)
+
 - Standard:
   . The following functions now raise a ValueError when the $filename argument
     contains NUL bytes: fileperms(), fileinode(), filesize(), fileowner(),
