@@ -5,6 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.preload={PWD}/constexpr_015.inc
+opcache.file_cache_only=0
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
