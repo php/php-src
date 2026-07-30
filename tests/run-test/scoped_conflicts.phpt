@@ -120,19 +120,23 @@ var_dump($exitCode);
 if ($exitCode !== 0) {
     echo $output;
 }
-
-foreach (glob($root . '/active-*') as $marker) {
-    unlink($marker);
-}
-unlink($results);
-foreach ([$group, $external] as $directory) {
-    foreach (glob($directory . '/*') as $file) {
-        unlink($file);
+?>
+--CLEAN--
+<?php
+foreach (glob(__DIR__ . '/scoped_conflicts_*') ?: [] as $root) {
+    foreach ([$root . '/a-group', $root . '/z-external'] as $directory) {
+        foreach (glob($directory . '/*') ?: [] as $file) {
+            @unlink($file);
+        }
+        @rmdir($directory);
     }
+    foreach (glob($root . '/*') ?: [] as $file) {
+        if (is_file($file)) {
+            @unlink($file);
+        }
+    }
+    @rmdir($root);
 }
-rmdir($group);
-rmdir($external);
-rmdir($root);
 ?>
 --EXPECT--
 PASSED one.phpt

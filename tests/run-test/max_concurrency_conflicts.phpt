@@ -90,11 +90,15 @@ var_dump($exitCode);
 if ($exitCode !== 0) {
     echo $output;
 }
-
-foreach (glob($root . '/*') as $file) {
-    unlink($file);
+?>
+--CLEAN--
+<?php
+foreach (glob(__DIR__ . '/max_concurrency_conflicts_*') ?: [] as $root) {
+    foreach (glob($root . '/*') ?: [] as $file) {
+        @unlink($file);
+    }
+    @rmdir($root);
 }
-rmdir($root);
 ?>
 --EXPECT--
 PASSED one.phpt
