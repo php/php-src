@@ -562,13 +562,13 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 					if (end) *end = '\0';
 					ZEND_HASH_FOREACH_PTR(params, param) {
 						if (param->paramName && strcmp(parts, param->paramName) == 0) {
-					  		sdlParamPtr x_param;
-					  		x_param = emalloc(sizeof(sdlParam));
-					  		*x_param = *param;
-					  		param->paramName = NULL;
-					  		zend_hash_next_index_insert_ptr(&ht, x_param);
-					  		found = true;
-					  		break;
+							sdlParamPtr x_param;
+							x_param = emalloc(sizeof(sdlParam));
+							*x_param = *param;
+							param->paramName = NULL;
+							zend_hash_next_index_insert_ptr(&ht, x_param);
+							found = true;
+							break;
 						}
 					} ZEND_HASH_FOREACH_END();
 					if (!found) {
@@ -2540,7 +2540,7 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 		if (func->binding->bindingType == BINDING_SOAP && pfault->bindingAttributes) {
 			sdlSoapBindingFunctionFaultPtr soap_binding;
 
-		   	soap_binding = malloc(sizeof(sdlSoapBindingFunctionFault));
+			soap_binding = malloc(sizeof(sdlSoapBindingFunctionFault));
 			memset(soap_binding, 0, sizeof(sdlSoapBindingFunctionFault));
 			*soap_binding = *(sdlSoapBindingFunctionFaultPtr)pfault->bindingAttributes;
 			if (soap_binding->ns) {
@@ -2876,7 +2876,7 @@ static sdlFunctionPtr make_persistent_sdl_function(sdlFunctionPtr func, HashTabl
 		if (pfunc->binding->bindingType == BINDING_SOAP && pfunc->bindingAttributes) {
 			sdlSoapBindingFunctionPtr soap_binding;
 
-		   	soap_binding = malloc(sizeof(sdlSoapBindingFunction));
+			soap_binding = malloc(sizeof(sdlSoapBindingFunction));
 			memset(soap_binding, 0, sizeof(sdlSoapBindingFunction));
 			*soap_binding = *(sdlSoapBindingFunctionPtr)pfunc->bindingAttributes;
 			if (soap_binding->soapAction) {

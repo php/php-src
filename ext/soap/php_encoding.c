@@ -249,7 +249,7 @@ void whiteSpace_collapse(xmlChar* str)
 		str++;
 	}
 	if (old == ' ') {
-	 	--pos;
+		--pos;
 	}
 	*pos = '\0';
 }
@@ -568,8 +568,8 @@ zval *master_to_zval(zval *ret, encodePtr encode, xmlNodePtr data)
 			         tmp->details.sdl_type->kind != XSD_TYPEKIND_COMPLEX) {
 			    if (enc == tmp->details.sdl_type->encode ||
 			        tmp == tmp->details.sdl_type->encode) {
-			    	enc = NULL;
-			    	break;
+				enc = NULL;
+				break;
 			    }
 			    tmp = tmp->details.sdl_type->encode;
 			  }
@@ -2048,9 +2048,9 @@ static int calc_dimension_12(const char* str)
 	while (*str != '\0') {
 		if (*str >= '0' && *str <= '9') {
 			if (flag == 0) {
-	   		i++;
-	   		flag = 1;
-	   	}
+			i++;
+			flag = 1;
+		}
 	  } else if (*str == '*') {
 			soap_error(E_ERROR, "Encoding: '*' may only be first arraySize value in list");
 		} else {
@@ -2160,18 +2160,18 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 		GC_TRY_PROTECT_RECURSION(Z_ARRVAL_P(data));
 
 		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(data), zdata) {
-	 		if (j >= dims[0]) {
-	 			break;
-	 		}
+			if (j >= dims[0]) {
+				break;
+			}
 			ZVAL_DEREF(zdata);
 			if (dimension == 1) {
 				if (enc == NULL) {
 					xparam = master_to_xml(get_conversion(Z_TYPE_P(zdata)), zdata, style, xmlParam);
 				} else {
 					xparam = master_to_xml(enc, zdata, style, xmlParam);
-	 			}
+				}
 
-	 			if (type) {
+				if (type) {
 					xmlNodeSetName(xparam, BAD_CAST(type->name));
 				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
 					xmlNodeSetName(xparam, BAD_CAST(enc->details.type_str));
@@ -2186,11 +2186,11 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 		} ZEND_HASH_FOREACH_END();
 
 		if (dimension == 1) {
-	 		while (j < dims[0]) {
+			while (j < dims[0]) {
 				xparam = xmlNewDocNode(xmlParam->doc, NULL, BAD_CAST("BOGUS"), NULL);
 				xmlAddChild(xmlParam, xparam);
 
-	 			if (type) {
+				if (type) {
 					xmlNodeSetName(xparam, BAD_CAST(type->name));
 				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
 					xmlNodeSetName(xparam, BAD_CAST(enc->details.type_str));
@@ -2202,7 +2202,7 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 				j++;
 			}
 		} else {
-	 		while (j < dims[0]) {
+			while (j < dims[0]) {
 				add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1, NULL, style);
 				j++;
 			}
@@ -2212,11 +2212,11 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 	} else {
 		for (j=0; j<dims[0]; j++) {
 			if (dimension == 1) {
-	 			xmlNodePtr xparam;
+				xmlNodePtr xparam;
 
 				xparam = xmlNewDocNode(xmlParam->doc, NULL, BAD_CAST("BOGUS"), NULL);
 				xmlAddChild(xmlParam, xparam);
-	 			if (type) {
+				if (type) {
 					xmlNodeSetName(xparam, BAD_CAST(type->name));
 				} else if (style == SOAP_LITERAL && enc && enc->details.type_str) {
 					xmlNodeSetName(xparam, BAD_CAST(enc->details.type_str));
@@ -2359,7 +2359,7 @@ iterator_failed_to_get:
 				if (el != NULL && Z_TYPE_P(el) == IS_ARRAY &&
 				    zend_hash_num_elements(Z_ARRVAL_P(el)) > 0) {
 				    ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(el), el) {
-				    	break;
+					break;
 				    } ZEND_HASH_FOREACH_END();
 					ZVAL_DEREF(el);
 					if (Z_TYPE_P(el) == IS_ARRAY) {
@@ -2882,8 +2882,8 @@ static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			         tmp->details.sdl_type->kind != XSD_TYPEKIND_COMPLEX) {
 			    if (enc == tmp->details.sdl_type->encode ||
 			        tmp == tmp->details.sdl_type->encode) {
-			    	enc = NULL;
-			    	break;
+				enc = NULL;
+				break;
 			    }
 			    tmp = tmp->details.sdl_type->encode;
 			  }
@@ -3312,7 +3312,7 @@ zval *sdl_guess_convert_zval(zval *ret, encodeTypePtr enc, xmlNodePtr data)
 			}
 			return to_zval_object(ret, enc, data);
 		default:
-	  	soap_error(E_ERROR, "Encoding: Internal Error");
+			soap_error(E_ERROR, "Encoding: Internal Error");
 			return guess_zval_convert(ret, enc, data);
 	}
 }
@@ -3341,15 +3341,15 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 			}
 			if (type->restrictions->minLength &&
 			    Z_STRLEN_P(data) < type->restrictions->minLength->value) {
-		  	soap_error(E_WARNING, "Encoding: Restriction: length less than 'minLength'");
+			soap_error(E_WARNING, "Encoding: Restriction: length less than 'minLength'");
 			}
 			if (type->restrictions->maxLength &&
 			    Z_STRLEN_P(data) > type->restrictions->maxLength->value) {
-		  	soap_error(E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
+			soap_error(E_WARNING, "Encoding: Restriction: length greater than 'maxLength'");
 			}
 			if (type->restrictions->length &&
 			    Z_STRLEN_P(data) != type->restrictions->length->value) {
-		  	soap_error(E_WARNING, "Encoding: Restriction: length is not equal to 'length'");
+			soap_error(E_WARNING, "Encoding: Restriction: length is not equal to 'length'");
 			}
 		}
 	}
@@ -3380,7 +3380,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 			}
 			break;
 		default:
-	  	soap_error(E_ERROR, "Encoding: Internal Error");
+		soap_error(E_ERROR, "Encoding: Internal Error");
 			break;
 	}
 	if (style == SOAP_ENCODED) {
