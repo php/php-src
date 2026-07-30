@@ -819,10 +819,13 @@ static bool zend_call_stack_get_aix_pthread(zend_call_stack *stack)
 	 * The top of the stack (stackend) is not page aligned, there's some
 	 * internal stuff above it. Thankfully, we don't need page alignment.
 	 *
-	 * The size is a little weird. The stacksize field is smaller than
-	 * subtracting the bottom (stackaddr) from the top; it's about 0x888
-	 * to 0x1888 above stackaddr. I'm assuming it rounds the bottom of the
-	 * stack to page alignment?
+	 * The size is a little weird. The stacksize field for child threads
+	 * is smaller than subtracting the bottom (stackaddr) from the top;
+	 * it's about 0x888 to 0x1888 above stackaddr. I'm assuming it rounds
+	 * the bottom of the stack to page alignment? The main thread size is
+	 * the same as end - addr, but it is variable between systems; also
+	 * assuming there's stuff at the top of the stack that gets taken off,
+	 * regardless of maximum declared size.
 	 *
 	 * A somewhat crude diagram is available here:
 	 * https://www.ibm.com/docs/en/aix/7.2.0?topic=tuning-thread-environment-variables
