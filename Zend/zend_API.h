@@ -415,12 +415,20 @@ ZEND_API ZEND_COLD void zend_wrong_property_read(const zval *object, zval *prope
 
 ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);
 ZEND_API zend_string *zend_get_callable_name_ex(const zval *callable, const zend_object *object);
-ZEND_API zend_string *zend_get_callable_name(const zval *callable);
+static zend_always_inline zend_string *zend_get_callable_name(const zval *callable)
+{
+	return zend_get_callable_name_ex(callable, NULL);
+}
+
 ZEND_API bool zend_is_callable_at_frame(
 		const zval *callable, zend_object *object, const zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error);
 ZEND_API bool zend_is_callable_ex(const zval *callable, zend_object *object, uint32_t check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error);
-ZEND_API bool zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name);
+static zend_always_inline bool zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name)
+{
+	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL);
+}
+
 ZEND_API const char *zend_get_module_version(const char *module_name);
 ZEND_API zend_result zend_get_module_started(const char *module_name);
 
