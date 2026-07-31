@@ -2565,7 +2565,6 @@ TEST $file
     }
 
     if ($DETAILED) {
-        $orig_cmd = escaped_shell_string_from($test_command);
         echo "
 CONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . "
 CONTENT_TYPE    = " . $env['CONTENT_TYPE'] . "
