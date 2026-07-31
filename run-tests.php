@@ -892,7 +892,7 @@ function write_information(array $user_tests, $phpdbg): void
     $escaped_no_file_cache = escaped_shell_string_from($no_file_cache);
 
     // Get info from php
-    $info_file = __DIR__ . '/run-test-info-' . getmypid() . '.php';
+    $info_file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'run-test-info-' . getmypid() . '.php';
     @unlink($info_file);
     $php_info = '<?php echo "
 PHP_SAPI    : " , PHP_SAPI , "
