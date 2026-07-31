@@ -129,6 +129,7 @@ PHP_FUNCTION(shm_attach)
 	zend_long shm_key_arg, shm_id, shm_size, shm_flag = 0666;
 	key_t shm_key;
 	bool shm_size_is_null = true;
+	bool created = false;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key_arg, &shm_size, &shm_size_is_null, &shm_flag)) {
 		RETURN_THROWS();
@@ -159,10 +160,14 @@ PHP_FUNCTION(shm_attach)
 			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key_arg, strerror(errno));
 			RETURN_FALSE;
 		}
+		created = true;
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key_arg, strerror(errno));
+		if (created) {
+			shmctl(shm_id, IPC_RMID, NULL);
+		}
 		RETURN_FALSE;
 	}
 
