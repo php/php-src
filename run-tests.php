@@ -306,7 +306,10 @@ function main(): void
         'date.timezone=UTC',
     ];
 
-    $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
+    $no_file_cache = [
+        '-d', 'opcache.file_cache=',
+        '-d', 'opcache.file_cache_only=0',
+    ];
 
     // Determine the tests to be run.
 
@@ -822,6 +825,7 @@ function write_information(array $user_tests, $phpdbg): void
     global $php, $php_cgi, $php_info, $ini_overwrites, $pass_option_args, $exts_to_test, $valgrind, $no_file_cache;
     $php_escaped = escapeshellarg($php);
     $escaped_pass_options = escaped_shell_string_from($pass_option_args);
+    $escaped_no_file_cache = escaped_shell_string_from($no_file_cache);
 
     // Get info from php
     $info_file = __DIR__ . '/run-test-info.php';
@@ -837,12 +841,12 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     $info_params = [];
     settings2array($ini_overwrites, $info_params);
     $info_params = settings2params($info_params);
-    $php_info = shell_exec("$php_escaped $escaped_pass_options $info_params $no_file_cache \"$info_file\"");
+    $php_info = shell_exec("$php_escaped $escaped_pass_options $info_params $escaped_no_file_cache \"$info_file\"");
     define('TESTED_PHP_VERSION', shell_exec("$php_escaped -n -r \"echo PHP_VERSION;\""));
 
     if ($php_cgi && $php != $php_cgi) {
         $php_cgi_escaped = escapeshellarg($php_cgi);
-        $php_info_cgi = shell_exec("$php_cgi_escaped $escaped_pass_options $info_params $no_file_cache -q \"$info_file\"");
+        $php_info_cgi = shell_exec("$php_cgi_escaped $escaped_pass_options $info_params $escaped_no_file_cache -q \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
     } else {
@@ -851,7 +855,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 
     if ($phpdbg) {
         $phpdbg_escaped = escapeshellarg($phpdbg);
-        $phpdbg_info = shell_exec("$phpdbg_escaped $escaped_pass_options $info_params $no_file_cache -qrr \"$info_file\"");
+        $phpdbg_info = shell_exec("$phpdbg_escaped $escaped_pass_options $info_params $escaped_no_file_cache -qrr \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $phpdbg_info = "$php_info_sep\nPHP         : $phpdbg $phpdbg_info$php_info_sep";
     } else {
@@ -877,7 +881,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         }
         echo implode(',', $exts);
         PHP);
-    $extensionsNames = explode(',', shell_exec("$php_escaped $escaped_pass_options $info_params $no_file_cache \"$info_file\""));
+    $extensionsNames = explode(',', shell_exec("$php_escaped $escaped_pass_options $info_params $escaped_no_file_cache \"$info_file\""));
     $exts_to_test = array_unique(remap_loaded_extensions_names($extensionsNames));
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
@@ -2099,13 +2103,16 @@ TEST $file
     if ($extensions != []) {
         $ext_params = [];
         settings2array($ini_overwrites, $ext_params);
-        $ext_params = settings2params($ext_params);
-        $extension_command = escaped_shell_string_from([
+        $ext_params = settings2arguments($ext_params);
+
+        [$ext_dir, $loaded] = $skipCache->getExtensions([
             $php,
             ...$pass_option_args,
             ...$extra_option_args,
-        ]) . " $ext_params $no_file_cache";
-        [$ext_dir, $loaded] = $skipCache->getExtensions($extension_command);
+            ...$ext_params,
+            ...$no_file_cache,
+        ]);
+
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
@@ -3761,19 +3768,33 @@ class SkipCache
         return $result;
     }
 
-    public function getExtensions(string $php): array
+    public function getExtensions(array $command): array
     {
-        if (isset($this->extensions[$php])) {
+        $key = implode("\0", $command);
+        if (isset($this->extensions[$key])) {
             $this->extHits++;
-            return $this->extensions[$php];
+            return $this->extensions[$key];
         }
 
-        $extDir = shell_exec("$php -d display_errors=0 -r \"echo ini_get('extension_dir');\"");
-        $extensionsNames = explode(",", shell_exec("$php -d display_errors=0 -r \"echo implode(',', get_loaded_extensions());\""));
+        $output = shell_exec(escaped_shell_string_from([
+            ...$command,
+            '-d',
+            'display_errors=0',
+            '-r',
+            'echo ini_get("extension_dir"), "\0", implode(",", get_loaded_extensions());',
+        ]));
+
+        if (!is_string($output) || !str_contains($output, "\0")) {
+            error("Unable to query loaded PHP extensions.");
+        }
+
+        [$extDir, $extensionsNames] = explode("\0", $output, 2);
+
+        $extensionsNames = explode(",", $extensionsNames);
         $extensions = remap_loaded_extensions_names($extensionsNames);
 
         $result = [$extDir, $extensions];
-        $this->extensions[$php] = $result;
+        $this->extensions[$key] = $result;
         $this->extMisses++;
 
         return $result;
