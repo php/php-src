@@ -3327,7 +3327,7 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	zend_object *orig_obj = NULL;
 	zend_class_entry *ce = NULL;
 	zend_string *class_name = NULL;
-	char *method_name;
+	const char *method_name;
 	size_t method_name_len;
 	char *lcname;
 
@@ -3370,11 +3370,11 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 		method_name = ZSTR_VAL(arg2_str);
 		method_name_len = ZSTR_LEN(arg2_str);
 	} else {
-		char *tmp;
+		const char *tmp;
 		size_t tmp_len;
-		char *name = ZSTR_VAL(arg1_str);
+		const char *name = ZSTR_VAL(arg1_str);
 
-		if ((tmp = strstr(name, "::")) == NULL) {
+		if ((tmp = zend_memnstr(name, "::", 2, name + ZSTR_LEN(arg1_str))) == NULL) {
 			zend_argument_error(reflection_exception_ptr, 1, "must be a valid method name");
 			RETURN_THROWS();
 		}
@@ -4747,7 +4747,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 	zend_class_entry *ce, *ce2;
 	zend_property_info *property_info;
 	zend_string *name, *classname;
-	char *tmp, *str_name;
+	const char *tmp, *str_name;
 	size_t classname_len, str_name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
@@ -4769,7 +4769,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 		}
 	}
 	str_name = ZSTR_VAL(name);
-	if ((tmp = strstr(ZSTR_VAL(name), "::")) != NULL) {
+	if ((tmp = zend_memnstr(ZSTR_VAL(name), "::", 2, ZSTR_VAL(name) + ZSTR_LEN(name))) != NULL) {
 		classname_len = tmp - ZSTR_VAL(name);
 		classname = zend_string_init(ZSTR_VAL(name), classname_len, 0);
 		str_name_len = ZSTR_LEN(name) - (classname_len + 2);
