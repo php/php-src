@@ -926,7 +926,8 @@ static void _function_string(smart_str *str, const zend_function *fptr, const ze
 	if (fptr->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 		smart_str_appendc(str, '&');
 	}
-	smart_str_append_printf(str, "%s ] {\n", ZSTR_VAL(fptr->common.function_name));
+	smart_str_append(str, fptr->common.function_name);
+	smart_str_appends(str, " ] {\n");
 	/* The information where a function is declared is only available for user classes */
 	if (fptr->type == ZEND_USER_FUNCTION) {
 		smart_str_append_printf(str, "%s  @@ %s %" PRIu32 " - %" PRIu32 "\n", indent,
