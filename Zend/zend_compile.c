@@ -1995,30 +1995,27 @@ static void zend_do_extended_fcall_end(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API bool zend_is_auto_global_str(const char *name, size_t len) /* {{{ */ {
-	zend_auto_global *auto_global;
-
-	if ((auto_global = zend_hash_str_find_ptr(CG(auto_globals), name, len)) != NULL) {
-		if (auto_global->armed) {
-			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
-		}
-		return 1;
+static zend_always_inline bool zend_auto_global_check(zend_auto_global *auto_global)
+{
+	if (auto_global == NULL) {
+		return false;
 	}
-	return 0;
+
+	if (auto_global->armed) {
+		auto_global->armed = auto_global->auto_global_callback(auto_global->name);
+	}
+	return true;
+}
+
+ZEND_API bool zend_is_auto_global_str(const char *name, size_t len) /* {{{ */
+{
+	return zend_auto_global_check(zend_hash_str_find_ptr(CG(auto_globals), name, len));
 }
 /* }}} */
 
 ZEND_API bool zend_is_auto_global(zend_string *name) /* {{{ */
 {
-	zend_auto_global *auto_global;
-
-	if ((auto_global = zend_hash_find_ptr(CG(auto_globals), name)) != NULL) {
-		if (auto_global->armed) {
-			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
-		}
-		return 1;
-	}
-	return 0;
+	return zend_auto_global_check(zend_hash_find_ptr(CG(auto_globals), name));
 }
 /* }}} */
 
