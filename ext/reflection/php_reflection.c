@@ -3200,7 +3200,7 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 		const char *tmp;
 		const char *name = ZSTR_VAL(arg1_str);
 
-		if ((tmp = strstr(name, "::")) == NULL) {
+		if ((tmp = zend_memnstr(name, "::", 2, name + ZSTR_LEN(arg1_str))) == NULL) {
 			zend_argument_error(reflection_exception_ptr, 1, "must be a valid method name");
 			RETURN_THROWS();
 		}
@@ -4566,7 +4566,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 	}
 	const char *str_name = ZSTR_VAL(name);
 	const char *tmp;
-	if ((tmp = strstr(ZSTR_VAL(name), "::")) != NULL) {
+	if ((tmp = zend_memnstr(ZSTR_VAL(name), "::", 2, ZSTR_VAL(name) + ZSTR_LEN(name))) != NULL) {
 		size_t classname_len = tmp - ZSTR_VAL(name);
 		zend_string *classname = zend_string_init(ZSTR_VAL(name), classname_len, false);
 		size_t str_name_len = ZSTR_LEN(name) - (classname_len + 2);
