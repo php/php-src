@@ -1477,7 +1477,7 @@ final class TestForkServer
         }
 
         $status = substr($this->buffer, $statusStart, $statusEnd - $statusStart);
-        if (!ctype_digit($status)) {
+        if ($status === '' || strspn($status, '0123456789') !== strlen($status)) {
             throw new UnexpectedValueException('Invalid test fork server status');
         }
 
