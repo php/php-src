@@ -1387,11 +1387,10 @@ final class TestForkServer
             $request = "@$environmentMode$errorMode\t" . strlen($testPhpExtraArgs)
                 . "\n$testPhpExtraArgs\n$file\n";
         }
-        if ($this->stopped || fwrite($this->pipes[0], $request) === false) {
+        if ($this->stopped || !$this->writeRequest($request)) {
             $this->abort();
             return null;
         }
-        fflush($this->pipes[0]);
 
         $beginMarker = "\0{$this->token}:B:{$this->index}\0";
         $endMarker = "\0{$this->token}:E:{$this->index}:";
@@ -1440,6 +1439,19 @@ final class TestForkServer
             }
             $this->buffer .= $chunk;
         }
+    }
+
+    private function writeRequest(string $request): bool
+    {
+        while ($request !== '') {
+            $written = @fwrite($this->pipes[0], $request);
+            if ($written === false || $written === 0) {
+                return false;
+            }
+            $request = substr($request, $written);
+        }
+
+        return @fflush($this->pipes[0]);
     }
 
     /**
