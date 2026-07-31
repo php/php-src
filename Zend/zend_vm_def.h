@@ -9393,6 +9393,14 @@ ZEND_VM_HANDLER(140, ZEND_MAKE_REF, VAR|CV, UNUSED)
 		}
 		ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 	} else {
+		if (UNEXPECTED(opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(op1))) {
+			SAVE_OPLINE();
+			zend_error(E_NOTICE, "Only variables should be assigned by reference");
+			if (UNEXPECTED(EG(exception))) {
+				FREE_OP1();
+				HANDLE_EXCEPTION();
+			}
+		}
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
 	}
 	ZEND_VM_NEXT_OPCODE();

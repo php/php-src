@@ -30512,6 +30512,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_MAKE_REF_SPEC
 		}
 		ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 	} else {
+		if (UNEXPECTED(opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(op1))) {
+			SAVE_OPLINE();
+			zend_error(E_NOTICE, "Only variables should be assigned by reference");
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+				HANDLE_EXCEPTION();
+			}
+		}
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -50073,6 +50081,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_MAKE_REF_SPEC
 		}
 		ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 	} else {
+		if (UNEXPECTED(opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(op1))) {
+			SAVE_OPLINE();
+			zend_error(E_NOTICE, "Only variables should be assigned by reference");
+			if (UNEXPECTED(EG(exception))) {
+
+
+				HANDLE_EXCEPTION();
+			}
+		}
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -83142,6 +83159,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MAKE_REF_SPEC_VAR_
 		}
 		ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 	} else {
+		if (UNEXPECTED(opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(op1))) {
+			SAVE_OPLINE();
+			zend_error(E_NOTICE, "Only variables should be assigned by reference");
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+				HANDLE_EXCEPTION();
+			}
+		}
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -102601,6 +102626,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MAKE_REF_SPEC_CV_U
 		}
 		ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 	} else {
+		if (UNEXPECTED(opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(op1))) {
+			SAVE_OPLINE();
+			zend_error(E_NOTICE, "Only variables should be assigned by reference");
+			if (UNEXPECTED(EG(exception))) {
+
+
+				HANDLE_EXCEPTION();
+			}
+		}
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
 	}
 	ZEND_VM_NEXT_OPCODE();
