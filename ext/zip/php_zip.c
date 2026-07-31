@@ -289,7 +289,7 @@ done:
 /* }}} */
 
 static zend_result php_zip_add_file(ze_zip_object *obj, const char *filename, size_t filename_len,
-	char *entry_name, size_t entry_name_len, /* unused if replace >= 0 */
+	const char *entry_name, size_t entry_name_len, /* unused if replace >= 0 */
 	zip_uint64_t offset_start, zip_uint64_t offset_len,
 	zend_long replace, /* index to replace, add new file if < 0 */
 	zip_flags_t flags
@@ -1845,7 +1845,9 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					file_stripped_len = Z_STRLEN_P(zval_file);
 				}
 
-				zend_string *entry_name;
+				zend_string *entry_name = NULL;
+				const char *entry_name_str = file_stripped;
+				size_t entry_name_len = file_stripped_len;
 				if (opts.add_path) {
 					if ((ZSTR_LEN(opts.add_path) + file_stripped_len) > MAXPATHLEN) {
 						if (basename) {
@@ -1860,20 +1862,21 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 						ZSTR_VAL(opts.add_path), ZSTR_LEN(opts.add_path),
 						file_stripped, file_stripped_len
 					);
-				} else {
-					entry_name = zend_string_init(file_stripped, file_stripped_len, false);
+					entry_name_str = ZSTR_VAL(entry_name);
+					entry_name_len = ZSTR_LEN(entry_name);
 				}
-				ZEND_ASSERT(ZSTR_LEN(entry_name) <= MAXPATHLEN);
+				ZEND_ASSERT(entry_name_len <= MAXPATHLEN);
+
+				const zend_result status = php_zip_add_file(ze_obj, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
+					entry_name_str, entry_name_len, 0, 0, -1, opts.flags);
 
 				if (basename) {
 					zend_string_release_ex(basename, false);
 					basename = NULL;
 				}
-
-				const zend_result status = php_zip_add_file(ze_obj, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
-					ZSTR_VAL(entry_name), ZSTR_LEN(entry_name), 0, 0, -1, opts.flags);
-
-				zend_string_release_ex(entry_name, false);
+				if (entry_name) {
+					zend_string_release_ex(entry_name, false);
+				}
 				if (status == FAILURE) {
 					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;
