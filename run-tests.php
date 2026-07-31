@@ -1307,12 +1307,8 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
     }
 
     /* Ignore -jN if there is only one file to analyze. */
-    if (
-        $workers !== null
-        && count($test_files) > 1
-        && !$workerID
-        && $redir_tested === null
-    ) {
+    if ($workers !== null && count($test_files) > 1 && !$workerID
+            && $redir_tested === null) {
         run_all_tests_parallel($test_files, $env, $redir_tested);
         return;
     }
