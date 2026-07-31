@@ -445,15 +445,17 @@ static zend_always_inline void user_cache_delete_entry_locked(php_user_cache_hea
 
 static zend_always_inline void user_cache_release_request_local_slot_table(HashTable **slots_ptr)
 {
-	if (*slots_ptr == NULL) {
+	HashTable *slots = *slots_ptr;
+
+	if (slots == NULL) {
 		return;
 	}
 
-	zend_hash_destroy(*slots_ptr);
-
-	FREE_HASHTABLE(*slots_ptr);
-
 	*slots_ptr = NULL;
+
+	zend_hash_destroy(slots);
+
+	FREE_HASHTABLE(slots);
 }
 
 /* now_rel is seconds relative to header time_base (php_user_cache_time_rel). */
@@ -1578,6 +1580,30 @@ static HashTable *user_cache_request_local_slots(void)
 	return *slots_ptr;
 }
 
+static void user_cache_replace_request_local_slot(
+		zend_string *key,
+		php_user_cache_request_local_slot *slot)
+{
+	php_user_cache_request_local_slot *old_slot;
+	HashTable *slots = user_cache_request_local_slots();
+	zval *entry, old_zv;
+
+	entry = zend_hash_lookup(slots, key);
+	if (Z_TYPE_P(entry) == IS_NULL) {
+		ZVAL_PTR(entry, slot);
+
+		return;
+	}
+
+	old_slot = Z_PTR_P(entry);
+
+	ZVAL_PTR(entry, slot);
+
+	ZVAL_PTR(&old_zv, old_slot);
+
+	user_cache_request_local_slot_dtor(&old_zv);
+}
+
 static bool user_cache_materialize_shared_graph_locked(
 		const php_user_cache_header *header,
 		zend_string *key,
@@ -1739,7 +1765,7 @@ static void user_cache_mark_request_local_slot(zend_string *key, uint64_t gen)
 {
 	php_user_cache_request_local_slot *slot = user_cache_alloc_request_local_slot(gen, true, false);
 
-	zend_hash_update_ptr(user_cache_request_local_slots(), key, slot);
+	user_cache_replace_request_local_slot(key, slot);
 }
 
 static void user_cache_throw_key_not_found_guarded(zend_string *key)
@@ -3984,7 +4010,7 @@ void php_user_cache_store_request_local_slot(zend_string *key, uint64_t gen, zva
 		slot->has_clone_verdicts = true;
 	}
 
-	zend_hash_update_ptr(user_cache_request_local_slots(), key, slot);
+	user_cache_replace_request_local_slot(key, slot);
 }
 
 bool php_user_cache_store_prepared_locked(
@@ -4347,7 +4373,7 @@ void php_user_cache_release_request_local_slots(void)
 void php_user_cache_release_active_request_local_slots_by_prefix(zend_string *prefix)
 {
 	zend_string *key, **keys;
-	HashTable **slots_ptr = &UC_G(request_local_slot_table);
+	HashTable *slots, **slots_ptr = &UC_G(request_local_slot_table);
 	uint32_t i, slot_count, count = 0;
 
 	if (*slots_ptr == NULL) {
@@ -4361,8 +4387,9 @@ void php_user_cache_release_active_request_local_slots_by_prefix(zend_string *pr
 		return;
 	}
 
+	slots = *slots_ptr;
 	keys = safe_emalloc(slot_count, sizeof(zend_string *), 0);
-	ZEND_HASH_FOREACH_STR_KEY(*slots_ptr, key) {
+	ZEND_HASH_FOREACH_STR_KEY(slots, key) {
 		if (key != NULL &&
 			ZSTR_LEN(key) >= ZSTR_LEN(prefix) &&
 			memcmp(
@@ -4376,14 +4403,16 @@ void php_user_cache_release_active_request_local_slots_by_prefix(zend_string *pr
 	} ZEND_HASH_FOREACH_END();
 
 	for (i = 0; i < count; i++) {
-		zend_hash_del(*slots_ptr, keys[i]);
+		if (*slots_ptr == slots) {
+			zend_hash_del(slots, keys[i]);
+		}
 
 		zend_string_release(keys[i]);
 	}
 
 	efree(keys);
 
-	if (zend_hash_num_elements(*slots_ptr) == 0) {
+	if (*slots_ptr == slots && zend_hash_num_elements(slots) == 0) {
 		user_cache_release_request_local_slot_table(slots_ptr);
 	}
 }

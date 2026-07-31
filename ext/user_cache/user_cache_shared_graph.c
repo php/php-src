@@ -5990,6 +5990,12 @@ PHP_USER_CACHE_DECODE_HOT bool php_user_cache_shared_graph_update_object_propert
 	}
 
 	if (zend_unmangle_property_name_ex(prop_name, &class_name, &unmangled_name, &unmangled_name_len) == SUCCESS) {
+		if (class_name == NULL) {
+			zend_update_property(obj->ce, obj, unmangled_name, unmangled_name_len, prop_val);
+
+			return !EG(exception);
+		}
+
 		if (class_name[0] != '*') {
 			cname = zend_string_init(class_name, strlen(class_name), 0);
 			scope = zend_lookup_class(cname);
