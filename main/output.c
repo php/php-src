@@ -1025,7 +1025,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 				status = PHP_OUTPUT_HANDLER_FAILURE;
 			}
 
-			/* Free arguments and return value */
+			/* Free return value */
 			zval_ptr_dtor(&retval);
 
 		} else {
