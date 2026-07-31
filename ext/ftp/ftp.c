@@ -1314,7 +1314,7 @@ static ssize_t my_recv_wrapper_with_restart(php_socket_t fd, void *buf, size_t s
 	return n;
 }
 
-static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
+static ssize_t single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 #ifdef HAVE_FTP_SSL
 	int err;
 	bool retry = false;
@@ -1368,7 +1368,7 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 				return -1;
 		}
 	} while (retry);
-	return (int)sent;
+	return sent;
 #else
 	return my_send_wrapper_with_restart(s, buf, size, 0);
 #endif
