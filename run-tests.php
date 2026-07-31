@@ -1192,6 +1192,9 @@ function system_with_timeout(
 ) {
     global $valgrind;
 
+    // when proc_open cmd is passed as a string (without bypass_shell=true option) the cmd goes thru shell
+    // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
+    // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
     if (IS_WINDOWS && is_string($command)) {
         $command = 'start "" /b /wait ' . $command . ' & exit';
     }
