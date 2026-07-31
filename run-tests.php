@@ -835,10 +835,8 @@ function get_default_worker_count(): ?int
     ];
     foreach ($commands as $command) {
         $workerCount = shell_exec($command);
-        if (
-            is_string($workerCount)
-            && ($workerCount = parse_default_worker_count($workerCount)) !== null
-        ) {
+        if (is_string($workerCount)
+                && ($workerCount = parse_default_worker_count($workerCount)) !== null) {
             return $workerCount;
         }
     }
