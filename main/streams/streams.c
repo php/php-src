@@ -2144,6 +2144,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 		php_stream_tidy_wrapper_name_error_log(wrapper_name);
 		goto cleanup;
 	}
+	php_stream_tidy_wrapper_name_error_log(wrapper_name);
 
 	/* if the caller asked for a persistent stream but the wrapper did not
 	 * return one, force an error here */
