@@ -35,6 +35,14 @@ function spl_autoload_register(?callable $callback = null, bool $throw = true, b
 
 function spl_autoload_unregister(callable $callback): bool {}
 
+function spl_autoload_register_function_loader(callable $callback, bool $prepend = false): bool {}
+
+function spl_autoload_unregister_function_loader(callable $callback): bool {}
+
+function spl_autoload_function_loaders(): array {}
+
+function spl_autoload_call_function_loader(string $function_name): void {}
+
 /**
  * @return array<string, string>
  * @refcount 1

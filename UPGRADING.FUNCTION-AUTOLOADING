@@ -1,0 +1,60 @@
+UPGRADE NOTES: FUNCTION AUTOLOADING
+
+1. New Features
+2. Changed Functions
+3. New Functions
+4. Internal API Changes
+
+========================================
+1. New Features
+========================================
+
+- Core:
+  . Added function autoloading support. Register callbacks via
+    spl_autoload_register_function_loader() that are invoked when an
+    undefined function is referenced. It is triggered wherever an
+    undefined function name is resolved: direct calls, dynamic calls
+    through a string variable ("$func()"), function_exists(), callable
+    resolution (is_callable(), call_user_func()/call_user_func_array(),
+    array and sort callbacks such as array_map()/array_filter()/usort(),
+    callable typed parameters, and Closure::fromCallable()), and the
+    Reflection API (new ReflectionFunction($name)).
+    As with class autoloading, it is NOT triggered by contexts that
+    deliberately avoid autoloading: function_exists($name, false),
+    is_callable($name, true) (syntax-only checks), and
+    get_defined_functions(). spl_autoload_call_function_loader() can be
+    used to trigger function autoloading manually in those situations.
+
+========================================
+2. Changed Functions
+========================================
+
+- Core:
+  . function_exists() now accepts an optional bool $autoload parameter.
+    When true (the default, matching class_exists()), function
+    autoloading is triggered before the function reports as missing.
+    BC note: existing function_exists() guards around conditional
+    function definitions (polyfills) will now consult registered function
+    loaders before falling through to define the fallback. Pass
+    function_exists($name, false) to check without autoloading.
+
+========================================
+3. New Functions
+========================================
+
+- SPL:
+  . spl_autoload_register_function_loader() registers a function autoloader.
+  . spl_autoload_unregister_function_loader() unregisters a function autoloader.
+  . spl_autoload_function_loaders() returns registered function autoloaders.
+  . spl_autoload_call_function_loader() manually triggers function autoloading.
+
+========================================
+4. Internal API Changes
+========================================
+
+- Zend:
+  . Added zend_autoload_function_fcc_map_to_callable_zval_map() as the
+    function-loader counterpart to the existing
+    zend_autoload_fcc_map_to_callable_zval_map(). The existing function
+    keeps its name and behaviour (it backs spl_autoload_functions()), so
+    there is no break for extensions that call it.

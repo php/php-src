@@ -3837,6 +3837,7 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 	if (!ce_org) {
 		zend_function *func;
 		zend_string *lmname;
+		bool free_lmname = false;
 
 		/* Check if function with given name exists.
 		 * This may be a compound name that includes namespace name */
@@ -3845,7 +3846,7 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 			ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable) - 1, use_heap);
 			zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable) - 1);
 			func = zend_fetch_function(lmname);
-			ZSTR_ALLOCA_FREE(lmname, use_heap);
+			free_lmname = true;
 		} else {
 			lmname = Z_STR_P(callable);
 			func = zend_fetch_function(lmname);
@@ -3853,8 +3854,17 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 				ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable), use_heap);
 				zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable), Z_STRLEN_P(callable));
 				func = zend_fetch_function(lmname);
-				ZSTR_ALLOCA_FREE(lmname, use_heap);
+				free_lmname = true;
 			}
+		}
+		/* Not found: try autoloading, as the class lookup in
+		 * zend_is_callable_check_class() does. zend_lookup_function() rejects
+		 * invalid names, so "Class::method" strings fall through below. */
+		if (!func) {
+			func = zend_lookup_function(Z_STR_P(callable), lmname);
+		}
+		if (free_lmname) {
+			ZSTR_ALLOCA_FREE(lmname, use_heap);
 		}
 		if (EXPECTED(func != NULL)) {
 			fcc->function_handler = func;

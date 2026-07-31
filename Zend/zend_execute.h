@@ -36,6 +36,9 @@ ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data, z
 /* The lc_name may be stack allocated! */
 ZEND_API extern zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
 
+/* The lc_name may be stack allocated! */
+ZEND_API extern zend_function *(*zend_function_autoload)(zend_string *name, zend_string *lc_name);
+
 void init_executor(void);
 void shutdown_executor(void);
 void shutdown_destructors(void);
@@ -48,8 +51,16 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
 ZEND_API bool zend_is_valid_class_name(const zend_string *name);
+
+/* Function names use the same character set as class names. */
+static zend_always_inline bool zend_is_valid_function_name(const zend_string *name)
+{
+	return zend_is_valid_class_name(name);
+}
+
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
+ZEND_API zend_function *zend_lookup_function(zend_string *name, zend_string *lc_name);
 ZEND_API zend_class_entry *zend_get_called_scope(const zend_execute_data *ex);
 ZEND_API zend_object *zend_get_this_object(const zend_execute_data *ex);
 ZEND_API zend_result zend_eval_string(const char *str, zval *retval_ptr, const char *string_name);
