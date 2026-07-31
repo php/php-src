@@ -51,6 +51,7 @@ function runTests(array $files, string $results, array $arguments = []): array
 {
     $command = [
         getenv('TEST_PHP_EXECUTABLE'),
+        '-n',
         dirname(__DIR__, 2) . '/run-tests.php',
         '-n',
         '-q',
@@ -95,15 +96,24 @@ function runTests(array $files, string $results, array $arguments = []): array
     return [$exitCode, $output, $statuses];
 }
 
-function processExited(int $pid): bool
+function processStopped(int $pid, string $heartbeat): bool
 {
-    $deadline = microtime(true) + 2;
-    do {
-        if (!@posix_kill($pid, 0)) {
+    if (!@posix_kill($pid, 0)) {
+        return true;
+    }
+
+    clearstatcache(true, $heartbeat);
+    $size = @filesize($heartbeat);
+    for ($attempt = 0; $attempt < 4; $attempt++) {
+        usleep(500_000);
+        clearstatcache(true, $heartbeat);
+        $nextSize = @filesize($heartbeat);
+        if ($size !== false && $size === $nextSize) {
             return true;
         }
-        usleep(10_000);
-    } while (microtime(true) < $deadline);
+        $size = $nextSize;
+    }
+
     return false;
 }
 
@@ -112,36 +122,44 @@ mkdir($root);
 
 $timeoutPid = $root . '/timeout.pid';
 $timeoutPidExpression = var_export($timeoutPid, true);
-$timeoutTest = $root . '/timeout.phpt';
-$afterTest = $root . '/after.phpt';
+$timeoutHeartbeat = $root . '/timeout.heartbeat';
+$timeoutHeartbeatExpression = var_export($timeoutHeartbeat, true);
+$timeoutTest = $root . '/01-timeout.phpt';
+$afterTest = $root . '/02-after.phpt';
 writeTest(
     $timeoutTest,
     'fork server timeout',
-    "file_put_contents($timeoutPidExpression, getmypid());\nsleep(10);\necho \"finished\\n\";",
-    'finished',
+    <<<PHP
+        file_put_contents($timeoutPidExpression, getmypid());
+        while (true) {
+            file_put_contents($timeoutHeartbeatExpression, '.', FILE_APPEND);
+            usleep(10_000);
+        }
+        PHP,
+    '** ERROR: process timed out **',
 );
 writeTest($afterTest, 'run after timeout', 'echo "after\n";', 'after');
 $timeoutResults = $root . '/timeout-results.txt';
 [$timeoutExit, $timeoutOutput, $timeoutStatuses] = runTests(
     [$timeoutTest, $afterTest],
     $timeoutResults,
-    ['--set-timeout', '1'],
+    ['--set-timeout', '2'],
 );
 foreach ($timeoutStatuses as $file => $status) {
     echo "timeout $status $file\n";
 }
 var_dump($timeoutExit);
 
-$timeoutChildExited = false;
-if (file_exists($timeoutPid)) {
+$timeoutChildStopped = false;
+if (file_exists($timeoutPid) && file_exists($timeoutHeartbeat)) {
     $timeoutChild = (int) file_get_contents($timeoutPid);
-    $timeoutChildExited = processExited($timeoutChild);
-    if (!$timeoutChildExited) {
+    $timeoutChildStopped = processStopped($timeoutChild, $timeoutHeartbeat);
+    if (!$timeoutChildStopped) {
         posix_kill($timeoutChild, 9);
     }
 }
-echo $timeoutChildExited ? "timeout child terminated\n" : "timeout child leaked\n";
-if ($timeoutExit !== 1 || count($timeoutStatuses) !== 2) {
+echo $timeoutChildStopped ? "timeout child terminated\n" : "timeout child leaked\n";
+if ($timeoutExit !== 0 || count($timeoutStatuses) !== 2) {
     echo $timeoutOutput;
 }
 
@@ -185,9 +203,9 @@ foreach (glob(__DIR__ . '/fork_server_lifecycle_*') ?: [] as $root) {
 }
 ?>
 --EXPECT--
-timeout PASSED after.phpt
-timeout FAILED timeout.phpt
-int(1)
+timeout PASSED 01-timeout.phpt
+timeout PASSED 02-after.phpt
+int(0)
 timeout child terminated
 failure PASSED failure.phpt
 int(0)
