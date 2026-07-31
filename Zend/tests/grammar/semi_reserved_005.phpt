@@ -1,5 +1,7 @@
 --TEST--
 Test semi-reserved words as class constants
+--INI--
+error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 
