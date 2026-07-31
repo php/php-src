@@ -2221,10 +2221,19 @@ TEST $file
 
     if ($test->sectionNotEmpty('SKIPIF')) {
         show_file_block('skip', $test->getSection('SKIPIF'));
+        $skipEnv = $env;
+        if (!IS_WINDOWS) {
+            unset(
+                $skipEnv['REQUEST_METHOD'],
+                $skipEnv['QUERY_STRING'],
+                $skipEnv['PATH_TRANSLATED'],
+                $skipEnv['SCRIPT_FILENAME'],
+            );
+        }
 
         if ($valgrind) {
-            $env['USE_ZEND_ALLOC'] = '0';
-            $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
+            $skipEnv['USE_ZEND_ALLOC'] = '0';
+            $skipEnv['ZEND_DONT_UNLOAD_MODULES'] = 1;
         }
 
         $junit->startTimer($shortname);
@@ -2246,7 +2255,7 @@ TEST $file
             '-d',
             'display_startup_errors=0',
         ];
-        $output = $skipCache->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $env);
+        $output = $skipCache->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $skipEnv);
 
         $time = microtime(true) - $startTime;
         $junit->stopTimer($shortname);
