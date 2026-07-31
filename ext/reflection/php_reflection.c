@@ -3241,14 +3241,25 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	{
 		/* Store the original closure object so we can validate it in invoke/invokeArgs.
 		 * Each closure has a unique __invoke signature, so we must reject different closures. */
+		zval_ptr_dtor(&intern->obj);
 		ZVAL_OBJ_COPY(&intern->obj, orig_obj);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), method_name);
 		RETURN_THROWS();
+	} else {
+		zval_ptr_dtor(&intern->obj);
+		ZVAL_UNDEF(&intern->obj);
 	}
 	efree(lcname);
+
+	if (intern->ptr) {
+		ZEND_ASSERT(is_constructor);
+		_free_function(intern->ptr);
+		zval_ptr_dtor(reflection_prop_name(object));
+		zval_ptr_dtor(reflection_prop_class(object));
+	}
 
 	ZVAL_STR_COPY(reflection_prop_name(object), mptr->common.function_name);
 	ZVAL_STR_COPY(reflection_prop_class(object), mptr->common.scope->name);
@@ -3751,6 +3762,11 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	if ((constant = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), constname)) == NULL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
 		RETURN_THROWS();
+	}
+
+	if (intern->ptr) {
+		zval_ptr_dtor(reflection_prop_name(object));
+		zval_ptr_dtor(reflection_prop_class(object));
 	}
 
 	intern->ptr = constant;
