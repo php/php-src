@@ -648,10 +648,8 @@ function main(): void
 
     if (!$workersExplicit && (!$selected_tests || count($test_files) > 1)) {
         $workers = get_default_worker_count();
-        if (
-            $workers !== null
-            && ($valgrind !== null || isset($environment['SKIP_ASAN']))
-        ) {
+        if ($workers !== null
+                && ($valgrind !== null || isset($environment['SKIP_ASAN']))) {
             $workers = min($workers, 2);
         }
         if ($workers !== null && !can_create_parallel_worker_socket()) {
