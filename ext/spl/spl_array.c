@@ -426,7 +426,7 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zend_object *objec
 				ZVAL_UNDEF(&tmp);
 				offset = &tmp;
 			}
-			zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_get, "offsetGet", rv, offset);
+			zend_call_known_function(intern->fptr_offset_get, object, object->ce, rv, 1, offset, NULL);
 
 			if (!Z_ISUNDEF_P(rv)) {
 				return rv;
@@ -520,7 +520,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	spl_hash_key key;
 
 	if (check_inherited && intern->fptr_offset_del) {
-		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_del, "offsetUnset", NULL, offset);
+		zend_call_known_function(intern->fptr_offset_del, object, object->ce, NULL, 1, offset, NULL);
 		return;
 	}
 
@@ -575,7 +575,7 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 	zval rv, *value = NULL, *tmp;
 
 	if (check_inherited && intern->fptr_offset_has) {
-		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
+		zend_call_known_function(intern->fptr_offset_has, object, object->ce, &rv, 1, offset, NULL);
 
 		if (!zend_is_true(&rv)) {
 			zval_ptr_dtor(&rv);
@@ -1130,7 +1130,7 @@ static zend_result spl_array_object_count_elements(zend_object *object, zend_lon
 
 	if (intern->fptr_count) {
 		zval rv;
-		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
+		zend_call_known_function(intern->fptr_count, object, object->ce, &rv, 0, NULL, NULL);
 		if (Z_TYPE(rv) != IS_UNDEF) {
 			*count = zval_get_long(&rv);
 			zval_ptr_dtor(&rv);
@@ -1811,18 +1811,11 @@ PHP_METHOD(RecursiveArrayIterator, hasChildren)
 }
 /* }}} */
 
-static void spl_instantiate_child_arg(zend_class_entry *pce, zval *retval, zval *arg1, zval *arg2) /* {{{ */
-{
-	object_init_ex(retval, pce);
-	zend_call_known_instance_method_with_2_params(pce->constructor, Z_OBJ_P(retval), NULL, arg1, arg2);
-}
-/* }}} */
-
 /* {{{ Create a sub iterator for the current element (same class as $this) */
 PHP_METHOD(RecursiveArrayIterator, getChildren)
 {
-	zval *object = ZEND_THIS, *entry, flags;
-	spl_array_object *intern = Z_SPLARRAY_P(object);
+	zval *entry;
+	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1845,8 +1838,10 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 		}
 	}
 
-	ZVAL_LONG(&flags, intern->ar_flags);
-	spl_instantiate_child_arg(Z_OBJCE_P(ZEND_THIS), return_value, entry, &flags);
+	zval params[2];
+	ZVAL_COPY_VALUE(&params[0], entry);
+	ZVAL_LONG(&params[1], intern->ar_flags);
+	object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 2, params, NULL);
 }
 /* }}} */
 
