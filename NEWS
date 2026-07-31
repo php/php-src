@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
     $this->stream during the close flush). (iliaal)
 
+- Sysvshm:
+  . Fixed out-of-bounds write when shm_attach() opens an existing segment with
+    a size larger than the segment actually is. (David Carlier)
+
 - Opcache:
   . Fixed bug GH-22857 (Function JIT emits wrong code for FETCH_OBJ_FUNC_ARG on a
     property hook getter, losing register-held variables). (Zhao Hao)
