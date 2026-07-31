@@ -25,6 +25,10 @@ PHP                                                                        NEWS
     is_writable(), is_readable(), is_executable(), is_file(), is_dir(),
     is_link(), file_exists(), lstat(), stat(). (Girgias)
 
+- Streams:
+  . Fixed memory leaks when a user stream filter returns PSFS_PASS_ON without
+    processing all input buckets. (Matthias Goergens)
+
 30 Jul 2026, PHP 8.6.0alpha3
 
 - Core:
