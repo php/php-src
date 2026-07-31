@@ -3420,6 +3420,13 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	}
 	efree(lcname);
 
+	if (intern->ptr) {
+		ZEND_ASSERT(is_constructor);
+		_free_function(intern->ptr);
+		zval_ptr_dtor(reflection_prop_name(object));
+		zval_ptr_dtor(reflection_prop_class(object));
+	}
+
 	ZVAL_STR_COPY(reflection_prop_name(object), mptr->common.function_name);
 	ZVAL_STR_COPY(reflection_prop_class(object), mptr->common.scope->name);
 	intern->ptr = mptr;
@@ -3930,6 +3937,11 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	if ((constant = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), constname)) == NULL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
 		RETURN_THROWS();
+	}
+
+	if (intern->ptr) {
+		zval_ptr_dtor(reflection_prop_name(object));
+		zval_ptr_dtor(reflection_prop_class(object));
 	}
 
 	intern->ptr = constant;
