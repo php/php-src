@@ -3401,7 +3401,10 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	if (is_constructor) {
 		object = ZEND_THIS;
 	} else {
-		object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : reflection_method_ptr);
+		zend_class_entry *called_ce = execute_data->This.value.ce ? execute_data->This.value.ce : reflection_method_ptr;
+		if (UNEXPECTED(object_init_ex(return_value, called_ce) != SUCCESS)) {
+			RETURN_THROWS();
+		}
 		object = return_value;
 	}
 	intern = Z_REFLECTION_P(object);
