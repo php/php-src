@@ -2551,7 +2551,7 @@ TEST $file
     }
 
     if ($DETAILED) {
-        $display_command = escaped_shell_string_from($test_command);
+        $orig_cmd = escaped_shell_string_from($test_command);
         echo "
 CONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . "
 CONTENT_TYPE    = " . $env['CONTENT_TYPE'] . "
@@ -2561,7 +2561,7 @@ REDIRECT_STATUS = " . $env['REDIRECT_STATUS'] . "
 REQUEST_METHOD  = " . $env['REQUEST_METHOD'] . "
 SCRIPT_FILENAME = " . $env['SCRIPT_FILENAME'] . "
 HTTP_COOKIE     = " . $env['HTTP_COOKIE'] . "
-COMMAND $display_command
+COMMAND $orig_cmd
 ";
     }
 
