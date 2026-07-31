@@ -1181,7 +1181,7 @@ function error_report(string $testname, string $logname, string $tested): void
  * @return false|string
  */
 function system_with_timeout(
-    array $command,
+    array|string $command,
     ?array $env = null,
     ?string $stdin = null,
     ?string $stdinFile = null,
@@ -1191,6 +1191,10 @@ function system_with_timeout(
     bool $mergeStdErr = false
 ) {
     global $valgrind;
+
+    if (IS_WINDOWS && is_string($command)) {
+        $command = 'start "" /b /wait ' . $command . ' & exit';
+    }
 
     $data = '';
 
@@ -1305,10 +1309,10 @@ function create_test_command(
     ];
 }
 
-function create_shell_invocation(string $command): array
+function create_shell_invocation(string $command): array|string
 {
     if (IS_WINDOWS) {
-        return [getenv('COMSPEC') ?: 'cmd.exe', '/d', '/s', '/c', $command];
+        return $command;
     }
 
     return ['/bin/sh', '-c', "exec $command"];
