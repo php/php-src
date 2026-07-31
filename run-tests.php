@@ -3780,13 +3780,17 @@ class SkipCache
             return $this->extensions[$key];
         }
 
-        $output = shell_exec(escaped_shell_string_from([
+        $probeCommand = escaped_shell_string_from([
             ...$command,
             '-d',
             'display_errors=0',
             '-r',
-            'echo ini_get("extension_dir"), "\0", implode(",", get_loaded_extensions());',
-        ]));
+        ]);
+
+        $output = shell_exec(
+            $probeCommand
+            . ' "echo ini_get(\'extension_dir\'), chr(0), implode(\',\', get_loaded_extensions());"'
+        );
 
         if (!is_string($output) || !str_contains($output, "\0")) {
             error("Unable to query loaded PHP extensions.");
