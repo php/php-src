@@ -2,8 +2,8 @@
 CLI test fork server isolates requests and continues after a nonzero exit
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY === 'Windows' || PHP_ZTS) {
-    die('skip requires a non-ZTS build with fork');
+if (PHP_OS_FAMILY === 'Windows') {
+    die('skip requires fork');
 }
 
 $process = proc_open(

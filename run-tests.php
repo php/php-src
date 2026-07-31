@@ -1522,7 +1522,6 @@ function can_use_test_fork_server(): bool
     global $cli_opcache_enabled, $environment, $file_cache, $IN_REDIRECT, $num_repeats, $preload, $valgrind;
 
     return !IS_WINDOWS
-        && !PHP_ZTS
         && !$cli_opcache_enabled
         && getenv('TEST_PHP_FORK_SERVER') !== '0'
         && !isset($environment['SKIP_ASAN'])

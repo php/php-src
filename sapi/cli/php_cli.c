@@ -181,7 +181,7 @@ typedef enum {
 	PHP_CLI_TEST_BATCH_DONE,
 } php_cli_test_batch_result;
 
-#if defined(HAVE_FORK) && !defined(ZTS)
+#ifdef HAVE_FORK
 static volatile sig_atomic_t php_cli_test_child_pid;
 
 static void php_cli_test_batch_signal(int signal) /* {{{ */
@@ -214,7 +214,7 @@ static bool php_cli_test_batch_init(php_cli_test_batch *batch, const char *token
 }
 /* }}} */
 
-#if defined(HAVE_FORK) && !defined(ZTS)
+#ifdef HAVE_FORK
 static int php_cli_test_batch_read_line(char *buffer, size_t size) /* {{{ */
 {
 	while (fgets(buffer, size, stdin)) {
@@ -365,8 +365,8 @@ static php_cli_test_batch_result php_cli_test_batch_start(
 	char **script_file
 ) /* {{{ */
 {
-#if !defined(HAVE_FORK) || defined(ZTS)
-	fprintf(stderr, "--test-fork-server requires a non-ZTS build with fork()\n");
+#ifndef HAVE_FORK
+	fprintf(stderr, "--test-fork-server requires fork()\n");
 	return PHP_CLI_TEST_BATCH_ERROR;
 #else
 	int test_output[2];
@@ -1199,7 +1199,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				param_error = "Unable to initialize test batch.\n";
 			}
 		}
-#if defined(HAVE_FORK) && !defined(ZTS)
+#ifdef HAVE_FORK
 		if (test_batch.token) {
 			signal(SIGINT, php_cli_test_batch_signal);
 			signal(SIGTERM, php_cli_test_batch_signal);
