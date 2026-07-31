@@ -1832,7 +1832,8 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					basename = php_basename(Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), NULL, 0);
 					file_stripped = ZSTR_VAL(basename);
 					file_stripped_len = ZSTR_LEN(basename);
-				} else if (opts.remove_path && zend_string_starts_with(Z_STR_P(zval_file), opts.remove_path)) {
+				} else if (opts.remove_path && Z_STRLEN_P(zval_file) > ZSTR_LEN(opts.remove_path)
+						&& zend_string_starts_with(Z_STR_P(zval_file), opts.remove_path)) {
 					if (IS_SLASH(Z_STRVAL_P(zval_file)[ZSTR_LEN(opts.remove_path)])) {
 						file_stripped = Z_STRVAL_P(zval_file) + ZSTR_LEN(opts.remove_path) + 1;
 						file_stripped_len = Z_STRLEN_P(zval_file) - ZSTR_LEN(opts.remove_path) - 1;
