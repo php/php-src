@@ -16,6 +16,7 @@
 
 #ifdef PHP_USER_CACHE_USE_SHM_OPEN
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,17 +25,47 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
+#include "ext/random/php_random_csprng.h"
+
+#define PHP_USER_CACHE_POSIX_SHM_NAME_PREFIX   "/php_uc."
+#define PHP_USER_CACHE_POSIX_SHM_NAME_BYTES    10
+#define PHP_USER_CACHE_POSIX_SHM_NAME_ATTEMPTS 5
+
 typedef struct {
 	php_user_cache_shm_segment common;
 	int shm_fd;
 } php_user_cache_shm_segment_posix;
 
+static bool user_cache_alloc_posix_segment_name(char *buf, size_t buf_size)
+{
+	static const char hexits[] = "0123456789abcdef";
+	unsigned char random_bytes[PHP_USER_CACHE_POSIX_SHM_NAME_BYTES];
+	char hex[sizeof(random_bytes) * 2 + 1];
+	size_t i;
+
+	if (php_random_bytes_silent(random_bytes, sizeof(random_bytes)) == FAILURE) {
+		return false;
+	}
+
+	for (i = 0; i < sizeof(random_bytes); i++) {
+		hex[i * 2] = hexits[random_bytes[i] >> 4];
+		hex[(i * 2) + 1] = hexits[random_bytes[i] & 0xf];
+	}
+	hex[sizeof(hex) - 1] = '\0';
+
+	snprintf(buf, buf_size, PHP_USER_CACHE_POSIX_SHM_NAME_PREFIX "%s", hex);
+
+	return true;
+}
+
 static int user_cache_alloc_posix_create_segments(size_t requested_size, php_user_cache_shm_segment_posix ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	php_user_cache_shm_segment_posix *shared_segment;
-	int shared_segment_flags = O_RDWR | O_CREAT | O_TRUNC;
-	char shared_segment_name[sizeof("/php_user_cache.") + 20];
 	mode_t shared_segment_mode = 0600;
+	/* O_EXCL: never adopt an object somebody else created under this name. */
+	int shared_segment_flags = O_RDWR | O_CREAT | O_EXCL,
+		shared_segment_fd = -1, shared_segment_attempt;
+	char shared_segment_name[sizeof(PHP_USER_CACHE_POSIX_SHM_NAME_PREFIX) + (PHP_USER_CACHE_POSIX_SHM_NAME_BYTES * 2)];
 
 #if defined(HAVE_SHM_CREATE_LARGEPAGE)
 	/* Prefer the largest compatible page size. Capture the getpagesizes()
@@ -69,22 +100,43 @@ static int user_cache_alloc_posix_create_segments(size_t requested_size, php_use
 	shared_segment = (php_user_cache_shm_segment_posix *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
-	snprintf(shared_segment_name, sizeof(shared_segment_name), "/php_user_cache.%d", getpid());
-#if defined(HAVE_SHM_CREATE_LARGEPAGE)
-	if (shared_segment_lg_index > 0) {
-		shared_segment->shm_fd =  shm_create_largepage(shared_segment_name, shared_segment_flags, shared_segment_lg_index, SHM_LARGEPAGE_ALLOC_DEFAULT, shared_segment_mode);
-		if (shared_segment->shm_fd != -1) {
-			goto truncate_segment;
+	for (shared_segment_attempt = 0; shared_segment_attempt < PHP_USER_CACHE_POSIX_SHM_NAME_ATTEMPTS; shared_segment_attempt++) {
+		if (!user_cache_alloc_posix_segment_name(shared_segment_name, sizeof(shared_segment_name))) {
+			*error_in = "php_random_bytes";
+
+			return PHP_USER_CACHE_ALLOC_FAILURE;
 		}
-	}
+
+#if defined(HAVE_SHM_CREATE_LARGEPAGE)
+		if (shared_segment_lg_index > 0) {
+			shared_segment_fd = shm_create_largepage(shared_segment_name, shared_segment_flags, shared_segment_lg_index, SHM_LARGEPAGE_ALLOC_DEFAULT, shared_segment_mode);
+			if (shared_segment_fd != -1) {
+				shared_segment->shm_fd = shared_segment_fd;
+
+				goto truncate_segment;
+			}
+		}
 #endif /* HAVE_SHM_CREATE_LARGEPAGE */
 
-	shared_segment->shm_fd = shm_open(shared_segment_name, shared_segment_flags, shared_segment_mode);
-	if (shared_segment->shm_fd == -1) {
+		shared_segment_fd = shm_open(shared_segment_name, shared_segment_flags, shared_segment_mode);
+		if (shared_segment_fd != -1) {
+			break;
+		}
+
+		if (errno != EEXIST) {
+			*error_in = "shm_open";
+
+			return PHP_USER_CACHE_ALLOC_FAILURE;
+		}
+	}
+
+	if (shared_segment_fd == -1) {
 		*error_in = "shm_open";
 
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
+
+	shared_segment->shm_fd = shared_segment_fd;
 
 #if defined(HAVE_SHM_CREATE_LARGEPAGE)
 truncate_segment:
@@ -93,6 +145,7 @@ truncate_segment:
 		*error_in = "ftruncate";
 
 		close(shared_segment->shm_fd);
+
 		shm_unlink(shared_segment_name);
 
 		return PHP_USER_CACHE_ALLOC_FAILURE;
@@ -103,12 +156,23 @@ truncate_segment:
 		*error_in = "mmap";
 
 		close(shared_segment->shm_fd);
+
 		shm_unlink(shared_segment_name);
 
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
-	shm_unlink(shared_segment_name);
+	if (shm_unlink(shared_segment_name) != 0) {
+		*error_in = "shm_unlink";
+
+		munmap(shared_segment->common.p, requested_size);
+
+		shared_segment->common.p = NULL;
+
+		close(shared_segment->shm_fd);
+
+		return PHP_USER_CACHE_ALLOC_FAILURE;
+	}
 
 	shared_segment->common.size = requested_size;
 
