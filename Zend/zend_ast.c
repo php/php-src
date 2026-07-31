@@ -1241,15 +1241,16 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 
 					if (!fptr) {
 						zend_string *function_name = zend_ast_get_str(ast->child[0]);
-						zend_string *function_name_lc = zend_string_tolower(function_name);
-						fptr = zend_fetch_function(function_name_lc);
+						fptr = zend_fetch_function(function_name);
+
+						/* Search for global function of the same name */
 						if (!fptr && ast->child[0]->attr != ZEND_NAME_FQ) {
-							const char *backslash = zend_memrchr(ZSTR_VAL(function_name_lc), '\\', ZSTR_LEN(function_name_lc));
+							const char *backslash = zend_memrchr(ZSTR_VAL(function_name), '\\', ZSTR_LEN(function_name));
 							if (backslash) {
-								fptr = zend_fetch_function_str(backslash + 1, ZSTR_LEN(function_name_lc) - (backslash - ZSTR_VAL(function_name_lc) + 1));
+								fptr = zend_fetch_function_str(backslash + 1, ZSTR_LEN(function_name) - (backslash - ZSTR_VAL(function_name) + 1));
 							}
 						}
-						zend_string_release(function_name_lc);
+
 						if (!fptr) {
 							zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function_name));
 							return FAILURE;
