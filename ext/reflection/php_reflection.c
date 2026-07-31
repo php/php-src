@@ -6150,19 +6150,22 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
 	} ZEND_PARSE_PARAMETERS_END();
 
-	if (reflection_property_check_lazy_compatible(ref->prop,
-				ref->unmangled_name, intern->ce, object,
-				"skipLazyInitialization") == FAILURE) {
-		RETURN_THROWS();
-	}
-
 	while (zend_object_is_lazy_proxy(object)
 			&& zend_lazy_object_initialized(object)) {
 		object = zend_lazy_object_get_instance(object);
 	}
 
-	const zval *src = &object->ce->default_properties_table[OBJ_PROP_TO_NUM(ref->prop->offset)];
-	zval *dst = OBJ_PROP(object, ref->prop->offset);
+	const zend_property_info *prop = reflection_property_get_effective_prop(ref->prop,
+			ref->unmangled_name, intern->ce, object);
+
+	if (reflection_property_check_lazy_compatible(prop,
+				ref->unmangled_name, intern->ce, object,
+				"skipLazyInitialization") == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	const zval *src = &object->ce->default_properties_table[OBJ_PROP_TO_NUM(prop->offset)];
+	zval *dst = OBJ_PROP(object, prop->offset);
 
 	if (!(Z_PROP_FLAG_P(dst) & IS_PROP_LAZY)) {
 		/* skipLazyInitialization has no effect on non-lazy properties */
@@ -6194,16 +6197,19 @@ ZEND_METHOD(ReflectionProperty, isLazy)
 		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
 	} ZEND_PARSE_PARAMETERS_END();
 
-	if (!ref->prop || ref->prop->flags & (ZEND_ACC_STATIC | ZEND_ACC_VIRTUAL)) {
-		RETURN_FALSE;
-	}
-
 	while (zend_object_is_lazy_proxy(object)
 			&& zend_lazy_object_initialized(object)) {
 		object = zend_lazy_object_get_instance(object);
 	}
 
-	RETURN_BOOL(Z_PROP_FLAG_P(OBJ_PROP(object, ref->prop->offset)) & IS_PROP_LAZY);
+	const zend_property_info *prop = reflection_property_get_effective_prop(ref->prop,
+			ref->unmangled_name, intern->ce, object);
+
+	if (!prop || prop->flags & (ZEND_ACC_STATIC | ZEND_ACC_VIRTUAL)) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(Z_PROP_FLAG_P(OBJ_PROP(object, prop->offset)) & IS_PROP_LAZY);
 }
 
 /* {{{ Returns true if property was initialized */
