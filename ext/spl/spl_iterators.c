@@ -213,7 +213,7 @@ static zend_result spl_recursive_it_valid_ex(spl_recursive_it_object *object, zv
 		level--;
 	}
 	if (object->endIteration && object->in_iteration) {
-		zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->endIteration, "endIteration", NULL);
+		zend_call_known_function(object->endIteration, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 	}
 	object->in_iteration = false;
 	return FAILURE;
@@ -292,7 +292,7 @@ next_step:
 				ZEND_FALLTHROUGH;
 			case RS_TEST:
 				if (object->callHasChildren) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callHasChildren, "callHasChildren", &retval);
+					zend_call_known_function(object->callHasChildren, Z_OBJ_P(zthis), object->ce, &retval, 0, NULL, NULL);
 				} else {
 					zend_class_entry *ce = object->iterators[object->level].ce;
 					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
@@ -333,7 +333,7 @@ next_step:
 					}
 				}
 				if (object->nextElement) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->nextElement, "nextelement", NULL);
+					zend_call_known_function(object->nextElement, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 				}
 				object->iterators[object->level].state = RS_NEXT;
 				if (EG(exception)) {
@@ -346,7 +346,7 @@ next_step:
 				return /* self */;
 			case RS_SELF:
 				if (object->nextElement && (object->mode == RIT_SELF_FIRST || object->mode == RIT_CHILD_FIRST)) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->nextElement, "nextelement", NULL);
+					zend_call_known_function(object->nextElement, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 				}
 				if (object->mode == RIT_SELF_FIRST) {
 					object->iterators[object->level].state = RS_CHILD;
@@ -356,7 +356,7 @@ next_step:
 				return /* self */;
 			case RS_CHILD:
 				if (object->callGetChildren) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callGetChildren, "callGetChildren", &child);
+					zend_call_known_function(object->callGetChildren, Z_OBJ_P(zthis), object->ce, &child, 0, NULL, NULL);
 				} else {
 					zend_class_entry *ce = object->iterators[object->level].ce;
 					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
@@ -408,7 +408,7 @@ next_step:
 					sub_iter->funcs->rewind(sub_iter);
 				}
 				if (object->beginChildren) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->beginChildren, "beginchildren", NULL);
+					zend_call_known_function(object->beginChildren, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 					if (EG(exception)) {
 						if (!(object->flags & RIT_CATCH_GET_CHILD)) {
 							return;
@@ -422,7 +422,7 @@ next_step:
 		/* no more elements */
 		if (object->level > 0) {
 			if (object->endChildren) {
-				zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->endChildren, "endchildren", NULL);
+				zend_call_known_function(object->endChildren, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 				if (EG(exception)) {
 					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
 						return;
@@ -466,7 +466,7 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 		sub_iter->funcs->rewind(sub_iter);
 	}
 	if (!EG(exception) && object->beginIteration && !object->in_iteration) {
-		zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->beginIteration, "beginIteration", NULL);
+		zend_call_known_function(object->beginIteration, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 	}
 	object->in_iteration = true;
 	spl_recursive_it_move_forward_ex(object, zthis);
@@ -2824,8 +2824,7 @@ PHP_METHOD(AppendIterator, __construct)
 	}
 
 	intern->dit_type = DIT_AppendIterator;
-	object_init_ex(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
-	zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
+	object_init_with_constructor(&intern->u.append.zarrayit, spl_ce_ArrayIterator, 0, NULL, NULL);
 	intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
 
 } /* }}} */
