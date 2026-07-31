@@ -1884,7 +1884,7 @@ zend_result php_request_startup(void)
 		if (PG(output_handler)) {
 			zval oh;
 
-			ZVAL_STR_COPY(&oh, PG(output_handler));
+			ZVAL_STR(&oh, zend_string_dup(PG(output_handler), false));
 			php_output_start_user(&oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
 			zval_ptr_dtor(&oh);
 		} else if (PG(output_buffering)) {
