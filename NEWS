@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0beta1
 
+- CLI:
+  . Fixed bug GH-7781 (Built-in web server prints HTML in startup warnings).
+    (Matthias Görgens)
+
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
     (Weilin Du)
