@@ -1177,22 +1177,16 @@ function error_report(string $testname, string $logname, string $tested): void
  * @return false|string
  */
 function system_with_timeout(
-    string|array $commandline,
+    array $command,
     ?array $env = null,
     ?string $stdin = null,
+    ?string $stdinFile = null,
     bool $captureStdIn = true,
     bool $captureStdOut = true,
     bool $captureStdErr = true,
     bool $mergeStdErr = false
 ) {
     global $valgrind;
-
-    // when proc_open cmd is passed as a string (without bypass_shell=true option) the cmd goes thru shell
-    // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
-    // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
-    if (IS_WINDOWS && is_string($commandline)) {
-        $commandline = 'start "" /b /wait ' . $commandline . ' & exit';
-    }
 
     $data = '';
 
@@ -1202,7 +1196,9 @@ function system_with_timeout(
     }
 
     $descriptorspec = [];
-    if ($captureStdIn) {
+    if ($stdinFile !== null) {
+        $descriptorspec[0] = ['file', $stdinFile, 'r'];
+    } elseif ($captureStdIn) {
         $descriptorspec[0] = ['pipe', 'r'];
     }
     if ($captureStdOut) {
@@ -1213,13 +1209,13 @@ function system_with_timeout(
             ? ['redirect', 1]
             : ['pipe', 'w'];
     }
-    $proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, ['suppress_errors' => true]);
+    $proc = proc_open($command, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, ['suppress_errors' => true]);
 
     if (!$proc) {
         return false;
     }
 
-    if ($captureStdIn) {
+    if (isset($pipes[0])) {
         if (!is_null($stdin)) {
             fwrite($pipes[0], $stdin);
         }
@@ -1284,36 +1280,14 @@ function system_with_timeout(
     return $data;
 }
 
-function can_run_with_structured_test_command(TestFile $test): bool
-{
-    global $preload, $valgrind;
-
-    return !$valgrind
-        && !$preload
-        && !$test->hasAnySections(
-            'ARGS',
-            'CAPTURE_STDIO',
-            'DEFLATE_POST',
-            'GZIP_POST',
-            'POST',
-            'POST_RAW',
-            'PUT',
-        );
-}
-
-function create_structured_test_command(
+function create_test_command(
     string $php,
-    array $sapiOptionArgs,
-    array $passOptionArgs,
+    array $optionArgs,
     array $iniSettings,
     string $testFile,
     int $numRepeats
 ): array {
-    $command = [
-        $php,
-        ...$sapiOptionArgs,
-        ...$passOptionArgs,
-    ];
+    $command = [$php, ...$optionArgs];
     if ($numRepeats > 1) {
         $command[] = '--repeat';
         $command[] = (string) $numRepeats;
@@ -1325,6 +1299,15 @@ function create_structured_test_command(
         '-f',
         $testFile,
     ];
+}
+
+function create_shell_invocation(string $command): array
+{
+    if (IS_WINDOWS) {
+        return [getenv('COMSPEC') ?: 'cmd.exe', '/d', '/s', '/c', $command];
+    }
+
+    return ['/bin/sh', '-c', "exec $command"];
 }
 
 function run_all_tests(array $test_files, array $env, ?string $redir_tested = null): void
@@ -1909,11 +1892,8 @@ function run_test(string $php, $file, array $env): string
         $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
-    $escaped_pass_options = escaped_shell_string_from($pass_option_args);
-    $orig_php_path = $php;
     $php_path = $php;
     $sapi_option_args = [];
-    $orig_php = escaped_shell_string_from([$orig_php_path]);
 
     $retried = false;
 retry:
@@ -1971,12 +1951,6 @@ TEST $file
         $captureStdOut = true;
         $captureStdErr = true;
     }
-    if ($captureStdOut && $captureStdErr) {
-        $cmdRedirect = ' 2>&1';
-    } else {
-        $cmdRedirect = '';
-    }
-
     /* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
     $uses_cgi = false;
     if ($test->isCGI()) {
@@ -2008,9 +1982,6 @@ TEST $file
             return skip_test($tested, $tested_file, $shortname, 'phpdbg does not support --repeat');
         }
     }
-
-    $php = escaped_shell_string_from([$php_path, ...$sapi_option_args]);
-    $extra_options = escaped_shell_string_from($extra_option_args);
 
     foreach (['CLEAN', 'STDIN', 'CAPTURE_STDIO'] as $section) {
         if ($test->hasSection($section)) {
@@ -2129,7 +2100,12 @@ TEST $file
         $ext_params = [];
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
-        [$ext_dir, $loaded] = $skipCache->getExtensions("$orig_php $escaped_pass_options $extra_options $ext_params $no_file_cache");
+        $extension_command = escaped_shell_string_from([
+            $php,
+            ...$pass_option_args,
+            ...$extra_option_args,
+        ]) . " $ext_params $no_file_cache";
+        [$ext_dir, $loaded] = $skipCache->getExtensions($extension_command);
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
@@ -2158,8 +2134,6 @@ TEST $file
     settings2array($ini_overwrites, $ini_settings);
 
     $orig_ini_settings_args = settings2arguments($ini_settings);
-    $orig_ini_settings = settings2params($ini_settings);
-
     if ($file_cache !== null) {
         $ini_settings['opcache.file_cache'] = get_file_cache_dir();
         // Make sure warnings still show up on the second run.
@@ -2208,6 +2182,7 @@ TEST $file
     $test_ini_settings = $ini_settings;
     $ini_settings = settings2params($ini_settings);
 
+    $escaped_pass_options = escaped_shell_string_from($pass_option_args);
     $env['TEST_PHP_EXTRA_ARGS'] = $escaped_pass_options . ' ' . $ini_settings;
 
     // Check if test should be skipped.
@@ -2420,13 +2395,18 @@ TEST $file
         $env['HTTP_COOKIE'] = '';
     }
 
-    $args = $test->hasSection('ARGS') ? ' -- ' . $test->getSection('ARGS') : '';
-
+    $test_option_args = [
+        ...$sapi_option_args,
+        ...$pass_option_args,
+    ];
     if ($preload && !empty($test_file)) {
         save_text($preload_filename, "<?php opcache_compile_file('$test_file');");
-        $escaped_pass_options .= " -d opcache.preload=" . $preload_filename;
+        $test_option_args[] = '-d';
+        $test_option_args[] = "opcache.preload=$preload_filename";
     }
 
+    $stdin = $test->hasSection('STDIN') ? $test->getSection('STDIN') : null;
+    $request = null;
     if ($test->sectionNotEmpty('POST_RAW')) {
         $post = trim($test->getSection('POST_RAW'));
         $raw_lines = explode("\n", $post);
@@ -2457,9 +2437,6 @@ TEST $file
             $junit->markTestAs('BORK', $shortname, $tested, null, 'empty $request');
             return 'BORKED';
         }
-
-        save_text($tmp_post, $request);
-        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } elseif ($test->sectionNotEmpty('PUT')) {
         $post = trim($test->getSection('PUT'));
         $raw_lines = explode("\n", $post);
@@ -2488,13 +2465,9 @@ TEST $file
             $junit->markTestAs('BORK', $shortname, $tested, null, 'empty $request');
             return 'BORKED';
         }
-
-        save_text($tmp_post, $request);
-        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } elseif ($test->sectionNotEmpty('POST')) {
-        $post = trim($test->getSection('POST'));
-        $content_length = strlen($post);
-        save_text($tmp_post, $post);
+        $request = trim($test->getSection('POST'));
+        $content_length = strlen($request);
 
         $env['REQUEST_METHOD'] = 'POST';
         if (empty($env['CONTENT_TYPE'])) {
@@ -2504,48 +2477,67 @@ TEST $file
         if (empty($env['CONTENT_LENGTH'])) {
             $env['CONTENT_LENGTH'] = $content_length;
         }
-
-        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } elseif ($test->sectionNotEmpty('GZIP_POST')) {
-        $post = trim($test->getSection('GZIP_POST'));
-        $post = gzencode($post, 9, FORCE_GZIP);
+        $request = trim($test->getSection('GZIP_POST'));
+        $request = gzencode($request, 9, FORCE_GZIP);
         $env['HTTP_CONTENT_ENCODING'] = 'gzip';
 
-        save_text($tmp_post, $post);
-        $content_length = strlen($post);
+        $content_length = strlen($request);
 
         $env['REQUEST_METHOD'] = 'POST';
         $env['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
         $env['CONTENT_LENGTH'] = $content_length;
-
-        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } elseif ($test->sectionNotEmpty('DEFLATE_POST')) {
-        $post = trim($test->getSection('DEFLATE_POST'));
-        $post = gzcompress($post, 9);
+        $request = trim($test->getSection('DEFLATE_POST'));
+        $request = gzcompress($request, 9);
         $env['HTTP_CONTENT_ENCODING'] = 'deflate';
-        save_text($tmp_post, $post);
-        $content_length = strlen($post);
+        $content_length = strlen($request);
 
         $env['REQUEST_METHOD'] = 'POST';
         $env['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
         $env['CONTENT_LENGTH'] = $content_length;
-
-        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } else {
         $env['REQUEST_METHOD'] = 'GET';
         $env['CONTENT_TYPE'] = '';
         $env['CONTENT_LENGTH'] = '';
-
-        $repeat_option = $num_repeats > 1 ? "--repeat $num_repeats" : "";
-        $cmd = "$php $escaped_pass_options $repeat_option $ini_settings -f \"$test_file\" $args$cmdRedirect";
     }
 
-    $orig_cmd = $cmd;
+    $request_file = null;
+    if ($request !== null) {
+        // A file descriptor avoids blocking while writing large request bodies to a pipe.
+        save_text($tmp_post, $request);
+        $request_file = $tmp_post;
+    }
+
+    $test_command = create_test_command(
+        $php_path,
+        $test_option_args,
+        $test_ini_settings,
+        $test_file,
+        $num_repeats,
+    );
+    $orig_cmd = escaped_shell_string_from($test_command);
+    if ($test->hasSection('ARGS')) {
+        // Preserve the existing shell parsing of the raw ARGS section.
+        $orig_cmd .= ' -- ' . $test->getSection('ARGS');
+        $test_command = create_shell_invocation($orig_cmd);
+    }
+    if ($request_file !== null) {
+        $orig_cmd .= ' < ' . escapeshellarg($request_file);
+    }
+    if ($captureStdOut && $captureStdErr) {
+        $orig_cmd .= ' 2>&1';
+    }
+
     if ($valgrind) {
         $env['USE_ZEND_ALLOC'] = '0';
         $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
-        $cmd = $valgrind->wrapCommand($cmd, $memcheck_filename, strpos($test_file, "pcre") !== false);
+        $test_command = $valgrind->wrapCommand(
+            $test_command,
+            $memcheck_filename,
+            strpos($test_file, "pcre") !== false,
+        );
     }
 
     if ($test->hasSection('XLEAK')) {
@@ -2559,6 +2551,7 @@ TEST $file
     }
 
     if ($DETAILED) {
+        $display_command = escaped_shell_string_from($test_command);
         echo "
 CONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . "
 CONTENT_TYPE    = " . $env['CONTENT_TYPE'] . "
@@ -2568,7 +2561,7 @@ REDIRECT_STATUS = " . $env['REDIRECT_STATUS'] . "
 REQUEST_METHOD  = " . $env['REQUEST_METHOD'] . "
 SCRIPT_FILENAME = " . $env['SCRIPT_FILENAME'] . "
 HTTP_COOKIE     = " . $env['HTTP_COOKIE'] . "
-COMMAND $cmd
+COMMAND $display_command
 ";
     }
 
@@ -2576,26 +2569,15 @@ COMMAND $cmd
     $hrtime = hrtime();
     $startTime = $hrtime[0] * 1000000000 + $hrtime[1];
 
-    $stdin = $test->hasSection('STDIN') ? $test->getSection('STDIN') : null;
-    $use_structured_command = can_run_with_structured_test_command($test);
-    $test_command = $use_structured_command
-        ? create_structured_test_command(
-            $php_path,
-            $sapi_option_args,
-            $pass_option_args,
-            $test_ini_settings,
-            $test_file,
-            $num_repeats,
-        )
-        : $cmd;
     $out = system_with_timeout(
         $test_command,
         $env,
         $stdin,
+        $request_file,
         $captureStdIn,
         $captureStdOut,
         $captureStdErr,
-        $use_structured_command && $captureStdOut && $captureStdErr,
+        $captureStdOut && $captureStdErr,
     );
 
     $junit->stopTimer($shortname);
@@ -2619,7 +2601,7 @@ COMMAND $cmd
 
         if (!$no_clean) {
             $clean_command = [
-                $orig_php_path,
+                $php,
                 ...$pass_option_args,
                 '-q',
                 ...$orig_ini_settings_args,
@@ -3747,12 +3729,12 @@ class SkipCache
         $this->keepFile = $keepFile;
     }
 
-    public function checkSkip(string|array $command, string $code, string $checkFile, string $tempFile, array $env): string
+    public function checkSkip(array $command, string $code, string $checkFile, string $tempFile, array $env): string
     {
         // Extension tests frequently use something like <?php require 'skipif.inc';
         // for skip checks. This forces us to cache per directory to avoid pollution.
         $dir = dirname($checkFile);
-        $key = (is_array($command) ? implode("\0", $command) : $command) . " => $dir";
+        $key = implode("\0", $command) . " => $dir";
 
         if (isset($this->skips[$key][$code])) {
             $this->hits++;
@@ -3763,11 +3745,7 @@ class SkipCache
         }
 
         save_text($checkFile, $code, $tempFile);
-        if (is_array($command)) {
-            $command[] = $checkFile;
-        } else {
-            $command .= " \"$checkFile\"";
-        }
+        $command[] = $checkFile;
         $result = trim(system_with_timeout($command, $env));
         if (strpos($result, 'nocache') === 0) {
             $result = '';
@@ -3816,7 +3794,11 @@ class RuntestsValgrind
     public function __construct(array $environment, string $tool = 'memcheck')
     {
         $this->tool = $tool;
-        $header = system_with_timeout("valgrind --tool={$this->tool} --version", $environment);
+        $header = system_with_timeout([
+            'valgrind',
+            "--tool={$this->tool}",
+            '--version',
+        ], $environment);
         if (!$header) {
             error("Valgrind returned no version info for {$this->tool}, cannot proceed.\n".
                 "Please check if Valgrind is installed and the tool is named correctly.");
@@ -3830,18 +3812,28 @@ class RuntestsValgrind
         $this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
     }
 
-    public function wrapCommand(string $cmd, string $memcheck_filename, bool $check_all): string
+    public function wrapCommand(array $command, string $memcheck_filename, bool $check_all): array
     {
-        $vcmd = "valgrind -q --tool={$this->tool} --trace-children=yes";
+        $valgrind_arguments = [
+            'valgrind',
+            '-q',
+            "--tool={$this->tool}",
+            '--trace-children=yes',
+        ];
+
         if ($check_all) {
-            $vcmd .= ' --smc-check=all';
+            $valgrind_arguments[] = '--smc-check=all';
         }
 
-        /* --vex-iropt-register-updates=allregs-at-mem-access is necessary for phpdbg watchpoint tests */
-        if ($this->version_3_8_0) {
-            return "$vcmd --vex-iropt-register-updates=allregs-at-mem-access --log-file=$memcheck_filename $cmd";
-        }
-        return "$vcmd --vex-iropt-precise-memory-exns=yes --log-file=$memcheck_filename $cmd";
+        $valgrind_arguments[] = $this->version_3_8_0
+            ? '--vex-iropt-register-updates=allregs-at-mem-access' // necessary for phpdbg watchpoint tests
+            : '--vex-iropt-precise-memory-exns=yes';
+
+        return [
+            ...$valgrind_arguments,
+            "--log-file=$memcheck_filename",
+            ...$command,
+        ];
     }
 }
 
