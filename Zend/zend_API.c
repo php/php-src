@@ -3830,7 +3830,6 @@ static zend_always_inline bool zend_is_callable_check_func(const zval *callable,
 	int call_via_handler = 0;
 	zend_class_entry *scope;
 	zval *zv;
-	ALLOCA_FLAG(use_heap)
 
 	fcc->calling_scope = NULL;
 

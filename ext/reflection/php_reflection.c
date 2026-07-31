@@ -1684,7 +1684,7 @@ ZEND_METHOD(ReflectionFunction, __construct)
 {
 	zend_object *closure_obj = NULL;
 	zend_function *fptr;
-	zend_string *fname, *lcname;
+	zend_string *fname;
 
 	zval *object = ZEND_THIS;
 	reflection_object *intern = Z_REFLECTION_P(object);
