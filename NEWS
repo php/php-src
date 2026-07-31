@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     operation depth. (iliaal)
 
 - Core:
+  . Deprecated "namespace" as a class constant name. (NickSdot)
   . Changed run-tests.php to run in parallel by default, using up to 10
     automatically detected workers. Pass -j1 for sequential execution.
     (NickSdot)
