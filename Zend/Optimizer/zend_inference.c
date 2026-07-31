@@ -1958,7 +1958,7 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 			zend_ssa_var *__ssa_var = &ssa_vars[__var];					\
 			if (__ssa_var->var < op_array->num_args) {					\
 				if (__type & MAY_BE_RC1) {                              \
-					/* TODO: may be captured by exception backtreace */ \
+					/* TODO: may be captured by exception backtrace */ \
 					__type |= MAY_BE_RCN;                               \
 				}                                                       \
 			}                                                           \
