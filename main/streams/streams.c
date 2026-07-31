@@ -1909,11 +1909,10 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 #else
 			if (!localhost && path[n+3] != '\0' && path[n+3] != '/') {
 #endif
-				if (options & REPORT_ERRORS) {
-					php_stream_wrapper_warn(plain_files_wrapper, NULL, options,
-							ProtocolUnsupported,
-							"Remote host file access not supported, %s", path);
-				}
+				php_stream_wrapper_warn(plain_files_wrapper, NULL, options,
+						ProtocolUnsupported,
+						"Remote host file access not supported, %s", path);
+
 				return NULL;
 			}
 
@@ -1950,11 +1949,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 				return wrapper;
 			}
 
-			if (options & REPORT_ERRORS) {
-				php_stream_wrapper_warn(plain_files_wrapper, NULL, options,
-					Disabled,
-					"file:// wrapper is disabled in the server configuration");
-			}
+			php_stream_wrapper_warn(plain_files_wrapper, NULL, options,
+				Disabled,
+				"file:// wrapper is disabled in the server configuration");
 			return NULL;
 		}
 

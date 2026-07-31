@@ -220,11 +220,9 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		php_stream_input_t *input;
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
-			if (options & REPORT_ERRORS) {
-				php_stream_wrapper_warn(wrapper, context, options,
-					Disabled,
-					"URL file-access is disabled in the server configuration");
-			}
+			php_stream_wrapper_warn(wrapper, context, options,
+				Disabled,
+				"URL file-access is disabled in the server configuration");
 			return NULL;
 		}
 
@@ -241,11 +239,9 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 
 	if (!strcasecmp(path, "stdin")) {
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
-			if (options & REPORT_ERRORS) {
-				php_stream_wrapper_warn(wrapper, context, options,
-					Disabled,
-					"URL file-access is disabled in the server configuration");
-			}
+			php_stream_wrapper_warn(wrapper, context, options,
+				Disabled,
+				"URL file-access is disabled in the server configuration");
 			return NULL;
 		}
 		if (!strcmp(sapi_module.name, "cli")) {
@@ -302,20 +298,16 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		int		   dtablesize;
 
 		if (strcmp(sapi_module.name, "cli")) {
-			if (options & REPORT_ERRORS) {
-				php_stream_wrapper_warn(wrapper, context, options,
-					Disabled,
-					"Direct access to file descriptors is only available from command-line PHP");
-			}
+			php_stream_wrapper_warn(wrapper, context, options,
+				Disabled,
+				"Direct access to file descriptors is only available from command-line PHP");
 			return NULL;
 		}
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
-			if (options & REPORT_ERRORS) {
-				php_stream_wrapper_warn(wrapper, context, options,
-					Disabled,
-					"URL file-access is disabled in the server configuration");
-			}
+			php_stream_wrapper_warn(wrapper, context, options,
+				Disabled,
+				"URL file-access is disabled in the server configuration");
 			return NULL;
 		}
 
