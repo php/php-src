@@ -148,7 +148,7 @@ function main(): void
            $exts_skipped, $exts_tested, $exts_to_test, $failed_tests_file,
            $ignored_by_ext, $ini_overwrites, $colorize,
            $log_format, $no_clean, $no_file_cache,
-           $pass_options, $pass_options_args, $php, $php_cgi, $preload,
+           $pass_option_args, $php, $php_cgi, $preload,
            $result_tests_file, $slow_min_ms, $start_time,
            $temp_source, $temp_target, $test_cnt,
            $test_files, $test_idx, $test_results, $testfile,
@@ -327,8 +327,7 @@ function main(): void
     $result_tests_file = false;
     $failed_tests_file = false;
     $pass_option_n = false;
-    $pass_options = '';
-    $pass_options_args = [];
+    $pass_option_args = [];
 
     $output_file = INIT_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
 
@@ -472,14 +471,12 @@ function main(): void
                     break;
                 case 'n':
                     if (!$pass_option_n) {
-                        $pass_options .= ' -n';
-                        $pass_options_args[] = '-n';
+                        $pass_option_args[] = '-n';
                     }
                     $pass_option_n = true;
                     break;
                 case 'e':
-                    $pass_options .= ' -e';
-                    $pass_options_args[] = '-e';
+                    $pass_option_args[] = '-e';
                     break;
                 case '--preload':
                     $preload = true;
@@ -684,14 +681,12 @@ function main(): void
 
     if ($conf_passed !== null) {
         if (IS_WINDOWS) {
-            $pass_options .= " -c " . escapeshellarg($conf_passed);
-            $pass_options_args[] = '-c';
-            $pass_options_args[] = $conf_passed;
+            $pass_option_args[] = '-c';
+            $pass_option_args[] = $conf_passed;
         } else {
             $configuration_file = realpath($conf_passed);
-            $pass_options .= " -c '" . $configuration_file . "'";
-            $pass_options_args[] = '-c';
-            $pass_options_args[] = (string) $configuration_file;
+            $pass_option_args[] = '-c';
+            $pass_option_args[] = (string) $configuration_file;
         }
     }
 
@@ -824,8 +819,9 @@ function verify_config(string $php): void
  */
 function write_information(array $user_tests, $phpdbg): void
 {
-    global $php, $php_cgi, $php_info, $ini_overwrites, $pass_options, $exts_to_test, $valgrind, $no_file_cache;
+    global $php, $php_cgi, $php_info, $ini_overwrites, $pass_option_args, $exts_to_test, $valgrind, $no_file_cache;
     $php_escaped = escapeshellarg($php);
+    $escaped_pass_options = escaped_shell_string_from($pass_option_args);
 
     // Get info from php
     $info_file = __DIR__ . '/run-test-info.php';
@@ -841,12 +837,12 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     $info_params = [];
     settings2array($ini_overwrites, $info_params);
     $info_params = settings2params($info_params);
-    $php_info = shell_exec("$php_escaped $pass_options $info_params $no_file_cache \"$info_file\"");
+    $php_info = shell_exec("$php_escaped $escaped_pass_options $info_params $no_file_cache \"$info_file\"");
     define('TESTED_PHP_VERSION', shell_exec("$php_escaped -n -r \"echo PHP_VERSION;\""));
 
     if ($php_cgi && $php != $php_cgi) {
         $php_cgi_escaped = escapeshellarg($php_cgi);
-        $php_info_cgi = shell_exec("$php_cgi_escaped $pass_options $info_params $no_file_cache -q \"$info_file\"");
+        $php_info_cgi = shell_exec("$php_cgi_escaped $escaped_pass_options $info_params $no_file_cache -q \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $php_cgi_info = "$php_info_sep\nPHP         : $php_cgi $php_info_cgi$php_info_sep";
     } else {
@@ -855,7 +851,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 
     if ($phpdbg) {
         $phpdbg_escaped = escapeshellarg($phpdbg);
-        $phpdbg_info = shell_exec("$phpdbg_escaped $pass_options $info_params $no_file_cache -qrr \"$info_file\"");
+        $phpdbg_info = shell_exec("$phpdbg_escaped $escaped_pass_options $info_params $no_file_cache -qrr \"$info_file\"");
         $php_info_sep = "\n---------------------------------------------------------------------";
         $phpdbg_info = "$php_info_sep\nPHP         : $phpdbg $phpdbg_info$php_info_sep";
     } else {
@@ -881,7 +877,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         }
         echo implode(',', $exts);
         PHP);
-    $extensionsNames = explode(',', shell_exec("$php_escaped $pass_options $info_params $no_file_cache \"$info_file\""));
+    $extensionsNames = explode(',', shell_exec("$php_escaped $escaped_pass_options $info_params $no_file_cache \"$info_file\""));
     $exts_to_test = array_unique(remap_loaded_extensions_names($extensionsNames));
     // check for extensions that need special handling and regenerate
     $info_params_ex = [
@@ -1891,7 +1887,7 @@ function skip_test(string $tested, string $tested_file, string $shortname, strin
 function run_test(string $php, $file, array $env): string
 {
     global $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
-    global $pass_options, $pass_options_args, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
+    global $pass_option_args, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
     global $valgrind, $temp_source, $temp_target, $cfg, $environment;
     global $no_clean;
     global $SHOW_ONLY_GROUPS;
@@ -1913,11 +1909,11 @@ function run_test(string $php, $file, array $env): string
         $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
+    $escaped_pass_options = escaped_shell_string_from($pass_option_args);
     $orig_php_path = $php;
     $php_path = $php;
     $sapi_option_args = [];
-    $php = escapeshellarg($php);
-    $orig_php = $php;
+    $orig_php = escaped_shell_string_from([$orig_php_path]);
 
     $retried = false;
 retry:
@@ -1989,7 +1985,6 @@ TEST $file
         }
         $php_path = $php_cgi;
         $sapi_option_args[] = '-C';
-        $php = escapeshellarg($php_cgi) . ' -C ';
         $uses_cgi = true;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'CGI does not support --repeat');
@@ -1997,17 +1992,14 @@ TEST $file
     }
 
     /* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
-    $extra_options = '';
     $extra_option_args = [];
     if ($test->hasSection('PHPDBG')) {
         if (isset($phpdbg)) {
             $php_path = $phpdbg;
-            $sapi_option_args[] = '-qIb';
-            $php = escapeshellarg($phpdbg) . ' -qIb';
+            $sapi_option_args = ['-qIb'];
 
             // Additional phpdbg command line options for sections that need to
             // be run straight away. For example, EXTENSIONS, SKIPIF, CLEAN.
-            $extra_options = '-rr';
             $extra_option_args[] = '-rr';
         } else {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
@@ -2016,6 +2008,9 @@ TEST $file
             return skip_test($tested, $tested_file, $shortname, 'phpdbg does not support --repeat');
         }
     }
+
+    $php = escaped_shell_string_from([$php_path, ...$sapi_option_args]);
+    $extra_options = escaped_shell_string_from($extra_option_args);
 
     foreach (['CLEAN', 'STDIN', 'CAPTURE_STDIO'] as $section) {
         if ($test->hasSection($section)) {
@@ -2134,7 +2129,7 @@ TEST $file
         $ext_params = [];
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
-        [$ext_dir, $loaded] = $skipCache->getExtensions("$orig_php $pass_options $extra_options $ext_params $no_file_cache");
+        [$ext_dir, $loaded] = $skipCache->getExtensions("$orig_php $escaped_pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
         foreach ($extensions as $req_ext) {
@@ -2213,7 +2208,7 @@ TEST $file
     $test_ini_settings = $ini_settings;
     $ini_settings = settings2params($ini_settings);
 
-    $env['TEST_PHP_EXTRA_ARGS'] = $pass_options . ' ' . $ini_settings;
+    $env['TEST_PHP_EXTRA_ARGS'] = $escaped_pass_options . ' ' . $ini_settings;
 
     // Check if test should be skipped.
     $info = '';
@@ -2242,7 +2237,7 @@ TEST $file
         $commandLine = [
             $php_path,
             ...$sapi_option_args,
-            ...$pass_options_args,
+            ...$pass_option_args,
             ...$extra_option_args,
             '-q',
             ...$orig_ini_settings_args,
@@ -2429,10 +2424,7 @@ TEST $file
 
     if ($preload && !empty($test_file)) {
         save_text($preload_filename, "<?php opcache_compile_file('$test_file');");
-        $local_pass_options = $pass_options;
-        unset($pass_options);
-        $pass_options = $local_pass_options;
-        $pass_options .= " -d opcache.preload=" . $preload_filename;
+        $escaped_pass_options .= " -d opcache.preload=" . $preload_filename;
     }
 
     if ($test->sectionNotEmpty('POST_RAW')) {
@@ -2467,7 +2459,7 @@ TEST $file
         }
 
         save_text($tmp_post, $request);
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
+        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } elseif ($test->sectionNotEmpty('PUT')) {
         $post = trim($test->getSection('PUT'));
         $raw_lines = explode("\n", $post);
@@ -2498,7 +2490,7 @@ TEST $file
         }
 
         save_text($tmp_post, $request);
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
+        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } elseif ($test->sectionNotEmpty('POST')) {
         $post = trim($test->getSection('POST'));
         $content_length = strlen($post);
@@ -2513,7 +2505,7 @@ TEST $file
             $env['CONTENT_LENGTH'] = $content_length;
         }
 
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
+        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } elseif ($test->sectionNotEmpty('GZIP_POST')) {
         $post = trim($test->getSection('GZIP_POST'));
         $post = gzencode($post, 9, FORCE_GZIP);
@@ -2526,7 +2518,7 @@ TEST $file
         $env['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
         $env['CONTENT_LENGTH'] = $content_length;
 
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
+        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } elseif ($test->sectionNotEmpty('DEFLATE_POST')) {
         $post = trim($test->getSection('DEFLATE_POST'));
         $post = gzcompress($post, 9);
@@ -2538,14 +2530,14 @@ TEST $file
         $env['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
         $env['CONTENT_LENGTH'] = $content_length;
 
-        $cmd = "$php $pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
+        $cmd = "$php $escaped_pass_options $ini_settings -f \"$test_file\"$cmdRedirect < \"$tmp_post\"";
     } else {
         $env['REQUEST_METHOD'] = 'GET';
         $env['CONTENT_TYPE'] = '';
         $env['CONTENT_LENGTH'] = '';
 
         $repeat_option = $num_repeats > 1 ? "--repeat $num_repeats" : "";
-        $cmd = "$php $pass_options $repeat_option $ini_settings -f \"$test_file\" $args$cmdRedirect";
+        $cmd = "$php $escaped_pass_options $repeat_option $ini_settings -f \"$test_file\" $args$cmdRedirect";
     }
 
     $orig_cmd = $cmd;
@@ -2590,7 +2582,7 @@ COMMAND $cmd
         ? create_structured_test_command(
             $php_path,
             $sapi_option_args,
-            $pass_options_args,
+            $pass_option_args,
             $test_ini_settings,
             $test_file,
             $num_repeats,
@@ -2628,7 +2620,7 @@ COMMAND $cmd
         if (!$no_clean) {
             $clean_command = [
                 $orig_php_path,
-                ...$pass_options_args,
+                ...$pass_option_args,
                 '-q',
                 ...$orig_ini_settings_args,
                 '-d',
@@ -3169,6 +3161,11 @@ function settings2arguments(array $ini_settings): array
     }
 
     return $arguments;
+}
+
+function escaped_shell_string_from(array $arguments): string
+{
+    return implode(' ', array_map(escapeshellarg(...), $arguments));
 }
 
 function compute_summary(): void
