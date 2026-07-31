@@ -2259,12 +2259,12 @@ TEST $file
                     $test_files[] = [$f, $file];
                 }
             }
-            $testCountDelta = count($test_files) - 1;
-            $test_cnt += $testCountDelta;
-            if ($workerID && $testCountDelta !== 0) {
+            $test_count_delta = count($test_files) - 1;
+            $test_cnt += $test_count_delta;
+            if ($workerID && $test_count_delta !== 0) {
                 send_message($workerSock, [
                     "type" => "test_count_delta",
-                    "delta" => $testCountDelta,
+                    "delta" => $test_count_delta,
                 ]);
             }
             $test_idx--;
