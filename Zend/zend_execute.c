@@ -4498,32 +4498,34 @@ static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_arr
 
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /* {{{ */
 {
-	zval *zv = zend_hash_find(EG(function_table), name);
-
-	if (EXPECTED(zv != NULL)) {
-		zend_function *fbc = Z_FUNC_P(zv);
-
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache_i(&fbc->op_array);
-		}
-		return fbc;
+	zend_function *fbc;
+	if (UNEXPECTED(ZSTR_VAL(name)[0] == '\\')) {
+		/* Ignore leading "\" */
+		fbc = zend_hash_str_find_ptr_lc(EG(function_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+	} else {
+		fbc = zend_hash_find_ptr_lc(EG(function_table), name);
 	}
-	return NULL;
+
+	if (EXPECTED(fbc && fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		init_func_run_time_cache_i(&fbc->op_array);
+	}
+	return fbc;
 } /* }}} */
 
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len) /* {{{ */
 {
-	const zval *zv = zend_hash_str_find(EG(function_table), name, len);
-
-	if (EXPECTED(zv != NULL)) {
-		zend_function *fbc = Z_FUNC_P(zv);
-
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache_i(&fbc->op_array);
-		}
-		return fbc;
+	zend_function *fbc;
+	if (UNEXPECTED(name[0] == '\\')) {
+		/* Ignore leading "\" */
+		fbc = zend_hash_str_find_ptr_lc(EG(function_table), name + 1, len - 1);
+	} else {
+		fbc = zend_hash_str_find_ptr_lc(EG(function_table), name, len);
 	}
-	return NULL;
+
+	if (EXPECTED(fbc && fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		init_func_run_time_cache_i(&fbc->op_array);
+	}
+	return fbc;
 } /* }}} */
 
 ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
