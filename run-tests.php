@@ -688,10 +688,10 @@ function main(): void
             $pass_options_args[] = '-c';
             $pass_options_args[] = $conf_passed;
         } else {
-            $configurationFile = realpath($conf_passed);
-            $pass_options .= " -c '" . $configurationFile . "'";
+            $configuration_file = realpath($conf_passed);
+            $pass_options .= " -c '" . $configuration_file . "'";
             $pass_options_args[] = '-c';
-            $pass_options_args[] = (string) $configurationFile;
+            $pass_options_args[] = (string) $configuration_file;
         }
     }
 
@@ -1913,9 +1913,9 @@ function run_test(string $php, $file, array $env): string
         $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
-    $originalPhpExecutable = $php;
-    $phpExecutable = $php;
-    $sapiOptionArgs = [];
+    $orig_php_path = $php;
+    $php_path = $php;
+    $sapi_option_args = [];
     $php = escapeshellarg($php);
     $orig_php = $php;
 
@@ -1987,8 +1987,8 @@ TEST $file
         if (!$php_cgi) {
             return skip_test($tested, $tested_file, $shortname, 'CGI not available');
         }
-        $phpExecutable = $php_cgi;
-        $sapiOptionArgs[] = '-C';
+        $php_path = $php_cgi;
+        $sapi_option_args[] = '-C';
         $php = escapeshellarg($php_cgi) . ' -C ';
         $uses_cgi = true;
         if ($num_repeats > 1) {
@@ -1998,17 +1998,17 @@ TEST $file
 
     /* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
     $extra_options = '';
-    $extraOptionArgs = [];
+    $extra_option_args = [];
     if ($test->hasSection('PHPDBG')) {
         if (isset($phpdbg)) {
-            $phpExecutable = $phpdbg;
-            $sapiOptionArgs[] = '-qIb';
+            $php_path = $phpdbg;
+            $sapi_option_args[] = '-qIb';
             $php = escapeshellarg($phpdbg) . ' -qIb';
 
             // Additional phpdbg command line options for sections that need to
             // be run straight away. For example, EXTENSIONS, SKIPIF, CLEAN.
             $extra_options = '-rr';
-            $extraOptionArgs[] = '-rr';
+            $extra_option_args[] = '-rr';
         } else {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
         }
@@ -2210,7 +2210,7 @@ TEST $file
         }
     }
 
-    $testIniSettings = $ini_settings;
+    $test_ini_settings = $ini_settings;
     $ini_settings = settings2params($ini_settings);
 
     $env['TEST_PHP_EXTRA_ARGS'] = $pass_options . ' ' . $ini_settings;
@@ -2221,29 +2221,29 @@ TEST $file
 
     if ($test->sectionNotEmpty('SKIPIF')) {
         show_file_block('skip', $test->getSection('SKIPIF'));
-        $skipEnv = $env;
+        $skip_env = $env;
         if (!IS_WINDOWS) {
             unset(
-                $skipEnv['REQUEST_METHOD'],
-                $skipEnv['QUERY_STRING'],
-                $skipEnv['PATH_TRANSLATED'],
-                $skipEnv['SCRIPT_FILENAME'],
+                $skip_env['REQUEST_METHOD'],
+                $skip_env['QUERY_STRING'],
+                $skip_env['PATH_TRANSLATED'],
+                $skip_env['SCRIPT_FILENAME'],
             );
         }
 
         if ($valgrind) {
-            $skipEnv['USE_ZEND_ALLOC'] = '0';
-            $skipEnv['ZEND_DONT_UNLOAD_MODULES'] = 1;
+            $skip_env['USE_ZEND_ALLOC'] = '0';
+            $skip_env['ZEND_DONT_UNLOAD_MODULES'] = 1;
         }
 
         $junit->startTimer($shortname);
 
         $startTime = microtime(true);
         $commandLine = [
-            $phpExecutable,
-            ...$sapiOptionArgs,
+            $php_path,
+            ...$sapi_option_args,
             ...$pass_options_args,
-            ...$extraOptionArgs,
+            ...$extra_option_args,
             '-q',
             ...$orig_ini_settings_args,
             '-d',
@@ -2255,7 +2255,7 @@ TEST $file
             '-d',
             'display_startup_errors=0',
         ];
-        $output = $skipCache->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $skipEnv);
+        $output = $skipCache->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $skip_env);
 
         $time = microtime(true) - $startTime;
         $junit->stopTimer($shortname);
@@ -2585,25 +2585,25 @@ COMMAND $cmd
     $startTime = $hrtime[0] * 1000000000 + $hrtime[1];
 
     $stdin = $test->hasSection('STDIN') ? $test->getSection('STDIN') : null;
-    $useStructuredCommand = can_run_with_structured_test_command($test);
-    $testCommand = $useStructuredCommand
+    $use_structured_command = can_run_with_structured_test_command($test);
+    $test_command = $use_structured_command
         ? create_structured_test_command(
-            $phpExecutable,
-            $sapiOptionArgs,
+            $php_path,
+            $sapi_option_args,
             $pass_options_args,
-            $testIniSettings,
+            $test_ini_settings,
             $test_file,
             $num_repeats,
         )
         : $cmd;
     $out = system_with_timeout(
-        $testCommand,
+        $test_command,
         $env,
         $stdin,
         $captureStdIn,
         $captureStdOut,
         $captureStdErr,
-        $useStructuredCommand && $captureStdOut && $captureStdErr,
+        $use_structured_command && $captureStdOut && $captureStdErr,
     );
 
     $junit->stopTimer($shortname);
@@ -2626,8 +2626,8 @@ COMMAND $cmd
         save_text($test_clean, trim($test->getSection('CLEAN')), $temp_clean);
 
         if (!$no_clean) {
-            $cleanCommand = [
-                $originalPhpExecutable,
+            $clean_command = [
+                $orig_php_path,
                 ...$pass_options_args,
                 '-q',
                 ...$orig_ini_settings_args,
@@ -2637,16 +2637,16 @@ COMMAND $cmd
                 'opcache.file_cache_only=0',
                 $test_clean,
             ];
-            $cleanEnv = $env;
+            $clean_env = $env;
             if (!IS_WINDOWS) {
                 unset(
-                    $cleanEnv['REQUEST_METHOD'],
-                    $cleanEnv['QUERY_STRING'],
-                    $cleanEnv['PATH_TRANSLATED'],
-                    $cleanEnv['SCRIPT_FILENAME'],
+                    $clean_env['REQUEST_METHOD'],
+                    $clean_env['QUERY_STRING'],
+                    $clean_env['PATH_TRANSLATED'],
+                    $clean_env['SCRIPT_FILENAME'],
                 );
             }
-            $clean_output = system_with_timeout($cleanCommand, $cleanEnv);
+            $clean_output = system_with_timeout($clean_command, $clean_env);
         }
 
         if (!$cfg['keep']['clean']) {
