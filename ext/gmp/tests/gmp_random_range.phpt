@@ -12,18 +12,18 @@ $zero = gmp_init(0);
 try {
     var_dump(gmp_random_range(10, -10));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(gmp_random_range($plusTen, $minusTen));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_random_range($plusTen, $zero));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // If these error the test fails.
@@ -74,7 +74,7 @@ while (1) {
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($max)
-gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($max)
-gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($max)
+ValueError: gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($max)
+ValueError: gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($max)
+ValueError: gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($max)
 Done

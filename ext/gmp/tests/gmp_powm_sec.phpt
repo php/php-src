@@ -18,20 +18,20 @@ foreach ([0, -1] as $exp) {
     try {
         var_dump(gmp_powm_sec(4, $exp, 497));
     } catch (\ValueError $e) {
-        echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
 try {
     var_dump(gmp_powm_sec(4, 13, 0));
 } catch (\DivisionByZeroError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(gmp_powm_sec(4, 13, 496));
 } catch (\ValueError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";

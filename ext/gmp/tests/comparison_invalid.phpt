@@ -8,13 +8,13 @@ gmp
 try {
     var_dump("hapfegfbu" > gmp_init(0));
 } catch (\Error $e) {
-    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump((new DateTime()) > gmp_init(0));
 } catch (\Error $e) {
-    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
