@@ -15,7 +15,7 @@ foreach ([-1, 0, 1, 2] as $value) {
     try {
         var_dump(gmp_prevprime($value));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -23,7 +23,7 @@ $definitelyPrime = null;
 try {
     var_dump(gmp_prevprime(2, $definitelyPrime));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($definitelyPrime);
 
@@ -44,11 +44,11 @@ var_dump($definitelyPrime === (gmp_prob_prime($previousPrime) === 2));
 
 ?>
 --EXPECT--
-gmp_prevprime(): Argument #1 ($num) must be greater than 2
-gmp_prevprime(): Argument #1 ($num) must be greater than 2
-gmp_prevprime(): Argument #1 ($num) must be greater than 2
-gmp_prevprime(): Argument #1 ($num) must be greater than 2
-gmp_prevprime(): Argument #1 ($num) must be greater than 2
+ValueError: gmp_prevprime(): Argument #1 ($num) must be greater than 2
+ValueError: gmp_prevprime(): Argument #1 ($num) must be greater than 2
+ValueError: gmp_prevprime(): Argument #1 ($num) must be greater than 2
+ValueError: gmp_prevprime(): Argument #1 ($num) must be greater than 2
+ValueError: gmp_prevprime(): Argument #1 ($num) must be greater than 2
 NULL
 string(1) "2"
 string(1) "3"

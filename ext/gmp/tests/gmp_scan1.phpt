@@ -8,7 +8,7 @@ gmp
 try {
     var_dump(gmp_scan1("434234", -10));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump(gmp_scan1("434234", 1));
@@ -22,17 +22,17 @@ var_dump(gmp_scan1($n, 10));
 try {
     var_dump(gmp_scan1(array(), 200));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
-gmp_scan1(): Argument #2 ($start) must be between 0 and %d * %d
+ValueError: gmp_scan1(): Argument #2 ($start) must be between 0 and %d * %d
 int(1)
 int(12)
 int(9)
 int(-1)
 int(10)
-gmp_scan1(): Argument #1 ($num1) must be of type GMP|string|int, array given
+TypeError: gmp_scan1(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

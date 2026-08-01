@@ -12,13 +12,13 @@ var_dump($n ** 10);
 try {
     pow($n, -10);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     $n ** -10;
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -31,5 +31,5 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(4) "1024"
 }
-Exponent must be between 0 and %d
-Exponent must be between 0 and %d
+ValueError: Exponent must be between 0 and %d
+ValueError: Exponent must be between 0 and %d
