@@ -24,7 +24,7 @@ foreach ([Collator::SORT_REGULAR, Collator::SORT_STRING] as $flag) {
     try {
         var_dump($coll->sort($array, $flag));
     } catch (Throwable $e) {
-        echo get_class($e), ': ', $e->getMessage(), PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     var_dump(names($array));
 }
@@ -33,7 +33,7 @@ $array = ['b', new NoToString(), 'a'];
 try {
     var_dump($coll->sort($array, Collator::SORT_STRING));
 } catch (Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(names($array));
 ?>

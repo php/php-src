@@ -40,7 +40,7 @@ try {
         $workdir
     );
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
     if ($previous = $e->getPrevious()) {
         echo "Previous: ", $previous->getMessage(), "\n";
     }
@@ -59,5 +59,5 @@ $workdir = __DIR__.'/getPathname_exception';
 [ Found: %shello.txt ]
 [getPathname]
 string(%d) "%shello.txt"
-getPathname() must return a string
+UnexpectedValueException: getPathname() must return a string
 Previous: exception in getPathname()
