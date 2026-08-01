@@ -2,6 +2,9 @@
 
 #include "fpm_config.h"
 
+#include <errno.h>
+#include <inttypes.h>
+#include <limits.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -53,6 +56,40 @@ static inline bool fpm_unix_is_id(const char* name)
 	return strlen(name) == strspn(name, "0123456789");
 }
 
+static bool fpm_unix_parse_uid(struct fpm_worker_pool_s *wp, const char *name, uid_t *uid)
+{
+	uintmax_t max = (uid_t) -1 > (uid_t) 0
+		? (uintmax_t) ((uid_t) -2)
+		: (UINTMAX_C(1) << (sizeof(uid_t) * CHAR_BIT - 1)) - 1;
+
+	errno = 0;
+	uintmax_t value = strtoumax(name, NULL, 10);
+	if (errno == ERANGE || value > max) {
+		zlog(ZLOG_ERROR, "[pool %s] user ID '%s' is out of range", wp->config->name, name);
+		return false;
+	}
+
+	*uid = (uid_t) value;
+	return true;
+}
+
+static bool fpm_unix_parse_gid(struct fpm_worker_pool_s *wp, const char *name, gid_t *gid)
+{
+	uintmax_t max = (gid_t) -1 > (gid_t) 0
+		? (uintmax_t) ((gid_t) -2)
+		: (UINTMAX_C(1) << (sizeof(gid_t) * CHAR_BIT - 1)) - 1;
+
+	errno = 0;
+	uintmax_t value = strtoumax(name, NULL, 10);
+	if (errno == ERANGE || value > max) {
+		zlog(ZLOG_ERROR, "[pool %s] group ID '%s' is out of range", wp->config->name, name);
+		return false;
+	}
+
+	*gid = (gid_t) value;
+	return true;
+}
+
 static struct passwd *fpm_unix_get_passwd(struct fpm_worker_pool_s *wp, const char *name, int flags)
 {
 	struct passwd *pwd = getpwnam(name);
@@ -93,7 +130,14 @@ static inline bool fpm_unix_check_listen_address(struct fpm_worker_pool_s *wp, c
 
 static inline bool fpm_unix_check_passwd(struct fpm_worker_pool_s *wp, const char *name, int flags)
 {
-	return !name || fpm_unix_is_id(name) || fpm_unix_get_passwd(wp, name, flags);
+	if (!name || !*name) {
+		return true;
+	}
+	if (fpm_unix_is_id(name)) {
+		uid_t uid;
+		return fpm_unix_parse_uid(wp, name, &uid);
+	}
+	return fpm_unix_get_passwd(wp, name, flags) != NULL;
 }
 
 static struct group *fpm_unix_get_group(struct fpm_worker_pool_s *wp, const char *name, int flags)
@@ -109,7 +153,14 @@ static struct group *fpm_unix_get_group(struct fpm_worker_pool_s *wp, const char
 
 static inline bool fpm_unix_check_group(struct fpm_worker_pool_s *wp, const char *name, int flags)
 {
-	return !name || fpm_unix_is_id(name) || fpm_unix_get_group(wp, name, flags);
+	if (!name || !*name) {
+		return true;
+	}
+	if (fpm_unix_is_id(name)) {
+		gid_t gid;
+		return fpm_unix_parse_gid(wp, name, &gid);
+	}
+	return fpm_unix_get_group(wp, name, flags) != NULL;
 }
 
 bool fpm_unix_test_config(struct fpm_worker_pool_s *wp)
@@ -133,8 +184,8 @@ int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 	/* uninitialized */
 	wp->socket_acl  = NULL;
 #endif
-	wp->socket_uid = -1;
-	wp->socket_gid = -1;
+	wp->socket_uid = (uid_t) -1;
+	wp->socket_gid = (gid_t) -1;
 	wp->socket_mode = 0660;
 
 	if (!c) {
@@ -252,7 +303,9 @@ int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (c->listen_owner && *c->listen_owner) {
 		if (fpm_unix_is_id(c->listen_owner)) {
-			wp->socket_uid = strtoul(c->listen_owner, 0, 10);
+			if (!fpm_unix_parse_uid(wp, c->listen_owner, &wp->socket_uid)) {
+				return -1;
+			}
 		} else {
 			struct passwd *pwd;
 
@@ -268,7 +321,9 @@ int fpm_unix_resolve_socket_permissions(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (c->listen_group && *c->listen_group) {
 		if (fpm_unix_is_id(c->listen_group)) {
-			wp->socket_gid = strtoul(c->listen_group, 0, 10);
+			if (!fpm_unix_parse_gid(wp, c->listen_group, &wp->socket_gid)) {
+				return -1;
+			}
 		} else {
 			struct group *grp;
 
@@ -325,7 +380,7 @@ int fpm_unix_set_socket_permissions(struct fpm_worker_pool_s *wp, const char *pa
 	/* When listen.users and listen.groups not configured, continue with standard right */
 #endif
 
-	if (wp->socket_uid != -1 || wp->socket_gid != -1) {
+	if (wp->socket_uid != (uid_t) -1 || wp->socket_gid != (gid_t) -1) {
 		if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to chown() the socket '%s'", wp->config->name, wp->config->listen_address);
 			return -1;
@@ -354,7 +409,9 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (is_root) {
 		if (wp->config->user && *wp->config->user) {
 			if (fpm_unix_is_id(wp->config->user)) {
-				wp->set_uid = strtoul(wp->config->user, 0, 10);
+				if (!fpm_unix_parse_uid(wp, wp->config->user, &wp->set_uid)) {
+					return -1;
+				}
 				pwd = getpwuid(wp->set_uid);
 				if (pwd) {
 					wp->set_gid = pwd->pw_gid;
@@ -378,7 +435,9 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 
 		if (wp->config->group && *wp->config->group) {
 			if (fpm_unix_is_id(wp->config->group)) {
-				wp->set_gid = strtoul(wp->config->group, 0, 10);
+				if (!fpm_unix_parse_gid(wp, wp->config->group, &wp->set_gid)) {
+					return -1;
+				}
 			} else {
 				struct group *grp;
 
@@ -476,17 +535,17 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 		if (wp->set_gid) {
 			if (0 > setgid(wp->set_gid)) {
-				zlog(ZLOG_SYSERROR, "[pool %s] failed to setgid(%d)", wp->config->name, wp->set_gid);
+				zlog(ZLOG_SYSERROR, "[pool %s] failed to setgid(%" PRIuMAX ")", wp->config->name, (uintmax_t) wp->set_gid);
 				return -1;
 			}
 		}
 		if (wp->set_uid) {
 			if (0 > initgroups(wp->set_user ? wp->set_user : wp->config->user, wp->set_gid)) {
-				zlog(ZLOG_SYSERROR, "[pool %s] failed to initgroups(%s, %d)", wp->config->name, wp->config->user, wp->set_gid);
+				zlog(ZLOG_SYSERROR, "[pool %s] failed to initgroups(%s, %" PRIuMAX ")", wp->config->name, wp->config->user, (uintmax_t) wp->set_gid);
 				return -1;
 			}
 			if (0 > setuid(wp->set_uid)) {
-				zlog(ZLOG_SYSERROR, "[pool %s] failed to setuid(%d)", wp->config->name, wp->set_uid);
+				zlog(ZLOG_SYSERROR, "[pool %s] failed to setuid(%" PRIuMAX ")", wp->config->name, (uintmax_t) wp->set_uid);
 				return -1;
 			}
 		}
