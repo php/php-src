@@ -19,7 +19,7 @@ function ut_main()
         try {
             $call();
         } catch (\ValueError $e) {
-            echo $e->getMessage(), PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
     }
 }
@@ -28,13 +28,13 @@ include_once 'ut_common.inc';
 ut_run();
 ?>
 --EXPECT--
-Locale::getDisplayKeyword(): Argument #1 ($keyword) must not contain any null bytes
-Locale::getDisplayKeyword(): Argument #2 ($displayLocale) must not contain any null bytes
-Locale::getDisplayKeywordValue(): Argument #1 ($locale) must not contain any null bytes
-Locale::getDisplayKeywordValue(): Argument #2 ($keyword) must not contain any null bytes
-Locale::getDisplayKeywordValue(): Argument #3 ($displayLocale) must not contain any null bytes
-locale_get_display_keyword(): Argument #1 ($keyword) must not contain any null bytes
-locale_get_display_keyword(): Argument #2 ($displayLocale) must not contain any null bytes
-locale_get_display_keyword_value(): Argument #1 ($locale) must not contain any null bytes
-locale_get_display_keyword_value(): Argument #2 ($keyword) must not contain any null bytes
-locale_get_display_keyword_value(): Argument #3 ($displayLocale) must not contain any null bytes
+ValueError: Locale::getDisplayKeyword(): Argument #1 ($keyword) must not contain any null bytes
+ValueError: Locale::getDisplayKeyword(): Argument #2 ($displayLocale) must not contain any null bytes
+ValueError: Locale::getDisplayKeywordValue(): Argument #1 ($locale) must not contain any null bytes
+ValueError: Locale::getDisplayKeywordValue(): Argument #2 ($keyword) must not contain any null bytes
+ValueError: Locale::getDisplayKeywordValue(): Argument #3 ($displayLocale) must not contain any null bytes
+ValueError: locale_get_display_keyword(): Argument #1 ($keyword) must not contain any null bytes
+ValueError: locale_get_display_keyword(): Argument #2 ($displayLocale) must not contain any null bytes
+ValueError: locale_get_display_keyword_value(): Argument #1 ($locale) must not contain any null bytes
+ValueError: locale_get_display_keyword_value(): Argument #2 ($keyword) must not contain any null bytes
+ValueError: locale_get_display_keyword_value(): Argument #3 ($displayLocale) must not contain any null bytes

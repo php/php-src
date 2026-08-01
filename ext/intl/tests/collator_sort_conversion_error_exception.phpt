@@ -19,7 +19,7 @@ try {
     $coll->sort($array, Collator::SORT_STRING);
     echo 'no exception', PHP_EOL;
 } catch (IntlException $e) {
-    echo get_class($e), ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($coll->getErrorCode() === U_INVALID_CHAR_FOUND);
 var_dump($array[0], $array[1] instanceof BadString, $array[2]);
@@ -29,7 +29,7 @@ try {
     collator_asort($coll, $array, Collator::SORT_STRING);
     echo 'no exception', PHP_EOL;
 } catch (IntlException $e) {
-    echo get_class($e), ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(array_keys($array));
 ?>
