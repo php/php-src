@@ -9,8 +9,8 @@ calendar
 try {
     cal_to_jd(-1, 8, 26, 74);
 } catch (ValueError $ex) {
-    echo "{$ex->getMessage()}\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-cal_to_jd(): Argument #1 ($calendar) must be a valid calendar ID
+ValueError: cal_to_jd(): Argument #1 ($calendar) must be a valid calendar ID
