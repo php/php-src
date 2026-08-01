@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     collator_asort() to report UTF-8/UTF-16 conversion errors through the intl
     error handler instead of emitting a warning and continuing with an empty
     string. (Weilin Du)
+  . Fixed IntlListFormatter::__construct() leaving stale global error state
+    after successful calls. (Weilin Du)
 
 - Reflection:
   . Added ReflectionAttribute::inNamespace(),
