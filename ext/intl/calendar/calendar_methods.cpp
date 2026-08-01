@@ -70,14 +70,13 @@ U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 		0 );
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_create_instance)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(intlcal_create_instance)
 {
 	zend_object *timezone_object = nullptr;
 	zend_string *timezone_string = nullptr;
 	char	        *locale_str	= NULL;
 	size_t		locale_len      = 0;
 	UErrorCode	status			= U_ZERO_ERROR;
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -158,7 +157,7 @@ private:
 };
 UOBJECT_DEFINE_RTTI_IMPLEMENTATION(BugStringCharEnumeration)
 
-U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(intlcal_get_keyword_values_for_locale)
 {
 	UErrorCode	status = U_ZERO_ERROR;
 	char		*key,
@@ -166,7 +165,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 	size_t			key_len,
 				locale_len;
 	bool	commonly_used;
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STRING(key, key_len)
@@ -186,19 +184,15 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 	IntlIterator_from_StringEnumeration(se, return_value);
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_now)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(intlcal_get_now)
 {
-	intl_error_reset(NULL);
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_DOUBLE((double)Calendar::getNow());
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(intlcal_get_available_locales)
 {
-	intl_error_reset(NULL);
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	int32_t count;
@@ -1018,7 +1012,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 	RETURN_TRUE;
 }
 
-U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(intlcal_from_date_time)
 {
 	zend_object     *date_obj;
 	zend_string     *date_str;
@@ -1029,7 +1023,6 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	TimeZone		*timeZone;
 	UErrorCode		status = U_ZERO_ERROR;
 	Calendar        *cal;
-	intl_error_reset(NULL);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(date_obj, php_date_get_date_ce(), date_str)
