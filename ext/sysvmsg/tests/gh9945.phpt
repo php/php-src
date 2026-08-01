@@ -12,13 +12,13 @@ if (PHP_OS_FAMILY !== 'Linux') die('skip only for platforms with 32-bit key_t');
 try {
     msg_queue_exists(0x100000000);
 } catch (ValueError $exception) {
-    echo $exception::class, ": ", $exception->getMessage(), "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     msg_get_queue(0x100000000);
 } catch (ValueError $exception) {
-    echo $exception::class, ": ", $exception->getMessage(), "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
