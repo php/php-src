@@ -94,6 +94,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21036 (mb_ereg_search_getregs() crashes after mb_eregi()
     invalidates the regex cache). (Matthias Goergens)
 
+- PCRE:
+  . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
+    now forbidden. (Arnaud)
+
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
