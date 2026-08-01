@@ -770,6 +770,10 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 			}
 		}
 	}
+	/* ASSIGN_OBJ carries the elision flag on its following OP_DATA opline. */
+	if (opline->opcode == ZEND_ASSIGN_OBJ && ((opline + 1)->extended_value & ZEND_ASSIGN_OBJ_SKIP_TYPE_CHECK)) {
+		fprintf(stderr, " (skip type check)");
+	}
 }
 
 ZEND_API void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)

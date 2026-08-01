@@ -49,7 +49,7 @@ MyClass::__construct:
 0001 CV1($bar) = RECV_INIT 2 int(0)
 0002 ASSIGN_OBJ THIS string("foo")
 0003 OP_DATA CV0($foo)
-0004 ASSIGN_OBJ THIS string("bar")
+0004 ASSIGN_OBJ THIS string("bar") (skip type check)
 0005 OP_DATA CV1($bar)
 0006 RETURN null
 
