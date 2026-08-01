@@ -20,20 +20,29 @@ class MySQLPDOTest extends PDOTest {
             $attr = is_string($attr) && strlen($attr) ? unserialize($attr) : null;
         }
 
-        if ($useConnectMethod) {
-            $db = $classname::connect($dsn, $user, $pass, $attr);
-        } else {
-            $db = new $classname($dsn, $user, $pass, $attr);
+        if (getenv('TEST_PHP_EVALUATING_SKIPIF') !== '1') {
+            return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attr);
         }
 
-        if (!$db) {
-            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+        $database = null;
+        $exception = null;
+        $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attr];
+
+        $reason = ProbeCache::getFailure('pdo', $configuration, static function () use (&$database, &$exception, $classname, $useConnectMethod, $dsn, $user, $pass, $attr): ?string {
+            try {
+                $database = self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attr);
+                return null;
+            } catch (PDOException $e) {
+                $exception = $e;
+                return $e->getMessage();
+            }
+        });
+
+        if (is_string($reason)) {
+            throw $exception ?? new PDOException($reason);
         }
 
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
-
-        return $db;
+        return $database;
     }
 
     static function factoryWithAttr($attr) {
@@ -168,7 +177,7 @@ class MySQLPDOTest extends PDOTest {
 
     static function skip() {
         try {
-            $db = self::factory();
+            self::factory();
         } catch (PDOException $e) {
             die('skip could not connect');
         }
@@ -211,6 +220,23 @@ class MySQLPDOTest extends PDOTest {
         $db = self::factory();
         $message = $message ?? 'skip Transactional engine not found';
         if (false == self::detect_transactional_mysql_engine($db)) die($message);
+    }
+
+    private static function createConnection($classname, bool $useConnectMethod, $dsn, $user, $pass, $attr) {
+        if ($useConnectMethod) {
+            $db = $classname::connect($dsn, $user, $pass, $attr);
+        } else {
+            $db = new $classname($dsn, $user, $pass, $attr);
+        }
+
+        if (!$db) {
+            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+        }
+
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+
+        return $db;
     }
 }
 ?>

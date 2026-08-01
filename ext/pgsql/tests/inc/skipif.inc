@@ -8,15 +8,22 @@
 
 include("config.inc");
 include("lcmess.inc");
+require_once dirname(__DIR__, 4) . '/tests/probe_cache.inc';
 
 if (getenv("SKIP_REPEAT")) {
     // pgsql tests are order-dependent.
     // We should probably change that, but in the meantime do not allow repetition.
     die("skip Cannot repeat pgsql tests");
 }
-$conn = @pg_connect($conn_str);
-if (!$conn) {
-    die("skip could not connect\n");
+$conn = null;
+
+$reason = ProbeCache::getFailure('pgsql', [$conn_str], static function () use (&$conn, $conn_str): ?string {
+    $conn = @pg_connect($conn_str);
+    return $conn ? null : 'could not connect';
+});
+
+if (is_string($reason)) {
+    die("skip $reason\n");
 }
 
 function skip_server_version($version, $op = '<')

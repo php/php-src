@@ -9,7 +9,7 @@ if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 
-$db = PDOTest::factoryForSkip();
+$db = PDOTest::factory();
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql') die('skip pgsql has its own test for this feature');
 if (!@$db->getAttribute(PDO::ATTR_EMULATE_PREPARES) && !@$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true)) die('skip driver cannot emulate prepared statements');
 ?>

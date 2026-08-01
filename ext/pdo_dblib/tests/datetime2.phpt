@@ -5,7 +5,7 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
-$db = skipIfNoDbConnection();
+$db = getDbConnection();
 if (in_array($db->getAttribute(Pdo\Dblib::ATTR_TDS_VERSION), ['4.2', '4.6', '5.0', '6.0', '7.0', '7.1', '7.2'])) die('skip feature unsupported by this TDS version');
 ?>
 --FILE--

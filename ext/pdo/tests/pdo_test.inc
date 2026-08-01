@@ -1,6 +1,8 @@
 <?php
 # PDO test framework utilities
 
+require_once dirname(__DIR__, 3) . '/tests/probe_cache.inc';
+
 if (getenv('PDOTEST_DSN') === false) {
     $common = '';
     $append = false;
@@ -16,14 +18,6 @@ if (getenv('PDOTEST_DSN') === false) {
 }
 
 class PDOTest {
-    private static function getAttributes(string $environmentVariable): ?array {
-        $attributes = getenv($environmentVariable);
-        if (is_string($attributes) && strlen($attributes)) {
-            return unserialize($attributes);
-        }
-        return null;
-    }
-
     // create an instance of the PDO driver, based on
     // the current environment
     static function factory($classname = PDO::class, bool $useConnectMethod = false, ?array $attributes = null) {
@@ -32,97 +26,47 @@ class PDOTest {
         $pass = getenv('PDOTEST_PASS');
         if ($attributes === null) {
             $attributes = self::getAttributes('PDOTEST_ATTR');
+            if (getenv('TEST_PHP_EVALUATING_SKIPIF') === '1') {
+                $skipAttributes = self::getAttributes('PDOTEST_SKIP_ATTR');
+                if ($skipAttributes !== null) {
+                    $attributes = $skipAttributes + ($attributes ?? []);
+                }
+            }
         }
 
         if ($user === false) $user = NULL;
         if ($pass === false) $pass = NULL;
 
-        if ($useConnectMethod) {
-            $db = $classname::connect($dsn, $user, $pass, $attributes);
-        } else {
-            $db = new $classname($dsn, $user, $pass, $attributes);
+        if (getenv('TEST_PHP_EVALUATING_SKIPIF') !== '1') {
+            return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
         }
 
-        if (!$db) {
-            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+        $database = null;
+        $exception = null;
+        $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attributes];
+
+        $reason = ProbeCache::getFailure('pdo', $configuration, static function () use (&$database, &$exception, $classname, $useConnectMethod, $dsn, $user, $pass, $attributes): ?string {
+            try {
+                $database = self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
+                return null;
+            } catch (PDOException $e) {
+                $exception = $e;
+                return $e->getMessage();
+            }
+        });
+
+        if (is_string($reason)) {
+            throw $exception ?? new PDOException($reason);
         }
-        // Ignore errors about non-existent tables
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
-        $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-        return $db;
-    }
-
-    private static function getSkipCacheFile(): ?string {
-        $directory = getenv('TEST_PHP_SHARED_CACHE_DIR');
-        if (!is_string($directory) || !is_dir($directory)) {
-            return null;
-        }
-
-        $configuration = [
-            getenv('PDOTEST_DSN'),
-            getenv('PDOTEST_USER'),
-            getenv('PDOTEST_PASS'),
-            getenv('PDOTEST_ATTR'),
-            getenv('PDOTEST_SKIP_ATTR'),
-        ];
-        return $directory . DIRECTORY_SEPARATOR . 'pdo-' . hash('sha256', serialize($configuration));
-    }
-
-    static function factoryForSkip() {
-        $attributes = self::getAttributes('PDOTEST_ATTR');
-        $skipAttributes = self::getAttributes('PDOTEST_SKIP_ATTR');
-        if ($skipAttributes !== null) {
-            $attributes = $skipAttributes + ($attributes ?? []);
-        }
-        return PDOTest::factory(PDO::class, false, $attributes);
-    }
-
-    private static function connectOrSkip(): void {
-        try {
-            self::factoryForSkip();
-        } catch (PDOException $e) {
-            die("skip " . $e->getMessage());
-        }
+        return $database;
     }
 
     static function skip() {
-        $cacheFile = self::getSkipCacheFile();
-        if ($cacheFile === null) {
-            self::connectOrSkip();
-            return;
-        }
-
-        $cache = @fopen($cacheFile, 'c+');
-        if ($cache === false || !flock($cache, LOCK_EX)) {
-            if (is_resource($cache)) {
-                fclose($cache);
-            }
-            self::connectOrSkip();
-            return;
-        }
-
-        $cached = stream_get_contents($cache);
-        $reason = $cached !== '' ? $cached : null;
-        if ($reason === null) {
-            // Only failures are shared; successful checks still create their own connection.
-            try {
-                self::factoryForSkip();
-            } catch (PDOException $e) {
-                $reason = $e->getMessage();
-                rewind($cache);
-                ftruncate($cache, 0);
-                fwrite($cache, $reason);
-                fflush($cache);
-            }
-        }
-
-        flock($cache, LOCK_UN);
-        fclose($cache);
-        if (is_string($reason)) {
-            die("skip $reason");
+        try {
+            self::factory();
+        } catch (PDOException $e) {
+            die("skip " . $e->getMessage());
         }
     }
 
@@ -162,6 +106,33 @@ class PDOTest {
             "firebird" => @$db->exec("DROP TABLE $tableName"),
             default => $db->exec("DROP TABLE IF EXISTS $tableName"),
         };
+    }
+
+    private static function createConnection($classname, bool $useConnectMethod, $dsn, $user, $pass, ?array $attributes) {
+        if ($useConnectMethod) {
+            $db = $classname::connect($dsn, $user, $pass, $attributes);
+        } else {
+            $db = new $classname($dsn, $user, $pass, $attributes);
+        }
+
+        if (!$db) {
+            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+        }
+        // Ignore errors about non-existent tables
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+        $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
+        return $db;
+    }
+
+    private static function getAttributes(string $environmentVariable): ?array {
+        $attributes = getenv($environmentVariable);
+        if (is_string($attributes) && strlen($attributes)) {
+            return unserialize($attributes);
+        }
+        return null;
     }
 }
 /** See https://stackoverflow.com/a/3732466 */

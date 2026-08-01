@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__DIR__, 4) . '/tests/probe_cache.inc';
+
 function get_default_host(): string {
     static $host = null;
     if ($host === null) {
@@ -110,12 +112,33 @@ function default_mysqli_connect(): \mysqli{
 function mysqli_check_skip_test(): void {
     mysqli_connect_or_skip();
 }
-function mysqli_connect_or_skip() {
-    try {
-        return default_mysqli_connect();
-    } catch (\mysqli_sql_exception) {
-        die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+
+function mysqli_connect_or_skip(): mysqli {
+    $connection = null;
+    $configuration = [
+        get_default_host(),
+        get_default_port(),
+        get_default_user(),
+        get_default_password(),
+        get_default_database(),
+        get_default_socket(),
+        get_environment_connection_flags(),
+    ];
+
+    $reason = ProbeCache::getFailure('mysqli', $configuration, static function () use (&$connection): ?string {
+        try {
+            $connection = default_mysqli_connect();
+            return null;
+        } catch (mysqli_sql_exception $e) {
+            return sprintf("Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error());
+        }
+    });
+
+    if (is_string($reason)) {
+        die("skip $reason");
     }
+
+    return $connection;
 }
 function have_innodb(mysqli $link): bool {
     $res = $link->query("SELECT SUPPORT FROM INFORMATION_SCHEMA.ENGINES WHERE ENGINE = 'InnoDB'");
@@ -123,11 +146,7 @@ function have_innodb(mysqli $link): bool {
     return $supported === 'YES' || $supported === 'DEFAULT';
 }
 function mysqli_check_innodb_support_skip_test(): void {
-    try {
-        $link = default_mysqli_connect();
-    } catch (\mysqli_sql_exception) {
-        die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
-    }
+    $link = mysqli_connect_or_skip();
     if (! have_innodb($link)) {
         die(sprintf("skip Needs InnoDB support"));
     }

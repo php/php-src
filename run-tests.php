@@ -232,19 +232,7 @@ function main(): void
         }
     }
 
-    // Tests may use this private directory to share results within this run.
-    unset($environment['TEST_PHP_SHARED_CACHE_DIR']);
-    $sharedCacheDirectory = getenv('TEST_PHP_SHARED_CACHE') !== '0'
-        ? create_shared_test_cache_directory()
-        : null;
-    if ($sharedCacheDirectory !== null) {
-        $environment['TEST_PHP_SHARED_CACHE_DIR'] = $sharedCacheDirectory;
-        register_shutdown_function(static function () use ($sharedCacheDirectory): void {
-            if (is_dir($sharedCacheDirectory)) {
-                rmdir_recursive($sharedCacheDirectory);
-            }
-        });
-    }
+    SharedProbeCache::setUp($environment);
 
     if (IS_WINDOWS && empty($environment["SystemRoot"])) {
         $environment["SystemRoot"] = getenv("SystemRoot");
@@ -1087,24 +1075,59 @@ function get_file_cache_dir(): string
     return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'php-run-tests-file-cache';
 }
 
-function create_shared_test_cache_directory(): ?string
+final class SharedProbeCache
 {
-    $temporaryDirectory = sys_get_temp_dir();
-    if ($temporaryDirectory === '') {
+    private string $directory;
+
+    private function __construct(string $directory)
+    {
+        $this->directory = $directory;
+    }
+
+    public static function setUp(array &$environment): void
+    {
+        unset($environment['TEST_PHP_SHARED_CACHE_DIR']);
+        if (getenv('TEST_PHP_SHARED_CACHE') === '0') {
+            return;
+        }
+
+        $cache = self::create();
+        if ($cache === null) {
+            return;
+        }
+
+        $environment['TEST_PHP_SHARED_CACHE_DIR'] = $cache->directory;
+        register_shutdown_function(static function () use ($cache): void {
+            $cache->cleanup();
+        });
+    }
+
+    private static function create(): ?self
+    {
+        $temporaryDirectory = sys_get_temp_dir();
+        if ($temporaryDirectory === '') {
+            return null;
+        }
+
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $directory = $temporaryDirectory
+                . DIRECTORY_SEPARATOR
+                . 'php-run-tests-'
+                . bin2hex(random_bytes(8));
+            if (@mkdir($directory, 0700)) {
+                return new self($directory);
+            }
+        }
+
         return null;
     }
 
-    for ($attempt = 0; $attempt < 3; $attempt++) {
-        $directory = $temporaryDirectory
-            . DIRECTORY_SEPARATOR
-            . 'php-run-tests-'
-            . bin2hex(random_bytes(8));
-        if (@mkdir($directory, 0700)) {
-            return $directory;
+    private function cleanup(): void
+    {
+        if (is_dir($this->directory)) {
+            rmdir_recursive($this->directory);
         }
     }
-
-    return null;
 }
 
 function rmdir_recursive($dir)
@@ -3803,6 +3826,7 @@ class SkipCache
         }
 
         save_text($checkFile, $code, $tempFile);
+        $env['TEST_PHP_EVALUATING_SKIPIF'] = '1';
         $command[] = $checkFile;
         $result = trim(system_with_timeout($command, $env));
         if (strpos($result, 'nocache') === 0) {

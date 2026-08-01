@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__DIR__, 3) . '/tests/probe_cache.inc';
+
 // bug #72969 reflects a bug with FreeTDS, not with pdo_dblib
 // this function will version detect so the relevant tests can XFAILIF
 // assume this bug isn't present if not using FreeTDS
@@ -41,25 +43,35 @@ function setAttributes(PDO $db) {
 }
 
 function getDbConnection(string $class = PDO::class, ?array $attributes = null) {
+    $connectionAttributes = $attributes;
+    $evaluatingSkipif = getenv('TEST_PHP_EVALUATING_SKIPIF') === '1';
+    if ($evaluatingSkipif && $connectionAttributes === null && getenv('PDO_DBLIB_TEST_DSN') === false) {
+        $connectionAttributes = [Pdo\Dblib::ATTR_CONNECTION_TIMEOUT => 1];
+    }
     [$dsn, $user, $pass] = getCredentials();
 
-    try {
-        $db = new $class($dsn, $user, $pass, $attributes);
-        if ($attributes === null) {
-            setAttributes($db);
+    $db = null;
+    $probe = static function () use (&$db, $class, $dsn, $user, $pass, $attributes, $connectionAttributes): ?string {
+        try {
+            $db = new $class($dsn, $user, $pass, $connectionAttributes);
+            if ($attributes === null) {
+                setAttributes($db);
+            }
+            return null;
+        } catch (PDOException $e) {
+            return $e->getMessage();
         }
-    } catch (PDOException $e) {
-        die('skip ' . $e->getMessage());
+    };
+
+    $reason = $evaluatingSkipif
+        ? ProbeCache::getFailure('pdo', [$class, false, $dsn, $user, $pass, $connectionAttributes], $probe)
+        : $probe();
+
+    if (is_string($reason)) {
+        die('skip ' . $reason);
     }
 
     return $db;
-}
-
-function skipIfNoDbConnection(): PDO {
-    $attributes = getenv('PDO_DBLIB_TEST_DSN') === false
-        ? [Pdo\Dblib::ATTR_CONNECTION_TIMEOUT => 1]
-        : null;
-    return getDbConnection(PDO::class, $attributes);
 }
 
 function connectToDb() {
