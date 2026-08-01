@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21036 (mb_ereg_search_getregs() crashes after mb_eregi()
     invalidates the regex cache). (Matthias Goergens)
 
+- Opcache:
+  . Fixed bug GH-22857 (Function JIT emits wrong code for FETCH_OBJ_FUNC_ARG on a
+    property hook getter, losing register-held variables). (Zhao Hao)
+
 - PCRE:
   . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
     now forbidden. (Arnaud)
@@ -29,6 +33,9 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
+- SQLite:
+  . Fix leak when trying to close db if blob stream is still open. (ndossche)
+
 - Streams:
   . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
     $this->stream during the close flush). (iliaal)
@@ -36,10 +43,6 @@ PHP                                                                        NEWS
 - Sysvshm:
   . Fixed out-of-bounds write when shm_attach() opens an existing segment with
     a size larger than the segment actually is. (David Carlier)
-
-- Opcache:
-  . Fixed bug GH-22857 (Function JIT emits wrong code for FETCH_OBJ_FUNC_ARG on a
-    property hook getter, losing register-held variables). (Zhao Hao)
 
 30 Jul 2026, PHP 8.4.24
 
