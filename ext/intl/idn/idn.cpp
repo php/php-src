@@ -107,6 +107,8 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	variant = INTL_IDN_VARIANT_UTS46;
 	zval *idna_info = NULL;
 
+	intl_error_reset(NULL);
+
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(domain)
 		Z_PARAM_OPTIONAL
@@ -140,7 +142,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 
 /* {{{ Converts an Unicode domain to ASCII representation, as defined in the IDNA RFC */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(idn_to_ascii)
+U_CFUNC PHP_FUNCTION(idn_to_ascii)
 {
 	php_intl_idn_handoff(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTL_IDN_TO_ASCII);
 }
@@ -148,7 +150,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(idn_to_ascii)
 
 
 /* {{{ Converts an ASCII representation of the domain to Unicode (UTF-8), as defined in the IDNA RFC */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(idn_to_utf8)
+U_CFUNC PHP_FUNCTION(idn_to_utf8)
 {
 	php_intl_idn_handoff(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTL_IDN_TO_UTF8);
 }

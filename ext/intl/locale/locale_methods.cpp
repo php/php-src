@@ -481,6 +481,8 @@ static void get_icu_value_src_php( const char* tag_name, INTERNAL_FUNCTION_PARAM
 
 	UErrorCode  status          	= U_ZERO_ERROR;
 
+	intl_error_reset( NULL );
+
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(loc_name, loc_name_len)
 	ZEND_PARSE_PARAMETERS_END();
@@ -520,21 +522,21 @@ static void get_icu_value_src_php( const char* tag_name, INTERNAL_FUNCTION_PARAM
 /* }}} */
 
 /* {{{ gets the script for the $locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_script)
+U_CFUNC PHP_FUNCTION( locale_get_script )
 {
 	get_icu_value_src_php( LOC_SCRIPT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the region for the $locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_region)
+U_CFUNC PHP_FUNCTION( locale_get_region )
 {
 	get_icu_value_src_php( LOC_REGION_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the primary language for the $locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_primary_language)
+U_CFUNC PHP_FUNCTION(locale_get_primary_language )
 {
 	get_icu_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
@@ -564,6 +566,8 @@ static void get_icu_disp_value_src_php( const char* tag_name, INTERNAL_FUNCTION_
 	zend_string* u8str;
 
 	char*       msg             	= NULL;
+
+	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(loc_name, loc_name_len)
@@ -690,6 +694,8 @@ static void get_icu_disp_keyword_value_src_php(const char* tag_name, INTERNAL_FU
 	zend_string* u8str;
 	char*       msg                 = NULL;
 
+	intl_error_reset( NULL );
+
 	if (strcmp(tag_name, DISP_KEYWORD) == 0) {
 		ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_PATH(keyword_name, keyword_name_len)
@@ -769,28 +775,28 @@ static void get_icu_disp_keyword_value_src_php(const char* tag_name, INTERNAL_FU
 /* }}} */
 
 /* {{{ gets the name for the $locale in $in_locale or default_locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_display_name)
+U_CFUNC PHP_FUNCTION(locale_get_display_name)
 {
 	get_icu_disp_value_src_php( DISP_NAME , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the language for the $locale in $in_locale or default_locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_display_language)
+U_CFUNC PHP_FUNCTION(locale_get_display_language)
 {
 	get_icu_disp_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the script for the $locale in $in_locale or default_locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_display_script)
+U_CFUNC PHP_FUNCTION(locale_get_display_script)
 {
 	get_icu_disp_value_src_php( LOC_SCRIPT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the region for the $locale in $in_locale or default_locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_display_region)
+U_CFUNC PHP_FUNCTION(locale_get_display_region)
 {
 	get_icu_disp_value_src_php( LOC_REGION_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
@@ -804,21 +810,21 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_display_region)
 * proto static string get_display_variant($locale, $in_locale = null)
 * gets the variant for the $locale in $in_locale or default_locale
 */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_display_variant)
+U_CFUNC PHP_FUNCTION(locale_get_display_variant)
 {
 	get_icu_disp_value_src_php( LOC_VARIANT_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
 /* }}} */
 
 /* {{{ gets the keyword display label in $in_locale or default_locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_display_keyword)
+U_CFUNC PHP_FUNCTION(locale_get_display_keyword)
 {
 	get_icu_disp_keyword_value_src_php(DISP_KEYWORD, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ gets the keyword value display label in $in_locale or default_locale */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_display_keyword_value)
+U_CFUNC PHP_FUNCTION(locale_get_display_keyword_value)
 {
 	get_icu_disp_keyword_value_src_php(DISP_KEYWORD_VALUE, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -899,7 +905,7 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_keywords)
  /* {{{ @return string the canonicalized locale
  * }}} */
  /* {{{ @param string $locale	The locale string to canonicalize */
-PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_canonicalize)
+U_CFUNC PHP_FUNCTION(locale_canonicalize)
 {
 	get_icu_value_src_php( LOC_CANONICALIZE_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
