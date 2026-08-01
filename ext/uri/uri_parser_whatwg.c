@@ -152,7 +152,7 @@ ZEND_ATTRIBUTE_NONNULL static bool get_reason_from_error_type(const lxb_url_erro
  * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum.
  * The result is passed by reference to the errors parameter.
  */
-ZEND_ATTRIBUTE_NONNULL static const char *fill_errors_inner(zval *errors)
+ZEND_ATTRIBUTE_NONNULL static const char *fill_errors_inner(HashTable *errors)
 {
 	const char *result = NULL;
 
@@ -177,7 +177,7 @@ ZEND_ATTRIBUTE_NONNULL static const char *fill_errors_inner(zval *errors)
 			result = error_str;
 		}
 
-		add_next_index_zval(errors, &error);
+		zend_hash_next_index_insert(errors, &error);
 	}
 
 	return result;
@@ -198,7 +198,7 @@ ZEND_ATTRIBUTE_NONNULL static const char *fill_errors(zval *errors)
 
 	array_init_size(errors, log_len);
 
-	return fill_errors_inner(errors);
+	return fill_errors_inner(Z_ARRVAL_P(errors));
 }
 
 static void throw_invalid_url_exception_during_write(zval *errors, const char *component)
@@ -890,7 +890,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors(zval *erro
 		array_init_size(errors, log_len);
 	}
 
-	fill_errors_inner(errors);
+	fill_errors_inner(Z_ARRVAL_P(errors));
 }
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_build_from_zval(
