@@ -1,7 +1,5 @@
 --TEST--
 Test semi-reserved words as class constants
---INI--
-error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 
@@ -162,7 +160,8 @@ echo Obj::__NAMESPACE__, PHP_EOL;
 
 echo "\nDone\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Declaring class constant called 'namespace' is deprecated in %s on line %d
 empty
 callable
 trait
