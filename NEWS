@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
 
+- Intl:
+  . Fixed IntlListFormatter::__construct() leaving stale global error state
+    after successful calls. (Weilin Du)
+
 - Opcache:
   . Fixed GH-22693 (DT_TEXTREL in JIT-generated TLS access on x86_64).
     (David Carlier)
