@@ -29,29 +29,29 @@ foreach ($badCode as $code) {
   try {
     eval($code);
   } catch (ParseError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
 }
 
 echo "==DONE==\n";
 ?>
 --EXPECT--
-Unclosed '('
-Unclosed '['
-Unclosed '{'
-Unmatched ')'
-Unmatched ']'
-Unmatched '}'
-Unclosed '(' does not match ']'
-Unclosed '[' does not match ')'
-Unclosed '{' does not match ')'
-Unclosed '{' on line 1
-Unclosed '[' on line 1
-Unclosed '{' on line 1
-Unmatched ')'
-Unmatched ']'
-Unmatched '}'
-Unclosed '(' on line 1 does not match ']'
-Unclosed '[' on line 1 does not match ')'
-Unclosed '{' on line 1 does not match ')'
+ParseError: Unclosed '('
+ParseError: Unclosed '['
+ParseError: Unclosed '{'
+ParseError: Unmatched ')'
+ParseError: Unmatched ']'
+ParseError: Unmatched '}'
+ParseError: Unclosed '(' does not match ']'
+ParseError: Unclosed '[' does not match ')'
+ParseError: Unclosed '{' does not match ')'
+ParseError: Unclosed '{' on line 1
+ParseError: Unclosed '[' on line 1
+ParseError: Unclosed '{' on line 1
+ParseError: Unmatched ')'
+ParseError: Unmatched ']'
+ParseError: Unmatched '}'
+ParseError: Unclosed '(' on line 1 does not match ']'
+ParseError: Unclosed '[' on line 1 does not match ')'
+ParseError: Unclosed '{' on line 1 does not match ')'
 ==DONE==
