@@ -4138,12 +4138,6 @@ ZEND_API bool zend_fcc_closure_equals_ex(const zend_fcall_info_cache* a, const z
 }
 /* }}} */
 
-ZEND_API zend_string *zend_get_callable_name(const zval *callable) /* {{{ */
-{
-	return zend_get_callable_name_ex(callable, NULL);
-}
-/* }}} */
-
 ZEND_API bool zend_is_callable_at_frame(
 		const zval *callable, zend_object *object, const zend_execute_data *frame,
 		uint32_t check_flags, zend_fcall_info_cache *fcc, char **error) /* {{{ */
@@ -4280,12 +4274,6 @@ ZEND_API bool zend_is_callable_ex(const zval *callable, zend_object *object, uin
 	}
 	return ret;
 }
-
-ZEND_API bool zend_is_callable(const zval *callable, uint32_t check_flags, zend_string **callable_name) /* {{{ */
-{
-	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL);
-}
-/* }}} */
 
 ZEND_API zend_result zend_fcall_info_init(const zval *callable, uint32_t check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_string **callable_name, char **error) /* {{{ */
 {
