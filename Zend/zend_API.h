@@ -1588,9 +1588,25 @@ typedef enum _zend_expected_type {
 	Z_EXPECTED_LAST
 } zend_expected_type;
 
+C23_ENUM(zpp_error, uint8_t) {
+	ZPP_ERROR_OK,
+	ZPP_ERROR_FAILURE,
+	ZPP_ERROR_WRONG_CALLBACK,
+	ZPP_ERROR_WRONG_CLASS,
+	ZPP_ERROR_WRONG_CLASS_OR_NULL,
+	ZPP_ERROR_WRONG_CLASS_OR_STRING,
+	ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL,
+	ZPP_ERROR_WRONG_CLASS_OR_LONG,
+	ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL,
+	ZPP_ERROR_WRONG_ARG,
+	ZPP_ERROR_WRONG_COUNT,
+	ZPP_ERROR_UNEXPECTED_EXTRA_NAMED,
+	ZPP_ERROR_WRONG_CALLBACK_OR_NULL,
+};
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t min_num_args, uint32_t max_num_args);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(zpp_error error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t num, zend_expected_type expected_type, const zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(uint32_t num, const char *name, const zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(uint32_t num, const char *name, const zval *arg);
@@ -1612,20 +1628,6 @@ ZEND_API ZEND_COLD void zend_argument_must_not_be_empty_error(uint32_t arg_num);
 ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_class_entry *old_ce);
 ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, const zend_class_entry *old_ce);
 
-#define ZPP_ERROR_OK                            0
-#define ZPP_ERROR_FAILURE                       1
-#define ZPP_ERROR_WRONG_CALLBACK                2
-#define ZPP_ERROR_WRONG_CLASS                   3
-#define ZPP_ERROR_WRONG_CLASS_OR_NULL           4
-#define ZPP_ERROR_WRONG_CLASS_OR_STRING         5
-#define ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL 6
-#define ZPP_ERROR_WRONG_CLASS_OR_LONG           7
-#define ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL   8
-#define ZPP_ERROR_WRONG_ARG                     9
-#define ZPP_ERROR_WRONG_COUNT                   10
-#define ZPP_ERROR_UNEXPECTED_EXTRA_NAMED        11
-#define ZPP_ERROR_WRONG_CALLBACK_OR_NULL        12
-
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
 		const int _flags = (flags); \
 		uint32_t _min_num_args = (min_num_args); \
@@ -1637,7 +1639,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		char *_error = NULL; \
 		bool _dummy = 0; \
 		bool _optional = 0; \
-		int _error_code = ZPP_ERROR_OK; \
+		zpp_error _error_code = ZPP_ERROR_OK; \
 		((void)_i); \
 		((void)_real_arg); \
 		((void)_arg); \
