@@ -6,6 +6,7 @@ on:
       - 'main/io/**'
       - 'main/php_io.h'
       - 'tests/unit/**'
+      - '.github/actions/ccache/action.yml'
       - '.github/workflows/unit-tests.yml'
     branches:
       - master
@@ -15,6 +16,7 @@ on:
       - 'main/io/**'
       - 'main/php_io.h'
       - 'tests/unit/**'
+      - '.github/actions/ccache/action.yml'
       - '.github/workflows/unit-tests.yml'
     branches:
       - '**'
@@ -57,11 +59,9 @@ jobs:
             ccache
 
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: ./.github/actions/ccache
         with:
-          key: "unit-tests-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-          save: ${{ github.event_name != 'pull_request' }}
+          name: UNIT_TESTS_LINUX_X64
           
       - name: ./configure (minimal build)
         uses: ./.github/actions/configure-unit-tests
@@ -76,4 +76,3 @@ jobs:
           set -x
           cd tests/unit
           make test
-
