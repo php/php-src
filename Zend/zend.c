@@ -1815,7 +1815,6 @@ ZEND_API void zend_free_recorded_errors(void)
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	if (!exception_ce) {
 		exception_ce = zend_ce_error;
@@ -1827,13 +1826,13 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	}
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-
+	zend_string *message = zend_vstrpprintf(0, format, va);
 	//TODO: we can't convert compile-time errors to exceptions yet???
 	if (EG(current_execute_data) && !CG(in_compilation)) {
-		zend_throw_exception(exception_ce, message, 0);
+		const char *format = "%S";
+		zend_throw_exception_ex(exception_ce, 0, format, message);
 	} else {
-		zend_error_noreturn(E_ERROR, "%s", message);
+		zend_error_noreturn(E_ERROR, "%s", ZSTR_VAL(message));
 	}
 
 	efree(message);
