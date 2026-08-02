@@ -30,6 +30,7 @@
 #include "zend_attributes.h"
 #include "zend_enum.h"
 #include "zend_interfaces.h"
+#include "zend_inheritance.h"
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
@@ -61,6 +62,7 @@ static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_repeatable_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
 static zend_class_entry *zend_test_property_attribute;
+static zend_class_entry *zend_test_attribute_add_interface;
 static zend_class_entry *zend_test_attribute_with_arguments;
 static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
@@ -913,6 +915,96 @@ void zend_attribute_validate_zendtestattribute(zend_attribute *attr, uint32_t ta
 	}
 }
 
+/**
+ * Recursive handler to check if a class implements the test interface, either
+ * directly or via inheritance.
+ *
+ * This is needed because even though attribute validators run before interfaces
+ * are added, another attribute validator might have done something weird like
+ * add *our* interface... better safe than sorry
+ */
+static bool check_class_has_interface(zend_class_entry *scope) {
+	/* Might be *linked* (so already have class entries) but not *resolved*,
+	 * since that waits until the inherited parent class is resolved */
+	if (scope->ce_flags & ZEND_ACC_LINKED) {
+		for (uint32_t iii = 0; iii < scope->num_interfaces; iii++) {
+			if (scope->interfaces[iii] == zend_test_interface) {
+				return true;
+			}
+		}
+	} else {
+		for (uint32_t iii = 0; iii < scope->num_interfaces; iii++) {
+			if (zend_string_equals_literal(
+				scope->interface_names[iii].lc_name,
+				"_zendtestinterface"
+			)) {
+				// Interface was added manually be the developer
+				return true;
+			}
+		}
+	}
+	zend_class_entry *parent = NULL;
+	if (scope->ce_flags & ZEND_ACC_LINKED) {
+		if (scope->parent == NULL) {
+			return false;
+		}
+		parent = scope->parent;
+	} else if (scope->parent_name == NULL) {
+		return false;
+	} else {
+		parent = zend_lookup_class_ex(
+			scope->parent_name,
+			NULL,
+			ZEND_FETCH_CLASS_ALLOW_UNLINKED
+		);
+	}
+	if (parent == NULL) {
+		// Invalid class to extend? Leave that up to normal PHP to deal with
+		return false;
+	}
+	return check_class_has_interface(parent);
+}
+
+void zend_attribute_validate_add_interface(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	if (target != ZEND_ATTRIBUTE_TARGET_CLASS) {
+		return;
+	}
+	if (scope->ce_flags & (ZEND_ACC_ENUM|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) {
+		zend_error_noreturn(E_ERROR, "Only classes can be marked with #[ZendTestAttributeAddsInterface]");
+	}
+	if (check_class_has_interface(scope)) {
+		return;
+	}
+	if (scope->ce_flags & ZEND_ACC_LINKED) {
+		// There is already a method to add interfaces
+		zend_do_implement_interface(scope, zend_test_interface);
+		return;
+	}
+
+	// Add the interface automatically to the list
+	const uint32_t interfaceIdx = scope->num_interfaces;
+	scope->num_interfaces++;
+
+	zend_class_name *newInterfaceSet = safe_erealloc(
+		scope->interface_names,
+		scope->num_interfaces,
+		sizeof(*newInterfaceSet),
+		0
+	);
+	newInterfaceSet[interfaceIdx].name = zend_string_init(
+		"_ZendTestInterface",
+		strlen("_ZendTestInterface"),
+		0
+	);
+	newInterfaceSet[interfaceIdx].lc_name = zend_string_init(
+		"_zendtestinterface",
+		strlen("_zendtestinterface"),
+		0
+	);
+	scope->interface_names = newInterfaceSet;
+}
+
 static ZEND_METHOD(_ZendTestClass, __toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1295,6 +1387,12 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_property_attribute = register_class_ZendTestPropertyAttribute();
 	zend_mark_internal_attribute(zend_test_property_attribute);
+
+	zend_test_attribute_add_interface = register_class_ZendTestAttributeAddsInterface();
+	{
+		zend_internal_attribute *attr = zend_mark_internal_attribute(zend_test_attribute_add_interface);
+		attr->validator = zend_attribute_validate_add_interface;
+	}
 
 	zend_test_attribute_with_arguments = register_class_ZendTestAttributeWithArguments();
 	zend_mark_internal_attribute(zend_test_attribute_with_arguments);
