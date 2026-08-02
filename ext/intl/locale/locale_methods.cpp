@@ -836,7 +836,7 @@ U_CFUNC PHP_FUNCTION(locale_get_display_keyword_value)
  /* {{{ return an associative array containing keyword-value
  * pairs for this locale. The keys are keys to the array (doh!)
  */
-U_CFUNC PHP_FUNCTION( locale_get_keywords )
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_keywords)
 {
 	UEnumeration*   e        = NULL;
 	UErrorCode      status   = U_ZERO_ERROR;
@@ -847,7 +847,6 @@ U_CFUNC PHP_FUNCTION( locale_get_keywords )
 	char*       	        loc_name        = NULL;
 	size_t        	 	loc_name_len    = 0;
 
-	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(loc_name, loc_name_len)
@@ -1051,7 +1050,7 @@ static int handleAppendResult( int result, smart_str* loc_name)
 * }}} */
 /* {{{ Creates a locale by combining the parts of locale-ID passed
 * }}} */
-U_CFUNC PHP_FUNCTION(locale_compose)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_compose)
 {
 	smart_str      	loc_name_s = {NULL, 0};
 	smart_str *loc_name = &loc_name_s;
@@ -1059,7 +1058,6 @@ U_CFUNC PHP_FUNCTION(locale_compose)
 	HashTable*		hash_arr = NULL;
 	int 			result = 0;
 
-	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY(arr)
@@ -1232,13 +1230,12 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, const char* key
 /* }}} */
 
 /* {{{ parses a locale-id into an array the different parts of it */
-U_CFUNC PHP_FUNCTION(locale_parse)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_parse)
 {
 	char*          loc_name        = NULL;
 	size_t         loc_name_len    = 0;
 	int         grOffset    	= 0;
 
-	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(loc_name, loc_name_len)
@@ -1268,7 +1265,7 @@ U_CFUNC PHP_FUNCTION(locale_parse)
 /* }}} */
 
 /* {{{ gets an array containing the list of variants, or null */
-U_CFUNC PHP_FUNCTION(locale_get_all_variants)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_get_all_variants)
 {
 	char*  	                loc_name        = NULL;
 	size_t    		loc_name_len    = 0;
@@ -1278,7 +1275,6 @@ U_CFUNC PHP_FUNCTION(locale_get_all_variants)
 	zend_string*	variant		= NULL;
 	char*	saved_ptr	= NULL;
 
-	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(loc_name, loc_name_len)
@@ -1352,7 +1348,7 @@ static int strToMatch(const char* str ,char *retstr)
 /* {{{ Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm */
 /* }}} */
 /* {{{ Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm */
-U_CFUNC PHP_FUNCTION(locale_filter_matches)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_filter_matches)
 {
 	char*       	lang_tag        = NULL;
 	size_t         	lang_tag_len    = 0;
@@ -1372,7 +1368,6 @@ U_CFUNC PHP_FUNCTION(locale_filter_matches)
 	bool 	boolCanonical 	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
 
-	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_PATH(lang_tag, lang_tag_len)
@@ -1640,7 +1635,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 /* {{{ Searches the items in $langtag for the best match to the language
 * range
 */
-U_CFUNC PHP_FUNCTION(locale_lookup)
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(locale_lookup)
 {
 	zend_string*   	fallback_loc_str	= NULL;
 	char*    	loc_range      		= NULL;
@@ -1651,7 +1646,6 @@ U_CFUNC PHP_FUNCTION(locale_lookup)
 	bool	boolCanonical	= 0;
 	zend_string* 	result_str	= NULL;
 
-	intl_error_reset( NULL );
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY(arr)

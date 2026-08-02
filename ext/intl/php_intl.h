@@ -71,6 +71,15 @@ PHP_MINFO_FUNCTION(intl);
 const char *intl_locale_get_default( void );
 char *canonicalize_locale_string(const char* locale);
 
+#define PHP_INTL_FUNCTION_WITH_ERROR_RESET(name) \
+	static void php_intl_##name##_impl(INTERNAL_FUNCTION_PARAMETERS); \
+	U_CFUNC PHP_FUNCTION(name) \
+	{ \
+		intl_error_reset(NULL); \
+		php_intl_##name##_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+	} \
+	static void php_intl_##name##_impl(INTERNAL_FUNCTION_PARAMETERS)
+
 #define PHP_INTL_VERSION PHP_VERSION
 
 #endif  /* PHP_INTL_H */
