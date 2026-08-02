@@ -113,13 +113,13 @@ jobs:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
       postgres:
-        image: postgres
+        image: ${{ (!matrix.asan || inputs.all_variations) && 'postgres' || '' }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
       firebird:
-        image: jacobalberty/firebird
+        image: ${{ (!matrix.asan || inputs.all_variations) && 'jacobalberty/firebird' || '' }}
         ports:
           - 3050:3050
         env:
@@ -139,11 +139,13 @@ jobs:
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Create MSSQL container
+        if: ${{ !matrix.asan || inputs.all_variations }}
         uses: ./.github/actions/setup-mssql
       - name: apt
         uses: ./.github/actions/apt-x64
         with:
           asan: ${{ matrix.asan && 'true' || 'false' }}
+          skipSlow: ${{ (matrix.asan && !inputs.all_variations) && 'true' || 'false' }}
       - name: System info
         run: |
           echo "::group::Show host CPU info"

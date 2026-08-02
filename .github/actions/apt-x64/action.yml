@@ -3,6 +3,9 @@ inputs:
   asan:
     default: false
     required: false
+  skipSlow:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
@@ -11,6 +14,13 @@ runs:
         set -x
 
         OPCACHE_TLS_TESTS_DEPS="gcc clang lld"
+        SLOW_EXTENSION_DEPS=""
+        if [[ "${{ inputs.skipSlow }}" == "false" ]]; then
+          SLOW_EXTENSION_DEPS="ldap-utils slapd libtidy-dev libenchant-2-dev libsasl2-dev"
+          SLOW_EXTENSION_DEPS+=" libsqlite3-mod-spatialite libpq-dev libldap2-dev libsnmp-dev"
+          SLOW_EXTENSION_DEPS+=" postgresql postgresql-contrib snmpd snmp-mibs-downloader"
+          SLOW_EXTENSION_DEPS+=" freetds-dev unixodbc-dev libsqliteodbc firebird-dev"
+        fi
 
         export DEBIAN_FRONTEND=noninteractive
 
@@ -30,47 +40,30 @@ runs:
           bison \
           re2c \
           locales \
-          ldap-utils \
           openssl \
-          slapd \
           language-pack-de \
           libgmp-dev \
           libicu-dev \
-          libtidy-dev \
-          libenchant-2-dev \
           libbz2-dev \
-          libsasl2-dev \
           libxpm-dev \
           libzip-dev \
           libsqlite3-dev \
-          libsqlite3-mod-spatialite \
           libwebp-dev \
           ${{ inputs.asan == 'false' && 'libavif-dev' || '' }} \
           libonig-dev \
           libcurl4-openssl-dev \
           libxml2-dev \
           libxslt1-dev \
-          libpq-dev \
           libedit-dev \
-          libldap2-dev \
           libsodium-dev \
           libargon2-dev \
           libmm-dev \
-          libsnmp-dev \
-          postgresql \
-          postgresql-contrib \
-          snmpd \
-          snmp-mibs-downloader \
-          freetds-dev \
-          unixodbc-dev \
-          libsqliteodbc \
           llvm \
           clang \
           dovecot-core \
           dovecot-pop3d \
           dovecot-imapd \
           sendmail \
-          firebird-dev \
           liblmdb-dev \
           libtokyocabinet-dev \
           libdb-dev \
@@ -78,4 +71,5 @@ runs:
           libjpeg-dev \
           libpng-dev \
           libfreetype6-dev \
-          $OPCACHE_TLS_TESTS_DEPS
+          $OPCACHE_TLS_TESTS_DEPS \
+          $SLOW_EXTENSION_DEPS
