@@ -225,7 +225,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(zpp_error error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg) /* {{{ */
 {
 	switch (error_code) {
 		case ZPP_ERROR_WRONG_CALLBACK:
@@ -261,7 +261,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_FAILURE:
 			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
 			break;
-		default: ZEND_UNREACHABLE();
+		case ZPP_ERROR_OK:
+		case ZPP_ERROR_WRONG_COUNT:
+			ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
