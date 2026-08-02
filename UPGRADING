@@ -363,6 +363,10 @@ PHP 8.6 UPGRADE NOTES
     internal API. It is controlled using error_mode, error_store and
     error_handler stream context options.
     RFC: https://wiki.php.net/rfc/stream_errors
+  . Added the "filter.max_filter_count" stream context option for php://filter
+    URLs. When set, opening the stream fails with a warning if the URL would
+    add more filters than the configured value. Negative values disable the
+    check.
   . Added stream socket context option so_reuseaddr that allows disabling
     address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
     Windows.
@@ -412,6 +416,11 @@ PHP 8.6 UPGRADE NOTES
   . Mbregex has been deprecated, because the underlying Oniguruma library
     is no longer maintained.
     RFC: https://wiki.php.net/rfc/eol-oniguruma
+
+- Standard:
+  . Using more than 16 filters in a php://filter URL without configuring the
+    "filter.max_filter_count" stream context option now emits an E_DEPRECATED
+    warning. Use stream_filter_append() or configure this option explicitly.
 
 ========================================
 5. Changed Functions
