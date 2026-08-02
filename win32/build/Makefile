@@ -54,8 +54,31 @@ DEBUGGER_ARGS=
 
 all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS) test_helpers
 
+!if "$(PARALLEL_BUILD)" == "yes"
+BUILD_DIR_TARGET=build_dirs
+!else
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
+BUILD_DIR_TARGET=$(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
+!endif
 
+!if "$(PARALLEL_BUILD)" == "yes"
+!if $(RE2C) == ""
+generated_files: build_dirs .SYNC \
+	Zend\zend_ini_parser.c Zend\zend_ini_parser.h \
+	Zend\zend_language_parser.c Zend\zend_language_parser.h \
+	sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h \
+	$(PHPDEF) $(MCFILE)
+!else
+generated_files: build_dirs .SYNC \
+	Zend\zend_ini_parser.c Zend\zend_ini_parser.h \
+	Zend\zend_language_parser.c Zend\zend_language_parser.h \
+	Zend\zend_ini_scanner.c Zend\zend_ini_scanner_defs.h \
+	Zend\zend_language_scanner.c Zend\zend_language_scanner_defs.h \
+	sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h \
+	sapi\phpdbg\phpdbg_lexer.c \
+	$(PHPDEF) $(MCFILE)
+!endif
+!else
 !if $(RE2C) == ""
 generated_files: build_dirs \
 	Zend\zend_ini_parser.c Zend\zend_ini_parser.h \
@@ -71,10 +94,28 @@ generated_files: build_dirs \
 	sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_lexer.c \
 	$(PHPDEF) $(MCFILE)
 !endif
+!endif
 
 $(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
 
+!if "$(PARALLEL_BUILD)" == "yes"
+# Bison and re2c generate two files per invocation. Give the recipe to one
+# target and make the side-effect output depend on it, so jom runs it once.
+Zend\zend_ini_parser.h: Zend\zend_ini_parser.c
+Zend\zend_ini_parser.c: Zend\zend_ini_parser.y
+	$(BISON) $(BISON_FLAGS) --output=Zend/zend_ini_parser.c -v -d Zend/zend_ini_parser.y
+
+Zend\zend_language_parser.h: Zend\zend_language_parser.c
+Zend\zend_language_parser.c: Zend\zend_language_parser.y
+	$(BISON) $(BISON_FLAGS) --output=Zend/zend_language_parser.c -v -d Zend/zend_language_parser.y
+	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.c
+	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.h
+
+sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.c
+sapi\phpdbg\phpdbg_parser.c: sapi\phpdbg\phpdbg_parser.y
+	$(BISON) $(BISON_FLAGS) --output=sapi/phpdbg/phpdbg_parser.c -v -d sapi/phpdbg/phpdbg_parser.y
+!else
 Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
 	$(BISON) $(BISON_FLAGS) --output=Zend/zend_ini_parser.c -v -d Zend/zend_ini_parser.y
 
@@ -85,13 +126,24 @@ Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_pars
 
 sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
 	$(BISON) $(BISON_FLAGS) --output=sapi/phpdbg/phpdbg_parser.c -v -d sapi/phpdbg/phpdbg_parser.y
+!endif
 
 !if $(RE2C) != ""
+!if "$(PARALLEL_BUILD)" == "yes"
+Zend\zend_ini_scanner_defs.h: Zend\zend_ini_scanner.c
+Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
+
+Zend\zend_language_scanner_defs.h: Zend\zend_language_scanner.c
+Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+!else
 Zend\zend_ini_scanner.c Zend\zend_ini_scanner_defs.h: Zend\zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
 Zend\zend_language_scanner.c Zend\zend_language_scanner_defs.h: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+!endif
 
 sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
 	$(RE2C) $(RE2C_FLAGS) -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l
@@ -124,7 +176,7 @@ _VC_MANIFEST_EMBED_EXE= if exist $@.manifest $(MT) -nologo -manifest $@.manifest
 _VC_MANIFEST_EMBED_DLL= if exist $@.manifest $(MT) -nologo -manifest $@.manifest -outputresource:$@;2
 !endif
 
-$(PHPDLL_RES): win32\build\template.rc
+$(PHPDLL_RES): generated_files $(MCFILE) win32\build\template.rc
 	$(RC) /nologo /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
 		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
@@ -138,7 +190,7 @@ $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EX
 
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
 
-$(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV):
+$(BUILD_DIR_TARGET):
 	@echo Recreating build dirs
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 	@cd $(BUILD_DIR)

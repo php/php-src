@@ -62,13 +62,18 @@ DEFINE('PHP_PREFIX', PHP_PREFIX);
 
 DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
+ARG_ENABLE('parallel-build', 'Generate independent object targets for a parallel NMAKE-compatible tool', 'no');
+DEFINE('PARALLEL_BUILD', PHP_PARALLEL_BUILD);
+
 toolset_setup_common_cflags();
 
 if (VS_TOOLSET) {
 	ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 	var PHP_MP_DISABLED = true;
 
-	if (PHP_MP != 'disable') {
+	if (is_parallel_build_enabled()) {
+		STDOUT.WriteLine('Using make-level parallel compilation');
+	} else if (PHP_MP != 'disable') {
 		if(PHP_DEBUG == 'yes') {
 			STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
 		} else {
@@ -273,14 +278,16 @@ if (TARGET_ARCH == 'x64') {
 }
 ADD_FLAG('ASM_OBJS', all_asm_objs);
 
-MFO.WriteLine('$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\jump_' + FIBER_ASM_ABI + '.asm');
+var fiber_asm_build_deps = is_parallel_build_enabled() ? 'generated_files ' : '';
+
+MFO.WriteLine('$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj: ' + fiber_asm_build_deps + 'Zend\\asm\\jump_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(FIBER_ASM_ABI).obj Zend\\asm\\jump_$(FIBER_ASM_ABI).asm');
 
-MFO.WriteLine('$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
+MFO.WriteLine('$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj: ' + fiber_asm_build_deps + 'Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
 MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\make_$(FIBER_ASM_ABI).obj Zend\\asm\\make_$(FIBER_ASM_ABI).asm');
 
 if (TARGET_ARCH == 'x64') {
-	MFO.WriteLine('$(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj: Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
+	MFO.WriteLine('$(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj: ' + fiber_asm_build_deps + 'Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
 	MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\save_xmm_x86_64_ms_masm.obj Zend\\asm\\save_xmm_x86_64_ms_masm.asm');
 }
 

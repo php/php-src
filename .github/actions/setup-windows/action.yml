@@ -1,21 +1,31 @@
-name: Setup
+name: Setup Windows build tools
 runs:
   using: composite
   steps:
-    - name: Setup MySQL
-      shell: cmd
-      run: |
-        mysqld --initialize-insecure
-        mysqld --install
-        net start MySQL
-        mysql --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
-    - name: Setup MSSQL
+    - name: Install jom
       shell: pwsh
       run: |
-        choco install sql-server-express -y --no-progress --install-arguments="/SECURITYMODE=SQL /SAPWD=Password12!"
-    - name: Setup PostgreSQL
+        $jomDirectory = Join-Path $env:RUNNER_TEMP "jom"
+        $jomArchive = Join-Path $env:RUNNER_TEMP "jom.zip"
+        Invoke-WebRequest https://download.qt.io/official_releases/jom/jom_1_1_7.zip -OutFile $jomArchive
+        if ((Get-FileHash $jomArchive -Algorithm SHA256).Hash -ne "4C8AF345586A9A08FBFD2F613FCAC748226D91A75627AA3581B297DD513046FE") {
+          throw "Unexpected jom archive checksum"
+        }
+        Expand-Archive $jomArchive -DestinationPath $jomDirectory
+        $jomDirectory | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    - name: Install sccache
+      if: ${{ env.CLANG_TOOLSET != '1' }}
       shell: pwsh
       run: |
-        $postgresService = if ($env:PHP_BUILD_CRT -eq "vs18") { "postgresql-x64-17" } else { "postgresql-x64-14" }
-        Set-Service -Name $postgresService -StartupType manual -Status Running
-        pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'Password12!';" }
+        $sccacheDirectory = Join-Path $env:RUNNER_TEMP "sccache-bin"
+        $sccacheCacheDirectory = Join-Path $env:RUNNER_TEMP "sccache"
+        $sccacheArchive = Join-Path $env:RUNNER_TEMP "sccache.zip"
+        Invoke-WebRequest https://github.com/mozilla/sccache/releases/download/v0.15.0/sccache-v0.15.0-x86_64-pc-windows-msvc.zip -OutFile $sccacheArchive
+        if ((Get-FileHash $sccacheArchive -Algorithm SHA256).Hash -ne "DCF489090AA5EF4C7D145E8B29F759124C803D636C3107F397BD50D425B5F341") {
+          throw "Unexpected sccache archive checksum"
+        }
+        Expand-Archive $sccacheArchive -DestinationPath $sccacheDirectory
+        (Join-Path $sccacheDirectory "sccache-v0.15.0-x86_64-pc-windows-msvc") |
+          Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        "SCCACHE_DIR=$sccacheCacheDirectory" |
+          Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
