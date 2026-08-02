@@ -262,7 +262,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(zpp_error error
 			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
 			break;
 		case ZPP_ERROR_OK:
-		case ZPP_ERROR_WRONG_COUNT:
 			ZEND_UNREACHABLE();
 	}
 }
