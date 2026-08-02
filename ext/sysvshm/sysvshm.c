@@ -130,6 +130,7 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
+	struct shmid_ds shm_desc;
 	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
 	bool shm_size_is_null = 1;
 	bool created = false;
@@ -162,6 +163,25 @@ PHP_FUNCTION(shm_attach)
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
 		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+		if (created) {
+			shmctl(shm_id, IPC_RMID, NULL);
+		}
+		RETURN_FALSE;
+	}
+
+	if (shmctl(shm_id, IPC_STAT, &shm_desc) < 0) {
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+		shmdt(shm_ptr);
+		if (created) {
+			shmctl(shm_id, IPC_RMID, NULL);
+		}
+		RETURN_FALSE;
+	}
+	shm_size = (zend_long)shm_desc.shm_segsz;
+
+	if (shm_size < (zend_long) sizeof(sysvshm_chunk_head)) {
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": segment too small", shm_key);
+		shmdt(shm_ptr);
 		if (created) {
 			shmctl(shm_id, IPC_RMID, NULL);
 		}
