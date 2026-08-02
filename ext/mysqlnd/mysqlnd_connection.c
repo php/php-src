@@ -364,6 +364,18 @@ MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn)
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_REUSED);
 		conn->current_result = NULL;
 		conn->last_message.s = NULL;
+
+		/* COM_RESET_CONNECTION reverts the session charset to the server
+		 * default, but the user may have changed the charset. Re-apply
+		 * conn->charset when it differs from that default. */
+		if (conn->charset && conn->charset != conn->greet_charset) {
+			ret = conn->m->set_charset(conn, conn->charset->name);
+		}
+
+		/* Re-execute any MYSQL_INIT_COMMAND commands. */
+		if (ret == PASS) {
+			ret = conn->m->execute_init_commands(conn);
+		}
 	}
 
 	DBG_RETURN(ret);
