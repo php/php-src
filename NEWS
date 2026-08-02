@@ -520,6 +520,8 @@ PHP                                                                        NEWS
     SodiumException. (iliaal)
 
 - SPL:
+  . Fixed bug GH-11591 (AppendIterator fails with an empty generator).
+    (Matthias Görgens)
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
   . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free with

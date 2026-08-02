@@ -18,7 +18,9 @@
 
 #include "php.h"
 #include "zend_exceptions.h"
+#include "zend_generators.h"
 #include "zend_interfaces.h"
+#include "zend_weakrefs.h"
 #include "ext/pcre/php_pcre.h"
 
 #include "spl_iterators.h"
@@ -119,7 +121,9 @@ typedef struct _spl_dual_it_object {
 		} caching;
 		struct {
 			zval                  zarrayit;
+			zval                  current_key;
 			zend_object_iterator *iterator;
+			HashTable            *empty_generators;
 		} append;
 		struct {
 			zend_long        flags;
@@ -2024,6 +2028,13 @@ static void spl_dual_it_free_storage(zend_object *_object)
 
 	if (object->dit_type == DIT_AppendIterator) {
 		zend_iterator_dtor(object->u.append.iterator);
+		if (object->u.append.empty_generators) {
+			zend_weakrefs_hash_destroy(object->u.append.empty_generators);
+			FREE_HASHTABLE(object->u.append.empty_generators);
+		}
+		if (!Z_ISUNDEF(object->u.append.current_key)) {
+			zval_ptr_dtor(&object->u.append.current_key);
+		}
 		if (Z_TYPE(object->u.append.zarrayit) != IS_UNDEF) {
 			zval_ptr_dtor(&object->u.append.zarrayit);
 		}
@@ -2767,6 +2778,10 @@ PHP_METHOD(EmptyIterator, next)
 static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
 {
 	spl_dual_it_free(intern);
+	if (!Z_ISUNDEF(intern->u.append.current_key)) {
+		zval_ptr_dtor(&intern->u.append.current_key);
+		ZVAL_UNDEF(&intern->u.append.current_key);
+	}
 
 	if (!Z_ISUNDEF(intern->inner.zobject)) {
 		zval_ptr_dtor(&intern->inner.zobject);
@@ -2783,6 +2798,20 @@ static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{
 		it  = intern->u.append.iterator->funcs->get_current_data(intern->u.append.iterator);
 		ZVAL_COPY(&intern->inner.zobject, it);
 		intern->inner.ce = Z_OBJCE_P(it);
+		intern->u.append.iterator->funcs->get_current_key(
+			intern->u.append.iterator, &intern->u.append.current_key);
+		if (intern->u.append.empty_generators) {
+			zval *keys = zend_hash_index_find(intern->u.append.empty_generators,
+				zend_object_to_weakref_key(Z_OBJ_P(it)));
+			if (keys) {
+				bool known_empty = Z_TYPE(intern->u.append.current_key) == IS_LONG
+					? zend_hash_index_exists(Z_ARRVAL_P(keys), Z_LVAL(intern->u.append.current_key))
+					: zend_hash_exists(Z_ARRVAL_P(keys), Z_STR(intern->u.append.current_key));
+				if (known_empty) {
+					return SUCCESS;
+				}
+			}
+		}
 		intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, it, 0);
 		spl_dual_it_rewind(intern);
 		return SUCCESS;
@@ -2791,9 +2820,44 @@ static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{
 	}
 } /* }}} */
 
-static void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
+static void spl_append_it_record_empty_generator(spl_dual_it_object *intern) /* {{{ */
 {
-	while (spl_dual_it_valid(intern) != SUCCESS) {
+	if (EG(exception)) {
+		return;
+	}
+
+	if (!intern->u.append.empty_generators) {
+		ALLOC_HASHTABLE(intern->u.append.empty_generators);
+		zend_hash_init(intern->u.append.empty_generators, 0, NULL, ZVAL_PTR_DTOR, 0);
+	}
+
+	zval *keys = zend_hash_index_find(intern->u.append.empty_generators,
+		zend_object_to_weakref_key(Z_OBJ(intern->inner.zobject)));
+	if (!keys) {
+		zval new_keys;
+		array_init(&new_keys);
+		keys = zend_weakrefs_hash_add(intern->u.append.empty_generators,
+			Z_OBJ(intern->inner.zobject), &new_keys);
+		ZEND_ASSERT(keys != NULL);
+	}
+
+	if (Z_TYPE(intern->u.append.current_key) == IS_LONG) {
+		zend_hash_index_add_empty_element(Z_ARRVAL_P(keys), Z_LVAL(intern->u.append.current_key));
+	} else {
+		zend_hash_add_empty_element(Z_ARRVAL_P(keys), Z_STR(intern->u.append.current_key));
+	}
+} /* }}} */
+
+static void spl_append_it_fetch(spl_dual_it_object *intern, bool record_empty) /* {{{*/
+{
+	while (true) {
+		bool may_record = record_empty && intern->inner.ce == zend_ce_generator;
+		if (spl_dual_it_valid(intern) == SUCCESS) {
+			break;
+		}
+		if (may_record) {
+			spl_append_it_record_empty_generator(intern);
+		}
 		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
 		if (spl_append_it_next_iterator(intern) != SUCCESS) {
 			return;
@@ -2807,7 +2871,7 @@ static void spl_append_it_next(spl_dual_it_object *intern) /* {{{ */
 	if (spl_dual_it_valid(intern) == SUCCESS) {
 		spl_dual_it_next(intern, 1);
 	}
-	spl_append_it_fetch(intern);
+	spl_append_it_fetch(intern, false);
 } /* }}} */
 
 /* {{{ Create an AppendIterator */
@@ -2824,6 +2888,8 @@ PHP_METHOD(AppendIterator, __construct)
 	}
 
 	intern->dit_type = DIT_AppendIterator;
+	ZVAL_UNDEF(&intern->u.append.current_key);
+	intern->u.append.empty_generators = NULL;
 	object_init_with_constructor(&intern->u.append.zarrayit, spl_ce_ArrayIterator, 0, NULL, NULL);
 	intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
 
@@ -2855,7 +2921,7 @@ PHP_METHOD(AppendIterator, append)
 		do {
 			spl_append_it_next_iterator(intern);
 		} while (Z_OBJ(intern->inner.zobject) != Z_OBJ_P(it));
-		spl_append_it_fetch(intern);
+		spl_append_it_fetch(intern, true);
 	}
 } /* }}} */
 
@@ -2887,7 +2953,7 @@ PHP_METHOD(AppendIterator, rewind)
 
 	intern->u.append.iterator->funcs->rewind(intern->u.append.iterator);
 	if (spl_append_it_next_iterator(intern) == SUCCESS) {
-		spl_append_it_fetch(intern);
+		spl_append_it_fetch(intern, false);
 	}
 } /* }}} */
 
