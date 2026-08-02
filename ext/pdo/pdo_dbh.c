@@ -433,17 +433,19 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 							zend_hash_del(&EG(persistent_list), hash_key);
 							pdbh = NULL;
 						}
-					} else if (pdbh->methods->check_liveness
-							&& FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
+					} else {
 						/* Another open handle shares this connection, so we must
 						 * not reset it: that would discard session state (open
 						 * transactions, temporary tables, user variables) the
 						 * other handle relies on. If it has died, drop our
 						 * reference and stop reusing it; it is closed once the
 						 * last handle referencing it is released. */
-						pdbh->refcount--;
-						zend_list_close(le);
-						pdbh = NULL;
+						if (pdbh->methods->check_liveness
+								&& FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
+							pdbh->refcount--;
+							zend_list_close(le);
+							pdbh = NULL;
+						}
 					}
 				}
 			}
