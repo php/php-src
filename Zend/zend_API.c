@@ -485,27 +485,29 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_clas
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null) /* {{{ */
 {
-	zend_class_entry *ce_base = *pce;
+	const zend_class_entry *ce_base = *pce;
 
 	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*pce = NULL;
 		return 1;
 	}
-	if (!try_convert_to_string(arg)) {
+	zend_string *class_name;
+	if (!zend_parse_arg_str(arg, &class_name, check_null, num)) {
 		*pce = NULL;
+		zend_wrong_parameter_error(ZPP_ERROR_WRONG_ARG, num, NULL, check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING, arg);
 		return 0;
 	}
 
-	*pce = zend_lookup_class(Z_STR_P(arg));
+	*pce = zend_lookup_class(class_name);
 	if (ce_base) {
 		if ((!*pce || !instanceof_function(*pce, ce_base))) {
-			zend_argument_type_error(num, "must be a class name derived from %s, %s given", ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
+			zend_argument_type_error(num, "must be a class name derived from %s, %s given", ZSTR_VAL(ce_base->name), ZSTR_VAL(class_name));
 			*pce = NULL;
 			return 0;
 		}
 	}
 	if (!*pce) {
-		zend_argument_type_error(num, "must be a valid class name, %s given", Z_STRVAL_P(arg));
+		zend_argument_type_error(num, "must be a valid class name, %s given", ZSTR_VAL(class_name));
 		return 0;
 	}
 	return 1;

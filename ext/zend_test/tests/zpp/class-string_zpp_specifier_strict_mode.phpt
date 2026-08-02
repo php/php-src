@@ -36,16 +36,14 @@ foreach ($types as $type) {
 }
 
 ?>
---EXPECTF--
-TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name,  given
-TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name,  given
-TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, 1 given
-TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, 42 given
-TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, 73.5 given
+--EXPECT--
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, null given
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, false given
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, true given
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, int given
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, float given
 TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, string given
-
-Warning: Array to string conversion in %s on line %d
-TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, Array given
-Error: Object of class stdClass could not be converted to string
-TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, S class given
-TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, Resource id #2 given
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, array given
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, stdClass given
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, S given
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, resource given
