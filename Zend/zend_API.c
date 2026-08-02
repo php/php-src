@@ -198,10 +198,10 @@ ZEND_API zend_string *zend_zval_get_legacy_type(const zval *arg) /* {{{ */
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void) /* {{{ */
 {
-	int num_args = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
+	uint32_t num_args = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 	zend_string *func_name = get_active_function_or_method_name();
 
-	zend_argument_count_error("%s() expects exactly 0 arguments, %d given", ZSTR_VAL(func_name), num_args);
+	zend_argument_count_error("%s() expects exactly 0 arguments, %" PRIu32 " given", ZSTR_VAL(func_name), num_args);
 
 	zend_string_release(func_name);
 }
