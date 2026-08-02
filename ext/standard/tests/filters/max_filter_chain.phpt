@@ -110,13 +110,13 @@ Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set 
 int(1)
 # file_get_contents on 3 filters, max_filter_count=2
 
-Warning: file_get_contents(php://filter/string.toupper|string.toupper|string.toupper/resource=data:text/plain,three): Failed to open stream: too many filters in %s on line %d
+Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
 bool(false)
 
-Warning: file_get_contents(php://filter/string.toupper/string.toupper/string.toupper/resource=data:text/plain,three): Failed to open stream: too many filters in %s on line %d
+Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
 bool(false)
 
-Warning: file_get_contents(php://filter/string.toupper/resource=php://filter/string.toupper/resource=php://filter/string.toupper/resource=data:text/plain,three): Failed to open stream: too many filters in %s on line %d
+Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
 bool(false)
 # file_get_contents on 19 filters, max_filter_count=20
 string(8) "NINETEEN"
