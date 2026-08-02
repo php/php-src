@@ -23,8 +23,8 @@ namespace UsingNS {
 
 ?>
 --EXPECT--
-class@anonymous
-DeclaringNS\Test1@anonymous
-DeclaringNS\Test1@anonymous
-DeclaringNS\Test2@anonymous
-DeclaringNS\Test2@anonymous
+UsingNS\@anonymous
+UsingNS\@anonymous
+UsingNS\@anonymous
+UsingNS\@anonymous
+UsingNS\@anonymous
