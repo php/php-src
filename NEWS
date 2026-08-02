@@ -46,6 +46,10 @@ PHP                                                                        NEWS
 - Embed:
   . Made php-cli functionality available in embed builds. (henderkes)
 
+- Curl:
+  . Deprecated the CURLAUTH_NTLM_WB and CURL_VERSION_NTLM_WB constants, as
+    libcurl 8.8.0 removed NTLM_WB support. (Graham Campbell)
+
 - GMP:
   . Added gmp_prevprime(). (Weilin Du, David Carlier)
   . Fixed GMP power and shift operators to reject GMP right operands outside

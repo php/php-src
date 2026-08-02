@@ -1,5 +1,5 @@
 /* This is a generated file, edit curl.stub.php instead.
- * Stub hash: d55adb230c533f4dde05e95759477dd9e1dd6efb */
+ * Stub hash: 84af09124e4197f9460e36e7e82bbd6b8d3fb443 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -691,11 +691,11 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURL_VERSION_TLSAUTH_SRP", CURL_VERSION_TLSAUTH_SRP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_ACCEPT_ENCODING", CURLOPT_ACCEPT_ENCODING, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_TRANSFER_ENCODING", CURLOPT_TRANSFER_ENCODING, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CURLAUTH_NTLM_WB", CURLAUTH_NTLM_WB, CONST_PERSISTENT);
+	zend_constant *const_CURLAUTH_NTLM_WB = REGISTER_LONG_CONSTANT("CURLAUTH_NTLM_WB", CURLAUTH_NTLM_WB, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("CURLGSSAPI_DELEGATION_FLAG", CURLGSSAPI_DELEGATION_FLAG, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLGSSAPI_DELEGATION_POLICY_FLAG", CURLGSSAPI_DELEGATION_POLICY_FLAG, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_GSSAPI_DELEGATION", CURLOPT_GSSAPI_DELEGATION, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CURL_VERSION_NTLM_WB", CURL_VERSION_NTLM_WB, CONST_PERSISTENT);
+	zend_constant *const_CURL_VERSION_NTLM_WB = REGISTER_LONG_CONSTANT("CURL_VERSION_NTLM_WB", CURL_VERSION_NTLM_WB, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("CURLOPT_ACCEPTTIMEOUT_MS", CURLOPT_ACCEPTTIMEOUT_MS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_DNS_SERVERS", CURLOPT_DNS_SERVERS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_MAIL_AUTH", CURLOPT_MAIL_AUTH, CONST_PERSISTENT);
@@ -1012,6 +1012,20 @@ static void register_curl_symbols(int module_number)
 	zend_string *attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1_str = zend_string_init("as it had no effect since 5.1.2", strlen("as it had no effect since 5.1.2"), 1);
 	ZVAL_STR(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[1].value, attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1_str);
 	attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_CURLAUTH_NTLM_WB_0 = zend_add_global_constant_attribute(const_CURLAUTH_NTLM_WB, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_const_CURLAUTH_NTLM_WB_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_CURLAUTH_NTLM_WB_0->args[0].value, attribute_Deprecated_const_CURLAUTH_NTLM_WB_0_arg0_str);
+	attribute_Deprecated_const_CURLAUTH_NTLM_WB_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_const_CURLAUTH_NTLM_WB_0_arg1_str = zend_string_init("as libcurl 8.8.0 removed NTLM_WB support", strlen("as libcurl 8.8.0 removed NTLM_WB support"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_CURLAUTH_NTLM_WB_0->args[1].value, attribute_Deprecated_const_CURLAUTH_NTLM_WB_0_arg1_str);
+	attribute_Deprecated_const_CURLAUTH_NTLM_WB_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_const_CURL_VERSION_NTLM_WB_0 = zend_add_global_constant_attribute(const_CURL_VERSION_NTLM_WB, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_CURL_VERSION_NTLM_WB_0->args[0].value, attribute_Deprecated_const_CURLAUTH_NTLM_WB_0_arg0_str);
+	attribute_Deprecated_const_CURL_VERSION_NTLM_WB_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_CURL_VERSION_NTLM_WB_0->args[1].value, attribute_Deprecated_const_CURLAUTH_NTLM_WB_0_arg1_str);
+	attribute_Deprecated_const_CURL_VERSION_NTLM_WB_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_CurlHandle(void)
