@@ -11,7 +11,7 @@ if (!function_exists('proc_open')) die('skip proc_open() not available');
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 $ini = getenv('TEST_PHP_EXTRA_ARGS');
-$prompt = 'pre\\\\-\n-\t-\e-\v-\b-\>-\`-\q-' . "\xC3\xA9\xC3\xA9" . '-`echo "dyn";`-x ';
+$prompt = 'pre\\\\-\n-\t-\e-\v-\b-\>-\`-\q-' . "\xC3\xA9\xC3\xA9" . '-`echo "dyn";`-`-x ';
 $descriptorspec = [['pipe', 'r'], STDOUT, STDERR];
 $proc = proc_open("$php $ini -d " . escapeshellarg("cli.prompt=$prompt") . " -a", $descriptorspec, $pipes);
 fwrite($pipes[0], "if (true) {\n");
