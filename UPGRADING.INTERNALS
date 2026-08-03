@@ -14,6 +14,19 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Breaking changes:
+  . String formatting functions now support the custom conversion specifiers
+    'pS' (zend_string*) and 'pp' (same as 'p'). Following the 'p' specifier with
+    an alpha-numeric character other than 'S' or 'p' is now an error.
+
+    Examples:
+
+    zend_string *str;
+    zend_spprintf("%pS", str);  // valid, same as "%S"
+    zend_spprintf("%pp", str);  // valid, same as "%p"
+    zend_spprintf("%pA", str);  // invalid
+    zend_spprintf("%ppA", str); // valid, same as zend_spprintf("%p%c", str, 'A')
+
 - Removed:
   . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
   . The zval_is_true() alias of zend_is_true() has been removed. Call

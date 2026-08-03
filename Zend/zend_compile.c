@@ -8580,8 +8580,8 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 
 		value = zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval));
 		if (!value) {
-			zend_error_noreturn_unchecked(E_COMPILE_ERROR,
-				"Cannot use variable $%S twice", var_name);
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use variable $%pS twice", var_name);
 		}
 
 		CG(zend_lineno) = zend_ast_get_lineno(var_name_ast);
