@@ -1197,6 +1197,14 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir, duplicate_so
 	var ld;
 	var manifest;
 
+	// In --enable-embed=static, php<N>embed.lib must contain PHP core, all
+	// statically built extensions, and the embed SAPI itself - no runtime
+	// dependency on php<N>.dll. Substitute the PHP object groups for the
+	// import lib in both the dependency line and the link command.
+	var is_static_embed = (sapiname == "embed" && PHP_EMBED == "static");
+	var dep_phplib_deps  = is_static_embed ? "$(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(ASM_OBJS)" : "$(BUILD_DIR)\\$(PHPLIB)";
+	var link_phplib_args = is_static_embed ? "$(PHP_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(ASM_OBJS) $(STATIC_EXT_LIBS)" : "$(BUILD_DIR)\\$(PHPLIB)";
+
 	if (typeof(obj_dir) == "undefined") {
 		sapiname_for_printing = configure_module_dirname;
 	} else {
@@ -1228,7 +1236,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir, duplicate_so
 	if (MODE_PHPIZE) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname + " $(BUILD_DIR)\\" + manifest_name);
 	} else {
-		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname  + " $(BUILD_DIR)\\" + manifest_name);
+		MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) " + dep_phplib_deps + " $(BUILD_DIR)\\" + resname  + " $(BUILD_DIR)\\" + manifest_name);
 	}
 
 	var is_lib = makefiletarget.match(new RegExp("\\.lib$"));
@@ -1276,10 +1284,10 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir, duplicate_so
 		}
 	} else {
 		if (ld) {
-			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(ARFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) " + link_phplib_args + " $(ARFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 		} else {
 			ld = CMD_MOD1 + '"$(LINK)"';
-			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
+			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) " + link_phplib_args + " $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
 		}
 	}
 
