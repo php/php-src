@@ -24,6 +24,10 @@ jobs:
       PDO_MYSQL_TEST_PASS: ''
       PDO_MYSQL_TEST_USER: root
       PDO_PGSQL_TEST_DSN: 'pgsql:host=127.0.0.1 port=5432 dbname=test user=postgres password=postgres'
+      CCACHE_BASEDIR: /home/circleci/project
+      CCACHE_COMPILERCHECK: content
+      CCACHE_DIR: /home/circleci/.cache/ccache
+      CCACHE_MAXSIZE: 500M
     steps:
       - checkout
       - run:
@@ -78,12 +82,18 @@ jobs:
               libqdbm-dev \
               libjpeg-dev \
               libpng-dev \
-              libfreetype-dev
+              libfreetype-dev \
+              ccache
+      - restore_cache:
+          keys:
+            - ccache-v1-arm-gcc-{{ checksum "main/php_version.h" }}-{{ .Branch }}-{{ .Revision }}
+            - ccache-v1-arm-gcc-{{ checksum "main/php_version.h" }}-{{ .Branch }}-
+            - ccache-v1-arm-gcc-{{ checksum "main/php_version.h" }}-master-
       - run:
           name: ./configure
           command: |
             ./buildconf -f
-            ./configure \
+            CC="ccache gcc" CXX="ccache g++" ./configure \
               --enable-debug \
               --enable-zts \
               --enable-option-checking=fatal \
@@ -153,7 +163,14 @@ jobs:
       - run:
           name: make
           no_output_timeout: 30m
-          command: make -j2 > /dev/null
+          command: |
+            ccache --zero-stats
+            make -j2 > /dev/null
+            ccache --show-stats
+      - save_cache:
+          key: ccache-v1-arm-gcc-{{ checksum "main/php_version.h" }}-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - /home/circleci/.cache/ccache
       - run:
           name: make install
           command: |
