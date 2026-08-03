@@ -34,9 +34,9 @@ Synopsis:
     php run-tests.php [options] [files] [directories]
 
 Options:
-    -j<workers> Run up to <workers> simultaneous testing processes in parallel for
-                quicker testing on systems with multiple logical processors.
-                Note that this is experimental feature.
+    -j<workers> Run up to <workers> simultaneous testing processes. By default,
+                the worker count is detected automatically. Use -j1 to run
+                tests sequentially.
 
     -l <file>   Read the testfiles to be executed from <file>. After the test
                 has finished all failed tests are written to the same <file>.
@@ -147,8 +147,9 @@ function main(): void
            $end_time, $environment,
            $exts_skipped, $exts_tested, $exts_to_test, $failed_tests_file,
            $ignored_by_ext, $ini_overwrites, $colorize,
+           $cli_opcache_enabled,
            $log_format, $no_clean, $no_file_cache,
-           $pass_options, $php, $php_cgi, $preload,
+           $pass_options, $pass_options_args, $php, $php_cgi, $preload,
            $result_tests_file, $slow_min_ms, $start_time,
            $temp_source, $temp_target, $test_cnt,
            $test_files, $test_idx, $test_results, $testfile,
@@ -230,6 +231,20 @@ function main(): void
             // test pass rate, so warn the user.
             echo "WARNING: Only 1 environment variable will be available to tests(TEMP environment variable)" , PHP_EOL;
         }
+    }
+
+    // Tests may use this private directory to share results within this run.
+    unset($environment['TEST_PHP_SHARED_CACHE_DIR']);
+    $sharedCacheDirectory = getenv('TEST_PHP_SHARED_CACHE') !== '0'
+        ? create_shared_test_cache_directory()
+        : null;
+    if ($sharedCacheDirectory !== null) {
+        $environment['TEST_PHP_SHARED_CACHE_DIR'] = $sharedCacheDirectory;
+        register_shutdown_function(static function () use ($sharedCacheDirectory): void {
+            if (is_dir($sharedCacheDirectory)) {
+                rmdir_recursive($sharedCacheDirectory);
+            }
+        });
     }
 
     if (IS_WINDOWS && empty($environment["SystemRoot"])) {
@@ -328,6 +343,7 @@ function main(): void
     $failed_tests_file = false;
     $pass_option_n = false;
     $pass_options = '';
+    $pass_options_args = [];
 
     $output_file = INIT_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
 
@@ -348,9 +364,11 @@ function main(): void
     $slow_min_ms = INF;
     $preload = false;
     $file_cache = null;
+    $cli_opcache_enabled = true;
     $shuffle = false;
     $bless = false;
     $workers = null;
+    $workersExplicit = false;
     $context_line_count = 3;
     $num_repeats = 1;
     $show_progress = true;
@@ -412,6 +430,7 @@ function main(): void
 
             switch ($switch) {
                 case 'j':
+                    $workersExplicit = true;
                     $workers = substr($argv[$i], 2);
                     if ($workers == 0 || !preg_match('/^\d+$/', $workers)) {
                         error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
@@ -472,11 +491,13 @@ function main(): void
                 case 'n':
                     if (!$pass_option_n) {
                         $pass_options .= ' -n';
+                        $pass_options_args[] = '-n';
                     }
                     $pass_option_n = true;
                     break;
                 case 'e':
                     $pass_options .= ' -e';
+                    $pass_options_args[] = '-e';
                     break;
                 case '--preload':
                     $preload = true;
@@ -641,6 +662,19 @@ function main(): void
         }
     }
 
+    if (!$workersExplicit && (!$selected_tests || count($test_files) > 1)) {
+        $workers = get_default_worker_count();
+        if (
+            $workers !== null
+            && ($valgrind !== null || isset($environment['SKIP_ASAN']))
+        ) {
+            $workers = min($workers, 2);
+        }
+        if ($workers !== null && !can_create_parallel_worker_socket()) {
+            $workers = null;
+        }
+    }
+
     if ($online === null && !isset($environment['SKIP_ONLINE_TESTS'])) {
         $online = false;
     }
@@ -682,8 +716,13 @@ function main(): void
     if ($conf_passed !== null) {
         if (IS_WINDOWS) {
             $pass_options .= " -c " . escapeshellarg($conf_passed);
+            $pass_options_args[] = '-c';
+            $pass_options_args[] = $conf_passed;
         } else {
-            $pass_options .= " -c '" . realpath($conf_passed) . "'";
+            $configurationFile = realpath($conf_passed);
+            $pass_options .= " -c '" . $configurationFile . "'";
+            $pass_options_args[] = '-c';
+            $pass_options_args[] = (string) $configurationFile;
         }
     }
 
@@ -800,6 +839,53 @@ function main(): void
     }
 }
 
+function get_default_worker_count(): ?int
+{
+    if (IS_WINDOWS) {
+        $workerCount = getenv('NUMBER_OF_PROCESSORS');
+        return is_string($workerCount) ? parse_default_worker_count($workerCount) : null;
+    }
+
+    $commands = [
+        'nproc 2>/dev/null',
+        'getconf _NPROCESSORS_ONLN 2>/dev/null',
+        'getconf NPROCESSORS_ONLN 2>/dev/null',
+        'sysctl -n hw.logicalcpu 2>/dev/null',
+        'sysctl -n hw.ncpu 2>/dev/null',
+    ];
+    foreach ($commands as $command) {
+        $workerCount = shell_exec($command);
+        if (
+            is_string($workerCount)
+            && ($workerCount = parse_default_worker_count($workerCount)) !== null
+        ) {
+            return $workerCount;
+        }
+    }
+
+    return null;
+}
+
+function parse_default_worker_count(string $workerCount): ?int
+{
+    $workerCount = filter_var(trim($workerCount), FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => 2],
+    ]);
+
+    return $workerCount !== false ? min($workerCount, 10) : null;
+}
+
+function can_create_parallel_worker_socket(): bool
+{
+    $socket = @stream_socket_server('tcp://127.0.0.1:0');
+    if ($socket === false) {
+        return false;
+    }
+
+    fclose($socket);
+    return true;
+}
+
 function verify_config(string $php): void
 {
     if (empty($php) || !file_exists($php)) {
@@ -817,6 +903,7 @@ function verify_config(string $php): void
 function write_information(array $user_tests, $phpdbg): void
 {
     global $php, $php_cgi, $php_info, $ini_overwrites, $pass_options, $exts_to_test, $valgrind, $no_file_cache;
+    global $cli_opcache_enabled;
     $php_escaped = escapeshellarg($php);
 
     // Get info from php
@@ -827,6 +914,8 @@ PHP_SAPI    : " , PHP_SAPI , "
 PHP_VERSION : " , phpversion() , "
 ZEND_VERSION: " , zend_version() , "
 PHP_OS      : " , PHP_OS , " - " , php_uname() , "
+OPCACHE CLI : " , filter_var(ini_get("opcache.enable"), FILTER_VALIDATE_BOOL)
+    && filter_var(ini_get("opcache.enable_cli"), FILTER_VALIDATE_BOOL) ? "enabled" : "disabled" , "
 INI actual  : " , realpath(get_cfg_var("cfg_file_path")) , "
 More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
     save_text($info_file, $php_info);
@@ -834,6 +923,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
     settings2array($ini_overwrites, $info_params);
     $info_params = settings2params($info_params);
     $php_info = shell_exec("$php_escaped $pass_options $info_params $no_file_cache \"$info_file\"");
+    $cli_opcache_enabled = !str_contains($php_info, "\nOPCACHE CLI : disabled\n");
     define('TESTED_PHP_VERSION', shell_exec("$php_escaped -n -r \"echo PHP_VERSION;\""));
 
     if ($php_cgi && $php != $php_cgi) {
@@ -1065,13 +1155,33 @@ function get_file_cache_dir(): string
     return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'php-run-tests-file-cache';
 }
 
+function create_shared_test_cache_directory(): ?string
+{
+    $temporaryDirectory = sys_get_temp_dir();
+    if ($temporaryDirectory === '') {
+        return null;
+    }
+
+    for ($attempt = 0; $attempt < 3; $attempt++) {
+        $directory = $temporaryDirectory
+            . DIRECTORY_SEPARATOR
+            . 'php-run-tests-'
+            . bin2hex(random_bytes(8));
+        if (@mkdir($directory, 0700)) {
+            return $directory;
+        }
+    }
+
+    return null;
+}
+
 function rmdir_recursive($dir)
 {
-    if (!file_exists($dir)) {
+    if (!file_exists($dir) && !is_link($dir)) {
         return;
     }
-    if (!is_dir($dir)) {
-        unlink($dir);
+    if (is_link($dir) || !is_dir($dir)) {
+        @unlink($dir);
         return;
     }
 
@@ -1173,19 +1283,20 @@ function error_report(string $testname, string $logname, string $tested): void
  * @return false|string
  */
 function system_with_timeout(
-    string $commandline,
+    string|array $commandline,
     ?array $env = null,
     ?string $stdin = null,
     bool $captureStdIn = true,
     bool $captureStdOut = true,
-    bool $captureStdErr = true
+    bool $captureStdErr = true,
+    bool $mergeStdErr = false
 ) {
     global $valgrind;
 
     // when proc_open cmd is passed as a string (without bypass_shell=true option) the cmd goes thru shell
     // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
     // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
-    if (IS_WINDOWS) {
+    if (IS_WINDOWS && is_string($commandline)) {
         $commandline = 'start "" /b /wait ' . $commandline . ' & exit';
     }
 
@@ -1204,7 +1315,9 @@ function system_with_timeout(
         $descriptorspec[1] = ['pipe', 'w'];
     }
     if ($captureStdErr) {
-        $descriptorspec[2] = ['pipe', 'w'];
+        $descriptorspec[2] = $mergeStdErr
+            ? ['redirect', 1]
+            : ['pipe', 'w'];
     }
     $proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, ['suppress_errors' => true]);
 
@@ -1277,6 +1390,403 @@ function system_with_timeout(
     return $data;
 }
 
+final class TestForkServer
+{
+    public const MAX_EXTRA_ARGS_LENGTH = 1_048_576;
+
+    /** @var resource */
+    private $process;
+    /** @var array<int, resource> */
+    private array $pipes = [];
+    private string $token;
+    private string $buffer = '';
+    private int $index = 0;
+    private bool $stopped = false;
+    private ?string $startupOutput = null;
+
+    public function __construct(string|array $command, array $env, bool $captureStdErr = true)
+    {
+        $this->token = bin2hex(random_bytes(16));
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => $captureStdErr
+                ? ['redirect', 1]
+                : ['file', '/dev/null', 'a'],
+        ];
+        if (is_array($command)) {
+            $command[] = '--test-fork-server';
+            $command[] = $this->token;
+        } else {
+            $command = "exec $command --test-fork-server {$this->token}";
+        }
+        $this->process = proc_open(
+            $command,
+            $descriptors,
+            $this->pipes,
+            TEST_PHP_SRCDIR,
+            $env,
+            ['suppress_errors' => true]
+        );
+        if (!is_resource($this->process)) {
+            throw new RuntimeException('Unable to start test fork server');
+        }
+        stream_set_blocking($this->pipes[1], false);
+    }
+
+    public function run(
+        string $file,
+        int $timeout,
+        bool $setScriptEnvironment = true,
+        bool $captureStdErr = true,
+        ?string $testPhpExtraArgs = null
+    ): ?string
+    {
+        $environmentMode = $setScriptEnvironment ? '+' : '-';
+        $errorMode = $captureStdErr ? '+' : '-';
+        $request = "$environmentMode$errorMode\t$file\n";
+        if ($testPhpExtraArgs !== null) {
+            // The length prefix supports values containing newlines or exceeding MAXPATHLEN.
+            $request = "@$environmentMode$errorMode\t" . strlen($testPhpExtraArgs)
+                . "\n$testPhpExtraArgs\n$file\n";
+        }
+        if ($this->stopped || fwrite($this->pipes[0], $request) === false) {
+            $this->abort();
+            return null;
+        }
+        fflush($this->pipes[0]);
+
+        $beginMarker = "\0{$this->token}:B:{$this->index}\0";
+        $endMarker = "\0{$this->token}:E:{$this->index}:";
+        $deadline = microtime(true) + $timeout;
+
+        while (true) {
+            try {
+                $result = $this->extractResult($beginMarker, $endMarker);
+            } catch (UnexpectedValueException) {
+                $this->abort();
+                return null;
+            }
+            if ($result !== null) {
+                [$output, $status] = $result;
+                $this->index++;
+                if ($status > 128 && $status < 160) {
+                    $output .= "\nTermsig=" . ($status - 128) . "\n";
+                }
+                return $output;
+            }
+
+            $remaining = $deadline - microtime(true);
+            if ($remaining <= 0) {
+                $this->abort();
+                return "\n ** ERROR: process timed out **\n";
+            }
+
+            $read = [$this->pipes[1]];
+            $write = null;
+            $except = null;
+            $seconds = (int) $remaining;
+            $microseconds = (int) (($remaining - $seconds) * 1_000_000);
+            $ready = @stream_select($read, $write, $except, $seconds, $microseconds);
+            if ($ready === false) {
+                $this->abort();
+                return null;
+            }
+            if ($ready === 0) {
+                continue;
+            }
+
+            $chunk = fread($this->pipes[1], 8192);
+            if ($chunk === false || ($chunk === '' && feof($this->pipes[1]))) {
+                $this->abort();
+                return null;
+            }
+            $this->buffer .= $chunk;
+        }
+    }
+
+    /**
+     * @return null|array{string, int}
+     */
+    private function extractResult(string $beginMarker, string $endMarker): ?array
+    {
+        $begin = strpos($this->buffer, $beginMarker);
+        if ($begin === false) {
+            return null;
+        }
+
+        $outputStart = $begin + strlen($beginMarker);
+        $end = strpos($this->buffer, $endMarker, $outputStart);
+        if ($end === false) {
+            return null;
+        }
+
+        $statusStart = $end + strlen($endMarker);
+        $statusEnd = strpos($this->buffer, "\0", $statusStart);
+        if ($statusEnd === false) {
+            return null;
+        }
+
+        $status = substr($this->buffer, $statusStart, $statusEnd - $statusStart);
+        if (!ctype_digit($status)) {
+            throw new UnexpectedValueException('Invalid test fork server status');
+        }
+
+        $prefix = substr($this->buffer, 0, $begin);
+        if ($this->startupOutput === null) {
+            $this->startupOutput = $prefix;
+            $prefix = '';
+        }
+        $output = $this->startupOutput
+            . $prefix
+            . substr($this->buffer, $outputStart, $end - $outputStart);
+        $this->buffer = substr($this->buffer, $statusEnd + 1);
+        return [$output, (int) $status];
+    }
+
+    private function abort(): void
+    {
+        if ($this->stopped) {
+            return;
+        }
+        $this->stopped = true;
+        proc_terminate($this->process);
+        foreach ($this->pipes as $pipe) {
+            fclose($pipe);
+        }
+        proc_close($this->process);
+    }
+
+    public function __destruct()
+    {
+        if ($this->stopped) {
+            return;
+        }
+        fclose($this->pipes[0]);
+        fclose($this->pipes[1]);
+        proc_close($this->process);
+    }
+}
+
+function can_use_test_fork_server(): bool
+{
+    global $cli_opcache_enabled, $environment, $file_cache, $IN_REDIRECT, $num_repeats, $preload, $valgrind;
+
+    return !IS_WINDOWS
+        && !PHP_ZTS
+        && !$cli_opcache_enabled
+        && getenv('TEST_PHP_FORK_SERVER') !== '0'
+        && !isset($environment['SKIP_ASAN'])
+        && !$valgrind
+        && !$preload
+        && $file_cache === null
+        && $num_repeats === 1
+        && !is_array($IN_REDIRECT);
+}
+
+function can_run_in_test_fork_server(TestFile $test, bool $uses_cgi): bool
+{
+    return can_use_test_fork_server()
+        && !$uses_cgi
+        && !($test->hasSection('SKIPIF') && str_contains($test->getSection('SKIPIF'), 'SKIP_REPEAT'))
+        && has_only_fork_safe_ini_settings($test)
+        && !$test->hasAnySections(
+            'ARGS',
+            'CAPTURE_STDIO',
+            'CGI',
+            'COOKIE',
+            'DEFLATE_POST',
+            'ENV',
+            'GET',
+            'GZIP_POST',
+            'PHPDBG',
+            'POST',
+            'POST_RAW',
+            'PUT',
+            'REDIRECTTEST',
+            'STDIN',
+            'XLEAK'
+        );
+}
+
+function can_run_auxiliary_script_in_test_fork_server(TestFile $test, bool $usesNonCliSapi): bool
+{
+    return can_use_test_fork_server()
+        && !$usesNonCliSapi
+        && !$test->hasSection('ENV');
+}
+
+function has_only_fork_safe_ini_settings(TestFile $test): bool
+{
+    if (!$test->sectionNotEmpty('INI')) {
+        return true;
+    }
+    // Only settings that are safe to initialize in the parent process belong here.
+    static $safeSettings = [
+        'allow_url_fopen' => true,
+        'assert.active' => true,
+        'assert.bail' => true,
+        'assert.callback' => true,
+        'assert.exception' => true,
+        'assert.warning' => true,
+        'bcmath.scale' => true,
+        'date.timezone' => true,
+        'default_charset' => true,
+        'ffi.enable' => true,
+        'internal_encoding' => true,
+        'intl.default_locale' => true,
+        'open_basedir' => true,
+        'output_handler' => true,
+        'phar.readonly' => true,
+        'phar.require_hash' => true,
+        'precision' => true,
+        'serialize_precision' => true,
+        'soap.wsdl_cache_enabled' => true,
+        'zend.assertions' => true,
+        'zend.enable_gc' => true,
+        'zlib.output_compression' => true,
+    ];
+
+    foreach (preg_split('/[\r\n]+/', $test->getSection('INI')) as $setting) {
+        $setting = trim($setting);
+        if ($setting === '' || $setting[0] === ';') {
+            continue;
+        }
+        $name = strtolower(trim(explode('=', $setting, 2)[0]));
+        // Session request state is initialized in the child after the fork.
+        if (str_starts_with($name, 'session.')) {
+            continue;
+        }
+        if (!isset($safeSettings[$name])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function can_run_with_structured_test_command(TestFile $test): bool
+{
+    global $preload, $valgrind;
+
+    return !$valgrind
+        && !$preload
+        && !$test->hasAnySections(
+            'ARGS',
+            'CAPTURE_STDIO',
+            'DEFLATE_POST',
+            'GZIP_POST',
+            'POST',
+            'POST_RAW',
+            'PUT',
+        );
+}
+
+function create_structured_test_command(
+    string $php,
+    array $sapiOptionArgs,
+    array $passOptionArgs,
+    array $iniSettings,
+    string $testFile,
+    int $numRepeats
+): array {
+    $command = [
+        $php,
+        ...$sapiOptionArgs,
+        ...$passOptionArgs,
+    ];
+    if ($numRepeats > 1) {
+        $command[] = '--repeat';
+        $command[] = (string) $numRepeats;
+    }
+
+    return [
+        ...$command,
+        ...settings2arguments($iniSettings),
+        '-f',
+        $testFile,
+    ];
+}
+
+function test_fork_server_cache_key(
+    string|array $command,
+    array $env,
+    bool $captureStdErr,
+    ?string $testPhpExtraArgs
+): string {
+    // A server inherits its environment only when it is created. These values are sent
+    // explicitly with each request and therefore do not belong to the inherited state.
+    unset($env['PATH_TRANSLATED'], $env['SCRIPT_FILENAME']);
+    if ($testPhpExtraArgs !== null) {
+        unset($env['TEST_PHP_EXTRA_ARGS']);
+    }
+    ksort($env);
+    return serialize([$command, $captureStdErr, $env, $testPhpExtraArgs !== null]);
+}
+
+function system_with_test_fork_server(
+    string|array $command,
+    string $file,
+    array $env,
+    string $channel = 'test',
+    bool $setScriptEnvironment = true,
+    bool $captureStdErr = true,
+    bool $deferUntilRepeated = false,
+    ?string $testPhpExtraArgs = null
+): ?string {
+    static $servers = [];
+    static $serverKeys = [];
+    static $pendingKeys = [];
+    static $unsupported = [];
+
+    $serverKey = test_fork_server_cache_key($command, $env, $captureStdErr, $testPhpExtraArgs);
+    if (
+        strpbrk($file, "\r\n") !== false
+        || ($testPhpExtraArgs !== null
+            && strlen($testPhpExtraArgs) > TestForkServer::MAX_EXTRA_ARGS_LENGTH)
+        || isset($unsupported[$serverKey])
+    ) {
+        return null;
+    }
+    if (($serverKeys[$channel] ?? null) !== $serverKey) {
+        if ($deferUntilRepeated && ($pendingKeys[$channel] ?? null) !== $serverKey) {
+            $pendingKeys[$channel] = $serverKey;
+            return null;
+        }
+        unset($pendingKeys[$channel]);
+        unset($servers[$channel]);
+        $serverKeys[$channel] = $serverKey;
+    } else {
+        unset($pendingKeys[$channel]);
+    }
+    if (!isset($servers[$channel])) {
+        try {
+            $servers[$channel] = new TestForkServer($command, $env, $captureStdErr);
+        } catch (Throwable) {
+            $unsupported[$serverKey] = true;
+            return null;
+        }
+    }
+
+    $timeout = (int) ($env['TEST_TIMEOUT'] ?? 60);
+    if (isset($env['SKIP_ASAN'])) {
+        $timeout *= 3;
+    }
+
+    $output = $servers[$channel]->run(
+        $file,
+        $timeout,
+        $setScriptEnvironment,
+        $captureStdErr,
+        $testPhpExtraArgs,
+    );
+    if ($output === null) {
+        unset($servers[$channel]);
+        $unsupported[$serverKey] = true;
+    }
+    return $output;
+}
+
 function run_all_tests(array $test_files, array $env, ?string $redir_tested = null): void
 {
     global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $file_cache, $shuffle;
@@ -1307,7 +1817,12 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
     }
 
     /* Ignore -jN if there is only one file to analyze. */
-    if ($workers !== null && count($test_files) > 1 && !$workerID) {
+    if (
+        $workers !== null
+        && count($test_files) > 1
+        && !$workerID
+        && $redir_tested === null
+    ) {
         run_all_tests_parallel($test_files, $env, $redir_tested);
         return;
     }
@@ -1362,7 +1877,7 @@ function run_all_tests(array $test_files, array $env, ?string $redir_tested = nu
 
 function run_all_tests_parallel(array $test_files, array $env, ?string $redir_tested): void
 {
-    global $workers, $test_idx, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $valgrind, $show_progress;
+    global $workers, $test_cnt, $test_idx, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $valgrind, $show_progress;
 
     global $junit;
 
@@ -1376,17 +1891,38 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
 
     // Each test may specify a list of conflict keys. While a test that conflicts with
     // key K is running, no other test that conflicts with K may run. Conflict keys are
-    // specified either in the --CONFLICTS-- section, or CONFLICTS file inside a directory.
+    // specified either in the --CONFLICTS-- section, or a CONFLICTS or SCOPED_CONFLICTS
+    // file inside a directory.
     $dirConflictsWith = [];
+    $dirScopedConflictsWith = [];
     $fileConflictsWith = [];
+    $fileConflictGroups = [];
+    // A MAX_CONCURRENCY file limits how many workers may run tests from that directory.
+    $dirMaxConcurrency = [];
+    $fileConcurrencyDirectory = [];
     $sequentialTests = [];
     foreach ($test_files as $i => $file) {
+        $dir = dirname($file);
+        if (!array_key_exists($dir, $dirMaxConcurrency)) {
+            $maxConcurrencyFile = $dir . '/MAX_CONCURRENCY';
+            $dirMaxConcurrency[$dir] = null;
+            if (file_exists($maxConcurrencyFile)) {
+                $dirMaxConcurrency[$dir] = parse_max_concurrency(
+                    file_get_contents($maxConcurrencyFile),
+                    $maxConcurrencyFile,
+                );
+            }
+        }
+        if ($dirMaxConcurrency[$dir] !== null) {
+            $fileConcurrencyDirectory[$file] = $dir;
+        }
+
         $contents = file_get_contents($file);
+        $conflictGroups = [];
         if (preg_match('/^--CONFLICTS--(.+?)^--/ms', $contents, $matches)) {
             $conflicts = parse_conflicts($matches[1]);
         } else {
             // Cache per-directory conflicts in a separate map, so we compute these only once.
-            $dir = dirname($file);
             if (!isset($dirConflictsWith[$dir])) {
                 $dirConflicts = [];
                 if (file_exists($dir . '/CONFLICTS')) {
@@ -1396,6 +1932,22 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
                 $dirConflictsWith[$dir] = $dirConflicts;
             }
             $conflicts = $dirConflictsWith[$dir];
+
+            if (!isset($dirScopedConflictsWith[$dir])) {
+                $dirScopedConflicts = [];
+                $scopedConflictsFile = $dir . '/SCOPED_CONFLICTS';
+                if (file_exists($scopedConflictsFile)) {
+                    $dirScopedConflicts = parse_conflicts(file_get_contents($scopedConflictsFile));
+                }
+                $dirScopedConflictsWith[$dir] = $dirScopedConflicts;
+            }
+            foreach ($dirScopedConflictsWith[$dir] as $conflictKey) {
+                if (in_array($conflictKey, $conflicts, true)) {
+                    error("Conflict key '$conflictKey' is listed in both CONFLICTS and SCOPED_CONFLICTS in $dir");
+                }
+                $conflicts[] = $conflictKey;
+                $conflictGroups[$conflictKey] = $dir;
+            }
         }
 
         // For tests conflicting with "all", no other tests may run in parallel. We'll run these
@@ -1406,6 +1958,7 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
         }
 
         $fileConflictsWith[$file] = $conflicts;
+        $fileConflictGroups[$file] = $conflictGroups;
     }
 
     // Some tests assume that they are executed in a certain order. We will be popping from
@@ -1504,10 +2057,16 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
     $rawMessageBuffers = [];
     $testsInProgress = 0;
 
-    // Map from conflict key to worker ID.
+    // Maps conflict keys to worker IDs and their optional internally compatible group.
     $activeConflicts = [];
     // Tests waiting due to conflicts. Map from conflict key to array.
     $waitingTests = [];
+    // Maps capped directories to the workers currently running tests from them.
+    $activeConcurrencyDirectories = [];
+    // Maps workers to the capped directories acquired for their current batch.
+    $workerConcurrencyDirectories = [];
+    // Tests waiting for capacity in a capped directory.
+    $waitingConcurrencyTests = [];
 
 escape:
     while ($test_files || $sequentialTests || $testsInProgress > 0) {
@@ -1544,17 +2103,33 @@ escape:
                     }
 
                     switch ($message["type"]) {
+                        case "test_count_delta":
+                            $test_cnt += $message["delta"];
+                            break;
                         case "tests_finished":
                             $testsInProgress--;
-                            foreach ($activeConflicts as $key => $workerId) {
-                                if ($workerId === $i) {
-                                    unset($activeConflicts[$key]);
-                                    if (isset($waitingTests[$key])) {
-                                        while ($test = array_pop($waitingTests[$key])) {
-                                            $test_files[] = $test;
-                                        }
-                                        unset($waitingTests[$key]);
+                            foreach ($workerConcurrencyDirectories[$i] ?? [] as $dir) {
+                                unset($activeConcurrencyDirectories[$dir][$i]);
+                                if (isset($waitingConcurrencyTests[$dir])) {
+                                    while ($test = array_pop($waitingConcurrencyTests[$dir])) {
+                                        $test_files[] = $test;
                                     }
+                                    unset($waitingConcurrencyTests[$dir]);
+                                }
+                            }
+                            unset($workerConcurrencyDirectories[$i]);
+                            foreach ($activeConflicts as $key => $activeGroups) {
+                                unset($activeGroups[$i]);
+                                if ($activeGroups) {
+                                    $activeConflicts[$key] = $activeGroups;
+                                    continue;
+                                }
+                                unset($activeConflicts[$key]);
+                                if (isset($waitingTests[$key])) {
+                                    while ($test = array_pop($waitingTests[$key])) {
+                                        $test_files[] = $test;
+                                    }
+                                    unset($waitingTests[$key]);
                                 }
                             }
                             $junit->mergeResults($message["junit"]);
@@ -1571,23 +2146,56 @@ escape:
                             // - If this is running a small enough number of tests,
                             //   reduce the batch size to give batches to more workers.
                             $files = [];
-                            $maxBatchSize = $valgrind ? 1 : ($shuffle ? 4 : 32);
+                            $batchConcurrencyDirectories = [];
+                            $maxBatchSize = $valgrind ? 1 : 4;
                             $averageFilesPerWorker = max(1, (int) ceil($totalFileCount / count($workerProcs)));
                             $batchSize = min($maxBatchSize, $averageFilesPerWorker);
-                            while (count($files) <= $batchSize && $file = array_pop($test_files)) {
+                            while (count($files) < $batchSize && $file = array_pop($test_files)) {
                                 foreach ($fileConflictsWith[$file] as $conflictKey) {
-                                    if (isset($activeConflicts[$conflictKey])) {
+                                    $conflictGroup = $fileConflictGroups[$file][$conflictKey] ?? null;
+                                    if (
+                                        isset($activeConflicts[$conflictKey])
+                                        && has_active_conflict(
+                                            $activeConflicts[$conflictKey],
+                                            $conflictGroup,
+                                        )
+                                    ) {
                                         $waitingTests[$conflictKey][] = $file;
                                         continue 2;
                                     }
                                 }
+                                $concurrencyDirectory = $fileConcurrencyDirectory[$file] ?? null;
+                                if (
+                                    $concurrencyDirectory !== null
+                                    && !isset($batchConcurrencyDirectories[$concurrencyDirectory])
+                                    && count($activeConcurrencyDirectories[$concurrencyDirectory] ?? [])
+                                        >= $dirMaxConcurrency[$concurrencyDirectory]
+                                ) {
+                                    $waitingConcurrencyTests[$concurrencyDirectory][] = $file;
+                                    continue;
+                                }
                                 $files[] = $file;
+                                if ($concurrencyDirectory !== null) {
+                                    $batchConcurrencyDirectories[$concurrencyDirectory] = true;
+                                }
                             }
                             if ($files) {
                                 foreach ($files as $file) {
                                     foreach ($fileConflictsWith[$file] as $conflictKey) {
-                                        $activeConflicts[$conflictKey] = $i;
+                                        $conflictGroup = $fileConflictGroups[$file][$conflictKey] ?? null;
+                                        if (
+                                            array_key_exists($i, $activeConflicts[$conflictKey] ?? [])
+                                            && $activeConflicts[$conflictKey][$i] !== $conflictGroup
+                                        ) {
+                                            $activeConflicts[$conflictKey][$i] = null;
+                                        } else {
+                                            $activeConflicts[$conflictKey][$i] = $conflictGroup;
+                                        }
                                     }
+                                }
+                                $workerConcurrencyDirectories[$i] = array_keys($batchConcurrencyDirectories);
+                                foreach ($workerConcurrencyDirectories[$i] as $dir) {
+                                    $activeConcurrencyDirectories[$dir][$i] = true;
                                 }
                                 $testsInProgress++;
                                 send_message($workerSocks[$i], [
@@ -1837,7 +2445,7 @@ function skip_test(string $tested, string $tested_file, string $shortname, strin
 function run_test(string $php, $file, array $env): string
 {
     global $log_format, $ini_overwrites, $PHP_FAILED_TESTS;
-    global $pass_options, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
+    global $pass_options, $pass_options_args, $DETAILED, $IN_REDIRECT, $test_cnt, $test_idx;
     global $valgrind, $temp_source, $temp_target, $cfg, $environment;
     global $no_clean;
     global $SHOW_ONLY_GROUPS;
@@ -1846,7 +2454,7 @@ function run_test(string $php, $file, array $env): string
     global $preload, $file_cache;
     global $num_repeats;
     // Parallel testing
-    global $workerID;
+    global $workerID, $workerSock;
     global $show_progress;
 
     // Temporary
@@ -1859,6 +2467,9 @@ function run_test(string $php, $file, array $env): string
         $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
+    $originalPhpExecutable = $php;
+    $phpExecutable = $php;
+    $sapiOptionArgs = [];
     $php = escapeshellarg($php);
     $orig_php = $php;
 
@@ -1930,6 +2541,8 @@ TEST $file
         if (!$php_cgi) {
             return skip_test($tested, $tested_file, $shortname, 'CGI not available');
         }
+        $phpExecutable = $php_cgi;
+        $sapiOptionArgs[] = '-C';
         $php = escapeshellarg($php_cgi) . ' -C ';
         $uses_cgi = true;
         if ($num_repeats > 1) {
@@ -1939,13 +2552,17 @@ TEST $file
 
     /* For phpdbg tests, check if phpdbg sapi is available and if it is, use it. */
     $extra_options = '';
+    $extraOptionArgs = [];
     if ($test->hasSection('PHPDBG')) {
         if (isset($phpdbg)) {
+            $phpExecutable = $phpdbg;
+            $sapiOptionArgs[] = '-qIb';
             $php = escapeshellarg($phpdbg) . ' -qIb';
 
             // Additional phpdbg command line options for sections that need to
             // be run straight away. For example, EXTENSIONS, SKIPIF, CLEAN.
             $extra_options = '-rr';
+            $extraOptionArgs[] = '-rr';
         } else {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
         }
@@ -2099,6 +2716,7 @@ TEST $file
     //$ini_overwrites[] = 'setting=value';
     settings2array($ini_overwrites, $ini_settings);
 
+    $orig_ini_settings_args = settings2arguments($ini_settings);
     $orig_ini_settings = settings2params($ini_settings);
 
     if ($file_cache !== null) {
@@ -2146,6 +2764,7 @@ TEST $file
         }
     }
 
+    $testIniSettings = $ini_settings;
     $ini_settings = settings2params($ini_settings);
 
     $env['TEST_PHP_EXTRA_ARGS'] = $pass_options . ' ' . $ini_settings;
@@ -2156,8 +2775,6 @@ TEST $file
 
     if ($test->sectionNotEmpty('SKIPIF')) {
         show_file_block('skip', $test->getSection('SKIPIF'));
-        $extra = !IS_WINDOWS ?
-            "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 
         if ($valgrind) {
             $env['USE_ZEND_ALLOC'] = '0';
@@ -2167,8 +2784,33 @@ TEST $file
         $junit->startTimer($shortname);
 
         $startTime = microtime(true);
-        $commandLine = "$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0";
-        $output = $skipCache->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $env);
+        $commandLine = [
+            $phpExecutable,
+            ...$sapiOptionArgs,
+            ...$pass_options_args,
+            ...$extraOptionArgs,
+            '-q',
+            ...$orig_ini_settings_args,
+            '-d',
+            'opcache.file_cache=',
+            '-d',
+            'opcache.file_cache_only=0',
+            '-d',
+            'display_errors=1',
+            '-d',
+            'display_startup_errors=0',
+        ];
+        $output = $skipCache->checkSkip(
+            $commandLine,
+            $test->getSection('SKIPIF'),
+            $test_skipif,
+            $temp_skipif,
+            $env,
+            can_run_auxiliary_script_in_test_fork_server(
+                $test,
+                $uses_cgi || $test->hasSection('PHPDBG')
+            ),
+        );
 
         $time = microtime(true) - $startTime;
         $junit->stopTimer($shortname);
@@ -2255,7 +2897,14 @@ TEST $file
                     $test_files[] = [$f, $file];
                 }
             }
-            $test_cnt += count($test_files) - 1;
+            $testCountDelta = count($test_files) - 1;
+            $test_cnt += $testCountDelta;
+            if ($workerID && $testCountDelta !== 0) {
+                send_message($workerSock, [
+                    "type" => "test_count_delta",
+                    "delta" => $testCountDelta,
+                ]);
+            }
             $test_idx--;
 
             show_redirect_start($IN_REDIRECT['TESTS'], $tested, $tested_file);
@@ -2498,7 +3147,39 @@ COMMAND $cmd
     $startTime = $hrtime[0] * 1000000000 + $hrtime[1];
 
     $stdin = $test->hasSection('STDIN') ? $test->getSection('STDIN') : null;
-    $out = system_with_timeout($cmd, $env, $stdin, $captureStdIn, $captureStdOut, $captureStdErr);
+    $out = null;
+    if (can_run_in_test_fork_server($test, $uses_cgi)) {
+        $hasTestIni = $test->sectionNotEmpty('INI');
+        $out = system_with_test_fork_server(
+            "$php $pass_options $ini_settings",
+            $test_file,
+            $env,
+            channel: $hasTestIni ? 'test-ini' : 'test',
+            deferUntilRepeated: $hasTestIni,
+        );
+    }
+    if ($out === null) {
+        $useStructuredCommand = can_run_with_structured_test_command($test);
+        $testCommand = $useStructuredCommand
+            ? create_structured_test_command(
+                $phpExecutable,
+                $sapiOptionArgs,
+                $pass_options_args,
+                $testIniSettings,
+                $test_file,
+                $num_repeats,
+            )
+            : $cmd;
+        $out = system_with_timeout(
+            $testCommand,
+            $env,
+            $stdin,
+            $captureStdIn,
+            $captureStdOut,
+            $captureStdErr,
+            $useStructuredCommand && $captureStdOut && $captureStdErr,
+        );
+    }
 
     $junit->stopTimer($shortname);
     $hrtime = hrtime();
@@ -2520,9 +3201,41 @@ COMMAND $cmd
         save_text($test_clean, trim($test->getSection('CLEAN')), $temp_clean);
 
         if (!$no_clean) {
-            $extra = !IS_WINDOWS ?
-                "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-            $clean_output = system_with_timeout("$extra $orig_php $pass_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
+            $cleanCommand = [
+                $originalPhpExecutable,
+                ...$pass_options_args,
+                '-q',
+                ...$orig_ini_settings_args,
+                '-d',
+                'opcache.file_cache=',
+                '-d',
+                'opcache.file_cache_only=0',
+            ];
+            $cleanEnv = $env;
+            if (!IS_WINDOWS) {
+                unset(
+                    $cleanEnv['REQUEST_METHOD'],
+                    $cleanEnv['QUERY_STRING'],
+                    $cleanEnv['PATH_TRANSLATED'],
+                    $cleanEnv['SCRIPT_FILENAME'],
+                );
+            }
+            $clean_output = null;
+            if (can_run_auxiliary_script_in_test_fork_server($test, $uses_cgi)) {
+                $clean_output = system_with_test_fork_server(
+                    $cleanCommand,
+                    $test_clean,
+                    $cleanEnv,
+                    channel: 'clean',
+                    setScriptEnvironment: false,
+                    captureStdErr: false,
+                    testPhpExtraArgs: $cleanEnv['TEST_PHP_EXTRA_ARGS'] ?? '',
+                );
+            }
+            if ($clean_output === null) {
+                $cleanCommand[] = $test_clean;
+                $clean_output = system_with_timeout($cleanCommand, $cleanEnv);
+            }
         }
 
         if (!$cfg['keep']['clean']) {
@@ -3033,6 +3746,20 @@ function settings2params(array $ini_settings): string
     return $settings;
 }
 
+function settings2arguments(array $ini_settings): array
+{
+    $arguments = [];
+
+    foreach ($ini_settings as $name => $value) {
+        foreach ((array) $value as $item) {
+            $arguments[] = '-d';
+            $arguments[] = "$name=$item";
+        }
+    }
+
+    return $arguments;
+}
+
 function compute_summary(): void
 {
     global $n_total, $test_results, $ignored_by_ext, $sum_results, $percent_results;
@@ -3265,6 +3992,35 @@ function parse_conflicts(string $text): array
     // Strip comments
     $text = preg_replace('/#.*/', '', $text);
     return array_map('trim', explode("\n", trim($text)));
+}
+
+/**
+ * @param array<int, ?string> $activeGroups
+ */
+function has_active_conflict(array $activeGroups, ?string $candidateGroup): bool
+{
+    if ($candidateGroup === null) {
+        return true;
+    }
+    foreach ($activeGroups as $activeGroup) {
+        if ($activeGroup !== $candidateGroup) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function parse_max_concurrency(string $text, string $file): int
+{
+    // Strip comments
+    $text = trim(preg_replace('/#.*/', '', $text));
+    $maxConcurrency = filter_var($text, FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => 1],
+    ]);
+    if ($maxConcurrency === false) {
+        error("Invalid positive integer in $file");
+    }
+    return $maxConcurrency;
 }
 
 function show_result(
@@ -3612,12 +4368,19 @@ class SkipCache
         $this->keepFile = $keepFile;
     }
 
-    public function checkSkip(string $php, string $code, string $checkFile, string $tempFile, array $env): string
+    public function checkSkip(
+        string|array $command,
+        string $code,
+        string $checkFile,
+        string $tempFile,
+        array $env,
+        bool $useForkServer
+    ): string
     {
         // Extension tests frequently use something like <?php require 'skipif.inc';
         // for skip checks. This forces us to cache per directory to avoid pollution.
         $dir = dirname($checkFile);
-        $key = "$php => $dir";
+        $key = (is_array($command) ? implode("\0", $command) : $command) . " => $dir";
 
         if (isset($this->skips[$key][$code])) {
             $this->hits++;
@@ -3628,7 +4391,27 @@ class SkipCache
         }
 
         save_text($checkFile, $code, $tempFile);
-        $result = trim(system_with_timeout("$php \"$checkFile\"", $env));
+        $result = null;
+        if ($useForkServer) {
+            $result = system_with_test_fork_server(
+                $command,
+                $checkFile,
+                $env,
+                channel: 'skip',
+                setScriptEnvironment: false,
+                captureStdErr: false,
+                testPhpExtraArgs: $env['TEST_PHP_EXTRA_ARGS'] ?? '',
+            );
+        }
+        if ($result === null) {
+            if (is_array($command)) {
+                $command[] = $checkFile;
+            } else {
+                $command .= " \"$checkFile\"";
+            }
+            $result = system_with_timeout($command, $env);
+        }
+        $result = trim($result);
         if (strpos($result, 'nocache') === 0) {
             $result = '';
         } else if ($this->enable) {

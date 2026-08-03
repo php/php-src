@@ -17,13 +17,13 @@ require "$file_path/file.inc";
 $file_name = "$file_path/lstat_stat_variation4.tmp";
 $fp = fopen($file_name, "w");  // temp file
 fclose($fp);
+touch($file_name, 946684800);
 
 // touch a file check stat, there should be difference in atime
 echo "*** Testing stat() for file after using touch() on the file ***\n";
 $old_stat = stat($file_name);
 // clear the cache
 clearstatcache();
-sleep(1);
 var_dump( touch($file_name) );
 $new_stat = stat($file_name);
 

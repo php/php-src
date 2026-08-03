@@ -13,7 +13,7 @@ if (curl_version()['version_number'] === 0x080a00) {
 <?php
 include 'server.inc';
 function checkForClosedFilePointer($target_url, $curl_option, $description) {
-    $fp = fopen(__DIR__ . '/bug48203.tmp', 'w');
+    $fp = fopen(__DIR__ . '/bug48203_multi.tmp', 'w');
 
     $ch1 = curl_init();
     $ch2 = curl_init();
@@ -70,7 +70,7 @@ foreach($options_to_check as $option) {
 
 ?>
 --CLEAN--
-<?php @unlink(__DIR__ . '/bug48203.tmp'); ?>
+<?php @unlink(__DIR__ . '/bug48203_multi.tmp'); ?>
 --EXPECTF--
 Warning: curl_multi_add_handle(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
 %A

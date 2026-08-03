@@ -40,7 +40,7 @@ function recursive_delete_directory($directory) {
         if ($item != '.') {
              if ($item != '..') {
                 $path = ($directory.'/'.$item);
-                if (is_dir($path) == TRUE) {
+                if (is_dir($path) == TRUE && !is_link($path)) {
                     recursive_delete_directory($path);
                 } else {
                     @chmod($path, 0777);
@@ -57,9 +57,24 @@ function recursive_delete_directory($directory) {
     return TRUE;
 }
 
+function open_basedir_test_directory() {
+    foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
+        if (!isset($frame["file"]) || $frame["file"] === __FILE__) {
+            continue;
+        }
+
+        $test = preg_replace('/(?:\.clean)?\.php$/', '', basename($frame["file"]));
+        return __DIR__."/open_basedir_test_".$test;
+    }
+
+    return __DIR__."/open_basedir_test";
+}
+
 function create_directories() {
     delete_directories();
-    $directory = getcwd();
+    $directory = open_basedir_test_directory();
+    mkdir($directory);
+    chdir($directory);
 
     var_dump(mkdir($directory."/test"));
     var_dump(mkdir($directory."/test/ok"));
@@ -69,8 +84,7 @@ function create_directories() {
 }
 
 function delete_directories() {
-    $directory = (getcwd()."/test");
-    recursive_delete_directory($directory);
+    recursive_delete_directory(open_basedir_test_directory());
 }
 
 function test_open_basedir_error($function) {
@@ -87,12 +101,15 @@ function test_open_basedir_error($function) {
 }
 
 function test_open_basedir_before($function, $change = TRUE) {
-    global $savedDirectory;
+    global $initdir, $savedDirectory;
     echo "*** Testing open_basedir configuration [$function] ***\n";
+    create_directories();
     $directory = getcwd();
+    if (isset($initdir)) {
+        $initdir = $directory;
+    }
     $savedDirectory = $directory;
     var_dump(chdir($directory));
-    create_directories();
 
     // Optionally change directory
     if ($change == TRUE) {

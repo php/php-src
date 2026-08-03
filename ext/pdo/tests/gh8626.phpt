@@ -9,7 +9,7 @@ if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 
-$db = PDOTest::factory();
+$db = PDOTest::factoryForSkip();
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
     die("xfail OCI driver errorInfo is inconsistent with other PDO drivers");
 }

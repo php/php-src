@@ -14,7 +14,7 @@ $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $filename = __DIR__."/010.test.php";
 $filename_escaped = escapeshellarg($filename);
-$filename_txt = __DIR__."/010.test.txt";
+$filename_txt = __DIR__."/010-F.test.txt";
 $filename_txt_escaped = escapeshellarg($filename_txt);
 
 $code = '
@@ -37,7 +37,7 @@ var_dump(shell_exec("cat $filename_txt_escaped | $php -n -F $filename_escaped"))
 --CLEAN--
 <?php
 @unlink(__DIR__."/010.test.php");
-@unlink(__DIR__."/010.test.txt");
+@unlink(__DIR__."/010-F.test.txt");
 ?>
 --EXPECT--
 string(25) "

@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 4) die("skip for 32bit platforms only");
 if (PHP_OS_FAMILY === "Windows") die("skip not for Windows because the virtual address space for application is only 2GiB");
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 require __DIR__ . '/config.inc';
-getDbConnection();
+skipIfNoDbConnection();
 ?>
 --INI--
 memory_limit=-1

@@ -6,7 +6,7 @@ pdo_dblib
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 require __DIR__ . '/config.inc';
-getDbConnection();
+skipIfNoDbConnection();
 ?>
 --FILE--
 <?php

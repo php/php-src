@@ -8,7 +8,7 @@ $dir = getenv('REDIR_TEST_DIR');
 if (!$dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 try {
-    $db = PDOTest::factory();
+    $db = PDOTest::factoryForSkip();
 } catch (PDOException $e) {
     die('skip ' . $e->getMessage());
 }
