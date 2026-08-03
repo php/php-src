@@ -46,6 +46,17 @@ function get_current_version(): array {
     return [$major, $minor];
 }
 
+function with_test_shards(array $configuration, int $shards): array {
+    $configurations = [];
+    for ($shard = 1; $shard <= $shards; $shard++) {
+        $configurations[] = $configuration + [
+            'test_shard' => $shard,
+            'test_shards' => $shards,
+        ];
+    }
+    return $configurations;
+}
+
 function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $ref, $all_variations) {
     $no_jobs = in_array('CI: No jobs', $labels, true);
     $all_jobs = in_array('CI: All jobs', $labels, true) || $nightly;
@@ -66,7 +77,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
 
     $jobs = [];
     if (version_compare($php_version, '8.4', '>=') && ($all_jobs || !$no_jobs || $test_alpine)) {
-        $jobs['ALPINE'] = true;
+        $jobs['ALPINE']['matrix']['include'] = with_test_shards([], $all_variations ? 1 : 3);
     }
     if (version_compare($php_version, '8.4', '>=')
         && !$nightly
@@ -113,9 +124,9 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
                 ],
             ]
             : ['include' => [
-                ['name' => '', 'asan' => false, 'debug' => false, 'repeat' => false, 'test_mode' => 'normal', 'variation' => false, 'zts' => false],
-                ['name' => '', 'asan' => false, 'debug' => false, 'repeat' => false, 'test_mode' => 'function-jit', 'variation' => false, 'zts' => false],
-                ['name' => '_ASAN', 'asan' => true, 'debug' => true, 'repeat' => false, 'test_mode' => 'normal', 'variation' => false, 'zts' => true],
+                ...with_test_shards(['name' => '', 'asan' => false, 'debug' => false, 'repeat' => false, 'test_mode' => 'normal', 'variation' => false, 'zts' => false], 1),
+                ...with_test_shards(['name' => '', 'asan' => false, 'debug' => false, 'repeat' => false, 'test_mode' => 'function-jit', 'variation' => false, 'zts' => false], 1),
+                ...with_test_shards(['name' => '_ASAN', 'asan' => true, 'debug' => true, 'repeat' => false, 'test_mode' => 'normal', 'variation' => false, 'zts' => true], 3),
             ]];
         $jobs['LINUX_X64']['config']['variation_enable_zend_max_execution_timers'] = version_compare($php_version, '8.3', '>=');
     }
@@ -148,7 +159,13 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
             if (version_compare($php_version, '8.6', '>=')) {
                 $matrix[] = ['asan' => false, 'opcache' => true, 'x64' => true, 'zts' => true, 'clang' => true];
             }
+        } else {
+            $matrix = with_test_shards($matrix[0], 2);
         }
+        foreach ($matrix as &$configuration) {
+            $configuration += ['test_shard' => 1, 'test_shards' => 1];
+        }
+        unset($configuration);
         $jobs['WINDOWS']['matrix'] = ['include' => $matrix];
         $jobs['WINDOWS']['config'] = match (true) {
             version_compare($php_version, '8.6', '>=') => ['vs_crt_version' => 'vs18', 'runs_on' => 'windows-2025-vs2026'],
