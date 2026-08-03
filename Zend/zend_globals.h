@@ -244,7 +244,7 @@ struct _zend_executor_globals {
 	bool exception_ignore_args;
 	int current_executed_error_handler_stack_position;
 	zend_fcall_info_cache user_error_handler;
-	zval user_exception_handler;
+	zend_fcall_info_cache user_exception_handler;
 	zend_stack user_error_handlers_error_reporting;
 	zend_stack user_error_handlers;
 	zend_stack user_exception_handlers;

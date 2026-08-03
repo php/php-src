@@ -4857,7 +4857,7 @@ static zend_result accel_preload(const char *config, bool in_child)
 		if (op_array) {
 			zend_execute(op_array, NULL);
 			if (UNEXPECTED(EG(exception))) {
-				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+				if (ZEND_FCC_INITIALIZED(EG(user_exception_handler))) {
 					zend_user_exception_handler();
 				}
 				if (EG(exception)) {

@@ -813,7 +813,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->capture_warnings_during_sccp = 0;
 	executor_globals->user_error_handler_error_reporting = 0;
 	executor_globals->user_error_handler = empty_fcall_info_cache;
-	ZVAL_UNDEF(&executor_globals->user_exception_handler);
+	executor_globals->user_exception_handler = empty_fcall_info_cache;
 	ZVAL_UNDEF(&executor_globals->last_fatal_error_backtrace);
 	executor_globals->current_execute_data = NULL;
 	executor_globals->current_module = NULL;
@@ -1928,39 +1928,38 @@ ZEND_API ZEND_COLD void zend_output_debug_string(bool trigger_break, const char 
 
 ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 {
-	zval orig_user_exception_handler;
-	zval params[1], retval2;
-	zend_object *old_exception;
-
 	if (zend_is_unwind_exit(EG(exception))) {
 		return;
 	}
 
-	old_exception = EG(exception);
+	zend_object *old_exception = EG(exception);
 	EG(exception) = NULL;
+
+	zval params[1];
 	ZVAL_OBJ(&params[0], old_exception);
 
-	ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
-	zend_stack_push(&EG(user_exception_handlers), &orig_user_exception_handler);
-	ZVAL_UNDEF(&EG(user_exception_handler));
+	zend_fcall_info_cache fcc = EG(user_exception_handler);
+	/* Push the current handler on the stack and set the current one to the default handler to prevent recursion */
+	zend_stack_push(&EG(user_exception_handlers), &EG(user_exception_handler));
 
-	if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
-		zval_ptr_dtor(&retval2);
-		if (EG(exception)) {
-			OBJ_RELEASE(EG(exception));
-			EG(exception) = NULL;
-		}
-		OBJ_RELEASE(old_exception);
-	} else {
-		EG(exception) = old_exception;
+	int current_stack_position = zend_stack_count(&EG(user_exception_handlers));
+
+	EG(user_exception_handler) = empty_fcall_info_cache;
+
+	zend_call_known_fcc(&fcc, NULL, 1, params, NULL);
+	if (EG(exception)) {
+		OBJ_RELEASE(EG(exception));
+		EG(exception) = NULL;
 	}
+	OBJ_RELEASE(old_exception);
 
-	if (Z_TYPE(EG(user_exception_handler)) == IS_UNDEF) {
-		zval *tmp = zend_stack_top(&EG(user_exception_handlers));
-		if (tmp) {
-			ZVAL_COPY_VALUE(&EG(user_exception_handler), tmp);
-			zend_stack_del_top(&EG(user_exception_handlers));
-		}
+	if (
+		current_stack_position == zend_stack_count(&EG(user_exception_handlers))
+		&& !ZEND_FCC_INITIALIZED(EG(user_exception_handler))
+	) {
+		const zend_fcall_info_cache *tmp = zend_stack_top(&EG(user_exception_handlers));
+		EG(user_exception_handler) = *tmp;
+		zend_stack_del_top(&EG(user_exception_handlers));
 	}
 } /* }}} */
 
@@ -1975,7 +1974,7 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 	if (op_array) {
 		zend_execute(op_array, retval);
 		if (UNEXPECTED(EG(exception))) {
-			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+			if (ZEND_FCC_INITIALIZED(EG(user_exception_handler))) {
 				zend_user_exception_handler();
 			}
 			if (EG(exception)) {

@@ -1349,18 +1349,21 @@ ZEND_FUNCTION(set_exception_handler)
 		Z_PARAM_FUNC_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-		ZVAL_COPY(return_value, &EG(user_exception_handler));
+	if (ZEND_FCC_INITIALIZED(EG(user_exception_handler))) {
+		zend_get_callable_zval_from_fcc(&EG(user_exception_handler), return_value);
 	}
 
+	/* Push current error handler onto the stack, so that it can be restored later */
 	zend_stack_push(&EG(user_exception_handlers), &EG(user_exception_handler));
 
-	if (!ZEND_FCI_INITIALIZED(fci)) { /* unset user-defined handler */
-		ZVAL_UNDEF(&EG(user_exception_handler));
+	/* if passed null the user want's to use the default PHP error handler */
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
+		EG(user_exception_handler) = empty_fcall_info_cache;
 		return;
 	}
 
-	ZVAL_COPY(&EG(user_exception_handler), &(fci.function_name));
+	zend_fcc_dup(&EG(user_exception_handler), &fcc);
+	// TODO Need to free trampoline?
 }
 /* }}} */
 
@@ -1369,14 +1372,14 @@ ZEND_FUNCTION(restore_exception_handler)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-		zval_ptr_dtor(&EG(user_exception_handler));
+	if (ZEND_FCC_INITIALIZED(EG(user_exception_handler))) {
+		zend_fcc_dtor(&EG(user_exception_handler));
+		EG(user_exception_handler) = empty_fcall_info_cache;
 	}
-	if (zend_stack_is_empty(&EG(user_exception_handlers))) {
-		ZVAL_UNDEF(&EG(user_exception_handler));
-	} else {
-		zval *tmp = zend_stack_top(&EG(user_exception_handlers));
-		ZVAL_COPY_VALUE(&EG(user_exception_handler), tmp);
+
+	if (!zend_stack_is_empty(&EG(user_exception_handlers))) {
+		const zend_fcall_info_cache *tmp = zend_stack_top(&EG(user_exception_handlers));
+		EG(user_exception_handler) = *tmp;
 		zend_stack_del_top(&EG(user_exception_handlers));
 	}
 
@@ -1389,8 +1392,8 @@ ZEND_FUNCTION(get_exception_handler)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-		RETURN_COPY(&EG(user_exception_handler));
+	if (ZEND_FCC_INITIALIZED(EG(user_exception_handler))) {
+		zend_get_callable_zval_from_fcc(&EG(user_exception_handler), return_value);
 	}
 }
 
