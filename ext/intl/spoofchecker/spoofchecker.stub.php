@@ -49,6 +49,13 @@ class Spoofchecker
     public const int SIMPLE_CASE_INSENSITIVE = UNKNOWN;
 #endif
 
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+    /** @cvalue UBIDI_LTR */
+    public const int LTR = UNKNOWN;
+    /** @cvalue UBIDI_RTL */
+    public const int RTL = UNKNOWN;
+#endif
+
     public function __construct() {}
 
     /**
@@ -72,4 +79,11 @@ class Spoofchecker
     /** @tentative-return-type */
     public function setRestrictionLevel(int $level): void {}
     public function setAllowedChars(string $pattern, int $patternOptions = 0): void {}
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+    /**
+     * @param int $errorCode
+     */
+    public function areBidiConfusable(int $direction, string $string1, string $string2, &$errorCode = null): bool {}
+#endif
 }
