@@ -1287,21 +1287,18 @@ ZEND_FUNCTION(set_error_handler)
 		Z_PARAM_LONG(error_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!ZEND_FCC_INITIALIZED(fcc)) { /* unset user-defined handler if null is passed*/
-		if (ZEND_FCC_INITIALIZED(EG(user_error_handler))) {
-			zend_get_callable_zval_from_fcc(&EG(user_error_handler), return_value);
-		}
-		zend_fcc_dtor(&EG(user_error_handler));
-		EG(user_error_handler) = empty_fcall_info_cache;
-		return;
-	}
-
 	if (ZEND_FCC_INITIALIZED(EG(user_error_handler))) {
 		zend_get_callable_zval_from_fcc(&EG(user_error_handler), return_value);
+	}
 
-		/* Push current error handler onto the stack */
-		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
-		zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
+	/* Push current error handler onto the stack, so that it can be restored later */
+	zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
+	zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
+
+	/* if passed null the user want's to use the default PHP error handler */
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
+		EG(user_error_handler) = empty_fcall_info_cache;
+		return;
 	}
 
 	zend_fcc_dup(&EG(user_error_handler), &fcc);

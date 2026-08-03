@@ -269,6 +269,12 @@ void shutdown_destructors(void) /* {{{ */
 }
 /* }}} */
 
+static void zend_fcc_dtor_if_set(zend_fcall_info_cache *fcc) {
+	if (ZEND_FCC_INITIALIZED(*fcc)) {
+		zend_fcc_dtor(fcc);
+	}
+}
+
 /* Free values held by the executor. */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 {
@@ -417,7 +423,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		}
 
 		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
-		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))zend_fcc_dtor, 1);
+		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))zend_fcc_dtor_if_set, true);
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 		zend_hash_clean(&EG(callable_convert_cache));

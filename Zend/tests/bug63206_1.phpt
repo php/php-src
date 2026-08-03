@@ -22,5 +22,5 @@ restore_error_handler();
 
 trigger_error('Error', E_USER_WARNING);
 ?>
---EXPECTF--
-Warning: Error in %s on line %d
+--EXPECT--
+Second handler
