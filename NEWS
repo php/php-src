@@ -43,6 +43,9 @@ PHP                                                                        NEWS
     SO_LINGER options. (Weilin Du)
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
+- SQLite:
+  . Fix leak when trying to close db if blob stream is still open. (ndossche)
+
 - Streams:
   . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
     $this->stream during the close flush). (iliaal)

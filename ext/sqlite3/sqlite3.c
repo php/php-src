@@ -2338,7 +2338,9 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 	}
 
 	if (intern->initialised && intern->db) {
-		sqlite3_close(intern->db);
+		/* Use sqlite3_close_v2() because the object may be destroyed while resources depending on the connection are still alive,
+		 * e.g. a blob stream created by SQLite3::openBlob(). */
+		sqlite3_close_v2(intern->db);
 		intern->initialised = false;
 	}
 
