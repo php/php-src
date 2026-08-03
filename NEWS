@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-22857 (Function JIT emits wrong code for FETCH_OBJ_FUNC_ARG on a
     property hook getter, losing register-held variables). (Zhao Hao)
 
+- OpenSSL:
+  . Fix missing error check on invalid alpn protocols. (ndossche)
+
 - PCRE:
   . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
     now forbidden. (Arnaud)
