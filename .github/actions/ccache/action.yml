@@ -11,6 +11,9 @@ inputs:
   cxx:
     required: false
     default: 'g++'
+  save:
+    required: false
+    default: true
 runs:
   using: composite
   steps:
@@ -32,7 +35,7 @@ runs:
         append-timestamp: false
         restore-keys: "${{ steps.cache_key.outputs.prefix }}"
         # GitHub isolates caches saved by PR merge refs from base branches and other PRs.
-        save: true
+        save: ${{ inputs.save == 'true' }}
     - name: Export CC/CXX
       shell: bash
       run: |

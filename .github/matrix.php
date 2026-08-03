@@ -113,8 +113,9 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
                 ],
             ]
             : ['include' => [
-                ['name' => '', 'asan' => false, 'debug' => false, 'repeat' => false, 'variation' => false, 'zts' => false],
-                ['name' => '_ASAN', 'asan' => true, 'debug' => true, 'repeat' => false, 'variation' => false, 'zts' => true],
+                ['name' => '', 'asan' => false, 'debug' => false, 'repeat' => false, 'test_mode' => 'normal', 'variation' => false, 'zts' => false],
+                ['name' => '', 'asan' => false, 'debug' => false, 'repeat' => false, 'test_mode' => 'function-jit', 'variation' => false, 'zts' => false],
+                ['name' => '_ASAN', 'asan' => true, 'debug' => true, 'repeat' => false, 'test_mode' => 'normal', 'variation' => false, 'zts' => true],
             ]];
         $jobs['LINUX_X64']['config']['variation_enable_zend_max_execution_timers'] = version_compare($php_version, '8.3', '>=');
     }
