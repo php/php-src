@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.ALPINE.matrix }}
-    name: "ALPINE_X64_ASAN_DEBUG_ZTS${{ matrix.test_shards > 1 && format('_SHARD_{0}_OF_{1}', matrix.test_shard, matrix.test_shards) || '' }}"
+    name: "ALPINE_X64_ASAN_DBG_ZTS${{ matrix.test_shards > 1 && format('_{0}-{1}', matrix.test_shard, matrix.test_shards) || '' }}"
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     container:
@@ -137,7 +137,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X64.matrix }}
-    name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.test_mode == 'function-jit' && '_FUNCTION_JIT' || '' }}${{ matrix.test_shards > 1 && format('_SHARD_{0}_OF_{1}', matrix.test_shard, matrix.test_shards) || '' }}"
+    name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DBG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.test_mode == 'function-jit' && '_FUNCTION_JIT' || '' }}${{ matrix.test_shards > 1 && format('_{0}-{1}', matrix.test_shard, matrix.test_shards) || '' }}"
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
     timeout-minutes: 180
     steps:
@@ -861,7 +861,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.WINDOWS.matrix }}
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}${{ matrix.test_shards > 1 && format('_SHARD_{0}_OF_{1}', matrix.test_shard, matrix.test_shards) || '' }}"
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}${{ matrix.test_shards > 1 && format('_{0}-{1}', matrix.test_shard, matrix.test_shards) || '' }}"
     runs-on: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.runs_on }}
     timeout-minutes: 180
     env:
