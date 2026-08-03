@@ -2654,7 +2654,13 @@ static zend_result php_openssl_create_server_ctx(php_stream *stream,
 				return FAILURE;
 			}
 			if (sslsock->is_client) {
-				SSL_CTX_set_alpn_protos(sslsock->ctx, alpn, alpn_len);
+				if (SSL_CTX_set_alpn_protos(sslsock->ctx, alpn, alpn_len)) {
+					php_stream_warn(stream, DecodingFailed, "Failed setting TLS ALPN protocols, protocol names must not be empty");
+					efree(alpn);
+					SSL_CTX_free(sslsock->ctx);
+					sslsock->ctx = NULL;
+					return FAILURE;
+				}
 			} else {
 				sslsock->alpn_ctx.data = (unsigned char *) pestrndup((const char*)alpn, alpn_len, php_stream_is_persistent(stream));
 				sslsock->alpn_ctx.len = alpn_len;
