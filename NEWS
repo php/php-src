@@ -37,6 +37,10 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).
     (DanielEScherzer)
+  . Fixed ReflectionProperty::isLazy() and skipLazyInitialization() using the
+    parent slot when a child class hooks an inherited property. (iliaal)
+  . Fixed segfault in ReflectionMethod::createFromMethodName() on an
+    uninstantiable subclass. (iliaal)
 
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
