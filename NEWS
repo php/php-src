@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   . Added ReflectionAttribute::inNamespace(),
     ReflectionAttribute::getNamespaceName(), and
     ReflectionAttribute::getShortName(). (Girgias)
+  . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).
+    (DanielEScherzer)
 
 - Standard:
   . Added the "filter.max_filter_count" stream context option for php://filter
