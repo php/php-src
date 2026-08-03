@@ -26,7 +26,7 @@ set_error_handler(function()
 });
 
 // trigger error handler
-$a['waa'];
+trigger_error('Error', E_USER_WARNING);
 ?>
 --EXPECTF--
 Notice: ob_end_flush(): Failed to delete and flush buffer. No buffer to delete or flush in %sbug64960.php on line 3

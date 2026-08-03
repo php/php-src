@@ -1282,24 +1282,30 @@ ZEND_FUNCTION(set_error_handler)
 	zend_long error_type = E_ALL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc) // TODO: handle ZPP error for Z_PARAM_LONG
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(error_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-		ZVAL_COPY(return_value, &EG(user_error_handler));
-	}
-
-	zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
-	zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
-
-	if (!ZEND_FCI_INITIALIZED(fci)) { /* unset user-defined handler */
-		ZVAL_UNDEF(&EG(user_error_handler));
+	if (!ZEND_FCC_INITIALIZED(fcc)) { /* unset user-defined handler if null is passed*/
+		if (ZEND_FCC_INITIALIZED(EG(user_error_handler))) {
+			zend_get_callable_zval_from_fcc(&EG(user_error_handler), return_value);
+		}
+		zend_fcc_dtor(&EG(user_error_handler));
+		EG(user_error_handler) = empty_fcall_info_cache;
 		return;
 	}
 
-	ZVAL_COPY(&EG(user_error_handler), &(fci.function_name));
+	if (ZEND_FCC_INITIALIZED(EG(user_error_handler))) {
+		zend_get_callable_zval_from_fcc(&EG(user_error_handler), return_value);
+
+		/* Push current error handler onto the stack */
+		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
+		zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
+	}
+
+	zend_fcc_dup(&EG(user_error_handler), &fcc);
+	// TODO Need to free trampoline?
 	EG(user_error_handler_error_reporting) = (int)error_type;
 }
 /* }}} */
@@ -1309,22 +1315,16 @@ ZEND_FUNCTION(restore_error_handler)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-		zval zeh;
-
-		ZVAL_COPY_VALUE(&zeh, &EG(user_error_handler));
-		ZVAL_UNDEF(&EG(user_error_handler));
-		zval_ptr_dtor(&zeh);
+	if (ZEND_FCC_INITIALIZED(EG(user_error_handler))) {
+		zend_fcc_dtor(&EG(user_error_handler));
+		EG(user_error_handler) = empty_fcall_info_cache;
 	}
 
-	if (zend_stack_is_empty(&EG(user_error_handlers))) {
-		ZVAL_UNDEF(&EG(user_error_handler));
-	} else {
-		zval *tmp;
+	if (!zend_stack_is_empty(&EG(user_error_handlers))) {
 		EG(user_error_handler_error_reporting) = zend_stack_int_top(&EG(user_error_handlers_error_reporting));
 		zend_stack_del_top(&EG(user_error_handlers_error_reporting));
-		tmp = zend_stack_top(&EG(user_error_handlers));
-		ZVAL_COPY_VALUE(&EG(user_error_handler), tmp);
+		const zend_fcall_info_cache *tmp = zend_stack_top(&EG(user_error_handlers));
+		EG(user_error_handler) = *tmp;
 		zend_stack_del_top(&EG(user_error_handlers));
 	}
 
@@ -1337,8 +1337,8 @@ ZEND_FUNCTION(get_error_handler)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-		RETURN_COPY(&EG(user_error_handler));
+	if (ZEND_FCC_INITIALIZED(EG(user_error_handler))) {
+		zend_get_callable_zval_from_fcc(&EG(user_error_handler), return_value);
 	}
 }
 

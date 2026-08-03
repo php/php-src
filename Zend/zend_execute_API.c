@@ -159,13 +159,14 @@ void init_executor(void) /* {{{ */
 
 	EG(ticks_count) = 0;
 
-	ZVAL_UNDEF(&EG(user_error_handler));
+	EG(current_executed_error_handler_stack_position) = -1;
+	EG(user_error_handler) = empty_fcall_info_cache;
 	ZVAL_UNDEF(&EG(user_exception_handler));
 
 	EG(current_execute_data) = NULL;
 
 	zend_stack_init(&EG(user_error_handlers_error_reporting), sizeof(int));
-	zend_stack_init(&EG(user_error_handlers), sizeof(zval));
+	zend_stack_init(&EG(user_error_handlers), sizeof(zend_fcall_info_cache));
 	zend_stack_init(&EG(user_exception_handlers), sizeof(zval));
 
 	zend_objects_store_init(&EG(objects_store), 1024);
@@ -405,9 +406,9 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		} ZEND_HASH_FOREACH_END();
 
 		/* Also release error and exception handlers, which may hold objects. */
-		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-			zval_ptr_dtor(&EG(user_error_handler));
-			ZVAL_UNDEF(&EG(user_error_handler));
+		if (ZEND_FCC_INITIALIZED(EG(user_error_handler))) {
+			zend_fcc_dtor(&EG(user_error_handler));
+			EG(user_error_handler) = empty_fcall_info_cache;
 		}
 
 		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
@@ -416,7 +417,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 		}
 
 		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
-		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
+		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))zend_fcc_dtor, 1);
 		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 		zend_hash_clean(&EG(callable_convert_cache));

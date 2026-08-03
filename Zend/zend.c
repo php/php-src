@@ -812,7 +812,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	memset(&executor_globals->trampoline, 0, sizeof(zend_op_array));
 	executor_globals->capture_warnings_during_sccp = 0;
 	executor_globals->user_error_handler_error_reporting = 0;
-	ZVAL_UNDEF(&executor_globals->user_error_handler);
+	executor_globals->user_error_handler = empty_fcall_info_cache;
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
 	ZVAL_UNDEF(&executor_globals->last_fatal_error_backtrace);
 	executor_globals->current_execute_data = NULL;
@@ -1443,7 +1443,6 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 {
 	zval params[4];
 	zval retval;
-	zval orig_user_error_handler;
 	bool in_compilation;
 	zend_class_entry *saved_class_entry = NULL;
 	zend_stack loop_var_stack;
@@ -1451,7 +1450,6 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	int type = orig_type & E_ALL;
 	bool orig_record_errors;
 	zend_err_buf orig_errors_buf;
-	zend_result res;
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
 	 * but don't perform any other error handling. */
@@ -1530,10 +1528,17 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 
 	zend_observer_error_notify(type, error_filename, error_lineno, message);
 
-	/* if we don't have a user defined error handler */
-	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
+	/* Use default error handler if */
+	if (
+		/* there is no user defined error handler */
+		!ZEND_FCC_INITIALIZED(EG(user_error_handler))
+		/* the error handler is called recursively */
+		|| EG(current_executed_error_handler_stack_position) == zend_stack_count(&EG(user_error_handlers))
+		/* the error handler doesn't handle the current severity */
 		|| !(EG(user_error_handler_error_reporting) & type)
-		|| EG(error_handling) != EH_NORMAL) {
+		/* the error handler was overridden by an internal extension function/method */
+		|| EG(error_handling) != EH_NORMAL
+	) {
 		zend_error_cb(orig_type, error_filename, error_lineno, message);
 	} else switch (type) {
 		case E_ERROR:
@@ -1558,9 +1563,6 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 
 			ZVAL_LONG(&params[3], error_lineno);
 
-			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
-			ZVAL_UNDEF(&EG(user_error_handler));
-
 			/* User error handler may include() additional PHP files.
 			 * If an error was generated during compilation PHP will compile
 			 * such scripts recursively, but some CG() variables may be
@@ -1581,18 +1583,23 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			orig_errors_buf = EG(errors);
 			memset(&EG(errors), 0, sizeof(EG(errors)));
 
-			res = call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params);
+			/* To prevent recursive calls of the error handler, we store the stack position of the current error handler */
+			EG(current_executed_error_handler_stack_position) = zend_stack_count(&EG(user_error_handlers));
+
+			zend_call_known_fcc(&EG(user_error_handler), &retval, 4, params, NULL);
+			/* Reset stack position of the current error handler */
+			EG(current_executed_error_handler_stack_position) = -1;
+			zval_ptr_dtor(&params[2]);
+			zval_ptr_dtor(&params[1]);
 
 			EG(record_errors) = orig_record_errors;
 			EG(errors) = orig_errors_buf;
 
-			if (res == SUCCESS) {
-				if (Z_TYPE(retval) != IS_UNDEF) {
-					if (Z_TYPE(retval) == IS_FALSE) {
-						zend_error_cb(orig_type, error_filename, error_lineno, message);
-					}
-					zval_ptr_dtor(&retval);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				if (Z_TYPE(retval) == IS_FALSE) {
+					zend_error_cb(orig_type, error_filename, error_lineno, message);
 				}
+				zval_ptr_dtor(&retval);
 			} else if (!EG(exception)) {
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(orig_type, error_filename, error_lineno, message);
@@ -1605,14 +1612,6 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 				CG(in_compilation) = 1;
 			}
 
-			zval_ptr_dtor(&params[2]);
-			zval_ptr_dtor(&params[1]);
-
-			if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF) {
-				ZVAL_COPY_VALUE(&EG(user_error_handler), &orig_user_error_handler);
-			} else {
-				zval_ptr_dtor(&orig_user_error_handler);
-			}
 			break;
 	}
 
