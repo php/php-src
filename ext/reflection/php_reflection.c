@@ -1336,7 +1336,10 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 	if (name && (flags & REFLECTION_ATTRIBUTE_IS_INSTANCEOF)) {
 		if (NULL == (base = zend_lookup_class(name))) {
 			if (!EG(exception)) {
-				zend_throw_error(NULL, "Class \"%s\" not found", ZSTR_VAL(name));
+				// %S is used for zend_string pointers by smart str printing, but normally
+				// is for wide character strings and so compilers complain if this is inline
+				const char *format = "Class \"%S\" not found";
+				zend_throw_error(NULL, format, name);
 			}
 
 			RETURN_THROWS();
@@ -1700,8 +1703,11 @@ ZEND_METHOD(ReflectionFunction, __construct)
 		fptr = zend_fetch_function(fname);
 
 		if (fptr == NULL) {
+			// %S is used for zend_string pointers by smart str printing, but normally
+			// is for wide character strings and so compilers complain if this is inline
+			const char *format = "Function %S() does not exist";
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Function %s() does not exist", ZSTR_VAL(fname));
+				format, fname);
 			RETURN_THROWS();
 		}
 	}
@@ -2421,8 +2427,11 @@ ZEND_METHOD(ReflectionParameter, __construct)
 			zend_string *fname = Z_STR_P(reference);
 			fptr = zend_fetch_function(fname);
 			if (!fptr) {
+				// %S is used for zend_string pointers by smart str printing, but normally
+				// is for wide character strings and so compilers complain if this is inline
+				const char *format = "Function %S() does not exist";
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Function %s() does not exist", Z_STRVAL_P(reference));
+					format, Z_STR_P(reference));
 				RETURN_THROWS();
 			}
 			ce = fptr->common.scope;
@@ -2449,8 +2458,11 @@ ZEND_METHOD(ReflectionParameter, __construct)
 					return;
 				}
 				if ((ce = zend_lookup_class(name)) == NULL) {
+					// %S is used for zend_string pointers by smart str printing, but normally
+					// is for wide character strings and so compilers complain if this is inline
+					const char *format = "Class \"%S\" does not exist";
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
-							"Class \"%s\" does not exist", ZSTR_VAL(name));
+							format, name);
 					zend_string_release(name);
 					RETURN_THROWS();
 				}
@@ -2469,8 +2481,11 @@ ZEND_METHOD(ReflectionParameter, __construct)
 				/* nothing to do. don't set is_closure since is the invoke handler,
 					not the closure itself */
 			} else if ((fptr = zend_hash_find_ptr(&ce->function_table, lcname)) == NULL) {
+				// %S is used for zend_string pointers by smart str printing, but normally
+				// is for wide character strings and so compilers complain if this is inline
+				const char *format = "Method %S::%S() does not exist";
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+					format, ce->name, name);
 				zend_string_release(name);
 				zend_string_release(lcname);
 				RETURN_THROWS();
@@ -3215,7 +3230,10 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	if (class_name) {
 		if ((ce = zend_lookup_class(class_name)) == NULL) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0, "Class \"%s\" does not exist", ZSTR_VAL(class_name));
+				// %S is used for zend_string pointers by smart str printing, but normally
+				// is for wide character strings and so compilers complain if this is inline
+				const char *format = "Class \"%S\" does not exist";
+				zend_throw_exception_ex(reflection_exception_ptr, 0, format, class_name);
 			}
 			zend_string_release(class_name);
 			RETURN_THROWS();
@@ -3249,8 +3267,16 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 		ZVAL_OBJ_COPY(&intern->obj, orig_obj);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
 		efree(lcname);
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Method %S::%S() does not exist";
+		ALLOCA_FLAG(use_heap);
+		zend_string *method_name_zstr;
+		ZSTR_ALLOCA_INIT(method_name_zstr, method_name, method_name_len, use_heap);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), method_name);
+			format, ce->name, method_name_zstr);
+		ZSTR_ALLOCA_FREE(method_name_zstr, use_heap);
+
 		RETURN_THROWS();
 	} else {
 		zval_ptr_dtor(&intern->obj);
@@ -3756,7 +3782,10 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	if (classname_obj) {
 		ce = classname_obj->ce;
 	} else if ((ce = zend_lookup_class(classname_str)) == NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class \"%s\" does not exist", ZSTR_VAL(classname_str));
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Class \"%S\" does not exist";
+		zend_throw_exception_ex(reflection_exception_ptr, 0, format, classname_str);
 		RETURN_THROWS();
 	}
 
@@ -3764,7 +3793,10 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	reflection_object *intern = Z_REFLECTION_P(object);
 
 	if ((constant = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), constname)) == NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Constant %S::%S does not exist";
+		zend_throw_exception_ex(reflection_exception_ptr, 0, format, ce->name, constname);
 		RETURN_THROWS();
 	}
 
@@ -4016,7 +4048,10 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, bool is_o
 		zend_class_entry *ce;
 		if ((ce = zend_lookup_class(arg_class)) == NULL) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class \"%s\" does not exist", ZSTR_VAL(arg_class));
+				// %S is used for zend_string pointers by smart str printing, but normally
+				// is for wide character strings and so compilers complain if this is inline
+				const char *format = "Class \"%S\" does not exist";
+				zend_throw_exception_ex(reflection_exception_ptr, -1, format, arg_class);
 			}
 			RETURN_THROWS();
 		}
@@ -4161,8 +4196,11 @@ ZEND_METHOD(ReflectionClass, getStaticPropertyValue)
 		zend_throw_error(NULL,
 			"Typed property %s::$%s must not be accessed before initialization", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	} else {
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Property %S::$%S does not exist";
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			format, ce->name, name);
 	}
 }
 /* }}} */
@@ -4191,8 +4229,11 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 	EG(fake_scope) = old_scope;
 	if (!variable_ptr) {
 		zend_clear_exception();
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Property %S::$%S does not exist";
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				format, ce->name, name);
 		RETURN_THROWS();
 	}
 
@@ -4440,8 +4481,11 @@ ZEND_METHOD(ReflectionClass, getMethod)
 	} else if ((mptr = zend_hash_find_ptr_lc(&ce->function_table, name)) != NULL) {
 		reflection_method_factory(ce, mptr, NULL, return_value);
 	} else {
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Method %S::%S() does not exist";
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				format, ce->name, name);
 	}
 }
 /* }}} */
@@ -4568,10 +4612,13 @@ ZEND_METHOD(ReflectionClass, getProperty)
 	}
 	const char *str_name = ZSTR_VAL(name);
 	const char *tmp;
+	size_t str_name_len;
+	bool fully_qualified = false;
 	if ((tmp = zend_memnstr(ZSTR_VAL(name), "::", 2, ZSTR_VAL(name) + ZSTR_LEN(name))) != NULL) {
+		fully_qualified = true;
 		size_t classname_len = tmp - ZSTR_VAL(name);
 		zend_string *classname = zend_string_init(ZSTR_VAL(name), classname_len, false);
-		size_t str_name_len = ZSTR_LEN(name) - (classname_len + 2);
+		str_name_len = ZSTR_LEN(name) - (classname_len + 2);
 		str_name = tmp + 2;
 
 		zend_class_entry *ce2 = zend_lookup_class(classname);
@@ -4585,7 +4632,15 @@ ZEND_METHOD(ReflectionClass, getProperty)
 		zend_string_release_ex(classname, false);
 
 		if (!instanceof_function(ce, ce2)) {
-			zend_throw_exception_ex(reflection_exception_ptr, -1, "Fully qualified property name %s::$%s does not specify a base class of %s", ZSTR_VAL(ce2->name), str_name, ZSTR_VAL(ce->name));
+			// %S is used for zend_string pointers by smart str printing, but normally
+			// is for wide character strings and so compilers complain if this is inline
+			const char *format = "Fully qualified property name %S::$%S does not specify a base class of %S";
+			ALLOCA_FLAG(use_heap);
+			zend_string *prop_name_zstr;
+			ZSTR_ALLOCA_INIT(prop_name_zstr, str_name, str_name_len, use_heap);
+			zend_throw_exception_ex(reflection_exception_ptr, -1, format, ce2->name, prop_name_zstr, ce->name);
+			ZSTR_ALLOCA_FREE(prop_name_zstr, use_heap);
+
 			RETURN_THROWS();
 		}
 		ce = ce2;
@@ -4599,7 +4654,19 @@ ZEND_METHOD(ReflectionClass, getProperty)
 			return;
 		}
 	}
-	zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), str_name);
+	// %S is used for zend_string pointers by smart str printing, but normally
+	// is for wide character strings and so compilers complain if this is inline
+	const char *format = "Property %S::$%S does not exist";
+	// Can only use the existing `name` string if it wasn't fully qualified
+	if (fully_qualified) {
+		ALLOCA_FLAG(use_heap);
+		zend_string *prop_name_zstr;
+		ZSTR_ALLOCA_INIT(prop_name_zstr, str_name, str_name_len, use_heap);
+		zend_throw_exception_ex(reflection_exception_ptr, 0, format, ce->name, prop_name_zstr);
+		ZSTR_ALLOCA_FREE(prop_name_zstr, use_heap);
+	} else {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, format, ce->name, name);
+	}
 }
 /* }}} */
 
@@ -5416,7 +5483,10 @@ ZEND_METHOD(ReflectionClass, isSubclassOf)
 		class_ce = argument->ptr;
 	} else {
 		if ((class_ce = zend_lookup_class(class_str)) == NULL) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Class \"%s\" does not exist", ZSTR_VAL(class_str));
+			// %S is used for zend_string pointers by smart str printing, but normally
+			// is for wide character strings and so compilers complain if this is inline
+			const char *format = "Class \"%S\" does not exist";
+			zend_throw_exception_ex(reflection_exception_ptr, 0, format, class_str);
 			RETURN_THROWS();
 		}
 	}
@@ -5448,7 +5518,10 @@ ZEND_METHOD(ReflectionClass, implementsInterface)
 
 		interface_ce = argument->ptr;
 	} else if ((interface_ce = zend_lookup_class(interface_str)) == NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Interface \"%s\" does not exist", ZSTR_VAL(interface_str));
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Interface \"%S\" does not exist";
+		zend_throw_exception_ex(reflection_exception_ptr, 0, format, interface_str);
 		RETURN_THROWS();
 	}
 
@@ -5597,7 +5670,10 @@ ZEND_METHOD(ReflectionProperty, __construct)
 	if (classname_obj) {
 		ce = classname_obj->ce;
 	} else if ((ce = zend_lookup_class(classname_str)) == NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class \"%s\" does not exist", ZSTR_VAL(classname_str));
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Class \"%S\" does not exist";
+		zend_throw_exception_ex(reflection_exception_ptr, 0, format, classname_str);
 		RETURN_THROWS();
 	}
 
@@ -5614,7 +5690,10 @@ ZEND_METHOD(ReflectionProperty, __construct)
 			dynam_prop = true;
 		}
 		if (!dynam_prop) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			// %S is used for zend_string pointers by smart str printing, but normally
+			// is for wide character strings and so compilers complain if this is inline
+			const char *format = "Property %S::$%S does not exist";
+			zend_throw_exception_ex(reflection_exception_ptr, 0, format, ce->name, name);
 			RETURN_THROWS();
 		}
 	}
@@ -6033,12 +6112,16 @@ static zend_result reflection_property_check_lazy_compatible(
 		const zend_class_entry *scope, const zend_object *object, const char *method)
 {
 	if (!prop) {
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Cannot use %s() on dynamic property %S::$%S";
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Cannot use %s() on dynamic property %s::$%s",
-				method, ZSTR_VAL(scope->name),
-				ZSTR_VAL(unmangled_name));
+				format,
+				method, scope->name,
+				unmangled_name);
 		return FAILURE;
 	}
+	// Non-dynamic properties cannot have null bytes so %s is fine
 
 	if (prop->flags & ZEND_ACC_STATIC) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -6813,8 +6896,11 @@ ZEND_METHOD(ReflectionExtension, __construct)
 	reflection_object *intern = Z_REFLECTION_P(object);
 	zend_module_entry *module;
 	if ((module = zend_hash_find_ptr_lc(&module_registry, name_str)) == NULL) {
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Extension \"%S\" does not exist";
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Extension \"%s\" does not exist", ZSTR_VAL(name_str));
+			format, name_str);
 		RETURN_THROWS();
 	}
 	zval *prop_name = reflection_prop_name(object);
@@ -7102,20 +7188,22 @@ ZEND_METHOD(ReflectionExtension, isTemporary)
 /* {{{ Constructor. Throws an Exception in case the given Zend extension does not exist */
 ZEND_METHOD(ReflectionZendExtension, __construct)
 {
-	const char *name_str;
-	size_t name_len;
+	zend_string *name_zstr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name_zstr) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	zval *object = ZEND_THIS;
 	reflection_object *intern = Z_REFLECTION_P(object);
 
-	zend_extension *extension = zend_get_extension(name_str);
+	zend_extension *extension = zend_get_extension(ZSTR_VAL(name_zstr));
 	if (!extension) {
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Zend Extension \"%S\" does not exist";
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Zend Extension \"%s\" does not exist", name_str);
+				format, name_zstr);
 		RETURN_THROWS();
 	}
 	ZVAL_STRING(reflection_prop_name(object), extension->name);
@@ -7624,7 +7712,10 @@ ZEND_METHOD(ReflectionEnum, getCase)
 
 	zend_class_constant *constant = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
 	if (constant == NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Case %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Case %S::%S does not exist";
+		zend_throw_exception_ex(reflection_exception_ptr, 0, format, ce->name, name);
 		RETURN_THROWS();
 	}
 	if (!(ZEND_CLASS_CONST_FLAGS(constant) & ZEND_CLASS_CONST_IS_CASE)) {
@@ -7918,7 +8009,10 @@ ZEND_METHOD(ReflectionConstant, __construct)
 	zend_constant *const_ = zend_get_constant_ptr(lc_name);
 	zend_string_release_ex(lc_name, /* persistent */ false);
 	if (!const_) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant \"%s\" does not exist", ZSTR_VAL(name));
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		const char *format = "Constant \"%S\" does not exist";
+		zend_throw_exception_ex(reflection_exception_ptr, 0, format, name);
 		RETURN_THROWS();
 	}
 
