@@ -5193,17 +5193,11 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 }
 /* }}} */
 
-ZEND_API void zend_save_error_handling(zend_error_handling *current) /* {{{ */
-{
-	current->handling = EG(error_handling);
-	current->exception = EG(exception_class);
-}
-/* }}} */
-
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current) /* {{{ */
 {
 	if (current) {
-		zend_save_error_handling(current);
+		current->handling = EG(error_handling);
+		current->exception = EG(exception_class);
 	}
 	ZEND_ASSERT(error_handling == EH_THROW || exception_class == NULL);
 	EG(error_handling) = error_handling;
