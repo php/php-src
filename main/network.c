@@ -543,9 +543,14 @@ php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, unsigned
 		if (sockvals != NULL) {
 #ifdef SO_LINGER
 			if (sockvals->mask & PHP_SOCKVAL_SO_LINGER) {
+				/* l_linger is an unsigned short on Windows, so clamp rather than
+				 * truncate: a truncated value may still be in range and would then
+				 * be applied silently (e.g. 65536 becoming 0, an abortive close). */
+				unsigned short secs = sockvals->linger > USHRT_MAX
+					? USHRT_MAX : (unsigned short)sockvals->linger;
 				struct linger linger_val = {
 					.l_onoff = (sockvals->linger > 0),
-					.l_linger = (unsigned short)sockvals->linger
+					.l_linger = sockvals->linger > 0 ? secs : 0
 				};
 #ifdef SO_LINGER_SEC
 				setsockopt(sock, SOL_SOCKET, SO_LINGER_SEC, (char*)&linger_val, sizeof(linger_val));
@@ -1042,9 +1047,14 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 		if (sockvals != NULL) {
 #ifdef SO_LINGER
 			if (sockvals->mask & PHP_SOCKVAL_SO_LINGER) {
+				/* l_linger is an unsigned short on Windows, so clamp rather than
+				 * truncate: a truncated value may still be in range and would then
+				 * be applied silently (e.g. 65536 becoming 0, an abortive close). */
+				unsigned short secs = sockvals->linger > USHRT_MAX
+					? USHRT_MAX : (unsigned short)sockvals->linger;
 				struct linger linger_val = {
 					.l_onoff = (sockvals->linger > 0),
-					.l_linger = (unsigned short)sockvals->linger
+					.l_linger = sockvals->linger > 0 ? secs : 0
 				};
 #ifdef SO_LINGER_SEC
 				setsockopt(sock, SOL_SOCKET, SO_LINGER_SEC, (char*)&linger_val, sizeof(linger_val));

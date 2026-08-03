@@ -2,12 +2,6 @@
 stream_socket_server() and stream_socket_client() SO_LINGER context option test
 --EXTENSIONS--
 sockets
---SKIPIF--
-<?php
-if (!defined('SO_LINGER')) {
-    die('skip SO_LINGER not available');
-}
-?>
 --FILE--
 <?php
 // Test server with SO_LINGER enabled
@@ -47,9 +41,17 @@ if (!$accepted) {
     die('Unable to accept connection');
 }
 
-$so_linger = PHP_OS_FAMILY === 'Darwin' ? SO_LINGER_SEC : SO_LINGER;
+// macOS expresses SO_LINGER in ticks, SO_LINGER_SEC in seconds.
+$so_linger = defined('SO_LINGER_SEC') ? SO_LINGER_SEC : SO_LINGER;
 
-// Verify server side (accepted connection)
+// Verify the listening socket
+$listen_sock = socket_import_stream($server);
+$listen_linger = socket_get_option($listen_sock, SOL_SOCKET, $so_linger);
+echo "Listen SO_LINGER\n";
+var_dump($listen_linger['l_onoff'] > 0);
+var_dump($listen_linger['l_linger']);
+
+// Verify server side (accepted connection, inherits from the listening socket)
 $server_sock = socket_import_stream($accepted);
 $server_linger = socket_get_option($server_sock, SOL_SOCKET, $so_linger);
 echo "Server SO_LINGER\n";
@@ -69,6 +71,9 @@ fclose($server);
 
 ?>
 --EXPECT--
+Listen SO_LINGER
+bool(true)
+int(10)
 Server SO_LINGER
 bool(true)
 int(10)
