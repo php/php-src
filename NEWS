@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
     now forbidden. (Arnaud)
 
+- Reflection:
+  . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).
+    (DanielEScherzer)
+
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     SO_LINGER options. (Weilin Du)
