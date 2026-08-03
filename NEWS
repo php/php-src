@@ -2559,7 +2559,7 @@ PHP                                                                        NEWS
     to that of fputcsv() and fgetcsv(). (Girgias)
   . php_uname() now throws ValueErrors on invalid inputs. (Girgias)
   . The "allowed_classes" option for unserialize() now throws TypeErrors and
-    ValueErrors	if it is not an	array of class names. (Girgias)
+    ValueErrors if it is not an array of class names. (Girgias)
   . Implemented GH-15685 (improve proc_open error reporting on Windows). (cmb)
   . Add support for backed enums in http_build_query(). (ilutov)
   . Fixed bug GH-15982 (Assertion failure with array_find when references are
