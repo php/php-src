@@ -50,9 +50,3 @@ string(1) "f"
 
 INSERT INTO "ghsa_7qpv_r5mr_78m4" ("name","admin") VALUES ('jake\'', true) --','f');
 string(1) "f"
---CLEAN--
-<?php
-include('config.inc');
-$db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE IF EXISTS ghsa_7qpv_r5mr_78m4");
-?>
