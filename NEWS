@@ -20,6 +20,7 @@ PHP                                                                        NEWS
     after successful calls. (Weilin Du)
   . Implemented GH-20255 (Add a predefined calendar constant in
     IntlDateFormatter for the proleptic gregorian calendar). (David Carlier)
+  . Added SpoofChecker::areBidiConfusable(). (David Carlier)
 
 - Reflection:
   . Added ReflectionAttribute::inNamespace(),

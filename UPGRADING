@@ -328,6 +328,10 @@ PHP 8.6 UPGRADE NOTES
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
     It is supported from icu 63.
+  . Added SpoofChecker::areBidiConfusable() to check whether two strings are
+    confusable for a given text direction, along with the SpoofChecker::LTR
+    and SpoofChecker::RTL direction constants.
+    It is supported from icu 74.
 
 - IO:
   . Added new polling API.
@@ -483,6 +487,7 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/grapheme_strrev
   . Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue()
     RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
+  . SpoofChecker::areBidiConfusable()
 
 - mysqli:
   . Added mysqli::quote_string() and mysqli_quote_string().

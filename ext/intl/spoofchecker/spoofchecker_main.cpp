@@ -223,3 +223,46 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 	}
 }
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+/* {{{ Checks if a given text contains any confusable characters, for a given text direction */
+U_CFUNC PHP_METHOD(Spoofchecker, areBidiConfusable)
+{
+	uint32_t ret = 0;
+	zend_long direction;
+	zend_string *s1, *s2;
+	zval *error_code = NULL;
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_LONG(direction)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(error_code)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+
+	if (direction != UBIDI_LTR && direction != UBIDI_RTL) {
+		zend_argument_value_error(1, "must be either Spoofchecker::LTR or Spoofchecker::RTL");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(ZSTR_LEN(s1) > INT32_MAX || ZSTR_LEN(s2) > INT32_MAX)) {
+		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
+	} else {
+		ret = uspoof_areBidiConfusableUTF8(co->uspoof, (UBiDiDirection)direction, ZSTR_VAL(s1), (int32_t)ZSTR_LEN(s1), ZSTR_VAL(s2), (int32_t)ZSTR_LEN(s2), SPOOFCHECKER_ERROR_CODE_P(co));
+	}
+	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		RETURN_TRUE;
+	}
+
+	if (error_code) {
+		ZEND_TRY_ASSIGN_REF_LONG(error_code, ret);
+	}
+	RETVAL_BOOL(ret != 0);
+}
+/* }}} */
+#endif
