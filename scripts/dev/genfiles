@@ -148,3 +148,13 @@ echo "genfiles: Generating phar extension lexer file"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/phar builddir=ext/phar top_srcdir=. \
   -f ext/phar/Makefile.frag \
   ext/phar/phar_path_check.c
+
+echo "genfiles: Generating timelib date lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/date builddir=ext/date top_srcdir=. \
+  -f ext/date/Makefile.frag \
+  ext/date/lib/parse_date.c
+
+echo "genfiles: Generating timelib iso_intervals lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/date builddir=ext/date top_srcdir=. \
+  -f ext/date/Makefile.frag \
+  ext/date/lib/parse_iso_intervals.c

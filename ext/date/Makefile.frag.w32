@@ -1,0 +1,7 @@
+ext\date\lib\parse_date.c: ext\date\lib\parse_date.re
+	cd $(PHP_SRC_DIR)
+	$(RE2C) $(RE2C_FLAGS) -b -o ext/date/lib/parse_date.c ext/date/lib/parse_date.re
+
+ext\date\lib\parse_iso_intervals.c: ext\date\lib\parse_iso_intervals.re
+	cd $(PHP_SRC_DIR)
+	$(RE2C) $(RE2C_FLAGS) -b -o ext/date/lib/parse_iso_intervals.c ext/date/lib/parse_iso_intervals.re
