@@ -16,8 +16,8 @@ $obj = new JsonSerializableObject();
 try {
     echo json_encode($obj);
 } catch (\Exception $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-This error is expected
+Exception: This error is expected
