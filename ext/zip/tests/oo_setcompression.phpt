@@ -31,13 +31,13 @@ var_dump($zip->setCompressionName('entry4.txt', ZipArchive::CM_DEFLATE));
 try {
 	$zip->setCompressionName('entry5.txt', PHP_INT_MIN);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	$zip->setCompressionIndex(4, PHP_INT_MIN);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($zip->setCompressionIndex(4, ZipArchive::CM_STORE));
@@ -69,8 +69,8 @@ unlink($tmpfile);
 bool(true)
 bool(true)
 bool(true)
-ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
-ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d
+ValueError: ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
+ValueError: ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d
 bool(true)
 bool(true)
 bool(true)
