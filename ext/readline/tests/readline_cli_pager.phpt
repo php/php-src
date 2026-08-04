@@ -5,6 +5,7 @@ readline
 --SKIPIF--
 <?php
 if (!function_exists('proc_open')) die('skip proc_open() not available');
+if (READLINE_LIB !== "readline") die('skip readline only');
 if (PHP_OS_FAMILY === 'Windows') die('skip tr pager is not portable on Windows');
 ?>
 --FILE--
@@ -18,5 +19,11 @@ fwrite($pipes[0], "quit\n");
 fclose($pipes[0]);
 proc_close($proc);
 ?>
---EXPECTF--
-%APAGER OUTPUT%A
+--EXPECT--
+Interactive shell
+
+php > echo "pager output
+php " ";
+pager output
+PAGER OUTPUT
+php > quit

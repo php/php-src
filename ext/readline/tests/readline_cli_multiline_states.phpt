@@ -14,20 +14,20 @@ $descriptorspec = [['pipe', 'r'], STDOUT, STDERR];
 $proc = proc_open("$php $ini -a", $descriptorspec, $pipes);
 
 fwrite($pipes[0], "\n");
-fwrite($pipes[0], "# comment without ini assignment\n");
-fwrite($pipes[0], "echo strtoupper('single \\\\ escape\n');\n");
-fwrite($pipes[0], "echo strtoupper(\"double \\\\ escape\n\");\n");
+fwrite($pipes[0], "echo strtoupper('single \\' semi ; brace }\nend');\n");
+fwrite($pipes[0], "echo strtoupper(\"double \\\" semi ; brace }\nend\");\n");
 fwrite($pipes[0], "echo strtoupper(\n\"paren\"\n);\n");
 fwrite($pipes[0], "echo \"arithmetic=\", 6 /\n2 + 100;\n");
-fwrite($pipes[0], "if (true) {\necho strtoupper(\"block\n\");\n}\n");
-fwrite($pipes[0], "// line comment\n");
-fwrite($pipes[0], "/*\n*/\necho strtoupper(\"comment\n\");\n");
+fwrite($pipes[0], "if (true) {\necho strtoupper(\"block_body\n\");\n}\n");
+fwrite($pipes[0], "echo strtoupper(\n\"hash_comment\\n\"\n# ) ;\n);\n");
+fwrite($pipes[0], "echo strtoupper(\n\"slash_comment\\n\"\n// ) ;\n);\n");
+fwrite($pipes[0], "echo strtoupper(\n\"block_comment\\n\" /*\n) ;\n*/\n);\n");
 fwrite($pipes[0], "#[AllowDynamicProperties]\nclass ReadlineCliCoverageClass {}\n");
-fwrite($pipes[0], "echo strtoupper(\"attribute\n\");\n");
-fwrite($pipes[0], "if (true) ?>out<?php\n?>side-\n<?php\n{\necho strtoupper(\"inside\n\");\n}\n");
+fwrite($pipes[0], "echo strtoupper((new ReflectionClass(ReadlineCliCoverageClass::class))->getAttributes()[0]->getName()), \"\\n\";\n");
+fwrite($pipes[0], "if (true) ?>outside } );\n<?php\necho strtoupper(\"outside_ok\\n\");\n");
 fwrite($pipes[0], "quit\n");
 fclose($pipes[0]);
 proc_close($proc);
 ?>
 --EXPECTF--
-%AInteractive shell%ASINGLE%ADOUBLE%APAREN%Aarithmetic=103%ABLOCK%ACOMMENT%AATTRIBUTE%Aoutside-%AINSIDE%A
+%AInteractive shell%ASINGLE%ADOUBLE%APAREN%Aarithmetic=103%ABLOCK_BODY%AHASH_COMMENT%ASLASH_COMMENT%ABLOCK_COMMENT%AALLOWDYNAMICPROPERTIES%AOUTSIDE_OK%A
