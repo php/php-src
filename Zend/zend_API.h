@@ -1549,6 +1549,7 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_OBJECT_OR_CLASS_NAME_OR_NULL, "an object, a valid class name, or null") \
 	_(Z_EXPECTED_OBJECT_OR_STRING,	"of type object|string") \
 	_(Z_EXPECTED_OBJECT_OR_STRING_OR_NULL, "of type object|string|null") \
+	_(Z_EXPECTED_OK, NULL) \
 
 #define Z_EXPECTED_TYPE
 
@@ -1557,7 +1558,6 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 
 typedef enum _zend_expected_type {
 	Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_ENUM)
-	Z_EXPECTED_LAST
 } zend_expected_type;
 
 C23_ENUM(zpp_error, uint8_t) {
@@ -1608,7 +1608,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		uint32_t _num_args = EX_NUM_ARGS(); \
 		uint32_t _i = 0; \
 		zval *_real_arg, *_arg = NULL; \
-		zend_expected_type _expected_type = Z_EXPECTED_LONG; \
+		zend_expected_type _expected_type = Z_EXPECTED_OK; \
 		char *_error = NULL; \
 		bool _dummy = 0; \
 		bool _optional = 0; \

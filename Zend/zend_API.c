@@ -228,7 +228,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t n
 {
 	static const char * const expected_error[] = {
 		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
-		NULL
 	};
 
 	if (EG(exception)) {
@@ -1085,7 +1084,7 @@ static zend_expected_type zend_parse_arg_impl(zval *arg, va_list *va, const char
 
 	*spec = spec_walk;
 
-	return Z_EXPECTED_LAST;
+	return Z_EXPECTED_OK;
 }
 /* }}} */
 
@@ -1094,7 +1093,7 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 	char *error = NULL;
 
 	zend_expected_type expected_type = zend_parse_arg_impl(arg, va, spec, &error, arg_num);
-	if (expected_type != Z_EXPECTED_LAST) {
+	if (expected_type != Z_EXPECTED_OK) {
 		if (EG(exception)) {
 			return FAILURE;
 		}
