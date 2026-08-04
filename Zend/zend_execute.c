@@ -234,11 +234,6 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 	return ptr;
 }
 
-ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data, uint32_t var)
-{
-	return EX_VAR(var);
-}
-
 ZEND_API bool zend_gcc_global_regs(void)
 {
   #if defined(HAVE_GCC_GLOBAL_REGS)
