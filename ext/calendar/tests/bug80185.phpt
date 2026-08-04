@@ -19,4 +19,4 @@ try {
 --EXPECT--
 int(2170713600)
 int(9223372036854720000)
-ValueError: jday must be between 2440588 and 106751993607888
+ValueError: jdtounix(): Argument #1 ($julian_day) jday must be between 2440588 and 106751993607888
