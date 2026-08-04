@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
+  . Fixed use-after-free when an error handler frees an array callable while
+    it is being validated. (iliaal)
 
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
