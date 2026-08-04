@@ -16,7 +16,7 @@ var_dump(xmlwriter_end_attribute($xw));
 try {
     xmlwriter_start_attribute($xw, "-1");
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(xmlwriter_end_attribute($xw));
@@ -24,7 +24,7 @@ var_dump(xmlwriter_end_attribute($xw));
 try {
     xmlwriter_start_attribute($xw, "\"");
 } catch (ValueError $e) {
-     echo $e->getMessage(), "\n";
+     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(xmlwriter_end_attribute($xw));
@@ -45,9 +45,9 @@ echo "Done\n";
 bool(true)
 bool(true)
 bool(true)
-xmlwriter_start_attribute(): Argument #2 ($name) must be a valid attribute name, "-1" given
+ValueError: xmlwriter_start_attribute(): Argument #2 ($name) must be a valid attribute name, "-1" given
 bool(false)
-xmlwriter_start_attribute(): Argument #2 ($name) must be a valid attribute name, """ given
+ValueError: xmlwriter_start_attribute(): Argument #2 ($name) must be a valid attribute name, """ given
 bool(false)
 bool(true)
 string(14) "<tag attr=""/>"
