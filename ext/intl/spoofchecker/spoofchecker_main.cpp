@@ -247,9 +247,19 @@ U_CFUNC PHP_METHOD(Spoofchecker, getBidiSkeleton)
 	if (UNEXPECTED(ZSTR_LEN(string) > INT32_MAX)) {
 		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
 		intl_errors_set(SPOOFCHECKER_ERROR_P(co), SPOOFCHECKER_ERROR_CODE(co),
-			"Failed to generate skeleton");
+			"Failed to convert input string to UTF-16");
 		RETURN_FALSE;
 	}
+
+	int32_t utf16_len;
+	u_strFromUTF8(nullptr, 0, &utf16_len, ZSTR_VAL(string), (int32_t) ZSTR_LEN(string),
+		SPOOFCHECKER_ERROR_CODE_P(co));
+	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co)) && SPOOFCHECKER_ERROR_CODE(co) != U_BUFFER_OVERFLOW_ERROR) {
+		intl_errors_set(SPOOFCHECKER_ERROR_P(co), SPOOFCHECKER_ERROR_CODE(co),
+			"Failed to convert input string to UTF-16");
+		RETURN_FALSE;
+	}
+	SPOOFCHECKER_ERROR_CODE(co) = U_ZERO_ERROR;
 
 	int32_t result_len = uspoof_getBidiSkeletonUTF8(
 		co->uspoof, (UBiDiDirection) direction, ZSTR_VAL(string), (int32_t) ZSTR_LEN(string),
@@ -261,10 +271,11 @@ U_CFUNC PHP_METHOD(Spoofchecker, getBidiSkeleton)
 	}
 
 	zend_string *result = zend_string_alloc(result_len, false);
+	int32_t result_capacity = result_len < INT32_MAX ? result_len + 1 : result_len;
 	SPOOFCHECKER_ERROR_CODE(co) = U_ZERO_ERROR;
 	result_len = uspoof_getBidiSkeletonUTF8(
 		co->uspoof, (UBiDiDirection) direction, ZSTR_VAL(string), (int32_t) ZSTR_LEN(string),
-		ZSTR_VAL(result), result_len, SPOOFCHECKER_ERROR_CODE_P(co));
+		ZSTR_VAL(result), result_capacity, SPOOFCHECKER_ERROR_CODE_P(co));
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
 		zend_string_release(result);
 		intl_errors_set(SPOOFCHECKER_ERROR_P(co), SPOOFCHECKER_ERROR_CODE(co),
