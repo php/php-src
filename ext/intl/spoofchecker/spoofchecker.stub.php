@@ -80,6 +80,8 @@ class Spoofchecker
     public function setRestrictionLevel(int $level): void {}
     public function setAllowedChars(string $pattern, int $patternOptions = 0): void {}
 
+    public function getSkeleton(string $string): string|false {}
+
 #if U_ICU_VERSION_MAJOR_NUM >= 74
     public function getBidiSkeleton(int $direction, string $string): string|false {}
 
