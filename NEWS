@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Fixed segfault in ReflectionMethod::createFromMethodName() on an
     uninstantiable subclass. (iliaal)
 
+- Readline:
+  . Fixed the interactive shell not waiting for the pager process to exit.
+    (Weilin Du)
+
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     SO_LINGER options. (Weilin Du)

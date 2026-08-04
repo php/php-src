@@ -712,7 +712,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		if (pager_pipe) {
-			fclose(pager_pipe);
+			pclose(pager_pipe);
 			pager_pipe = NULL;
 		}
 
