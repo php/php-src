@@ -260,6 +260,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     direct U_ICU_VERSION_* guards for supported ICU API variants.
   . The internal grapheme_get_break_iterator() helper no longer accepts a
     stack buffer argument; pass only the UErrorCode* status argument.
+  . Added PHP_INTL_FUNCTION_WITH_ERROR_RESET() for procedural functions that
+    reset the global error. Use it instead of PHP_FUNCTION() followed by a
+    manual intl_error_reset(NULL) call.
+  . IC_METHOD() now resets the global error before entering the method
+    implementation. IntlChar methods should no longer reset it manually.
 
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.
