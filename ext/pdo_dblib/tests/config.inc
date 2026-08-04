@@ -50,28 +50,21 @@ function getDbConnection(string $class = PDO::class, ?array $attributes = null) 
     }
     [$dsn, $user, $pass] = getCredentials();
 
-    $db = null;
-    $probe = static function () use (&$db, $class, $dsn, $user, $pass, $attributes, $connectionAttributes): ?string {
-        try {
-            $db = new $class($dsn, $user, $pass, $connectionAttributes);
-            if ($attributes === null) {
-                setAttributes($db);
+    try {
+        return ProbeCache::getFailure('pdo', [$class, false, $dsn, $user, $pass, $connectionAttributes], static function () use ($class, $dsn, $user, $pass, $attributes, $connectionAttributes): PDO {
+            try {
+                $db = new $class($dsn, $user, $pass, $connectionAttributes);
+                if ($attributes === null) {
+                    setAttributes($db);
+                }
+                return $db;
+            } catch (PDOException $e) {
+                throw new ProbeFailureException($e);
             }
-            return null;
-        } catch (PDOException $e) {
-            return $e->getMessage();
-        }
-    };
-
-    $reason = $evaluatingSkipif
-        ? ProbeCache::getFailure('pdo', [$class, false, $dsn, $user, $pass, $connectionAttributes], $probe)
-        : $probe();
-
-    if (is_string($reason)) {
-        die('skip ' . $reason);
+        });
+    } catch (ProbeFailureException $e) {
+        die('skip ' . $e->getMessage());
     }
-
-    return $db;
 }
 
 function connectToDb() {

@@ -48,16 +48,17 @@ if (!is_string($cacheDirectory)) {
 }
 
 $environment = getenv();
+$environment['TEST_PHP_EVALUATING_SKIPIF'] = '1';
 
 $helper = var_export(dirname(__DIR__) . '/probe_cache.inc', true);
 $namespace = 'probe-cache-test-' . bin2hex(random_bytes(8));
 $namespaceCode = var_export($namespace, true);
 $first = run_probe_cache_process(
-    "require $helper; echo ProbeCache::getFailure($namespaceCode, ['shared'], static fn(): ?string => 'shared failure');",
+    "require $helper; try { ProbeCache::getFailure($namespaceCode, ['shared'], static function (): never { throw new ProbeFailureException('shared failure'); }); } catch (ProbeFailureException \$e) { echo \$e->getMessage(); }",
     $environment,
 );
 $second = run_probe_cache_process(
-    "require $helper; echo ProbeCache::getFailure($namespaceCode, ['shared'], static function (): ?string { throw new Exception('Probe should not run'); });",
+    "require $helper; try { ProbeCache::getFailure($namespaceCode, ['shared'], static function (): never { throw new Exception('Probe should not run'); }); } catch (ProbeFailureException \$e) { echo \$e->getMessage(); }",
     $environment,
 );
 echo "$first\n$second\n";
@@ -66,7 +67,7 @@ $probeStarted = $cacheDirectory . '/probe_started';
 $probeStartedCode = var_export($probeStarted, true);
 @unlink($probeStarted);
 [$firstProcess, $firstPipes] = start_probe_cache_process(
-    "require $helper; echo ProbeCache::getFailure($namespaceCode, ['concurrent'], static function (): ?string { file_put_contents($probeStartedCode, 'started'); usleep(1000000); return 'concurrent failure'; });",
+    "require $helper; try { ProbeCache::getFailure($namespaceCode, ['concurrent'], static function (): never { file_put_contents($probeStartedCode, 'started'); usleep(1000000); throw new ProbeFailureException('concurrent failure'); }); } catch (ProbeFailureException \$e) { echo \$e->getMessage(); }",
     $environment,
 );
 
@@ -80,7 +81,7 @@ if (!file_exists($probeStarted)) {
 }
 
 [$secondProcess, $secondPipes] = start_probe_cache_process(
-    "require $helper; echo ProbeCache::getFailure($namespaceCode, ['concurrent'], static function (): ?string { throw new Exception('Concurrent probe should not run'); });",
+    "require $helper; try { ProbeCache::getFailure($namespaceCode, ['concurrent'], static function (): never { throw new Exception('Concurrent probe should not run'); }); } catch (ProbeFailureException \$e) { echo \$e->getMessage(); }",
     $environment,
 );
 $first = finish_probe_cache_process($firstProcess, $firstPipes);
@@ -88,30 +89,62 @@ $second = finish_probe_cache_process($secondProcess, $secondPipes);
 echo "$first\n$second\n";
 
 putenv("TEST_PHP_SHARED_CACHE_DIR=$cacheDirectory");
+putenv('TEST_PHP_EVALUATING_SKIPIF=1');
 
 $failureCalls = 0;
-$failureProbe = static function () use (&$failureCalls): ?string {
+$failureProbe = static function () use (&$failureCalls): never {
     $failureCalls++;
-    return "failure $failureCalls";
+    throw new ProbeFailureException("failure $failureCalls");
 };
 
-var_dump(ProbeCache::getFailure($namespace, ['first'], $failureProbe));
-var_dump(ProbeCache::getFailure($namespace, ['first'], $failureProbe));
-var_dump(ProbeCache::getFailure($namespace, ['second'], $failureProbe));
+try {
+    ProbeCache::getFailure($namespace, ['first'], $failureProbe);
+} catch (ProbeFailureException $e) {
+    var_dump($e->getMessage());
+}
+try {
+    ProbeCache::getFailure($namespace, ['first'], $failureProbe);
+} catch (ProbeFailureException $e) {
+    var_dump($e->getMessage());
+}
+try {
+    ProbeCache::getFailure($namespace, ['second'], $failureProbe);
+} catch (ProbeFailureException $e) {
+    var_dump($e->getMessage());
+}
 var_dump($failureCalls);
 
 $successCalls = 0;
-$successProbe = static function () use (&$successCalls): ?string {
+$successProbe = static function () use (&$successCalls): string {
     $successCalls++;
-    return null;
+    return "success $successCalls";
 };
 
 var_dump(ProbeCache::getFailure($namespace, ['available'], $successProbe));
 var_dump(ProbeCache::getFailure($namespace, ['available'], $successProbe));
 var_dump($successCalls);
 
+putenv('TEST_PHP_EVALUATING_SKIPIF');
+var_dump(ProbeCache::getFailure($namespace, ['first'], static fn(): string => 'uncached success'));
+
+$previous = new Exception('original failure');
+try {
+    ProbeCache::getFailure($namespace, ['wrapped'], static function () use ($previous): never {
+        throw new ProbeFailureException($previous);
+    });
+} catch (Throwable $e) {
+    var_dump($e === $previous);
+}
+
+putenv('TEST_PHP_EVALUATING_SKIPIF=1');
 putenv('TEST_PHP_SHARED_CACHE_DIR');
-var_dump(ProbeCache::getFailure($namespace, ['uncached'], static fn(): ?string => 'uncached failure'));
+try {
+    ProbeCache::getFailure($namespace, ['uncached'], static function (): never {
+        throw new ProbeFailureException('uncached failure');
+    });
+} catch (ProbeFailureException $e) {
+    var_dump($e->getMessage());
+}
 ?>
 --EXPECT--
 shared failure
@@ -122,7 +155,9 @@ string(9) "failure 1"
 string(9) "failure 1"
 string(9) "failure 2"
 int(2)
-NULL
-NULL
+string(9) "success 1"
+string(9) "success 2"
 int(2)
+string(16) "uncached success"
+bool(true)
 string(16) "uncached failure"

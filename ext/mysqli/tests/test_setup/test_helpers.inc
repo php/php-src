@@ -114,7 +114,6 @@ function mysqli_check_skip_test(): void {
 }
 
 function mysqli_connect_or_skip(): mysqli {
-    $connection = null;
     $configuration = [
         get_default_host(),
         get_default_port(),
@@ -125,20 +124,20 @@ function mysqli_connect_or_skip(): mysqli {
         get_environment_connection_flags(),
     ];
 
-    $reason = ProbeCache::getFailure('mysqli', $configuration, static function () use (&$connection): ?string {
-        try {
-            $connection = default_mysqli_connect();
-            return null;
-        } catch (mysqli_sql_exception $e) {
-            return sprintf("Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error());
-        }
-    });
-
-    if (is_string($reason)) {
-        die("skip $reason");
+    try {
+        return ProbeCache::getFailure('mysqli', $configuration, static function (): mysqli {
+            try {
+                return default_mysqli_connect();
+            } catch (mysqli_sql_exception $e) {
+                throw new ProbeFailureException(
+                    sprintf("Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()),
+                    $e,
+                );
+            }
+        });
+    } catch (ProbeFailureException $e) {
+        die("skip {$e->getMessage()}");
     }
-
-    return $connection;
 }
 function have_innodb(mysqli $link): bool {
     $res = $link->query("SELECT SUPPORT FROM INFORMATION_SCHEMA.ENGINES WHERE ENGINE = 'InnoDB'");

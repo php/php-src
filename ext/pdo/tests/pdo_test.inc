@@ -37,27 +37,19 @@ class PDOTest {
         if ($user === false) $user = NULL;
         if ($pass === false) $pass = NULL;
 
-        if (getenv('TEST_PHP_EVALUATING_SKIPIF') !== '1') {
-            return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
-        }
-
-        $database = null;
         $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attributes];
 
-        $reason = ProbeCache::getFailure('pdo', $configuration, static function () use (&$database, $classname, $useConnectMethod, $dsn, $user, $pass, $attributes): ?string {
-            try {
-                $database = self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
-                return null;
-            } catch (PDOException $e) {
-                return $e->getMessage();
-            }
-        });
-
-        if (is_string($reason)) {
-            throw new PDOException($reason);
+        try {
+            return ProbeCache::getFailure('pdo', $configuration, static function () use ($classname, $useConnectMethod, $dsn, $user, $pass, $attributes): PDO {
+                try {
+                    return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
+                } catch (PDOException $e) {
+                    throw new ProbeFailureException($e);
+                }
+            });
+        } catch (ProbeFailureException $e) {
+            throw new PDOException($e->getMessage());
         }
-
-        return $database;
     }
 
     static function skip() {

@@ -20,27 +20,19 @@ class MySQLPDOTest extends PDOTest {
             $attr = is_string($attr) && strlen($attr) ? unserialize($attr) : null;
         }
 
-        if (getenv('TEST_PHP_EVALUATING_SKIPIF') !== '1') {
-            return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attr);
-        }
-
-        $database = null;
         $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attr];
 
-        $reason = ProbeCache::getFailure('pdo', $configuration, static function () use (&$database, $classname, $useConnectMethod, $dsn, $user, $pass, $attr): ?string {
-            try {
-                $database = self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attr);
-                return null;
-            } catch (PDOException $e) {
-                return $e->getMessage();
-            }
-        });
-
-        if (is_string($reason)) {
-            throw new PDOException($reason);
+        try {
+            return ProbeCache::getFailure('pdo', $configuration, static function () use ($classname, $useConnectMethod, $dsn, $user, $pass, $attr): PDO {
+                try {
+                    return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attr);
+                } catch (PDOException $e) {
+                    throw new ProbeFailureException($e);
+                }
+            });
+        } catch (ProbeFailureException $e) {
+            throw new PDOException($e->getMessage());
         }
-
-        return $database;
     }
 
     static function factoryWithAttr($attr) {

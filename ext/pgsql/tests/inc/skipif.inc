@@ -15,15 +15,17 @@ if (getenv("SKIP_REPEAT")) {
     // We should probably change that, but in the meantime do not allow repetition.
     die("skip Cannot repeat pgsql tests");
 }
-$conn = null;
+try {
+    $conn = ProbeCache::getFailure('pgsql', [$conn_str], static function () use ($conn_str): PgSql\Connection {
+        $conn = @pg_connect($conn_str);
+        if (!$conn) {
+            throw new ProbeFailureException('could not connect');
+        }
 
-$reason = ProbeCache::getFailure('pgsql', [$conn_str], static function () use (&$conn, $conn_str): ?string {
-    $conn = @pg_connect($conn_str);
-    return $conn ? null : 'could not connect';
-});
-
-if (is_string($reason)) {
-    die("skip $reason\n");
+        return $conn;
+    });
+} catch (ProbeFailureException $e) {
+    die("skip {$e->getMessage()}\n");
 }
 
 function skip_server_version($version, $op = '<')
