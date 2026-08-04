@@ -9,7 +9,7 @@ try {
     serialize($t);
     echo "ERROR: should have thrown\n";
 } catch (\Exception $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $t->parseString("<html><body>test</body></html>");
@@ -18,7 +18,7 @@ try {
     serialize($node);
     echo "ERROR: should have thrown\n";
 } catch (\Exception $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

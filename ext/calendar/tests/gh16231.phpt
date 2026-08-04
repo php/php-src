@@ -7,15 +7,15 @@ calendar
 try {
 	jdtounix(PHP_INT_MIN);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	jdtounix(240587);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-jday must be between 2440588 and %d
-jday must be between 2440588 and %d
+ValueError: jday must be between 2440588 and %d
+ValueError: jday must be between 2440588 and %d

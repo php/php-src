@@ -29,7 +29,7 @@ foreach ($controls as $control) {
     try {
         var_dump(ldap_set_option($link, LDAP_OPT_SERVER_CONTROLS, $control));
     } catch (Error $exception) {
-        echo get_class($exception) . ": " . $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
