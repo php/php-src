@@ -334,6 +334,8 @@ PHP 8.6 UPGRADE NOTES
     It is supported from icu 74.
   . Added SpoofChecker::getBidiSkeleton() to generate a confusable skeleton for
     a given text direction. It is supported from icu 74.
+  . Added SpoofChecker::getSkeleton() to generate a confusable skeleton for a
+    given string.
 
 - IO:
   . Added new polling API.
@@ -491,6 +493,7 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
   . SpoofChecker::areBidiConfusable()
   . SpoofChecker::getBidiSkeleton()
+  . SpoofChecker::getSkeleton()
 
 - mysqli:
   . Added mysqli::quote_string() and mysqli_quote_string().
