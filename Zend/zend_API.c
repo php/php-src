@@ -5248,23 +5248,6 @@ ZEND_API bool zend_is_iterable(const zval *iterable) /* {{{ */
 }
 /* }}} */
 
-ZEND_API bool zend_is_countable(const zval *countable) /* {{{ */
-{
-	switch (Z_TYPE_P(countable)) {
-		case IS_ARRAY:
-			return 1;
-		case IS_OBJECT:
-			if (Z_OBJ_HT_P(countable)->count_elements) {
-				return 1;
-			}
-
-			return zend_class_implements_interface(Z_OBJCE_P(countable), zend_ce_countable);
-		default:
-			return 0;
-	}
-}
-/* }}} */
-
 static zend_result get_default_via_ast(zval *default_value_zval, const char *default_value) {
 	zend_ast *ast;
 	zend_arena *ast_arena;
