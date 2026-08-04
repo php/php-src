@@ -87,6 +87,10 @@ PHP 8.6 UPGRADE NOTES
   . Added stream socket context options so_keepalive, tcp_keepidle,
     tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
     options.
+  . Added stream socket context option so_linger that sets SO_LINGER on TCP
+    sockets. A positive value enables lingering for that many seconds, zero
+    or a negative value disables it. Values above 65535 are clamped as the
+    linger time is limited to an unsigned short on some platforms.
   . Allowed casting casting filtered streams as file descriptor for select.
 
 ========================================
