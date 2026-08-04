@@ -23,7 +23,7 @@ final class ProbeCache
         $cache = @fopen($cacheFile, 'c+');
 
         if ($cache === false || !flock($cache, LOCK_EX)) {
-            if (is_resource($cache)) {
+            if ($cache !== false) {
                 fclose($cache);
             }
             return $probe();
