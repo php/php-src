@@ -225,7 +225,7 @@ DBA_SYNC_FUNC(db3)
 
 DBA_INFO_FUNC(db3)
 {
-	return estrdup(DB_VERSION_STRING);
+	return DB_VERSION_STRING;
 }
 
 #endif

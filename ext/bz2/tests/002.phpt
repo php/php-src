@@ -31,14 +31,14 @@ $fp = fopen("bz_open_002.txt", "br");
 try {
     var_dump(bzopen($fp, "r"));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $fp = fopen("bz_open_002.txt", "br");
 try {
     var_dump(bzopen($fp, "w"));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $fp = fopen("bz_open_002.txt", "r");
@@ -90,11 +90,11 @@ bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: fopen(bz_open_002.txt): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
-bzopen(): Argument #1 ($file) must be of type string or file-resource, false given
+Warning: fopen(): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
+TypeError: bzopen(): Argument #1 ($file) must be of type string or file-resource, false given
 
-Warning: fopen(bz_open_002.txt): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
-bzopen(): Argument #1 ($file) must be of type string or file-resource, false given
+Warning: fopen(): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
+TypeError: bzopen(): Argument #1 ($file) must be of type string or file-resource, false given
 
 Warning: bzopen(): cannot write to a stream opened in read only mode in %s on line %d
 bool(false)

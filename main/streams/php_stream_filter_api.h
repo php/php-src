@@ -108,6 +108,7 @@ typedef struct _php_stream_filter_ops {
 
 typedef struct _php_stream_filter_chain {
 	php_stream_filter *head, *tail;
+	zend_long num_filters;
 
 	/* Owning stream */
 	php_stream *stream;
@@ -134,11 +135,11 @@ struct _php_stream_filter {
 
 /* stack filter onto a stream */
 BEGIN_EXTERN_C()
-PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter);
+PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI void php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
-PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter);
+PHPAPI void php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI zend_result php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter);
-PHPAPI zend_result _php_stream_filter_flush(php_stream_filter *filter, bool finish);
+PHPAPI zend_result php_stream_filter_flush(php_stream_filter *filter, bool finish);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, bool call_dtor);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops,
@@ -153,9 +154,6 @@ END_EXTERN_C()
 		_php_stream_filter_alloc((fops), (thisptr), (persistent), (rseek), (wseek) STREAMS_CC)
 #define php_stream_filter_alloc_rel(fops, thisptr, persistent, rseek, wseek) \
 	_php_stream_filter_alloc((fops), (thisptr), (persistent), (rseek), (wseek) STREAMS_REL_CC)
-#define php_stream_filter_prepend(chain, filter) _php_stream_filter_prepend((chain), (filter))
-#define php_stream_filter_append(chain, filter) _php_stream_filter_append((chain), (filter))
-#define php_stream_filter_flush(filter, finish) _php_stream_filter_flush((filter), (finish))
 
 #define php_stream_is_filtered(stream)	((stream)->readfilters.head || (stream)->writefilters.head)
 

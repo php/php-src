@@ -16,5 +16,5 @@ var_dump($stream);
 
 ?>
 --EXPECTF--
-Warning: fopen(php://nonexistent): Failed to open stream: %s in %s on line %d
+Warning: fopen(): Failed to open stream: %s in %s on line %d
 bool(false)

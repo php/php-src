@@ -33,4 +33,6 @@ runs:
           t1lib \
           libxml2 \
           libjpeg \
-          libxslt
+          libxslt \
+          openssl@4
+        brew link --force --overwrite openssl@4

@@ -26,7 +26,7 @@ gmp
         try {
             $test[] = gmp_init("4d2");
         } catch (\ValueError $e) {
-            echo $e->getMessage() . \PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
         $test[] = gmp_init("4d2", 16);
 
@@ -35,7 +35,7 @@ gmp
         }
 ?>
 --EXPECT--
-gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
 1234
 1234
 10011010010

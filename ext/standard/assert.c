@@ -245,7 +245,9 @@ PHP_FUNCTION(assert)
 			 * exception so we can avoid bailout and use unwind_exit. */
 			zend_exception_error(EG(exception), E_WARNING);
 		}
-		zend_throw_unwind_exit();
+		if (!EG(exception)) {
+			zend_throw_unwind_exit();
+		}
 		RETURN_THROWS();
 	} else {
 		RETURN_FALSE;

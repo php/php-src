@@ -347,15 +347,15 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
 							if (UNEXPECTED(node->type == XML_NAMESPACE_DECL)) {
-								xmlNodePtr nsparent = node->_private;
 								xmlNsPtr original = (xmlNsPtr) node;
 
 								/* Make sure parent dom object exists, so we can take an extra reference. */
 								zval parent_zval; /* don't destroy me, my lifetime is transferred to the fake namespace decl */
-								php_dom_create_object(nsparent, &parent_zval, intern);
+								proxy_factory(node->_private, &parent_zval, intern, ctxt);
 								dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
+								xmlNodePtr parent = dom_object_get_node(parent_intern);
 
-								php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
+								php_dom_create_fake_namespace_decl(parent, original, &child, parent_intern);
 							} else {
 								proxy_factory(node, &child, intern, ctxt);
 							}
@@ -379,11 +379,19 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 	return params;
 }
 
-static void php_dom_xpath_callback_cleanup_args(zval *params, uint32_t param_count)
+static void php_dom_xpath_callback_cleanup_args(php_dom_xpath_callbacks *xpath_callbacks, zval *params, uint32_t param_count)
 {
 	if (params) {
 		for (uint32_t i = 0; i < param_count; i++) {
-			zval_ptr_dtor(&params[i]);
+			zval *param = &params[i];
+			if (Z_TYPE_P(param) == IS_OBJECT || Z_TYPE_P(param) == IS_ARRAY) {
+				if (xpath_callbacks->node_list == NULL) {
+					xpath_callbacks->node_list = zend_new_array(0);
+				}
+				zend_hash_next_index_insert_new(xpath_callbacks->node_list, param);
+			} else {
+				zval_ptr_dtor(param);
+			}
 		}
 		efree(params);
 	}
@@ -478,7 +486,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_php_ns(php_dom_xpath_cal
 
 cleanup:
 	xmlXPathFreeObject(obj);
-	php_dom_xpath_callback_cleanup_args(params, param_count);
+	php_dom_xpath_callback_cleanup_args(xpath_callbacks, params, param_count);
 cleanup_no_obj:
 	if (UNEXPECTED(result != SUCCESS)) {
 		/* Push sentinel value */
@@ -506,7 +514,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_custom_ns(php_dom_xpath_
 
 	zend_result result = php_dom_xpath_callback_dispatch(xpath_callbacks, ns, ctxt, params, param_count, function_name, function_name_length);
 
-	php_dom_xpath_callback_cleanup_args(params, param_count);
+	php_dom_xpath_callback_cleanup_args(xpath_callbacks, params, param_count);
 	if (UNEXPECTED(result != SUCCESS)) {
 		/* Push sentinel value */
 		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));

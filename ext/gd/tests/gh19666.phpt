@@ -2,6 +2,10 @@
 GH-19666 (Unexpected nan value in imageconvolution)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+    if (!GD_BUNDLED) die("skip requires bundled GD library\n");
+?>
 --FILE--
 <?php
 $image = imagecreatetruecolor(180, 30);

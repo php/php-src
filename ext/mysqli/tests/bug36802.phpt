@@ -18,7 +18,7 @@ mysqli
         try {
             $mysql->set_charset('utf8');
         } catch (Error $exception) {
-            echo $exception->getMessage() . "\n";
+            echo $exception::class, ': ', $exception->getMessage(), "\n";
         }
     } else {
         $x[0] = false;
@@ -27,7 +27,7 @@ mysqli
     try {
         $mysql->query("SELECT 'foo' FROM DUAL");
     } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 
     /* following operations should work */
@@ -39,8 +39,8 @@ mysqli
     var_dump($x);
 ?>
 --EXPECT--
-mysqli object is not fully initialized
-mysqli object is not fully initialized
+Error: mysqli object is not fully initialized
+Error: mysqli object is not fully initialized
 array(2) {
   [1]=>
   string(0) ""

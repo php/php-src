@@ -2,10 +2,6 @@
 imagecreatefromwbmp with invalid wbmp
 --EXTENSIONS--
 gd
---SKIPIF--
-<?php
-    if (GD_BUNDLED) die("skip requires extern GD\n");
-?>
 --FILE--
 <?php
 $filename = __DIR__ . '/_tmp.wbmp';

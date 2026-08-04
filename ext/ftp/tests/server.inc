@@ -290,7 +290,7 @@ if ($pid) {
             }
 
             if (empty($m[1]) || $m[1] !== 'emptydir') {
-                fputs($fs, "file1\r\nfile1\r\nfile\nb0rk\r\n");
+                fputs($fs, $nlst_data ?? "file1\r\nfile1\r\nfile\nb0rk\r\n");
             }
 
             fputs($s, "226 Closing data Connection.\r\n");

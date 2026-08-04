@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Borisov <lex.borisov@gmail.com>
+Date: Fri, 5 Jun 2026 22:13:32 +0300
+Subject: [PATCH 09/11] URL: fixed uninitialized memory in the path buffer
+ growth.
+
+When a path was long enough to outgrow the on-stack buffer, the first
+move to the heap didn't copy what was already written, so the start of
+the path could contain garbage. Also fixed the 'last' pointer after the
+move.
+
+Per report from Recep Asan (recep@asan.me)
+---
+ source/lexbor/url/url.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
+index 5c6d5cc..1fd044b 100644
+--- a/source/lexbor/url/url.c
++++ b/source/lexbor/url/url.c
+@@ -499,6 +499,7 @@ lxb_url_scheme_length = sizeof(lxb_url_scheme_res) / sizeof(lxb_url_scheme_data_
+             if (tmp == NULL) {                                                \
+                 return NULL;                                                  \
+             }                                                                 \
++            memcpy(tmp, (sbuf_begin), offset);                                \
+         }                                                                     \
+         else {                                                                \
+             tmp = lexbor_realloc((sbuf_begin), new_len);                      \
+@@ -509,7 +510,7 @@ lxb_url_scheme_length = sizeof(lxb_url_scheme_res) / sizeof(lxb_url_scheme_data_
+         }                                                                     \
+                                                                               \
+         (sbuf) = tmp + offset;                                                \
+-        (last) = sbuf + lst;                                                  \
++        (last) = tmp + lst;                                                   \
+         (sbuf_begin) = tmp;                                                   \
+         (sbuf_end) = tmp + new_len;                                           \
+     }                                                                         \

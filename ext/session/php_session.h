@@ -183,6 +183,7 @@ typedef struct _php_ps_globals {
 	bool mod_user_is_open;
 	bool mod_user_uses_object_methods_as_handlers;
 	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
+	bool random_seeded;
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

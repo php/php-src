@@ -15,6 +15,6 @@ var_dump(rmdir($srcFile));
 bool(false)
 bool(false)
 
-Warning: opendir(compress.zlib://%s/dir.gz): Failed to open directory: not implemented in %s on line %d
+Warning: opendir(): Failed to open directory: not implemented in %s on line %d
 bool(false)
 bool(false)

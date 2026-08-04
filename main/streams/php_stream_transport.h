@@ -29,8 +29,8 @@ typedef php_stream *(php_stream_transport_factory_func)(const char *proto, size_
 typedef php_stream_transport_factory_func *php_stream_transport_factory;
 
 BEGIN_EXTERN_C()
-PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory);
-PHPAPI int php_stream_xport_unregister(const char *protocol);
+PHPAPI void php_stream_xport_register(const char *protocol, php_stream_transport_factory factory);
+PHPAPI zend_result php_stream_xport_unregister(const char *protocol);
 
 #define STREAM_XPORT_CLIENT			0
 #define STREAM_XPORT_SERVER			1

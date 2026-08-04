@@ -18,6 +18,7 @@ const A_prop = (new A)->{new Printer ? 'printer' : null};
 
 ?>
 --EXPECTF--
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
 Printer
 
 Fatal error: Uncaught Error: Fetching properties on non-enums in constant expressions is not allowed in %s:%d

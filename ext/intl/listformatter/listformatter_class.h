@@ -21,9 +21,8 @@
 #include "intl_error.h"
 #include "intl_data.h"
 
-#include <unicode/listformatter.h>
-
 #ifdef __cplusplus
+#include <unicode/listformatter.h>
 using icu::ListFormatter;
 #else
 typedef void ListFormatter;

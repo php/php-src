@@ -79,14 +79,22 @@ void dom_free_notation(xmlEntityPtr entity) /* {{{ */
 }
 /* }}} */
 
-xmlNodePtr php_dom_libxml_hash_iter(xmlHashTable *ht, int index)
+xmlNodePtr php_dom_libxml_hash_iter(xmlHashTable *ht, zend_long index)
 {
 	int htsize;
+
+	if (index < 0) {
+		return NULL;
+	}
+	if (UNEXPECTED(ZEND_LONG_INT_OVFL(index))) {
+		zend_value_error("must be between 0 and %d", INT_MAX);
+		return NULL;
+	}
 
 	if ((htsize = xmlHashSize(ht)) > 0 && index < htsize) {
 		nodeIterator iter;
 		iter.cur = 0;
-		iter.index = index;
+		iter.index = (int) index;
 		iter.node = NULL;
 		xmlHashScan(ht, itemHashScanner, &iter);
 		return iter.node;

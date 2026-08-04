@@ -21,6 +21,7 @@
 #include "streamsfuncs.h"
 #include "php_network.h"
 #include "php_string.h"
+#include "streams/php_streams_int.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -139,7 +140,9 @@ PHP_FUNCTION(stream_socket_client)
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
-		spprintf(&hashkey, 0, "stream_socket_client__%s", ZSTR_VAL(host));
+		zend_string *escaped = php_stream_escape_persistent_key(ZSTR_VAL(host), ZSTR_LEN(host));
+		spprintf(&hashkey, 0, "stream_socket_client__%s", ZSTR_VAL(escaped));
+		zend_string_release_ex(escaped, false);
 	}
 
 	/* prepare the timeout value for use */
@@ -325,7 +328,7 @@ PHP_FUNCTION(stream_socket_accept)
 		if (peername) {
 			zend_string_release(peername);
 		}
-		php_error_docref(NULL, E_WARNING, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
+		php_stream_warn(stream, AcceptFailed, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
 		RETVAL_FALSE;
 	}
 

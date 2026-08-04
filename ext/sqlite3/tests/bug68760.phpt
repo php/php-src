@@ -24,7 +24,7 @@ try {
     $db->close();
 }
 catch(\Exception $e) {
-    echo "Exception: ".$e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

@@ -34,7 +34,7 @@ try {
     $r = mb_internal_encoding('BAD_NAME');
     print 'NG_BAD_SET' . \PHP_EOL;
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $enc = mb_internal_encoding();
@@ -49,5 +49,5 @@ UTF-8
 OK_ASCII_SET
 ASCII
 == INVALID PARAMETER ==
-mb_internal_encoding(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
+ValueError: mb_internal_encoding(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
 ASCII

@@ -187,7 +187,7 @@ DBA_SYNC_FUNC(db2)
 
 DBA_INFO_FUNC(db2)
 {
-	return estrdup(DB_VERSION_STRING);
+	return DB_VERSION_STRING;
 }
 
 #endif

@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * gdcache.h
  *
@@ -8,7 +12,9 @@
  * John Ellson  (ellson@graphviz.org)  Oct 31, 1997
  *
  * Test this with:
- *		 gcc -o gdcache -g -Wall -DTEST gdcache.c
+ *		 gcc -o gdcache -g -Wall -DTEST -DNEED_CACHE gdcache.c -lgd
+ *		 or
+ *		 gcc -o gdcache -g -Wall -DTEST -DNEED_CACHE gdcache.c libgd.a
  *
  * The cache is implemented by a singly-linked list of elements
  * each containing a pointer to a user struct that is being managed by
@@ -53,31 +59,29 @@ typedef void (*gdCacheReleaseFn_t)(void *userdata);
 /* element structure */
 typedef struct gdCache_element_s gdCache_element_t;
 struct gdCache_element_s {
-	gdCache_element_t	*next;
-	void			*userdata;
+    gdCache_element_t *next;
+    void *userdata;
 };
 
 /* head structure */
 typedef struct gdCache_head_s gdCache_head_t;
 struct gdCache_head_s {
-	gdCache_element_t	*mru;
-	int					size;
-	char				*error;
-	gdCacheTestFn_t		gdCacheTest;
-	gdCacheFetchFn_t	gdCacheFetch;
-	gdCacheReleaseFn_t	gdCacheRelease;
+    gdCache_element_t *mru;
+    int size;
+    char *error;
+    gdCacheTestFn_t gdCacheTest;
+    gdCacheFetchFn_t gdCacheFetch;
+    gdCacheReleaseFn_t gdCacheRelease;
 };
 
 /* function templates */
-gdCache_head_t *
-gdCacheCreate(
-	int					size,
-	gdCacheTestFn_t		gdCacheTest,
-	gdCacheFetchFn_t	gdCacheFetch,
-	gdCacheReleaseFn_t	gdCacheRelease );
+gdCache_head_t *gdCacheCreate(int size, gdCacheTestFn_t gdCacheTest, gdCacheFetchFn_t gdCacheFetch,
+                              gdCacheReleaseFn_t gdCacheRelease);
 
-void
-gdCacheDelete( gdCache_head_t *head );
+void gdCacheDelete(gdCache_head_t *head);
 
-void *
-gdCacheGet( gdCache_head_t *head, void *keydata );
+void *gdCacheGet(gdCache_head_t *head, void *keydata);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1810,12 +1810,14 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 				data->chunk_size = 0;
 			case CHUNK_SIZE:
 				while (p < end) {
+					size_t digit;
+
 					if (*p >= '0' && *p <= '9') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - '0');
+						digit = *p - '0';
 					} else if (*p >= 'A' && *p <= 'F') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - 'A' + 10);
+						digit = *p - 'A' + 10;
 					} else if (*p >= 'a' && *p <= 'f') {
-						data->chunk_size = (data->chunk_size * 16) + (*p - 'a' + 10);
+						digit = *p - 'a' + 10;
 					} else if (data->state == CHUNK_SIZE_START) {
 						data->state = CHUNK_ERROR;
 						break;
@@ -1823,6 +1825,11 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 						data->state = CHUNK_SIZE_EXT;
 						break;
 					}
+					if (data->chunk_size > (SIZE_MAX / 16)) {
+						data->state = CHUNK_ERROR;
+						break;
+					}
+					data->chunk_size = (data->chunk_size * 16) + digit;
 					data->state = CHUNK_SIZE;
 					p++;
 				}

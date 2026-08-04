@@ -22,11 +22,11 @@ echo "Done";
 
 -- Testing parse_ini_file() function with more than expected no. of arguments --
 
-Warning: parse_ini_file(%s): Failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Testing parse_ini_file() function with a non-existent file --
 
-Warning: parse_ini_file(%s): Failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 Done

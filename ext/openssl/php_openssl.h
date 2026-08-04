@@ -23,6 +23,7 @@ extern zend_module_entry openssl_module_entry;
 #include "php_version.h"
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
+#include <openssl/opensslconf.h>
 #include <openssl/opensslv.h>
 /* OpenSSL version check */
 #if OPENSSL_VERSION_NUMBER < 0x30000000L
@@ -102,34 +103,39 @@ void php_openssl_store_errors(void);
 void php_openssl_errors_set_mark(void);
 void php_openssl_errors_restore_mark(void);
 
-/* openssl file path extra */
+/* openssl file path extra
+ * When a non-NULL stream is passed and the path check fails for a stream context option
+ * (arg_num == 0), the warning is reported via the stream error API so it participates in
+ * any active stream error operation; otherwise it is emitted immediately. */
 bool php_openssl_check_path_ex(
 		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num,
-		bool contains_file_protocol, bool is_from_array, const char *option_name);
+		bool contains_file_protocol, bool is_from_array, const char *option_name,
+		struct _php_stream *stream);
 
 /* openssl file path check */
 static inline bool php_openssl_check_path(
 		const char *file_path, size_t file_path_len, char *real_path, uint32_t arg_num)
 {
 	return php_openssl_check_path_ex(
-			file_path, file_path_len, real_path, arg_num, false, false, NULL);
+			file_path, file_path_len, real_path, arg_num, false, false, NULL, NULL);
 }
 
 /* openssl file path extra check with zend string */
 static inline bool php_openssl_check_path_str_ex(
 		zend_string *file_path, char *real_path, uint32_t arg_num,
-		bool contains_file_protocol, bool is_from_array, const char *option_name)
+		bool contains_file_protocol, bool is_from_array, const char *option_name,
+		struct _php_stream *stream)
 {
 	return php_openssl_check_path_ex(
 			ZSTR_VAL(file_path), ZSTR_LEN(file_path), real_path, arg_num, contains_file_protocol,
-			is_from_array, option_name);
+			is_from_array, option_name, stream);
 }
 
 /* openssl file path check with zend string */
 static inline bool php_openssl_check_path_str(
 		zend_string *file_path, char *real_path, uint32_t arg_num)
 {
-	return php_openssl_check_path_str_ex(file_path, real_path, arg_num, true, false, NULL);
+	return php_openssl_check_path_str_ex(file_path, real_path, arg_num, true, false, NULL, NULL);
 }
 
 PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(const char *method);

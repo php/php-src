@@ -22,7 +22,7 @@ extern "C" {
 #include "intl_convert.h"
 
 /* get_break_interator: get a break iterator from the global structure */
-UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );
+UBreakIterator* grapheme_get_break_iterator(UErrorCode *status );
 
 zend_long grapheme_ascii_check(const unsigned char *day, size_t len);
 void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len);
@@ -37,7 +37,7 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 
 int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 
-UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );
+UBreakIterator* grapheme_get_break_iterator(UErrorCode *status );
 #ifdef __cplusplus
 }
 #endif

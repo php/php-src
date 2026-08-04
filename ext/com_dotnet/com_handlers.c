@@ -17,8 +17,6 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
@@ -511,7 +509,7 @@ zend_object_handlers php_com_object_handlers = {
 	0,
 	php_com_object_free_storage,
 	zend_objects_destroy_object,
-	php_com_object_clone,
+	NULL, /* clone */
 	NULL, /* clone_with */
 	com_property_read,
 	com_property_write,
@@ -587,30 +585,6 @@ void php_com_object_free_storage(zend_object *object)
 	}
 
 	zend_object_std_dtor(object);
-}
-
-zend_object* php_com_object_clone(zend_object *object)
-{
-	php_com_dotnet_object *cloneobj, *origobject;
-
-	origobject = (php_com_dotnet_object*) object;
-	cloneobj = (php_com_dotnet_object*)emalloc(sizeof(php_com_dotnet_object));
-
-	memcpy(cloneobj, origobject, sizeof(*cloneobj));
-
-	/* VariantCopy will perform VariantClear; we don't want to clobber
-	 * the IDispatch that we memcpy'd, so we init a new variant in the
-	 * clone structure */
-	VariantInit(&cloneobj->v);
-	/* We use the Indirection-following version of the API since we
-	 * want to clone as much as possible */
-	VariantCopyInd(&cloneobj->v, &origobject->v);
-
-	if (cloneobj->typeinfo) {
-		ITypeInfo_AddRef(cloneobj->typeinfo);
-	}
-
-	return (zend_object*)cloneobj;
 }
 
 zend_object* php_com_object_new(zend_class_entry *ce)

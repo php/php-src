@@ -282,7 +282,7 @@ DBA_SYNC_FUNC(db4)
 
 DBA_INFO_FUNC(db4)
 {
-	return estrdup(DB_VERSION_STRING);
+	return DB_VERSION_STRING;
 }
 
 #endif

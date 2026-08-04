@@ -193,7 +193,7 @@ DBA_SYNC_FUNC(tcadb)
 
 DBA_INFO_FUNC(tcadb)
 {
-	return estrdup(tcversion);
+	return tcversion;
 }
 
 #endif

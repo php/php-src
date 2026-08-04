@@ -186,7 +186,7 @@ DBA_SYNC_FUNC(inifile)
 
 DBA_INFO_FUNC(inifile)
 {
-	return estrdup(inifile_version());
+	return inifile_version();
 }
 
 #endif

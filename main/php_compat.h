@@ -266,6 +266,8 @@
 #define gdImageCreateFromWBMPCtx php_gd_gdImageCreateFromWBMPCtx
 #define gdImageCreateFromWBMPPtr php_gd_gdImageCreateFromWBMPPtr
 #define gdImageCreateFromXbm php_gd_gdImageCreateFromXbm
+#define gdImageWebp php_gd_gdImageWebp
+#define gdImageHeif php_gd_gdImageHeif
 #define gdImageCreatePaletteFromTrueColor php_gd_gdImageCreatePaletteFromTrueColor
 #define gdImageCreateTrueColor php_gd_gdImageCreateTrueColor
 #define gdImageDashedLine php_gd_gdImageDashedLine
@@ -307,6 +309,7 @@
 #define gdImagePngPtr php_gd_gdImagePngPtr
 #define gdImagePngPtrEx php_gd_gdImagePngPtrEx
 #define gdImagePngToSink php_gd_gdImagePngToSink
+#define gdPngGetVersionString php_gd_gdPngGetVersionString
 #define gdImagePolygon php_gd_gdImagePolygon
 #define gdImageRectangle php_gd_gdImageRectangle
 #define gdImageRotate php_gd_gdImageRotate
@@ -375,7 +378,10 @@
 #define gdCacheGet php_gd_gdCacheGet
 #define gdFontCacheSetup php_gd_gdFontCacheSetup
 #define gdFontCacheShutdown php_gd_gdFontCacheShutdown
+#define gdFontCacheMutexSetup php_gd_gdFontCacheMutexSetup
+#define gdFontCacheMutexShutdown php_gd_gdFontCacheMutexShutdown
 #define gdFreeFontCache php_gd_gdFreeFontCache
+#define gdFTUseFontConfig php_gd_gdFTUseFontConfig
 #endif /* HAVE_GD_BUNDLED */
 
 /* Define to specify how much context to retain around the current parse

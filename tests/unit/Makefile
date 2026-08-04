@@ -3,9 +3,11 @@ CFLAGS = -g -Wall -I../../ -I../../Zend -I../../main -I../../TSRM -I. -I..
 COMMON_LDFLAGS = ../../.libs/libphp.a -lcmocka -lpthread -lm -ldl -lresolv -lutil
 
 # Update paths in .github/workflows/unit-tests.yml when adding new test to make it run in PR when such file changes
-TESTS = main/test_network
+TESTS = main/test_network main/test_io_copy
 main/test_network_SRC = main/test_network.c
 main/test_network_LDFLAGS = $(COMMON_LDFLAGS) -Wl,--wrap=connect,--wrap=poll,--wrap=getsockopt,--wrap=gettimeofday
+main/test_io_copy_SRC = main/test_io_copy.c
+main/test_io_copy_LDFLAGS = $(COMMON_LDFLAGS) -Wl,--wrap=copy_file_range,--wrap=sendfile,--wrap=splice,--wrap=read,--wrap=write,--wrap=poll,--wrap=setsockopt
 
 
 # Build all tests

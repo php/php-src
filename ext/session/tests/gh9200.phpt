@@ -3,6 +3,8 @@ GH-9200: setcookie has an obsolete expires date format
 --INI--
 session.cookie_lifetime=3600
 session.use_strict_mode=0
+session.cookie_samesite=Lax
+session.cookie_httponly=1
 --EXTENSIONS--
 session
 --CGI--

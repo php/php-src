@@ -970,7 +970,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			xmlAttrPtr lastattr;
 
 			if (child->ns == NULL)
-				lastattr = xmlHasProp(refp->parent, child->name);
+				lastattr = xmlHasNsProp(refp->parent, child->name, NULL);
 			else
 				lastattr = xmlHasNsProp(refp->parent, child->name, child->ns->href);
 			if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
@@ -1017,7 +1017,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			xmlAttrPtr lastattr;
 
 			if (child->ns == NULL)
-				lastattr = xmlHasProp(parentp, child->name);
+				lastattr = xmlHasNsProp(parentp, child->name, NULL);
 			else
 				lastattr = xmlHasNsProp(parentp, child->name, child->ns->href);
 			if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
@@ -1379,7 +1379,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 		xmlAttrPtr lastattr;
 
 		if (child->ns == NULL)
-			lastattr = xmlHasProp(nodep, child->name);
+			lastattr = xmlHasNsProp(nodep, child->name, NULL);
 		else
 			lastattr = xmlHasNsProp(nodep, child->name, child->ns->href);
 		if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {

@@ -130,8 +130,10 @@ permissions.
 ## PHP extensions
 
 Extensions provide additional functionality on top of PHP. PHP consists of many
-essential bundled extensions. Additional extensions can be found in the PHP
-Extension Community Library - [PECL](https://pecl.php.net).
+essential bundled extensions. Additional extensions can be found on the
+[PIE Extensions](https://packagist.org/extensions) list, and installed with
+[🥧 PIE, the PHP Installer for Extensions](https://github.com/php/pie) or the
+deprecated PHP Extension Community Library - [PECL](https://pecl.php.net).
 
 ## Contributing
 

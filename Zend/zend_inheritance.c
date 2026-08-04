@@ -264,11 +264,7 @@ static zend_class_entry *lookup_class_ex(
 	bool in_preload = CG(compiler_options) & ZEND_COMPILE_PRELOAD;
 
 	if (UNEXPECTED(!EG(active) && !in_preload)) {
-		zend_string *lc_name = zend_string_tolower(name);
-
-		ce = zend_hash_find_ptr(CG(class_table), lc_name);
-
-		zend_string_release(lc_name);
+		ce = zend_hash_find_ptr_lc(CG(class_table), name);
 
 		if (register_unresolved && !ce) {
 			zend_error_noreturn(
@@ -2119,6 +2115,12 @@ static bool do_inherit_constant_check(
 		);
 	}
 
+	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE)) {
+		if (child_constant->ce == ce) {
+			ZEND_CLASS_CONST_FLAGS(child_constant) &= ~ZEND_ACC_OVERRIDE;
+		}
+	}
+
 	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && ZEND_TYPE_IS_SET(parent_constant->type)) {
 		inheritance_status status = class_constant_types_compatible(parent_constant, child_constant);
 		if (status == INHERITANCE_ERROR) {
@@ -2321,6 +2323,15 @@ void zend_inheritance_check_override(const zend_class_entry *ce)
 		}
 	} ZEND_HASH_FOREACH_END();
 
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, zend_string *name, zend_class_constant *c) {
+		if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_OVERRIDE) {
+			zend_error_noreturn(
+				E_COMPILE_ERROR,
+				"%s::%s has #[\\Override] attribute, but no matching parent constant exists",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
+	} ZEND_HASH_FOREACH_END();
+
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, zend_property_info *prop) {
 		if (prop->flags & ZEND_ACC_OVERRIDE) {
 			zend_error_noreturn(
@@ -2392,7 +2403,11 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		}
 	}
 
-	if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		ZEND_ASSERT(fn->type == ZEND_INTERNAL_FUNCTION);
+		new_fn = (zend_function*)(uintptr_t)malloc(sizeof(zend_internal_function));
+		memcpy(new_fn, fn, sizeof(zend_internal_function));
+	} else if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
 		memcpy(new_fn, fn, sizeof(zend_internal_function));
 		new_fn->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
@@ -2530,7 +2545,6 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 	size_t i, j = 0;
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
-	zend_string *lc_trait_name;
 	zend_string *lcname;
 	HashTable **exclude_tables = NULL;
 	zend_class_entry **aliases = NULL;
@@ -2545,9 +2559,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 		while ((cur_precedence = precedences[i])) {
 			/** Resolve classes for all precedence operations. */
 			cur_method_ref = &cur_precedence->trait_method;
-			lc_trait_name = zend_string_tolower(cur_method_ref->class_name);
-			trait = zend_hash_find_ptr(EG(class_table), lc_trait_name);
-			zend_string_release_ex(lc_trait_name, 0);
+			trait = zend_hash_find_ptr_lc(EG(class_table), cur_method_ref->class_name);
 			if (!trait || !(trait->ce_flags & ZEND_ACC_LINKED)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
 			}
@@ -2574,9 +2586,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 				zend_class_entry *exclude_ce;
 				uint32_t trait_num;
 
-				lc_trait_name = zend_string_tolower(class_name);
-				exclude_ce = zend_hash_find_ptr(EG(class_table), lc_trait_name);
-				zend_string_release_ex(lc_trait_name, 0);
+				exclude_ce = zend_hash_find_ptr_lc(EG(class_table), class_name);
 				if (!exclude_ce || !(exclude_ce->ce_flags & ZEND_ACC_LINKED)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(class_name));
 				}
@@ -2619,9 +2629,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 			lcname = zend_string_tolower(cur_method_ref->method_name);
 			if (cur_method_ref->class_name) {
 				/* For all aliases with an explicit class name, resolve the class now. */
-				lc_trait_name = zend_string_tolower(cur_method_ref->class_name);
-				trait = zend_hash_find_ptr(EG(class_table), lc_trait_name);
-				zend_string_release_ex(lc_trait_name, 0);
+				trait = zend_hash_find_ptr_lc(EG(class_table), cur_method_ref->class_name);
 				if (!trait || !(trait->ce_flags & ZEND_ACC_LINKED)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
 				}
@@ -2829,7 +2837,11 @@ static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_ent
 			if (do_trait_constant_check(ce, constant, constant_name, traits, i)) {
 				zend_class_constant *ct = NULL;
 
-				ct = zend_arena_alloc(&CG(arena),sizeof(zend_class_constant));
+				if (ce->type == ZEND_INTERNAL_CLASS) {
+					ct = malloc(sizeof(zend_class_constant));
+				} else {
+					ct = zend_arena_alloc(&CG(arena),sizeof(zend_class_constant));
+				}
 				memcpy(ct, constant, sizeof(zend_class_constant));
 				constant = ct;
 
@@ -3007,6 +3019,49 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 	}
 }
 /* }}} */
+
+ZEND_API void zend_class_use_internal_traits(zend_class_entry *class_entry, int num_traits, ...)
+{
+	ZEND_ASSERT(class_entry->ce_flags & ZEND_ACC_LINKED);
+	ZEND_ASSERT(num_traits >= 0);
+
+	if (UNEXPECTED(num_traits == 0)) {
+		return;
+	}
+
+	zend_class_entry **traits = safe_pemalloc(num_traits, sizeof(zend_class_entry *), 0, /* persistent */ true);
+	class_entry->trait_names = safe_pemalloc(num_traits, sizeof(zend_class_name), 0, /* persistent */ true);
+	class_entry->num_traits = num_traits;
+
+	va_list trait_list;
+	va_start(trait_list, num_traits);
+	for (int i = 0; i < num_traits; i++) {
+		zend_class_entry *trait_entry = va_arg(trait_list, zend_class_entry *);
+		class_entry->trait_names[i].name = zend_string_copy(trait_entry->name);
+		class_entry->trait_names[i].lc_name = zend_string_tolower_ex(zend_string_copy(trait_entry->name), /* persistent */ true);
+
+		if (UNEXPECTED(!(trait_entry->ce_flags & ZEND_ACC_TRAIT))) {
+			free(traits);
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot use %s - it is not a trait",
+				ZSTR_VAL(class_entry->name), ZSTR_VAL(trait_entry->name));
+		}
+		traits[i] = trait_entry;
+	}
+	va_end(trait_list);
+
+	bool contains_abstract_methods = false;
+	zend_do_traits_method_binding(class_entry, traits, NULL, NULL, false, &contains_abstract_methods);
+	zend_do_traits_constant_binding(class_entry, traits);
+	zend_do_traits_property_binding(class_entry, traits);
+
+	ZEND_HASH_MAP_FOREACH_PTR(&class_entry->function_table, zend_function *fn) {
+		zend_fixup_trait_method(fn, class_entry);
+	} ZEND_HASH_FOREACH_END();
+
+	free(traits);
+
+	/* TODO: Verify abstract trait method implementation requirements are enforced. */
+}
 
 #define MAX_ABSTRACT_INFO_CNT 3
 #define MAX_ABSTRACT_INFO_FMT "%s%s%s%s"

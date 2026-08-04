@@ -42,10 +42,20 @@
  * to be really buggy.
  */
 #include <spawn.h>
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#endif
 #define USE_POSIX_SPAWN
 
-/* The non-_np variant is in macOS 26 (and _np deprecated) */
-#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR
+/* The non-_np variant is in macOS 26 (and _np deprecated). On Apple, it has to be selected by the
+ * deployment target rather than the configure check: the link check passes whenever the SDK
+ * exports the symbol even if the running system is older, in which case the weakly linked
+ * reference resolves to NULL at runtime. */
+#if defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= 260000
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
+#elif defined(__APPLE__)
+#define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
+#elif defined(HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR)
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir
 #else
 #define POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR posix_spawn_file_actions_addchdir_np
@@ -266,7 +276,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	php_process_handle *proc = (php_process_handle*)rsrc->ptr;
 #ifdef PHP_WIN32
 	DWORD wstatus;
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	int wstatus;
 	int waitpid_options = 0;
 	pid_t wait_pid;
@@ -297,7 +307,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	}
 	CloseHandle(proc->childHandle);
 
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	if (!FG(pclose_wait)) {
 		waitpid_options = WNOHANG;
 	}
@@ -389,7 +399,7 @@ PHP_FUNCTION(proc_get_status)
 	php_process_handle *proc;
 #ifdef PHP_WIN32
 	DWORD wstatus;
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	int wstatus;
 	pid_t wait_pid;
 #endif
@@ -418,7 +428,7 @@ PHP_FUNCTION(proc_get_status)
 	 * even if the child has already exited. This is because the result stays available
 	 * until the child handle is closed. Hence no caching is used on Windows. */
 	add_assoc_bool(return_value, "cached", false);
-#elif HAVE_SYS_WAIT_H
+#elif defined(HAVE_SYS_WAIT_H)
 	wait_pid = waitpid_cached(proc, &wstatus, WNOHANG|WUNTRACED);
 
 	if (wait_pid == proc->child) {

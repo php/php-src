@@ -21,6 +21,8 @@
 #include <unicode/unistr.h>
 #endif
 
+#include <unicode/uenum.h>
+
 extern "C" {
 #include "php_intl.h"
 #include "intl_data.h"
@@ -221,14 +223,13 @@ U_CFUNC PHP_FUNCTION( transliterator_create_inverse )
 /* }}} */
 
 /* {{{ Return an array with the registered transliterator IDs. */
-U_CFUNC PHP_FUNCTION( transliterator_list_ids )
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(transliterator_list_ids)
 {
 	UEnumeration  *en;
 	const UChar	  *elem;
 	int32_t		  elem_len;
+	int32_t		  count;
 	UErrorCode	  status = U_ZERO_ERROR;
-
-	intl_error_reset( nullptr );
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -236,7 +237,14 @@ U_CFUNC PHP_FUNCTION( transliterator_list_ids )
 	INTL_CHECK_STATUS( status,
 		"Failed to obtain registered transliterators" );
 
-	array_init( return_value );
+	count = uenum_count( en, &status );
+	if( U_FAILURE( status ) )
+	{
+		count = 0;
+		status = U_ZERO_ERROR;
+	}
+
+	array_init_size( return_value, count );
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
 		zend_string *el = intl_convert_utf16_to_utf8(elem, elem_len, &status );
@@ -321,17 +329,17 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 		RETURN_THROWS();
 	}
 
-	if (limit < -1) {
+	if (UNEXPECTED(limit < -1)) {
 		zend_argument_value_error(is_method ? 3 : 4, "must be greater than or equal to -1");
 		goto cleanup_object;
 	}
 
-	if (start < 0) {
+	if (UNEXPECTED(start < 0)) {
 		zend_argument_value_error(is_method ? 2 : 3, "must be greater than or equal to 0");
 		goto cleanup_object;
 	}
 
-	if (limit != -1 && start > limit) {
+	if (UNEXPECTED(limit != -1 && start > limit)) {
 		zend_argument_value_error(is_method ? 2 : 3, "must be less than or equal to argument #%d ($end)", is_method ? 3 : 4);
 		goto cleanup_object;
 	}
@@ -345,7 +353,7 @@ U_CFUNC PHP_FUNCTION( transliterator_transliterate )
 
 	/* we've started allocating resources, goto from now on */
 
-	if( ( start > ustr_len ) || (( limit != -1 ) && (limit > ustr_len ) ) )
+	if (UNEXPECTED((start > ustr_len) || ((limit != -1) && (limit > ustr_len))))
 	{
 		char *msg;
 		spprintf( &msg, 0,

@@ -129,6 +129,10 @@ class ServerClientTestCase
     private function cleanupWorkerProcess($worker)
     {
         fclose($this->workerStdIn[$worker]);
+        /* Drain stdout to EOF before closing it, so late worker writes (e.g.
+         * buffered error output) don't fail and abort the worker mid-output. */
+        stream_set_blocking($this->workerStdOut[$worker], true);
+        stream_get_contents($this->workerStdOut[$worker]);
         fclose($this->workerStdOut[$worker]);
         proc_close($this->workerHandle[$worker]);
     }

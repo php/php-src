@@ -526,7 +526,7 @@ static void sapi_cli_server_flush(void *server_context) /* {{{ */
 
 	if (!SG(headers_sent)) {
 		sapi_send_headers();
-		SG(headers_sent) = 1;
+		SG(headers_sent) = true;
 	}
 } /* }}} */
 
@@ -1219,7 +1219,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 
 	/* error */
 	if (append_error_message) {
-		spprintf(&error_buf, 0, " - %s in %s on line %d",
+		spprintf(&error_buf, 0, " - %s in %s on line %" PRIu32,
 			ZSTR_VAL(PG(last_error_message)), ZSTR_VAL(PG(last_error_file)), PG(last_error_lineno));
 		if (!error_buf) {
 			efree(basic_buf);

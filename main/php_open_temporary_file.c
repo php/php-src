@@ -240,14 +240,14 @@ PHPAPI const char* php_get_temporary_directory(void)
 
 	/* Is there a temporary directory "sys_temp_dir" in .ini defined? */
 	{
-		char *sys_temp_dir = PG(sys_temp_dir);
+		const zend_string *sys_temp_dir = PG(sys_temp_dir);
 		if (sys_temp_dir) {
-			size_t len = strlen(sys_temp_dir);
-			if (len >= 2 && sys_temp_dir[len - 1] == DEFAULT_SLASH) {
-				PG(php_sys_temp_dir) = estrndup(sys_temp_dir, len - 1);
+			size_t len = ZSTR_LEN(sys_temp_dir);
+			if (len >= 2 && ZSTR_VAL(sys_temp_dir)[len - 1] == DEFAULT_SLASH) {
+				PG(php_sys_temp_dir) = estrndup(ZSTR_VAL(sys_temp_dir), len - 1);
 				return PG(php_sys_temp_dir);
-			} else if (len >= 1 && sys_temp_dir[len - 1] != DEFAULT_SLASH) {
-				PG(php_sys_temp_dir) = estrndup(sys_temp_dir, len);
+			} else if (len >= 1 && ZSTR_VAL(sys_temp_dir)[len - 1] != DEFAULT_SLASH) {
+				PG(php_sys_temp_dir) = estrndup(ZSTR_VAL(sys_temp_dir), len);
 				return PG(php_sys_temp_dir);
 			}
 		}

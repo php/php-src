@@ -192,7 +192,7 @@ DBA_INFO_FUNC(dbm)
 		return dba_info_gdbm(hnd, info);
 	}
 #endif
-	return estrdup(DBM_VERSION);
+	return DBM_VERSION;
 }
 
 #endif

@@ -34,11 +34,9 @@
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
-#include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()  php_win_err()
 #else
-#include <sys/param.h>
 #define GET_DL_ERROR()  DL_ERROR()
 #endif
 #endif

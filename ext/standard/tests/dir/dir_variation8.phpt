@@ -39,16 +39,16 @@ echo "Done";
 *** Testing dir() : checking with wildcard characters ***
 -- wildcard = '*' --
 
-Warning: dir(%s/dir_var*): Failed to open directory: %s in %s on line %d
+Warning: dir(): Failed to open directory: %s in %s on line %d
 bool(false)
 
-Warning: dir(%s/*): Failed to open directory: %s in %s on line %d
+Warning: dir(): Failed to open directory: %s in %s on line %d
 bool(false)
 -- wildcard = '?' --
 
-Warning: dir(%s/dir_variation81/sub_dir?): Failed to open directory: %s in %s on line %d
+Warning: dir(): Failed to open directory: %s in %s on line %d
 bool(false)
 
-Warning: dir(%s/dir_variation81/sub?dir1): Failed to open directory: %s in %s on line %d
+Warning: dir(): Failed to open directory: %s in %s on line %d
 bool(false)
 Done

@@ -27,6 +27,7 @@ extern "C" {
 }
 #endif
 
+#include "intl_icu_compat.h"
 #include <unicode/uspoof.h>
 
 typedef struct {
@@ -35,9 +36,7 @@ typedef struct {
 
 	// ICU Spoofchecker
 	USpoofChecker*     uspoof;
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-	USpoofCheckResult* uspoofres;
-#endif
+	IntlIcuSpoofCheckResult* uspoofres;
 
 	zend_object     zo;
 } Spoofchecker_object;
@@ -86,9 +85,5 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
         intl_errors_set_custom_msg(SPOOFCHECKER_ERROR_P(co), msg); \
         RETURN_FALSE;                                                           \
     }                                                                           \
-
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-#define SPOOFCHECKER_DEFAULT_RESTRICTION_LEVEL USPOOF_HIGHLY_RESTRICTIVE
-#endif
 
 #endif // #ifndef SPOOFCHECKER_CLASS_H

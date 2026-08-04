@@ -471,6 +471,11 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 	if (!ts->innerstream) {
 		return FAILURE;
 	}
+	if (castas == PHP_STREAM_AS_FD_FOR_COPY) {
+		/* the fd would come from the inner stream whose buffer state and
+		 * position the copy fast path cannot see, so use the stream fallback */
+		return FAILURE;
+	}
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_STDIO)) {
 		return php_stream_cast(ts->innerstream, castas, ret, 0);
 	}

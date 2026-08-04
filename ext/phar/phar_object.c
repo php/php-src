@@ -633,9 +633,9 @@ PHP_METHOD(Phar, webPhar)
 				IS_STRING == Z_TYPE_P(z_path_info)) {
 				entry_len = Z_STRLEN_P(z_path_info);
 				entry = estrndup(Z_STRVAL_P(z_path_info), entry_len);
-				path_info = emalloc(Z_STRLEN_P(z_script_name) + entry_len + 1);
-				memcpy(path_info, Z_STRVAL_P(z_script_name), Z_STRLEN_P(z_script_name));
-				memcpy(path_info + Z_STRLEN_P(z_script_name), entry, entry_len + 1);
+				path_info = zend_cstr_concat(
+					Z_STRVAL_P(z_script_name), Z_STRLEN_P(z_script_name),
+					entry, entry_len);
 				free_pathinfo = 1;
 			} else {
 				entry_len = 0;
@@ -3865,15 +3865,11 @@ PHP_METHOD(Phar, getStub)
 					RETURN_THROWS();
 				}
 				if (stub->flags & PHAR_ENT_COMPRESSION_MASK) {
-					const char *filter_name = phar_decompress_filter(stub, false);
-
-					if (filter_name != NULL) {
-						filter = php_stream_filter_create(filter_name, NULL, php_stream_is_persistent(fp));
-					} else {
-						filter = NULL;
-					}
-					if (!filter) {
-						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "phar error: unable to read stub of phar \"%s\" (cannot create %s filter)", ZSTR_VAL(phar_obj->archive->fname), phar_decompress_filter(stub, true));
+					const char *decompression_filter_name = phar_get_decompress_filter_name(stub);
+					ZEND_ASSERT(decompression_filter_name && "Must have as this has a decompression flag set");
+					filter = php_stream_filter_create(decompression_filter_name, NULL, php_stream_is_persistent(fp));
+					if (UNEXPECTED(filter == NULL)) {
+						zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "phar error: unable to read stub of phar \"%s\" (cannot create %s filter)", ZSTR_VAL(phar_obj->archive->fname), decompression_filter_name);
 						RETURN_THROWS();
 					}
 					php_stream_filter_append(&fp->readfilters, filter);
@@ -4140,7 +4136,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_result phar_extract_file(bool overwrite, phar
 	}
 
 	if (php_check_open_basedir(fullpath)) {
-		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", openbasedir/safe mode restrictions in effect", ZSTR_VAL(entry->filename), fullpath);
+		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", open_basedir restrictions in effect", ZSTR_VAL(entry->filename), fullpath);
 		efree(fullpath);
 		efree(new_state.cwd);
 		return FAILURE;

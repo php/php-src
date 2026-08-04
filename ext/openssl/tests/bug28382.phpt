@@ -6,6 +6,12 @@ openssl
 <?php
 $cert = file_get_contents(__DIR__ . "/bug28382cert.txt");
 $ext = openssl_x509_parse($cert);
+
+if (OPENSSL_VERSION_NUMBER >= 0x40000000) {
+    $extensions = &$ext['extensions'];
+    $extensions['crlDistributionPoints'] = preg_replace('/^Full Name:\R\s*/', '', trim($extensions['crlDistributionPoints']));
+}
+
 var_dump($ext['extensions']);
 /*
  * The reason for %A at the end of crlDistributionPoints and authorityKeyIdentifier is that
@@ -30,7 +36,7 @@ array(11) {
   string(59) "B0:A7:FF:F9:41:15:DE:23:39:BD:DD:31:0F:97:A0:B2:A2:74:E0:FC"
   ["authorityKeyIdentifier"]=>
   string(%d) "DirName:/C=RO/ST=Romania/L=Craiova/O=Sergiu/OU=Sergiu SRL/CN=Sergiu CA/emailAddress=n_sergiu@hotmail.com
-serial:00%A"
+serial:%A"
   ["keyUsage"]=>
   string(71) "Digital Signature, Non Repudiation, Key Encipherment, Data Encipherment"
   ["nsBaseUrl"]=>

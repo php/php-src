@@ -78,12 +78,6 @@
 #include "php_cli_process_title.h"
 #include "php_cli_process_title_arginfo.h"
 
-#ifndef PHP_WIN32
-# define php_select(m, r, w, e, t)	select(m, r, w, e, t)
-#else
-# include "win32/select.h"
-#endif
-
 #if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
 #endif
@@ -218,20 +212,12 @@ static void print_extensions(void) /* {{{ */
 #ifdef PHP_WRITE_STDOUT
 static inline bool sapi_cli_select(php_socket_t fd)
 {
-	fd_set wfd;
 	struct timeval tv;
-	int ret;
-
-	FD_ZERO(&wfd);
-
-	PHP_SAFE_FD_SET(fd, &wfd);
 
 	tv.tv_sec = (long)FG(default_socket_timeout);
 	tv.tv_usec = 0;
 
-	ret = php_select(fd+1, NULL, &wfd, NULL, &tv);
-
-	return ret != -1;
+	return php_pollfd_for(fd, POLLOUT, &tv) != -1;
 }
 #endif
 
@@ -1093,10 +1079,9 @@ do_repeat:
 		case PHP_CLI_MODE_REFLECTION_EXT_INFO:
 			{
 				size_t len = strlen(reflection_what);
-				char *lcname = zend_str_tolower_dup(reflection_what, len);
 				zend_module_entry *module;
 
-				if ((module = zend_hash_str_find_ptr(&module_registry, lcname, len)) == NULL) {
+				if ((module = zend_hash_str_find_ptr_lc(&module_registry, reflection_what, len)) == NULL) {
 					if (!strcmp(reflection_what, "main")) {
 						display_ini_entries(NULL);
 					} else {
@@ -1107,7 +1092,6 @@ do_repeat:
 					php_info_print_module(module);
 				}
 
-				efree(lcname);
 				break;
 			}
 
@@ -1189,18 +1173,10 @@ err:
 }
 /* }}} */
 
-/* {{{ main */
-#ifdef PHP_CLI_WIN32_NO_CONSOLE
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-#else
-int main(int argc, char *argv[])
-#endif
+/* {{{ do_php_cli */
+PHP_CLI_API int do_php_cli(int argc, char *argv[])
 {
 #if defined(PHP_WIN32)
-# ifdef PHP_CLI_WIN32_NO_CONSOLE
-	int argc = __argc;
-	char **argv = __argv;
-# endif
 	int num_args;
 	wchar_t **argv_wide;
 	char **argv_save = argv;
@@ -1403,6 +1379,6 @@ out:
 	 * exiting.
 	 */
 	cleanup_ps_args(argv);
-	exit(exit_status);
+	return exit_status;
 }
 /* }}} */

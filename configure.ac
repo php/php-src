@@ -369,6 +369,9 @@ AC_SEARCH_LIBS([Pgrab], [proc])
 dnl Haiku does not have network api in libc.
 AC_SEARCH_LIBS([setsockopt], [network])
 
+dnl Solaris/illumos provide sendfile() in libsendfile; libc on Linux/FreeBSD.
+AC_SEARCH_LIBS([sendfile], [sendfile])
+
 dnl Check for openpty. It may require linking against libutil or libbsd.
 AC_CHECK_FUNCS([openpty],,
   [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
@@ -588,10 +591,12 @@ AC_CHECK_FUNCS(m4_normalize([
   putenv
   reallocarray
   scandir
+  sendfile
   setenv
   setitimer
   shutdown
   sigprocmask
+  splice
   statfs
   statvfs
   std_syslog
@@ -1685,6 +1690,15 @@ PHP_ADD_SOURCES_X([main],
   [PHP_FASTCGI_OBJS],
   [no])
 
+PHP_ADD_SOURCES([main/io], m4_normalize([
+    php_io.c
+    php_io_copy_linux.c
+    php_io_copy_freebsd.c
+    php_io_copy_solaris.c
+    php_io_copy_macos.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
 PHP_ADD_SOURCES([main/poll], m4_normalize([
     poll_backend_epoll.c
     poll_backend_eventport.c
@@ -1789,6 +1803,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_observer.c
     zend_opcode.c
     zend_operators.c
+    zend_partial.c
     zend_property_hooks.c
     zend_ptr_stack.c
     zend_signal.c
@@ -1819,6 +1834,7 @@ AC_DEFINE([HAVE_BUILD_DEFS_H], [1],
 
 PHP_ADD_BUILD_DIR([
   main
+  main/io
   main/poll
   main/streams
   scripts

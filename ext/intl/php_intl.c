@@ -106,7 +106,7 @@ char* canonicalize_locale_string(const char* locale) {
 
 	canonicalized_len = uloc_canonicalize(locale, canonicalized, sizeof(canonicalized), &status);
 
-	if (U_FAILURE(status) || canonicalized_len <= 0) {
+	if (UNEXPECTED(U_FAILURE(status) || canonicalized_len <= 0)) {
 		return NULL;
 	}
 
@@ -278,6 +278,7 @@ PHP_RINIT_FUNCTION( intl )
 PHP_RSHUTDOWN_FUNCTION( intl )
 {
 	INTL_G(current_collator) = NULL;
+	INTL_G(current_collator_error) = NULL;
 	if (INTL_G(grapheme_iterator)) {
 		grapheme_close_global_iterator(  );
 		INTL_G(grapheme_iterator) = NULL;

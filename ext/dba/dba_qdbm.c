@@ -173,7 +173,7 @@ DBA_SYNC_FUNC(qdbm)
 
 DBA_INFO_FUNC(qdbm)
 {
-	return estrdup(dpversion);
+	return dpversion;
 }
 
 #endif

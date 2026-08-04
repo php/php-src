@@ -215,8 +215,11 @@ static int poll_backend_wait(
 	int timeout_ms = php_poll_timespec_to_ms(timeout);
 	int nfds = poll(backend_data->temp_fds, fd_count, timeout_ms);
 
-	if (nfds <= 0) {
-		return nfds; /* Return 0 for timeout, -1 for error */
+	if (nfds < 0) {
+		php_poll_set_current_errno_error(ctx);
+		return -1;
+	} else if (nfds == 0) {
+		return 0; /* timeout */
 	}
 
 	/* Process results - iterate through struct pollfd array directly */

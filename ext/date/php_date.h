@@ -124,7 +124,7 @@ PHPAPI time_t php_time(void);
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(const char *string, zend_long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt);
-PHPAPI int php_idate(char format, time_t ts, bool localtime);
+PHPAPI bool php_idate(char format, time_t ts, bool localtime, int *result);
 
 #define _php_strftime php_strftime
 

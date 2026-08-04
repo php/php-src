@@ -12,10 +12,10 @@ file_put_contents(__DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php', $fil
 try {
 include __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 } catch (Exception $e) {
-echo $e->getMessage();
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-internal corruption of phar "%s" (truncated manifest header)
+PharException: internal corruption of phar "%s" (truncated manifest header)

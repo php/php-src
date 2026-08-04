@@ -11,19 +11,19 @@ $string = "日本"; /* 2 chars */
 try {
     mb_str_split($string, 0);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     mb_str_split($string, -5);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 //Invalid Encoding
 try {
     mb_str_split($string, 1, "BAD_ENCODING");
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // For UTF-8, error markers are not inserted
@@ -48,9 +48,9 @@ echo "[", implode(', ', array_map('bin2hex', $array)), "]\n";
 
 ?>
 --EXPECT--
-mb_str_split(): Argument #2 ($length) must be greater than 0
-mb_str_split(): Argument #2 ($length) must be greater than 0
-mb_str_split(): Argument #3 ($encoding) must be a valid encoding, "BAD_ENCODING" given
+ValueError: mb_str_split(): Argument #2 ($length) must be greater than 0
+ValueError: mb_str_split(): Argument #2 ($length) must be greater than 0
+ValueError: mb_str_split(): Argument #3 ($encoding) must be a valid encoding, "BAD_ENCODING" given
 == INVALID UTF-8 ==
 [6162, 63ff, 6162, 63]
 == INVALID HZ ==

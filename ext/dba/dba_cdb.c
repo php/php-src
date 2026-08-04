@@ -319,12 +319,12 @@ DBA_INFO_FUNC(cdb)
 {
 #ifdef DBA_CDB_BUILTIN
 	if (!strcmp(hnd->name, "cdb")) {
-		return estrdup(cdb_version());
+		return cdb_version();
 	} else {
-		return estrdup(cdb_make_version());
+		return cdb_make_version();
 	}
 #else
-	return estrdup("External");
+	return "External";
 #endif
 }
 

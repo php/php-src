@@ -73,8 +73,8 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message);
 			efree(message);
 		} else {
-			if (Z_LVAL_P(ele_value) > INT32_MAX ||
-					Z_LVAL_P(ele_value) < INT32_MIN) {
+			if (UNEXPECTED(Z_LVAL_P(ele_value) > INT32_MAX ||
+					Z_LVAL_P(ele_value) < INT32_MIN)) {
 				spprintf(&message, 0, "value " ZEND_LONG_FMT " is out of "
 						"bounds for a 32-bit integer in key '%s'",
 						Z_LVAL_P(ele_value), key_name);

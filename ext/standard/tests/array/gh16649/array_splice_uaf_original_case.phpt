@@ -25,5 +25,6 @@ try {
     echo "Exception caught: " . $e->getMessage() . "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning a value from a destructor is deprecated in %s on line %d
 Exception caught: Array was modified during array_splice operation

@@ -689,11 +689,7 @@ second_try:
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
 			if (info) {
-				if (Z_ISREF_P(data)) {
-					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
-				} else {
-					var_restore_prop_default(var_hash, obj, info, data);
-				}
+				var_restore_prop_default(var_hash, obj, info, data);
 			}
 			goto failure;
 		}
@@ -1253,14 +1249,14 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* Check for unserialize callback */
-		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
+		if (PG(unserialize_callback_func) == NULL) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
 		}
 
 		/* Call unserialize callback */
-		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
+		ZVAL_STR(&user_func, zend_string_dup(PG(unserialize_callback_func), false));
 
 		ZVAL_STR(&args[0], class_name);
 		BG(serialize_lock)++;

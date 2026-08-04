@@ -24,14 +24,14 @@ echo "\n-- ASCII string with out of bound positive offset --\n";
 try {
     var_dump(mb_stripos($string_ascii, '', 150));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n-- ASCII string with out of bound negative offset --\n";
 try {
     var_dump(mb_stripos($string_ascii, '', -150));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 
@@ -48,14 +48,14 @@ echo "\n-- Multi-byte string with out of bound positive offset --\n";
 try {
     var_dump(mb_stripos($string_mb, '', 150));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n-- Multi-byte string with out of bound negative offset --\n";
 try {
     var_dump(mb_stripos($string_mb, '', -150));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -70,10 +70,10 @@ int(2)
 int(5)
 
 -- ASCII string with out of bound positive offset --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- ASCII string with out of bound negative offset --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Multi-byte string without offset --
 int(0)
@@ -85,7 +85,7 @@ int(2)
 int(19)
 
 -- Multi-byte string with out of bound positive offset --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Multi-byte string with out of bound negative offset --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

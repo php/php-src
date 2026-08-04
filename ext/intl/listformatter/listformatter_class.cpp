@@ -67,6 +67,9 @@ PHP_METHOD(IntlListFormatter, __construct)
         zend_long type = INTL_LISTFORMATTER_FALLBACK_TYPE_AND;
         zend_long width = INTL_LISTFORMATTER_FALLBACK_WIDTH_WIDE;
     #endif
+
+    intl_errors_reset(LISTFORMATTER_ERROR_P(obj));
+
     ZEND_PARSE_PARAMETERS_START(1, 3)
         Z_PARAM_STRING(locale, locale_len)
         Z_PARAM_OPTIONAL
@@ -83,7 +86,7 @@ PHP_METHOD(IntlListFormatter, __construct)
         locale = (char *)intl_locale_get_default();
     }
 
-    if (locale_len > INTL_MAX_LOCALE_LEN) {
+    if (UNEXPECTED(locale_len > INTL_MAX_LOCALE_LEN)) {
         zend_argument_value_error(1, "must be less than or equal to %d characters", INTL_MAX_LOCALE_LEN);
         RETURN_THROWS();
     }

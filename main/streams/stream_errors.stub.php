@@ -22,6 +22,7 @@ enum StreamErrorCode
     case ConnectFailed;
     case BindFailed;
     case ListenFailed;
+    case AcceptFailed;
     case NotWritable;
     case NotReadable;
 
@@ -86,6 +87,7 @@ enum StreamErrorCode
     case InvalidParam;
     case RedirectLimit;
     case AuthFailed;
+    case TimeOut;
 
     /* Encoding/decoding/archiving operations */
     case ArchivingFailed;
@@ -130,7 +132,6 @@ final readonly class StreamError
     public string $wrapperName;
     public int $severity;
     public bool $terminating;
-    public ?string $param;
 }
 
 class StreamException extends Exception

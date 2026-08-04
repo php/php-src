@@ -26,6 +26,6 @@ try {
 ?>
 --EXPECTF--
 Caught: Failed to open stream: operation failed
-Code: 20
+Code: 21
 Wrapper: PHP
 Error code name: OpenFailed

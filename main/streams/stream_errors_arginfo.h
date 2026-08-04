@@ -1,5 +1,5 @@
 /* This is a generated file, edit stream_errors.stub.php instead.
- * Stub hash: 3e9ee6f0fdd8ecf3ded82728487a9e774137036a
+ * Stub hash: d3087b608996f81bf0dd19c25792feec9744e768
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamException_getErrors, 0, 0, IS_ARRAY, 0)
@@ -37,6 +37,8 @@ static zend_class_entry *register_class_StreamErrorCode(void)
 	zend_enum_add_case_cstr(class_entry, "BindFailed", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "ListenFailed", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "AcceptFailed", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "NotWritable", NULL);
 
@@ -146,6 +148,8 @@ static zend_class_entry *register_class_StreamErrorCode(void)
 
 	zend_enum_add_case_cstr(class_entry, "AuthFailed", NULL);
 
+	zend_enum_add_case_cstr(class_entry, "TimeOut", NULL);
+
 	zend_enum_add_case_cstr(class_entry, "ArchivingFailed", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "EncodingFailed", NULL);
@@ -232,12 +236,6 @@ static zend_class_entry *register_class_StreamError(void)
 	zend_string *property_terminating_name = zend_string_init("terminating", sizeof("terminating") - 1, true);
 	zend_declare_typed_property(class_entry, property_terminating_name, &property_terminating_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release_ex(property_terminating_name, true);
-
-	zval property_param_default_value;
-	ZVAL_UNDEF(&property_param_default_value);
-	zend_string *property_param_name = zend_string_init("param", sizeof("param") - 1, true);
-	zend_declare_typed_property(class_entry, property_param_name, &property_param_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release_ex(property_param_name, true);
 
 	return class_entry;
 }

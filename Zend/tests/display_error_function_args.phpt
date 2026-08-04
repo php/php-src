@@ -25,6 +25,6 @@ Warning: unlink('/'): %s in %s on line %d
 
 Warning: password_hash(Object(SensitiveParameterValue), '2y', Array): The "salt" option has been ignored, since providing a custom salt is no longer supported in %s on line %d
 
-Warning: unlink(/): %s in %s on line %d
+Warning: unlink(): %s in %s on line %d
 
 Warning: password_hash(): The "salt" option has been ignored, since providing a custom salt is no longer supported in %s on line %d

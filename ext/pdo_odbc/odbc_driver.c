@@ -93,6 +93,8 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		errmsgsize = 0;
+	} else if ((size_t) errmsgsize >= sizeof(einfo->last_err_msg)) {
+		errmsgsize = sizeof(einfo->last_err_msg) - 1;
 	}
 
 	einfo->last_err_msg[errmsgsize] = '\0';
@@ -604,7 +606,11 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 				dsnbuf, sizeof(dsnbuf)-1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
 	}
 	if (!use_direct) {
-		rc = SQLConnect(H->dbc, (SQLCHAR *) dbh->data_source, SQL_NTS, (SQLCHAR *) dbh->username, SQL_NTS, (SQLCHAR *) dbh->password, SQL_NTS);
+		/* unixODBC pooling strcmp()s the credentials when matching a cached
+		 * connection and crashes on a NULL username/password, so pass "". */
+		rc = SQLConnect(H->dbc, (SQLCHAR *) dbh->data_source, SQL_NTS,
+			(SQLCHAR *) (dbh->username ? dbh->username : ""), SQL_NTS,
+			(SQLCHAR *) (dbh->password ? dbh->password : ""), SQL_NTS);
 	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {

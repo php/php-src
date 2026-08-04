@@ -469,7 +469,7 @@ PHP_METHOD(SQLite3, escapeString)
 	zend_string *sql;
 	char *ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S", &sql)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "P", &sql)) {
 		RETURN_THROWS();
 	}
 
@@ -1660,7 +1660,7 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 					break;
 
 				default:
-					php_sqlite3_error(stmt_obj->db_obj, 0, "Unknown parameter type: %pd for parameter %pd", param->type, param->param_number);
+					php_sqlite3_error(stmt_obj->db_obj, 0, "Unknown parameter type: " ZEND_LONG_FMT " for parameter " ZEND_LONG_FMT, param->type, param->param_number);
 					return FAILURE;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -2314,7 +2314,9 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 	}
 
 	if (intern->initialised && intern->db) {
-		sqlite3_close(intern->db);
+		/* Use sqlite3_close_v2() because the object may be destroyed while resources depending on the connection are still alive,
+		 * e.g. a blob stream created by SQLite3::openBlob(). */
+		sqlite3_close_v2(intern->db);
 		intern->initialised = false;
 	}
 

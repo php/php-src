@@ -11,7 +11,7 @@ $file_path = __DIR__;
 include($file_path."/file.inc");
 
 echo "\n-- Testing with  Non-existing file --\n";
-print( file_get_contents("/no/such/file/or/dir") );
+var_dump( file_get_contents("/no/such/file/or/dir") );
 
 create_files($file_path, 1, "text", 0755, 100, "w", "file_get_contents_error", 1, "byte");
 $file_handle = fopen($file_path."/file_put_contents_error.tmp", "w");
@@ -44,7 +44,8 @@ if(file_exists($file_path."/file_put_contents1.tmp")) {
 
 -- Testing with  Non-existing file --
 
-Warning: file_get_contents(/no/such/file/or/dir): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(): Failed to open stream: No such file or directory in %s on line %d
+bool(false)
 
 -- Testing for invalid negative maxlen values --
 file_get_contents(): Argument #5 ($length) must be greater than or equal to 0

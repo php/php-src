@@ -1670,7 +1670,9 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 	}
 
 	if (!res) {
-		php_error_docref(NULL, E_WARNING, "Could not save document");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Could not save document");
+		}
 		RETURN_FALSE;
 	} else {
 		RETURN_NEW_STR(res);

@@ -8,6 +8,8 @@ snmp
 <?php
 require_once(__DIR__.'/skipif.inc');
 ?>
+--XFAIL--
+SNMP tests might possibly fail on Windows
 --FILE--
 <?php
 require_once(__DIR__.'/snmp_include.inc');

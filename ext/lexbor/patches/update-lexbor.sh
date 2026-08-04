@@ -15,7 +15,10 @@ git clone "$LEXBOR_REPO" "$LEXBOR_TMP_DIR"
 (cd "$LEXBOR_TMP_DIR" && git checkout "$LEXBOR_REF")
 
 # Apply patches
-mapfile -t patches < <(ls "$PATCHES_DIR"/*.patch)
+patches=()
+for f in "$PATCHES_DIR"/*.patch; do
+    [ -e "$f" ] && patches+=("$f")
+done
 cd "$LEXBOR_TMP_DIR"
 for patch in "${patches[@]}"; do
     if ! git am -3 "$patch"; then
@@ -25,8 +28,9 @@ for patch in "${patches[@]}"; do
 done
 
 # Refresh patches
+rm "$PATCHES_DIR"/*.patch
 NUM_PATCHES=${#patches[@]}
-git format-patch "HEAD~$NUM_PATCHES" -o "$PATCHES_DIR"
+git format-patch --no-signature --zero-commit "HEAD~$NUM_PATCHES" -o "$PATCHES_DIR"
 
 # Run code-generation tools
 (cd "$LEXBOR_TMP_DIR/utils/lexbor/encoding" && python3 single-byte.py)

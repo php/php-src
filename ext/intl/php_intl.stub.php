@@ -487,6 +487,10 @@ function locale_get_display_language(string $locale, ?string $displayLocale = nu
 
 function locale_get_display_variant(string $locale, ?string $displayLocale = null): string|false {}
 
+function locale_get_display_keyword(string $keyword, ?string $displayLocale = null): string|false {}
+
+function locale_get_display_keyword_value(string $locale, string $keyword, ?string $displayLocale = null): string|false {}
+
 function locale_compose(array $subtags): string|false {}
 
 function locale_parse(string $locale): ?array {}

@@ -233,6 +233,8 @@ typedef struct _zend_ast_fcc {
 	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
 	zend_ast_attr attr; /* Additional attribute, use depending on node type */
 	uint32_t lineno;    /* Line number */
+	zend_string *filename;
+	zend_string *name;
 	zend_ast *args;
 	ZEND_MAP_PTR_DEF(zend_function *, fptr);
 } zend_ast_fcc;
@@ -350,7 +352,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *ast, zend_class_entry *scope, bool *short_circuited_ptr, zend_ast_evaluate_ctx *ctx);
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
+/* Copies 'ast' to the heap, returns a refcounted AST reference */
 ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);
+/* Duplicates 'ast' on the arena */
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_dup(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
@@ -439,5 +444,8 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr);
 
 zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast);
+
+/* Recognize parent::$prop::get() pattern. */
+bool zend_ast_is_parent_hook_call(const zend_ast *ast);
 
 #endif

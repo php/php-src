@@ -14,7 +14,7 @@
 
 #include "php.h"
 #include "php_streams_int.h"
-#include "ext/standard/file.h"
+#include "ext/standard/file.h" /* For FG(default_socket_timeout) */
 
 static HashTable xport_hash;
 
@@ -23,16 +23,15 @@ PHPAPI HashTable *php_stream_xport_get_hash(void)
 	return &xport_hash;
 }
 
-PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory)
+PHPAPI void php_stream_xport_register(const char *protocol, php_stream_transport_factory factory)
 {
-	zend_string *str = zend_string_init_interned(protocol, strlen(protocol), 1);
+	zend_string *str = zend_string_init_interned(protocol, strlen(protocol), true);
 
 	zend_hash_update_ptr(&xport_hash, str, factory);
-	zend_string_release_ex(str, 1);
-	return SUCCESS;
+	zend_string_release_ex(str, true);
 }
 
-PHPAPI int php_stream_xport_unregister(const char *protocol)
+PHPAPI zend_result php_stream_xport_unregister(const char *protocol)
 {
 	return zend_hash_str_del(&xport_hash, protocol, strlen(protocol));
 }

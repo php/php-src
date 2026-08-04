@@ -4,6 +4,8 @@ Test session_regenerate_id() function : basic functionality
 session
 --INI--
 session.sid_length = 32
+session.cookie_samesite=Lax
+session.cookie_httponly=1
 --SKIPIF--
 <?php
 

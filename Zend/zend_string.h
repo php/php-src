@@ -43,6 +43,8 @@ ZEND_API extern zend_string_init_existing_interned_func_t zend_string_init_exist
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
 ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
+ZEND_API void ZEND_FASTCALL zend_bin2hex(char *out, const unsigned char *in, size_t in_len);
+ZEND_API zend_string *zend_bin2hex_str(const unsigned char *in, size_t in_len);
 
 ZEND_API zend_string *zend_string_concat2(
 	const char *str1, size_t str1_len,
@@ -491,6 +493,32 @@ static zend_always_inline bool zend_string_starts_with_ci(const zend_string *str
 #define zend_string_starts_with_literal_ci(str, prefix) \
 	zend_string_starts_with_cstr_ci(str, "" prefix, sizeof(prefix) - 1)
 
+static zend_always_inline bool zend_string_ends_with_cstr(const zend_string *str, const char *suffix, size_t suffix_length)
+{
+	return ZSTR_LEN(str) >= suffix_length && !memcmp(ZSTR_VAL(str) + ZSTR_LEN(str) - suffix_length, suffix, suffix_length);
+}
+
+static zend_always_inline bool zend_string_ends_with(const zend_string *str, const zend_string *suffix)
+{
+	return zend_string_ends_with_cstr(str, ZSTR_VAL(suffix), ZSTR_LEN(suffix));
+}
+
+#define zend_string_ends_with_literal(str, suffix) \
+	zend_string_ends_with_cstr(str, "" suffix, sizeof(suffix) - 1)
+
+static zend_always_inline bool zend_string_ends_with_cstr_ci(const zend_string *str, const char *suffix, size_t suffix_length)
+{
+	return ZSTR_LEN(str) >= suffix_length && !strncasecmp(ZSTR_VAL(str) + ZSTR_LEN(str) - suffix_length, suffix, suffix_length);
+}
+
+static zend_always_inline bool zend_string_ends_with_ci(const zend_string *str, const zend_string *suffix)
+{
+	return zend_string_ends_with_cstr_ci(str, ZSTR_VAL(suffix), ZSTR_LEN(suffix));
+}
+
+#define zend_string_ends_with_literal_ci(str, suffix) \
+	zend_string_ends_with_cstr_ci(str, "" suffix, sizeof(suffix) - 1)
+
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
  *
@@ -705,10 +733,16 @@ default: ZEND_UNREACHABLE();
 	_(ZEND_STR_AUTOGLOBAL_ENV,         "_ENV") \
 	_(ZEND_STR_AUTOGLOBAL_REQUEST,     "_REQUEST") \
 	_(ZEND_STR_COUNT,                  "count") \
+	_(ZEND_STR_FUNC_NUM_ARGS,          "func_num_args") \
+	_(ZEND_STR_FUNC_GET_ARGS,          "func_get_args") \
+	_(ZEND_STR_ASSERT,                 "assert") \
+	_(ZEND_STR_CALL_USER_FUNC,         "call_user_func") \
+	_(ZEND_STR_ARRAY_SLICE,            "array_slice") \
 	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 	_(ZEND_STR_DEPRECATED_CAPITALIZED, "Deprecated") \
 	_(ZEND_STR_SINCE,                  "since") \
+	_(ZEND_STR_NODISCARD,              "NoDiscard") \
 	_(ZEND_STR_GET,                    "get") \
 	_(ZEND_STR_SET,                    "set") \
 	_(ZEND_STR_8_DOT_0,                "8.0") \

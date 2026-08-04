@@ -32,6 +32,7 @@ const php_hash_ops php_hash_xxh32_ops = {
 	4,
 	4,
 	sizeof(PHP_XXH32_CTX),
+	0,
 	0
 };
 
@@ -99,6 +100,7 @@ const php_hash_ops php_hash_xxh64_ops = {
 	8,
 	8,
 	sizeof(PHP_XXH64_CTX),
+	0,
 	0
 };
 
@@ -150,7 +152,8 @@ const php_hash_ops php_hash_xxh3_64_ops = {
 	8,
 	8,
 	sizeof(PHP_XXH3_64_CTX),
-	0
+	0,
+	64
 };
 
 typedef XXH_errorcode (*xxh3_reset_with_secret_func_t)(XXH3_state_t*, const void*, size_t);
@@ -255,7 +258,8 @@ const php_hash_ops php_hash_xxh3_128_ops = {
 	16,
 	8,
 	sizeof(PHP_XXH3_128_CTX),
-	0
+	0,
+	64
 };
 
 PHP_HASH_API void PHP_XXH3_128_Init(PHP_XXH3_128_CTX *ctx, HashTable *args)

@@ -74,6 +74,7 @@ typedef struct {
 	php_curl_write    *write_header;
 	php_curl_read     *read;
 	zval               std_err;
+	zend_fcall_info_cache seek;
 	zend_fcall_info_cache progress;
 	zend_fcall_info_cache xferinfo;
 	zend_fcall_info_cache fnmatch;

@@ -126,7 +126,7 @@ void CodePointBreakIterator::setText(const UnicodeString &text)
 
 void CodePointBreakIterator::setText(UText *text, UErrorCode &status)
 {
-	if (U_FAILURE(status)) {
+	if (UNEXPECTED(U_FAILURE(status))) {
 		return;
 	}
 
@@ -234,7 +234,7 @@ CodePointBreakIterator *CodePointBreakIterator::createBufferClone(
 	void *stackBuffer, int32_t &bufferSize, UErrorCode &status)
 {
 	//see implementation of RuleBasedBreakIterator::createBufferClone()
-	if (U_FAILURE(status)) {
+	if (UNEXPECTED(U_FAILURE(status))) {
 		return NULL;
 	}
 
@@ -273,17 +273,17 @@ CodePointBreakIterator *CodePointBreakIterator::createBufferClone(
 CodePointBreakIterator &CodePointBreakIterator::refreshInputText(UText *input, UErrorCode &status)
 {
 	//see implementation of RuleBasedBreakIterator::createBufferClone()
-	if (U_FAILURE(status)) {
+	if (UNEXPECTED(U_FAILURE(status))) {
 		return *this;
 	}
-	if (input == NULL) {
+	if (UNEXPECTED(input == NULL)) {
 		status = U_ILLEGAL_ARGUMENT_ERROR;
 		return *this;
 	}
 
 	int64_t pos = utext_getNativeIndex(this->fText);
 	this->fText = utext_clone(this->fText, input, false, true, &status);
-	if (U_FAILURE(status)) {
+	if (UNEXPECTED(U_FAILURE(status))) {
 		return *this;
 	}
 

@@ -23,10 +23,6 @@
 # include <langinfo.h>
 #endif
 
-#ifdef HAVE_LIBINTL
-# include <libintl.h> /* For LC_MESSAGES */
-#endif
-
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
@@ -49,31 +45,10 @@
 
 #include "zend_simd.h"
 
-/* this is read-only, so it's ok */
-ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
-
 /* localeconv mutex */
 #ifdef ZTS
 static MUTEX_T locale_mutex = NULL;
 #endif
-
-/* {{{ php_bin2hex */
-static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
-{
-	zend_string *result;
-	size_t i, j;
-
-	result = zend_string_safe_alloc(oldlen, 2 * sizeof(char), 0, 0);
-
-	for (i = j = 0; i < oldlen; i++) {
-		ZSTR_VAL(result)[j++] = hexconvtab[old[i] >> 4];
-		ZSTR_VAL(result)[j++] = hexconvtab[old[i] & 15];
-	}
-	ZSTR_VAL(result)[j] = '\0';
-
-	return result;
-}
-/* }}} */
 
 /* {{{ php_hex2bin */
 static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
@@ -162,7 +137,7 @@ PHP_FUNCTION(bin2hex)
 		Z_PARAM_STR(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = php_bin2hex((unsigned char *)ZSTR_VAL(data), ZSTR_LEN(data));
+	result = zend_bin2hex_str((unsigned char *) ZSTR_VAL(data), ZSTR_LEN(data));
 
 	RETURN_STR(result);
 }
@@ -1886,13 +1861,7 @@ PHP_FUNCTION(str_ends_with)
 		Z_PARAM_STR(needle)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(memcmp(
-		ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - ZSTR_LEN(needle),
-		ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
+	RETURN_BOOL(zend_string_ends_with(haystack, needle));
 }
 /* }}} */
 
@@ -4940,6 +4909,11 @@ static zend_string *try_setlocale_zval(zend_long cat, zval *loc_zv) {
 	if (UNEXPECTED(loc_str == NULL)) {
 		return NULL;
 	}
+	if (zend_str_has_nul_byte(loc_str)) {
+		zend_argument_value_error(2, "must not contain any null bytes");
+		zend_tmp_string_release(tmp_loc_str);
+		return NULL;
+	}
 	zend_string *result = try_setlocale_str(cat, loc_str);
 	zend_tmp_string_release(tmp_loc_str);
 	return result;
@@ -4961,8 +4935,26 @@ PHP_FUNCTION(setlocale)
 	zend_string **strings = do_alloca(sizeof(zend_string *) * num_args, use_heap);
 
 	for (uint32_t i = 0; i < num_args; i++) {
-		if (UNEXPECTED(Z_TYPE(args[i]) != IS_ARRAY && !zend_parse_arg_str(&args[i], &strings[i], true, i + 2))) {
-			zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_ARRAY_OR_STRING_OR_NULL, &args[i]);
+		if (Z_TYPE(args[i]) == IS_ARRAY) {
+			if (UNEXPECTED(i != 0)) {
+				zend_wrong_parameter_type_error(i + 2, Z_EXPECTED_STRING_OR_NULL, &args[i]);
+				goto out;
+			}
+			if (UNEXPECTED(num_args > 1)) {
+				zend_argument_count_error(
+					"setlocale() expects exactly 2 arguments when argument #2 ($locales) is an array, %d given",
+					ZEND_NUM_ARGS());
+				goto out;
+			}
+			break;
+		}
+		if (UNEXPECTED(!zend_parse_arg_path_str(&args[i], &strings[i], true, i + 2))) {
+			zend_wrong_parameter_type_error(
+				i + 2,
+				Z_TYPE(args[i]) == IS_STRING
+					? Z_EXPECTED_PATH
+					: (i == 0 ? Z_EXPECTED_ARRAY_OR_STRING_OR_NULL : Z_EXPECTED_STRING_OR_NULL),
+				&args[i]);
 			goto out;
 		}
 	}
@@ -5763,7 +5755,7 @@ PHP_FUNCTION(substr_count)
 
 static void php_str_pad_fill(zend_string *result, size_t pad_chars, const char *pad_str, size_t pad_str_len) {
 	char *p = ZSTR_VAL(result) + ZSTR_LEN(result);
-	
+
 	if (pad_str_len == 1) {
 		memset(p, pad_str[0], pad_chars);
 		ZSTR_LEN(result) += pad_chars;
@@ -5778,7 +5770,7 @@ static void php_str_pad_fill(zend_string *result, size_t pad_chars, const char *
 	if (p < end) {
 		memcpy(p, pad_str, end - p);
 	}
-	
+
 	ZSTR_LEN(result) += pad_chars;
 }
 

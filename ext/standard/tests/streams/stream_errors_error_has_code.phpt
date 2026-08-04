@@ -27,4 +27,4 @@ if ($error2) {
 ?>
 --EXPECT--
 Got most recent error
-Param contains 'nonexistent2': yes
+Param contains 'nonexistent2': no

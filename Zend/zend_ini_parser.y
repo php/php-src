@@ -151,7 +151,7 @@ static void zend_ini_get_constant(zval *result, zval *name)
 		   	&& (c = zend_get_constant(Z_STR_P(name))) != 0) {
 		if (Z_TYPE_P(c) != IS_STRING) {
 			ZVAL_COPY_OR_DUP(&tmp, c);
-			if (Z_OPT_CONSTANT(tmp)) {
+			if (Z_OPT_TYPE(tmp) == IS_CONSTANT_AST) {
 				zval_update_constant_ex(&tmp, NULL);
 			}
 			convert_to_string(&tmp);

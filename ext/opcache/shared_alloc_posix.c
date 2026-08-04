@@ -49,9 +49,10 @@ static int create_segments(size_t requested_size, zend_shared_segment_posix ***s
 	 * only then amd64/i386/arm64 and perharps risc64*
 	 * archs are on interest here.
 	 */
-	size_t i, shared_segment_sizes = 0, shared_segment_lg_index = 0;
+	size_t shared_segment_lg_index = 0;
 	size_t shared_segment_sindexes[3] = {0};
 	const size_t entries = sizeof(shared_segment_sindexes) / sizeof(shared_segment_sindexes[0]);
+	int i, shared_segment_sizes;
 
 	shared_segment_sizes = getpagesizes(shared_segment_sindexes, entries);
 

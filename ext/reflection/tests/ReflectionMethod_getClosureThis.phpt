@@ -1,5 +1,5 @@
 --TEST--
-Reflection::getClosureThis()
+ReflectionMethod::getClosureThis()
 --FILE--
 <?php
 class StaticExample

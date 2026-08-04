@@ -32,6 +32,6 @@ Handler called
 Wrapper: PHP
 Code: OpenFailed
 Message: Failed to open stream: operation failed
-Param: php://nonexistent
+Param: null
 Terminating: yes
 bool(true)
