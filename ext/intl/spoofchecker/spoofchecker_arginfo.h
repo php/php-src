@@ -1,5 +1,5 @@
 /* This is a generated file, edit spoofchecker.stub.php instead.
- * Stub hash: 528a85d28312688d9ba2c78ede2f07356bbff0f6 */
+ * Stub hash: cb99c1be997a0b11e23b6ae61c27fa2ecd6e403f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -33,6 +33,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_setAllowedCha
 ZEND_END_ARG_INFO()
 
 #if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Spoofchecker_getBidiSkeleton, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, direction, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_areBidiConfusable, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, direction, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
@@ -49,6 +54,7 @@ ZEND_METHOD(Spoofchecker, setChecks);
 ZEND_METHOD(Spoofchecker, setRestrictionLevel);
 ZEND_METHOD(Spoofchecker, setAllowedChars);
 #if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_METHOD(Spoofchecker, getBidiSkeleton);
 ZEND_METHOD(Spoofchecker, areBidiConfusable);
 #endif
 
@@ -61,6 +67,7 @@ static const zend_function_entry class_Spoofchecker_methods[] = {
 	ZEND_ME(Spoofchecker, setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC)
 	ZEND_ME(Spoofchecker, setAllowedChars, arginfo_class_Spoofchecker_setAllowedChars, ZEND_ACC_PUBLIC)
 #if U_ICU_VERSION_MAJOR_NUM >= 74
+	ZEND_ME(Spoofchecker, getBidiSkeleton, arginfo_class_Spoofchecker_getBidiSkeleton, ZEND_ACC_PUBLIC)
 	ZEND_ME(Spoofchecker, areBidiConfusable, arginfo_class_Spoofchecker_areBidiConfusable, ZEND_ACC_PUBLIC)
 #endif
 	ZEND_FE_END

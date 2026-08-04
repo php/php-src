@@ -332,6 +332,8 @@ PHP 8.6 UPGRADE NOTES
     confusable for a given text direction, along with the SpoofChecker::LTR
     and SpoofChecker::RTL direction constants.
     It is supported from icu 74.
+  . Added SpoofChecker::getBidiSkeleton() to generate a confusable skeleton for
+    a given text direction. It is supported from icu 74.
 
 - IO:
   . Added new polling API.
@@ -488,6 +490,7 @@ PHP 8.6 UPGRADE NOTES
   . Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue()
     RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
   . SpoofChecker::areBidiConfusable()
+  . SpoofChecker::getBidiSkeleton()
 
 - mysqli:
   . Added mysqli::quote_string() and mysqli_quote_string().
