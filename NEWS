@@ -37,6 +37,11 @@ PHP                                                                        NEWS
   . Fixed segfault in ReflectionMethod::createFromMethodName() on an
     uninstantiable subclass. (iliaal)
 
+- Session:
+  . Fix corruption in mod_mm. (ndossche)
+  . Fixed bug GH-23043 (broken session id code can cause zend_mm_heap
+    corrupted). (ndossche)
+
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
