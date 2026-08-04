@@ -13,7 +13,7 @@ $reader = new XMLReader();
 try {
     $reader->open('');
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $reader = new XMLReader();
@@ -36,6 +36,6 @@ unlink($filename);
 
 ?>
 --EXPECT--
-XMLReader::open(): Argument #1 ($uri) must not be empty
+ValueError: XMLReader::open(): Argument #1 ($uri) must not be empty
 books
 books
