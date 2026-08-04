@@ -1,7 +1,5 @@
 --TEST--
 Test extension of Uri\WhatWg\Url
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

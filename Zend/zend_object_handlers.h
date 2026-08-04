@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -205,7 +204,7 @@ typedef zend_result (*zend_object_do_operation_t)(uint8_t opcode, zval *result, 
 
 struct _zend_object_handlers {
 	/* offset of real object header (usually zero) */
-	int										offset;
+	size_t										offset;
 	/* object handlers */
 	zend_object_free_obj_t					free_obj;             /* required */
 	zend_object_dtor_obj_t					dtor_obj;             /* required */
@@ -237,11 +236,10 @@ struct _zend_object_handlers {
 BEGIN_EXTERN_C()
 extern const ZEND_API zend_object_handlers std_object_handlers;
 
-#define zend_get_std_object_handlers() \
-	(&std_object_handlers)
-
-#define zend_get_function_root_class(fbc) \
-	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
+static zend_always_inline const zend_object_handlers *zend_get_std_object_handlers(void)
+{
+	return &std_object_handlers;
+}
 
 #define ZEND_PROPERTY_ISSET     0x0          /* Property exists and is not NULL */
 #define ZEND_PROPERTY_NOT_EMPTY ZEND_ISEMPTY /* Property is not empty */
@@ -251,7 +249,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *ce);
 ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, struct _zend_property_info **prop_info);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
-ZEND_API ZEND_COLD bool zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name);
+ZEND_API ZEND_COLD void zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name);
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
@@ -291,18 +289,20 @@ static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *obj
 /* Implements the fast path for array cast */
 ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
 
-#define ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(object) (            \
-		/* We can use zend_std_build_object_properties_array() for objects     \
-		 * without properties ht and with standard handlers */                 \
-		Z_OBJ_P(object)->properties == NULL                                    \
-		&& Z_OBJ_HT_P(object)->get_properties_for == NULL                      \
-		&& Z_OBJ_HT_P(object)->get_properties == zend_std_get_properties       \
-		/* For initialized proxies we need to forward to the real instance */  \
-		&& (                                                                   \
-			!zend_object_is_lazy_proxy(Z_OBJ_P(object))                        \
-			|| !zend_lazy_object_initialized(Z_OBJ_P(object))                  \
-		)                                                                      \
-)
+static zend_always_inline bool ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(const zval *zv) {
+	/* We can use zend_std_build_object_properties_array() for objects
+	 * without properties ht and with standard handlers */
+	const zend_object *obj = Z_OBJ_P(zv);
+
+	return obj->properties == NULL
+		&& obj->handlers->get_properties_for == NULL
+		&& obj->handlers->get_properties == zend_std_get_properties
+		/* For initialized proxies we need to forward to the real instance */
+		&& (
+			!zend_object_is_lazy_proxy(obj)
+			|| !zend_lazy_object_initialized(obj)
+		);
+}
 
 /* Handler for objects that cannot be meaningfully compared.
  * Only objects with the same identity will be considered equal. */
@@ -313,6 +313,7 @@ ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_
 ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
 
 ZEND_API ZEND_ATTRIBUTE_NONNULL zend_function *zend_get_call_trampoline_func(const zend_function *fbc, zend_string *method_name);
+ZEND_API void zend_free_trampoline(zend_function *func);
 
 ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
 
@@ -336,20 +337,12 @@ ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_p
 
 void zend_object_handlers_startup(void);
 
-#define zend_release_properties(ht) do { \
-	if (ht) { \
-		zend_array_release(ht); \
-	} \
-} while (0)
-
-#define zend_free_trampoline(func) do { \
-		if ((func) == &EG(trampoline)) { \
-			EG(trampoline).common.attributes = NULL; \
-			EG(trampoline).common.function_name = NULL; \
-		} else { \
-			efree(func); \
-		} \
-	} while (0)
+static zend_always_inline void zend_release_properties(HashTable *ht)
+{
+	if (ht) {
+		zend_array_release(ht);
+	}
+}
 
 /* Fallback to default comparison implementation if the arguments aren't both objects
  * and have the same compare() handler. You'll likely want to use this unless you

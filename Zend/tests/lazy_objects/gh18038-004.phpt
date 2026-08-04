@@ -36,7 +36,6 @@ var_dump($real->prop);
 --EXPECTF--
 init
 string(19) "RealInstance::__get"
-string(12) "Proxy::__get"
 
 Warning: Undefined property: RealInstance::$prop in %s on line %d
 NULL

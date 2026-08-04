@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -337,7 +335,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					) {
 						zend_error(E_CORE_ERROR, "Invalid browscap ini file: "
 							"'Parent' value cannot be same as the section name: %s "
-							"(in file %s)", ZSTR_VAL(ctx->current_section_name), INI_STR("browscap"));
+							"(in file %s)", ZSTR_VAL(ctx->current_section_name), zend_ini_string_literal("browscap"));
 						return;
 					}
 
@@ -399,7 +397,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 }
 /* }}} */
 
-static zend_result browscap_read_file(char *filename, browser_data *browdata, bool persistent) /* {{{ */
+static zend_result browscap_read_file(const char *filename, browser_data *browdata, bool persistent) /* {{{ */
 {
 	zend_file_handle fh;
 	browscap_parser_ctx ctx = {0};
@@ -499,7 +497,7 @@ PHP_INI_MH(OnChangeBrowscap)
 
 PHP_MINIT_FUNCTION(browscap) /* {{{ */
 {
-	char *browscap = INI_STR("browscap");
+	const char *browscap = zend_ini_string_literal("browscap");
 
 #ifdef ZTS
 	ts_allocate_id(&browscap_globals_id, sizeof(browser_data), (ts_allocate_ctor) browscap_globals_ctor, NULL);

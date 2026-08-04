@@ -142,6 +142,7 @@ void ir_dump_dot(const ir_ctx *ctx, const char *name, const char *comments, FILE
 						break;
 					case IR_OPND_CONTROL_DEP:
 					case IR_OPND_CONTROL_REF:
+					case IR_OPND_CONTROL_GUARD:
 						fprintf(f, "\tn%d -> n%d [style=dashed,dir=back,weight=%d];\n", ref, i, REF_WEIGHT);
 						break;
 					case IR_OPND_LABEL_REF:
@@ -650,6 +651,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 						case IR_OPND_CONTROL:
 						case IR_OPND_CONTROL_DEP:
 						case IR_OPND_CONTROL_REF:
+						case IR_OPND_CONTROL_GUARD:
 							fprintf(f, "%sl_%d", first ? "(" : ", ", ref);
 							first = 0;
 							break;
@@ -680,6 +682,8 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 				} else if (opnd_kind == IR_OPND_NUM) {
 					fprintf(f, "%s%d", first ? "(" : ", ", ref);
 					first = 0;
+				} else if (opnd_kind == IR_OPND_CONTROL_GUARD) {
+					/* skip */
 				} else if (j != n &&
 						(IR_IS_REF_OPND_KIND(opnd_kind) || (opnd_kind == IR_OPND_UNUSED && p[n-j]))) {
 					fprintf(f, "%snull", first ? "(" : ", ");

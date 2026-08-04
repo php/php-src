@@ -282,7 +282,7 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;
@@ -409,7 +409,7 @@ int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	return 0;

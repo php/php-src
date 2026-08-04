@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\Rfc3986\Uri component modification - path - using an email format
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

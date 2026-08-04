@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
    |          Nuno Lopes <nlopess@php.net>                                |
@@ -85,7 +84,11 @@
 #define SCNG	LANG_SCNG
 #ifdef ZTS
 ZEND_API ts_rsrc_id language_scanner_globals_id;
-ZEND_API size_t language_scanner_globals_offset;
+# ifdef ZEND_WIN32
+TSRM_TLS zend_php_scanner_globals language_scanner_globals;
+# else
+ZEND_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_php_scanner_globals language_scanner_globals;
+# endif
 #else
 ZEND_API zend_php_scanner_globals language_scanner_globals;
 #endif
@@ -591,6 +594,43 @@ ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle)
 	return SUCCESS;
 }
 
+static zend_op_array *zend_compile_ast_internal(int type)
+{
+	ZEND_ASSERT(CG(in_compilation));
+	ZEND_ASSERT(CG(ast));
+
+	uint32_t last_lineno = CG(zend_lineno);
+	zend_file_context original_file_context;
+	zend_oparray_context original_oparray_context;
+	zend_op_array *original_active_op_array = CG(active_op_array);
+
+	zend_op_array *op_array = emalloc(sizeof(*op_array));
+	init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
+	CG(active_op_array) = op_array;
+
+	/* Use heap to not waste arena memory */
+	op_array->fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
+
+	if (zend_ast_process) {
+		zend_ast_process(CG(ast));
+	}
+
+	zend_file_context_begin(&original_file_context);
+	zend_oparray_context_begin(&original_oparray_context, op_array);
+	zend_compile_top_stmt(CG(ast));
+	CG(zend_lineno) = last_lineno;
+	zend_emit_final_return(type == ZEND_USER_FUNCTION);
+	op_array->line_start = 1;
+	op_array->line_end = last_lineno;
+	pass_two(op_array);
+	zend_oparray_context_end(&original_oparray_context);
+	zend_file_context_end(&original_file_context);
+
+	CG(active_op_array) = original_active_op_array;
+
+	return op_array;
+}
+
 static zend_op_array *zend_compile(zend_function_type type)
 {
 	zend_op_array *op_array = NULL;
@@ -601,34 +641,7 @@ static zend_op_array *zend_compile(zend_function_type type)
 	CG(ast_arena) = zend_arena_create(1024 * 32);
 
 	if (!zendparse()) {
-		uint32_t last_lineno = CG(zend_lineno);
-		zend_file_context original_file_context;
-		zend_oparray_context original_oparray_context;
-		zend_op_array *original_active_op_array = CG(active_op_array);
-
-		op_array = emalloc(sizeof(zend_op_array));
-		init_op_array(op_array, type, INITIAL_OP_ARRAY_SIZE);
-		CG(active_op_array) = op_array;
-
-		/* Use heap to not waste arena memory */
-		op_array->fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
-
-		if (zend_ast_process) {
-			zend_ast_process(CG(ast));
-		}
-
-		zend_file_context_begin(&original_file_context);
-		zend_oparray_context_begin(&original_oparray_context, op_array);
-		zend_compile_top_stmt(CG(ast));
-		CG(zend_lineno) = last_lineno;
-		zend_emit_final_return(type == ZEND_USER_FUNCTION);
-		op_array->line_start = 1;
-		op_array->line_end = last_lineno;
-		pass_two(op_array);
-		zend_oparray_context_end(&original_oparray_context);
-		zend_file_context_end(&original_file_context);
-
-		CG(active_op_array) = original_active_op_array;
+		op_array = zend_compile_ast_internal(type);
 	}
 
 	zend_ast_destroy(CG(ast));
@@ -668,6 +681,23 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
+	return op_array;
+}
+
+ZEND_API zend_op_array *zend_compile_ast(
+	zend_ast *ast, int type, zend_string *filename)
+{
+	zend_string *original_compiled_filename = CG(compiled_filename);
+	bool original_in_compilation = CG(in_compilation);
+	CG(in_compilation) = true;
+	CG(ast) = ast;
+
+	zend_set_compiled_filename(filename);
+	zend_op_array *op_array = zend_compile_ast_internal(type);
+
+	CG(in_compilation) = original_in_compilation;
+	zend_restore_compiled_filename(original_compiled_filename);
+
 	return op_array;
 }
 

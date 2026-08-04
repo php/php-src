@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - host - forbidden host codepoint
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

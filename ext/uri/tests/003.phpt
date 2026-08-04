@@ -1,7 +1,5 @@
 --TEST--
 Parse special URIs
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

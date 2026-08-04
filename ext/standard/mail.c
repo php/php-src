@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Rasmus Lerdorf <rasmus@php.net>                              |
    +----------------------------------------------------------------------+
@@ -336,8 +334,8 @@ PHP_FUNCTION(mail)
 		subject_r = subject;
 	}
 
-	zend_string *force_extra_parameters = zend_ini_str_ex("mail.force_extra_parameters", strlen("mail.force_extra_parameters"), false, NULL);
-	if (force_extra_parameters) {
+	zend_string *force_extra_parameters = zend_ini_str_literal("mail.force_extra_parameters");
+	if (force_extra_parameters && ZSTR_LEN(force_extra_parameters) > 0) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
@@ -437,9 +435,9 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const zend_string *extra_cmd)
 {
 	FILE *sendmail;
-	char *sendmail_path = INI_STR("sendmail_path");
+	const char *sendmail_path = zend_ini_string_literal("sendmail_path");
 	char *sendmail_cmd = NULL;
-	const zend_string *mail_log = zend_ini_str(ZEND_STRL("mail.log"), false);
+	const zend_string *mail_log = zend_ini_str_literal("mail.log");
 	const char *hdr = headers;
 	char *ahdr = NULL;
 #if PHP_SIGCHILD
@@ -536,7 +534,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 		char *tsm_errmsg = NULL;
 
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message) == FAILURE) {
+		if (TSendMail(zend_ini_string_literal("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message) == FAILURE) {
 			if (tsm_errmsg) {
 				php_error_docref(NULL, E_WARNING, "%s", tsm_errmsg);
 				efree(tsm_errmsg);
@@ -553,7 +551,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	if (extra_cmd != NULL) {
 		spprintf(&sendmail_cmd, 0, "%s %s", sendmail_path, ZSTR_VAL(extra_cmd));
 	} else {
-		sendmail_cmd = sendmail_path;
+		sendmail_cmd = (char*)sendmail_path;
 	}
 
 #if PHP_SIGCHILD
@@ -576,7 +574,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 	sendmail = popen(sendmail_cmd, "w");
 #endif
 	if (extra_cmd != NULL) {
-		efree (sendmail_cmd);
+		efree(sendmail_cmd);
 	}
 
 	if (sendmail) {
@@ -701,7 +699,7 @@ PHPAPI bool php_mail(const char *to, const char *subject, const char *message, c
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(mail)
 {
-	char *sendmail_path = INI_STR("sendmail_path");
+	const char *sendmail_path = zend_ini_string_literal("sendmail_path");
 
 #ifdef PHP_WIN32
 	if (!sendmail_path) {

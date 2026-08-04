@@ -17,4 +17,4 @@ $c = new C(true);
 var_dump($c);
 ?>
 --EXPECTF--
-Fatal error: __debuginfo() must return an array in %s on line %d
+Fatal error: __debugInfo() must return an array in %s on line %d

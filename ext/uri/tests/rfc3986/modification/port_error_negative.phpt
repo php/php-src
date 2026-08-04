@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - too small number
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri component modification - port - too small number
 --FILE--
 <?php
 

@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -301,10 +300,9 @@ ZEND_API void  zend_hash_bucket_renum_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
 
 typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
-ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, bool ordered);
+ZEND_API int   zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_func_t compar, bool ordered);
 ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 ZEND_API void  ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
-ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
 
 static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucket_compare_func_t compare_func, bool renumber) {
 	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber);
@@ -405,14 +403,14 @@ static zend_always_inline bool _zend_handle_numeric_str(const char *key, size_t 
 	const char *tmp = key;
 
 	if (EXPECTED(*tmp > '9')) {
-		return 0;
+		return false;
 	} else if (*tmp < '0') {
 		if (*tmp != '-') {
-			return 0;
+			return false;
 		}
 		tmp++;
 		if (*tmp > '9' || *tmp < '0') {
-			return 0;
+			return false;
 		}
 	}
 	return _zend_handle_numeric_str_ex(key, length, idx);
@@ -1606,30 +1604,30 @@ static zend_always_inline bool zend_array_is_list(const zend_array *array)
 	zend_string* str_idx;
 	/* Empty arrays are lists */
 	if (zend_hash_num_elements(array) == 0) {
-		return 1;
+		return true;
 	}
 
 	/* Packed arrays are lists */
 	if (HT_IS_PACKED(array)) {
 		if (HT_IS_WITHOUT_HOLES(array)) {
-			return 1;
+			return true;
 		}
 		/* Check if the list could theoretically be repacked */
 		ZEND_HASH_PACKED_FOREACH_KEY(array, num_idx) {
 			if (num_idx != expected_idx++) {
-				return 0;
+				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* Check if the list could theoretically be repacked */
 		ZEND_HASH_MAP_FOREACH_KEY(array, num_idx, str_idx) {
 			if (str_idx != NULL || num_idx != expected_idx++) {
-				return 0;
+				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	return 1;
+	return true;
 }
 
 

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Jakub Zelenka <bukka@php.net>                                |
   +----------------------------------------------------------------------+
@@ -50,20 +48,12 @@ typedef struct _php_json_parser_methods {
 	php_json_parser_func_object_end_t object_end;
 } php_json_parser_methods;
 
- typedef struct _php_json_parser_location {
-	size_t first_line;
-	size_t first_column;
-	size_t last_line;
-	size_t last_column;
-} php_json_parser_location;
-
 struct _php_json_parser {
 	php_json_scanner scanner;
 	zval *return_value;
 	int depth;
 	int max_depth;
 	php_json_parser_methods methods;
-	php_json_parser_location *location;
 };
 
 PHP_JSON_API void php_json_parser_init_ex(
@@ -85,9 +75,7 @@ PHP_JSON_API void php_json_parser_init(
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser);
 
-PHP_JSON_API size_t php_json_parser_error_line(const php_json_parser *parser);
-
-PHP_JSON_API size_t php_json_parser_error_column(const php_json_parser *parser);
+PHP_JSON_API void php_json_parser_error_details(const php_json_parser *parser, php_json_error_details *out);
 
 PHP_JSON_API int php_json_parse(php_json_parser *parser);
 

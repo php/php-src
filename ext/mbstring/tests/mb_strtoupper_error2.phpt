@@ -16,10 +16,10 @@ $encoding = 'unknown-encoding';
 try {
     var_dump( mb_strtoupper($sourcestring, $encoding) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 *** Testing mb_strtoupper() : error conditions ***
-mb_strtoupper(): Argument #2 ($encoding) must be a valid encoding, "unknown-encoding" given
+ValueError: mb_strtoupper(): Argument #2 ($encoding) must be a valid encoding, "unknown-encoding" given

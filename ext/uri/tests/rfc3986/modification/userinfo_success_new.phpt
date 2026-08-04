@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\Rfc3986\Uri component modification - userinfo - adding a new one
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

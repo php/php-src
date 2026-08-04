@@ -38,5 +38,5 @@ hash_file(): Argument #1 ($algo) must be a valid hashing algorithm
 
 -- Testing hash_file() function with a non-existent file --
 
-Warning: hash_file(%s): Failed to open stream: No such file or directory in %s on line %d
+Warning: hash_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

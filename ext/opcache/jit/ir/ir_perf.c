@@ -30,7 +30,7 @@
 
 #if defined(__linux__)
 #include <sys/syscall.h>
-#elif defined(__darwin__)
+#elif defined(__APPLE__)
 # include <pthread.h>
 #elif defined(__FreeBSD__)
 # include <sys/thr.h>
@@ -215,7 +215,7 @@ int ir_perf_jitdump_register(const char *name, const void *start, size_t size)
 		uint32_t thread_id = 0;
 #if defined(__linux__)
 		thread_id = syscall(SYS_gettid);
-#elif defined(__darwin__)
+#elif defined(__APPLE__)
 		uint64_t thread_id_u64;
 		pthread_threadid_np(NULL, &thread_id_u64);
 		thread_id = (uint32_t) thread_id_u64;

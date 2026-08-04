@@ -258,6 +258,23 @@ const STREAM_CRYPTO_PROTO_TLSv1_3 = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue STREAM_CRYPTO_STATUS_NONE
+ */
+const STREAM_CRYPTO_STATUS_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue STREAM_CRYPTO_STATUS_WANT_READ
+ */
+const STREAM_CRYPTO_STATUS_WANT_READ = UNKNOWN;
+/**
+ * @var int
+ * @cvalue STREAM_CRYPTO_STATUS_WANT_WRITE
+ */
+const STREAM_CRYPTO_STATUS_WANT_WRITE = UNKNOWN;
+
+
+/**
+ * @var int
  * @cvalue STREAM_SHUT_RD
  */
 const STREAM_SHUT_RD = UNKNOWN;

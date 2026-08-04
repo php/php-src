@@ -66,6 +66,8 @@
 #  endif
 
 #  include <assert.h>
+#  include <stddef.h>
+#  include <stdint.h>  // SIZE_MAX
 
 /*extern*/ const URI_CHAR * const URI_FUNC(SafeToPointTo) = _UT("X");
 /*extern*/ const URI_CHAR * const URI_FUNC(ConstPwd) = _UT(".");
@@ -104,42 +106,35 @@ int URI_FUNC(FreeUriPath)(URI_TYPE(Uri) * uri, UriMemoryManager * memory) {
 }
 
 /* Compares two text ranges for equal text content */
-int URI_FUNC(CompareRange)(const URI_TYPE(TextRange) * a, const URI_TYPE(TextRange) * b) {
-    int diff;
-
+bool URI_FUNC(RangeEquals)(const URI_TYPE(TextRange) * a, const URI_TYPE(TextRange) * b) {
     /* NOTE: Both NULL means equal! */
     if ((a == NULL) || (b == NULL)) {
-        return ((a == NULL) ? 0 : 1) - ((b == NULL) ? 0 : 1);
+        return a == b;
     }
 
     /* NOTE: Both NULL means equal! */
     if ((a->first == NULL) || (b->first == NULL)) {
-        return ((a->first == NULL) ? 0 : 1) - ((b->first == NULL) ? 0 : 1);
+        return a->first == b->first;
     }
 
-    diff = ((int)(a->afterLast - a->first) - (int)(b->afterLast - b->first));
-    if (diff > 0) {
-        return 1;
-    } else if (diff < 0) {
-        return -1;
+    const size_t lenA = a->afterLast - a->first;
+    const size_t lenB = b->afterLast - b->first;
+
+    if (lenA != lenB) {
+        return false;
     }
 
-    diff = URI_STRNCMP(a->first, b->first, (a->afterLast - a->first));
-
-    if (diff > 0) {
-        return 1;
-    } else if (diff < 0) {
-        return -1;
-    }
-
-    return diff;
+    return URI_STRNCMP(a->first, b->first, lenA) == 0;
 }
 
 UriBool URI_FUNC(CopyRange)(URI_TYPE(TextRange) * destRange,
                             const URI_TYPE(TextRange) * sourceRange,
                             UriMemoryManager * memory) {
-    const int lenInChars = (int)(sourceRange->afterLast - sourceRange->first);
-    const int lenInBytes = lenInChars * sizeof(URI_CHAR);
+    const size_t lenInChars = sourceRange->afterLast - sourceRange->first;
+    if (lenInChars > SIZE_MAX / sizeof(URI_CHAR)) {  // detect integer overflow
+        return URI_FALSE;
+    }
+    const size_t lenInBytes = lenInChars * sizeof(URI_CHAR);
     URI_CHAR * dup = memory->malloc(memory, lenInBytes);
     if (dup == NULL) {
         return URI_FALSE;
@@ -178,7 +173,7 @@ UriBool URI_FUNC(RemoveDotSegmentsEx)(URI_TYPE(Uri) * uri, UriBool relative,
     walker->reserved = NULL; /* Prev pointer */
     do {
         UriBool removeSegment = URI_FALSE;
-        int len = (int)(walker->text.afterLast - walker->text.first);
+        const size_t len = walker->text.afterLast - walker->text.first;
         switch (len) {
         case 1:
             if ((walker->text.first)[0] == _UT('.')) {
@@ -727,7 +722,7 @@ UriBool URI_FUNC(FixPathNoScheme)(URI_TYPE(Uri) * uri, UriMemoryManager * memory
 }
 
 /* When dropping a host from a URI without a scheme, an absolute path
- * and and empty first path segment, a consecutive reparse would rightfully
+ * and empty first path segment, a consecutive reparse would rightfully
  * mis-classify the first path segment as a host marker due to the "//".
  * To protect against this case, we prepend an artificial "." segment
  * to the path in here; the function is called after the host has

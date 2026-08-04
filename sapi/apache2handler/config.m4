@@ -6,6 +6,15 @@ PHP_ARG_WITH([apxs2],
   [no],
   [no])
 
+PHP_ARG_ENABLE([apache2-conf],
+  [whether to activate the PHP module in Apache httpd.conf via apxs],
+  [AS_HELP_STRING([--disable-apache2-conf],
+    [Do not activate the PHP module in the Apache httpd.conf during installation
+    via apxs. Useful when installing into a staging directory or when Apache
+    configuration is managed separately (e.g., via a2enmod).])],
+  [yes],
+  [no])
+
 if test "$PHP_APXS2" != "no"; then
   AS_VAR_IF([PHP_APXS2], [yes], [
     APXS=apxs
@@ -69,7 +78,7 @@ if test "$PHP_APXS2" != "no"; then
     [AC_MSG_ERROR([Please note that Apache version >= 2.4 is required])])
 
   APXS_LIBEXECDIR='$(INSTALL_ROOT)'$($APXS -q LIBEXECDIR)
-  if test -z $($APXS -q SYSCONFDIR); then
+  if test -z $($APXS -q SYSCONFDIR) || test "$PHP_APACHE2_CONF" = "no"; then
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
                        -i -n php"

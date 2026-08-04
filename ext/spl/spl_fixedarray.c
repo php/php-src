@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Antony Dovgal <tony@daylessday.org>                          |
   |         Etienne Kneuss <colder@php.net>                              |
@@ -55,10 +53,7 @@ typedef struct _spl_fixedarray_it {
 	zend_long            current;
 } spl_fixedarray_it;
 
-static spl_fixedarray_object *spl_fixed_array_from_obj(zend_object *obj)
-{
-	return (spl_fixedarray_object*)((char*)(obj) - XtOffsetOf(spl_fixedarray_object, std));
-}
+#define spl_fixed_array_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_fixedarray_object, std)
 
 #define Z_SPLFIXEDARRAY_P(zv)  spl_fixed_array_from_obj(Z_OBJ_P((zv)))
 
@@ -172,18 +167,18 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 		return;
 	}
 
-	/* first initialization */
-	if (array->size == 0) {
-		spl_fixedarray_init(array, size);
-		return;
-	}
-
 	if (UNEXPECTED(array->cached_resize >= 0)) {
 		/* We're already resizing, so just remember the desired size.
 		 * The resize will happen later. */
 		array->cached_resize = size;
 		return;
 	}
+	/* first initialization */
+	if (array->size == 0) {
+		spl_fixedarray_init(array, size);
+		return;
+	}
+
 	array->cached_resize = size;
 
 	/* clearing the array */
@@ -954,7 +949,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 
 	memcpy(&spl_handler_SplFixedArray, &std_object_handlers, sizeof(zend_object_handlers));
 
-	spl_handler_SplFixedArray.offset          = XtOffsetOf(spl_fixedarray_object, std);
+	spl_handler_SplFixedArray.offset          = offsetof(spl_fixedarray_object, std);
 	spl_handler_SplFixedArray.clone_obj       = spl_fixedarray_object_clone;
 	spl_handler_SplFixedArray.read_dimension  = spl_fixedarray_object_read_dimension;
 	spl_handler_SplFixedArray.write_dimension = spl_fixedarray_object_write_dimension;

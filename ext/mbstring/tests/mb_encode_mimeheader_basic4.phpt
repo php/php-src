@@ -134,7 +134,7 @@ try {
 	mb_internal_encoding('Quoted-Printable');
 	var_dump(mb_encode_mimeheader("=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=00=00=00=00=00=00=00=01=00=00=00=00=00=00=00850r=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=0D=00=00=00=0050r=08=0DCP850r850r0r", "Quoted-Printable", "B", "", 184));
 } catch (\ValueError $e) {
-	echo $e->getMessage() . \PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done";
@@ -182,5 +182,5 @@ string(135) "=?UTF-8?B?LDk4Njg5NDksOTg2ODk3OCw5ODY5MDE1LDk2ODkxMDAsOTg2OTEyMSw5O
 string(142) "xx =?UTF-8?B?QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB?=
  =?UTF-8?B?QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIA==?="
 string(690) "=?ISO-2022-JP?B?bmU/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/cxskQiFEGyhCPw==?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/MRskQiFEGyhCPxskQiFEGyhCPw==?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/MQ==?="
-mb_encode_mimeheader(): Argument #2 ($charset) "Quoted-Printable" cannot be used for MIME header encoding
+ValueError: mb_encode_mimeheader(): Argument #2 ($charset) "Quoted-Printable" cannot be used for MIME header encoding
 Done

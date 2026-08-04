@@ -12,20 +12,20 @@ $db = new SQLite3(':memory:');
 $db->createFunction('my_udf_md5', 'my_udf_md5');
 
 try {
-    $result = $db->query('SELECT my_udf_md5("test")');
+    $result = $db->query("SELECT my_udf_md5('test')");
     var_dump($result);
 }
 catch(\Exception $e) {
     echo "Exception: ".$e->getMessage();
 }
 try {
-    $result = $db->querySingle('SELECT my_udf_md5("test")');
+    $result = $db->querySingle("SELECT my_udf_md5('test')");
     var_dump($result);
 }
 catch(\Exception $e) {
     echo "Exception: ".$e->getMessage();
 }
-$statement = $db->prepare('SELECT my_udf_md5("test")');
+$statement = $db->prepare("SELECT my_udf_md5('test')");
 try {
     $result = $statement->execute();
     var_dump($result);

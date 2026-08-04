@@ -16,7 +16,8 @@ test");
           echo $a[$i] . "\n";
         }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_split() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 4
 this
 is

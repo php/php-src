@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - path - without leading slash
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

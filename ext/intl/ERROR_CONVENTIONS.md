@@ -6,14 +6,14 @@ conventions are enumerated in this document.
 * The last error is always stored globally.
 
 The global error code can be obtained in userland with `intl_get_error_code()`.
-This is a `U_*` error code defined by ICU, but it does not have necessarily to
-be returned obtained after a call to an ICU function. That is to say, the
+This is a `U_*` error code defined by ICU, but it is not necessarily obtained
+from a call to an ICU function. That is to say, the
 internal PHP wrapper functions can set these error codes when appropriate. For
 instance, in response to bad arguments (e.g. `zend_parse_parameters()` failure),
 the PHP wrapper function should set the global error code to
-`U_ILLEGAL_ARGUMENT_ERROR`).
+`U_ILLEGAL_ARGUMENT_ERROR`.
 
-The error code (an integer) can be converter to the corresponding enum name
+The error code (an integer) can be converted to the corresponding enum name
 string in userland with `intl_error_name()`.
 
 The associated message can be obtained with `intl_get_error_message()`. This is
@@ -40,7 +40,7 @@ no way to pass ownership of the string without it being copied.
   unless the error is due to bad arguments, in which case only the global error
   should be set.
 
-Objects store an intl_error structed in their private data. For instance:
+Objects store an intl_error in their private data. For instance:
 
 ```c
 typedef struct {
@@ -59,8 +59,8 @@ void intl_errors_set_code(intl_error* err, UErrorCode err_code);
 void intl_errors_set(intl_error* err, UErrorCode code, char* msg, int copyMsg);
 ```
 
-by passing a pointer to the object's `intl_error` structed as the first parameter.
-Node the extra `s` in the functions' names (`errors`, not `error`).
+by passing a pointer to the object's `intl_error` as the first parameter.
+Note the extra `s` in the functions' names (`errors`, not `error`).
 
 Static methods should only set the global error.
 
@@ -68,15 +68,15 @@ Static methods should only set the global error.
   `getErrorMessage()` methods.
 
 These methods are used to retrieve the error codes stored in the object's
-private `intl_error` structured and mirror the global `intl_get_error_code()`
+private `intl_error` structure and mirror the global `intl_get_error_code()`
 and `intl_get_error_message()`.
 
 * Intl methods and functions should return `FALSE` on error (even argument
   parsing errors), not `NULL`. Constructors and factory methods are the
   exception; these should return `NULL`, not `FALSE`.
 
-Note that constructors in Intl generally (always?) don't throws exceptions. They
-instead destroy the object to that the result of new `IntlClass()` can be
+Note that constructors in Intl generally (always?) do not throw exceptions. They
+instead destroy the object so that the result of new `IntlClass()` can be
 `NULL`. This may be surprising.
 
 * Intl functions and methods should reset the global error before doing anything
@@ -93,13 +93,21 @@ void intl_error_reset(NULL);             /* reset global error */
 void intl_errors_reset(intl_error* err); /* reset global and object error */
 ```
 
-In practice, `intl_errors_reset()` is not used because most classes have also
-plain functions mapped to the same internal functions as their instance methods.
-Fetching of the object is done with `zend_parse_method_parameters()` instead of
-directly using `getThis()`. Therefore, no reference to object is obtained until
-the arguments are fully parsed. Without a reference to the object, there's no
-way to reset the object's internal error code. Instead, resetting of the
-object's internal error code is done upon fetching the object from its zval.
+Procedural functions that reset the global error should normally use
+`PHP_INTL_FUNCTION_WITH_ERROR_RESET(name)`, which resets the global error before
+entering the implementation body.
+Class-specific method helper macros may use the same pattern when all methods
+covered by the macro reset the global error.
+
+`intl_errors_reset()` may be used directly when the object is available before
+argument parsing, for example in methods that only operate on `ZEND_THIS()`.
+For classes that have plain functions mapped to the same internal functions as
+their instance methods, fetching of the object is done with
+`zend_parse_method_parameters()` instead of directly using `getThis()`.
+Therefore, no reference to object is obtained until the arguments are fully
+parsed. Without a reference to the object, there's no way to reset the object's
+internal error code. Instead, resetting of the object's internal error code is
+done upon fetching the object from its zval.
 
 Example:
 

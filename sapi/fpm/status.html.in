@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <!--
 	(c) 2011 Jerome Loyet
-	The PHP License, version 3.01
+	Modified BSD License (BSD-3-Clause)
 	This is sample real-time status page for FPM. You can change it to better fit your needs.
 -->
 	<head>

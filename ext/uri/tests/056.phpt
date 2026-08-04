@@ -1,7 +1,5 @@
 --TEST--
 Test Lexbor memory management
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

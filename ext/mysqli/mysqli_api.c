@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Georg Richter <georg@php.net>                               |
   |          Andrey Hristov <andrey@php.net>                             |
@@ -532,6 +530,10 @@ PHP_FUNCTION(mysqli_execute_query)
 		MYSQLND_PARAM_BIND	*params;
 
 		if (!zend_array_is_list(input_params)) {
+			if (stmt->query) {
+				efree(stmt->query);
+				stmt->query = NULL;
+			}
 			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
 			efree(stmt);
@@ -542,6 +544,10 @@ PHP_FUNCTION(mysqli_execute_query)
 		hash_num_elements = zend_hash_num_elements(input_params);
 		param_count = mysql_stmt_param_count(stmt->stmt);
 		if (hash_num_elements != param_count) {
+			if (stmt->query) {
+				efree(stmt->query);
+				stmt->query = NULL;
+			}
 			mysqli_stmt_close(stmt->stmt, false);
 			stmt->stmt = NULL;
 			efree(stmt);
@@ -1198,7 +1204,7 @@ PHP_FUNCTION(mysqli_options)
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be MYSQLI_INIT_COMMAND, MYSQLI_SET_CHARSET_NAME, MYSQLI_SERVER_PUBLIC_KEY, or one of the MYSQLI_OPT_* constants");
 		RETURN_THROWS();
 	}
-	
+
 	if (expected_type != Z_TYPE_P(mysql_value)) {
 		switch (expected_type) {
 			case IS_STRING:
@@ -1363,6 +1369,29 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	RETURN_NEW_STR(newstr);
 }
 
+PHP_FUNCTION(mysqli_quote_string) {
+	MY_MYSQL	*mysql;
+	zval		*mysql_link = NULL;
+	char		*escapestr;
+	size_t		escapestr_len;
+	zend_string *newstr;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &mysql_link, mysqli_link_class_entry, &escapestr, &escapestr_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
+
+	newstr = zend_string_safe_alloc(2, escapestr_len, 2, 0);
+	char *out = ZSTR_VAL(newstr);
+	*out++ = '\'';
+	out += mysql_real_escape_string(mysql->mysql, out, escapestr, escapestr_len);
+	*out++ = '\'';
+	*out = '\0';
+	newstr = zend_string_truncate(newstr, out - ZSTR_VAL(newstr), 0);
+
+	RETURN_NEW_STR(newstr);
+}
+
 /* {{{ Undo actions from current transaction */
 PHP_FUNCTION(mysqli_rollback)
 {
@@ -1466,6 +1495,15 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 	}
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
+
+	if (!stmt->stmt->data || !stmt->stmt->data->result || !stmt->stmt->data->result->stored_data) {
+		if (hasThis()) {
+			zend_throw_error(NULL, "mysqli_stmt::data_seek(): No result set associated with the statement");
+		} else {
+			zend_throw_error(NULL, "mysqli_stmt_data_seek(): No result set associated with the statement");
+		}
+		RETURN_THROWS();
+	}
 
 	mysql_stmt_data_seek(stmt->stmt, offset);
 }

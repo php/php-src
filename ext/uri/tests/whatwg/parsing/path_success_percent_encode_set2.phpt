@@ -22,10 +22,10 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(28) "/foo%22/%3Cbar%3E/^%7Bbaz%7D"
+  string(30) "/foo%22/%3Cbar%3E/%5E%7Bbaz%7D"
   ["query"]=>
   NULL
   ["fragment"]=>
   NULL
 }
-string(47) "https://example.com/foo%22/%3Cbar%3E/^%7Bbaz%7D"
+string(49) "https://example.com/foo%22/%3Cbar%3E/%5E%7Bbaz%7D"

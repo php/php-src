@@ -144,7 +144,7 @@ Incomplete or ill-typed serialization data
 Passed variable is not an array or object
 Incomplete or ill-typed serialization data
 Cannot deserialize ArrayObject with iterator class 'NonExistent'; no such class exists
-Cannot deserialize ArrayObject with iterator class 'Existent'; this class does not implement the Iterator interface
+Cannot deserialize ArrayObject with iterator class 'Existent'; this class is not derived from ArrayIterator
 ArrayIterator:
 Incomplete or ill-typed serialization data
 Incomplete or ill-typed serialization data

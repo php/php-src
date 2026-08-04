@@ -15,6 +15,9 @@ var_dump(mb_ereg_replace('(%)', '\\\1', 'a%c'));
 var_dump(mb_ereg_replace('(%)', '\\\\1', 'a%c'));
 
 ?>
---EXPECT--
-string(4) "a\%c"
-string(4) "a\%c"
+--EXPECTF--
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+string(4) "a\%%c"
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+string(4) "a\%%c"

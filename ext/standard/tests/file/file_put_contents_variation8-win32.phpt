@@ -62,7 +62,7 @@ ValueError: Path must not be empty
 
 -- Filename: " " --
 
-Warning: file_put_contents( ): Failed to open stream: Permission denied in %s on line %d
+Warning: file_put_contents(): Failed to open stream: Permission denied in %s on line %d
 Failed to write data to: " "
 
 -- Filename: \0 --
@@ -73,10 +73,10 @@ TypeError: file_put_contents(): Argument #1 ($filename) must be of type string, 
 
 -- Filename: /no/such/file/dir --
 
-Warning: file_put_contents(/no/such/file/dir): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): Failed to open stream: %s in %s on line %d
 Failed to write data to: /no/such/file/dir
 
 -- Filename: php/php --
 
-Warning: file_put_contents(php/php): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): Failed to open stream: %s in %s on line %d
 Failed to write data to: php/php

@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@netcabo.pt>                       |
    +----------------------------------------------------------------------+
@@ -46,9 +46,7 @@ typedef struct {
 	zend_object		zo;
 } TimeZone_object;
 
-static inline TimeZone_object *php_intl_timezone_fetch_object(zend_object *obj) {
-	return (TimeZone_object *)((char*)(obj) - XtOffsetOf(TimeZone_object, zo));
-}
+#define php_intl_timezone_fetch_object(obj) ZEND_CONTAINER_OF(obj, TimeZone_object, zo)
 #define Z_INTL_TIMEZONE_P(zv) php_intl_timezone_fetch_object(Z_OBJ_P(zv))
 
 #define TIMEZONE_ERROR(to)						(to)->err
@@ -67,7 +65,7 @@ static inline TimeZone_object *php_intl_timezone_fetch_object(zend_object *obj) 
 	}
 
 zval *timezone_convert_to_datetimezone(const TimeZone *timeZone, intl_error *outside_error, zval *ret);
-TimeZone *timezone_process_timezone_argument(zend_object *timezone_object, zend_string *timezone_string, intl_error *error);
+TimeZone *timezone_process_timezone_argument(zend_object *timezone_object, zend_string *timezone_string, intl_error *error, uint32_t arg_num);
 
 void timezone_object_construct(const TimeZone *zone, zval *object, int owned);
 

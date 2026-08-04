@@ -45,11 +45,24 @@
 #include "UriConfig.h" /* for HAVE_REALLOCARRAY */
 
 #ifdef HAVE_REALLOCARRAY
-#  ifndef _GNU_SOURCE
-#    define _GNU_SOURCE 1
+// For glibc >=2.29 of 2019-02-01
+#  if !defined(_DEFAULT_SOURCE)
+#    define _DEFAULT_SOURCE 1
 #  endif
-#  ifdef __NetBSD__
+
+// For NetBSD (stdlib.h revision 1.122 of 2020-05-26)
+#  if defined(__NetBSD__) && !defined(_OPENBSD_SOURCE)
 #    define _OPENBSD_SOURCE 1
+#  endif
+
+// POSIX 2024 (XPG8) for e.g. Illumos/SmartOS
+#  if !defined(_XOPEN_SOURCE) || (_XOPEN_SOURCE - 0 < 800)
+#    undef _XOPEN_SOURCE
+#    define _XOPEN_SOURCE 800
+#  endif
+#  if !defined(_POSIX_C_SOURCE) || (_POSIX_C_SOURCE - 0 < 202405L)
+#    undef _POSIX_C_SOURCE
+#    define _POSIX_C_SOURCE 202405L
 #  endif
 #endif
 

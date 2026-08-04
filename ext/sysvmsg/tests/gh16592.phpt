@@ -8,11 +8,14 @@ class Test {
     function __serialize() {}
 }
 
-$q = msg_get_queue(1);
+// use a private queue, so we only remove our own.
+$q = msg_get_queue(0, 0600);
 try {
 	msg_send($q, 1, new Test, true);
 } catch (\TypeError $e) {
 	echo $e->getMessage();
+} finally {
+	msg_remove_queue($q);
 }
 ?>
 --EXPECT--

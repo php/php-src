@@ -1,7 +1,5 @@
 --TEST--
 Test resolve() method - success cases
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

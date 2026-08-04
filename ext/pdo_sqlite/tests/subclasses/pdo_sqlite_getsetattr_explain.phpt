@@ -13,7 +13,7 @@ if (!defined('Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN')) die('skip system sqlite does n
 $db = new Pdo\Sqlite('sqlite::memory:');
 
 $db->query('CREATE TABLE test_explain (a string);');
-$stmt = $db->prepare('INSERT INTO test_explain VALUES ("first insert"), ("second_insert")');
+$stmt = $db->prepare("INSERT INTO test_explain VALUES ('first insert'), ('second_insert')");
 $stmt->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN);
 var_dump($stmt->getAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT) == Pdo\Sqlite::EXPLAIN_MODE_EXPLAIN);
 $r = $stmt->execute();
@@ -24,7 +24,7 @@ var_dump($stmt->getAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT) == Pdo\Sqlite::
 $r = $stmts->execute();
 var_dump($stmts->fetchAll(PDO::FETCH_ASSOC));
 
-$stmt = $db->prepare('INSERT INTO test_explain VALUES ("first insert"), ("second_insert")');
+$stmt = $db->prepare("INSERT INTO test_explain VALUES ('first insert'), ('second_insert')");
 $stmt->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, Pdo\Sqlite::EXPLAIN_MODE_PREPARED);
 $stmt->execute();
 $stmts->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, Pdo\Sqlite::EXPLAIN_MODE_PREPARED);
@@ -88,7 +88,7 @@ array(%d) {
     ["opcode"]=>
     string(13) "InitCoroutine"
     ["p1"]=>
-    int(3)
+    int(%d)
     ["p2"]=>
     int(%d)
     ["p3"]=>
@@ -109,7 +109,7 @@ array(%d) {
     ["p1"]=>
     int(0)
     ["p2"]=>
-    int(2)
+    int(%d)
     ["p3"]=>
     int(0)
     ["p4"]=>
@@ -126,7 +126,7 @@ array(%d) {
     ["opcode"]=>
     string(5) "Yield"
     ["p1"]=>
-    int(3)
+    int(%d)
     ["p2"]=>
     int(0)
     ["p3"]=>
@@ -147,7 +147,7 @@ array(%d) {
     ["p1"]=>
     int(0)
     ["p2"]=>
-    int(2)
+    int(%d)
     ["p3"]=>
     int(0)
     ["p4"]=>
@@ -164,7 +164,7 @@ array(%d) {
     ["opcode"]=>
     string(5) "Yield"
     ["p1"]=>
-    int(3)
+    int(%d)
     ["p2"]=>
     int(0)
     ["p3"]=>
@@ -183,7 +183,7 @@ array(%d) {
     ["opcode"]=>
     string(12) "EndCoroutine"
     ["p1"]=>
-    int(3)
+    int(%d)
     ["p2"]=>
     int(0)
     ["p3"]=>
@@ -221,7 +221,7 @@ array(%d) {
     ["opcode"]=>
     string(5) "Yield"
     ["p1"]=>
-    int(3)
+    int(%d)
     ["p2"]=>
     int(%d)
     ["p3"]=>
@@ -242,7 +242,7 @@ array(%d) {
     ["p1"]=>
     int(0)
     ["p2"]=>
-    int(1)
+    int(%d)
     ["p3"]=>
     int(0)
     ["p4"]=>
@@ -259,11 +259,11 @@ array(%d) {
     ["opcode"]=>
     string(10) "MakeRecord"
     ["p1"]=>
-    int(2)
+    int(%d)
     ["p2"]=>
     int(1)
     ["p3"]=>
-    int(4)
+    int(%d)
     ["p4"]=>
     string(1) "C"
     ["p5"]=>
@@ -280,9 +280,9 @@ array(%d) {
     ["p1"]=>
     int(0)
     ["p2"]=>
-    int(4)
+    int(%d)
     ["p3"]=>
-    int(1)
+    int(%d)
     ["p4"]=>
     string(12) "test_explain"
     ["p5"]=>

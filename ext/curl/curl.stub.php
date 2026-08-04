@@ -345,6 +345,11 @@ const CURLOPT_RESUME_FROM = UNKNOWN;
 const CURLOPT_RETURNTRANSFER = UNKNOWN;
 /**
  * @var int
+ * @cvalue CURLOPT_SEEKFUNCTION
+ */
+const CURLOPT_SEEKFUNCTION = UNKNOWN;
+/**
+ * @var int
  * @cvalue CURLOPT_SHARE
  */
 const CURLOPT_SHARE = UNKNOWN;
@@ -1790,6 +1795,21 @@ const CURLPAUSE_SEND_CONT = UNKNOWN;
 const CURL_READFUNC_PAUSE = UNKNOWN;
 /**
  * @var int
+ * @cvalue CURL_SEEKFUNC_OK
+ */
+const CURL_SEEKFUNC_OK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_SEEKFUNC_FAIL
+ */
+const CURL_SEEKFUNC_FAIL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_SEEKFUNC_CANTSEEK
+ */
+const CURL_SEEKFUNC_CANTSEEK = UNKNOWN;
+/**
+ * @var int
  * @cvalue CURL_WRITEFUNC_PAUSE
  */
 const CURL_WRITEFUNC_PAUSE = UNKNOWN;
@@ -3116,6 +3136,13 @@ const CURLINFO_POSTTRANSFER_TIME_T = UNKNOWN;
  * @cvalue CURLINFO_CONN_ID
  */
 const CURLINFO_CONN_ID = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x081400 /* Available since 8.20.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_SIZE_DELIVERED
+ */
+const CURLINFO_SIZE_DELIVERED = UNKNOWN;
 #endif
 /**
  * @var int

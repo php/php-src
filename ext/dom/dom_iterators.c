@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -56,7 +54,7 @@ static dom_nnodemap_object *php_dom_iterator_get_nnmap(const php_dom_iterator *i
 	return nnmap->ptr;
 }
 
-xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID) /* {{{ */
+xmlNodePtr create_notation(xmlDtdPtr parent_dtd, const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID) /* {{{ */
 {
 	xmlEntityPtr ret = xmlMalloc(sizeof(xmlEntity));
 	memset(ret, 0, sizeof(xmlEntity));
@@ -64,18 +62,39 @@ xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const
 	ret->name = xmlStrdup(name);
 	ret->ExternalID = xmlStrdup(ExternalID);
 	ret->SystemID = xmlStrdup(SystemID);
+	if (parent_dtd != NULL) {
+		ret->parent = parent_dtd;
+		ret->doc = parent_dtd->doc;
+	}
 	return (xmlNodePtr) ret;
 }
 /* }}} */
 
-xmlNodePtr php_dom_libxml_hash_iter(xmlHashTable *ht, int index)
+void dom_free_notation(xmlEntityPtr entity) /* {{{ */
+{
+	xmlFree((xmlChar *) entity->name);
+	xmlFree((xmlChar *) entity->ExternalID);
+	xmlFree((xmlChar *) entity->SystemID);
+	xmlFree(entity);
+}
+/* }}} */
+
+xmlNodePtr php_dom_libxml_hash_iter(xmlHashTable *ht, zend_long index)
 {
 	int htsize;
+
+	if (index < 0) {
+		return NULL;
+	}
+	if (UNEXPECTED(ZEND_LONG_INT_OVFL(index))) {
+		zend_value_error("must be between 0 and %d", INT_MAX);
+		return NULL;
+	}
 
 	if ((htsize = xmlHashSize(ht)) > 0 && index < htsize) {
 		nodeIterator iter;
 		iter.cur = 0;
-		iter.index = index;
+		iter.index = (int) index;
 		iter.node = NULL;
 		xmlHashScan(ht, itemHashScanner, &iter);
 		return iter.node;

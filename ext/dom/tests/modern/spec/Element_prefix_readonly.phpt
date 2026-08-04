@@ -14,5 +14,5 @@ try {
 echo $dom->saveXml();
 ?>
 --EXPECT--
-Cannot modify readonly property Dom\HTMLElement::$prefix
+Cannot modify private(set) property Dom\Element::$prefix from global scope
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

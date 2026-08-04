@@ -1,7 +1,5 @@
 --TEST--
 Test IDNA support
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

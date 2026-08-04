@@ -7,7 +7,7 @@ sleep(-10);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: sleep(): Argument #1 ($seconds) must be greater than or equal to 0 in %s:%d
+Fatal error: Uncaught ValueError: sleep(): Argument #1 ($seconds) must be between 0 and %d in %s:%d
 Stack trace:
 #0 %s(%d): sleep(-10)
 #1 {main}

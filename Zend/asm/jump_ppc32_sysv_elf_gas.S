@@ -53,6 +53,7 @@
 .file "jump_ppc32_sysv_elf_gas.S"
 .text
 .globl jump_fcontext
+.hidden jump_fcontext
 .align 2
 .type jump_fcontext,@function
 jump_fcontext:

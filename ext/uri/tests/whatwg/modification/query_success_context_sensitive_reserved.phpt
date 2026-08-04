@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - query - context-sensitive reserved character
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

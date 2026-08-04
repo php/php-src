@@ -66,5 +66,6 @@ class WidenedArgumentType extends NarrowedReturnType {
 
 echo 'No problems!';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning null from ValidMagicMethods::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead in %s on line %d
 No problems!

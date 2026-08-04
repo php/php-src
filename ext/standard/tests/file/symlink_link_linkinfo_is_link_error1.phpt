@@ -27,8 +27,11 @@ var_dump( symlink($filename, false) );  // false as linkname
 echo "\n*** Testing linkinfo() for error conditions ***\n";
 
 //invalid arguments
-var_dump( linkinfo('') );  // empty string as linkname
-var_dump( linkinfo(false) );  // boolean false as linkname
+try {
+    var_dump(linkinfo(''));  // empty string as linkname
+} catch (ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
@@ -53,10 +56,5 @@ Warning: symlink(): %s in %s on line %d
 bool(false)
 
 *** Testing linkinfo() for error conditions ***
-
-Warning: linkinfo(): %s in %s on line %d
-int(-1)
-
-Warning: linkinfo(): %s in %s on line %d
-int(-1)
+linkinfo(): Argument #1 ($path) must not be empty
 Done

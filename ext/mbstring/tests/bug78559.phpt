@@ -12,5 +12,6 @@ $str = "5b5b5b5b5b5b5b492a5bce946b5c4b5d5c6b5c4b5d5c4b5d1cceb04b5d1cceb07a73717e
 $str = hex2bin($str);
 var_dump(mb_eregi($str, $str));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_eregi() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(false)

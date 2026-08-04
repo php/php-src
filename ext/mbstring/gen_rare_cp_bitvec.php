@@ -6,7 +6,7 @@ if ($argc < 2) {
     return;
 }
 
-$bitvec = array_fill(0, (0xFFFF / 32) + 1, 0xFFFFFFFF);
+$bitvec = array_fill(0, intdiv(0xFFFF, 32) + 1, 0xFFFFFFFF);
 
 $input = file_get_contents($argv[1]);
 foreach (explode("\n", $input) as $line) {

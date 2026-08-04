@@ -1,26 +1,16 @@
 --TEST--
-Test ArrayObject::uasort() function : wrong arg count
+ArrayObject::uasort() function: non callable error
 --FILE--
 <?php
-/* Sort the entries by values user defined function.
- * Source code: ext/spl/spl_array.c
- * Alias to functions:
- */
 
 $ao = new ArrayObject();
 
 try {
-    $ao->uasort();
-} catch (ArgumentCountError $e) {
-    echo $e->getMessage() . "\n";
+    $ao->uasort('not_a_valid_function');
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
-try {
-    $ao->uasort(1,2);
-} catch (ArgumentCountError $e) {
-    echo $e->getMessage() . "\n";
-}
 ?>
 --EXPECT--
-ArrayObject::uasort() expects exactly 1 argument, 0 given
-ArrayObject::uasort() expects exactly 1 argument, 2 given
+TypeError: uasort(): Argument #2 ($callback) must be a valid callback, function "not_a_valid_function" not found or invalid function name

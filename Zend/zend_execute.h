@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -61,7 +60,7 @@ ZEND_API zend_result zend_eval_stringl_ex(const char *str, size_t str_len, zval 
 /* export zend_pass_function to allow comparisons against it */
 extern ZEND_API const zend_internal_function zend_pass_function;
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(const zend_execute_data *execute_data);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(const zend_execute_data *execute_data);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_nodiscard_function(const zend_function *fbc);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name);
@@ -81,39 +80,41 @@ typedef enum {
 ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(const zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context);
 ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(const zend_property_info *prop_info, zval *orig_val, bool strict);
 
-ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info *prop, const zval *zv);
-ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv);
+ZEND_API zend_never_inline ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info *prop, const zval *zv);
+ZEND_API zend_never_inline ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv);
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht, zend_long lval);
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht, zend_string *offset);
-ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void);
+ZEND_API zend_never_inline ZEND_COLD void zend_wrong_string_offset_error(void);
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(const zend_property_info *info);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error_ex(const char *class_name, const char *prop_name);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(const zend_property_info *info);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(const zend_property_info *info);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error_ex(const char *class_name, const char *prop_name);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(const zend_property_info *info);
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(uint8_t type);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(uint8_t type);
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_property_error(const zend_property_info *info);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_property_error(const zend_property_info *info);
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void);
 
 ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(const zend_property_info *prop_info, const char *operation);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modification_error(const zend_property_info *prop_info, const char *operation);
 
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg);
-ZEND_API ZEND_COLD void zend_verify_arg_error(
+ZEND_API zend_never_inline ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, const zval *value);
-ZEND_API ZEND_COLD void zend_verify_return_error(
+ZEND_API zend_never_inline ZEND_COLD void zend_verify_return_error(
 		const zend_function *zf, const zval *value);
-ZEND_API ZEND_COLD void zend_verify_never_error(
+ZEND_API zend_never_inline ZEND_COLD void zend_verify_never_error(
 		const zend_function *zf);
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API bool zend_check_user_type_slow(
-		const zend_type *type, zval *arg, const zend_reference *ref, bool is_return_type);
+		const zend_type *type, zval *arg, const zend_reference *ref, bool current_frame);
+ZEND_API bool zend_check_type_ex(
+		const zend_type *type, zval *arg, bool current_frame, bool is_internal);
 
 #if ZEND_DEBUG
 ZEND_API bool zend_internal_call_should_throw(const zend_function *fbc, zend_execute_data *call);
-ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(const zend_function *fbc);
+ZEND_API zend_never_inline ZEND_COLD void zend_internal_call_arginfo_violation(const zend_function *fbc);
 ZEND_API bool zend_verify_internal_return_type(const zend_function *zf, zval *ret);
 #endif
 
@@ -135,7 +136,7 @@ ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_l
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, uint8_t value_type, bool strict);
 ZEND_API zval* zend_assign_to_typed_ref_ex(zval *variable_ptr, zval *value, uint8_t value_type, bool strict, zend_refcounted **garbage_ptr);
 
-static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, uint8_t value_type)
+static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, const zval *value, uint8_t value_type)
 {
 	zend_refcounted *ref = NULL;
 
@@ -211,7 +212,7 @@ static zend_always_inline zval* zend_assign_to_variable_ex(zval *variable_ptr, z
 	return variable_ptr;
 }
 
-static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable_ptr, zval *value) {
+static zend_always_inline void zend_safe_assign_to_variable_noref(zval *variable_ptr, const zval *value) {
 	if (Z_REFCOUNTED_P(variable_ptr)) {
 		ZEND_ASSERT(Z_TYPE_P(variable_ptr) != IS_REFERENCE);
 		zend_refcounted *ref = Z_COUNTED_P(variable_ptr);
@@ -248,7 +249,7 @@ static zend_always_inline void zend_cast_zval_to_object(zval *result, zval *expr
 }
 
 static zend_always_inline void zend_cast_zval_to_array(zval *result, zval *expr, uint8_t op1_type) {
-	extern zend_class_entry *zend_ce_closure;
+	extern ZEND_API zend_class_entry *zend_ce_closure;
 	if (op1_type == IS_CONST || Z_TYPE_P(expr) != IS_OBJECT || Z_OBJCE_P(expr) == zend_ce_closure) {
 		if (Z_TYPE_P(expr) != IS_NULL) {
 			if (UNEXPECTED(Z_TYPE_P(expr) == IS_DOUBLE && zend_isnan(Z_DVAL_P(expr)))) {
@@ -472,7 +473,7 @@ ZEND_API zend_string *zend_get_executed_filename_ex(void);
 ZEND_API uint32_t zend_get_executed_lineno(void);
 ZEND_API zend_class_entry *zend_get_executed_scope(void);
 ZEND_API bool zend_is_executing(void);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num);
 
 ZEND_API void zend_set_timeout(zend_long seconds, bool reset_signals);
 ZEND_API void zend_unset_timeout(void);
@@ -485,7 +486,7 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name);
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len);
 ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_array);
 
-ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type);
+ZEND_API void zend_fetch_dimension_const(zval *result, const zval *container, zval *dim, int type);
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 
@@ -512,7 +513,7 @@ ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield);
 ZEND_API zval* ZEND_FASTCALL zend_fetch_static_property(zend_execute_data *ex, int fetch_type);
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method);
-ZEND_API void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc);
+ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc);
 
 ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data);
 
@@ -586,11 +587,8 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 
 
 ZEND_API bool zend_verify_class_constant_type(const zend_class_constant *c, const zend_string *name, zval *constant);
-ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *c, const zend_string *name, const zval *constant);
 
 ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);
-ZEND_COLD void zend_verify_property_type_error(const zend_property_info *info, const zval *property);
-ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_property_info *info, const zval *property);
 
 #define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \
 	zend_ref_add_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
@@ -619,7 +617,7 @@ ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_prope
 		} \
 	} while (0)
 
-ZEND_COLD void zend_match_unhandled_error(const zval *value);
+zend_never_inline ZEND_COLD void zend_match_unhandled_error(const zval *value);
 
 /* Call this to handle the timeout or the interrupt function. It will set
  * EG(vm_interrupt) to false.

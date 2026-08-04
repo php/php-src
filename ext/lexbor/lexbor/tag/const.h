@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -14,8 +14,8 @@
 #ifndef LXB_TAG_CONST_H
 #define LXB_TAG_CONST_H
 
-#define LXB_TAG_CONST_VERSION "A161EC911182C3254E7A972D5C51DF86"
-#define LXB_TAG_CONST_VERSION_A161EC911182C3254E7A972D5C51DF86
+#define LXB_TAG_CONST_VERSION "5AB3094FB370521074947DC082575715"
+#define LXB_TAG_CONST_VERSION_5AB3094FB370521074947DC082575715
 
 
 typedef uintptr_t lxb_tag_id_t;
@@ -183,41 +183,43 @@ typedef enum {
     LXB_TAG_S                   = 0x009f,
     LXB_TAG_SAMP                = 0x00a0,
     LXB_TAG_SCRIPT              = 0x00a1,
-    LXB_TAG_SECTION             = 0x00a2,
-    LXB_TAG_SELECT              = 0x00a3,
-    LXB_TAG_SLOT                = 0x00a4,
-    LXB_TAG_SMALL               = 0x00a5,
-    LXB_TAG_SOURCE              = 0x00a6,
-    LXB_TAG_SPACER              = 0x00a7,
-    LXB_TAG_SPAN                = 0x00a8,
-    LXB_TAG_STRIKE              = 0x00a9,
-    LXB_TAG_STRONG              = 0x00aa,
-    LXB_TAG_STYLE               = 0x00ab,
-    LXB_TAG_SUB                 = 0x00ac,
-    LXB_TAG_SUMMARY             = 0x00ad,
-    LXB_TAG_SUP                 = 0x00ae,
-    LXB_TAG_SVG                 = 0x00af,
-    LXB_TAG_TABLE               = 0x00b0,
-    LXB_TAG_TBODY               = 0x00b1,
-    LXB_TAG_TD                  = 0x00b2,
-    LXB_TAG_TEMPLATE            = 0x00b3,
-    LXB_TAG_TEXTAREA            = 0x00b4,
-    LXB_TAG_TEXTPATH            = 0x00b5,
-    LXB_TAG_TFOOT               = 0x00b6,
-    LXB_TAG_TH                  = 0x00b7,
-    LXB_TAG_THEAD               = 0x00b8,
-    LXB_TAG_TIME                = 0x00b9,
-    LXB_TAG_TITLE               = 0x00ba,
-    LXB_TAG_TR                  = 0x00bb,
-    LXB_TAG_TRACK               = 0x00bc,
-    LXB_TAG_TT                  = 0x00bd,
-    LXB_TAG_U                   = 0x00be,
-    LXB_TAG_UL                  = 0x00bf,
-    LXB_TAG_VAR                 = 0x00c0,
-    LXB_TAG_VIDEO               = 0x00c1,
-    LXB_TAG_WBR                 = 0x00c2,
-    LXB_TAG_XMP                 = 0x00c3,
-    LXB_TAG__LAST_ENTRY         = 0x00c4
+    LXB_TAG_SEARCH              = 0x00a2,
+    LXB_TAG_SECTION             = 0x00a3,
+    LXB_TAG_SELECT              = 0x00a4,
+    LXB_TAG_SELECTEDCONTENT     = 0x00a5,
+    LXB_TAG_SLOT                = 0x00a6,
+    LXB_TAG_SMALL               = 0x00a7,
+    LXB_TAG_SOURCE              = 0x00a8,
+    LXB_TAG_SPACER              = 0x00a9,
+    LXB_TAG_SPAN                = 0x00aa,
+    LXB_TAG_STRIKE              = 0x00ab,
+    LXB_TAG_STRONG              = 0x00ac,
+    LXB_TAG_STYLE               = 0x00ad,
+    LXB_TAG_SUB                 = 0x00ae,
+    LXB_TAG_SUMMARY             = 0x00af,
+    LXB_TAG_SUP                 = 0x00b0,
+    LXB_TAG_SVG                 = 0x00b1,
+    LXB_TAG_TABLE               = 0x00b2,
+    LXB_TAG_TBODY               = 0x00b3,
+    LXB_TAG_TD                  = 0x00b4,
+    LXB_TAG_TEMPLATE            = 0x00b5,
+    LXB_TAG_TEXTAREA            = 0x00b6,
+    LXB_TAG_TEXTPATH            = 0x00b7,
+    LXB_TAG_TFOOT               = 0x00b8,
+    LXB_TAG_TH                  = 0x00b9,
+    LXB_TAG_THEAD               = 0x00ba,
+    LXB_TAG_TIME                = 0x00bb,
+    LXB_TAG_TITLE               = 0x00bc,
+    LXB_TAG_TR                  = 0x00bd,
+    LXB_TAG_TRACK               = 0x00be,
+    LXB_TAG_TT                  = 0x00bf,
+    LXB_TAG_U                   = 0x00c0,
+    LXB_TAG_UL                  = 0x00c1,
+    LXB_TAG_VAR                 = 0x00c2,
+    LXB_TAG_VIDEO               = 0x00c3,
+    LXB_TAG_WBR                 = 0x00c4,
+    LXB_TAG_XMP                 = 0x00c5,
+    LXB_TAG__LAST_ENTRY         = 0x00c6
 }
 lxb_tag_id_enum_t;
 

@@ -33,7 +33,7 @@ try {
 
 var_dump(ini_get("session.cookie_secure"));
 var_dump(ini_get("session.cookie_samesite"));
-var_dump(session_set_cookie_params(["secure" => true, "samesite" => "please"]));
+var_dump(session_set_cookie_params(["secure" => true, "samesite" => "Strict"]));
 var_dump(ini_get("session.cookie_secure"));
 var_dump(ini_get("session.cookie_samesite"));
 
@@ -66,7 +66,7 @@ string(1) "0"
 string(0) ""
 bool(true)
 string(1) "1"
-string(6) "please"
+string(6) "Strict"
 string(1) "0"
 bool(true)
 string(2) "42"

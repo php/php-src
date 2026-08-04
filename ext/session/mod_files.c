@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
@@ -103,7 +101,6 @@ const ps_module ps_mod_files = {
 	PS_MOD_UPDATE_TIMESTAMP(files)
 };
 
-
 static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const zend_string *key)
 {
 	const char *p;
@@ -153,7 +150,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
-    struct stat sbuf = {0};
+	struct stat sbuf = {0};
 #endif
 	int ret;
 
@@ -183,7 +180,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 #else
 		/* Check to make sure that the opened file is not outside of allowable dirs.
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
-		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
+		if (PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
 			return;
 		}
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
@@ -230,7 +227,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
-       data->last_key and reopen when it is needed. */
+	   data->last_key and reopen when it is needed. */
 	ps_files_open(data, key);
 	if (data->fd < 0) {
 		return FAILURE;
@@ -258,7 +255,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 			buf = wrote > -1 ? buf + wrote : 0;
 			to_write = wrote > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(val) - n) : 0;
 
-		} while(wrote > 0);
+		} while (wrote > 0);
 	}
 #else
 	n = write(data->fd, ZSTR_VAL(val), ZSTR_LEN(val));
@@ -277,7 +274,10 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 	return SUCCESS;
 }
 
-static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetime)
+/* Recursively remove expired session files. When dirdepth > 0 the
+ * cleanup descends into subdirectories up to that many levels before
+ * inspecting individual session files. */
+static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetime, size_t remaining_depth)
 {
 	DIR *dir;
 	struct dirent *entry;
@@ -292,8 +292,6 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 		return -1;
 	}
 
-	time(&now);
-
 	if (ZSTR_LEN(dirname) >= MAXPATHLEN) {
 		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", ZSTR_VAL(dirname));
 		closedir(dir);
@@ -305,31 +303,52 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 	buf[ZSTR_LEN(dirname)] = PHP_DIR_SEPARATOR;
 
 	while ((entry = readdir(dir))) {
-		/* does the file start with our prefix? */
-		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1)) {
-			size_t entry_len = strlen(entry->d_name);
+		/* skip . and .. */
+		if (entry->d_name[0] == '.' &&
+				(entry->d_name[1] == '\0' ||
+				 (entry->d_name[1] == '.' && entry->d_name[2] == '\0'))) {
+			continue;
+		}
+		size_t entry_len = strlen(entry->d_name);
+		/* does it fit into our buffer? */
+		if (ZSTR_LEN(dirname) + 1 + entry_len >= MAXPATHLEN) {
+			continue;
+		}
+		/* create the full path and NUL-terminate it */
+		memcpy(buf + ZSTR_LEN(dirname) + 1, entry->d_name, entry_len);
+		buf[ZSTR_LEN(dirname) + 1 + entry_len] = '\0';
 
-			/* does it fit into our buffer? */
-			if (entry_len + ZSTR_LEN(dirname) + 2 < MAXPATHLEN) {
-				/* create the full path.. */
-				memcpy(buf + ZSTR_LEN(dirname) + 1, entry->d_name, entry_len);
-
-				/* NUL terminate it and */
-				buf[ZSTR_LEN(dirname) + entry_len + 1] = '\0';
-
-				/* check whether its last access was more than maxlifetime ago */
-				if (VCWD_STAT(buf, &sbuf) == 0 &&
-						(now - sbuf.st_mtime) > maxlifetime) {
-					VCWD_UNLINK(buf);
-					nrdels++;
+		if (remaining_depth == 0) {
+			/* target depth: delete expired session files */
+			if (strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) != 0) {
+				continue;
+			}
+			if (VCWD_STAT(buf, &sbuf) != 0) {
+				continue;
+			}
+			time(&now);
+			if ((now - sbuf.st_mtime) > maxlifetime) {
+				VCWD_UNLINK(buf);
+				nrdels++;
+			}
+		} else {
+			/* intermediate depth: recurse into subdirectories */
+			if (VCWD_STAT(buf, &sbuf) != 0) {
+				continue;
+			}
+			if (S_ISDIR(sbuf.st_mode)) {
+				zend_string *subdir = zend_string_init(buf, ZSTR_LEN(dirname) + 1 + entry_len, 0);
+				int n = ps_files_cleanup_dir(subdir, maxlifetime, remaining_depth - 1);
+				zend_string_release(subdir);
+				if (n >= 0) {
+					nrdels += n;
 				}
 			}
 		}
 	}
 
 	closedir(dir);
-
-	return (nrdels);
+	return nrdels;
 }
 
 static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
@@ -346,9 +365,7 @@ static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
 	return SUCCESS;
 }
 
-
 #define PS_FILES_DATA ps_files *data = PS_GET_MOD_DATA()
-
 
 /*
  * Open save handler. Setup resources that are needed by the handler.
@@ -427,7 +444,6 @@ PS_OPEN_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Clean up opened resources.
  * PARAMETERS: PS_CLOSE_ARGS in php_session.h
@@ -455,7 +471,6 @@ PS_CLOSE_FUNC(files)
 
 	return SUCCESS;
 }
-
 
 /*
  * Read session data from opened resource.
@@ -508,7 +523,7 @@ PS_READ_FUNC(files)
 			buf = read_in > -1 ? buf + read_in : 0;
 			to_read = read_in > -1 ? SESS_FILE_BUF_SIZE(ZSTR_LEN(*val) - n) : 0;
 
-		} while(read_in > 0);
+		} while (read_in > 0);
 
 	}
 #else
@@ -531,7 +546,6 @@ PS_READ_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Write session data.
  * PARAMETERS: PS_WRITE_ARGS in php_session.h
@@ -546,7 +560,6 @@ PS_WRITE_FUNC(files)
 
 	return ps_files_write(data, key, val);
 }
-
 
 /*
  * Update session data modification/access time stamp.
@@ -582,7 +595,6 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Delete session data.
  * PARAMETERS: PS_DESTROY_ARGS in php_session.h
@@ -617,7 +629,6 @@ PS_DESTROY_FUNC(files)
 	return SUCCESS;
 }
 
-
 /*
  * Cleanup expired session data.
  * PARAMETERS: PS_GC_ARGS in php_session.h
@@ -633,19 +644,10 @@ PS_GC_FUNC(files)
 {
 	PS_FILES_DATA;
 
-	/* We don't perform any cleanup, if dirdepth is larger than 0.
-	   we return SUCCESS, since all cleanup should be handled by
-	   an external entity (i.e. find -ctime x | xargs rm) */
-
-	if (data->dirdepth == 0) {
-		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime);
-	} else {
-		*nrdels = -1; // Cannot process multiple depth save dir
-	}
+	*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime, data->dirdepth);
 
 	return *nrdels;
 }
-
 
 /*
  * Create session ID.
@@ -684,11 +686,10 @@ PS_CREATE_SID_FUNC(files)
 				return NULL;
 			}
 		}
-	} while(!sid);
+	} while (!sid);
 
 	return sid;
 }
-
 
 /*
  * Check session ID existence for use_strict_mode support.

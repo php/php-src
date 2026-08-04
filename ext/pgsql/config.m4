@@ -38,7 +38,7 @@ if test "$PHP_PGSQL" != "no"; then
   old_CFLAGS=$CFLAGS
   CFLAGS="$CFLAGS $PGSQL_CFLAGS"
 
-  AC_CHECK_DECLS([PGRES_TUPLES_CHUNK],
+  AC_CHECK_DECL([PGRES_TUPLES_CHUNK],
     PHP_CHECK_LIBRARY([pq], [PQsetChunkedRowsMode],
       [AC_DEFINE([HAVE_PG_SET_CHUNKED_ROWS_SIZE], [1],
         [Define to 1 if libpq has the 'PQsetChunkedRowsMode' function (PostgreSQL

@@ -1,7 +1,5 @@
 --TEST--
 Test extension of Uri\Rfc3986\Uri
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

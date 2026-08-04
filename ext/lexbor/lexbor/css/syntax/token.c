@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2025 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -12,15 +12,12 @@
 #include "lexbor/css/parser.h"
 #include "lexbor/css/syntax/token.h"
 #include "lexbor/css/syntax/state.h"
-#include "lexbor/css/syntax/state_res.h"
-
-#define LXB_CSS_SYNTAX_TOKEN_RES_NAME_SHS_MAP
 #include "lexbor/css/syntax/token_res.h"
 
-#define LEXBOR_STR_RES_MAP_HEX
-#define LEXBOR_STR_RES_ANSI_REPLACEMENT_CHARACTER
-#include "lexbor/core/str_res.h"
-
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
+    LXB_EXTERN const lxb_char_t lexbor_str_res_ansi_replacement_character[4];
+    LXB_EXTERN const lxb_char_t lexbor_str_res_map_hex[256];
+#endif
 
 lxb_css_syntax_token_t *
 lxb_css_syntax_tokenizer_token(lxb_css_syntax_tokenizer_t *tkz);

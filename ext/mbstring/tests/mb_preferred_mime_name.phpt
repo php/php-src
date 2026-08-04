@@ -38,7 +38,7 @@ echo "== INVALID PARAMETER ==\n";
 try {
     var_dump(mb_preferred_mime_name('BAD_NAME'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -53,4 +53,4 @@ ISO-8859-1
 UCS-2
 UCS-4
 == INVALID PARAMETER ==
-mb_preferred_mime_name(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
+ValueError: mb_preferred_mime_name(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given

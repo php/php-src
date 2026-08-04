@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sterling Hughes <sterling@php.net>                           |
    |         Wez Furlong <wez@thebrainroom.com>                           |
@@ -76,6 +74,7 @@ typedef struct {
 	php_curl_write    *write_header;
 	php_curl_read     *read;
 	zval               std_err;
+	zend_fcall_info_cache seek;
 	zend_fcall_info_cache progress;
 	zend_fcall_info_cache xferinfo;
 	zend_fcall_info_cache fnmatch;
@@ -153,15 +152,11 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source);
 /* Consumes `zv` */
 zend_long php_curl_get_long(zval *zv);
 
-static inline php_curl *curl_from_obj(zend_object *obj) {
-	return (php_curl *)((char *)(obj) - XtOffsetOf(php_curl, std));
-}
+#define curl_from_obj(obj) ZEND_CONTAINER_OF(obj, php_curl, std)
 
 #define Z_CURL_P(zv) curl_from_obj(Z_OBJ_P(zv))
 
-static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
-	return (php_curlsh *)((char *)(obj) - XtOffsetOf(php_curlsh, std));
-}
+#define curl_share_from_obj(obj) ZEND_CONTAINER_OF(obj, php_curlsh, std)
 
 #define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
 

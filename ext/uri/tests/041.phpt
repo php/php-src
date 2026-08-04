@@ -1,7 +1,5 @@
 --TEST--
 Test relative URI parsing
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

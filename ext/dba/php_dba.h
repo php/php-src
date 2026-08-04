@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
@@ -91,7 +89,7 @@ typedef struct dba_handler {
 	zend_string* (*nextkey)(dba_info *);
 	zend_result (*optimize)(dba_info *);
 	zend_result (*sync)(dba_info *);
-	char* (*info)(const struct dba_handler *hnd, dba_info *);
+	const char* (*info)(const struct dba_handler *hnd, dba_info *);
 		/* dba_info==NULL: Handler info, dba_info!=NULL: Database info */
 } dba_handler;
 
@@ -118,7 +116,7 @@ typedef struct dba_handler {
 #define DBA_SYNC_FUNC(x) \
 	zend_result dba_sync_##x(dba_info *info)
 #define DBA_INFO_FUNC(x) \
-	char *dba_info_##x(const dba_handler *hnd, dba_info *info)
+	const char *dba_info_##x(const dba_handler *hnd, dba_info *info)
 
 #define DBA_FUNCS(x) \
 	DBA_OPEN_FUNC(x); \

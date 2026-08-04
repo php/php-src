@@ -419,7 +419,6 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_NANOSLEEP)
 	F1("time_nanosleep", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_BOOL),
 #endif
-	F1("get_current_user", MAY_BE_STRING),
 	FN("get_cfg_var", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 	F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_NULL),
 	F1("highlight_file", MAY_BE_STRING|MAY_BE_BOOL),
@@ -596,6 +595,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_get_line", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("stream_resolve_include_path", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("stream_get_wrappers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+	FN("stream_last_errors", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_OBJECT),
 	F1("stream_get_transports", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #if defined(HAVE_GETTIMEOFDAY)
 	F1("uniqid", MAY_BE_STRING),

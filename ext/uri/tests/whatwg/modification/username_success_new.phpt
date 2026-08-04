@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - username - adding a new one
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

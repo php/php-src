@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Anatol Belski <ab@php.net>                                   |
    +----------------------------------------------------------------------+
@@ -20,7 +18,7 @@
 #include "win32/console.h"
 
 /* true globals; only used from main thread and from kernel callback */
-static zval ctrl_handler;
+static zend_fcall_info_cache ctrl_handler;
 static DWORD ctrl_evt = (DWORD)-1;
 static zend_atomic_bool *vm_interrupt_flag = NULL;
 
@@ -28,14 +26,12 @@ static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
 static void php_win32_signal_ctrl_interrupt_function(zend_execute_data *execute_data)
 {/*{{{*/
-	if (IS_UNDEF != Z_TYPE(ctrl_handler)) {
-		zval retval, params[1];
+	if (ZEND_FCC_INITIALIZED(ctrl_handler)) {
+		zval params[1];
 
 		ZVAL_LONG(&params[0], ctrl_evt);
 
-		/* If the function returns, */
-		call_user_function(NULL, NULL, &ctrl_handler, &retval, 1, params);
-		zval_ptr_dtor(&retval);
+		zend_call_known_fcc(&ctrl_handler, NULL, 1, params, NULL);
 	}
 
 	if (orig_interrupt_function) {
@@ -53,7 +49,7 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_init(void)
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = php_win32_signal_ctrl_interrupt_function;
 	vm_interrupt_flag = &EG(vm_interrupt);
-	ZVAL_UNDEF(&ctrl_handler);
+	ctrl_handler = empty_fcall_info_cache;
 
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_C", CTRL_C_EVENT, CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_EVENT_CTRL_BREAK", CTRL_BREAK_EVENT, CONST_PERSISTENT);
@@ -84,9 +80,8 @@ PHP_WINUTIL_API void php_win32_signal_ctrl_handler_request_shutdown(void)
 
 	/* The ctrl_handler must be cleared between requests, otherwise we can crash
 	 * due to accessing a previous request's memory. */
-	if (!Z_ISUNDEF(ctrl_handler)) {
-		zval_ptr_dtor(&ctrl_handler);
-		ZVAL_UNDEF(&ctrl_handler);
+	if (ZEND_FCC_INITIALIZED(ctrl_handler)) {
+		zend_fcc_dtor(&ctrl_handler);
 	}
 }
 
@@ -112,25 +107,32 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 
 
 	/* callable argument corresponds to the CTRL handler */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f!|b", &fci, &fcc, &add) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "F!|b", &fci, &fcc, &add) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 #ifdef ZTS
 	if (!tsrm_is_main_thread()) {
+		if (ZEND_FCC_INITIALIZED(fcc)) {
+			zend_release_fcall_info_cache(&fcc);
+		}
 		zend_throw_error(NULL, "CTRL events can only be received on the main thread");
 		RETURN_THROWS();
 	}
 #endif
 
 	if (!php_win32_console_is_cli_sapi()) {
+		if (ZEND_FCC_INITIALIZED(fcc)) {
+			zend_release_fcall_info_cache(&fcc);
+		}
 		zend_throw_error(NULL, "CTRL events trapping is only supported on console");
 		RETURN_THROWS();
 	}
 
-	if (!ZEND_FCI_INITIALIZED(fci)) {
-		zval_ptr_dtor(&ctrl_handler);
-		ZVAL_UNDEF(&ctrl_handler);
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
+		if (ZEND_FCC_INITIALIZED(ctrl_handler)) {
+			zend_fcc_dtor(&ctrl_handler);
+		}
 		RETURN_BOOL(SetConsoleCtrlHandler(NULL, add));
 	}
 
@@ -138,11 +140,14 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 		zend_string *func_name = zend_get_callable_name(&fci.function_name);
 		php_error_docref(NULL, E_WARNING, "Unable to attach %s as a CTRL handler", ZSTR_VAL(func_name));
 		zend_string_release_ex(func_name, 0);
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_FALSE;
 	}
 
-	zval_ptr_dtor(&ctrl_handler);
-	ZVAL_COPY(&ctrl_handler, &fci.function_name);
+	if (ZEND_FCC_INITIALIZED(ctrl_handler)) {
+		zend_fcc_dtor(&ctrl_handler);
+	}
+	zend_fcc_dup(&ctrl_handler, &fcc);
 
 	RETURN_TRUE;
 }/*}}}*/
@@ -165,7 +170,7 @@ PHP_FUNCTION(sapi_windows_generate_ctrl_event)
 
 	ret = (GenerateConsoleCtrlEvent(evt, pid) != 0);
 
-	if (IS_UNDEF != Z_TYPE(ctrl_handler)) {
+	if (ZEND_FCC_INITIALIZED(ctrl_handler)) {
 		ret = ret && SetConsoleCtrlHandler(php_win32_signal_system_ctrl_handler, TRUE);
 	}
 

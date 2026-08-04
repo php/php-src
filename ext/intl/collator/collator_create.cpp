@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Vadim Savchuk <vsavchuk@productengine.com>                  |
    |          Dmitry Lakhtyuk <dlakhtyuk@productengine.com>               |
@@ -44,6 +44,10 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 	COLLATOR_METHOD_FETCH_OBJECT;
+	if (co->ucoll) {
+		zend_throw_error(NULL, "Collator object is already constructed");
+		return FAILURE;
+	}
 
 	if(locale_len == 0) {
 		locale = (char *)intl_locale_get_default();

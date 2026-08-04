@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
@@ -193,6 +191,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
 			case ZEND_CALLABLE_CONVERT:
+			case ZEND_CALLABLE_CONVERT_PARTIAL:
 				call--;
 				if (call_stack[call].func && call_stack[call].opline) {
 					zend_op *fcall = call_stack[call].opline;
@@ -225,13 +224,14 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					 * At this point we also know whether or not the result of
 					 * the DO opcode is used, allowing to optimize calls to
 					 * ZEND_ACC_NODISCARD functions. */
-					if (opline->opcode != ZEND_CALLABLE_CONVERT) {
+					if (opline->opcode != ZEND_CALLABLE_CONVERT && opline->opcode != ZEND_CALLABLE_CONVERT_PARTIAL) {
 						opline->opcode = zend_get_call_op(fcall, call_stack[call].func, !RESULT_UNUSED(opline));
 					}
 
 					if ((ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level)
 							&& call_stack[call].try_inline
-							&& opline->opcode != ZEND_CALLABLE_CONVERT) {
+							&& opline->opcode != ZEND_CALLABLE_CONVERT
+							&& opline->opcode != ZEND_CALLABLE_CONVERT_PARTIAL) {
 						zend_try_inline_call(op_array, fcall, opline, call_stack[call].func);
 					}
 				}

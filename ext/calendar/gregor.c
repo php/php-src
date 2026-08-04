@@ -209,6 +209,7 @@ zend_long GregorianToSdn(
 
 	/* check for invalid dates */
 	if (inputYear == 0 || inputYear < -4714 ||
+		inputYear > INT_MAX - 4800 ||
 		inputMonth <= 0 || inputMonth > 12 ||
 		inputDay <= 0 || inputDay > 31) {
 		return (0);

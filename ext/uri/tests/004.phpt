@@ -1,7 +1,5 @@
 --TEST--
 Parse invalid URLs
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

@@ -3,7 +3,7 @@
 /**
  * @generate-class-entries static
  * @generate-c-enums
- * @generate-legacy-arginfo 80000
+ * @generate-legacy-arginfo 70000
  * @undocumentable
  */
 namespace {
@@ -35,6 +35,32 @@ namespace {
         public const DUMMY = 0;
     }
 
+    trait _ZendTestTraitForInternalClass
+    {
+        /** @var int */
+        public const ZEND_TRAIT_CONST = 123;
+
+        public int $traitProp = 456;
+
+        public function traitMethod(): int {}
+    }
+
+    trait _ZendTestTraitForInternalClass2
+    {
+        /** @var int */
+        public const ZEND_TRAIT_CONST2 = 321;
+
+        public static int $staticTraitProp = 999;
+
+        public function traitMethod2(): int {}
+    }
+
+    class _ZendTestClassWithTraits
+    {
+        use _ZendTestTraitForInternalClass;
+        use _ZendTestTraitForInternalClass2;
+    }
+
     /** @alias _ZendTestClassAlias */
     class _ZendTestClass implements _ZendTestInterface {
         public const mixed TYPED_CLASS_CONST1 = [];
@@ -56,6 +82,12 @@ namespace {
         /** @var mixed */
         public static $_StaticProp;
         public static int $staticIntProp = 123;
+
+        /* If there's a problem with escapes in quotes in generated headers,
+         * the generated header won't compile. (tests/gh22169.phpt) */
+        public static string $doubleQuoteEscaped = "BEGIN \n\r\t\v\e\f\\\$\"\101\x41\u{41} END";
+        public static string $singleQuoteEscaped = 'BEGIN \n\r\t\v\e\f\\\$\"\101\x41\u{41} END';
+        public static string $escapeInterpolated = "begin \$ \\$ end";
 
         public int $intProp = 123;
         public ?stdClass $classProp = null;
@@ -187,7 +219,9 @@ namespace {
     }
 
     final class ZendTestForbidDynamicCall {
+        /** @forbid-dynamic-calls */
         public function call(): void {}
+        /** @forbid-dynamic-calls */
         public static function callStatic(): void {}
     }
 
@@ -303,6 +337,10 @@ namespace {
 
     function zend_call_method_if_exists(object $obj, string $method, mixed ...$args): mixed {}
 
+    function zend_test_call_with_consumed_args(callable $cb, array $args, int $consumed_args): array {}
+
+    function zend_test_refcount(mixed $value): int {}
+
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 
@@ -363,6 +401,8 @@ namespace ZendTestNS {
         public function method(): int {}
     }
 
+    interface Bar {}
+
     class UnlikelyCompileError {
         /* This method signature would create a compile error due to the string
          * "ZendTestNS\UnlikelyCompileError" in the generated macro call */
@@ -378,11 +418,20 @@ namespace ZendTestNS {
 
 namespace ZendTestNS2 {
 
+    use ZendTestNS\Foo as FooAlias;
+    use ZendTestNS\UnlikelyCompileError;
+    use ZendTestNS\{NotUnlikelyCompileError};
+
     /** @var string */
     const ZEND_CONSTANT_A = "namespaced";
 
     class Foo {
         public ZendSubNS\Foo $foo;
+        public ZendSubNS\Foo&\ZendTestNS\Bar $intersectionProp;
+        public ZendSubNS\Foo|\ZendTestNS\Bar $unionProp;
+        public FooAlias $fooAlias;
+        public UnlikelyCompileError $unlProp;
+        public NotUnlikelyCompileError $notUnlProp;
 
         public function method(): void {}
     }

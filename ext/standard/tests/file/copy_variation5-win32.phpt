@@ -98,7 +98,7 @@ Destination file name => %s/CopY5.TMP
 Size of source file => int(1500)
 Size of destination file => int(1500)
 
-Warning: unlink(%s/COPY5.TMP): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory in %s on line %d
 
-Warning: unlink(%s/CopY5.TMP): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory in %s on line %d
 *** Done ***

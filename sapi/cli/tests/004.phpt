@@ -12,6 +12,9 @@ $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 var_dump(shell_exec("$php -n --rf unknown"));
 var_dump(shell_exec("$php -n --rf echo"));
 var_dump(shell_exec("$php -n --rf phpinfo"));
+// Regression tests for https://github.com/php/php-src/issues/21754
+var_dump(shell_exec("$php -n --rf ReflectionMethod::__construct"));
+var_dump(shell_exec("$php -n --rf ReflectionMethod::missing"));
 
 echo "Done\n";
 ?>
@@ -28,5 +31,16 @@ string(155) "Function [ <internal:standard> function phpinfo ] {
   - Return [ true ]
 }
 
+"
+string(213) "Method [ <internal:Reflection, ctor> public method __construct ] {
+
+  - Parameters [2] {
+    Parameter #0 [ <required> object|string $objectOrMethod ]
+    Parameter #1 [ <optional> ?string $method = null ]
+  }
+}
+
+"
+string(61) "Exception: Method ReflectionMethod::missing() does not exist
 "
 Done

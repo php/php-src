@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -74,12 +73,19 @@ typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
+typedef struct _zend_error_info zend_error_info;
 
 typedef enum {
 	ZEND_MEMOIZE_NONE,
 	ZEND_MEMOIZE_COMPILE,
 	ZEND_MEMOIZE_FETCH,
 } zend_memoize_mode;
+
+typedef struct zend_err_buf {
+	uint32_t size;
+	uint32_t capacity;
+	zend_error_info **errors;
+} zend_err_buf;
 
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
@@ -298,8 +304,7 @@ struct _zend_executor_globals {
 	 * and their processing is delayed until zend_emit_recorded_errors()
 	 * is called or a fatal diagnostic is emitted. */
 	bool record_errors;
-	uint32_t num_errors;
-	zend_error_info **errors;
+	zend_err_buf errors;
 
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;
@@ -320,9 +325,16 @@ struct _zend_executor_globals {
 	zend_strtod_state strtod_state;
 
 	HashTable callable_convert_cache;
+	HashTable partial_function_application_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
+
+#ifdef ZTS
+/* Compile-time offsets of the hot globals, in a reserved region just before *_tsrm_ls_cache. */
+# define ZEND_CG_OFFSET   (-(ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)))
+# define ZEND_EG_OFFSET   (ZEND_CG_OFFSET - (ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)))
+#endif
 
 #define EG_FLAGS_INITIAL				(0)
 #define EG_FLAGS_IN_SHUTDOWN			(1<<0)

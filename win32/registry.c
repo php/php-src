@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -51,9 +49,9 @@ static int OpenPhpRegistryKey(char* sub_key, HKEY *hKey)
 			LONG ret;
 
 			main_key_len = strlen(*key_name);
-			reg_key = emalloc(main_key_len + sub_key_len + 1);
-			memcpy(reg_key, *key_name, main_key_len);
-			memcpy(reg_key + main_key_len, sub_key, sub_key_len + 1);
+			reg_key = zend_cstr_concat(
+				*key_name, main_key_len,
+				sub_key, sub_key_len);
 			ret = RegOpenKeyEx(HKEY_LOCAL_MACHINE, reg_key, 0, KEY_READ, hKey);
 			efree(reg_key);
 

@@ -27,7 +27,7 @@ extern "C" {
 #include "lexbor/core/lexbor.h"
 
 #define LEXBOR_VERSION_MAJOR 2
-#define LEXBOR_VERSION_MINOR 0
+#define LEXBOR_VERSION_MINOR 7
 #define LEXBOR_VERSION_PATCH 0
 
 #define LEXBOR_VERSION_STRING LEXBOR_STRINGIZE(LEXBOR_VERSION_MAJOR) "."       \
@@ -39,6 +39,10 @@ extern "C" {
 #define lexbor_max(val1, val2) ((val1) > (val2) ? (val1) : (val2))
 #define lexbor_min(val1, val2) ((val1) < (val2) ? (val1) : (val2))
 
+#define LEXBOR_STR_RES_MAP_CHAR_OTHER      0x00
+#define LEXBOR_STR_RES_MAP_CHAR_A_Z_a_z    0x01
+#define LEXBOR_STR_RES_MAP_CHAR_WHITESPACE 0x02
+#define LEXBOR_STR_RES_SLIP                0xFF
 
 /*
  * Very important!!!

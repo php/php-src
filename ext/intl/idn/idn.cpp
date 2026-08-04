@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Pierre A. Joye <pierre@php.net>                              |
    |         Gustavo Lopes  <cataphract@php.net>                          |
@@ -42,7 +40,7 @@ enum {
 static zend_result php_intl_idn_check_status(UErrorCode err, const char *msg)
 {
 	intl_error_set_code(NULL, err);
-	if (U_FAILURE(err)) {
+	if (UNEXPECTED(U_FAILURE(err))) {
 		intl_error_set_custom_msg(NULL, msg);
 		return FAILURE;
 	}
@@ -61,7 +59,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 
 	uts46 = uidna_openUTS46(option, &status);
-	if (php_intl_idn_check_status(status, "failed to open UIDNA instance") == FAILURE) {
+	if (UNEXPECTED(php_intl_idn_check_status(status, "failed to open UIDNA instance") == FAILURE)) {
 		RETURN_FALSE;
 	}
 
@@ -76,7 +74,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 		len = uidna_nameToUnicodeUTF8(uts46, ZSTR_VAL(domain), ZSTR_LEN(domain),
 				ZSTR_VAL(buffer), buffer_capac, &info, &status);
 	}
-	if (len >= buffer_capac || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
+	if (UNEXPECTED(len >= buffer_capac || php_intl_idn_check_status(status, "failed to convert name") == FAILURE)) {
 		uidna_close(uts46);
 		zend_string_efree(buffer);
 		RETURN_FALSE;
@@ -123,7 +121,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
-	if (ZSTR_LEN(domain) > INT32_MAX - 1) {
+	if (UNEXPECTED(ZSTR_LEN(domain) > INT32_MAX - 1)) {
 		zend_argument_value_error(1, "must be less than " PRId32 " bytes", INT32_MAX);
 		RETURN_THROWS();
 	}
@@ -135,7 +133,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (idna_info != NULL) {
 		idna_info = zend_try_array_init(idna_info);
-		if (!idna_info) {
+		if (UNEXPECTED(!idna_info)) {
 			RETURN_THROWS();
 		}
 	}

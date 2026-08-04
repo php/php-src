@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -552,7 +550,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 			/* IPv6 without square brackets so without port */
 			transport.l = mnd_sprintf(&transport.s, 0, "tcp://[%s]:%u", hostname.s, port);
 		} else {
-			char *p;
+			const char *p;
 
 			/* IPv6 addresses are in the format [address]:port */
 			if (hostname.s[0] == '[') { /* IPv6 */
@@ -1559,17 +1557,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 				zval attrz;
 				zend_string *str;
 
+				str = zend_string_init(key, strlen(key), conn->persistent);
+				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), conn->persistent));
 				if (conn->persistent) {
-					str = zend_string_init(key, strlen(key), 1);
 					GC_MAKE_PERSISTENT_LOCAL(str);
-					ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 1));
 					GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(attrz));
-				} else {
-					str = zend_string_init(key, strlen(key), 0);
-					ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 0));
 				}
 				zend_hash_update(conn->options->connect_attr, str, &attrz);
-				zend_string_release_ex(str, 1);
+				zend_string_release_ex(str, conn->persistent);
 			}
 			break;
 		default:

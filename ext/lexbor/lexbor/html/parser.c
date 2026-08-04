@@ -13,9 +13,10 @@
 #include "lexbor/html/tree/template_insertion.h"
 #include "lexbor/html/tree/insertion_mode.h"
 
-#define LXB_HTML_TAG_RES_DATA
-#define LXB_HTML_TAG_RES_SHS_DATA
-#include "lexbor/html/tag_res.h"
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
+    LXB_EXTERN lxb_html_tag_category_t lxb_html_tag_res_cats[LXB_TAG__LAST_ENTRY][LXB_NS__LAST_ENTRY];
+    LXB_EXTERN lxb_html_tag_fixname_t lxb_html_tag_res_fixname_svg[LXB_TAG__LAST_ENTRY];
+#endif
 
 
 static void
@@ -42,6 +43,8 @@ lxb_html_parser_init(lxb_html_parser_t *parser)
     if (status != LXB_STATUS_OK) {
         return status;
     }
+
+    lxb_html_tokenizer_keep_duplicate_set(parser->tkz, true);
 
     /* Tree */
     parser->tree = lxb_html_tree_create();
@@ -339,7 +342,9 @@ lxb_html_parse_fragment_chunk_destroy(lxb_html_parser_t *parser)
         parser->tree->fragment = NULL;
     }
 
-    if (lxb_html_document_is_original(parser->tree->document) == false) {
+    if (parser->tree->document != NULL
+        && lxb_html_document_is_original(parser->tree->document) == false)
+    {
         if (parser->root != NULL) {
             doc = lxb_dom_interface_node(parser->tree->document)->owner_document;
             parser->root->parent = &doc->node;

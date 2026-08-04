@@ -23,7 +23,7 @@ try {
 ?>
 ==DONE==
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 before
-in catch: DirectoryIterator::__construct(c:\not\exists\here): %s (code: 3)
+in catch: DirectoryIterator::__construct(): Failed to open directory: No such file or directory
 ==DONE==

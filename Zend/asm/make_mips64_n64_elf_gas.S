@@ -48,6 +48,7 @@
 .file "make_mips64_n64_elf_gas.S"
 .text
 .globl make_fcontext
+.hidden make_fcontext
 .align 3
 .type make_fcontext,@function
 .ent make_fcontext
@@ -69,7 +70,7 @@ make_fcontext:
     # save global pointer in context-data
     sd  $gp, 136($v0)
 
-    # psudo instruction compute abs address of label finish based on GP
+    # pseudo instruction compute abs address of label finish based on GP
     dla  $t9, finish
 
     # save address of finish as return-address for context-function

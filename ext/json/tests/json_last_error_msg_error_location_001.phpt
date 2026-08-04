@@ -66,8 +66,8 @@ string(30) "Syntax error near location 1:1"
 
 Error at position 1:10:
 bool(false)
-int(3)
-string(72) "Control character error, possibly incorrectly encoded near location 1:10"
+int(4)
+string(31) "Syntax error near location 1:10"
 
 Error at position 1:9:
 bool(false)
@@ -118,4 +118,3 @@ Error at position 1:10:
 bool(false)
 int(3)
 string(72) "Control character error, possibly incorrectly encoded near location 1:10"
-

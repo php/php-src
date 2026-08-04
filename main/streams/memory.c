@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
@@ -128,7 +126,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 	switch(whence) {
 		case SEEK_CUR:
 			if (offset < 0) {
-				if (ms->fpos < (size_t)(-offset)) {
+				if (ms->fpos < -(size_t)offset) {
 					ms->fpos = 0;
 					*newoffs = -1;
 					return -1;
@@ -165,7 +163,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				stream->eof = 0;
 				stream->fatal_error = 0;
 				return 0;
-			} else if (ZSTR_LEN(ms->data) < (size_t)(-offset)) {
+			} else if (ZSTR_LEN(ms->data) < -(size_t)offset) {
 				ms->fpos = 0;
 				*newoffs = -1;
 				return -1;
@@ -364,7 +362,9 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 			zend_string *membuf = php_stream_memory_get_buffer(ts->innerstream);
 			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
 			if (file == NULL) {
-				php_error_docref(NULL, E_WARNING, "Unable to create temporary file, Check permissions in temporary files directory.");
+				php_stream_wrapper_warn(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
+						PermissionDenied,
+						"Unable to create temporary file, Check permissions in temporary files directory.");
 				return 0;
 			}
 			php_stream_write(file, ZSTR_VAL(membuf), ZSTR_LEN(membuf));
@@ -471,6 +471,11 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 	if (!ts->innerstream) {
 		return FAILURE;
 	}
+	if (castas == PHP_STREAM_AS_FD_FOR_COPY) {
+		/* the fd would come from the inner stream whose buffer state and
+		 * position the copy fast path cannot see, so use the stream fallback */
+		return FAILURE;
+	}
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_STDIO)) {
 		return php_stream_cast(ts->innerstream, castas, ret, 0);
 	}
@@ -491,7 +496,8 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 
 	file = php_stream_fopen_tmpfile();
 	if (file == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to create temporary file.");
+		php_stream_wrapper_warn(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
+				PermissionDenied, "Unable to create temporary file.");
 		return FAILURE;
 	}
 
@@ -641,7 +647,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	}
 
 	if ((comma = (char *) memchr(path, ',', dlen)) == NULL) {
-		php_stream_wrapper_log_error(wrapper, options, "rfc2397: no comma in URL");
+		php_stream_wrapper_log_warn(wrapper, context, options,
+				InvalidUrl, "rfc2397: no comma in URL");
 		return NULL;
 	}
 
@@ -653,7 +660,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		sep = memchr(path, '/', mlen);
 
 		if (!semi && !sep) {
-			php_stream_wrapper_log_error(wrapper, options, "rfc2397: illegal media type");
+			php_stream_wrapper_log_warn(wrapper, context, options,
+					InvalidUrl, "rfc2397: illegal media type");
 			return NULL;
 		}
 
@@ -668,7 +676,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			path += plen;
 		} else if (semi != path || mlen != sizeof(";base64")-1 || memcmp(path, ";base64", sizeof(";base64")-1)) { /* must be error since parameters are only allowed after mediatype */
 			zval_ptr_dtor(&meta);
-			php_stream_wrapper_log_error(wrapper, options, "rfc2397: illegal media type");
+			php_stream_wrapper_log_warn(wrapper, context, options,
+					InvalidUrl, "rfc2397: illegal media type");
 			return NULL;
 		}
 		/* get parameters and potentially ';base64' */
@@ -681,7 +690,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 				if (mlen != sizeof("base64")-1 || memcmp(path, "base64", sizeof("base64")-1)) {
 					/* must be error since parameters are only allowed after mediatype and we have no '=' sign */
 					zval_ptr_dtor(&meta);
-					php_stream_wrapper_log_error(wrapper, options, "rfc2397: illegal parameter");
+					php_stream_wrapper_log_warn(wrapper, context, options,
+							InvalidParam, "rfc2397: illegal parameter");
 					return NULL;
 				}
 				base64 = 1;
@@ -701,7 +711,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		}
 		if (mlen) {
 			zval_ptr_dtor(&meta);
-			php_stream_wrapper_log_error(wrapper, options, "rfc2397: illegal URL");
+			php_stream_wrapper_log_warn(wrapper, context, options,
+					InvalidUrl, "rfc2397: illegal URL");
 			return NULL;
 		}
 	} else {
@@ -717,7 +728,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		base64_comma = php_base64_decode_ex((const unsigned char *)comma, dlen, 1);
 		if (!base64_comma) {
 			zval_ptr_dtor(&meta);
-			php_stream_wrapper_log_error(wrapper, options, "rfc2397: unable to decode");
+			php_stream_wrapper_log_warn(wrapper, context, options,
+					DecodingFailed, "rfc2397: unable to decode");
 			return NULL;
 		}
 		comma = ZSTR_VAL(base64_comma);

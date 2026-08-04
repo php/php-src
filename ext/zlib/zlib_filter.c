@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sara Golemon (pollita@php.net)                              |
    +----------------------------------------------------------------------+
@@ -28,6 +26,7 @@ typedef struct _php_zlib_filter_data {
 	size_t outbuf_len;
 	int persistent;
 	bool finished; /* for zlib.deflate: signals that no flush is pending */
+	int windowBits;
 } php_zlib_filter_data;
 
 /* }}} */
@@ -143,6 +142,47 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	return exit_status;
 }
 
+static zend_result php_zlib_inflate_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	int status;
+
+	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	php_zlib_filter_data *data = Z_PTR(thisfilter->abstract);
+
+	if (data->finished) {
+		/* Stream was ended, need to reinitialize */
+		status = inflateInit2(&(data->strm), data->windowBits);
+		if (status != Z_OK) {
+			php_error_docref(NULL, E_WARNING, "zlib.inflate: failed to reinitialize inflation state");
+			return FAILURE;
+		}
+	} else {
+		/* Stream is active, just reset it */
+		status = inflateReset(&(data->strm));
+		if (status != Z_OK) {
+			php_error_docref(NULL, E_WARNING, "zlib.inflate: failed to reset inflation state");
+			return FAILURE;
+		}
+	}
+
+	/* Reset our own state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->finished = false;
+
+	return SUCCESS;
+}
+
 static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -158,6 +198,7 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_zlib_inflate_ops = {
 	php_zlib_inflate_filter,
+	php_zlib_inflate_seek,
 	php_zlib_inflate_dtor,
 	"zlib.inflate"
 };
@@ -259,6 +300,38 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	return exit_status;
 }
 
+static zend_result php_zlib_deflate_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	int status;
+
+	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	php_zlib_filter_data *data = Z_PTR(thisfilter->abstract);
+
+	/* Reset zlib deflation state */
+	status = deflateReset(&(data->strm));
+	if (status != Z_OK) {
+		php_error_docref(NULL, E_WARNING, "zlib.deflate: failed to reset deflation state");
+		return FAILURE;
+	}
+
+	/* Reset our own state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->finished = true;
+
+	return SUCCESS;
+}
+
 static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -272,6 +345,7 @@ static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_zlib_deflate_ops = {
 	php_zlib_deflate_filter,
+	php_zlib_deflate_seek,
 	php_zlib_deflate_dtor,
 	"zlib.deflate"
 };
@@ -280,11 +354,16 @@ static const php_stream_filter_ops php_zlib_deflate_ops = {
 
 /* {{{ zlib.* common factory */
 
-static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
+static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
+	php_stream_filter_seekable_t write_seekable;
 	php_zlib_filter_data *data;
 	int status;
+
+	if (php_stream_filter_parse_write_seek_mode(filterparams, &write_seekable) == FAILURE) {
+		return NULL;
+	}
 
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_zlib_filter_data), persistent);
@@ -315,6 +394,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	}
 
 	data->strm.data_type = Z_ASCII;
+	data->persistent = persistent;
 
 	if (strcasecmp(filtername, "zlib.inflate") == 0) {
 		int windowBits = -MAX_WBITS;
@@ -333,6 +413,9 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				}
 			}
 		}
+
+		/* Save configuration for reset */
+		data->windowBits = windowBits;
 
 		/* RFC 1951 Inflate */
 		data->finished = false;
@@ -401,6 +484,10 @@ factory_setlevel:
 					php_error_docref(NULL, E_WARNING, "Invalid filter parameter, ignored");
 			}
 		}
+
+		/* Save configuration for reset */
+		data->windowBits = windowBits;
+
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);
 		data->finished = true;
 		fops = &php_zlib_deflate_ops;
@@ -416,7 +503,7 @@ factory_setlevel:
 		return NULL;
 	}
 
-	return php_stream_filter_alloc(fops, data, persistent);
+	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, write_seekable);
 }
 
 const php_stream_filter_factory php_zlib_filter_factory = {

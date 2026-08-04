@@ -21,6 +21,12 @@ class Bar {
   }
 }
 
+class Baz {
+  public function __debugInfo(): ?array {
+    return null;
+  }
+}
+
 $f = new Foo;
 var_dump($f);
 
@@ -28,6 +34,7 @@ $b = new Bar;
 var_dump($b);
 ?>
 --EXPECTF--
+Deprecated: Returning null from Baz::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead in %s on line %d
 object(Foo)#%d (3) {
   ["a"]=>
   int(1)

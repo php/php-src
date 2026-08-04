@@ -1,7 +1,5 @@
 --TEST--
 Test HTTP URL validation
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

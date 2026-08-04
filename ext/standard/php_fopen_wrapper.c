@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
@@ -146,30 +144,60 @@ static const php_stream_ops php_stream_input_ops = {
 	NULL  /* set_option */
 };
 
-static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain) /* {{{ */
+static const zend_long max_filter_count_default = 16;
+
+static zend_result php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain, php_stream_context *context) /* {{{ */
 {
 	char *p, *token = NULL;
 	php_stream_filter *temp_filter;
 
+	zend_long max_filter_count = max_filter_count_default;
+	bool max_filter_count_configured = false;
+	if (context != NULL) {
+		zval *option_val = php_stream_context_get_option(context, "filter", "max_filter_count");
+		if (option_val) {
+			max_filter_count = zval_get_long(option_val);
+			max_filter_count_configured = true;
+		}
+	}
+
 	p = php_strtok_r(filterlist, "|", &token);
 	while (p) {
+		zend_long read_count = read_chain ? stream->readfilters.num_filters : 0;
+		zend_long write_count = write_chain ? stream->writefilters.num_filters : 0;
+
+		if (read_count == max_filter_count || write_count == max_filter_count) {
+			if (max_filter_count_configured) {
+				return FAILURE;
+			} else {
+				// No max_filter_count configured; raise deprecation error if over default
+				zend_error(E_DEPRECATED, "Using more than " ZEND_LONG_FMT " filters in a php://filter URL is deprecated, "
+					"set this limit using the stream context option max_filter_count, or use stream_filter_append", max_filter_count_default);
+			}
+		}
+
 		php_url_decode(p, strlen(p));
 		if (read_chain) {
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream)))) {
 				php_stream_filter_append(&stream->readfilters, temp_filter);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Unable to create filter (%s)", p);
+				php_stream_wrapper_warn_nt(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
+					CreateFailed,
+					"Unable to create filter (%s)", p);
 			}
 		}
 		if (write_chain) {
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream)))) {
 				php_stream_filter_append(&stream->writefilters, temp_filter);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Unable to create filter (%s)", p);
+				php_stream_wrapper_warn_nt(NULL, PHP_STREAM_CONTEXT(stream), REPORT_ERRORS,
+					CreateFailed,
+					"Unable to create filter (%s)", p);
 			}
 		}
 		p = php_strtok_r(NULL, "|", &token);
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -218,9 +246,9 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		php_stream_input_t *input;
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
-			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
-			}
+			php_stream_wrapper_warn(wrapper, context, options,
+				Disabled,
+				"URL file-access is disabled in the server configuration");
 			return NULL;
 		}
 
@@ -237,9 +265,9 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 
 	if (!strcasecmp(path, "stdin")) {
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
-			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
-			}
+			php_stream_wrapper_warn(wrapper, context, options,
+				Disabled,
+				"URL file-access is disabled in the server configuration");
 			return NULL;
 		}
 		if (!strcmp(sapi_module.name, "cli")) {
@@ -296,23 +324,24 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 		int		   dtablesize;
 
 		if (strcmp(sapi_module.name, "cli")) {
-			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "Direct access to file descriptors is only available from command-line PHP");
-			}
+			php_stream_wrapper_warn(wrapper, context, options,
+				Disabled,
+				"Direct access to file descriptors is only available from command-line PHP");
 			return NULL;
 		}
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
-			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
-			}
+			php_stream_wrapper_warn(wrapper, context, options,
+				Disabled,
+				"URL file-access is disabled in the server configuration");
 			return NULL;
 		}
 
 		start = &path[3];
 		fildes_ori = ZEND_STRTOL(start, &end, 10);
 		if (end == start || *end != '\0') {
-			php_stream_wrapper_log_error(wrapper, options,
+			php_stream_wrapper_log_warn(wrapper, context, options,
+				InvalidUrl,
 				"php://fd/ stream must be specified in the form php://fd/<orig fd>");
 			return NULL;
 		}
@@ -324,14 +353,16 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 #endif
 
 		if (fildes_ori < 0 || fildes_ori >= dtablesize) {
-			php_stream_wrapper_log_error(wrapper, options,
+			php_stream_wrapper_log_warn(wrapper, context, options,
+				InvalidParam,
 				"The file descriptors must be non-negative numbers smaller than %d", dtablesize);
 			return NULL;
 		}
 
 		fd = dup((int)fildes_ori);
 		if (fd == -1) {
-			php_stream_wrapper_log_error(wrapper, options,
+			php_stream_wrapper_log_warn(wrapper, context, options,
+				DupFailed,
 				"Error duping file descriptor " ZEND_LONG_FMT "; possibly it doesn't exist: "
 				"[%d]: %s", fildes_ori, errno, strerror(errno));
 			return NULL;
@@ -357,17 +388,23 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 			return NULL;
 		}
 
+		zend_result safl_result = SUCCESS;
 		*p = '\0';
 
 		p = php_strtok_r(pathdup + 1, "/", &token);
 		while (p) {
 			if (!strncasecmp(p, "read=", 5)) {
-				php_stream_apply_filter_list(stream, p + 5, 1, 0);
+				safl_result = php_stream_apply_filter_list(stream, p + 5, 1, 0, context);
 			} else if (!strncasecmp(p, "write=", 6)) {
-				php_stream_apply_filter_list(stream, p + 6, 0, 1);
+				safl_result = php_stream_apply_filter_list(stream, p + 6, 0, 1, context);
 			} else {
-				php_stream_apply_filter_list(stream, p, mode_rw & PHP_STREAM_FILTER_READ, mode_rw & PHP_STREAM_FILTER_WRITE);
+				safl_result = php_stream_apply_filter_list(stream, p, mode_rw & PHP_STREAM_FILTER_READ, mode_rw & PHP_STREAM_FILTER_WRITE, context);
 			}
+
+			if (safl_result == FAILURE) {
+				break;
+			}
+
 			p = php_strtok_r(NULL, "/", &token);
 		}
 		efree(pathdup);
@@ -377,10 +414,18 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 			return NULL;
 		}
 
+		if (safl_result == FAILURE) {
+			php_stream_wrapper_log_warn(wrapper, context, options,
+				PathTooLong, "too many filters");
+			php_stream_close(stream);
+			return NULL;
+		}
+
 		return stream;
 	} else {
 		/* invalid php://thingy */
-		php_error_docref(NULL, E_WARNING, "Invalid php:// URL specified");
+		php_stream_wrapper_warn(wrapper, context, options,
+				InvalidUrl, "Invalid php:// URL specified");
 		return NULL;
 	}
 

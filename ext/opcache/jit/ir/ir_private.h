@@ -949,10 +949,11 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 #define IR_OPND_LABEL_REF         0x3
 #define IR_OPND_CONTROL_DEP       0x4
 #define IR_OPND_CONTROL_REF       0x5
-#define IR_OPND_STR               0x6
-#define IR_OPND_NUM               0x7
-#define IR_OPND_PROB              0x8
-#define IR_OPND_PROTO             0x9
+#define IR_OPND_CONTROL_GUARD     0x6
+#define IR_OPND_STR               0x7
+#define IR_OPND_NUM               0x8
+#define IR_OPND_PROB              0x9
+#define IR_OPND_PROTO             0xa
 
 #define IR_OP_FLAGS(op_flags, op1_flags, op2_flags, op3_flags) \
 	((op_flags) | ((op1_flags) << 20) | ((op2_flags) << 24) | ((op3_flags) << 28))
@@ -966,7 +967,7 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(const ir_ctx *ctx, ir_ref ref)
 	(((flags) >> (16 + (4 * (((i) > 3) ? 3 : (i))))) & 0xf)
 
 #define IR_IS_REF_OPND_KIND(kind) \
-	((kind) >= IR_OPND_DATA && (kind) <= IR_OPND_CONTROL_REF)
+	((kind) >= IR_OPND_DATA && (kind) <= IR_OPND_CONTROL_GUARD)
 
 IR_ALWAYS_INLINE ir_ref ir_operands_count(const ir_ctx *ctx, const ir_insn *insn)
 {
@@ -1047,7 +1048,6 @@ void ir_use_list_remove_one(ir_ctx *ctx, ir_ref def, ir_ref use);
 void ir_use_list_replace_all(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
 void ir_use_list_replace_one(ir_ctx *ctx, ir_ref def, ir_ref use, ir_ref new_use);
 bool ir_use_list_add(ir_ctx *ctx, ir_ref def, ir_ref use);
-void ir_use_list_sort(ir_ctx *ctx, ir_ref def);
 
 IR_ALWAYS_INLINE ir_ref ir_next_control(const ir_ctx *ctx, ir_ref ref)
 {
@@ -1100,6 +1100,7 @@ void ir_iter_add_uses(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist);
 void ir_iter_replace(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bitqueue *worklist);
 void ir_iter_update_op(ir_ctx *ctx, ir_ref ref, uint32_t idx, ir_ref new_val, ir_bitqueue *worklist);
 void ir_iter_opt(ir_ctx *ctx, ir_bitqueue *worklist);
+void ir_iter_cleanup(ir_ctx *ctx);
 
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \
@@ -1145,12 +1146,15 @@ struct _ir_block {
 	};
 	union {
 		uint32_t dom_depth;      /* depth from the root of the dominators tree */
-		uint32_t postnum;        /* used temporary during tree constructon     */
+		uint32_t postnum;        /* used temporary for iterative Post Ordering */
 	};
 	uint32_t     dom_child;      /* first dominated blocks                     */
 	uint32_t     dom_next_child; /* next dominated block (linked list)         */
 	uint32_t     loop_header;
-	uint32_t     loop_depth;
+	union {
+		uint32_t loop_depth;
+		uint32_t next_succ;      /* used temporary for iterative Post Ordering */
+	};
 };
 
 void ir_build_prev_refs(ir_ctx *ctx);
@@ -1220,6 +1224,7 @@ typedef struct _ir_use_pos       ir_use_pos;
 #define IR_USE_SHOULD_BE_IN_REG          (1<<1)
 #define IR_DEF_REUSES_OP1_REG            (1<<2)
 #define IR_DEF_CONFLICTS_WITH_INPUT_REGS (1<<3)
+#define IR_EXTEND_INPUTS_TO_NEXT         (1<<4) /* used for SNAPSHOT followed by GUARD */
 
 #define IR_FUSED_USE                     (1<<6)
 #define IR_PHI_USE                       (1<<7)

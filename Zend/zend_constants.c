@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -251,7 +250,7 @@ ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t len) /*
 }
 /* }}} */
 
-ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope) /* {{{ */
+ZEND_API bool zend_verify_const_access(const zend_class_constant *c, const zend_class_entry *scope) /* {{{ */
 {
 	if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_PUBLIC) {
 		return 1;
@@ -312,9 +311,9 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 	return NULL;
 }
 
-ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, zend_class_entry *scope, uint32_t flags)
+ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, const zend_class_entry *scope, uint32_t flags)
 {
-	zend_class_entry *ce = NULL;
+	const zend_class_entry *ce = NULL;
 	zend_class_constant *c = NULL;
 	zval *ret_constant = NULL;
 
@@ -413,7 +412,7 @@ failure:
 	return ret_constant;
 }
 
-ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)
+ZEND_API zval *zend_get_constant_ex(zend_string *cname, const zend_class_entry *scope, uint32_t flags)
 {
 	zend_constant *c;
 	const char *colon;
@@ -495,7 +494,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	return &c->value;
 }
 
-static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_constant *c)
+static void* zend_hash_add_constant(HashTable *ht, zend_string *key, const zend_constant *c)
 {
 	void *ret;
 	zend_constant *copy = pemalloc(sizeof(zend_constant), ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);

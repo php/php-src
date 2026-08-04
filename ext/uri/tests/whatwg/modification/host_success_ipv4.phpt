@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - host - IPv4 address
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

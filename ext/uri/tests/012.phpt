@@ -1,7 +1,5 @@
 --TEST--
 Test parsing of various schemes
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

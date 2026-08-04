@@ -13,7 +13,7 @@ $n = gmp_init(5);
 try {
     gmp_setbit($n, -20, false);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(gmp_strval($n));
 
@@ -39,26 +39,26 @@ $b = "";
 try {
     gmp_setbit($b, 23);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $a = array();
 try {
     gmp_setbit($a, array());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
 string(2) "-1"
-gmp_setbit(): Argument #2 ($index) must be between 0 and %d * %d
+ValueError: gmp_setbit(): Argument #2 ($index) must be between 0 and %d * %d
 string(1) "5"
 string(1) "1"
 string(1) "7"
 string(12) "100008388608"
 string(12) "100000000000"
 string(12) "100000000008"
-gmp_setbit(): Argument #1 ($num) must be of type GMP, string given
-gmp_setbit(): Argument #1 ($num) must be of type GMP, array given
+TypeError: gmp_setbit(): Argument #1 ($num) must be of type GMP, string given
+TypeError: gmp_setbit(): Argument #1 ($num) must be of type GMP, array given
 Done

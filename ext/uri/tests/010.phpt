@@ -1,7 +1,5 @@
 --TEST--
 Test parsing URIs when a base URI is present
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

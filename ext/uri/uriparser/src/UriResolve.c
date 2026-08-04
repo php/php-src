@@ -183,9 +183,8 @@ static int URI_FUNC(AddBaseUriImpl)(URI_TYPE(Uri) * absDest,
                 if ((options & URI_RESOLVE_IDENTICAL_SCHEME_COMPAT)
                     && (absBase->scheme.first != NULL)
                     && (relSource->scheme.first != NULL)
-                    && (0
-                        == URI_FUNC(CompareRange)(&(absBase->scheme),
-                                                  &(relSource->scheme)))) {
+                    && (URI_FUNC(RangeEquals)(&(absBase->scheme),
+                                              &(relSource->scheme)))) {
                     /* clang-format off */
     /* [00/32]     undefine(R.scheme); */
                     /* clang-format on */

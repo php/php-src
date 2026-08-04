@@ -46,6 +46,11 @@
     case 'method':
       echo $_SERVER['REQUEST_METHOD'];
       break;
+    case 'redirect':
+      // A 307 preserves the method and body, so libcurl must rewind the upload
+      // (via CURLOPT_SEEKFUNCTION) before resending it to the new location.
+      header('Location: /get.inc?test=input', true, 307);
+      break;
     default:
       echo "Hello World!\n";
       echo "Hello World!";

@@ -17,5 +17,6 @@ try {
 } catch(Exception $e) {}
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_replace_callback() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 DONE

@@ -19,7 +19,7 @@ Warning: Undefined variable $c in %s on line %d
 
 Deprecated: zend_test_compile_string(): Passing null to parameter #3 ($position) of type int is deprecated in %s on line %d
 
-Warning: require(sumfile.php): Failed to open stream: No such file or directory in <?php
+Warning: require(): Failed to open stream: No such file or directory in <?php
 require("sumfile.php");
 ?> on line %d
 

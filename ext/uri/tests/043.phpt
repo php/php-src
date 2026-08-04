@@ -1,7 +1,5 @@
 --TEST--
 Test reference resolution
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

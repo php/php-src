@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -57,7 +57,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	if (!compiled) {
 		UnicodeString	rulesStr;
 		UParseError		parseError = UParseError();
-		if (intl_stringFromChar(rulesStr, ZSTR_VAL(rules), ZSTR_LEN(rules), &status) == FAILURE) {
+		if (UNEXPECTED(intl_stringFromChar(rulesStr, ZSTR_VAL(rules), ZSTR_LEN(rules), &status) == FAILURE)) {
 			zend_throw_exception(IntlException_ce_ptr,
 				"IntlRuleBasedBreakIterator::__construct(): rules were not a valid UTF-8 string", 0);
 			RETURN_THROWS();
@@ -65,7 +65,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 
 		rbbi = new RuleBasedBreakIterator(rulesStr, parseError, status);
 		intl_error_set_code(NULL, status);
-		if (U_FAILURE(status)) {
+		if (UNEXPECTED(U_FAILURE(status))) {
 			smart_str parse_error_str;
 			parse_error_str = intl_parse_error_to_string(&parseError);
 			zend_throw_exception_ex(IntlException_ce_ptr, 0,
@@ -78,7 +78,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 		}
 	} else { // compiled
 		rbbi = new RuleBasedBreakIterator(reinterpret_cast<uint8_t *>(ZSTR_VAL(rules)), ZSTR_LEN(rules), status);
-		if (U_FAILURE(status)) {
+		if (UNEXPECTED(U_FAILURE(status))) {
 			zend_throw_exception(IntlException_ce_ptr,
 				"IntlRuleBasedBreakIterator::__construct(): unable to create instance from compiled rules", 0);
 			delete rbbi;
@@ -165,7 +165,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules)
 	uint32_t		rules_len;
 	const uint8_t	*rules = fetch_rbbi(bio)->getBinaryRules(rules_len);
 
-	if (rules_len > INT_MAX - 1) {
+	if (UNEXPECTED(rules_len > INT_MAX - 1)) {
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"the rules are too large");
 		RETURN_FALSE;

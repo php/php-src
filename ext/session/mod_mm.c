@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
@@ -40,11 +38,11 @@
 
 typedef struct ps_sd {
 	struct ps_sd *next;
-	uint32_t hv;		/* hash value of key */
-	time_t ctime;		/* time of last change */
+	uint32_t hv;        /* hash value of key */
+	time_t ctime;       /* time of last change */
 	void *data;
-	size_t datalen;		/* amount of valid data */
-	size_t alloclen;	/* amount of allocated memory for data */
+	size_t datalen;     /* amount of valid data */
+	size_t alloclen;    /* amount of allocated memory for data */
 	zend_string *key;
 } ps_sd;
 
@@ -464,7 +462,7 @@ PS_CREATE_SID_FUNC(mm)
 				return NULL;
 			}
 		}
-	} while(!sid);
+	} while (!sid);
 
 	return sid;
 }
@@ -483,7 +481,7 @@ PS_VALIDATE_SID_FUNC(mm)
 	PS_MM_DATA;
 
 	mm_lock(data->mm, MM_LOCK_RD);
-	zend_result ret = ps_mm_key_exists(data, key)
+	zend_result ret = ps_mm_key_exists(data, key);
 	mm_unlock(data->mm);
 	return ret;
 }

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -34,6 +32,24 @@
 */
 
 #ifdef LIBXML_XPATH_ENABLED
+
+static dom_object *dom_xpath_intern_for_doc(dom_xpath_object *xpath_obj, xmlDocPtr doc)
+{
+	if (xpath_obj->dom.document && xpath_obj->dom.document->ptr == doc) {
+		return &xpath_obj->dom;
+	}
+	HashTable *node_list = xpath_obj->xpath_callbacks.node_list;
+	if (node_list) {
+		zval *entry;
+		ZEND_HASH_PACKED_FOREACH_VAL(node_list, entry) {
+			dom_object *obj = Z_DOMOBJ_P(entry);
+			if (obj->document && obj->document->ptr == doc) {
+				return obj;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	return &xpath_obj->dom;
+}
 
 void dom_xpath_objects_free_storage(zend_object *object)
 {
@@ -61,7 +77,8 @@ static void dom_xpath_proxy_factory(xmlNodePtr node, zval *child, dom_object *in
 
 	ZEND_ASSERT(node->type != XML_NAMESPACE_DECL);
 
-	php_dom_create_object(node, child, intern);
+	dom_xpath_object *xobj = php_xpath_obj_from_obj(&intern->std);
+	php_dom_create_object(node, child, dom_xpath_intern_for_doc(xobj, node->doc));
 }
 
 static dom_xpath_object *dom_xpath_ext_fetch_intern(xmlXPathParserContextPtr ctxt)
@@ -191,7 +208,7 @@ zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 
 /* {{{ registerNodeNamespaces bool*/
 static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
-	return (dom_xpath_object*)((char*)(obj) - XtOffsetOf(dom_xpath_object, dom));
+	return ZEND_CONTAINER_OF(obj, dom_xpath_object, dom);
 }
 
 zend_result dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
@@ -354,7 +371,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 						node = php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
 					} else {
-						php_dom_create_object(node, &child, &intern->dom);
+						dom_object *parent = dom_xpath_intern_for_doc(intern, node->doc);
+						php_dom_create_object(node, &child, parent);
 					}
 					add_next_index_zval(&retval, &child);
 				}

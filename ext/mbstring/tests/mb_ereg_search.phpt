@@ -32,9 +32,26 @@ function_exists('mb_ereg_search') or die("skip mb_ereg_search() is not available
         while($r);
     }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_search() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_search_getregs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(9) "中国abc"
+
+Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(3) "abc"
+
+Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "字符"
+
+Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(5) "china"
+
+Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(6) "string"
+
+Deprecated: Function mb_ereg_search_regs() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d

@@ -19,6 +19,7 @@
 #include "lexbor/html/interface.h"
 #include "lexbor/html/interfaces/template_element.h"
 #include "lexbor/html/interfaces/unknown_element.h"
+#include "lexbor/html/interfaces/option_element.h"
 #include "lexbor/html/tokenizer/state_rawtext.h"
 #include "lexbor/html/tokenizer/state_rcdata.h"
 
@@ -390,7 +391,8 @@ lxb_html_tree_appropriate_place_inserting_node(lxb_html_tree_t *tree,
 
 lxb_html_element_t *
 lxb_html_tree_insert_foreign_element(lxb_html_tree_t *tree,
-                                     lxb_html_token_t *token, lxb_ns_id_t ns)
+                                     lxb_html_token_t *token, lxb_ns_id_t ns,
+                                     bool only_add_stack)
 {
     lxb_status_t status;
     lxb_dom_node_t *pos;
@@ -407,7 +409,9 @@ lxb_html_tree_insert_foreign_element(lxb_html_tree_t *tree,
         return NULL;
     }
 
-    lxb_html_tree_insert_node(pos, lxb_dom_interface_node(element), ipos);
+    if (only_add_stack == false) {
+        lxb_html_tree_insert_node(pos, lxb_dom_interface_node(element), ipos);
+    }
 
     status = lxb_html_tree_open_elements_push(tree,
                                               lxb_dom_interface_node(element));
@@ -1033,44 +1037,7 @@ lxb_html_tree_reset_insertion_mode_appropriately(lxb_html_tree_t *tree)
             continue;
         }
 
-        /* Step 4 */
-        if (node->local_name == LXB_TAG_SELECT) {
-            /* Step 4.1 */
-            if (last) {
-                tree->mode = lxb_html_tree_insertion_mode_in_select;
-                return;
-            }
-
-            /* Step 4.2 */
-            size_t ancestor = idx;
-
-            for (;;) {
-                /* Step 4.3 */
-                if (ancestor == 0) {
-                    tree->mode = lxb_html_tree_insertion_mode_in_select;
-                    return;
-                }
-
-                /* Step 4.4 */
-                ancestor--;
-
-                /* Step 4.5 */
-                lxb_dom_node_t *ancestor_node = list[ancestor];
-
-                if(lxb_html_tree_node_is(ancestor_node, LXB_TAG_TEMPLATE)) {
-                    tree->mode = lxb_html_tree_insertion_mode_in_select;
-                    return;
-                }
-
-                /* Step 4.6 */
-                else if(lxb_html_tree_node_is(ancestor_node, LXB_TAG_TABLE)) {
-                    tree->mode = lxb_html_tree_insertion_mode_in_select_in_table;
-                    return;
-                }
-            }
-        }
-
-        /* Step 5-15 */
+        /* Step 4-15 */
         switch (node->local_name) {
             case LXB_TAG_TD:
             case LXB_TAG_TH:
@@ -1309,6 +1276,41 @@ lxb_html_tree_element_in_scope_td_th(lxb_html_tree_t *tree)
     return NULL;
 }
 
+lxb_dom_node_t *
+lxb_html_tree_element_in_scope_option_optgroup(lxb_html_tree_t *tree)
+{
+    lxb_dom_node_t *node;
+
+    size_t idx = tree->open_elements->length;
+    void **list = tree->open_elements->list;
+
+    while (idx != 0) {
+        idx--;
+        node = list[idx];
+
+        switch (node->local_name) {
+            case LXB_TAG_OPTION:
+            case LXB_TAG_OPTGROUP:
+                if (node->ns == LXB_NS_HTML) {
+                    return node;
+                }
+
+                break;
+
+            default:
+                break;
+        }
+
+        if (lxb_html_tag_is_category(node->local_name, LXB_NS_HTML,
+                                     LXB_HTML_TAG_CATEGORY_SCOPE))
+        {
+            return NULL;
+        }
+    }
+
+    return NULL;
+}
+
 bool
 lxb_html_tree_check_scope_element(lxb_html_tree_t *tree)
 {
@@ -1361,8 +1363,6 @@ lxb_html_tree_close_p_element(lxb_html_tree_t *tree, lxb_html_token_t *token)
     lxb_html_tree_open_elements_pop_until_tag_id(tree, LXB_TAG_P, LXB_NS_HTML,
                                                  true);
 }
-
-#include "lexbor/html/serialize.h"
 
 bool
 lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,

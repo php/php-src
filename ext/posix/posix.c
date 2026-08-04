@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Kristian Koehntopp <kris@koehntopp.de>                       |
    +----------------------------------------------------------------------+
@@ -690,7 +688,11 @@ static void php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ 
 	array_init(&array_members);
 	zend_hash_real_init_packed(Z_ARRVAL(array_members));
 
-	add_assoc_string(array_group, "name", g->gr_name);
+	if (g->gr_name) {
+		add_assoc_string(array_group, "name", g->gr_name);
+	} else {
+		add_assoc_null(array_group, "name");
+	}
 	if (g->gr_passwd) {
 		add_assoc_string(array_group, "passwd", g->gr_passwd);
 	} else {
@@ -928,13 +930,33 @@ static void php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* 
 {
 	ZEND_ASSERT(Z_TYPE_P(return_value) == IS_ARRAY);
 
-	add_assoc_string(return_value, "name",      pw->pw_name);
-	add_assoc_string(return_value, "passwd",    pw->pw_passwd);
-	add_assoc_long  (return_value, "uid",       pw->pw_uid);
-	add_assoc_long  (return_value, "gid",		pw->pw_gid);
-	add_assoc_string(return_value, "gecos",     pw->pw_gecos);
-	add_assoc_string(return_value, "dir",       pw->pw_dir);
-	add_assoc_string(return_value, "shell",     pw->pw_shell);
+	if (pw->pw_name) {
+		add_assoc_string(return_value, "name", pw->pw_name);
+	} else {
+		add_assoc_null(return_value, "name");
+	}
+	if (pw->pw_passwd) {
+		add_assoc_string(return_value, "passwd", pw->pw_passwd);
+	} else {
+		add_assoc_null(return_value, "passwd");
+	}
+	add_assoc_long(return_value, "uid", pw->pw_uid);
+	add_assoc_long(return_value, "gid", pw->pw_gid);
+	if (pw->pw_gecos) {
+		add_assoc_string(return_value, "gecos", pw->pw_gecos);
+	} else {
+		add_assoc_null(return_value, "gecos");
+	}
+	if (pw->pw_dir) {
+		add_assoc_string(return_value, "dir", pw->pw_dir);
+	} else {
+		add_assoc_null(return_value, "dir");
+	}
+	if (pw->pw_shell) {
+		add_assoc_string(return_value, "shell", pw->pw_shell);
+	} else {
+		add_assoc_null(return_value, "shell");
+	}
 }
 /* }}} */
 

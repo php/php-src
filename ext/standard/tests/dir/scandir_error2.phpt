@@ -27,14 +27,14 @@ var_dump(scandir('/idonotexist'));
 
 -- Pass scandir() an absolute path that does not exist --
 
-Warning: scandir(%s/idonotexist): Failed to open directory: %s in %s on line %d
+Warning: scandir(): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
 -- Pass scandir() a relative path that does not exist --
 
-Warning: scandir(/idonotexist): Failed to open directory: %s in %s on line %d
+Warning: scandir(): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)

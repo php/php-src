@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\Rfc3986\Uri component modification - path - changing an existing one
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

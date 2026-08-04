@@ -22,5 +22,5 @@ try {
 }
 ?>
 --EXPECT--
-socket_setopt(): Argument #4 ($value) must be of between 0 and 65535
-socket_setopt(): Argument #4 ($value) must be of between 0 and 65535
+socket_setopt(): Argument #4 ($value) must be between 0 and 65535
+socket_setopt(): Argument #4 ($value) must be between 0 and 65535

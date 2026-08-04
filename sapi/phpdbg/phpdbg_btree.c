@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -158,13 +156,18 @@ int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr,
 		}
 
 		{
-			phpdbg_btree_branch *memory = *branch = pemalloc((i + 2) * sizeof(phpdbg_btree_branch), tree->persistent);
+			phpdbg_btree_branch *memory = pemalloc((i + 2) * sizeof(phpdbg_btree_branch), tree->persistent);
+			phpdbg_btree_branch *node = memory;
 			do {
-				(*branch)->branches[!((idx >> i) % 2)] = NULL;
-				branch = &(*branch)->branches[(idx >> i) % 2];
-				*branch = ++memory;
+				node->branches[!((idx >> i) % 2)] = NULL;
+				node->branches[(idx >> i) % 2] = node + 1;
+				node++;
 			} while (i--);
+			node->result.idx = idx;
+			node->result.ptr = ptr;
+			*branch = memory;
 			tree->count++;
+			return SUCCESS;
 		}
 	} else if (!(flags & PHPDBG_BTREE_UPDATE)) {
 		return FAILURE;

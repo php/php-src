@@ -2,15 +2,13 @@
 %code top {
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Jakub Zelenka <bukka@php.net>                                |
   +----------------------------------------------------------------------+
@@ -41,7 +39,6 @@ int json_yydebug = 1;
 
 }
 
-%locations
 %define api.prefix {php_json_yy}
 %define api.pure full
 %param  { php_json_parser *parser  }
@@ -66,8 +63,8 @@ int json_yydebug = 1;
 %destructor { zval_ptr_dtor_nogc(&$$); } <value>
 
 %code {
-static int php_json_yylex(union YYSTYPE *value, YYLTYPE *location, php_json_parser *parser);
-static void php_json_yyerror(YYLTYPE *location, php_json_parser *parser, char const *msg);
+static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
+static void php_json_yyerror(php_json_parser *parser, char const *msg);
 static int php_json_parser_array_create(php_json_parser *parser, zval *array);
 static int php_json_parser_object_create(php_json_parser *parser, zval *array);
 
@@ -277,7 +274,7 @@ static int php_json_parser_object_update_validate(php_json_parser *parser, zval 
 	return SUCCESS;
 }
 
-static int php_json_yylex(union YYSTYPE *value, YYLTYPE *location, php_json_parser *parser)
+static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 {
 	int token = php_json_scan(&parser->scanner);
 
@@ -293,15 +290,10 @@ static int php_json_yylex(union YYSTYPE *value, YYLTYPE *location, php_json_pars
 		value->value = parser->scanner.value;
 	}
 
-	location->first_column = PHP_JSON_SCANNER_LOCATION(parser->scanner, first_column);
-	location->first_line = PHP_JSON_SCANNER_LOCATION(parser->scanner, first_line);
-	location->last_column = PHP_JSON_SCANNER_LOCATION(parser->scanner, last_column);
-	location->last_line = PHP_JSON_SCANNER_LOCATION(parser->scanner, last_line);
-
 	return token;
 }
 
-static void php_json_yyerror(YYLTYPE *location, php_json_parser *parser, char const *msg)
+static void php_json_yyerror(php_json_parser *parser, char const *msg)
 {
 	if (!parser->scanner.errcode) {
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
@@ -313,14 +305,28 @@ PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parse
 	return parser->scanner.errcode;
 }
 
-PHP_JSON_API size_t php_json_parser_error_line(const php_json_parser *parser)
+static uint64_t php_json_compute_error_column(const php_json_scanner *s)
 {
-	return parser->scanner.errloc.first_line;
+	const php_json_ctype *p = s->line_start;
+	const php_json_ctype *end = s->token;
+	/* Count characters from the start of the line to the failing token,
+	 * folding UTF-8 continuation bytes into their leading byte. */
+	uint64_t column = 1;
+
+	while (p < end) {
+		if ((*p & 0b11000000) != 0b10000000) {
+			column++;
+		}
+		p++;
+	}
+	return column;
 }
 
-PHP_JSON_API size_t php_json_parser_error_column(const php_json_parser *parser)
+PHP_JSON_API void php_json_parser_error_details(const php_json_parser *parser, php_json_error_details *out)
 {
-	return parser->scanner.errloc.first_column;
+	out->code = parser->scanner.errcode;
+	out->line = parser->scanner.line;
+	out->column = php_json_compute_error_column(&parser->scanner);
 }
 
 static const php_json_parser_methods default_parser_methods =

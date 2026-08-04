@@ -44,6 +44,7 @@
 .file "jump_x86_64_sysv_elf_gas.S"
 .text
 .globl jump_fcontext
+.hidden jump_fcontext
 .type jump_fcontext,@function
 .align 16
 jump_fcontext:
@@ -66,14 +67,6 @@ jump_fcontext:
     movq  %r15, 0x28(%rsp)  /* save R15 */
     movq  %rbx, 0x30(%rsp)  /* save RBX */
     movq  %rbp, 0x38(%rsp)  /* save RBP */
-
-#if BOOST_CONTEXT_SHADOW_STACK
-    /* grow the stack to reserve space for shadow stack pointer(SSP) */
-    leaq  -0x8(%rsp), %rsp
-    /* read the current SSP and store it */
-    rdsspq  %rcx
-    movq  %rcx, (%rsp)
-#endif
 
 #if BOOST_CONTEXT_SHADOW_STACK
     /* grow the stack to reserve space for shadow stack pointer(SSP) */

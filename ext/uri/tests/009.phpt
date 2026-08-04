@@ -1,7 +1,5 @@
 --TEST--
 Test parsing with IANA schemes
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

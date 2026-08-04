@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - query - URL encoded characters
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

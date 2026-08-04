@@ -1,5 +1,5 @@
 --TEST--
-GitHub #12043 segfault with IntlDateFormatter::dateType where it equals to UDAT_PATTERN (icu 50) but
+GitHub #12043 segfault with IntlDateFormatter::dateType where it equals to IntlDateFormatter::PATTERN (icu 50) but
 IntldateFormatter::timeType needs to be set as such.
 --EXTENSIONS--
 intl
@@ -16,9 +16,9 @@ try {
 	    timezone: $datetime->getTimezone(),
     );
 } catch (\IntlException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-IntlDateFormatter::__construct(): time format must be UDAT_PATTERN if date format is UDAT_PATTERN
+IntlException: IntlDateFormatter::__construct(): datefmt_create: time format must be IntlDateFormatter::PATTERN if date format is IntlDateFormatter::PATTERN

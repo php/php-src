@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - scheme - trailing colon
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

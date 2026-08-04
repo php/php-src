@@ -1,7 +1,5 @@
 --TEST--
 Test toString()
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

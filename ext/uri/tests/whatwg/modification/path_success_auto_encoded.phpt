@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\WhatWg\Url component modification - path - characters from the percent encode set
---EXTENSIONS--
-uri
 --FILE--
 <?php
 
@@ -15,5 +13,5 @@ var_dump($url2->toAsciiString());
 ?>
 --EXPECT--
 string(1) "/"
-string(8) "/p^th%23"
-string(27) "https://example.com/p^th%23"
+string(10) "/p%5Eth%23"
+string(29) "https://example.com/p%5Eth%23"

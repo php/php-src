@@ -1,3 +1,17 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Authors: Gustavo Lopes    <cataphract@php.net>                       |
+   +----------------------------------------------------------------------+
+ */
+
 #ifdef __sun
 /* to enable 'new' ancillary data layout instead */
 # define _XPG4_2
@@ -571,7 +585,6 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 	const struct in_addr *addr = (const struct in_addr *)data;
 	socklen_t size = INET_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
-	memset(ZSTR_VAL(str), '\0', size);
 
 	ZVAL_NEW_STR(zv, str);
 
@@ -581,7 +594,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in[] = {
 		{"family", sizeof("family"), false, offsetof(struct sockaddr_in, sin_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -622,8 +635,6 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 	socklen_t size = INET6_ADDRSTRLEN;
 	zend_string *str = zend_string_alloc(size - 1, 0);
 
-	memset(ZSTR_VAL(str), '\0', size);
-
 	ZVAL_NEW_STR(zv, str);
 
 	if (inet_ntop(AF_INET6, addr, Z_STRVAL_P(zv), size) == NULL) {
@@ -632,7 +643,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STR_P(zv) = zend_string_truncate(Z_STR_P(zv), strlen(Z_STRVAL_P(zv)), 0);
 }
 static const field_descriptor descriptors_sockaddr_in6[] = {
 		{"family", sizeof("family"), false, offsetof(struct sockaddr_in6, sin6_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -1207,6 +1218,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	if (iovlen > UINT_MAX) {
 		do_to_zval_err(ctx, "unexpectedly large value for iov_len: %lu",
 				(unsigned long)iovlen);
+		return;
 	}
 	array_init_size(zv, (uint32_t)iovlen);
 
@@ -1270,11 +1282,10 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 #elif defined(SIOCGIFINDEX)
 		{
 			struct ifreq ifr;
-			if (ZSTR_LEN(str) >= sizeof(ifr.ifr_name)) {
+			if (strlcpy(ifr.ifr_name, ZSTR_VAL(str), sizeof(ifr.ifr_name))
+					>= sizeof(ifr.ifr_name)) {
 				do_from_zval_err(ctx, "the interface name \"%s\" is too large ", ZSTR_VAL(str));
-			}
-			memcpy(ifr.ifr_name, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-			if (ioctl(ctx->sock->bsd_socket, SIOCGIFINDEX, &ifr) < 0) {
+			} else if (ioctl(ctx->sock->bsd_socket, SIOCGIFINDEX, &ifr) < 0) {
 				if (errno == ENODEV) {
 					do_from_zval_err(ctx, "no interface with name \"%s\" could be "
 							"found", ZSTR_VAL(str));
@@ -1387,7 +1398,7 @@ static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, se
 			return;
 		}
 
-		iarr[i] = sock->bsd_socket;
+		iarr[i - 1] = sock->bsd_socket;
 		return;
 	}
 

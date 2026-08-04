@@ -26,12 +26,29 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
     // An unclosed backref is ignored
     echo mb_ereg_replace('(?<a>\w+)', '-\k<a', 'AA'), PHP_EOL;
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 _a_ _b_ _c_ _d_ _e_
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 <abc> <def> <ghi>
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 123456789aa-a-
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 123456789aa-a-
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 a_\k<01>
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 -\1-
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 -\k<>-
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 -\k<a

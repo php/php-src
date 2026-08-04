@@ -34,16 +34,18 @@ echo "Done\n";
 ?>
 --EXPECT--
 array(4) {
+  ["count"]=>
+  int(3)
   [0]=>
   string(6) "cn=bob"
   [1]=>
   string(10) "dc=example"
   [2]=>
   string(6) "dc=com"
-  ["count"]=>
-  int(3)
 }
 array(5) {
+  ["count"]=>
+  int(4)
   [0]=>
   string(6) "cn=bob"
   [1]=>
@@ -52,20 +54,20 @@ array(5) {
   string(10) "dc=example"
   [3]=>
   string(6) "dc=com"
-  ["count"]=>
-  int(4)
 }
 array(4) {
+  ["count"]=>
+  int(3)
   [0]=>
   string(3) "bob"
   [1]=>
   string(7) "example"
   [2]=>
   string(3) "com"
-  ["count"]=>
-  int(3)
 }
 array(5) {
+  ["count"]=>
+  int(4)
   [0]=>
   string(3) "bob"
   [1]=>
@@ -74,8 +76,6 @@ array(5) {
   string(7) "example"
   [3]=>
   string(3) "com"
-  ["count"]=>
-  int(4)
 }
 bool(false)
 bool(false)

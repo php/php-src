@@ -44,23 +44,23 @@ object(finfo)#%d (0) {
 object(finfo)#%d (0) {
 }
 
-Warning: finfo_open(%s123): Failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(%s123): Failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(): Failed to open stream: No such file or directory in %s on line %d
 
 Warning: finfo_open(): Failed to load magic database at "%s123" in %s on line %d
 bool(false)
 
-Warning: finfo_open(%s1): Failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(%s1): Failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(): Failed to open stream: No such file or directory in %s on line %d
 
 Warning: finfo_open(): Failed to load magic database at "%s1" in %s on line %d
 bool(false)
 
-Warning: finfo_open(%sinexistent): Failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(): Failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(%sinexistent): Failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(): Failed to open stream: No such file or directory in %s on line %d
 
 Warning: finfo_open(): Failed to load magic database at "%sinexistent" in %s on line %d
 bool(false)
@@ -68,6 +68,6 @@ object(finfo)#%d (%d) {
 }
 object(finfo)#%d (%d) {
 }
-finfo::__construct(%s123): Failed to open stream: No such file or directory
-finfo::__construct(%s1): Failed to open stream: No such file or directory
-finfo::__construct(%sinexistent): Failed to open stream: No such file or directory
+finfo::__construct(): Failed to open stream: No such file or directory
+finfo::__construct(): Failed to open stream: No such file or directory
+finfo::__construct(): Failed to open stream: No such file or directory

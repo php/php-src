@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
   +----------------------------------------------------------------------+
@@ -67,9 +65,7 @@ ZEND_GET_MODULE(sysvmsg)
 zend_class_entry *sysvmsg_queue_ce;
 static zend_object_handlers sysvmsg_queue_object_handlers;
 
-static inline sysvmsg_queue_t *sysvmsg_queue_from_obj(zend_object *obj) {
-	return (sysvmsg_queue_t *)((char *)(obj) - XtOffsetOf(sysvmsg_queue_t, std));
-}
+#define sysvmsg_queue_from_obj(obj) ZEND_CONTAINER_OF(obj, sysvmsg_queue_t, std)
 
 #define Z_SYSVMSG_QUEUE_P(zv) sysvmsg_queue_from_obj(Z_OBJ_P(zv))
 
@@ -103,7 +99,7 @@ PHP_MINIT_FUNCTION(sysvmsg)
 	sysvmsg_queue_ce->default_object_handlers = &sysvmsg_queue_object_handlers;
 
 	memcpy(&sysvmsg_queue_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	sysvmsg_queue_object_handlers.offset = XtOffsetOf(sysvmsg_queue_t, std);
+	sysvmsg_queue_object_handlers.offset = offsetof(sysvmsg_queue_t, std);
 	sysvmsg_queue_object_handlers.free_obj = sysvmsg_queue_free_obj;
 	sysvmsg_queue_object_handlers.get_constructor = sysvmsg_queue_get_constructor;
 	sysvmsg_queue_object_handlers.clone_obj = NULL;
@@ -196,10 +192,21 @@ PHP_FUNCTION(msg_stat_queue)
 /* {{{ Check whether a message queue exists */
 PHP_FUNCTION(msg_queue_exists)
 {
-	zend_long key;
+	zend_long key_arg;
+	key_t key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &key) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &key_arg) == FAILURE)	{
 		RETURN_THROWS();
+	}
+
+	key = (key_t) key_arg;
+	if ((zend_long) key != key_arg) {
+		zend_argument_value_error(1, "is out of range");
+		RETURN_THROWS();
+	}
+
+	if (key == IPC_PRIVATE) {
+		RETURN_FALSE;
 	}
 
 	RETURN_BOOL(msgget(key, 0) >= 0);
@@ -209,11 +216,18 @@ PHP_FUNCTION(msg_queue_exists)
 /* {{{ Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
 {
-	zend_long key;
+	zend_long key_arg;
 	zend_long perms = 0666;
+	key_t key;
 	sysvmsg_queue_t *mq;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &key, &perms) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &key_arg, &perms) == FAILURE)	{
+		RETURN_THROWS();
+	}
+
+	key = (key_t) key_arg;
+	if ((zend_long) key != key_arg) {
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -221,12 +235,16 @@ PHP_FUNCTION(msg_get_queue)
 	mq = Z_SYSVMSG_QUEUE_P(return_value);
 
 	mq->key = key;
-	mq->id = msgget(key, 0);
+	if (key == IPC_PRIVATE) {
+		mq->id = -1;
+	} else {
+		mq->id = msgget(key, 0);
+	}
 	if (mq->id < 0)	{
 		/* doesn't already exist; create it */
 		mq->id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
 		if (mq->id < 0)	{
-			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key_arg, strerror(errno));
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}

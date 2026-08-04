@@ -3,6 +3,13 @@ SPL: AppendIterator::append() rewinds when necessary
 --FILE--
 <?php
 
+$ap = new AppendIterator();
+try {
+	$ap->__construct();
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
 class MyArrayIterator extends ArrayIterator
 {
     function rewind(): void
@@ -14,8 +21,7 @@ class MyArrayIterator extends ArrayIterator
 
 $it = new MyArrayIterator(array(1,2));
 
-foreach($it as $k=>$v)
-{
+foreach($it as $k=>$v) {
     echo "$k=>$v\n";
 }
 
@@ -44,31 +50,24 @@ class MyAppendIterator extends AppendIterator
         parent::append($what);
     }
 
-    function parent__construct()
-    {
+    function parent__construct() {
         parent::__construct();
     }
 }
 
 $ap = new MyAppendIterator;
 
-try
-{
+try {
     $ap->append($it);
-}
-catch(\Error $e)
-{
+} catch(\Error $e) {
     echo $e->getMessage() . "\n";
 }
 
 $ap->parent__construct();
 
-try
-{
+try {
     $ap->parent__construct($it);
-}
-catch(BadMethodCallException $e)
-{
+} catch(BadMethodCallException $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -76,13 +75,13 @@ $ap->append($it);
 $ap->append($it);
 $ap->append($it);
 
-foreach($ap as $k=>$v)
-{
+foreach($ap as $k=>$v) {
     echo "$k=>$v\n";
 }
 
 ?>
 --EXPECT--
+BadMethodCallException: AppendIterator::getIterator() must be called exactly once per instance
 MyArrayIterator::rewind
 0=>1
 1=>2

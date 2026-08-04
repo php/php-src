@@ -27,7 +27,7 @@ if (!CHECK_HEADER('KeccakHash.h', 'CFLAGS_HASH', hash_sha3_dir)) {
 	ERROR('Unable to locate SHA3 headers');
 }
 
-ADD_FLAG('CFLAGS_HASH', '/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+ADD_FLAG('CFLAGS_HASH', '/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded');
 
 ADD_SOURCES('ext/hash/murmur', 'PMurHash.c PMurHash128.c', 'hash');
 

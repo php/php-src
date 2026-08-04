@@ -1,7 +1,5 @@
 --TEST--
 Test percent-encoding of different URI components
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

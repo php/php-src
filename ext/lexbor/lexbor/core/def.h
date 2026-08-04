@@ -54,4 +54,6 @@
 
 #define LXB_EXTERN extern LXB_API
 
+#define lxb_size(_size) ((size_t) (_size))
+
 #endif /* LEXBOR_DEF_H */

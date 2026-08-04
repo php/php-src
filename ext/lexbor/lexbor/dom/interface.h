@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2021 Alexander Borisov
+ * Copyright (C) 2018-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -15,8 +15,6 @@ extern "C" {
 
 #include "lexbor/tag/const.h"
 #include "lexbor/ns/const.h"
-
-#include "lexbor/dom/exception.h"
 
 
 #define lxb_dom_interface_cdata_section(obj) ((lxb_dom_cdata_section_t *) (obj))

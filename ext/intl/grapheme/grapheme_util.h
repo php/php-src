@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Ed Batutis <ed@batutis.com>                                 |
    +----------------------------------------------------------------------+
@@ -22,7 +22,7 @@ extern "C" {
 #include "intl_convert.h"
 
 /* get_break_interator: get a break iterator from the global structure */
-UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );
+UBreakIterator* grapheme_get_break_iterator(UErrorCode *status );
 
 zend_long grapheme_ascii_check(const unsigned char *day, size_t len);
 void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len);
@@ -37,7 +37,7 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 
 int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 
-UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );
+UBreakIterator* grapheme_get_break_iterator(UErrorCode *status );
 #ifdef __cplusplus
 }
 #endif

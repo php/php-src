@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author:  Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
@@ -99,8 +97,7 @@ typedef struct {
 	/* this is necessary for the CGI SAPI module */
 	char *argv0;
 
-	char *current_user;
-	int current_user_length;
+	zend_string *current_user;
 
 	/* this is necessary for CLI module */
 	int argc;
@@ -134,19 +131,18 @@ typedef struct _sapi_globals_struct {
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
 	int64_t read_post_bytes;
-	unsigned char post_read;
-	unsigned char headers_sent;
+	bool post_read;
+	bool headers_sent;
+	bool sapi_started;
+	int options;
 	zend_stat_t global_stat;
 	char *default_mimetype;
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
 	zend_long post_max_size;
-	int options;
-	bool sapi_started;
 	double global_request_time;
 	HashTable known_post_content_types;
-	zval callback_func;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache send_header_fcc;
 	sapi_request_parse_body_context request_parse_body_context;
 } sapi_globals_struct;
 
@@ -201,25 +197,25 @@ typedef enum {					/* Parameter: 			*/
 } sapi_header_op_enum;
 
 BEGIN_EXTERN_C()
-SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg);
+SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg);
 
 SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, bool duplicate, bool replace);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1)
 
 
-SAPI_API int sapi_send_headers(void);
+SAPI_API zend_result sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
 SAPI_API void sapi_read_post_data(void);
 SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
-SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entry);
-SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry);
+SAPI_API zend_result sapi_register_post_entries(const sapi_post_entry *post_entry);
+SAPI_API zend_result sapi_register_post_entry(const sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry);
-SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void));
-SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray));
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
+SAPI_API zend_result sapi_register_default_post_reader(void (*default_post_reader)(void));
+SAPI_API zend_result sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray));
+SAPI_API zend_result sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
 
-SAPI_API int sapi_flush(void);
+SAPI_API zend_result sapi_flush(void);
 SAPI_API zend_stat_t *sapi_get_stat(void);
 SAPI_API char *sapi_getenv(const char *name, size_t name_len);
 

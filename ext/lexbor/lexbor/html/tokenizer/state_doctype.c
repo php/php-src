@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 Alexander Borisov
+ * Copyright (C) 2018-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -7,10 +7,9 @@
 #include "lexbor/html/tokenizer/state_doctype.h"
 #include "lexbor/html/tokenizer/state.h"
 
-
-#define LEXBOR_STR_RES_ANSI_REPLACEMENT_CHARACTER
-#include "lexbor/core/str_res.h"
-
+#ifndef LEXBOR_DISABLE_INTERNAL_EXTERN
+    LXB_EXTERN const lxb_char_t lexbor_str_res_ansi_replacement_character[4];
+#endif
 
 lxb_dom_attr_data_t *
 lxb_dom_attr_local_name_append(lexbor_hash_t *hash,
@@ -527,6 +526,7 @@ lxb_html_tokenizer_state_doctype_after_name_public(lxb_html_tokenizer_t *tkz,
         lxb_html_tokenizer_error_add(tkz->parse_errors, data,
                                      LXB_HTML_TOKENIZER_ERROR_INCHSEAFDONA);
 
+        tkz->token->type |= LXB_HTML_TOKEN_TYPE_FORCE_QUIRKS;
         tkz->state = lxb_html_tokenizer_state_doctype_bogus;
 
         return data;
@@ -577,6 +577,7 @@ lxb_html_tokenizer_state_doctype_after_name_system(lxb_html_tokenizer_t *tkz,
         lxb_html_tokenizer_error_add(tkz->parse_errors, data,
                                      LXB_HTML_TOKENIZER_ERROR_INCHSEAFDONA);
 
+        tkz->token->type |= LXB_HTML_TOKEN_TYPE_FORCE_QUIRKS;
         tkz->state = lxb_html_tokenizer_state_doctype_bogus;
 
         return data;
@@ -797,6 +798,7 @@ lxb_html_tokenizer_state_doctype_public_identifier_double_quoted(lxb_html_tokeni
             /* U+003E GREATER-THAN SIGN (>) */
             case 0x3E:
                 tkz->state = lxb_html_tokenizer_state_data_before;
+                tkz->token->type |= LXB_HTML_TOKEN_TYPE_FORCE_QUIRKS;
 
                 lxb_html_tokenizer_error_add(tkz->parse_errors, data,
                                              LXB_HTML_TOKENIZER_ERROR_ABDOPUID);
@@ -912,6 +914,7 @@ lxb_html_tokenizer_state_doctype_public_identifier_single_quoted(lxb_html_tokeni
             /* U+003E GREATER-THAN SIGN (>) */
             case 0x3E:
                 tkz->state = lxb_html_tokenizer_state_data_before;
+                tkz->token->type |= LXB_HTML_TOKEN_TYPE_FORCE_QUIRKS;
 
                 lxb_html_tokenizer_error_add(tkz->parse_errors, data,
                                              LXB_HTML_TOKENIZER_ERROR_ABDOPUID);
@@ -1350,6 +1353,7 @@ lxb_html_tokenizer_state_doctype_system_identifier_double_quoted(lxb_html_tokeni
             /* U+003E GREATER-THAN SIGN (>) */
             case 0x3E:
                 tkz->state = lxb_html_tokenizer_state_data_before;
+                tkz->token->type |= LXB_HTML_TOKEN_TYPE_FORCE_QUIRKS;
 
                 lxb_html_tokenizer_error_add(tkz->parse_errors, data,
                                              LXB_HTML_TOKENIZER_ERROR_ABDOSYID);
@@ -1465,6 +1469,7 @@ lxb_html_tokenizer_state_doctype_system_identifier_single_quoted(lxb_html_tokeni
             /* U+003E GREATER-THAN SIGN (>) */
             case 0x3E:
                 tkz->state = lxb_html_tokenizer_state_data_before;
+                tkz->token->type |= LXB_HTML_TOKEN_TYPE_FORCE_QUIRKS;
 
                 lxb_html_tokenizer_error_add(tkz->parse_errors, data,
                                              LXB_HTML_TOKENIZER_ERROR_ABDOSYID);

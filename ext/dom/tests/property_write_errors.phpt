@@ -49,8 +49,8 @@ try {
 ?>
 --EXPECT--
 Cannot assign array to property DOMNode::$nodeValue of type ?string
-Cannot modify readonly property DOMDocument::$nodeType
-Cannot modify readonly property DOMDocument::$xmlEncoding
-Cannot modify readonly property DOMEntity::$actualEncoding
-Cannot modify readonly property DOMEntity::$encoding
-Cannot modify readonly property DOMEntity::$version
+Cannot modify private(set) property DOMNode::$nodeType from global scope
+Cannot modify private(set) property DOMDocument::$xmlEncoding from global scope
+Cannot modify private(set) property DOMEntity::$actualEncoding from global scope
+Cannot modify private(set) property DOMEntity::$encoding from global scope
+Cannot modify private(set) property DOMEntity::$version from global scope

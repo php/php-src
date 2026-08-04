@@ -16,6 +16,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(%d) "PHP %s (cgi%s (built: %s
-Copyright (c) The PHP Group
-%AZend Engine v%s, Copyright (c) Zend Technologies%A"
+Copyright © The PHP Group and Contributors
+%AZend Engine v%s, Copyright © Zend by Perforce%A"
 Done

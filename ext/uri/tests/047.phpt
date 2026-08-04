@@ -1,7 +1,5 @@
 --TEST--
 Test IP addresses
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

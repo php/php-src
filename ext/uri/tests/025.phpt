@@ -1,7 +1,5 @@
 --TEST--
 Test property mutation - password
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

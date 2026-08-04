@@ -1,7 +1,5 @@
 --TEST--
 Test empty ports become null
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

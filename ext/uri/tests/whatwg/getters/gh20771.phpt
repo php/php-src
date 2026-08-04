@@ -1,7 +1,5 @@
 --TEST--
 GH-20771 (Assertion failure when getUnicodeHost() returns empty string)
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

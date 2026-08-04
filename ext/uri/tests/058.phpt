@@ -1,7 +1,5 @@
 --TEST--
 Test that integer overflows in the port are rejected
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

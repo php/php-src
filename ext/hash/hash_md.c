@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Taken from: ext/standard/md5.c                                       |
   +----------------------------------------------------------------------+
@@ -29,7 +27,8 @@ const php_hash_ops php_hash_md5_ops = {
 	16,
 	64,
 	sizeof(PHP_MD5_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_md4_ops = {
@@ -44,7 +43,8 @@ const php_hash_ops php_hash_md4_ops = {
 	16,
 	64,
 	sizeof(PHP_MD4_CTX),
-	1
+	1,
+	0
 };
 
 static hash_spec_result php_md2_unserialize(php_hashcontext_object *hash, zend_long magic, const zval *zv);
@@ -61,7 +61,8 @@ const php_hash_ops php_hash_md2_ops = {
 	16,
 	16,
 	sizeof(PHP_MD2_CTX),
-	1
+	1,
+	0
 };
 
 /* MD common stuff */

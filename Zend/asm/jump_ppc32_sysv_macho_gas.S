@@ -68,12 +68,13 @@
  *  -------------------------------------------------  *
  *  | 256 |                                         |  *
  *  -------------------------------------------------  *
- *  | DATA|                                         |  * 
+ *  | DATA|                                         |  *
  *  -------------------------------------------------  *
  *                                                     *
  *******************************************************/
 
 .text
+.private_extern _jump_fcontext
 .globl _jump_fcontext
 .align 2
 _jump_fcontext:
@@ -193,7 +194,7 @@ _jump_fcontext:
     ; adjust stack
     addi  r1, r1, 244
 
-    ; return transfer_t 
+    ; return transfer_t
     stw  r6, 0(r3)
     stw  r5, 4(r3)
 

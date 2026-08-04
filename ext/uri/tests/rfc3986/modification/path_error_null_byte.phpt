@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\Rfc3986\Uri component modification - path - null byte
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

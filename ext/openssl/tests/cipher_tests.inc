@@ -160,6 +160,59 @@ $php_openssl_cipher_tests = array(
             'ct'  => '1792A4E31E0755FB03E31B22116E6C2DDF9EFD6E33D536F1A0124B0A55BAE884ED93481529C76B6A',
         ),
     ),
+    'aes-128-siv' => array(
+        array(
+            'key' => 'fffefdfcfbfaf9f8f7f6f5f4f3f2f1f0' .
+                     '0f0e0d0c0b0a09080706050403020100',
+            'iv'  => '',
+            'aad' => '',
+            'tag' => 'baba5b99dfc42fa9810fb2eb71ac2e9c',
+            'pt'  => 'b1677d933fa706f7ef349f9dd569c028' .
+                     '279a5e2219728e77cfe916d5db979942' .
+                     '5d8fb93b0e26dbc85ed14c050dc9f054' .
+                     'd9153c2be1e9b99ae7a109aba1e5a7f1' .
+                     'f2131786da90fe998d3571c144d066c3',
+            'ct'  => '91416054151e844965ad20a2057e2baa' .
+                     '0e785269b152ba9d4dc834777e0d5376' .
+                     'db611856ae0d5d826f446c8eef47acb4' .
+                     '83dccb37da9481648a4907fd3d65335b' .
+                     'd9585361c0c1834ac2b975f3238ea7c6',
+       ),
+       array(
+            'key' => 'fffefdfcfbfaf9f8f7f6f5f4f3f2f1f0' .
+                     '0f0e0d0c0b0a09080706050403020100',
+            'iv'  => '',
+            'aad' => null,
+            'tag' => '606ac96568128a278b02e3e04de97b7e',
+            'pt'  => 'ea597a2f9fb0b5c4d5a6f215047b58a3' .
+                     '3d2c885bf67cbb09239239f5aecafd6f' .
+                     'd2401391154b024b05cd938b40fdc749' .
+                     'ebccb3f48a3156c0bad69cfc5035360d' .
+                     '21ad626dc866cc539f2d0e34b6824fc3',
+            'ct'  => '9c75fa0345b35e2d6cbcc91ed3fc7feb' .
+                     '84fea50c35766db0c847fb627385107b' .
+                     '4f257548d8b80ccd04261fa651fb89cc' .
+                     'e6815ecf0c8c4586ce68544ddce4c3af' .
+                     '01e9587282256569194b1dca788fd987',
+       ),
+       array(
+            'key' => 'fffefdfcfbfaf9f8f7f6f5f4f3f2f1f0' .
+                     '0f0e0d0c0b0a09080706050403020100',
+            'iv'  => '',
+            'aad' => 'c0ef488e684e6fc95e0bd1da59861259',
+            'tag' => 'a24cd6dcc0791bd7719a7f4fcb16de81',
+            'pt'  => 'b1677d933fa706f7ef349f9dd569c028' .
+                     '279a5e2219728e77cfe916d5db979942' .
+                     '5d8fb93b0e26dbc85ed14c050dc9f054' .
+                     'd9153c2be1e9b99ae7a109aba1e5a7f1' .
+                     'f2131786da90fe998d3571c144d066c3',
+            'ct'  => 'ea597a2f9fb0b5c4d5a6f215047b58a3' .
+                     '3d2c885bf67cbb09239239f5aecafd6f' .
+                     'd2401391154b024b05cd938b40fdc749' .
+                     'ebccb3f48a3156c0bad69cfc5035360d' .
+                     '21ad626dc866cc539f2d0e34b6824fc3',
+       ),
+    ),
     'chacha20-poly1305' => array(
         array(
             'key' => '808182838485868788898a8b8c8d8e8f' .

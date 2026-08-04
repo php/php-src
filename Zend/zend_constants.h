@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -85,12 +84,12 @@ void clean_module_constants(int module_number);
 void free_zend_constant(zval *zv);
 void zend_startup_constants(void);
 void zend_register_standard_constants(void);
-ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
+ZEND_API bool zend_verify_const_access(const zend_class_constant *c, const zend_class_entry *ce);
 ZEND_API zval *zend_get_constant(zend_string *name);
 ZEND_API zend_constant *zend_get_constant_ptr(zend_string *name);
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);
-ZEND_API zval *zend_get_constant_ex(zend_string *name, zend_class_entry *scope, uint32_t flags);
-ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, zend_class_entry *scope, uint32_t flags);
+ZEND_API zval *zend_get_constant_ex(zend_string *name, const zend_class_entry *scope, uint32_t flags);
+ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, const zend_class_entry *scope, uint32_t flags);
 ZEND_API zend_constant *zend_register_bool_constant(const char *name, size_t name_len, bool bval, int flags, int module_number);
 ZEND_API zend_constant *zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number);
 ZEND_API zend_constant *zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number);

@@ -13,5 +13,5 @@ stream_wrapper_register('foo', 'FooWrapper');
 var_dump(fopen('foo://bar', 'r'));
 ?>
 --EXPECTF--
-Warning: fopen(foo://bar): Failed to open stream: "FooWrapper::stream_open" call failed in %s on line %d
+Warning: fopen(): Failed to open stream: "FooWrapper::stream_open" call failed in %s on line %d
 bool(false)

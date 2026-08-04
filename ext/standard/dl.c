@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Brian Schaffner <brian@tool.net>                            |
    |          Shane Caraveo <shane@caraveo.com>                           |
@@ -45,7 +43,7 @@ PHPAPI PHP_FUNCTION(dl)
 	size_t filename_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(filename, filename_len)
+		Z_PARAM_PATH(filename, filename_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PG(enable_dl)) {
@@ -93,7 +91,7 @@ PHPAPI void *php_load_shlib(const char *path, char **errp)
 			size_t i = strlen(err);
 			(*errp)=estrdup(err);
 			php_win32_error_msg_free(err);
-			while (i > 0 && isspace((*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
+			while (i > 0 && isspace((unsigned char)(*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
 		} else {
 			(*errp) = estrdup("<No message>");
 		}
@@ -114,11 +112,11 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 	zend_module_entry *module_entry;
 	zend_module_entry *(*get_module)(void);
 	int error_type, slash_suffix = 0;
-	char *extension_dir;
+	const char *extension_dir;
 	char *err1, *err2;
 
 	if (type == MODULE_PERSISTENT) {
-		extension_dir = INI_STR("extension_dir");
+		extension_dir = zend_ini_string_literal("extension_dir");
 	} else {
 		extension_dir = PG(extension_dir);
 	}

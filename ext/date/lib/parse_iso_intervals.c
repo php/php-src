@@ -985,10 +985,10 @@ void timelib_strtointerval(const char *s, size_t len,
 	in.errors->error_messages = NULL;
 
 	if (len > 0) {
-		while (isspace(*s) && s < e) {
+		while (isspace((unsigned char)*s) && s < e) {
 			s++;
 		}
-		while (isspace(*e) && e > s) {
+		while (isspace((unsigned char)*e) && e > s) {
 			e--;
 		}
 	}

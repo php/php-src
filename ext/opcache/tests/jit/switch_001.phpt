@@ -16,7 +16,7 @@ foo();
 ?>
 DONE
 --EXPECTF--
-Warning: Undefined variable $y in %sswitch_001.php on line 4
+Warning: Undefined variable $y in %sswitch_001.php on line 3
 
-Warning: Undefined variable $y in %sswitch_001.php on line 5
+Warning: Undefined variable $y in %sswitch_001.php on line 3
 DONE

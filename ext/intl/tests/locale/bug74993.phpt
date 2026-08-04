@@ -5,6 +5,8 @@ intl
 --FILE--
 <?php
 $funcs = [
+    'locale_get_display_keyword',
+    'locale_get_display_keyword_value',
     'locale_get_display_language',
     'locale_get_display_name',
     'locale_get_display_region',
@@ -19,6 +21,23 @@ foreach ($funcs as $func) {
 }
 ?>
 --EXPECT--
+Function [ <internal:intl> function locale_get_display_keyword ] {
+
+  - Parameters [2] {
+    Parameter #0 [ <required> string $keyword ]
+    Parameter #1 [ <optional> ?string $displayLocale = null ]
+  }
+  - Return [ string|false ]
+}
+Function [ <internal:intl> function locale_get_display_keyword_value ] {
+
+  - Parameters [3] {
+    Parameter #0 [ <required> string $locale ]
+    Parameter #1 [ <required> string $keyword ]
+    Parameter #2 [ <optional> ?string $displayLocale = null ]
+  }
+  - Return [ string|false ]
+}
 Function [ <internal:intl> function locale_get_display_language ] {
 
   - Parameters [2] {

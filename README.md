@@ -11,10 +11,12 @@
 
 PHP is a popular general-purpose scripting language that is especially suited to
 web development. Fast, flexible and pragmatic, PHP powers everything from your
-blog to the most popular websites in the world. PHP is distributed under the
-[PHP License v3.01](LICENSE).
+blog to the most popular websites in the world.
 
-[![Push](https://github.com/php/php-src/actions/workflows/push.yml/badge.svg)](https://github.com/php/php-src/actions/workflows/push.yml)
+PHP is distributed under the [Modified BSD License](LICENSE)
+(SPDX-License-Identifier: `BSD-3-Clause`).
+
+[![Test](https://github.com/php/php-src/actions/workflows/test.yml/badge.svg)](https://github.com/php/php-src/actions/workflows/test.yml)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://issues.oss-fuzz.com/issues?q=project:php)
 
 ## Documentation
@@ -49,7 +51,7 @@ sudo apt install -y pkg-config build-essential autoconf bison re2c libxml2-dev l
 On Fedora, you can install these using:
 
 ```shell
-sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
+sudo dnf install re2c bison autoconf make ccache libxml2-devel sqlite-devel
 ```
 
 On MacOS, you can install these using `brew`:
@@ -128,8 +130,10 @@ permissions.
 ## PHP extensions
 
 Extensions provide additional functionality on top of PHP. PHP consists of many
-essential bundled extensions. Additional extensions can be found in the PHP
-Extension Community Library - [PECL](https://pecl.php.net).
+essential bundled extensions. Additional extensions can be found on the
+[PIE Extensions](https://packagist.org/extensions) list, and installed with
+[🥧 PIE, the PHP Installer for Extensions](https://github.com/php/pie) or the
+deprecated PHP Extension Community Library - [PECL](https://pecl.php.net).
 
 ## Contributing
 

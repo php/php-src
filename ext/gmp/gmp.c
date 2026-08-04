@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Stanislav Malyshev <stas@php.net>                            |
    +----------------------------------------------------------------------+
@@ -285,7 +283,7 @@ static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 
 static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 {
-	gmp_object *old_object = GET_GMP_OBJECT_FROM_OBJ(obj);
+	const gmp_object *old_object = GET_GMP_OBJECT_FROM_OBJ(obj);
 	gmp_object *new_object = GET_GMP_OBJECT_FROM_OBJ(gmp_create_object(obj->ce));
 
 	zend_objects_clone_members( &new_object->std, &old_object->std);
@@ -329,16 +327,25 @@ static zend_result binop_operator_helper(gmp_binary_op_t gmp_op, zval *return_va
 
 typedef void (*gmp_binary_ui_op_t)(mpz_ptr, mpz_srcptr, gmp_ulong);
 
+static void gmp_shift_operator_range_error(uint8_t opcode) {
+	zend_throw_error(
+		zend_ce_value_error, "%s must be between 0 and %lu",
+		opcode == ZEND_POW ? "Exponent" : "Shift", ULONG_MAX
+	);
+}
+
 static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2, uint8_t opcode) {
 	zend_long shift = 0;
+	gmp_ulong shift_ui = 0;
+	bool have_shift_ui = false;
 
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		if (UNEXPECTED(!IS_GMP(op2))) {
-			// For PHP 8.3 and up use zend_try_get_long()
+			bool failed;
 			switch (Z_TYPE_P(op2)) {
 				case IS_DOUBLE:
-					shift = zval_get_long(op2);
-					if (UNEXPECTED(EG(exception))) {
+					shift = zval_try_get_long(op2, &failed);
+					if (UNEXPECTED(failed)) {
 						return FAILURE;
 					}
 					break;
@@ -351,31 +358,35 @@ static zend_result shift_operator_helper(gmp_binary_ui_op_t op, zval *return_val
 					goto typeof_op_failure;
 			}
 		} else {
-			// TODO We shouldn't cast the GMP object to int here
-			shift = zval_get_long(op2);
+			mpz_ptr gmpnum_shift = GET_GMP_FROM_ZVAL(op2);
+			if (!mpz_fits_ulong_p(gmpnum_shift)) {
+				gmp_shift_operator_range_error(opcode);
+				return FAILURE;
+			}
+			shift_ui = (gmp_ulong) mpz_get_ui(gmpnum_shift);
+			have_shift_ui = true;
 		}
 	} else {
 		shift = Z_LVAL_P(op2);
 	}
 
-	if (shift < 0) {
-		zend_throw_error(
-			zend_ce_value_error, "%s must be greater than or equal to 0",
-			opcode == ZEND_POW ? "Exponent" : "Shift"
-		);
-		ZVAL_UNDEF(return_value);
-		return FAILURE;
-	} else {
-		mpz_ptr gmpnum_op, gmpnum_result;
-
-		if (!gmp_zend_parse_arg_into_mpz_ex(op1, &gmpnum_op, 1, true)) {
-			goto typeof_op_failure;
+	if (!have_shift_ui) {
+		if (shift < 0 || shift > ULONG_MAX) {
+			gmp_shift_operator_range_error(opcode);
+			return FAILURE;
 		}
-
-		INIT_GMP_RETVAL(gmpnum_result);
-		op(gmpnum_result, gmpnum_op, (gmp_ulong) shift);
-		return SUCCESS;
+		shift_ui = (gmp_ulong) shift;
 	}
+
+	mpz_ptr gmpnum_op, gmpnum_result;
+
+	if (!gmp_zend_parse_arg_into_mpz_ex(op1, &gmpnum_op, 1, true)) {
+		goto typeof_op_failure;
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	op(gmpnum_result, gmpnum_op, shift_ui);
+	return SUCCESS;
 
 typeof_op_failure: ;
 	/* Returning FAILURE without throwing an exception would emit the
@@ -393,7 +404,7 @@ typeof_op_failure: ;
 		case ZEND_SR:
 			op_sigil = ">>";
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	zend_type_error("Unsupported operand types: %s %s %s", zend_zval_type_name(op1), op_sigil, zend_zval_type_name(op2));
 	return FAILURE;
@@ -588,7 +599,7 @@ ZEND_MINIT_FUNCTION(gmp)
 	gmp_ce->unserialize = gmp_unserialize;
 
 	memcpy(&gmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	gmp_object_handlers.offset = XtOffsetOf(gmp_object, std);
+	gmp_object_handlers.offset = offsetof(gmp_object, std);
 	gmp_object_handlers.free_obj = gmp_free_object_storage;
 	gmp_object_handlers.cast_object = gmp_cast_object;
 	gmp_object_handlers.get_debug_info = gmp_get_debug_info;
@@ -633,8 +644,17 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	const char *num_str = ZSTR_VAL(val);
 	bool skip_lead = false;
 
+	if (UNEXPECTED(zend_str_has_nul_byte(val))) {
+		if (arg_pos == 0) {
+			zend_value_error("Number is not an integer string");
+		} else {
+			zend_argument_value_error(arg_pos, "is not an integer string");
+		}
+		return FAILURE;
+	}
+
 	size_t num_len = ZSTR_LEN(val);
-	while (isspace(*num_str)) {
+	while (isspace((unsigned char)*num_str)) {
 		++num_str;
 		--num_len;
 	}
@@ -929,7 +949,7 @@ ZEND_FUNCTION(gmp_div_qr)
 		case GMP_ROUND_MINUSINF:
 			mpz_fdiv_qr(gmpnum_result1, gmpnum_result2, gmpnum_a, gmpnum_b);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -1062,6 +1082,40 @@ GMP_UNARY_OP_FUNCTION(com);
 /* {{{ Finds next prime of a */
 GMP_UNARY_OP_FUNCTION(nextprime);
 
+#ifdef HAVE___GMPZ_PREVPRIME
+/* {{{ Finds previous prime of a */
+ZEND_FUNCTION(gmp_prevprime)
+{
+	mpz_ptr gmpnum_a, gmpnum_result;
+	zval *definitely_prime = NULL;
+	int res;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_a)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(definitely_prime)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (mpz_cmp_ui(gmpnum_a, 2) <= 0) {
+		/*
+		 * mpz_prevprime() returns 0 when no previous prime exists, which happens
+		 * for operands not greater than 2.
+		 * https://gmplib.org/manual/Number-Theoretic-Functions#index-mpz_005fprevprime
+		 */
+		zend_argument_value_error(1, "must be greater than 2");
+		RETURN_THROWS();
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	res = mpz_prevprime(gmpnum_result, gmpnum_a);
+	ZEND_ASSERT(res);
+	if (definitely_prime) {
+		ZEND_TRY_ASSIGN_REF_BOOL(definitely_prime, res == 2);
+	}
+}
+/* }}} */
+#endif
+
 /* Add a and b */
 GMP_BINARY_OP_FUNCTION(add);
 /* Subtract b from a */
@@ -1089,13 +1143,10 @@ ZEND_FUNCTION(gmp_fact)
 		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (mpz_sgn(gmpnum) < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
+	if (!mpz_fits_ulong_p(gmpnum)) {
+		zend_argument_value_error(1, "must be between 0 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
-
-	// TODO: Check that we don't an int that is larger than an unsigned long?
-	// Could use mpz_fits_slong_p() if we revert to using mpz_get_si()
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	mpz_fac_ui(gmpnum_result, mpz_get_ui(gmpnum));
@@ -1114,8 +1165,8 @@ ZEND_FUNCTION(gmp_binomial)
 		Z_PARAM_LONG(k)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (k < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (k < 0 || k > ULONG_MAX) {
+		zend_argument_value_error(2, "must be between 0 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1136,8 +1187,8 @@ ZEND_FUNCTION(gmp_pow)
 		Z_PARAM_LONG(exp)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (exp < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
+	if (exp < 0 || exp > ULONG_MAX) {
+		zend_argument_value_error(2, "must be between 0 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1163,7 +1214,7 @@ ZEND_FUNCTION(gmp_powm)
 	}
 
 	if (!mpz_cmp_ui(gmpnum_mod, 0)) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+		zend_argument_error(zend_ce_division_by_zero_error, 3, "Modulo by zero");
 		RETURN_THROWS();
 	}
 
@@ -1171,6 +1222,39 @@ ZEND_FUNCTION(gmp_powm)
 	mpz_powm(gmpnum_result, gmpnum_base, gmpnum_exp, gmpnum_mod);
 }
 /* }}} */
+
+#ifdef HAVE___GMPZ_POWM_SEC
+/* {{{ Raise base to power exp and take result modulo mod using a side-channel quiet algorithm */
+ZEND_FUNCTION(gmp_powm_sec)
+{
+	mpz_ptr gmpnum_base, gmpnum_exp, gmpnum_mod, gmpnum_result;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_base)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_exp)
+		GMP_Z_PARAM_INTO_MPZ_PTR(gmpnum_mod)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (mpz_sgn(gmpnum_exp) <= 0) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(!mpz_odd_p(gmpnum_mod))) {
+		/* Zero is an even modulus, but report it like gmp_powm() does. */
+		if (!mpz_cmp_ui(gmpnum_mod, 0)) {
+			zend_argument_error(zend_ce_division_by_zero_error, 3, "Modulo by zero");
+		} else {
+			zend_argument_value_error(3, "must be odd");
+		}
+		RETURN_THROWS();
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	mpz_powm_sec(gmpnum_result, gmpnum_base, gmpnum_exp, gmpnum_mod);
+}
+/* }}} */
+#endif
 
 /* {{{ Takes integer part of square root of a */
 ZEND_FUNCTION(gmp_sqrt)
@@ -1226,13 +1310,13 @@ ZEND_FUNCTION(gmp_root)
 		Z_PARAM_LONG(nth)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (nth <= 0) {
-		zend_argument_value_error(2, "must be greater than 0");
+	if (nth <= 0 || nth > ULONG_MAX) {
+		zend_argument_value_error(2, "must be between 1 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
-		zend_argument_value_error(2, "must be odd if argument #1 ($a) is negative");
+		zend_argument_value_error(2, "must be odd if argument #1 ($num) is negative");
 		RETURN_THROWS();
 	}
 
@@ -1253,13 +1337,13 @@ ZEND_FUNCTION(gmp_rootrem)
 		Z_PARAM_LONG(nth)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (nth <= 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 1");
+	if (nth <= 0 || nth > ULONG_MAX) {
+		zend_argument_value_error(2, "must be between 1 and %lu", ULONG_MAX);
 		RETURN_THROWS();
 	}
 
 	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
-		zend_argument_value_error(2, "must be odd if argument #1 ($a) is negative");
+		zend_argument_value_error(2, "must be odd if argument #1 ($num) is negative");
 		RETURN_THROWS();
 	}
 
@@ -1511,7 +1595,7 @@ ZEND_FUNCTION(gmp_random_range)
 
 	gmp_init_random();
 	if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
-		zend_argument_value_error(1, "must be less than argument #2 ($maximum)");
+		zend_argument_value_error(1, "must be less than argument #2 ($max)");
 		RETURN_THROWS();
 	}
 

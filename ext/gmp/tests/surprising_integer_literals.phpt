@@ -19,15 +19,15 @@ foreach ($values as $value) {
     try {
         var_dump(gmp_init($value));
     } catch (\ValueError $e) {
-        echo $e->getMessage(), \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 ?>
 --EXPECT--
-gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string

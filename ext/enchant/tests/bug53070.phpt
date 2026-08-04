@@ -13,16 +13,16 @@ var_dump(enchant_broker_get_dict_path($broker, ENCHANT_MYSPELL));
 var_dump(enchant_broker_get_dict_path($broker, ENCHANT_ISPELL));
 ?>
 --EXPECTF--
-Deprecated: Constant ENCHANT_MYSPELL is deprecated in %s
+Deprecated: Constant ENCHANT_MYSPELL is deprecated since 8.0, as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated in %s on line %d
 
-Deprecated: Function enchant_broker_get_dict_path() is deprecated since 8.0 in %s
+Deprecated: Function enchant_broker_get_dict_path() is deprecated since 8.0 in %s on line %d
 
 Warning: enchant_broker_get_dict_path(): dict_path not set in %s on line %d
 bool(false)
 
-Deprecated: Constant ENCHANT_ISPELL is deprecated in %s
+Deprecated: Constant ENCHANT_ISPELL is deprecated since 8.0, as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated in %s on line %d
 
-Deprecated: Function enchant_broker_get_dict_path() is deprecated since 8.0 in %s
+Deprecated: Function enchant_broker_get_dict_path() is deprecated since 8.0 in %s on line %d
 
 Warning: enchant_broker_get_dict_path(): dict_path not set in %s on line %d
 bool(false)

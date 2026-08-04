@@ -80,10 +80,6 @@ require_once 'skipifconnectfailure.inc';
     $field = mysqli_fetch_field($res);
     var_dump($field);
     /* label column, result set charset */
-    if ($field->charsetnr != $charsetInfo->number) {
-        printf("[004] Expecting charset %s/%d got %d\n",
-            $charsetInfo->charset, $charsetInfo->number, $field->charsetnr);
-    }
     if ($field->length != $charsetInfo->max_length) {
         printf("[005] Expecting length %d got %d\n",
             $charsetInfo->max_length, $field->max_length);

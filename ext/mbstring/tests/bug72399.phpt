@@ -16,10 +16,15 @@ var_dump($var6);
 try {
     $var13 = mb_ereg_search_pos();
 } catch (\Error $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
+
+Deprecated: Function mb_eregi_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(0) ""
-No pattern was provided
+
+Deprecated: Function mb_ereg_search_pos() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+Error: No pattern was provided

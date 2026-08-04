@@ -5,6 +5,7 @@ dom
 --SKIPIF--
 <?php
 if (LIBXML_VERSION < 20912) die('skip For libxml2 >= 2.9.12 only');
+if (preg_match('/[^\x00-\x7F]/', __DIR__)) die('skip path contains non-ASCII characters that libxml URI parser rejects');
 ?>
 --INI--
 open_basedir=.
@@ -58,6 +59,6 @@ bool(true)
 int(4)
 bool(true)
 
-%s: DOMDocument::loadXML(): %Sfailed to load %s
+%s: DOMDocument::loadXML(): %s
 
 Warning: Attempt to read property "nodeValue" on null in %s on line %d

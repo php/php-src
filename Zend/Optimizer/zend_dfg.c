@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DFG - Data Flow Graph                                   |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -253,10 +251,9 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const ze
 {
 	uint32_t set_size = dfg->size;
 	zend_basic_block *blocks = cfg->blocks;
-	int blocks_count = cfg->blocks_count;
+	uint32_t blocks_count = cfg->blocks_count;
 	zend_bitset tmp, def, use, in, out;
-	int k;
-	int j;
+	uint32_t j;
 
 	tmp = dfg->tmp;
 	def = dfg->def;
@@ -305,7 +302,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const ze
 			}
 			if (blocks[j].successors_count != 0) {
 				zend_bitset_copy(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[0]), set_size);
-				for (k = 1; k < blocks[j].successors_count; k++) {
+				for (uint32_t k = 1; k < blocks[j].successors_count; k++) {
 					zend_bitset_union(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[k]), set_size);
 				}
 			} else {
@@ -318,7 +315,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const ze
 				/* Add predecessors of changed block to worklist */
 				{
 					const int *predecessors = &cfg->predecessors[blocks[j].predecessor_offset];
-					for (k = 0; k < blocks[j].predecessors_count; k++) {
+					for (uint32_t k = 0; k < blocks[j].predecessors_count; k++) {
 						zend_bitset_incl(worklist, predecessors[k]);
 					}
 				}

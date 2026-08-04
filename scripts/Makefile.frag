@@ -9,6 +9,10 @@ BUILD_FILES = \
 	scripts/phpize.m4 \
 	build/libtool.m4 \
 	build/ltmain.sh \
+	build/lt~obsolete.m4 \
+	build/ltoptions.m4 \
+	build/ltsugar.m4 \
+	build/ltversion.m4 \
 	build/ax_check_compile_flag.m4 \
 	build/ax_gcc_func_attribute.m4 \
 	build/php_cxx_compile_stdcxx.m4 \

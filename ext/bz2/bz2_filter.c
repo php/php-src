@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sara Golemon (pollita@php.net)                              |
    +----------------------------------------------------------------------+
@@ -23,7 +21,7 @@
 
 /* {{{ data structure */
 
-enum strm_status {
+C23_ENUM(strm_status, uint8_t) {
 	PHP_BZ2_UNINITIALIZED,
 	PHP_BZ2_RUNNING,
 	PHP_BZ2_FINISHED
@@ -36,12 +34,15 @@ typedef struct _php_bz2_filter_data {
 	size_t inbuf_len;
 	size_t outbuf_len;
 
-	enum strm_status status;              /* Decompress option */
-	unsigned int small_footprint : 1;     /* Decompress option */
-	unsigned int expect_concatenated : 1; /* Decompress option */
-	unsigned int is_flushed : 1;          /* only for compression */
+	bool persistent;
+	bool expect_concatenated : 1; /* Decompress option */
+	bool small_footprint : 1;     /* Decompress option */
+	bool is_flushed : 1;          /* only for compression */
+	strm_status status;           /* Decompress option */
 
-	int persistent;
+	/* Configuration for reset - immutable */
+	int blockSize100k;  /* compress only */
+	int workFactor;     /* compress only */
 } php_bz2_filter_data;
 
 /* }}} */
@@ -178,6 +179,36 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	return exit_status;
 }
 
+static zend_result php_bz2_decompress_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	if (!Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
+
+	/* End current decompression if running */
+	if (data->status == PHP_BZ2_RUNNING) {
+		BZ2_bzDecompressEnd(&(data->strm));
+	}
+
+	/* Reset stream state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->status = PHP_BZ2_UNINITIALIZED;
+
+	/* Note: We don't reinitialize here - it will be done on first use in the filter function */
+
+	return SUCCESS;
+}
+
 static void php_bz2_decompress_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
@@ -193,6 +224,7 @@ static void php_bz2_decompress_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_bz2_decompress_ops = {
 	php_bz2_decompress_filter,
+	php_bz2_decompress_seek,
 	php_bz2_decompress_dtor,
 	"bzip2.decompress"
 };
@@ -288,6 +320,41 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 	return exit_status;
 }
 
+static zend_result php_bz2_compress_seek(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	zend_off_t offset,
+	int whence
+	)
+{
+	int status;
+
+	if (!Z_PTR(thisfilter->abstract)) {
+		return FAILURE;
+	}
+
+	php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
+
+	/* End current compression */
+	BZ2_bzCompressEnd(&(data->strm));
+
+	/* Reset stream state */
+	data->strm.next_in = data->inbuf;
+	data->strm.avail_in = 0;
+	data->strm.next_out = data->outbuf;
+	data->strm.avail_out = data->outbuf_len;
+	data->is_flushed = 1;
+
+	/* Reinitialize compression with saved configuration */
+	status = BZ2_bzCompressInit(&(data->strm), data->blockSize100k, 0, data->workFactor);
+	if (status != BZ_OK) {
+		php_error_docref(NULL, E_WARNING, "bzip2.compress: failed to reset compression state");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static void php_bz2_compress_dtor(php_stream_filter *thisfilter)
 {
 	if (Z_PTR(thisfilter->abstract)) {
@@ -301,23 +368,15 @@ static void php_bz2_compress_dtor(php_stream_filter *thisfilter)
 
 static const php_stream_filter_ops php_bz2_compress_ops = {
 	php_bz2_compress_filter,
+	php_bz2_compress_seek,
 	php_bz2_compress_dtor,
 	"bzip2.compress"
 };
 
 /* }}} */
 
-/* {{{ bzip2.* common factory */
-
-static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
-{
-	const php_stream_filter_ops *fops = NULL;
-	php_bz2_filter_data *data;
-	int status = BZ_OK;
-
-	/* Create this filter */
-	data = pecalloc(1, sizeof(php_bz2_filter_data), persistent);
-
+static php_bz2_filter_data *php_bz2_filter_data_new(bool persistent) {
+	php_bz2_filter_data *data = pecalloc(1, sizeof(php_bz2_filter_data), persistent);
 	/* Circular reference */
 	data->strm.opaque = (void *) data;
 
@@ -328,82 +387,143 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 	data->strm.next_in = data->inbuf = (char *) pemalloc(data->inbuf_len, persistent);
 	data->strm.avail_in = 0;
 	data->strm.next_out = data->outbuf = (char *) pemalloc(data->outbuf_len, persistent);
+	return data;
+}
 
-	if (strcasecmp(filtername, "bzip2.decompress") == 0) {
-		data->small_footprint = 0;
-		data->expect_concatenated = 0;
+static php_stream_filter *php_bz2_decompress_filter_create(zval *filter_params, bool persistent) {
+	php_stream_filter_seekable_t write_seekable = PSFS_SEEKABLE_ALWAYS;
+	bool small_footprint = false;
+	bool expect_concatenated = false;
 
-		if (filterparams) {
-			zval *tmpzval = NULL;
-
-			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
-				HashTable *ht = HASH_OF(filterparams);
-
-				if ((tmpzval = zend_hash_str_find_ind(ht, "concatenated", sizeof("concatenated")-1))) {
-					data->expect_concatenated = zend_is_true(tmpzval);
-					tmpzval = NULL;
-				}
-
-				tmpzval = zend_hash_str_find_ind(ht, "small", sizeof("small")-1);
-			} else {
-				tmpzval = filterparams;
-			}
-
-			if (tmpzval) {
-				data->small_footprint = zend_is_true(tmpzval);
-			}
+	if (filter_params) {
+		if (UNEXPECTED(
+			Z_TYPE_P(filter_params) != IS_TRUE
+			&& Z_TYPE_P(filter_params) != IS_FALSE
+			&& Z_TYPE_P(filter_params) != IS_ARRAY
+			&& Z_TYPE_P(filter_params) != IS_OBJECT
+		)) {
+			php_error_docref(NULL, E_WARNING,
+				"Filter parameters for bzip2.decompress filter must be of type array|object|bool, %s given",
+				zend_zval_type_name(filter_params)
+			);
+			return NULL;
 		}
 
-		data->status = PHP_BZ2_UNINITIALIZED;
-		fops = &php_bz2_decompress_ops;
-	} else if (strcasecmp(filtername, "bzip2.compress") == 0) {
-		int blockSize100k = PHP_BZ2_FILTER_DEFAULT_BLOCKSIZE;
-		int workFactor = PHP_BZ2_FILTER_DEFAULT_WORKFACTOR;
+		if (Z_TYPE_P(filter_params) == IS_TRUE || Z_TYPE_P(filter_params) == IS_FALSE) {
+			small_footprint = Z_TYPE_P(filter_params) == IS_TRUE;
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(filter_params) == IS_ARRAY || Z_TYPE_P(filter_params) == IS_OBJECT);
 
-		if (filterparams) {
-			zval *tmpzval;
+			const HashTable *filter_params_ht = HASH_OF(filter_params);
+			/* TODO: convert php_stream_filter_parse_write_seek_mode() to take HashTable */
+			if (php_stream_filter_parse_write_seek_mode(filter_params, &write_seekable) == FAILURE) {
+				return NULL;
+			}
 
-			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
-				HashTable *ht = HASH_OF(filterparams);
+			const zval *concatenated = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("concatenated"));
+			if (concatenated) {
+				expect_concatenated = zend_is_true(concatenated);
+			}
 
-				if ((tmpzval = zend_hash_str_find_ind(ht, "blocks", sizeof("blocks")-1))) {
-					/* How much memory to allocate (1 - 9) x 100kb */
-					zend_long blocks = zval_get_long(tmpzval);
-					if (blocks < 1 || blocks > 9) {
-						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate (" ZEND_LONG_FMT ")", blocks);
-					} else {
-						blockSize100k = (int) blocks;
-					}
-				}
-
-				if ((tmpzval = zend_hash_str_find_ind(ht, "work", sizeof("work")-1))) {
-					/* Work Factor (0 - 250) */
-					zend_long work = zval_get_long(tmpzval);
-					if (work < 0 || work > 250) {
-						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor (" ZEND_LONG_FMT ")", work);
-					} else {
-						workFactor = (int) work;
-					}
-				}
+			const zval *small = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("small"));
+			if (small) {
+				small_footprint = zend_is_true(small);
 			}
 		}
-
-		status = BZ2_bzCompressInit(&(data->strm), blockSize100k, 0, workFactor);
-		data->is_flushed = 1;
-		fops = &php_bz2_compress_ops;
-	} else {
-		status = BZ_DATA_ERROR;
 	}
 
-	if (status != BZ_OK) {
+	php_bz2_filter_data *data = php_bz2_filter_data_new(persistent);
+	/* Save configuration for reset */
+	data->small_footprint = small_footprint;
+	data->expect_concatenated = expect_concatenated;
+	data->status = PHP_BZ2_UNINITIALIZED;
+
+	return php_stream_filter_alloc(&php_bz2_decompress_ops, data, persistent, PSFS_SEEKABLE_START, write_seekable);
+}
+
+static php_stream_filter *php_bz2_compress_filter_create(zval *filter_params, bool persistent) {
+	php_stream_filter_seekable_t write_seekable = PSFS_SEEKABLE_ALWAYS;
+	int blockSize100k = PHP_BZ2_FILTER_DEFAULT_BLOCKSIZE;
+	int workFactor = PHP_BZ2_FILTER_DEFAULT_WORKFACTOR;
+
+	if (filter_params) {
+		if (UNEXPECTED(Z_TYPE_P(filter_params) != IS_ARRAY && Z_TYPE_P(filter_params) != IS_OBJECT)) {
+			php_error_docref(NULL, E_WARNING,
+				"Filter parameters for bzip2.compress filter must be of type array|object, %s given",
+				zend_zval_type_name(filter_params)
+			);
+			return NULL;
+		}
+
+		const HashTable *filter_params_ht = HASH_OF(filter_params);
+		/* TODO: convert php_stream_filter_parse_write_seek_mode() to take HashTable */
+		if (php_stream_filter_parse_write_seek_mode(filter_params, &write_seekable) == FAILURE) {
+			return NULL;
+		}
+
+		const zval *blocks_zv = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("blocks"));
+		if (blocks_zv) {
+			ZEND_ASSERT(Z_TYPE_P(blocks_zv) != IS_INDIRECT);
+			bool failed = false;
+			/* How much memory to allocate (1 - 9) x 100kb */
+			zend_long blocks = zval_try_get_long(blocks_zv, &failed);
+			if (UNEXPECTED(failed)) {
+				php_error_docref(NULL, E_WARNING, "Number of blocks parameter must be of type int, %s given", zend_zval_type_name(blocks_zv));
+				return NULL;
+			} else if (blocks < 1 || blocks > 9) {
+				php_error_docref(NULL, E_WARNING, "Number of blocks to allocate must be between 1 and 9, " ZEND_LONG_FMT " given", blocks);
+				return NULL;
+			} else {
+				blockSize100k = (int) blocks;
+			}
+		}
+
+		const zval *work_zv = zend_hash_str_find_ind(filter_params_ht, ZEND_STRL("work"));
+		if (work_zv) {
+			ZEND_ASSERT(Z_TYPE_P(work_zv) != IS_INDIRECT);
+			bool failed = false;
+			/* Work Factor (0 - 250) */
+			zend_long work = zval_try_get_long(work_zv, &failed);
+			if (UNEXPECTED(failed)) {
+				php_error_docref(NULL, E_WARNING, "Work factor parameter must be of type int, %s given", zend_zval_type_name(work_zv));
+				return NULL;
+			} else if (work < 0 || work > 250) {
+				php_error_docref(NULL, E_WARNING, "Work factor must be between 0 and 250, " ZEND_LONG_FMT " given", work);
+				return NULL;
+			} else {
+				workFactor = (int) work;
+			}
+		}
+	}
+
+	php_bz2_filter_data *data = php_bz2_filter_data_new(persistent);
+	/* Save configuration for reset */
+	data->blockSize100k = blockSize100k;
+	data->workFactor = workFactor;
+
+	int status = BZ2_bzCompressInit(&(data->strm), blockSize100k, 0, workFactor);
+	if (UNEXPECTED(status != BZ_OK)) {
 		/* Unspecified (probably strm) error, let stream-filter error do its own whining */
 		pefree(data->strm.next_in, persistent);
 		pefree(data->strm.next_out, persistent);
 		pefree(data, persistent);
 		return NULL;
 	}
+	data->is_flushed = true;
 
-	return php_stream_filter_alloc(fops, data, persistent);
+	return php_stream_filter_alloc(&php_bz2_compress_ops, data, persistent, PSFS_SEEKABLE_START, write_seekable);
+}
+
+/* {{{ bzip2.* common factory */
+static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, bool persistent)
+{
+	if (strcasecmp(filtername, "bzip2.decompress") == 0) {
+		return php_bz2_decompress_filter_create(filterparams, persistent);
+	} else if (strcasecmp(filtername, "bzip2.compress") == 0) {
+		return php_bz2_compress_filter_create(filterparams, persistent);
+	} else {
+		return NULL;
+	}
 }
 
 const php_stream_filter_factory php_bz2_filter_factory = {

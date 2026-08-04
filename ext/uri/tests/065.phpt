@@ -1,7 +1,5 @@
 --TEST--
 Test that overwriting the URI is not possible
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2024 Alexander Borisov
+ * Copyright (C) 2023-2026 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -15,7 +15,7 @@ extern "C" {
 
 
 #define LXB_PUNYCODE_VERSION_MAJOR 1
-#define LXB_PUNYCODE_VERSION_MINOR 1
+#define LXB_PUNYCODE_VERSION_MINOR 2
 #define LXB_PUNYCODE_VERSION_PATCH 0
 
 #define LEXBOR_PUNYCODE_VERSION_STRING LEXBOR_STRINGIZE(LXB_PUNYCODE_VERSION_MAJOR) "." \

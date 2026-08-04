@@ -10,7 +10,7 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->query('CREATE TABLE test_pdo_sqlite_createcollation (id INT AUTO INCREMENT, name TEXT)');
 
-$db->query('INSERT INTO test_pdo_sqlite_createcollation VALUES (NULL, "1"), (NULL, "2"), (NULL, "10")');
+$db->query("INSERT INTO test_pdo_sqlite_createcollation VALUES (NULL, '1'), (NULL, '2'), (NULL, '10')");
 
 $db->sqliteCreateCollation('MYCOLLATE', function($a, $b) { return strnatcmp($a, $b); });
 

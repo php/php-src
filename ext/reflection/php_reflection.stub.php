@@ -652,6 +652,8 @@ class ReflectionParameter implements Reflector
 
     public function __toString(): string {}
 
+    public function getDocComment(): string|false {}
+
     /** @tentative-return-type */
     public function getName(): string {}
 
@@ -847,6 +849,9 @@ class ReflectionAttribute implements Reflector
     public string $name;
 
     public function getName(): string {}
+    public function inNamespace(): bool {}
+    public function getNamespaceName(): string {}
+    public function getShortName(): string {}
     public function getTarget(): int {}
     public function isRepeated(): bool {}
     public function getArguments(): array {}

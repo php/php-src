@@ -51,19 +51,19 @@ bool(true)
 bool(true)
 int(1500)
 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 bool(false)
 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 bool(false)
 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 bool(false)
 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 bool(false)
 *** Done ***

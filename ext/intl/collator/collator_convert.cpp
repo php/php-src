@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Vadim Savchuk <vsavchuk@productengine.com>                  |
    |          Dmitry Lakhtyuk <dlakhtyuk@productengine.com>               |
@@ -37,6 +37,20 @@ extern "C" {
 			Z_TRY_ADDREF_P(retval);              \
 			return retval;                       \
 	}
+
+static void collator_set_conversion_error(UErrorCode status, const char *message)
+{
+	if (U_SUCCESS(status)) {
+		status = U_MEMORY_ALLOCATION_ERROR;
+	}
+
+	ZEND_ASSERT(INTL_G(current_collator_error) != nullptr);
+	intl_error *err = INTL_G(current_collator_error);
+	intl_error_reset(err);
+	err->code = status;
+	err->custom_error_message = zend_string_init(
+		message, strlen(message), false);
+}
 
 /* {{{ collator_convert_hash_item_from_utf8_to_utf16 */
 static void collator_convert_hash_item_from_utf8_to_utf16(
@@ -166,11 +180,12 @@ U_CFUNC zval* collator_convert_zstr_utf16_to_utf8( zval* utf16_zval, zval *rv )
 	u8str = intl_convert_utf16_to_utf8(
 		(UChar*) Z_STRVAL_P(utf16_zval), UCHARS( Z_STRLEN_P(utf16_zval) ), &status );
 	if( !u8str ) {
-		php_error( E_WARNING, "Error converting utf16 to utf8 in collator_convert_zval_utf16_to_utf8()" );
-		ZVAL_EMPTY_STRING( rv );
-	} else {
-		ZVAL_NEW_STR( rv, u8str );
+		collator_set_conversion_error(status, "Error converting string from UTF-16 to UTF-8");
+		ZVAL_NULL( rv );
+		return nullptr;
 	}
+
+	ZVAL_NEW_STR( rv, u8str );
 	return rv;
 }
 /* }}} */
@@ -183,11 +198,9 @@ U_CFUNC zend_string *collator_convert_zstr_utf8_to_utf16(zend_string *utf8_str)
 	zend_string *zstr = intl_convert_utf8_to_utf16_zstr(
 			ZSTR_VAL(utf8_str), ZSTR_LEN(utf8_str),
 			&status);
-	// FIXME Or throw error or use intl internal error handler
 	if (U_FAILURE(status)) {
-		php_error(E_WARNING,
-			"Error casting object to string in collator_convert_zstr_utf8_to_utf16()");
-		zstr = ZSTR_EMPTY_ALLOC();
+		collator_set_conversion_error(status, "Error converting string from UTF-8 to UTF-16");
+		return nullptr;
 	}
 
 	return zstr;
@@ -214,12 +227,19 @@ U_CFUNC zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	{
 		/* cast_object failed => bail out. */
 		zval_ptr_dtor( zstr );
+		ZVAL_NULL( zstr );
+		if( EG(exception) ) {
+			return nullptr;
+		}
 		COLLATOR_CONVERT_RETURN_FAILED( obj );
 	}
 
 	/* Object wasn't successfully converted => bail out. */
 	if( zstr == nullptr )
 	{
+		if( EG(exception) ) {
+			return nullptr;
+		}
 		COLLATOR_CONVERT_RETURN_FAILED( obj );
 	}
 
@@ -227,10 +247,11 @@ U_CFUNC zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	zend_string *converted_str = intl_convert_utf8_to_utf16_zstr(
 			Z_STRVAL_P( zstr ), Z_STRLEN_P( zstr ),
 			&status );
-	// FIXME Or throw error or use intl internal error handler
 	if( U_FAILURE( status ) ) {
-		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
-		converted_str = ZSTR_EMPTY_ALLOC();
+		collator_set_conversion_error(status, "Error converting object string from UTF-8 to UTF-16");
+		zval_ptr_dtor( zstr );
+		ZVAL_NULL( zstr );
+		return nullptr;
 	}
 
 	/* Cleanup zstr to hold utf16 string. */
@@ -289,7 +310,7 @@ U_CFUNC zval* collator_convert_string_to_double( zval* str, zval *rv )
 
 /* {{{ collator_convert_string_to_number_if_possible
  *
- * Convert string to numer.
+ * Convert string to number.
  *
  * @param  zval* str String to convert.
  *
@@ -339,7 +360,11 @@ U_CFUNC zend_string *collator_zval_to_string(zval *arg)
 		return zend_string_copy(Z_STR_P(arg));
 	}
 
-	zend_string *utf8_str = zval_get_string(arg);
+	zend_string *utf8_str = zval_try_get_string(arg);
+	if (utf8_str == nullptr) {
+		return nullptr;
+	}
+
 	zend_string *utf16_str = collator_convert_zstr_utf8_to_utf16(utf8_str);
 	zend_string_release(utf8_str);
 	return utf16_str;

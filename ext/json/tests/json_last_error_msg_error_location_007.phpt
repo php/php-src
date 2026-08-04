@@ -118,8 +118,8 @@ string(30) "Syntax error near location 1:9"
 
 Unclosed string:
 bool(false)
-int(3)
-string(71) "Control character error, possibly incorrectly encoded near location 1:9"
+int(4)
+string(30) "Syntax error near location 1:9"
 
 Invalid escape sequence:
 bool(false)
@@ -175,4 +175,3 @@ Missing comma between object properties:
 bool(false)
 int(4)
 string(30) "Syntax error near location 1:9"
-

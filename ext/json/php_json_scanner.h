@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Jakub Zelenka <bukka@php.net>                                |
   +----------------------------------------------------------------------+
@@ -22,17 +20,6 @@
 
 typedef unsigned char php_json_ctype;
 
-typedef struct _php_json_error_location {
-	/** first column of the error */
-	size_t first_column;
-	/** first line of the error */
-	size_t first_line;
-	/** last column of the error */
-	size_t last_column;
-	/** last line of the error */
-	size_t last_line;
-} php_json_error_location;
-
 typedef struct _php_json_scanner {
 	php_json_ctype *cursor;         /* cursor position */
 	php_json_ctype *token;          /* token position */
@@ -41,17 +28,16 @@ typedef struct _php_json_scanner {
 	php_json_ctype *ctxmarker;      /* marker position for context backtracking */
 	php_json_ctype *str_start;      /* start position of the string */
 	php_json_ctype *pstr;           /* string pointer for escapes conversion */
+	php_json_ctype *line_start;     /* start position of the current line */
+	uint64_t line;                  /* current line number (1-based) */
 	zval value;                     /* value */
 	int str_esc;                    /* number of extra characters for escaping */
 	int state;                      /* condition state */
 	int options;                    /* options */
 	php_json_error_code errcode;    /* error type if there is an error */
-	php_json_error_location errloc; /* error location */
 	int utf8_invalid;               /* whether utf8 is invalid */
 	int utf8_invalid_count;         /* number of extra character for invalid utf8 */
 } php_json_scanner;
-
-#define PHP_JSON_SCANNER_LOCATION(scanner, slocation) (scanner).errloc.slocation
 
 void php_json_scanner_init(php_json_scanner *scanner, const char *str, size_t str_len, int options);
 int php_json_scan(php_json_scanner *s);

@@ -15,6 +15,12 @@ require_once 'skipifconnectfailure.inc';
         exit(1);
     }
 
+    // On some servers the default collation is not what we expect,
+    // so we need to set it explicitly to make sure that the test is deterministic.
+    mysqli_set_charset($link, 'utf8mb4');
+    if (!$res = mysqli_query($link, "SET NAMES utf8mb4 COLLATE 'utf8mb4_general_ci'"))
+        printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
     if (!$res = mysqli_query($link, 'SELECT @@character_set_connection AS charset, @@collation_connection AS collation'))
         printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     $tmp = mysqli_fetch_assoc($res);
@@ -26,13 +32,6 @@ require_once 'skipifconnectfailure.inc';
         printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     if (!mysqli_fetch_assoc($res))
         printf("[010] Cannot fetch Maxlen and/or Comment, test will fail: $sql\n");
-
-    if (!$res = mysqli_query($link, sprintf("SHOW COLLATION LIKE '%s'", $collation_connection)))
-        printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    $tmp = mysqli_fetch_assoc($res);
-    mysqli_free_result($res);
-    if (!($id = $tmp['Id']))
-        printf("[012] Cannot fetch Id/Number, test will fail\n");
 
     if (!$res = mysqli_query($link, sprintf("SHOW VARIABLES LIKE 'character_sets_dir'")))
         printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -66,8 +65,8 @@ require_once 'skipifconnectfailure.inc';
 
     if (!isset($charset->number) ||
         !is_int($charset->number) ||
-        ($charset->number !== (int)$id))
-        printf("[021] Expecting int/%d, got %s/%s\n", $id, gettype($charset->number), $charset->number);
+        ($charset->number !== 0))
+        printf("[021] Expecting int/%d, got %s/%s\n", 0, gettype($charset->number), $charset->number);
 
     if (!isset($charset->state) ||
         !is_int($charset->state))

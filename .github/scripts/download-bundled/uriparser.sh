@@ -5,7 +5,7 @@ cd "$(dirname "$0")/../../.."
 tmp_dir=/tmp/php-src-download-bundled/uriparser
 rm -rf "$tmp_dir"
 
-revision=refs/tags/uriparser-1.0.0
+revision=refs/tags/uriparser-1.0.2
 
 git clone --depth 1 --revision="$revision" https://github.com/uriparser/uriparser.git "$tmp_dir"
 

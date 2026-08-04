@@ -1,7 +1,5 @@
 --TEST--
 Test URN parsing
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

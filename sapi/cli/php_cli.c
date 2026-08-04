@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Edin Kadribasic <edink@php.net>                              |
    |         Marcus Boerger <helly@php.net>                               |
@@ -79,12 +77,6 @@
 #include "ps_title.h"
 #include "php_cli_process_title.h"
 #include "php_cli_process_title_arginfo.h"
-
-#ifndef PHP_WIN32
-# define php_select(m, r, w, e, t)	select(m, r, w, e, t)
-#else
-# include "win32/select.h"
-#endif
 
 #if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
@@ -220,20 +212,12 @@ static void print_extensions(void) /* {{{ */
 #ifdef PHP_WRITE_STDOUT
 static inline bool sapi_cli_select(php_socket_t fd)
 {
-	fd_set wfd;
 	struct timeval tv;
-	int ret;
-
-	FD_ZERO(&wfd);
-
-	PHP_SAFE_FD_SET(fd, &wfd);
 
 	tv.tv_sec = (long)FG(default_socket_timeout);
 	tv.tv_usec = 0;
 
-	ret = php_select(fd+1, NULL, &wfd, NULL, &tv);
-
-	return ret != -1;
+	return php_pollfd_for(fd, POLLOUT, &tv) != -1;
 }
 #endif
 
@@ -1056,13 +1040,25 @@ do_repeat:
 				}
 
 				ZVAL_STRING(&arg, reflection_what);
-				object_init_ex(&ref, pce);
 
 				memset(&execute_data, 0, sizeof(zend_execute_data));
 				execute_data.func = (zend_function *) &zend_pass_function;
 				EG(current_execute_data) = &execute_data;
-				zend_call_known_instance_method_with_1_params(
-					pce->constructor, Z_OBJ(ref), NULL, &arg);
+				// Avoid deprecation warnings from ReflectionMethod::__construct()
+				// with one argument
+				if (pce == reflection_method_ptr) {
+					zend_function *create_from_method = zend_hash_str_find_ptr(
+						&(pce->function_table),
+						"createfrommethodname",
+						strlen( "createFromMethodName" )
+					);
+					zend_call_known_function(
+						create_from_method, NULL, pce, &ref, 1, &arg, NULL);
+				} else {
+					object_init_ex(&ref, pce);
+					zend_call_known_instance_method_with_1_params(
+						pce->constructor, Z_OBJ(ref), NULL, &arg);
+				}
 
 				if (EG(exception)) {
 					zval rv;
@@ -1083,10 +1079,9 @@ do_repeat:
 		case PHP_CLI_MODE_REFLECTION_EXT_INFO:
 			{
 				size_t len = strlen(reflection_what);
-				char *lcname = zend_str_tolower_dup(reflection_what, len);
 				zend_module_entry *module;
 
-				if ((module = zend_hash_str_find_ptr(&module_registry, lcname, len)) == NULL) {
+				if ((module = zend_hash_str_find_ptr_lc(&module_registry, reflection_what, len)) == NULL) {
 					if (!strcmp(reflection_what, "main")) {
 						display_ini_entries(NULL);
 					} else {
@@ -1097,7 +1092,6 @@ do_repeat:
 					php_info_print_module(module);
 				}
 
-				efree(lcname);
 				break;
 			}
 
@@ -1179,18 +1173,10 @@ err:
 }
 /* }}} */
 
-/* {{{ main */
-#ifdef PHP_CLI_WIN32_NO_CONSOLE
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-#else
-int main(int argc, char *argv[])
-#endif
+/* {{{ do_php_cli */
+PHP_CLI_API int do_php_cli(int argc, char *argv[])
 {
 #if defined(PHP_WIN32)
-# ifdef PHP_CLI_WIN32_NO_CONSOLE
-	int argc = __argc;
-	char **argv = __argv;
-# endif
 	int num_args;
 	wchar_t **argv_wide;
 	char **argv_save = argv;
@@ -1393,6 +1379,6 @@ out:
 	 * exiting.
 	 */
 	cleanup_ps_args(argv);
-	exit(exit_status);
+	return exit_status;
 }
 /* }}} */

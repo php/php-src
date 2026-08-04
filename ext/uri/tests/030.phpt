@@ -1,7 +1,5 @@
 --TEST--
 Test property mutation - fragment
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

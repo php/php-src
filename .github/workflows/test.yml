@@ -2,15 +2,17 @@ name: Test
 on:
   push:
     paths-ignore: &ignore_paths
+      - .circleci/**
+      - .github/CODEOWNERS
+      - .github/ISSUE_TEMPLATE/**
+      - '**/*.md'
+      - '**/*.rst'
       - docs/**
+      - EXTENSIONS
+      - LICENSE
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
-      - '**/README.*'
-      - CONTRIBUTING.md
-      - CODING_STANDARDS.md
-      - .cirrus.yml
-      - .circleci/**
     branches:
       - PHP-8.2
       - PHP-8.3

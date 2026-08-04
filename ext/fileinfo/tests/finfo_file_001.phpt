@@ -25,5 +25,5 @@ finfo_file(): Argument #2 ($filename) must not contain any null bytes
 finfo_file(): Argument #2 ($filename) must not be empty
 string(9) "directory"
 
-Warning: finfo_file(&): Failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -486,7 +485,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_string_release_ex(ce->name, 1);
 
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
-				if (fn->common.scope == ce) {
+				if (fn->common.scope == ce && !(fn->common.fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 					zend_free_internal_arg_info(&fn->internal_function, true);
 
 					if (fn->common.attributes) {
@@ -535,6 +534,13 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->attributes) {
 				zend_hash_release(ce->attributes);
+			}
+			if (ce->num_traits > 0) {
+				for (uint32_t i = 0; i < ce->num_traits; i++) {
+					zend_string_release(ce->trait_names[i].name);
+					zend_string_release(ce->trait_names[i].lc_name);
+				}
+				free(ce->trait_names);
 			}
 			free(ce);
 			break;
@@ -648,6 +654,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release_ex(arg_info[i].name, 0);
 			}
+			if (arg_info[i].doc_comment) {
+				zend_string_release_ex(arg_info[i].doc_comment, 0);
+			}
 			zend_type_release(arg_info[i].type, /* persistent */ false);
 		}
 		efree(arg_info);
@@ -696,6 +705,10 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num, uint32_t dst_num)
 {
 	for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
+		if (!op_array->try_catch_array[i].finally_op) {
+			continue;
+		}
+
 		if ((op_num < op_array->try_catch_array[i].finally_op ||
 					op_num >= op_array->try_catch_array[i].finally_end)
 				&& (dst_num >= op_array->try_catch_array[i].finally_op &&

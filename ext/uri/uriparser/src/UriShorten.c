@@ -111,14 +111,14 @@ static URI_INLINE UriBool URI_FUNC(EqualsAuthority)(const URI_TYPE(Uri) * first,
     /* IPvFuture */
     if (first->hostData.ipFuture.first != NULL) {
         return ((second->hostData.ipFuture.first != NULL)
-                && !URI_FUNC(CompareRange)(&first->hostData.ipFuture,
-                                           &second->hostData.ipFuture))
+                && URI_FUNC(RangeEquals)(&first->hostData.ipFuture,
+                                         &second->hostData.ipFuture))
                    ? URI_TRUE
                    : URI_FALSE;
     }
 
-    return !URI_FUNC(CompareRange)(&first->hostText, &second->hostText) ? URI_TRUE
-                                                                        : URI_FALSE;
+    return URI_FUNC(RangeEquals)(&first->hostText, &second->hostText) ? URI_TRUE
+                                                                      : URI_FALSE;
 }
 
 static int URI_FUNC(RemoveBaseUriImpl)(URI_TYPE(Uri) * dest,
@@ -152,7 +152,7 @@ static int URI_FUNC(RemoveBaseUriImpl)(URI_TYPE(Uri) * dest,
                 /* clang-format off */
     /* [01/50] if (A.scheme != Base.scheme) then */
                 /* clang-format on */
-                if (URI_FUNC(CompareRange)(&absSource->scheme, &absBase->scheme)) {
+                if (!URI_FUNC(RangeEquals)(&absSource->scheme, &absBase->scheme)) {
                     /* clang-format off */
     /* [02/50]    T.scheme    = A.scheme; */
                     /* clang-format on */
@@ -255,8 +255,7 @@ static int URI_FUNC(RemoveBaseUriImpl)(URI_TYPE(Uri) * dest,
                             /* clang-format on */
                             while (
                                 (sourceSeg != NULL) && (baseSeg != NULL)
-                                && !URI_FUNC(CompareRange)(&sourceSeg->text,
-                                                           &baseSeg->text)
+                                && URI_FUNC(RangeEquals)(&sourceSeg->text, &baseSeg->text)
                                 && !((sourceSeg->text.first == sourceSeg->text.afterLast)
                                      && ((sourceSeg->next == NULL)
                                          != (baseSeg->next == NULL)))) {

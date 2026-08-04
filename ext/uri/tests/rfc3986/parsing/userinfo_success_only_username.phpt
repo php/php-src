@@ -1,7 +1,5 @@
 --TEST--
 Test Uri\Rfc3986\Uri parsing - userinfo - only username
---EXTENSIONS--
-uri
 --FILE--
 <?php
 

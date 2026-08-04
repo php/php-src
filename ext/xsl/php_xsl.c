@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Christian Stocker <chregu@php.net>                           |
   +----------------------------------------------------------------------+
@@ -144,6 +142,8 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 	}
 #endif
 
+XSL_DEFINE_PROP_ACCESSOR(do_xinclude, "doXInclude", 0)
+XSL_DEFINE_PROP_ACCESSOR(clone_document, "cloneDocument", 1)
 XSL_DEFINE_PROP_ACCESSOR(max_template_depth, "maxTemplateDepth", 2)
 XSL_DEFINE_PROP_ACCESSOR(max_template_vars, "maxTemplateVars", 3)
 
@@ -266,7 +266,7 @@ static void xsl_libxslt_error_handler(void *ctx, const char *msg, ...)
 PHP_MINIT_FUNCTION(xsl)
 {
 	memcpy(&xsl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	xsl_object_handlers.offset = XtOffsetOf(xsl_object, std);
+	xsl_object_handlers.offset = offsetof(xsl_object, std);
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 	xsl_object_handlers.get_gc = xsl_objects_get_gc;
@@ -323,7 +323,6 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 	xsltUnregisterExtModuleFunction ((const xmlChar *) "function",
 				   (const xmlChar *) "http://php.net/xsl");
 	xsltSetGenericErrorFunc(NULL, NULL);
-	xsltCleanupGlobals();
 
 	return SUCCESS;
 }
