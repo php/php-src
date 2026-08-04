@@ -4654,7 +4654,7 @@ static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DAT
 }
 /* }}} */
 
-ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf) /* {{{ */
+static void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf) /* {{{ */
 {
 	zend_op *opline = EX(func)->op_array.opcodes + op_num;
 	int level;
