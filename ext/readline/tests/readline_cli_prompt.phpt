@@ -26,18 +26,18 @@ Interactive shell
 
 
 Warning: prompt contains unsupported unicode characters in Unknown on line 0
-dynpre\-
--	-%c-%d.%d.%s-php->-`-\q-????-dyn--x if (true) {
-
-Warning: prompt contains unsupported unicode characters in Unknown on line 0
-dynpre\-
--	-%c-%d.%d.%s-php-{-`-\q-????-dyn--x echo strtoupper("prompt_body\n");
-
-Warning: prompt contains unsupported unicode characters in Unknown on line 0
-dynpre\-
--	-%c-%d.%d.%s-php-{-`-\q-????-dyn--x }
-
-Warning: prompt contains unsupported unicode characters in Unknown on line 0
-dynPROMPT_BODY
 pre\-
--	-%c-%d.%d.%s-php->-`-\q-????-dyn--x quit
+-	-%c-%d.%d.%s-php->-`-\q-????-echodynif (true) {
+
+Warning: prompt contains unsupported unicode characters in Unknown on line 0
+pre\-
+-	-%c-%d.%d.%s-php-{-`-\q-????-echodynecho strtoupper("prompt_body\n");
+
+Warning: prompt contains unsupported unicode characters in Unknown on line 0
+pre\-
+-	-%c-%d.%d.%s-php-{-`-\q-????-echodyn}
+
+Warning: prompt contains unsupported unicode characters in Unknown on line 0
+PROMPT_BODY
+pre\-
+-	-%c-%d.%d.%s-php->-`-\q-????-echodynquit
