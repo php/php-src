@@ -440,8 +440,7 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 						 * other handle relies on. If it has died, drop our
 						 * reference and stop reusing it; it is closed once the
 						 * last handle referencing it is released. */
-						if (pdbh->methods->check_liveness
-								&& FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
+						if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
 							pdbh->refcount--;
 							zend_list_close(le);
 							pdbh = NULL;

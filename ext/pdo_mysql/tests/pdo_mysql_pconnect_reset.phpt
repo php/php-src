@@ -1,5 +1,5 @@
 --TEST--
-PDO MySQL persistent connection session state is reset (COM_RESET_CONNECTION) on reuse
+PDO MySQL: reusing a persistent connection resets its session state (COM_RESET_CONNECTION)
 --EXTENSIONS--
 pdo_mysql
 --SKIPIF--
@@ -9,44 +9,63 @@ MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
+// Reusing a pooled persistent connection sends COM_RESET_CONNECTION, which must
+// wipe all existing session state.
+
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
 $dsn  = MySQLPDOTest::getDSN();
 $user = PDO_MYSQL_TEST_USER;
 $pass = PDO_MYSQL_TEST_PASS;
+$opts = [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT];
 
-$db1 = new PDO($dsn, $user, $pass, [PDO::ATTR_PERSISTENT => true]);
-$db1->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-
+// Establish a persistent handle with some session state.
+$db1  = new PDO($dsn, $user, $pass, $opts);
 $con1 = $db1->query('SELECT CONNECTION_ID()')->fetchColumn();
 
-/* leave some server-side session state behind */
 $db1->exec('SET @test_var = 42');
 $db1->exec('CREATE TEMPORARY TABLE pdo_reset_tmp (id INT)');
 
-$tmp = $db1->query('SELECT @test_var')->fetchColumn();
-if ($tmp != 42)
-    printf("[001] Expected 42, got %s\n", var_export($tmp, true));
+$db1->exec('DROP TABLE IF EXISTS pdo_reset_trx');
+$db1->exec('CREATE TABLE pdo_reset_trx (id INT) ENGINE=InnoDB');
 
-/* release the handle; the persistent connection stays pooled */
+$db1->beginTransaction();
+$db1->exec('INSERT INTO pdo_reset_trx VALUES (1)');
+
+// Return the connection to the pool.
 $db1 = null;
 
-/* reusing the pooled connection must reset its session state */
-$db2 = new PDO($dsn, $user, $pass, [PDO::ATTR_PERSISTENT => true]);
-$db2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-
+// Open a second handle for the same DSN, which should be reset.
+$db2  = new PDO($dsn, $user, $pass, $opts);
 $con2 = $db2->query('SELECT CONNECTION_ID()')->fetchColumn();
-if ($con1 != $con2)
-    printf("[002] Expected the pooled connection to be reused (%s vs %s)\n",
-        var_export($con1, true), var_export($con2, true));
 
+// Compare the connection IDs to ensure they are different.
+if ($con1 != $con2) {
+    printf("[001] Expected the pooled connection to be reused (%s vs %s)\n",
+           var_export($con1, true), var_export($con2, true));
+}
+
+// Check the session variable to ensure it is no longer present.
 $tmp = $db2->query('SELECT @test_var')->fetchColumn();
-if (null !== $tmp)
-    printf("[003] User variable should have been reset, got %s\n", var_export($tmp, true));
 
-/* SHOW TABLES never lists temporary tables, so probe by selecting from it */
-if (false !== $db2->query('SELECT COUNT(*) FROM pdo_reset_tmp'))
-    printf("[004] Temporary table should not exist after reset\n");
+if ($tmp !== null) {
+    printf("[002] User variable should be reset, got %s\n", var_export($tmp, true));
+}
+
+// Check the temporary table to ensure it is no longer present.
+if ($db2->query('SELECT COUNT(*) FROM pdo_reset_tmp') !== false) {
+    printf("[003] Temporary table should not exist after reset\n");
+}
+
+// Check to see we are no longer in a transaction.
+$rows = $db2->query('SELECT COUNT(*) FROM pdo_reset_trx')->fetchColumn();
+
+if ($rows != 0) {
+    printf("[004] Transaction should have been rolled back, found %s row(s)\n", var_export($rows, true));
+}
+
+// Clean up the non-temporary table.
+$db2->exec('DROP TABLE IF EXISTS pdo_reset_trx');
 
 echo "done!";
 ?>
