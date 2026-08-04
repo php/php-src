@@ -11,10 +11,10 @@ var_dump($s->valid());
 try {
     var_dump($s->current());
 } catch (RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 bool(false)
-Called current() on invalid iterator
+RuntimeException: Called current() on invalid iterator

@@ -48,7 +48,7 @@ class MyRecursiveCachingIterator extends RecursiveCachingIterator
             }
             catch (Exception $e)
             {
-                echo "Exception: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
+                echo $e::class, ': ', $e->getMessage(), ' in ', $e->getFile(), ' on line ', $e->getLine(), "\n";
             }
             MyRecursiveArrayIterator::$fail++;
         }

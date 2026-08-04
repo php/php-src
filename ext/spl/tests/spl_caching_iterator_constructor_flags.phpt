@@ -16,10 +16,10 @@ new CachingIterator($arrayIterator, CachingIterator::TOSTRING_USE_INNER);
 try {
     $test = new CachingIterator($arrayIterator, 3); // this throws an exception
 } catch (\ValueError $e){
-  print  $e->getMessage() . "\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
 ?>
 --EXPECT--
-CachingIterator::__construct(): Argument #2 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
+ValueError: CachingIterator::__construct(): Argument #2 ($flags) must contain only one of CachingIterator::CALL_TOSTRING, CachingIterator::TOSTRING_USE_KEY, CachingIterator::TOSTRING_USE_CURRENT, or CachingIterator::TOSTRING_USE_INNER
