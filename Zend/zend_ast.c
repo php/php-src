@@ -1256,7 +1256,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 							zend_string *lc_name = zend_string_tolower(function_name);
 							zend_string *suggestion = zend_find_similar_function(ZSTR_VAL(lc_name), ZSTR_LEN(lc_name));
 							if (suggestion) {
-								zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s()?)", ZSTR_VAL(function_name), ZSTR_VAL(suggestion));
+								zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s?)", ZSTR_VAL(function_name), ZSTR_VAL(suggestion));
 							} else {
 								zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function_name));
 							}

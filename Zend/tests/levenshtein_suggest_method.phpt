@@ -23,7 +23,7 @@ try { $calc->nonexistent(); } catch (Error $e) { echo $e->getMessage(), "\n"; }
 try { Calculator::addd(1, 2); } catch (Error $e) { echo $e->getMessage(), "\n"; }
 ?>
 --EXPECT--
-Call to undefined method Calculator::addd() (did you mean add()?)
-Call to undefined method Calculator::subtarct() (did you mean subtract()?)
+Call to undefined method Calculator::addd() (did you mean add?)
+Call to undefined method Calculator::subtarct() (did you mean subtract?)
 Call to undefined method Calculator::nonexistent()
-Call to undefined method Calculator::addd() (did you mean add()?)
+Call to undefined method Calculator::addd() (did you mean add?)
