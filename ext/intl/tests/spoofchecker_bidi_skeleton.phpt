@@ -13,7 +13,7 @@ var_dump($checker->getBidiSkeleton(Spoofchecker::LTR, ""));
 try {
     $checker->getBidiSkeleton(Spoofchecker::RTL + 1, "a");
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 /* These identifiers are confusable in a left-to-right context only. */
@@ -31,7 +31,7 @@ var_dump(intl_get_error_code() === U_INVALID_CHAR_FOUND);
 ?>
 --EXPECT--
 string(0) ""
-Spoofchecker::getBidiSkeleton(): Argument #1 ($direction) must be either Spoofchecker::LTR or Spoofchecker::RTL
+ValueError: Spoofchecker::getBidiSkeleton(): Argument #1 ($direction) must be either Spoofchecker::LTR or Spoofchecker::RTL
 bool(true)
 bool(false)
 bool(false)
