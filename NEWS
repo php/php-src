@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Implemented GH-20255 (Add a predefined calendar constant in
     IntlDateFormatter for the proleptic gregorian calendar). (David Carlier)
   . Added SpoofChecker::areBidiConfusable(). (David Carlier)
+  . Added SpoofChecker::getBidiSkeleton(). (Weilin Du)
 
 - Reflection:
   . Added ReflectionAttribute::inNamespace(),
