@@ -2581,7 +2581,7 @@ static zend_string *zend_find_similar_in_function_table(const HashTable *ht, con
 	return best;
 }
 
-static zend_string *zend_find_similar_function(const char *lcname, size_t lcname_len)
+ZEND_API zend_string *zend_find_similar_function(const char *lcname, size_t lcname_len)
 {
 	if (memchr(lcname, '\\', lcname_len)) {
 		return NULL;

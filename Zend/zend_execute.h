@@ -514,6 +514,7 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 ZEND_API zval* ZEND_FASTCALL zend_fetch_static_property(zend_execute_data *ex, int fetch_type);
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method);
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_function_error(zval *function_name);
+ZEND_API zend_string *zend_find_similar_function(const char *lcname, size_t lcname_len);
 ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc);
 
 ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data);
