@@ -1138,6 +1138,11 @@ try_again:
 				if ((prop_info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(prop_info)) {
 					zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
 					variable_ptr = &EG(error_zval);
+					if (cache_slot) {
+						/* Reset cache slot to dodge fast path in next execution. */
+						CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 					goto exit;
 				}
 			}
