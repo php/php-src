@@ -11,9 +11,9 @@ if (!function_exists('proc_open')) die('skip proc_open() not available');
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 $ini = getenv('TEST_PHP_EXTRA_ARGS');
-$prompt = 'pre\\\\-\n-\t-\e-\v-\b-\>-\`-\q-' . "\xC3\xA9\xC3\xA9" . '-`echo "dyn";`-`-x ';
+$prompt = 'pre\\\\-\n-\t-\e-\v-\b-\>-\`-\q-' . "\xC3\xA9\xC3\xA9" . '-`echo \'dyn\';`-`-x ';
 $descriptorspec = [['pipe', 'r'], STDOUT, STDERR];
-$proc = proc_open("$php $ini -d " . escapeshellarg("cli.prompt=$prompt") . " -a", $descriptorspec, $pipes);
+$proc = proc_open("$php $ini -d " . escapeshellarg("cli.prompt=\"$prompt\"") . " -a", $descriptorspec, $pipes);
 fwrite($pipes[0], "if (true) {\n");
 fwrite($pipes[0], "echo strtoupper(\"prompt_body\\n\");\n");
 fwrite($pipes[0], "}\n");
@@ -26,18 +26,18 @@ Interactive shell
 
 
 Warning: prompt contains unsupported unicode characters in Unknown on line 0
-pre\-
--	-%c-%d.%d.%s-php->-`-\q-????-echodynif (true) {
+dynpre\-
+-	-%c-%d.%d.%s-php->-`-\q-????-dyn--x if (true) {
 
 Warning: prompt contains unsupported unicode characters in Unknown on line 0
-pre\-
--	-%c-%d.%d.%s-php-{-`-\q-????-echodynecho strtoupper("prompt_body\n");
+dynpre\-
+-	-%c-%d.%d.%s-php-{-`-\q-????-dyn--x echo strtoupper("prompt_body\n");
 
 Warning: prompt contains unsupported unicode characters in Unknown on line 0
-pre\-
--	-%c-%d.%d.%s-php-{-`-\q-????-echodyn}
+dynpre\-
+-	-%c-%d.%d.%s-php-{-`-\q-????-dyn--x }
 
 Warning: prompt contains unsupported unicode characters in Unknown on line 0
-PROMPT_BODY
+dynPROMPT_BODY
 pre\-
--	-%c-%d.%d.%s-php->-`-\q-????-echodynquit
+-	-%c-%d.%d.%s-php->-`-\q-????-dyn--x quit
