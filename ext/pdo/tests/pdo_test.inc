@@ -42,21 +42,19 @@ class PDOTest {
         }
 
         $database = null;
-        $exception = null;
         $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attributes];
 
-        $reason = ProbeCache::getFailure('pdo', $configuration, static function () use (&$database, &$exception, $classname, $useConnectMethod, $dsn, $user, $pass, $attributes): ?string {
+        $reason = ProbeCache::getFailure('pdo', $configuration, static function () use (&$database, $classname, $useConnectMethod, $dsn, $user, $pass, $attributes): ?string {
             try {
                 $database = self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
                 return null;
             } catch (PDOException $e) {
-                $exception = $e;
                 return $e->getMessage();
             }
         });
 
         if (is_string($reason)) {
-            throw $exception ?? new PDOException($reason);
+            throw new PDOException($reason);
         }
 
         return $database;
