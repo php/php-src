@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Added SpoofChecker::areBidiConfusable(). (David Carlier)
   . Added SpoofChecker::getBidiSkeleton(). (Weilin Du)
 
+- PDO_ODBC:
+  . Fixed bug GH-23016 (NULL values in long columns come back as garbage
+    binary strings). (Calvin Buckley, iliaal)
+
 - Reflection:
   . Added ReflectionAttribute::inNamespace(),
     ReflectionAttribute::getNamespaceName(), and
