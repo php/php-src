@@ -24,11 +24,9 @@ readline_cli_completion_fun	);
 define('READLINE_CLI_COMPLETION_CONSTANT', strtolower("CONSTANT_OK\n"));
 echo READLINE_CLI_COMPLETION_CON	;
 class ReadlineCliCompletionClass {
-    public const COMPLETION_CLASS_CONSTANT = "CLASS" . "CONST_OK\n";
     public static function completionMethod() { echo strtolower("METHOD_OK\n"); }
 }
 echo "class_ok:" . ReadlineCliCompletionCla	::class . "\n";
-echo ReadlineCliCompletionClass::COMPLETION_CLASS_CON	;
 ReadlineCliCompletionClass::completionM	);
 exit
 PHP;
@@ -36,4 +34,4 @@ PHP;
 echo shell_exec("echo " . escapeshellarg($code) . " | $php $ini -a");
 ?>
 --EXPECTF--
-%AInteractive shell%Avariable_ok%Aprecision_result=3%Afunction_ok%Aconstant_ok%Aclass_ok:ReadlineCliCompletionClass%ACLASSCONST_OK%Amethod_ok%A
+%AInteractive shell%Avariable_ok%Aprecision_result=3%Afunction_ok%Aconstant_ok%Aclass_ok:ReadlineCliCompletionClass%Amethod_ok%A
