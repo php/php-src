@@ -15,7 +15,7 @@ function TestXML($file) {
     while (($lastRead = $XR->read()) && ($XR->name !== 'records'));
     while (($lastRead = $XR->read()) && ($XR->name !== 'record'));
     while ($lastRead) {
-        $xml = $XR->readOuterXML();
+        $xml = $XR->readOuterXml();
         if ($xml === '') {
             $err = '';
             if ($e = libxml_get_last_error()) { $err = $e->message.' (line: '.$e->line.')'; }

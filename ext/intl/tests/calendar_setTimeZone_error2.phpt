@@ -11,12 +11,12 @@ intl.default_locale=nl
 $intlcal = new IntlGregorianCalendar();
 
 $pstdate = new DateTime('2012-01-01 00:00:00 WEST');
-var_dump($intlcal->setTimeZone($pstdate->getTimeZone()));
+var_dump($intlcal->setTimeZone($pstdate->getTimezone()));
 var_dump($intlcal->getErrorMessage());
 var_dump($intlcal->getTimeZone()->getID());
 
 $pstdate = new DateTime('2012-01-01 00:00:00 +24:00');
-var_dump($intlcal->setTimeZone($pstdate->getTimeZone()));
+var_dump($intlcal->setTimeZone($pstdate->getTimezone()));
 var_dump($intlcal->getErrorMessage());
 var_dump($intlcal->getTimeZone()->getID());
 ?>

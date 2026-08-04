@@ -11,7 +11,7 @@ var_dump($els[0]->tagName);
 
 $dom->documentElement->innerHTML = '<b/>';
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 var_dump($els);
 var_dump($els[0]?->tagName);
 

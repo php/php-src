@@ -11,7 +11,7 @@ Rein Velt <rein@velt.org>
         public $varX;
         public $varY;
     }
-    $rc=new reflectionClass('myClass');
+    $rc=new ReflectionClass('myClass');
     var_dump( $rc->getExtensionName()) ;
 ?>
 --EXPECT--

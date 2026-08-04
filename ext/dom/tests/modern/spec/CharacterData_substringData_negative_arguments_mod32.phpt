@@ -29,19 +29,19 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHtml($comment), "\n";
+echo $dom->saveHTML($comment), "\n";
 try {
     var_dump($comment->substringData(2, -(2**32 - 2)));
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHtml($comment), "\n";
+echo $dom->saveHTML($comment), "\n";
 try {
     var_dump($comment->substringData(-(2**32 - 2), 2));
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHtml($comment), "\n";
+echo $dom->saveHTML($comment), "\n";
 
 ?>
 --EXPECT--

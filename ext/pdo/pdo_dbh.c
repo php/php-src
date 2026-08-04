@@ -1372,7 +1372,6 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 	const zend_function_entry *funcs;
 	zend_internal_function func;
 	size_t namelen;
-	char *lc_name;
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
 	if (!dbh || !dbh->methods || !dbh->methods->get_driver_methods) {
@@ -1442,10 +1441,7 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		}
 		zend_set_function_arg_flags((zend_function*)&func);
 		namelen = strlen(funcs->fname);
-		lc_name = emalloc(namelen+1);
-		zend_str_tolower_copy(lc_name, funcs->fname, namelen);
-		zend_function *func_p = zend_hash_str_add_mem(dbh->cls_methods[kind], lc_name, namelen, &func, sizeof(func));
-		efree(lc_name);
+		zend_function *func_p = zend_hash_str_add_mem(dbh->cls_methods[kind], funcs->fname, namelen, &func, sizeof(func));
 
 		const char *new_name = NULL;
 		for (const struct driver_specific_method_deprecation *d = driver_specific_method_deprecations;
@@ -1496,7 +1492,7 @@ static zend_function *dbh_method_get(zend_object **object, zend_string *method_n
 			}
 		}
 
-		fbc = zend_hash_find_ptr_lc(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], method_name);
+		fbc = zend_hash_find_ptr(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], method_name);
 	}
 
 out:

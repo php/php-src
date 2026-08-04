@@ -6,7 +6,7 @@ Clint Priest @ PhpTek09
 dom
 --FILE--
 <?php
-    $objDoc = new DomDocument();
+    $objDoc = new DOMDocument();
 
     $objRef = $objDoc->createEntityReference('Test');
     echo $objRef->nodeName . "\n";

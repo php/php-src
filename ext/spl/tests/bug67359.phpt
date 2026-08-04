@@ -4,8 +4,8 @@ Bug #67359 (Segfault in recursiveDirectoryIterator)
 <?php
 try
 {
-    $rdi = new recursiveDirectoryIterator(__DIR__,  FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);
-    $it = new recursiveIteratorIterator( $rdi );
+    $rdi = new RecursiveDirectoryIterator(__DIR__,  FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);
+    $it = new RecursiveIteratorIterator( $rdi );
     $it->seek(1);
     while( $it->valid())
     {

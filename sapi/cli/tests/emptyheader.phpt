@@ -7,7 +7,7 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start("var_dump(getAllheaders());");
+php_cli_server_start("var_dump(getallheaders());");
 
 $host = PHP_CLI_SERVER_HOSTNAME;
 $fp = php_cli_server_connect();

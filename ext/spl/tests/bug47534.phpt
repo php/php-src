@@ -2,7 +2,7 @@
 SPL: RecursiveDirectoryIterator bug 47534
 --FILE--
 <?php
-$it1 = new RecursiveDirectoryIterator(__DIR__, FileSystemIterator::CURRENT_AS_PATHNAME);
+$it1 = new RecursiveDirectoryIterator(__DIR__, FilesystemIterator::CURRENT_AS_PATHNAME);
 $it1->rewind();
 echo gettype($it1->current())."\n";
 

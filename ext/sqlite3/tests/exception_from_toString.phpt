@@ -11,7 +11,7 @@ class throws {
     }
 }
 
-$db = new sqlite3(':memory:');
+$db = new SQLite3(':memory:');
 $db->exec('CREATE TABLE t(id int, v varchar(255))');
 
 $stmt = $db->prepare('INSERT INTO t VALUES(:i, :v)');

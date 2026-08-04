@@ -25,7 +25,7 @@ $dom->loadXML('<root xmlns="urn::default"><child>myval</child></root>');
 
 $xpath = new DOMXPath($dom);
 
-$xpath->registerPHPFunctions('MyAverage');
+$xpath->registerPhpFunctions('MyAverage');
 $xpath->registerNamespace("php", "http://php.net/xpath");
 
 $xpath->registerNamespace("def", "urn::default");
@@ -52,7 +52,7 @@ $avg = $xpath->evaluate('number(php:function("MyAverage", //def:testnode))');
 var_dump($avg);
 
 try {
-    $xpath->registerPHPFunctions('non_existent');
+    $xpath->registerPhpFunctions('non_existent');
     $avg = $xpath->evaluate('number(php:function("non_existent", //def:testnode))');
 } catch (\Error $e) {
     echo $e->getMessage() . \PHP_EOL;

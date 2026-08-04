@@ -14,9 +14,9 @@ class MyClass
 
 $doc = new DOMDocument();
 $doc->loadHTML('<a href="https://php.net">hello</a>');
-$xpath = new DOMXpath($doc);
+$xpath = new DOMXPath($doc);
 $xpath->registerNamespace("php", "http://php.net/xpath");
-$xpath->registerPHPFunctions();
+$xpath->registerPhpFunctions();
 $xpath->query("//a[php:function('MyClass::dump', string(@href))]");
 
 ?>

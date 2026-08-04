@@ -19,6 +19,6 @@ class B extends A {}
 ?>
 --EXPECTF--
 <!-- declared function 'a' -->
-<!-- declared class 'a' -->
-<!-- declared class 'b' -->
+<!-- declared class 'A' -->
+<!-- declared class 'B' -->
 <!-- init '%s' -->

@@ -28,7 +28,7 @@ class test extends bar {
     public function __construct() {
         parent::__construct();
 
-        $p = new reflectionobject($this);
+        $p = new ReflectionObject($this);
         var_dump($h = $p->getProperty('a'));
         var_dump($h->isDefault(), $h->isProtected(), $h->isPrivate(), $h->isPublic(), $h->isStatic());
         var_dump($p->getProperties());

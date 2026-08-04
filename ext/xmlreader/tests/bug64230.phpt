@@ -17,7 +17,7 @@ echo "Internal errors TRUE\n";
 libxml_use_internal_errors(true);
 
 $x = new XMLReader;
-$x->xml("<root att/>");
+$x->XML("<root att/>");
 $x->read();
 
 show_internal_errors();
@@ -26,7 +26,7 @@ echo "Internal errors FALSE\n";
 libxml_use_internal_errors(false);
 
 $x = new XMLReader;
-$x->xml("<root att/>");
+$x->XML("<root att/>");
 $x->read();
 
 show_internal_errors();

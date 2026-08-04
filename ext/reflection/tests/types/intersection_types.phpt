@@ -27,12 +27,12 @@ dumpType($rp->getType());
 
 /* Force CE resolution of the property type */
 
-interface y {}
-class x implements Y, Countable {
+interface Y {}
+class X implements Y, Countable {
     public function count(): int { return 0; }
 }
 $test = new Test;
-$test->prop = new x;
+$test->prop = new X;
 
 $rp = $rc->getProperty('prop');
 dumpType($rp->getType());

@@ -32,7 +32,7 @@ class setter {
     }
 }
 
-$foo = new Setter();
+$foo = new setter();
 
 // this doesn't go through __set()... should it?
 $foo->n = 1;

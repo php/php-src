@@ -6,7 +6,7 @@ dom
 <?php
 $Data = "<!DOCTYPE HTML>\n<br />\n<input />";
 $Document = \Dom\HTMLDocument::createFromString( $Data );
-echo $Document->saveHTML();
+echo $Document->saveHtml();
 ?>
 --EXPECT--
 <!DOCTYPE html><html><head></head><body><br>

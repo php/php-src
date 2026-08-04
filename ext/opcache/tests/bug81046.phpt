@@ -11,7 +11,7 @@ class Test {
 
 const methoD = 1;
 var_dump(methoD);
-test::methoD();
+Test::methoD();
 
 ?>
 --EXPECT--

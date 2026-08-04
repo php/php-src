@@ -9,7 +9,7 @@ function my_global_fn($name) {
     eval('class Foo {}');
 }
 
-$o = unserialize('O:3:"FOO":0:{}');
+$o = unserialize('O:3:"Foo":0:{}');
 
 var_dump($o);
 

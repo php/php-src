@@ -104,7 +104,7 @@ zend_result zend_optimizer_eval_special_func_call(
 		zval *result, const zend_string *name, zend_string *arg) {
 	if (zend_string_equals_literal(name, "function_exists") ||
 			zend_string_equals_literal(name, "is_callable")) {
-		const zend_internal_function *func = zend_hash_find_ptr_lc(EG(function_table), arg);
+		const zend_internal_function *func = zend_hash_find_ptr(EG(function_table), arg);
 
 		if (func && func->type == ZEND_INTERNAL_FUNCTION
 				&& func->module->type == MODULE_PERSISTENT
@@ -214,13 +214,6 @@ uint32_t zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv)
 	return i;
 }
 
-static inline uint32_t zend_optimizer_add_literal_string(zend_op_array *op_array, zend_string *str) {
-	zval zv;
-	ZVAL_STR(&zv, str);
-	zend_string_hash_val(str);
-	return zend_optimizer_add_literal(op_array, &zv);
-}
-
 static inline void drop_leading_backslash(zval *val) {
 	if (Z_STRVAL_P(val)[0] == '\\') {
 		zend_string *str = zend_string_init(Z_STRVAL_P(val) + 1, Z_STRLEN_P(val) - 1, 0);
@@ -286,21 +279,18 @@ bool zend_optimizer_update_op1_const(zend_op_array *op_array,
 			drop_leading_backslash(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & ZEND_LAST_CATCH);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
 		case ZEND_DEFINED:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			opline->extended_value = alloc_cache_slots(op_array, 1);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
 		case ZEND_NEW:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			opline->op2.num = alloc_cache_slots(op_array, 1);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 			REQUIRES_STRING(val);
@@ -309,7 +299,6 @@ bool zend_optimizer_update_op1_const(zend_op_array *op_array,
 			if (opline->op2_type != IS_CONST) {
 				opline->result.num = alloc_cache_slots(op_array, 1);
 			}
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
 		case ZEND_FETCH_CLASS_CONSTANT:
 			REQUIRES_STRING(val);
@@ -318,7 +307,6 @@ bool zend_optimizer_update_op1_const(zend_op_array *op_array,
 			if (opline->op2_type != IS_CONST) {
 				opline->extended_value = alloc_cache_slots(op_array, 1);
 			}
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
 		case ZEND_ASSIGN_OP:
 		case ZEND_ASSIGN_DIM_OP:
@@ -424,14 +412,12 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			opline->extended_value = alloc_cache_slots(op_array, 1);
 			break;
 		case ZEND_INIT_FCALL_BY_NAME:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			opline->result.num = alloc_cache_slots(op_array, 1);
 			break;
 		case ZEND_ASSIGN_STATIC_PROP:
@@ -452,20 +438,12 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			if (opline->op1_type != IS_CONST) {
 				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & (ZEND_RETURNS_FUNCTION|ZEND_ISEMPTY|ZEND_FETCH_OBJ_FLAGS));
 			}
 			break;
 		case ZEND_INIT_FCALL:
 			REQUIRES_STRING(val);
-			if (Z_REFCOUNT_P(val) == 1) {
-				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
-			} else {
-				ZVAL_STR(&tmp, zend_string_tolower(Z_STR_P(val)));
-				zval_ptr_dtor_nogc(val);
-				val = &tmp;
-			}
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			opline->result.num = alloc_cache_slots(op_array, 1);
 			break;
@@ -484,7 +462,6 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 				opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 				drop_leading_backslash(val);
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-				zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 				opline->result.num = alloc_cache_slots(op_array, 1);
 			} else {
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
@@ -493,13 +470,11 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_INIT_METHOD_CALL:
 			REQUIRES_STRING(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			opline->result.num = alloc_cache_slots(op_array, 2);
 			break;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 			REQUIRES_STRING(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			if (opline->op1_type != IS_CONST) {
 				opline->result.num = alloc_cache_slots(op_array, 2);
 			}
@@ -811,18 +786,18 @@ static bool zend_optimizer_ignore_function(zval *fbc_zv, const zend_string *file
 }
 
 zend_class_entry *zend_optimizer_get_class_entry(
-		const zend_script *script, const zend_op_array *op_array, zend_string *lcname) {
-	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
+		const zend_script *script, const zend_op_array *op_array, zend_string *name) {
+	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, name) : NULL;
 	if (ce) {
 		return ce;
 	}
 
-	zval *ce_zv = zend_hash_find(CG(class_table), lcname);
+	zval *ce_zv = zend_hash_find(CG(class_table), name);
 	if (ce_zv && !zend_optimizer_ignore_class(ce_zv, op_array ? op_array->filename : NULL)) {
 		return Z_PTR_P(ce_zv);
 	}
 
-	if (op_array && op_array->scope && zend_string_equals_ci(op_array->scope->name, lcname)) {
+	if (op_array && op_array->scope && zend_string_equals(op_array->scope->name, name)) {
 		return op_array->scope;
 	}
 
@@ -834,7 +809,7 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 	if (opline->op1_type == IS_CONST) {
 		const zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
-			return zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
+			return zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1));
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope
 			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
@@ -858,9 +833,9 @@ const zend_class_constant *zend_fetch_class_const_info(
 		const zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
 			if (script) {
-				ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
+				ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1));
 			} else {
-				zval *ce_zv = zend_hash_find(EG(class_table), Z_STR_P(op1 + 1));
+				zval *ce_zv = zend_hash_find(EG(class_table), Z_STR_P(op1));
 				if (ce_zv && !zend_optimizer_ignore_class(ce_zv, op_array->filename)) {
 					ce = Z_PTR_P(ce_zv);
 				}
@@ -920,7 +895,11 @@ zend_function *zend_optimizer_get_called_func(
 		case ZEND_INIT_FCALL_BY_NAME:
 		case ZEND_INIT_NS_FCALL_BY_NAME:
 			if (opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING) {
-				const zval *function_name = CRT_CONSTANT(opline->op2) + 1;
+				/* For ZEND_INIT_NS_FCALL_BY_NAME only the ns-qualified name (slot 0)
+				 * is considered: resolving the unqualified global fallback at
+				 * optimization time would be unsound, as another file may declare
+				 * the namespaced function and shadow the global one at runtime. */
+				const zval *function_name = CRT_CONSTANT(opline->op2);
 				zend_function *func;
 				zval *func_zv;
 				if (script && (func = zend_hash_find_ptr(&script->function_table, Z_STR_P(function_name)))) {
@@ -937,7 +916,7 @@ zend_function *zend_optimizer_get_called_func(
 				const zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 					script, op_array, opline);
 				if (ce) {
-					zend_string *func_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
+					zend_string *func_name = Z_STR_P(CRT_CONSTANT(opline->op2));
 					zend_function *fbc = zend_hash_find_ptr(&ce->function_table, func_name);
 					if (fbc && !(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 						bool is_public = (fbc->common.fn_flags & ZEND_ACC_PUBLIC) != 0;
@@ -955,7 +934,7 @@ zend_function *zend_optimizer_get_called_func(
 					&& op_array->scope
 					&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
 					&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
-				zend_string *method_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
+				zend_string *method_name = Z_STR_P(CRT_CONSTANT(opline->op2));
 				zend_function *fbc = zend_hash_find_ptr(
 					&op_array->scope->function_table, method_name);
 				if (fbc) {

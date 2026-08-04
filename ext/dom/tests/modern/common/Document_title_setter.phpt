@@ -9,59 +9,59 @@ echo "\n=== SVG namespaced test ===\n\n";
 
 $dom = Dom\XMLDocument::createFromString('<root xmlns="http://www.w3.org/2000/svg"/>');
 $dom->title = "hello &amp; world";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom = Dom\XMLDocument::createFromString('<svg xmlns="http://www.w3.org/2000/svg"/>');
 $dom->title = "hello &amp; world";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $dom->title = "";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom = Dom\XMLDocument::createFromString('<svg:svg xmlns:svg="http://www.w3.org/2000/svg"/>');
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 var_dump($dom->documentElement->firstElementChild->prefix, $dom->documentElement->firstElementChild->namespaceURI);
 
 $dom = Dom\XMLDocument::createFromString('<svg xmlns="http://www.w3.org/2000/svg">first node<div/></svg>');
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $dom->documentElement->firstElementChild->remove();
 $dom->title = "test2";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "\n=== HTML namespaced test ===\n\n";
 
 $dom = Dom\XMLDocument::createFromString('<root xmlns="http://www.w3.org/1999/xhtml"/>');
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom = Dom\XMLDocument::createFromString('<html xmlns="http://www.w3.org/1999/xhtml"/>');
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom = Dom\XMLDocument::createFromString('<html xmlns="http://www.w3.org/1999/xhtml"><foo/><head/></html>');
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom = Dom\XMLDocument::createFromString('<html xmlns="http://www.w3.org/1999/xhtml"><head><?ignore me?></head></html>');
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom = Dom\XMLDocument::createFromString('<html xmlns="http://www.w3.org/1999/xhtml"><head><?ignore me?><title>foo<div/></title></head></html>');
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "\n=== neither namespaced test ===\n\n";
 
 $dom = Dom\XMLDocument::createEmpty();
 $dom->title = "";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $dom = Dom\XMLDocument::createFromString('<root/>');
 $dom->title = "test";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

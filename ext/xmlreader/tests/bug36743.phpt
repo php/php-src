@@ -15,7 +15,7 @@ class Test extends XMLReader
     }
 }
 
-$t = new test;
+$t = new Test;
 
 echo "Done\n";
 ?>

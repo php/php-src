@@ -13,7 +13,7 @@ $name = __DIR__ . '/torrent.zip';
 $zip = new ZipArchive();
 
 echo "Open write\n";
-$zip->open($name, ZIPARCHIVE::CREATE);
+$zip->open($name, ZipArchive::CREATE);
 var_dump($zip->getArchiveFlag(ZipArchive::AFL_IS_TORRENTZIP));
 var_dump($zip->setArchiveFlag(ZipArchive::AFL_WANT_TORRENTZIP, 1), $zip->status === ZipArchive::ER_OK);
 var_dump($zip->addFile(__FILE__, "test.php"));

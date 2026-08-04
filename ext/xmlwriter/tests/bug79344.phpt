@@ -9,8 +9,8 @@ $writer->openMemory();
 $writer->setIndent(true);
 $writer->startElement('foo');
 
-$writer->writeAttributeNS(null, 'test1', null, 'test1');
-$writer->startAttributeNS(null, 'test2', null);
+$writer->writeAttributeNs(null, 'test1', null, 'test1');
+$writer->startAttributeNs(null, 'test2', null);
 $writer->text('test2');
 $writer->endAttribute();
 

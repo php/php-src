@@ -9,7 +9,7 @@ function &cb() {}
 
 $file = __DIR__ . '/gh18907.zip';
 $zip = new ZipArchive;
-$zip->open($file, ZIPARCHIVE::CREATE);
+$zip->open($file, ZipArchive::CREATE);
 $zip->registerCancelCallback(cb(...));
 $zip->addFromString('test', 'test');
 $fusion = $zip;

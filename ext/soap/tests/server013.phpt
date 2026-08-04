@@ -4,7 +4,7 @@ SOAP Server 13: array handling
 soap
 --FILE--
 <?php
-function Sum($a) {
+function sum($a) {
   $sum = 0;
   if (is_array($a)) {
     foreach($a as $val) {
@@ -14,8 +14,8 @@ function Sum($a) {
   return $sum;
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("Sum");
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->addFunction("sum");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>

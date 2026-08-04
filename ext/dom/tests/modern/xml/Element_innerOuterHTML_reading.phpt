@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 
 function createContainer() {
     global $dom;
@@ -48,7 +48,7 @@ $element->setAttributeNS('urn:b', 'name', '');
 var_dump($container->innerHTML);
 var_dump($container->outerHTML);
 
-$dom = DOM\XMLDocument::createFromFile(__DIR__ . '/../../book.xml');
+$dom = Dom\XMLDocument::createFromFile(__DIR__ . '/../../book.xml');
 var_dump($dom->documentElement->innerHTML);
 var_dump($dom->documentElement->outerHTML);
 

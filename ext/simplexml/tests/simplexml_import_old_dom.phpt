@@ -5,7 +5,7 @@ simplexml
 dom
 --FILE--
 <?php
-$dom = new domDocument;
+$dom = new DOMDocument;
 $dom->load(__DIR__."/book.xml");
 if(!$dom) {
   echo "Error while parsing the document\n";

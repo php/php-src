@@ -500,7 +500,7 @@ static zend_ast *zp_param_attributes_to_ast(zend_function *function,
 	/* Inherit the SensitiveParameter attribute */
 	zend_attribute *attr = zend_get_parameter_attribute_str(
 			function->common.attributes,
-			"sensitiveparameter", strlen("sensitiveparameter"), offset);
+			"SensitiveParameter", strlen("SensitiveParameter"), offset);
 	if (attr) {
 		attributes_ast = zend_ast_create_list(1, ZEND_AST_ATTRIBUTE_GROUP,
 				zp_attribute_to_ast(attr));
@@ -955,7 +955,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	/* Inherit the NoDiscard attribute */
 	if (function->common.attributes) {
 		zend_attribute *attr = zend_get_attribute_str(
-				function->common.attributes, "nodiscard", strlen("nodiscard"));
+				function->common.attributes, "NoDiscard", strlen("NoDiscard"));
 		if (attr) {
 			attributes_ast = zend_ast_create_list(1, ZEND_AST_ATTRIBUTE_GROUP,
 					zp_attribute_to_ast(attr));

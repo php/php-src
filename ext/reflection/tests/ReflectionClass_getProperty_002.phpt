@@ -23,22 +23,22 @@ try {
 }
 try {
     var_dump($rc->getProperty(null));
-} catch (exception $e) {
+} catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     var_dump($rc->getProperty(1));
-} catch (exception $e) {
+} catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     var_dump($rc->getProperty(1.5));
-} catch (exception $e) {
+} catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     var_dump($rc->getProperty(true));
-} catch (exception $e) {
+} catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
 try {

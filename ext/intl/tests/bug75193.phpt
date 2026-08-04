@@ -5,7 +5,7 @@ intl
 --FILE--
 <?php
 $a = new \Collator('en_US');
-$b = [new stdclass, new stdclass];
+$b = [new stdClass, new stdClass];
 var_dump($a->sort($b));
 ?>
 --EXPECT--

@@ -14,7 +14,7 @@ $dbh->exec("CREATE TABLE test_ddl2 (val int)");
 $dbh->beginTransaction();
 $dbh->exec("INSERT INTO test_ddl2 (val) VALUES (120)");
 $dbh->exec("CREATE TABLE test_ddl2_2 (val INT)");
-$dbh->rollback();
+$dbh->rollBack();
 
 $result = $dbh->query("SELECT * FROM test_ddl2");
 var_dump($result->fetchAll());

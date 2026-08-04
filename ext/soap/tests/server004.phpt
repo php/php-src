@@ -11,8 +11,8 @@ function Sub($x,$y) {
   return $x-$y;
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction(array("Sub","Add"));
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->addFunction(array("Sub","Add"));
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

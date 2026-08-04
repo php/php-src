@@ -26,7 +26,7 @@ class CustomStreamWrapper {
 
 $file = __DIR__ . '/gh18438.zip';
 $zip = new ZipArchive;
-$zip->open($file, ZIPARCHIVE::CREATE);
+$zip->open($file, ZipArchive::CREATE);
 var_dump($zip->addPattern('/nomatches/'));
 var_dump($zip->addPattern('/invalid'));
 

@@ -7,7 +7,7 @@ dom
 $dom = @Dom\HTMLDocument::createFromString("<p>foo</p>");
 $dom2 = clone $dom;
 $element = $dom2->firstChild;
-$dom = new DomDocument();
+$dom = new DOMDocument();
 var_dump($element);
 ?>
 --EXPECT--

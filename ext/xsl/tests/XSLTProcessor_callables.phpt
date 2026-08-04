@@ -7,7 +7,7 @@ xsl
 
 require __DIR__ . '/xpath_callables.inc';
 
-$inputdom = new DomDocument();
+$inputdom = new DOMDocument();
 $inputdom->loadXML('<?xml version="1.0" encoding="iso-8859-1"?><a href="https://php.net">hello</a>');
 
 echo "--- Legit cases: none ---\n";
@@ -28,15 +28,15 @@ var_dump($proc->transformToXml($inputdom));
 echo "--- Legit cases: set ---\n";
 
 $proc = createProcessor(["'mydump', string(@href)", "'xyz', string(@href)", "'var_dump', string(@href)"]);
-$proc->registerPhpFunctions([]);
+$proc->registerPHPFunctions([]);
 $proc->registerPHPFunctions(["xyz" => MyClass::dump(...), "mydump" => function (string $x) {
     var_dump($x);
 }]);
-$proc->registerPhpFunctions(str_repeat("var_dump", mt_rand(1, 1) /* defeat SCCP */));
+$proc->registerPHPFunctions(str_repeat("var_dump", mt_rand(1, 1) /* defeat SCCP */));
 var_dump($proc->transformToXml($inputdom));
 
 $proc = createProcessor(["'notinset', string(@href)"]);
-$proc->registerPhpFunctions([]);
+$proc->registerPHPFunctions([]);
 try {
     var_dump($proc->transformToXml($inputdom));
 } catch (Throwable $e) {

@@ -31,6 +31,6 @@ var_dump(function_exists('C::f'));
 *** Testing function_exists() : basic functionality ***
 Internal function: bool(true)
 User defined function: bool(true)
-Case sensitivity: bool(true)
+Case sensitivity: bool(false)
 Non existent function: bool(false)
 Method: bool(false)

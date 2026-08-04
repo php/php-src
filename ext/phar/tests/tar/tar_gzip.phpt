@@ -18,8 +18,8 @@ $a = new tarmaker($fname, 'zlib');
 $a->init();
 $a->addFile('tar_004.php', '<?php var_dump(__FILE__);');
 $a->addFile('internal/file/here', "hi there!\n");
-$a->mkDir('internal/dir');
-$a->mkDir('dir');
+$a->mkdir('internal/dir');
+$a->mkdir('dir');
 $a->addFile('.phar/stub.php', '<?php
 Phar::mapPhar();
 var_dump("it worked");

@@ -18,7 +18,7 @@ function Add($x,$y) {
   return $x+$y;
 }
 
-$server = new soapserver(__DIR__."/test.wsdl");
+$server = new SoapServer(__DIR__."/test.wsdl");
 ob_start();
 $server->handle();
 $wsdl = ob_get_contents();

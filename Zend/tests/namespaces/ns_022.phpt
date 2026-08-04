@@ -13,7 +13,7 @@ function foo() {
 }
 
 test\foo();
-\test::foo();
+\Test::foo();
 ?>
 --EXPECT--
 a\b\c\foo

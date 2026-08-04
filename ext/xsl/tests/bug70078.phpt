@@ -40,9 +40,9 @@ $xsl = new \DOMDocument();
 $xsl->loadXML($xslStr);
 $xslt = new \XSLTProcessor();
 $xslt->registerPHPFunctions('testPhpFunction');
-$xslt->importStyleSheet($xsl);
+$xslt->importStylesheet($xsl);
 
-echo $xslt->transformToXML($dom);
+echo $xslt->transformToXml($dom);
 ?>
 --EXPECT--
 <?xml version="1.0"?>

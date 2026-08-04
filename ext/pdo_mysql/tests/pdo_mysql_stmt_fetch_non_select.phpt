@@ -175,7 +175,7 @@ MySQLPDOTest::skip();
         $stmt->execute();
         $stmt->execute();
         // libmysql needs this - otherwise we get a 2015 error
-        if (!MYSQLPDOTest::isPDOMySQLnd())
+        if (!MySQLPDOTest::isPDOMySQLnd())
             $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     } catch (PDOException $e) {

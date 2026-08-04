@@ -24,7 +24,7 @@ for ($i = 0; $i < 3; $i++) {
         $db->commit();
     } catch (Exception $e) {
         echo trim(current(explode("\n", $e->getMessage())))."\n";
-        $db->rollback();
+        $db->rollBack();
     }
 }
 

@@ -962,7 +962,7 @@ static const zend_class_entry *resolve_single_class_type(zend_string *name, cons
 	} else if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_PARENT))) {
 		return self_ce->parent;
 	} else {
-		return zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+		return zend_lookup_class_ex(name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 	}
 }
 
@@ -973,7 +973,7 @@ static zend_always_inline const zend_class_entry *zend_ce_from_type(
 	if (ZSTR_HAS_CE_CACHE(name)) {
 		zend_class_entry *ce = ZSTR_GET_CE_CACHE(name);
 		if (!ce) {
-			ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+			ce = zend_lookup_class_ex(name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		}
 		return ce;
 	}
@@ -1113,7 +1113,7 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_type(
 	if (ZSTR_HAS_CE_CACHE(name)) {
 		ce = ZSTR_GET_CE_CACHE(name);
 		if (!ce) {
-			ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+			ce = zend_lookup_class_ex(name, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 			if (UNEXPECTED(!ce)) {
 				/* Cannot resolve */
 				return NULL;
@@ -1810,7 +1810,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 		return SUCCESS;
 	}
 
-	zend_attribute *deprecated = zend_get_attribute_str(attributes, "deprecated", sizeof("deprecated")-1);
+	zend_attribute *deprecated = zend_get_attribute_str(attributes, "Deprecated", sizeof("Deprecated")-1);
 
 	if (!deprecated) {
 		return SUCCESS;
@@ -1901,7 +1901,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_nodiscard_suffix_from_attribute(H
 		return SUCCESS;
 	}
 
-	zend_attribute *nodiscard = zend_get_attribute_str(attributes, "nodiscard", sizeof("nodiscard")-1);
+	zend_attribute *nodiscard = zend_get_attribute_str(attributes, "NoDiscard", sizeof("NoDiscard")-1);
 
 	if (!nodiscard) {
 		return SUCCESS;
@@ -3748,7 +3748,7 @@ static zend_never_inline zval* zend_fetch_static_property_address_ex(zend_proper
 		ZEND_ASSERT(op1_type != IS_CONST || CACHED_PTR(cache_slot) == NULL);
 
 		if (EXPECTED((ce = CACHED_PTR(cache_slot)) == NULL)) {
-			ce = zend_fetch_class_by_name(Z_STR_P(class_name), Z_STR_P(class_name + 1), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			ce = zend_fetch_class_by_name(Z_STR_P(class_name), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 			if (UNEXPECTED(ce == NULL)) {
 				FREE_OP(op1_type, opline->op1.var);
 				return NULL;
@@ -4496,9 +4496,9 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /*
 	zend_function *fbc;
 	if (UNEXPECTED(ZSTR_VAL(name)[0] == '\\')) {
 		/* Ignore leading "\" */
-		fbc = zend_hash_str_find_ptr_lc(EG(function_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+		fbc = zend_hash_str_find_ptr(EG(function_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
 	} else {
-		fbc = zend_hash_find_ptr_lc(EG(function_table), name);
+		fbc = zend_hash_find_ptr(EG(function_table), name);
 	}
 
 	if (EXPECTED(fbc && fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
@@ -4512,9 +4512,9 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name,
 	zend_function *fbc;
 	if (UNEXPECTED(name[0] == '\\')) {
 		/* Ignore leading "\" */
-		fbc = zend_hash_str_find_ptr_lc(EG(function_table), name + 1, len - 1);
+		fbc = zend_hash_str_find_ptr(EG(function_table), name + 1, len - 1);
 	} else {
-		fbc = zend_hash_str_find_ptr_lc(EG(function_table), name, len);
+		fbc = zend_hash_str_find_ptr(EG(function_table), name, len);
 	}
 
 	if (EXPECTED(fbc && fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
@@ -5105,7 +5105,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 	zend_function *fbc;
 	zval *func;
 	zend_class_entry *called_scope;
-	zend_string *lcname;
+	zend_string *name;
 	const char *colon;
 
 	if ((colon = zend_memrchr(ZSTR_VAL(function), ':', ZSTR_LEN(function))) != NULL &&
@@ -5116,11 +5116,11 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		size_t cname_length = colon - ZSTR_VAL(function) - 1;
 		size_t mname_length = ZSTR_LEN(function) - cname_length - (sizeof("::") - 1);
 
-		lcname = zend_string_init(ZSTR_VAL(function), cname_length, 0);
+		name = zend_string_init(ZSTR_VAL(function), cname_length, 0);
 
-		called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+		called_scope = zend_fetch_class_by_name(name, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 		if (UNEXPECTED(called_scope == NULL)) {
-			zend_string_release_ex(lcname, 0);
+			zend_string_release_ex(name, 0);
 			return NULL;
 		}
 
@@ -5135,12 +5135,12 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 			if (EXPECTED(!EG(exception))) {
 				zend_undefined_method(called_scope, mname);
 			}
-			zend_string_release_ex(lcname, 0);
+			zend_string_release_ex(name, 0);
 			zend_string_release_ex(mname, 0);
 			return NULL;
 		}
 
-		zend_string_release_ex(lcname, 0);
+		zend_string_release_ex(name, 0);
 		zend_string_release_ex(mname, 0);
 
 		if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
@@ -5156,17 +5156,16 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		}
 	} else {
 		if (ZSTR_VAL(function)[0] == '\\') {
-			lcname = zend_string_alloc(ZSTR_LEN(function) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(function) + 1, ZSTR_LEN(function) - 1);
+			name = zend_string_init(ZSTR_VAL(function) + 1, ZSTR_LEN(function) - 1, 0);
+			func = zend_hash_find(EG(function_table), name);
+			zend_string_release_ex(name, 0);
 		} else {
-			lcname = zend_string_tolower(function);
+			func = zend_hash_find(EG(function_table), function);
 		}
-		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
+		if (UNEXPECTED(func == NULL)) {
 			zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
-			zend_string_release_ex(lcname, 0);
 			return NULL;
 		}
-		zend_string_release_ex(lcname, 0);
 
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
@@ -5254,7 +5253,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(const z
 		}
 
 		if (Z_TYPE_P(obj) == IS_STRING) {
-			zend_class_entry *called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			zend_class_entry *called_scope = zend_fetch_class_by_name(Z_STR_P(obj), ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 
 			if (UNEXPECTED(called_scope == NULL)) {
 				return NULL;

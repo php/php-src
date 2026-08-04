@@ -36,7 +36,11 @@ foreach($classes as $class) {
     echo "  --> Check for s(): ";
     var_dump($rc->getMethod("s"));
     echo "  --> Check for F(): ";
-    var_dump($rc->getMethod("F"));
+    try {
+        var_dump($rc->getMethod("F"));
+    } catch (Exception $e) {
+        echo $e->getMessage() . "\n";
+    }
     echo "  --> Check for doesNotExist(): ";
     try {
         var_dump($rc->getMethod("doesNotExist"));
@@ -59,12 +63,7 @@ Reflecting on class pubf:
   ["class"]=>
   string(4) "pubf"
 }
-  --> Check for F(): object(ReflectionMethod)#%d (2) {
-  ["name"]=>
-  string(1) "f"
-  ["class"]=>
-  string(4) "pubf"
-}
+  --> Check for F(): Method pubf::F() does not exist
   --> Check for doesNotExist(): Method pubf::doesNotExist() does not exist
 Reflecting on class subpubf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
@@ -79,12 +78,7 @@ Reflecting on class subpubf:
   ["class"]=>
   string(4) "pubf"
 }
-  --> Check for F(): object(ReflectionMethod)#%d (2) {
-  ["name"]=>
-  string(1) "f"
-  ["class"]=>
-  string(4) "pubf"
-}
+  --> Check for F(): Method subpubf::F() does not exist
   --> Check for doesNotExist(): Method subpubf::doesNotExist() does not exist
 Reflecting on class protf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
@@ -99,12 +93,7 @@ Reflecting on class protf:
   ["class"]=>
   string(5) "protf"
 }
-  --> Check for F(): object(ReflectionMethod)#%d (2) {
-  ["name"]=>
-  string(1) "f"
-  ["class"]=>
-  string(5) "protf"
-}
+  --> Check for F(): Method protf::F() does not exist
   --> Check for doesNotExist(): Method protf::doesNotExist() does not exist
 Reflecting on class subprotf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
@@ -119,12 +108,7 @@ Reflecting on class subprotf:
   ["class"]=>
   string(5) "protf"
 }
-  --> Check for F(): object(ReflectionMethod)#%d (2) {
-  ["name"]=>
-  string(1) "f"
-  ["class"]=>
-  string(5) "protf"
-}
+  --> Check for F(): Method subprotf::F() does not exist
   --> Check for doesNotExist(): Method subprotf::doesNotExist() does not exist
 Reflecting on class privf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
@@ -139,12 +123,7 @@ Reflecting on class privf:
   ["class"]=>
   string(5) "privf"
 }
-  --> Check for F(): object(ReflectionMethod)#%d (2) {
-  ["name"]=>
-  string(1) "f"
-  ["class"]=>
-  string(5) "privf"
-}
+  --> Check for F(): Method privf::F() does not exist
   --> Check for doesNotExist(): Method privf::doesNotExist() does not exist
 Reflecting on class subprivf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
@@ -159,10 +138,5 @@ Reflecting on class subprivf:
   ["class"]=>
   string(5) "privf"
 }
-  --> Check for F(): object(ReflectionMethod)#%d (2) {
-  ["name"]=>
-  string(1) "f"
-  ["class"]=>
-  string(5) "privf"
-}
+  --> Check for F(): Method subprivf::F() does not exist
   --> Check for doesNotExist(): Method subprivf::doesNotExist() does not exist

@@ -6,7 +6,7 @@ array_map() and exceptions in the callback
 $a = array(1,2,3);
 
 function foo() {
-    throw new exception(1);
+    throw new Exception(1);
 }
 
 try {

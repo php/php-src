@@ -3,7 +3,7 @@ new with an arbitrary expression
 --FILE--
 <?php
 
-$class = 'class';
+$class = 'Class';
 var_dump(new ('std'.$class));
 var_dump(new ('std'.$class)());
 $obj = new stdClass;

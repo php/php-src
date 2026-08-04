@@ -154,7 +154,7 @@ PHPDBG_PRINT(method) /* {{{ */
 	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce) == SUCCESS) {
 		zend_function *fbc;
 
-		if ((fbc = zend_hash_str_find_ptr_lc(&ce->function_table, param->method.name, strlen(param->method.name)))) {
+		if ((fbc = zend_hash_str_find_ptr(&ce->function_table, param->method.name, strlen(param->method.name)))) {
 			phpdbg_notice("%s Method %s (%d ops)",
 				(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 				ZSTR_VAL(fbc->common.function_name),
@@ -198,7 +198,7 @@ PHPDBG_PRINT(func) /* {{{ */
 	}
 
 	phpdbg_try_access {
-		if ((fbc = zend_hash_str_find_ptr_lc(func_table, func_name, func_name_len))) {
+		if ((fbc = zend_hash_str_find_ptr(func_table, func_name, func_name_len))) {
 			phpdbg_notice("%s %s %s (%d ops)",
 				(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 				(fbc->common.scope) ? "Method" : "Function",
@@ -331,12 +331,13 @@ void phpdbg_print_opcodes(const char *function)
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		char *function_lowercase = zend_str_tolower_dup(function, strlen(function));
+		/* duplicate so strtok() can modify the buffer */
+		char *function_dup = estrdup(function);
 
-		if (strstr(function_lowercase, "::") == NULL) {
-			phpdbg_print_opcodes_function(function_lowercase, strlen(function_lowercase));
+		if (strstr(function_dup, "::") == NULL) {
+			phpdbg_print_opcodes_function(function_dup, strlen(function_dup));
 		} else {
-			char *method_name, *class_name = strtok(function_lowercase, "::");
+			char *method_name, *class_name = strtok(function_dup, "::");
 			if ((method_name = strtok(NULL, "::")) == NULL) {
 				phpdbg_print_opcodes_class(class_name);
 			} else {
@@ -344,7 +345,7 @@ void phpdbg_print_opcodes(const char *function)
 			}
 		}
 
-		efree(function_lowercase);
+		efree(function_dup);
 	}
 }
 

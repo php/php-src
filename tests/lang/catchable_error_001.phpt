@@ -15,7 +15,7 @@ Catchable fatal error [1]
         var_dump($a);
     }
 
-    blah (new StdClass);
+    blah (new stdClass);
     echo "ALIVE!\n";
 ?>
 --EXPECTF--

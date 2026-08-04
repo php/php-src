@@ -13,8 +13,8 @@ class SOAPStruct {
 $struct = new SOAPStruct('arg',34,325.325);
 $client = new SoapClient(__DIR__."/round4_groupH_complex_rpcenc.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoSOAPStructFault(array("soapStruct"=>$struct));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round4_groupH_complex_rpcenc.inc");
 echo "ok\n";
 ?>

@@ -23,11 +23,11 @@ class MyHelloWorld {
 }
 
 
-$o= myHelloWorld::getInstance(1);
-$o= myHelloWorld::getInstance(1);
-$o= myHelloWorld::getInstance(2);
-$o= myHelloWorld::getInstance(array(1=>2));
-$o= myHelloWorld::getInstance(array(1=>2));
+$o= MyHelloWorld::getInstance(1);
+$o= MyHelloWorld::getInstance(1);
+$o= MyHelloWorld::getInstance(2);
+$o= MyHelloWorld::getInstance(array(1=>2));
+$o= MyHelloWorld::getInstance(array(1=>2));
 
 ?>
 --EXPECT--

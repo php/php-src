@@ -11,7 +11,7 @@ $xw->openUri($doc_dest);
 $xw->startDtd('foo', NULL, 'urn:bar');
 $xw->endDtd();
 $xw->startElement('foo');
-$xw->writeElementNS('foo', 'bar', 'urn:foo', 'dummy content');
+$xw->writeElementNs('foo', 'bar', 'urn:foo', 'dummy content');
 $xw->endElement();
 
 // Force to write and empty the buffer

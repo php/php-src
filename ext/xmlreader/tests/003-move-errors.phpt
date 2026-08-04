@@ -20,9 +20,9 @@ if (!$reader->open($filename)) {
 
 // Parse the data
 while ($reader->read()) {
-    if ($reader->nodeType != XMLREADER::END_ELEMENT) {
+    if ($reader->nodeType != XMLReader::END_ELEMENT) {
         // Find the book node
-        if ($reader->nodeType == XMLREADER::ELEMENT && $reader->name == 'book') {
+        if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'book') {
             echo $reader->name . "\n";
 
             $attr = $reader->moveToNextAttribute();

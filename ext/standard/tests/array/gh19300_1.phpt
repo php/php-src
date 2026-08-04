@@ -4,7 +4,7 @@ GH-19300 (Nested array_multisort invocation with error breaks) - correct invocat
 <?php
 class MyStringable {
     public function __construct(private string $data) {}
-    public function __tostring() {
+    public function __toString() {
         array_multisort([]); // Trigger update of array sort globals in happy path
         return $this->data;
     }

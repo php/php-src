@@ -31,11 +31,11 @@ static zend_always_inline void zend_do_inheritance(zend_class_entry *ce, zend_cl
 	zend_do_inheritance_ex(ce, parent_ce, 0);
 }
 
-ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name, const zend_string *key);
+ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, const zend_string *key);
 
 void zend_verify_abstract_class(zend_class_entry *ce);
 void zend_build_properties_info_table(zend_class_entry *ce);
-ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding);
+ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *key_name, zval *delayed_early_binding);
 
 void zend_inheritance_check_override(const zend_class_entry *ce);
 

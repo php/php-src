@@ -26,7 +26,7 @@ class StatefulClass {
 }
 
 function createProcessor($inputs) {
-    $xsl = new DomDocument();
+    $xsl = new DOMDocument();
     $xsl->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
     <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -42,7 +42,7 @@ function createProcessor($inputs) {
     return $proc;
 }
 
-$inputdom = new DomDocument();
+$inputdom = new DOMDocument();
 $inputdom->loadXML('<?xml version="1.0" encoding="iso-8859-1"?><a href="https://php.net">hello</a>');
 
 echo "--- Legit cases: none ---\n";

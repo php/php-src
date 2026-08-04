@@ -16,8 +16,8 @@ function Add($x,$y) {
   return $x+$y;
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("Add");
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->addFunction("Add");
 $server->handle();
 echo "ok\n";
 ?>

@@ -13,8 +13,8 @@ $XML = <<< XML
 </root>
 XML;
 
-$dom = new DomDocument();
-$dom->loadXml($XML);
+$dom = new DOMDocument();
+$dom->loadXML($XML);
 $items = $dom->getElementsByTagName('item');
 
 echo "Count: ".count($items)."\n";

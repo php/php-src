@@ -25,7 +25,7 @@ $dom2->loadXML($xml2);
 $root2 = $dom2->documentElement;
 try {
     $root2->setAttributeNode($attr);
-} catch (domexception $e) {
+} catch (DOMException $e) {
 ob_start();
     var_dump($e);
     $contents = ob_get_contents();

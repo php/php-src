@@ -89,7 +89,7 @@ PHPDBG_LIST(method) /* {{{ */
 	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce) == SUCCESS) {
 		zend_function *function;
 
-		if ((function = zend_hash_str_find_ptr_lc(&ce->function_table, param->method.name, strlen(param->method.name)))) {
+		if ((function = zend_hash_str_find_ptr(&ce->function_table, param->method.name, strlen(param->method.name)))) {
 			phpdbg_list_function(function);
 		} else {
 			phpdbg_error("Could not find %s::%s", param->method.class, param->method.name);
@@ -204,9 +204,6 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 		func_table = EG(function_table);
 	}
 
-	/* use lowercase names, case insensitive */
-	func_name = zend_str_tolower_dup(func_name, func_name_len);
-
 	phpdbg_try_access {
 		if ((fbc = zend_hash_str_find_ptr(func_table, func_name, func_name_len))) {
 			phpdbg_list_function(fbc);
@@ -216,8 +213,6 @@ void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 	} phpdbg_catch_access {
 		phpdbg_error("Could not list function %s, invalid data source", func_name);
 	} phpdbg_end_try_access();
-
-	efree(func_name);
 } /* }}} */
 
 /* Note: do not free the original file handler, let original compile_file() or caller do that. Caller may rely on its value to check success */

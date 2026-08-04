@@ -29,7 +29,7 @@ foo();
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- declared class 'foo' -->
+<!-- declared class 'Foo' -->
 <!-- init '%sobserver_preload.inc' -->
 <file '%sobserver_preload.inc'>
   <!-- declared function 'foo' -->

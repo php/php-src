@@ -16,7 +16,7 @@ $dom->loadXML(<<<XML
     </child>
 </root>
 XML);
-$xpath = new DOMXpath($dom);
+$xpath = new DOMXPath($dom);
 
 foreach ($xpath->query("p", $dom->documentElement->firstElementChild->nextElementSibling) as $p) {
     echo $p->textContent, "\n";

@@ -12,11 +12,11 @@ $intlcal->setTimeZone(new DateTimeZone('Europe/Madrid'));
 var_dump($intlcal->getTimeZone()->getID());
 
 $pstdate = new DateTime('2012-01-01 00:00:00 PST');
-$intlcal->setTimeZone($pstdate->getTimeZone());
+$intlcal->setTimeZone($pstdate->getTimezone());
 var_dump($intlcal->getTimeZone()->getID());
 
 $offsetdate = new DateTime('2012-01-01 00:00:00 -02:30');
-$intlcal->setTimeZone($offsetdate->getTimeZone());
+$intlcal->setTimeZone($offsetdate->getTimezone());
 var_dump($intlcal->getTimeZone()->getID());
 ?>
 --EXPECTF--

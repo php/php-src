@@ -25,14 +25,17 @@ $a::bAr();
 foo::BAZ();
 
 ?>
---EXPECT--
+--EXPECTF--
 nonstatic
-string(6) "fOoBaR"
+string(%d) "fOoBaR"
 nonstatic
-string(6) "foOBAr"
+string(%d) "foOBAr"
 nonstatic
-string(6) "fOOBAr"
+string(%d) "fOOBAr"
 static
-string(3) "bAr"
-static
-string(3) "BAZ"
+string(%d) "bAr"
+
+Fatal error: Uncaught Error: Class "foo" not found in %s:%d
+Stack trace:
+#%d {main}
+  thrown in %s on line %d

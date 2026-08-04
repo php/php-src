@@ -7,13 +7,13 @@ dom
 
 require __DIR__ . '/test_utils.inc';
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <container/>
 XML);
 
 test_helper($dom, ':root', true);
 $fragment = $dom->createDocumentFragment();
-$fragment->appendXML('<div><p></p></div>');
+$fragment->appendXml('<div><p></p></div>');
 test_helper($fragment, ':root', true);
 test_helper($dom->createElement("foo"), ':root', true);
 

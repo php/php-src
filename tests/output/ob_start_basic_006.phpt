@@ -58,7 +58,7 @@ checkAndClean();
 var_dump(ob_start(array("f", "non_existent", "f", "f")));
 checkAndClean();
 
-$c = new c('originalID');
+$c = new C('originalID');
 var_dump(ob_start(array($c, "h")));
 checkAndClean();
 
