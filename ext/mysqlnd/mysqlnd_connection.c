@@ -366,10 +366,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn)
 		conn->last_message.s = NULL;
 
 		/* COM_RESET_CONNECTION reverts the session charset to the server
-		 * default, but the user may have changed the charset. Re-apply
-		 * conn->charset when it differs from that default. */
-		if (conn->charset && conn->charset != conn->greet_charset) {
-			ret = conn->m->set_charset(conn, conn->charset->name);
+		 * default. A charset requested as a connection option (DSN charset=,
+		 * MYSQLI_SET_CHARSET_NAME) is part of establishing the connection, so
+		 * re-apply it to match a fresh connect. A charset chosen afterwards
+		 * with set_charset() is not restored - the caller reapplies that
+		 * itself - but realign the cached charset (used for escaping) with the
+		 * now-reset connection. */
+		if (conn->options->charset_name) {
+			ret = conn->m->set_charset(conn, conn->options->charset_name);
+		} else if (conn->greet_charset) {
+			conn->charset = conn->greet_charset;
 		}
 
 		/* Re-execute any MYSQL_INIT_COMMAND commands. */
