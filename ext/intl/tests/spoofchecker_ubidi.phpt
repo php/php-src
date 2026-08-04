@@ -11,7 +11,7 @@ $s = new Spoofchecker();
 try {
     $s->areBidiConfusable(Spoofchecker::RTL + 1, "a", "a");
 } catch (ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 /* "A1<aleph>" and "A<aleph>1" both display as "A1<aleph>" in a left to right
@@ -39,7 +39,7 @@ var_dump($s->areBidiConfusable(Spoofchecker::LTR, "Mark_", "_Mark", $errorCode))
 var_dump($errorCode);
 ?>
 --EXPECT--
-Spoofchecker::areBidiConfusable(): Argument #1 ($direction) must be either Spoofchecker::LTR or Spoofchecker::RTL
+ValueError: Spoofchecker::areBidiConfusable(): Argument #1 ($direction) must be either Spoofchecker::LTR or Spoofchecker::RTL
 bool(true)
 bool(false)
 bool(false)
