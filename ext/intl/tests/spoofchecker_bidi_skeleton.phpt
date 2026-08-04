@@ -26,6 +26,16 @@ var_dump(
     $checker->getBidiSkeleton(Spoofchecker::RTL, "A\u{05D0}1")
 );
 
+/* These identifiers are confusable in a right-to-left context only. */
+var_dump(
+    $checker->getBidiSkeleton(Spoofchecker::LTR, "\u{05D0}A_1") ===
+    $checker->getBidiSkeleton(Spoofchecker::LTR, "\u{05D0}1_A")
+);
+var_dump(
+    $checker->getBidiSkeleton(Spoofchecker::RTL, "\u{05D0}A_1") ===
+    $checker->getBidiSkeleton(Spoofchecker::RTL, "\u{05D0}1_A")
+);
+
 var_dump($checker->getBidiSkeleton(Spoofchecker::LTR, "\x80"));
 var_dump(intl_get_error_code() === U_INVALID_CHAR_FOUND);
 ?>
@@ -34,5 +44,7 @@ string(0) ""
 ValueError: Spoofchecker::getBidiSkeleton(): Argument #1 ($direction) must be either Spoofchecker::LTR or Spoofchecker::RTL
 bool(true)
 bool(false)
+bool(false)
+bool(true)
 bool(false)
 bool(true)
