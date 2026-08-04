@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-Call to undefined function array_pussh() (did you mean array_push()?)
+Call to undefined function array_pussh() (did you mean array_push?)

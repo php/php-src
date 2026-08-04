@@ -2608,7 +2608,7 @@ ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(co
 {
 	zend_string *suggestion = zend_find_similar_method(ce, method);
 	if (suggestion) {
-		zend_throw_error(NULL, "Call to undefined method %s::%s() (did you mean %s()?)", ZSTR_VAL(ce->name), ZSTR_VAL(method), ZSTR_VAL(suggestion));
+		zend_throw_error(NULL, "Call to undefined method %s::%s() (did you mean %s?)", ZSTR_VAL(ce->name), ZSTR_VAL(method), ZSTR_VAL(suggestion));
 	} else {
 		zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
 	}
@@ -2621,7 +2621,7 @@ ZEND_API zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_function_
 	zend_string *lc_key = Z_STR_P(function_name + 1);
 	zend_string *suggestion = zend_find_similar_function(ZSTR_VAL(lc_key), ZSTR_LEN(lc_key));
 	if (suggestion) {
-		zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s()?)", Z_STRVAL_P(function_name), ZSTR_VAL(suggestion));
+		zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s?)", Z_STRVAL_P(function_name), ZSTR_VAL(suggestion));
 	} else {
 		zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 	}
@@ -5233,7 +5233,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_string *suggestion = zend_find_similar_function(ZSTR_VAL(lcname), ZSTR_LEN(lcname));
 			if (suggestion) {
-				zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s()?)", ZSTR_VAL(function), ZSTR_VAL(suggestion));
+				zend_throw_error(NULL, "Call to undefined function %s() (did you mean %s?)", ZSTR_VAL(function), ZSTR_VAL(suggestion));
 			} else {
 				zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
 			}

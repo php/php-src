@@ -9,7 +9,7 @@ var_dump(Closure);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to undefined function strlenn() (did you mean strlen()?) in %s:%d
+Fatal error: Uncaught Error: Call to undefined function strlenn() (did you mean strlen?) in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

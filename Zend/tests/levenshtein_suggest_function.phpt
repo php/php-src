@@ -19,8 +19,8 @@ $f = "strlenx";
 try { $f("x"); } catch (Error $e) { echo $e->getMessage(), "\n"; }
 ?>
 --EXPECT--
-Call to undefined function strlenn() (did you mean strlen()?)
-Call to undefined function array_pussh() (did you mean array_push()?)
-Call to undefined function arry_pussh() (did you mean array_push()?)
+Call to undefined function strlenn() (did you mean strlen?)
+Call to undefined function array_pussh() (did you mean array_push?)
+Call to undefined function arry_pussh() (did you mean array_push?)
 Call to undefined function nonexistentfunc()
-Call to undefined function strlenx() (did you mean strlen()?)
+Call to undefined function strlenx() (did you mean strlen?)
