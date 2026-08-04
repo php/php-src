@@ -225,48 +225,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(zpp_error error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg) /* {{{ */
-{
-	switch (error_code) {
-		case ZPP_ERROR_WRONG_CALLBACK:
-			zend_wrong_callback_error(num, name);
-			break;
-		case ZPP_ERROR_WRONG_CALLBACK_OR_NULL:
-			zend_wrong_callback_or_null_error(num, name);
-			break;
-		case ZPP_ERROR_WRONG_CLASS:
-			zend_wrong_parameter_class_error(num, name, arg);
-			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_NULL:
-			zend_wrong_parameter_class_or_null_error(num, name, arg);
-			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_STRING:
-			zend_wrong_parameter_class_or_string_error(num, name, arg);
-			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL:
-			zend_wrong_parameter_class_or_string_or_null_error(num, name, arg);
-			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_LONG:
-			zend_wrong_parameter_class_or_long_error(num, name, arg);
-			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL:
-			zend_wrong_parameter_class_or_long_or_null_error(num, name, arg);
-			break;
-		case ZPP_ERROR_WRONG_ARG:
-			zend_wrong_parameter_type_error(num, expected_type, arg);
-			break;
-		case ZPP_ERROR_UNEXPECTED_EXTRA_NAMED:
-			zend_unexpected_extra_named_error();
-			break;
-		case ZPP_ERROR_FAILURE:
-			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
-			break;
-		case ZPP_ERROR_OK:
-			ZEND_UNREACHABLE();
-	}
-}
-/* }}} */
-
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t num, zend_expected_type expected_type, const zval *arg) /* {{{ */
 {
 	static const char * const expected_error[] = {
@@ -358,6 +316,34 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_string_or_nu
 }
 /* }}} */
 
+static ZEND_COLD void ZEND_FASTCALL zend_wrong_class_name_error(uint32_t num, const char *name, const zval *arg)
+{
+	if (EG(exception)) {
+		return;
+	}
+
+	if (name && Z_TYPE_P(arg) == IS_STRING) {
+		zend_argument_type_error(num, "must be a class name derived from %s, %s given", name, Z_STRVAL_P(arg));
+		return;
+	}
+
+	zend_wrong_parameter_type_error(num, Z_EXPECTED_CLASS_NAME, arg);
+}
+
+static ZEND_COLD void ZEND_FASTCALL zend_wrong_class_name_or_null_error(uint32_t num, const char *name, const zval *arg)
+{
+	if (EG(exception)) {
+		return;
+	}
+
+	if (name && Z_TYPE_P(arg) == IS_STRING) {
+		zend_argument_type_error(num, "must be a class name derived from %s, %s given", name, Z_STRVAL_P(arg));
+		return;
+	}
+
+	zend_wrong_parameter_type_error(num, Z_EXPECTED_CLASS_NAME_OR_NULL, arg);
+}
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(uint32_t num, char *error) /* {{{ */
 {
 	if (!EG(exception)) {
@@ -373,6 +359,54 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_or_null_error(uint32_t
 		zend_argument_type_error(num, "must be a valid callback or null, %s", error);
 	}
 	efree(error);
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(zpp_error error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg) /* {{{ */
+{
+	switch (error_code) {
+		case ZPP_ERROR_WRONG_CALLBACK:
+			zend_wrong_callback_error(num, name);
+			break;
+		case ZPP_ERROR_WRONG_CALLBACK_OR_NULL:
+			zend_wrong_callback_or_null_error(num, name);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_NAME:
+			zend_wrong_class_name_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_NAME_OR_NULL:
+			zend_wrong_class_name_or_null_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS:
+			zend_wrong_parameter_class_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_NULL:
+			zend_wrong_parameter_class_or_null_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_STRING:
+			zend_wrong_parameter_class_or_string_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL:
+			zend_wrong_parameter_class_or_string_or_null_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_LONG:
+			zend_wrong_parameter_class_or_long_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL:
+			zend_wrong_parameter_class_or_long_or_null_error(num, name, arg);
+			break;
+		case ZPP_ERROR_WRONG_ARG:
+			zend_wrong_parameter_type_error(num, expected_type, arg);
+			break;
+		case ZPP_ERROR_UNEXPECTED_EXTRA_NAMED:
+			zend_unexpected_extra_named_error();
+			break;
+		case ZPP_ERROR_FAILURE:
+			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
+			break;
+		case ZPP_ERROR_OK:
+			ZEND_UNREACHABLE();
+	}
 }
 /* }}} */
 
@@ -494,20 +528,20 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_clas
 	zend_class_redeclaration_error_ex(type, old_ce->name, old_ce);
 }
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null) /* {{{ */
+ZEND_API ZEND_FASTCALL bool zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null)
 {
 	const zend_class_entry *ce_base = *pce;
 
 	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*pce = NULL;
-		return 1;
+		return true;
 	}
 	/* Only accept string and Stringable(?) as int/foat/bool are not valid class names */
 	if (UNEXPECTED(Z_TYPE_P(arg) != IS_STRING)) {
 		if (Z_TYPE_P(arg) != IS_OBJECT || !zend_parse_arg_str_slow(arg, num)) {
 			*pce = NULL;
 			zend_wrong_parameter_type_error(num, check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME, arg);
-			return 0;
+			return false;
 		}
 		/* Object was converted to string */
 		ZEND_ASSERT(Z_TYPE_P(arg) == IS_STRING);
@@ -515,20 +549,15 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 	zend_string *class_name = Z_STR_P(arg);
 
 	*pce = zend_lookup_class(class_name);
-	if (ce_base) {
-		if ((!*pce || !instanceof_function(*pce, ce_base))) {
-			zend_argument_type_error(num, "must be a class name derived from %s, \"%s\" given", ZSTR_VAL(ce_base->name), ZSTR_VAL(class_name));
-			*pce = NULL;
-			return 0;
-		}
-	}
 	if (!*pce) {
-		zend_wrong_parameter_type_error(num, check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME, arg);
-		return 0;
+		return false;
 	}
-	return 1;
+	if (ce_base && !instanceof_function(*pce, ce_base)) {
+		*pce = NULL;
+		return false;
+	}
+	return true;
 }
-/* }}} */
 
 static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32_t arg_num) {
 	const zend_function *func = zend_active_function();
@@ -1022,41 +1051,10 @@ static zend_expected_type zend_parse_arg_impl(zval *arg, va_list *va, const char
 				zend_class_entry **pce = va_arg(*va, zend_class_entry **);
 				const zend_class_entry *ce_base = *pce;
 
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
-					*pce = NULL;
-					break;
-				}
-
-				/* Only accept string and Stringable(?) as int/foat/bool are not valid class names */
-				if (UNEXPECTED(Z_TYPE_P(arg) != IS_STRING)) {
-					if (Z_TYPE_P(arg) != IS_OBJECT || !zend_parse_arg_str_slow(arg, arg_num)) {
-						/* __toString may throw */
-						if (!EG(exception)) {
-							zend_spprintf(error, 0, "must be a valid class name%s, %s given",
-								check_null ? " or null" : "", zend_zval_value_name(arg));
-						}
-						*pce = NULL;
-						return check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME;
-					}
-					/* Object was converted to string */
-					ZEND_ASSERT(Z_TYPE_P(arg) == IS_STRING);
-				}
-				zend_string *class_name = Z_STR_P(arg);
-
-				*pce = zend_lookup_class(class_name);
-				if (ce_base) {
-					if ((!*pce || !instanceof_function(*pce, ce_base))) {
-						zend_spprintf(error, 0, "must be a class name derived from %s%s, \"%s\" given",
-							ZSTR_VAL(ce_base->name), check_null ? " or null" : "", Z_STRVAL_P(arg));
-						*pce = NULL;
-						return check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME;
-					}
-				}
-				if (!*pce) {
+				*error = *pce ? ZSTR_VAL(ce_base->name) : NULL;
+				if (!zend_parse_arg_class(arg, pce, arg_num, check_null)) {
 					return check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME;
 				}
-				break;
-
 			}
 			break;
 
@@ -1135,9 +1133,12 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 						zend_wrong_callback_or_null_error(arg_num, error);
 						break;
 					case Z_EXPECTED_CLASS_NAME:
+						/* DO NOT FREE error: it's a pointer to ZSTR_VAL(ce->name) */
+						zend_wrong_class_name_error(arg_num, error, arg);
+						break;
 					case Z_EXPECTED_CLASS_NAME_OR_NULL:
-						zend_argument_type_error(arg_num, "%s", error);
-						efree(error);
+						/* DO NOT FREE error: it's a pointer to ZSTR_VAL(ce->name) */
+						zend_wrong_class_name_or_null_error(arg_num, error, arg);
 						break;
 					default:
 						ZEND_UNREACHABLE();
@@ -1145,8 +1146,8 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 			}
 			zend_wrong_parameter_type_error(arg_num, expected_type, arg);
 		} else if (error
-			/* DO NOT FREE error when it's a pointer to ZSTR_VAL(ce->name) */
-			&& expected_type != Z_EXPECTED_OBJECT && expected_type != Z_EXPECTED_OBJECT_OR_NULL) {
+			/* Only free error if it's a callable expected type, as otherwise it's a pointer to ZSTR_VAL(ce->name) */
+			&& (expected_type == Z_EXPECTED_FUNC || expected_type == Z_EXPECTED_FUNC_OR_NULL)) {
 			efree(error);
 		}
 

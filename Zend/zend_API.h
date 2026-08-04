@@ -1590,6 +1590,9 @@ C23_ENUM(zpp_error, uint8_t) {
 	ZPP_ERROR_OK,
 	ZPP_ERROR_FAILURE,
 	ZPP_ERROR_WRONG_CALLBACK,
+	ZPP_ERROR_WRONG_CALLBACK_OR_NULL,
+	ZPP_ERROR_WRONG_CLASS_NAME,
+	ZPP_ERROR_WRONG_CLASS_NAME_OR_NULL,
 	ZPP_ERROR_WRONG_CLASS,
 	ZPP_ERROR_WRONG_CLASS_OR_NULL,
 	ZPP_ERROR_WRONG_CLASS_OR_STRING,
@@ -1598,7 +1601,6 @@ C23_ENUM(zpp_error, uint8_t) {
 	ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL,
 	ZPP_ERROR_WRONG_ARG,
 	ZPP_ERROR_UNEXPECTED_EXTRA_NAMED,
-	ZPP_ERROR_WRONG_CALLBACK_OR_NULL,
 };
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void);
@@ -1767,8 +1769,10 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 /* old "C" */
 #define Z_PARAM_CLASS_EX(dest, check_null, deref) \
 		Z_PARAM_PROLOGUE(deref, 0); \
+		_error = dest ? ZSTR_VAL((dest)->name) : NULL; \
 		if (UNEXPECTED(!zend_parse_arg_class(_arg, &dest, _i, check_null))) { \
-			_error_code = ZPP_ERROR_FAILURE; \
+			_expected_type = check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME; \
+			_error_code = check_null ? ZPP_ERROR_WRONG_CLASS_NAME_OR_NULL : ZPP_ERROR_WRONG_CLASS_NAME; \
 			break; \
 		}
 
