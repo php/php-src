@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
     now forbidden. (Arnaud)
 
+- PDO_ODBC:
+  . Fixed bug GH-23016 (NULL values in long columns come back as garbage
+    binary strings). (Calvin Buckley, iliaal)
+
 - Reflection:
   . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).
     (DanielEScherzer)
