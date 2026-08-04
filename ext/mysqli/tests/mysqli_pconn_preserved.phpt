@@ -49,6 +49,11 @@ if ($marker != 42) {
     printf("[003] Init command should have set @init_marker at connect, got %s\n", var_export($marker, true));
 }
 
+// Drift both values away from the configuration, so the checks after reuse prove
+// the config was re-applied by the reset rather than merely carried over.
+mysqli_set_charset($link, 'ascii');
+mysqli_query($link, "SET @init_marker = 99");
+
 // Return the connection to the pool.
 mysqli_close($link);
 
