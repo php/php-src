@@ -15,19 +15,19 @@ $ini = getenv('TEST_PHP_EXTRA_ARGS');
 putenv('TERM=VT100');
 
 $code = <<<'PHP'
-$readline_cli_completion_variable = "variable\n";
+$readline_cli_completion_variable = strtolower("VARIABLE_OK\n");
 echo $readline_cli_completion_var	;
 #prec	3
-echo "precision=" . ini_get("precision") . "\n";
-function readline_cli_completion_function() { echo "function\n"; }
+echo "precision_result=" . ini_get("precision") . "\n";
+function readline_cli_completion_function() { echo strtolower("FUNCTION_OK\n"); }
 readline_cli_completion_fun	);
-define('READLINE_CLI_COMPLETION_CONSTANT', "constant\n");
+define('READLINE_CLI_COMPLETION_CONSTANT', strtolower("CONSTANT_OK\n"));
 echo READLINE_CLI_COMPLETION_CON	;
 class ReadlineCliCompletionClass {
-    public const COMPLETION_CLASS_CONSTANT = "class constant\n";
-    public static function completionMethod() { echo "method\n"; }
+    public const COMPLETION_CLASS_CONSTANT = "CLASS" . "CONST_OK\n";
+    public static function completionMethod() { echo strtolower("METHOD_OK\n"); }
 }
-echo ReadlineCliCompletionCla	::class . "\n";
+echo "class_ok:" . ReadlineCliCompletionCla	::class . "\n";
 echo ReadlineCliCompletionClass::COMPLETION_CLASS_CON	;
 ReadlineCliCompletionClass::completionM	);
 exit
@@ -36,4 +36,4 @@ PHP;
 echo shell_exec("echo " . escapeshellarg($code) . " | $php $ini -a");
 ?>
 --EXPECTF--
-%AInteractive shell%Avariable%Aprecision=3%Afunction%Aconstant%AReadlineCliCompletionClass%Aclass constant%Amethod%A
+%AInteractive shell%Avariable_ok%Aprecision_result=3%Afunction_ok%Aconstant_ok%Aclass_ok:ReadlineCliCompletionClass%ACLASSCONST_OK%Amethod_ok%A
