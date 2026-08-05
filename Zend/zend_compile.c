@@ -8931,6 +8931,10 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			"__autoload() is no longer supported, use spl_autoload_register() instead");
 	}
 
+	if (zend_string_equals_literal_ci(unqualified_name, "readonly")) {
+		zend_error(E_DEPRECATED, "Calling a function “readonly” is deprecated");
+	}
+
 	if (zend_string_equals_literal_ci(unqualified_name, "assert")) {
 		zend_error(E_COMPILE_ERROR,
 			"Defining a custom assert() function is not allowed, "
