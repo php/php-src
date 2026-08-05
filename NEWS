@@ -41,6 +41,8 @@ PHP                                                                        NEWS
   . Fix corruption in mod_mm. (ndossche)
   . Fixed bug GH-23043 (broken session id code can cause zend_mm_heap
     corrupted). (ndossche)
+  . Fixed bug GH-23061 (SessionHandler::create_sid() callback failure leaks
+    memory in debug build). (Lazizbek Ergashev)
 
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)

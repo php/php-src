@@ -145,6 +145,14 @@ static void php_rshutdown_session_globals(void) /* {{{ */
 			PS(mod)->s_close(&PS(mod_data));
 		} zend_end_try();
 	}
+	/* The user handler may not have closed the default handler it opened, e.g. because a pending
+	 * exception prevented its close callback from running at all */
+	if (PS(mod_user_is_open)) {
+		zend_try {
+			PS(default_mod)->s_close(&PS(mod_data));
+		} zend_end_try();
+		PS(mod_user_is_open) = false;
+	}
 	if (PS(id)) {
 		zend_string_release_ex(PS(id), 0);
 		PS(id) = NULL;
