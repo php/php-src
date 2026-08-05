@@ -5387,14 +5387,9 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_typecheck(result, args, IS_NULL);
 	} else if (zend_string_equals_literal(lcname, "is_bool")) {
 		return zend_compile_func_typecheck(result, args, _IS_BOOL);
-	} else if (zend_string_equals_literal(lcname, "is_long")
-		|| zend_string_equals_literal(lcname, "is_int")
-		|| zend_string_equals_literal(lcname, "is_integer")
-	) {
+	} else if (zend_string_equals_literal(lcname, "is_int")) {
 		return zend_compile_func_typecheck(result, args, IS_LONG);
-	} else if (zend_string_equals_literal(lcname, "is_float")
-		|| zend_string_equals_literal(lcname, "is_double")
-	) {
+	} else if (zend_string_equals_literal(lcname, "is_float")) {
 		return zend_compile_func_typecheck(result, args, IS_DOUBLE);
 	} else if (zend_string_equals_literal(lcname, "is_string")) {
 		return zend_compile_func_typecheck(result, args, IS_STRING);
@@ -5410,9 +5405,7 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_cast(result, args, _IS_BOOL);
 	} else if (zend_string_equals_literal(lcname, "intval")) {
 		return zend_compile_func_cast(result, args, IS_LONG);
-	} else if (zend_string_equals_literal(lcname, "floatval")
-		|| zend_string_equals_literal(lcname, "doubleval")
-	) {
+	} else if (zend_string_equals_literal(lcname, "floatval")) {
 		return zend_compile_func_cast(result, args, IS_DOUBLE);
 	} else if (zend_string_equals_literal(lcname, "strval")) {
 		return zend_compile_func_cast(result, args, IS_STRING);

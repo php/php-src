@@ -3634,6 +3634,7 @@ function intval(mixed $value, int $base = 10): int {}
 function floatval(mixed $value): float {}
 
 /** @alias floatval */
+#[\Deprecated(message: "use floatval() instead", since: "8.6")]
 function doubleval(mixed $value): float {}
 
 /**
@@ -3667,9 +3668,11 @@ function is_bool(mixed $value): bool {}
 function is_int(mixed $value): bool {}
 
 /** @alias is_int */
+#[\Deprecated(message: "use is_int() instead", since: "8.6")]
 function is_integer(mixed $value): bool {}
 
 /** @alias is_int */
+#[\Deprecated(message: "use is_int() instead", since: "8.6")]
 function is_long(mixed $value): bool {}
 
 /**
@@ -3678,6 +3681,7 @@ function is_long(mixed $value): bool {}
 function is_float(mixed $value): bool {}
 
 /** @alias is_float */
+#[\Deprecated(message: "use is_float() instead", since: "8.6")]
 function is_double(mixed $value): bool {}
 
 /**
