@@ -359,49 +359,49 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_or_null_error(uint32_t
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(zpp_error error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(uint32_t num, char *name, zend_expected_type expected_type, const zval *arg) /* {{{ */
 {
-	switch (error_code) {
-		case ZPP_ERROR_WRONG_CALLBACK:
+	switch (expected_type) {
+		case Z_EXPECTED_FUNC:
 			zend_wrong_callback_error(num, name);
 			break;
-		case ZPP_ERROR_WRONG_CALLBACK_OR_NULL:
+		case Z_EXPECTED_FUNC_OR_NULL:
 			zend_wrong_callback_or_null_error(num, name);
 			break;
-		case ZPP_ERROR_WRONG_CLASS_NAME:
+		case Z_EXPECTED_CLASS_NAME:
 			zend_wrong_class_name_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_CLASS_NAME_OR_NULL:
+		case Z_EXPECTED_CLASS_NAME_OR_NULL:
 			zend_wrong_class_name_or_null_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_CLASS:
+		case Z_EXPECTED_CLASS:
 			zend_wrong_parameter_class_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_NULL:
+		case Z_EXPECTED_CLASS_OR_NULL:
 			zend_wrong_parameter_class_or_null_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_STRING:
+		case Z_EXPECTED_CLASS_OR_STRING:
 			zend_wrong_parameter_class_or_string_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL:
+		case Z_EXPECTED_CLASS_OR_STRING_OR_NULL:
 			zend_wrong_parameter_class_or_string_or_null_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_LONG:
+		case Z_EXPECTED_CLASS_OR_LONG:
 			zend_wrong_parameter_class_or_long_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL:
+		case Z_EXPECTED_CLASS_OR_LONG_OR_NULL:
 			zend_wrong_parameter_class_or_long_or_null_error(num, name, arg);
 			break;
-		case ZPP_ERROR_WRONG_ARG:
+		default:
 			zend_wrong_parameter_type_error(num, expected_type, arg);
 			break;
-		case ZPP_ERROR_UNEXPECTED_EXTRA_NAMED:
+		case Z_EXPECTED_NO_EXTRA_NAMED:
 			zend_unexpected_extra_named_error();
 			break;
-		case ZPP_ERROR_FAILURE:
+		case Z_EXPECTED_FAILURE:
 			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
 			break;
-		case ZPP_ERROR_OK:
+		case Z_EXPECTED_OK:
 			ZEND_UNREACHABLE();
 	}
 }
@@ -1032,7 +1032,7 @@ static zend_expected_type zend_parse_arg_impl(zval *arg, va_list *va, const char
 					if (ce) {
 						*error = ZSTR_VAL(ce->name);
 					}
-					return check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT;
+					return check_null ? Z_EXPECTED_CLASS_OR_NULL : Z_EXPECTED_CLASS;
 				}
 			}
 			break;
@@ -1094,48 +1094,7 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 		}
 
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
-			/* More complex error, can only happen for:
-			 * Objects of a specific class
-			 * Z_EXPECTED_OBJECT
-			 * Z_EXPECTED_OBJECT_OR_NULL
-			 * Class names
-			 * Z_EXPECTED_OBJECT_OR_CLASS_NAME
-			 * Z_EXPECTED_OBJECT_OR_CLASS_NAME_OR_NULL
-			 * Functions
-			 * Z_EXPECTED_FUNC
-			 * Z_EXPECTED_FUNC_OR_NULL
-			 */
-			if (error) {
-				switch (expected_type) {
-					case Z_EXPECTED_OBJECT:
-						/* DO NOT FREE error: it's a pointer to ZSTR_VAL(ce->name) */
-						zend_wrong_parameter_class_error(arg_num, error, arg);
-						break;
-					case Z_EXPECTED_OBJECT_OR_NULL:
-						/* DO NOT FREE error: it's a pointer to ZSTR_VAL(ce->name) */
-						zend_wrong_parameter_class_or_null_error(arg_num, error, arg);
-						break;
-					case Z_EXPECTED_FUNC:
-						/* error is freed by zend_wrong_callback_error() */
-						zend_wrong_callback_error(arg_num, error);
-						break;
-					case Z_EXPECTED_FUNC_OR_NULL:
-						/* error is freed by zend_wrong_callback_or_null_error() */
-						zend_wrong_callback_or_null_error(arg_num, error);
-						break;
-					case Z_EXPECTED_CLASS_NAME:
-						/* DO NOT FREE error: it's a pointer to ZSTR_VAL(ce->name) */
-						zend_wrong_class_name_error(arg_num, error, arg);
-						break;
-					case Z_EXPECTED_CLASS_NAME_OR_NULL:
-						/* DO NOT FREE error: it's a pointer to ZSTR_VAL(ce->name) */
-						zend_wrong_class_name_or_null_error(arg_num, error, arg);
-						break;
-					default:
-						ZEND_UNREACHABLE();
-				}
-			}
-			zend_wrong_parameter_type_error(arg_num, expected_type, arg);
+			zend_wrong_parameter_error(arg_num, error, expected_type, arg);
 		} else if (error
 			/* Only free error if it's a callable expected type, as otherwise it's a pointer to ZSTR_VAL(ce->name) */
 			&& (expected_type == Z_EXPECTED_FUNC || expected_type == Z_EXPECTED_FUNC_OR_NULL)) {
