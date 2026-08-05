@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.25
 
+- PDO:
+  . Fixed PDOStatement::setFetchMode() not applying changes atomically.
+    (iliaal)
+
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
