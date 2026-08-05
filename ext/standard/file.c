@@ -1127,6 +1127,10 @@ PHP_FUNCTION(mkdir)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (zend_validate_file_permission(mode, 4, "mode") == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	php_stream_error_operation_begin();
