@@ -164,6 +164,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . EG(in_autoload) was renamed to EG(autoload_current_classnames) and no
     longer is a pointer, but a directly embedded HashTable struct.
   . Extended php_stream_filter_ops with seek method.
+  . php_print_info_htmlhead() now takes a title argument.
   . zend_argument_error_variadic() now takes a new 'function' parameter.
   . The param argument in the php_verror() function has been removed.
   . The php_stream_wrapper_log_error() signature changed from

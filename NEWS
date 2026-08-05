@@ -46,6 +46,8 @@ PHP                                                                        NEWS
   . Added the "filter.max_filter_count" stream context option for php://filter
     URLs. Using more than 16 filters without configuring this option is now
     deprecated. (Sjoerd Langkemper)
+  . Fixed bug GH-23006 (phpcredits() full-page HTML title says phpinfo()).
+    (Weilin Du)
   . The following functions now raise a ValueError when the $filename argument
     contains NUL bytes: fileperms(), fileinode(), filesize(), fileowner(),
     filegroup(), fileatime(), filemtime(), filectime(), filetype(),
