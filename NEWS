@@ -607,7 +607,8 @@ PHP                                                                        NEWS
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
     socket context options. (Jakub Zelenka)
   . Added so_reuseaddr streams context socket option that allows disabling
-    address reuse. (Jakub Zelenka)
+    address resuse. (Jakub Zelenka)
+  . Added so_linger stream socket context option. (Jakub Zelenka)
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)
