@@ -5392,8 +5392,6 @@ static zend_always_inline bool php_array_intersect_get_key(
 
 static zend_always_inline void php_array_intersect_empty_result(zval *first, zval *return_value)
 {
-	zend_ulong num_key;
-	zend_string *key;
 	HashTable *result;
 	bool in_place = zend_may_modify_arg_in_place(first);
 
@@ -5405,7 +5403,7 @@ static zend_always_inline void php_array_intersect_empty_result(zval *first, zva
 		ZVAL_ARR(return_value, result);
 	}
 
-	ZEND_HASH_FOREACH_KEY(result, num_key, key) {
+	ZEND_HASH_FOREACH_KEY(result, zend_ulong num_key, zend_string *key) {
 		if (key) {
 			zend_hash_del(result, key);
 		} else {
@@ -5426,17 +5424,7 @@ static zend_always_inline void php_array_intersect_empty_result(zval *first, zva
  * key. Other values are converted to string before the same normalization. */
 static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc, zval *return_value)
 {
-	uint32_t i, result_pos = 0, delete_bitset_len;
-	zval *value, *entry, *count;
-	zend_string *key, *value_str_key, *tmp_key;
-	zend_ulong num_key, value_num_key = 0;
-	HashTable set, *result;
-	zend_bitset delete_bitset = NULL;
-	zval one;
-	ALLOCA_FLAG(use_heap);
-	bool in_place = false;
-
-	for (i = 0; i < argc; i++) {
+	for (uint32_t i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(&args[i]));
 			return;
@@ -5445,7 +5433,7 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 
 	/* An empty argument makes the intersection empty, so no values need to be
 	 * converted to string. */
-	for (i = 0; i < argc; i++) {
+	for (uint32_t i = 0; i < argc; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL(args[i])) == 0) {
 			php_array_intersect_empty_result(&args[0], return_value);
 			return;
@@ -5454,9 +5442,17 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 
 	/* Map each value of args[1] to the number of consecutive arguments,
 	 * starting from args[1], the value has been seen in. */
+	zval one;
 	ZVAL_LONG(&one, 1);
+	HashTable set;
 	zend_hash_init(&set, zend_hash_num_elements(Z_ARRVAL(args[1])), NULL, NULL, 0);
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[1]), value) {
+	zend_bitset delete_bitset = NULL;
+	ALLOCA_FLAG(use_heap);
+	bool in_place = false;
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[1]), zval *value) {
+		zend_ulong value_num_key = 0;
+		zend_string *value_str_key, *tmp_key;
 		if (!php_array_intersect_get_key(value, &value_num_key, &value_str_key, &tmp_key)) {
 			goto cleanup;
 		}
@@ -5468,11 +5464,14 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 		zend_tmp_string_release(tmp_key);
 	} ZEND_HASH_FOREACH_END();
 
-	for (i = 2; i < argc; i++) {
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), value) {
+	for (uint32_t i = 2; i < argc; i++) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), zval *value) {
+			zend_ulong value_num_key = 0;
+			zend_string *value_str_key, *tmp_key;
 			if (!php_array_intersect_get_key(value, &value_num_key, &value_str_key, &tmp_key)) {
 				goto cleanup;
 			}
+			zval *count;
 			if (value_str_key) {
 				count = zend_symtable_find(&set, value_str_key);
 			} else {
@@ -5488,6 +5487,7 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 	/* Match the generic path by filtering the first argument in place if
 	 * possible and duplicating it otherwise. In particular, duplication keeps
 	 * bucket holes whose positions are observable through array_rand(). */
+	HashTable *result;
 	in_place = zend_may_modify_arg_in_place(&args[0]);
 	if (in_place) {
 		result = Z_ARRVAL(args[0]);
@@ -5497,14 +5497,20 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 		ZVAL_ARR(return_value, result);
 	}
 
-	delete_bitset_len = zend_bitset_len(zend_hash_num_elements(result));
+	/* Determine all entries to remove before deleting any. Deleting an entry may
+	 * invoke a user destructor that changes subsequent string conversions. */
+	uint32_t delete_bitset_len = zend_bitset_len(zend_hash_num_elements(result));
 	delete_bitset = ZEND_BITSET_ALLOCA(delete_bitset_len, use_heap);
 	zend_bitset_clear(delete_bitset, delete_bitset_len);
 
-	ZEND_HASH_FOREACH_KEY_VAL(result, num_key, key, entry) {
+	uint32_t result_pos = 0;
+	ZEND_HASH_FOREACH_VAL(result, zval *entry) {
+		zend_ulong value_num_key = 0;
+		zend_string *value_str_key, *tmp_key;
 		if (!php_array_intersect_get_key(entry, &value_num_key, &value_str_key, &tmp_key)) {
 			goto cleanup;
 		}
+		zval *count;
 		if (value_str_key) {
 			count = zend_symtable_find(&set, value_str_key);
 		} else {
@@ -5525,10 +5531,8 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 		in_place = false;
 	}
 
-	/* Convert every value before removing any entries. Removing an entry may
-	 * invoke a user destructor that changes subsequent string conversions. */
 	result_pos = 0;
-	ZEND_HASH_FOREACH_KEY(result, num_key, key) {
+	ZEND_HASH_FOREACH_KEY(result, zend_ulong num_key, zend_string *key) {
 		if (zend_bitset_in(delete_bitset, result_pos)) {
 			if (key) {
 				zend_hash_del(result, key);
