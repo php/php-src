@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
 
+- Date:
+  . Update timelib to 2026.01. (Derick, timwolla)
+
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
     (Weilin Du)
