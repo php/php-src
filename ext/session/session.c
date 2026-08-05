@@ -531,7 +531,10 @@ static void php_session_save_current_state(bool write)
 					&& zend_string_equals(val, PS(session_vars))
 				) {
 					ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
-					handler_function = &PS(mod_user_names).ps_update_timestamp;
+					/* The user handler falls back to the write handler if no update timestamp handler is set */
+					if (!Z_ISUNDEF(PS(mod_user_names).ps_update_timestamp)) {
+						handler_function = &PS(mod_user_names).ps_update_timestamp;
+					}
 				} else {
 					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
 				}
