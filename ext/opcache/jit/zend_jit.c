@@ -3159,7 +3159,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_runtime_jit(Z
 	return; // ZEND_VM_CONTINUE
 #else
 	opline = orig_opline;
+# if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
+	/* zend_try() uses setjmp(), which GCC 16 refuses to combine with the guaranteed
+	 * tail call of ZEND_OPCODE_RETURN(); a plain call is fine for this cold path. */
+	return ((zend_vm_opcode_handler_t)opline->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+# else
 	ZEND_OPCODE_RETURN();
+# endif
 #endif
 }
 
