@@ -37,7 +37,7 @@ function find_and_delete_message($username, $subject) {
             if ($info->subject === $subject) {
                 $header = imap_fetchheader($imap_stream, $i);
                 echo "Return-Path header found: ";
-                var_dump(strpos($header, 'Return-Path: joe@example.com') !== false);
+                var_dump(strpos($header, 'Return-Path: <joe@example.com>') !== false);
                 echo "To header found: ";
                 var_dump(strpos($header, "To: \"<bob@example.com>\" <{$users[1]}@$domain>") !== false);
                 echo "From header found: ";
