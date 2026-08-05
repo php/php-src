@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23043 (broken session id code can cause zend_mm_heap
     corrupted). (ndossche)
 
+- SimpleXML:
+  . Fixed segfault when comparing uninitialized SimpleXMLElement
+    instances. (iliaal)
+
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 

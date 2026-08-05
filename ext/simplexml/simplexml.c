@@ -1229,6 +1229,12 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 
 	if (sxe1->node == NULL && sxe2->node == NULL) {
 		/* Both nodes not set: Only support equality comparison between documents. */
+		if (sxe1->document == NULL || sxe2->document == NULL) {
+			if (sxe1->document == sxe2->document) {
+				return 0;
+			}
+			return ZEND_UNCOMPARABLE;
+		}
 		if (sxe1->document->ptr == sxe2->document->ptr) {
 			return 0;
 		}
