@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
 
+- Curl:
+  . Raise a value error when the callback registered with CURLOPT_READFUNCTION
+    returns an unexpected long. (Sjoerd Langkemper)
+
 - Date:
   . Update timelib to 2026.01. (Derick, timwolla)
 

@@ -24,6 +24,11 @@ PHP 8.6 UPGRADE NOTES
     has materialised the property by writing into the property table.
     The freshly-written value is returned directly. isset() is unaffected.
 
+- Curl:
+  . The callback registered with CURLOPT_READFUNCTION now throws a ValueError
+    when returning an integer other than 0, CURL_READFUNC_ABORT or
+    CURL_READFUNC_PAUSE.
+
 - COM
   . It is no longer possible to clone variant objects, this is because
     the cloning behaviour was ill defined.
@@ -602,6 +607,7 @@ PHP 8.6 UPGRADE NOTES
   . CURL_SEEKFUNC_OK.
   . CURL_SEEKFUNC_FAIL.
   . CURL_SEEKFUNC_CANTSEEK.
+  . CURL_READFUNC_ABORT.
 
 - OpenSSL:
   . OPENSSL_RSA_PSS_SALTLEN_DIGEST.
