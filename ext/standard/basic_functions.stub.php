@@ -78,6 +78,7 @@ const SORT_STRING = UNKNOWN;
  * @var int
  * @cvalue PHP_SORT_LOCALE_STRING
  */
+#[\Deprecated(message: "use one of the Collator::*sort*() methods instead", since: "8.6")]
 const SORT_LOCALE_STRING = UNKNOWN;
 /**
  * @var int
@@ -2319,6 +2320,7 @@ function strcspn(string $string, string $characters, int $offset = 0, ?int $leng
 function nl_langinfo(int $item): string|false {}
 #endif
 
+#[\Deprecated(message: "use Collator::compare() instead", since: "8.6")]
 function strcoll(string $string1, string $string2): int {}
 
 /**

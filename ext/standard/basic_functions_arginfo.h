@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 7a3bb062cb216bd28c1c97c44f2f611992c47063
+ * Stub hash: 21b2089bd39aadeeb8730e4bb2fecbb32e65d1c8
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -3158,7 +3158,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_NL_LANGINFO)
 	ZEND_FE(nl_langinfo, arginfo_nl_langinfo)
 #endif
-	ZEND_FE(strcoll, arginfo_strcoll)
+	ZEND_RAW_FENTRY("strcoll", zif_strcoll, arginfo_strcoll, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("trim", zif_trim, arginfo_trim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_trim, NULL)
 	ZEND_RAW_FENTRY("rtrim", zif_rtrim, arginfo_rtrim, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("chop", zif_rtrim, arginfo_chop, 0, NULL, NULL)
@@ -3550,7 +3550,7 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SORT_REGULAR", PHP_SORT_REGULAR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NUMERIC", PHP_SORT_NUMERIC, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_STRING", PHP_SORT_STRING, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_PERSISTENT);
+	zend_constant *const_SORT_LOCALE_STRING = REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_LOWER", PHP_CASE_LOWER, CONST_PERSISTENT);
@@ -3948,6 +3948,14 @@ static void register_basic_functions_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_assert_options_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_func_assert_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
+	zend_attribute *attribute_Deprecated_func_strcoll_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strcoll", sizeof("strcoll") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_func_strcoll_0_arg0_str = zend_string_init("use Collator::compare() instead", strlen("use Collator::compare() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_strcoll_0->args[0].value, attribute_Deprecated_func_strcoll_0_arg0_str);
+	attribute_Deprecated_func_strcoll_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_string *attribute_Deprecated_func_strcoll_0_arg1_str = zend_string_init("8.6", strlen("8.6"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_strcoll_0->args[1].value, attribute_Deprecated_func_strcoll_0_arg1_str);
+	attribute_Deprecated_func_strcoll_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
 	zend_attribute *attribute_Deprecated_func_utf8_encode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_encode", sizeof("utf8_encode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
 	attribute_Deprecated_func_utf8_encode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
@@ -3978,29 +3986,35 @@ static void register_basic_functions_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_doubleval_0_arg0_str = zend_string_init("use floatval() instead", strlen("use floatval() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_doubleval_0->args[0].value, attribute_Deprecated_func_doubleval_0_arg0_str);
 	attribute_Deprecated_func_doubleval_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_string *attribute_Deprecated_func_doubleval_0_arg1_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_doubleval_0->args[1].value, attribute_Deprecated_func_doubleval_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_doubleval_0->args[1].value, attribute_Deprecated_func_strcoll_0_arg1_str);
 	attribute_Deprecated_func_doubleval_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_is_integer_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_integer", sizeof("is_integer") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zend_string *attribute_Deprecated_func_is_integer_0_arg0_str = zend_string_init("use is_int() instead", strlen("use is_int() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_is_integer_0->args[0].value, attribute_Deprecated_func_is_integer_0_arg0_str);
 	attribute_Deprecated_func_is_integer_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_is_integer_0->args[1].value, attribute_Deprecated_func_doubleval_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_is_integer_0->args[1].value, attribute_Deprecated_func_strcoll_0_arg1_str);
 	attribute_Deprecated_func_is_integer_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_is_long_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_long", sizeof("is_long") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR_COPY(&attribute_Deprecated_func_is_long_0->args[0].value, attribute_Deprecated_func_is_integer_0_arg0_str);
 	attribute_Deprecated_func_is_long_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_is_long_0->args[1].value, attribute_Deprecated_func_doubleval_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_is_long_0->args[1].value, attribute_Deprecated_func_strcoll_0_arg1_str);
 	attribute_Deprecated_func_is_long_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_is_double_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_double", sizeof("is_double") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zend_string *attribute_Deprecated_func_is_double_0_arg0_str = zend_string_init("use is_float() instead", strlen("use is_float() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_is_double_0->args[0].value, attribute_Deprecated_func_is_double_0_arg0_str);
 	attribute_Deprecated_func_is_double_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_is_double_0->args[1].value, attribute_Deprecated_func_doubleval_0_arg1_str);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_is_double_0->args[1].value, attribute_Deprecated_func_strcoll_0_arg1_str);
 	attribute_Deprecated_func_is_double_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_const_SORT_LOCALE_STRING_0 = zend_add_global_constant_attribute(const_SORT_LOCALE_STRING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_const_SORT_LOCALE_STRING_0_arg0_str = zend_string_init("use one of the Collator::*sort*() methods instead", strlen("use one of the Collator::*sort*() methods instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SORT_LOCALE_STRING_0->args[0].value, attribute_Deprecated_const_SORT_LOCALE_STRING_0_arg0_str);
+	attribute_Deprecated_const_SORT_LOCALE_STRING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR_COPY(&attribute_Deprecated_const_SORT_LOCALE_STRING_0->args[1].value, attribute_Deprecated_func_strcoll_0_arg1_str);
+	attribute_Deprecated_const_SORT_LOCALE_STRING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_const_ASSERT_ACTIVE_0 = zend_add_global_constant_attribute(const_ASSERT_ACTIVE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
