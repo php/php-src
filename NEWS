@@ -71,6 +71,10 @@ PHP                                                                        NEWS
   . Fixed exceptions from user-defined create_sid() handlers being replaced
     by return-value validation errors. (Ilia Alshanetsky)
 
+- SimpleXML:
+  . Fixed bug GH-12171 (SimpleXML property-proxy equality ignores element
+    names). (Ilia Alshanetsky)
+
 - SOAP:
   . Fixed the SOAP client accepting a response body shorter than its
     Content-Length and reusing the connection. (Ilia Alshanetsky)
