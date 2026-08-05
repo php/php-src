@@ -16,6 +16,7 @@
 #include "php.h"
 #include "Zend/zend_exceptions.h"
 
+#include "php_date.h"
 #include "php_time.h"
 
 #define NANOS_IN_SEC 1000000000
@@ -103,6 +104,16 @@ ZEND_ATTRIBUTE_NODISCARD static zend_result create_duration(zval *target, zend_l
 	ZEND_ASSERT(nanoseconds >= 0);
 	ZEND_ASSERT(nanoseconds < NANOS_IN_SEC);
 
+	if (EXPECTED(DATEG(duration_cache))) {
+		php_date_time_duration *cached = php_date_time_duration_from_obj(DATEG(duration_cache));
+		ZEND_ASSERT(!cached->duration.negative);
+
+		if (cached->duration.seconds == seconds && cached->duration.nanoseconds == nanoseconds) {
+			ZVAL_OBJ_COPY(target, &cached->std);
+			return SUCCESS;
+		}
+	}
+
 	php_date_time_duration *obj = create_duration_shell(target);
 
 	int error = timelib_duration_ctor_static(&obj->duration, seconds, nanoseconds, /* negative */ false);
@@ -111,7 +122,17 @@ ZEND_ATTRIBUTE_NODISCARD static zend_result create_duration(zval *target, zend_l
 		return FAILURE;
 	}
 
-	return sync_properties(obj);
+	if (sync_properties(obj) == FAILURE) {
+		return FAILURE;
+	}
+
+	if (DATEG(duration_cache)) {
+		zend_object_release(DATEG(duration_cache));
+	}
+	GC_ADDREF(&obj->std);
+	DATEG(duration_cache) = &obj->std;
+
+	return SUCCESS;
 }
 
 PHP_METHOD(Time_Duration, __construct)

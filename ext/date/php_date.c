@@ -387,6 +387,7 @@ static PHP_GINIT_FUNCTION(date)
 	date_globals->default_timezone = NULL;
 	date_globals->timezone = NULL;
 	date_globals->tzcache = NULL;
+	date_globals->duration_cache = NULL;
 }
 /* }}} */
 
@@ -419,6 +420,10 @@ PHP_RSHUTDOWN_FUNCTION(date)
 		efree(DATEG(timezone));
 	}
 	DATEG(timezone) = NULL;
+	if (DATEG(duration_cache)) {
+		zend_object_release(DATEG(duration_cache));
+	}
+	DATEG(duration_cache) = NULL;
 
 	return SUCCESS;
 }
