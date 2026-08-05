@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Fixed segfault in ReflectionMethod::createFromMethodName() on an
     uninstantiable subclass. (iliaal)
 
+- Session:
+  . Fixed session.use_strict_mode being a no-op for the built-in
+    SessionHandler. (iliaal)
+
 - Standard:
   . Added the "filter.max_filter_count" stream context option for php://filter
     URLs. Using more than 16 filters without configuring this option is now
