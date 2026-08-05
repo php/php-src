@@ -22,13 +22,17 @@ class MySQLPDOTest extends PDOTest {
 
         $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attr];
 
-        return ProbeCache::getFailure('pdo', $configuration, static function () use ($classname, $useConnectMethod, $dsn, $user, $pass, $attr): PDO {
-            try {
-                return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attr);
-            } catch (PDOException $e) {
-                throw new ProbeFailureException($e);
-            }
-        });
+        try {
+            return ProbeCache::getFailure('pdo', $configuration, static function () use ($classname, $useConnectMethod, $dsn, $user, $pass, $attr): PDO {
+                try {
+                    return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attr);
+                } catch (PDOException $e) {
+                    throw new ProbeFailureException($e);
+                }
+            });
+        } catch (ProbeFailureException $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     static function factoryWithAttr($attr) {
@@ -164,7 +168,7 @@ class MySQLPDOTest extends PDOTest {
     static function skip() {
         try {
             self::factory();
-        } catch (ProbeFailureException $e) {
+        } catch (PDOException $e) {
             die('skip could not connect');
         }
     }

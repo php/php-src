@@ -39,19 +39,23 @@ class PDOTest {
 
         $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attributes];
 
-        return ProbeCache::getFailure('pdo', $configuration, static function () use ($classname, $useConnectMethod, $dsn, $user, $pass, $attributes): PDO {
-            try {
-                return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
-            } catch (PDOException $e) {
-                throw new ProbeFailureException($e);
-            }
-        });
+        try {
+            return ProbeCache::getFailure('pdo', $configuration, static function () use ($classname, $useConnectMethod, $dsn, $user, $pass, $attributes): PDO {
+                try {
+                    return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
+                } catch (PDOException $e) {
+                    throw new ProbeFailureException($e);
+                }
+            });
+        } catch (ProbeFailureException $e) {
+            throw new PDOException($e->getMessage());
+        }
     }
 
     static function skip() {
         try {
             self::factory();
-        } catch (ProbeFailureException $e) {
+        } catch (PDOException $e) {
             die("skip " . $e->getMessage());
         }
     }
