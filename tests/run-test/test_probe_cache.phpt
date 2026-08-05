@@ -54,11 +54,39 @@ $helper = var_export(dirname(__DIR__) . '/probe_cache.inc', true);
 $namespace = 'probe-cache-test-' . bin2hex(random_bytes(8));
 $namespaceCode = var_export($namespace, true);
 $first = run_probe_cache_process(
-    "require $helper; try { ProbeCache::getFailure($namespaceCode, ['shared'], static function (): never { throw new ProbeFailureException('shared failure'); }); } catch (ProbeFailureException \$e) { echo \$e->getMessage(); }",
+    <<<PHP
+    require $helper;
+
+    try {
+        ProbeCache::getFailure(
+            $namespaceCode,
+            ['shared'],
+            static function (): never {
+                throw new ProbeFailureException('shared failure');
+            },
+        );
+    } catch (ProbeFailureException \$e) {
+        echo \$e::class, ': ', \$e->getMessage();
+    }
+    PHP,
     $environment,
 );
 $second = run_probe_cache_process(
-    "require $helper; try { ProbeCache::getFailure($namespaceCode, ['shared'], static function (): never { throw new Exception('Probe should not run'); }); } catch (ProbeFailureException \$e) { echo \$e->getMessage(); }",
+    <<<PHP
+    require $helper;
+
+    try {
+        ProbeCache::getFailure(
+            $namespaceCode,
+            ['shared'],
+            static function (): never {
+                throw new Exception('Probe should not run');
+            },
+        );
+    } catch (ProbeFailureException \$e) {
+        echo \$e::class, ': ', \$e->getMessage();
+    }
+    PHP,
     $environment,
 );
 echo "$first\n$second\n";
@@ -67,7 +95,23 @@ $probeStarted = $cacheDirectory . '/probe_started';
 $probeStartedCode = var_export($probeStarted, true);
 @unlink($probeStarted);
 [$firstProcess, $firstPipes] = start_probe_cache_process(
-    "require $helper; try { ProbeCache::getFailure($namespaceCode, ['concurrent'], static function (): never { file_put_contents($probeStartedCode, 'started'); usleep(1000000); throw new ProbeFailureException('concurrent failure'); }); } catch (ProbeFailureException \$e) { echo \$e->getMessage(); }",
+    <<<PHP
+    require $helper;
+
+    try {
+        ProbeCache::getFailure(
+            $namespaceCode,
+            ['concurrent'],
+            static function (): never {
+                file_put_contents($probeStartedCode, 'started');
+                usleep(1000000);
+                throw new ProbeFailureException('concurrent failure');
+            },
+        );
+    } catch (ProbeFailureException \$e) {
+        echo \$e::class, ': ', \$e->getMessage();
+    }
+    PHP,
     $environment,
 );
 
@@ -81,7 +125,21 @@ if (!file_exists($probeStarted)) {
 }
 
 [$secondProcess, $secondPipes] = start_probe_cache_process(
-    "require $helper; try { ProbeCache::getFailure($namespaceCode, ['concurrent'], static function (): never { throw new Exception('Concurrent probe should not run'); }); } catch (ProbeFailureException \$e) { echo \$e->getMessage(); }",
+    <<<PHP
+    require $helper;
+
+    try {
+        ProbeCache::getFailure(
+            $namespaceCode,
+            ['concurrent'],
+            static function (): never {
+                throw new Exception('Concurrent probe should not run');
+            },
+        );
+    } catch (ProbeFailureException \$e) {
+        echo \$e::class, ': ', \$e->getMessage();
+    }
+    PHP,
     $environment,
 );
 $first = finish_probe_cache_process($firstProcess, $firstPipes);
@@ -100,17 +158,17 @@ $failureProbe = static function () use (&$failureCalls): never {
 try {
     ProbeCache::getFailure($namespace, ['first'], $failureProbe);
 } catch (ProbeFailureException $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     ProbeCache::getFailure($namespace, ['first'], $failureProbe);
 } catch (ProbeFailureException $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     ProbeCache::getFailure($namespace, ['second'], $failureProbe);
 } catch (ProbeFailureException $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($failureCalls);
 
@@ -133,6 +191,7 @@ try {
         throw new ProbeFailureException($previous);
     });
 } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump($e === $previous);
 }
 
@@ -143,21 +202,22 @@ try {
         throw new ProbeFailureException('uncached failure');
     });
 } catch (ProbeFailureException $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-shared failure
-shared failure
-concurrent failure
-concurrent failure
-string(9) "failure 1"
-string(9) "failure 1"
-string(9) "failure 2"
+ProbeFailureException: shared failure
+ProbeFailureException: shared failure
+ProbeFailureException: concurrent failure
+ProbeFailureException: concurrent failure
+ProbeFailureException: failure 1
+ProbeFailureException: failure 1
+ProbeFailureException: failure 2
 int(2)
 string(9) "success 1"
 string(9) "success 2"
 int(2)
 string(16) "uncached success"
+Exception: original failure
 bool(true)
-string(16) "uncached failure"
+ProbeFailureException: uncached failure
