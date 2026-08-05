@@ -391,6 +391,11 @@ PHP 8.6 UPGRADE NOTES
     outcome is reported as 'accepted', 'rejected' or 'not_sent' in the
     early_data key of the crypto stream_get_meta_data() array.
 
+- PDO_PGSQL:
+  . Added Pdo\Pgsql::ATTR_CHUNK_SIZE, the number of rows a statement fetches
+    per chunk. A value of 1 or more enters the lazy fetch mode of
+    PDO::ATTR_PREFETCH => 0. Requires libpq 17 or later.
+
 - Phar:
   . Overriding the getMTime() and getPathname() methods of SplFileInfo now
     influences the result of the phar buildFrom family of functions.

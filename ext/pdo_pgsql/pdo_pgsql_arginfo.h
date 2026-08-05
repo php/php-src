@@ -1,5 +1,5 @@
 /* This is a generated file, edit pdo_pgsql.stub.php instead.
- * Stub hash: 0ea21010467d661416f0858f2bda095583ea3a36 */
+ * Stub hash: 3f62627e74ad08de8e95c9862e3d209ae63d971a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Pgsql_escapeIdentifier, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -100,6 +100,14 @@ static zend_class_entry *register_class_Pdo_Pgsql(zend_class_entry *class_entry_
 	zend_string *const_ATTR_RESULT_MEMORY_SIZE_name = zend_string_init_interned("ATTR_RESULT_MEMORY_SIZE", sizeof("ATTR_RESULT_MEMORY_SIZE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_RESULT_MEMORY_SIZE_name, &const_ATTR_RESULT_MEMORY_SIZE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_ATTR_RESULT_MEMORY_SIZE_name, true);
+#endif
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+
+	zval const_ATTR_CHUNK_SIZE_value;
+	ZVAL_LONG(&const_ATTR_CHUNK_SIZE_value, PDO_PGSQL_ATTR_CHUNK_SIZE);
+	zend_string *const_ATTR_CHUNK_SIZE_name = zend_string_init_interned("ATTR_CHUNK_SIZE", sizeof("ATTR_CHUNK_SIZE") - 1, true);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_CHUNK_SIZE_name, &const_ATTR_CHUNK_SIZE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(const_ATTR_CHUNK_SIZE_name, true);
 #endif
 
 	zval const_TRANSACTION_IDLE_value;

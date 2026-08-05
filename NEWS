@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     statement with emulated or disabled prepares is destroyed, a connection
     left busy for the next fetch, and rows delivered from a result another
     statement took over. (KentarouTakeda)
+  . Added Pdo\Pgsql::ATTR_CHUNK_SIZE to fetch a result set in chunks of the
+    given number of rows. (KentarouTakeda)
 
 13 Aug 2026, PHP 8.6.0beta1
 
