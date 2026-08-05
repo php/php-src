@@ -124,15 +124,25 @@ PS_CLOSE_FUNC(user)
 
 	PS(mod_user_implemented) = false;
 
+	if (!bailout) {
+		ret = verify_bool_return_type_userland_calls(&retval);
+	}
+	if (!Z_ISUNDEF(retval)) {
+		zval_ptr_dtor(&retval);
+	}
+
+	/* User close() may return false without calling parent::close(). */
+	if (PS(default_mod) && PS(mod_data)) {
+		zend_try {
+			PS(default_mod)->s_close(&PS(mod_data));
+		} zend_end_try();
+	}
+	PS(mod_user_is_open) = false;
+
 	if (bailout) {
-		if (!Z_ISUNDEF(retval)) {
-			zval_ptr_dtor(&retval);
-		}
 		zend_bailout();
 	}
 
-	ret = verify_bool_return_type_userland_calls(&retval);
-	zval_ptr_dtor(&retval);
 	return ret;
 }
 
