@@ -62,6 +62,8 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Fixed integer element offsets that cannot resolve aliasing an existing
     element. (iliaal)
+  . Fixed segfault when comparing uninitialized SimpleXMLElement
+    instances. (iliaal)
 
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
