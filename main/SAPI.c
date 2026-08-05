@@ -217,7 +217,7 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 	}
 	if (read_bytes < buflen) {
 		/* done */
-		SG(post_read) = 1;
+		SG(post_read) = true;
 	}
 
 	return read_bytes;
@@ -370,7 +370,6 @@ SAPI_API void sapi_activate_headers_only(void)
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
-	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
 	SG(request_info).post_entry = NULL;
 	SG(global_request_time) = 0;
@@ -409,16 +408,15 @@ SAPI_API void sapi_activate(void)
 	*/
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
-	SG(headers_sent) = 0;
+	SG(headers_sent) = false;
 	SG(read_post_bytes) = 0;
 	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
-	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
 	SG(request_info).post_entry = NULL;
 	SG(request_info).proto_num = 1000; /* Default to HTTP 1.0 */
 	SG(global_request_time) = 0;
-	SG(post_read) = 0;
+	SG(post_read) = false;
 	SG(send_header_fcc) = empty_fcall_info_cache;
 	/* It's possible to override this general case in the activate() callback, if necessary. */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
@@ -499,7 +497,7 @@ SAPI_API void sapi_deactivate_module(void)
 		efree(SG(request_info).content_type_dup);
 	}
 	if (SG(request_info).current_user) {
-		efree(SG(request_info).current_user);
+		zend_string_release_ex(SG(request_info).current_user, false);
 	}
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate();
@@ -517,7 +515,7 @@ SAPI_API void sapi_deactivate_destroy(void)
 	}
 	sapi_send_headers_free();
 	SG(sapi_started) = 0;
-	SG(headers_sent) = 0;
+	SG(headers_sent) = false;
 	SG(request_info).headers_read = 0;
 	SG(global_request_time) = 0;
 }
@@ -646,7 +644,7 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 	}
 }
 
-SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
+SAPI_API zend_result sapi_header_op(sapi_header_op_enum op, void *arg)
 {
 	sapi_header_struct sapi_header;
 	char *colon_offset;
@@ -830,10 +828,10 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 }
 
 
-SAPI_API int sapi_send_headers(void)
+SAPI_API zend_result sapi_send_headers(void)
 {
 	int retval;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 
 	if (SG(headers_sent) || SG(request_info).no_headers) {
 		return SUCCESS;
@@ -871,7 +869,7 @@ SAPI_API int sapi_send_headers(void)
 		zend_fcc_dtor(&fcc);
 	}
 
-	SG(headers_sent) = 1;
+	SG(headers_sent) = true;
 
 	if (sapi_module.send_headers) {
 		retval = sapi_module.send_headers(&SG(sapi_headers));
@@ -908,7 +906,7 @@ SAPI_API int sapi_send_headers(void)
 			ret = SUCCESS;
 			break;
 		case SAPI_HEADER_SEND_FAILED:
-			SG(headers_sent) = 0;
+			SG(headers_sent) = false;
 			ret = FAILURE;
 			break;
 	}
@@ -919,7 +917,7 @@ SAPI_API int sapi_send_headers(void)
 }
 
 
-SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entries)
+SAPI_API zend_result sapi_register_post_entries(const sapi_post_entry *post_entries)
 {
 	const sapi_post_entry *p=post_entries;
 
@@ -933,16 +931,15 @@ SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entries)
 }
 
 
-SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry)
+SAPI_API zend_result sapi_register_post_entry(const sapi_post_entry *post_entry)
 {
-	int ret;
 	zend_string *key;
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
 	}
 	key = zend_string_init(post_entry->content_type, post_entry->content_type_len, 1);
 	GC_MAKE_PERSISTENT_LOCAL(key);
-	ret = zend_hash_add_mem(&SG(known_post_content_types), key,
+	zend_result ret = zend_hash_add_mem(&SG(known_post_content_types), key,
 			(void *) post_entry, sizeof(sapi_post_entry)) ? SUCCESS : FAILURE;
 	zend_string_release_ex(key, 1);
 	return ret;
@@ -958,7 +955,7 @@ SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry)
 }
 
 
-SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void))
+SAPI_API zend_result sapi_register_default_post_reader(void (*default_post_reader)(void))
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
@@ -968,7 +965,7 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void)
 }
 
 
-SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray))
+SAPI_API zend_result sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray))
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
@@ -977,7 +974,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 	return SUCCESS;
 }
 
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void))
+SAPI_API zend_result sapi_register_input_filter(unsigned int (*input_filter)(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void))
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
@@ -987,7 +984,7 @@ SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, co
 	return SUCCESS;
 }
 
-SAPI_API int sapi_flush(void)
+SAPI_API zend_result sapi_flush(void)
 {
 	if (sapi_module.flush) {
 		sapi_module.flush(SG(server_context));

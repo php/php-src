@@ -39,7 +39,7 @@ What do you write phpt tests on?
    If you want more guidance than that you can always ask the PHP Quality Assurance Team on their
    mailing list (php-qa@lists.php.net) where they would like you to direct your attentions.
 
-How is a phpt test is used?
+How is a phpt test used?
 
    When a test is called by the ``run-tests.php`` script it takes various parts of the phpt file to
    name and create a .php file. That .php file is then executed. The output of the .php file is then

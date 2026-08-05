@@ -16,10 +16,10 @@ try {
     var_dump(ftp_login($ftp, 'user', 'pass'));
     echo "Login did not throw\n";
 } catch (ValueError $ex) {
-    echo "Exception: ", $ex->getMessage(), "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 bool(true)
 bool(true)
-Exception: FTP\Connection is already closed
+ValueError: FTP\Connection is already closed

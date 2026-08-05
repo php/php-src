@@ -32,13 +32,13 @@ for ($i = -30; $i <= 60; $i += 10) {
     try {
         var_dump(iconv_strpos($string_ascii, $needle_ascii, $i));
     } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     echo "--Multibyte String --\n";
     try {
         var_dump(iconv_strpos($string_mb, $needle_mb, $i, 'UTF-8'));
     } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -49,9 +49,9 @@ echo "Done";
 
 **-- Offset is: -30 --**
 -- ASCII String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: -20 --**
 -- ASCII String --
@@ -85,25 +85,25 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 40 --**
 -- ASCII String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 50 --**
 -- ASCII String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 60 --**
 -- ASCII String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 Done

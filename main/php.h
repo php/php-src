@@ -304,7 +304,6 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *forma
 /* PHPAPI void php_error(int type, const char *format, ...); */
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...);
 END_EXTERN_C()
 
 #define zenderror phperror
@@ -323,7 +322,7 @@ PHPAPI extern int (*php_register_internal_extensions_func)(void);
 PHPAPI int php_register_internal_extensions(void);
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(void);
-PHPAPI char *php_get_current_user(void);
+PHPAPI zend_string *php_get_current_user(void);
 
 PHPAPI const char *php_get_internal_encoding(void);
 PHPAPI const char *php_get_input_encoding(void);

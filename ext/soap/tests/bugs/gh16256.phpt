@@ -20,5 +20,5 @@ try {
 }
 ?>
 --EXPECT--
-SoapClient::__construct(): 'classmap' option must be an associative array
+SoapClient::__construct(): Argument #2 ($options) "classmap" option must be an associative array
 SoapServer::__construct(): Argument #2 ($options) "classmap" option must be an associative array

@@ -2024,7 +2024,7 @@ static char *zend_accel_uintptr_hex(char *dest, uintptr_t n)
  * a scheme, except file:// and phar://. */
 #define PFA_KEY_PREFIX "pfa://"
 
-static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
+static zend_string *zend_accel_pfa_key(const uint32_t *declaring_lineno_ptr,
 		const zend_function *called_function)
 {
 	const size_t max_key_len = strlen(PFA_KEY_PREFIX) + (sizeof(uintptr_t)*2) + strlen(":") + (sizeof(uintptr_t)*2);
@@ -2032,7 +2032,7 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 
 	char *dest = ZSTR_VAL(key);
 	dest = zend_mempcpy(dest, PFA_KEY_PREFIX, strlen(PFA_KEY_PREFIX));
-	dest = zend_accel_uintptr_hex(dest, (uintptr_t)declaring_opline);
+	dest = zend_accel_uintptr_hex(dest, (uintptr_t)declaring_lineno_ptr);
 	*dest++ = ':';
 
 	const void *ptr;
@@ -2054,17 +2054,17 @@ static zend_string *zend_accel_pfa_key(const zend_op *declaring_opline,
 	return key;
 }
 
-const zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline, const zend_function *called_function)
+const zend_op_array *zend_accel_pfa_cache_get(
+		const uint32_t *declaring_lineno_ptr, const zend_function *called_function, bool cacheable_in_shm)
 {
-	zend_string *key = zend_accel_pfa_key(declaring_opline, called_function);
+	zend_string *key = zend_accel_pfa_key(declaring_lineno_ptr, called_function);
 	zend_op_array *op_array = NULL;
 
-	/* A PFA is SHM-cacheable if the declaring_op_array and called_function are
+	/* A PFA is SHM-cacheable if the declaring op_array and called_function are
 	 * cached. */
 	if (ZCG(accelerator_enabled)
 			&& !file_cache_only
-			&& !declaring_op_array->refcount
+			&& cacheable_in_shm /* declaring op_array is cached */
 			&& (called_function->type != ZEND_USER_FUNCTION || !called_function->op_array.refcount)) {
 		zend_persistent_script *persistent_script = zend_accel_hash_find(&ZCSG(hash), key);
 		if (persistent_script) {
@@ -2084,11 +2084,13 @@ const zend_op_array *zend_accel_pfa_cache_get(const zend_op_array *declaring_op_
 }
 
 zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
-		const zend_op_array *declaring_op_array,
-		const zend_op *declaring_opline,
+		zend_string *declaring_filename,
+		const uint32_t *declaring_lineno_ptr,
 		const zend_function *called_function,
-		zend_string *pfa_func_name)
+		zend_string *pfa_func_name, bool cacheable_in_shm)
 {
+	ZEND_ASSERT(zend_accel_in_shm((void*)declaring_lineno_ptr) || !cacheable_in_shm);
+
 	zend_begin_record_errors();
 	zend_op_array *op_array;
 
@@ -2106,7 +2108,7 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
 #endif
 
-		op_array = zend_compile_ast(ast, ZEND_USER_FUNCTION, declaring_op_array->filename);
+		op_array = zend_compile_ast(ast, ZEND_USER_FUNCTION, declaring_filename);
 
 		CG(compiler_options) = orig_compiler_options;
 	} zend_catch {
@@ -2119,21 +2121,21 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 	ZEND_ASSERT(op_array->num_dynamic_func_defs == 1);
 
 	zend_string_release(op_array->dynamic_func_defs[0]->function_name);
-	op_array->dynamic_func_defs[0]->function_name = pfa_func_name;
+	op_array->dynamic_func_defs[0]->function_name = zend_string_copy(pfa_func_name);
 
-	zend_string *key = zend_accel_pfa_key(declaring_opline, called_function);
+	zend_string *key = zend_accel_pfa_key(declaring_lineno_ptr, called_function);
 
 	/* Cache op_array only if the declaring op_array and the called function
 	 * are cached */
 	if (!ZCG(accelerator_enabled)
 			|| file_cache_only
-			|| declaring_op_array->refcount
+			|| !cacheable_in_shm /* declaring op_array is not in SHM */
 			|| (called_function->type == ZEND_USER_FUNCTION && called_function->op_array.refcount)
 			|| (ZCSG(restart_in_progress) && accel_restart_is_active())
 			|| (!ZCG(counted) && accel_activate_add() == FAILURE)) {
 		zend_op_array *script_op_array = op_array;
 		zend_op_array *op_array = script_op_array->dynamic_func_defs[0];
-		GC_ADDREF(op_array->function_name);
+		GC_TRY_ADDREF(op_array->function_name);
 		(*op_array->refcount)++;
 		destroy_op_array(script_op_array);
 		efree(script_op_array);

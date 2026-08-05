@@ -115,8 +115,9 @@ set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
 if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
 
 rem prepare for mail
-curl -sLo hMailServer.exe https://www.hmailserver.com/download_file/?downloadid=271
-hMailServer.exe /verysilent
+curl -sLo hMailServer.zip https://downloads.php.net/~windows/php-sdk/deps/vs18/x64/hmailserver-5.7.0-vs18-x64.zip
+unzip -q hMailServer.zip -d hMailServer
+hMailServer\bin\hMailServer.exe /verysilent
 cd %APPVEYOR_BUILD_FOLDER%
 %PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet .github\setup_hmailserver.php
 

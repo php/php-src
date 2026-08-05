@@ -26,7 +26,7 @@ var_dump(42 / $b);
 try {
     var_dump($a / 0);
 } catch (\DivisionByZeroError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($a % $b);
@@ -35,7 +35,7 @@ var_dump(42 % $b);
 try {
     var_dump($a % 0);
 } catch (\DivisionByZeroError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($a ** $b);
@@ -64,13 +64,13 @@ var_dump(-$a >> 2);
 try {
     $a << -1;
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     $a >> -1;
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(~$a);
@@ -97,7 +97,7 @@ var_dump($a >= 42);
 try {
     var_dump($a == new stdClass);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $a += 1;
@@ -172,7 +172,7 @@ object(GMP)#3 (1) {
   ["num"]=>
   string(1) "2"
 }
-Division by zero
+DivisionByZeroError: Division by zero
 object(GMP)#4 (1) {
   ["num"]=>
   string(1) "8"
@@ -185,7 +185,7 @@ object(GMP)#4 (1) {
   ["num"]=>
   string(1) "8"
 }
-Modulo by zero
+DivisionByZeroError: Modulo by zero
 object(GMP)#3 (1) {
   ["num"]=>
   string(28) "3937657486715347520027492352"
@@ -254,8 +254,8 @@ object(GMP)#5 (1) {
   ["num"]=>
   string(3) "-11"
 }
-Shift must be between 0 and %d
-Shift must be between 0 and %d
+ValueError: Shift must be between 0 and %d
+ValueError: Shift must be between 0 and %d
 object(GMP)#5 (1) {
   ["num"]=>
   string(3) "-43"
@@ -282,7 +282,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-Number must be of type GMP|string|int, stdClass given
+TypeError: Number must be of type GMP|string|int, stdClass given
 object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"

@@ -16,7 +16,7 @@ echo "==========================================================================
 echo "============================================================================\n";
 var_dump(Phar::createDefaultStub(str_repeat('a', 401)));
 } catch(Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "============================================================================\n";
 echo "============================================================================\n";
@@ -29,7 +29,7 @@ echo "==========================================================================
 var_dump(strlen(Phar::createDefaultStub('index.php', str_repeat('a', 400))));
 var_dump(Phar::createDefaultStub('hio', str_repeat('a', 401)));
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -636,7 +636,7 @@ __HALT_COMPILER(); ?>"
 int(7050)
 ============================================================================
 ============================================================================
-Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
+PharException: Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ============================================================================
 ============================================================================
 ============================================================================
@@ -942,4 +942,4 @@ __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
 int(7050)
-Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
+PharException: Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed

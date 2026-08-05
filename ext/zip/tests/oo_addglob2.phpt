@@ -41,7 +41,7 @@ $options = [
 try {
 	$zip->addGlob($dirname. 'bar.*', GLOB_BRACE, $options);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $options['comp_flags'] = 65536;
@@ -49,7 +49,7 @@ $options['comp_flags'] = 65536;
 try {
 	$zip->addGlob($dirname. 'bar.*', GLOB_BRACE, $options);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $options['comp_flags'] = 5;
