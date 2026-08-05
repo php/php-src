@@ -14,6 +14,8 @@
 
 #include "../intl_cppshims.h"
 
+#include <limits>
+
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
 
