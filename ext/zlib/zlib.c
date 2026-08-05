@@ -881,10 +881,22 @@ PHP_FUNCTION(inflate_init)
 	zend_long encoding, window = 15;
 	char *dict = NULL;
 	size_t dictlen = 0;
+	zval *options_zv = NULL;
 	HashTable *options = (HashTable *) &zend_empty_array;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|A", &encoding, &options_zv)) {
 		RETURN_THROWS();
+	}
+
+	if (options_zv) {
+		if (Z_TYPE_P(options_zv) == IS_OBJECT) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Passing an object for argument #2 $option to inflate_init() is deprecated, call get_object_vars() first instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+		options = HASH_OF(options_zv);
 	}
 
 	if (!zlib_get_long_option(options, ZEND_STRL("window"), &window)) {
@@ -1100,10 +1112,22 @@ PHP_FUNCTION(deflate_init)
 	zend_long encoding, level = -1, memory = 8, window = 15, strategy = Z_DEFAULT_STRATEGY;
 	char *dict = NULL;
 	size_t dictlen = 0;
+	zval *options_zv = NULL;
 	HashTable *options = (HashTable*)&zend_empty_array;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|A", &encoding, &options_zv)) {
 		RETURN_THROWS();
+	}
+
+	if (options_zv) {
+		if (Z_TYPE_P(options_zv) == IS_OBJECT) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Passing an object for argument #2 $option to deflate_init() is deprecated, call get_object_vars() first instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+		options = HASH_OF(options_zv);
 	}
 
 	if (!zlib_get_long_option(options, ZEND_STRL("level"), &level)) {
