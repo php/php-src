@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0beta1
 
+- Streams:
+  . Fixed file_put_contents() LOCK_EX early return leaking stream error
+    operation depth. (iliaal)
+
 - Core:
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
