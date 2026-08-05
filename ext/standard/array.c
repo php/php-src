@@ -5426,12 +5426,14 @@ static zend_always_inline void php_array_intersect_empty_result(zval *first, zva
  * key. Other values are converted to string before the same normalization. */
 static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc, zval *return_value)
 {
-	uint32_t i;
+	uint32_t i, result_pos = 0, delete_bitset_len;
 	zval *value, *entry, *count;
 	zend_string *key, *value_str_key, *tmp_key;
 	zend_ulong num_key, value_num_key = 0;
 	HashTable set, *result;
+	zend_bitset delete_bitset = NULL;
 	zval one;
+	ALLOCA_FLAG(use_heap);
 	bool in_place = false;
 
 	for (i = 0; i < argc; i++) {
@@ -5495,6 +5497,10 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 		ZVAL_ARR(return_value, result);
 	}
 
+	delete_bitset_len = zend_bitset_len(zend_hash_num_elements(result));
+	delete_bitset = ZEND_BITSET_ALLOCA(delete_bitset_len, use_heap);
+	zend_bitset_clear(delete_bitset, delete_bitset_len);
+
 	ZEND_HASH_FOREACH_KEY_VAL(result, num_key, key, entry) {
 		if (!php_array_intersect_get_key(entry, &value_num_key, &value_str_key, &tmp_key)) {
 			goto cleanup;
@@ -5506,15 +5512,37 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 		}
 		zend_tmp_string_release(tmp_key);
 		if (!count || Z_LVAL_P(count) != (zend_long) argc - 1) {
+			zend_bitset_incl(delete_bitset, result_pos);
+		}
+		result_pos++;
+	} ZEND_HASH_FOREACH_END();
+
+	/* A conversion may retain the first argument through reentrant user code,
+	 * so it may no longer be safe to modify the original array in place. */
+	if (in_place && !zend_may_modify_arg_in_place(&args[0])) {
+		result = zend_array_dup(Z_ARRVAL(args[0]));
+		ZVAL_ARR(return_value, result);
+		in_place = false;
+	}
+
+	/* Convert every value before removing any entries. Removing an entry may
+	 * invoke a user destructor that changes subsequent string conversions. */
+	result_pos = 0;
+	ZEND_HASH_FOREACH_KEY(result, num_key, key) {
+		if (zend_bitset_in(delete_bitset, result_pos)) {
 			if (key) {
 				zend_hash_del(result, key);
 			} else {
 				zend_hash_index_del(result, num_key);
 			}
 		}
+		result_pos++;
 	} ZEND_HASH_FOREACH_END();
 
 cleanup:
+	if (delete_bitset) {
+		free_alloca(delete_bitset, use_heap);
+	}
 	zend_hash_destroy(&set);
 	if (in_place) {
 		Z_ADDREF_P(return_value);
