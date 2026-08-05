@@ -3982,9 +3982,17 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMP|CV, NUM)
 	void *object_or_called_scope;
 	zend_execute_data *call;
 	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
+	zval held_callable;
 
 	SAVE_OPLINE();
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	ZVAL_UNDEF(&held_callable);
+	if (UNEXPECTED(Z_TYPE_P(function_name) == IS_ARRAY)
+	 || (Z_ISREF_P(function_name) && Z_TYPE_P(Z_REFVAL_P(function_name)) == IS_ARRAY)) {
+		ZVAL_DEREF(function_name);
+		ZVAL_COPY(&held_callable, function_name);
+		function_name = &held_callable;
+	}
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		ZEND_ASSERT(!error);
 
@@ -3993,6 +4001,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMP|CV, NUM)
 		 * For the CONST and CV case we reuse the same exception block below
 		 * to make sure we don't increase VM size too much. */
 		if (!(OP2_TYPE & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(&held_callable);
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
@@ -4016,6 +4025,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMP|CV, NUM)
 			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 		}
 
+		zval_ptr_dtor(&held_callable);
 		FREE_OP2();
 		if ((OP2_TYPE & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
 			if (call_info & ZEND_CALL_CLOSURE) {
@@ -4032,6 +4042,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMP|CV, NUM)
 	} else {
 		zend_type_error("%s(): Argument #1 ($callback) must be a valid callback, %s", Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), error);
 		efree(error);
+		zval_ptr_dtor(&held_callable);
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
