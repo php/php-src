@@ -58,6 +58,21 @@
 #define FIN_CLOSE   0x2
 #define FIN_ABORT   0x4
 
+static bool pgsql_result_status_ok(ExecStatusType status)
+{
+	switch (status) {
+		case PGRES_COMMAND_OK:
+		case PGRES_TUPLES_OK:
+		case PGRES_SINGLE_TUPLE:
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		case PGRES_TUPLES_CHUNK:
+#endif
+			return true;
+		default:
+			return false;
+	}
+}
+
 
 
 static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
@@ -354,8 +369,16 @@ stmt_retry:
 			return 0;
 		}
 		S->is_running_unbuffered = true;
+		/* no matter if they return 0: PQ then transparently fallbacks to full result fetching */
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		if (S->chunk_size >= 1) {
+			(void)PQsetChunkedRowsMode(H->server, (int)S->chunk_size);
+		} else {
+			(void)PQsetSingleRowMode(H->server);
+		}
+#else
 		(void)PQsetSingleRowMode(H->server);
-		/* no matter if it returns 0: PQ then transparently fallbacks to full result fetching */
+#endif
 
 		/* try a first fetch to at least have column names and so on */
 		S->result = PQgetResult(S->H->server);
@@ -363,7 +386,7 @@ stmt_retry:
 
 	status = PQresultStatus(S->result);
 
-	if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK && status != PGRES_SINGLE_TUPLE) {
+	if (!pgsql_result_status_ok(status)) {
 		pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 		return 0;
 	}
@@ -607,7 +630,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			}
 			status = PQresultStatus(S->result);
 
-			if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK && status != PGRES_SINGLE_TUPLE) {
+			if (!pgsql_result_status_ok(status)) {
 				pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 				return 0;
 			}
@@ -881,6 +904,12 @@ static int pgsql_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 
 				ZVAL_NULL(val);
 			}
+			return 1;
+#endif
+
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		case PDO_PGSQL_ATTR_CHUNK_SIZE:
+			ZVAL_LONG(val, S->chunk_size);
 			return 1;
 #endif
 
