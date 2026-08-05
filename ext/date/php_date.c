@@ -18,6 +18,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_versioning.h"
 #include "php_date.h"
+#include "php_time.h"
 #include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -447,6 +448,7 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_INI_ENTRIES();
 	date_register_classes();
 	register_php_date_symbols(module_number);
+	PHP_MINIT(date_time)(INIT_FUNC_ARGS_PASSTHRU);
 
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;
