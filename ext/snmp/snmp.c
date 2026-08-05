@@ -1061,20 +1061,48 @@ static ZEND_ATTRIBUTE_NONNULL bool snmp_session_set_sec_protocol(struct snmp_ses
 		s->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
 		return true;
 	}
+
+# ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+	if (zend_string_equals_literal_ci(prot, "AES192")) {
+		s->securityPrivProto = usmAES192PrivProtocol;
+		s->securityPrivProtoLen = OID_LENGTH(usmAES192PrivProtocol);
+		return true;
+	}
+
+	if (zend_string_equals_literal_ci(prot, "AES256")) {
+		s->securityPrivProto = usmAES256PrivProtocol;
+		s->securityPrivProtoLen = OID_LENGTH(usmAES256PrivProtocol);
+		return true;
+	}
+
+	if (zend_string_equals_literal_ci(prot, "AES192C")) {
+		s->securityPrivProto = usmAES192CiscoPrivProtocol;
+		s->securityPrivProtoLen = OID_LENGTH(usmAES192CiscoPrivProtocol);
+		return true;
+	}
+
+	if (zend_string_equals_literal_ci(prot, "AES256C")) {
+		s->securityPrivProto = usmAES256CiscoPrivProtocol;
+		s->securityPrivProtoLen = OID_LENGTH(usmAES256CiscoPrivProtocol);
+		return true;
+	}
+# endif
 #endif
 
 #ifdef HAVE_AES
-# ifndef NETSNMP_DISABLE_DES
-	zend_value_error("Security protocol must be one of \"DES\", \"AES128\", or \"AES\"");
-# else
-	zend_value_error("Security protocol must be one of \"AES128\", or \"AES\"");
+zend_value_error("Security protocol must be one of "
+#  ifndef NETSNMP_DISABLE_DES
+    "\"DES\", "
+#  endif
+# ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+ "\"AES256\", \"AES256C\", \"AES192\", \"AES192C\", "
 # endif
-#else
-# ifndef NETSNMP_DISABLE_DES
+ "\"AES128\", or \"AES\""
+);
+#elif !defined(NETSNMP_DISABLE_DES)
 	zend_value_error("Security protocol must be \"DES\"");
-# else
+#else
 	zend_value_error("No security protocol supported");
-# endif
 #endif
 	return false;
 }
