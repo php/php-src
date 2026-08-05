@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 0c8af3b78b3d6e1ee3e59c60363d0d941bea9faa
+ * Stub hash: 7a3bb062cb216bd28c1c97c44f2f611992c47063
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -3479,17 +3479,17 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(settype, arginfo_settype)
 	ZEND_RAW_FENTRY("intval", zif_intval, arginfo_intval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("floatval", zif_floatval, arginfo_floatval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("doubleval", zif_floatval, arginfo_doubleval, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("doubleval", zif_floatval, arginfo_doubleval, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("boolval", zif_boolval, arginfo_boolval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("strval", zif_strval, arginfo_strval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_null", zif_is_null, arginfo_is_null, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_resource", zif_is_resource, arginfo_is_resource, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_bool", zif_is_bool, arginfo_is_bool, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_int", zif_is_int, arginfo_is_int, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("is_integer", zif_is_int, arginfo_is_integer, 0, NULL, NULL)
-	ZEND_RAW_FENTRY("is_long", zif_is_int, arginfo_is_long, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("is_integer", zif_is_int, arginfo_is_integer, ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("is_long", zif_is_int, arginfo_is_long, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("is_float", zif_is_float, arginfo_is_float, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("is_double", zif_is_float, arginfo_is_double, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("is_double", zif_is_float, arginfo_is_double, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("is_numeric", zif_is_numeric, arginfo_is_numeric, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_is_numeric, NULL)
 	ZEND_RAW_FENTRY("is_string", zif_is_string, arginfo_is_string, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_array", zif_is_array, arginfo_is_array, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
@@ -3973,6 +3973,34 @@ static void register_basic_functions_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_socket_set_timeout_0->args[1].value, attribute_Deprecated_func_socket_set_timeout_0_arg1_str);
 	attribute_Deprecated_func_socket_set_timeout_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
+
+	zend_attribute *attribute_Deprecated_func_doubleval_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "doubleval", sizeof("doubleval") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_func_doubleval_0_arg0_str = zend_string_init("use floatval() instead", strlen("use floatval() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_doubleval_0->args[0].value, attribute_Deprecated_func_doubleval_0_arg0_str);
+	attribute_Deprecated_func_doubleval_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_string *attribute_Deprecated_func_doubleval_0_arg1_str = zend_string_init("8.6", strlen("8.6"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_doubleval_0->args[1].value, attribute_Deprecated_func_doubleval_0_arg1_str);
+	attribute_Deprecated_func_doubleval_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_is_integer_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_integer", sizeof("is_integer") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_func_is_integer_0_arg0_str = zend_string_init("use is_int() instead", strlen("use is_int() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_is_integer_0->args[0].value, attribute_Deprecated_func_is_integer_0_arg0_str);
+	attribute_Deprecated_func_is_integer_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_is_integer_0->args[1].value, attribute_Deprecated_func_doubleval_0_arg1_str);
+	attribute_Deprecated_func_is_integer_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_is_long_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_long", sizeof("is_long") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_is_long_0->args[0].value, attribute_Deprecated_func_is_integer_0_arg0_str);
+	attribute_Deprecated_func_is_long_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_is_long_0->args[1].value, attribute_Deprecated_func_doubleval_0_arg1_str);
+	attribute_Deprecated_func_is_long_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_is_double_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_double", sizeof("is_double") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_func_is_double_0_arg0_str = zend_string_init("use is_float() instead", strlen("use is_float() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_is_double_0->args[0].value, attribute_Deprecated_func_is_double_0_arg0_str);
+	attribute_Deprecated_func_is_double_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_is_double_0->args[1].value, attribute_Deprecated_func_doubleval_0_arg1_str);
+	attribute_Deprecated_func_is_double_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_const_ASSERT_ACTIVE_0 = zend_add_global_constant_attribute(const_ASSERT_ACTIVE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
