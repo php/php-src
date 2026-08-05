@@ -137,6 +137,8 @@ PHP                                                                        NEWS
     options value. (Ilia Alshanetsky)
   . Fixed PDOStatement not reporting its bound parameters and columns to the
     cycle collector. (Ilia Alshanetsky)
+  . Fixed PDOStatement::setFetchMode() not applying changes atomically.
+    (Ilia Alshanetsky)
 
 - PDO_DBLIB:
   . Fixed bug GH-23741 (segfault after a failed query inside a PDO
