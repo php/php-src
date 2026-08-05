@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
+  . Fixed bug GH-22878 (Use-after-free of callable via autoloader). (iliaal)
 
 - Curl:
   . Raise a value error when the callback registered with CURLOPT_READFUNCTION
