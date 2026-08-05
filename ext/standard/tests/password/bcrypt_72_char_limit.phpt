@@ -1,5 +1,5 @@
 --TEST--
-Test error operation of password_hash() with bcrypt hashing
+Test 72 character limit of bcrypt
 --FILE--
 <?php
 $long_pass = str_repeat('a', 71);
