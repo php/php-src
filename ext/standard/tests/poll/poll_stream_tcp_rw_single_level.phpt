@@ -10,14 +10,14 @@ $poll_ctx = pt_new_stream_poll();
 pt_stream_poll_add($poll_ctx, $client, [Io\Poll\Event::Read, Io\Poll\Event::Write], "client_data");
 pt_stream_poll_add($poll_ctx, $server, [Io\Poll\Event::Read, Io\Poll\Event::Write], "server_data");
 
-pt_expect_events($poll_ctx->wait(0), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromSeconds(0)), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'client_data'],
     ['events' => [Io\Poll\Event::Write], 'data' => 'server_data']
 ]);
 
 fwrite($client, "test data");
 usleep(10000);
-pt_expect_events($poll_ctx->wait(0, 100000), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'client_data'],
     ['events' => [Io\Poll\Event::Read, Io\Poll\Event::Write], 'data' => 'server_data', 'read' => 'test data']
 ]);
