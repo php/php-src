@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Added SpoofChecker::getBidiSkeleton(). (Weilin Du)
   . Added SpoofChecker::getSkeleton(). (David Carlier)
 
+- PDO:
+  . Fixed pdo_raise_impl_error() emitting a warning under ERRMODE_SILENT.
+    (iliaal)
+
 - PDO_ODBC:
   . Fixed bug GH-23016 (NULL values in long columns come back as garbage
     binary strings). (Calvin Buckley, iliaal)
