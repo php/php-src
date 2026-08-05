@@ -2920,7 +2920,8 @@ $output
 {$exported_environment}
 case "$1" in
 "gdb")
-    gdb -ex 'unset environment LINES' -ex 'unset environment COLUMNS' --args {$orig_cmd}
+    shift
+    gdb -ex 'unset environment LINES' -ex 'unset environment COLUMNS' "$@" --args {$orig_cmd}
     ;;
 "lldb")
     lldb -- {$orig_cmd}
