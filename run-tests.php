@@ -2926,7 +2926,8 @@ case "$1" in
     lldb -- {$orig_cmd}
     ;;
 "valgrind")
-    USE_ZEND_ALLOC=0 valgrind $2 {$orig_cmd}
+    shift
+    USE_ZEND_ALLOC=0 valgrind "$@" {$orig_cmd}
     ;;
 "strace")
     shift
