@@ -1220,8 +1220,11 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 	sxe2 = Z_SXEOBJ_P(object2);
 
 	if (sxe1->node != NULL && sxe2->node != NULL) {
+		xmlNodePtr node1 = php_sxe_get_first_node_non_destructive(sxe1, sxe1->node->node);
+		xmlNodePtr node2 = php_sxe_get_first_node_non_destructive(sxe2, sxe2->node->node);
+
 		/* Both nodes set: Only support equality comparison between nodes. */
-		if (sxe1->node == sxe2->node) {
+		if (node1 && node1 == node2) {
 			return 0;
 		}
 		return ZEND_UNCOMPARABLE;
