@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
 
+- Date:
+  . Update timelib to 2026.01. (Derick, timwolla)
+
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
     (Weilin Du)
@@ -21,6 +24,12 @@ PHP                                                                        NEWS
   . Implemented GH-20255 (Add a predefined calendar constant in
     IntlDateFormatter for the proleptic gregorian calendar). (David Carlier)
   . Added SpoofChecker::areBidiConfusable(). (David Carlier)
+  . Added SpoofChecker::getBidiSkeleton(). (Weilin Du)
+  . Added SpoofChecker::getSkeleton(). (David Carlier)
+
+- PDO_ODBC:
+  . Fixed bug GH-23016 (NULL values in long columns come back as garbage
+    binary strings). (Calvin Buckley, iliaal)
 
 - Reflection:
   . Added ReflectionAttribute::inNamespace(),
@@ -38,6 +47,8 @@ PHP                                                                        NEWS
     URLs. Using more than 16 filters without configuring this option is now
     deprecated. (Sjoerd Langkemper)
   . Improved performance of array_intersect(). (mehmetcansahin)
+  . Fixed bug GH-23006 (phpcredits() full-page HTML title says phpinfo()).
+    (Weilin Du)
   . The following functions now raise a ValueError when the $filename argument
     contains NUL bytes: fileperms(), fileinode(), filesize(), fileowner(),
     filegroup(), fileatime(), filemtime(), filectime(), filetype(),

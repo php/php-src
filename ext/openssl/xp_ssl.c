@@ -947,15 +947,14 @@ static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *c
 		goto cert_start;
 	}
 
-	stream_complete: {
-		php_stream_close(stream);
-		if (buffer_active == 1) {
-			BIO_free(buffer);
-		}
+stream_complete:
+	if (certs_added == 0) {
+		php_stream_warn(stream, DecodingFailed, "no valid certs found cafile stream: '%s'", cafile);
 	}
 
-	if (certs_added == 0) {
-		php_stream_warn(stream, DecodingFailed, "no valid certs found cafile stream: `%s'", cafile);
+	php_stream_close(stream);
+	if (buffer_active == 1) {
+		BIO_free(buffer);
 	}
 
 	return certs_added;

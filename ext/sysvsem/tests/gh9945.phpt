@@ -12,7 +12,7 @@ if (PHP_OS_FAMILY !== 'Linux') die('skip only for platforms with 32-bit key_t');
 try {
     sem_get(0x100000000);
 } catch (ValueError $exception) {
-    echo $exception::class, ": ", $exception->getMessage(), "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--

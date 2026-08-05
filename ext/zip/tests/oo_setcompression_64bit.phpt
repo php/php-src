@@ -14,16 +14,16 @@ $zip = new ZipArchive;
 try {
 	$zip->setCompressionName('entry5.txt', PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	$zip->setCompressionIndex(4, PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECTF--
-ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
-ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d
+ValueError: ZipArchive::setCompressionName(): Argument #2 ($method) must be between -1 and %d
+ValueError: ZipArchive::setCompressionIndex(): Argument #2 ($method) must be between -1 and %d

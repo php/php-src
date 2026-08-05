@@ -17,13 +17,13 @@ var_dump($a->getopt("tab-size"));
 try {
     $a->getopt('bogus-opt');
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     tidy_getopt($a, 'non-ASCII string ���');
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -31,5 +31,5 @@ try {
 Current Value of 'tidy-mark': bool(false)
 Current Value of 'error-file': string(0) ""
 Current Value of 'tab-size': int(8)
-tidy::getOpt(): Argument #1 ($option) is an invalid configuration option, "bogus-opt" given
-tidy_getopt(): Argument #2 ($option) is an invalid configuration option, "non-ASCII string ���" given
+ValueError: tidy::getOpt(): Argument #1 ($option) is an invalid configuration option, "bogus-opt" given
+ValueError: tidy_getopt(): Argument #2 ($option) is an invalid configuration option, "non-ASCII string ���" given

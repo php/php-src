@@ -19,11 +19,11 @@ $cleanup = shm_attach($key);
 try {
     shm_put_var($mem, 1, new C);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 } finally {
     shm_remove($cleanup);
 }
 
 ?>
 --EXPECT--
-Shared memory block has been destroyed by the serialization function
+Error: Shared memory block has been destroyed by the serialization function
