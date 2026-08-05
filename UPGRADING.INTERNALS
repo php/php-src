@@ -166,6 +166,13 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Extended php_stream_filter_ops with seek method.
   . zend_argument_error_variadic() now takes a new 'function' parameter.
   . The param argument in the php_verror() function has been removed.
+  . The php_stream_wrapper_log_error() signature changed from
+    (wrapper, options, fmt, ...) to
+    (wrapper, context, options, severity, terminating, code, fmt, ...).
+    To keep the previous behaviour pass NULL for the context, or the context at
+    hand if there is one, E_WARNING for the severity, and
+    ZEND_ENUM_StreamErrorCode_Generic for the code. terminating should be true
+    only if the error aborts the operation.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
