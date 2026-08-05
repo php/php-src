@@ -196,6 +196,12 @@ PHP 8.6 UPGRADE NOTES
     SplTempFileObject; the two previously returned different values.
 
 - Standard:
+  . array_intersect() with at least two arrays now converts values to strings
+    while scanning its inputs instead of during sort comparisons. This can
+    change the number and order of conversion warnings and __toString() calls,
+    which conversion exception is reached, and the result for stateful
+    __toString() implementations. Values are not converted if any input array
+    is empty.
   . Form feed (\f) is now added in the default trimmed characters of trim(),
     rtrim() and ltrim().
     RFC: https://wiki.php.net/rfc/trim_form_feed
@@ -699,6 +705,7 @@ PHP 8.6 UPGRADE NOTES
 
 - Standard:
   . Improved performance of array_fill_keys().
+  . Improved performance of array_intersect().
   . Improved performance of array_map() with multiple arrays passed.
   . Improved performance of array_sum() and array_product() for
     integer-only arrays.

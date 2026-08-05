@@ -5369,9 +5369,176 @@ PHP_FUNCTION(array_intersect_ukey)
 }
 /* }}} */
 
+static zend_always_inline bool php_array_intersect_get_key(
+		zval *value, zend_ulong *num_key, zend_string **str_key, zend_string **tmp_key)
+{
+	ZVAL_DEREF(value);
+	*tmp_key = NULL;
+
+	if (Z_TYPE_P(value) == IS_LONG) {
+		*num_key = (zend_ulong) Z_LVAL_P(value);
+		*str_key = NULL;
+		return true;
+	}
+
+	if (Z_TYPE_P(value) == IS_STRING) {
+		*str_key = Z_STR_P(value);
+		return true;
+	}
+
+	*str_key = zval_try_get_tmp_string(value, tmp_key);
+	return *str_key != NULL;
+}
+
+static zend_always_inline void php_array_intersect_empty_result(zval *first, zval *return_value)
+{
+	zend_ulong num_key;
+	zend_string *key;
+	HashTable *result;
+	bool in_place = zend_may_modify_arg_in_place(first);
+
+	if (in_place) {
+		result = Z_ARRVAL_P(first);
+		ZVAL_ARR(return_value, result);
+	} else {
+		result = zend_array_dup(Z_ARRVAL_P(first));
+		ZVAL_ARR(return_value, result);
+	}
+
+	ZEND_HASH_FOREACH_KEY(result, num_key, key) {
+		if (key) {
+			zend_hash_del(result, key);
+		} else {
+			zend_hash_index_del(result, num_key);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (in_place) {
+		Z_ADDREF_P(return_value);
+	}
+}
+
+/* {{{ Hash-based implementation of array_intersect(). Values are compared
+ * using their string representation. On the long|string domain, this is
+ * exactly key equality under symtable normalization: a long and a string
+ * compare equal iff the string is the canonical decimal representation of the
+ * long, which is precisely when ZEND_HANDLE_NUMERIC converts it to that long
+ * key. Other values are converted to string before the same normalization. */
+static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc, zval *return_value)
+{
+	uint32_t i;
+	zval *value, *entry, *count;
+	zend_string *key, *value_str_key, *tmp_key;
+	zend_ulong num_key, value_num_key = 0;
+	HashTable set, *result;
+	zval one;
+	bool in_place = false;
+
+	for (i = 0; i < argc; i++) {
+		if (Z_TYPE(args[i]) != IS_ARRAY) {
+			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(&args[i]));
+			return;
+		}
+	}
+
+	/* An empty argument makes the intersection empty, so no values need to be
+	 * converted to string. */
+	for (i = 0; i < argc; i++) {
+		if (zend_hash_num_elements(Z_ARRVAL(args[i])) == 0) {
+			php_array_intersect_empty_result(&args[0], return_value);
+			return;
+		}
+	}
+
+	/* Map each value of args[1] to the number of consecutive arguments,
+	 * starting from args[1], the value has been seen in. */
+	ZVAL_LONG(&one, 1);
+	zend_hash_init(&set, zend_hash_num_elements(Z_ARRVAL(args[1])), NULL, NULL, 0);
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[1]), value) {
+		if (!php_array_intersect_get_key(value, &value_num_key, &value_str_key, &tmp_key)) {
+			goto cleanup;
+		}
+		if (value_str_key) {
+			zend_symtable_update(&set, value_str_key, &one);
+		} else {
+			zend_hash_index_update(&set, value_num_key, &one);
+		}
+		zend_tmp_string_release(tmp_key);
+	} ZEND_HASH_FOREACH_END();
+
+	for (i = 2; i < argc; i++) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), value) {
+			if (!php_array_intersect_get_key(value, &value_num_key, &value_str_key, &tmp_key)) {
+				goto cleanup;
+			}
+			if (value_str_key) {
+				count = zend_symtable_find(&set, value_str_key);
+			} else {
+				count = zend_hash_index_find(&set, value_num_key);
+			}
+			zend_tmp_string_release(tmp_key);
+			if (count && Z_LVAL_P(count) == (zend_long) i - 1) {
+				ZVAL_LONG(count, i);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	/* Match the generic path by filtering the first argument in place if
+	 * possible and duplicating it otherwise. In particular, duplication keeps
+	 * bucket holes whose positions are observable through array_rand(). */
+	in_place = zend_may_modify_arg_in_place(&args[0]);
+	if (in_place) {
+		result = Z_ARRVAL(args[0]);
+		ZVAL_ARR(return_value, result);
+	} else {
+		result = zend_array_dup(Z_ARRVAL(args[0]));
+		ZVAL_ARR(return_value, result);
+	}
+
+	ZEND_HASH_FOREACH_KEY_VAL(result, num_key, key, entry) {
+		if (!php_array_intersect_get_key(entry, &value_num_key, &value_str_key, &tmp_key)) {
+			goto cleanup;
+		}
+		if (value_str_key) {
+			count = zend_symtable_find(&set, value_str_key);
+		} else {
+			count = zend_hash_index_find(&set, value_num_key);
+		}
+		zend_tmp_string_release(tmp_key);
+		if (!count || Z_LVAL_P(count) != (zend_long) argc - 1) {
+			if (key) {
+				zend_hash_del(result, key);
+			} else {
+				zend_hash_index_del(result, num_key);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+cleanup:
+	zend_hash_destroy(&set);
+	if (in_place) {
+		Z_ADDREF_P(return_value);
+	}
+}
+/* }}} */
+
 /* {{{ Returns the entries of arr1 that have values which are present in all the other arguments */
 PHP_FUNCTION(array_intersect)
 {
+	zval *args;
+	uint32_t argc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (argc >= 2) {
+		php_array_intersect_hash(args, argc, return_value);
+		return;
+	}
+
+	/* Preserve the generic path and its conversion side effects for calls with
+	 * a single array. */
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL, INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
 }
 /* }}} */
