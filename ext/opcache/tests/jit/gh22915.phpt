@@ -1,5 +1,10 @@
 --TEST--
 GH-22915: compiled exit clobbers registers before saving
+--EXTENSIONS--
+opcache
+--INI--
+opcache.jit_max_side_traces=0
+opcache.jit_blacklist_side_trace=0
 --ENV--
 F=iter
 --FILE--
@@ -47,14 +52,6 @@ function iter(It $it) {
 echo "# First run\n";
 for ($i = 0; $i < 5; $i++) {
     getenv('F')(new It([getenv('F')]));                // non-immutable, packed array
-}
-
-// Next side-exit should deoptimize
-if (ini_set('opcache.jit_max_side_traces', '0') === false) {
-    die("Failed setting opcache.jit_max_side_traces");
-}
-if (ini_set('opcache.jit_blacklist_side_trace', '0') === false) {
-    die("Failed setting opcache.jit_blacklist_side_trace");
 }
 
 echo "# Second run\n";
