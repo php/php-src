@@ -2924,7 +2924,8 @@ case "$1" in
     gdb -ex 'unset environment LINES' -ex 'unset environment COLUMNS' "$@" --args {$orig_cmd}
     ;;
 "lldb")
-    lldb -- {$orig_cmd}
+    shift
+    lldb "$@" -- {$orig_cmd}
     ;;
 "valgrind")
     shift
