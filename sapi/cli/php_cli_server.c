@@ -449,22 +449,23 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 
 PHP_FUNCTION(apache_connection_stream) /* {{{ */
 {
-    php_cli_server_client *client = SG(server_context);
+	php_cli_server_client *client = SG(server_context);
+	php_stream *stream;
 
-    // Check for proper parsing of parameters (none expected)
-    ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_NONE();
 
-    // Use php_stream_sock_open_from_socket() to create a PHP stream
-    php_stream *stream = php_stream_sock_open_from_socket(client->sock, NULL);
+	if (!client) {
+		php_error_docref(NULL, E_WARNING, "Server context is not available");
+		RETURN_FALSE;
+	}
 
-    // Check if the stream was successfully created
-    if (!stream) {
-        php_error_docref(NULL, E_WARNING, "Failed to open stream from socket in cli server");
-        RETURN_FALSE;
-    }
+	stream = php_stream_sock_open_from_socket(client->sock, NULL);
+	if (!stream) {
+		php_error_docref(NULL, E_WARNING, "Failed to open stream from socket in cli server");
+		RETURN_FALSE;
+	}
 
-    // Convert the php_stream to a zval and return it
-    php_stream_to_zval(stream, return_value);
+	php_stream_to_zval(stream, return_value);
 }
 /* }}} */
 

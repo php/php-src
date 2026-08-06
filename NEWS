@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0beta1
 
-- apache2handler:
-  . Added the apache_connection_stream() function for CGI WebSockets. (Richard Tyler Miles)
-
 - Core:
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
