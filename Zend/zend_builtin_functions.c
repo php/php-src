@@ -945,6 +945,11 @@ ZEND_FUNCTION(get_class_methods)
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (ce == zend_ce_closure) {
+		ZVAL_STR_COPY(&method_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
+	}
 }
 /* }}} */
 
