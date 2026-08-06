@@ -16,7 +16,7 @@ function foo($var) {
 foo("hello");
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Unsupported operand types: string + int in %s:%d
+Fatal error: Uncaught TypeError: Unsupported operand types: non-numeric-string + int in %s:%d
 Stack trace:
 #0 %s(%d): foo('hello')
 #1 {main}

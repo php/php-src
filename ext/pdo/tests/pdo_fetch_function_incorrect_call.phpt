@@ -47,4 +47,4 @@ PDOTest::dropTableIfExists($db, "pdo_fetch_function_incorrect_call");
 ?>
 --EXPECT--
 Fetch all with bogus call:
-TypeError: bogusCallback(): Argument #1 ($obj) must be of type stdClass, string given
+TypeError: bogusCallback(): Argument #1 ($obj) must be of type stdClass, non-numeric-string given

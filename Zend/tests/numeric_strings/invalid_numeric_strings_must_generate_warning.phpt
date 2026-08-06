@@ -117,56 +117,56 @@ Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(5)
-Unsupported operand types: string + string
+Unsupported operand types: non-numeric-string + non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(-2)
-Unsupported operand types: string - string
+Unsupported operand types: non-numeric-string - non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(143)
-Unsupported operand types: string * string
+Unsupported operand types: non-numeric-string * non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 float(0.8947368421052632)
-Unsupported operand types: string / string
+Unsupported operand types: non-numeric-string / non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 float(3.0910586430935376E+39)
-Unsupported operand types: string ** string
+Unsupported operand types: non-numeric-string ** non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(31)
-TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: non-numeric-string % non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(%d)
-Unsupported operand types: string << string
+Unsupported operand types: non-numeric-string << non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
-Unsupported operand types: string >> string
+Unsupported operand types: non-numeric-string >> non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -174,8 +174,8 @@ int(63)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(71)
-Unsupported operand types: string | int
-Unsupported operand types: int | string
+Unsupported operand types: non-numeric-string | int
+Unsupported operand types: int | non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -183,8 +183,8 @@ int(81)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(97)
-Unsupported operand types: string & int
-Unsupported operand types: int & string
+Unsupported operand types: non-numeric-string & int
+Unsupported operand types: int & non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -192,15 +192,15 @@ int(28)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(252)
-Unsupported operand types: string ^ int
-Unsupported operand types: int ^ string
+Unsupported operand types: non-numeric-string ^ int
+Unsupported operand types: int ^ non-numeric-string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 int(149)
-Unsupported operand types: string * int
+Unsupported operand types: non-numeric-string * int
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 int(-151)
-Unsupported operand types: string * int
+Unsupported operand types: non-numeric-string * int
