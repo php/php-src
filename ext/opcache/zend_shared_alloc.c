@@ -669,12 +669,6 @@ void zend_accel_shared_protect(bool protected)
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode);
 	}
 #elif defined(ZEND_WIN32)
-	int i;
-
-	if (!smm_shared_globals) {
-		return;
-	}
-
 	const int mode = protected ? PAGE_READONLY : PAGE_READWRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
