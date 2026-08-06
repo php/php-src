@@ -121,12 +121,18 @@ typedef struct _zend_file_context {
 	HashTable seen_symbols;
 } zend_file_context;
 
+typedef struct _zend_extends_info {
+	zend_ast *class_name;
+	zend_ast *ctor_args;
+} zend_extends_info;
+
 typedef union _zend_parser_stack_elem {
 	zend_ast *ast;
 	zend_string *str;
 	zend_ulong num;
 	unsigned char *ptr;
 	unsigned char *ident;
+	zend_extends_info extends_info;
 } zend_parser_stack_elem;
 
 void zend_compile_top_stmt(zend_ast *ast);
@@ -930,6 +936,9 @@ typedef enum {
 /* Used during AST construction */
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 zend_ast *zend_negate_num_string(zend_ast *ast);
+zend_ast *zend_ast_create_class_decl(uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
+	zend_string *name, zend_ast *extends, zend_ast *parent_args, zend_ast *implements,
+	zend_ast *params, zend_ast *stmts);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag, zend_modifier_target target);
