@@ -622,7 +622,8 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 				pgsql_stmt_finish(S, 0);
 			}
 		}
-		if (S->current_row < stmt->row_count) {
+		/* another statement may have taken over and freed the result */
+		if (S->result && S->current_row < stmt->row_count) {
 			S->current_row++;
 			return 1;
 		} else {
