@@ -1018,6 +1018,11 @@ cleanup_args:
 		fci_cache->function_handler = NULL;
 	}
 
+	zend_object *pinned_this = (call_info & ZEND_CALL_HAS_THIS) ? fci_cache->object : NULL;
+	if (pinned_this) {
+		GC_ADDREF(pinned_this);
+	}
+
 	const zend_class_entry *orig_fake_scope = EG(fake_scope);
 	EG(fake_scope) = NULL;
 	if (func->type == ZEND_USER_FUNCTION) {
@@ -1084,6 +1089,10 @@ cleanup_args:
 		}
 	}
 	EG(fake_scope) = orig_fake_scope;
+
+	if (pinned_this) {
+		OBJ_RELEASE(pinned_this);
+	}
 
 	zend_vm_stack_free_call_frame(call);
 
