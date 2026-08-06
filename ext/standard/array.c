@@ -5369,9 +5369,218 @@ PHP_FUNCTION(array_intersect_ukey)
 }
 /* }}} */
 
+static zend_always_inline bool php_array_intersect_get_key(
+		zval *value, zend_ulong *num_key, zend_string **str_key, zend_string **tmp_key)
+{
+	ZVAL_DEREF(value);
+	*tmp_key = NULL;
+
+	if (Z_TYPE_P(value) == IS_LONG) {
+		*num_key = (zend_ulong) Z_LVAL_P(value);
+		*str_key = NULL;
+		return true;
+	}
+
+	if (Z_TYPE_P(value) == IS_STRING) {
+		*str_key = Z_STR_P(value);
+		return true;
+	}
+
+	*str_key = zval_try_get_tmp_string(value, tmp_key);
+	return *str_key != NULL;
+}
+
+static zend_always_inline void php_array_intersect_empty_result(zval *first, zval *return_value)
+{
+	HashTable *result;
+	bool in_place = zend_may_modify_arg_in_place(first);
+
+	if (in_place) {
+		result = Z_ARRVAL_P(first);
+		ZVAL_ARR(return_value, result);
+	} else {
+		result = zend_array_dup(Z_ARRVAL_P(first));
+		ZVAL_ARR(return_value, result);
+	}
+
+	ZEND_HASH_FOREACH_KEY(result, zend_ulong num_key, zend_string *key) {
+		if (key) {
+			zend_hash_del(result, key);
+		} else {
+			zend_hash_index_del(result, num_key);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (in_place) {
+		Z_ADDREF_P(return_value);
+	}
+}
+
+/* {{{ Hash-based implementation of array_intersect(). Values are compared
+ * using their string representation. On the long|string domain, this is
+ * exactly key equality under symtable normalization: a long and a string
+ * compare equal iff the string is the canonical decimal representation of the
+ * long, which is precisely when ZEND_HANDLE_NUMERIC converts it to that long
+ * key. Other values are converted to string before the same normalization. */
+static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc, zval *return_value)
+{
+	for (uint32_t i = 0; i < argc; i++) {
+		if (Z_TYPE(args[i]) != IS_ARRAY) {
+			zend_argument_type_error(i + 1, "must be of type array, %s given", zend_zval_value_name(&args[i]));
+			return;
+		}
+	}
+
+	/* An empty argument makes the intersection empty, so no values need to be
+	 * converted to string. */
+	for (uint32_t i = 0; i < argc; i++) {
+		if (zend_hash_num_elements(Z_ARRVAL(args[i])) == 0) {
+			php_array_intersect_empty_result(&args[0], return_value);
+			return;
+		}
+	}
+
+	/* Map each value of args[1] to the number of consecutive arguments,
+	 * starting from args[1], the value has been seen in. */
+	zval one;
+	ZVAL_LONG(&one, 1);
+	HashTable set;
+	zend_hash_init(&set, zend_hash_num_elements(Z_ARRVAL(args[1])), NULL, NULL, 0);
+	zend_bitset delete_bitset = NULL;
+	ALLOCA_FLAG(use_heap);
+	bool in_place = false;
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[1]), zval *value) {
+		zend_ulong value_num_key = 0;
+		zend_string *value_str_key, *tmp_key;
+		if (!php_array_intersect_get_key(value, &value_num_key, &value_str_key, &tmp_key)) {
+			goto cleanup;
+		}
+		if (value_str_key) {
+			zend_symtable_update(&set, value_str_key, &one);
+		} else {
+			zend_hash_index_update(&set, value_num_key, &one);
+		}
+		zend_tmp_string_release(tmp_key);
+	} ZEND_HASH_FOREACH_END();
+
+	for (uint32_t i = 2; i < argc; i++) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), zval *value) {
+			zend_ulong value_num_key = 0;
+			zend_string *value_str_key, *tmp_key;
+			if (!php_array_intersect_get_key(value, &value_num_key, &value_str_key, &tmp_key)) {
+				goto cleanup;
+			}
+			zval *count;
+			if (value_str_key) {
+				count = zend_symtable_find(&set, value_str_key);
+			} else {
+				count = zend_hash_index_find(&set, value_num_key);
+			}
+			zend_tmp_string_release(tmp_key);
+			if (count && Z_LVAL_P(count) == (zend_long) i - 1) {
+				ZVAL_LONG(count, i);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	/* Match the generic path by filtering the first argument in place if
+	 * possible and duplicating it otherwise. In particular, duplication keeps
+	 * bucket holes whose positions are observable through array_rand(). */
+	HashTable *result;
+	in_place = zend_may_modify_arg_in_place(&args[0]);
+	if (in_place) {
+		result = Z_ARRVAL(args[0]);
+		ZVAL_ARR(return_value, result);
+	} else {
+		result = zend_array_dup(Z_ARRVAL(args[0]));
+		ZVAL_ARR(return_value, result);
+	}
+
+	/* Determine all entries to remove before deleting any. Deleting an entry may
+	 * invoke a user destructor that changes subsequent string conversions. */
+	HashTable *scanned_result = result;
+	uint32_t scanned_num_used = result->nNumUsed;
+	uint32_t delete_bitset_len = zend_bitset_len(scanned_num_used);
+	delete_bitset = ZEND_BITSET_ALLOCA(delete_bitset_len, use_heap);
+	zend_bitset_clear(delete_bitset, delete_bitset_len);
+
+	size_t scanned_element_size = ZEND_HASH_ELEMENT_SIZE(scanned_result);
+	for (uint32_t result_idx = 0; result_idx < scanned_num_used; result_idx++) {
+		zval *entry = ZEND_HASH_ELEMENT_EX(scanned_result, result_idx, scanned_element_size);
+		if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
+			continue;
+		}
+		zend_ulong value_num_key = 0;
+		zend_string *value_str_key, *tmp_key;
+		if (!php_array_intersect_get_key(entry, &value_num_key, &value_str_key, &tmp_key)) {
+			goto cleanup;
+		}
+		zval *count;
+		if (value_str_key) {
+			count = zend_symtable_find(&set, value_str_key);
+		} else {
+			count = zend_hash_index_find(&set, value_num_key);
+		}
+		zend_tmp_string_release(tmp_key);
+		if (!count || Z_LVAL_P(count) != (zend_long) argc - 1) {
+			zend_bitset_incl(delete_bitset, result_idx);
+		}
+	}
+
+	/* A conversion may retain the first argument through reentrant user code,
+	 * so it may no longer be safe to modify the original array in place. */
+	if (in_place && !zend_may_modify_arg_in_place(&args[0])) {
+		result = zend_array_dup(Z_ARRVAL(args[0]));
+		ZVAL_ARR(return_value, result);
+		in_place = false;
+	}
+
+	/* The late duplication may compact holes, so read keys from the table whose
+	 * bucket indexes are stored in the bitset. */
+	uint32_t result_idx;
+	ZEND_BITSET_FOREACH(delete_bitset, delete_bitset_len, result_idx) {
+		if (HT_IS_PACKED(scanned_result)) {
+			zend_hash_index_del(result, result_idx);
+		} else {
+			zval *entry = ZEND_HASH_ELEMENT_EX(scanned_result, result_idx, scanned_element_size);
+			Bucket *bucket = (Bucket *) entry;
+			if (bucket->key) {
+				zend_hash_del(result, bucket->key);
+			} else {
+				zend_hash_index_del(result, bucket->h);
+			}
+		}
+	} ZEND_BITSET_FOREACH_END();
+
+cleanup:
+	if (delete_bitset) {
+		free_alloca(delete_bitset, use_heap);
+	}
+	zend_hash_destroy(&set);
+	if (in_place) {
+		Z_ADDREF_P(return_value);
+	}
+}
+/* }}} */
+
 /* {{{ Returns the entries of arr1 that have values which are present in all the other arguments */
 PHP_FUNCTION(array_intersect)
 {
+	zval *args;
+	uint32_t argc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (argc >= 2) {
+		php_array_intersect_hash(args, argc, return_value);
+		return;
+	}
+
+	/* Preserve the generic path and its conversion side effects for calls with
+	 * a single array. */
 	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL, INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
 }
 /* }}} */
