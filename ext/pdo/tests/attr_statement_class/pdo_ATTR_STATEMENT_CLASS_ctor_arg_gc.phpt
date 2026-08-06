@@ -49,8 +49,8 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_attr_statement_class_ctor_arg_gc");
 ?>
---EXPECT--
-object(Bar)#1 (1) {
+--EXPECTF--
+object(Bar)#%d (1) {
   ["statementClass"]=>
   string(3) "Foo"
 }

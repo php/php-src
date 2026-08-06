@@ -232,6 +232,8 @@ function main(): void
         }
     }
 
+    SharedProbeCache::setUp($environment);
+
     if (IS_WINDOWS && empty($environment["SystemRoot"])) {
         $environment["SystemRoot"] = getenv("SystemRoot");
     }
@@ -1073,13 +1075,68 @@ function get_file_cache_dir(): string
     return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'php-run-tests-file-cache';
 }
 
+final class SharedProbeCache
+{
+    private string $directory;
+
+    private function __construct(string $directory)
+    {
+        $this->directory = $directory;
+    }
+
+    public static function setUp(array &$environment): void
+    {
+        unset($environment['TEST_PHP_SHARED_CACHE_DIR']);
+        if (getenv('TEST_PHP_SHARED_CACHE') === '0') {
+            return;
+        }
+
+        $cache = self::create();
+        if ($cache === null) {
+            return;
+        }
+
+        $environment['TEST_PHP_SHARED_CACHE_DIR'] = $cache->directory;
+        register_shutdown_function(static function () use ($cache): void {
+            $cache->cleanup();
+        });
+    }
+
+    private static function create(): ?self
+    {
+        $temporaryDirectory = sys_get_temp_dir();
+        if ($temporaryDirectory === '') {
+            return null;
+        }
+
+        for ($attempt = 0; $attempt < 3; $attempt++) {
+            $directory = $temporaryDirectory
+                . DIRECTORY_SEPARATOR
+                . 'php-run-tests-'
+                . bin2hex(random_bytes(8));
+            if (@mkdir($directory, 0700)) {
+                return new self($directory);
+            }
+        }
+
+        return null;
+    }
+
+    private function cleanup(): void
+    {
+        if (is_dir($this->directory)) {
+            rmdir_recursive($this->directory);
+        }
+    }
+}
+
 function rmdir_recursive($dir)
 {
-    if (!file_exists($dir)) {
+    if (!file_exists($dir) && !is_link($dir)) {
         return;
     }
-    if (!is_dir($dir)) {
-        unlink($dir);
+    if (is_link($dir) || !is_dir($dir)) {
+        @unlink($dir);
         return;
     }
 
@@ -3777,6 +3834,7 @@ class SkipCache
         }
 
         save_text($checkFile, $code, $tempFile);
+        $env['TEST_PHP_EVALUATING_SKIPIF'] = '1';
         $command[] = $checkFile;
         $result = trim(system_with_timeout($command, $env));
         if (strpos($result, 'nocache') === 0) {
