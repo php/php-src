@@ -227,6 +227,8 @@ typedef struct _zend_accel_globals {
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
 	zend_string            *key;
+	/* per-process cache to avoid leaks on repeated includes when opcache.file_cache_only=1. */
+	HashTable               file_cache_only_scripts;
 } zend_accel_globals;
 
 typedef struct _zend_string_table {
