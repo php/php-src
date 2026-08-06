@@ -7,10 +7,6 @@ opcache.protect_memory=1
 opcache.preload={PWD}/preload_gh10914.inc
 --EXTENSIONS--
 opcache
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 $x = new ReflectionEnum(ExampleEnum::class);
