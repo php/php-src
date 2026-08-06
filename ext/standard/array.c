@@ -5499,12 +5499,18 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 
 	/* Determine all entries to remove before deleting any. Deleting an entry may
 	 * invoke a user destructor that changes subsequent string conversions. */
-	uint32_t delete_bitset_len = zend_bitset_len(zend_hash_num_elements(result));
+	HashTable *scanned_result = result;
+	uint32_t scanned_num_used = result->nNumUsed;
+	uint32_t delete_bitset_len = zend_bitset_len(scanned_num_used);
 	delete_bitset = ZEND_BITSET_ALLOCA(delete_bitset_len, use_heap);
 	zend_bitset_clear(delete_bitset, delete_bitset_len);
 
-	uint32_t result_pos = 0;
-	ZEND_HASH_FOREACH_VAL(result, zval *entry) {
+	size_t scanned_element_size = ZEND_HASH_ELEMENT_SIZE(scanned_result);
+	for (uint32_t result_idx = 0; result_idx < scanned_num_used; result_idx++) {
+		zval *entry = ZEND_HASH_ELEMENT_EX(scanned_result, result_idx, scanned_element_size);
+		if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
+			continue;
+		}
 		zend_ulong value_num_key = 0;
 		zend_string *value_str_key, *tmp_key;
 		if (!php_array_intersect_get_key(entry, &value_num_key, &value_str_key, &tmp_key)) {
@@ -5518,10 +5524,9 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 		}
 		zend_tmp_string_release(tmp_key);
 		if (!count || Z_LVAL_P(count) != (zend_long) argc - 1) {
-			zend_bitset_incl(delete_bitset, result_pos);
+			zend_bitset_incl(delete_bitset, result_idx);
 		}
-		result_pos++;
-	} ZEND_HASH_FOREACH_END();
+	}
 
 	/* A conversion may retain the first argument through reentrant user code,
 	 * so it may no longer be safe to modify the original array in place. */
@@ -5531,17 +5536,22 @@ static zend_never_inline void php_array_intersect_hash(zval *args, uint32_t argc
 		in_place = false;
 	}
 
-	result_pos = 0;
-	ZEND_HASH_FOREACH_KEY(result, zend_ulong num_key, zend_string *key) {
-		if (zend_bitset_in(delete_bitset, result_pos)) {
-			if (key) {
-				zend_hash_del(result, key);
+	/* The late duplication may compact holes, so read keys from the table whose
+	 * bucket indexes are stored in the bitset. */
+	uint32_t result_idx;
+	ZEND_BITSET_FOREACH(delete_bitset, delete_bitset_len, result_idx) {
+		if (HT_IS_PACKED(scanned_result)) {
+			zend_hash_index_del(result, result_idx);
+		} else {
+			zval *entry = ZEND_HASH_ELEMENT_EX(scanned_result, result_idx, scanned_element_size);
+			Bucket *bucket = (Bucket *) entry;
+			if (bucket->key) {
+				zend_hash_del(result, bucket->key);
 			} else {
-				zend_hash_index_del(result, num_key);
+				zend_hash_index_del(result, bucket->h);
 			}
 		}
-		result_pos++;
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_BITSET_FOREACH_END();
 
 cleanup:
 	if (delete_bitset) {
