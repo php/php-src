@@ -40,6 +40,11 @@ AC_DEFUN([PHP_CXX_COMPILE_STDCXX], [dnl
   dnl Cray's crayCC needs "-h std=c++11"
   for alternative in ${ax_cxx_compile_alternatives}; do
     for switch in -std=c++${alternative} +std=c++${alternative} "-h std=c++${alternative}"; do
+      case "$CXX" in
+        *clang++*)
+    	  switch="${switch} -stdlib=libc++"
+	  ;;
+      esac
       cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1_$switch])
       AC_CACHE_CHECK(whether $CXX supports C++$1 features with $switch,
                      $cachevar,
