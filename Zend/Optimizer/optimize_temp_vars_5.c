@@ -108,7 +108,7 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 					     opline->opcode == ZEND_RETURN_BY_REF ||
 					     opline->opcode == ZEND_FREE ||
 					     opline->opcode == ZEND_FE_FREE)) {
-						zend_op *curr = opline;
+						const zend_op *curr = opline;
 
 						while (--curr >= end) {
 							if (curr->opcode == ZEND_FAST_CALL) {

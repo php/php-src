@@ -124,6 +124,6 @@ void zend_optimizer_migrate_jump(const zend_op_array *op_array, zend_op *new_opl
 void zend_optimizer_shift_jump(const zend_op_array *op_array, zend_op *opline, const uint32_t *shiftlist);
 uint32_t sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_array, zend_ssa *ssa, zend_call_info **call_map);
 int dce_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *optimizer_ctx, zend_ssa *ssa, bool reorder_dtor_effects);
-zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa);
+zend_result zend_ssa_escape_analysis(const zend_script *script, const zend_op_array *op_array, const zend_ssa *ssa);
 
 #endif
