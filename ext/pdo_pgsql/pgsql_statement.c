@@ -140,9 +140,6 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		}
 
 		S->is_prepared = false;
-		if (H->running_stmt == S) {
-			H->running_stmt = NULL;
-		}
 	}
 }
 
@@ -152,6 +149,10 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	bool server_obj_usable = php_pdo_stmt_valid_db_obj_handle(stmt);
 
 	pgsql_stmt_finish(S, FIN_DISCARD|(server_obj_usable ? FIN_CLOSE|FIN_ABORT : 0));
+
+	if (server_obj_usable && S->H->running_stmt == S) {
+		S->H->running_stmt = NULL;
+	}
 
 	if (S->stmt_name) {
 		efree(S->stmt_name);
