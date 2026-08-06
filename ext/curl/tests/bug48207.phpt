@@ -39,7 +39,7 @@ $ch = curl_init($url);
 try {
     curl_setopt($ch, CURLOPT_FILE, $fp);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 curl_exec($ch);
@@ -47,6 +47,6 @@ is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>
 --EXPECT--
-curl_setopt(): The provided file handle must be writable
+ValueError: curl_setopt(): The provided file handle must be writable
 Hello World!
 Hello World!
