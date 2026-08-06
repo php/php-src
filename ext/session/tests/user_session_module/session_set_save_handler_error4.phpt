@@ -14,37 +14,37 @@ function callback() { return true; }
 try {
     session_set_save_handler("callback", "callback", "callback", "callback", "callback", "callback");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     session_set_save_handler("callback", "echo", "callback", "callback", "callback", "callback");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     session_set_save_handler("callback", "callback", "echo", "callback", "callback", "callback");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     session_set_save_handler("callback", "callback", "callback", "echo", "callback", "callback");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     session_set_save_handler("callback", "callback", "callback", "callback", "echo", "callback");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     session_set_save_handler("callback", "callback", "callback", "callback", "callback", "echo");
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 session_set_save_handler("callback", "callback", "callback", "callback", "callback", "callback");
@@ -58,19 +58,19 @@ ob_end_flush();
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
-session_set_save_handler(): Argument #2 ($close) must be a valid callback, function "echo" not found or invalid function name
+TypeError: session_set_save_handler(): Argument #2 ($close) must be a valid callback, function "echo" not found or invalid function name
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
-session_set_save_handler(): Argument #3 ($read) must be a valid callback, function "echo" not found or invalid function name
+TypeError: session_set_save_handler(): Argument #3 ($read) must be a valid callback, function "echo" not found or invalid function name
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
-session_set_save_handler(): Argument #4 ($write) must be a valid callback, function "echo" not found or invalid function name
+TypeError: session_set_save_handler(): Argument #4 ($write) must be a valid callback, function "echo" not found or invalid function name
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
-session_set_save_handler(): Argument #5 ($destroy) must be a valid callback, function "echo" not found or invalid function name
+TypeError: session_set_save_handler(): Argument #5 ($destroy) must be a valid callback, function "echo" not found or invalid function name
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
-session_set_save_handler(): Argument #6 ($gc) must be a valid callback, function "echo" not found or invalid function name
+TypeError: session_set_save_handler(): Argument #6 ($gc) must be a valid callback, function "echo" not found or invalid function name
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 

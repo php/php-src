@@ -13,8 +13,8 @@ $x = new SessionHandler;
 try {
     $x->gc(1);
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Session is not active
+Error: Session is not active
