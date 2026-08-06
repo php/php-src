@@ -1990,7 +1990,7 @@ static const php_stream_filter_ops chunked_filter_ops = {
 	"dechunk"
 };
 
-static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, bool persistent)
+PHPAPI php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, bool persistent)
 {
 	const php_stream_filter_ops *fops = NULL;
 	php_chunked_filter_data *data;
@@ -2009,8 +2009,18 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 	return php_stream_filter_alloc(fops, data, persistent, PSFS_SEEKABLE_START, PSFS_SEEKABLE_ALWAYS);
 }
 
+static php_stream_filter *chunked_filter_create_deprecated(const char *filtername, zval *filterparams, bool persistent)
+{
+	if (strcasecmp(filtername, "dechunk")) {
+		return NULL;
+	}
+
+	php_error_docref(NULL, E_DEPRECATED, "The \"dechunk\" stream filter is deprecated");
+	return chunked_filter_create(filtername, filterparams, persistent);
+}
+
 static const php_stream_filter_factory chunked_filter_factory = {
-	chunked_filter_create
+	chunked_filter_create_deprecated
 };
 /* }}} */
 
