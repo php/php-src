@@ -12,7 +12,7 @@ try {
   $obj = new test;
   $clone = clone $obj;
 } catch (Throwable $e) {
-  echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+  echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

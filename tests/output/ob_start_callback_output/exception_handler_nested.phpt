@@ -38,21 +38,21 @@ echo "In all of them\n\n";
 try {
     ob_end_flush();
 } catch (\ErrorException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "Ended third_handler\n\n";
 
 try {
     ob_end_flush();
 } catch (\ErrorException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "Ended second_handler\n\n";
 
 try {
     ob_end_flush();
 } catch (\ErrorException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "Ended first_handler handler\n\n";
 
@@ -62,7 +62,7 @@ echo implode("\n", $log);
 ?>
 --EXPECT--
 FIRST
-ob_end_flush(): Producing output from user output handler first_handler is deprecated
+ErrorException: ob_end_flush(): Producing output from user output handler first_handler is deprecated
 Ended first_handler handler
 
 All handlers are over
@@ -71,12 +71,12 @@ third_handler: <<<In all of them
 
 >>>
 second_handler: <<<THIRD
-ob_end_flush(): Producing output from user output handler third_handler is deprecated
+ErrorException: ob_end_flush(): Producing output from user output handler third_handler is deprecated
 Ended third_handler
 
 >>>
 first_handler: <<<SECOND
-ob_end_flush(): Producing output from user output handler second_handler is deprecated
+ErrorException: ob_end_flush(): Producing output from user output handler second_handler is deprecated
 Ended second_handler
 
 >>>
