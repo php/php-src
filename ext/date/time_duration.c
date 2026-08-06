@@ -28,6 +28,17 @@
 ZEND_STATIC_ASSERT(NANOS_IN_MICRO * MICROS_IN_SEC == NANOS_IN_SEC, "");
 ZEND_STATIC_ASSERT(NANOS_IN_MILLI * MILLIS_IN_SEC == NANOS_IN_SEC, "");
 
+#define Z_PARAM_ULONG(l) { \
+		zend_long __l; \
+		Z_PARAM_LONG(__l); \
+		if (__l < 0) { \
+			zend_argument_value_error(_i, "must be greater than or equal to 0"); \
+			_error_code = ZPP_ERROR_FAILURE; \
+			break; \
+		} \
+		l = __l; \
+	}
+
 ZEND_COLD static void throw_out_of_range_exception(void)
 {
 #if SIZEOF_ZEND_LONG != 4
@@ -98,10 +109,8 @@ ZEND_ATTRIBUTE_NODISCARD static inline zend_result sync_properties(php_date_time
 	return SUCCESS;
 }
 
-ZEND_ATTRIBUTE_NODISCARD static zend_result create_duration(zval *target, zend_long seconds, zend_long nanoseconds)
+ZEND_ATTRIBUTE_NODISCARD static zend_result create_duration(zval *target, zend_ulong seconds, zend_ulong nanoseconds)
 {
-	ZEND_ASSERT(seconds >= 0);
-	ZEND_ASSERT(nanoseconds >= 0);
 	ZEND_ASSERT(nanoseconds < NANOS_IN_SEC);
 
 	if (EXPECTED(DATEG(duration_cache))) {
@@ -141,23 +150,15 @@ PHP_METHOD(Time_Duration, __construct)
 
 PHP_METHOD(Time_Duration, fromSeconds)
 {
-	zend_long seconds;
-	zend_long nanoseconds = 0;
+	zend_ulong seconds;
+	zend_ulong nanoseconds = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_LONG(seconds);
+		Z_PARAM_ULONG(seconds);
 		Z_PARAM_OPTIONAL;
-		Z_PARAM_LONG(nanoseconds);
+		Z_PARAM_ULONG(nanoseconds);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (seconds < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-	if (nanoseconds < 0) {
-		zend_argument_value_error(2, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
 	if (nanoseconds >= NANOS_IN_SEC) {
 		zend_argument_value_error(2, "must be less than 1_000_000_000");
 		RETURN_THROWS();
@@ -170,18 +171,13 @@ PHP_METHOD(Time_Duration, fromSeconds)
 
 PHP_METHOD(Time_Duration, fromNanoseconds)
 {
-	zend_long nanoseconds;
+	zend_ulong nanoseconds;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(nanoseconds);
+		Z_PARAM_ULONG(nanoseconds);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (nanoseconds < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-
-	zend_long seconds = nanoseconds / NANOS_IN_SEC;
+	zend_ulong seconds = nanoseconds / NANOS_IN_SEC;
 	nanoseconds %= NANOS_IN_SEC;
 
 	if (create_duration(return_value, seconds, nanoseconds) == FAILURE) {
@@ -191,19 +187,14 @@ PHP_METHOD(Time_Duration, fromNanoseconds)
 
 PHP_METHOD(Time_Duration, fromMicroseconds)
 {
-	zend_long microseconds;
+	zend_ulong microseconds;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(microseconds);
+		Z_PARAM_ULONG(microseconds);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (microseconds < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-
-	zend_long seconds = microseconds / MICROS_IN_SEC;
-	zend_long nanoseconds = (microseconds % MICROS_IN_SEC) * NANOS_IN_MICRO;
+	zend_ulong seconds = microseconds / MICROS_IN_SEC;
+	zend_ulong nanoseconds = (microseconds % MICROS_IN_SEC) * NANOS_IN_MICRO;
 
 	if (create_duration(return_value, seconds, nanoseconds) == FAILURE) {
 		RETURN_THROWS();
@@ -212,19 +203,14 @@ PHP_METHOD(Time_Duration, fromMicroseconds)
 
 PHP_METHOD(Time_Duration, fromMilliseconds)
 {
-	zend_long milliseconds;
+	zend_ulong milliseconds;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(milliseconds);
+		Z_PARAM_ULONG(milliseconds);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (milliseconds < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-
-	zend_long seconds = milliseconds / MILLIS_IN_SEC;
-	zend_long nanoseconds = (milliseconds % MILLIS_IN_SEC) * NANOS_IN_MILLI;
+	zend_ulong seconds = milliseconds / MILLIS_IN_SEC;
+	zend_ulong nanoseconds = (milliseconds % MILLIS_IN_SEC) * NANOS_IN_MILLI;
 
 	if (create_duration(return_value, seconds, nanoseconds) == FAILURE) {
 		RETURN_THROWS();
@@ -233,18 +219,13 @@ PHP_METHOD(Time_Duration, fromMilliseconds)
 
 PHP_METHOD(Time_Duration, fromMinutes)
 {
-	zend_long minutes;
+	zend_ulong minutes;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(minutes);
+		Z_PARAM_ULONG(minutes);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (minutes < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-
-	if (minutes > (ZEND_LONG_MAX / 60)) {
+	if (minutes > (ZEND_ULONG_MAX / 60)) {
 		throw_out_of_range_exception();
 		RETURN_THROWS();
 	}
@@ -256,18 +237,13 @@ PHP_METHOD(Time_Duration, fromMinutes)
 
 PHP_METHOD(Time_Duration, fromHours)
 {
-	zend_long hours;
+	zend_ulong hours;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(hours);
+		Z_PARAM_ULONG(hours);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (hours < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
-
-	if (hours > (ZEND_LONG_MAX / 3600)) {
+	if (hours > (ZEND_ULONG_MAX / 3600)) {
 		throw_out_of_range_exception();
 		RETURN_THROWS();
 	}
@@ -385,16 +361,11 @@ PHP_METHOD(Time_Duration, multiplyBy)
 {
 	const php_date_time_duration *original = Z_DATE_TIME_DURATION_P(ZEND_THIS);
 
-	zend_long factor;
+	zend_ulong factor;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(factor);
+		Z_PARAM_ULONG(factor);
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (factor < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
 
 	php_date_time_duration *new = create_duration_shell(return_value);
 
@@ -413,16 +384,11 @@ PHP_METHOD(Time_Duration, divideBy)
 {
 	const php_date_time_duration *original = Z_DATE_TIME_DURATION_P(ZEND_THIS);
 
-	zend_long divisor;
+	zend_ulong divisor;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(divisor);
+		Z_PARAM_ULONG(divisor);
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (divisor < 0) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
-	}
 
 	php_date_time_duration *new = create_duration_shell(return_value);
 
