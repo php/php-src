@@ -19,6 +19,7 @@ validate_url                               http://a.b.c
 validate_email              foo@bar.com                                                                                              
 validate_ip                                                    1.2.3.4                                                               
 validate_mac                                                                                                               aa:bb:cc:dd:ee:ff
+validate_strlen     PHP                                                  123                                     하퍼              
 string              PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc()            O&#39;Henry    하퍼    aa:bb:cc:dd:ee:ff
 stripped            PHP  1  foo@bar.com    http://a.b.c        1.2.3.4   123  123abc()            O&#39;Henry    하퍼    aa:bb:cc:dd:ee:ff
 encoded             PHP  1  foo%40bar.com  http%3A%2F%2Fa.b.c  1.2.3.4   123  123abc%3C%3E%28%29  O%27Henry      %ED%95%98%ED%8D%BCaa%3Abb%3Acc%3Add%3Aee%3Aff
