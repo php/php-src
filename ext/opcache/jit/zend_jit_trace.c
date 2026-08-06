@@ -3606,7 +3606,7 @@ static int zend_jit_trace_deoptimization(
 
 		ZEND_ASSERT(STACK_FLAGS(parent_stack, check2) == ZREG_ZVAL_COPY);
 		ZEND_ASSERT(reg != ZREG_NONE);
-		if (!zend_jit_escape_if_undef(jit, check2, flags, opline, exit_info->op_array, reg)) {
+		if (!zend_jit_escape_if_undef(jit, check2, flags, opline, reg)) {
 			return 0;
 		}
 		if (!zend_jit_restore_zval(jit, EX_NUM_TO_VAR(check2), reg)) {
@@ -7376,6 +7376,8 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 	stack =  zend_jit_traces[trace_num].exit_info[exit_num].stack_size ?
 		zend_jit_traces[trace_num].stack_map + zend_jit_traces[trace_num].exit_info[exit_num].stack_offset :
 		NULL;
+
+	ctx.current_op_array = zend_jit_traces[trace_num].exit_info[exit_num].op_array;
 
 	if (!zend_jit_trace_deoptimization(&ctx,
 			&zend_jit_traces[trace_num].exit_info[exit_num],

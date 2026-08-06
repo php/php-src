@@ -8068,7 +8068,7 @@ static int zend_jit_defined(zend_jit_ctx *jit, const zend_op *opline, uint8_t sm
 	return 1;
 }
 
-static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, const zend_op *opline, const zend_op_array *op_array, int8_t reg)
+static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, const zend_op *opline, int8_t reg)
 {
 	zend_jit_addr reg_addr = ZEND_ADDR_REF_ZVAL(zend_jit_deopt_rload(jit, IR_ADDR, reg));
 	ir_ref if_def = ir_IF(jit_Z_TYPE(jit, reg_addr));
@@ -8094,7 +8094,7 @@ static int zend_jit_escape_if_undef(zend_jit_ctx *jit, int var, uint32_t flags, 
 
 	/* We can't use trace_escape() because opcode handler may be overridden by JIT */
 	zend_jit_op_array_trace_extension *jit_extension =
-		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(jit->current_op_array);
 	size_t offset = jit_extension->offset;
 	ir_ref ref = ir_CONST_FC_FUNC(ZEND_OP_TRACE_INFO((opline - 1), offset)->orig_handler);
 	if (GCC_GLOBAL_REGS) {
