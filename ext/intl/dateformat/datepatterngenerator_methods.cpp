@@ -165,7 +165,7 @@ static void dtpg_get_skeleton(INTERNAL_FUNCTION_PARAMETERS, F&& skeletonfn, cons
 U_CFUNC PHP_METHOD(IntlDatePatternGenerator, getSkeleton)
 {
 	dtpg_get_skeleton(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		[](const UnicodeString& pattern, UErrorCode& status) {
+		[](const UnicodeString &pattern, UErrorCode &status) {
 			return DateTimePatternGenerator::staticGetSkeleton(pattern, status);
 		},
 		"Error getting skeleton");
@@ -174,7 +174,7 @@ U_CFUNC PHP_METHOD(IntlDatePatternGenerator, getSkeleton)
 U_CFUNC PHP_METHOD(IntlDatePatternGenerator, getBaseSkeleton)
 {
 	dtpg_get_skeleton(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-		[](const UnicodeString& pattern, UErrorCode& status) {
+		[](const UnicodeString &pattern, UErrorCode &status) {
 			return DateTimePatternGenerator::staticGetBaseSkeleton(pattern, status);
 		},
 		"Error getting base skeleton");
