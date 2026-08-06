@@ -132,3 +132,44 @@ U_CFUNC PHP_METHOD( IntlDatePatternGenerator, getBestPattern )
 
 	RETVAL_STR(u8str);
 }
+
+static void dtpg_get_skeleton(INTERNAL_FUNCTION_PARAMETERS, bool base)
+{
+	zend_string *pattern_str;
+	UnicodeString pattern;
+
+	DTPATTERNGEN_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(pattern_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	object = ZEND_THIS;
+	DTPATTERNGEN_METHOD_FETCH_OBJECT;
+
+	intl_stringFromChar(pattern, ZSTR_VAL(pattern_str), ZSTR_LEN(pattern_str), DTPATTERNGEN_ERROR_CODE_P(dtpgo));
+
+	INTL_METHOD_CHECK_STATUS(dtpgo, "Pattern is not a valid UTF-8 string");
+
+	UnicodeString result = base
+		? dtpgo->dtpg->getBaseSkeleton(pattern, DTPATTERNGEN_ERROR_CODE(dtpgo))
+		: dtpgo->dtpg->getSkeleton(pattern, DTPATTERNGEN_ERROR_CODE(dtpgo));
+
+	INTL_METHOD_CHECK_STATUS(dtpgo, base ? "Error getting base skeleton" : "Error getting skeleton");
+
+	zend_string *u8str = intl_charFromString(result, DTPATTERNGEN_ERROR_CODE_P(dtpgo));
+
+	INTL_METHOD_CHECK_STATUS(dtpgo, "Error converting result to UTF-8");
+
+	RETVAL_STR(u8str);
+}
+
+U_CFUNC PHP_METHOD(IntlDatePatternGenerator, getSkeleton)
+{
+	dtpg_get_skeleton(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+
+U_CFUNC PHP_METHOD(IntlDatePatternGenerator, getBaseSkeleton)
+{
+	dtpg_get_skeleton(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}

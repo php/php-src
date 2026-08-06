@@ -10,4 +10,8 @@ class IntlDatePatternGenerator
     public static function create(?string $locale = null): ?IntlDatePatternGenerator {}
 
     public function getBestPattern(string $skeleton): string|false {}
+
+    public function getSkeleton(string $pattern): string|false {}
+
+    public function getBaseSkeleton(string $pattern): string|false {}
 }
