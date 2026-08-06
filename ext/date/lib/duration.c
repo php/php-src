@@ -27,7 +27,7 @@
 
 int timelib_duration_ctor_static(
 	timelib_duration *duration,
-	timelib_ull       seconds,
+	uint64_t          seconds,
 	uint32_t          nanoseconds,
 	bool              negative
 ) {
@@ -51,7 +51,7 @@ int timelib_duration_ctor_static(
 }
 
 timelib_duration *timelib_duration_ctor(
-	timelib_ull            seconds,
+	uint64_t               seconds,
 	uint32_t               nanoseconds,
 	bool                   negative,
 	int                   *error_code
@@ -134,7 +134,7 @@ static int timelib_duration_add_abs_internal(
 	const timelib_duration *original,
 	const timelib_duration *additional
 ) {
-	timelib_ull seconds = original->seconds + additional->seconds;
+	uint64_t seconds = original->seconds + additional->seconds;
 	uint32_t nanoseconds = original->nanoseconds + additional->nanoseconds;
 
 	if (nanoseconds >= NSECS_PER_SEC) {
@@ -151,8 +151,8 @@ static int timelib_duration_sub_abs_internal(
 	const timelib_duration *original,
 	const timelib_duration *minus
 ) {
-	timelib_ull seconds = original->seconds - minus->seconds;
-	timelib_sll nanoseconds = (timelib_sll)original->nanoseconds - (timelib_sll)minus->nanoseconds;
+	uint64_t seconds = original->seconds - minus->seconds;
+	int32_t nanoseconds = (int32_t)original->nanoseconds - (int32_t)minus->nanoseconds;
 
 	if (nanoseconds < 0) {
 		seconds--;
@@ -343,8 +343,8 @@ int timelib_duration_div_static(
 	const timelib_duration *original,
 	uint64_t                divisor
 ) {
-	timelib_ull seconds;
-	uint32_t nanoseconds;
+	uint64_t seconds;
+	uint64_t nanoseconds;
 
 	if (divisor < 1) {
 		return TIMELIB_ERROR_DIVISION_BY_ZERO;

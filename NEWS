@@ -13,7 +13,7 @@ PHP                                                                        NEWS
     returns an unexpected long. (Sjoerd Langkemper)
 
 - Date:
-  . Update timelib to 2026.01. (Derick, timwolla)
+  . Update timelib to 2026.02. (Derick, timwolla)
 
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().

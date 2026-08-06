@@ -50,10 +50,10 @@ const char *timelib_error_messages[18] = {
 	"Nanoseconds value out of range",
 	"Division by zero",
 	"Integer Overflow",
-	"The ISO8601 duration string may only contain the period (P) aspect",
-	"The ISO8601 duration string is missing the perido (P) aspect",
-	"The ISO8601 duration string may only contain the time (T) aspect",
-	"The ISO8601 duration string could not be parsed",
+	"The ISO 8601 duration string may only contain the period (P) aspect",
+	"The ISO 8601 duration string is missing the period (P) aspect",
+	"The ISO 8601 duration string may only contain the time (T) aspect",
+	"The ISO 8601 duration string could not be parsed",
 };
 
 const char *timelib_get_error_message(int error_code)
