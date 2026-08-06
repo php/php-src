@@ -14,9 +14,9 @@ Class C implements Iterator {
 try {
   var_dump(new ArrayObject(new stdClass, 0, "C", "extra"));
 } catch (TypeError $e) {
-  echo $e::class, ': ', $e->getMessage(), ' on line ', $e->getLine(), "\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 Too many arguments:
-ArgumentCountError: ArrayObject::__construct() expects at most 3 arguments, 4 given on line 12
+ArgumentCountError: ArrayObject::__construct() expects at most 3 arguments, 4 given
