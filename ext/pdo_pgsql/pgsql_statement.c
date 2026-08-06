@@ -90,8 +90,35 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		//       instead of discarding results we could store them to their statement
 		//       so that their fetch() will get them (albeit not in lazy mode anymore).
 		while ((S->result = PQgetResult(H->server))) {
+			ExecStatusType status = PQresultStatus(S->result);
+
 			PQclear(S->result);
 			S->result = NULL;
+
+			/* PQgetResult() keeps handing out the same result while the
+			 * connection is copying: only these calls can end it */
+			if (status == PGRES_COPY_IN || status == PGRES_COPY_BOTH) {
+				/* fail a copy in, so that abandoning a statement cannot
+				 * commit it; a replication stream only accepts a clean end */
+				const char *error = status == PGRES_COPY_IN
+					? "COPY terminated by PDO"
+					: NULL;
+
+				if (PQputCopyEnd(H->server, error) < 0) {
+					break;
+				}
+			}
+			if (status == PGRES_COPY_OUT || status == PGRES_COPY_BOTH) {
+				char *buf;
+				int nbytes;
+
+				while ((nbytes = PQgetCopyData(H->server, &buf, 0)) > 0) {
+					PQfreemem(buf);
+				}
+				if (nbytes < -1) {
+					break;
+				}
+			}
 		}
 		S->is_running_unbuffered = false;
 	}
