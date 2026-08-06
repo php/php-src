@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_constants.stub.php instead.
- * Stub hash: 569ccba4e0a93a9ce49c81c76955413188df390e */
+ * Stub hash: c29c64a7cc3bdec6c7227a8f6e4583d050e3e81c */
 
 static void register_zend_constants_symbols(int module_number)
 {
@@ -27,6 +27,7 @@ static void register_zend_constants_symbols(int module_number)
 	REGISTER_BOOL_CONSTANT("TRUE", true, CONST_PERSISTENT);
 	REGISTER_BOOL_CONSTANT("FALSE", false, CONST_PERSISTENT);
 	REGISTER_NULL_CONSTANT("NULL", CONST_PERSISTENT);
+	REGISTER_NULL_CONSTANT("fallthrough", CONST_PERSISTENT);
 
 
 	zend_attribute *attribute_Deprecated_const_E_STRICT_0 = zend_add_global_constant_attribute(const_E_STRICT, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);

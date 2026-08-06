@@ -442,7 +442,7 @@ function main(): void
                         break;
                     }
                     $i--;
-                // no break
+                    fallthrough;
                 case 'w':
                     $failed_tests_file = fopen($argv[++$i], 'w+t');
                     break;
@@ -606,10 +606,11 @@ function main(): void
                 case '--version':
                     echo '$Id$' . "\n";
                     exit(1);
+                    break;
 
                 default:
                     echo "Illegal switch '$switch' specified!\n";
-                    // no break
+                    fallthrough;
                 case 'h':
                 case '-help':
                 case '--help':
@@ -1606,7 +1607,7 @@ escape:
                                 }
                             }
                             $junit->mergeResults($message["junit"]);
-                            // no break
+                            fallthrough;
                         case "ready":
                             // Schedule sequential tests only once we are down to one worker.
                             if (count($workerProcs) === 1 && $sequentialTests) {
@@ -1702,7 +1703,7 @@ escape:
                             ];
                             $error_consts = array_combine(array_map('constant', $error_consts), $error_consts);
                             error("Worker $i reported unexpected {$error_consts[$message['errno']]}: $message[errstr] in $message[errfile] on line $message[errline]");
-                            // no break
+                            fallthrough;
                         default:
                             kill_children($workerProcs);
                             error("Unrecognised message type '$message[type]' from worker $i");
