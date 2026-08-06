@@ -314,7 +314,7 @@ PHP 8.6 UPGRADE NOTES
     on official Windows builds using MPIR.
 
 - Intl:
-  . Added IntlDatePatternGenerator::getSkeleton() and
+  . Added the static methods IntlDatePatternGenerator::getSkeleton() and
     IntlDatePatternGenerator::getBaseSkeleton() to generate the unique skeleton
     and base skeleton for a date/time pattern.
   . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),

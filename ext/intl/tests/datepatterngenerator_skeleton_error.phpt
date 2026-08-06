@@ -5,10 +5,8 @@ intl
 --FILE--
 <?php
 
-$dtpg = new IntlDatePatternGenerator();
-
 foreach (["getSkeleton", "getBaseSkeleton"] as $method) {
-    var_dump($dtpg->$method("dd/MMM\x80"));
+    var_dump(IntlDatePatternGenerator::$method("dd/MMM\x80"));
     echo intl_get_error_message(), "\n";
 }
 

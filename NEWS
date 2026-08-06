@@ -15,7 +15,7 @@ PHP                                                                        NEWS
   . Added gmp_powm_sec(). (Weilin Du)
 
 - Intl:
-  . Added IntlDatePatternGenerator::getSkeleton() and
+  . Added static methods IntlDatePatternGenerator::getSkeleton() and
     IntlDatePatternGenerator::getBaseSkeleton(). (Weilin Du)
   . Fixed Collator::sort(), collator_sort(), Collator::asort(), and
     collator_asort() to report UTF-8/UTF-16 conversion errors through the intl

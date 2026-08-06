@@ -5,14 +5,12 @@ intl
 --FILE--
 <?php
 
-$dtpg = new IntlDatePatternGenerator();
-
-var_dump($dtpg->getSkeleton("dd/MMM"));
-var_dump($dtpg->getSkeleton("MMM-dd"));
-var_dump($dtpg->getBaseSkeleton("dd/MMM"));
-var_dump($dtpg->getBaseSkeleton("MMM-dd"));
-var_dump($dtpg->getSkeleton(""));
-var_dump($dtpg->getBaseSkeleton(""));
+var_dump(IntlDatePatternGenerator::getSkeleton("dd/MMM"));
+var_dump(IntlDatePatternGenerator::getSkeleton("MMM-dd"));
+var_dump(IntlDatePatternGenerator::getBaseSkeleton("dd/MMM"));
+var_dump(IntlDatePatternGenerator::getBaseSkeleton("MMM-dd"));
+var_dump(IntlDatePatternGenerator::getSkeleton(""));
+var_dump(IntlDatePatternGenerator::getBaseSkeleton(""));
 
 ?>
 --EXPECT--
