@@ -1249,7 +1249,7 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* Check for unserialize callback */
-		if (PG(unserialize_callback_func) == NULL || ZSTR_LEN(PG(unserialize_callback_func))) {
+		if (PG(unserialize_callback_func) == NULL || ZSTR_LEN(PG(unserialize_callback_func)) == 0) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
