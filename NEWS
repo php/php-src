@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     possible. (NickSdot)
 
 - Curl:
+  . Improved cURL option validation errors to include the option name.
+    (Sjoerd Langkemper)
   . Raise a value error when the callback registered with CURLOPT_READFUNCTION
     returns an unexpected long. (Sjoerd Langkemper)
 
