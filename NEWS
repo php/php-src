@@ -56,6 +56,8 @@ PHP                                                                        NEWS
     (PDO::ATTR_PREFETCH => 0) left in a COPY. (KentarouTakeda)
   . Fixed a use-after-free when a lazy statement with emulated or disabled
     prepares is destroyed. (KentarouTakeda)
+  . Fixed a lazy fetch with emulated or disabled prepares leaving the
+    connection busy for the next one. (KentarouTakeda)
 
 - Reflection:
   . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).

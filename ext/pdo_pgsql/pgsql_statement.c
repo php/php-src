@@ -66,12 +66,12 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 {
 	pdo_pgsql_db_handle *H = S->H;
 
-	if (S->is_running_unbuffered && S->result && (fin_mode & FIN_ABORT)) {
+	/* a buffered query may have already drained this statement's stream */
+	if (S->is_running_unbuffered && H->running_stmt == S && S->result && (fin_mode & FIN_ABORT)) {
 		PGcancel *cancel = PQgetCancel(H->server);
 		char errbuf[256];
 		PQcancel(cancel, errbuf, 256);
 		PQfreeCancel(cancel);
-		S->is_running_unbuffered = false;
 	}
 
 	if (S->result) {
@@ -80,7 +80,7 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		S->result = NULL;
 	}
 
-	if (S->is_running_unbuffered) {
+	if (S->is_running_unbuffered && H->running_stmt == S) {
 		/* https://postgresql.org/docs/current/libpq-async.html:
 		 * "PQsendQuery cannot be called again until PQgetResult has returned NULL"
 		 * And as all single-row functions are connection-wise instead of statement-wise,
@@ -618,7 +618,6 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			S->current_row = 0;
 
 			if (!stmt->row_count) {
-				S->is_running_unbuffered = false;
 				/* libpq requires looping until getResult returns null */
 				pgsql_stmt_finish(S, 0);
 			}
