@@ -430,6 +430,7 @@ static zend_always_inline bool zend_is_callable(const zval *callable, uint32_t c
 }
 
 ZEND_API const char *zend_get_module_version(const char *module_name);
+ZEND_API const char *zend_get_module_version_ex(const char *module_name, size_t module_name_name_len);
 ZEND_API zend_result zend_get_module_started(const char *module_name);
 
 ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type);
