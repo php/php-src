@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
+  . Fixed GH-23083 (SEGV build_trace_args in zend_exceptions.c with
+    -d error_include_args=On). (David Carlier)
 
 - Curl:
   . Improved cURL option validation errors to include the option name.
