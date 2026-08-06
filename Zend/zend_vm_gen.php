@@ -2523,7 +2523,7 @@ ENDNAMES;
         $str .= "# define ZEND_VM_KIND\t\tZEND_VM_KIND_HYBRID\n";
     }
     if ($GLOBALS["vm_kind_name"][ZEND_VM_GEN_KIND] === "ZEND_VM_KIND_HYBRID" || $GLOBALS["vm_kind_name"][ZEND_VM_GEN_KIND] === "ZEND_VM_KIND_CALL") {
-        $str .= "#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(__aarch64__))\n";
+        $str .= "#elif defined(HAVE_MUSTTAIL) && defined(HAVE_PRESERVE_NONE) && (defined(__x86_64__) || defined(__aarch64__)) && defined(__clang__)\n";
         $str .= "# define ZEND_VM_KIND\t\tZEND_VM_KIND_TAILCALL\n";
         $str .= "#else\n";
         $str .= "# define ZEND_VM_KIND\t\tZEND_VM_KIND_CALL\n";
