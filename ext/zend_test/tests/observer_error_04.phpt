@@ -25,7 +25,7 @@ function main()
 try {
     main();
 } catch (SoapFault $e) {
-    echo $e->getMessage() . PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo 'Done.' . PHP_EOL;
@@ -45,7 +45,7 @@ echo 'Done.' . PHP_EOL;
     </foo:NULL>
     <!-- Exception: SoapFault -->
   </main:NULL>
-  <!-- init Exception::getMessage() -->
+SoapFault:   <!-- init Exception::getMessage() -->
   <Exception::getMessage>
   </Exception::getMessage:'SOAP-ERROR: Parsing WSDL: %s
 '>

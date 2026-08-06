@@ -9,12 +9,12 @@ $ldap = ldap_connect('ldap://127.0.0.1:3333');
 try {
     var_dump(ldap_set_option($ldap, 999999, "bogus"));
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(ldap_get_option($ldap, 999999, $value));
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

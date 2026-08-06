@@ -2920,19 +2920,27 @@ $output
 {$exported_environment}
 case "$1" in
 "gdb")
-    gdb -ex 'unset environment LINES' -ex 'unset environment COLUMNS' --args {$orig_cmd}
+    shift
+    exec gdb -ex 'unset environment LINES' -ex 'unset environment COLUMNS' "$@" --args {$orig_cmd}
     ;;
 "lldb")
-    lldb -- {$orig_cmd}
+    shift
+    exec lldb "$@" -- {$orig_cmd}
     ;;
 "valgrind")
-    USE_ZEND_ALLOC=0 valgrind $2 {$orig_cmd}
+    export USE_ZEND_ALLOC=0
+    shift
+    exec valgrind "$@" {$orig_cmd}
+    ;;
+"strace")
+    shift
+    exec strace "$@" {$orig_cmd}
     ;;
 "rr")
-    rr record $2 {$orig_cmd}
+    exec rr record $2 {$orig_cmd}
     ;;
 *)
-    {$orig_cmd}
+    exec {$orig_cmd}
     ;;
 esac
 SH;

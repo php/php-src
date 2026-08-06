@@ -133,6 +133,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     flags parameter was never used.
   . The PHP stream function _php_stream_flush() was removed,
     instead the PHP macro php_stream_flush() is now a proper function.
+  . The zend_save_error_handling() function was removed.
 
 - Changed:
   . Internal functions that return by reference are now expected to
@@ -163,8 +164,16 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . EG(in_autoload) was renamed to EG(autoload_current_classnames) and no
     longer is a pointer, but a directly embedded HashTable struct.
   . Extended php_stream_filter_ops with seek method.
+  . php_print_info_htmlhead() now takes a title argument.
   . zend_argument_error_variadic() now takes a new 'function' parameter.
   . The param argument in the php_verror() function has been removed.
+  . The php_stream_wrapper_log_error() signature changed from
+    (wrapper, options, fmt, ...) to
+    (wrapper, context, options, severity, terminating, code, fmt, ...).
+    To keep the previous behaviour pass NULL for the context, or the context at
+    hand if there is one, E_WARNING for the severity, and
+    ZEND_ENUM_StreamErrorCode_Generic for the code. terminating should be true
+    only if the error aborts the operation.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
@@ -260,6 +269,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     direct U_ICU_VERSION_* guards for supported ICU API variants.
   . The internal grapheme_get_break_iterator() helper no longer accepts a
     stack buffer argument; pass only the UErrorCode* status argument.
+  . Added PHP_INTL_FUNCTION_WITH_ERROR_RESET() for procedural functions that
+    reset the global error. Use it instead of PHP_FUNCTION() followed by a
+    manual intl_error_reset(NULL) call.
+  . IC_METHOD() now resets the global error before entering the method
+    implementation. IntlChar methods should no longer reset it manually.
 
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.

@@ -24,6 +24,11 @@ PHP 8.6 UPGRADE NOTES
     has materialised the property by writing into the property table.
     The freshly-written value is returned directly. isset() is unaffected.
 
+- Curl:
+  . The callback registered with CURLOPT_READFUNCTION now throws a ValueError
+    when returning an integer other than 0, CURL_READFUNC_ABORT or
+    CURL_READFUNC_PAUSE.
+
 - COM
   . It is no longer possible to clone variant objects, this is because
     the cloning behaviour was ill defined.
@@ -332,6 +337,10 @@ PHP 8.6 UPGRADE NOTES
     confusable for a given text direction, along with the SpoofChecker::LTR
     and SpoofChecker::RTL direction constants.
     It is supported from icu 74.
+  . Added SpoofChecker::getBidiSkeleton() to generate a confusable skeleton for
+    a given text direction. It is supported from icu 74.
+  . Added SpoofChecker::getSkeleton() to generate a confusable skeleton for a
+    given string.
 
 - IO:
   . Added new polling API.
@@ -378,6 +387,10 @@ PHP 8.6 UPGRADE NOTES
   . Added stream socket context options so_keepalive, tcp_keepidle,
     tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
     options.
+  . Added stream socket context option so_linger that sets SO_LINGER on TCP
+    sockets. A positive value enables lingering for that many seconds, zero
+    or a negative value disables it. Values above 65535 are clamped as the
+    linger time is limited to an unsigned short on some platforms.
   . Allowed casting casting filtered streams as file descriptor for select.
   . Added the "write_seek_mode stream" filter parameter for the bz2, iconv,
     zlib, and string stream filters. This parameter must be set via an
@@ -488,6 +501,8 @@ PHP 8.6 UPGRADE NOTES
   . Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue()
     RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
   . SpoofChecker::areBidiConfusable()
+  . SpoofChecker::getBidiSkeleton()
+  . SpoofChecker::getSkeleton()
 
 - mysqli:
   . Added mysqli::quote_string() and mysqli_quote_string().
@@ -592,6 +607,7 @@ PHP 8.6 UPGRADE NOTES
   . CURL_SEEKFUNC_OK.
   . CURL_SEEKFUNC_FAIL.
   . CURL_SEEKFUNC_CANTSEEK.
+  . CURL_READFUNC_ABORT.
 
 - OpenSSL:
   . OPENSSL_RSA_PSS_SALTLEN_DIGEST.

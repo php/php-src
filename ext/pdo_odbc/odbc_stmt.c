@@ -25,7 +25,7 @@
 #include "php_pdo_odbc_int.h"
 
 /* Buffer size; bigger columns than this become a "long column" */
-#define LONG_COLUMN_BUFFER_SIZE (ZEND_MM_PAGE_SIZE- ZSTR_MAX_OVERHEAD)
+#define LONG_COLUMN_BUFFER_SIZE ((SQLLEN)(ZEND_MM_PAGE_SIZE - ZSTR_MAX_OVERHEAD))
 
 enum pdo_odbc_conv_result {
 	PDO_ODBC_CONV_NOT_REQUIRED,
@@ -731,6 +731,10 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 		if (rc == SQL_SUCCESS && C->fetched_len < LONG_COLUMN_BUFFER_SIZE) {
 			/* all the data fit into our little buffer;
 			 * jump down to the generic bound data case */
+			goto in_data;
+		}
+
+		if (C->fetched_len < 0 && C->fetched_len != SQL_NO_TOTAL) {
 			goto in_data;
 		}
 
