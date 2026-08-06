@@ -2417,8 +2417,16 @@ ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) 
 		case IS_STRING:
 			return zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
 		case IS_ARRAY:
-			return (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||
-				zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1) == 0);
+			if (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2)) {
+				return 1;
+			}
+#ifdef ZEND_CHECK_STACK_LIMIT
+			if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+				zend_throw_error(NULL, "Maximum call stack size reached during array comparison");
+				return 0;
+			}
+#endif
+			return zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1) == 0;
 		case IS_OBJECT:
 			return (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 		default:
@@ -3423,6 +3431,13 @@ ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable 
 
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2) /* {{{ */
 {
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_throw_error(NULL, "Maximum call stack size reached during array comparison");
+		return ZEND_UNCOMPARABLE;
+	}
+#endif
+
 	return zend_compare_symbol_tables(Z_ARRVAL_P(a1), Z_ARRVAL_P(a2));
 }
 /* }}} */
