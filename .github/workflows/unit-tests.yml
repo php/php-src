@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         
       - name: Install dependencies
         run: |
@@ -57,7 +57,7 @@ jobs:
             ccache
 
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "unit-tests-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
