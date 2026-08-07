@@ -54,6 +54,7 @@ $f1->testNull();
 echo "Done\n";
 ?>
 --EXPECTF--
+string(3) "foo"
 Calling get_class() without arguments is deprecated
 
 Deprecated: Calling get_class() without arguments is deprecated in %s on line %d

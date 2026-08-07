@@ -78,53 +78,53 @@ unset($x);
 --EXPECT--
 NULL (only --)
 POST DEC
-Decrement on type null has no effect, this will change in the next major version of PHP
 NULL
+Decrement on type null has no effect, this will change in the next major version of PHP
 PRE DEC
-Decrement on type null has no effect, this will change in the next major version of PHP
 NULL
+Decrement on type null has no effect, this will change in the next major version of PHP
 Empty string
 POST INC
-Increment on non-numeric string is deprecated, use str_increment() instead
 string(0) ""
+Increment on non-numeric string is deprecated, use str_increment() instead
 POST DEC
-Decrement on empty string is deprecated as non-numeric
 string(0) ""
-PRE INC
-Increment on non-numeric string is deprecated, use str_increment() instead
-string(1) "1"
-PRE DEC
 Decrement on empty string is deprecated as non-numeric
+PRE INC
+string(1) "1"
+Increment on non-numeric string is deprecated, use str_increment() instead
+PRE DEC
 int(-1)
+Decrement on empty string is deprecated as non-numeric
 Non fill ASCII (only ++)
 POST INC
-Increment on non-numeric string is deprecated, use str_increment() instead
 string(4) " ad "
+Increment on non-numeric string is deprecated, use str_increment() instead
 PRE INC
-Increment on non-numeric string is deprecated, use str_increment() instead
 string(4) " ad "
+Increment on non-numeric string is deprecated, use str_increment() instead
 Bool
 POST INC
-Increment on type bool has no effect, this will change in the next major version of PHP
 bool(false)
+Increment on type bool has no effect, this will change in the next major version of PHP
 POST DEC
-Decrement on type bool has no effect, this will change in the next major version of PHP
 bool(false)
+Decrement on type bool has no effect, this will change in the next major version of PHP
 PRE INC
+bool(false)
 Increment on type bool has no effect, this will change in the next major version of PHP
-bool(false)
 PRE DEC
-Decrement on type bool has no effect, this will change in the next major version of PHP
 bool(false)
+Decrement on type bool has no effect, this will change in the next major version of PHP
 POST INC
-Increment on type bool has no effect, this will change in the next major version of PHP
 bool(true)
+Increment on type bool has no effect, this will change in the next major version of PHP
 POST DEC
-Decrement on type bool has no effect, this will change in the next major version of PHP
 bool(true)
+Decrement on type bool has no effect, this will change in the next major version of PHP
 PRE INC
+bool(true)
 Increment on type bool has no effect, this will change in the next major version of PHP
-bool(true)
 PRE DEC
-Decrement on type bool has no effect, this will change in the next major version of PHP
 bool(true)
+Decrement on type bool has no effect, this will change in the next major version of PHP

@@ -15,4 +15,3 @@ try {
 ?>
 --EXPECT--
 Err: Creation of dynamic property class@anonymous::$y is deprecated
-Exception: Cannot create dynamic property class@anonymous::$y

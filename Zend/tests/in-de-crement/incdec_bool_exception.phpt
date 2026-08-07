@@ -7,15 +7,22 @@ set_error_handler(function($severity, $m) {
     throw new Exception($m, $severity);
 });
 
+function inc(&$v) {
+    $v++;
+}
+function dec(&$v) {
+    $v--;
+}
+
 $values = [false, true];
 foreach ($values as $value) {
     try {
-        $value++;
+        inc($value);
     } catch (\Exception $e) {
         echo $e->getMessage(), PHP_EOL;
     }
     try {
-        $value--;
+        dec($value);
     } catch (\Exception $e) {
         echo $e->getMessage(), PHP_EOL;
     }

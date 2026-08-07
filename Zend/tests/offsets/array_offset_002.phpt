@@ -12,7 +12,9 @@ function x(&$s){
 x($y);
 var_dump($y);
 ?>
---EXPECT--
+--EXPECTF--
 Err: The float 1.0E+20 is not representable as an int, cast occurred
-array(0) {
+array(1) {
+  [%d]=>
+  int(1)
 }

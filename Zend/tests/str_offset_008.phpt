@@ -12,7 +12,7 @@ var_dump($a[0][$b]);
 var_dump($a);
 ?>
 --EXPECT--
+string(1) "x"
 Err: Undefined variable $b
 Err: String offset cast occurred
-string(1) "x"
 int(8)

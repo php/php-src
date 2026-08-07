@@ -306,6 +306,11 @@ struct _zend_executor_globals {
 	bool record_errors;
 	zend_err_buf errors;
 
+	/* Diagnostics whose user error handler is deferred to the next VM
+	 * safepoint, so the handler cannot run mid-opcode and corrupt a
+	 * structure the opcode still holds a pointer into. */
+	zend_err_buf deferred_errors;
+
 	/* Override filename or line number of thrown errors and exceptions */
 	zend_string *filename_override;
 	zend_long lineno_override;

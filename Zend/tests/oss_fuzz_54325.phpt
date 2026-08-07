@@ -14,6 +14,5 @@ $$x++;
 var_dump($x);
 ?>
 --EXPECT--
+string(3) "oof"
 string(23) "Undefined variable $oof"
-object(stdClass)#2 (0) {
-}

@@ -42,5 +42,6 @@ echo "Done\n";
 Fatal error: Uncaught ErrorException: Undefined variable $id in %s:%d
 Stack trace:
 #0 %s(%d): env::errorHandler(2, 'Undefined varia...', '%s', %d)
-#1 {main}
+#1 %s(%d): cache->offsetExists(NULL)
+#2 {main}
   thrown in %s on line %d

@@ -31,5 +31,7 @@ try {
 
 ?>
 --EXPECT--
+take_bool entered
 bool: unexpected NAN value was coerced to bool
+take_string entered
 string: unexpected NAN value was coerced to string

@@ -79,12 +79,12 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_subclass_of() : usage variations ***
-Error: 2 - Undefined variable $undefined_var
-Error: 2 - Undefined variable $unset_var
-
-Arg value 0 
+%A
+%A
+%A
+%A
 bool(false)
 
 Arg value 1 
@@ -110,25 +110,25 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 2 - Array to string conversion
 
 Arg value Array 
+Error: 2 - Array to string conversion
 bool(false)
-Error: 2 - Array to string conversion
 
 Arg value Array 
+Error: 2 - Array to string conversion
 bool(false)
-Error: 2 - Array to string conversion
 
 Arg value Array 
+Error: 2 - Array to string conversion
 bool(false)
-Error: 2 - Array to string conversion
 
 Arg value Array 
+Error: 2 - Array to string conversion
 bool(false)
-Error: 2 - Array to string conversion
 
 Arg value Array 
+Error: 2 - Array to string conversion
 bool(false)
 
 Arg value  

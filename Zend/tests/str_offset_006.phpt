@@ -9,8 +9,13 @@ set_error_handler(function($code, $msg) {
 $a[$y]=$a.=($y);
 var_dump($a);
 ?>
---EXPECT--
+--EXPECTF--
 Err: Undefined variable $y
+Err: Undefined variable $a
 Err: Undefined variable $y
 Err: String offset cast occurred
-NULL
+
+Fatal error: Uncaught Error: Cannot assign an empty string to a string offset in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

@@ -14,5 +14,6 @@ $a[$y] = function(){};
 ?>
 DONE
 --EXPECT--
-Error: Undefined variable $y
 DONE
+Error: Undefined variable $y
+Error: Using null as an array offset is deprecated, use an empty string instead

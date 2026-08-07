@@ -18,7 +18,9 @@ x($y);
 var_dump($x,$y);
 ?>
 --EXPECT--
-array(0) {
+array(1) {
+  [0]=>
+  int(1)
 }
 array(1) {
   [0]=>

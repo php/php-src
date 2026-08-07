@@ -26,9 +26,11 @@ foreach ($tests as $obj) {
 ?>
 --EXPECTF--
 int(1)
+NULL
 
 Fatal error: Uncaught Exception: Undefined property: B::$b in %s:%d
 Stack trace:
-#0 %s(%d): {closure:%s:%d}(2, 'Undefined prope...', '%s', %d)
-#1 {main}
+#0 [internal function]: {closure:%s:%d}(2, 'Undefined prope...', '%s', %d)
+#1 %s(%d): var_dump(NULL)
+#2 {main}
   thrown in %s on line %d
