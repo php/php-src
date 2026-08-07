@@ -8,8 +8,8 @@ $ffi = FFI::cdef();
 try {
     var_dump($ffi != 1);
 } catch (FFI\Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot compare FFI objects
+FFI\Exception: Cannot compare FFI objects
