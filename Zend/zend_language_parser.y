@@ -60,7 +60,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence T_YIELD
 %precedence T_DOUBLE_ARROW
 %precedence T_YIELD_FROM
-%precedence '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
+%precedence '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL T_PIPE_EQUAL
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
@@ -197,6 +197,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_SL_EQUAL     "'<<='"
 %token T_SR_EQUAL     "'>>='"
 %token T_COALESCE_EQUAL "'??='"
+%token T_PIPE_EQUAL   "'|>='"
 %token T_BOOLEAN_OR   "'||'"
 %token T_BOOLEAN_AND  "'&&'"
 %token T_IS_EQUAL     "'=='"
@@ -1296,6 +1297,8 @@ expr:
 			{ $$ = zend_ast_create_assign_op(ZEND_SR, $1, $3); }
 	|	variable T_COALESCE_EQUAL expr
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_COALESCE, $1, $3); }
+	|	variable T_PIPE_EQUAL expr
+			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_PIPE, $1, $3); }
 	|	variable T_INC { $$ = zend_ast_create(ZEND_AST_POST_INC, $1); }
 	|	T_INC variable { $$ = zend_ast_create(ZEND_AST_PRE_INC, $2); }
 	|	variable T_DEC { $$ = zend_ast_create(ZEND_AST_POST_DEC, $1); }

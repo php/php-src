@@ -544,6 +544,11 @@ const T_SR_EQUAL = UNKNOWN;
 const T_COALESCE_EQUAL = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_PIPE_EQUAL
+ */
+const T_PIPE_EQUAL = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_BOOLEAN_OR
  */
 const T_BOOLEAN_OR = UNKNOWN;
