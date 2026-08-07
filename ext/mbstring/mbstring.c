@@ -1891,6 +1891,9 @@ static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *
 			}
 			pos += u8_tbl[*pos];
 		}
+		if (pos > end) {
+			pos = end;
+		}
 		return pos;
 	}
 }
