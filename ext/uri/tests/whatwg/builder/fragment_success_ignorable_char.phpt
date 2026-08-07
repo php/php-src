@@ -4,9 +4,9 @@ Test Uri\WhatWg\UrlBuilder::setFragment() - success - contains tab and newline c
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setScheme("\tfo\no");
+$builder->setScheme("foo");
 $builder->setHost("example.com");
-$builder->setFragment("\tfoo");
+$builder->setFragment("\tfo\no");
 $errors = [];
 $url = $builder->build(errors: $errors);
 
@@ -42,15 +42,6 @@ array(%d) {
     ["context"]=>
     string(5) "	fo
 o"
-    ["type"]=>
-    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
-    ["failure"]=>
-    bool(false)
-  }
-  [1]=>
-  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
-    ["context"]=>
-    string(4) "	foo"
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
     ["failure"]=>

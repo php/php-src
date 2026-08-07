@@ -5,7 +5,7 @@ Test Uri\WhatWg\UrlBuilder::setPassword() - error - missing opaque host
 
 $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("scheme");
-$builder->setPassword("user");
+$builder->setPassword("password");
 
 try {
     $builder->build();
@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\WhatWg\InvalidUrlException: The specified URI is malformed
+Uri\WhatWg\InvalidUrlException: The specified URL cannot have password

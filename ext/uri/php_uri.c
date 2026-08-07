@@ -75,14 +75,16 @@ static zend_always_inline zval *php_uri_deref(zval *zv)
 #define Z_RFC3986_URI_PROP_QUERY_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
 #define Z_RFC3986_URI_PROP_FRAGMENT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
 
-#define Z_WHATWG_URL_PROP_SCHEME_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
-#define Z_WHATWG_URL_PROP_USERNAME_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
-#define Z_WHATWG_URL_PROP_PASSWORD_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
-#define Z_WHATWG_URL_PROP_HOST_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
-#define Z_WHATWG_URL_PROP_PORT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
-#define Z_WHATWG_URL_PROP_PATH_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
-#define Z_WHATWG_URL_PROP_QUERY_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
-#define Z_WHATWG_URL_PROP_FRAGMENT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 7))
+#define Z_WHATWG_URL_PROP_SCHEME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_WHATWG_URL_PROP_SCHEME_DEREF_P(zv) php_uri_deref(Z_WHATWG_URL_PROP_SCHEME_P(zv))
+#define Z_WHATWG_URL_PROP_USERNAME_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_WHATWG_URL_PROP_PASSWORD_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
+#define Z_WHATWG_URL_PROP_HOST_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
+#define Z_WHATWG_URL_PROP_PORT_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
+#define Z_WHATWG_URL_PROP_PATH_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 5)
+#define Z_WHATWG_URL_PROP_PATH_DEREF_P(zv) php_uri_deref(Z_WHATWG_URL_PROP_PATH_P(zv))
+#define Z_WHATWG_URL_PROP_QUERY_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
+#define Z_WHATWG_URL_PROP_FRAGMENT_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 7))
 
 static HashTable *uri_get_debug_properties(php_uri_object *object)
 {
@@ -1259,16 +1261,18 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, reset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zval_ptr_dtor(Z_WHATWG_URL_PROP_SCHEME_P(ZEND_THIS));
+	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	zval *property = object->properties_table;
+	const zval *end = property + object->ce->default_properties_count;
+
+	while (property != end) {
+		zend_object_dtor_property(object, property);
+		ZVAL_NULL(property);
+		property++;
+	}
+
 	ZVAL_EMPTY_STRING(Z_WHATWG_URL_PROP_SCHEME_P(ZEND_THIS));
-	convert_to_null(Z_WHATWG_URL_PROP_USERNAME_P(ZEND_THIS));
-	convert_to_null(Z_WHATWG_URL_PROP_PASSWORD_P(ZEND_THIS));
-	convert_to_null(Z_WHATWG_URL_PROP_HOST_P(ZEND_THIS));
-	convert_to_null(Z_WHATWG_URL_PROP_PORT_P(ZEND_THIS));
-	zval_ptr_dtor(Z_WHATWG_URL_PROP_PATH_P(ZEND_THIS));
 	ZVAL_EMPTY_STRING(Z_WHATWG_URL_PROP_PATH_P(ZEND_THIS));
-	convert_to_null(Z_WHATWG_URL_PROP_QUERY_P(ZEND_THIS));
-	convert_to_null(Z_WHATWG_URL_PROP_FRAGMENT_P(ZEND_THIS));
 
 	RETVAL_COPY(ZEND_THIS);
 }
@@ -1356,14 +1360,14 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, build)
 		Z_PARAM_ZVAL(errors)
 	ZEND_PARSE_PARAMETERS_END();
 
-	const zval *scheme = Z_WHATWG_URL_PROP_SCHEME_P(ZEND_THIS);
-	const zval *username = Z_WHATWG_URL_PROP_USERNAME_P(ZEND_THIS);
-	const zval *password = Z_WHATWG_URL_PROP_PASSWORD_P(ZEND_THIS);
-	const zval *host = Z_WHATWG_URL_PROP_HOST_P(ZEND_THIS);
-	const zval *port = Z_WHATWG_URL_PROP_PORT_P(ZEND_THIS);
-	const zval *path = Z_WHATWG_URL_PROP_PATH_P(ZEND_THIS);
-	const zval *query = Z_WHATWG_URL_PROP_QUERY_P(ZEND_THIS);
-	const zval *fragment = Z_WHATWG_URL_PROP_FRAGMENT_P(ZEND_THIS);
+	const zval *scheme = Z_WHATWG_URL_PROP_SCHEME_DEREF_P(ZEND_THIS);
+	const zval *username = Z_WHATWG_URL_PROP_USERNAME_DEREF_P(ZEND_THIS);
+	const zval *password = Z_WHATWG_URL_PROP_PASSWORD_DEREF_P(ZEND_THIS);
+	const zval *host = Z_WHATWG_URL_PROP_HOST_DEREF_P(ZEND_THIS);
+	const zval *port = Z_WHATWG_URL_PROP_PORT_DEREF_P(ZEND_THIS);
+	const zval *path = Z_WHATWG_URL_PROP_PATH_DEREF_P(ZEND_THIS);
+	const zval *query = Z_WHATWG_URL_PROP_QUERY_DEREF_P(ZEND_THIS);
+	const zval *fragment = Z_WHATWG_URL_PROP_FRAGMENT_DEREF_P(ZEND_THIS);
 
 	lxb_url_t *base_url = NULL;
 	if (base_url_zv != NULL) {

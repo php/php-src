@@ -5,7 +5,7 @@ Test Uri\WhatWg\UrlBuilder::setPort() - success - default port
 
 $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("https");
-$builder->setPort(444);
+$builder->setPort(443);
 $builder->setHost("example.com");
 $url = $builder->build();
 
@@ -15,7 +15,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(24) "https://example.com:444/"
+string(20) "https://example.com/"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -26,7 +26,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["host"]=>
   string(11) "example.com"
   ["port"]=>
-  int(444)
+  NULL
   ["path"]=>
   string(1) "/"
   ["query"]=>

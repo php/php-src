@@ -902,8 +902,18 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		Z_STRLEN_P(host) == 0 ||
 		php_uri_parser_whatwg_get_special_scheme(Z_STR_P(scheme)) == LXB_URL_SCHEMEL_TYPE_FILE
 	) {
-		if (Z_TYPE_P(username) != IS_NULL || Z_TYPE_P(password) != IS_NULL || Z_TYPE_P(port) != IS_NULL) {
-			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URI is malformed");
+		if (Z_TYPE_P(username) != IS_NULL) {
+			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have username");
+			return NULL;
+		}
+
+		if (Z_TYPE_P(password) != IS_NULL) {
+			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have password");
+			return NULL;
+		}
+
+		if (Z_TYPE_P(port) != IS_NULL) {
+			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have port");
 			return NULL;
 		}
 	}
