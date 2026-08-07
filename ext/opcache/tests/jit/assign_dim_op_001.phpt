@@ -49,19 +49,19 @@ false_to_array_append(false);
 try {
     var_dump(false_to_array_invalid_index(false));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(false_to_array_nested(false));
 var_dump(false_to_array_nested_append(false));
 try {
     var_dump(false_to_array_nested_invalid_index(false));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(modulo_string([]));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -78,7 +78,7 @@ Warning: Undefined array key 2 in %s on line %d
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type array on array
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 
@@ -103,5 +103,5 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Cannot access offset of type array on array
-Unsupported operand types: null % string
+TypeError: Cannot access offset of type array on array
+TypeError: Unsupported operand types: null % string

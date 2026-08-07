@@ -14,8 +14,8 @@ function test() {
 try {
     test();
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Undefined variable $b
+Exception: Undefined variable $b

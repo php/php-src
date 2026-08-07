@@ -10,12 +10,12 @@ set_error_handler(static function (int $errno, string $errstr, string $errfile, 
 try {
 	require __DIR__ . "/warning.inc";
 } catch (\Exception $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 warning();
 
 ?>
 --EXPECT--
-Caught: "continue" targeting switch is equivalent to "break"
+ErrorException: "continue" targeting switch is equivalent to "break"
 OK: warning
