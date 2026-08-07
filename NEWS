@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (Sjoerd Langkemper)
   . Raise a value error when the callback registered with CURLOPT_READFUNCTION
     returns an unexpected long. (Sjoerd Langkemper)
+  . Fix bug GH-16513 (curl: exceptions in callbacks do not abort the request).
+    (Sjoerd Langkemper)
 
 - Date:
   . Update timelib to 2026.02. (Derick, timwolla)
