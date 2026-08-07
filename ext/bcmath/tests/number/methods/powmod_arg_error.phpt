@@ -20,7 +20,7 @@ foreach ($args as [$val, $type]) {
     try {
         $num->powmod($val, 1);
     } catch (Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -32,18 +32,18 @@ foreach ($args as [$val, $type]) {
     try {
         $num->powmod(1, $val);
     } catch (Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECTF--
 ========== check 1st arg ==========
 non number str:
-BcMath\Number::powmod(): Argument #1 ($exponent) is not well-formed
+ValueError: BcMath\Number::powmod(): Argument #1 ($exponent) is not well-formed
 array:
-BcMath\Number::powmod(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::powmod(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, array given
 other object:
-BcMath\Number::powmod(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::powmod(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
 Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
@@ -53,16 +53,16 @@ Deprecated: BcMath\Number::powmod(): Passing null to parameter #1 ($exponent) of
 
 ========== check 2nd arg ==========
 non number str:
-BcMath\Number::powmod(): Argument #2 ($modulus) is not well-formed
+ValueError: BcMath\Number::powmod(): Argument #2 ($modulus) is not well-formed
 array:
-BcMath\Number::powmod(): Argument #2 ($modulus) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::powmod(): Argument #2 ($modulus) must be of type int, string, or BcMath\Number, array given
 other object:
-BcMath\Number::powmod(): Argument #2 ($modulus) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::powmod(): Argument #2 ($modulus) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
 Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
-Modulo by zero
+DivisionByZeroError: Modulo by zero
 null:
 
 Deprecated: BcMath\Number::powmod(): Passing null to parameter #2 ($modulus) of type BcMath\Number|string|int is deprecated in %s
-Modulo by zero
+DivisionByZeroError: Modulo by zero

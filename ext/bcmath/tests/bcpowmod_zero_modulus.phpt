@@ -9,8 +9,8 @@ bcmath
 try {
     var_dump(bcpowmod('1', '1', '0'));
 } catch (DivisionByZeroError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Modulo by zero
+DivisionByZeroError: Modulo by zero

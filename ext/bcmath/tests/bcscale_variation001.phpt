@@ -6,13 +6,13 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
-echo bcdiv("20.56", "4");
+echo bcdiv("20.56", "4"), PHP_EOL;
 try {
     bcscale(-4);
 } catch (\ValueError $e) {
-    echo \PHP_EOL . $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 5
-bcscale(): Argument #1 ($scale) must be between 0 and 2147483647
+ValueError: bcscale(): Argument #1 ($scale) must be between 0 and 2147483647

@@ -7,15 +7,15 @@ bcmath
 try {
     var_dump(bcpow('0', '9223372036854775808', 2));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(bcpow('0', '-9223372036854775808', 2));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-bcpow(): Argument #2 ($exponent) is too large
-bcpow(): Argument #2 ($exponent) is too large
+ValueError: bcpow(): Argument #2 ($exponent) is too large
+ValueError: bcpow(): Argument #2 ($exponent) is too large
