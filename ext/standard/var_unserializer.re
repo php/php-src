@@ -53,6 +53,11 @@ struct php_unserialize_data {
 	zend_long         cur_depth;
 	zend_long         max_depth;
 	var_entries       entries;
+	/* O(1) random-access jump table for var_access(): holds pointers to the
+	 * overflow chunks beyond `entries` (chunk 0), in allocation order.
+	 * chunk_list[0] corresponds to ids [VAR_ENTRIES_MAX, 2*VAR_ENTRIES_MAX).
+	 * Lazily allocated: stays NULL/0 for payloads that never exceed
+	 * VAR_ENTRIES_MAX back-referenceable values (the common case). */
 	var_entries     **chunk_list;
 	zend_long         num_chunks;
 	zend_long         chunk_list_capacity;
@@ -132,6 +137,9 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 		(*var_hashx)->last->next = var_hash;
 		(*var_hashx)->last = var_hash;
 
+		/* Record the new overflow chunk in the O(1) jump table used by
+		 * var_access(). This runs exactly once per VAR_ENTRIES_MAX (1018)
+		 * pushes, so the amortized cost is negligible. */
 		if ((*var_hashx)->num_chunks == (*var_hashx)->chunk_list_capacity) {
 			zend_long new_capacity = (*var_hashx)->chunk_list_capacity
 				? (*var_hashx)->chunk_list_capacity * 2 : 4;
@@ -249,6 +257,11 @@ static zval *var_access(php_unserialize_data_t *var_hashx, zend_long id)
 	}
 
 	{
+		/* id is provably >= VAR_ENTRIES_MAX here, so rem/chunk_index/slot
+		 * are all provably non-negative. Every chunk but possibly the last
+		 * is exactly full (var_push() only allocates a new chunk once the
+		 * tail is completely full), so chunk_index deterministically
+		 * identifies the right chunk -- no need to walk the chain. */
 		zend_long rem = id - VAR_ENTRIES_MAX;
 		zend_long chunk_index = rem / VAR_ENTRIES_MAX;
 		zend_long slot = rem % VAR_ENTRIES_MAX;
@@ -282,6 +295,8 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		var_hash = next;
 	}
 
+	/* Free the jump-table bookkeeping array itself. The chunks it points to
+	 * were already freed by the loop above (chunk_list never owns them). */
 	if ((*var_hashx)->chunk_list) {
 		efree((*var_hashx)->chunk_list);
 	}
