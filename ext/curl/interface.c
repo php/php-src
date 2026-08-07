@@ -554,7 +554,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				/* TODO Check callback returns an int or something castable to int */
 				length = php_curl_get_long(&retval);
-			} else if (EG(exception)) {
+			} else {
 				length = -1;
 			}
 
@@ -824,7 +824,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 				}
 				// TODO Do type error if invalid type?
 				zval_ptr_dtor(&retval);
-			} else if (EG(exception)) {
+			} else {
 				length = CURL_READFUNC_ABORT;
 			}
 
@@ -920,7 +920,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 				// TODO: Check for valid int type for return value
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				length = php_curl_get_long(&retval);
-			} else if (EG(exception)) {
+			} else {
 				length = -1;
 			}
 			zval_ptr_dtor(&argv[0]);
