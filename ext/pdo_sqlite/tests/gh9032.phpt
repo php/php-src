@@ -16,7 +16,7 @@ $st = $db->prepare('attach database :a AS "db2"');
 $st->execute([':a' => ':memory:']);
 var_dump($db->exec('create table db2.r (id int)'));
 } catch (PDOException $ex) {
-    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--

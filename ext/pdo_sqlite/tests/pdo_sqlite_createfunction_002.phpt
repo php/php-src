@@ -13,7 +13,7 @@ $db = new PDO( 'sqlite::memory:');
 try {
     $db->sqliteCreateFunction('bar-alias', 'bar');
 } catch (\TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

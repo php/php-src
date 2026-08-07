@@ -36,25 +36,25 @@ class Duh {}
 try {
     $stmts->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, "EXPLAIN");
 } catch (\TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $stmts->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, new Duh());
 } catch (\TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $stmts->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, -1);
 } catch (\ValueError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $stmts->setAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT, 256);
 } catch (\ValueError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($stmts->getAttribute(Pdo\Sqlite::ATTR_EXPLAIN_STATEMENT) == Pdo\Sqlite::EXPLAIN_MODE_PREPARED);

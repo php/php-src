@@ -17,7 +17,7 @@ $db->createCollation('NAT', function($a, $b): string { return $a . $b; });
 try {
     $db->query("SELECT c FROM test ORDER BY c COLLATE NAT");
 } catch (\TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

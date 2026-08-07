@@ -10,13 +10,13 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 try {
     var_dump($pdo->setAttribute(PDO::NULL_TO_STRING, NULL));
 } catch (\TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($pdo->setAttribute(PDO::NULL_TO_STRING, 1));
 try {
     var_dump($pdo->setAttribute(PDO::NULL_TO_STRING, 'nonsense'));
 } catch (\TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 @unlink(__DIR__."/foo.db");

@@ -11,12 +11,12 @@ $pdo = new Pdo\Sqlite('sqlite::memory:');
 try {
     $pdo->createAggregate('foo', 'a', '');
 } catch (\TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $pdo->createAggregate('foo', 'strlen', '');
 } catch (\TypeError $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

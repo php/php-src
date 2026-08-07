@@ -11,7 +11,7 @@ $db = new PDO('sqlite::memory:');
 try {
 	$db->query("select 1 as queryStringxx")->fetch(PDO::FETCH_LAZY)->documentElement->firstChild->nextElementSibling->textContent = "Ã©";
 } catch (Error $e) {
-	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

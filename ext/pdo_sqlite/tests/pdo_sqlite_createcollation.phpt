@@ -29,7 +29,7 @@ $db->sqliteCreateCollation('MYCOLLATEBAD', function($a, $b) { return $a; });
 try {
 	$db->query('SELECT name FROM test_pdo_sqlite_createcollation ORDER BY name COLLATE MYCOLLATEBAD');
 } catch (\TypeError $e) {
-	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
