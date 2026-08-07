@@ -495,9 +495,11 @@ SAPI_API void sapi_deactivate_module(void)
 	}
 	if (SG(request_info).content_type_dup) {
 		efree(SG(request_info).content_type_dup);
+		SG(request_info).content_type_dup = NULL;
 	}
 	if (SG(request_info).current_user) {
 		zend_string_release_ex(SG(request_info).current_user, false);
+		SG(request_info).current_user = NULL;
 	}
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate();
