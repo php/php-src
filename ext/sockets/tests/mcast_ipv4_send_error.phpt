@@ -43,7 +43,7 @@ try {
     $r = socket_set_option($s, $level, IP_MULTICAST_TTL, 256);
     var_dump($r);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $r = socket_get_option($s, $level, IP_MULTICAST_TTL);
 var_dump($r);
@@ -62,7 +62,7 @@ try {
     $r = socket_set_option($s, $level, IP_MULTICAST_TTL, -1);
     var_dump($r);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $r = socket_get_option($s, $level, IP_MULTICAST_TTL);
 var_dump($r);
@@ -78,7 +78,7 @@ bool(true)
 int(0)
 
 Setting IP_MULTICAST_TTL with 256
-socket_set_option(): Argument #4 ($value) must be between 0 and 255
+ValueError: socket_set_option(): Argument #4 ($value) must be between 0 and 255
 int(1)
 
 Setting IP_MULTICAST_TTL with "254"
@@ -86,5 +86,5 @@ bool(true)
 int(254)
 
 Setting IP_MULTICAST_TTL with -1
-socket_set_option(): Argument #4 ($value) must be between 0 and 255
+ValueError: socket_set_option(): Argument #4 ($value) must be between 0 and 255
 int(254)

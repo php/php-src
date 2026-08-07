@@ -23,8 +23,8 @@ try {
         "interface" => "lo",
     ));
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-IP address used in the context of an unexpected type of socket
+ValueError: IP address used in the context of an unexpected type of socket

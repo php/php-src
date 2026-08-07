@@ -18,13 +18,13 @@ socket_set_block($socket);
 try {
 	socket_setopt($socket, SOL_TCP, TCP_USER_TIMEOUT, -1);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	socket_setopt($socket, SOL_TCP, TCP_USER_TIMEOUT, PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $timeout = 200;
@@ -35,7 +35,7 @@ var_dump($retval_3 === $timeout);
 socket_close($socket);
 ?>
 --EXPECTF--
-socket_setopt(): Argument #4 ($value) must be between 0 and %d
-socket_setopt(): Argument #4 ($value) must be between 0 and %d
+ValueError: socket_setopt(): Argument #4 ($value) must be between 0 and %d
+ValueError: socket_setopt(): Argument #4 ($value) must be between 0 and %d
 bool(true)
 bool(true)
