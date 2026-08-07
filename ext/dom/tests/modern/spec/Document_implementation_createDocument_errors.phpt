@@ -10,16 +10,16 @@ $dom = Dom\XMLDocument::createEmpty();
 try {
     $dom->implementation->createDocument("urn:a", "@");
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $dom->implementation->createDocument("", "foo:bar");
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Invalid Character Error
-Namespace Error
+DOMException: Invalid Character Error
+DOMException: Namespace Error

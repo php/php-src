@@ -10,9 +10,9 @@ $rm = new ReflectionMethod($doc, '__construct');
 try {
     $rm->invoke($doc);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot directly construct Dom\XMLDocument, use document methods instead
+Error: Cannot directly construct Dom\XMLDocument, use document methods instead

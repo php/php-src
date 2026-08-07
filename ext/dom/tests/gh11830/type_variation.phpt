@@ -18,41 +18,41 @@ $testElement = $doc->documentElement->firstElementChild->nextElementSibling->fir
 try {
     $doc->documentElement->firstElementChild->prepend($testElement, 0);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $doc->documentElement->firstElementChild->append($testElement, true);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $doc->documentElement->firstElementChild->before($testElement, null);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $doc->documentElement->firstElementChild->after($testElement, new stdClass);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $doc->documentElement->firstElementChild->replaceWith($testElement, []);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $doc->saveXML();
 ?>
 --EXPECT--
-DOMElement::prepend(): Argument #2 must be of type DOMNode|string, int given
-DOMElement::append(): Argument #2 must be of type DOMNode|string, bool given
-DOMElement::before(): Argument #2 must be of type DOMNode|string, null given
-DOMElement::after(): Argument #2 must be of type DOMNode|string, stdClass given
-DOMElement::replaceWith(): Argument #2 must be of type DOMNode|string, array given
+TypeError: DOMElement::prepend(): Argument #2 must be of type DOMNode|string, int given
+TypeError: DOMElement::append(): Argument #2 must be of type DOMNode|string, bool given
+TypeError: DOMElement::before(): Argument #2 must be of type DOMNode|string, null given
+TypeError: DOMElement::after(): Argument #2 must be of type DOMNode|string, stdClass given
+TypeError: DOMElement::replaceWith(): Argument #2 must be of type DOMNode|string, array given
 <?xml version="1.0"?>
 <container>
     <test/>

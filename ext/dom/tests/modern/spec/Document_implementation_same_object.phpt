@@ -18,7 +18,7 @@ var_dump($implementation);
 try {
     clone $implementation;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -28,4 +28,4 @@ bool(true)
 bool(false)
 object(Dom\Implementation)#2 (0) {
 }
-Trying to clone an uncloneable object of class Dom\Implementation
+Error: Trying to clone an uncloneable object of class Dom\Implementation

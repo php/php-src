@@ -11,9 +11,9 @@ $children = $dom->documentElement->childNodes;
 try {
     $children[][0] = 1;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot append to Dom\NodeList
+Error: Cannot append to Dom\NodeList

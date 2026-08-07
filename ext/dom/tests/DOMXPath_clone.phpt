@@ -14,9 +14,9 @@ $xpath = new DOMXPath($dom);
 try {
     clone $xpath;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Trying to clone an uncloneable object of class DOMXPath
+Error: Trying to clone an uncloneable object of class DOMXPath

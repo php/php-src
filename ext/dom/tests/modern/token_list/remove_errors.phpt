@@ -11,31 +11,31 @@ $list = $dom->documentElement->classList;
 try {
     $list->remove("");
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $list->remove("  ");
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $list->remove("\0");
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $list->remove(0);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $dom->saveXML(), "\n";
 
 ?>
 --EXPECT--
-The empty string is not a valid token
-The token must not contain any ASCII whitespace
-Dom\TokenList::remove(): Argument #1 must not contain any null bytes
-Dom\TokenList::remove(): Argument #1 must be of type string, int given
+DOMException: The empty string is not a valid token
+DOMException: The token must not contain any ASCII whitespace
+ValueError: Dom\TokenList::remove(): Argument #1 must not contain any null bytes
+TypeError: Dom\TokenList::remove(): Argument #1 must be of type string, int given
 <?xml version="1.0" encoding="UTF-8"?>
 <root/>

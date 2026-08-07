@@ -10,20 +10,20 @@ $dom = Dom\XMLDocument::createFromString('<root/>');
 try {
     $dom->documentElement->rename('', 'a:b');
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $dom->documentElement->rename('urn:a', 'a:b:c');
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $dom->saveXML();
 
 ?>
 --EXPECT--
-Namespace Error
-Invalid Character Error
+DOMException: Namespace Error
+DOMException: Invalid Character Error
 <?xml version="1.0" encoding="UTF-8"?>
 <root/>

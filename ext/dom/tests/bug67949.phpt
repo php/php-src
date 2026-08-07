@@ -46,7 +46,7 @@ echo "--- testing read_dimension with null offset ---\n";
 try {
     var_dump($nodes[][] = 1);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- testing attribute access ---\n";
@@ -87,7 +87,7 @@ Warning: Attempt to read property "textContent" on null in %s on line %d
 bool(false)
 NULL
 --- testing read_dimension with null offset ---
-Cannot access DOMNodeList without offset
+Error: Cannot access DOMNodeList without offset
 --- testing attribute access ---
 string(4) "href"
 ==DONE==

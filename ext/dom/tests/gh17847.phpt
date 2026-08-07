@@ -38,15 +38,15 @@ foreach ($garbage as $node) {
     try {
         var_dump($node->localName);
     } catch (DOMException $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
-Invalid State Error
-Invalid State Error
-Invalid State Error
-Invalid State Error
-Invalid State Error
-Invalid State Error
-Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error

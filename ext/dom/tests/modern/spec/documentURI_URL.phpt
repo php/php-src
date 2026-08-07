@@ -14,7 +14,7 @@ try {
     var_dump($dom->documentURI);
     var_dump($dom->URL);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $dom->URL = "";
@@ -29,7 +29,7 @@ var_dump($dom->URL);
 --EXPECTF--
 string(%d) "%s"
 string(%d) "%s"
-Cannot assign null to property Dom\Document::$URL of type string
+TypeError: Cannot assign null to property Dom\Document::$URL of type string
 string(0) ""
 string(0) ""
 string(%d) "%s"

@@ -10,11 +10,11 @@ foreach (['Dom\HTMLDocument', 'Dom\XMLDocument'] as $class) {
         $rc = new ReflectionClass($class);
         $rc->newInstanceWithoutConstructor();
     } catch (ReflectionException $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
-Class Dom\HTMLDocument is an internal class marked as final that cannot be instantiated without invoking its constructor
-Class Dom\XMLDocument is an internal class marked as final that cannot be instantiated without invoking its constructor
+ReflectionException: Class Dom\HTMLDocument is an internal class marked as final that cannot be instantiated without invoking its constructor
+ReflectionException: Class Dom\XMLDocument is an internal class marked as final that cannot be instantiated without invoking its constructor

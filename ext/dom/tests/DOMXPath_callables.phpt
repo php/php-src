@@ -31,7 +31,7 @@ $xpath->registerNamespace("php", "http://php.net/xpath");
 try {
     $xpath->evaluate("//a[php:function('var_dump', string(@href))]");
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- Legit cases: all ---\n";
@@ -55,7 +55,7 @@ $xpath->evaluate("//a[php:function('var_dump', string(@href))]");
 try {
     $xpath->evaluate("//a[php:function('notinset', string(@href))]");
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- Legit cases: set with cycle ---\n";
@@ -73,7 +73,7 @@ $xpath->evaluate("//a[php:function('var_dump', string(@href))]");
 ?>
 --EXPECT--
 --- Legit cases: none ---
-No callbacks were registered
+Error: No callbacks were registered
 --- Legit cases: all ---
 string(15) "https://php.net"
 string(15) "https://php.net"
@@ -81,7 +81,7 @@ string(15) "https://php.net"
 string(15) "https://php.net"
 string(15) "https://php.net"
 string(15) "https://php.net"
-No callback handler "notinset" registered
+Error: No callback handler "notinset" registered
 --- Legit cases: set with cycle ---
 dummy: https://php.net
 --- Legit cases: reset to null ---

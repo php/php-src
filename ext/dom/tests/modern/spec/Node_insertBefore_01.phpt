@@ -14,12 +14,12 @@ $fragment->appendChild($dom->createElement('a'));
 try {
     $dom->insertBefore($fragment, $dom->doctype);
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--
-Document types must be the first child in a document
+DOMException: Document types must be the first child in a document
 <!DOCTYPE html>

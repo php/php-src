@@ -10,8 +10,8 @@ $doc = new DOMDocument();
 try {
     $doc->loadHTML('');
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-DOMDocument::loadHTML(): Argument #1 ($source) must not be empty
+ValueError: DOMDocument::loadHTML(): Argument #1 ($source) must not be empty

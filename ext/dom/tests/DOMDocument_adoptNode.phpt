@@ -21,7 +21,7 @@ echo "-- Trying to append child from other document --\n";
 try {
     $doc2->firstChild->appendChild($b_tag_element); // Should fail because it's another document
 } catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Adopting --\n";
@@ -48,7 +48,7 @@ echo "-- Adopt a document (strict error on) --\n";
 try {
     $doc1->adoptNode($doc1);
 } catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Adopt a document (strict error off) --\n";
@@ -57,7 +57,7 @@ $doc1->strictErrorChecking = false;
 try {
     $doc1->adoptNode($doc1);
 } catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $doc1->strictErrorChecking = true;
 
@@ -117,7 +117,7 @@ var_dump($child->nodeName);
 bool(true)
 bool(false)
 -- Trying to append child from other document --
-Wrong Document Error
+DOMException: Wrong Document Error
 -- Adopting --
 string(3) "hix"
 string(35) "<?xml version="1.0"?>
@@ -138,7 +138,7 @@ string(27) "<?xml version="1.0"?>
 <p/>
 "
 -- Adopt a document (strict error on) --
-Not Supported Error
+DOMException: Not Supported Error
 -- Adopt a document (strict error off) --
 
 Warning: DOMDocument::adoptNode(): Not Supported Error in %s on line %d

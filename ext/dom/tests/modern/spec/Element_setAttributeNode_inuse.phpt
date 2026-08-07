@@ -14,11 +14,11 @@ $element = $container->appendChild($dom1->createElement("element"));
 try {
     $element->setAttributeNode($attr1);
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom1->saveHtml(), "\n";
 
 ?>
 --EXPECT--
-Inuse Attribute Error
+DOMException: Inuse Attribute Error
 <container my-attribute="1"><element></element></container>

@@ -26,13 +26,13 @@ $comment = $dom->createComment("foobarbaz");
 try {
     $comment->replaceData(0, -1, "A");
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 try {
     $comment->replaceData(2, -(2**32 - 2), "A");
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 
@@ -42,7 +42,7 @@ echo $dom->saveHtml($comment), "\n";
 <!--A-->
 <!--foAarbaz-->
 --- Legacy behaviour ---
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->

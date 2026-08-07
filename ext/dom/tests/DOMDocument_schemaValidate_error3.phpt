@@ -15,9 +15,9 @@ $doc->load(__DIR__."/book.xml");
 try {
     $doc->schemaValidate('');
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-DOMDocument::schemaValidate(): Argument #1 ($filename) must not be empty
+ValueError: DOMDocument::schemaValidate(): Argument #1 ($filename) must not be empty
