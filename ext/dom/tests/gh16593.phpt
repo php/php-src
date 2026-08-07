@@ -11,12 +11,12 @@ $child = $root->appendChild($doc->createElement('child'));
 try {
     $root->replaceChild($doc->createAttribute('foo'), $child);
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $doc->saveXML();
 
 ?>
 --EXPECT--
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>
 <root><child/></root>

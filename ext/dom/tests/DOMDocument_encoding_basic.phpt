@@ -25,7 +25,7 @@ try {
     $ret = $dom->encoding = 'NYPHP DOMinatrix';
     echo "Adding invalid encoding: $ret\n";
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $ret = $dom->encoding = 'ISO-8859-1';
@@ -44,7 +44,7 @@ echo "UTF-16 Encoding Read: {$dom->encoding}\n";
 ?>
 --EXPECT--
 Empty Encoding Read: ''
-Invalid document encoding
+ValueError: Invalid document encoding
 Adding ISO-8859-1 encoding: ISO-8859-1
 ISO-8859-1 Encoding Read: ISO-8859-1
 Adding UTF-8 encoding: UTF-8

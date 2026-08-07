@@ -30,7 +30,7 @@ echo get_class($attr), "\n";
 try {
     print $attr->testit()."\n";
 } catch (Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
@@ -39,4 +39,4 @@ HELLO Element
 myAttribute
 HELLO Attribute
 DOMAttr
-Call to undefined method DOMAttr::testit()
+Error: Call to undefined method DOMAttr::testit()

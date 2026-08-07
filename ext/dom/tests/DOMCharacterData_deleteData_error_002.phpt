@@ -16,8 +16,8 @@ $root->appendChild($cdata);
 try {
     $cdata->deleteData(5, 1);
 } catch (DOMException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Index Size Error
+DOMException: Index Size Error

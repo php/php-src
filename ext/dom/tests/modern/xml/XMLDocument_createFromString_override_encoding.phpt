@@ -8,7 +8,7 @@ dom
 try {
     Dom\XMLDocument::createFromString(file_get_contents(__DIR__ . '/dummy.xml'), overrideEncoding: 'nonexistent');
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // The override encoding matches with the document encoding attribute
@@ -23,7 +23,7 @@ var_dump($dom->charset);
 
 ?>
 --EXPECT--
-Dom\XMLDocument::createFromString(): Argument #3 ($overrideEncoding) must be a valid document encoding
+ValueError: Dom\XMLDocument::createFromString(): Argument #3 ($overrideEncoding) must be a valid document encoding
 string(2) "é"
 string(5) "UTF-8"
 string(4) "Ã©"

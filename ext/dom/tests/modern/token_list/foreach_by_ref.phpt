@@ -11,9 +11,9 @@ try {
     foreach ($dom->documentElement->classList as &$class) {
     }
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-An iterator cannot be used with foreach by reference
+Error: An iterator cannot be used with foreach by reference

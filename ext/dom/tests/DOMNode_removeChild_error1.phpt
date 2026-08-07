@@ -14,7 +14,7 @@ $parent->appendChild($child2);
 try {
 	$parent->removeChild($child1);
 } catch (DOMException $e) {
-	echo "DOMException: " . $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

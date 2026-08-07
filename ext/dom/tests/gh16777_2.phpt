@@ -15,7 +15,7 @@ $dom2 = new DOMDocument();
 try {
     $dom2->appendChild($el);
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($child->ownerDocument === $doc);
 ?>
@@ -23,5 +23,5 @@ var_dump($child->ownerDocument === $doc);
 <?xml version="1.0"?>
 <name><child/></name>
 <newname/>
-Wrong Document Error
+DOMException: Wrong Document Error
 bool(true)

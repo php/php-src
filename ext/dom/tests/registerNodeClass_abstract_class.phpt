@@ -14,7 +14,7 @@ $dom = new DOMDocument;
 try {
     $dom->registerNodeClass("DOMElement", "Test");
 } catch (ValueError $e) {
-    echo "ValueError: ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $dom->createElement("foo");

@@ -12,10 +12,10 @@ $xpath = new Dom\XPath($dom);
 try {
     var_dump($xpath->evaluate('-'));
 } catch (Error $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 Warning: Dom\XPath::evaluate(): Invalid expression in %s on line %d
-string(35) "Could not evaluate XPath expression"
+Error: Could not evaluate XPath expression

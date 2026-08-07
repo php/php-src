@@ -14,7 +14,7 @@ $dom = Dom\HTMLDocument::createEmpty();
 try {
     $dom->registerNodeClass("Dom\\Document", "Custom");
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $element = $dom->appendChild($dom->createElement("foo"));
@@ -27,7 +27,7 @@ $element->ownerDocument->foo();
 
 ?>
 --EXPECTF--
-Dom\Document::registerNodeClass(): Argument #1 ($baseClass) must not be an abstract class
+ValueError: Dom\Document::registerNodeClass(): Argument #1 ($baseClass) must not be an abstract class
 string(16) "Dom\HTMLDocument"
 
 Fatal error: Uncaught Error: Call to undefined method Dom\HTMLDocument::foo() in %s:%d

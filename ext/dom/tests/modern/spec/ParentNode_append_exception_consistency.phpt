@@ -11,13 +11,13 @@ $fragment->append($dom->createElement("bar"));
 try {
     $dom->append($fragment);
 } catch (DOMException $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($element->parentNode);
 ?>
 --EXPECT--
-Exception: Cannot have more than one element child in a document
+DOMException: Cannot have more than one element child in a document
 object(Dom\DocumentFragment)#2 (18) {
   ["children"]=>
   string(22) "(object value omitted)"

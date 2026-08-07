@@ -30,7 +30,7 @@ foreach ($xpath->query($query) as $attribute) {
     try {
         $attribute->parentNode->remove();
     } catch (\DOMException $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     // However, it should not cause a use-after-free
     echo "After: ", $attribute->parentNode->tagName, "\n";
@@ -57,19 +57,19 @@ string(5) "child"
 Before: root
 After: root
 Before: root
-Not Found Error
+DOMException: Not Found Error
 After: root
 Before: root
-Not Found Error
+DOMException: Not Found Error
 After: root
 Before: child
 After: child
 Before: child
-Not Found Error
+DOMException: Not Found Error
 After: child
 Before: child
-Not Found Error
+DOMException: Not Found Error
 After: child
 Before: child
-Not Found Error
+DOMException: Not Found Error
 After: child

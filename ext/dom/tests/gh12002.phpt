@@ -16,7 +16,7 @@ var_dump($dom->encoding);
 try {
     $dom->encoding = make_nonconst('foobar');
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->encoding);
 $dom->encoding = make_nonconst('utf-16le');
@@ -24,15 +24,15 @@ var_dump($dom->encoding);
 try {
     $dom->encoding = NULL;
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->encoding);
 
 ?>
 --EXPECT--
 string(5) "utf-8"
-Invalid document encoding
+ValueError: Invalid document encoding
 string(5) "utf-8"
 string(8) "utf-16le"
-Invalid document encoding
+ValueError: Invalid document encoding
 string(8) "utf-16le"

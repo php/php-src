@@ -22,7 +22,7 @@ echo $element->ownerDocument->saveXml($element), "\n";
 try {
     dom_import_simplexml($sxe);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Import again and compare
@@ -37,5 +37,5 @@ object(Dom\NamedNodeMap)#3 (1) {
 <container xmlns="urn:a">foo</container>
 <container xmlns="urn:a">foo<child/></container>
 <container xmlns="urn:a">foo<child/><name>value</name></container>
-dom_import_simplexml(): Argument #1 ($node) must not be already imported as a Dom\Node
+TypeError: dom_import_simplexml(): Argument #1 ($node) must not be already imported as a Dom\Node
 bool(true)
