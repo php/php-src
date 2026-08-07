@@ -237,7 +237,7 @@ function test_serialization($serial, $hash, $algo) {
         }
     } catch (Throwable $e) {
         echo "$algo: problem with serialization {$serial}\n";
-        echo '  ', $e::class . ': ' . $e->getMessage(), "\n", $e->getTraceAsString();
+        echo $e::class, ': ', $e->getMessage(), "\n", $e->getTraceAsString();
     }
 }
 
