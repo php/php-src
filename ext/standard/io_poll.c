@@ -791,7 +791,7 @@ PHP_METHOD(Io_Poll_Context, wait)
 	struct timespec timeout_ts;
 	if (timeout) {
 		if (timeout->duration.negative) {
-			zend_argument_value_error(2, "must not be negative");
+			zend_argument_value_error(1, "must not be negative");
 			RETURN_THROWS();
 		}
 
