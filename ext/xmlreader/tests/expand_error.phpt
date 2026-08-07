@@ -18,7 +18,7 @@ $reader = new XMLReader();
 try {
     $reader->expand();
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $reader->close();
@@ -29,7 +29,7 @@ var_dump($reader->expand());
 $reader->close();
 ?>
 --EXPECTF--
-Data must be loaded before expanding
+Error: Data must be loaded before expanding
 
 Warning: XMLReader::expand(): An Error Occurred while expanding in %s on line %d
 bool(false)

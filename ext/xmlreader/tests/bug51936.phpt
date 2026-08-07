@@ -14,7 +14,7 @@ try {
     $xmlreader2 = clone $xmlreader;
     $xmlreader2->next();
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

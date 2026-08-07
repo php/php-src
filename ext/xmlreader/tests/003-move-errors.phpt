@@ -34,7 +34,7 @@ while ($reader->read()) {
             try {
                 $reader->moveToAttribute('');
             } catch (ValueError $exception) {
-                echo $exception->getMessage() . "\n";
+                echo $exception::class, ': ', $exception->getMessage(), "\n";
             }
 
             // Ensure that node pointer has not changed position
@@ -68,7 +68,7 @@ unlink(__DIR__.'/003-move-errors.xml');
 book
 bool(true)
 num: 1
-XMLReader::moveToAttribute(): Argument #1 ($name) must not be empty
+ValueError: XMLReader::moveToAttribute(): Argument #1 ($name) must not be empty
 num: 1
 bool(false)
 num: 1

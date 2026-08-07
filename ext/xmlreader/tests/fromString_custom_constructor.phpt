@@ -17,7 +17,7 @@ $reader = CustomXMLReader::fromString("<root/>");
 try {
     var_dump($reader);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($reader->read());
 var_dump($reader->nodeType);
@@ -54,6 +54,6 @@ object(CustomXMLReader)#%d (14) {
   ["xmlLang"]=>
   string(0) ""
 }
-Failed to read property because no XML data has been read yet
+Error: Failed to read property because no XML data has been read yet
 bool(true)
 int(1)
