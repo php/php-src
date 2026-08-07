@@ -6,14 +6,14 @@ function foo() {
     try {
         extract(["this"=>42, "a"=>24]);
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($a);
 }
 foo();
 ?>
 --EXPECTF--
-Cannot re-assign $this
+Error: Cannot re-assign $this
 
 Warning: Undefined variable $a in %s on line %d
 NULL

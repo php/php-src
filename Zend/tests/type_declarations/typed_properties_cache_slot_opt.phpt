@@ -12,7 +12,7 @@ class Test {
         try {
             $this->prop = "foobar";
         } catch (TypeError $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         var_dump($this->prop);
     }
@@ -24,7 +24,7 @@ $test->method();
 
 ?>
 --EXPECT--
-Cannot assign string to property Test::$prop of type int
+TypeError: Cannot assign string to property Test::$prop of type int
 int(1)
-Cannot assign string to property Test::$prop of type int
+TypeError: Cannot assign string to property Test::$prop of type int
 int(1)

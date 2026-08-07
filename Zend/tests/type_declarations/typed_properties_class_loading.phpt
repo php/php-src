@@ -16,7 +16,7 @@ $test = new Test;
 try {
     $test->propX = new stdClass;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 if (true) {
@@ -31,7 +31,7 @@ $r =& $test->propY;
 try {
     $test->propY = new stdClass;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 if (true) {
@@ -43,9 +43,9 @@ var_dump($test->propY);
 
 ?>
 --EXPECT--
-Cannot assign stdClass to property Test::$propX of type X
+TypeError: Cannot assign stdClass to property Test::$propX of type X
 object(X)#3 (0) {
 }
-Cannot assign stdClass to property Test::$propY of type ?Y
+TypeError: Cannot assign stdClass to property Test::$propY of type ?Y
 object(Y)#4 (0) {
 }

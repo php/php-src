@@ -6,7 +6,7 @@ Using clone statement on undefined variable
 try {
     $a = clone $b;
 } catch (Error $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

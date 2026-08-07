@@ -15,7 +15,7 @@ try {
     $c = $i + $s1;
     var_dump($c);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $c = $i + $s2;
 var_dump($c);
@@ -30,7 +30,7 @@ try {
     $c = $s1 + $i;
     var_dump($c);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $c = $s2 + $i;
@@ -45,13 +45,13 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Unsupported operand types: int + string
+TypeError: Unsupported operand types: int + string
 
 Warning: A non-numeric value encountered in %s on line %d
 int(951858)
 int(48550510)
 float(75661.68)
-Unsupported operand types: string + int
+TypeError: Unsupported operand types: string + int
 
 Warning: A non-numeric value encountered in %s on line %d
 int(951858)

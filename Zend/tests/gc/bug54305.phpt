@@ -12,8 +12,8 @@ $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
 try {
     echo $methodWithArgs++;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot increment ReflectionMethod
+TypeError: Cannot increment ReflectionMethod

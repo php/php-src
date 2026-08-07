@@ -41,12 +41,12 @@ var_dump($o);
 try {
     bar1();
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     bar2();
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -59,5 +59,5 @@ object(B)#%d (0) {
 }
 object(B)#%d (0) {
 }
-bar1(): Return value must be of type (X&Y)|(W&Z), C returned
-bar2(): Return value must be of type (W&Z)|(X&Y), C returned
+TypeError: bar1(): Return value must be of type (X&Y)|(W&Z), C returned
+TypeError: bar2(): Return value must be of type (W&Z)|(X&Y), C returned

@@ -12,7 +12,7 @@ usort($list, function($a, $b) use ($comparator) {
   try {
       return $comparator->compare($a, $b);
   } catch (Error $e) {
-      var_dump($e->getCode(), $e->getMessage());
+      echo $e::class, ': ', $e->getCode(), ': ', $e->getMessage(), "\n";
       return 0;
   }
 });
@@ -20,14 +20,10 @@ var_dump($list);
 echo "Alive\n";
 ?>
 --EXPECT--
-int(0)
-string(43) "Call to a member function compare() on null"
-int(0)
-string(43) "Call to a member function compare() on null"
-int(0)
-string(43) "Call to a member function compare() on null"
-int(0)
-string(43) "Call to a member function compare() on null"
+Error: 0: Call to a member function compare() on null
+Error: 0: Call to a member function compare() on null
+Error: 0: Call to a member function compare() on null
+Error: 0: Call to a member function compare() on null
 array(5) {
   [0]=>
   int(1)

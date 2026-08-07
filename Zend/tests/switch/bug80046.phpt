@@ -14,9 +14,9 @@ function test($foo) {
 try {
     test('Foo');
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Default
+Exception: Default

@@ -13,9 +13,9 @@ $foo = new Foo();
 try {
     var_dump($foo->prop);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot use "parent" when current class scope has no parent
+Error: Cannot use "parent" when current class scope has no parent

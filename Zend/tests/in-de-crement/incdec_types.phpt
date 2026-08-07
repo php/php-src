@@ -10,12 +10,12 @@ foreach ($types as $type) {
     try {
         $type++;
     } catch (\TypeError $e) {
-        echo $e->getMessage(), PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     try {
         $type--;
     } catch (\TypeError $e) {
-        echo $e->getMessage(), PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -40,12 +40,12 @@ foreach ($values as $value) {
 }
 ?>
 --EXPECTF--
-Cannot increment array
-Cannot decrement array
-Cannot increment stdClass
-Cannot decrement stdClass
-Cannot increment resource
-Cannot decrement resource
+TypeError: Cannot increment array
+TypeError: Cannot decrement array
+TypeError: Cannot increment stdClass
+TypeError: Cannot decrement stdClass
+TypeError: Cannot increment resource
+TypeError: Cannot decrement resource
 Using increment:
 Initial value:NULL
 Result value:int(1)

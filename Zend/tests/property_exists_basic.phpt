@@ -43,27 +43,27 @@ var_dump(property_exists($foo,""));
 try {
     var_dump(property_exists(array(), "test"));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(property_exists(1, "test"));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(property_exists(3.14, "test"));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(property_exists(true, "test"));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(property_exists(null, "test"));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $foo->bar();
@@ -86,11 +86,11 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-property_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
-property_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
-property_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
-property_exists(): Argument #1 ($object_or_class) must be of type object|string, true given
-property_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: property_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: property_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: property_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: property_exists(): Argument #1 ($object_or_class) must be of type object|string, true given
+TypeError: property_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 bool(true)
 bool(true)
 bool(true)

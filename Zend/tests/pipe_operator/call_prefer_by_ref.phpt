@@ -9,7 +9,7 @@ try {
     $r = $a |> array_multisort(...);
     var_dump($r);
 } catch (\Error $e) {
-  echo $e->getMessage(), PHP_EOL;
+  echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

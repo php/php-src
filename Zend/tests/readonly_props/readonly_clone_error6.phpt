@@ -22,13 +22,13 @@ var_dump($foo);
 try {
     $foo->__clone();
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $foo->__clone();
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($foo);
@@ -39,8 +39,8 @@ object(Foo)#%d (%d) {
   ["bar"]=>
   int(0)
 }
-Cannot modify readonly property Foo::$bar
-Cannot modify readonly property Foo::$bar
+Error: Cannot modify readonly property Foo::$bar
+Error: Cannot modify readonly property Foo::$bar
 object(Foo)#%d (%d) {
   ["bar"]=>
   int(0)

@@ -13,9 +13,9 @@ $point = new Point(1, 2, 3);
 try {
     $point->x = "foo";
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign string to property Point::$x of type int
+TypeError: Cannot assign string to property Point::$x of type int

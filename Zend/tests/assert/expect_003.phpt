@@ -8,8 +8,8 @@ assert.exception=1
 try {
     assert(false);
 } catch (AssertionError $ex) {
-    var_dump($ex->getMessage());
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(13) "assert(false)"
+AssertionError: assert(false)

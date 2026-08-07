@@ -13,7 +13,7 @@ function test() {
     try {
         throw new Exception("ops 2");
     } catch (Exception $e) {
-        echo $e->getMessage()."\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

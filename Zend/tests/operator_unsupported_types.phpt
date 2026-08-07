@@ -46,7 +46,7 @@ function evalBinOp(string $op, string $value1, string $value2) {
         eval("return $value1 $op $value2;");
         echo "No error for $value1 $op $value2\n";
     } catch (Throwable $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -56,7 +56,7 @@ function evalAssignOp(string $op, string $value1, string $value2) {
         eval("\$x $op= $value2;");
         echo "No error for $value1 $op= $value2\n";
     } catch (Throwable $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
         if ($x !== $origX) {
             die("Value corrupted!");
         }
@@ -101,7 +101,7 @@ foreach ($illegalValues as $illegalValue) {
         eval("return ~$illegalValue;");
         echo "No error for ~$illegalValue\n";
     } catch (TypeError $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -112,14 +112,14 @@ foreach ($illegalValues as $illegalValue) {
         $copy++;
         echo "No error for $copy++\n";
     } catch (TypeError $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $copy = eval("return $illegalValue;");
     try {
         $copy--;
         echo "No error for $copy--\n";
     } catch (TypeError $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -127,844 +127,844 @@ foreach ($illegalValues as $illegalValue) {
 --EXPECT--
 BINARY OP:
 No error for [] + []
-Unsupported operand types: array + stdClass
-Unsupported operand types: array + resource
-Unsupported operand types: array + string
-Unsupported operand types: stdClass + array
-Unsupported operand types: stdClass + stdClass
-Unsupported operand types: stdClass + resource
-Unsupported operand types: stdClass + string
-Unsupported operand types: resource + array
-Unsupported operand types: resource + stdClass
-Unsupported operand types: resource + resource
-Unsupported operand types: resource + string
-Unsupported operand types: string + array
-Unsupported operand types: string + stdClass
-Unsupported operand types: string + resource
-Unsupported operand types: string + string
-Unsupported operand types: array + null
-Unsupported operand types: null + array
-Unsupported operand types: array + bool
-Unsupported operand types: bool + array
-Unsupported operand types: array + bool
-Unsupported operand types: bool + array
-Unsupported operand types: array + int
-Unsupported operand types: int + array
-Unsupported operand types: array + float
-Unsupported operand types: float + array
-Unsupported operand types: array + string
-Unsupported operand types: string + array
-Unsupported operand types: array + string
+TypeError: Unsupported operand types: array + stdClass
+TypeError: Unsupported operand types: array + resource
+TypeError: Unsupported operand types: array + string
+TypeError: Unsupported operand types: stdClass + array
+TypeError: Unsupported operand types: stdClass + stdClass
+TypeError: Unsupported operand types: stdClass + resource
+TypeError: Unsupported operand types: stdClass + string
+TypeError: Unsupported operand types: resource + array
+TypeError: Unsupported operand types: resource + stdClass
+TypeError: Unsupported operand types: resource + resource
+TypeError: Unsupported operand types: resource + string
+TypeError: Unsupported operand types: string + array
+TypeError: Unsupported operand types: string + stdClass
+TypeError: Unsupported operand types: string + resource
+TypeError: Unsupported operand types: string + string
+TypeError: Unsupported operand types: array + null
+TypeError: Unsupported operand types: null + array
+TypeError: Unsupported operand types: array + bool
+TypeError: Unsupported operand types: bool + array
+TypeError: Unsupported operand types: array + bool
+TypeError: Unsupported operand types: bool + array
+TypeError: Unsupported operand types: array + int
+TypeError: Unsupported operand types: int + array
+TypeError: Unsupported operand types: array + float
+TypeError: Unsupported operand types: float + array
+TypeError: Unsupported operand types: array + string
+TypeError: Unsupported operand types: string + array
+TypeError: Unsupported operand types: array + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + array
-Unsupported operand types: stdClass + null
-Unsupported operand types: null + stdClass
-Unsupported operand types: stdClass + bool
-Unsupported operand types: bool + stdClass
-Unsupported operand types: stdClass + bool
-Unsupported operand types: bool + stdClass
-Unsupported operand types: stdClass + int
-Unsupported operand types: int + stdClass
-Unsupported operand types: stdClass + float
-Unsupported operand types: float + stdClass
-Unsupported operand types: stdClass + string
-Unsupported operand types: string + stdClass
-Unsupported operand types: stdClass + string
+TypeError: Unsupported operand types: string + array
+TypeError: Unsupported operand types: stdClass + null
+TypeError: Unsupported operand types: null + stdClass
+TypeError: Unsupported operand types: stdClass + bool
+TypeError: Unsupported operand types: bool + stdClass
+TypeError: Unsupported operand types: stdClass + bool
+TypeError: Unsupported operand types: bool + stdClass
+TypeError: Unsupported operand types: stdClass + int
+TypeError: Unsupported operand types: int + stdClass
+TypeError: Unsupported operand types: stdClass + float
+TypeError: Unsupported operand types: float + stdClass
+TypeError: Unsupported operand types: stdClass + string
+TypeError: Unsupported operand types: string + stdClass
+TypeError: Unsupported operand types: stdClass + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + stdClass
-Unsupported operand types: resource + null
-Unsupported operand types: null + resource
-Unsupported operand types: resource + bool
-Unsupported operand types: bool + resource
-Unsupported operand types: resource + bool
-Unsupported operand types: bool + resource
-Unsupported operand types: resource + int
-Unsupported operand types: int + resource
-Unsupported operand types: resource + float
-Unsupported operand types: float + resource
-Unsupported operand types: resource + string
-Unsupported operand types: string + resource
-Unsupported operand types: resource + string
+TypeError: Unsupported operand types: string + stdClass
+TypeError: Unsupported operand types: resource + null
+TypeError: Unsupported operand types: null + resource
+TypeError: Unsupported operand types: resource + bool
+TypeError: Unsupported operand types: bool + resource
+TypeError: Unsupported operand types: resource + bool
+TypeError: Unsupported operand types: bool + resource
+TypeError: Unsupported operand types: resource + int
+TypeError: Unsupported operand types: int + resource
+TypeError: Unsupported operand types: resource + float
+TypeError: Unsupported operand types: float + resource
+TypeError: Unsupported operand types: resource + string
+TypeError: Unsupported operand types: string + resource
+TypeError: Unsupported operand types: resource + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + resource
-Unsupported operand types: string + null
-Unsupported operand types: null + string
-Unsupported operand types: string + bool
-Unsupported operand types: bool + string
-Unsupported operand types: string + bool
-Unsupported operand types: bool + string
-Unsupported operand types: string + int
-Unsupported operand types: int + string
-Unsupported operand types: string + float
-Unsupported operand types: float + string
-Unsupported operand types: string + string
-Unsupported operand types: string + string
-Unsupported operand types: string + string
+TypeError: Unsupported operand types: string + resource
+TypeError: Unsupported operand types: string + null
+TypeError: Unsupported operand types: null + string
+TypeError: Unsupported operand types: string + bool
+TypeError: Unsupported operand types: bool + string
+TypeError: Unsupported operand types: string + bool
+TypeError: Unsupported operand types: bool + string
+TypeError: Unsupported operand types: string + int
+TypeError: Unsupported operand types: int + string
+TypeError: Unsupported operand types: string + float
+TypeError: Unsupported operand types: float + string
+TypeError: Unsupported operand types: string + string
+TypeError: Unsupported operand types: string + string
+TypeError: Unsupported operand types: string + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + string
-Unsupported operand types: array - array
-Unsupported operand types: array - stdClass
-Unsupported operand types: array - resource
-Unsupported operand types: array - string
-Unsupported operand types: stdClass - array
-Unsupported operand types: stdClass - stdClass
-Unsupported operand types: stdClass - resource
-Unsupported operand types: stdClass - string
-Unsupported operand types: resource - array
-Unsupported operand types: resource - stdClass
-Unsupported operand types: resource - resource
-Unsupported operand types: resource - string
-Unsupported operand types: string - array
-Unsupported operand types: string - stdClass
-Unsupported operand types: string - resource
-Unsupported operand types: string - string
-Unsupported operand types: array - null
-Unsupported operand types: null - array
-Unsupported operand types: array - bool
-Unsupported operand types: bool - array
-Unsupported operand types: array - bool
-Unsupported operand types: bool - array
-Unsupported operand types: array - int
-Unsupported operand types: int - array
-Unsupported operand types: array - float
-Unsupported operand types: float - array
-Unsupported operand types: array - string
-Unsupported operand types: string - array
-Unsupported operand types: array - string
+TypeError: Unsupported operand types: string + string
+TypeError: Unsupported operand types: array - array
+TypeError: Unsupported operand types: array - stdClass
+TypeError: Unsupported operand types: array - resource
+TypeError: Unsupported operand types: array - string
+TypeError: Unsupported operand types: stdClass - array
+TypeError: Unsupported operand types: stdClass - stdClass
+TypeError: Unsupported operand types: stdClass - resource
+TypeError: Unsupported operand types: stdClass - string
+TypeError: Unsupported operand types: resource - array
+TypeError: Unsupported operand types: resource - stdClass
+TypeError: Unsupported operand types: resource - resource
+TypeError: Unsupported operand types: resource - string
+TypeError: Unsupported operand types: string - array
+TypeError: Unsupported operand types: string - stdClass
+TypeError: Unsupported operand types: string - resource
+TypeError: Unsupported operand types: string - string
+TypeError: Unsupported operand types: array - null
+TypeError: Unsupported operand types: null - array
+TypeError: Unsupported operand types: array - bool
+TypeError: Unsupported operand types: bool - array
+TypeError: Unsupported operand types: array - bool
+TypeError: Unsupported operand types: bool - array
+TypeError: Unsupported operand types: array - int
+TypeError: Unsupported operand types: int - array
+TypeError: Unsupported operand types: array - float
+TypeError: Unsupported operand types: float - array
+TypeError: Unsupported operand types: array - string
+TypeError: Unsupported operand types: string - array
+TypeError: Unsupported operand types: array - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - array
-Unsupported operand types: stdClass - null
-Unsupported operand types: null - stdClass
-Unsupported operand types: stdClass - bool
-Unsupported operand types: bool - stdClass
-Unsupported operand types: stdClass - bool
-Unsupported operand types: bool - stdClass
-Unsupported operand types: stdClass - int
-Unsupported operand types: int - stdClass
-Unsupported operand types: stdClass - float
-Unsupported operand types: float - stdClass
-Unsupported operand types: stdClass - string
-Unsupported operand types: string - stdClass
-Unsupported operand types: stdClass - string
+TypeError: Unsupported operand types: string - array
+TypeError: Unsupported operand types: stdClass - null
+TypeError: Unsupported operand types: null - stdClass
+TypeError: Unsupported operand types: stdClass - bool
+TypeError: Unsupported operand types: bool - stdClass
+TypeError: Unsupported operand types: stdClass - bool
+TypeError: Unsupported operand types: bool - stdClass
+TypeError: Unsupported operand types: stdClass - int
+TypeError: Unsupported operand types: int - stdClass
+TypeError: Unsupported operand types: stdClass - float
+TypeError: Unsupported operand types: float - stdClass
+TypeError: Unsupported operand types: stdClass - string
+TypeError: Unsupported operand types: string - stdClass
+TypeError: Unsupported operand types: stdClass - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - stdClass
-Unsupported operand types: resource - null
-Unsupported operand types: null - resource
-Unsupported operand types: resource - bool
-Unsupported operand types: bool - resource
-Unsupported operand types: resource - bool
-Unsupported operand types: bool - resource
-Unsupported operand types: resource - int
-Unsupported operand types: int - resource
-Unsupported operand types: resource - float
-Unsupported operand types: float - resource
-Unsupported operand types: resource - string
-Unsupported operand types: string - resource
-Unsupported operand types: resource - string
+TypeError: Unsupported operand types: string - stdClass
+TypeError: Unsupported operand types: resource - null
+TypeError: Unsupported operand types: null - resource
+TypeError: Unsupported operand types: resource - bool
+TypeError: Unsupported operand types: bool - resource
+TypeError: Unsupported operand types: resource - bool
+TypeError: Unsupported operand types: bool - resource
+TypeError: Unsupported operand types: resource - int
+TypeError: Unsupported operand types: int - resource
+TypeError: Unsupported operand types: resource - float
+TypeError: Unsupported operand types: float - resource
+TypeError: Unsupported operand types: resource - string
+TypeError: Unsupported operand types: string - resource
+TypeError: Unsupported operand types: resource - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - resource
-Unsupported operand types: string - null
-Unsupported operand types: null - string
-Unsupported operand types: string - bool
-Unsupported operand types: bool - string
-Unsupported operand types: string - bool
-Unsupported operand types: bool - string
-Unsupported operand types: string - int
-Unsupported operand types: int - string
-Unsupported operand types: string - float
-Unsupported operand types: float - string
-Unsupported operand types: string - string
-Unsupported operand types: string - string
-Unsupported operand types: string - string
+TypeError: Unsupported operand types: string - resource
+TypeError: Unsupported operand types: string - null
+TypeError: Unsupported operand types: null - string
+TypeError: Unsupported operand types: string - bool
+TypeError: Unsupported operand types: bool - string
+TypeError: Unsupported operand types: string - bool
+TypeError: Unsupported operand types: bool - string
+TypeError: Unsupported operand types: string - int
+TypeError: Unsupported operand types: int - string
+TypeError: Unsupported operand types: string - float
+TypeError: Unsupported operand types: float - string
+TypeError: Unsupported operand types: string - string
+TypeError: Unsupported operand types: string - string
+TypeError: Unsupported operand types: string - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - string
-Unsupported operand types: array * array
-Unsupported operand types: stdClass * array
-Unsupported operand types: resource * array
-Unsupported operand types: array * string
-Unsupported operand types: stdClass * array
-Unsupported operand types: stdClass * stdClass
-Unsupported operand types: stdClass * resource
-Unsupported operand types: stdClass * string
-Unsupported operand types: resource * array
-Unsupported operand types: resource * stdClass
-Unsupported operand types: resource * resource
-Unsupported operand types: resource * string
-Unsupported operand types: string * array
-Unsupported operand types: stdClass * string
-Unsupported operand types: resource * string
-Unsupported operand types: string * string
-Unsupported operand types: array * null
-Unsupported operand types: null * array
-Unsupported operand types: array * bool
-Unsupported operand types: bool * array
-Unsupported operand types: array * bool
-Unsupported operand types: bool * array
-Unsupported operand types: array * int
-Unsupported operand types: int * array
-Unsupported operand types: array * float
-Unsupported operand types: float * array
-Unsupported operand types: array * string
-Unsupported operand types: string * array
-Unsupported operand types: array * string
+TypeError: Unsupported operand types: string - string
+TypeError: Unsupported operand types: array * array
+TypeError: Unsupported operand types: stdClass * array
+TypeError: Unsupported operand types: resource * array
+TypeError: Unsupported operand types: array * string
+TypeError: Unsupported operand types: stdClass * array
+TypeError: Unsupported operand types: stdClass * stdClass
+TypeError: Unsupported operand types: stdClass * resource
+TypeError: Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: resource * array
+TypeError: Unsupported operand types: resource * stdClass
+TypeError: Unsupported operand types: resource * resource
+TypeError: Unsupported operand types: resource * string
+TypeError: Unsupported operand types: string * array
+TypeError: Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: resource * string
+TypeError: Unsupported operand types: string * string
+TypeError: Unsupported operand types: array * null
+TypeError: Unsupported operand types: null * array
+TypeError: Unsupported operand types: array * bool
+TypeError: Unsupported operand types: bool * array
+TypeError: Unsupported operand types: array * bool
+TypeError: Unsupported operand types: bool * array
+TypeError: Unsupported operand types: array * int
+TypeError: Unsupported operand types: int * array
+TypeError: Unsupported operand types: array * float
+TypeError: Unsupported operand types: float * array
+TypeError: Unsupported operand types: array * string
+TypeError: Unsupported operand types: string * array
+TypeError: Unsupported operand types: array * string
 Warning: A non-numeric value encountered
-Unsupported operand types: string * array
-Unsupported operand types: stdClass * null
-Unsupported operand types: stdClass * null
-Unsupported operand types: stdClass * bool
-Unsupported operand types: stdClass * bool
-Unsupported operand types: stdClass * bool
-Unsupported operand types: stdClass * bool
-Unsupported operand types: stdClass * int
-Unsupported operand types: stdClass * int
-Unsupported operand types: stdClass * float
-Unsupported operand types: stdClass * float
-Unsupported operand types: stdClass * string
-Unsupported operand types: stdClass * string
-Unsupported operand types: stdClass * string
-Unsupported operand types: stdClass * string
-Unsupported operand types: resource * null
-Unsupported operand types: resource * null
-Unsupported operand types: resource * bool
-Unsupported operand types: resource * bool
-Unsupported operand types: resource * bool
-Unsupported operand types: resource * bool
-Unsupported operand types: resource * int
-Unsupported operand types: resource * int
-Unsupported operand types: resource * float
-Unsupported operand types: resource * float
-Unsupported operand types: resource * string
-Unsupported operand types: resource * string
-Unsupported operand types: resource * string
-Unsupported operand types: resource * string
-Unsupported operand types: string * null
-Unsupported operand types: null * string
-Unsupported operand types: string * bool
-Unsupported operand types: bool * string
-Unsupported operand types: string * bool
-Unsupported operand types: bool * string
-Unsupported operand types: string * int
-Unsupported operand types: int * string
-Unsupported operand types: string * float
-Unsupported operand types: float * string
-Unsupported operand types: string * string
-Unsupported operand types: string * string
-Unsupported operand types: string * string
+TypeError: Unsupported operand types: string * array
+TypeError: Unsupported operand types: stdClass * null
+TypeError: Unsupported operand types: stdClass * null
+TypeError: Unsupported operand types: stdClass * bool
+TypeError: Unsupported operand types: stdClass * bool
+TypeError: Unsupported operand types: stdClass * bool
+TypeError: Unsupported operand types: stdClass * bool
+TypeError: Unsupported operand types: stdClass * int
+TypeError: Unsupported operand types: stdClass * int
+TypeError: Unsupported operand types: stdClass * float
+TypeError: Unsupported operand types: stdClass * float
+TypeError: Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: resource * null
+TypeError: Unsupported operand types: resource * null
+TypeError: Unsupported operand types: resource * bool
+TypeError: Unsupported operand types: resource * bool
+TypeError: Unsupported operand types: resource * bool
+TypeError: Unsupported operand types: resource * bool
+TypeError: Unsupported operand types: resource * int
+TypeError: Unsupported operand types: resource * int
+TypeError: Unsupported operand types: resource * float
+TypeError: Unsupported operand types: resource * float
+TypeError: Unsupported operand types: resource * string
+TypeError: Unsupported operand types: resource * string
+TypeError: Unsupported operand types: resource * string
+TypeError: Unsupported operand types: resource * string
+TypeError: Unsupported operand types: string * null
+TypeError: Unsupported operand types: null * string
+TypeError: Unsupported operand types: string * bool
+TypeError: Unsupported operand types: bool * string
+TypeError: Unsupported operand types: string * bool
+TypeError: Unsupported operand types: bool * string
+TypeError: Unsupported operand types: string * int
+TypeError: Unsupported operand types: int * string
+TypeError: Unsupported operand types: string * float
+TypeError: Unsupported operand types: float * string
+TypeError: Unsupported operand types: string * string
+TypeError: Unsupported operand types: string * string
+TypeError: Unsupported operand types: string * string
 Warning: A non-numeric value encountered
-Unsupported operand types: string * string
-Unsupported operand types: array / array
-Unsupported operand types: array / stdClass
-Unsupported operand types: array / resource
-Unsupported operand types: array / string
-Unsupported operand types: stdClass / array
-Unsupported operand types: stdClass / stdClass
-Unsupported operand types: stdClass / resource
-Unsupported operand types: stdClass / string
-Unsupported operand types: resource / array
-Unsupported operand types: resource / stdClass
-Unsupported operand types: resource / resource
-Unsupported operand types: resource / string
-Unsupported operand types: string / array
-Unsupported operand types: string / stdClass
-Unsupported operand types: string / resource
-Unsupported operand types: string / string
-Unsupported operand types: array / null
-Unsupported operand types: null / array
-Unsupported operand types: array / bool
-Unsupported operand types: bool / array
-Unsupported operand types: array / bool
-Unsupported operand types: bool / array
-Unsupported operand types: array / int
-Unsupported operand types: int / array
-Unsupported operand types: array / float
-Unsupported operand types: float / array
-Unsupported operand types: array / string
-Unsupported operand types: string / array
-Unsupported operand types: array / string
+TypeError: Unsupported operand types: string * string
+TypeError: Unsupported operand types: array / array
+TypeError: Unsupported operand types: array / stdClass
+TypeError: Unsupported operand types: array / resource
+TypeError: Unsupported operand types: array / string
+TypeError: Unsupported operand types: stdClass / array
+TypeError: Unsupported operand types: stdClass / stdClass
+TypeError: Unsupported operand types: stdClass / resource
+TypeError: Unsupported operand types: stdClass / string
+TypeError: Unsupported operand types: resource / array
+TypeError: Unsupported operand types: resource / stdClass
+TypeError: Unsupported operand types: resource / resource
+TypeError: Unsupported operand types: resource / string
+TypeError: Unsupported operand types: string / array
+TypeError: Unsupported operand types: string / stdClass
+TypeError: Unsupported operand types: string / resource
+TypeError: Unsupported operand types: string / string
+TypeError: Unsupported operand types: array / null
+TypeError: Unsupported operand types: null / array
+TypeError: Unsupported operand types: array / bool
+TypeError: Unsupported operand types: bool / array
+TypeError: Unsupported operand types: array / bool
+TypeError: Unsupported operand types: bool / array
+TypeError: Unsupported operand types: array / int
+TypeError: Unsupported operand types: int / array
+TypeError: Unsupported operand types: array / float
+TypeError: Unsupported operand types: float / array
+TypeError: Unsupported operand types: array / string
+TypeError: Unsupported operand types: string / array
+TypeError: Unsupported operand types: array / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / array
-Unsupported operand types: stdClass / null
-Unsupported operand types: null / stdClass
-Unsupported operand types: stdClass / bool
-Unsupported operand types: bool / stdClass
-Unsupported operand types: stdClass / bool
-Unsupported operand types: bool / stdClass
-Unsupported operand types: stdClass / int
-Unsupported operand types: int / stdClass
-Unsupported operand types: stdClass / float
-Unsupported operand types: float / stdClass
-Unsupported operand types: stdClass / string
-Unsupported operand types: string / stdClass
-Unsupported operand types: stdClass / string
+TypeError: Unsupported operand types: string / array
+TypeError: Unsupported operand types: stdClass / null
+TypeError: Unsupported operand types: null / stdClass
+TypeError: Unsupported operand types: stdClass / bool
+TypeError: Unsupported operand types: bool / stdClass
+TypeError: Unsupported operand types: stdClass / bool
+TypeError: Unsupported operand types: bool / stdClass
+TypeError: Unsupported operand types: stdClass / int
+TypeError: Unsupported operand types: int / stdClass
+TypeError: Unsupported operand types: stdClass / float
+TypeError: Unsupported operand types: float / stdClass
+TypeError: Unsupported operand types: stdClass / string
+TypeError: Unsupported operand types: string / stdClass
+TypeError: Unsupported operand types: stdClass / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / stdClass
-Unsupported operand types: resource / null
-Unsupported operand types: null / resource
-Unsupported operand types: resource / bool
-Unsupported operand types: bool / resource
-Unsupported operand types: resource / bool
-Unsupported operand types: bool / resource
-Unsupported operand types: resource / int
-Unsupported operand types: int / resource
-Unsupported operand types: resource / float
-Unsupported operand types: float / resource
-Unsupported operand types: resource / string
-Unsupported operand types: string / resource
-Unsupported operand types: resource / string
+TypeError: Unsupported operand types: string / stdClass
+TypeError: Unsupported operand types: resource / null
+TypeError: Unsupported operand types: null / resource
+TypeError: Unsupported operand types: resource / bool
+TypeError: Unsupported operand types: bool / resource
+TypeError: Unsupported operand types: resource / bool
+TypeError: Unsupported operand types: bool / resource
+TypeError: Unsupported operand types: resource / int
+TypeError: Unsupported operand types: int / resource
+TypeError: Unsupported operand types: resource / float
+TypeError: Unsupported operand types: float / resource
+TypeError: Unsupported operand types: resource / string
+TypeError: Unsupported operand types: string / resource
+TypeError: Unsupported operand types: resource / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / resource
-Unsupported operand types: string / null
-Unsupported operand types: null / string
-Unsupported operand types: string / bool
-Unsupported operand types: bool / string
-Unsupported operand types: string / bool
-Unsupported operand types: bool / string
-Unsupported operand types: string / int
-Unsupported operand types: int / string
-Unsupported operand types: string / float
-Unsupported operand types: float / string
-Unsupported operand types: string / string
-Unsupported operand types: string / string
-Unsupported operand types: string / string
+TypeError: Unsupported operand types: string / resource
+TypeError: Unsupported operand types: string / null
+TypeError: Unsupported operand types: null / string
+TypeError: Unsupported operand types: string / bool
+TypeError: Unsupported operand types: bool / string
+TypeError: Unsupported operand types: string / bool
+TypeError: Unsupported operand types: bool / string
+TypeError: Unsupported operand types: string / int
+TypeError: Unsupported operand types: int / string
+TypeError: Unsupported operand types: string / float
+TypeError: Unsupported operand types: float / string
+TypeError: Unsupported operand types: string / string
+TypeError: Unsupported operand types: string / string
+TypeError: Unsupported operand types: string / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / string
-Unsupported operand types: array % array
-Unsupported operand types: array % stdClass
-Unsupported operand types: array % resource
-Unsupported operand types: array % string
-Unsupported operand types: stdClass % array
-Unsupported operand types: stdClass % stdClass
-Unsupported operand types: stdClass % resource
-Unsupported operand types: stdClass % string
-Unsupported operand types: resource % array
-Unsupported operand types: resource % stdClass
-Unsupported operand types: resource % resource
-Unsupported operand types: resource % string
-Unsupported operand types: string % array
-Unsupported operand types: string % stdClass
-Unsupported operand types: string % resource
-Unsupported operand types: string % string
-Unsupported operand types: array % null
-Unsupported operand types: null % array
-Unsupported operand types: array % bool
-Unsupported operand types: bool % array
-Unsupported operand types: array % bool
-Unsupported operand types: bool % array
-Unsupported operand types: array % int
-Unsupported operand types: int % array
-Unsupported operand types: array % float
+TypeError: Unsupported operand types: string / string
+TypeError: Unsupported operand types: array % array
+TypeError: Unsupported operand types: array % stdClass
+TypeError: Unsupported operand types: array % resource
+TypeError: Unsupported operand types: array % string
+TypeError: Unsupported operand types: stdClass % array
+TypeError: Unsupported operand types: stdClass % stdClass
+TypeError: Unsupported operand types: stdClass % resource
+TypeError: Unsupported operand types: stdClass % string
+TypeError: Unsupported operand types: resource % array
+TypeError: Unsupported operand types: resource % stdClass
+TypeError: Unsupported operand types: resource % resource
+TypeError: Unsupported operand types: resource % string
+TypeError: Unsupported operand types: string % array
+TypeError: Unsupported operand types: string % stdClass
+TypeError: Unsupported operand types: string % resource
+TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: array % null
+TypeError: Unsupported operand types: null % array
+TypeError: Unsupported operand types: array % bool
+TypeError: Unsupported operand types: bool % array
+TypeError: Unsupported operand types: array % bool
+TypeError: Unsupported operand types: bool % array
+TypeError: Unsupported operand types: array % int
+TypeError: Unsupported operand types: int % array
+TypeError: Unsupported operand types: array % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % array
-Unsupported operand types: array % string
-Unsupported operand types: string % array
-Unsupported operand types: array % string
+TypeError: Unsupported operand types: float % array
+TypeError: Unsupported operand types: array % string
+TypeError: Unsupported operand types: string % array
+TypeError: Unsupported operand types: array % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % array
-Unsupported operand types: stdClass % null
-Unsupported operand types: null % stdClass
-Unsupported operand types: stdClass % bool
-Unsupported operand types: bool % stdClass
-Unsupported operand types: stdClass % bool
-Unsupported operand types: bool % stdClass
-Unsupported operand types: stdClass % int
-Unsupported operand types: int % stdClass
-Unsupported operand types: stdClass % float
+TypeError: Unsupported operand types: string % array
+TypeError: Unsupported operand types: stdClass % null
+TypeError: Unsupported operand types: null % stdClass
+TypeError: Unsupported operand types: stdClass % bool
+TypeError: Unsupported operand types: bool % stdClass
+TypeError: Unsupported operand types: stdClass % bool
+TypeError: Unsupported operand types: bool % stdClass
+TypeError: Unsupported operand types: stdClass % int
+TypeError: Unsupported operand types: int % stdClass
+TypeError: Unsupported operand types: stdClass % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % stdClass
-Unsupported operand types: stdClass % string
-Unsupported operand types: string % stdClass
-Unsupported operand types: stdClass % string
+TypeError: Unsupported operand types: float % stdClass
+TypeError: Unsupported operand types: stdClass % string
+TypeError: Unsupported operand types: string % stdClass
+TypeError: Unsupported operand types: stdClass % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % stdClass
-Unsupported operand types: resource % null
-Unsupported operand types: null % resource
-Unsupported operand types: resource % bool
-Unsupported operand types: bool % resource
-Unsupported operand types: resource % bool
-Unsupported operand types: bool % resource
-Unsupported operand types: resource % int
-Unsupported operand types: int % resource
-Unsupported operand types: resource % float
+TypeError: Unsupported operand types: string % stdClass
+TypeError: Unsupported operand types: resource % null
+TypeError: Unsupported operand types: null % resource
+TypeError: Unsupported operand types: resource % bool
+TypeError: Unsupported operand types: bool % resource
+TypeError: Unsupported operand types: resource % bool
+TypeError: Unsupported operand types: bool % resource
+TypeError: Unsupported operand types: resource % int
+TypeError: Unsupported operand types: int % resource
+TypeError: Unsupported operand types: resource % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % resource
-Unsupported operand types: resource % string
-Unsupported operand types: string % resource
-Unsupported operand types: resource % string
+TypeError: Unsupported operand types: float % resource
+TypeError: Unsupported operand types: resource % string
+TypeError: Unsupported operand types: string % resource
+TypeError: Unsupported operand types: resource % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % resource
-Unsupported operand types: string % null
-Unsupported operand types: null % string
-Unsupported operand types: string % bool
-Unsupported operand types: bool % string
-Unsupported operand types: string % bool
-Unsupported operand types: bool % string
-Unsupported operand types: string % int
-Unsupported operand types: int % string
-Unsupported operand types: string % float
+TypeError: Unsupported operand types: string % resource
+TypeError: Unsupported operand types: string % null
+TypeError: Unsupported operand types: null % string
+TypeError: Unsupported operand types: string % bool
+TypeError: Unsupported operand types: bool % string
+TypeError: Unsupported operand types: string % bool
+TypeError: Unsupported operand types: bool % string
+TypeError: Unsupported operand types: string % int
+TypeError: Unsupported operand types: int % string
+TypeError: Unsupported operand types: string % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % string
-Unsupported operand types: string % string
-Unsupported operand types: string % string
-Unsupported operand types: string % string
+TypeError: Unsupported operand types: float % string
+TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: string % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % string
-Unsupported operand types: array ** array
-Unsupported operand types: array ** stdClass
-Unsupported operand types: array ** resource
-Unsupported operand types: array ** string
-Unsupported operand types: stdClass ** array
-Unsupported operand types: stdClass ** stdClass
-Unsupported operand types: stdClass ** resource
-Unsupported operand types: stdClass ** string
-Unsupported operand types: resource ** array
-Unsupported operand types: resource ** stdClass
-Unsupported operand types: resource ** resource
-Unsupported operand types: resource ** string
-Unsupported operand types: string ** array
-Unsupported operand types: string ** stdClass
-Unsupported operand types: string ** resource
-Unsupported operand types: string ** string
-Unsupported operand types: array ** null
-Unsupported operand types: null ** array
-Unsupported operand types: array ** bool
-Unsupported operand types: bool ** array
-Unsupported operand types: array ** bool
-Unsupported operand types: bool ** array
-Unsupported operand types: array ** int
-Unsupported operand types: int ** array
-Unsupported operand types: array ** float
-Unsupported operand types: float ** array
-Unsupported operand types: array ** string
-Unsupported operand types: string ** array
-Unsupported operand types: array ** string
+TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: array ** array
+TypeError: Unsupported operand types: array ** stdClass
+TypeError: Unsupported operand types: array ** resource
+TypeError: Unsupported operand types: array ** string
+TypeError: Unsupported operand types: stdClass ** array
+TypeError: Unsupported operand types: stdClass ** stdClass
+TypeError: Unsupported operand types: stdClass ** resource
+TypeError: Unsupported operand types: stdClass ** string
+TypeError: Unsupported operand types: resource ** array
+TypeError: Unsupported operand types: resource ** stdClass
+TypeError: Unsupported operand types: resource ** resource
+TypeError: Unsupported operand types: resource ** string
+TypeError: Unsupported operand types: string ** array
+TypeError: Unsupported operand types: string ** stdClass
+TypeError: Unsupported operand types: string ** resource
+TypeError: Unsupported operand types: string ** string
+TypeError: Unsupported operand types: array ** null
+TypeError: Unsupported operand types: null ** array
+TypeError: Unsupported operand types: array ** bool
+TypeError: Unsupported operand types: bool ** array
+TypeError: Unsupported operand types: array ** bool
+TypeError: Unsupported operand types: bool ** array
+TypeError: Unsupported operand types: array ** int
+TypeError: Unsupported operand types: int ** array
+TypeError: Unsupported operand types: array ** float
+TypeError: Unsupported operand types: float ** array
+TypeError: Unsupported operand types: array ** string
+TypeError: Unsupported operand types: string ** array
+TypeError: Unsupported operand types: array ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** array
-Unsupported operand types: stdClass ** null
-Unsupported operand types: null ** stdClass
-Unsupported operand types: stdClass ** bool
-Unsupported operand types: bool ** stdClass
-Unsupported operand types: stdClass ** bool
-Unsupported operand types: bool ** stdClass
-Unsupported operand types: stdClass ** int
-Unsupported operand types: int ** stdClass
-Unsupported operand types: stdClass ** float
-Unsupported operand types: float ** stdClass
-Unsupported operand types: stdClass ** string
-Unsupported operand types: string ** stdClass
-Unsupported operand types: stdClass ** string
+TypeError: Unsupported operand types: string ** array
+TypeError: Unsupported operand types: stdClass ** null
+TypeError: Unsupported operand types: null ** stdClass
+TypeError: Unsupported operand types: stdClass ** bool
+TypeError: Unsupported operand types: bool ** stdClass
+TypeError: Unsupported operand types: stdClass ** bool
+TypeError: Unsupported operand types: bool ** stdClass
+TypeError: Unsupported operand types: stdClass ** int
+TypeError: Unsupported operand types: int ** stdClass
+TypeError: Unsupported operand types: stdClass ** float
+TypeError: Unsupported operand types: float ** stdClass
+TypeError: Unsupported operand types: stdClass ** string
+TypeError: Unsupported operand types: string ** stdClass
+TypeError: Unsupported operand types: stdClass ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** stdClass
-Unsupported operand types: resource ** null
-Unsupported operand types: null ** resource
-Unsupported operand types: resource ** bool
-Unsupported operand types: bool ** resource
-Unsupported operand types: resource ** bool
-Unsupported operand types: bool ** resource
-Unsupported operand types: resource ** int
-Unsupported operand types: int ** resource
-Unsupported operand types: resource ** float
-Unsupported operand types: float ** resource
-Unsupported operand types: resource ** string
-Unsupported operand types: string ** resource
-Unsupported operand types: resource ** string
+TypeError: Unsupported operand types: string ** stdClass
+TypeError: Unsupported operand types: resource ** null
+TypeError: Unsupported operand types: null ** resource
+TypeError: Unsupported operand types: resource ** bool
+TypeError: Unsupported operand types: bool ** resource
+TypeError: Unsupported operand types: resource ** bool
+TypeError: Unsupported operand types: bool ** resource
+TypeError: Unsupported operand types: resource ** int
+TypeError: Unsupported operand types: int ** resource
+TypeError: Unsupported operand types: resource ** float
+TypeError: Unsupported operand types: float ** resource
+TypeError: Unsupported operand types: resource ** string
+TypeError: Unsupported operand types: string ** resource
+TypeError: Unsupported operand types: resource ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** resource
-Unsupported operand types: string ** null
-Unsupported operand types: null ** string
-Unsupported operand types: string ** bool
-Unsupported operand types: bool ** string
-Unsupported operand types: string ** bool
-Unsupported operand types: bool ** string
-Unsupported operand types: string ** int
-Unsupported operand types: int ** string
-Unsupported operand types: string ** float
-Unsupported operand types: float ** string
-Unsupported operand types: string ** string
-Unsupported operand types: string ** string
-Unsupported operand types: string ** string
+TypeError: Unsupported operand types: string ** resource
+TypeError: Unsupported operand types: string ** null
+TypeError: Unsupported operand types: null ** string
+TypeError: Unsupported operand types: string ** bool
+TypeError: Unsupported operand types: bool ** string
+TypeError: Unsupported operand types: string ** bool
+TypeError: Unsupported operand types: bool ** string
+TypeError: Unsupported operand types: string ** int
+TypeError: Unsupported operand types: int ** string
+TypeError: Unsupported operand types: string ** float
+TypeError: Unsupported operand types: float ** string
+TypeError: Unsupported operand types: string ** string
+TypeError: Unsupported operand types: string ** string
+TypeError: Unsupported operand types: string ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** string
-Unsupported operand types: array << array
-Unsupported operand types: array << stdClass
-Unsupported operand types: array << resource
-Unsupported operand types: array << string
-Unsupported operand types: stdClass << array
-Unsupported operand types: stdClass << stdClass
-Unsupported operand types: stdClass << resource
-Unsupported operand types: stdClass << string
-Unsupported operand types: resource << array
-Unsupported operand types: resource << stdClass
-Unsupported operand types: resource << resource
-Unsupported operand types: resource << string
-Unsupported operand types: string << array
-Unsupported operand types: string << stdClass
-Unsupported operand types: string << resource
-Unsupported operand types: string << string
-Unsupported operand types: array << null
-Unsupported operand types: null << array
-Unsupported operand types: array << bool
-Unsupported operand types: bool << array
-Unsupported operand types: array << bool
-Unsupported operand types: bool << array
-Unsupported operand types: array << int
-Unsupported operand types: int << array
-Unsupported operand types: array << float
+TypeError: Unsupported operand types: string ** string
+TypeError: Unsupported operand types: array << array
+TypeError: Unsupported operand types: array << stdClass
+TypeError: Unsupported operand types: array << resource
+TypeError: Unsupported operand types: array << string
+TypeError: Unsupported operand types: stdClass << array
+TypeError: Unsupported operand types: stdClass << stdClass
+TypeError: Unsupported operand types: stdClass << resource
+TypeError: Unsupported operand types: stdClass << string
+TypeError: Unsupported operand types: resource << array
+TypeError: Unsupported operand types: resource << stdClass
+TypeError: Unsupported operand types: resource << resource
+TypeError: Unsupported operand types: resource << string
+TypeError: Unsupported operand types: string << array
+TypeError: Unsupported operand types: string << stdClass
+TypeError: Unsupported operand types: string << resource
+TypeError: Unsupported operand types: string << string
+TypeError: Unsupported operand types: array << null
+TypeError: Unsupported operand types: null << array
+TypeError: Unsupported operand types: array << bool
+TypeError: Unsupported operand types: bool << array
+TypeError: Unsupported operand types: array << bool
+TypeError: Unsupported operand types: bool << array
+TypeError: Unsupported operand types: array << int
+TypeError: Unsupported operand types: int << array
+TypeError: Unsupported operand types: array << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << array
-Unsupported operand types: array << string
-Unsupported operand types: string << array
-Unsupported operand types: array << string
+TypeError: Unsupported operand types: float << array
+TypeError: Unsupported operand types: array << string
+TypeError: Unsupported operand types: string << array
+TypeError: Unsupported operand types: array << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << array
-Unsupported operand types: stdClass << null
-Unsupported operand types: null << stdClass
-Unsupported operand types: stdClass << bool
-Unsupported operand types: bool << stdClass
-Unsupported operand types: stdClass << bool
-Unsupported operand types: bool << stdClass
-Unsupported operand types: stdClass << int
-Unsupported operand types: int << stdClass
-Unsupported operand types: stdClass << float
+TypeError: Unsupported operand types: string << array
+TypeError: Unsupported operand types: stdClass << null
+TypeError: Unsupported operand types: null << stdClass
+TypeError: Unsupported operand types: stdClass << bool
+TypeError: Unsupported operand types: bool << stdClass
+TypeError: Unsupported operand types: stdClass << bool
+TypeError: Unsupported operand types: bool << stdClass
+TypeError: Unsupported operand types: stdClass << int
+TypeError: Unsupported operand types: int << stdClass
+TypeError: Unsupported operand types: stdClass << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << stdClass
-Unsupported operand types: stdClass << string
-Unsupported operand types: string << stdClass
-Unsupported operand types: stdClass << string
+TypeError: Unsupported operand types: float << stdClass
+TypeError: Unsupported operand types: stdClass << string
+TypeError: Unsupported operand types: string << stdClass
+TypeError: Unsupported operand types: stdClass << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << stdClass
-Unsupported operand types: resource << null
-Unsupported operand types: null << resource
-Unsupported operand types: resource << bool
-Unsupported operand types: bool << resource
-Unsupported operand types: resource << bool
-Unsupported operand types: bool << resource
-Unsupported operand types: resource << int
-Unsupported operand types: int << resource
-Unsupported operand types: resource << float
+TypeError: Unsupported operand types: string << stdClass
+TypeError: Unsupported operand types: resource << null
+TypeError: Unsupported operand types: null << resource
+TypeError: Unsupported operand types: resource << bool
+TypeError: Unsupported operand types: bool << resource
+TypeError: Unsupported operand types: resource << bool
+TypeError: Unsupported operand types: bool << resource
+TypeError: Unsupported operand types: resource << int
+TypeError: Unsupported operand types: int << resource
+TypeError: Unsupported operand types: resource << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << resource
-Unsupported operand types: resource << string
-Unsupported operand types: string << resource
-Unsupported operand types: resource << string
+TypeError: Unsupported operand types: float << resource
+TypeError: Unsupported operand types: resource << string
+TypeError: Unsupported operand types: string << resource
+TypeError: Unsupported operand types: resource << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << resource
-Unsupported operand types: string << null
-Unsupported operand types: null << string
-Unsupported operand types: string << bool
-Unsupported operand types: bool << string
-Unsupported operand types: string << bool
-Unsupported operand types: bool << string
-Unsupported operand types: string << int
-Unsupported operand types: int << string
-Unsupported operand types: string << float
+TypeError: Unsupported operand types: string << resource
+TypeError: Unsupported operand types: string << null
+TypeError: Unsupported operand types: null << string
+TypeError: Unsupported operand types: string << bool
+TypeError: Unsupported operand types: bool << string
+TypeError: Unsupported operand types: string << bool
+TypeError: Unsupported operand types: bool << string
+TypeError: Unsupported operand types: string << int
+TypeError: Unsupported operand types: int << string
+TypeError: Unsupported operand types: string << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << string
-Unsupported operand types: string << string
-Unsupported operand types: string << string
-Unsupported operand types: string << string
+TypeError: Unsupported operand types: float << string
+TypeError: Unsupported operand types: string << string
+TypeError: Unsupported operand types: string << string
+TypeError: Unsupported operand types: string << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << string
-Unsupported operand types: array >> array
-Unsupported operand types: array >> stdClass
-Unsupported operand types: array >> resource
-Unsupported operand types: array >> string
-Unsupported operand types: stdClass >> array
-Unsupported operand types: stdClass >> stdClass
-Unsupported operand types: stdClass >> resource
-Unsupported operand types: stdClass >> string
-Unsupported operand types: resource >> array
-Unsupported operand types: resource >> stdClass
-Unsupported operand types: resource >> resource
-Unsupported operand types: resource >> string
-Unsupported operand types: string >> array
-Unsupported operand types: string >> stdClass
-Unsupported operand types: string >> resource
-Unsupported operand types: string >> string
-Unsupported operand types: array >> null
-Unsupported operand types: null >> array
-Unsupported operand types: array >> bool
-Unsupported operand types: bool >> array
-Unsupported operand types: array >> bool
-Unsupported operand types: bool >> array
-Unsupported operand types: array >> int
-Unsupported operand types: int >> array
-Unsupported operand types: array >> float
+TypeError: Unsupported operand types: string << string
+TypeError: Unsupported operand types: array >> array
+TypeError: Unsupported operand types: array >> stdClass
+TypeError: Unsupported operand types: array >> resource
+TypeError: Unsupported operand types: array >> string
+TypeError: Unsupported operand types: stdClass >> array
+TypeError: Unsupported operand types: stdClass >> stdClass
+TypeError: Unsupported operand types: stdClass >> resource
+TypeError: Unsupported operand types: stdClass >> string
+TypeError: Unsupported operand types: resource >> array
+TypeError: Unsupported operand types: resource >> stdClass
+TypeError: Unsupported operand types: resource >> resource
+TypeError: Unsupported operand types: resource >> string
+TypeError: Unsupported operand types: string >> array
+TypeError: Unsupported operand types: string >> stdClass
+TypeError: Unsupported operand types: string >> resource
+TypeError: Unsupported operand types: string >> string
+TypeError: Unsupported operand types: array >> null
+TypeError: Unsupported operand types: null >> array
+TypeError: Unsupported operand types: array >> bool
+TypeError: Unsupported operand types: bool >> array
+TypeError: Unsupported operand types: array >> bool
+TypeError: Unsupported operand types: bool >> array
+TypeError: Unsupported operand types: array >> int
+TypeError: Unsupported operand types: int >> array
+TypeError: Unsupported operand types: array >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> array
-Unsupported operand types: array >> string
-Unsupported operand types: string >> array
-Unsupported operand types: array >> string
+TypeError: Unsupported operand types: float >> array
+TypeError: Unsupported operand types: array >> string
+TypeError: Unsupported operand types: string >> array
+TypeError: Unsupported operand types: array >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> array
-Unsupported operand types: stdClass >> null
-Unsupported operand types: null >> stdClass
-Unsupported operand types: stdClass >> bool
-Unsupported operand types: bool >> stdClass
-Unsupported operand types: stdClass >> bool
-Unsupported operand types: bool >> stdClass
-Unsupported operand types: stdClass >> int
-Unsupported operand types: int >> stdClass
-Unsupported operand types: stdClass >> float
+TypeError: Unsupported operand types: string >> array
+TypeError: Unsupported operand types: stdClass >> null
+TypeError: Unsupported operand types: null >> stdClass
+TypeError: Unsupported operand types: stdClass >> bool
+TypeError: Unsupported operand types: bool >> stdClass
+TypeError: Unsupported operand types: stdClass >> bool
+TypeError: Unsupported operand types: bool >> stdClass
+TypeError: Unsupported operand types: stdClass >> int
+TypeError: Unsupported operand types: int >> stdClass
+TypeError: Unsupported operand types: stdClass >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> stdClass
-Unsupported operand types: stdClass >> string
-Unsupported operand types: string >> stdClass
-Unsupported operand types: stdClass >> string
+TypeError: Unsupported operand types: float >> stdClass
+TypeError: Unsupported operand types: stdClass >> string
+TypeError: Unsupported operand types: string >> stdClass
+TypeError: Unsupported operand types: stdClass >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> stdClass
-Unsupported operand types: resource >> null
-Unsupported operand types: null >> resource
-Unsupported operand types: resource >> bool
-Unsupported operand types: bool >> resource
-Unsupported operand types: resource >> bool
-Unsupported operand types: bool >> resource
-Unsupported operand types: resource >> int
-Unsupported operand types: int >> resource
-Unsupported operand types: resource >> float
+TypeError: Unsupported operand types: string >> stdClass
+TypeError: Unsupported operand types: resource >> null
+TypeError: Unsupported operand types: null >> resource
+TypeError: Unsupported operand types: resource >> bool
+TypeError: Unsupported operand types: bool >> resource
+TypeError: Unsupported operand types: resource >> bool
+TypeError: Unsupported operand types: bool >> resource
+TypeError: Unsupported operand types: resource >> int
+TypeError: Unsupported operand types: int >> resource
+TypeError: Unsupported operand types: resource >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> resource
-Unsupported operand types: resource >> string
-Unsupported operand types: string >> resource
-Unsupported operand types: resource >> string
+TypeError: Unsupported operand types: float >> resource
+TypeError: Unsupported operand types: resource >> string
+TypeError: Unsupported operand types: string >> resource
+TypeError: Unsupported operand types: resource >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> resource
-Unsupported operand types: string >> null
-Unsupported operand types: null >> string
-Unsupported operand types: string >> bool
-Unsupported operand types: bool >> string
-Unsupported operand types: string >> bool
-Unsupported operand types: bool >> string
-Unsupported operand types: string >> int
-Unsupported operand types: int >> string
-Unsupported operand types: string >> float
+TypeError: Unsupported operand types: string >> resource
+TypeError: Unsupported operand types: string >> null
+TypeError: Unsupported operand types: null >> string
+TypeError: Unsupported operand types: string >> bool
+TypeError: Unsupported operand types: bool >> string
+TypeError: Unsupported operand types: string >> bool
+TypeError: Unsupported operand types: bool >> string
+TypeError: Unsupported operand types: string >> int
+TypeError: Unsupported operand types: int >> string
+TypeError: Unsupported operand types: string >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> string
-Unsupported operand types: string >> string
-Unsupported operand types: string >> string
-Unsupported operand types: string >> string
+TypeError: Unsupported operand types: float >> string
+TypeError: Unsupported operand types: string >> string
+TypeError: Unsupported operand types: string >> string
+TypeError: Unsupported operand types: string >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> string
-Unsupported operand types: array & array
-Unsupported operand types: stdClass & array
-Unsupported operand types: resource & array
-Unsupported operand types: array & string
-Unsupported operand types: stdClass & array
-Unsupported operand types: stdClass & stdClass
-Unsupported operand types: stdClass & resource
-Unsupported operand types: stdClass & string
-Unsupported operand types: resource & array
-Unsupported operand types: resource & stdClass
-Unsupported operand types: resource & resource
-Unsupported operand types: resource & string
-Unsupported operand types: string & array
-Unsupported operand types: stdClass & string
-Unsupported operand types: resource & string
+TypeError: Unsupported operand types: string >> string
+TypeError: Unsupported operand types: array & array
+TypeError: Unsupported operand types: stdClass & array
+TypeError: Unsupported operand types: resource & array
+TypeError: Unsupported operand types: array & string
+TypeError: Unsupported operand types: stdClass & array
+TypeError: Unsupported operand types: stdClass & stdClass
+TypeError: Unsupported operand types: stdClass & resource
+TypeError: Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: resource & array
+TypeError: Unsupported operand types: resource & stdClass
+TypeError: Unsupported operand types: resource & resource
+TypeError: Unsupported operand types: resource & string
+TypeError: Unsupported operand types: string & array
+TypeError: Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: resource & string
 No error for "foo" & "foo"
-Unsupported operand types: array & null
-Unsupported operand types: null & array
-Unsupported operand types: array & bool
-Unsupported operand types: bool & array
-Unsupported operand types: array & bool
-Unsupported operand types: bool & array
-Unsupported operand types: array & int
-Unsupported operand types: int & array
-Unsupported operand types: array & float
+TypeError: Unsupported operand types: array & null
+TypeError: Unsupported operand types: null & array
+TypeError: Unsupported operand types: array & bool
+TypeError: Unsupported operand types: bool & array
+TypeError: Unsupported operand types: array & bool
+TypeError: Unsupported operand types: bool & array
+TypeError: Unsupported operand types: array & int
+TypeError: Unsupported operand types: int & array
+TypeError: Unsupported operand types: array & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & array
-Unsupported operand types: array & string
-Unsupported operand types: string & array
-Unsupported operand types: array & string
+TypeError: Unsupported operand types: float & array
+TypeError: Unsupported operand types: array & string
+TypeError: Unsupported operand types: string & array
+TypeError: Unsupported operand types: array & string
 Warning: A non-numeric value encountered
-Unsupported operand types: string & array
-Unsupported operand types: stdClass & null
-Unsupported operand types: stdClass & null
-Unsupported operand types: stdClass & bool
-Unsupported operand types: stdClass & bool
-Unsupported operand types: stdClass & bool
-Unsupported operand types: stdClass & bool
-Unsupported operand types: stdClass & int
-Unsupported operand types: stdClass & int
-Unsupported operand types: stdClass & float
-Unsupported operand types: stdClass & float
-Unsupported operand types: stdClass & string
-Unsupported operand types: stdClass & string
-Unsupported operand types: stdClass & string
-Unsupported operand types: stdClass & string
-Unsupported operand types: resource & null
-Unsupported operand types: resource & null
-Unsupported operand types: resource & bool
-Unsupported operand types: resource & bool
-Unsupported operand types: resource & bool
-Unsupported operand types: resource & bool
-Unsupported operand types: resource & int
-Unsupported operand types: resource & int
-Unsupported operand types: resource & float
-Unsupported operand types: resource & float
-Unsupported operand types: resource & string
-Unsupported operand types: resource & string
-Unsupported operand types: resource & string
-Unsupported operand types: resource & string
-Unsupported operand types: string & null
-Unsupported operand types: null & string
-Unsupported operand types: string & bool
-Unsupported operand types: bool & string
-Unsupported operand types: string & bool
-Unsupported operand types: bool & string
-Unsupported operand types: string & int
-Unsupported operand types: int & string
-Unsupported operand types: string & float
+TypeError: Unsupported operand types: string & array
+TypeError: Unsupported operand types: stdClass & null
+TypeError: Unsupported operand types: stdClass & null
+TypeError: Unsupported operand types: stdClass & bool
+TypeError: Unsupported operand types: stdClass & bool
+TypeError: Unsupported operand types: stdClass & bool
+TypeError: Unsupported operand types: stdClass & bool
+TypeError: Unsupported operand types: stdClass & int
+TypeError: Unsupported operand types: stdClass & int
+TypeError: Unsupported operand types: stdClass & float
+TypeError: Unsupported operand types: stdClass & float
+TypeError: Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: resource & null
+TypeError: Unsupported operand types: resource & null
+TypeError: Unsupported operand types: resource & bool
+TypeError: Unsupported operand types: resource & bool
+TypeError: Unsupported operand types: resource & bool
+TypeError: Unsupported operand types: resource & bool
+TypeError: Unsupported operand types: resource & int
+TypeError: Unsupported operand types: resource & int
+TypeError: Unsupported operand types: resource & float
+TypeError: Unsupported operand types: resource & float
+TypeError: Unsupported operand types: resource & string
+TypeError: Unsupported operand types: resource & string
+TypeError: Unsupported operand types: resource & string
+TypeError: Unsupported operand types: resource & string
+TypeError: Unsupported operand types: string & null
+TypeError: Unsupported operand types: null & string
+TypeError: Unsupported operand types: string & bool
+TypeError: Unsupported operand types: bool & string
+TypeError: Unsupported operand types: string & bool
+TypeError: Unsupported operand types: bool & string
+TypeError: Unsupported operand types: string & int
+TypeError: Unsupported operand types: int & string
+TypeError: Unsupported operand types: string & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & string
+TypeError: Unsupported operand types: float & string
 No error for "foo" & "123"
 No error for "123" & "foo"
 No error for "foo" & "123foo"
 No error for "123foo" & "foo"
-Unsupported operand types: array | array
-Unsupported operand types: stdClass | array
-Unsupported operand types: resource | array
-Unsupported operand types: array | string
-Unsupported operand types: stdClass | array
-Unsupported operand types: stdClass | stdClass
-Unsupported operand types: stdClass | resource
-Unsupported operand types: stdClass | string
-Unsupported operand types: resource | array
-Unsupported operand types: resource | stdClass
-Unsupported operand types: resource | resource
-Unsupported operand types: resource | string
-Unsupported operand types: string | array
-Unsupported operand types: stdClass | string
-Unsupported operand types: resource | string
+TypeError: Unsupported operand types: array | array
+TypeError: Unsupported operand types: stdClass | array
+TypeError: Unsupported operand types: resource | array
+TypeError: Unsupported operand types: array | string
+TypeError: Unsupported operand types: stdClass | array
+TypeError: Unsupported operand types: stdClass | stdClass
+TypeError: Unsupported operand types: stdClass | resource
+TypeError: Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: resource | array
+TypeError: Unsupported operand types: resource | stdClass
+TypeError: Unsupported operand types: resource | resource
+TypeError: Unsupported operand types: resource | string
+TypeError: Unsupported operand types: string | array
+TypeError: Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: resource | string
 No error for "foo" | "foo"
-Unsupported operand types: array | null
-Unsupported operand types: null | array
-Unsupported operand types: array | bool
-Unsupported operand types: bool | array
-Unsupported operand types: array | bool
-Unsupported operand types: bool | array
-Unsupported operand types: array | int
-Unsupported operand types: int | array
-Unsupported operand types: array | float
+TypeError: Unsupported operand types: array | null
+TypeError: Unsupported operand types: null | array
+TypeError: Unsupported operand types: array | bool
+TypeError: Unsupported operand types: bool | array
+TypeError: Unsupported operand types: array | bool
+TypeError: Unsupported operand types: bool | array
+TypeError: Unsupported operand types: array | int
+TypeError: Unsupported operand types: int | array
+TypeError: Unsupported operand types: array | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | array
-Unsupported operand types: array | string
-Unsupported operand types: string | array
-Unsupported operand types: array | string
+TypeError: Unsupported operand types: float | array
+TypeError: Unsupported operand types: array | string
+TypeError: Unsupported operand types: string | array
+TypeError: Unsupported operand types: array | string
 Warning: A non-numeric value encountered
-Unsupported operand types: string | array
-Unsupported operand types: stdClass | null
-Unsupported operand types: stdClass | null
-Unsupported operand types: stdClass | bool
-Unsupported operand types: stdClass | bool
-Unsupported operand types: stdClass | bool
-Unsupported operand types: stdClass | bool
-Unsupported operand types: stdClass | int
-Unsupported operand types: stdClass | int
-Unsupported operand types: stdClass | float
-Unsupported operand types: stdClass | float
-Unsupported operand types: stdClass | string
-Unsupported operand types: stdClass | string
-Unsupported operand types: stdClass | string
-Unsupported operand types: stdClass | string
-Unsupported operand types: resource | null
-Unsupported operand types: resource | null
-Unsupported operand types: resource | bool
-Unsupported operand types: resource | bool
-Unsupported operand types: resource | bool
-Unsupported operand types: resource | bool
-Unsupported operand types: resource | int
-Unsupported operand types: resource | int
-Unsupported operand types: resource | float
-Unsupported operand types: resource | float
-Unsupported operand types: resource | string
-Unsupported operand types: resource | string
-Unsupported operand types: resource | string
-Unsupported operand types: resource | string
-Unsupported operand types: string | null
-Unsupported operand types: null | string
-Unsupported operand types: string | bool
-Unsupported operand types: bool | string
-Unsupported operand types: string | bool
-Unsupported operand types: bool | string
-Unsupported operand types: string | int
-Unsupported operand types: int | string
-Unsupported operand types: string | float
+TypeError: Unsupported operand types: string | array
+TypeError: Unsupported operand types: stdClass | null
+TypeError: Unsupported operand types: stdClass | null
+TypeError: Unsupported operand types: stdClass | bool
+TypeError: Unsupported operand types: stdClass | bool
+TypeError: Unsupported operand types: stdClass | bool
+TypeError: Unsupported operand types: stdClass | bool
+TypeError: Unsupported operand types: stdClass | int
+TypeError: Unsupported operand types: stdClass | int
+TypeError: Unsupported operand types: stdClass | float
+TypeError: Unsupported operand types: stdClass | float
+TypeError: Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: resource | null
+TypeError: Unsupported operand types: resource | null
+TypeError: Unsupported operand types: resource | bool
+TypeError: Unsupported operand types: resource | bool
+TypeError: Unsupported operand types: resource | bool
+TypeError: Unsupported operand types: resource | bool
+TypeError: Unsupported operand types: resource | int
+TypeError: Unsupported operand types: resource | int
+TypeError: Unsupported operand types: resource | float
+TypeError: Unsupported operand types: resource | float
+TypeError: Unsupported operand types: resource | string
+TypeError: Unsupported operand types: resource | string
+TypeError: Unsupported operand types: resource | string
+TypeError: Unsupported operand types: resource | string
+TypeError: Unsupported operand types: string | null
+TypeError: Unsupported operand types: null | string
+TypeError: Unsupported operand types: string | bool
+TypeError: Unsupported operand types: bool | string
+TypeError: Unsupported operand types: string | bool
+TypeError: Unsupported operand types: bool | string
+TypeError: Unsupported operand types: string | int
+TypeError: Unsupported operand types: int | string
+TypeError: Unsupported operand types: string | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | string
+TypeError: Unsupported operand types: float | string
 No error for "foo" | "123"
 No error for "123" | "foo"
 No error for "foo" | "123foo"
 No error for "123foo" | "foo"
-Unsupported operand types: array ^ array
-Unsupported operand types: stdClass ^ array
-Unsupported operand types: resource ^ array
-Unsupported operand types: array ^ string
-Unsupported operand types: stdClass ^ array
-Unsupported operand types: stdClass ^ stdClass
-Unsupported operand types: stdClass ^ resource
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: resource ^ array
-Unsupported operand types: resource ^ stdClass
-Unsupported operand types: resource ^ resource
-Unsupported operand types: resource ^ string
-Unsupported operand types: string ^ array
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: array ^ array
+TypeError: Unsupported operand types: stdClass ^ array
+TypeError: Unsupported operand types: resource ^ array
+TypeError: Unsupported operand types: array ^ string
+TypeError: Unsupported operand types: stdClass ^ array
+TypeError: Unsupported operand types: stdClass ^ stdClass
+TypeError: Unsupported operand types: stdClass ^ resource
+TypeError: Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: resource ^ array
+TypeError: Unsupported operand types: resource ^ stdClass
+TypeError: Unsupported operand types: resource ^ resource
+TypeError: Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: string ^ array
+TypeError: Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: resource ^ string
 No error for "foo" ^ "foo"
-Unsupported operand types: array ^ null
-Unsupported operand types: null ^ array
-Unsupported operand types: array ^ bool
-Unsupported operand types: bool ^ array
-Unsupported operand types: array ^ bool
-Unsupported operand types: bool ^ array
-Unsupported operand types: array ^ int
-Unsupported operand types: int ^ array
-Unsupported operand types: array ^ float
+TypeError: Unsupported operand types: array ^ null
+TypeError: Unsupported operand types: null ^ array
+TypeError: Unsupported operand types: array ^ bool
+TypeError: Unsupported operand types: bool ^ array
+TypeError: Unsupported operand types: array ^ bool
+TypeError: Unsupported operand types: bool ^ array
+TypeError: Unsupported operand types: array ^ int
+TypeError: Unsupported operand types: int ^ array
+TypeError: Unsupported operand types: array ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ array
-Unsupported operand types: array ^ string
-Unsupported operand types: string ^ array
-Unsupported operand types: array ^ string
+TypeError: Unsupported operand types: float ^ array
+TypeError: Unsupported operand types: array ^ string
+TypeError: Unsupported operand types: string ^ array
+TypeError: Unsupported operand types: array ^ string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ^ array
-Unsupported operand types: stdClass ^ null
-Unsupported operand types: stdClass ^ null
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: stdClass ^ int
-Unsupported operand types: stdClass ^ int
-Unsupported operand types: stdClass ^ float
-Unsupported operand types: stdClass ^ float
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: resource ^ null
-Unsupported operand types: resource ^ null
-Unsupported operand types: resource ^ bool
-Unsupported operand types: resource ^ bool
-Unsupported operand types: resource ^ bool
-Unsupported operand types: resource ^ bool
-Unsupported operand types: resource ^ int
-Unsupported operand types: resource ^ int
-Unsupported operand types: resource ^ float
-Unsupported operand types: resource ^ float
-Unsupported operand types: resource ^ string
-Unsupported operand types: resource ^ string
-Unsupported operand types: resource ^ string
-Unsupported operand types: resource ^ string
-Unsupported operand types: string ^ null
-Unsupported operand types: null ^ string
-Unsupported operand types: string ^ bool
-Unsupported operand types: bool ^ string
-Unsupported operand types: string ^ bool
-Unsupported operand types: bool ^ string
-Unsupported operand types: string ^ int
-Unsupported operand types: int ^ string
-Unsupported operand types: string ^ float
+TypeError: Unsupported operand types: string ^ array
+TypeError: Unsupported operand types: stdClass ^ null
+TypeError: Unsupported operand types: stdClass ^ null
+TypeError: Unsupported operand types: stdClass ^ bool
+TypeError: Unsupported operand types: stdClass ^ bool
+TypeError: Unsupported operand types: stdClass ^ bool
+TypeError: Unsupported operand types: stdClass ^ bool
+TypeError: Unsupported operand types: stdClass ^ int
+TypeError: Unsupported operand types: stdClass ^ int
+TypeError: Unsupported operand types: stdClass ^ float
+TypeError: Unsupported operand types: stdClass ^ float
+TypeError: Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: resource ^ null
+TypeError: Unsupported operand types: resource ^ null
+TypeError: Unsupported operand types: resource ^ bool
+TypeError: Unsupported operand types: resource ^ bool
+TypeError: Unsupported operand types: resource ^ bool
+TypeError: Unsupported operand types: resource ^ bool
+TypeError: Unsupported operand types: resource ^ int
+TypeError: Unsupported operand types: resource ^ int
+TypeError: Unsupported operand types: resource ^ float
+TypeError: Unsupported operand types: resource ^ float
+TypeError: Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: string ^ null
+TypeError: Unsupported operand types: null ^ string
+TypeError: Unsupported operand types: string ^ bool
+TypeError: Unsupported operand types: bool ^ string
+TypeError: Unsupported operand types: string ^ bool
+TypeError: Unsupported operand types: bool ^ string
+TypeError: Unsupported operand types: string ^ int
+TypeError: Unsupported operand types: int ^ string
+TypeError: Unsupported operand types: string ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ string
+TypeError: Unsupported operand types: float ^ string
 No error for "foo" ^ "123"
 No error for "123" ^ "foo"
 No error for "foo" ^ "123foo"
@@ -1045,24 +1045,24 @@ Warning: Array to string conversion
 Warning: Array to string conversion
 No error for [] . []
 Warning: Array to string conversion
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 Warning: Array to string conversion
 No error for [] . STDOUT
 Warning: Array to string conversion
 No error for [] . "foo"
 Warning: Array to string conversion
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 Warning: Array to string conversion
 No error for STDOUT . []
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 No error for STDOUT . STDOUT
 No error for STDOUT . "foo"
 Warning: Array to string conversion
 No error for "foo" . []
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 No error for "foo" . STDOUT
 No error for "foo" . "foo"
 Warning: Array to string conversion
@@ -1093,20 +1093,20 @@ Warning: Array to string conversion
 No error for [] . "123foo"
 Warning: Array to string conversion
 No error for "123foo" . []
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 No error for STDOUT . null
 No error for null . STDOUT
 No error for STDOUT . true
@@ -1139,858 +1139,858 @@ No error for "123foo" . "foo"
 
 ASSIGN OP:
 No error for [] += []
-Unsupported operand types: array + stdClass
-Unsupported operand types: array + resource
-Unsupported operand types: array + string
-Unsupported operand types: stdClass + array
-Unsupported operand types: stdClass + stdClass
-Unsupported operand types: stdClass + resource
-Unsupported operand types: stdClass + string
-Unsupported operand types: resource + array
-Unsupported operand types: resource + stdClass
-Unsupported operand types: resource + resource
-Unsupported operand types: resource + string
-Unsupported operand types: string + array
-Unsupported operand types: string + stdClass
-Unsupported operand types: string + resource
-Unsupported operand types: string + string
-Unsupported operand types: array + null
-Unsupported operand types: null + array
-Unsupported operand types: array + bool
-Unsupported operand types: bool + array
-Unsupported operand types: array + bool
-Unsupported operand types: bool + array
-Unsupported operand types: array + int
-Unsupported operand types: int + array
-Unsupported operand types: array + float
-Unsupported operand types: float + array
-Unsupported operand types: array + string
-Unsupported operand types: string + array
-Unsupported operand types: array + string
+TypeError: Unsupported operand types: array + stdClass
+TypeError: Unsupported operand types: array + resource
+TypeError: Unsupported operand types: array + string
+TypeError: Unsupported operand types: stdClass + array
+TypeError: Unsupported operand types: stdClass + stdClass
+TypeError: Unsupported operand types: stdClass + resource
+TypeError: Unsupported operand types: stdClass + string
+TypeError: Unsupported operand types: resource + array
+TypeError: Unsupported operand types: resource + stdClass
+TypeError: Unsupported operand types: resource + resource
+TypeError: Unsupported operand types: resource + string
+TypeError: Unsupported operand types: string + array
+TypeError: Unsupported operand types: string + stdClass
+TypeError: Unsupported operand types: string + resource
+TypeError: Unsupported operand types: string + string
+TypeError: Unsupported operand types: array + null
+TypeError: Unsupported operand types: null + array
+TypeError: Unsupported operand types: array + bool
+TypeError: Unsupported operand types: bool + array
+TypeError: Unsupported operand types: array + bool
+TypeError: Unsupported operand types: bool + array
+TypeError: Unsupported operand types: array + int
+TypeError: Unsupported operand types: int + array
+TypeError: Unsupported operand types: array + float
+TypeError: Unsupported operand types: float + array
+TypeError: Unsupported operand types: array + string
+TypeError: Unsupported operand types: string + array
+TypeError: Unsupported operand types: array + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + array
-Unsupported operand types: stdClass + null
-Unsupported operand types: null + stdClass
-Unsupported operand types: stdClass + bool
-Unsupported operand types: bool + stdClass
-Unsupported operand types: stdClass + bool
-Unsupported operand types: bool + stdClass
-Unsupported operand types: stdClass + int
-Unsupported operand types: int + stdClass
-Unsupported operand types: stdClass + float
-Unsupported operand types: float + stdClass
-Unsupported operand types: stdClass + string
-Unsupported operand types: string + stdClass
-Unsupported operand types: stdClass + string
+TypeError: Unsupported operand types: string + array
+TypeError: Unsupported operand types: stdClass + null
+TypeError: Unsupported operand types: null + stdClass
+TypeError: Unsupported operand types: stdClass + bool
+TypeError: Unsupported operand types: bool + stdClass
+TypeError: Unsupported operand types: stdClass + bool
+TypeError: Unsupported operand types: bool + stdClass
+TypeError: Unsupported operand types: stdClass + int
+TypeError: Unsupported operand types: int + stdClass
+TypeError: Unsupported operand types: stdClass + float
+TypeError: Unsupported operand types: float + stdClass
+TypeError: Unsupported operand types: stdClass + string
+TypeError: Unsupported operand types: string + stdClass
+TypeError: Unsupported operand types: stdClass + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + stdClass
-Unsupported operand types: resource + null
-Unsupported operand types: null + resource
-Unsupported operand types: resource + bool
-Unsupported operand types: bool + resource
-Unsupported operand types: resource + bool
-Unsupported operand types: bool + resource
-Unsupported operand types: resource + int
-Unsupported operand types: int + resource
-Unsupported operand types: resource + float
-Unsupported operand types: float + resource
-Unsupported operand types: resource + string
-Unsupported operand types: string + resource
-Unsupported operand types: resource + string
+TypeError: Unsupported operand types: string + stdClass
+TypeError: Unsupported operand types: resource + null
+TypeError: Unsupported operand types: null + resource
+TypeError: Unsupported operand types: resource + bool
+TypeError: Unsupported operand types: bool + resource
+TypeError: Unsupported operand types: resource + bool
+TypeError: Unsupported operand types: bool + resource
+TypeError: Unsupported operand types: resource + int
+TypeError: Unsupported operand types: int + resource
+TypeError: Unsupported operand types: resource + float
+TypeError: Unsupported operand types: float + resource
+TypeError: Unsupported operand types: resource + string
+TypeError: Unsupported operand types: string + resource
+TypeError: Unsupported operand types: resource + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + resource
-Unsupported operand types: string + null
-Unsupported operand types: null + string
-Unsupported operand types: string + bool
-Unsupported operand types: bool + string
-Unsupported operand types: string + bool
-Unsupported operand types: bool + string
-Unsupported operand types: string + int
-Unsupported operand types: int + string
-Unsupported operand types: string + float
-Unsupported operand types: float + string
-Unsupported operand types: string + string
-Unsupported operand types: string + string
-Unsupported operand types: string + string
+TypeError: Unsupported operand types: string + resource
+TypeError: Unsupported operand types: string + null
+TypeError: Unsupported operand types: null + string
+TypeError: Unsupported operand types: string + bool
+TypeError: Unsupported operand types: bool + string
+TypeError: Unsupported operand types: string + bool
+TypeError: Unsupported operand types: bool + string
+TypeError: Unsupported operand types: string + int
+TypeError: Unsupported operand types: int + string
+TypeError: Unsupported operand types: string + float
+TypeError: Unsupported operand types: float + string
+TypeError: Unsupported operand types: string + string
+TypeError: Unsupported operand types: string + string
+TypeError: Unsupported operand types: string + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + string
-Unsupported operand types: array - array
-Unsupported operand types: array - stdClass
-Unsupported operand types: array - resource
-Unsupported operand types: array - string
-Unsupported operand types: stdClass - array
-Unsupported operand types: stdClass - stdClass
-Unsupported operand types: stdClass - resource
-Unsupported operand types: stdClass - string
-Unsupported operand types: resource - array
-Unsupported operand types: resource - stdClass
-Unsupported operand types: resource - resource
-Unsupported operand types: resource - string
-Unsupported operand types: string - array
-Unsupported operand types: string - stdClass
-Unsupported operand types: string - resource
-Unsupported operand types: string - string
-Unsupported operand types: array - null
-Unsupported operand types: null - array
-Unsupported operand types: array - bool
-Unsupported operand types: bool - array
-Unsupported operand types: array - bool
-Unsupported operand types: bool - array
-Unsupported operand types: array - int
-Unsupported operand types: int - array
-Unsupported operand types: array - float
-Unsupported operand types: float - array
-Unsupported operand types: array - string
-Unsupported operand types: string - array
-Unsupported operand types: array - string
+TypeError: Unsupported operand types: string + string
+TypeError: Unsupported operand types: array - array
+TypeError: Unsupported operand types: array - stdClass
+TypeError: Unsupported operand types: array - resource
+TypeError: Unsupported operand types: array - string
+TypeError: Unsupported operand types: stdClass - array
+TypeError: Unsupported operand types: stdClass - stdClass
+TypeError: Unsupported operand types: stdClass - resource
+TypeError: Unsupported operand types: stdClass - string
+TypeError: Unsupported operand types: resource - array
+TypeError: Unsupported operand types: resource - stdClass
+TypeError: Unsupported operand types: resource - resource
+TypeError: Unsupported operand types: resource - string
+TypeError: Unsupported operand types: string - array
+TypeError: Unsupported operand types: string - stdClass
+TypeError: Unsupported operand types: string - resource
+TypeError: Unsupported operand types: string - string
+TypeError: Unsupported operand types: array - null
+TypeError: Unsupported operand types: null - array
+TypeError: Unsupported operand types: array - bool
+TypeError: Unsupported operand types: bool - array
+TypeError: Unsupported operand types: array - bool
+TypeError: Unsupported operand types: bool - array
+TypeError: Unsupported operand types: array - int
+TypeError: Unsupported operand types: int - array
+TypeError: Unsupported operand types: array - float
+TypeError: Unsupported operand types: float - array
+TypeError: Unsupported operand types: array - string
+TypeError: Unsupported operand types: string - array
+TypeError: Unsupported operand types: array - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - array
-Unsupported operand types: stdClass - null
-Unsupported operand types: null - stdClass
-Unsupported operand types: stdClass - bool
-Unsupported operand types: bool - stdClass
-Unsupported operand types: stdClass - bool
-Unsupported operand types: bool - stdClass
-Unsupported operand types: stdClass - int
-Unsupported operand types: int - stdClass
-Unsupported operand types: stdClass - float
-Unsupported operand types: float - stdClass
-Unsupported operand types: stdClass - string
-Unsupported operand types: string - stdClass
-Unsupported operand types: stdClass - string
+TypeError: Unsupported operand types: string - array
+TypeError: Unsupported operand types: stdClass - null
+TypeError: Unsupported operand types: null - stdClass
+TypeError: Unsupported operand types: stdClass - bool
+TypeError: Unsupported operand types: bool - stdClass
+TypeError: Unsupported operand types: stdClass - bool
+TypeError: Unsupported operand types: bool - stdClass
+TypeError: Unsupported operand types: stdClass - int
+TypeError: Unsupported operand types: int - stdClass
+TypeError: Unsupported operand types: stdClass - float
+TypeError: Unsupported operand types: float - stdClass
+TypeError: Unsupported operand types: stdClass - string
+TypeError: Unsupported operand types: string - stdClass
+TypeError: Unsupported operand types: stdClass - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - stdClass
-Unsupported operand types: resource - null
-Unsupported operand types: null - resource
-Unsupported operand types: resource - bool
-Unsupported operand types: bool - resource
-Unsupported operand types: resource - bool
-Unsupported operand types: bool - resource
-Unsupported operand types: resource - int
-Unsupported operand types: int - resource
-Unsupported operand types: resource - float
-Unsupported operand types: float - resource
-Unsupported operand types: resource - string
-Unsupported operand types: string - resource
-Unsupported operand types: resource - string
+TypeError: Unsupported operand types: string - stdClass
+TypeError: Unsupported operand types: resource - null
+TypeError: Unsupported operand types: null - resource
+TypeError: Unsupported operand types: resource - bool
+TypeError: Unsupported operand types: bool - resource
+TypeError: Unsupported operand types: resource - bool
+TypeError: Unsupported operand types: bool - resource
+TypeError: Unsupported operand types: resource - int
+TypeError: Unsupported operand types: int - resource
+TypeError: Unsupported operand types: resource - float
+TypeError: Unsupported operand types: float - resource
+TypeError: Unsupported operand types: resource - string
+TypeError: Unsupported operand types: string - resource
+TypeError: Unsupported operand types: resource - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - resource
-Unsupported operand types: string - null
-Unsupported operand types: null - string
-Unsupported operand types: string - bool
-Unsupported operand types: bool - string
-Unsupported operand types: string - bool
-Unsupported operand types: bool - string
-Unsupported operand types: string - int
-Unsupported operand types: int - string
-Unsupported operand types: string - float
-Unsupported operand types: float - string
-Unsupported operand types: string - string
-Unsupported operand types: string - string
-Unsupported operand types: string - string
+TypeError: Unsupported operand types: string - resource
+TypeError: Unsupported operand types: string - null
+TypeError: Unsupported operand types: null - string
+TypeError: Unsupported operand types: string - bool
+TypeError: Unsupported operand types: bool - string
+TypeError: Unsupported operand types: string - bool
+TypeError: Unsupported operand types: bool - string
+TypeError: Unsupported operand types: string - int
+TypeError: Unsupported operand types: int - string
+TypeError: Unsupported operand types: string - float
+TypeError: Unsupported operand types: float - string
+TypeError: Unsupported operand types: string - string
+TypeError: Unsupported operand types: string - string
+TypeError: Unsupported operand types: string - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - string
-Unsupported operand types: array * array
-Unsupported operand types: array * stdClass
-Unsupported operand types: array * resource
-Unsupported operand types: array * string
-Unsupported operand types: stdClass * array
-Unsupported operand types: stdClass * stdClass
-Unsupported operand types: stdClass * resource
-Unsupported operand types: stdClass * string
-Unsupported operand types: resource * array
-Unsupported operand types: resource * stdClass
-Unsupported operand types: resource * resource
-Unsupported operand types: resource * string
-Unsupported operand types: string * array
-Unsupported operand types: string * stdClass
-Unsupported operand types: string * resource
-Unsupported operand types: string * string
-Unsupported operand types: array * null
-Unsupported operand types: null * array
-Unsupported operand types: array * bool
-Unsupported operand types: bool * array
-Unsupported operand types: array * bool
-Unsupported operand types: bool * array
-Unsupported operand types: array * int
-Unsupported operand types: int * array
-Unsupported operand types: array * float
-Unsupported operand types: float * array
-Unsupported operand types: array * string
-Unsupported operand types: string * array
-Unsupported operand types: array * string
+TypeError: Unsupported operand types: string - string
+TypeError: Unsupported operand types: array * array
+TypeError: Unsupported operand types: array * stdClass
+TypeError: Unsupported operand types: array * resource
+TypeError: Unsupported operand types: array * string
+TypeError: Unsupported operand types: stdClass * array
+TypeError: Unsupported operand types: stdClass * stdClass
+TypeError: Unsupported operand types: stdClass * resource
+TypeError: Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: resource * array
+TypeError: Unsupported operand types: resource * stdClass
+TypeError: Unsupported operand types: resource * resource
+TypeError: Unsupported operand types: resource * string
+TypeError: Unsupported operand types: string * array
+TypeError: Unsupported operand types: string * stdClass
+TypeError: Unsupported operand types: string * resource
+TypeError: Unsupported operand types: string * string
+TypeError: Unsupported operand types: array * null
+TypeError: Unsupported operand types: null * array
+TypeError: Unsupported operand types: array * bool
+TypeError: Unsupported operand types: bool * array
+TypeError: Unsupported operand types: array * bool
+TypeError: Unsupported operand types: bool * array
+TypeError: Unsupported operand types: array * int
+TypeError: Unsupported operand types: int * array
+TypeError: Unsupported operand types: array * float
+TypeError: Unsupported operand types: float * array
+TypeError: Unsupported operand types: array * string
+TypeError: Unsupported operand types: string * array
+TypeError: Unsupported operand types: array * string
 Warning: A non-numeric value encountered
-Unsupported operand types: string * array
-Unsupported operand types: stdClass * null
-Unsupported operand types: null * stdClass
-Unsupported operand types: stdClass * bool
-Unsupported operand types: bool * stdClass
-Unsupported operand types: stdClass * bool
-Unsupported operand types: bool * stdClass
-Unsupported operand types: stdClass * int
-Unsupported operand types: int * stdClass
-Unsupported operand types: stdClass * float
-Unsupported operand types: float * stdClass
-Unsupported operand types: stdClass * string
-Unsupported operand types: string * stdClass
-Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: string * array
+TypeError: Unsupported operand types: stdClass * null
+TypeError: Unsupported operand types: null * stdClass
+TypeError: Unsupported operand types: stdClass * bool
+TypeError: Unsupported operand types: bool * stdClass
+TypeError: Unsupported operand types: stdClass * bool
+TypeError: Unsupported operand types: bool * stdClass
+TypeError: Unsupported operand types: stdClass * int
+TypeError: Unsupported operand types: int * stdClass
+TypeError: Unsupported operand types: stdClass * float
+TypeError: Unsupported operand types: float * stdClass
+TypeError: Unsupported operand types: stdClass * string
+TypeError: Unsupported operand types: string * stdClass
+TypeError: Unsupported operand types: stdClass * string
 Warning: A non-numeric value encountered
-Unsupported operand types: string * stdClass
-Unsupported operand types: resource * null
-Unsupported operand types: null * resource
-Unsupported operand types: resource * bool
-Unsupported operand types: bool * resource
-Unsupported operand types: resource * bool
-Unsupported operand types: bool * resource
-Unsupported operand types: resource * int
-Unsupported operand types: int * resource
-Unsupported operand types: resource * float
-Unsupported operand types: float * resource
-Unsupported operand types: resource * string
-Unsupported operand types: string * resource
-Unsupported operand types: resource * string
+TypeError: Unsupported operand types: string * stdClass
+TypeError: Unsupported operand types: resource * null
+TypeError: Unsupported operand types: null * resource
+TypeError: Unsupported operand types: resource * bool
+TypeError: Unsupported operand types: bool * resource
+TypeError: Unsupported operand types: resource * bool
+TypeError: Unsupported operand types: bool * resource
+TypeError: Unsupported operand types: resource * int
+TypeError: Unsupported operand types: int * resource
+TypeError: Unsupported operand types: resource * float
+TypeError: Unsupported operand types: float * resource
+TypeError: Unsupported operand types: resource * string
+TypeError: Unsupported operand types: string * resource
+TypeError: Unsupported operand types: resource * string
 Warning: A non-numeric value encountered
-Unsupported operand types: string * resource
-Unsupported operand types: string * null
-Unsupported operand types: null * string
-Unsupported operand types: string * bool
-Unsupported operand types: bool * string
-Unsupported operand types: string * bool
-Unsupported operand types: bool * string
-Unsupported operand types: string * int
-Unsupported operand types: int * string
-Unsupported operand types: string * float
-Unsupported operand types: float * string
-Unsupported operand types: string * string
-Unsupported operand types: string * string
-Unsupported operand types: string * string
+TypeError: Unsupported operand types: string * resource
+TypeError: Unsupported operand types: string * null
+TypeError: Unsupported operand types: null * string
+TypeError: Unsupported operand types: string * bool
+TypeError: Unsupported operand types: bool * string
+TypeError: Unsupported operand types: string * bool
+TypeError: Unsupported operand types: bool * string
+TypeError: Unsupported operand types: string * int
+TypeError: Unsupported operand types: int * string
+TypeError: Unsupported operand types: string * float
+TypeError: Unsupported operand types: float * string
+TypeError: Unsupported operand types: string * string
+TypeError: Unsupported operand types: string * string
+TypeError: Unsupported operand types: string * string
 Warning: A non-numeric value encountered
-Unsupported operand types: string * string
-Unsupported operand types: array / array
-Unsupported operand types: array / stdClass
-Unsupported operand types: array / resource
-Unsupported operand types: array / string
-Unsupported operand types: stdClass / array
-Unsupported operand types: stdClass / stdClass
-Unsupported operand types: stdClass / resource
-Unsupported operand types: stdClass / string
-Unsupported operand types: resource / array
-Unsupported operand types: resource / stdClass
-Unsupported operand types: resource / resource
-Unsupported operand types: resource / string
-Unsupported operand types: string / array
-Unsupported operand types: string / stdClass
-Unsupported operand types: string / resource
-Unsupported operand types: string / string
-Unsupported operand types: array / null
-Unsupported operand types: null / array
-Unsupported operand types: array / bool
-Unsupported operand types: bool / array
-Unsupported operand types: array / bool
-Unsupported operand types: bool / array
-Unsupported operand types: array / int
-Unsupported operand types: int / array
-Unsupported operand types: array / float
-Unsupported operand types: float / array
-Unsupported operand types: array / string
-Unsupported operand types: string / array
-Unsupported operand types: array / string
+TypeError: Unsupported operand types: string * string
+TypeError: Unsupported operand types: array / array
+TypeError: Unsupported operand types: array / stdClass
+TypeError: Unsupported operand types: array / resource
+TypeError: Unsupported operand types: array / string
+TypeError: Unsupported operand types: stdClass / array
+TypeError: Unsupported operand types: stdClass / stdClass
+TypeError: Unsupported operand types: stdClass / resource
+TypeError: Unsupported operand types: stdClass / string
+TypeError: Unsupported operand types: resource / array
+TypeError: Unsupported operand types: resource / stdClass
+TypeError: Unsupported operand types: resource / resource
+TypeError: Unsupported operand types: resource / string
+TypeError: Unsupported operand types: string / array
+TypeError: Unsupported operand types: string / stdClass
+TypeError: Unsupported operand types: string / resource
+TypeError: Unsupported operand types: string / string
+TypeError: Unsupported operand types: array / null
+TypeError: Unsupported operand types: null / array
+TypeError: Unsupported operand types: array / bool
+TypeError: Unsupported operand types: bool / array
+TypeError: Unsupported operand types: array / bool
+TypeError: Unsupported operand types: bool / array
+TypeError: Unsupported operand types: array / int
+TypeError: Unsupported operand types: int / array
+TypeError: Unsupported operand types: array / float
+TypeError: Unsupported operand types: float / array
+TypeError: Unsupported operand types: array / string
+TypeError: Unsupported operand types: string / array
+TypeError: Unsupported operand types: array / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / array
-Unsupported operand types: stdClass / null
-Unsupported operand types: null / stdClass
-Unsupported operand types: stdClass / bool
-Unsupported operand types: bool / stdClass
-Unsupported operand types: stdClass / bool
-Unsupported operand types: bool / stdClass
-Unsupported operand types: stdClass / int
-Unsupported operand types: int / stdClass
-Unsupported operand types: stdClass / float
-Unsupported operand types: float / stdClass
-Unsupported operand types: stdClass / string
-Unsupported operand types: string / stdClass
-Unsupported operand types: stdClass / string
+TypeError: Unsupported operand types: string / array
+TypeError: Unsupported operand types: stdClass / null
+TypeError: Unsupported operand types: null / stdClass
+TypeError: Unsupported operand types: stdClass / bool
+TypeError: Unsupported operand types: bool / stdClass
+TypeError: Unsupported operand types: stdClass / bool
+TypeError: Unsupported operand types: bool / stdClass
+TypeError: Unsupported operand types: stdClass / int
+TypeError: Unsupported operand types: int / stdClass
+TypeError: Unsupported operand types: stdClass / float
+TypeError: Unsupported operand types: float / stdClass
+TypeError: Unsupported operand types: stdClass / string
+TypeError: Unsupported operand types: string / stdClass
+TypeError: Unsupported operand types: stdClass / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / stdClass
-Unsupported operand types: resource / null
-Unsupported operand types: null / resource
-Unsupported operand types: resource / bool
-Unsupported operand types: bool / resource
-Unsupported operand types: resource / bool
-Unsupported operand types: bool / resource
-Unsupported operand types: resource / int
-Unsupported operand types: int / resource
-Unsupported operand types: resource / float
-Unsupported operand types: float / resource
-Unsupported operand types: resource / string
-Unsupported operand types: string / resource
-Unsupported operand types: resource / string
+TypeError: Unsupported operand types: string / stdClass
+TypeError: Unsupported operand types: resource / null
+TypeError: Unsupported operand types: null / resource
+TypeError: Unsupported operand types: resource / bool
+TypeError: Unsupported operand types: bool / resource
+TypeError: Unsupported operand types: resource / bool
+TypeError: Unsupported operand types: bool / resource
+TypeError: Unsupported operand types: resource / int
+TypeError: Unsupported operand types: int / resource
+TypeError: Unsupported operand types: resource / float
+TypeError: Unsupported operand types: float / resource
+TypeError: Unsupported operand types: resource / string
+TypeError: Unsupported operand types: string / resource
+TypeError: Unsupported operand types: resource / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / resource
-Unsupported operand types: string / null
-Unsupported operand types: null / string
-Unsupported operand types: string / bool
-Unsupported operand types: bool / string
-Unsupported operand types: string / bool
-Unsupported operand types: bool / string
-Unsupported operand types: string / int
-Unsupported operand types: int / string
-Unsupported operand types: string / float
-Unsupported operand types: float / string
-Unsupported operand types: string / string
-Unsupported operand types: string / string
-Unsupported operand types: string / string
+TypeError: Unsupported operand types: string / resource
+TypeError: Unsupported operand types: string / null
+TypeError: Unsupported operand types: null / string
+TypeError: Unsupported operand types: string / bool
+TypeError: Unsupported operand types: bool / string
+TypeError: Unsupported operand types: string / bool
+TypeError: Unsupported operand types: bool / string
+TypeError: Unsupported operand types: string / int
+TypeError: Unsupported operand types: int / string
+TypeError: Unsupported operand types: string / float
+TypeError: Unsupported operand types: float / string
+TypeError: Unsupported operand types: string / string
+TypeError: Unsupported operand types: string / string
+TypeError: Unsupported operand types: string / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / string
-Unsupported operand types: array % array
-Unsupported operand types: array % stdClass
-Unsupported operand types: array % resource
-Unsupported operand types: array % string
-Unsupported operand types: stdClass % array
-Unsupported operand types: stdClass % stdClass
-Unsupported operand types: stdClass % resource
-Unsupported operand types: stdClass % string
-Unsupported operand types: resource % array
-Unsupported operand types: resource % stdClass
-Unsupported operand types: resource % resource
-Unsupported operand types: resource % string
-Unsupported operand types: string % array
-Unsupported operand types: string % stdClass
-Unsupported operand types: string % resource
-Unsupported operand types: string % string
-Unsupported operand types: array % null
-Unsupported operand types: null % array
-Unsupported operand types: array % bool
-Unsupported operand types: bool % array
-Unsupported operand types: array % bool
-Unsupported operand types: bool % array
-Unsupported operand types: array % int
-Unsupported operand types: int % array
-Unsupported operand types: array % float
+TypeError: Unsupported operand types: string / string
+TypeError: Unsupported operand types: array % array
+TypeError: Unsupported operand types: array % stdClass
+TypeError: Unsupported operand types: array % resource
+TypeError: Unsupported operand types: array % string
+TypeError: Unsupported operand types: stdClass % array
+TypeError: Unsupported operand types: stdClass % stdClass
+TypeError: Unsupported operand types: stdClass % resource
+TypeError: Unsupported operand types: stdClass % string
+TypeError: Unsupported operand types: resource % array
+TypeError: Unsupported operand types: resource % stdClass
+TypeError: Unsupported operand types: resource % resource
+TypeError: Unsupported operand types: resource % string
+TypeError: Unsupported operand types: string % array
+TypeError: Unsupported operand types: string % stdClass
+TypeError: Unsupported operand types: string % resource
+TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: array % null
+TypeError: Unsupported operand types: null % array
+TypeError: Unsupported operand types: array % bool
+TypeError: Unsupported operand types: bool % array
+TypeError: Unsupported operand types: array % bool
+TypeError: Unsupported operand types: bool % array
+TypeError: Unsupported operand types: array % int
+TypeError: Unsupported operand types: int % array
+TypeError: Unsupported operand types: array % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % array
-Unsupported operand types: array % string
-Unsupported operand types: string % array
-Unsupported operand types: array % string
+TypeError: Unsupported operand types: float % array
+TypeError: Unsupported operand types: array % string
+TypeError: Unsupported operand types: string % array
+TypeError: Unsupported operand types: array % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % array
-Unsupported operand types: stdClass % null
-Unsupported operand types: null % stdClass
-Unsupported operand types: stdClass % bool
-Unsupported operand types: bool % stdClass
-Unsupported operand types: stdClass % bool
-Unsupported operand types: bool % stdClass
-Unsupported operand types: stdClass % int
-Unsupported operand types: int % stdClass
-Unsupported operand types: stdClass % float
+TypeError: Unsupported operand types: string % array
+TypeError: Unsupported operand types: stdClass % null
+TypeError: Unsupported operand types: null % stdClass
+TypeError: Unsupported operand types: stdClass % bool
+TypeError: Unsupported operand types: bool % stdClass
+TypeError: Unsupported operand types: stdClass % bool
+TypeError: Unsupported operand types: bool % stdClass
+TypeError: Unsupported operand types: stdClass % int
+TypeError: Unsupported operand types: int % stdClass
+TypeError: Unsupported operand types: stdClass % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % stdClass
-Unsupported operand types: stdClass % string
-Unsupported operand types: string % stdClass
-Unsupported operand types: stdClass % string
+TypeError: Unsupported operand types: float % stdClass
+TypeError: Unsupported operand types: stdClass % string
+TypeError: Unsupported operand types: string % stdClass
+TypeError: Unsupported operand types: stdClass % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % stdClass
-Unsupported operand types: resource % null
-Unsupported operand types: null % resource
-Unsupported operand types: resource % bool
-Unsupported operand types: bool % resource
-Unsupported operand types: resource % bool
-Unsupported operand types: bool % resource
-Unsupported operand types: resource % int
-Unsupported operand types: int % resource
-Unsupported operand types: resource % float
+TypeError: Unsupported operand types: string % stdClass
+TypeError: Unsupported operand types: resource % null
+TypeError: Unsupported operand types: null % resource
+TypeError: Unsupported operand types: resource % bool
+TypeError: Unsupported operand types: bool % resource
+TypeError: Unsupported operand types: resource % bool
+TypeError: Unsupported operand types: bool % resource
+TypeError: Unsupported operand types: resource % int
+TypeError: Unsupported operand types: int % resource
+TypeError: Unsupported operand types: resource % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % resource
-Unsupported operand types: resource % string
-Unsupported operand types: string % resource
-Unsupported operand types: resource % string
+TypeError: Unsupported operand types: float % resource
+TypeError: Unsupported operand types: resource % string
+TypeError: Unsupported operand types: string % resource
+TypeError: Unsupported operand types: resource % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % resource
-Unsupported operand types: string % null
-Unsupported operand types: null % string
-Unsupported operand types: string % bool
-Unsupported operand types: bool % string
-Unsupported operand types: string % bool
-Unsupported operand types: bool % string
-Unsupported operand types: string % int
-Unsupported operand types: int % string
-Unsupported operand types: string % float
+TypeError: Unsupported operand types: string % resource
+TypeError: Unsupported operand types: string % null
+TypeError: Unsupported operand types: null % string
+TypeError: Unsupported operand types: string % bool
+TypeError: Unsupported operand types: bool % string
+TypeError: Unsupported operand types: string % bool
+TypeError: Unsupported operand types: bool % string
+TypeError: Unsupported operand types: string % int
+TypeError: Unsupported operand types: int % string
+TypeError: Unsupported operand types: string % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % string
-Unsupported operand types: string % string
-Unsupported operand types: string % string
-Unsupported operand types: string % string
+TypeError: Unsupported operand types: float % string
+TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: string % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % string
-Unsupported operand types: array ** array
-Unsupported operand types: array ** stdClass
-Unsupported operand types: array ** resource
-Unsupported operand types: array ** string
-Unsupported operand types: stdClass ** array
-Unsupported operand types: stdClass ** stdClass
-Unsupported operand types: stdClass ** resource
-Unsupported operand types: stdClass ** string
-Unsupported operand types: resource ** array
-Unsupported operand types: resource ** stdClass
-Unsupported operand types: resource ** resource
-Unsupported operand types: resource ** string
-Unsupported operand types: string ** array
-Unsupported operand types: string ** stdClass
-Unsupported operand types: string ** resource
-Unsupported operand types: string ** string
-Unsupported operand types: array ** null
-Unsupported operand types: null ** array
-Unsupported operand types: array ** bool
-Unsupported operand types: bool ** array
-Unsupported operand types: array ** bool
-Unsupported operand types: bool ** array
-Unsupported operand types: array ** int
-Unsupported operand types: int ** array
-Unsupported operand types: array ** float
-Unsupported operand types: float ** array
-Unsupported operand types: array ** string
-Unsupported operand types: string ** array
-Unsupported operand types: array ** string
+TypeError: Unsupported operand types: string % string
+TypeError: Unsupported operand types: array ** array
+TypeError: Unsupported operand types: array ** stdClass
+TypeError: Unsupported operand types: array ** resource
+TypeError: Unsupported operand types: array ** string
+TypeError: Unsupported operand types: stdClass ** array
+TypeError: Unsupported operand types: stdClass ** stdClass
+TypeError: Unsupported operand types: stdClass ** resource
+TypeError: Unsupported operand types: stdClass ** string
+TypeError: Unsupported operand types: resource ** array
+TypeError: Unsupported operand types: resource ** stdClass
+TypeError: Unsupported operand types: resource ** resource
+TypeError: Unsupported operand types: resource ** string
+TypeError: Unsupported operand types: string ** array
+TypeError: Unsupported operand types: string ** stdClass
+TypeError: Unsupported operand types: string ** resource
+TypeError: Unsupported operand types: string ** string
+TypeError: Unsupported operand types: array ** null
+TypeError: Unsupported operand types: null ** array
+TypeError: Unsupported operand types: array ** bool
+TypeError: Unsupported operand types: bool ** array
+TypeError: Unsupported operand types: array ** bool
+TypeError: Unsupported operand types: bool ** array
+TypeError: Unsupported operand types: array ** int
+TypeError: Unsupported operand types: int ** array
+TypeError: Unsupported operand types: array ** float
+TypeError: Unsupported operand types: float ** array
+TypeError: Unsupported operand types: array ** string
+TypeError: Unsupported operand types: string ** array
+TypeError: Unsupported operand types: array ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** array
-Unsupported operand types: stdClass ** null
-Unsupported operand types: null ** stdClass
-Unsupported operand types: stdClass ** bool
-Unsupported operand types: bool ** stdClass
-Unsupported operand types: stdClass ** bool
-Unsupported operand types: bool ** stdClass
-Unsupported operand types: stdClass ** int
-Unsupported operand types: int ** stdClass
-Unsupported operand types: stdClass ** float
-Unsupported operand types: float ** stdClass
-Unsupported operand types: stdClass ** string
-Unsupported operand types: string ** stdClass
-Unsupported operand types: stdClass ** string
+TypeError: Unsupported operand types: string ** array
+TypeError: Unsupported operand types: stdClass ** null
+TypeError: Unsupported operand types: null ** stdClass
+TypeError: Unsupported operand types: stdClass ** bool
+TypeError: Unsupported operand types: bool ** stdClass
+TypeError: Unsupported operand types: stdClass ** bool
+TypeError: Unsupported operand types: bool ** stdClass
+TypeError: Unsupported operand types: stdClass ** int
+TypeError: Unsupported operand types: int ** stdClass
+TypeError: Unsupported operand types: stdClass ** float
+TypeError: Unsupported operand types: float ** stdClass
+TypeError: Unsupported operand types: stdClass ** string
+TypeError: Unsupported operand types: string ** stdClass
+TypeError: Unsupported operand types: stdClass ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** stdClass
-Unsupported operand types: resource ** null
-Unsupported operand types: null ** resource
-Unsupported operand types: resource ** bool
-Unsupported operand types: bool ** resource
-Unsupported operand types: resource ** bool
-Unsupported operand types: bool ** resource
-Unsupported operand types: resource ** int
-Unsupported operand types: int ** resource
-Unsupported operand types: resource ** float
-Unsupported operand types: float ** resource
-Unsupported operand types: resource ** string
-Unsupported operand types: string ** resource
-Unsupported operand types: resource ** string
+TypeError: Unsupported operand types: string ** stdClass
+TypeError: Unsupported operand types: resource ** null
+TypeError: Unsupported operand types: null ** resource
+TypeError: Unsupported operand types: resource ** bool
+TypeError: Unsupported operand types: bool ** resource
+TypeError: Unsupported operand types: resource ** bool
+TypeError: Unsupported operand types: bool ** resource
+TypeError: Unsupported operand types: resource ** int
+TypeError: Unsupported operand types: int ** resource
+TypeError: Unsupported operand types: resource ** float
+TypeError: Unsupported operand types: float ** resource
+TypeError: Unsupported operand types: resource ** string
+TypeError: Unsupported operand types: string ** resource
+TypeError: Unsupported operand types: resource ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** resource
-Unsupported operand types: string ** null
-Unsupported operand types: null ** string
-Unsupported operand types: string ** bool
-Unsupported operand types: bool ** string
-Unsupported operand types: string ** bool
-Unsupported operand types: bool ** string
-Unsupported operand types: string ** int
-Unsupported operand types: int ** string
-Unsupported operand types: string ** float
-Unsupported operand types: float ** string
-Unsupported operand types: string ** string
-Unsupported operand types: string ** string
-Unsupported operand types: string ** string
+TypeError: Unsupported operand types: string ** resource
+TypeError: Unsupported operand types: string ** null
+TypeError: Unsupported operand types: null ** string
+TypeError: Unsupported operand types: string ** bool
+TypeError: Unsupported operand types: bool ** string
+TypeError: Unsupported operand types: string ** bool
+TypeError: Unsupported operand types: bool ** string
+TypeError: Unsupported operand types: string ** int
+TypeError: Unsupported operand types: int ** string
+TypeError: Unsupported operand types: string ** float
+TypeError: Unsupported operand types: float ** string
+TypeError: Unsupported operand types: string ** string
+TypeError: Unsupported operand types: string ** string
+TypeError: Unsupported operand types: string ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** string
-Unsupported operand types: array << array
-Unsupported operand types: array << stdClass
-Unsupported operand types: array << resource
-Unsupported operand types: array << string
-Unsupported operand types: stdClass << array
-Unsupported operand types: stdClass << stdClass
-Unsupported operand types: stdClass << resource
-Unsupported operand types: stdClass << string
-Unsupported operand types: resource << array
-Unsupported operand types: resource << stdClass
-Unsupported operand types: resource << resource
-Unsupported operand types: resource << string
-Unsupported operand types: string << array
-Unsupported operand types: string << stdClass
-Unsupported operand types: string << resource
-Unsupported operand types: string << string
-Unsupported operand types: array << null
-Unsupported operand types: null << array
-Unsupported operand types: array << bool
-Unsupported operand types: bool << array
-Unsupported operand types: array << bool
-Unsupported operand types: bool << array
-Unsupported operand types: array << int
-Unsupported operand types: int << array
-Unsupported operand types: array << float
+TypeError: Unsupported operand types: string ** string
+TypeError: Unsupported operand types: array << array
+TypeError: Unsupported operand types: array << stdClass
+TypeError: Unsupported operand types: array << resource
+TypeError: Unsupported operand types: array << string
+TypeError: Unsupported operand types: stdClass << array
+TypeError: Unsupported operand types: stdClass << stdClass
+TypeError: Unsupported operand types: stdClass << resource
+TypeError: Unsupported operand types: stdClass << string
+TypeError: Unsupported operand types: resource << array
+TypeError: Unsupported operand types: resource << stdClass
+TypeError: Unsupported operand types: resource << resource
+TypeError: Unsupported operand types: resource << string
+TypeError: Unsupported operand types: string << array
+TypeError: Unsupported operand types: string << stdClass
+TypeError: Unsupported operand types: string << resource
+TypeError: Unsupported operand types: string << string
+TypeError: Unsupported operand types: array << null
+TypeError: Unsupported operand types: null << array
+TypeError: Unsupported operand types: array << bool
+TypeError: Unsupported operand types: bool << array
+TypeError: Unsupported operand types: array << bool
+TypeError: Unsupported operand types: bool << array
+TypeError: Unsupported operand types: array << int
+TypeError: Unsupported operand types: int << array
+TypeError: Unsupported operand types: array << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << array
-Unsupported operand types: array << string
-Unsupported operand types: string << array
-Unsupported operand types: array << string
+TypeError: Unsupported operand types: float << array
+TypeError: Unsupported operand types: array << string
+TypeError: Unsupported operand types: string << array
+TypeError: Unsupported operand types: array << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << array
-Unsupported operand types: stdClass << null
-Unsupported operand types: null << stdClass
-Unsupported operand types: stdClass << bool
-Unsupported operand types: bool << stdClass
-Unsupported operand types: stdClass << bool
-Unsupported operand types: bool << stdClass
-Unsupported operand types: stdClass << int
-Unsupported operand types: int << stdClass
-Unsupported operand types: stdClass << float
+TypeError: Unsupported operand types: string << array
+TypeError: Unsupported operand types: stdClass << null
+TypeError: Unsupported operand types: null << stdClass
+TypeError: Unsupported operand types: stdClass << bool
+TypeError: Unsupported operand types: bool << stdClass
+TypeError: Unsupported operand types: stdClass << bool
+TypeError: Unsupported operand types: bool << stdClass
+TypeError: Unsupported operand types: stdClass << int
+TypeError: Unsupported operand types: int << stdClass
+TypeError: Unsupported operand types: stdClass << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << stdClass
-Unsupported operand types: stdClass << string
-Unsupported operand types: string << stdClass
-Unsupported operand types: stdClass << string
+TypeError: Unsupported operand types: float << stdClass
+TypeError: Unsupported operand types: stdClass << string
+TypeError: Unsupported operand types: string << stdClass
+TypeError: Unsupported operand types: stdClass << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << stdClass
-Unsupported operand types: resource << null
-Unsupported operand types: null << resource
-Unsupported operand types: resource << bool
-Unsupported operand types: bool << resource
-Unsupported operand types: resource << bool
-Unsupported operand types: bool << resource
-Unsupported operand types: resource << int
-Unsupported operand types: int << resource
-Unsupported operand types: resource << float
+TypeError: Unsupported operand types: string << stdClass
+TypeError: Unsupported operand types: resource << null
+TypeError: Unsupported operand types: null << resource
+TypeError: Unsupported operand types: resource << bool
+TypeError: Unsupported operand types: bool << resource
+TypeError: Unsupported operand types: resource << bool
+TypeError: Unsupported operand types: bool << resource
+TypeError: Unsupported operand types: resource << int
+TypeError: Unsupported operand types: int << resource
+TypeError: Unsupported operand types: resource << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << resource
-Unsupported operand types: resource << string
-Unsupported operand types: string << resource
-Unsupported operand types: resource << string
+TypeError: Unsupported operand types: float << resource
+TypeError: Unsupported operand types: resource << string
+TypeError: Unsupported operand types: string << resource
+TypeError: Unsupported operand types: resource << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << resource
-Unsupported operand types: string << null
-Unsupported operand types: null << string
-Unsupported operand types: string << bool
-Unsupported operand types: bool << string
-Unsupported operand types: string << bool
-Unsupported operand types: bool << string
-Unsupported operand types: string << int
-Unsupported operand types: int << string
-Unsupported operand types: string << float
+TypeError: Unsupported operand types: string << resource
+TypeError: Unsupported operand types: string << null
+TypeError: Unsupported operand types: null << string
+TypeError: Unsupported operand types: string << bool
+TypeError: Unsupported operand types: bool << string
+TypeError: Unsupported operand types: string << bool
+TypeError: Unsupported operand types: bool << string
+TypeError: Unsupported operand types: string << int
+TypeError: Unsupported operand types: int << string
+TypeError: Unsupported operand types: string << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << string
-Unsupported operand types: string << string
-Unsupported operand types: string << string
-Unsupported operand types: string << string
+TypeError: Unsupported operand types: float << string
+TypeError: Unsupported operand types: string << string
+TypeError: Unsupported operand types: string << string
+TypeError: Unsupported operand types: string << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << string
-Unsupported operand types: array >> array
-Unsupported operand types: array >> stdClass
-Unsupported operand types: array >> resource
-Unsupported operand types: array >> string
-Unsupported operand types: stdClass >> array
-Unsupported operand types: stdClass >> stdClass
-Unsupported operand types: stdClass >> resource
-Unsupported operand types: stdClass >> string
-Unsupported operand types: resource >> array
-Unsupported operand types: resource >> stdClass
-Unsupported operand types: resource >> resource
-Unsupported operand types: resource >> string
-Unsupported operand types: string >> array
-Unsupported operand types: string >> stdClass
-Unsupported operand types: string >> resource
-Unsupported operand types: string >> string
-Unsupported operand types: array >> null
-Unsupported operand types: null >> array
-Unsupported operand types: array >> bool
-Unsupported operand types: bool >> array
-Unsupported operand types: array >> bool
-Unsupported operand types: bool >> array
-Unsupported operand types: array >> int
-Unsupported operand types: int >> array
-Unsupported operand types: array >> float
+TypeError: Unsupported operand types: string << string
+TypeError: Unsupported operand types: array >> array
+TypeError: Unsupported operand types: array >> stdClass
+TypeError: Unsupported operand types: array >> resource
+TypeError: Unsupported operand types: array >> string
+TypeError: Unsupported operand types: stdClass >> array
+TypeError: Unsupported operand types: stdClass >> stdClass
+TypeError: Unsupported operand types: stdClass >> resource
+TypeError: Unsupported operand types: stdClass >> string
+TypeError: Unsupported operand types: resource >> array
+TypeError: Unsupported operand types: resource >> stdClass
+TypeError: Unsupported operand types: resource >> resource
+TypeError: Unsupported operand types: resource >> string
+TypeError: Unsupported operand types: string >> array
+TypeError: Unsupported operand types: string >> stdClass
+TypeError: Unsupported operand types: string >> resource
+TypeError: Unsupported operand types: string >> string
+TypeError: Unsupported operand types: array >> null
+TypeError: Unsupported operand types: null >> array
+TypeError: Unsupported operand types: array >> bool
+TypeError: Unsupported operand types: bool >> array
+TypeError: Unsupported operand types: array >> bool
+TypeError: Unsupported operand types: bool >> array
+TypeError: Unsupported operand types: array >> int
+TypeError: Unsupported operand types: int >> array
+TypeError: Unsupported operand types: array >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> array
-Unsupported operand types: array >> string
-Unsupported operand types: string >> array
-Unsupported operand types: array >> string
+TypeError: Unsupported operand types: float >> array
+TypeError: Unsupported operand types: array >> string
+TypeError: Unsupported operand types: string >> array
+TypeError: Unsupported operand types: array >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> array
-Unsupported operand types: stdClass >> null
-Unsupported operand types: null >> stdClass
-Unsupported operand types: stdClass >> bool
-Unsupported operand types: bool >> stdClass
-Unsupported operand types: stdClass >> bool
-Unsupported operand types: bool >> stdClass
-Unsupported operand types: stdClass >> int
-Unsupported operand types: int >> stdClass
-Unsupported operand types: stdClass >> float
+TypeError: Unsupported operand types: string >> array
+TypeError: Unsupported operand types: stdClass >> null
+TypeError: Unsupported operand types: null >> stdClass
+TypeError: Unsupported operand types: stdClass >> bool
+TypeError: Unsupported operand types: bool >> stdClass
+TypeError: Unsupported operand types: stdClass >> bool
+TypeError: Unsupported operand types: bool >> stdClass
+TypeError: Unsupported operand types: stdClass >> int
+TypeError: Unsupported operand types: int >> stdClass
+TypeError: Unsupported operand types: stdClass >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> stdClass
-Unsupported operand types: stdClass >> string
-Unsupported operand types: string >> stdClass
-Unsupported operand types: stdClass >> string
+TypeError: Unsupported operand types: float >> stdClass
+TypeError: Unsupported operand types: stdClass >> string
+TypeError: Unsupported operand types: string >> stdClass
+TypeError: Unsupported operand types: stdClass >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> stdClass
-Unsupported operand types: resource >> null
-Unsupported operand types: null >> resource
-Unsupported operand types: resource >> bool
-Unsupported operand types: bool >> resource
-Unsupported operand types: resource >> bool
-Unsupported operand types: bool >> resource
-Unsupported operand types: resource >> int
-Unsupported operand types: int >> resource
-Unsupported operand types: resource >> float
+TypeError: Unsupported operand types: string >> stdClass
+TypeError: Unsupported operand types: resource >> null
+TypeError: Unsupported operand types: null >> resource
+TypeError: Unsupported operand types: resource >> bool
+TypeError: Unsupported operand types: bool >> resource
+TypeError: Unsupported operand types: resource >> bool
+TypeError: Unsupported operand types: bool >> resource
+TypeError: Unsupported operand types: resource >> int
+TypeError: Unsupported operand types: int >> resource
+TypeError: Unsupported operand types: resource >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> resource
-Unsupported operand types: resource >> string
-Unsupported operand types: string >> resource
-Unsupported operand types: resource >> string
+TypeError: Unsupported operand types: float >> resource
+TypeError: Unsupported operand types: resource >> string
+TypeError: Unsupported operand types: string >> resource
+TypeError: Unsupported operand types: resource >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> resource
-Unsupported operand types: string >> null
-Unsupported operand types: null >> string
-Unsupported operand types: string >> bool
-Unsupported operand types: bool >> string
-Unsupported operand types: string >> bool
-Unsupported operand types: bool >> string
-Unsupported operand types: string >> int
-Unsupported operand types: int >> string
-Unsupported operand types: string >> float
+TypeError: Unsupported operand types: string >> resource
+TypeError: Unsupported operand types: string >> null
+TypeError: Unsupported operand types: null >> string
+TypeError: Unsupported operand types: string >> bool
+TypeError: Unsupported operand types: bool >> string
+TypeError: Unsupported operand types: string >> bool
+TypeError: Unsupported operand types: bool >> string
+TypeError: Unsupported operand types: string >> int
+TypeError: Unsupported operand types: int >> string
+TypeError: Unsupported operand types: string >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> string
-Unsupported operand types: string >> string
-Unsupported operand types: string >> string
-Unsupported operand types: string >> string
+TypeError: Unsupported operand types: float >> string
+TypeError: Unsupported operand types: string >> string
+TypeError: Unsupported operand types: string >> string
+TypeError: Unsupported operand types: string >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> string
-Unsupported operand types: array & array
-Unsupported operand types: array & stdClass
-Unsupported operand types: array & resource
-Unsupported operand types: array & string
-Unsupported operand types: stdClass & array
-Unsupported operand types: stdClass & stdClass
-Unsupported operand types: stdClass & resource
-Unsupported operand types: stdClass & string
-Unsupported operand types: resource & array
-Unsupported operand types: resource & stdClass
-Unsupported operand types: resource & resource
-Unsupported operand types: resource & string
-Unsupported operand types: string & array
-Unsupported operand types: string & stdClass
-Unsupported operand types: string & resource
+TypeError: Unsupported operand types: string >> string
+TypeError: Unsupported operand types: array & array
+TypeError: Unsupported operand types: array & stdClass
+TypeError: Unsupported operand types: array & resource
+TypeError: Unsupported operand types: array & string
+TypeError: Unsupported operand types: stdClass & array
+TypeError: Unsupported operand types: stdClass & stdClass
+TypeError: Unsupported operand types: stdClass & resource
+TypeError: Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: resource & array
+TypeError: Unsupported operand types: resource & stdClass
+TypeError: Unsupported operand types: resource & resource
+TypeError: Unsupported operand types: resource & string
+TypeError: Unsupported operand types: string & array
+TypeError: Unsupported operand types: string & stdClass
+TypeError: Unsupported operand types: string & resource
 No error for "foo" &= "foo"
-Unsupported operand types: array & null
-Unsupported operand types: null & array
-Unsupported operand types: array & bool
-Unsupported operand types: bool & array
-Unsupported operand types: array & bool
-Unsupported operand types: bool & array
-Unsupported operand types: array & int
-Unsupported operand types: int & array
-Unsupported operand types: array & float
+TypeError: Unsupported operand types: array & null
+TypeError: Unsupported operand types: null & array
+TypeError: Unsupported operand types: array & bool
+TypeError: Unsupported operand types: bool & array
+TypeError: Unsupported operand types: array & bool
+TypeError: Unsupported operand types: bool & array
+TypeError: Unsupported operand types: array & int
+TypeError: Unsupported operand types: int & array
+TypeError: Unsupported operand types: array & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & array
-Unsupported operand types: array & string
-Unsupported operand types: string & array
-Unsupported operand types: array & string
+TypeError: Unsupported operand types: float & array
+TypeError: Unsupported operand types: array & string
+TypeError: Unsupported operand types: string & array
+TypeError: Unsupported operand types: array & string
 Warning: A non-numeric value encountered
-Unsupported operand types: string & array
-Unsupported operand types: stdClass & null
-Unsupported operand types: null & stdClass
-Unsupported operand types: stdClass & bool
-Unsupported operand types: bool & stdClass
-Unsupported operand types: stdClass & bool
-Unsupported operand types: bool & stdClass
-Unsupported operand types: stdClass & int
-Unsupported operand types: int & stdClass
-Unsupported operand types: stdClass & float
+TypeError: Unsupported operand types: string & array
+TypeError: Unsupported operand types: stdClass & null
+TypeError: Unsupported operand types: null & stdClass
+TypeError: Unsupported operand types: stdClass & bool
+TypeError: Unsupported operand types: bool & stdClass
+TypeError: Unsupported operand types: stdClass & bool
+TypeError: Unsupported operand types: bool & stdClass
+TypeError: Unsupported operand types: stdClass & int
+TypeError: Unsupported operand types: int & stdClass
+TypeError: Unsupported operand types: stdClass & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & stdClass
-Unsupported operand types: stdClass & string
-Unsupported operand types: string & stdClass
-Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: float & stdClass
+TypeError: Unsupported operand types: stdClass & string
+TypeError: Unsupported operand types: string & stdClass
+TypeError: Unsupported operand types: stdClass & string
 Warning: A non-numeric value encountered
-Unsupported operand types: string & stdClass
-Unsupported operand types: resource & null
-Unsupported operand types: null & resource
-Unsupported operand types: resource & bool
-Unsupported operand types: bool & resource
-Unsupported operand types: resource & bool
-Unsupported operand types: bool & resource
-Unsupported operand types: resource & int
-Unsupported operand types: int & resource
-Unsupported operand types: resource & float
+TypeError: Unsupported operand types: string & stdClass
+TypeError: Unsupported operand types: resource & null
+TypeError: Unsupported operand types: null & resource
+TypeError: Unsupported operand types: resource & bool
+TypeError: Unsupported operand types: bool & resource
+TypeError: Unsupported operand types: resource & bool
+TypeError: Unsupported operand types: bool & resource
+TypeError: Unsupported operand types: resource & int
+TypeError: Unsupported operand types: int & resource
+TypeError: Unsupported operand types: resource & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & resource
-Unsupported operand types: resource & string
-Unsupported operand types: string & resource
-Unsupported operand types: resource & string
+TypeError: Unsupported operand types: float & resource
+TypeError: Unsupported operand types: resource & string
+TypeError: Unsupported operand types: string & resource
+TypeError: Unsupported operand types: resource & string
 Warning: A non-numeric value encountered
-Unsupported operand types: string & resource
-Unsupported operand types: string & null
-Unsupported operand types: null & string
-Unsupported operand types: string & bool
-Unsupported operand types: bool & string
-Unsupported operand types: string & bool
-Unsupported operand types: bool & string
-Unsupported operand types: string & int
-Unsupported operand types: int & string
-Unsupported operand types: string & float
+TypeError: Unsupported operand types: string & resource
+TypeError: Unsupported operand types: string & null
+TypeError: Unsupported operand types: null & string
+TypeError: Unsupported operand types: string & bool
+TypeError: Unsupported operand types: bool & string
+TypeError: Unsupported operand types: string & bool
+TypeError: Unsupported operand types: bool & string
+TypeError: Unsupported operand types: string & int
+TypeError: Unsupported operand types: int & string
+TypeError: Unsupported operand types: string & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & string
+TypeError: Unsupported operand types: float & string
 No error for "foo" &= "123"
 No error for "123" &= "foo"
 No error for "foo" &= "123foo"
 No error for "123foo" &= "foo"
-Unsupported operand types: array | array
-Unsupported operand types: array | stdClass
-Unsupported operand types: array | resource
-Unsupported operand types: array | string
-Unsupported operand types: stdClass | array
-Unsupported operand types: stdClass | stdClass
-Unsupported operand types: stdClass | resource
-Unsupported operand types: stdClass | string
-Unsupported operand types: resource | array
-Unsupported operand types: resource | stdClass
-Unsupported operand types: resource | resource
-Unsupported operand types: resource | string
-Unsupported operand types: string | array
-Unsupported operand types: string | stdClass
-Unsupported operand types: string | resource
+TypeError: Unsupported operand types: array | array
+TypeError: Unsupported operand types: array | stdClass
+TypeError: Unsupported operand types: array | resource
+TypeError: Unsupported operand types: array | string
+TypeError: Unsupported operand types: stdClass | array
+TypeError: Unsupported operand types: stdClass | stdClass
+TypeError: Unsupported operand types: stdClass | resource
+TypeError: Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: resource | array
+TypeError: Unsupported operand types: resource | stdClass
+TypeError: Unsupported operand types: resource | resource
+TypeError: Unsupported operand types: resource | string
+TypeError: Unsupported operand types: string | array
+TypeError: Unsupported operand types: string | stdClass
+TypeError: Unsupported operand types: string | resource
 No error for "foo" |= "foo"
-Unsupported operand types: array | null
-Unsupported operand types: null | array
-Unsupported operand types: array | bool
-Unsupported operand types: bool | array
-Unsupported operand types: array | bool
-Unsupported operand types: bool | array
-Unsupported operand types: array | int
-Unsupported operand types: int | array
-Unsupported operand types: array | float
+TypeError: Unsupported operand types: array | null
+TypeError: Unsupported operand types: null | array
+TypeError: Unsupported operand types: array | bool
+TypeError: Unsupported operand types: bool | array
+TypeError: Unsupported operand types: array | bool
+TypeError: Unsupported operand types: bool | array
+TypeError: Unsupported operand types: array | int
+TypeError: Unsupported operand types: int | array
+TypeError: Unsupported operand types: array | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | array
-Unsupported operand types: array | string
-Unsupported operand types: string | array
-Unsupported operand types: array | string
+TypeError: Unsupported operand types: float | array
+TypeError: Unsupported operand types: array | string
+TypeError: Unsupported operand types: string | array
+TypeError: Unsupported operand types: array | string
 Warning: A non-numeric value encountered
-Unsupported operand types: string | array
-Unsupported operand types: stdClass | null
-Unsupported operand types: null | stdClass
-Unsupported operand types: stdClass | bool
-Unsupported operand types: bool | stdClass
-Unsupported operand types: stdClass | bool
-Unsupported operand types: bool | stdClass
-Unsupported operand types: stdClass | int
-Unsupported operand types: int | stdClass
-Unsupported operand types: stdClass | float
+TypeError: Unsupported operand types: string | array
+TypeError: Unsupported operand types: stdClass | null
+TypeError: Unsupported operand types: null | stdClass
+TypeError: Unsupported operand types: stdClass | bool
+TypeError: Unsupported operand types: bool | stdClass
+TypeError: Unsupported operand types: stdClass | bool
+TypeError: Unsupported operand types: bool | stdClass
+TypeError: Unsupported operand types: stdClass | int
+TypeError: Unsupported operand types: int | stdClass
+TypeError: Unsupported operand types: stdClass | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | stdClass
-Unsupported operand types: stdClass | string
-Unsupported operand types: string | stdClass
-Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: float | stdClass
+TypeError: Unsupported operand types: stdClass | string
+TypeError: Unsupported operand types: string | stdClass
+TypeError: Unsupported operand types: stdClass | string
 Warning: A non-numeric value encountered
-Unsupported operand types: string | stdClass
-Unsupported operand types: resource | null
-Unsupported operand types: null | resource
-Unsupported operand types: resource | bool
-Unsupported operand types: bool | resource
-Unsupported operand types: resource | bool
-Unsupported operand types: bool | resource
-Unsupported operand types: resource | int
-Unsupported operand types: int | resource
-Unsupported operand types: resource | float
+TypeError: Unsupported operand types: string | stdClass
+TypeError: Unsupported operand types: resource | null
+TypeError: Unsupported operand types: null | resource
+TypeError: Unsupported operand types: resource | bool
+TypeError: Unsupported operand types: bool | resource
+TypeError: Unsupported operand types: resource | bool
+TypeError: Unsupported operand types: bool | resource
+TypeError: Unsupported operand types: resource | int
+TypeError: Unsupported operand types: int | resource
+TypeError: Unsupported operand types: resource | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | resource
-Unsupported operand types: resource | string
-Unsupported operand types: string | resource
-Unsupported operand types: resource | string
+TypeError: Unsupported operand types: float | resource
+TypeError: Unsupported operand types: resource | string
+TypeError: Unsupported operand types: string | resource
+TypeError: Unsupported operand types: resource | string
 Warning: A non-numeric value encountered
-Unsupported operand types: string | resource
-Unsupported operand types: string | null
-Unsupported operand types: null | string
-Unsupported operand types: string | bool
-Unsupported operand types: bool | string
-Unsupported operand types: string | bool
-Unsupported operand types: bool | string
-Unsupported operand types: string | int
-Unsupported operand types: int | string
-Unsupported operand types: string | float
+TypeError: Unsupported operand types: string | resource
+TypeError: Unsupported operand types: string | null
+TypeError: Unsupported operand types: null | string
+TypeError: Unsupported operand types: string | bool
+TypeError: Unsupported operand types: bool | string
+TypeError: Unsupported operand types: string | bool
+TypeError: Unsupported operand types: bool | string
+TypeError: Unsupported operand types: string | int
+TypeError: Unsupported operand types: int | string
+TypeError: Unsupported operand types: string | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | string
+TypeError: Unsupported operand types: float | string
 No error for "foo" |= "123"
 No error for "123" |= "foo"
 No error for "foo" |= "123foo"
 No error for "123foo" |= "foo"
-Unsupported operand types: array ^ array
-Unsupported operand types: array ^ stdClass
-Unsupported operand types: array ^ resource
-Unsupported operand types: array ^ string
-Unsupported operand types: stdClass ^ array
-Unsupported operand types: stdClass ^ stdClass
-Unsupported operand types: stdClass ^ resource
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: resource ^ array
-Unsupported operand types: resource ^ stdClass
-Unsupported operand types: resource ^ resource
-Unsupported operand types: resource ^ string
-Unsupported operand types: string ^ array
-Unsupported operand types: string ^ stdClass
-Unsupported operand types: string ^ resource
+TypeError: Unsupported operand types: array ^ array
+TypeError: Unsupported operand types: array ^ stdClass
+TypeError: Unsupported operand types: array ^ resource
+TypeError: Unsupported operand types: array ^ string
+TypeError: Unsupported operand types: stdClass ^ array
+TypeError: Unsupported operand types: stdClass ^ stdClass
+TypeError: Unsupported operand types: stdClass ^ resource
+TypeError: Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: resource ^ array
+TypeError: Unsupported operand types: resource ^ stdClass
+TypeError: Unsupported operand types: resource ^ resource
+TypeError: Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: string ^ array
+TypeError: Unsupported operand types: string ^ stdClass
+TypeError: Unsupported operand types: string ^ resource
 No error for "foo" ^= "foo"
-Unsupported operand types: array ^ null
-Unsupported operand types: null ^ array
-Unsupported operand types: array ^ bool
-Unsupported operand types: bool ^ array
-Unsupported operand types: array ^ bool
-Unsupported operand types: bool ^ array
-Unsupported operand types: array ^ int
-Unsupported operand types: int ^ array
-Unsupported operand types: array ^ float
+TypeError: Unsupported operand types: array ^ null
+TypeError: Unsupported operand types: null ^ array
+TypeError: Unsupported operand types: array ^ bool
+TypeError: Unsupported operand types: bool ^ array
+TypeError: Unsupported operand types: array ^ bool
+TypeError: Unsupported operand types: bool ^ array
+TypeError: Unsupported operand types: array ^ int
+TypeError: Unsupported operand types: int ^ array
+TypeError: Unsupported operand types: array ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ array
-Unsupported operand types: array ^ string
-Unsupported operand types: string ^ array
-Unsupported operand types: array ^ string
+TypeError: Unsupported operand types: float ^ array
+TypeError: Unsupported operand types: array ^ string
+TypeError: Unsupported operand types: string ^ array
+TypeError: Unsupported operand types: array ^ string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ^ array
-Unsupported operand types: stdClass ^ null
-Unsupported operand types: null ^ stdClass
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: bool ^ stdClass
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: bool ^ stdClass
-Unsupported operand types: stdClass ^ int
-Unsupported operand types: int ^ stdClass
-Unsupported operand types: stdClass ^ float
+TypeError: Unsupported operand types: string ^ array
+TypeError: Unsupported operand types: stdClass ^ null
+TypeError: Unsupported operand types: null ^ stdClass
+TypeError: Unsupported operand types: stdClass ^ bool
+TypeError: Unsupported operand types: bool ^ stdClass
+TypeError: Unsupported operand types: stdClass ^ bool
+TypeError: Unsupported operand types: bool ^ stdClass
+TypeError: Unsupported operand types: stdClass ^ int
+TypeError: Unsupported operand types: int ^ stdClass
+TypeError: Unsupported operand types: stdClass ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ stdClass
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: string ^ stdClass
-Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: float ^ stdClass
+TypeError: Unsupported operand types: stdClass ^ string
+TypeError: Unsupported operand types: string ^ stdClass
+TypeError: Unsupported operand types: stdClass ^ string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ^ stdClass
-Unsupported operand types: resource ^ null
-Unsupported operand types: null ^ resource
-Unsupported operand types: resource ^ bool
-Unsupported operand types: bool ^ resource
-Unsupported operand types: resource ^ bool
-Unsupported operand types: bool ^ resource
-Unsupported operand types: resource ^ int
-Unsupported operand types: int ^ resource
-Unsupported operand types: resource ^ float
+TypeError: Unsupported operand types: string ^ stdClass
+TypeError: Unsupported operand types: resource ^ null
+TypeError: Unsupported operand types: null ^ resource
+TypeError: Unsupported operand types: resource ^ bool
+TypeError: Unsupported operand types: bool ^ resource
+TypeError: Unsupported operand types: resource ^ bool
+TypeError: Unsupported operand types: bool ^ resource
+TypeError: Unsupported operand types: resource ^ int
+TypeError: Unsupported operand types: int ^ resource
+TypeError: Unsupported operand types: resource ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ resource
-Unsupported operand types: resource ^ string
-Unsupported operand types: string ^ resource
-Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: float ^ resource
+TypeError: Unsupported operand types: resource ^ string
+TypeError: Unsupported operand types: string ^ resource
+TypeError: Unsupported operand types: resource ^ string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ^ resource
-Unsupported operand types: string ^ null
-Unsupported operand types: null ^ string
-Unsupported operand types: string ^ bool
-Unsupported operand types: bool ^ string
-Unsupported operand types: string ^ bool
-Unsupported operand types: bool ^ string
-Unsupported operand types: string ^ int
-Unsupported operand types: int ^ string
-Unsupported operand types: string ^ float
+TypeError: Unsupported operand types: string ^ resource
+TypeError: Unsupported operand types: string ^ null
+TypeError: Unsupported operand types: null ^ string
+TypeError: Unsupported operand types: string ^ bool
+TypeError: Unsupported operand types: bool ^ string
+TypeError: Unsupported operand types: string ^ bool
+TypeError: Unsupported operand types: bool ^ string
+TypeError: Unsupported operand types: string ^ int
+TypeError: Unsupported operand types: int ^ string
+TypeError: Unsupported operand types: string ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ string
+TypeError: Unsupported operand types: float ^ string
 No error for "foo" ^= "123"
 No error for "123" ^= "foo"
 No error for "foo" ^= "123foo"
@@ -1999,23 +1999,23 @@ Warning: Array to string conversion
 Warning: Array to string conversion
 No error for [] .= []
 Warning: Array to string conversion
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 Warning: Array to string conversion
 No error for [] .= STDOUT
 Warning: Array to string conversion
 No error for [] .= "foo"
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 Warning: Array to string conversion
 No error for STDOUT .= []
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 No error for STDOUT .= STDOUT
 No error for STDOUT .= "foo"
 Warning: Array to string conversion
 No error for "foo" .= []
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 No error for "foo" .= STDOUT
 No error for "foo" .= "foo"
 Warning: Array to string conversion
@@ -2046,20 +2046,20 @@ Warning: Array to string conversion
 No error for [] .= "123foo"
 Warning: Array to string conversion
 No error for "123foo" .= []
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 No error for STDOUT .= null
 No error for null .= STDOUT
 No error for STDOUT .= true
@@ -2091,19 +2091,19 @@ No error for "123foo" .= "foo"
 
 
 UNARY OP:
-Cannot perform bitwise not on array
-Cannot perform bitwise not on stdClass
-Cannot perform bitwise not on resource
+TypeError: Cannot perform bitwise not on array
+TypeError: Cannot perform bitwise not on stdClass
+TypeError: Cannot perform bitwise not on resource
 No error for ~"foo"
 
 
 INCDEC:
-Cannot increment array
-Cannot decrement array
-Cannot increment stdClass
-Cannot decrement stdClass
-Cannot increment resource
-Cannot decrement resource
+TypeError: Cannot increment array
+TypeError: Cannot decrement array
+TypeError: Cannot increment stdClass
+TypeError: Cannot decrement stdClass
+TypeError: Cannot increment resource
+TypeError: Cannot decrement resource
 Warning: Increment on non-numeric string is deprecated, use str_increment() instead
 No error for fop++
 Warning: Decrement on non-numeric string has no effect and is deprecated

@@ -36,17 +36,17 @@ var_dump(isset($test->prop));
 try {
     var_dump($test->prop);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $test->prop = 1;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unset($test->prop);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $test->unsetProp();
@@ -57,15 +57,15 @@ $test->prop = 2;
 try {
     unset($test->prop);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 bool(false)
-Typed property Test::$prop must not be accessed before initialization
-Cannot modify protected(set) readonly property Test::$prop from global scope
-Cannot unset protected(set) readonly property Test::$prop from global scope
+Error: Typed property Test::$prop must not be accessed before initialization
+Error: Cannot modify protected(set) readonly property Test::$prop from global scope
+Error: Cannot unset protected(set) readonly property Test::$prop from global scope
 Test::__isset(prop)
 bool(true)
 Test::__get(prop)

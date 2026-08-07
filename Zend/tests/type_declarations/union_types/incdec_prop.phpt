@@ -56,28 +56,28 @@ try {
     $test->prop2 = PHP_INT_MAX;
     $x = $test->prop2++;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $test->prop2 = PHP_INT_MAX;
     $x = ++$test->prop2;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $test->prop2 = PHP_INT_MIN;
     $x = $test->prop2--;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $test->prop2 = PHP_INT_MIN;
     $x = --$test->prop2;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -85,7 +85,7 @@ try {
     $r =& $test->prop2;
     $x = $test->prop2++;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -93,7 +93,7 @@ try {
     $r =& $test->prop2;
     $x = ++$test->prop2;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -101,7 +101,7 @@ try {
     $r =& $test->prop2;
     $x = $test->prop2--;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -109,7 +109,7 @@ try {
     $r =& $test->prop2;
     $x = --$test->prop2;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -122,11 +122,11 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-Cannot increment property Test::$prop2 of type int|bool past its maximal value
-Cannot increment property Test::$prop2 of type int|bool past its maximal value
-Cannot decrement property Test::$prop2 of type int|bool past its minimal value
-Cannot decrement property Test::$prop2 of type int|bool past its minimal value
-Cannot increment a reference held by property Test::$prop2 of type int|bool past its maximal value
-Cannot increment a reference held by property Test::$prop2 of type int|bool past its maximal value
-Cannot decrement a reference held by property Test::$prop2 of type int|bool past its minimal value
-Cannot decrement a reference held by property Test::$prop2 of type int|bool past its minimal value
+TypeError: Cannot increment property Test::$prop2 of type int|bool past its maximal value
+TypeError: Cannot increment property Test::$prop2 of type int|bool past its maximal value
+TypeError: Cannot decrement property Test::$prop2 of type int|bool past its minimal value
+TypeError: Cannot decrement property Test::$prop2 of type int|bool past its minimal value
+TypeError: Cannot increment a reference held by property Test::$prop2 of type int|bool past its maximal value
+TypeError: Cannot increment a reference held by property Test::$prop2 of type int|bool past its maximal value
+TypeError: Cannot decrement a reference held by property Test::$prop2 of type int|bool past its minimal value
+TypeError: Cannot decrement a reference held by property Test::$prop2 of type int|bool past its minimal value

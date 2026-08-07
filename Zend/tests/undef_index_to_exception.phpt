@@ -11,14 +11,14 @@ $test = [];
 try {
     $test[0] .= "xyz";
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test);
 
 try {
     $test["key"] .= "xyz";
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test);
 
@@ -26,21 +26,21 @@ unset($test);
 try {
     $GLOBALS["test"] .= "xyz";
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($test);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Undefined array key 0
+Exception: Undefined array key 0
 array(0) {
 }
-Undefined array key "key"
+Exception: Undefined array key "key"
 array(0) {
 }
-Undefined global variable $test
-Undefined variable $test
+Exception: Undefined global variable $test
+Exception: Undefined variable $test

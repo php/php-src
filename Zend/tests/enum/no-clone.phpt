@@ -10,9 +10,9 @@ enum Foo {
 try {
     var_dump(clone Foo::Bar);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Trying to clone an uncloneable object of class Foo
+Error: Trying to clone an uncloneable object of class Foo

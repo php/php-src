@@ -37,17 +37,17 @@ var_dump(call_user_func('call_user_func', $test, c: 'D'));
 try {
     call_user_func($test_required, b: 'B');
 } catch (ArgumentCountError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(call_user_func('array_slice', [1, 2, 3, 4, 5], length: 2));
 } catch (ArgumentCountError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(call_user_func('array_slice', [1, 2, 3, 4, 'x' => 5], 3, preserve_keys: true));
 } catch (ArgumentCountError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "\n";
 
@@ -82,8 +82,8 @@ array(2) {
 Warning: {closure:%s:%d}(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 a = a, b = b, c = D
 NULL
-{closure:%s:%d}(): Argument #1 ($a) not passed
-array_slice(): Argument #2 ($offset) not passed
+ArgumentCountError: {closure:%s:%d}(): Argument #1 ($a) not passed
+ArgumentCountError: array_slice(): Argument #2 ($offset) not passed
 array(2) {
   [3]=>
   int(4)

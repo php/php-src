@@ -6,16 +6,16 @@ $a = [&$a];
 try {
     $a === [[]];
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     [[]] === $a;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($a === $a);
 ?>
 --EXPECT--
-Nesting level too deep - recursive dependency?
-Nesting level too deep - recursive dependency?
+Error: Nesting level too deep - recursive dependency?
+Error: Nesting level too deep - recursive dependency?
 bool(true)

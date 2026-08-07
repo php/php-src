@@ -23,21 +23,21 @@ $c = new C;
 try {
     $c->test1("foo");
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $c->test2("foo");
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $c->test3("foo");
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-C::test1(): Return value must be of type int, string returned
-C::test2(): Argument #1 ($arg) must be of type int, string given, called in %s on line %d
-C::test3(): Argument #1 ($arg) must be of type int, string given, called in %s on line %d
+TypeError: C::test1(): Return value must be of type int, string returned
+TypeError: C::test2(): Argument #1 ($arg) must be of type int, string given, called in %s on line %d
+TypeError: C::test3(): Argument #1 ($arg) must be of type int, string given, called in %s on line %d

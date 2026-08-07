@@ -23,7 +23,7 @@ class C extends P {
         try {
             $this->pPrivate = 1;
         } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         $this->pProtected = 1;
         $this->pPublic = 1;
@@ -35,17 +35,17 @@ function test() {
     try {
         $p->pDefault = 1;
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         $p->pPrivate = 1;
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         $p->pProtected = 1;
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $p->pPublic = 1;
 }
@@ -56,7 +56,7 @@ test();
 
 ?>
 --EXPECT--
-Cannot modify private(set) property P::$pPrivate from scope C
-Cannot modify protected(set) readonly property P::$pDefault from global scope
-Cannot modify private(set) property P::$pPrivate from global scope
-Cannot modify protected(set) readonly property P::$pProtected from global scope
+Error: Cannot modify private(set) property P::$pPrivate from scope C
+Error: Cannot modify protected(set) readonly property P::$pDefault from global scope
+Error: Cannot modify private(set) property P::$pPrivate from global scope
+Error: Cannot modify protected(set) readonly property P::$pProtected from global scope

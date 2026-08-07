@@ -19,15 +19,15 @@ $foo = new Foo([]);
 try {
     var_dump(clone $foo);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(clone $foo);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot indirectly modify readonly property Foo::$bar
-Cannot indirectly modify readonly property Foo::$bar
+Error: Cannot indirectly modify readonly property Foo::$bar
+Error: Cannot indirectly modify readonly property Foo::$bar

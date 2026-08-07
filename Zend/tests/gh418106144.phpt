@@ -12,9 +12,9 @@ function test($y=new Foo>''){
 try {
     test();
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Foo::__toString(): Return value must be of type string, none returned
+TypeError: Foo::__toString(): Return value must be of type string, none returned

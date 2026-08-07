@@ -19,7 +19,7 @@ $str = '';
 try {
     var_dump($str['foo'] = 'a');
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($str);
 
@@ -27,7 +27,7 @@ $str = '';
 try {
     var_dump($str[] = 'a');
 } catch (Error $e) {
-    echo "Error: {$e->getMessage()}\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($str);
 
@@ -35,7 +35,7 @@ $str = '';
 try {
     var_dump($str[0] += 1);
 } catch (Error $e) {
-    echo "Error: {$e->getMessage()}\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($str);
 
@@ -43,7 +43,7 @@ $str = '';
 try {
     var_dump($str[0][0] = 'a');
 } catch (Error $e) {
-    echo "Error: {$e->getMessage()}\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($str);
 
@@ -57,7 +57,7 @@ string(6) "     a"
 Warning: Illegal string offset -1 in %s on line %d
 NULL
 string(0) ""
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 string(0) ""
 Error: [] operator not supported for strings
 string(0) ""

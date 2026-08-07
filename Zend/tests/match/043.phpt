@@ -9,7 +9,7 @@ function test(mixed $var) {
     try {
         match($var) {};
     } catch (UnhandledMatchError $e) {
-        print $e->getMessage() . PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -27,14 +27,14 @@ test(str_repeat('e', 100));
 test(str_repeat("e\n", 100));
 ?>
 --EXPECT--
-Unhandled match case NULL
-Unhandled match case 1
-Unhandled match case 5.5
-Unhandled match case 5.0
-Unhandled match case 'foo'
-Unhandled match case true
-Unhandled match case false
-Unhandled match case of type array
-Unhandled match case of type Beep
-Unhandled match case 'eeeeeeeeeeeeeee...'
-Unhandled match case 'e\ne\ne\ne\ne\ne\ne\ne...'
+UnhandledMatchError: Unhandled match case NULL
+UnhandledMatchError: Unhandled match case 1
+UnhandledMatchError: Unhandled match case 5.5
+UnhandledMatchError: Unhandled match case 5.0
+UnhandledMatchError: Unhandled match case 'foo'
+UnhandledMatchError: Unhandled match case true
+UnhandledMatchError: Unhandled match case false
+UnhandledMatchError: Unhandled match case of type array
+UnhandledMatchError: Unhandled match case of type Beep
+UnhandledMatchError: Unhandled match case 'eeeeeeeeeeeeeee...'
+UnhandledMatchError: Unhandled match case 'e\ne\ne\ne\ne\ne\ne\ne...'

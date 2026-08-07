@@ -7,9 +7,9 @@ namespace Foo;
 try {
     ('\bar')();
 } catch (\Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Call to undefined function bar()
+Error: Call to undefined function bar()

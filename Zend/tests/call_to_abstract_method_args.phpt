@@ -10,17 +10,17 @@ abstract class Test {
 try {
     Test::method(new stdClass);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ret = new stdClass;
 try {
     $ret = Test::method(new stdClass);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot call abstract method Test::method()
-Cannot call abstract method Test::method()
+Error: Cannot call abstract method Test::method()
+Error: Cannot call abstract method Test::method()

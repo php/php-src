@@ -20,12 +20,12 @@ try {
         }
     });
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(false && new class {
+AssertionError: assert(false && new class {
     public $prop1 {
         get;
         set;

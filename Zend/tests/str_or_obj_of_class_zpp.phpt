@@ -21,13 +21,13 @@ var_dump(zend_string_or_stdclass(new ToString()));
 try {
     zend_string_or_stdclass([]);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     zend_string_or_stdclass(new Foo());
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(zend_string_or_stdclass_or_null("string"));
@@ -39,13 +39,13 @@ var_dump(zend_string_or_stdclass_or_null(new ToString()));
 try {
     zend_string_or_stdclass_or_null([]);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     zend_string_or_stdclass_or_null(new Foo());
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -58,13 +58,13 @@ string(0) ""
 object(stdClass)#1 (0) {
 }
 string(8) "ToString"
-zend_string_or_stdclass(): Argument #1 ($param) must be of type stdClass|string, array given
-zend_string_or_stdclass(): Argument #1 ($param) must be of type stdClass|string, Foo given
+TypeError: zend_string_or_stdclass(): Argument #1 ($param) must be of type stdClass|string, array given
+TypeError: zend_string_or_stdclass(): Argument #1 ($param) must be of type stdClass|string, Foo given
 string(6) "string"
 string(1) "1"
 NULL
 object(stdClass)#1 (0) {
 }
 string(8) "ToString"
-zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type stdClass|string|null, array given
-zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type stdClass|string|null, Foo given
+TypeError: zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type stdClass|string|null, array given
+TypeError: zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type stdClass|string|null, Foo given

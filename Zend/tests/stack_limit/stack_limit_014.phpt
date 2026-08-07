@@ -16,7 +16,7 @@ memory_limit=1G
 try {
     require __DIR__.'/stack_limit_014.inc';
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

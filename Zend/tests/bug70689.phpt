@@ -14,7 +14,7 @@ set_error_handler(function($errno, $errstr) {
 try {
     foo();
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

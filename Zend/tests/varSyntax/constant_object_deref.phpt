@@ -9,16 +9,16 @@ class Bar { const FOO = "foo"; }
 try {
     FOO->length();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     Bar::FOO->length();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Call to a member function length() on string
-Call to a member function length() on string
+Error: Call to a member function length() on string
+Error: Call to a member function length() on string

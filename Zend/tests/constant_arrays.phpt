@@ -34,7 +34,7 @@ $recursive[0] = &$recursive;
 try {
     define('RECURSION', $recursive);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -104,4 +104,4 @@ array(1) {
   object(stdClass)#1 (0) {
   }
 }
-define(): Argument #2 ($value) cannot be a recursive array
+ValueError: define(): Argument #2 ($value) cannot be a recursive array

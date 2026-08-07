@@ -13,9 +13,9 @@ function takesInt(int $x) {}
 try {
     takesInt('42');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-takesInt(): Argument #1 ($x) must be of type int, string given, called in %s on line %d
+TypeError: takesInt(): Argument #1 ($x) must be of type int, string given, called in %s on line %d

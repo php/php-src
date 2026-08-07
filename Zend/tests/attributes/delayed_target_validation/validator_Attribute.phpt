@@ -33,7 +33,7 @@ foreach ($cases as $r) {
 	try {
 		$attributes[1]->newInstance();
 	} catch (Error $e) {
-		echo get_class($e) . ": " . $e->getMessage() . "\n";
+		echo $e::class, ': ', $e->getMessage(), "\n";
 	}
 }
 

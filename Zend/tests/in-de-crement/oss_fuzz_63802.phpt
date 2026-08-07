@@ -22,13 +22,13 @@ foreach (['pre', 'post'] as $prePost) {
         try {
             $foo->{$prePost . ucfirst($incDec)}();
         } catch (TypeError $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
 ?>
 --EXPECT--
-Cannot increment Foo
-Cannot decrement Foo
-Cannot increment Foo
-Cannot decrement Foo
+TypeError: Cannot increment Foo
+TypeError: Cannot decrement Foo
+TypeError: Cannot increment Foo
+TypeError: Cannot decrement Foo

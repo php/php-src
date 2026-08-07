@@ -8,11 +8,11 @@ try {
         (void) somefunc();
     });
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(false && function () {
+AssertionError: assert(false && function () {
     (void)somefunc();
 })

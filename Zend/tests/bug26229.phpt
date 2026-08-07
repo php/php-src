@@ -21,8 +21,8 @@ try
 }
 catch(Exception $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Objects returned by array_iterator::getIterator() must be traversable or implement interface Iterator
+Exception: Objects returned by array_iterator::getIterator() must be traversable or implement interface Iterator

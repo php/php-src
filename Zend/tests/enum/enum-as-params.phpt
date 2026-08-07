@@ -20,16 +20,16 @@ takesBaz(Baz::Qux);
 try {
     takesBaz(Foo::Bar);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     takesFoo(Baz::Qux);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-takesBaz(): Argument #1 ($baz) must be of type Baz, Foo given, called in %s on line %d
-takesFoo(): Argument #1 ($foo) must be of type Foo, Baz given, called in %s on line %d
+TypeError: takesBaz(): Argument #1 ($baz) must be of type Baz, Foo given, called in %s on line %d
+TypeError: takesFoo(): Argument #1 ($foo) must be of type Foo, Baz given, called in %s on line %d

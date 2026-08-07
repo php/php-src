@@ -11,8 +11,8 @@ $drv = new drv;
 try {
     call_user_func_array(array($drv, 'func'), null);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-call_user_func_array(): Argument #2 ($args) must be of type array, null given
+TypeError: call_user_func_array(): Argument #2 ($args) must be of type array, null given

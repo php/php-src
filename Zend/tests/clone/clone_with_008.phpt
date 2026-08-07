@@ -21,7 +21,7 @@ var_dump(clone($c, [ 'a' => "with" ]));
 try {
 	var_dump(clone($c, [ 'b' => "with" ]));
 } catch (Throwable $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

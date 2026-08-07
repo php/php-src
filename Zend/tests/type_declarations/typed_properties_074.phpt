@@ -18,7 +18,7 @@ unset($test->val);
 var_dump($test);
 try {
     var_dump($test->val);
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (TypeError $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($test);
 
 $test->prop = "y";
@@ -32,7 +32,7 @@ object(Test)#1 (1) {
   ["val"]=>
   uninitialized(int)
 }
-Value of type string returned from Test::__get() must be compatible with unset property Test::$val of type int
+TypeError: Value of type string returned from Test::__get() must be compatible with unset property Test::$val of type int
 object(Test)#1 (1) {
   ["prop"]=>
   &string(1) "x"

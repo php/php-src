@@ -12,9 +12,9 @@ set_error_handler(function($_, $msg) {
 try {
     test(0.5);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Implicit conversion from float 0.5 to int loses precision
+Exception: Implicit conversion from float 0.5 to int loses precision

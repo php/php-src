@@ -10,41 +10,41 @@ var_dump(is_callable("strlen"));
 try {
     var_dump(strlen("xxx"));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(defined("PHP_VERSION"));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(constant("PHP_VERSION"));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(call_user_func("strlen"));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(is_string("xxx"));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(is_string());
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 bool(false)
 bool(false)
-Call to undefined function strlen()
-Call to undefined function defined()
-Call to undefined function constant()
-Call to undefined function call_user_func()
-Call to undefined function is_string()
-Call to undefined function is_string()
+Error: Call to undefined function strlen()
+Error: Call to undefined function defined()
+Error: Call to undefined function constant()
+Error: Call to undefined function call_user_func()
+Error: Call to undefined function is_string()
+Error: Call to undefined function is_string()

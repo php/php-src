@@ -12,7 +12,7 @@ A::$a = &A::$it;
 
 try {
     A::$it = new ArrayIterator();
-} catch (TypeError $e) { var_dump($e->getMessage()); }
+} catch (TypeError $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump(A::$it);
 
 A::$a = &$a;
@@ -21,13 +21,13 @@ A::$it = new ArrayIterator();
 
 try {
     $a = 1;
-} catch (TypeError $e) { var_dump($e->getMessage()); }
+} catch (TypeError $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($a);
 
 ?>
 --EXPECT--
-string(78) "Cannot assign ArrayIterator to reference held by property A::$a of type ?array"
+TypeError: Cannot assign ArrayIterator to reference held by property A::$a of type ?array
 array(0) {
 }
-string(68) "Cannot assign int to reference held by property A::$a of type ?array"
+TypeError: Cannot assign int to reference held by property A::$a of type ?array
 NULL

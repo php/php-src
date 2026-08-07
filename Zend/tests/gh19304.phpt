@@ -10,9 +10,9 @@ $foo = new class {
 try {
     $foo->v = 0;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign int to property class@anonymous::$v of type self
+TypeError: Cannot assign int to property class@anonymous::$v of type self

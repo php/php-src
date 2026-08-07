@@ -22,7 +22,7 @@ $test(b: 'B');
 try {
     $test(b: 'B', c: 'C');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "\n";
 
@@ -39,14 +39,14 @@ $test3(b: 'B');
 try {
     $test3(b: 'B', c: 'C');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 a: A, b: B
 a: a, b: B
-Unknown named parameter $c
+Error: Unknown named parameter $c
 
 a: A, b: B
 array(1) {
@@ -61,4 +61,4 @@ array(1) {
 
 a: A, b: B
 a: a, b: B
-Unknown named parameter $c
+Error: Unknown named parameter $c

@@ -11,8 +11,8 @@ try {
     $new = new Test;
     static $new;
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Foo
+Exception: Foo

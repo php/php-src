@@ -6,8 +6,8 @@ try  {
         $a = "1";
         [1, (y().$a.$a) . ($a.$a)];
 } catch (Error $e) {
-        var_dump($e->getMessage());
+        echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(30) "Call to undefined function y()"
+Error: Call to undefined function y()

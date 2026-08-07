@@ -11,12 +11,12 @@ try {
     $bar = Foo::Bar;
     foreach ([1] as &$bar->value) {}
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(Foo::Bar->value);
 
 ?>
 --EXPECT--
-Cannot indirectly modify readonly property Foo::$value
+Error: Cannot indirectly modify readonly property Foo::$value
 int(0)

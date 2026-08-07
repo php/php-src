@@ -24,13 +24,13 @@ $test->byVal = [];
 try {
     $test->byVal[] = 1;
 } catch (\Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->byVal);
 try {
     $ref =& $test->byVal;
 } catch (\Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $ref = 42;
 var_dump($test->byVal);
@@ -43,9 +43,9 @@ Test::$byVal::set
 Test::$byVal::set
 int(3)
 Test::$byVal::set
-Indirect modification of Test::$byVal is not allowed
+Error: Indirect modification of Test::$byVal is not allowed
 array(0) {
 }
-Indirect modification of Test::$byVal is not allowed
+Error: Indirect modification of Test::$byVal is not allowed
 array(0) {
 }

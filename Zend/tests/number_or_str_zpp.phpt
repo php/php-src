@@ -23,12 +23,12 @@ var_dump(zend_number_or_string(new ToString()));
 try {
     zend_string_or_object([]);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 try {
     zend_number_or_string(new Foo());
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(zend_number_or_string_or_null("string"));
@@ -42,12 +42,12 @@ var_dump(zend_number_or_string_or_null(new ToString()));
 try {
     zend_number_or_string_or_null([]);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 try {
     zend_number_or_string_or_null(new Foo());
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -61,8 +61,8 @@ int(0)
 int(0)
 int(1)
 string(8) "ToString"
-zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
-zend_number_or_string(): Argument #1 ($param) must be of type string|int|float, Foo given
+TypeError: zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
+TypeError: zend_number_or_string(): Argument #1 ($param) must be of type string|int|float, Foo given
 string(6) "string"
 int(1)
 float(5.5)
@@ -70,5 +70,5 @@ NULL
 int(0)
 int(1)
 string(8) "ToString"
-zend_number_or_string_or_null(): Argument #1 ($param) must be of type string|int|float|null, array given
-zend_number_or_string_or_null(): Argument #1 ($param) must be of type string|int|float|null, Foo given
+TypeError: zend_number_or_string_or_null(): Argument #1 ($param) must be of type string|int|float|null, array given
+TypeError: zend_number_or_string_or_null(): Argument #1 ($param) must be of type string|int|float|null, Foo given

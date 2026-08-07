@@ -16,19 +16,19 @@ try {
     $test->byVal = [];
     $test->byVal[] = 42;
 } catch (\Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->byVal);
 
 try {
     $test->byVal =& $ref;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Indirect modification of Test::$byVal is not allowed
+Error: Indirect modification of Test::$byVal is not allowed
 array(0) {
 }
-Cannot assign by reference to overloaded object
+Error: Cannot assign by reference to overloaded object

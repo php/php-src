@@ -25,12 +25,12 @@ function foo(bool $throw) {
 try {
     foo(true);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 foo(false);
 
 ?>
 --EXPECT--
 bar() called
-__destruct() called
+Exception: __destruct() called
 int(42)

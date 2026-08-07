@@ -13,30 +13,30 @@ enum Suit: string {
 try {
     var_dump(Suit::Hearts);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(Suit::Hearts);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(Suit::from(42));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(Suit::tryFrom('bar'));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Duplicate value in enum Suit for cases Hearts and Spades
-Duplicate value in enum Suit for cases Hearts and Spades
-Duplicate value in enum Suit for cases Hearts and Spades
-Duplicate value in enum Suit for cases Hearts and Spades
+Error: Duplicate value in enum Suit for cases Hearts and Spades
+Error: Duplicate value in enum Suit for cases Hearts and Spades
+Error: Duplicate value in enum Suit for cases Hearts and Spades
+Error: Duplicate value in enum Suit for cases Hearts and Spades

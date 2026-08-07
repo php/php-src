@@ -9,8 +9,8 @@ class A {
 try {
     define("C", new A());
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Undefined constant "C"
+Error: Undefined constant "C"

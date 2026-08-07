@@ -6,16 +6,16 @@ Bug #44827 (define() allows :: in constant names)
 try {
     define('foo::bar', 1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     define('::', 1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-define(): Argument #1 ($constant_name) cannot be a class constant
-define(): Argument #1 ($constant_name) cannot be a class constant
+ValueError: define(): Argument #1 ($constant_name) cannot be a class constant
+ValueError: define(): Argument #1 ($constant_name) cannot be a class constant

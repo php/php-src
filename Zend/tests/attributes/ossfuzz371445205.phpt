@@ -10,8 +10,8 @@ $attr=(new ReflectionClass(Test1::class))->getAttributes()[0];
 try {
     $attr->newInstance();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unknown named parameter $notinterned
+Error: Unknown named parameter $notinterned

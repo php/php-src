@@ -18,13 +18,13 @@ $ref = "foobar";
 try {
     $test->$name =& $ref;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test);
 
 ?>
 --EXPECT--
-Cannot assign string to property Test::$prop of type int
+TypeError: Cannot assign string to property Test::$prop of type int
 object(Test)#2 (0) {
   ["prop"]=>
   uninitialized(int)

@@ -16,7 +16,7 @@ var_dump(zend_string_or_object(new Foo()));
 try {
     zend_string_or_object([]);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(zend_string_or_object_or_null("string"));
@@ -28,7 +28,7 @@ var_dump(zend_string_or_object_or_null(new Foo()));
 try {
     zend_string_or_object_or_null([]);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -42,7 +42,7 @@ object(stdClass)#1 (0) {
 }
 object(Foo)#1 (0) {
 }
-zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
+TypeError: zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
 string(6) "string"
 string(1) "1"
 NULL
@@ -50,4 +50,4 @@ object(stdClass)#2 (0) {
 }
 object(Foo)#2 (0) {
 }
-zend_string_or_object_or_null(): Argument #1 ($param) must be of type object|string|null, array given
+TypeError: zend_string_or_object_or_null(): Argument #1 ($param) must be of type object|string|null, array given

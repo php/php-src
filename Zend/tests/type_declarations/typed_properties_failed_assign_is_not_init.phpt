@@ -16,21 +16,21 @@ $test = new Test;
 try {
     $test->prop;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $test->prop = "foo";
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $test->prop;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Typed property Test::$prop must not be accessed before initialization
-Cannot assign string to property Test::$prop of type int
-Typed property Test::$prop must not be accessed before initialization
+Error: Typed property Test::$prop must not be accessed before initialization
+TypeError: Cannot assign string to property Test::$prop of type int
+Error: Typed property Test::$prop must not be accessed before initialization

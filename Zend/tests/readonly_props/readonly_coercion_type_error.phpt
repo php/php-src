@@ -11,7 +11,7 @@ class Foo {
         try {
             $this->bar = 42;
         } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -20,4 +20,4 @@ new Foo();
 
 ?>
 --EXPECTF--
-Cannot modify readonly property Foo::$bar
+Error: Cannot modify readonly property Foo::$bar

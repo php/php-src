@@ -10,9 +10,9 @@ function gen() {
 try {
     gen()->current();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Can use "yield from" only with arrays and Traversables
+Error: Can use "yield from" only with arrays and Traversables

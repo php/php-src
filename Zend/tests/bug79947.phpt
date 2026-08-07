@@ -7,11 +7,11 @@ $key = [];
 try {
     $array[$key] += [$key];
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($array);
 ?>
 --EXPECT--
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type array on array
 array(0) {
 }

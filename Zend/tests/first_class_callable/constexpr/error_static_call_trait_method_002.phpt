@@ -22,10 +22,10 @@ function foo(Closure $c = Foo::myMethod(...)) {
 try {
     foo();
 } catch (ErrorException $e) {
-    echo "Caught: ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 
 ?>
 --EXPECT--
-Caught: Calling static trait method Foo::myMethod is deprecated, it should only be called on a class using the trait
+ErrorException: Calling static trait method Foo::myMethod is deprecated, it should only be called on a class using the trait

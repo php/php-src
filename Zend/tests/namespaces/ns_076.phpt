@@ -8,23 +8,23 @@ use Error;
 try {
     $a = array(unknown => unknown);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo unknown;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo \unknown;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Undefined constant "foo\unknown"
-Undefined constant "foo\unknown"
-Undefined constant "unknown"
+Error: Undefined constant "foo\unknown"
+Error: Undefined constant "foo\unknown"
+Error: Undefined constant "unknown"

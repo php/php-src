@@ -8,7 +8,7 @@ function test() {
     try {
         array_map('extract', [['i' => new stdClass]]);
     } catch (\Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $i += 1;
     var_dump($i);
@@ -17,5 +17,5 @@ test();
 
 ?>
 --EXPECT--
-Cannot call extract() dynamically
+Error: Cannot call extract() dynamically
 int(2)

@@ -11,7 +11,7 @@ $test = new Test;
 try {
     $test->prop = 2;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

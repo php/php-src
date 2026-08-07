@@ -9,11 +9,11 @@ $b = array();
 try {
     $c = $a ^ $b;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECT--
-Unsupported operand types: array ^ array
+TypeError: Unsupported operand types: array ^ array
 Done

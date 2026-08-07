@@ -13,9 +13,9 @@ function test() {}
 try {
 	$x = test();
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Caught: Function test() is deprecated
+ErrorException: Function test() is deprecated

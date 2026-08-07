@@ -9,7 +9,7 @@ function test_parse_error($code) {
     try {
         require 'data://text/plain;base64,' . base64_encode($code);
     } catch (ParseError $e) {
-        echo $e->getMessage(), " on line ", $e->getLine(), "\n";
+        echo $e::class, ': ', $e->getMessage(), ' on line ', $e->getLine(), "\n";
     }
 }
 
@@ -43,9 +43,9 @@ var_dump("\u{ffffff}");');
 ?>
 --EXPECT--
 Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
-Unclosed '{' on line 2
-Unclosed '{' on line 3
-syntax error, unexpected end of file, expecting "(" on line 2
-Invalid numeric literal on line 2
-Invalid UTF-8 codepoint escape sequence on line 2
-Invalid UTF-8 codepoint escape sequence: Codepoint too large on line 2
+ParseError: Unclosed '{' on line 2
+ParseError: Unclosed '{' on line 3
+ParseError: syntax error, unexpected end of file, expecting "(" on line 2
+ParseError: Invalid numeric literal on line 2
+ParseError: Invalid UTF-8 codepoint escape sequence on line 2
+ParseError: Invalid UTF-8 codepoint escape sequence: Codepoint too large on line 2
