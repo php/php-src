@@ -31,14 +31,14 @@ echo "Returning a non-int:\n";
 try {
     run_upload($host, fn($ch, $offset, $origin) => 'not an int');
 } catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\nReturning an out-of-range int:\n";
 try {
     run_upload($host, fn($ch, $offset, $origin) => 42);
 } catch (\ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\nThrowing from the callback:\n";
@@ -47,7 +47,7 @@ try {
         throw new \RuntimeException('boom from seek');
     });
 } catch (\RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\nSetting the callback to null:\n";
@@ -57,21 +57,21 @@ echo "\nSetting a non-callable scalar:\n";
 try {
     curl_setopt(curl_init(), CURLOPT_SEEKFUNCTION, 42);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 Returning a non-int:
-The CURLOPT_SEEKFUNCTION callback must return one of CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK
+TypeError: The CURLOPT_SEEKFUNCTION callback must return one of CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK
 
 Returning an out-of-range int:
-The CURLOPT_SEEKFUNCTION callback must return one of CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK
+ValueError: The CURLOPT_SEEKFUNCTION callback must return one of CURL_SEEKFUNC_OK, CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK
 
 Throwing from the callback:
-boom from seek
+RuntimeException: boom from seek
 
 Setting the callback to null:
 bool(true)
 
 Setting a non-callable scalar:
-curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_SEEKFUNCTION, no array or string given
+TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_SEEKFUNCTION, no array or string given

@@ -12,11 +12,11 @@ var_dump(curl_share_setopt($sh, CURLSHOPT_UNSHARE, CURL_LOCK_DATA_DNS));
 try {
     curl_share_setopt($sh, -1, 0);
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 bool(true)
 bool(true)
-curl_share_setopt(): Argument #2 ($option) is not a valid cURL share option
+ValueError: curl_share_setopt(): Argument #2 ($option) is not a valid cURL share option
