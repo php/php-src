@@ -9,15 +9,15 @@ Steve Seear <stevseea@php.net>
 try {
     new ReflectionMethod();
 } catch (ArgumentCountError $re) {
-    echo "Ok - ".$re->getMessage().PHP_EOL;
+    echo $re::class, ': ', $re->getMessage(), PHP_EOL;
 }
 try {
     new ReflectionMethod('a', 'b', 'c');
 } catch (ArgumentCountError $re) {
-    echo "Ok - ".$re->getMessage().PHP_EOL;
+    echo $re::class, ': ', $re->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Ok - ReflectionMethod::__construct() expects at least 1 argument, 0 given
-Ok - ReflectionMethod::__construct() expects at most 2 arguments, 3 given
+ArgumentCountError: ReflectionMethod::__construct() expects at least 1 argument, 0 given
+ArgumentCountError: ReflectionMethod::__construct() expects at most 2 arguments, 3 given

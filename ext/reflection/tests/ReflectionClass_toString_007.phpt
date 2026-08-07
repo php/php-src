@@ -12,9 +12,9 @@ define("C", new stdClass());
 try {
     (string) new ReflectionClass(Foo::class);
 } catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign stdClass to class constant Foo::CONST1 of type array
+TypeError: Cannot assign stdClass to class constant Foo::CONST1 of type array

@@ -52,7 +52,7 @@ function check_params($r)
         }
         catch(ReflectionException $e)
         {
-            echo $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         check_params_decl_class($p, 'getDeclaringClass');
 //		check_params_decl_func($p, 'getDeclaringFunction');
@@ -132,7 +132,7 @@ getName: string(2) "na"
 isPassedByReference: bool(false)
 
 Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
-Class "NonExistingClass" does not exist
+ReflectionException: Class "NonExistingClass" does not exist
 getDeclaringClass: NULL
 isArray: 
 Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
@@ -226,7 +226,7 @@ getName: string(2) "na"
 isPassedByReference: bool(false)
 
 Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
-Class "NonExistingClass" does not exist
+ReflectionException: Class "NonExistingClass" does not exist
 getDeclaringClass: test
 isArray: 
 Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d

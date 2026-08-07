@@ -11,9 +11,9 @@ $rm = new ReflectionMethod('Test', 'foo');
 try {
     var_dump($rm->invoke(null));
 } catch (ReflectionException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Trying to invoke abstract method Test::foo()
+ReflectionException: Trying to invoke abstract method Test::foo()

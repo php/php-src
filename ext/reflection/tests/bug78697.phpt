@@ -7,8 +7,8 @@ trait T {}
 try {
     (new ReflectionClass(new stdClass))->implementsInterface(T::class);
 } catch (ReflectionException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-T is not an interface
+ReflectionException: T is not an interface

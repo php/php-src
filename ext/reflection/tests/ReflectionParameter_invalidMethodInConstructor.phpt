@@ -6,17 +6,17 @@ ReflectionParameter::__construct(): Invalid method as constructor
 // Invalid class name
 try {
     new ReflectionParameter (array ('A', 'b'), 0);
-} catch (ReflectionException $e) { echo $e->getMessage()."\n"; }
+} catch (ReflectionException $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 
 // Invalid class method
 try {
     new ReflectionParameter (array ('C', 'b'), 0);
-} catch (ReflectionException $e) { echo $e->getMessage ()."\n"; }
+} catch (ReflectionException $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 
 // Invalid object method
 try {
     new ReflectionParameter (array (new C, 'b'), 0);
-} catch (ReflectionException $e) { echo $e->getMessage ()."\n"; }
+} catch (ReflectionException $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 
 
 class C {
@@ -40,9 +40,9 @@ echo "Done.\n";
 
 ?>
 --EXPECT--
-Class "A" does not exist
-Method C::b() does not exist
-Method C::b() does not exist
+ReflectionException: Class "A" does not exist
+ReflectionException: Method C::b() does not exist
+ReflectionException: Method C::b() does not exist
 Ok - ReflectionParameter::__construct() expects exactly 2 arguments, 1 given
 Ok - ReflectionParameter::__construct(): Argument #1 ($function) must be a string, an array(class, method), or a callable object, int given
 Done.

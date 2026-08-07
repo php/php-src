@@ -51,12 +51,12 @@ function test($class, $prop) {
     try {
         $propertyReflection->setRawValue($object, 42);
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump($propertyReflection->getRawValue($object));
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -70,7 +70,7 @@ test(Unguarded::class, 'plainProp');
 --EXPECT--
 int(42)
 int(42)
-Must not write to virtual property Test::$virtualProp
-Must not read from virtual property Test::$virtualProp
+Error: Must not write to virtual property Test::$virtualProp
+Error: Must not read from virtual property Test::$virtualProp
 int(42)
 int(42)

@@ -13,10 +13,10 @@ foreach($reflect->getParameters() as $param) {
     try {
         echo $param->getDefaultValueConstantName() . "\n";
     } catch(ReflectionException $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
-Internal error: Failed to retrieve the default value
+ReflectionException: Internal error: Failed to retrieve the default value
 CONST_TEST_1

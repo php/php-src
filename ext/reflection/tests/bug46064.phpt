@@ -24,7 +24,7 @@ print "---------------------------\n";
 try {
     var_dump(new reflectionproperty($o, 'zz'));
 } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(new reflectionproperty($o, 'zzz'));
@@ -64,7 +64,7 @@ array(1) {
 }
 int(1000)
 ---------------------------
-string(30) "Property x::$zz does not exist"
+ReflectionException: Property x::$zz does not exist
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
   string(3) "zzz"

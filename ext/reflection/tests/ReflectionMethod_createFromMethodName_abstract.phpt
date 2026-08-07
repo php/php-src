@@ -12,7 +12,7 @@ abstract class R extends ReflectionMethod {}
 try {
     R::createFromMethodName('C::a');
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump(ReflectionMethod::createFromMethodName('C::a')->name);
