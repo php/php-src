@@ -583,6 +583,8 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				/* TODO Check callback returns an int or something castable to int */
 				length = php_curl_get_long(&retval);
+			} else {
+				length = -1;
 			}
 
 			zval_ptr_dtor(&argv[0]);
@@ -632,14 +634,14 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 static int curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = 0;
+	int rval = 1; // error
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_progress() called\n");
 	fprintf(stderr, "clientp = %p, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
-		return rval;
+		return 0; // ok
 	}
 
 	zval args[5];
@@ -659,8 +661,8 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		/* TODO Check callback returns an int or something castable to int */
-		if (0 != php_curl_get_long(&retval)) {
-			rval = 1;
+		if (0 == php_curl_get_long(&retval)) {
+			rval = 0; // ok
 		}
 	}
 
@@ -673,14 +675,14 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = 0;
+	int rval = 1; // error
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_xferinfo() called\n");
 	fprintf(stderr, "clientp = %p, dltotal = %ld, dlnow = %ld, ultotal = %ld, ulnow = %ld\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
-	if (!ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
-		return rval;
+	if (UNEXPECTED(!ZEND_FCC_INITIALIZED(ch->handlers.xferinfo))) {
+		return 0; // ok
 	}
 
 	zval argv[5];
@@ -700,8 +702,8 @@ static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, cu
 	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		/* TODO Check callback returns an int or something castable to int */
-		if (0 != php_curl_get_long(&retval)) {
-			rval = 1;
+		if (0 == php_curl_get_long(&retval)) {
+			rval = 0; // ok
 		}
 	}
 
@@ -714,13 +716,13 @@ static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, cu
 static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_local_ip, int conn_primary_port, int conn_local_port)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = CURL_PREREQFUNC_OK;
+	int rval = CURL_PREREQFUNC_ABORT;
 
 	// when CURLOPT_PREREQFUNCTION is set to null, curl_prereqfunction still
 	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
 	// zend_call_known_fcc() with an uninitialized FCC.
-	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
-		return rval;
+	if (UNEXPECTED(!ZEND_FCC_INITIALIZED(ch->handlers.prereq))) {
+		return CURL_PREREQFUNC_OK;
 	}
 
 #if PHP_CURL_DEBUG
@@ -858,6 +860,8 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 				}
 				// TODO Do type error if invalid type?
 				zval_ptr_dtor(&retval);
+			} else {
+				length = CURL_READFUNC_ABORT;
 			}
 
 			zval_ptr_dtor(&argv[0]);
@@ -952,6 +956,8 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 				// TODO: Check for valid int type for return value
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				length = php_curl_get_long(&retval);
+			} else {
+				length = -1;
 			}
 			zval_ptr_dtor(&argv[0]);
 			zval_ptr_dtor(&argv[1]);
