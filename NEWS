@@ -44,6 +44,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23016 (NULL values in long columns come back as garbage
     binary strings). (Calvin Buckley, iliaal)
 
+- Readline:
+  . Fixed the interactive shell not waiting for the pager process to exit.
+    (Weilin Du)
+
 - Reflection:
   . Added ReflectionAttribute::inNamespace(),
     ReflectionAttribute::getNamespaceName(), and
