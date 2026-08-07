@@ -16,7 +16,7 @@ $typed = new Typed;
 try {
     openssl_pkcs12_read($cert_store, $typed->foo, "csos");
 } catch (TypeError $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
