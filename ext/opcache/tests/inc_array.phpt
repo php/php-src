@@ -14,14 +14,14 @@ function test_inc_partial_array($k) {
 try {
     test_inc_array();
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test_inc_partial_array(0);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot increment array
-Cannot increment array
+TypeError: Cannot increment array
+TypeError: Cannot increment array

@@ -15,9 +15,9 @@ function test($cond) {
 try {
     test(true);
 } catch (Throwable $e) {
-    echo $e::class, $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-ReflectionExceptionClass "non" does not exist
+ReflectionException: Class "non" does not exist

@@ -14,10 +14,10 @@ function foo() {
 try {
     foo();
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 OK
 --EXPECT--
-Exception: Undefined constant "UNDEFINED_CONST"
+Error: Undefined constant "UNDEFINED_CONST"
 OK

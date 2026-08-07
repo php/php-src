@@ -15,14 +15,14 @@ function test2($a) {
 try {
     test1(1);
 } catch (DivisionByZeroError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test2(1);
 } catch (ArithmeticError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Modulo by zero
-Bit shift by negative number
+DivisionByZeroError: Modulo by zero
+ArithmeticError: Bit shift by negative number

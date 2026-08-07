@@ -14,10 +14,10 @@ function test(): int {
 try {
     test();
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 Warning: Undefined variable $undef in %s on line %d
-test(): Return value must be of type int, null returned
+TypeError: test(): Return value must be of type int, null returned
