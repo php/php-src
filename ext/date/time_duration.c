@@ -146,6 +146,7 @@ ZEND_ATTRIBUTE_NODISCARD static zend_result create_duration(zval *target, zend_u
 
 PHP_METHOD(Time_Duration, __construct)
 {
+	zend_throw_error(NULL, "Cannot directly construct Time\\Duration, use Time\\Duration::from*() methods instead");
 }
 
 PHP_METHOD(Time_Duration, fromSeconds)

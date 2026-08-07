@@ -89,6 +89,16 @@ echo "====", PHP_EOL;
 
 var_dump((new ReflectionProperty($d, 'seconds'))->isWritable(null, $d));
 
+echo "====", PHP_EOL;
+
+try {
+    (new ReflectionMethod($d, '__construct'))->invoke($d);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+echo f($d), PHP_EOL;
+
 ?>
 --EXPECT--
 Error: Cannot modify readonly property Time\Duration::$seconds
@@ -112,3 +122,6 @@ Error: Cannot modify readonly property Time\Duration::$seconds
 Error: Cannot modify protected(set) readonly property Time\Duration::$seconds from global scope
 ====
 bool(false)
+====
+Error: Cannot directly construct Time\Duration, use Time\Duration::from*() methods instead
+         +1.000000000
