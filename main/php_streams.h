@@ -672,13 +672,13 @@ static inline zend_signal_interrupt_result php_stream_check_signals(php_stream *
 	return zend_signal_interrupt_function();
 }
 
-PHPAPI ZEND_COLD void php_stream_in_use_error(void);
+PHPAPI ZEND_COLD void php_stream_concurrent_access_error(void);
 
 /* See PHP_STREAM_FLAG_IN_USE */
-static inline zend_result php_stream_check_in_use(php_stream *stream)
+static inline zend_result php_stream_check_concurrent_access(php_stream *stream)
 {
 	if (UNEXPECTED(stream->flags & PHP_STREAM_FLAG_IN_USE)) {
-		php_stream_in_use_error();
+		php_stream_concurrent_access_error();
 		return FAILURE;
 	}
 	return SUCCESS;

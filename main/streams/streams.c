@@ -258,9 +258,7 @@ PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 	int release_cast = 1;
 	php_stream_context *context;
 
-	/* Not using php_stream_check_in_use() as we want to allow releasing file descriptors during resource shutdown */
-	if (UNEXPECTED((stream->flags & PHP_STREAM_FLAG_IN_USE) && !(EG(flags) & EG_FLAGS_IN_RESOURCE_SHUTDOWN))) {
-		php_stream_in_use_error();
+	if (UNEXPECTED(!(EG(flags) & EG_FLAGS_IN_RESOURCE_SHUTDOWN) && php_stream_check_concurrent_access(stream) != SUCCESS)) {
 		return 0;
 	}
 
@@ -442,7 +440,7 @@ PHPAPI zend_result php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
 	/* allocate/fill the buffer */
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -618,7 +616,7 @@ PHPAPI ssize_t php_stream_read(php_stream *stream, char *buf, size_t size)
 {
 	ssize_t toread = 0, didread = 0;
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return 0;
 	}
 
@@ -724,7 +722,7 @@ PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len)
 
 PHPAPI bool php_stream_eof(php_stream *stream)
 {
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return 0;
 	}
 
@@ -777,7 +775,7 @@ PHPAPI bool php_stream_puts(php_stream *stream, const char *buf)
 
 PHPAPI int php_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 {
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return -1;
 	}
 
@@ -805,7 +803,7 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf)
 	const char *eol = NULL;
 	const char *readptr;
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return 0;
 	}
 
@@ -854,7 +852,7 @@ PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 	int grow_mode = 0;
 	char *bufstart = buf;
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return NULL;
 	}
 
@@ -1004,7 +1002,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 			tent_ret_len;			/* tentative returned length */
 	bool	has_delim = delim_len > 0;
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return NULL;
 	}
 
@@ -1222,7 +1220,7 @@ static int php_stream_flush_ex(php_stream *stream, bool closing)
 {
 	int ret = 0;
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return -1;
 	}
 
@@ -1247,7 +1245,7 @@ PHPAPI ssize_t php_stream_write(php_stream *stream, const char *buf, size_t coun
 {
 	ssize_t bytes;
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return (ssize_t) -1;
 	}
 
@@ -1358,7 +1356,7 @@ static bool php_stream_has_notifier(php_stream *stream)
 
 PHPAPI int php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return -1;
 	}
 
@@ -1471,7 +1469,7 @@ PHPAPI int php_stream_set_option(php_stream *stream, int option, int value, void
 {
 	int ret = PHP_STREAM_OPTION_RETURN_NOTIMPL;
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return PHP_STREAM_OPTION_RETURN_ERR;
 	}
 
@@ -1525,7 +1523,7 @@ PHPAPI ssize_t _php_stream_passthru(php_stream * stream STREAMS_DC)
 	char buf[8192];
 	ssize_t b;
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return -1;
 	}
 
@@ -1570,7 +1568,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, bool
 	php_stream_statbuf ssbuf;
 	zend_string *result;
 
-	if (php_stream_check_in_use(src) != SUCCESS) {
+	if (php_stream_check_concurrent_access(src) != SUCCESS) {
 		return NULL;
 	}
 
@@ -2291,7 +2289,7 @@ PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream
 {
 	php_stream_context *oldcontext = PHP_STREAM_CONTEXT(stream);
 
-	if (php_stream_check_in_use(stream) != SUCCESS) {
+	if (php_stream_check_concurrent_access(stream) != SUCCESS) {
 		return NULL;
 	}
 
@@ -2484,7 +2482,7 @@ overflow:
 	return -1;
 }
 
-PHPAPI ZEND_COLD void php_stream_in_use_error(void)
+PHPAPI ZEND_COLD void php_stream_concurrent_access_error(void)
 {
 	zend_throw_error(NULL, "Concurrent access to a stream");
 }
