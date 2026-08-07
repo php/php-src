@@ -10,8 +10,8 @@ bcmath
 try {
     bcsqrt('-9');
 } catch (ValueError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-bcsqrt(): Argument #1 ($num) must be greater than or equal to 0
+ValueError: bcsqrt(): Argument #1 ($num) must be greater than or equal to 0

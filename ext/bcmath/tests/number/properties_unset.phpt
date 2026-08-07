@@ -9,15 +9,15 @@ $num = new BcMath\Number(1);
 try {
     unset($num->value);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     unset($num->scale);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot unset readonly property BcMath\Number::$value
-Cannot unset readonly property BcMath\Number::$scale
+Error: Cannot unset readonly property BcMath\Number::$value
+Error: Cannot unset readonly property BcMath\Number::$scale

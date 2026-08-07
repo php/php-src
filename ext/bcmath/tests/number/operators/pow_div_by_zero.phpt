@@ -21,21 +21,21 @@ foreach ($values as $value) {
         try {
             $num ** $exponent;
         } catch (Error $e) {
-            echo $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
 ?>
 --EXPECT--
 0 ** -3: int
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -2: string
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -2: object
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -3: int
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -2: string
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -2: object
-Negative power of zero
+DivisionByZeroError: Negative power of zero
