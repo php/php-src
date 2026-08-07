@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - scheme - multibyte codepoint
 try {
     new Uri\WhatWg\Url("ƕŢŢƤƨ://example.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

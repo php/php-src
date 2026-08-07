@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - port - percent encoded character
 try {
     new Uri\WhatWg\Url("https://example.com:%30");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

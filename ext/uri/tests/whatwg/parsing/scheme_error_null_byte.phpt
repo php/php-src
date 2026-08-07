@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - scheme - null byte
 try {
     new Uri\WhatWg\Url("ht\0tp://example.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

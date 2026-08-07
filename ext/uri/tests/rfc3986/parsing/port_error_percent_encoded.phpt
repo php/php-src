@@ -6,7 +6,7 @@ Test Uri\Rfc3986\Uri parsing - port - percent encoded character
 try {
     new Uri\Rfc3986\Uri("https://example.com:%30");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

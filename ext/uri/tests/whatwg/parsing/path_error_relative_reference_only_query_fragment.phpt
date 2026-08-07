@@ -6,7 +6,7 @@ Test Uri\WhatWg\Url parsing - path - relative reference
 try {
     new Uri\WhatWg\Url("?query#fragment");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

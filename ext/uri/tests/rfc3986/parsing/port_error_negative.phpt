@@ -6,7 +6,7 @@ Test Uri\Rfc3986\Uri parsing - port - negative value
 try {
     var_dump(new Uri\Rfc3986\Uri("http://example.com:-1"));
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
