@@ -9,32 +9,32 @@ function foo() {
 try {
     foo()->a = 1;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     foo()->a->b = 2;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     foo()->a++;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     foo()->a->b++;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     foo()->a += 2;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     foo()->a->b += 2;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 foo()[0] = 1;
@@ -48,22 +48,22 @@ var_dump(foo());
 ?>
 --EXPECTF--
 Warning: Undefined variable $x in %s on line %d
-Attempt to assign property "a" on null
+Error: Attempt to assign property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property "a" on null
+Error: Attempt to modify property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to increment/decrement property "a" on null
+Error: Attempt to increment/decrement property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property "a" on null
+Error: Attempt to modify property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to assign property "a" on null
+Error: Attempt to assign property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property "a" on null
+Error: Attempt to modify property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
 

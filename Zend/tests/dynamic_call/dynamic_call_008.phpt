@@ -7,11 +7,11 @@ function test() {
     try {
         ((string) 'extract')(['a' => 42]);
     } catch (\Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 test();
 
 ?>
 --EXPECT--
-Cannot call extract() dynamically
+Error: Cannot call extract() dynamically

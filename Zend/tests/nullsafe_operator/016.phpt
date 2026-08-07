@@ -15,12 +15,12 @@ function test($foo) {
     try {
         set($foo?->bar, 'bar');
     } catch (Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         (strrev('tes'))($foo?->bar, 'bar2');
     } catch (Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -29,7 +29,7 @@ test(new Foo());
 
 ?>
 --EXPECT--
-set(): Argument #1 ($ref) could not be passed by reference
-set(): Argument #1 ($ref) could not be passed by reference
-set(): Argument #1 ($ref) could not be passed by reference
-set(): Argument #1 ($ref) could not be passed by reference
+Error: set(): Argument #1 ($ref) could not be passed by reference
+Error: set(): Argument #1 ($ref) could not be passed by reference
+Error: set(): Argument #1 ($ref) could not be passed by reference
+Error: set(): Argument #1 ($ref) could not be passed by reference

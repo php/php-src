@@ -8,9 +8,9 @@ enum Foo {}
 try {
     new Foo();
 } catch (\Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Cannot instantiate enum Foo
+Error: Cannot instantiate enum Foo

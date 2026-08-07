@@ -16,7 +16,7 @@ var_dump($ref);
 
 try {
     $a->t = &$ref;
-} catch (TypeError $e) { var_dump($e->getMessage()); }
+} catch (TypeError $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($ref);
 
 $a->it = [1]; // type is still assignable
@@ -24,7 +24,7 @@ var_dump($ref);
 
 try {
     $ref = new ArrayIterator();
-} catch (TypeError $e) { var_dump($e->getMessage()); }
+} catch (TypeError $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($ref instanceof ArrayIterator);
 
 unset($a->a);
@@ -35,7 +35,7 @@ $a->t = &$ref;
 
 try {
     $ref = [];
-} catch (TypeError $e) { var_dump($e->getMessage()); }
+} catch (TypeError $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($ref instanceof ArrayIterator);
 
 $ref = new ArrayIterator();
@@ -45,15 +45,15 @@ var_dump($ref instanceof ArrayIterator);
 --EXPECT--
 array(0) {
 }
-string(72) "Cannot assign array to property class@anonymous::$t of type ?Traversable"
+TypeError: Cannot assign array to property class@anonymous::$t of type ?Traversable
 array(0) {
 }
 array(1) {
   [0]=>
   int(1)
 }
-string(92) "Cannot assign ArrayIterator to reference held by property class@anonymous::$a of type ?array"
+TypeError: Cannot assign ArrayIterator to reference held by property class@anonymous::$a of type ?array
 bool(false)
-string(90) "Cannot assign array to reference held by property class@anonymous::$t of type ?Traversable"
+TypeError: Cannot assign array to reference held by property class@anonymous::$t of type ?Traversable
 bool(false)
 bool(true)

@@ -22,10 +22,10 @@ var_dump($p->foo(0));
 try {
     var_dump($c->foo(0));
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 bool(false)
-C::foo(): Return value must be of type array|false, int returned
+TypeError: C::foo(): Return value must be of type array|false, int returned

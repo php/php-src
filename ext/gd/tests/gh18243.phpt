@@ -14,29 +14,29 @@ $im = imagecreatetruecolor(100, 80);
 try {
 	imagettftext($im, PHP_INT_MAX, 0, 15, 60, 0, $font, "");
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	imagettftext($im, PHP_INT_MIN, 0, 15, 60, 0, $font, "");
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	imagettftext($im, NAN, 0, 15, 60, 0, $font, "");
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	imagettftext($im, INF, 0, 15, 60, 0, $font, "");
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-imagettftext(): Argument #2 ($size) must be between %i and %d
-imagettftext(): Argument #2 ($size) must be between %i and %d
-imagettftext(): Argument #2 ($size) must be finite
-imagettftext(): Argument #2 ($size) must be between %i and %d
+ValueError: imagettftext(): Argument #2 ($size) must be between %i and %d
+ValueError: imagettftext(): Argument #2 ($size) must be between %i and %d
+ValueError: imagettftext(): Argument #2 ($size) must be finite
+ValueError: imagettftext(): Argument #2 ($size) must be between %i and %d

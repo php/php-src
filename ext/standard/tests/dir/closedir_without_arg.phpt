@@ -5,9 +5,9 @@ Calling closedir() without argument and without opening a directory beforehand
 try {
     closedir();
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Deprecated: closedir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
-No resource supplied
+TypeError: No resource supplied

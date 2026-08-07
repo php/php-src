@@ -18,7 +18,7 @@ var_dump($dom->createElement('free')->insertAdjacentElement("afterend", $dom->cr
 try {
     var_dump($dom->createElement('free')->insertAdjacentElement("bogus", $dom->createElement('element')));
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- Hierarchy test ---\n";
@@ -29,7 +29,7 @@ foreach (['beforebegin', 'afterbegin', 'beforeend', 'afterend'] as $where) {
     try {
         var_dump($child->insertAdjacentElement($where, $element)->tagName);
     } catch (DOMException $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -84,12 +84,12 @@ echo $dom2->saveXML();
 --- Edge cases ---
 NULL
 NULL
-Syntax Error
+DOMException: Syntax Error
 --- Hierarchy test ---
-Hierarchy Request Error
-Hierarchy Request Error
-Hierarchy Request Error
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
 --- Normal cases uppercase ---
 string(1) "A"
 <?xml version="1.0"?>

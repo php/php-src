@@ -5,8 +5,8 @@ Bug #67249 (printf out-of-bounds read)
 try {
     var_dump(sprintf("%'", "foo"));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Missing padding character
+ValueError: Missing padding character

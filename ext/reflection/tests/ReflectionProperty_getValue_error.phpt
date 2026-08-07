@@ -25,7 +25,7 @@ echo "\nStatic property / too many args:\n";
 try {
     var_dump($propInfo->getValue($instance, true));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\nProtected property:\n";
@@ -37,14 +37,14 @@ $propInfo = new ReflectionProperty('TestClass', 'pub2');
 try {
     var_dump($propInfo->getValue($invalidInstance));
 } catch (ReflectionException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
-echo "\n\nMissing instance:\n";
+echo "\nMissing instance:\n";
 try {
     var_dump($propInfo->getValue());
 } catch (TypeError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -52,14 +52,14 @@ try {
 Instance without property:
 
 Static property / too many args:
-ReflectionProperty::getValue() expects at most 1 argument, 2 given
+ArgumentCountError: ReflectionProperty::getValue() expects at most 1 argument, 2 given
 
 Protected property:
 int(4)
 
 
 Invalid instance:
-Given object is not an instance of the class this property was declared in
+ReflectionException: Given object is not an instance of the class this property was declared in
 
 Missing instance:
-ReflectionProperty::getValue(): Argument #1 ($object) must be provided for instance properties
+TypeError: ReflectionProperty::getValue(): Argument #1 ($object) must be provided for instance properties

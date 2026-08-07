@@ -10,7 +10,7 @@ try {
     }
     new C;
 } catch (Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--

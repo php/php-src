@@ -12,7 +12,7 @@ var_dump($num->foo);
 try {
     $num->foo = 1;
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($num->foo);
@@ -20,7 +20,7 @@ var_dump($num->foo);
 try {
     $num->bar = 1;
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(isset($num->foo));
@@ -28,9 +28,9 @@ var_dump(isset($num->foo));
 --EXPECTF--
 Warning: Undefined property: BcMath\Number::$foo in %s
 NULL
-Cannot create dynamic property BcMath\Number::$foo
+Error: Cannot create dynamic property BcMath\Number::$foo
 
 Warning: Undefined property: BcMath\Number::$foo in %s
 NULL
-Cannot create dynamic property BcMath\Number::$bar
+Error: Cannot create dynamic property BcMath\Number::$bar
 bool(false)

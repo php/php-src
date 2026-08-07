@@ -12,10 +12,10 @@ fclose($sock2);
 try {
     fwrite($sock, "3");
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 int(%d)
 int(%d)
-fwrite(): Argument #1 ($stream) must be an open stream resource
+TypeError: fwrite(): Argument #1 ($stream) must be an open stream resource

@@ -7,9 +7,9 @@ $array = array('at least one element');
 try {
     array_walk($array, array($nonesuchvar,'show'));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Warning: Undefined variable $nonesuchvar in %s on line %d
-array_walk(): Argument #2 ($callback) must be a valid callback, first array member is not a valid class name or object
+TypeError: array_walk(): Argument #2 ($callback) must be a valid callback, first array member is not a valid class name or object

@@ -9,29 +9,29 @@ unset($$A);
 try {
     $$A -= $$B['a'] = &$$C;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 unset($$A);
 try {
     $$A *= $$B['a'] = &$$C;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 unset($$A);
 try {
     $$A /= $$B['a'] = &$$C;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 unset($$A);
 try {
     $$A **= $$B['a'] = &$$C;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unsupported operand types: array - array
-Unsupported operand types: array * array
-Unsupported operand types: array / array
-Unsupported operand types: array ** array
+TypeError: Unsupported operand types: array - array
+TypeError: Unsupported operand types: array * array
+TypeError: Unsupported operand types: array / array
+TypeError: Unsupported operand types: array ** array

@@ -18,13 +18,13 @@ for ($i = 0; $i < 5; $i++) {
     try {
         foo()->{bar()} = str_repeat("a", 3);
     } catch (Throwable $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
-Cannot assign string to property Foo::$bbb of type int
-Cannot assign string to property Foo::$bbb of type int
-Cannot assign string to property Foo::$bbb of type int
-Cannot assign string to property Foo::$bbb of type int
-Cannot assign string to property Foo::$bbb of type int
+TypeError: Cannot assign string to property Foo::$bbb of type int
+TypeError: Cannot assign string to property Foo::$bbb of type int
+TypeError: Cannot assign string to property Foo::$bbb of type int
+TypeError: Cannot assign string to property Foo::$bbb of type int
+TypeError: Cannot assign string to property Foo::$bbb of type int

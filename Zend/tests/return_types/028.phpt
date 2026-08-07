@@ -12,9 +12,9 @@ function foo(): stdClass {
 try {
     foo();
 } catch (Error $e) {
-    echo $e->getMessage(), " in ", $e->getFile(), " on line ", $e->getLine();
+    echo $e::class, ': ', $e->getMessage(), ' in ', $e->getFile(), ' on line ', $e->getLine(), PHP_EOL;
 }
 
 ?>
 --EXPECTF--
-foo(): Return value must be of type stdClass, array returned in %s on line %d
+TypeError: foo(): Return value must be of type stdClass, array returned in %s on line %d

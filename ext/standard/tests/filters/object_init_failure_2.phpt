@@ -9,11 +9,11 @@ stream_filter_register('sample.filter', SampleFilter::class);
 try {
     include 'php://filter/read=sample.filter/resource='. __FILE__;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Warning: main(): Unable to create or locate filter "sample.filter" in %s on line %d
 
 Warning: main(): Unable to create filter (sample.filter) in %s on line %d
-Undefined constant "FOO"
+Error: Undefined constant "FOO"

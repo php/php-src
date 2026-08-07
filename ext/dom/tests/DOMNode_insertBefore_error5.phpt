@@ -30,9 +30,9 @@ $dom->saveXML();
 try {
     $parent_node->insertBefore($new_node, $ref_node);
 } catch(DOMException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Not Found Error
+DOMException: Not Found Error

@@ -20,7 +20,7 @@ echo "--- \"foo\" ---\n";
 try {
     var_dump($list["foo"], isset($list["foo"]), empty($list["foo"]));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- 1.1 ---\n";
@@ -68,7 +68,7 @@ string(1) "A"
 bool(true)
 bool(false)
 --- "foo" ---
-Cannot access offset of type string on Dom\TokenList
+TypeError: Cannot access offset of type string on Dom\TokenList
 --- 1.1 ---
 
 Deprecated: Implicit conversion from float 1.1 to int loses precision in %s on line %d

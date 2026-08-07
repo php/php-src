@@ -15,7 +15,7 @@ function test() {
 try {
 	test();
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 eval(<<<'CODE'
@@ -28,7 +28,7 @@ CODE);
 try {
 	test2();
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 class Clazz {
@@ -42,7 +42,7 @@ try {
 	$cls = new Clazz();
 	$cls->test();
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $closure = #[\Deprecated("convert to exception")] function () {
@@ -52,7 +52,7 @@ $closure = #[\Deprecated("convert to exception")] function () {
 try {
 	$closure();
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 class Constructor {
@@ -65,7 +65,7 @@ class Constructor {
 try {
 	new Constructor();
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 class Destructor {
@@ -78,14 +78,14 @@ class Destructor {
 try {
 	new Destructor();
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECTF--
-Caught: Function test() is deprecated, convert to exception
-Caught: Function test2() is deprecated, convert to exception
-Caught: Method Clazz::test() is deprecated, convert to exception
-Caught: Function {closure:%s:%d}() is deprecated, convert to exception
-Caught: Method Constructor::__construct() is deprecated, convert to exception
-Caught: Method Destructor::__destruct() is deprecated, convert to exception
+ErrorException: Function test() is deprecated, convert to exception
+ErrorException: Function test2() is deprecated, convert to exception
+ErrorException: Method Clazz::test() is deprecated, convert to exception
+ErrorException: Function {closure:%s:%d}() is deprecated, convert to exception
+ErrorException: Method Constructor::__construct() is deprecated, convert to exception
+ErrorException: Method Destructor::__destruct() is deprecated, convert to exception

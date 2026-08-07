@@ -18,15 +18,15 @@ unset($root->myProp);
 try {
     $root->myProp;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unset($root->textContent);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Typed property MyElement::$myProp must not be accessed before initialization
-Cannot unset MyElement::$textContent
+Error: Typed property MyElement::$myProp must not be accessed before initialization
+Error: Cannot unset MyElement::$textContent

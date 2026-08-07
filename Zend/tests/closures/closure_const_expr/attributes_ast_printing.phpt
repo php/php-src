@@ -14,7 +14,7 @@ try {
         function () { }
     );
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -26,16 +26,16 @@ try {
         class {}
     );
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(!#[Attr(static function ($foo) {
+AssertionError: assert(!#[Attr(static function ($foo) {
     echo $foo;
 })] function () {
 })
-assert(!new #[Attr(static function ($foo) {
+AssertionError: assert(!new #[Attr(static function ($foo) {
     echo $foo;
 })] class {
 })

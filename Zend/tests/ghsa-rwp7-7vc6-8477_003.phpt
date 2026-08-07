@@ -14,9 +14,9 @@ function newFoo() {
 try {
     newFoo()->prop ??= 'foo';
 } catch (Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Cannot assign string to property Foo::$prop of type int
+TypeError: Cannot assign string to property Foo::$prop of type int

@@ -11,8 +11,8 @@ $doctype = new DOMDocumentType();
 try {
     $doctype->name;
 } catch (DOMException $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Invalid State Error
+DOMException: Invalid State Error

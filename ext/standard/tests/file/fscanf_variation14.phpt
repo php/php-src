@@ -97,7 +97,7 @@ foreach($string_formats as $string_format) {
     try {
       var_dump(fscanf($file_handle,$string_format));
     } catch (ValueError $exception) {
-      echo $exception->getMessage() . "\n";
+      echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
   }
   $counter++;
@@ -565,30 +565,30 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
-Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
+ValueError: Bad scan conversion character " "
 bool(false)
 
 -- iteration 8 --

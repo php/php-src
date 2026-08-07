@@ -31,17 +31,17 @@ try {
     // during auto-priming, so fails
     var_dump($gen->getReturn());
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     // This fails, because the return value was discarded
     var_dump($gen->getReturn());
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 int(42)
-gen2() throw
-Cannot get return value of a generator that hasn't returned
+Exception: gen2() throw
+Exception: Cannot get return value of a generator that hasn't returned

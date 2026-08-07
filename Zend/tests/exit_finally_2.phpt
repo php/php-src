@@ -15,7 +15,7 @@ try {
     }
     echo "Not executed\n";
 } catch (Exception $e) {
-    echo "Caught {$e->getMessage()}\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

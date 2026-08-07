@@ -21,13 +21,13 @@ $foo = new Foo(1);
 try {
     clone $foo;
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     clone $foo;
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -36,9 +36,9 @@ object(Foo)#2 (1) {
   ["bar"]=>
   int(3)
 }
-Cannot modify readonly property Foo::$bar
+Error: Cannot modify readonly property Foo::$bar
 object(Foo)#2 (1) {
   ["bar"]=>
   int(3)
 }
-Cannot modify readonly property Foo::$bar
+Error: Cannot modify readonly property Foo::$bar

@@ -17,9 +17,9 @@ $foo = new Foo();
 try {
     $foo->bar = 2;
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot modify readonly property Foo::$bar
+Error: Cannot modify readonly property Foo::$bar

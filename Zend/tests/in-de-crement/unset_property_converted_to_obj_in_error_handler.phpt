@@ -15,11 +15,11 @@ unset($c->a);
 try {
     (++$c->a);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($c->a);
 ?>
 --EXPECT--
-Cannot increment stdClass
+TypeError: Cannot increment stdClass
 object(stdClass)#2 (0) {
 }

@@ -18,17 +18,17 @@ $test->prop->foo++;
 try {
     $test->prop += 1;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $test->prop++;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     --$test->prop;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->prop);
 
@@ -44,9 +44,9 @@ var_dump($test->prop);
 
 ?>
 --EXPECT--
-Unsupported operand types: stdClass + int
-Cannot modify readonly property Test::$prop
-Cannot modify readonly property Test::$prop
+TypeError: Unsupported operand types: stdClass + int
+Error: Cannot modify readonly property Test::$prop
+Error: Cannot modify readonly property Test::$prop
 object(stdClass)#2 (1) {
   ["foo"]=>
   int(3)

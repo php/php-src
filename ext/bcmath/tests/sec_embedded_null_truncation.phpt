@@ -27,33 +27,33 @@ foreach ($cases as $s) {
             $fn($s);
             echo "FAIL: accepted\n";
         } catch (\ValueError $e) {
-            echo $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
 ?>
 --EXPECT--
-bcadd(): Argument #1 ($num1) is not well-formed
-bcsub(): Argument #1 ($num1) is not well-formed
-bcmul(): Argument #1 ($num1) is not well-formed
-bcdiv(): Argument #1 ($num1) is not well-formed
-bcmod(): Argument #1 ($num1) is not well-formed
-bcpow(): Argument #1 ($num) is not well-formed
-bccomp(): Argument #1 ($num1) is not well-formed
-bcsqrt(): Argument #1 ($num) is not well-formed
-bcadd(): Argument #1 ($num1) is not well-formed
-bcsub(): Argument #1 ($num1) is not well-formed
-bcmul(): Argument #1 ($num1) is not well-formed
-bcdiv(): Argument #1 ($num1) is not well-formed
-bcmod(): Argument #1 ($num1) is not well-formed
-bcpow(): Argument #1 ($num) is not well-formed
-bccomp(): Argument #1 ($num1) is not well-formed
-bcsqrt(): Argument #1 ($num) is not well-formed
-bcadd(): Argument #1 ($num1) is not well-formed
-bcsub(): Argument #1 ($num1) is not well-formed
-bcmul(): Argument #1 ($num1) is not well-formed
-bcdiv(): Argument #1 ($num1) is not well-formed
-bcmod(): Argument #1 ($num1) is not well-formed
-bcpow(): Argument #1 ($num) is not well-formed
-bccomp(): Argument #1 ($num1) is not well-formed
-bcsqrt(): Argument #1 ($num) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcsub(): Argument #1 ($num1) is not well-formed
+ValueError: bcmul(): Argument #1 ($num1) is not well-formed
+ValueError: bcdiv(): Argument #1 ($num1) is not well-formed
+ValueError: bcmod(): Argument #1 ($num1) is not well-formed
+ValueError: bcpow(): Argument #1 ($num) is not well-formed
+ValueError: bccomp(): Argument #1 ($num1) is not well-formed
+ValueError: bcsqrt(): Argument #1 ($num) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcsub(): Argument #1 ($num1) is not well-formed
+ValueError: bcmul(): Argument #1 ($num1) is not well-formed
+ValueError: bcdiv(): Argument #1 ($num1) is not well-formed
+ValueError: bcmod(): Argument #1 ($num1) is not well-formed
+ValueError: bcpow(): Argument #1 ($num) is not well-formed
+ValueError: bccomp(): Argument #1 ($num1) is not well-formed
+ValueError: bcsqrt(): Argument #1 ($num) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcsub(): Argument #1 ($num1) is not well-formed
+ValueError: bcmul(): Argument #1 ($num1) is not well-formed
+ValueError: bcdiv(): Argument #1 ($num1) is not well-formed
+ValueError: bcmod(): Argument #1 ($num1) is not well-formed
+ValueError: bcpow(): Argument #1 ($num) is not well-formed
+ValueError: bccomp(): Argument #1 ($num1) is not well-formed
+ValueError: bcsqrt(): Argument #1 ($num) is not well-formed

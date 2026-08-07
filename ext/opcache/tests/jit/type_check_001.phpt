@@ -17,7 +17,7 @@ try {
         undefined_function('Null');
     }
 } catch (Exception $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

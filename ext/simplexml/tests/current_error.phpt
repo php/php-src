@@ -17,7 +17,7 @@ $sxe = simplexml_load_string($xml);
 try {
     $sxe->current();
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
@@ -27,13 +27,13 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 try {
     $sxe->current();
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Iterator not initialized or already consumed
+Error: Iterator not initialized or already consumed
 string(4) "elem"
 object(SimpleXMLElement)#3 (0) {
 }
-Iterator not initialized or already consumed
+Error: Iterator not initialized or already consumed

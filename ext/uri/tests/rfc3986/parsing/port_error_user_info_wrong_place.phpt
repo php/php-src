@@ -6,7 +6,7 @@ Test Uri\Rfc3986\Uri parsing - port - user info component is in wrong place
 try {
     var_dump(new Uri\Rfc3986\Uri("https://example.com:8080@username:password"));
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

@@ -20,7 +20,7 @@ function test($g) {
     try {
         $g->throw(new Exception("Exception!"));
     } catch (Exception $e) {
-        echo "{$e->getMessage()}\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($g->current());
 }
@@ -35,9 +35,9 @@ test(yf(yielditer($data)));
 ?>
 --EXPECT--
 int(1)
-Exception!
+Exception: Exception!
 NULL
 
 int(1)
-Exception!
+Exception: Exception!
 NULL

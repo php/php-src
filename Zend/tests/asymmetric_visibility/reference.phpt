@@ -18,7 +18,7 @@ try {
     $bar = &$foo->bar;
     $bar++;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo->bar);
 
@@ -27,6 +27,6 @@ var_dump($foo->bar);
 
 ?>
 --EXPECT--
-Cannot indirectly modify private(set) property Foo::$bar from global scope
+Error: Cannot indirectly modify private(set) property Foo::$bar from global scope
 int(0)
 int(1)

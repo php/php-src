@@ -13,7 +13,7 @@ enum Suit: string {
 try {
     var_dump(Suit::from(42));
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 enum Foo: int {
@@ -24,11 +24,11 @@ enum Foo: int {
 try {
     var_dump(Foo::from('H'));
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
 ?>
 --EXPECT--
-"42" is not a valid backing value for enum Suit
-Foo::from(): Argument #1 ($value) must be of type int, string given
+ValueError: "42" is not a valid backing value for enum Suit
+TypeError: Foo::from(): Argument #1 ($value) must be of type int, string given

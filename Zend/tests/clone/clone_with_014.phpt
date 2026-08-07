@@ -19,7 +19,7 @@ var_dump($test);
 try {
     $test->b = 4;
 } catch (Error $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($test);

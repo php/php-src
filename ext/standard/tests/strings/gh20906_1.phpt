@@ -17,7 +17,7 @@ class A {
 try {
   new A;
 } catch (Throwable $e) {
-  echo $e::class, ": ", $e->getMessage(), "\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--

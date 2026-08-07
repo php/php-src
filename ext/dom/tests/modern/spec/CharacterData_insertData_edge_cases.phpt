@@ -12,17 +12,17 @@ $comment = $dom->createComment("foobarbaz");
 try {
     var_dump($comment->insertData(100, "data"));
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($comment->insertData(2**31+1, "data"));
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 
 ?>
 --EXPECT--
-Index Size Error
-Index Size Error
+DOMException: Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->

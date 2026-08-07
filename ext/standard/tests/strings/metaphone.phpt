@@ -9,7 +9,7 @@ var_dump(metaphone(-1));
 try {
     var_dump(metaphone("valid phrase", -1));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(metaphone("valid phrase", 0));
 var_dump(metaphone("valid phrase", 10000));
@@ -30,7 +30,7 @@ echo "Done\n";
 --EXPECT--
 string(0) ""
 string(0) ""
-metaphone(): Argument #2 ($max_phonemes) must be greater than or equal to 0
+ValueError: metaphone(): Argument #2 ($max_phonemes) must be greater than or equal to 0
 string(6) "FLTFRS"
 string(6) "FLTFRS"
 string(26) "0FLFRWRTKRFLNKHTLSLN0KLTR0"

@@ -22,14 +22,14 @@ function foo() {
     try {
         var_dump($a["ab"]);
     } catch (\TypeError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     $x = "a";
     $y = "b";
     try {
         var_dump($a[$x . $y]);
     } catch (\TypeError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     var_dump($a["2x"]);
     $x = "2";
@@ -55,8 +55,8 @@ string(1) "B"
 
 Warning: String offset cast occurred in %s on line %d
 string(1) "A"
-Cannot access offset of type string on string
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 
 Warning: Illegal string offset "2x" in %sfetch_dim_r_003.php on line 24
 string(1) "C"

@@ -7,9 +7,9 @@ $str = "foo";
 try {
     Test::{$str . "bar"}();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Class "Test" not found
+Error: Class "Test" not found

@@ -16,8 +16,8 @@ $var3=3;
 try {
     openssl_spki_new($var1, $var2, $var3);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-openssl_spki_new(): Argument #1 ($private_key) must be of type OpenSSLAsymmetricKey, resource given
+TypeError: openssl_spki_new(): Argument #1 ($private_key) must be of type OpenSSLAsymmetricKey, resource given

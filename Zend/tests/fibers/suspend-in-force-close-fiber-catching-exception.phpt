@@ -16,12 +16,12 @@ try {
         $fiber->start();
     })();
 } catch (FiberError $exception) {
-    echo $exception->getMessage(), "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "done\n";
 
 ?>
 --EXPECT--
-Cannot suspend in a force-closed fiber
+FiberError: Cannot suspend in a force-closed fiber
 done

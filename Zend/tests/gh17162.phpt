@@ -14,8 +14,8 @@ $box = [new Test];
 try {
     getimagesize("dummy", $box);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Attempt to assign property "value" on null
+Error: Attempt to assign property "value" on null

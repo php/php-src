@@ -41,25 +41,25 @@ var_dump($c->m2());
 try {
 	var_dump($c->m3());
 } catch (Error $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	var_dump(clone($p, [ 'b' => 'inaccessible' ]));
 } catch (Error $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	var_dump(clone($p, [ 'd' => 'inaccessible' ]));
 } catch (Error $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	var_dump((new Unrelated())->m3($p));
 } catch (Error $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

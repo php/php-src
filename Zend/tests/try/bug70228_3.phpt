@@ -21,11 +21,11 @@ try {
     var_dump(test());
 } catch (Exception $e) {
     do {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
         $e = $e->getPrevious();
     } while ($e);
 }
 ?>
 --EXPECT--
-2
-1
+Exception: 2
+Exception: 1

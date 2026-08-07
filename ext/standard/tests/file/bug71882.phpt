@@ -6,8 +6,8 @@ $fd = fopen("php://memory", "w+");
 try {
     var_dump(ftruncate($fd, -1));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0

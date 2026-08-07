@@ -21,13 +21,13 @@ $ref = "foobar";
 try {
     $test->$name =& $ref;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test);
 
 ?>
 --EXPECTF--
-Cannot assign string to property Test::$prop of type int
+TypeError: Cannot assign string to property Test::$prop of type int
 lazy proxy object(Test)#%d (1) {
   ["instance"]=>
   object(Test)#%d (0) {

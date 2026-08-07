@@ -15,7 +15,7 @@ class C extends P {
         try {
             $this->prop = 'overwritten';
         } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         var_dump($this->prop);
     }
@@ -27,8 +27,8 @@ $c->test();
 ?>
 --EXPECT--
 string(7) "default"
-Cannot modify private(set) property P::$prop from scope C
+Error: Cannot modify private(set) property P::$prop from scope C
 string(7) "default"
 string(7) "default"
-Cannot modify private(set) property P::$prop from scope C
+Error: Cannot modify private(set) property P::$prop from scope C
 string(7) "default"

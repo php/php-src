@@ -6,7 +6,7 @@ Test Uri\Rfc3986\Uri parsing - basic - multibyte character
 try {
     new Uri\Rfc3986\Uri("🐘");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

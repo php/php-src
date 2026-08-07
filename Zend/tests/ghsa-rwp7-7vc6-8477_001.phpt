@@ -18,9 +18,9 @@ $foo = new Foo();
 try {
     $foo->foo()->baz ??= 1;
 } catch (Exception $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Hello
+Exception: Hello

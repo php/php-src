@@ -5,8 +5,8 @@ Call internal function with incorrect number of arguments
 try {
     substr("foo");
 } catch (ArgumentCountError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-substr() expects at least 2 arguments, 1 given
+ArgumentCountError: substr() expects at least 2 arguments, 1 given

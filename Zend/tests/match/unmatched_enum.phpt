@@ -13,9 +13,9 @@ try {
         Foo::Baz => 42,
     };
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Unhandled match case Foo::Bar
+UnhandledMatchError: Unhandled match case Foo::Bar

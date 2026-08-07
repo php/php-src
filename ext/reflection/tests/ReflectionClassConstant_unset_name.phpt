@@ -14,15 +14,15 @@ unset($rc->name);
 try {
     var_dump($rc->getName());
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     echo $rc, "\n";
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Typed property ReflectionClassConstant::$name must not be accessed before initialization
-Typed property ReflectionClassConstant::$name must not be accessed before initialization
+Error: Typed property ReflectionClassConstant::$name must not be accessed before initialization
+Error: Typed property ReflectionClassConstant::$name must not be accessed before initialization

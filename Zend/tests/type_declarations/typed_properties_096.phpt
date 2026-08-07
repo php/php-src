@@ -14,7 +14,7 @@ $ref =& $test->prop2;
 try {
     $test->prop =& $ref;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test);
 
@@ -31,7 +31,7 @@ var_dump($test);
 
 ?>
 --EXPECT--
-Cannot assign int to property Test1::$prop of type Foobar
+TypeError: Cannot assign int to property Test1::$prop of type Foobar
 object(Test1)#1 (1) {
   ["prop"]=>
   uninitialized(Foobar)

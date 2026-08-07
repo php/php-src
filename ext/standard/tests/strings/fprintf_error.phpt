@@ -10,28 +10,28 @@ echo "*** Testing Error Conditions ***\n";
 try {
     var_dump( fprintf() );
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /* scalar argument */
 try {
     var_dump( fprintf(3) );
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /* NULL argument */
 try {
     var_dump( fprintf(NULL) );
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECT--
 *** Testing Error Conditions ***
-fprintf() expects at least 2 arguments, 0 given
-fprintf() expects at least 2 arguments, 1 given
-fprintf() expects at least 2 arguments, 1 given
+ArgumentCountError: fprintf() expects at least 2 arguments, 0 given
+ArgumentCountError: fprintf() expects at least 2 arguments, 1 given
+ArgumentCountError: fprintf() expects at least 2 arguments, 1 given
 Done

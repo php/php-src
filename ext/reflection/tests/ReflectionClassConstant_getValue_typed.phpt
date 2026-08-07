@@ -21,13 +21,13 @@ $rc = new ReflectionClassConstant(B::class, 'CONST1');
 try {
     $rc->getValue();
 } catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo $rc;
 } catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -35,5 +35,5 @@ try {
 object(stdClass)#1 (0) {
 }
 Constant [ public object CONST1 ] { Object }
-Cannot assign stdClass to class constant B::CONST1 of type array
-Cannot assign stdClass to class constant B::CONST1 of type array
+TypeError: Cannot assign stdClass to class constant B::CONST1 of type array
+TypeError: Cannot assign stdClass to class constant B::CONST1 of type array

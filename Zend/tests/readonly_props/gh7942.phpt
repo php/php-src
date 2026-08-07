@@ -14,9 +14,9 @@ try {
     $i = 42;
     new Foo($i);
 } catch (Error $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Cannot indirectly modify readonly property Foo::$bar
+Error: Cannot indirectly modify readonly property Foo::$bar

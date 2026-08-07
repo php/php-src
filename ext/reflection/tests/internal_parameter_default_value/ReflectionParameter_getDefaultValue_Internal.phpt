@@ -9,7 +9,7 @@ foreach ($method->getParameters() as $k => $parameter) {
     try {
         var_dump($parameter->getDefaultValue());
     } catch (ReflectionException $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -22,14 +22,14 @@ foreach ($method->getParameters() as $parameter) {
     try {
         var_dump($parameter->getDefaultValue());
     } catch (ReflectionException $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
-Internal error: Failed to retrieve the default value
-Internal error: Failed to retrieve the default value
+ReflectionException: Internal error: Failed to retrieve the default value
+ReflectionException: Internal error: Failed to retrieve the default value
 int(0)
 int(0)
 ----------

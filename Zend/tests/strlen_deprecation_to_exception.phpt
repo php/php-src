@@ -9,9 +9,9 @@ set_error_handler(function($_, $msg) {
 try {
     strlen(null);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-strlen(): Passing null to parameter #1 ($string) of type string is deprecated
+Exception: strlen(): Passing null to parameter #1 ($string) of type string is deprecated

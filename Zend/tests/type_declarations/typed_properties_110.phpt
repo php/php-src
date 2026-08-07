@@ -12,9 +12,9 @@ $foo->value = null;
 try {
     $foo->value = 1;
 } catch (\TypeError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Cannot assign int to property Foo::$value of type null
+TypeError: Cannot assign int to property Foo::$value of type null

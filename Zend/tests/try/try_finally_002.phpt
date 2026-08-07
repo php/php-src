@@ -14,10 +14,10 @@ try {
   foo();
 } catch (Exception $e) {
   do {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
   } while ($e = $e->getPrevious());
 }
 ?>
 --EXPECT--
-string(7) "finally"
-string(3) "try"
+Exception: finally
+Exception: try

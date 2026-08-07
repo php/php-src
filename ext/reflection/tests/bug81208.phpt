@@ -19,10 +19,10 @@ foreach ($z->getProperty("property")->getAttributes() as $attribute) {
     try {
         $attribute->newInstance();
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
-Undefined constant "asdasdasd"
+Error: Undefined constant "asdasdasd"

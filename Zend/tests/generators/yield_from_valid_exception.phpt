@@ -18,7 +18,7 @@ function gen() {
         // the fact that the yield from result is used is relevant.
         var_dump(yield from new FooBar);
     } catch (Exception $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -27,4 +27,4 @@ $x->current();
 
 ?>
 --EXPECT--
-Exception from valid()
+Exception: Exception from valid()

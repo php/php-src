@@ -20,13 +20,13 @@ echo http_build_query(['e1' => E1::C, 'e2' => E2::C]), "\n";
 try {
     echo http_build_query(['e3' => E3::C]);
 } catch (Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo http_build_query(E1::C);
 } catch (Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

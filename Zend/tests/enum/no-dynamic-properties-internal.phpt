@@ -10,9 +10,9 @@ $bar = ZendTestUnitEnum::Bar;
 try {
     $bar->baz = 'Baz';
 } catch (\Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Cannot create dynamic property ZendTestUnitEnum::$baz
+Error: Cannot create dynamic property ZendTestUnitEnum::$baz

@@ -14,8 +14,8 @@ $process = proc_open('nothing', $description, $pipes);
 try {
     stream_context_set_options($process, []);
 } catch (TypeError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-stream_context_set_options(): Argument #1 ($context) must be a valid stream/context
+TypeError: stream_context_set_options(): Argument #1 ($context) must be a valid stream/context

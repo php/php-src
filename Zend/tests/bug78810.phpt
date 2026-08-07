@@ -11,15 +11,15 @@ $test = new Test;
 try {
     $test->i++;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $test->i += 1;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Typed property Test::$i must not be accessed before initialization
-Typed property Test::$i must not be accessed before initialization
+Error: Typed property Test::$i must not be accessed before initialization
+Error: Typed property Test::$i must not be accessed before initialization

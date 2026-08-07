@@ -20,7 +20,7 @@ var_dump($attr->getName(), $attr->getTarget() == Attribute::TARGET_CLASS, $attr-
 try {
     $attr->newInstance();
 } catch (\Throwable $e) {
-    var_dump('ERROR 1', $e->getMessage());
+    echo 'ERROR 1: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -32,7 +32,7 @@ var_dump($attr->getName(), $attr->getTarget() == Attribute::TARGET_FUNCTION, $at
 try {
     $attr->newInstance();
 } catch (\Throwable $e) {
-    var_dump('ERROR 2', $e->getMessage());
+    echo 'ERROR 2: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -55,14 +55,12 @@ string(2) "A1"
 string(2) "A1"
 bool(true)
 bool(false)
-string(7) "ERROR 1"
-string(70) "Attribute "A1" cannot target class (allowed targets: function, method)"
+ERROR 1: Error: Attribute "A1" cannot target class (allowed targets: function, method)
 
 string(2) "A1"
 bool(true)
 bool(true)
-string(7) "ERROR 2"
-string(35) "Attribute "A1" must not be repeated"
+ERROR 2: Error: Attribute "A1" must not be repeated
 
 string(2) "A2"
 bool(true)

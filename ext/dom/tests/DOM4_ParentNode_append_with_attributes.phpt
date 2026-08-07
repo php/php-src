@@ -19,12 +19,12 @@ $element = $dom->documentElement;
 try {
     $element->append($replacement, $addition);
 } catch (DOMException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $dom->saveXML();
 ?>
 --EXPECT--
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>
 <test attr-one="21"/>

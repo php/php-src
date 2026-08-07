@@ -16,12 +16,12 @@ enum Test {
 try {
     Test::A->modify();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(Test::A->name);
 
 ?>
 --EXPECT--
 string(1) "A"
-Cannot modify readonly property Test::$name
+Error: Cannot modify readonly property Test::$name
 string(1) "A"

@@ -10,8 +10,8 @@ function getNumber() : int {
 try {
     getNumber();
 } catch (TypeError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(62) "getNumber(): Return value must be of type int, string returned"
+TypeError: getNumber(): Return value must be of type int, string returned

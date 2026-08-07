@@ -64,7 +64,7 @@ echo "\n*** Testing error conditions ***\n";
 try {
     array_key_exists(array(), array());
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\n*** Testing operation on objects ***\n";
@@ -77,7 +77,7 @@ $key_check_obj = new key_check; //new object
 try {
     var_dump(array_key_exists("public_var", $key_check_obj));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -250,8 +250,8 @@ bool(false)
 bool(true)
 
 *** Testing error conditions ***
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type array on array
 
 *** Testing operation on objects ***
-array_key_exists(): Argument #2 ($array) must be of type array, key_check given
+TypeError: array_key_exists(): Argument #2 ($array) must be of type array, key_check given
 Done

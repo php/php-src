@@ -25,14 +25,14 @@ $other->appendChild($doctype);
 try {
     $other->appendChild($other->implementation->createDocumentType('doc', '', ''));
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $other->saveXml();
 
 ?>
 --EXPECT--
 Found entity: foo
-A document may only contain one document type
+DOMException: A document may only contain one document type
 <?xml version="1.0"?>
 <!DOCTYPE doc [
 <!ENTITY foo "bar">

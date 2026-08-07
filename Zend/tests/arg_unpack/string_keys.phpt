@@ -10,9 +10,9 @@ set_error_handler(function($errno, $errstr) {
 try {
     var_dump(...new ArrayIterator([1, 2, "foo" => 3, 4]));
 } catch (Error $ex) {
-    var_dump($ex->getMessage());
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-string(68) "Cannot use positional argument after named argument during unpacking"
+Error: Cannot use positional argument after named argument during unpacking

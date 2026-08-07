@@ -15,8 +15,8 @@ $b = new MyString();
 try {
     var_dump($a + $b);
 } catch (Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Unsupported operand types: BcMath\Number + MyString
+TypeError: Unsupported operand types: BcMath\Number + MyString

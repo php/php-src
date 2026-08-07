@@ -31,7 +31,7 @@ foreach(['rewind', 'valid', 'key', 'current', 'next'] as $trap) {
         // IS_CV
         foreach ($obj as $key => $val) echo "$val\n";
     } catch (Exception $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     unset($obj);
 
@@ -39,33 +39,33 @@ foreach(['rewind', 'valid', 'key', 'current', 'next'] as $trap) {
         // IS_VAR
         foreach (new IT(3, $trap) as $key => $val) echo "$val\n";
     } catch (Exception $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         // IS_TMP_VAR
         foreach ((object)new IT(2, $trap) as $key => $val) echo "$val\n";
     } catch (Exception $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
-rewind
-rewind
-rewind
-valid
-valid
-valid
-key
-key
-key
-current
-current
-current
+Exception: rewind
+Exception: rewind
+Exception: rewind
+Exception: valid
+Exception: valid
+Exception: valid
+Exception: key
+Exception: key
+Exception: key
+Exception: current
+Exception: current
+Exception: current
 0
-next
+Exception: next
 0
-next
+Exception: next
 0
-next
+Exception: next

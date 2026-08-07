@@ -6,9 +6,9 @@ Trying to use lambda as array key
 try {
     var_dump(array(function() { } => 1));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot access offset of type Closure on array
+TypeError: Cannot access offset of type Closure on array

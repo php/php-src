@@ -10,12 +10,12 @@ try {
     $x = new Closure();
 } catch (Exception $e) {
     // Instantiating a closure is an error, not an exception, so we shouldn't see this
-    echo 'EXCEPTION: ', $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 } catch (Throwable $e) {
     // This is the message that we should see for a caught error
-    echo 'ERROR: ', $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-ERROR: Instantiation of class Closure is not allowed
+Error: Instantiation of class Closure is not allowed

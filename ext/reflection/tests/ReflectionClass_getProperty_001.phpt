@@ -35,25 +35,25 @@ foreach($classes as $class) {
         echo "  --> Check for s: ";
         var_dump($rc->getProperty("s"));
     } catch (exception $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         echo "  --> Check for a: ";
         var_dump($rc->getProperty("a"));
     } catch (exception $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         echo "  --> Check for A: ";
         var_dump($rc->getProperty("A"));
     } catch (exception $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         echo "  --> Check for doesNotExist: ";
         var_dump($rc->getProperty("doesNotExist"));
     } catch (exception $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
 }
@@ -72,8 +72,8 @@ Reflecting on class pubf:
   ["class"]=>
   string(4) "pubf"
 }
-  --> Check for A: Property pubf::$A does not exist
-  --> Check for doesNotExist: Property pubf::$doesNotExist does not exist
+  --> Check for A: ReflectionException: Property pubf::$A does not exist
+  --> Check for doesNotExist: ReflectionException: Property pubf::$doesNotExist does not exist
 Reflecting on class subpubf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -87,8 +87,8 @@ Reflecting on class subpubf:
   ["class"]=>
   string(4) "pubf"
 }
-  --> Check for A: Property subpubf::$A does not exist
-  --> Check for doesNotExist: Property subpubf::$doesNotExist does not exist
+  --> Check for A: ReflectionException: Property subpubf::$A does not exist
+  --> Check for doesNotExist: ReflectionException: Property subpubf::$doesNotExist does not exist
 Reflecting on class protf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -102,8 +102,8 @@ Reflecting on class protf:
   ["class"]=>
   string(5) "protf"
 }
-  --> Check for A: Property protf::$A does not exist
-  --> Check for doesNotExist: Property protf::$doesNotExist does not exist
+  --> Check for A: ReflectionException: Property protf::$A does not exist
+  --> Check for doesNotExist: ReflectionException: Property protf::$doesNotExist does not exist
 Reflecting on class subprotf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -117,8 +117,8 @@ Reflecting on class subprotf:
   ["class"]=>
   string(5) "protf"
 }
-  --> Check for A: Property subprotf::$A does not exist
-  --> Check for doesNotExist: Property subprotf::$doesNotExist does not exist
+  --> Check for A: ReflectionException: Property subprotf::$A does not exist
+  --> Check for doesNotExist: ReflectionException: Property subprotf::$doesNotExist does not exist
 Reflecting on class privf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -132,8 +132,8 @@ Reflecting on class privf:
   ["class"]=>
   string(5) "privf"
 }
-  --> Check for A: Property privf::$A does not exist
-  --> Check for doesNotExist: Property privf::$doesNotExist does not exist
+  --> Check for A: ReflectionException: Property privf::$A does not exist
+  --> Check for doesNotExist: ReflectionException: Property privf::$doesNotExist does not exist
 Reflecting on class subprivf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -141,6 +141,6 @@ Reflecting on class subprivf:
   ["class"]=>
   string(5) "privf"
 }
-  --> Check for a: Property subprivf::$a does not exist
-  --> Check for A: Property subprivf::$A does not exist
-  --> Check for doesNotExist: Property subprivf::$doesNotExist does not exist
+  --> Check for a: ReflectionException: Property subprivf::$a does not exist
+  --> Check for A: ReflectionException: Property subprivf::$A does not exist
+  --> Check for doesNotExist: ReflectionException: Property subprivf::$doesNotExist does not exist

@@ -9,12 +9,12 @@ $timeZone = new DateTimeZone('UTC');
 try {
     $dateTime = new DateTime($time, $timeZone);
 } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(error_get_last());
 
 ?>
 --EXPECT--
-string(80) "Failed to parse time string (9999-11-33) at position 9 (3): Unexpected character"
+DateMalformedStringException: Failed to parse time string (9999-11-33) at position 9 (3): Unexpected character
 NULL

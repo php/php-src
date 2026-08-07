@@ -18,8 +18,8 @@ define("S", new S());
 try {
     var_dump(A::S);
 } catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot assign S to class constant A::S of type string
+TypeError: Cannot assign S to class constant A::S of type string

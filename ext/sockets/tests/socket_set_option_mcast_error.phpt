@@ -22,15 +22,15 @@ $iwanttoleavenow = true;
 try {
 	socket_set_option($s, $level, MCAST_LEAVE_GROUP, $iwanttoleavenow);
 } catch (\TypeError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	socket_set_option($s, $level, MCAST_LEAVE_SOURCE_GROUP, $iwanttoleavenow);
 } catch (\TypeError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is MCAST_LEAVE_GROUP, true given
-socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is MCAST_LEAVE_SOURCE_GROUP, true given
+TypeError: socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is MCAST_LEAVE_GROUP, true given
+TypeError: socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is MCAST_LEAVE_SOURCE_GROUP, true given

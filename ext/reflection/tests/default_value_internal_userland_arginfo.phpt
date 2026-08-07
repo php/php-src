@@ -12,7 +12,7 @@ var_dump($rp->isDefaultValueAvailable());
 try {
     var_dump($rp->getDefaultValue());
 } catch (ReflectionException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -24,4 +24,4 @@ Method [ <internal> public method __invoke ] {
 }
 
 bool(false)
-Internal error: Failed to retrieve the default value
+ReflectionException: Internal error: Failed to retrieve the default value

@@ -19,18 +19,18 @@ var_dump($foo->bar);
 try {
     $c();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     ($c->bindTo(null, Bar::class))();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo->bar);
 
 ?>
 --EXPECT--
 int(2)
-Cannot modify private(set) property Foo::$bar from global scope
-Cannot modify private(set) property Foo::$bar from scope Bar
+Error: Cannot modify private(set) property Foo::$bar from global scope
+Error: Cannot modify private(set) property Foo::$bar from scope Bar
 int(2)

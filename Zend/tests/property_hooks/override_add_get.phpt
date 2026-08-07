@@ -21,7 +21,7 @@ $a->prop = 1;
 try {
     var_dump($a->prop);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $b = new B;
@@ -31,7 +31,7 @@ var_dump($b->prop);
 ?>
 --EXPECT--
 A::A::$prop::set
-Cannot read from set-only virtual property A::$prop
+Error: Cannot read from set-only virtual property A::$prop
 B::B::$prop::set
 B::B::$prop::get
 int(42)

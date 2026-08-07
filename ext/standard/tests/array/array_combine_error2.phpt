@@ -13,23 +13,23 @@ echo "\n-- Testing array_combine() function with empty array for \$keys argument
 try {
     var_dump( array_combine(array(), array(1, 2)) );
 } catch (\ValueError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Testing array_combine by passing empty array to $values
-echo "\n-- Testing array_combine() function with empty array for \$values argument --\n";
+echo "-- Testing array_combine() function with empty array for \$values argument --\n";
 try {
     var_dump( array_combine(array(1, 2), array()) );
 } catch (\ValueError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Testing array_combine with arrays having unequal number of elements
-echo "\n-- Testing array_combine() function by passing array with unequal number of elements --\n";
+echo "-- Testing array_combine() function by passing array with unequal number of elements --\n";
 try {
     var_dump( array_combine(array(1, 2), array(1, 2, 3)) );
 } catch (\ValueError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -41,8 +41,8 @@ array(0) {
 }
 
 -- Testing array_combine() function with empty array for $keys argument --
-array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
+ValueError: array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
 -- Testing array_combine() function with empty array for $values argument --
-array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
+ValueError: array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
 -- Testing array_combine() function by passing array with unequal number of elements --
-array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements
+ValueError: array_combine(): Argument #1 ($keys) and argument #2 ($values) must have the same number of elements

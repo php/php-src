@@ -6,8 +6,8 @@ $comparator = null;
 try {
     var_dump(call_user_func([$comparator, 'compare'], 1, 2));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-call_user_func(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object

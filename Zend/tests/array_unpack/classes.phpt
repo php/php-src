@@ -20,7 +20,7 @@ var_dump(C::$bar);
 try {
     var_dump(D::A);
 } catch (Error $ex) {
-    echo "Exception: " . $ex->getMessage() . "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -44,4 +44,4 @@ array(3) {
   [2]=>
   int(3)
 }
-Exception: Cannot declare self-referencing constant self::B
+Error: Cannot declare self-referencing constant self::B

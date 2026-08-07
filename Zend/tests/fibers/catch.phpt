@@ -7,7 +7,7 @@ $fiber = new Fiber(function () {
     try {
         Fiber::suspend('test');
     } catch (Exception $exception) {
-        var_dump($exception->getMessage());
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 });
 
@@ -19,4 +19,4 @@ $fiber->throw(new Exception('test'));
 ?>
 --EXPECT--
 string(4) "test"
-string(4) "test"
+Exception: test

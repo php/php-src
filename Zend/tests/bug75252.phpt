@@ -13,16 +13,16 @@ CODE;
 try {
     eval($code);
 } catch (ParseError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     eval($code);
 } catch (ParseError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-string(41) "syntax error, unexpected identifier "FOO""
-string(41) "syntax error, unexpected identifier "FOO""
+ParseError: syntax error, unexpected identifier "FOO"
+ParseError: syntax error, unexpected identifier "FOO"

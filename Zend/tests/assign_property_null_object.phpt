@@ -16,7 +16,7 @@ print "ok\n";
 try {
     $test->a()->a = 1;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 print "ok\n";
 
@@ -24,5 +24,5 @@ print "ok\n";
 --EXPECTF--
 Warning: Attempt to read property "a" on null in %s on line %d
 ok
-Attempt to assign property "a" on null
+Error: Attempt to assign property "a" on null
 ok

@@ -7,7 +7,7 @@ function try_and_dump($fn) {
     try {
         var_dump($fn());
     } catch (\Error $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -40,8 +40,8 @@ bar
 int(0)
 bar
 int(0)
-Call to a member function null() on null
-Call to a member function null() on null
+Error: Call to a member function null() on null
+Error: Call to a member function null() on null
 bar
 bar
-Call to a member function baz() on int
+Error: Call to a member function baz() on int

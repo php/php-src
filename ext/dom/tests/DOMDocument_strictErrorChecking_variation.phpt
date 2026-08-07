@@ -21,7 +21,7 @@ try {
     $attr = $doc->createAttribute(0);
 } catch (DOMException $e) {
     echo "GOOD. DOMException thrown\n";
-    echo $e->getMessage() ."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 } catch (Exception $e) {
     echo "OOPS. Other exception thrown\n";
 }
@@ -38,7 +38,7 @@ try {
     $attr = $doc->createAttribute(0);
 } catch (DOMException $e) {
     echo "OOPS. DOMException thrown\n";
-    echo $e->getMessage() ."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 } catch (Exception $e) {
     echo "OOPS. Other exception thrown\n";
 }
@@ -50,7 +50,7 @@ See if strictErrorChecking is on
 bool(true)
 Should throw DOMException when strictErrorChecking is on
 GOOD. DOMException thrown
-Invalid Character Error
+DOMException: Invalid Character Error
 Turn strictErrorChecking off
 See if strictErrorChecking is off
 bool(false)

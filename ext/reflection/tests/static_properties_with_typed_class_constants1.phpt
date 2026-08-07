@@ -16,9 +16,9 @@ $foo = new ReflectionClass(Foo::class);
 try {
     $foo->getStaticProperties();
 } catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign string to class constant Foo::CONST1 of type int
+TypeError: Cannot assign string to class constant Foo::CONST1 of type int

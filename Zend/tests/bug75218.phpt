@@ -7,7 +7,7 @@ function try_eval($code) {
     try {
         eval($code);
     } catch (CompileError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -18,7 +18,7 @@ try_eval('declare(encoding=[]);');
 
 ?>
 --EXPECT--
-Multiple final modifiers are not allowed
-Multiple access type modifiers are not allowed
-__HALT_COMPILER() can only be used from the outermost scope
-Encoding must be a literal
+CompileError: Multiple final modifiers are not allowed
+CompileError: Multiple access type modifiers are not allowed
+CompileError: __HALT_COMPILER() can only be used from the outermost scope
+CompileError: Encoding must be a literal

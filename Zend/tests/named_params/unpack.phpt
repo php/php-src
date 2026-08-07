@@ -18,13 +18,13 @@ test(...['a', 'b' => 'b', 'c' => 'c']);
 try {
     test(...['a', 'b' => 'b', 'c']);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     test(...['a', 'a' => 'a']);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ary = ['b' => 0];
@@ -39,13 +39,13 @@ test(...new ArrayIterator(['a', 'b' => 'b', 'c' => 'c']));
 try {
     test(...new ArrayIterator(['a', 'b' => 'b', 'c']));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     test(...new ArrayIterator(['a', 'a' => 'a']));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ary = ['b' => 0];
@@ -58,8 +58,8 @@ var_dump($ary, $ary2);
 a = a, b = b, c = c
 a = a, b = b, c = c
 a = a, b = b, c = c
-Cannot use positional argument after named argument during unpacking
-Named parameter $a overwrites previous argument
+Error: Cannot use positional argument after named argument during unpacking
+Error: Named parameter $a overwrites previous argument
 array(1) {
   ["b"]=>
   int(1)
@@ -71,8 +71,8 @@ array(1) {
 a = a, b = b, c = c
 a = a, b = b, c = c
 a = a, b = b, c = c
-Cannot use positional argument after named argument during unpacking
-Named parameter $a overwrites previous argument
+Error: Cannot use positional argument after named argument during unpacking
+Error: Named parameter $a overwrites previous argument
 
 Warning: Cannot pass by-reference argument 2 of test2() by unpacking a Traversable, passing by-value instead in %s on line %d
 array(1) {

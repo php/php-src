@@ -10,9 +10,9 @@ function gen() {
 try {
     [...gen()];
 } catch (Error $ex) {
-    echo "Exception: " . $ex->getMessage() . "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Exception: Keys must be of type int|string during array unpacking
+Error: Keys must be of type int|string during array unpacking

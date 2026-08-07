@@ -40,22 +40,22 @@ $c = new C();
 try {
     $test->foo1($c);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $test->foo2($c);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $test->prop1 = $c;
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $test->prop2 = $c;
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -67,8 +67,8 @@ object(A)#2 (0) {
 }
 NULL
 NULL
-Test::foo1(): Argument #1 ($v) must be of type (X&Y)|null, C given, called in %s on line %d
-Test::foo2(): Argument #1 ($v) must be of type (X&Y)|null, C given, called in %s on line %d
-Cannot assign C to property Test::$prop1 of type (X&Y)|null
-Cannot assign C to property Test::$prop2 of type (X&Y)|null
+TypeError: Test::foo1(): Argument #1 ($v) must be of type (X&Y)|null, C given, called in %s on line %d
+TypeError: Test::foo2(): Argument #1 ($v) must be of type (X&Y)|null, C given, called in %s on line %d
+TypeError: Cannot assign C to property Test::$prop1 of type (X&Y)|null
+TypeError: Cannot assign C to property Test::$prop2 of type (X&Y)|null
 ===DONE===

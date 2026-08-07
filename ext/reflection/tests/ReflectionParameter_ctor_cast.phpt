@@ -10,9 +10,9 @@ try {
         new class { public function __toString() { return 'method'; } }
     ], 'param');
 } catch (ReflectionException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Method A::method() does not exist
+ReflectionException: Method A::method() does not exist

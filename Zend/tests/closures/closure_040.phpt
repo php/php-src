@@ -27,13 +27,13 @@ $cas = $a->getStaticIncrementor();
 try {
     $ca->bindTo($a, array());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $cas->bindTo($a, 'A');
 
 ?>
 --EXPECTF--
-Closure::bindTo(): Argument #2 ($newScope) must be of type object|string|null, array given
+TypeError: Closure::bindTo(): Argument #2 ($newScope) must be of type object|string|null, array given
 
 Warning: Cannot bind an instance to a static closure, this will be an error in PHP 9 in %s on line %d

@@ -31,7 +31,7 @@ $ref = new \ReflectionFunction(#[A1] function () { });
 try {
     $ref->getAttributes()[0]->newInstance();
 } catch (\ArgumentCountError $e) {
-    var_dump('ERROR 1', $e->getMessage());
+    echo 'ERROR 1: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -41,7 +41,7 @@ $ref = new \ReflectionFunction(#[A1([])] function () { });
 try {
     $ref->getAttributes()[0]->newInstance();
 } catch (\TypeError $e) {
-    var_dump('ERROR 2', $e->getMessage());
+    echo 'ERROR 2: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -51,7 +51,7 @@ $ref = new \ReflectionFunction(#[A2] function () { });
 try {
     $ref->getAttributes()[0]->newInstance();
 } catch (\Error $e) {
-    var_dump('ERROR 3', $e->getMessage());
+    echo 'ERROR 3: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -67,7 +67,7 @@ $ref = new \ReflectionFunction(#[A3] function () { });
 try {
     $ref->getAttributes()[0]->newInstance();
 } catch (\Error $e) {
-    var_dump('ERROR 4', $e->getMessage());
+    echo 'ERROR 4: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -79,7 +79,7 @@ $ref = new \ReflectionFunction(#[A5] function () { });
 try {
     $ref->getAttributes()[0]->newInstance();
 } catch (\Error $e) {
-    var_dump('ERROR 6', $e->getMessage());
+    echo 'ERROR 6: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -88,17 +88,12 @@ string(2) "A1"
 string(4) "test"
 int(50)
 
-string(7) "ERROR 1"
-string(%d) "Too few arguments to function A1::__construct(), 0 passed in %s005_objects.php on line 26 and at least 1 expected"
+ERROR 1: ArgumentCountError: Too few arguments to function A1::__construct(), 0 passed in %s005_objects.php on line 26 and at least 1 expected
 
-string(7) "ERROR 2"
-string(%d) "A1::__construct(): Argument #1 ($name) must be of type string, array given, called in %s005_objects.php on line 36"
+ERROR 2: TypeError: A1::__construct(): Argument #1 ($name) must be of type string, array given, called in %s005_objects.php on line 36
 
-string(7) "ERROR 3"
-string(30) "Attribute class "A2" not found"
+ERROR 3: Error: Attribute class "A2" not found
 
-string(7) "ERROR 4"
-string(51) "Call to private A3::__construct() from global scope"
+ERROR 4: Error: Call to private A3::__construct() from global scope
 
-string(7) "ERROR 6"
-string(55) "Attempting to use non-attribute class "A5" as attribute"
+ERROR 6: Error: Attempting to use non-attribute class "A5" as attribute

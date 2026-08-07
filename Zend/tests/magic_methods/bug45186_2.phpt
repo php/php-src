@@ -29,12 +29,12 @@ call_user_func(array('BAR','x'));
 try {
     call_user_func('BAR::www');
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     call_user_func('self::y');
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -56,5 +56,5 @@ Deprecated: Use of "self" in callables is deprecated in %s on line %d
 __call:
 string(1) "y"
 ok
-call_user_func(): Argument #1 ($callback) must be a valid callback, class bar does not have a method "www"
-call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access "self" when no class scope is active
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class bar does not have a method "www"
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access "self" when no class scope is active

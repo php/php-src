@@ -35,7 +35,7 @@ function test($value) {
         var_dump(json_encode($value, JSON_THROW_ON_ERROR));
         echo json_last_error_msg() . "\n";
     } catch (Exception $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

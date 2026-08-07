@@ -31,7 +31,7 @@ foreach($names_arr as $i=>$prefix) {
     try {
         $file_name = tempnam("$file_path", $prefix);
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
         continue;
     }
 

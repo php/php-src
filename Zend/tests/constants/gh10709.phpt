@@ -13,7 +13,7 @@ spl_autoload_register(function ($class) {
 try {
     new B();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

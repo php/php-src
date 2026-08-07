@@ -10,12 +10,12 @@ chdir(__DIR__);
 try {
     bindtextdomain('', 'foobar');
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-bindtextdomain(): Argument #1 ($domain) must not be empty
+ValueError: bindtextdomain(): Argument #1 ($domain) must not be empty
 --CREDITS--
 Till Klampaeckel, till@php.net
 PHP Testfest Berlin 2009-05-09

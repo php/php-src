@@ -25,7 +25,7 @@ class TestClass {
         try {
             var_dump($this);
         } catch (Throwable $e) {
-            echo "Exception: " . $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 
@@ -63,12 +63,12 @@ echo "\nStatic method:\n";
 try {
     var_dump($staticMethod->invoke());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($staticMethod->invoke(true));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($staticMethod->invoke(new stdClass()));
 
@@ -76,7 +76,7 @@ echo "\nMethod that throws an exception:\n";
 try {
     var_dump($methodThatThrows->invoke($testClassInstance));
 } catch (Exception $exc) {
-    var_dump($exc->getMessage());
+    echo $exc::class, ': ', $exc->getMessage(), "\n";
 }
 
 ?>
@@ -102,11 +102,11 @@ Called methodWithArgs(1, arg2)
 NULL
 
 Static method:
-ReflectionMethod::invoke() expects at least 1 argument, 0 given
-ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, true given
+ArgumentCountError: ReflectionMethod::invoke() expects at least 1 argument, 0 given
+TypeError: ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, true given
 Called staticMethod()
-Exception: Using $this when not in object context
+Error: Using $this when not in object context
 NULL
 
 Method that throws an exception:
-string(18) "Called willThrow()"
+Exception: Called willThrow()

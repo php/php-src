@@ -35,17 +35,17 @@ var_dump($b->virtual);
 try {
     var_dump($b->backed = 42);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($b->backed);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 int(42)
 NULL
-A::$backed::set() expects exactly 1 argument, 2 given
-A::$backed::get() expects exactly 0 arguments, 1 given
+ArgumentCountError: A::$backed::set() expects exactly 1 argument, 2 given
+ArgumentCountError: A::$backed::get() expects exactly 0 arguments, 1 given

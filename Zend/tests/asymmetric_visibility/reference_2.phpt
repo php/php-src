@@ -15,16 +15,16 @@ function test($c) {
 try {
     test(new C());
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     test(new C());
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot indirectly modify private(set) property C::$prop from global scope
-Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope
+Error: Cannot indirectly modify private(set) property C::$prop from global scope

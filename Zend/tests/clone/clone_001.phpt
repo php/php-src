@@ -6,7 +6,7 @@ Using clone statement on non-object
 try {
     $a = clone array();
 } catch (Error $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

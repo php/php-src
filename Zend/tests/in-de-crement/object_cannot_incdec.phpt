@@ -8,38 +8,38 @@ $o = new Foo;
 try {
     $o++;
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     var_dump($o);
 }
 try {
     $o--;
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     var_dump($o);
 }
 try {
     ++$o;
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     var_dump($o);
 }
 try {
     --$o;
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     var_dump($o);
 }
 ?>
 --EXPECT--
-Cannot increment Foo
+TypeError: Cannot increment Foo
 object(Foo)#1 (0) {
 }
-Cannot decrement Foo
+TypeError: Cannot decrement Foo
 object(Foo)#1 (0) {
 }
-Cannot increment Foo
+TypeError: Cannot increment Foo
 object(Foo)#1 (0) {
 }
-Cannot decrement Foo
+TypeError: Cannot decrement Foo
 object(Foo)#1 (0) {
 }

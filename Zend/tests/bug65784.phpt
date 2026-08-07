@@ -18,7 +18,7 @@ try {
     var_dump($foo);
 } catch (Exception $e) {
     do {
-        var_dump($e->getMessage());
+        echo $e::class, ': ', $e->getMessage(), "\n";
     } while ($e = $e->getPrevious());
 }
 
@@ -55,7 +55,7 @@ function foo3() {
 $bar = foo3();
 ?>
 --EXPECTF--
-string(9) "not catch"
+Exception: not catch
 NULL
 
 Fatal error: Uncaught Exception: not caught in %sbug65784.php:42

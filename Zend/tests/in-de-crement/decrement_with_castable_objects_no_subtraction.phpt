@@ -14,25 +14,25 @@ $nf = new NumericCastableNoOperations(58.3);
 try {
     var_dump($l - 1);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump($f - 1);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump($nl - 1);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump($nf - 1);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 /* Decrement */
@@ -40,37 +40,37 @@ try {
     $l--;
     var_dump($l);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $f--;
     var_dump($f);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $nl--;
     var_dump($nl);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $nf--;
     var_dump($nf);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Unsupported operand types: LongCastableNoOperations - int
-Unsupported operand types: FloatCastableNoOperations - int
+TypeError: Unsupported operand types: LongCastableNoOperations - int
+TypeError: Unsupported operand types: FloatCastableNoOperations - int
 int(51)
 float(57.3)
-Cannot decrement LongCastableNoOperations
-Cannot decrement FloatCastableNoOperations
+TypeError: Cannot decrement LongCastableNoOperations
+TypeError: Cannot decrement FloatCastableNoOperations
 int(51)
 float(57.3)

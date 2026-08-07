@@ -19,16 +19,16 @@ const TEST3 = 1;
 try {
 	TEST;
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	TEST3;
 } catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Caught: Constant TEST is deprecated, from itself
-Caught: Constant TEST2 is deprecated
+ErrorException: Constant TEST is deprecated, from itself
+ErrorException: Constant TEST2 is deprecated

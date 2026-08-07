@@ -9,8 +9,8 @@ $dom = new DOMDocument();
 try {
     $dom->loadXML("");
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-DOMDocument::loadXML(): Argument #1 ($source) must not be empty
+ValueError: DOMDocument::loadXML(): Argument #1 ($source) must not be empty

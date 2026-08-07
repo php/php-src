@@ -12,9 +12,9 @@ $foo->value = false;
 try {
     $foo->value = true;
 } catch (\TypeError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Cannot assign true to property Foo::$value of type false
+TypeError: Cannot assign true to property Foo::$value of type false

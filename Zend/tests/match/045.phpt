@@ -11,8 +11,8 @@ function test() {
 try {
     test();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Undefined constant "x"
+Error: Undefined constant "x"

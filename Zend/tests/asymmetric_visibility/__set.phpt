@@ -23,14 +23,14 @@ $foo = new Foo();
 try {
     $foo->bar = 'baz';
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $foo->setBar('baz');
 try {
     $foo->bar = 'baz';
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $foo->unsetBar();
@@ -38,6 +38,6 @@ $foo->bar = 'baz';
 
 ?>
 --EXPECT--
-Cannot modify private(set) property Foo::$bar from global scope
-Cannot modify private(set) property Foo::$bar from global scope
+Error: Cannot modify private(set) property Foo::$bar from global scope
+Error: Cannot modify private(set) property Foo::$bar from global scope
 Foo::Foo::__set

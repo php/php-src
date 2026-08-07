@@ -20,7 +20,7 @@ $fiber = new Fiber(function (): void {
             throw new \Exception("finally exception");
         }
     } catch (Exception $exception) {
-        echo $exception->getMessage(), "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     } finally {
         echo "outer finally\n";
     }
@@ -28,7 +28,7 @@ $fiber = new Fiber(function (): void {
     try {
         echo Fiber::suspend();
     } catch (FiberError $exception) {
-        echo $exception->getMessage(), "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 });
 
@@ -42,7 +42,7 @@ echo "done\n";
 --EXPECT--
 fiber
 inner finally
-finally exception
+Exception: finally exception
 outer finally
-Cannot suspend in a force-closed fiber
+FiberError: Cannot suspend in a force-closed fiber
 done

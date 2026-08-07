@@ -30,9 +30,9 @@ function dummy($query) {
 try {
     dummy(0);
 } catch (Exception $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-exception
+Exception: exception

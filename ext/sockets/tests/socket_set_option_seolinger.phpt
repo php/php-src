@@ -17,7 +17,7 @@ if (!$socket) {
 try {
     $retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_LINGER, []);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // set/get comparison
@@ -30,7 +30,7 @@ $options_2 = array("l_onoff" => 1);
 try {
     var_dump(socket_set_option( $socket, SOL_SOCKET, SO_LINGER, $options_2));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($retval_2);
@@ -41,8 +41,8 @@ var_dump((bool)$retval_3["l_onoff"] === (bool)$options["l_onoff"]);
 socket_close($socket);
 ?>
 --EXPECT--
-socket_set_option(): Argument #4 ($value) must have key "l_onoff"
-socket_set_option(): Argument #4 ($value) must have key "l_linger"
+ValueError: socket_set_option(): Argument #4 ($value) must have key "l_onoff"
+ValueError: socket_set_option(): Argument #4 ($value) must have key "l_linger"
 bool(true)
 bool(true)
 bool(true)

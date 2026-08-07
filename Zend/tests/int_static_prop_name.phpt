@@ -17,19 +17,19 @@ var_dump(${(int) $n});
 try {
     var_dump(Foo::${42});
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(Foo::${(int) 42});
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(Foo::${(int) $n});
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -37,6 +37,6 @@ try {
 int(24)
 int(24)
 int(24)
-Access to undeclared static property Foo::$42
-Access to undeclared static property Foo::$42
-Access to undeclared static property Foo::$42
+Error: Access to undeclared static property Foo::$42
+Error: Access to undeclared static property Foo::$42
+Error: Access to undeclared static property Foo::$42

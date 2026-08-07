@@ -17,7 +17,7 @@ class TestClass {
         try {
             var_dump($this);
         } catch (Throwable $e) {
-            echo "Exception: " . $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 
@@ -41,7 +41,7 @@ echo "\nNon-instance:\n";
 try {
     var_dump($foo->invokeArgs(new stdClass(), array()));
 } catch (ReflectionException $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\nStatic method:\n";
@@ -56,22 +56,22 @@ $abstractMethod = new ReflectionMethod("AbstractClass", "foo");
 try {
     $abstractMethod->invokeArgs($testClassInstance, array());
 } catch (ReflectionException $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $abstractMethod->invokeArgs(true);
 } catch (ReflectionException $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 Non-instance:
-string(72) "Given object is not an instance of the class this method was declared in"
+ReflectionException: Given object is not an instance of the class this method was declared in
 
 Static method:
 Called staticMethod()
-Exception: Using $this when not in object context
+Error: Using $this when not in object context
 NULL
 
 Private method:
@@ -79,5 +79,5 @@ Called privateMethod()
 NULL
 
 Abstract method:
-string(53) "Trying to invoke abstract method AbstractClass::foo()"
-string(53) "Trying to invoke abstract method AbstractClass::foo()"
+ReflectionException: Trying to invoke abstract method AbstractClass::foo()
+ReflectionException: Trying to invoke abstract method AbstractClass::foo()

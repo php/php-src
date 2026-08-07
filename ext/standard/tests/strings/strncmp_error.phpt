@@ -14,10 +14,10 @@ $len = -10;
 try {
     var_dump( strncmp($str1, $str2, $len) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 *** Testing strncmp() function: error conditions ***
-strncmp(): Argument #3 ($length) must be greater than or equal to 0
+ValueError: strncmp(): Argument #3 ($length) must be greater than or equal to 0

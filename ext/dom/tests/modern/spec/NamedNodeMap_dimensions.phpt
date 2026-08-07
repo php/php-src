@@ -15,7 +15,7 @@ foreach ($test_values as $value) {
     try {
         var_dump($attributes[$value] ? $attributes[$value]->nodeName : "N/A", isset($attributes[$value]), empty($attributes[$value]));
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -58,9 +58,9 @@ string(1) "b"
 bool(true)
 bool(false)
 --- true ---
-Cannot access offset of type bool on Dom\NamedNodeMap
+TypeError: Cannot access offset of type bool on Dom\NamedNodeMap
 --- null ---
-Cannot access offset of type null on Dom\NamedNodeMap
+TypeError: Cannot access offset of type null on Dom\NamedNodeMap
 --- "0" ---
 string(1) "a"
 bool(true)

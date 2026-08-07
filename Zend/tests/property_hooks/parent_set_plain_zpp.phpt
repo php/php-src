@@ -19,9 +19,9 @@ $b = new B();
 try {
     $b->prop = 42;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-A::$prop::set() expects exactly 1 argument, 2 given
+ArgumentCountError: A::$prop::set() expects exactly 1 argument, 2 given

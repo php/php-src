@@ -15,7 +15,7 @@ function test($msg, $x) {
     try {
         var_dump([...generator($x)]);
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -26,10 +26,10 @@ test("object", new stdClass);
 ?>
 --EXPECT--
 yield null
-Keys must be of type int|string during array unpacking
+Error: Keys must be of type int|string during array unpacking
 yield false
-Keys must be of type int|string during array unpacking
+Error: Keys must be of type int|string during array unpacking
 yield true
-Keys must be of type int|string during array unpacking
+Error: Keys must be of type int|string during array unpacking
 yield object
-Keys must be of type int|string during array unpacking
+Error: Keys must be of type int|string during array unpacking

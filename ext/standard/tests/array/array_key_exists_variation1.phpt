@@ -80,7 +80,7 @@ foreach($inputs as $input) {
   try {
       var_dump( array_key_exists($input, $search) );
   } catch (TypeError $exception) {
-      echo $exception->getMessage() . "\n";
+      echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
   $iterator++;
 };
@@ -133,7 +133,7 @@ bool(false)
 bool(false)
 
 -- Iteration 13 --
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type array on array
 
 -- Iteration 14 --
 bool(true)
@@ -145,7 +145,7 @@ bool(true)
 bool(true)
 
 -- Iteration 17 --
-Cannot access offset of type classA on array
+TypeError: Cannot access offset of type classA on array
 
 -- Iteration 18 --
 

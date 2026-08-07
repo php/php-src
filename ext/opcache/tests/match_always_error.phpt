@@ -14,8 +14,8 @@ function test() {
 try {
     test();
 } catch (UnhandledMatchError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unhandled match case 0
+UnhandledMatchError: Unhandled match case 0

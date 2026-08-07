@@ -7,21 +7,21 @@ $ary = [];
 try {
     unset($ary[[]]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     isset($ary[[]]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     empty($ary[[]]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot unset offset of type array on array
-Cannot access offset of type array in isset or empty
-Cannot access offset of type array in isset or empty
+TypeError: Cannot unset offset of type array on array
+TypeError: Cannot access offset of type array in isset or empty
+TypeError: Cannot access offset of type array in isset or empty

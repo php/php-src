@@ -17,7 +17,7 @@ $a = array();
 try {
     $item->$a = new stdclass;
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -33,5 +33,5 @@ object(SimpleXMLElement)#%d (1) {
 }
 
 Warning: Array to string conversion in %s on line %d
-It's not possible to assign a complex type to properties, stdClass given
+TypeError: It's not possible to assign a complex type to properties, stdClass given
 Done

@@ -8,10 +8,10 @@ var_dump(json_last_error());
 try {
     var_dump(json_last_error(true));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 int(0)
-json_last_error() expects exactly 0 arguments, 1 given
+ArgumentCountError: json_last_error() expects exactly 0 arguments, 1 given

@@ -21,7 +21,7 @@ stream_wrapper_register('abc', 'Loader');
 try {
     require 'abc://';
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -29,4 +29,4 @@ try {
 stream_set_option
 stream_stat
 stream_read
-Message
+Exception: Message

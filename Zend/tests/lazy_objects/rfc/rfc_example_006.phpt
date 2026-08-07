@@ -33,7 +33,7 @@ var_dump($object2);
 try {
     var_dump($object1->propB);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // The state of both objects is unchanged
@@ -52,7 +52,7 @@ lazy ghost object(MyClass)#%d (1) {
   ["propA"]=>
   string(8) "object-2"
 }
-initializer exception
+Exception: initializer exception
 lazy ghost object(MyClass)#%d (1) {
   ["propA"]=>
   string(8) "object-1"

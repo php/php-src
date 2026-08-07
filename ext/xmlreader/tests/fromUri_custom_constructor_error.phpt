@@ -13,7 +13,7 @@ class CustomXMLReader extends XMLReader {
 try {
     CustomXMLReader::fromUri("nonexistent");
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $filename = __DIR__ . '/_fromUri_custom_constructor_error.xml';
@@ -24,12 +24,12 @@ file_put_contents($filename, $xmlstring);
 try {
     CustomXMLReader::fromUri($filename);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unable to open source data
-nope
+Error: Unable to open source data
+Error: nope
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/_fromUri_custom_constructor_error.xml');

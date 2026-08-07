@@ -8,9 +8,9 @@ opcache
 try {
     (42)->foo();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Call to a member function foo() on int
+Error: Call to a member function foo() on int

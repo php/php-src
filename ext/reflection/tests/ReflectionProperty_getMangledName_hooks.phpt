@@ -32,7 +32,7 @@ function testHookedProperty($obj, $property, $description) {
         echo "  Has hooks: " . ($reflection->hasHooks() ? "yes" : "no") . "\n";
         echo "\n";
     } catch (ReflectionException $e) {
-        echo "$description: EXCEPTION - " . $e->getMessage() . "\n\n";
+        echo "$description: ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

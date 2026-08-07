@@ -42,7 +42,7 @@ $c = new Clazz();
 try {
 	var_dump(clone($c, [ 'hooked' => 'updated', 'maxLength' => 'abcdef', 'minLength' => 'abc' ]));
 } catch (Throwable $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo PHP_EOL;
@@ -50,7 +50,7 @@ echo PHP_EOL;
 try {
 	var_dump(clone($c, [ 'hooked' => 'updated', 'minLength' => 'abc', 'maxLength' => 'abcdef' ]));
 } catch (Throwable $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

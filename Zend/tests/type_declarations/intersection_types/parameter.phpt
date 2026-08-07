@@ -18,11 +18,11 @@ foo(new Foo());
 try {
     foo(new Bar());
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECTF--
 object(Foo)#1 (0) {
 }
-foo(): Argument #1 ($bar) must be of type A&B, Bar given, called in %s on line %d
+TypeError: foo(): Argument #1 ($bar) must be of type A&B, Bar given, called in %s on line %d

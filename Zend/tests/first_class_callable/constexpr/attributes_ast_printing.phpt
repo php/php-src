@@ -12,7 +12,7 @@ try {
         function () { }
     );
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -22,12 +22,12 @@ try {
         class {}
     );
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(!#[Attr(strrev(...))] function () {
+AssertionError: assert(!#[Attr(strrev(...))] function () {
 })
-assert(!new #[Attr(strrev(...))] class {
+AssertionError: assert(!new #[Attr(strrev(...))] class {
 })

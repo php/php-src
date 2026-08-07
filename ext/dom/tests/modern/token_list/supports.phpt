@@ -10,9 +10,9 @@ $element = $dom->documentElement;
 try {
     $element->classList->supports('a');
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Attribute "class" does not define any supported tokens
+TypeError: Attribute "class" does not define any supported tokens

@@ -8,21 +8,21 @@ function test(false $v) { var_dump($v); }
 try {
     test(0);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     test('');
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     test([]);
 } catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECTF--
-test(): Argument #1 ($v) must be of type false, int given, called in %s on line %d
-test(): Argument #1 ($v) must be of type false, string given, called in %s on line %d
-test(): Argument #1 ($v) must be of type false, array given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type false, int given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type false, string given, called in %s on line %d
+TypeError: test(): Argument #1 ($v) must be of type false, array given, called in %s on line %d

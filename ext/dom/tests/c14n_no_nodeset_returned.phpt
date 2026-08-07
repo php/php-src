@@ -9,8 +9,8 @@ $dom->loadXML('<root>test</root>');
 try {
     $dom->documentElement->C14N(true, false, ['query' => 'string(./root/text())']);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-XPath query did not return a nodeset
+Error: XPath query did not return a nodeset

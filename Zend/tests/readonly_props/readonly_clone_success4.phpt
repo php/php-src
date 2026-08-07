@@ -13,7 +13,7 @@ class Foo {
         try {
             $this->bar = "foo";
         } catch (Error $e) {
-            echo $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
 
         $this->bar = 2;
@@ -27,12 +27,12 @@ var_dump(clone $foo);
 
 ?>
 --EXPECTF--
-Cannot assign string to property Foo::$bar of type int
+TypeError: Cannot assign string to property Foo::$bar of type int
 object(Foo)#%d (%d) {
   ["bar"]=>
   int(2)
 }
-Cannot assign string to property Foo::$bar of type int
+TypeError: Cannot assign string to property Foo::$bar of type int
 object(Foo)#%d (%d) {
   ["bar"]=>
   int(2)

@@ -20,7 +20,7 @@ $a = $ffi->new("struct {int x,y;}");
 try {
     var_dump(count($a));
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -28,7 +28,7 @@ try {
         echo "$key => $val\n";
     }
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

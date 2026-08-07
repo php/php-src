@@ -8,9 +8,9 @@ sockets
     try {
         $s_w = socket_send($s_c, "foo", -1, MSG_OOB);
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     socket_close($s_c);
 ?>
 --EXPECT--
-socket_send(): Argument #3 ($length) must be greater than or equal to 0
+ValueError: socket_send(): Argument #3 ($length) must be greater than or equal to 0

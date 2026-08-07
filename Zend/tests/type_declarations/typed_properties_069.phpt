@@ -14,14 +14,14 @@ class Foo {
 
 try {
     Foo::$i = &nonNumericStringRef();
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (TypeError $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 try {
     var_dump(Foo::$i);
-} catch (Error $e) { print $e->getMessage()."\n"; }
+} catch (Error $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump(nonNumericStringRef());
 
 ?>
 --EXPECT--
-Cannot assign string to property Foo::$i of type int
-Typed static property Foo::$i must not be accessed before initialization
+TypeError: Cannot assign string to property Foo::$i of type int
+Error: Typed static property Foo::$i must not be accessed before initialization
 string(1) "x"

@@ -16,24 +16,24 @@ function &gen() {
 try {
     test();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $str = "foo";
     $str[0] =& $str[1];
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     foreach (gen() as $v) {}
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot create references to/from string offsets
-Cannot create references to/from string offsets
-Cannot create references to/from string offsets
+Error: Cannot create references to/from string offsets
+Error: Cannot create references to/from string offsets
+Error: Cannot create references to/from string offsets

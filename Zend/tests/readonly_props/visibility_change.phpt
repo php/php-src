@@ -18,7 +18,7 @@ $a = new A();
 try {
     var_dump($a->prop);
 } catch (Error $error) {
-    echo $error->getMessage() . "\n";
+    echo $error::class, ': ', $error->getMessage(), "\n";
 }
 
 $b = new B();
@@ -26,5 +26,5 @@ var_dump($b->prop);
 
 ?>
 --EXPECT--
-Cannot access protected property A::$prop
+Error: Cannot access protected property A::$prop
 int(42)

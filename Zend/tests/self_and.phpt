@@ -16,7 +16,7 @@ try {
     $s1 &= 11;
     var_dump($s1);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $s2 &= 33;
@@ -32,7 +32,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 int(18)
-Unsupported operand types: string & int
+TypeError: Unsupported operand types: string & int
 
 Warning: A non-numeric value encountered in %s on line %d
 int(33)

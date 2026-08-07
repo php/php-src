@@ -15,12 +15,12 @@ try {
     $bar = Foo::Bar;
     $value = setBarValueByRef($bar->value, 1);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(Foo::Bar->value);
 
 ?>
 --EXPECT--
-Cannot indirectly modify readonly property Foo::$value
+Error: Cannot indirectly modify readonly property Foo::$value
 int(0)

@@ -32,14 +32,14 @@ foreach ($timestamps as $ts) {
     try {
         var_dump(DateTime::createFromTimestamp($ts));
     } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     echo 'DateTimeImmutable::createFromTimestamp(' . var_export($ts, true) . '): ';
     try {
         var_dump(DateTimeImmutable::createFromTimestamp($ts));
     } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -47,14 +47,14 @@ echo 'MyDateTime::createFromTimestamp(' . var_export(0, true) . '): ';
 try {
     var_dump(MyDateTime::createFromTimestamp(0));
 } catch (Throwable $e) {
-    echo get_class($e) . ': ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo 'MyDateTimeImmutable::createFromTimestamp(' . var_export(0, true) . '): ';
 try {
     var_dump(MyDateTimeImmutable::createFromTimestamp(0));
 } catch (Throwable $e) {
-    echo get_class($e) . ': ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

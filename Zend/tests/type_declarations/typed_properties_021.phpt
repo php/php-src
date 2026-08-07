@@ -9,8 +9,8 @@ class Foo {
 try {
     $foo = new Foo();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Class "BAR" not found
+Error: Class "BAR" not found

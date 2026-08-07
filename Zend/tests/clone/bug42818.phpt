@@ -5,7 +5,7 @@ Bug #42818 ($foo = clone(array()); leaks memory)
 try {
     $foo = clone(array());
 } catch (Error $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

@@ -10,9 +10,9 @@ function gen() {
 try {
     test(...gen());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Warning: Cannot pass by-reference argument 1 of test() by unpacking a Traversable, passing by-value instead in %s on line %d
-test(): Argument #1 ($a) must be of type T, null given, called in %s on line %d
+TypeError: test(): Argument #1 ($a) must be of type T, null given, called in %s on line %d

@@ -6,9 +6,9 @@ Trying to use lambda in array offset
 try {
     $test[function(){}] = 1;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot access offset of type Closure on array
+TypeError: Cannot access offset of type Closure on array

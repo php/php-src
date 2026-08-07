@@ -9,8 +9,8 @@ function test($a) {
 try {
     test(1);
 } catch (\Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-func_get_args() expects exactly 0 arguments, 4 given
+ArgumentCountError: func_get_args() expects exactly 0 arguments, 4 given

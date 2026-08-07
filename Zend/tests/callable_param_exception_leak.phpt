@@ -8,8 +8,8 @@ spl_autoload_register(function ($class) {
 try {
     array_map('A::b', []);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Failed
+Exception: Failed

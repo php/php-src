@@ -35,7 +35,7 @@ var_dump($dom->documentElement->contains(null));
 try {
     var_dump($dom->contains(new stdClass));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- True cases ---\n";
@@ -78,7 +78,7 @@ var_dump($dom->contains($main));
 --EXPECT--
 --- False edge cases ---
 bool(false)
-DOMNode::contains(): Argument #1 ($other) must be of type DOMNode|DOMNameSpaceNode|null, stdClass given
+TypeError: DOMNode::contains(): Argument #1 ($other) must be of type DOMNode|DOMNameSpaceNode|null, stdClass given
 --- True cases ---
 bool(true)
 bool(true)

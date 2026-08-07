@@ -8,8 +8,8 @@ assert.exception=1
 try {
     assert(false, "I require this to succeed");
 } catch (AssertionError $ex) {
-    var_dump($ex->getMessage());
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(25) "I require this to succeed"
+AssertionError: I require this to succeed

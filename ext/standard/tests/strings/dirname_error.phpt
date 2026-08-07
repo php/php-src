@@ -8,10 +8,10 @@ echo "*** Testing error conditions ***\n";
 try {
     dirname("/var/tmp/bar.gz", 0);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 *** Testing error conditions ***
-dirname(): Argument #2 ($levels) must be greater than or equal to 1
+ValueError: dirname(): Argument #2 ($levels) must be greater than or equal to 1

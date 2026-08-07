@@ -11,11 +11,11 @@ try {
     } && new class(42) extends stdclass {
     });
 } catch (AssertionError $e) {
-    echo "Assertion failure: ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Assertion failure: assert(0 && new class {
+AssertionError: assert(0 && new class {
 } && new class(42) extends stdclass {
 })

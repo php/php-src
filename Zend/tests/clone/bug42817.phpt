@@ -5,7 +5,7 @@ Bug #42817 (clone() on a non-object does not result in a fatal error)
 try {
     $a = clone(null);
 } catch (Error $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

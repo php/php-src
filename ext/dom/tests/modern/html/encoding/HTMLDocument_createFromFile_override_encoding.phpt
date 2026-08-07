@@ -8,7 +8,7 @@ dom
 try {
     Dom\HTMLDocument::createFromFile(__DIR__ . '/gb18030_without_charset.html', overrideEncoding: 'nonexistent');
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // The override encoding matches with the document encoding attribute
@@ -23,7 +23,7 @@ var_dump($dom->charset);
 
 ?>
 --EXPECT--
-Dom\HTMLDocument::createFromFile(): Argument #3 ($overrideEncoding) must be a valid document encoding
+ValueError: Dom\HTMLDocument::createFromFile(): Argument #3 ($overrideEncoding) must be a valid document encoding
 string(20) "
     Héllo, world!
 "

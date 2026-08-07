@@ -24,7 +24,7 @@ function fail() {
 try {
     fail();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 function foo() {
@@ -34,7 +34,7 @@ function foo() {
 try {
     foo(...)();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -60,5 +60,5 @@ int(9)
 int(10)
 int(10)
 int(11)
-Current function is not a closure
-Current function is not a closure
+Error: Current function is not a closure
+Error: Current function is not a closure

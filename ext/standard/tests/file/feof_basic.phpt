@@ -61,7 +61,7 @@ fclose($h);
 try {
     feof($h);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 unlink($tmpFile1);
 unlink($tmpFile2);
@@ -94,5 +94,5 @@ bool(false)
 *** testing feof after a seek passed the end ***
 bool(false)
 *** closing file, testing eof ***
-feof(): Argument #1 ($stream) must be an open stream resource
+TypeError: feof(): Argument #1 ($stream) must be an open stream resource
 Done

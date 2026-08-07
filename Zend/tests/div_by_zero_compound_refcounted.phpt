@@ -7,10 +7,10 @@ $h .= "2";
 try {
     $h /= 0;
 } catch (DivisionByZeroError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($h);
 ?>
 --EXPECT--
-Division by zero
+DivisionByZeroError: Division by zero
 string(2) "12"

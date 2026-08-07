@@ -25,7 +25,7 @@ foreach ($gens as $gen) {
     try {
         var_dump($ref->getExecutingLine());
     } catch (\Exception $e) {
-        echo $e->getMessage(), PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     echo PHP_EOL;
@@ -37,10 +37,10 @@ int(9)
 bool(false)
 int(9)
 bool(true)
-Cannot fetch information from a closed Generator
+ReflectionException: Cannot fetch information from a closed Generator
 
 int(3)
 bool(false)
 int(3)
 bool(true)
-Cannot fetch information from a closed Generator
+ReflectionException: Cannot fetch information from a closed Generator

@@ -21,7 +21,7 @@ set_include_path('test://foo:test://bar');
 try {
     require_once 'doesnt_exist.php';
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

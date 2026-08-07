@@ -12,8 +12,8 @@ pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write], "socket2_data")
 try {
     pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write], "socket2_data");
 } catch (Io\Poll\HandleAlreadyWatchedException $e) {
-    echo "ERROR: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-ERROR: Handle already added
+Io\Poll\HandleAlreadyWatchedException: Handle already added

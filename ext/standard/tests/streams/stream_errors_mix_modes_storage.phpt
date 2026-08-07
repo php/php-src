@@ -41,7 +41,7 @@ function stream_test_errors($title, $contextOptions) {
         $except = NULL;
         stream_select($read, $write, $except, 0, 0, $context);
     } catch (StreamException $e) {
-        echo 'EXCEPTION: ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     $errors = stream_last_errors();
@@ -130,7 +130,7 @@ Error details:
   [1] CastNotSupported: Cannot represent a stream of type user-space as a select()able descriptor
 
 AUTO EXCEPTION
-EXCEPTION: TestStream::stream_cast is not implemented!
+StreamException: TestStream::stream_cast is not implemented!
 Error details:
 - Message: TestStream::stream_read - read 10 bytes more data than requested (8202 read, 8192 max) - excess data will be lost
 - Code: UserspaceInvalidReturn

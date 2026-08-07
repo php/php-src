@@ -18,43 +18,43 @@ var_dump(pathinfo(__FILE__, PATHINFO_DIRNAME));
 try {
 	pathinfo(__FILE__, PATHINFO_EXTENSION|PATHINFO_FILENAME|PATHINFO_DIRNAME);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	pathinfo(__FILE__, PATHINFO_EXTENSION|PATHINFO_FILENAME);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	pathinfo(__FILE__, PATHINFO_EXTENSION|PATHINFO_DIRNAME);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	pathinfo(__FILE__, PATHINFO_FILENAME|PATHINFO_BASENAME);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	pathinfo(__FILE__, PATHINFO_DIRNAME|PATHINFO_EXTENSION);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	pathinfo(__FILE__, PATHINFO_DIRNAME|PATHINFO_BASENAME);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	pathinfo(__FILE__, PATHINFO_DIRNAME-1);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	pathinfo(__FILE__, PATHINFO_ALL+1);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -128,12 +128,12 @@ string(12) "pathinfo.php"
 string(8) "pathinfo"
 string(3) "php"
 string(%d) "%s%estrings"
-pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
-pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
-pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
-pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
-pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
-pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
-pathinfo(): Argument #2 ($flags) must be one of the PATHINFO_* constants
-pathinfo(): Argument #2 ($flags) must be one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be only one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be one of the PATHINFO_* constants
+ValueError: pathinfo(): Argument #2 ($flags) must be one of the PATHINFO_* constants
 Done

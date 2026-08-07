@@ -21,12 +21,12 @@ try {
     $bar = new bar();
     $foo = new foo();
 } catch (Exception $e){
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "ok\n";
 ?>
 --EXPECTF--
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'httpx://' : failed to load %s
+SoapFault: SOAP-ERROR: Parsing WSDL: Couldn't load from 'httpx://' : failed to load %s
 
 ok
 I don't get executed either.

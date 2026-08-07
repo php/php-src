@@ -14,9 +14,9 @@ $foo = function() {
 try {
     $foo();
 } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-string(5) "test!"
+Exception: test!

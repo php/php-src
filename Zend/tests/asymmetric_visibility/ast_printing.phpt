@@ -14,12 +14,12 @@ try {
         }
     } && false);
 } catch (Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-assert(function () {
+AssertionError: assert(function () {
     class Foo {
         public private(set) string $bar;
         public protected(set) string $baz;
