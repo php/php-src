@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     (Arnaud)
   . Fixed bug GH-22857 (Function JIT emits wrong code for FETCH_OBJ_FUNC_ARG on
     a property hook getter, losing register-held variables). (Zhao Hao)
+  . Fixed bug GH-22916 (Preserve parent regs in zend_jit_deoptimizer_start()).
+    (Arnaud)
 
 - OpenSSL:
   . Fix missing error check on invalid alpn protocols. (ndossche)
