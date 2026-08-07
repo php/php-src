@@ -18,7 +18,7 @@ timelib_sources="lib/astro.c lib/dow.c lib/duration.c lib/parse_date.c lib/parse
                  lib/timelib.c lib/tm2unixtime.c lib/unixtime2tm.c lib/parse_iso_intervals.c lib/interval.c"
 
 PHP_NEW_EXTENSION([date],
-  [php_date.c],
+  [php_date.c php_time.c time_duration.c],
   [no],,
   [$PHP_DATE_CFLAGS])
 

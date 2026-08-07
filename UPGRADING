@@ -313,6 +313,10 @@ PHP 8.6 UPGRADE NOTES
     offset and origin, and must return one of CURL_SEEKFUNC_OK,
     CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK.
 
+- Date:
+  . Added a new Time\Duration class.
+    RFC: https://wiki.php.net/rfc/duration_class
+
 - Fileinfo:
   . finfo_file() now works with remote streams.
 
@@ -552,6 +556,12 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- Date:
+  . Time\Duration
+    RFC: https://wiki.php.net/rfc/duration_class
+  . Time\TimeException
+    RFC: https://wiki.php.net/rfc/duration_class
 
 - Intl:
   . IntlNumberRangeFormatter
