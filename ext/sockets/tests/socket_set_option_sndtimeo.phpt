@@ -17,7 +17,7 @@ socket_set_block($socket);
 try {
     $retval_1 = socket_set_option( $socket, SOL_SOCKET, SO_SNDTIMEO, []);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 //set/get comparison
@@ -30,6 +30,6 @@ var_dump($retval_3 === $options);
 socket_close($socket);
 ?>
 --EXPECT--
-socket_set_option(): Argument #4 ($value) must have key "sec"
+ValueError: socket_set_option(): Argument #4 ($value) must have key "sec"
 bool(true)
 bool(true)
