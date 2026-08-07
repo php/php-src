@@ -14,10 +14,13 @@ try {
 }
 
 // calling array_fill() with 'count' equals to INT_MAX
-$array = array_fill(0, $intMax, 1);
+try {
+    $array = array_fill(0, $intMax, 1);
+} catch (\MemoryError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 array_fill(): Argument #2 ($count) is too large
-
-Fatal error: Possible integer overflow in memory allocation (%d * %d + %d) in %s on line %d
+The resulting array is too large to fit in the configured memory limit
