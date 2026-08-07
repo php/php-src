@@ -29,15 +29,15 @@ typedef struct php_date_time_duration {
 # define Z_DATE_TIME_DURATION_P(zv)  php_date_time_duration_from_obj(Z_OBJ_P((zv)))
 
 # define Z_PARAM_DATE_TIME_DURATION(d) { \
-		zend_object *__d; \
-		Z_PARAM_OBJ_OF_CLASS(__d, php_date_ce_time_duration); \
-		d = php_date_time_duration_from_obj(__d); \
+		zend_object *__##d; \
+		Z_PARAM_OBJ_OF_CLASS(__##d, php_date_ce_time_duration); \
+		d = php_date_time_duration_from_obj(__##d); \
 	}
 
 # define Z_PARAM_DATE_TIME_DURATION_OR_NULL(d) { \
-		zend_object *__d; \
-		Z_PARAM_OBJ_OF_CLASS_OR_NULL(__d, php_date_ce_time_duration); \
-		d = __d ? php_date_time_duration_from_obj(__d) : NULL; \
+		zend_object *__##d; \
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(__##d, php_date_ce_time_duration); \
+		d = __##d ? php_date_time_duration_from_obj(__##d) : NULL; \
 	}
 
 PHPAPI extern zend_class_entry *php_date_ce_time_duration;

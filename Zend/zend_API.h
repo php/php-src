@@ -2057,9 +2057,9 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 
 #define Z_PARAM_ENUM(dest, _ce) \
 	{ \
-		zend_object *_tmp = NULL; \
-		Z_PARAM_OBJ_OF_CLASS(_tmp, _ce); \
-		dest = zend_enum_fetch_case_id(_tmp); \
+		zend_object *__##dest = NULL; \
+		Z_PARAM_OBJ_OF_CLASS(__##dest, _ce); \
+		dest = zend_enum_fetch_case_id(__##dest); \
 	}
 
 /* old "p" */

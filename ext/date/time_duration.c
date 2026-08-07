@@ -29,14 +29,14 @@ ZEND_STATIC_ASSERT(NANOS_IN_MICRO * MICROS_IN_SEC == NANOS_IN_SEC, "");
 ZEND_STATIC_ASSERT(NANOS_IN_MILLI * MILLIS_IN_SEC == NANOS_IN_SEC, "");
 
 #define Z_PARAM_ULONG(l) { \
-		zend_long __l; \
-		Z_PARAM_LONG(__l); \
-		if (__l < 0) { \
+		zend_long __##l; \
+		Z_PARAM_LONG(__##l); \
+		if (__##l < 0) { \
 			zend_argument_value_error(_i, "must be greater than or equal to 0"); \
 			_error_code = ZPP_ERROR_FAILURE; \
 			break; \
 		} \
-		l = __l; \
+		l = __##l; \
 	}
 
 ZEND_COLD static void throw_out_of_range_exception(void)
