@@ -15,10 +15,10 @@ var_dump(phpcredits(CREDITS_GROUP));
 --EXPECTF--
 PHP Credits
 
-PHP Group
+%wPHP Group%w
 %a
 
-Language Design & Concept
+%wLanguage Design & Concept%w
 %a
 
 %wPHP Authors%w
@@ -45,6 +45,6 @@ bool(true)
 --
 PHP Credits
 
-PHP Group
+%wPHP Group%w
 %a
 bool(true)

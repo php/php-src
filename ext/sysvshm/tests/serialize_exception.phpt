@@ -17,11 +17,11 @@ class Test {
 try {
     shm_put_var($s, 1, new Test);
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 shm_remove($s);
 
 ?>
 --EXPECT--
-no
+Error: no

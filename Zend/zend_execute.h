@@ -488,8 +488,6 @@ ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_arra
 
 ZEND_API void zend_fetch_dimension_const(zval *result, const zval *container, zval *dim, int type);
 
-ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
-
 ZEND_API bool zend_gcc_global_regs(void);
 
 #define ZEND_USER_OPCODE_CONTINUE   0 /* execute next opcode */

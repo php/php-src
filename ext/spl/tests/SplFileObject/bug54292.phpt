@@ -6,9 +6,9 @@ Bug #54292 (Wrong parameter causes crash in SplFileObject::__construct())
 try {
     new SplFileObject('foo', array());
 } catch (TypeError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-string(85) "SplFileObject::__construct(): Argument #2 ($mode) must be of type string, array given"
+TypeError: SplFileObject::__construct(): Argument #2 ($mode) must be of type string, array given

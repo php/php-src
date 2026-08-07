@@ -9,7 +9,7 @@ try {
     var_dump(hash_init('dummy'));
 }
 catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- Testing hash_init() function with HASH_HMAC and non-cryptographic algorithms --\n";
@@ -17,7 +17,7 @@ try {
     var_dump(hash_init('crc32', HASH_HMAC));
 }
 catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- Testing hash_init() function with HASH_HMAC and no key --\n";
@@ -25,14 +25,14 @@ try {
     var_dump(hash_init('md5', HASH_HMAC));
 }
 catch (\Error $e) {
-    echo  $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(hash_init('md5', HASH_HMAC, null));
 }
 catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
@@ -41,13 +41,13 @@ catch (\Error $e) {
 *** Testing hash_init(): error conditions ***
 
 -- Testing hash_init() function with unknown algorithms --
-hash_init(): Argument #1 ($algo) must be a valid hashing algorithm
+ValueError: hash_init(): Argument #1 ($algo) must be a valid hashing algorithm
 
 -- Testing hash_init() function with HASH_HMAC and non-cryptographic algorithms --
-hash_init(): Argument #1 ($algo) must be a cryptographic hashing algorithm if HMAC is requested
+ValueError: hash_init(): Argument #1 ($algo) must be a cryptographic hashing algorithm if HMAC is requested
 
 -- Testing hash_init() function with HASH_HMAC and no key --
-hash_init(): Argument #3 ($key) must not be empty when HMAC is requested
+ValueError: hash_init(): Argument #3 ($key) must not be empty when HMAC is requested
 
 Deprecated: hash_init(): Passing null to parameter #3 ($key) of type string is deprecated in %s on line %d
-hash_init(): Argument #3 ($key) must not be empty when HMAC is requested
+ValueError: hash_init(): Argument #3 ($key) must not be empty when HMAC is requested

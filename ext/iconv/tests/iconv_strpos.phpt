@@ -14,7 +14,7 @@ function foo($haystk, $needle, $offset, $to_charset = false, $from_charset = fal
     try {
         var_dump(strpos($haystk, $needle, $offset));
     } catch (ValueError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
     try {
         if ($to_charset !== false) {
@@ -23,7 +23,7 @@ function foo($haystk, $needle, $offset, $to_charset = false, $from_charset = fal
             var_dump(iconv_strpos($haystk, $needle, $offset));
         }
     } catch (ValueError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 foo("abecdbcdabef", "bcd", -1);
@@ -48,8 +48,8 @@ int(5)
 int(5)
 bool(false)
 bool(false)
-strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 int(7)
 int(7)
 int(16)

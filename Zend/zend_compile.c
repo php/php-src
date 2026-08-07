@@ -40,6 +40,7 @@
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
 #include "zend_property_hooks.h"
+#include "zend_partial.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -1994,30 +1995,27 @@ static void zend_do_extended_fcall_end(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API bool zend_is_auto_global_str(const char *name, size_t len) /* {{{ */ {
-	zend_auto_global *auto_global;
-
-	if ((auto_global = zend_hash_str_find_ptr(CG(auto_globals), name, len)) != NULL) {
-		if (auto_global->armed) {
-			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
-		}
-		return 1;
+static zend_always_inline bool zend_auto_global_check(zend_auto_global *auto_global)
+{
+	if (auto_global == NULL) {
+		return false;
 	}
-	return 0;
+
+	if (auto_global->armed) {
+		auto_global->armed = auto_global->auto_global_callback(auto_global->name);
+	}
+	return true;
+}
+
+ZEND_API bool zend_is_auto_global_str(const char *name, size_t len) /* {{{ */
+{
+	return zend_auto_global_check(zend_hash_str_find_ptr(CG(auto_globals), name, len));
 }
 /* }}} */
 
 ZEND_API bool zend_is_auto_global(zend_string *name) /* {{{ */
 {
-	zend_auto_global *auto_global;
-
-	if ((auto_global = zend_hash_find_ptr(CG(auto_globals), name)) != NULL) {
-		if (auto_global->armed) {
-			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
-		}
-		return 1;
-	}
-	return 0;
+	return zend_auto_global_check(zend_hash_find_ptr(CG(auto_globals), name));
 }
 /* }}} */
 
@@ -4088,7 +4086,50 @@ ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, const zend_function *f
 }
 /* }}} */
 
-static void zend_compile_call_partial(znode *result, uint32_t arg_count,
+static zend_string *zend_compile_partial_name(const zend_op_array *declaring_op_array,
+		const uint32_t declaring_lineno)
+{
+	/* We attempt to generate a name that hints at where the PFA was created,
+	 * similarly to Closures (GH-13550).
+	 * We do not attempt to make the name unique. */
+
+	zend_string *filename = declaring_op_array->filename;
+	uint32_t start_lineno = declaring_lineno;
+
+	zend_string *class = zend_empty_string;
+	zend_string *separator = zend_empty_string;
+	zend_string *function = filename;
+	const char *parens = "";
+
+	if (declaring_op_array->function_name) {
+		function = declaring_op_array->function_name;
+		if (declaring_op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			/* If the parent function is a closure, don't redundantly
+			 * add the classname and parentheses. */
+		} else {
+			parens = "()";
+
+			if (declaring_op_array->scope && declaring_op_array->scope->name) {
+				class = declaring_op_array->scope->name;
+				separator = ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM);
+			}
+		}
+	}
+
+	zend_string *name = zend_strpprintf_unchecked(
+		0,
+		"{closure:pfa:%S%S%S%s:%" PRIu32 "}",
+		class,
+		separator,
+		function,
+		parens,
+		start_lineno
+	);
+
+	return name;
+}
+
+static void zend_compile_call_partial(znode *result, zend_ast_fcc *fcc_ast, uint32_t arg_count,
 		bool may_have_extra_named_args, bool uses_variadic_placeholder,
 		zval *named_positions, uint32_t opnum_init, const zend_function *fbc) {
 
@@ -4105,18 +4146,21 @@ static void zend_compile_call_partial(znode *result, uint32_t arg_count,
 	zend_op *opline = zend_emit_op_tmp(result, ZEND_CALLABLE_CONVERT_PARTIAL,
 				NULL, NULL);
 
-	opline->op1.num = zend_alloc_cache_slots(2);
+	opline->extended_value = zend_alloc_cache_slots(2);
 
-	if (may_have_extra_named_args) {
-		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
-	}
 	if (uses_variadic_placeholder) {
-		opline->extended_value |= ZEND_FCALL_USES_VARIADIC_PLACEHOLDER;
+		opline->extended_value |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 	}
+
+	zend_string *name = zend_compile_partial_name(CG(active_op_array), opline->lineno);
+	opline->op1.constant = zend_add_literal_string(&name);
+	opline->op1_type = IS_CONST;
 
 	if (!Z_ISUNDEF_P(named_positions)) {
 		opline->op2.constant = zend_add_literal(named_positions);
 		opline->op2_type = IS_CONST;
+	} else {
+		opline->op2.num = 0;
 	}
 }
 
@@ -4156,7 +4200,8 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 			return true;
 		}
 
-		args_ast = ((zend_ast_fcc*)args_ast)->args;
+		zend_ast_fcc *fcc_ast = (zend_ast_fcc*)args_ast;
+		args_ast = fcc_ast->args;
 
 		bool may_have_extra_named_args;
 		bool uses_variadic_placeholder;
@@ -4168,7 +4213,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, const ze
 				&may_have_extra_named_args, true, &uses_variadic_placeholder,
 				&named_positions);
 
-		zend_compile_call_partial(result, arg_count,
+		zend_compile_call_partial(result, fcc_ast, arg_count,
 				may_have_extra_named_args, uses_variadic_placeholder,
 				&named_positions, opnum_init, fbc);
 
@@ -7125,6 +7170,8 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		zend_ast *arm_ast = arms->child[i];
 		zend_ast *body_ast = arm_ast->child[1];
 
+		CG(zend_lineno) = zend_ast_get_lineno(arm_ast);
+
 		if (arm_ast->child[0] != NULL) {
 			zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
@@ -8533,8 +8580,8 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 
 		value = zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval));
 		if (!value) {
-			zend_error_noreturn_unchecked(E_COMPILE_ERROR,
-				"Cannot use variable $%S twice", var_name);
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use variable $%pS twice", var_name);
 		}
 
 		CG(zend_lineno) = zend_ast_get_lineno(var_name_ast);
@@ -10728,6 +10775,8 @@ static void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&left_node, left_ast);
 	zend_compile_expr(&right_node, right_ast);
 
+	CG(zend_lineno) = ast->lineno;
+
 	if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
 		if (zend_try_ct_eval_binary_op(&result->u.constant, opcode,
 				&left_node.u.constant, &right_node.u.constant)
@@ -11852,7 +11901,8 @@ static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_NAMED_ARG
 		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP
 		|| kind == ZEND_AST_CLOSURE
-		|| kind == ZEND_AST_CALL || kind == ZEND_AST_STATIC_CALL || kind == ZEND_AST_CALLABLE_CONVERT;
+		|| kind == ZEND_AST_CALL || kind == ZEND_AST_STATIC_CALL || kind == ZEND_AST_CALLABLE_CONVERT
+		|| kind == ZEND_AST_PLACEHOLDER_ARG;
 }
 /* }}} */
 
@@ -12017,27 +12067,21 @@ static void zend_compile_const_expr_closure(zend_ast **ast_ptr)
 
 static void zend_compile_const_expr_fcc(zend_ast **ast_ptr)
 {
-	zend_ast **args_ast;
-	switch ((*ast_ptr)->kind) {
-		case ZEND_AST_CALL:
-			args_ast = &(*ast_ptr)->child[1];
-			break;
-		case ZEND_AST_STATIC_CALL:
-			args_ast = &(*ast_ptr)->child[2];
-			break;
-		default: ZEND_UNREACHABLE();
-	}
-	if ((*args_ast)->kind != ZEND_AST_CALLABLE_CONVERT) {
+	zend_ast *args_ast = zend_ast_call_get_args(*ast_ptr);
+
+	if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
 	}
 
-	zend_ast_list *args = zend_ast_get_list(((zend_ast_fcc*)*args_ast)->args);
-	if (args->children != 1 || args->child[0]->attr != ZEND_PLACEHOLDER_VARIADIC) {
-		// TODO: PFAs
-		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
-	}
+	zend_ast_fcc *fcc = (zend_ast_fcc*)args_ast;
 
-	ZEND_MAP_PTR_NEW(((zend_ast_fcc *)*args_ast)->fptr);
+	zend_ast_list *args = zend_ast_get_list(fcc->args);
+	bool is_fcc = args->children == 1 && args->child[0]->attr == ZEND_PLACEHOLDER_VARIADIC;
+
+	if (!is_fcc) {
+		fcc->filename = zend_string_copy(CG(active_op_array)->filename);
+		fcc->name = zend_compile_partial_name(CG(active_op_array), fcc->lineno);
+	}
 
 	switch ((*ast_ptr)->kind) {
 		case ZEND_AST_CALL: {
@@ -12078,6 +12122,7 @@ static void zend_compile_const_expr_args(zend_ast **ast_ptr)
 {
 	zend_ast_list *list = zend_ast_get_list(*ast_ptr);
 	bool uses_named_args = false;
+	bool uses_variadic_placeholder = false;
 	for (uint32_t i = 0; i < list->children; i++) {
 		const zend_ast *arg = list->child[i];
 		if (arg->kind == ZEND_AST_UNPACK) {
@@ -12086,11 +12131,31 @@ static void zend_compile_const_expr_args(zend_ast **ast_ptr)
 		}
 		if (arg->kind == ZEND_AST_NAMED_ARG) {
 			uses_named_args = true;
-		} else if (uses_named_args) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use positional argument after named argument");
+			if (uses_variadic_placeholder) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Variadic placeholder must be last");
+			}
+		} else {
+			bool is_variadic_placeholder = arg->kind == ZEND_AST_PLACEHOLDER_ARG
+				&& arg->attr == ZEND_PLACEHOLDER_VARIADIC;
+
+			if (uses_named_args && !is_variadic_placeholder) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use positional argument after named argument");
+			}
+
+			if (uses_variadic_placeholder) {
+				if (is_variadic_placeholder) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Variadic placeholder may only appear once");
+				} else {
+					zend_error_noreturn(E_COMPILE_ERROR, "Variadic placeholder must be last");
+				}
+			}
+
+			if (is_variadic_placeholder) {
+				uses_variadic_placeholder = true;
+			}
 		}
 	}
+
 	if (uses_named_args) {
 		list->attr = 1;
 	}
@@ -12213,7 +12278,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	CG(zend_lineno) = ast->lineno;
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
 
 	if ((CG(compiler_options) & ZEND_COMPILE_EXTENDED_STMT) && !zend_is_unticked_stmt(ast)) {
 		zend_do_extended_stmt(NULL);
@@ -12337,9 +12402,6 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 
 static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 {
-	/* CG(zend_lineno) = ast->lineno; */
-	CG(zend_lineno) = zend_ast_get_lineno(ast);
-
 	if (CG(memoize_mode) != ZEND_MEMOIZE_NONE) {
 		zend_compile_memoized_expr(result, ast, BP_VAR_R);
 		return;
@@ -12481,6 +12543,9 @@ static void zend_compile_expr(znode *result, zend_ast *ast)
 {
 	zend_check_stack_limit();
 
+	uint32_t prev_lineno = CG(zend_lineno);
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
 	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_compile_expr_inner(result, ast);
 	zend_short_circuiting_commit(checkpoint, result, ast);
@@ -12490,12 +12555,12 @@ static void zend_compile_expr(znode *result, zend_ast *ast)
 		ZEND_ASSERT(result->op_type != IS_VAR);
 	}
 #endif
+
+	CG(zend_lineno) = prev_lineno;
 }
 
 static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t type, bool by_ref)
 {
-	CG(zend_lineno) = zend_ast_get_lineno(ast);
-
 	if (CG(memoize_mode) != ZEND_MEMOIZE_NONE) {
 		switch (ast->kind) {
 			case ZEND_AST_CALL:
@@ -12556,6 +12621,9 @@ static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bo
 {
 	zend_check_stack_limit();
 
+	uint32_t prev_lineno = CG(zend_lineno);
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
 	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_op *opcode = zend_compile_var_inner(result, ast, type, by_ref);
 	zend_short_circuiting_commit(checkpoint, result, ast);
@@ -12569,6 +12637,9 @@ static zend_op *zend_compile_var(znode *result, zend_ast *ast, uint32_t type, bo
 		ZEND_ASSERT(result->op_type != IS_VAR);
 	}
 #endif
+
+	CG(zend_lineno) = prev_lineno;
+
 	return opcode;
 }
 
@@ -12576,25 +12647,37 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 {
 	zend_check_stack_limit();
 
+	uint32_t prev_lineno = CG(zend_lineno);
+	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
+	zend_op *opline;
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
-			return zend_compile_simple_var(result, ast, type, true);
+			opline = zend_compile_simple_var(result, ast, type, true);
+			break;
 		case ZEND_AST_DIM:
-			return zend_delayed_compile_dim(result, ast, type, by_ref);
+			opline = zend_delayed_compile_dim(result, ast, type, by_ref);
+			break;
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 		{
-			zend_op *opline = zend_delayed_compile_prop(result, ast, type);
+			opline = zend_delayed_compile_prop(result, ast, type);
 			if (by_ref) {
 				opline->extended_value |= ZEND_FETCH_REF;
 			}
-			return opline;
+			break;
 		}
 		case ZEND_AST_STATIC_PROP:
-			return zend_compile_static_prop(result, ast, type, by_ref, true);
+			opline = zend_compile_static_prop(result, ast, type, by_ref, true);
+			break;
 		default:
-			return zend_compile_var(result, ast, type, false);
+			opline = zend_compile_var(result, ast, type, false);
+			break;
 	}
+
+	CG(zend_lineno) = prev_lineno;
+
+	return opline;
 }
 /* }}} */
 

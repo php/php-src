@@ -115,7 +115,10 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 	char                    *timezone;
 	HashTable               *tzcache;
 	timelib_error_container *last_errors;
+	zend_object             *duration_cache;
 ZEND_END_MODULE_GLOBALS(date)
+
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(date)
 
 #define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)
 

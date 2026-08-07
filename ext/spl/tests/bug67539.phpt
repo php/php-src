@@ -9,7 +9,7 @@ function badsort($a, $b) {
     try {
         $GLOBALS['it']->unserialize($GLOBALS['it']->serialize());
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     return 0;
 }
@@ -17,4 +17,4 @@ function badsort($a, $b) {
 $it->uksort('badsort');
 ?>
 --EXPECT--
-Modification of ArrayObject during sorting is prohibited
+Error: Modification of ArrayObject during sorting is prohibited

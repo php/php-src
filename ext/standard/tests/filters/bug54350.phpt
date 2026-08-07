@@ -23,4 +23,4 @@ fwrite($fd, "foo");
 ?>
 --EXPECTF--
 Warning: fclose(): cannot close the provided stream, as it must not be manually closed in %s on line %d
-fclose(): Argument #1 ($stream) must be an open stream resource
+fclose(): Argument #1 ($stream) must be of type resource, null given

@@ -299,16 +299,11 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handli
 }
 static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling(void) {}
 
-PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
+PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...);
-PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
-PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
 END_EXTERN_C()
 
 #define zenderror phperror
@@ -327,7 +322,7 @@ PHPAPI extern int (*php_register_internal_extensions_func)(void);
 PHPAPI int php_register_internal_extensions(void);
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(void);
-PHPAPI char *php_get_current_user(void);
+PHPAPI zend_string *php_get_current_user(void);
 
 PHPAPI const char *php_get_internal_encoding(void);
 PHPAPI const char *php_get_input_encoding(void);

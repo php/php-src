@@ -66,9 +66,7 @@ if (PHP_GD != "no") {
 				heif_location = false;
 			}
 			if (heif_location && heif_location.match(/heif_a\.lib$/)) {
-				if (!(CHECK_LIB("libde265_a.lib", "gd", PHP_GD) &&
-					CHECK_LIB("x265_a.lib", "gd", PHP_GD) &&
-					CHECK_LIB("aom_a.lib", "gd", PHP_GD) &&
+				if (!(CHECK_LIB("aom_a.lib", "gd", PHP_GD) &&
 					CHECK_LIB("dav1d_a.lib", "gd", PHP_GD))) {
 					WARNING("static libheif not enabled; codec libraries not found");
 					heif_location = false;

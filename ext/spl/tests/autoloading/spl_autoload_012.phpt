@@ -22,7 +22,7 @@ try {
     class_exists('ThisClassDoesNotExist');
 } catch(Exception $e) {
     do {
-        echo $e->getMessage()."\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     } while($e = $e->getPrevious());
 }
 
@@ -30,7 +30,7 @@ try {
     new ThisClassDoesNotExist;
 } catch(Exception $e) {
     do {
-        echo $e->getMessage()."\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     } while($e = $e->getPrevious());
 }
 
@@ -39,9 +39,9 @@ class_exists('ThisClassDoesNotExist');
 ===DONE===
 --EXPECTF--
 autoload_first
-first
+Exception: first
 autoload_first
-first
+Exception: first
 autoload_first
 
 Fatal error: Uncaught Exception: first in %sspl_autoload_012.php:%d

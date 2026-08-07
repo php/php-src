@@ -959,7 +959,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		}
 
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, false)) {
-			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
+			spprintf(p->error, 0, "unable to seek to start of file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 
@@ -1008,7 +1008,7 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, false)) {
 			php_stream_filter_free(filter);
-			spprintf(p->error, 0, "unable to seek to start of file \"%s\" to zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
+			spprintf(p->error, 0, "unable to seek to start of file \"%s\" while creating zip-based phar \"%s\"", ZSTR_VAL(entry->filename), ZSTR_VAL(entry->phar->fname));
 			return ZEND_HASH_APPLY_STOP;
 		}
 

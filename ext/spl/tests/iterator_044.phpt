@@ -27,12 +27,12 @@ class MyCachingIterator extends CachingIterator
             try {
                 var_dump($this->offsetExists($v));
             } catch (TypeError $e) {
-                echo $e->getMessage(), "\n";
+                echo $e::class, ': ', $e->getMessage(), "\n";
             }
             try {
                 var_dump($this->offsetGet($v));
             } catch (TypeError $e) {
-                echo $e->getMessage(), "\n";
+                echo $e::class, ': ', $e->getMessage(), "\n";
             }
         }
     }
@@ -46,7 +46,7 @@ try
 }
 catch(Exception $e)
 {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try
@@ -55,7 +55,7 @@ try
 }
 catch(Exception $e)
 {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $it = new MyCachingIterator(new ArrayIterator(array(0, 'foo'=>1, 2, 'bar'=>3, 4)), CachingIterator::FULL_CACHE);
@@ -72,8 +72,8 @@ $it->test($checks);
 
 ?>
 --EXPECTF--
-Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
-Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
+BadMethodCallException: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
+BadMethodCallException: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 ===0===
 int(0)
 bool(false)
@@ -83,8 +83,8 @@ NULL
 ===1===
 object(stdClass)#%d (0) {
 }
-CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, stdClass given
-CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, stdClass given
+TypeError: CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, stdClass given
+TypeError: CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, stdClass given
 ===2===
 object(MyFoo)#%d (0) {
 }
@@ -128,8 +128,8 @@ int(0)
 ===1===
 object(stdClass)#1 (0) {
 }
-CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, stdClass given
-CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, stdClass given
+TypeError: CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, stdClass given
+TypeError: CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, stdClass given
 ===2===
 object(MyFoo)#2 (0) {
 }

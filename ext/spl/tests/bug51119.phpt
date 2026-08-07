@@ -14,7 +14,7 @@ foreach ($limitIterator as $item) {
 try {
     $limitIterator = new LimitIterator($arrayIterator, -1);
 } catch (\ValueError $e){
-    print $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -22,4 +22,4 @@ try {
 a
 b
 c
-LimitIterator::__construct(): Argument #2 ($offset) must be greater than or equal to 0
+ValueError: LimitIterator::__construct(): Argument #2 ($offset) must be greater than or equal to 0

@@ -181,6 +181,7 @@ function snmp_get_valueretrieval(): int {}
 
 function snmp_read_mib(string $filename): bool {}
 
+/** @not-serializable */
 class SNMP
 {
     /** @cvalue SNMP_VERSION_1 */

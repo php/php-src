@@ -16,8 +16,8 @@ PHPNW Testfest 2009 - Paul Court ( g@rgoyle.com )
         $dll->offsetUnset(-1);
     }
     catch (Exception $e) {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 ?>
 --EXPECT--
-SplDoublyLinkedList::offsetUnset(): Argument #1 ($index) is out of range
+OutOfRangeException: SplDoublyLinkedList::offsetUnset(): Argument #1 ($index) is out of range

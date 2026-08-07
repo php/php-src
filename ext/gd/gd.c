@@ -322,7 +322,7 @@ void php_gd_error_method(int type, const char *format, va_list args)
 		default:
 			type = E_ERROR;
 	}
-	php_verror(NULL, "", type, format, args);
+	php_verror(NULL, type, format, args);
 }
 /* }}} */
 

@@ -669,6 +669,23 @@ ZEND_API uint32_t *zend_get_recursion_guard(zend_object *zobj)
 	return &Z_GUARD_P(zv);
 }
 
+static zend_always_inline zend_object *zend_lazy_proxy_get_guarded_instance(
+		zend_object *zobj, zend_string *name, uint32_t guard_type)
+{
+	if (UNEXPECTED(zend_object_is_lazy_proxy(zobj)
+			&& zend_lazy_object_initialized(zobj))) {
+		zend_object *instance = zend_lazy_object_get_instance(zobj);
+		if (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS) {
+			uint32_t *instance_guard = zend_get_property_guard(instance, name);
+			if ((*instance_guard) & guard_type) {
+				return instance;
+			}
+		}
+	}
+
+	return NULL;
+}
+
 ZEND_COLD static void zend_typed_property_uninitialized_access(const zend_property_info *prop_info, zend_string *name)
 {
 	zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
@@ -896,21 +913,16 @@ try_again:
 	 * guard is already set for this property, we are inside a recursive
 	 * call from the real instance's __get/__isset. Forward directly to
 	 * the real instance to avoid double invocation. (GH-21478) */
-	if (UNEXPECTED(zend_object_is_lazy_proxy(zobj)
-			&& zend_lazy_object_initialized(zobj))) {
-		zend_object *instance = zend_lazy_object_get_instance(zobj);
-		if (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS) {
-			uint32_t *instance_guard = zend_get_property_guard(instance, name);
-			uint32_t guard_type = ((type == BP_VAR_IS) && zobj->ce->__isset)
-				? IN_ISSET : IN_GET;
-			if ((*instance_guard) & guard_type) {
-				retval = zend_std_read_property(instance, name, type, cache_slot, rv);
-				if (retval == &EG(uninitialized_zval)) {
-					ZVAL_NULL(rv);
-					retval = rv;
-				}
-				return retval;
+	{
+		zend_object *instance = zend_lazy_proxy_get_guarded_instance(zobj, name,
+			((type == BP_VAR_IS) && zobj->ce->__isset) ? IN_ISSET : IN_GET);
+		if (instance) {
+			retval = zend_std_read_property(instance, name, type, cache_slot, rv);
+			if (retval == &EG(uninitialized_zval)) {
+				ZVAL_NULL(rv);
+				retval = rv;
 			}
+			return retval;
 		}
 	}
 
@@ -1126,6 +1138,11 @@ try_again:
 				if ((prop_info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(prop_info)) {
 					zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
 					variable_ptr = &EG(error_zval);
+					if (cache_slot) {
+						/* Reset cache slot to dodge fast path in next execution. */
+						CACHE_POLYMORPHIC_PTR_EX(cache_slot, NULL, NULL);
+						CACHE_PTR_EX(cache_slot + 2, NULL);
+					}
 					goto exit;
 				}
 			}
@@ -1262,14 +1279,10 @@ found:;
 	/* For initialized lazy proxies: if the real instance's __set guard
 	 * is already set, we are inside a recursive call from the real
 	 * instance's __set. Forward directly to avoid double invocation. */
-	if (UNEXPECTED(zend_object_is_lazy_proxy(zobj)
-			&& zend_lazy_object_initialized(zobj))) {
-		zend_object *instance = zend_lazy_object_get_instance(zobj);
-		if (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS) {
-			uint32_t *instance_guard = zend_get_property_guard(instance, name);
-			if ((*instance_guard) & IN_SET) {
-				return zend_std_write_property(instance, name, value, cache_slot);
-			}
+	{
+		zend_object *instance = zend_lazy_proxy_get_guarded_instance(zobj, name, IN_SET);
+		if (instance) {
+			return zend_std_write_property(instance, name, value, cache_slot);
 		}
 	}
 
@@ -1670,15 +1683,11 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 	/* For initialized lazy proxies: if the real instance's __unset guard
 	 * is already set, we are inside a recursive call from the real
 	 * instance's __unset. Forward directly to avoid double invocation. */
-	if (UNEXPECTED(zend_object_is_lazy_proxy(zobj)
-			&& zend_lazy_object_initialized(zobj))) {
-		zend_object *instance = zend_lazy_object_get_instance(zobj);
-		if (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS) {
-			uint32_t *instance_guard = zend_get_property_guard(instance, name);
-			if ((*instance_guard) & IN_UNSET) {
-				zend_std_unset_property(instance, name, cache_slot);
-				return;
-			}
+	{
+		zend_object *instance = zend_lazy_proxy_get_guarded_instance(zobj, name, IN_UNSET);
+		if (instance) {
+			zend_std_unset_property(instance, name, cache_slot);
+			return;
 		}
 	}
 
@@ -2498,14 +2507,10 @@ found:
 	/* For initialized lazy proxies: if the real instance's __isset guard
 	 * is already set, we are inside a recursive call from the real
 	 * instance's __isset. Forward directly to avoid double invocation. */
-	if (UNEXPECTED(zend_object_is_lazy_proxy(zobj)
-			&& zend_lazy_object_initialized(zobj))) {
-		zend_object *instance = zend_lazy_object_get_instance(zobj);
-		if (instance->ce->ce_flags & ZEND_ACC_USE_GUARDS) {
-			uint32_t *instance_guard = zend_get_property_guard(instance, name);
-			if ((*instance_guard) & IN_ISSET) {
-				return zend_std_has_property(instance, name, has_set_exists, cache_slot);
-			}
+	{
+		zend_object *instance = zend_lazy_proxy_get_guarded_instance(zobj, name, IN_ISSET);
+		if (instance) {
+			return zend_std_has_property(instance, name, has_set_exists, cache_slot);
 		}
 	}
 

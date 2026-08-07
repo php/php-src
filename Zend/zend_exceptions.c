@@ -630,6 +630,29 @@ ZEND_API zend_string *zend_trace_function_args_to_string(const HashTable *frame)
 /* {{{ Gets the currently executing function's arguments as a string. Used by php_verror. */
 ZEND_API zend_string *zend_trace_current_function_args_string(void) {
 	zend_string *dynamic_params = NULL;
+	/* Special case: require_once/include_once aren't functions, but we
+	 * want to capture their arguments anyways, for i.e. file not found.
+	 */
+	zend_execute_data *execute_data = EG(current_execute_data);
+	if (execute_data && execute_data->func
+			&& ZEND_USER_CODE(execute_data->func->common.type)
+			&& (execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
+		zval *inc_filename;
+
+		switch (execute_data->opline->op1_type) {
+			/* op1 may be CONST, TMP or CV; RT_CONSTANT() is only valid for the former. */
+			case IS_CONST:
+				inc_filename = RT_CONSTANT(execute_data->opline, execute_data->opline->op1);
+				break;
+			default:
+				inc_filename = EX_VAR(execute_data->opline->op1.var);
+		}
+
+		smart_str str = {0};
+		build_trace_args(inc_filename, &str);
+		return smart_str_extract(&str);
+	}
+
 	/* get a backtrace to snarf function args */
 	zval backtrace;
 	zend_fetch_debug_backtrace(&backtrace, /* skip_last */ 0, /* options */ 0, /* limit */ 1);

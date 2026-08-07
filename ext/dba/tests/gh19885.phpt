@@ -16,20 +16,20 @@ $db =dba_open($db_file, "r", $handler);
 try {
 	dba_fetch("1", $db, PHP_INT_MIN);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	dba_fetch("1", $db, PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 // negative skip needs to remain acceptable albeit corrected down the line
 var_dump(dba_fetch("1", $db, -1000000));
 ?>
 --EXPECTF--
-dba_fetch(): Argument #3 ($skip) must be between -%d and %d
-dba_fetch(): Argument #3 ($skip) must be between -%d and %d
+ValueError: dba_fetch(): Argument #3 ($skip) must be between -%d and %d
+ValueError: dba_fetch(): Argument #3 ($skip) must be between -%d and %d
 
 Notice: dba_fetch(): Handler cdb accepts only skip values greater than or equal to zero, using skip=0 in %s on line %d
 string(1) "1"

@@ -448,19 +448,14 @@ static int PQsocketPoll(int socket, int read, int write, time_t timeout)
 	if (!read && !write)
 		return 0;
 
-	php_pollfd fd;
-	int ts = -1;
-
-	fd.fd = socket;
-	fd.events = POLLERR;
-	fd.revents = 0;
+	int ts = -1, events = 0;
 
 	if (read) {
-		fd.events |= POLLIN;
+		events |= POLLIN;
 	}
 
 	if (write) {
-		fd.events |= POLLOUT;
+		events |= POLLOUT;
 	}
 
 	if (timeout != (time_t)ts) {
@@ -473,7 +468,7 @@ static int PQsocketPoll(int socket, int read, int write, time_t timeout)
 		}
 	}
 
-	return php_poll2(&fd, 1, ts);
+	return php_pollfd_for_ms(socket, events, ts);
 }
 #endif
 
@@ -3433,10 +3428,8 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 
 	int result;
 	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(tmp)[ZSTR_LEN(tmp) - 1] != '\n') {
-		char *zquery = emalloc(ZSTR_LEN(tmp) + 2);
-		memcpy(zquery, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-		zquery[ZSTR_LEN(tmp)] = '\n';
-		zquery[ZSTR_LEN(tmp) + 1] = '\0';
+		char *zquery = zend_cstr_append_char(
+			ZSTR_VAL(tmp), ZSTR_LEN(tmp), '\n');
 		result = PQputCopyData(pgsql, zquery, ZSTR_LEN(tmp) + 1);
 		efree(zquery);
 	} else {
@@ -4846,7 +4839,7 @@ static int php_pgsql_convert_match(const zend_string *str, zend_string *regex)
  */
 static zend_string *php_pgsql_add_quotes(zend_string *src)
 {
-	return zend_string_concat3("E'", strlen("E'"), ZSTR_VAL(src), ZSTR_LEN(src), "'", strlen("'"));
+	return zend_string_concat3("'", strlen("'"), ZSTR_VAL(src), ZSTR_LEN(src), "'", strlen("'"));
 }
 /* }}} */
 
@@ -5117,7 +5110,6 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 							zend_string *str;
 							/* PostgreSQL ignores \0 */
 							str = zend_string_alloc(Z_STRLEN_P(val) * 2, 0);
-							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							ZSTR_LEN(str) = PQescapeStringConn(pg_link, ZSTR_VAL(str),
 									Z_STRVAL_P(val), Z_STRLEN_P(val), &escape_err);
 							if (escape_err) {

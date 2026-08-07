@@ -24,6 +24,9 @@ $functions1 = [
     'gmp_com',
     'gmp_nextprime',
 ];
+if (function_exists('gmp_prevprime')) {
+    $functions1[] = 'gmp_prevprime';
+}
 $functions1_need_int_2 = [
     'gmp_testbit',
     'gmp_scan0',
@@ -60,30 +63,33 @@ $functions2 = [
 $functions3 = [
     'gmp_powm',
 ];
+if (function_exists('gmp_powm_sec')) {
+    $functions3[] = 'gmp_powm_sec';
+}
 
 echo 'Explicit base with gmp_init:', \PHP_EOL;
 echo 'Hexadecimal', \PHP_EOL;
 try {
     var_dump(gmp_init('0X', 16));
 } catch (\ValueError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_init('0x', 16));
 } catch (\ValueError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo 'Binary', \PHP_EOL;
 try {
     var_dump(gmp_init('0B', 2));
 } catch (\ValueError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_init('0b', 2));
 } catch (\ValueError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo 'Fuzzing gmp functions:', \PHP_EOL;
@@ -213,10 +219,10 @@ echo "Done\n";
 --EXPECT--
 Explicit base with gmp_init:
 Hexadecimal
-gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
 Binary
-gmp_init(): Argument #1 ($num) is not an integer string
-gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
+ValueError: gmp_init(): Argument #1 ($num) is not an integer string
 Fuzzing gmp functions:
 Done

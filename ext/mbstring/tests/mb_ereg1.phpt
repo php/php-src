@@ -19,7 +19,7 @@ foreach ($a as $args) {
     try {
         var_dump(mb_ereg($args[0], $args[1], $args[2]));
     } catch (\TypeError|\ValueError $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     var_dump($args);
 }

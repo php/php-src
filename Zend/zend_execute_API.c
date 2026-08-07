@@ -1100,9 +1100,9 @@ cleanup_args:
 }
 /* }}} */
 
-ZEND_API void zend_call_known_function(
+ZEND_API void zend_call_known_function_ex(
 		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
-		uint32_t param_count, zval *params, HashTable *named_params)
+		uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args)
 {
 	zval retval;
 	zend_fcall_info fci;
@@ -1116,7 +1116,7 @@ ZEND_API void zend_call_known_function(
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.named_params = named_params;
-	fci.consumed_args = 0;
+	fci.consumed_args = consumed_args;
 	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
 	fcic.function_handler = fn;

@@ -15,6 +15,14 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+var_dump(array_intersect(array: [1, 2]) === [1, 2]);
+
+try {
+    array_intersect([1, 2], arrays: [2]);
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 try {
     $array = [1, 2];
     array_push($array, ...['values' => 3]);
@@ -25,4 +33,6 @@ try {
 --EXPECT--
 Internal function array_merge() does not accept named variadic arguments
 Internal function array_diff_key() does not accept named variadic arguments
+bool(true)
+Internal function array_intersect() does not accept named variadic arguments
 Internal function array_push() does not accept named variadic arguments

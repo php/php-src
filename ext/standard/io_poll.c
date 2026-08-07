@@ -19,6 +19,7 @@
 #include "php_poll.h"
 #include "io_poll_arginfo.h"
 #include "io_poll_decl.h"
+#include "ext/date/php_time.h"
 
 /* Class entries */
 static zend_class_entry *php_io_poll_backend_class_entry;
@@ -774,38 +775,28 @@ PHP_METHOD(Io_Poll_Context, add)
 
 PHP_METHOD(Io_Poll_Context, wait)
 {
-	zend_long timeout_seconds = -1;
-	bool timeout_seconds_is_null = true;
-	zend_long timeout_microseconds = 0;
+	php_date_time_duration *timeout = NULL;
 	zend_long max_events = 0;
 	bool max_events_is_null = true;
 
-	ZEND_PARSE_PARAMETERS_START(0, 3)
+	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(timeout_seconds, timeout_seconds_is_null)
-		Z_PARAM_LONG(timeout_microseconds)
+		Z_PARAM_DATE_TIME_DURATION_OR_NULL(timeout)
 		Z_PARAM_LONG_OR_NULL(max_events, max_events_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZV(getThis());
 
-	/* Build timespec from seconds + microseconds, or NULL for indefinite */
-	struct timespec ts;
-	const struct timespec *timeout = NULL;
-	if (timeout_seconds >= 0) {
-		if (timeout_microseconds < 0) {
-			zend_argument_value_error(2, "must be greater than or equal to 0");
+	/* Build timespec from php_date_time_duration, or NULL for indefinite */
+	struct timespec timeout_ts;
+	if (timeout) {
+		if (timeout->duration.negative) {
+			zend_argument_value_error(1, "must not be negative");
 			RETURN_THROWS();
 		}
 
-		/* Allow microseconds >= 1000000, carry overflow into seconds
-		 * (same behavior as stream_select) */
-		ts.tv_sec = (time_t) (timeout_seconds + (timeout_microseconds / 1000000));
-		ts.tv_nsec = (long) ((timeout_microseconds % 1000000) * 1000);
-		timeout = &ts;
-	} else if (!timeout_seconds_is_null) {
-		zend_argument_value_error(1, "must be greater than or equal to 0");
-		RETURN_THROWS();
+		timeout_ts.tv_sec = timeout->duration.seconds;
+		timeout_ts.tv_nsec = timeout->duration.nanoseconds;
 	}
 
 	if (max_events_is_null) {
@@ -814,12 +805,12 @@ PHP_METHOD(Io_Poll_Context, wait)
 			max_events = 64;
 		}
 	} else if (max_events <= 0) {
-		zend_argument_value_error(3, "must be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
 	php_poll_event *events = safe_emalloc(max_events, sizeof(*events), 0);
-	int num_events = php_poll_wait(intern->ctx, events, (int) max_events, timeout);
+	int num_events = php_poll_wait(intern->ctx, events, (int) max_events, timeout ? &timeout_ts : NULL);
 
 	if (num_events < 0) {
 		php_poll_error err = php_poll_get_error(intern->ctx);

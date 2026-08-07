@@ -211,6 +211,7 @@ static int read_64bit_transitions(const unsigned char **tzf, timelib_tzinfo *tz)
 			buffer[i] = timelib_conv_int64_signed(buffer[i]);
 			/* Sanity check to see whether TS is just increasing */
 			if (i > 0 && !(buffer[i] > buffer[i - 1])) {
+				timelib_free(buffer);
 				return TIMELIB_ERROR_CORRUPT_TRANSITIONS_DONT_INCREASE;
 			}
 		}
@@ -543,7 +544,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 		timelib_free(trans_str);
 	}
 	for (i = 0; i < tz->bit64.leapcnt; i++) {
-		date_str = format_ut_time(tz->trans[i], tz);
+		date_str = format_ut_time(tz->leap_times[i].trans, tz);
 		printf (
 			"%s (%20ld) = %d\n",
 			date_str,

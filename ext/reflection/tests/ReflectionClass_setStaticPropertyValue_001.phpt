@@ -73,5 +73,5 @@ Array
 )
 
 Set non-existent values from A with no default value:
-Class A does not have a property named protectedDoesNotExist
-Class A does not have a property named privateDoesNotExist
+Property A::$protectedDoesNotExist does not exist
+Property A::$privateDoesNotExist does not exist

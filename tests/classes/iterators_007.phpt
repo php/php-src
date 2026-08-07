@@ -27,15 +27,15 @@ while($t->x < 5)
     }
     catch(Exception $e)
     {
-        echo "Caught in " . $e->getMessage() . "()\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $t->x++;
 }
 ?>
 --EXPECT--
-Caught in Test::rewind()
-Caught in Test::current()
-Caught in Test::key()
+Exception: Test::rewind
+Exception: Test::current
+Exception: Test::key
 Current
-Caught in Test::next()
-Caught in Test::valid()
+Exception: Test::next
+Exception: Test::valid

@@ -746,13 +746,10 @@ PHP_FUNCTION(pcntl_exec)
 				zend_string_addref(key);
 			}
 
-			/* Length of element + equal sign + length of key + null */
-			*pair = safe_emalloc(ZSTR_LEN(element_str) + 1, sizeof(char), ZSTR_LEN(key) + 1);
-			/* Copy key=element + final null byte into buffer */
-			memcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key));
-			(*pair)[ZSTR_LEN(key)] = '=';
-			/* Copy null byte */
-			memcpy(*pair + ZSTR_LEN(key) + 1, ZSTR_VAL(element_str), ZSTR_LEN(element_str) + 1);
+			*pair = zend_cstr_concat3(
+				ZSTR_VAL(key), ZSTR_LEN(key),
+				"=", 1,
+				ZSTR_VAL(element_str), ZSTR_LEN(element_str));
 
 			/* Cleanup */
 			zend_string_release_ex(key, false);

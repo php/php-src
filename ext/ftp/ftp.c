@@ -308,14 +308,9 @@ bool ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const cha
 
 				case SSL_ERROR_WANT_READ:
 				case SSL_ERROR_WANT_WRITE: {
-						php_pollfd p;
-						int i;
+						int i, events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
 
-						p.fd = ftp->fd;
-						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
-						p.revents = 0;
-
-						i = php_poll2(&p, 1, 300);
+						i = php_pollfd_for_ms(ftp->fd, events, 300);
 
 						retry = i > 0;
 					}
@@ -1388,14 +1383,9 @@ static int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 
 			case SSL_ERROR_WANT_READ:
 			case SSL_ERROR_WANT_CONNECT: {
-					php_pollfd p;
-					int i;
+					int i, events = POLLOUT;
 
-					p.fd = fd;
-					p.events = POLLOUT;
-					p.revents = 0;
-
-					i = php_poll2(&p, 1, 300);
+					i = php_pollfd_for_ms(fd, events, 300);
 
 					retry = i > 0;
 				}
@@ -1521,14 +1511,9 @@ static int my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 
 				case SSL_ERROR_WANT_READ:
 				case SSL_ERROR_WANT_CONNECT: {
-						php_pollfd p;
-						int i;
+						int i, events = POLLIN|POLLPRI;
 
-						p.fd = fd;
-						p.events = POLLIN|POLLPRI;
-						p.revents = 0;
-
-						i = php_poll2(&p, 1, 300);
+						i = php_pollfd_for_ms(fd, events, 300);
 
 						retry = i > 0;
 					}
@@ -1825,14 +1810,9 @@ data_accepted:
 
 				case SSL_ERROR_WANT_READ:
 				case SSL_ERROR_WANT_WRITE: {
-						php_pollfd p;
-						int i;
+						int i, events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
 
-						p.fd = data->fd;
-						p.events = (err == SSL_ERROR_WANT_READ) ? (POLLIN|POLLPRI) : POLLOUT;
-						p.revents = 0;
-
-						i = php_poll2(&p, 1, 300);
+						i = php_pollfd_for_ms(data->fd, events, 300);
 
 						retry = i > 0;
 					}

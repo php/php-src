@@ -6,9 +6,9 @@ func_num_args() outside of a function declaration
 try {
     func_num_args();
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-func_num_args() must be called from a function context
+Error: func_num_args() must be called from a function context

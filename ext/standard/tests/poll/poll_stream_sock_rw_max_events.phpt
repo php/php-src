@@ -23,14 +23,14 @@ for ($i = 0; $i < 4; $i++) {
     ];
 }
 
-pt_expect_events($poll_ctx->wait(0, 100000, 8), $expected);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000), 8), $expected);
 
 // All read data was drained above, so only write events remain
 $expected = [];
 for ($i = 0; $i < 4; $i++) {
     $expected[] = ['events' => [Io\Poll\Event::Write], 'data' => "sock$i"];
 }
-pt_expect_events($poll_ctx->wait(0, 100000, 8), $expected);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000), 8), $expected);
 
 ?>
 --EXPECT--

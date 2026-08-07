@@ -41,13 +41,13 @@ var_dump($result);
 try {
     $stmts->setExplain(-1);
 } catch (\ValueError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     $stmts->setExplain(256);
 } catch (\ValueError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($stmts->explain() == Sqlite3Stmt::EXPLAIN_MODE_PREPARED);
@@ -385,6 +385,6 @@ array(2) {
     string(13) "second_insert"
   }
 }
-SQLite3Stmt::setExplain(): Argument #1 ($mode) must be one of the SQLite3Stmt::EXPLAIN_MODE_* constants
-SQLite3Stmt::setExplain(): Argument #1 ($mode) must be one of the SQLite3Stmt::EXPLAIN_MODE_* constants
+ValueError: SQLite3Stmt::setExplain(): Argument #1 ($mode) must be one of the SQLite3Stmt::EXPLAIN_MODE_* constants
+ValueError: SQLite3Stmt::setExplain(): Argument #1 ($mode) must be one of the SQLite3Stmt::EXPLAIN_MODE_* constants
 bool(true)

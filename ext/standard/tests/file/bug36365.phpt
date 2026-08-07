@@ -2,6 +2,7 @@
 Bug #36365 (scandir duplicates file name at every 65535th file)
 --SKIPIF--
 <?php
+if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only');
 if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 ?>
 --FILE--
