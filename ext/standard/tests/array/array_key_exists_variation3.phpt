@@ -20,7 +20,7 @@ foreach($keys as $key) {
     try {
         var_dump(array_key_exists($key, $search));
     } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
     echo "Cast float to int:\n";
     var_dump(array_key_exists((int)$key, $search));

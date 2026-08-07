@@ -15,11 +15,11 @@ var_dump(constant("FOO::CONST1"));
 try {
     constant("FOO::CONST2");
 } catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 object(stdClass)#1 (0) {
 }
-Cannot assign stdClass to class constant Foo::CONST2 of type array
+TypeError: Cannot assign stdClass to class constant Foo::CONST2 of type array

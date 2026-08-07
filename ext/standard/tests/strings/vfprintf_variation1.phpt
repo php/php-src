@@ -34,7 +34,7 @@ function writeAndDump($fp, $format, $args)
         var_dump( $content );
         var_dump( $length );
     } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -60,7 +60,7 @@ unlink( $file );
 ?>
 --EXPECT--
 *** Testing vfprintf() : variation functionality ***
-vfprintf(): Argument #3 ($values) must be of type array, null given
+TypeError: vfprintf(): Argument #3 ($values) must be of type array, null given
 string(17) "Foo is 30 and bar"
 int(17)
 string(14) "Foobar testing"

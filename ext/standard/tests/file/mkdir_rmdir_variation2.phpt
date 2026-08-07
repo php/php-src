@@ -26,12 +26,12 @@ echo "\n*** Testing mkdir() and rmdir() for binary safe functionality ***\n";
 try {
     var_dump( mkdir("$file_path/temp".chr(0)."/") );
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( rmdir("$file_path/temp".chr(0)."/") );
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n*** Testing mkdir() with miscellaneous input ***\n";
@@ -60,8 +60,8 @@ Warning: rmdir(): %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-mkdir(): Argument #1 ($directory) must not contain any null bytes
-rmdir(): Argument #1 ($directory) must not contain any null bytes
+ValueError: mkdir(): Argument #1 ($directory) must not contain any null bytes
+ValueError: rmdir(): Argument #1 ($directory) must not contain any null bytes
 
 *** Testing mkdir() with miscellaneous input ***
 bool(true)

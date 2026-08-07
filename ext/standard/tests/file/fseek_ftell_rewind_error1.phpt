@@ -12,7 +12,7 @@ fclose($fp);
 try {
     var_dump(fseek($fp,10));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -20,5 +20,5 @@ echo "Done\n";
 --EXPECT--
 *** Testing fseek() : error conditions ***
 -- Testing fseek() with closed/unset file handle --
-fseek(): Argument #1 ($stream) must be an open stream resource
+TypeError: fseek(): Argument #1 ($stream) must be an open stream resource
 Done

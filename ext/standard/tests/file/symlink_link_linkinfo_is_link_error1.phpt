@@ -30,7 +30,7 @@ echo "\n*** Testing linkinfo() for error conditions ***\n";
 try {
     var_dump(linkinfo(''));  // empty string as linkname
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -56,5 +56,5 @@ Warning: symlink(): %s in %s on line %d
 bool(false)
 
 *** Testing linkinfo() for error conditions ***
-linkinfo(): Argument #1 ($path) must not be empty
+ValueError: linkinfo(): Argument #1 ($path) must not be empty
 Done

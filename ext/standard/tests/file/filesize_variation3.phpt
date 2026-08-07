@@ -19,7 +19,7 @@ for($size = filesize($filename); $size>=-1200; $size-=1200) {
     try {
         var_dump( ftruncate($file_handle, $size) );
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     fclose($file_handle);
     var_dump( filesize($filename) );
@@ -57,5 +57,5 @@ bool(true)
 int(1200)
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)

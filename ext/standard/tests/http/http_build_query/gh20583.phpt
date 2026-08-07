@@ -20,7 +20,7 @@ for ($i = 0; $i < 3000; $i++) {
 try {
     http_build_query($a, 'p');
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

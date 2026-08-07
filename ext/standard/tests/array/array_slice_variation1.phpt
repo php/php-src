@@ -18,12 +18,12 @@ $a = 'foo';
 try {
     var_dump(array_slice(range(1, 3), 0, $a));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(array_slice(range(1, 3), 0, $a));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($a);
 
@@ -61,6 +61,6 @@ array(1) {
   [2]=>
   int(3)
 }
-array_slice(): Argument #3 ($length) must be of type ?int, string given
-array_slice(): Argument #3 ($length) must be of type ?int, string given
+TypeError: array_slice(): Argument #3 ($length) must be of type ?int, string given
+TypeError: array_slice(): Argument #3 ($length) must be of type ?int, string given
 string(3) "foo"

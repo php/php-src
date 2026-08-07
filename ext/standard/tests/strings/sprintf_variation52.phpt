@@ -21,7 +21,7 @@ echo"\n-- Testing for invalid width(-15) specifier --\n";
 try {
     var_dump(sprintf("%030.-15s", $tempstring));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo"\n-- Testing for '%X' as the format parameter --\n";
@@ -50,7 +50,7 @@ Notice: sprintf(): Requested precision of 988 digits was truncated to PHP maximu
 string(65) "12345678900.00000000000000000000000000000000000000000000000000000"
 
 -- Testing for invalid width(-15) specifier --
-Unknown format specifier "-"
+ValueError: Unknown format specifier "-"
 
 -- Testing for '%X' as the format parameter --
 string(1) "C"

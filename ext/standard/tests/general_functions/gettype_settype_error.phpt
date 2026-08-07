@@ -12,7 +12,7 @@ echo "\n*** Testing settype(): error conditions ***\n";
 try {
     settype( $var, "unknown" );
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -21,5 +21,5 @@ echo "Done\n";
 **** Testing gettype() and settype() functions ****
 
 *** Testing settype(): error conditions ***
-settype(): Argument #2 ($type) must be a valid type
+ValueError: settype(): Argument #2 ($type) must be a valid type
 Done

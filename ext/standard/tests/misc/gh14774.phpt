@@ -10,14 +10,14 @@ foreach([INF, -INF, 10e300, -10e300, NAN, -NAN] as $var) {
 	try {
 		time_sleep_until($var);
 	} catch (\ValueError $e) {
-		echo $e->getMessage() . PHP_EOL;
+		echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 	}
 }
 ?>
 --EXPECTF--
-time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
-time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
-time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
-time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
-time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
-time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
+ValueError: time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
+ValueError: time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
+ValueError: time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
+ValueError: time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
+ValueError: time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d
+ValueError: time_sleep_until(): Argument #1 ($timestamp) must be between 0 and %d

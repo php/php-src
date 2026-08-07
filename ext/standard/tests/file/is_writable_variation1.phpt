@@ -43,12 +43,12 @@ foreach($files_arr as $file) {
   try {
     var_dump( is_writable($file) );
   } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   try {
     var_dump( is_writeable($file) );
   } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $counter++;
   clearstatcache();

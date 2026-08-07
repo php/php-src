@@ -6,8 +6,8 @@ ob_start("compact");
 try {
     ob_end_clean();
 } catch (\Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Cannot call compact() dynamically
+Error: Cannot call compact() dynamically

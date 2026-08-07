@@ -19,44 +19,44 @@ const baz = new stdClass();
 try {
 	assert(!$foo instanceof (bar));
 } catch (AssertionError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	assert(!new (bar)());
 } catch (AssertionError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	assert(!(bar)::m());
 } catch (AssertionError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	assert(!(bar)::$p);
 } catch (AssertionError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	assert(!(bar)::C);
 } catch (AssertionError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	assert((baz)::class !== 'stdClass');
 } catch (AssertionError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-assert(!$foo instanceof (bar))
-assert(!new (bar)())
-assert(!(bar)::m())
-assert(!(bar)::$p)
-assert(!(bar)::C)
-assert((baz)::class !== 'stdClass')
+AssertionError: assert(!$foo instanceof (bar))
+AssertionError: assert(!new (bar)())
+AssertionError: assert(!(bar)::m())
+AssertionError: assert(!(bar)::$p)
+AssertionError: assert(!(bar)::C)
+AssertionError: assert((baz)::class !== 'stdClass')

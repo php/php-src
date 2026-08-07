@@ -10,7 +10,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 try {
     chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", 0);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECTF--

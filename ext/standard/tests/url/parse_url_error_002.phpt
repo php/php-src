@@ -12,7 +12,7 @@ echo "\n\n--> Above range:\n";
 try {
     parse_url($url, 99);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done"
@@ -40,5 +40,5 @@ echo "Done"
 
 
 --> Above range:
-parse_url(): Argument #2 ($component) must be a valid URL component identifier, 99 given
+ValueError: parse_url(): Argument #2 ($component) must be a valid URL component identifier, 99 given
 Done

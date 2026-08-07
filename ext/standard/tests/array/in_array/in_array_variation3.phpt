@@ -32,13 +32,13 @@ $in_array_obj = new in_array_check();  //creating new object
 try {
     var_dump( in_array("array_var", $in_array_obj) );
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 //error: as wrong datatype for second argument
 try {
     var_dump( in_array("foo", $in_array_obj) );
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 //element found as "one" exists in array $array_var
 var_dump( in_array("one", $in_array_obj->array_var) );
@@ -52,7 +52,7 @@ bool(true)
 bool(true)
 
 *** Testing objects with in_array() ***
-in_array(): Argument #2 ($haystack) must be of type array, in_array_check given
-in_array(): Argument #2 ($haystack) must be of type array, in_array_check given
+TypeError: in_array(): Argument #2 ($haystack) must be of type array, in_array_check given
+TypeError: in_array(): Argument #2 ($haystack) must be of type array, in_array_check given
 bool(true)
 Done

@@ -5,9 +5,9 @@ Bug #33605 (substr_compare crashes)
 try {
     substr_compare("aa", "a", -99999999, -1, 0);
 } catch (\ValueError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-substr_compare(): Argument #4 ($length) must be greater than or equal to 0
+ValueError: substr_compare(): Argument #4 ($length) must be greater than or equal to 0

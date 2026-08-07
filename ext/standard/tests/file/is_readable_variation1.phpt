@@ -44,7 +44,7 @@ foreach($files_arr as $file) {
   try {
     var_dump( is_readable($file) );
   } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $counter++;
   clearstatcache();

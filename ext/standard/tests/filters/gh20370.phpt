@@ -26,13 +26,13 @@ stream_filter_append($fp, "pass");
 try {
     fwrite($fp, "data");
 } catch (TypeError $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     fclose($fp);
 } catch (TypeError $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 unset($fp); // prevent cleanup at shutdown

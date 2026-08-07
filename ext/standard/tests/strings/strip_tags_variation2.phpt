@@ -75,7 +75,7 @@ foreach($values as $value) {
       try {
         var_dump(strip_tags($string, $value));
       } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
       }
       $iterator++;
 };
@@ -125,5 +125,5 @@ string(10) "helloworld"
 -- Iteration 20 --
 string(10) "helloworld"
 -- Iteration 21 --
-strip_tags(): Argument #2 ($allowed_tags) must be of type array|string|null, resource given
+TypeError: strip_tags(): Argument #2 ($allowed_tags) must be of type array|string|null, resource given
 Done
