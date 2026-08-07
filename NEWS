@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.6.0beta1
 
 - Core:
+  . Allowed readonly properties to declare default values. (NickSdot)
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
   . Fixed GH-23083 (SEGV build_trace_args in zend_exceptions.c with
