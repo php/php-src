@@ -23,7 +23,9 @@ pcntl_signal(SIGUSR1, function ($signo) use (&$indent, $read) {
     // Queue signal
     posix_kill(posix_getpid(), SIGUSR2);
     // Delivered here
-    var_dump(fread($read, 1));
+    $result = fread($read, 1);
+    echo "{$indent}fread(): ";
+    var_dump($result);
 
     $indent = substr($indent, 0, -1);
     echo "{$indent}Done handling SIGUSR1\n";
@@ -43,5 +45,5 @@ pcntl_signal_dispatch();
 Handling SIGUSR1
  Handling SIGUSR2
  Done handling SIGUSR2
-bool(false)
+ fread(): bool(false)
 Done handling SIGUSR1
