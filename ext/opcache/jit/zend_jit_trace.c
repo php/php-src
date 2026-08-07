@@ -7455,7 +7455,7 @@ static zend_vm_opcode_handler_t zend_jit_trace_exit_to_vm(uint32_t trace_num, ui
 
 	name = zend_jit_trace_escape_name(trace_num, exit_num);
 
-	if (!zend_jit_deoptimizer_start(&ctx, name, trace_num, exit_num)) {
+	if (!zend_jit_deoptimizer_start(&ctx, name, trace_num, &zend_jit_traces[trace_num], exit_num)) {
 		zend_string_release(name);
 		return NULL;
 	}
