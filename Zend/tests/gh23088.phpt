@@ -36,5 +36,5 @@ try {
 
 ?>
 --EXPECT--
-Maximum call stack size reached during array comparison
-Maximum call stack size reached during array comparison
+Maximum call stack size reached during comparison
+Maximum call stack size reached during comparison
