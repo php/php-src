@@ -28,17 +28,17 @@ typedef struct php_date_time_duration {
 
 # define Z_DATE_TIME_DURATION_P(zv)  php_date_time_duration_from_obj(Z_OBJ_P((zv)))
 
-# define Z_PARAM_DATE_TIME_DURATION(d) do { \
+# define Z_PARAM_DATE_TIME_DURATION(d) { \
 		zend_object *__d; \
 		Z_PARAM_OBJ_OF_CLASS(__d, php_date_ce_time_duration); \
 		d = php_date_time_duration_from_obj(__d); \
-	} while (0);
+	}
 
-# define Z_PARAM_DATE_TIME_DURATION_OR_NULL(d) do { \
+# define Z_PARAM_DATE_TIME_DURATION_OR_NULL(d) { \
 		zend_object *__d; \
 		Z_PARAM_OBJ_OF_CLASS_OR_NULL(__d, php_date_ce_time_duration); \
 		d = __d ? php_date_time_duration_from_obj(__d) : NULL; \
-	} while (0);
+	}
 
 PHPAPI extern zend_class_entry *php_date_ce_time_duration;
 PHPAPI extern zend_class_entry *php_date_ce_time_timeexception;
