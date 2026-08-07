@@ -1768,6 +1768,12 @@ static zend_result php_session_abort(void) /* {{{ */
 		if (PS(mod_data) || PS(mod_user_implemented)) {
 			PS(mod)->s_close(&PS(mod_data));
 		}
+		/* The user handler may not have closed the default handler it opened, e.g. because a pending
+		 * exception prevented its close callback from running at all */
+		if (PS(mod_user_is_open)) {
+			PS(default_mod)->s_close(&PS(mod_data));
+			PS(mod_user_is_open) = false;
+		}
 		PS(session_status) = php_session_none;
 		return SUCCESS;
 	}
