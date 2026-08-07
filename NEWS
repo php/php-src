@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fix missing error check on invalid alpn protocols. (ndossche)
 
+- Opcache:
+  . Fixed bug GH-22916 (Preserve parent regs in zend_jit_deoptimizer_start()).
+    (Arnaud)
+
 - PCRE:
   . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
     now forbidden. (Arnaud)
