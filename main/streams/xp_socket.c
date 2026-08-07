@@ -175,9 +175,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 
 	/* Compute deadline once so that signal-restart loops don't extend the timeout. */
 	php_deadline deadline;
-	if (sock->is_blocked) {
-		php_deadline_init(&deadline, &sock->timeout);
-	}
+	php_deadline_init(&deadline, &sock->timeout);
 
 restart:
 	if (php_stream_check_signals(stream) == ZEND_SIGNAL_INTERRUPT) {
