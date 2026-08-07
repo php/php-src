@@ -15,8 +15,8 @@ $image = imagecreate(1,1);// 1px image
 try {
     imagejpeg($image, "./foo\0bar");
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-imagejpeg(): Argument #2 ($file) must not contain null bytes
+TypeError: imagejpeg(): Argument #2 ($file) must not contain null bytes
