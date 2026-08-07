@@ -25,7 +25,8 @@ function is_negative(Time\Duration $d): bool {
 function negate_all(
     array $d /** @param Time\Duration[] */,
 ): array {
-    return $d
-        |> array_map(negate(?), ?)
-        |> array_filter(?, is_negative(?));
+    $negated = array_map(negate(...), $d);
+
+    /* Filter out values that were not successfully negated (i.e. 0-values). */
+    return array_filter($negated, is_negative(...));
 }
