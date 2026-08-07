@@ -46,4 +46,3 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
 caught: Client PSK callback must return Openssl\Psk with a non-null identity
-
