@@ -246,12 +246,12 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 
     /** @tentative-return-type */
     public function fgetcsv(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
-
+    
     /** @tentative-return-type */
     public function fputcsv(array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
 
     /** @tentative-return-type */
-    public function setCsvControl(string $separator = ",", string $enclosure = "\"", string $escape = "\\"): void {}
+    public function setCsvControl(?string $separator = null, ?string $enclosure = null, string $escape = "\\"): void {}
 
     /** @tentative-return-type */
     public function getCsvControl(): array {}

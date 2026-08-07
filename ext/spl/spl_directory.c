@@ -366,8 +366,8 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 	Z_SET_REFCOUNT(intern->u.file.zresource, 1);
 	*/
 
-	intern->u.file.delimiter = ',';
-	intern->u.file.enclosure = '"';
+	intern->u.file.delimiter = '\0';
+	intern->u.file.enclosure = '\0';
 	intern->u.file.escape = (unsigned char) '\\';
 	intern->u.file.is_escape_default = true;
 
@@ -648,10 +648,19 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 		ZVAL_STR_COPY(&tmp, intern->u.file.open_mode);
 		spl_set_private_debug_info_property(spl_ce_SplFileObject, "openMode", strlen("openMode"), debug_info, &tmp);
 
-		ZVAL_STR(&tmp, ZSTR_CHAR((zend_uchar)intern->u.file.delimiter));
+		zend_uchar delimiter = (zend_uchar) intern->u.file.delimiter;
+		zend_uchar enclosure = (zend_uchar) intern->u.file.enclosure;
+		if(delimiter == '\0') { 
+			delimiter = ',';
+		}
+		if(enclosure == '\0') { 
+			enclosure = '"';
+		}
+
+		ZVAL_CHAR(&tmp, delimiter);
 		spl_set_private_debug_info_property(spl_ce_SplFileObject, "delimiter", strlen("delimiter"), debug_info, &tmp);
 
-		ZVAL_STR(&tmp, ZSTR_CHAR((zend_uchar)intern->u.file.enclosure));
+		ZVAL_CHAR(&tmp, enclosure);
 		spl_set_private_debug_info_property(spl_ce_SplFileObject, "enclosure", strlen("enclosure"), debug_info, &tmp);
 	}
 
@@ -1885,10 +1894,18 @@ static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, c
 static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_object *intern, bool silent) /* {{{ */
 {
 	zval retval;
+	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
+
+	if(delimiter == '\0') {
+		delimiter = ',';
+	}
+	if(enclosure == '\0') {
+		enclosure = '"';
+	}
 
 	/* 1) use fgetcsv? 2) overloaded call the function, 3) do it directly */
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
-		return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL, silent);
+		return spl_filesystem_file_read_csv(intern, delimiter, enclosure, intern->u.file.escape, NULL, silent);
 	}
 	if (intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
 		spl_filesystem_file_free_line(intern);
@@ -2266,14 +2283,24 @@ PHP_METHOD(SplFileObject, fgetcsv)
 			zend_argument_value_error(1, "must be a single character");
 			RETURN_THROWS();
 		}
-		delimiter = delim[0];
+		if(delimiter == '\0') {
+			delimiter = delim[0];
+		}
 	}
 	if (enclo) {
 		if (e_len != 1) {
 			zend_argument_value_error(2, "must be a single character");
 			RETURN_THROWS();
 		}
-		enclosure = enclo[0];
+		if(enclosure == '\0') {
+			enclosure = enclo[0];
+		}
+	}
+	if(delimiter == '\0') {
+		delimiter = ',';
+	}
+	if(enclosure == '\0') {
+		enclosure = '"';
 	}
 	int escape_char = spl_csv_enclosure_param_handling(escape_str, intern, 3);
 	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
@@ -2309,14 +2336,24 @@ PHP_METHOD(SplFileObject, fputcsv)
 			zend_argument_value_error(2, "must be a single character");
 			RETURN_THROWS();
 		}
-		delimiter = delim[0];
+		if(delimiter == '\0') {
+			delimiter = delim[0];
+		}
 	}
 	if (enclo) {
 		if (e_len != 1) {
 			zend_argument_value_error(3, "must be a single character");
 			RETURN_THROWS();
 		}
-		enclosure = enclo[0];
+		if(enclosure == '\0') {
+			enclosure = enclo[0];
+		}
+	}
+	if(delimiter == '\0') {
+		delimiter = ',';
+	}
+	if(enclosure == '\0') {
+		enclosure = '"';
 	}
 	int escape_char = spl_csv_enclosure_param_handling(escape_str, intern, 4);
 	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
@@ -2335,12 +2372,12 @@ PHP_METHOD(SplFileObject, fputcsv)
 PHP_METHOD(SplFileObject, setCsvControl)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
-	char delimiter = ',', enclosure = '"';
+	char delimiter = '\0', enclosure = '\0';
 	char *delim = NULL, *enclo = NULL;
 	size_t d_len = 0, e_len = 0;
 	zend_string *escape_str = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssS", &delim, &d_len, &enclo, &e_len, &escape_str) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!S", &delim, &d_len, &enclo, &e_len, &escape_str) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2381,11 +2418,17 @@ PHP_METHOD(SplFileObject, getCsvControl)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
-
 	delimiter[0] = intern->u.file.delimiter;
 	delimiter[1] = '\0';
 	enclosure[0] = intern->u.file.enclosure;
 	enclosure[1] = '\0';
+	if(intern->u.file.enclosure == '\0') {
+		enclosure[0] = '"';
+	}
+	if(intern->u.file.delimiter == '\0') {
+		delimiter[0] = ',';
+	}
+	
 	if (intern->u.file.escape == PHP_CSV_NO_ESCAPE) {
 		escape[0] = '\0';
 	} else {
