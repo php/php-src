@@ -20,13 +20,13 @@ $evil = new EvilStorage();
 try {
     $evil->addAll($storage);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(count($evil), count($storage));
 
 ?>
 --EXPECT--
-Modification of SplObjectStorage during getHash() is prohibited
+Error: Modification of SplObjectStorage during getHash() is prohibited
 int(0)
 int(1)

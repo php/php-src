@@ -17,7 +17,7 @@ try {
   $output = $test->callGetChildren();
 } catch (TypeError $exception) {
   $output = null;
-  echo $exception->getMessage() . "\n";
+  echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 var_dump($output);
 
@@ -33,5 +33,5 @@ array(3) {
   int(9)
 }
 int(7)
-ArrayIterator::__construct(): Argument #1 ($array) must be of type array, int given
+TypeError: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, int given
 NULL

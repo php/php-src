@@ -10,7 +10,7 @@ try
 }
 catch (Exception $e)
 {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($foo);
@@ -23,7 +23,7 @@ try
 }
 catch (Exception $e)
 {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($foo);

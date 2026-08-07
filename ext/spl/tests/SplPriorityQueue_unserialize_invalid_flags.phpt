@@ -16,7 +16,7 @@ try {
     $queue->__unserialize($data);
     echo "Should have thrown exception for invalid flags\n";
 } catch (Exception $e) {
-    echo "Exception thrown for invalid flags: " . $e->getMessage() . "\n";
+    echo 'invalid flags: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -32,7 +32,7 @@ try {
     $queue->__unserialize($data);
     echo "Should have thrown exception for zero flags\n";
 } catch (Exception $e) {
-    echo "Exception thrown for zero flags: " . $e->getMessage() . "\n";
+    echo 'zero flags: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -48,7 +48,7 @@ try {
     $queue->__unserialize($data);
     echo "Valid flags accepted\n";
 } catch (Exception $e) {
-    echo "Valid flags rejected: " . $e->getMessage() . "\n";
+    echo 'Valid flags rejected: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -69,12 +69,12 @@ try {
         echo "Flags not properly masked, got: " . $queue->getExtractFlags() . "\n";
     }
 } catch (Exception $e) {
-    echo "Flags with extra bits should be masked: " . $e->getMessage() . "\n";
+    echo 'Flags with extra bits should be masked: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Exception thrown for invalid flags: Invalid serialization data for SplPriorityQueue object
-Exception thrown for zero flags: Invalid serialization data for SplPriorityQueue object
+invalid flags: Exception: Invalid serialization data for SplPriorityQueue object
+zero flags: Exception: Invalid serialization data for SplPriorityQueue object
 Valid flags accepted
 Flags properly masked

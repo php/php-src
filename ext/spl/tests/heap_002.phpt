@@ -8,7 +8,7 @@ $h = new SplMinHeap();
 try {
     $h->extract();
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
@@ -35,7 +35,7 @@ $b = 5;
 echo $h->extract()."\n";
 ?>
 --EXPECT--
-Exception: Can't extract from an empty heap
+RuntimeException: Can't extract from an empty heap
 5
 1
 2

@@ -6,9 +6,9 @@ spl_autoload_register() function - warn when using spl_autoload_call() as the au
 try {
     spl_autoload_register('spl_autoload_call');
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-spl_autoload_register(): Argument #1 ($callback) must not be the spl_autoload_call() function
+ValueError: spl_autoload_register(): Argument #1 ($callback) must not be the spl_autoload_call() function
