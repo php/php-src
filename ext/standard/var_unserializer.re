@@ -1249,7 +1249,7 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* Check for unserialize callback */
-		if (PG(unserialize_callback_func) == NULL) {
+		if (PG(unserialize_callback_func) == NULL || zend_string_equals(PG(unserialize_callback_func), zend_empty_string)) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;
