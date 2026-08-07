@@ -23,7 +23,7 @@ echo "-- With 'echo' language construct --\n";
 try {
     var_dump( array_walk($input, "echo"));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done"
@@ -35,5 +35,5 @@ bool(true)
 -- With 'min' built-in function --
 bool(true)
 -- With 'echo' language construct --
-array_walk(): Argument #2 ($callback) must be a valid callback, function "echo" not found or invalid function name
+TypeError: array_walk(): Argument #2 ($callback) must be a valid callback, function "echo" not found or invalid function name
 Done

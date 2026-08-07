@@ -24,8 +24,8 @@ setlocale(LC_ALL, new MyStringable);
 try {
     setlocale(LC_ALL, new MyStringableThrow);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-no
+Error: no

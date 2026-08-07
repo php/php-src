@@ -21,7 +21,7 @@ echo (CRYPT_BLOWFISH) ? ((crypt($str, $salt4) === $res_4) ? 'BLO' : 'BLO - ERROR
 try {
     var_dump(crypt($str));
 } catch (ArgumentCountError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -30,4 +30,4 @@ STD
 EXT
 MD5
 BLO
-crypt() expects exactly 2 arguments, 1 given
+ArgumentCountError: crypt() expects exactly 2 arguments, 1 given

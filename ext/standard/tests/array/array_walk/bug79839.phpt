@@ -13,13 +13,13 @@ try {
         $ref = []; // Should throw
     });
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test);
 
 ?>
 --EXPECT--
-Cannot assign array to reference held by property Test::$prop of type int
+TypeError: Cannot assign array to reference held by property Test::$prop of type int
 object(Test)#1 (1) {
   ["prop"]=>
   int(42)

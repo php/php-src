@@ -6,9 +6,9 @@ Test unpack() function : error conditions
 try {
     var_dump(unpack("B", pack("I", 65534)));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Invalid format type B
+ValueError: Invalid format type B

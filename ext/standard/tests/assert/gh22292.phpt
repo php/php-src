@@ -12,7 +12,7 @@ try {
 	var_dump(${'---'});
 	assert(!${'---'});
 } catch (Error $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
@@ -20,12 +20,12 @@ try {
 	var_dump($f->{'---'});
 	assert(!$f->{'---'});
 } catch (Error $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 string(3) "abc"
-assert(!${'---'})
+AssertionError: assert(!${'---'})
 string(3) "---"
-assert(!$f->{'---'})
+AssertionError: assert(!$f->{'---'})

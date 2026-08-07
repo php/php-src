@@ -13,14 +13,14 @@ foreach ([$ctx, $handle, $watcher] as $obj) {
     try {
         clone $obj;
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 echo "done\n";
 ?>
 --EXPECT--
-Trying to clone an uncloneable object of class Io\Poll\Context
-Trying to clone an uncloneable object of class StreamPollHandle
-Trying to clone an uncloneable object of class Io\Poll\Watcher
+Error: Trying to clone an uncloneable object of class Io\Poll\Context
+Error: Trying to clone an uncloneable object of class StreamPollHandle
+Error: Trying to clone an uncloneable object of class Io\Poll\Watcher
 done

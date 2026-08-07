@@ -9,11 +9,11 @@ try {
 	var_dump("{$foo}");
 	assert(!"{{$foo}}");
 } catch (Error $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
 string(5) "{abc}"
 string(3) "abc"
-assert(!"{{$foo}}")
+AssertionError: assert(!"{{$foo}}")

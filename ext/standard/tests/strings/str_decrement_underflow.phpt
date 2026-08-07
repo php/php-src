@@ -17,16 +17,16 @@ foreach ($strings as $s) {
     try {
         var_dump(str_decrement($s));
     } catch (ValueError $e) {
-        echo $e->getMessage(), PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
 ?>
 --EXPECT--
-str_decrement(): Argument #1 ($string) must not be empty
-str_decrement(): Argument #1 ($string) "0" is out of decrement range
-str_decrement(): Argument #1 ($string) "a" is out of decrement range
-str_decrement(): Argument #1 ($string) "A" is out of decrement range
-str_decrement(): Argument #1 ($string) "00" is out of decrement range
-str_decrement(): Argument #1 ($string) "0a" is out of decrement range
-str_decrement(): Argument #1 ($string) "0A" is out of decrement range
+ValueError: str_decrement(): Argument #1 ($string) must not be empty
+ValueError: str_decrement(): Argument #1 ($string) "0" is out of decrement range
+ValueError: str_decrement(): Argument #1 ($string) "a" is out of decrement range
+ValueError: str_decrement(): Argument #1 ($string) "A" is out of decrement range
+ValueError: str_decrement(): Argument #1 ($string) "00" is out of decrement range
+ValueError: str_decrement(): Argument #1 ($string) "0a" is out of decrement range
+ValueError: str_decrement(): Argument #1 ($string) "0A" is out of decrement range

@@ -84,7 +84,7 @@ for( $i = 0; $i < count( $offset_values ); $i++ ) {
   try {
     var_dump( strpos($string, "Hello", $offset_values[$i]) );
   } catch (TypeError $e) {
-    echo "\n", $e->getMessage(), "\n";
+    echo "\n", $e::class, ': ', $e->getMessage(), "\n";
   }
 }
 
@@ -162,13 +162,13 @@ var_dump( strpos($string, "") );
 try {
     strpos($string, "test", strlen($string)+1);  // offset > strlen()
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     strpos($string, "test", -strlen($string)-1);  // offset before start
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -227,14 +227,14 @@ abcd$:Hello world' is => int(0)
 *** Testing strpos() with possible variations in offset ***
 Position of 'Hello' with offset '1' is => int(74)
 Position of 'Hello' with offset 'string' is => 
-strpos(): Argument #3 ($offset) must be of type int, string given
+TypeError: strpos(): Argument #3 ($offset) must be of type int, string given
 Position of 'Hello' with offset '' is => 
-strpos(): Argument #3 ($offset) must be of type int, string given
+TypeError: strpos(): Argument #3 ($offset) must be of type int, string given
 Position of 'Hello' with offset '0' is => int(0)
 Position of 'Hello' with offset '1' is => int(74)
 Position of 'Hello' with offset '' is => int(0)
 Position of 'Hello' with offset 'string12' is => 
-strpos(): Argument #3 ($offset) must be of type int, string given
+TypeError: strpos(): Argument #3 ($offset) must be of type int, string given
 Position of 'Hello' with offset '-10' is => bool(false)
 Position of 'Hello' with offset '-15' is => int(74)
 Position of 'Hello' with offset '-85' is => int(0)
@@ -278,7 +278,7 @@ int(7)
 
 *** Testing error conditions ***
 int(0)
-strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 DONE

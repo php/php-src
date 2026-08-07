@@ -9,8 +9,8 @@ class Foo {
 try {
     var_dump(constant('Foo::C1'));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot access private constant Foo::C1
+Error: Cannot access private constant Foo::C1

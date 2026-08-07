@@ -11,15 +11,16 @@ $array = array(new test(), 'throwException');
 try {
      call_user_func($array, 1, 2);
 } catch (Exception $e) {
-     echo $e->getMessage();
+     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
      call_user_func_array($array, array(1, 2));
 } catch (Exception $e) {
-     echo $e->getMessage();
+     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Hello World!
-Hello World!
+Exception: Hello World!
+
+Exception: Hello World!

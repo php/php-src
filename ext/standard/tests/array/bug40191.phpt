@@ -11,11 +11,11 @@ $arrObj->append('foo');
 try {
     $arr = array_unique($arrObj);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECT--
-array_unique(): Argument #1 ($array) must be of type array, ArrayObject given
+TypeError: array_unique(): Argument #1 ($array) must be of type array, ArrayObject given
 Done

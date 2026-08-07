@@ -13,14 +13,14 @@ $array = array(PHP_INT_MAX => 'max');
 try {
     var_dump(array_push($array, 'new'));
 } catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($array);
 
 ?>
 --EXPECTF--
 *** Testing array_push() : error conditions ***
-Cannot add element to the array as the next element is already occupied
+Error: Cannot add element to the array as the next element is already occupied
 array(1) {
   [%d]=>
   string(3) "max"

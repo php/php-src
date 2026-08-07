@@ -41,7 +41,7 @@ for($index = 0; $index < count($glues); $index ++) {
   try {
     var_dump(join($glues[$index], $pieces));
   } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
   $counter++;
 }
@@ -57,7 +57,7 @@ string(57) "2101-6391-1.3444111PHP111 16999.999999991string%0with%0...%0"
 -- Iteration 3 --
 string(47) "20-639-1.34441PHP 6999.99999999string%0with%0...%0"
 -- Iteration 4 --
-join(): Argument #1 ($separator) must be of type string, array given
+TypeError: join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 5 --
 string(47) "20-639-1.34441PHP 6999.99999999string%0with%0...%0"
 -- Iteration 6 --

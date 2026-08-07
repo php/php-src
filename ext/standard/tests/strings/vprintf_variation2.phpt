@@ -84,9 +84,9 @@ foreach($values as $value) {
     echo "\n";
     var_dump($result);
   } catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   } catch (\ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $counter++;
 };
@@ -99,70 +99,70 @@ fclose($file_handle);
 *** Testing vprintf() : with unexpected values for args argument ***
 
 -- Iteration 1 --
-vprintf(): Argument #2 ($values) must be of type array, int given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 2 --
-vprintf(): Argument #2 ($values) must be of type array, int given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 3 --
-vprintf(): Argument #2 ($values) must be of type array, int given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 4 --
-vprintf(): Argument #2 ($values) must be of type array, int given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, int given
 
 -- Iteration 5 --
-vprintf(): Argument #2 ($values) must be of type array, float given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 6 --
-vprintf(): Argument #2 ($values) must be of type array, float given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 7 --
-vprintf(): Argument #2 ($values) must be of type array, float given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 8 --
-vprintf(): Argument #2 ($values) must be of type array, float given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 9 --
-vprintf(): Argument #2 ($values) must be of type array, float given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, float given
 
 -- Iteration 10 --
-vprintf(): Argument #2 ($values) must be of type array, null given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 11 --
-vprintf(): Argument #2 ($values) must be of type array, null given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 12 --
-vprintf(): Argument #2 ($values) must be of type array, true given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, true given
 
 -- Iteration 13 --
-vprintf(): Argument #2 ($values) must be of type array, false given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, false given
 
 -- Iteration 14 --
-vprintf(): Argument #2 ($values) must be of type array, true given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, true given
 
 -- Iteration 15 --
-vprintf(): Argument #2 ($values) must be of type array, false given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, false given
 
 -- Iteration 16 --
-vprintf(): Argument #2 ($values) must be of type array, string given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 17 --
-vprintf(): Argument #2 ($values) must be of type array, string given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 18 --
-vprintf(): Argument #2 ($values) must be of type array, string given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 19 --
-vprintf(): Argument #2 ($values) must be of type array, string given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, string given
 
 -- Iteration 20 --
-vprintf(): Argument #2 ($values) must be of type array, sample given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, sample given
 
 -- Iteration 21 --
-vprintf(): Argument #2 ($values) must be of type array, null given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 22 --
-vprintf(): Argument #2 ($values) must be of type array, null given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, null given
 
 -- Iteration 23 --
-vprintf(): Argument #2 ($values) must be of type array, resource given
+TypeError: vprintf(): Argument #2 ($values) must be of type array, resource given

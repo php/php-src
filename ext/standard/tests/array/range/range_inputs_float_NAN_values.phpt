@@ -29,7 +29,7 @@ foreach ($fs as $s) {
         try {
             var_dump( range($s, $e) );
         } catch (\ValueError $e) {
-            echo $e->getMessage(), PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
     }
 }
@@ -40,35 +40,35 @@ float(NAN)
 float(NAN)
 float(NAN)
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, 5.5);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, 5.5);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, NAN);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(NAN, 5.5);
-range(): Argument #1 ($start) must be a finite number, NAN provided
+ValueError: range(): Argument #1 ($start) must be a finite number, NAN provided
 range(5.5, NAN);
-range(): Argument #2 ($end) must be a finite number, NAN provided
+ValueError: range(): Argument #2 ($end) must be a finite number, NAN provided
 range(5.5, NAN);
-range(): Argument #2 ($end) must be a finite number, NAN provided
+ValueError: range(): Argument #2 ($end) must be a finite number, NAN provided
 range(5.5, NAN);
-range(): Argument #2 ($end) must be a finite number, NAN provided
+ValueError: range(): Argument #2 ($end) must be a finite number, NAN provided
 range(5.5, 5.5);
 array(1) {
   [0]=>
