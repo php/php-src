@@ -7,12 +7,19 @@ trait TDefault {
     public readonly int $prop = 2;
 }
 
-readonly class C {
+readonly class A {
     use TDefault;
 }
 
-var_dump(new C()->prop);
+var_dump(new A()->prop);
+
+class B {
+    use TDefault;
+}
+
+var_dump(new B()->prop);
 
 ?>
 --EXPECT--
+int(2)
 int(2)
