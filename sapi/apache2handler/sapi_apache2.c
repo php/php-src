@@ -32,6 +32,7 @@
 
 #include "zend_smart_str.h"
 #include "ext/standard/php_standard.h"
+#include "ext/user_cache/php_user_cache.h"
 
 #include "apr_strings.h"
 #include "ap_config.h"
@@ -63,6 +64,14 @@ char *apache2_php_ini_path_override = NULL;
 #if defined(PHP_WIN32) && defined(ZTS)
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
+
+typedef struct _php_apache_user_cache_partition_entry {
+	const server_rec *server;
+	php_user_cache_partition *partition;
+	struct _php_apache_user_cache_partition_entry *next;
+} php_apache_user_cache_partition_entry;
+
+static php_apache_user_cache_partition_entry *php_apache_user_cache_partitions = NULL;
 
 static size_t
 php_apache_sapi_ub_write(const char *str, size_t str_length)
@@ -418,6 +427,7 @@ static sapi_module_struct apache2_sapi_module = {
 static apr_status_t php_apache_server_shutdown(void *tmp)
 {
 	apache2_sapi_module.shutdown(&apache2_sapi_module);
+	php_apache_user_cache_partitions = NULL;
 	sapi_shutdown();
 #ifdef ZTS
 	tsrm_shutdown();
@@ -456,6 +466,63 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	 * php.ini path setting. */
 	apache2_php_ini_path_override = NULL;
 	return OK;
+}
+
+/* Linear over the vhost list, run once per request. */
+static php_user_cache_partition *php_apache_user_cache_partition_for_server(const server_rec *server)
+{
+	php_apache_user_cache_partition_entry *entry;
+
+	for (entry = php_apache_user_cache_partitions; entry != NULL; entry = entry->next) {
+		if (entry->server == server) {
+			return entry->partition;
+		}
+	}
+
+	return NULL;
+}
+
+static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec *server)
+{
+	const char *hostname, *partition_name;
+	php_apache_user_cache_partition_entry *entry;
+	server_rec *cur;
+	unsigned int i;
+
+	/* The partition entries are pool-allocated (freed with pconf); the
+	 * php_user_cache_partition objects created below are owned by the
+	 * user_cache extension and released together in its MSHUTDOWN
+	 * (user_cache_partitions_shutdown), so no cgi/lsapi-style SAPI
+	 * shutdown hook is required here. */
+	php_apache_user_cache_partitions = NULL;
+	php_user_cache_opt_in();
+
+	i = 0;
+	for (cur = server; cur != NULL; cur = cur->next, i++) {
+		hostname = cur->server_hostname != NULL ? cur->server_hostname : "default";
+		partition_name = apr_psprintf(
+			pconf,
+			"apache2handler:%u:%s:%u",
+			i,
+			hostname,
+			(unsigned int) cur->port
+		);
+
+		entry = apr_pcalloc(pconf, sizeof(*entry));
+		entry->server = cur;
+		entry->partition = php_user_cache_partition_create(partition_name);
+		if (entry->partition == NULL) {
+			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "Unable to allocate UserCache partition");
+			continue;
+		}
+
+		if (!php_user_cache_partition_startup_storage(entry->partition)) {
+			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "UserCache partition startup failed; UserCache will be unavailable");
+		}
+
+		entry->next = php_apache_user_cache_partitions;
+		php_apache_user_cache_partitions = entry;
+	}
 }
 
 static int
@@ -500,6 +567,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	if (apache2_sapi_module.startup(&apache2_sapi_module) != SUCCESS) {
 		return DONE;
 	}
+	php_apache_user_cache_init_partitions(pconf, s);
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_add_version(pconf);
 
@@ -548,12 +616,21 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 
 	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
 
-	return php_request_startup();
+	php_user_cache_partition_activate(php_apache_user_cache_partition_for_server(r->server));
+
+	if (php_request_startup() == FAILURE) {
+		php_user_cache_partition_activate(NULL);
+
+		return FAILURE;
+	}
+
+	return SUCCESS;
 }
 
 static void php_apache_request_dtor(request_rec *r)
 {
 	php_request_shutdown(NULL);
+	php_user_cache_partition_activate(NULL);
 }
 
 static void php_apache_ini_dtor(request_rec *r, request_rec *p)
