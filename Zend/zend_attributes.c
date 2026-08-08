@@ -75,16 +75,16 @@ static zend_string *validate_allow_dynamic_properties(
 	ZEND_ASSERT(scope != NULL);
 	const char *msg = NULL;
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
-		msg = "Cannot apply #[\\AllowDynamicProperties] to trait %s";
+		msg = "Cannot apply #[\\AllowDynamicProperties] to trait %pS";
 	} else if (scope->ce_flags & ZEND_ACC_INTERFACE) {
-		msg = "Cannot apply #[\\AllowDynamicProperties] to interface %s";
+		msg = "Cannot apply #[\\AllowDynamicProperties] to interface %pS";
 	} else if (scope->ce_flags & ZEND_ACC_READONLY_CLASS) {
-		msg = "Cannot apply #[\\AllowDynamicProperties] to readonly class %s";
+		msg = "Cannot apply #[\\AllowDynamicProperties] to readonly class %pS";
 	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
-		msg = "Cannot apply #[\\AllowDynamicProperties] to enum %s";
+		msg = "Cannot apply #[\\AllowDynamicProperties] to enum %pS";
 	}
 	if (msg != NULL) {
-		return zend_strpprintf(0, msg, ZSTR_VAL(scope->name));
+		return zend_strpprintf(0, msg, scope->name);
 	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 	return NULL;
@@ -95,16 +95,16 @@ static zend_string *validate_attribute(
 {
 	const char *msg = NULL;
 	if (scope->ce_flags & ZEND_ACC_TRAIT) {
-		msg = "Cannot apply #[\\Attribute] to trait %s";
+		msg = "Cannot apply #[\\Attribute] to trait %pS";
 	} else if (scope->ce_flags & ZEND_ACC_INTERFACE) {
-		msg = "Cannot apply #[\\Attribute] to interface %s";
+		msg = "Cannot apply #[\\Attribute] to interface %pS";
 	} else if (scope->ce_flags & ZEND_ACC_ENUM) {
-		msg = "Cannot apply #[\\Attribute] to enum %s";
+		msg = "Cannot apply #[\\Attribute] to enum %pS";
 	} else if (scope->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
-		msg = "Cannot apply #[\\Attribute] to abstract class %s";
+		msg = "Cannot apply #[\\Attribute] to abstract class %pS";
 	}
 	if (msg != NULL) {
-		return zend_strpprintf(0, msg, ZSTR_VAL(scope->name));
+		return zend_strpprintf(0, msg, scope->name);
 	}
 	return NULL;
 }
@@ -120,7 +120,7 @@ static zend_string *validate_deprecated(
 	}
 	if (!(scope->ce_flags & ZEND_ACC_TRAIT)) {
 		const char *type = zend_get_object_type_case(scope, false);
-		return zend_strpprintf(0, "Cannot apply #[\\Deprecated] to %s %s", type, ZSTR_VAL(scope->name));
+		return zend_strpprintf(0, "Cannot apply #[\\Deprecated] to %s %pS", type, scope->name);
 	}
 
 	scope->ce_flags |= ZEND_ACC_DEPRECATED;
