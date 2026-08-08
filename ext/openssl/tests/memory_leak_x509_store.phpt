@@ -14,9 +14,9 @@ class MyStringable{
 try {
     openssl_pkcs7_verify("does not matter", 0, "does not matter", [new MyStringable]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-stop
+Error: stop

@@ -21,8 +21,8 @@ $ekeys = array();
 try {
     $result = openssl_seal('test phrase', $encrypted, $ekeys, array($pubkey), 'AES-256-CBC');
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-openssl_seal(): Argument #6 ($iv) cannot be null for the chosen cipher algorithm
+ValueError: openssl_seal(): Argument #6 ($iv) cannot be null for the chosen cipher algorithm
