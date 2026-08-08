@@ -26,4 +26,4 @@ ValueError: mb_convert_encoding(): Argument #3 ($from_encoding) contains invalid
 
 Warning: Array to string conversion in %s on line %d
 ValueError: mb_convert_encoding(): Argument #3 ($from_encoding) contains invalid encoding "Array"
-ValueError: mb_convert_encoding(): Argument #3 ($from_encoding) contains invalid encoding "foo"
+ValueError: mb_convert_encoding(): Argument #3 ($from_encoding) contains invalid encoding "foo%0bar"
