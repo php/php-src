@@ -105,10 +105,10 @@ static bool zend_valid_closure_binding(
 		if (is_fake_closure && func->common.scope &&
 				!instanceof_function(new_this->ce, func->common.scope)) {
 			/* Binding incompatible $this to an internal method is not supported. */
-			zend_error(E_WARNING, "Cannot bind method %s::%s() to object of class %s, this will be an error in PHP 9",
-					ZSTR_VAL(func->common.scope->name),
-					ZSTR_VAL(func->common.function_name),
-					ZSTR_VAL(new_this->ce->name));
+			zend_error(E_WARNING, "Cannot bind method %pS::%pS() to object of class %pS, this will be an error in PHP 9",
+					func->common.scope->name,
+					func->common.function_name,
+					new_this->ce->name);
 			return false;
 		}
 	} else if (is_fake_closure && func->common.scope
@@ -123,8 +123,8 @@ static bool zend_valid_closure_binding(
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {
 		/* rebinding to internal class is not allowed */
-		zend_error(E_WARNING, "Cannot bind closure to scope of internal class %s, this will be an error in PHP 9",
-				ZSTR_VAL(scope->name));
+		zend_error(E_WARNING, "Cannot bind closure to scope of internal class %pS, this will be an error in PHP 9",
+				scope->name);
 		return false;
 	}
 
@@ -254,7 +254,7 @@ static zend_result do_closure_bind(zval *return_value, zval *zclosure, zend_obje
 		if (zend_string_equals(scope_str, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 			ce = closure->func.common.scope;
 		} else if ((ce = zend_lookup_class(scope_str)) == NULL) {
-			zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(scope_str));
+			zend_error(E_WARNING, "Class \"%pS\" not found", scope_str);
 			RETVAL_NULL();
 			return FAILURE;
 		}
@@ -730,9 +730,9 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			zend_string *name;
 			zval info;
 			ZEND_ASSERT(arg_info->name && "Argument should have name");
-			name = zend_strpprintf(0, "%s$%s",
+			name = zend_strpprintf(0, "%s$%pS",
 					ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
-					ZSTR_VAL(arg_info->name));
+					arg_info->name);
 			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 			zend_hash_update(Z_ARRVAL(val), name, &info);
 			zend_string_release_ex(name, 0);
