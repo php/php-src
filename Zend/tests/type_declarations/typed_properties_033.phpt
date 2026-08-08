@@ -26,7 +26,7 @@ var_dump($foo);
 ?>
 --EXPECTF--
 Cannot assign float to reference held by property class@anonymous::$qux of type int
-object(class@anonymous)#1 (4) {
+object(class@anonymous%0%s:2$%x)#1 (4) {
   ["foo"]=>
   int(2)
   ["bar"]=>

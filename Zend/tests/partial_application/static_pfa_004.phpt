@@ -39,6 +39,6 @@ Closure [ <user> function {closure:pfa:%s:13} ] {
 
 Error: Using $this when not in object context
 # Re-bound PFA
-object(class@anonymous)#3 (0) {
+object(class@anonymous%0%s:19$%x)#3 (0) {
 }
 bool(true)

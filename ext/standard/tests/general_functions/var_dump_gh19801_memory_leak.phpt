@@ -24,7 +24,7 @@ object(stdClass)#2 (1) {
   ["a"]=>
   &array(1) {
     [0]=>
-    object(class@anonymous)#1 (0) {
+    object(class@anonymous%0%s:4$%x)#1 (0) {
     }
   }
 }

@@ -32,7 +32,7 @@ array(4) {
   [12]=>
   int(6)
   ["test"]=>
-  object(JsonSerializable@anonymous)#2 (0) {
+  object(JsonSerializable@anonymous%0%s:8$%x)#2 (0) {
   }
 }
 array(4) {
@@ -43,6 +43,6 @@ array(4) {
   [12]=>
   int(6)
   ["test"]=>
-  object(JsonSerializable@anonymous)#2 (0) {
+  object(JsonSerializable@anonymous%0%s:8$%x)#2 (0) {
   }
 }

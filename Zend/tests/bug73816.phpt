@@ -13,12 +13,12 @@ var_dump(anon());
 var_dump(anon());
 
 ?>
---EXPECT--
-object(class@anonymous)#1 (1) {
+--EXPECTF--
+object(class@anonymous%0%s:1$%x)#1 (1) {
   ["prop1":"class@anonymous":private]=>
   NULL
 }
-object(class@anonymous)#1 (1) {
+object(class@anonymous%0%s:1$%x)#1 (1) {
   ["prop2":"class@anonymous":private]=>
   NULL
 }

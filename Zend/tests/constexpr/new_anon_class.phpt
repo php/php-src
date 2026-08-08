@@ -8,6 +8,6 @@ static $x = new class {};
 var_dump($x);
 
 ?>
---EXPECT--
-object(class@anonymous)#1 (0) {
+--EXPECTF--
+object(class@anonymous%0%s:3$%x)#1 (0) {
 }

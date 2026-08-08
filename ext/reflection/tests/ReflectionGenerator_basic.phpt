@@ -59,7 +59,7 @@ array(2) {
     ["class"]=>
     string(%d) "class@anonymous%s"
     ["object"]=>
-    object(class@anonymous)#%d (0) {
+    object(class@anonymous%0%s:8$%x)#1 (0) {
     }
     ["type"]=>
     string(2) "->"
@@ -80,7 +80,7 @@ object(ReflectionMethod)#8 (2) {
   ["class"]=>
   string(%d) "class@anonymous%s"
 }
-object(class@anonymous)#1 (0) {
+object(class@anonymous%0%s:8$%x)#1 (0) {
 }
 object(Generator)#%d (1) {
   ["function"]=>

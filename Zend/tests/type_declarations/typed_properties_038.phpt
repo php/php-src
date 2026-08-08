@@ -41,22 +41,22 @@ var_dump($foo);
 ?>
 --EXPECTF--
 string(82) "Cannot increment property class@anonymous::$bar of type int past its maximal value"
-object(class@anonymous)#1 (1) {
+object(class@anonymous%0%s:3$%x)#1 (1) {
   ["bar"]=>
   int(%d)
 }
 string(65) "Cannot assign float to property class@anonymous::$bar of type int"
-object(class@anonymous)#1 (1) {
+object(class@anonymous%0%s:3$%x)#1 (1) {
   ["bar"]=>
   int(%d)
 }
 string(82) "Cannot increment property class@anonymous::$bar of type int past its maximal value"
-object(class@anonymous)#1 (1) {
+object(class@anonymous%0%s:3$%x)#1 (1) {
   ["bar"]=>
   int(%d)
 }
 string(65) "Cannot assign float to property class@anonymous::$bar of type int"
-object(class@anonymous)#1 (1) {
+object(class@anonymous%0%s:3$%x)#1 (1) {
   ["bar"]=>
   int(%d)
 }

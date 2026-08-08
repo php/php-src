@@ -46,7 +46,7 @@ try {
 ?>
 --EXPECTF--
 Serialization of 'MySplFileInfo' is not allowed
-Serialization of 'class@anonymous' is not allowed
+Serialization of 'class@anonymous%0%s:14$%x' is not allowed
 Unserialization of 'MySplFileInfo' is not allowed
 Unserialization of 'MySplFileInfo' is not allowed
 
