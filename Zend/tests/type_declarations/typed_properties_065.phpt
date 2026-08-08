@@ -52,7 +52,7 @@ try {
 echo gettype($a->foo),"\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 offsetSet(2)
 int(1)
 offsetSet(11)
@@ -61,11 +61,11 @@ offsetSet(1e50)
 int(1)
 int(0)
 int(-1)
-Cannot decrement a reference held by property ArrayAccess@anonymous::$foo of type int past its minimal value
+Cannot decrement a reference held by property ArrayAccess@anonymous%0%s:3$%x::$foo of type int past its minimal value
 integer
-Cannot decrement a reference held by property ArrayAccess@anonymous::$foo of type int past its minimal value
+Cannot decrement a reference held by property ArrayAccess@anonymous%0%s:3$%x::$foo of type int past its minimal value
 integer
-Cannot increment a reference held by property ArrayAccess@anonymous::$foo of type int past its maximal value
+Cannot increment a reference held by property ArrayAccess@anonymous%0%s:3$%x::$foo of type int past its maximal value
 integer
-Cannot increment a reference held by property ArrayAccess@anonymous::$foo of type int past its maximal value
+Cannot increment a reference held by property ArrayAccess@anonymous%0%s:3$%x::$foo of type int past its maximal value
 integer

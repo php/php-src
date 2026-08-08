@@ -14,5 +14,5 @@ try {
 }
 
 ?>
---EXPECT--
-Cannot assign int to property class@anonymous::$v of type self
+--EXPECTF--
+Cannot assign int to property class@anonymous%0%s:3$0::$v of type self
