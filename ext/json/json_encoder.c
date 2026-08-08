@@ -27,8 +27,54 @@
 #include "zend_enum.h"
 #include "zend_property_hooks.h"
 #include "zend_lazy_objects.h"
+#include "zend_simd.h"
+#include "zend_bitset.h"
 
 static const char digits[] = "0123456789abcdef";
+
+static const uint32_t php_json_encode_charmap[8] = {
+	0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
+	0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+};
+
+#ifdef XSSE2
+static zend_never_inline size_t php_json_safe_prefix(const char *s, size_t len)
+{
+	size_t pos = 0;
+
+	while (pos < len && pos < sizeof(__m128i)
+			&& !ZEND_BIT_TEST(php_json_encode_charmap, (unsigned char) s[pos])) {
+		pos++;
+	}
+	if (pos < len && pos < sizeof(__m128i)) {
+		return pos;
+	}
+	while (len - pos >= sizeof(__m128i)) {
+		__m128i in = _mm_loadu_si128((const __m128i *) (s + pos));
+		/* A signed comparison treats non-ASCII bytes as special as well. */
+		__m128i special = _mm_cmplt_epi8(in, _mm_set1_epi8(' '));
+		uint32_t mask;
+
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(in, _mm_set1_epi8('"')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(in, _mm_set1_epi8('&')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(in, _mm_set1_epi8('\'')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(in, _mm_set1_epi8('/')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(in, _mm_set1_epi8('<')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(in, _mm_set1_epi8('>')));
+		special = _mm_or_si128(special, _mm_cmpeq_epi8(in, _mm_set1_epi8('\\')));
+		mask = _mm_movemask_epi8(special);
+		if (mask) {
+			return pos + zend_ulong_ntz(mask);
+		}
+		pos += sizeof(__m128i);
+	}
+
+	while (pos < len && !ZEND_BIT_TEST(php_json_encode_charmap, (unsigned char) s[pos])) {
+		pos++;
+	}
+	return pos;
+}
+#endif
 
 static zend_always_inline bool php_json_check_stack_limit(void)
 {
@@ -381,15 +427,27 @@ zend_result php_json_escape_string(
 	smart_str_alloc(buf, len+2, 0);
 	smart_str_appendc(buf, '"');
 
+#ifdef XSSE2
+	if (len >= 2 * sizeof(__m128i) && !(options & PHP_JSON_UNESCAPED_UNICODE)) {
+		size_t safe_prefix = php_json_safe_prefix(s, len);
+
+		if (safe_prefix) {
+			smart_str_appendl(buf, s, safe_prefix);
+			s += safe_prefix;
+			len -= safe_prefix;
+			if (len == 0) {
+				smart_str_appendc(buf, '"');
+				return SUCCESS;
+			}
+		}
+	}
+#endif
+
 	pos = 0;
 
 	do {
-		static const uint32_t charmap[8] = {
-			0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
-			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
-
 		unsigned int us = (unsigned char)s[pos];
-		if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
+		if (EXPECTED(!ZEND_BIT_TEST(php_json_encode_charmap, us))) {
 			pos++;
 			len--;
 			if (len == 0) {
