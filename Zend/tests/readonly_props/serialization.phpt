@@ -30,7 +30,7 @@ var_dump(unserialize("O:11:\"TestDefault\":2:{s:4:\"prop\";i:2;s:4:\"prop\";i:3;
 
 class TestDefaultWithUnserialize {
     public readonly int $prop = 1;
-    public public(set) readonly int $lock= 1;
+    public public(set) readonly int $lock = 1;
 
     public function __unserialize(array $data): void {
         foreach ($data as $key => $value) {
