@@ -1712,7 +1712,7 @@ ex_is_caught:
 		/* perform seek operation */
 		if ((PHPDBG_G(flags) & PHPDBG_SEEK_MASK) && !(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
 			/* current address */
-			zend_ulong address = (zend_ulong) execute_data->opline;
+			zend_ulong address = (zend_ulong)(uintptr_t)execute_data->opline;
 
 			if (PHPDBG_G(seek_ex) != execute_data) {
 				if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {
