@@ -16,7 +16,7 @@ register_shutdown_function(static function (): void {
 });
 
 $fiber = new Fiber(static function (): void {
-    str_repeat('X', PHP_INT_MAX);
+    str_repeat('X', 2 ** (PHP_SYS_SIZE * 8 - 1) - 1);
 });
 $fiber->start();
 
