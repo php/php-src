@@ -2334,6 +2334,11 @@ PHP_METHOD(SimpleXMLElement, __construct)
 		RETURN_THROWS();
 	}
 
+	if (is_url && CHECK_NULL_PATH(data, data_len)) {
+		zend_argument_value_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
+	}
+
 	PHP_LIBXML_SANITIZE_GLOBALS(read_file_or_memory);
 	docp = is_url ? xmlReadFile(data, NULL, (int)options) : xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
 	PHP_LIBXML_RESTORE_GLOBALS(read_file_or_memory);
