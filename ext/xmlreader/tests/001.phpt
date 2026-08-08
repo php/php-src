@@ -21,11 +21,11 @@ $reader = new XMLReader();
 try {
     $reader->XML($xmlstring);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 books
 books
-XMLReader::XML(): Argument #1 ($source) must not be empty
+ValueError: XMLReader::XML(): Argument #1 ($source) must not be empty

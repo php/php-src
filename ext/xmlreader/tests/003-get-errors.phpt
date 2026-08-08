@@ -34,7 +34,7 @@ while ($reader->read()) {
             try {
                 $reader->getAttribute('');
             } catch (ValueError $exception) {
-                echo $exception->getMessage() . "\n";
+                echo $exception::class, ': ', $exception->getMessage(), "\n";
             }
 
             // Ensure that node pointer has not changed position
@@ -69,7 +69,7 @@ unlink(__DIR__.'/003-get-errors.xml');
 book
 bool(true)
 num: 1
-XMLReader::getAttribute(): Argument #1 ($name) must not be empty
+ValueError: XMLReader::getAttribute(): Argument #1 ($name) must not be empty
 num: 1
 NULL
 num: 1

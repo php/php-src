@@ -15,31 +15,31 @@ $reader = new MyXMLReader();
 try {
     unset($reader->attributeCount);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     unset($reader->baseURI);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     unset($reader->depth);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     unset($reader->hasAttributes);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     unset($reader->hasValue);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 unset($reader->x);
@@ -47,9 +47,9 @@ var_dump(isset($reader->x));
 
 ?>
 --EXPECT--
-Cannot unset MyXMLReader::$attributeCount
-Cannot unset MyXMLReader::$baseURI
-Cannot unset MyXMLReader::$depth
-Cannot unset MyXMLReader::$hasAttributes
-Cannot unset MyXMLReader::$hasValue
+Error: Cannot unset MyXMLReader::$attributeCount
+Error: Cannot unset MyXMLReader::$baseURI
+Error: Cannot unset MyXMLReader::$depth
+Error: Cannot unset MyXMLReader::$hasAttributes
+Error: Cannot unset MyXMLReader::$hasValue
 bool(false)
