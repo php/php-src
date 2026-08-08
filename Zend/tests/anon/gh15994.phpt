@@ -10,4 +10,4 @@ abstract class ParentClass {
 $o = new class extends ParentClass {};
 ?>
 --EXPECTF--
-Fatal error: Class ParentClass@anonymous must implement 1 abstract method (ParentClass::f) in %sgh15994.php on line 7
+Fatal error: Class ParentClass@anonymous%0%s:7$0 must implement 1 abstract method (ParentClass::f) in %s on line %d
