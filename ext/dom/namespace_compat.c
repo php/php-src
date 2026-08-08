@@ -240,32 +240,34 @@ PHP_DOM_EXPORT void php_dom_ns_compat_mark_attribute_list(php_dom_libxml_ns_mapp
 
 	/* We want to prepend at the front, but in order of the namespace definitions.
 	 * So temporarily unlink the existing properties and add them again at the end. */
-	xmlAttrPtr attr = node->properties;
-	node->properties = NULL;
+	xmlAttrPtr first_original = node->properties;
+	xmlAttrPtr first_ns_attr = NULL, last_ns_attr = NULL;
 
 	xmlNsPtr ns = node->nsDef;
-	xmlAttrPtr last_added = NULL;
 	do {
-		last_added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
-		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		xmlNsPtr next = ns->next;
+		node->nsDef = next;
 		ns->next = NULL;
 		php_libxml_set_old_ns(node->doc, ns);
+		xmlAttrPtr added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
+		if (UNEXPECTED(added != NULL)) {
+			if (first_ns_attr == NULL) {
+				first_ns_attr = added;
+			}
+			last_ns_attr = added;
+		}
+		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		ns = next;
 	} while (ns != NULL);
 
-	if (last_added != NULL) {
-		/* node->properties now points to the first namespace declaration attribute. */
-		if (attr != NULL) {
-			last_added->next = attr;
-			attr->prev = last_added;
-		}
-	} else {
-		/* Nothing added, so nothing changed. Only really possible on OOM. */
-		node->properties = attr;
+	if (first_ns_attr != NULL && first_original != NULL) {
+		xmlAttrPtr last_original = first_ns_attr->prev;
+		last_original->next = NULL;
+		first_ns_attr->prev = NULL;
+		last_ns_attr->next = first_original;
+		first_original->prev = last_ns_attr;
+		node->properties = first_ns_attr;
 	}
-
-	node->nsDef = NULL;
 }
 
 PHP_DOM_EXPORT bool php_dom_ns_is_fast_ex(xmlNsPtr ns, const php_dom_ns_magic_token *magic_token)
