@@ -43,7 +43,7 @@ int(1)
 int(10)
 int(10)
 TypeError: Cannot assign null to reference held by property class@anonymous%0%s::$baz of type int
-object(class@anonymous)#1 (2) {
+object(class@anonymous%0%s)#1 (2) {
   ["bar"]=>
   &int(10)
   ["baz"]=>

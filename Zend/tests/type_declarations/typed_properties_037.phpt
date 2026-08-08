@@ -9,7 +9,7 @@ $foo = new class {
 var_dump($foo);
 ?>
 --EXPECTF--
-object(class@anonymous)#%d (1) {
+object(class@anonymous%0%s)#%d (1) {
   ["bar"]=>
   int(10)
   ["qux"]=>
