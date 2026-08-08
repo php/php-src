@@ -40,22 +40,22 @@ try {
 var_dump($foo);
 ?>
 --EXPECTF--
-TypeError: Cannot increment property class@anonymous::$bar of type int past its maximal value
+TypeError: Cannot increment property class@anonymous%0%s::$bar of type int past its maximal value
 object(class@anonymous)#1 (1) {
   ["bar"]=>
   int(%d)
 }
-TypeError: Cannot assign float to property class@anonymous::$bar of type int
+TypeError: Cannot assign float to property class@anonymous%0%s::$bar of type int
 object(class@anonymous)#1 (1) {
   ["bar"]=>
   int(%d)
 }
-TypeError: Cannot increment property class@anonymous::$bar of type int past its maximal value
+TypeError: Cannot increment property class@anonymous%0%s::$bar of type int past its maximal value
 object(class@anonymous)#1 (1) {
   ["bar"]=>
   int(%d)
 }
-TypeError: Cannot assign float to property class@anonymous::$bar of type int
+TypeError: Cannot assign float to property class@anonymous%0%s::$bar of type int
 object(class@anonymous)#1 (1) {
   ["bar"]=>
   int(%d)
