@@ -54,7 +54,10 @@ jobs:
         uses: ./.github/actions/extra-tests
   ALPINE:
     if: ${{ fromJson(inputs.branch).jobs.ALPINE }}
-    name: ALPINE_X64_ASAN_DEBUG_ZTS
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(inputs.branch).jobs.ALPINE.matrix }}
+    name: "ALPINE_X64_ASAN_DBG_ZTS${{ matrix.test_shards > 1 && format('_{0}-{1}', matrix.test_shard, matrix.test_shards) || '' }}"
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     container:
@@ -80,6 +83,7 @@ jobs:
           name: "${{ github.job }}"
           cc: clang-20
           cxx: clang++-20
+          save: ${{ matrix.test_shard == 1 && 'true' || 'false' }}
       - name: ./configure
         uses: ./.github/actions/configure-alpine
         with:
@@ -100,7 +104,10 @@ jobs:
           jitType: tracing
           runTestsParameters: >-
             --asan -x
+          testShard: ${{ matrix.test_shard }}
+          testShards: ${{ matrix.test_shards }}
       - name: Extra tests
+        if: ${{ matrix.test_shard == 1 }}
         uses: ./.github/actions/extra-tests
   LINUX_X64:
     if: ${{ fromJson(inputs.branch).jobs.LINUX_X64 }}
@@ -113,13 +120,13 @@ jobs:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
       postgres:
-        image: postgres
+        image: ${{ (!matrix.asan || inputs.all_variations) && 'postgres' || '' }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
       firebird:
-        image: jacobalberty/firebird
+        image: ${{ (!matrix.asan || inputs.all_variations) && 'jacobalberty/firebird' || '' }}
         ports:
           - 3050:3050
         env:
@@ -130,7 +137,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X64.matrix }}
-    name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DBG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.test_mode == 'function-jit' && '_FUNCTION_JIT' || '' }}${{ matrix.test_shards > 1 && format('_{0}-{1}', matrix.test_shard, matrix.test_shards) || '' }}"
     runs-on: ubuntu-${{ fromJson(inputs.branch).config.ubuntu_version }}
     timeout-minutes: 180
     steps:
@@ -139,11 +146,13 @@ jobs:
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
       - name: Create MSSQL container
+        if: ${{ !matrix.asan || inputs.all_variations }}
         uses: ./.github/actions/setup-mssql
       - name: apt
         uses: ./.github/actions/apt-x64
         with:
           asan: ${{ matrix.asan && 'true' || 'false' }}
+          skipSlow: ${{ (matrix.asan && !inputs.all_variations) && 'true' || 'false' }}
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -161,6 +170,9 @@ jobs:
           # GitHub has no way to query the job name (github.job is the
           # job id, not the job name)
           name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+          # Test modes and shards of the same configuration share a cache.
+          # Only the normal job's first shard saves it to avoid concurrent writes.
+          save: ${{ (matrix.test_mode != 'function-jit' && (!matrix.test_shard || matrix.test_shard == 1)) && 'true' || 'false' }}
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -181,7 +193,7 @@ jobs:
         if: ${{ !matrix.asan || inputs.all_variations }}
         uses: ./.github/actions/setup-x64
       - name: Test
-        if: ${{ inputs.all_variations || !matrix.asan }}
+        if: ${{ (inputs.all_variations || !matrix.asan) && matrix.test_mode != 'function-jit' }}
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
@@ -190,7 +202,7 @@ jobs:
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
           idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
-        if: ${{ inputs.all_variations || matrix.asan }}
+        if: ${{ (inputs.all_variations || matrix.asan) && matrix.test_mode != 'function-jit' }}
         uses: ./.github/actions/test-linux
         with:
           enableOpcache: true
@@ -200,8 +212,10 @@ jobs:
             ${{ (matrix.asan && !inputs.all_variations) && '-x' || '' }}
             ${{ matrix.repeat && '--repeat 2' || '' }}
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
+          testShard: ${{ matrix.test_shard || 1 }}
+          testShards: ${{ matrix.test_shards || 1 }}
       - name: Test OpCache
-        if: ${{ inputs.all_variations }}
+        if: ${{ inputs.all_variations && matrix.test_mode != 'function-jit' }}
         uses: ./.github/actions/test-linux
         with:
           enableOpcache: true
@@ -212,7 +226,7 @@ jobs:
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
         # avoid running into the 6 hour timeout by skipping the function JIT.
-        if: ${{ !matrix.asan }}
+        if: ${{ !matrix.asan && matrix.test_mode != 'normal' }}
         uses: ./.github/actions/test-linux
         with:
           enableOpcache: true
@@ -221,8 +235,10 @@ jobs:
             ${{ matrix.repeat && '--repeat 2' || '' }}
             ${{ matrix.variation && '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0' || '' }}
       - name: Extra tests
+        if: ${{ matrix.test_mode != 'function-jit' && (!matrix.test_shard || matrix.test_shard == 1) }}
         uses: ./.github/actions/extra-tests
       - name: Verify generated files are up to date
+        if: ${{ matrix.test_mode != 'function-jit' && (!matrix.test_shard || matrix.test_shard == 1) }}
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:
     if: ${{ fromJson(inputs.branch).jobs.LINUX_X32 }}
@@ -845,7 +861,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.branch).jobs.WINDOWS.matrix }}
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}"
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || ''}}${{ matrix.clang && '_CLANG' || ''}}${{ matrix.test_shards > 1 && format('_{0}-{1}', matrix.test_shard, matrix.test_shards) || '' }}"
     runs-on: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.runs_on }}
     timeout-minutes: 180
     env:
@@ -857,10 +873,16 @@ jobs:
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
-      PARALLEL: -j2
+      PARALLEL: -j4
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
       ASAN: "${{ matrix.asan && '1' || '0' }}"
       CLANG_TOOLSET: "${{ matrix.clang && '1' || '0' }}"
+      TEST_SHARD: "${{ matrix.test_shard }}"
+      TEST_SHARDS: "${{ matrix.test_shards }}"
+      SCCACHE_CACHE_SIZE: 1G
+      SCCACHE_IGNORE_SERVER_IO_ERROR: "1"
+      SCCACHE_CACHE_KEY: windows-sccache-v2-php${{ join(fromJson(inputs.branch).version, '.') }}-${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}-${{ matrix.x64 && 'x64' || 'x86' }}-zts${{ matrix.zts && '1' || '0' }}-asan${{ matrix.asan && '1' || '0' }}-${{ github.sha }}
+      SCCACHE_CACHE_RESTORE_PREFIX: windows-sccache-v2-php${{ join(fromJson(inputs.branch).version, '.') }}-${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}-${{ matrix.x64 && 'x64' || 'x86' }}-zts${{ matrix.zts && '1' || '0' }}-asan${{ matrix.asan && '1' || '0' }}-
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
@@ -868,10 +890,28 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
-      - name: Setup
+      - name: Setup Windows build tools
         uses: ./.github/actions/setup-windows
-      - name: Build
-        run: .github/scripts/windows/build.bat
+      - name: Restore MSVC compiler cache
+        if: ${{ !matrix.clang }}
+        continue-on-error: true
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ runner.temp }}\sccache
+          key: ${{ env.SCCACHE_CACHE_KEY }}
+          restore-keys: ${{ env.SCCACHE_CACHE_RESTORE_PREFIX }}
+      - name: Build PHP while preparing test databases
+        shell: pwsh
+        run: .github/scripts/windows/build_with_test_database_setup.ps1
+      # Pull request caches are isolated to the PR merge ref and cannot update
+      # caches used by the base branch or other pull requests.
+      - name: Save MSVC compiler cache
+        if: ${{ !matrix.clang && matrix.test_shard == 1 }}
+        continue-on-error: true
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ runner.temp }}\sccache
+          key: ${{ env.SCCACHE_CACHE_KEY }}
       - name: Test
         run: .github/scripts/windows/test.bat
   FREEBSD:
@@ -919,6 +959,7 @@ jobs:
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
           fetch-depth: 0
+          filter: blob:none
       # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
       # and other operations, so we disable it during benchmarking.
       - name: Disable ASLR
