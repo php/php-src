@@ -194,8 +194,8 @@ static ZEND_INI_MH(OnUpdateMaxAllowedStackSize) /* {{{ */
 	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (size < ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting. Value must be >= %d, but got " ZEND_LONG_FMT,
-			ZSTR_VAL(entry->name), ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED, size);
+		zend_error(E_WARNING, "Invalid \"%pS\" setting. Value must be >= %d, but got " ZEND_LONG_FMT,
+			entry->name, ZEND_MAX_ALLOWED_STACK_SIZE_UNCHECKED, size);
 		return FAILURE;
 	}
 
@@ -228,8 +228,8 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 	if (size == 0) {
 		size = min;
 	} else if (size < min) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting. Value must be >= " ZEND_ULONG_FMT ", but got " ZEND_ULONG_FMT "\n",
-			ZSTR_VAL(entry->name), min, size);
+		zend_error(E_WARNING, "Invalid \"%pS\" setting. Value must be >= " ZEND_ULONG_FMT ", but got " ZEND_ULONG_FMT "\n",
+			entry->name, min, size);
 		return FAILURE;
 	}
 
@@ -1833,7 +1833,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	if (EG(current_execute_data) && !CG(in_compilation)) {
 		zend_throw_exception_ex(exception_ce, 0, "%pS", message);
 	} else {
-		zend_error_noreturn(E_ERROR, "%s", ZSTR_VAL(message));
+		zend_error_noreturn(E_ERROR, "%pS", message);
 	}
 
 	zend_string_release(message);
@@ -1854,12 +1854,12 @@ ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *contain
 			if (zend_string_equals(container, ZSTR_KNOWN(ZEND_STR_STRING))) {
 				zend_throw_error(NULL, "Cannot unset string offsets");
 			} else {
-				zend_type_error("Cannot unset offset of type %s on %s", zend_zval_type_name(offset), ZSTR_VAL(container));
+				zend_type_error("Cannot unset offset of type %s on %pS", zend_zval_type_name(offset), container);
 			}
 			return;
 		default:
-			zend_type_error("Cannot access offset of type %s on %s",
-				zend_zval_type_name(offset), ZSTR_VAL(container));
+			zend_type_error("Cannot access offset of type %s on %pS",
+				zend_zval_type_name(offset), container);
 			return;
 	}
 }
