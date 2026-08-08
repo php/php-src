@@ -77,7 +77,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (persistent) {
 		zend_string *escaped = php_stream_escape_persistent_key(host, host_len);
-		spprintf(&hashkey, 0, "pfsockopen__%s:"  ZEND_LONG_FMT, ZSTR_VAL(escaped), port);
+		spprintf(&hashkey, 0, "pfsockopen__%pS:"  ZEND_LONG_FMT, escaped, port);
 		zend_string_release_ex(escaped, false);
 	}
 
