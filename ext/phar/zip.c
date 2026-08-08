@@ -917,7 +917,10 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		efp = phar_get_efp(entry, 0);
 		newcrc32 = php_crc32_bulk_init();
 
-		php_crc32_stream_bulk_update(&newcrc32, efp, entry->uncompressed_filesize);
+		if (php_crc32_stream_bulk_update(&newcrc32, efp, entry->uncompressed_filesize) != SUCCESS) {
+			spprintf(p->error, 0, "unable to read file \"%s\" for crc32 in zip-based phar \"%s\"", entry->filename, entry->phar->fname);
+			return ZEND_HASH_APPLY_STOP;
+		}
 
 		entry->crc32 = php_crc32_bulk_end(newcrc32);
 		PHAR_SET_32(central.uncompsize, entry->uncompressed_filesize);
