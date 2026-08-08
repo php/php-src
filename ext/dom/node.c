@@ -1730,10 +1730,26 @@ static bool php_dom_is_equal_attr(const xmlAttr *this_attr, const xmlAttr *other
 		&& php_dom_node_is_content_equal((const xmlNode *) this_attr, (const xmlNode *) other_attr);
 }
 
+static zend_always_inline bool php_dom_node_is_equal_node_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other, bool spec_compliant)
 {
 	ZEND_ASSERT(this != NULL);
 	ZEND_ASSERT(other != NULL);
+
+	if (UNEXPECTED(php_dom_node_is_equal_node_check_stack_limit())) {
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Maximum call stack size reached.");
+		}
+		return false;
+	}
 
 	if (this->type != other->type) {
 		return false;
@@ -1795,6 +1811,7 @@ static void dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAMETERS, bool mod
 	zval *id, *node;
 	xmlNodePtr otherp, nodep;
 	dom_object *intern;
+	bool result;
 
 	id = ZEND_THIS;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1817,7 +1834,11 @@ static void dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAMETERS, bool mod
 		RETURN_BOOL(nodep == NULL && otherp == NULL);
 	}
 
-	RETURN_BOOL(php_dom_node_is_equal_node(nodep, otherp, modern));
+	result = php_dom_node_is_equal_node(nodep, otherp, modern);
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+	RETURN_BOOL(result);
 }
 
 PHP_METHOD(DOMNode, isEqualNode)
