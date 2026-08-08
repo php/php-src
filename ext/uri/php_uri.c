@@ -1119,6 +1119,7 @@ PHP_FUNCTION(Uri_WhatWg_url_percent_encode)
 		default: ZEND_UNREACHABLE();
 	}
 
+	/* This should be unreachable in practice, as str is null only due to memory errors. */
 	if (str == NULL) {
 		zend_throw_exception(php_uri_ce_error, "Cannot percent-encode input", 0);
 		RETURN_THROWS();
@@ -1604,14 +1605,14 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri)
 zend_module_entry uri_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	uri_deps,
-	"uri",                          /* Extension name */
-	ext_functions,                           /* zend_function_entry */
+	"uri",                                     /* Extension name */
+	ext_functions,                                   /* zend_function_entry */
 	PHP_MINIT(uri),                 /* PHP_MINIT - Module initialization */
-	PHP_MSHUTDOWN(uri),             /* PHP_MSHUTDOWN - Module shutdown */
+	PHP_MSHUTDOWN(uri),           /* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(uri),                 /* PHP_RINIT - Request initialization */
-	NULL,                           /* PHP_RSHUTDOWN - Request shutdown */
-	PHP_MINFO(uri),                 /* PHP_MINFO - Module info */
-	PHP_VERSION,                    /* Version */
+	NULL,                         /* PHP_RSHUTDOWN - Request shutdown */
+	PHP_MINFO(uri),                                  /* PHP_MINFO - Module info */
+	PHP_VERSION,                              /* Version */
 	NO_MODULE_GLOBALS,
 	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(uri),
 	STANDARD_MODULE_PROPERTIES_EX
