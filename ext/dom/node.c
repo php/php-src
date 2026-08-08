@@ -1745,7 +1745,9 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 	ZEND_ASSERT(other != NULL);
 
 	if (UNEXPECTED(php_dom_node_is_equal_node_check_stack_limit())) {
-		zend_throw_error(NULL, "Maximum call stack size reached. Infinite recursion?");
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Maximum call stack size reached. Infinite recursion?");
+		}
 		return false;
 	}
 
