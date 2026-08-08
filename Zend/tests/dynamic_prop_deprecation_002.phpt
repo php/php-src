@@ -13,6 +13,6 @@ try {
 	echo "Exception: " .$ex->getMessage() . "\n";
 }
 ?>
---EXPECT--
-Err: Creation of dynamic property class@anonymous::$y is deprecated
-Exception: Cannot create dynamic property class@anonymous::$y
+--EXPECTF--
+Err: Creation of dynamic property class@anonymous%0%s:6$%x::$y is deprecated
+Exception: Cannot create dynamic property class@anonymous%0%s:6$%x::$y
