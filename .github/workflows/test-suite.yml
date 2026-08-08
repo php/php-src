@@ -516,8 +516,10 @@ jobs:
           exit $X
       - name: Test Laravel
         if: ${{ !cancelled() }}
+        env:
+          LARAVEL_VERSION: ${{ fromJson(inputs.branch).jobs.COMMUNITY.config.laravel_version }}
         run: |
-          branch=${{ fromJson(inputs.branch).jobs.COMMUNITY.config.laravel_version }}
+          branch="$LARAVEL_VERSION"
           git clone https://github.com/laravel/framework.git --depth=1 ${branch:+--branch="$branch"}
           cd framework
           git rev-parse HEAD
@@ -562,8 +564,10 @@ jobs:
           fi
       - name: Test Symfony
         if: ${{ !cancelled() }}
+        env:
+          SYMFONY_VERSION: ${{ fromJson(inputs.branch).jobs.COMMUNITY.config.symfony_version }}
         run: |
-          branch=${{ fromJson(inputs.branch).jobs.COMMUNITY.config.symfony_version }}
+          branch="$SYMFONY_VERSION"
           git clone https://github.com/symfony/symfony.git --depth=1 ${branch:+--branch="$branch"}
           cd symfony
           git rev-parse HEAD
