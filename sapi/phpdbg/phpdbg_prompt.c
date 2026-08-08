@@ -20,6 +20,7 @@
 #include "zend_compile.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
+#include "zend_constants.h"
 #include "zend_generators.h"
 #include "zend_interfaces.h"
 #include "zend_smart_str.h"
@@ -1093,7 +1094,7 @@ PHPDBG_COMMAND(info) /* {{{ */
 
 	phpdbg_writeln("Classes    %d", zend_hash_num_elements(EG(class_table)));
 	phpdbg_writeln("Functions  %d", zend_hash_num_elements(EG(function_table)));
-	phpdbg_writeln("Constants  %d", zend_hash_num_elements(EG(zend_constants)));
+	phpdbg_writeln("Constants  %d", zend_get_constants_count());
 	phpdbg_writeln("Included   %d", zend_hash_num_elements(&EG(included_files)));
 
 	return SUCCESS;
@@ -1436,7 +1437,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 
 	phpdbg_writeln("Classes    %d", zend_hash_num_elements(EG(class_table)));
 	phpdbg_writeln("Functions  %d", zend_hash_num_elements(EG(function_table)));
-	phpdbg_writeln("Constants  %d", zend_hash_num_elements(EG(zend_constants)));
+	phpdbg_writeln("Constants  %d", zend_get_constants_count());
 	phpdbg_writeln("Includes   %d", zend_hash_num_elements(&EG(included_files)));
 
 	phpdbg_clean(1, 0);

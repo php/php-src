@@ -20,6 +20,7 @@
 #include "phpdbg_break.h"
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
+#include "zend_constants.h"
 #include "phpdbg_set.h"
 #include "phpdbg_io.h"
 #include "zend_alloc.h"
@@ -1006,7 +1007,7 @@ static void phpdbg_welcome(bool cleaning) /* {{{ */
 			"Includes             %d\n",
 			zend_hash_num_elements(EG(class_table)),
 			zend_hash_num_elements(EG(function_table)),
-			zend_hash_num_elements(EG(zend_constants)),
+			zend_get_constants_count(),
 			zend_hash_num_elements(&EG(included_files)));
 	}
 } /* }}} */

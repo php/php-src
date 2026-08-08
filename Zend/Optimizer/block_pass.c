@@ -31,6 +31,11 @@
 bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, bool copy)
 {
 	const zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
+#ifdef ZTS
+	if (!c) {
+		c = zend_hash_find_ptr(zend_global_constants_table, name);
+	}
+#endif
 	if (c) {
 		if ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
 		 && !(ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)

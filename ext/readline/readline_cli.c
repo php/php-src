@@ -31,6 +31,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
+#include "zend_constants.h"
 
 #ifdef __riscos__
 #include <unixlib/local.h>
@@ -557,13 +558,31 @@ TODO:
 				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
+#ifdef ZTS
+				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : zend_global_constants_table);
+#else
 				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
+#endif
 				if (retval || ce) {
 					break;
 				}
 				ZEND_FALLTHROUGH;
+#ifdef ZTS
 			case 4:
 			case 5:
+				if (!ce) {
+					retval = cli_completion_generator_define(text, textlen, &cli_completion_state, EG(zend_constants));
+				}
+				if (retval || ce) {
+					break;
+				}
+				ZEND_FALLTHROUGH;
+			case 6:
+			case 7:
+#else
+			case 4:
+			case 5:
+#endif
 				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state);
 				break;
 			default:
