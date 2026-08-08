@@ -52,6 +52,10 @@ PHP                                                                        NEWS
 - SQLite:
   . Fix leak when trying to close db if blob stream is still open. (ndossche)
 
+- Standard:
+  . Fixed bug GH-23111 (Stack overflow in array_walk_recursive() with deeply
+    nested arrays). (Lazizbek Ergashev)
+
 - Streams:
   . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
     $this->stream during the close flush). (iliaal)
