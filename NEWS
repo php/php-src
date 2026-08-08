@@ -21,6 +21,8 @@ PHP                                                                        NEWS
     offset in a non-UTF-8 encoding). (Eyüp Can Akman)
   . Fixed bug GH-21036 (mb_ereg_search_getregs() crashes after mb_eregi()
     invalidates the regex cache). (Matthias Goergens)
+  . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
+    a truncated UTF-8 sequence). (Lazizbek Ergashev)
 
 - Opcache:
   . Fixed bug GH-22857 (Function JIT emits wrong code for FETCH_OBJ_FUNC_ARG on a
