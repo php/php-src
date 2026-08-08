@@ -2696,6 +2696,13 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 {
 	zval *value_ptr, data;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return;
+	}
+#endif
+
 	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if ((value_ptr = zend_hash_find_ind(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
