@@ -9,7 +9,7 @@ try {
     $stmt = new PDOStatement();
     clone $stmt;
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
