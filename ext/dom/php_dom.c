@@ -1975,7 +1975,7 @@ void php_dom_normalize_legacy(xmlNodePtr nodep)
 			case XML_TEXT_NODE:
 				dom_merge_adjacent_exclusive_text_nodes(child);
 				if (is_empty_node(child)) {
-					xmlNodePtr nextp = child->next;
+					xmlNodePtr nextp = php_dom_next_in_tree_order(child, nodep);
 					xmlUnlinkNode(child);
 					free_node(child);
 					child = nextp;
@@ -1983,7 +1983,6 @@ void php_dom_normalize_legacy(xmlNodePtr nodep)
 				}
 				break;
 			case XML_ELEMENT_NODE:
-				php_dom_normalize_legacy(child);
 				xmlAttrPtr attr = child->properties;
 				while (attr != NULL) {
 					php_dom_normalize_legacy((xmlNodePtr) attr);
@@ -1993,7 +1992,7 @@ void php_dom_normalize_legacy(xmlNodePtr nodep)
 			default:
 				break;
 		}
-		child = child->next;
+		child = php_dom_next_in_tree_order(child, nodep);
 	}
 }
 /* }}} end php_dom_normalize_legacy */
@@ -2011,7 +2010,7 @@ void php_dom_normalize_modern(xmlNodePtr this)
 
 			/* 2. If length is zero, then remove node and continue with the next exclusive Text node, if any. */
 			if (is_empty) {
-				xmlNodePtr next = node->next;
+				xmlNodePtr next = php_dom_next_in_tree_order(node, this);
 				xmlUnlinkNode(node);
 				free_node(node);
 				node = next;
@@ -2025,10 +2024,8 @@ void php_dom_normalize_modern(xmlNodePtr this)
 			dom_merge_adjacent_exclusive_text_nodes(node);
 
 			/* Steps 5-6 deal with mutation records, we don't do that here. */
-		} else if (node->type == XML_ELEMENT_NODE) {
-			php_dom_normalize_modern(node);
 		}
-		node = node->next;
+		node = php_dom_next_in_tree_order(node, this);
 	}
 }
 

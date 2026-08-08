@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-22447 (UAF at dom_objects_free_storage when setting an
     attribute node that collides by local name with a namespaced
     attribute). (David Carlier)
+  . Fixed bug GH-23116 (Stack overflow when normalizing a deeply nested
+    DOMDocument). (Weilin Du)
+  . Fixed bug GH-23117 (Stack overflow when normalizing a deeply nested
+    Dom\XMLDocument). (Weilin Du)
 
 - MBString:
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
