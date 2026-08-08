@@ -10,43 +10,43 @@ $other = new stdClass();
 try {
     $num + $other;
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $num - $other;
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $num * $other;
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $num / $other;
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $num % $other;
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $num ** $other;
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unsupported operand types: BcMath\Number + stdClass
-Unsupported operand types: BcMath\Number - stdClass
-Unsupported operand types: BcMath\Number * stdClass
-Unsupported operand types: BcMath\Number / stdClass
-Unsupported operand types: BcMath\Number % stdClass
-Unsupported operand types: BcMath\Number ** stdClass
+TypeError: Unsupported operand types: BcMath\Number + stdClass
+TypeError: Unsupported operand types: BcMath\Number - stdClass
+TypeError: Unsupported operand types: BcMath\Number * stdClass
+TypeError: Unsupported operand types: BcMath\Number / stdClass
+TypeError: Unsupported operand types: BcMath\Number % stdClass
+TypeError: Unsupported operand types: BcMath\Number ** stdClass
