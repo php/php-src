@@ -1870,12 +1870,11 @@ ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *contain
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_ce_type_error, message, 0);
-	efree(message);
+	zend_string *message = zend_vstrpprintf(0, format, va);
+	zend_throw_exception_ex(zend_ce_type_error, 0, "%pS", message);
+	zend_string_release(message);
 	va_end(va);
 } /* }}} */
 

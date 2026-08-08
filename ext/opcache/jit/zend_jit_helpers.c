@@ -109,8 +109,8 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
 		}
 		object = &EG(uninitialized_zval);
 	}
-	zend_throw_error(NULL, "Call to a member function %s() on %s",
-		Z_STRVAL_P(function_name), zend_zval_value_name(object));
+	zend_throw_error(NULL, "Call to a member function %pS() on %s",
+		Z_STR_P(function_name), zend_zval_value_name(object));
 }
 
 static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call_tmp(zval *object)
@@ -584,7 +584,7 @@ str_index:
 	}
 	retval = zend_hash_find(ht, offset_key);
 	if (!retval) {
-		zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(offset_key));
+		zend_error(E_WARNING, "Undefined array key \"%pS\"", offset_key);
 		ZVAL_NULL(result);
 		return;
 	}
@@ -1188,7 +1188,7 @@ try_again:
 					/* allow errors */ true, NULL, &trailing_data)) {
 				if (UNEXPECTED(trailing_data)
 				 && EG(current_execute_data)->opline->opcode != ZEND_FETCH_DIM_UNSET) {
-					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+					zend_error(E_WARNING, "Illegal string offset \"%pS\"", Z_STR_P(dim));
 				}
 				return offset;
 			}
@@ -1538,7 +1538,7 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 			zend_class_entry *ce = obj->ce;
 
 			ZVAL_NULL(result);
-			zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
+			zend_error(E_NOTICE, "Indirect modification of overloaded element of %pS has no effect", ce->name);
 		} else if (EXPECTED(retval && Z_TYPE_P(retval) != IS_UNDEF)) {
 			if (!Z_ISREF_P(retval)) {
 				if (result != retval) {
@@ -1547,7 +1547,7 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 				}
 				if (Z_TYPE_P(retval) != IS_OBJECT) {
 					zend_class_entry *ce = obj->ce;
-					zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
+					zend_error(E_NOTICE, "Indirect modification of overloaded element of %pS has no effect", ce->name);
 				}
 			} else if (UNEXPECTED(Z_REFCOUNT_P(retval) == 1)) {
 				ZVAL_UNREF(retval);
@@ -2232,10 +2232,10 @@ static zend_always_inline bool check_type_array_assignable(zend_type type) {
 static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_property_info *prop, const char *type) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error(
-		"Cannot auto-initialize an %s inside property %s::$%s of type %s",
+		"Cannot auto-initialize an %s inside property %pS::$%s of type %pS",
 		type,
-		ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name),
-		ZSTR_VAL(type_str)
+		prop->ce->name, zend_get_unmangled_property_name(prop->name),
+		type_str
 	);
 	zend_string_release(type_str);
 }
@@ -2243,8 +2243,8 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_
 static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_error(
 		zend_property_info *prop) {
 	zend_throw_error(NULL,
-		"Cannot access uninitialized non-nullable property %s::$%s by reference",
-		ZSTR_VAL(prop->ce->name),
+		"Cannot access uninitialized non-nullable property %pS::$%s by reference",
+		prop->ce->name,
 		zend_get_unmangled_property_name(prop->name));
 }
 
@@ -2351,9 +2351,9 @@ static void ZEND_FASTCALL zend_jit_check_array_promotion(zval *val, zend_propert
 		&& (ZEND_TYPE_FULL_MASK(prop->type) & MAY_BE_ARRAY) == 0) {
 		zend_string *type_str = zend_type_to_string(prop->type);
 		zend_type_error(
-			"Cannot auto-initialize an array inside property %s::$%s of type %s",
-			ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name),
-			ZSTR_VAL(type_str)
+			"Cannot auto-initialize an array inside property %pS::$%s of type %pS",
+			prop->ce->name, zend_get_unmangled_property_name(prop->name),
+			type_str
 		);
 		zend_string_release(type_str);
 		ZVAL_ERROR(result);
@@ -2490,10 +2490,10 @@ static ZEND_COLD void zend_jit_throw_inc_ref_error(zend_reference *ref, zend_pro
 	zend_string *type_str = zend_type_to_string(error_prop->type);
 
 	zend_type_error(
-		"Cannot increment a reference held by property %s::$%s of type %s past its maximal value",
-		ZSTR_VAL(error_prop->ce->name),
+		"Cannot increment a reference held by property %pS::$%s of type %pS past its maximal value",
+		error_prop->ce->name,
 		zend_get_unmangled_property_name(error_prop->name),
-		ZSTR_VAL(type_str));
+		type_str);
 	zend_string_release(type_str);
 }
 
@@ -2502,10 +2502,10 @@ static ZEND_COLD void zend_jit_throw_dec_ref_error(zend_reference *ref, zend_pro
 	zend_string *type_str = zend_type_to_string(error_prop->type);
 
 	zend_type_error(
-		"Cannot decrement a reference held by property %s::$%s of type %s past its minimal value",
-		ZSTR_VAL(error_prop->ce->name),
+		"Cannot decrement a reference held by property %pS::$%s of type %pS past its minimal value",
+		error_prop->ce->name,
 		zend_get_unmangled_property_name(error_prop->name),
-		ZSTR_VAL(type_str));
+		type_str);
 	zend_string_release(type_str);
 }
 
@@ -2662,14 +2662,14 @@ static void ZEND_FASTCALL zend_jit_invalid_property_read(zval *container, const 
 	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", property_name, zend_zval_value_name(container));
 }
 
-static void ZEND_FASTCALL zend_jit_invalid_property_write(zval *container, const char *property_name)
+static void ZEND_FASTCALL zend_jit_invalid_property_write(zval *container, zend_string *property_name)
 {
 	zend_throw_error(NULL,
-		"Attempt to modify property \"%s\" on %s",
+		"Attempt to modify property \"%pS\" on %s",
 		property_name, zend_zval_value_name(container));
 }
 
-static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, const char *property_name)
+static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, zend_string *property_name)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
@@ -2683,21 +2683,21 @@ static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, cons
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
 	}
 	zend_throw_error(NULL,
-		"Attempt to increment/decrement property \"%s\" on %s",
+		"Attempt to increment/decrement property \"%pS\" on %s",
 		property_name, zend_zval_value_name(container));
 	if (opline->op1_type == IS_VAR) {
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_invalid_property_assign(zval *container, const char *property_name)
+static void ZEND_FASTCALL zend_jit_invalid_property_assign(zval *container, zend_string *property_name)
 {
 	zend_throw_error(NULL,
-		"Attempt to assign property \"%s\" on %s",
+		"Attempt to assign property \"%pS\" on %s",
 		property_name, zend_zval_value_name(container));
 }
 
-static void ZEND_FASTCALL zend_jit_invalid_property_assign_op(zval *container, const char *property_name)
+static void ZEND_FASTCALL zend_jit_invalid_property_assign_op(zval *container, zend_string *property_name)
 {
 	if (Z_TYPE_P(container) == IS_UNDEF) {
 		const zend_execute_data *execute_data = EG(current_execute_data);
@@ -2962,10 +2962,10 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 static ZEND_COLD zend_long _zend_jit_throw_inc_prop_error(zend_property_info *prop)
 {
 	zend_string *type_str = zend_type_to_string(prop->type);
-	zend_type_error("Cannot increment property %s::$%s of type %s past its maximal value",
-		ZSTR_VAL(prop->ce->name),
+	zend_type_error("Cannot increment property %pS::$%s of type %pS past its maximal value",
+		prop->ce->name,
 		zend_get_unmangled_property_name(prop->name),
-		ZSTR_VAL(type_str));
+		type_str);
 	zend_string_release(type_str);
 	return ZEND_LONG_MAX;
 }
@@ -2973,10 +2973,10 @@ static ZEND_COLD zend_long _zend_jit_throw_inc_prop_error(zend_property_info *pr
 static ZEND_COLD zend_long _zend_jit_throw_dec_prop_error(zend_property_info *prop)
 {
 	zend_string *type_str = zend_type_to_string(prop->type);
-	zend_type_error("Cannot decrement property %s::$%s of type %s past its minimal value",
-		ZSTR_VAL(prop->ce->name),
+	zend_type_error("Cannot decrement property %pS::$%s of type %pS past its minimal value",
+		prop->ce->name,
 		zend_get_unmangled_property_name(prop->name),
-		ZSTR_VAL(type_str));
+		type_str);
 	zend_string_release(type_str);
 	return ZEND_LONG_MIN;
 }
@@ -3408,8 +3408,8 @@ static void ZEND_FASTCALL zend_jit_uninit_static_prop(void)
 	uint32_t cache_slot = opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS;
 	const zend_property_info *property_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
 
-	zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
-		ZSTR_VAL(property_info->ce->name),
+	zend_throw_error(NULL, "Typed static property %pS::$%s must not be accessed before initialization",
+		property_info->ce->name,
 		zend_get_unmangled_property_name(property_info->name));
 }
 
