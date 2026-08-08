@@ -39,4 +39,4 @@ try {
 }
 ?>
 --EXPECT--
-Error: Maximum call stack size reached. Infinite recursion?
+Error: Maximum call stack size reached.
