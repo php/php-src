@@ -7,9 +7,9 @@ $payload = 'O:23:"RecursiveFilterIterator":0:{}';
 try {
     var_dump(unserialize($payload));
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot instantiate abstract class RecursiveFilterIterator
+Error: Cannot instantiate abstract class RecursiveFilterIterator

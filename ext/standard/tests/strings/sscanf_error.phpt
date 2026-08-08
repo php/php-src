@@ -13,11 +13,11 @@ echo "\n-- Testing sscanf() function with more than expected no. of arguments --
 try {
     sscanf($str, $format, $str1, $str2, $extra_str);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 *** Testing sscanf() : error conditions ***
 
 -- Testing sscanf() function with more than expected no. of arguments --
-Variable is not assigned by any conversion specifiers
+ValueError: Variable is not assigned by any conversion specifiers

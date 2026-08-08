@@ -17,12 +17,12 @@ var_dump($test->x);
 try {
     settype($test->x, 'array');
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->x);
 
 ?>
 --EXPECT--
 int(42)
-Cannot assign array to reference held by property Test::$x of type int
+TypeError: Cannot assign array to reference held by property Test::$x of type int
 int(42)

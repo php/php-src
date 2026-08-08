@@ -34,7 +34,7 @@ foreach($files_arr as $file) {
   try {
     var_dump( fileinode( $file_path."/".$file ) );
   } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   clearstatcache();
   $count++;

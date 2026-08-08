@@ -39,7 +39,7 @@ $c = [new Boom(), new Boom()];
 try {
     array_multisort($c, SORT_STRING);
 } catch (Exception $e) {
-    echo $e::class, ": ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

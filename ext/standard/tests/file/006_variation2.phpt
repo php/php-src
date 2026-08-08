@@ -55,7 +55,7 @@ foreach($perms_array as $permission) {
     echo "\n";
     clearstatcache();
   } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
 
   try {
@@ -64,7 +64,7 @@ foreach($perms_array as $permission) {
     echo "\n";
     clearstatcache();
   } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $count++;
 }
@@ -137,15 +137,15 @@ bool(true)
 bool(true)
 43567
 -- Iteration 12 --
-chmod(): Argument #2 ($permissions) must be of type int, string given
-chmod(): Argument #2 ($permissions) must be of type int, string given
+TypeError: chmod(): Argument #2 ($permissions) must be of type int, string given
+TypeError: chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 13 --
-chmod(): Argument #2 ($permissions) must be of type int, string given
-chmod(): Argument #2 ($permissions) must be of type int, string given
+TypeError: chmod(): Argument #2 ($permissions) must be of type int, string given
+TypeError: chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 14 --
-chmod(): Argument #2 ($permissions) must be of type int, string given
-chmod(): Argument #2 ($permissions) must be of type int, string given
+TypeError: chmod(): Argument #2 ($permissions) must be of type int, string given
+TypeError: chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 15 --
-chmod(): Argument #2 ($permissions) must be of type int, string given
-chmod(): Argument #2 ($permissions) must be of type int, string given
+TypeError: chmod(): Argument #2 ($permissions) must be of type int, string given
+TypeError: chmod(): Argument #2 ($permissions) must be of type int, string given
 *** Done ***

@@ -11,20 +11,20 @@ $cmd = "echo abc\n\0command";
 try {
     var_dump(exec($cmd, $output));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(system($cmd, $output));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(passthru($cmd, $output));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-exec(): Argument #1 ($command) must not contain any null bytes
-system(): Argument #1 ($command) must not contain any null bytes
-passthru(): Argument #1 ($command) must not contain any null bytes
+ValueError: exec(): Argument #1 ($command) must not contain any null bytes
+ValueError: system(): Argument #1 ($command) must not contain any null bytes
+ValueError: passthru(): Argument #1 ($command) must not contain any null bytes

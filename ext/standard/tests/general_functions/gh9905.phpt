@@ -5,8 +5,8 @@ GH-9905 (constant() behaves inconsistent when class is undefined)
 try {
     \constant("\NonExistantClass::non_existant_constant");
 } catch (\Throwable|\Error|\Exception $e) {
-    echo($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Class "NonExistantClass" not found
+Error: Class "NonExistantClass" not found

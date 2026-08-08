@@ -35,7 +35,7 @@ echo "\n-- No filename --\n";
 try {
     var_dump( sha1_file("") );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n-- invalid filename --\n";
@@ -48,7 +48,7 @@ echo "\n-- NULL as filename --\n";
 try {
     var_dump( sha1_file(NULL) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n-- Hexadecimal Output for Empty file as Argument --\n";
@@ -74,7 +74,7 @@ unlink("EmptyFileSHA1.txt");
 *** Testing for error conditions ***
 
 -- No filename --
-Path must not be empty
+ValueError: Path must not be empty
 
 -- invalid filename --
 
@@ -89,7 +89,7 @@ bool(false)
 -- NULL as filename --
 
 Deprecated: sha1_file(): Passing null to parameter #1 ($filename) of type string is deprecated in %s on line %d
-Path must not be empty
+ValueError: Path must not be empty
 
 -- Hexadecimal Output for Empty file as Argument --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"

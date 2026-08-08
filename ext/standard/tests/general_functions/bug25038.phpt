@@ -13,7 +13,7 @@ try
 }
 catch (Exception $e)
 {
-    print $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try
 {
@@ -21,10 +21,10 @@ try
 }
 catch (Exception $e)
 {
-    print $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-This is an exception from bar(first try).
-This is an exception from bar(second try).
+Exception: This is an exception from bar(first try).
+Exception: This is an exception from bar(second try).

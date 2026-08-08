@@ -21,7 +21,7 @@ $a1 = array_merge_recursive( $a1, $a2 );
 try {
     $a1 = array_merge_recursive( $a1, $a2 );
 } catch (\Error $e) {
-    echo $e->getMessage() . " on line " . $e->getLine() . "\n";
+    echo $e::class, ': ', $e->getMessage(), ' on line ', $e->getLine(), "\n";
 }
 unset( $a1, $a2 );
 
@@ -35,4 +35,4 @@ unset( $a1, $a2 );
 
 ?>
 --EXPECT--
-Recursion detected on line 19
+Error: Recursion detected on line 19

@@ -10,7 +10,7 @@ fclose($fp);
 try {
     var_dump(stream_get_meta_data($fp));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
@@ -19,5 +19,5 @@ echo "Done";
 *** Testing stream_get_meta_data() : error conditions ***
 
 -- Testing stream_get_meta_data() function with closed stream resource --
-stream_get_meta_data(): Argument #1 ($stream) must be an open stream resource
+TypeError: stream_get_meta_data(): Argument #1 ($stream) must be an open stream resource
 Done

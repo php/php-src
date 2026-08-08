@@ -31,23 +31,23 @@ foreach ($strings as $s) {
     try {
         var_dump(str_decrement($s));
     } catch (ValueError $e) {
-        echo $e->getMessage(), PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
 ?>
 --EXPECT--
-str_decrement(): Argument #1 ($string) must not be empty
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must not be empty
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_decrement(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters

@@ -21,7 +21,7 @@ $fp = fopen($filename, "rt");
 try {
     fscanf($fp, "%s", $v, $v1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 var_dump($v);
 var_dump($v1);
@@ -33,7 +33,7 @@ $fp = fopen($filename, "rt");
 try {
     fscanf($fp, "", $v, $v1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 var_dump($v);
 var_dump($v1);
@@ -45,7 +45,7 @@ $fp = fopen($filename, "rt");
 try {
     fscanf($fp, "%.a", $v, $v1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 var_dump($v);
 var_dump($v1);
@@ -65,7 +65,7 @@ $fp = fopen($filename, "rt");
 try {
     var_dump(fscanf($fp, "%s%d", $v));
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -80,15 +80,15 @@ int(0)
 NULL
 int(1)
 string(4) "data"
-Variable is not assigned by any conversion specifiers
+ValueError: Variable is not assigned by any conversion specifiers
 string(4) "data"
 NULL
-Variable is not assigned by any conversion specifiers
+ValueError: Variable is not assigned by any conversion specifiers
 array(0) {
 }
 array(0) {
 }
-Bad scan conversion character "."
+ValueError: Bad scan conversion character "."
 array(0) {
 }
 array(0) {
@@ -96,5 +96,5 @@ array(0) {
 bool(false)
 array(0) {
 }
-Different numbers of variable names and field specifiers
+ValueError: Different numbers of variable names and field specifiers
 Done

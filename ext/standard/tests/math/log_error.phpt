@@ -7,8 +7,8 @@ precision=14
 try {
     log(36, -4);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-log(): Argument #2 ($base) must be greater than 0
+ValueError: log(): Argument #2 ($base) must be greater than 0

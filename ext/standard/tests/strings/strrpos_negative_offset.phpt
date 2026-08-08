@@ -11,7 +11,7 @@ strr[i]pos() function with negative offset
     try {
         strrpos("haystack", 'h', -9);
     } catch (ValueError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
     var_dump(strripos("HAYSTHACk", 'ha', -9));
     var_dump(strripos("HAYSTACK", 'h', -8));
@@ -22,7 +22,7 @@ strr[i]pos() function with negative offset
     try {
         strripos("HAYSTACK", 'h', -9);
     } catch (ValueError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 ?>
 --EXPECT--
@@ -32,11 +32,11 @@ int(7)
 bool(false)
 int(5)
 int(1)
-strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 int(0)
 int(0)
 int(7)
 bool(false)
 int(5)
 int(1)
-strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

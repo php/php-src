@@ -12,9 +12,9 @@ class Test {
 try {
     serialize(new Test);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Test::__serialize() must return an array
+TypeError: Test::__serialize() must return an array

@@ -32,7 +32,7 @@ echo "\n*** Testing for error conditions ***\n";
 try {
     var_dump( md5_file("") );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 /* invalid filename */
 var_dump( md5_file("aZrq16u") );
@@ -64,7 +64,7 @@ echo "\nDone";
 ?>
 --EXPECTF--
 *** Testing for error conditions ***
-Path must not be empty
+ValueError: Path must not be empty
 
 Warning: md5_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

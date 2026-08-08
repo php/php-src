@@ -28,8 +28,8 @@ try
 }
 catch(Exception $e)
 {
-    echo "Caught: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Caught: Error
+Exception: Error

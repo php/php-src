@@ -83,7 +83,7 @@ var_dump($count);
 try {
     str_replace("a", array("q", "q", "c"), array("aaa"), $count);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(str_replace("a", 1, array("aaa", "bbb"), $count));
@@ -99,12 +99,12 @@ $resource2 = opendir( "." );
 try {
     var_dump(str_replace("stream", "FOUND", $resource1, $count));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(str_replace("stream", "FOUND", $resource2, $count));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
@@ -180,7 +180,7 @@ array(2) {
   string(3) "ccc"
 }
 int(6)
-str_replace(): Argument #2 ($replace) must be of type string when argument #1 ($search) is a string
+TypeError: str_replace(): Argument #2 ($replace) must be of type string when argument #1 ($search) is a string
 array(2) {
   [0]=>
   string(3) "111"
@@ -197,8 +197,8 @@ array(2) {
 int(1)
 
 -- Testing Resources --
-str_replace(): Argument #3 ($subject) must be of type array|string, resource given
-str_replace(): Argument #3 ($subject) must be of type array|string, resource given
+TypeError: str_replace(): Argument #3 ($subject) must be of type array|string, resource given
+TypeError: str_replace(): Argument #3 ($subject) must be of type array|string, resource given
 
 -- Testing a longer and heredoc string --
 string(623) "FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789

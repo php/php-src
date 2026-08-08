@@ -47,7 +47,7 @@ set_error_handler(static function (int $code, string $message): bool {
 try {
     array_intersect([[1], [2]], ['Array'], new stdClass());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 restore_error_handler();
@@ -67,4 +67,4 @@ array(2) {
   [1]=>
   string(4) "keep"
 }
-array_intersect(): Argument #3 must be of type array, stdClass given
+TypeError: array_intersect(): Argument #3 must be of type array, stdClass given

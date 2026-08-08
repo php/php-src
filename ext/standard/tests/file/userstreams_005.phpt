@@ -42,7 +42,7 @@ test("stream_truncate size 10", $fd, 10);
 try {
     test("stream_truncate negative size", $fd, -1);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 test("stream_truncate bad return", $fd3, 0);
 ?>
@@ -61,7 +61,7 @@ bool(true)
 truncation with new_size=10
 bool(true)
 ------ stream_truncate negative size: -------
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 ------ stream_truncate bad return: -------
 truncation with new_size=0
 

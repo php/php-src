@@ -11,12 +11,12 @@ echo "\n-- Testing readfile() with invalid arguments --\n";
 try {
     var_dump( readfile('') );  // empty string as $filename
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump( readfile(false) );  // boolean false as $filename
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n-- Testing readfile() with non-existent file --\n";
@@ -29,8 +29,8 @@ echo "Done\n";
 *** Test readfile(): error conditions ***
 
 -- Testing readfile() with invalid arguments --
-Path must not be empty
-Path must not be empty
+ValueError: Path must not be empty
+ValueError: Path must not be empty
 
 -- Testing readfile() with non-existent file --
 
