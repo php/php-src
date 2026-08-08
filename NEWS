@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
 - DOM:
+  . Fixed bug GH-23116 (Stack overflow when normalizing a deeply nested
+    DOMDocument). (Lazizbek Ergashev)
+  . Fixed bug GH-23117 (Stack overflow when normalizing a deeply nested
+    Dom\XMLDocument). (Lazizbek Ergashev)
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
   . Fixed bug GH-22447 (UAF at dom_objects_free_storage when setting an
