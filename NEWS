@@ -20,6 +20,12 @@ PHP                                                                        NEWS
   . Update timelib to 2026.02. (Derick, timwolla)
   . Added Time\Duration. (timwolla, Derick)
 
+- DOM:
+  . Fixed bug GH-23116 (Stack overflow when normalizing a deeply nested
+    DOMDocument). (Lazizbek Ergashev)
+  . Fixed bug GH-23117 (Stack overflow when normalizing a deeply nested
+    Dom\XMLDocument). (Lazizbek Ergashev)
+
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
     (Weilin Du)
