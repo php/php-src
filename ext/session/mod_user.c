@@ -266,6 +266,16 @@ PS_VALIDATE_SID_FUNC(user)
 		return ret;
 	}
 
+	if (PS(default_mod) && PS(default_mod)->s_validate_sid
+			&& PS(default_mod)->s_validate_sid != php_session_validate_sid
+			&& !Z_ISUNDEF(PSF(open)) && Z_TYPE(PSF(open)) == IS_ARRAY) {
+		zval *handler_obj = zend_hash_index_find(Z_ARRVAL(PSF(open)), 0);
+		if (handler_obj && Z_TYPE_P(handler_obj) == IS_OBJECT
+				&& Z_OBJCE_P(handler_obj) == php_session_class_entry) {
+			return PS(default_mod)->s_validate_sid(mod_data, key);
+		}
+	}
+
 	/* dummy function defined by PS_MOD */
 	return php_session_validate_sid(mod_data, key);
 }
