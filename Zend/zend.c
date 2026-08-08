@@ -1895,12 +1895,11 @@ ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{
 ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_exception(zend_ce_value_error, message, 0);
-	efree(message);
+	zend_string *message = zend_vstrpprintf(0, format, va);
+	zend_throw_exception_ex(zend_ce_value_error, 0, "%pS", message);
+	zend_string_release(message);
 	va_end(va);
 } /* }}} */
 

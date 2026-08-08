@@ -239,7 +239,7 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 		} else if (zend_string_equals_literal_ci(key, "partitioned")) {
 			*partitioned = zend_is_true(value);
 		} else {
-			zend_value_error("%s(): option \"%s\" is invalid", get_active_function_name(), ZSTR_VAL(key));
+			zend_value_error("%s(): option \"%pS\" is invalid", get_active_function_name(), key);
 			return FAILURE;
 		}
 	} ZEND_HASH_FOREACH_END();
