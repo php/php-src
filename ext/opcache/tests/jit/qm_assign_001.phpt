@@ -13,4 +13,3 @@ Deprecated: Implicit conversion from float 1.5 to int loses precision in %sqm_as
 
 Deprecated: Implicit conversion from float 1.5 to int loses precision in %sqm_assign_001.php on line 2
 -1
-
