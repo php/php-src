@@ -301,16 +301,16 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 					zval param;
 					ZVAL_COPY(&param, &var_dtor_hash->data[i + 1]);
 
-					BG(serialize_lock)++;
 					zend_object_set_properties_reinitable(Z_OBJ_P(zv), /* reinitable */ true);
+					BG(serialize_lock)++;
 					zend_call_known_instance_method_with_1_params(
 						Z_OBJCE_P(zv)->__unserialize, Z_OBJ_P(zv), NULL, &param);
-					zend_object_set_properties_reinitable(Z_OBJ_P(zv), /* reinitable */ false);
 					if (EG(exception)) {
 						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
 					BG(serialize_lock)--;
+					zend_object_set_properties_reinitable(Z_OBJ_P(zv), /* reinitable */ false);
 					zval_ptr_dtor(&param);
 				} else {
 					GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
