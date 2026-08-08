@@ -1678,22 +1678,6 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 		}																																	\
 		return counter;																														\
 	}
-#define PHP_DOM_DEFINE_LIST_EQUALITY_ORDERED_HELPER(type)																					\
-	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check_ordered, type)(const type *list1, const type *list2, bool spec_compliant)	\
-	{																																		\
-		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);															\
-		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {															\
-			return false;																													\
-		}																																	\
-		for (size_t i = 0; i < count; i++) {																								\
-			if (!php_dom_node_is_equal_node((const xmlNode *) list1, (const xmlNode *) list2, spec_compliant)) {							\
-				return false;																												\
-			}																																\
-			list1 = list1->next;																											\
-			list2 = list2->next;																											\
-		}																																	\
-		return true;																														\
-	}
 #define PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(type)																					\
 	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check_unordered, type)(const type *list1, const type *list2, bool spec_compliant)\
 	{																																		\
@@ -1717,7 +1701,6 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 
 PHP_DOM_DEFINE_LIST_COUNTER_HELPER(xmlNode)
 PHP_DOM_DEFINE_LIST_COUNTER_HELPER(xmlNs)
-PHP_DOM_DEFINE_LIST_EQUALITY_ORDERED_HELPER(xmlNode)
 PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(xmlNode)
 PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(xmlNs)
 
@@ -1730,7 +1713,15 @@ static bool php_dom_is_equal_attr(const xmlAttr *this_attr, const xmlAttr *other
 		&& php_dom_node_is_content_equal((const xmlNode *) this_attr, (const xmlNode *) other_attr);
 }
 
-static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other, bool spec_compliant)
+static zend_always_inline bool php_dom_node_has_ordered_children(const xmlNode *node)
+{
+	return node->type == XML_ELEMENT_NODE
+		|| node->type == XML_DOCUMENT_FRAG_NODE
+		|| node->type == XML_HTML_DOCUMENT_NODE
+		|| node->type == XML_DOCUMENT_NODE;
+}
+
+static bool php_dom_node_is_equal_node_without_children(const xmlNode *this, const xmlNode *other, bool spec_compliant)
 {
 	ZEND_ASSERT(this != NULL);
 	ZEND_ASSERT(other != NULL);
@@ -1749,7 +1740,8 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 			/* Check attributes first, then namespace declarations, then children */
 			&& php_dom_node_list_equality_check_unordered_xmlNode((const xmlNode *) this->properties, (const xmlNode *) other->properties, spec_compliant)
 			&& (spec_compliant || php_dom_node_list_equality_check_unordered_xmlNs(this->nsDef, other->nsDef, false))
-			&& php_dom_node_list_equality_check_ordered_xmlNode(this->children, other->children, spec_compliant);
+			&& php_dom_node_count_list_size_xmlNode(this->children)
+				== php_dom_node_count_list_size_xmlNode(other->children);
 	} else if (this->type == XML_DTD_NODE) {
 		/* Note: in the living spec entity declarations and notations are no longer compared because they're considered obsolete. */
 		const xmlDtd *this_dtd = (const xmlDtd *) this;
@@ -1780,10 +1772,51 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 		const xmlNs *other_ns = (const xmlNs *) other;
 		return xmlStrEqual(this_ns->prefix, other_ns->prefix) && xmlStrEqual(this_ns->href, other_ns->href);
 	} else if (this->type == XML_DOCUMENT_FRAG_NODE || this->type == XML_HTML_DOCUMENT_NODE || this->type == XML_DOCUMENT_NODE) {
-		return php_dom_node_list_equality_check_ordered_xmlNode(this->children, other->children, spec_compliant);
+		return php_dom_node_count_list_size_xmlNode(this->children)
+			== php_dom_node_count_list_size_xmlNode(other->children);
 	}
 
 	return false;
+}
+
+static bool php_dom_node_list_equality_check_ordered_xmlNode(const xmlNode *list1, const xmlNode *list2, bool spec_compliant)
+{
+	size_t count = php_dom_node_count_list_size_xmlNode(list1);
+	if (count != php_dom_node_count_list_size_xmlNode(list2)) {
+		return false;
+	}
+	if (count == 0) {
+		return true;
+	}
+
+	const xmlNode *base1 = list1->parent;
+	const xmlNode *base2 = list2->parent;
+
+	/* Immediate child counts are checked by the node comparison below. This
+	 * preserves the tree structure while walking both subtrees in tree order. */
+	while (list1 != NULL && list2 != NULL) {
+		if (!php_dom_node_is_equal_node_without_children(list1, list2, spec_compliant)) {
+			return false;
+		}
+
+		list1 = php_dom_next_in_tree_order(list1, base1);
+		list2 = php_dom_next_in_tree_order(list2, base2);
+	}
+
+	return list1 == NULL && list2 == NULL;
+}
+
+static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other, bool spec_compliant)
+{
+	if (!php_dom_node_is_equal_node_without_children(this, other, spec_compliant)) {
+		return false;
+	}
+
+	if (php_dom_node_has_ordered_children(this)) {
+		return php_dom_node_list_equality_check_ordered_xmlNode(this->children, other->children, spec_compliant);
+	}
+
+	return true;
 }
 
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-node-isequalnode (for everything still in the living spec)

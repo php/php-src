@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-22447 (UAF at dom_objects_free_storage when setting an
     attribute node that collides by local name with a namespaced
     attribute). (David Carlier)
+  . Fixed bug GH-23120 (Stack overflow when comparing deeply nested DOM nodes
+    with DOMNode::isEqualNode()). (Weilin Du)
 
 - MBString:
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
