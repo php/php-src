@@ -1667,6 +1667,20 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 	zend_long lval;
 
 	switch (option) {
+		case CURLOPT_KEYPASSWD:
+		case CURLOPT_PASSWORD:
+		case CURLOPT_PROXY_KEYPASSWD:
+		case CURLOPT_PROXY_TLSAUTH_PASSWORD:
+		case CURLOPT_PROXYPASSWORD:
+		case CURLOPT_PROXYUSERPWD:
+		case CURLOPT_SSLKEY_BLOB:
+		case CURLOPT_TLSAUTH_PASSWORD:
+		case CURLOPT_USERPWD:
+		case CURLOPT_XOAUTH2_BEARER:
+			EG(current_execute_data)->sensitive_args |= (1u << 2);
+	}
+
+	switch (option) {
 		/* Callable options */
 		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_WRITE, write, PHP_CURL_STDOUT);
 		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_HEADER, write_header, PHP_CURL_IGNORE);

@@ -4448,6 +4448,7 @@ static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array,
 #endif
 	EX(call) = NULL;
 	EX(return_value) = return_value;
+	EX(sensitive_args) = 0;
 
 	/* Handle arguments */
 	first_extra_arg = op_array->num_args;
@@ -4537,6 +4538,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
 	EX(return_value) = return_value;
+	EX(sensitive_args) = 0;
 
 	if (op_array->last_var) {
 		zend_attach_symbol_table(execute_data);
