@@ -570,8 +570,8 @@ static int is_property_visibility_changed(zend_class_entry *ce, zval *key)
 				return 1;
 			} else {
 				php_error_docref(NULL, E_WARNING,
-					"Cannot unserialize value for virtual property %s::$%s",
-					ZSTR_VAL(existing_propinfo->ce->name), Z_STRVAL_P(key));
+					"Cannot unserialize value for virtual property %pS::$%pS",
+					existing_propinfo->ce->name, Z_STR_P(key));
 				zval_ptr_dtor_str(key);
 				return -1;
 			}
@@ -650,13 +650,13 @@ declared_property:
 
 				if (EXPECTED(!ret)) {
 					if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
-						zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
-							ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+						zend_throw_error(NULL, "Cannot create dynamic property %pS::$%s",
+							obj->ce->name, zend_get_unmangled_property_name(Z_STR_P(&key)));
 						zval_ptr_dtor_str(&key);
 						goto failure;
 					} else if (!(obj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-						zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
-							ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+						zend_error(E_DEPRECATED, "Creation of dynamic property %pS::$%s is deprecated",
+							obj->ce->name, zend_get_unmangled_property_name(Z_STR_P(&key)));
 						if (EG(exception)) {
 							zval_ptr_dtor_str(&key);
 							goto failure;
@@ -777,7 +777,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	}
 
 	if (ce->unserialize == NULL) {
-		zend_error(E_WARNING, "Class %s has no unserializer", ZSTR_VAL(ce->name));
+		zend_error(E_WARNING, "Class %pS has no unserializer", ce->name);
 		return 0;
 	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, datalen, (zend_unserialize_data *)var_hash) != SUCCESS) {
 		return 0;
@@ -1273,7 +1273,7 @@ object ":" uiv ":" ["]	{
 		/* The callback function may have defined the class */
 		BG(serialize_lock)++;
 		if ((ce = zend_lookup_class(class_name)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Function %s() hasn't defined the class it was called for", Z_STRVAL(user_func));
+			php_error_docref(NULL, E_WARNING, "Function %pS() hasn't defined the class it was called for", Z_STR(user_func));
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 		}
@@ -1285,8 +1285,8 @@ object ":" uiv ":" ["]	{
 	*p = YYCURSOR;
 
 	if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
-		zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed",
-			ZSTR_VAL(ce->name));
+		zend_throw_exception_ex(NULL, 0, "Unserialization of '%pS' is not allowed",
+			ce->name);
 		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
@@ -1336,7 +1336,7 @@ object ":" uiv ":" ["]	{
 	 * there is both Serializable::unserialize() and __unserialize(), then both may be used,
 	 * depending on the serialization format. */
 	if (ce->serialize != NULL && !has_unserialize) {
-		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ZSTR_VAL(ce->name));
+		zend_error(E_WARNING, "Erroneous data format for unserializing '%pS'", ce->name);
 		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
@@ -1392,11 +1392,11 @@ object ":" uiv ":" ["]	{
 
 	zend_class_entry *ce = zend_lookup_class(enum_name);
 	if (!ce) {
-		php_error_docref(NULL, E_WARNING, "Class '%s' not found", ZSTR_VAL(enum_name));
+		php_error_docref(NULL, E_WARNING, "Class '%pS' not found", enum_name);
 		goto fail;
 	}
 	if (!(ce->ce_flags & ZEND_ACC_ENUM)) {
-		php_error_docref(NULL, E_WARNING, "Class '%s' is not an enum", ZSTR_VAL(enum_name));
+		php_error_docref(NULL, E_WARNING, "Class '%pS' is not an enum", enum_name);
 		goto fail;
 	}
 
@@ -1405,12 +1405,12 @@ object ":" uiv ":" ["]	{
 
 	zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), case_name);
 	if (!c) {
-		php_error_docref(NULL, E_WARNING, "Undefined constant %s::%s", ZSTR_VAL(enum_name), ZSTR_VAL(case_name));
+		php_error_docref(NULL, E_WARNING, "Undefined constant %pS::%pS", enum_name, case_name);
 		goto fail;
 	}
 
 	if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
-		php_error_docref(NULL, E_WARNING, "%s::%s is not an enum case", ZSTR_VAL(enum_name), ZSTR_VAL(case_name));
+		php_error_docref(NULL, E_WARNING, "%pS::%pS is not an enum case", enum_name, case_name);
 		goto fail;
 	}
 
