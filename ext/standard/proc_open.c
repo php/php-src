@@ -938,7 +938,7 @@ static zend_result set_proc_descriptor_to_socket(descriptorspec_item *desc)
 
 	if (create_socketpair(sock)) {
 		zend_string *err = php_socket_error_str(php_socket_errno());
-		php_error_docref(NULL, E_WARNING, "Unable to create socket pair: %s", ZSTR_VAL(err));
+		php_error_docref(NULL, E_WARNING, "Unable to create socket pair: %pS", err);
 		zend_string_release(err);
 		return FAILURE;
 	}
@@ -1091,7 +1091,7 @@ static zend_result set_proc_descriptor_from_array(const HashTable *ht, descripto
 		/* Set descriptor to slave end of PTY */
 		retval = set_proc_descriptor_to_pty(&descriptors[ndesc], pty_master_fd, pty_slave_fd);
 	} else {
-		php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", ZSTR_VAL(ztype));
+		php_error_docref(NULL, E_WARNING, "%pS is not a valid descriptor spec/mode", ztype);
 		goto finish;
 	}
 
