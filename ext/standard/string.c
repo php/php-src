@@ -5524,7 +5524,7 @@ PHP_FUNCTION(str_repeat)
 
 		while (e<ee) {
 			l = (e-s) < (ee-e) ? (e-s) : (ee-e);
-			memmove(e, s, l);
+			memcpy(e, s, l);
 			e += l;
 		}
 	}
