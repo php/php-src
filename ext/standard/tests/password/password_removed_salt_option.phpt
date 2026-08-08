@@ -7,9 +7,9 @@ Test removed support for explicit salt option
 //-=-=-=-
 
 
-var_dump(strlen(password_hash("rasmuslerdorf", PASSWORD_BCRYPT, array("cost" => 7, "salt" => "usesomesillystringforsalt"))));
+var_dump(strlen(password_hash("rasmuslerdorf", PASSWORD_BCRYPT, array("cost" => 4, "salt" => "usesomesillystringforsalt"))));
 
-var_dump(strlen(password_hash("test", PASSWORD_BCRYPT, array("salt" => "123456789012345678901" . chr(0)))));
+var_dump(strlen(password_hash("test", PASSWORD_BCRYPT, array("cost" => 4, "salt" => "123456789012345678901" . chr(0)))));
 
 echo "OK!";
 ?>
