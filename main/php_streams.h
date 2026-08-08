@@ -322,10 +322,9 @@ static zend_always_inline bool php_stream_zend_parse_arg_into_stream(
 #define PHP_Z_PARAM_STREAM_EX(destination_stream_ptr, check_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!php_stream_zend_parse_arg_into_stream(_arg, &destination_stream_ptr, check_null, _i))) { \
-		_error_code = ZPP_ERROR_FAILURE; \
+		_expected_type = Z_EXPECTED_FAILURE; \
 		if (!EG(exception)) { \
 			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 		} \
 		break; \
 	}

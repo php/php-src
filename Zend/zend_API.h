@@ -1555,8 +1555,6 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_ARRAY_OR_LONG_OR_NULL, "of type array|int|null") \
 	_(Z_EXPECTED_ITERABLE,				"of type Traversable|array") \
 	_(Z_EXPECTED_ITERABLE_OR_NULL,		"of type Traversable|array|null") \
-	_(Z_EXPECTED_FUNC,				"a valid callback") \
-	_(Z_EXPECTED_FUNC_OR_NULL,		"a valid callback or null") \
 	_(Z_EXPECTED_RESOURCE,			"of type resource") \
 	_(Z_EXPECTED_RESOURCE_OR_NULL,	"of type resource or null") \
 	_(Z_EXPECTED_PATH,				"of type string") \
@@ -1577,6 +1575,20 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_OBJECT_OR_CLASS_NAME_OR_NULL, "an object, a valid class name, or null") \
 	_(Z_EXPECTED_OBJECT_OR_STRING,	"of type object|string") \
 	_(Z_EXPECTED_OBJECT_OR_STRING_OR_NULL, "of type object|string|null") \
+	/* Have special error message behaviour */ \
+	_(Z_EXPECTED_FUNC,				NULL) \
+	_(Z_EXPECTED_FUNC_OR_NULL,		NULL) \
+	_(Z_EXPECTED_CLASS_NAME,	NULL) \
+	_(Z_EXPECTED_CLASS_NAME_OR_NULL, NULL) \
+	_(Z_EXPECTED_CLASS, NULL) \
+	_(Z_EXPECTED_CLASS_OR_NULL, NULL) \
+	_(Z_EXPECTED_CLASS_OR_STRING, NULL) \
+	_(Z_EXPECTED_CLASS_OR_STRING_OR_NULL, NULL) \
+	_(Z_EXPECTED_CLASS_OR_LONG, NULL) \
+	_(Z_EXPECTED_CLASS_OR_LONG_OR_NULL, NULL) \
+	_(Z_EXPECTED_NO_EXTRA_NAMED, NULL) \
+	_(Z_EXPECTED_FAILURE, NULL)  /* For custom ZPP specifier which already throw an exception */ \
+	_(Z_EXPECTED_OK, NULL) \
 
 #define Z_EXPECTED_TYPE
 
@@ -1585,27 +1597,11 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 
 typedef enum _zend_expected_type {
 	Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_ENUM)
-	Z_EXPECTED_LAST
 } zend_expected_type;
-
-C23_ENUM(zpp_error, uint8_t) {
-	ZPP_ERROR_OK,
-	ZPP_ERROR_FAILURE,
-	ZPP_ERROR_WRONG_CALLBACK,
-	ZPP_ERROR_WRONG_CLASS,
-	ZPP_ERROR_WRONG_CLASS_OR_NULL,
-	ZPP_ERROR_WRONG_CLASS_OR_STRING,
-	ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL,
-	ZPP_ERROR_WRONG_CLASS_OR_LONG,
-	ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL,
-	ZPP_ERROR_WRONG_ARG,
-	ZPP_ERROR_UNEXPECTED_EXTRA_NAMED,
-	ZPP_ERROR_WRONG_CALLBACK_OR_NULL,
-};
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t min_num_args, uint32_t max_num_args);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(zpp_error error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(uint32_t num, char *name, zend_expected_type expected_type, const zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t num, zend_expected_type expected_type, const zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(uint32_t num, const char *name, const zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(uint32_t num, const char *name, const zval *arg);
@@ -1634,11 +1630,10 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		uint32_t _num_args = EX_NUM_ARGS(); \
 		uint32_t _i = 0; \
 		zval *_real_arg, *_arg = NULL; \
-		zend_expected_type _expected_type = Z_EXPECTED_LONG; \
+		zend_expected_type _expected_type = Z_EXPECTED_OK; \
 		char *_error = NULL; \
 		bool _dummy = 0; \
 		bool _optional = 0; \
-		zpp_error _error_code = ZPP_ERROR_OK; \
 		((void)_i); \
 		((void)_real_arg); \
 		((void)_arg); \
@@ -1653,7 +1648,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 				if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
 					zend_wrong_parameters_count_error(_min_num_args, _max_num_args); \
 				} \
-				_error_code = ZPP_ERROR_FAILURE; \
+				_expected_type = Z_EXPECTED_FAILURE; \
 				break; \
 			} \
 			_real_arg = ZEND_CALL_ARG(execute_data, 0);
@@ -1671,9 +1666,9 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define ZEND_PARSE_PARAMETERS_END_EX(failure) \
 			ZEND_ASSERT(_i == _max_num_args || _max_num_args == (uint32_t) -1); \
 		} while (0); \
-		if (UNEXPECTED(_error_code != ZPP_ERROR_OK)) { \
+		if (UNEXPECTED(_expected_type != Z_EXPECTED_OK)) { \
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
-				zend_wrong_parameter_error(_error_code, _i, _error, _expected_type, _arg); \
+				zend_wrong_parameter_error(_i, _error, _expected_type, _arg); \
 			} \
 			failure; \
 		} \
@@ -1713,7 +1708,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_array(_arg, &dest, check_null, 0))) { \
 			_expected_type = check_null ? Z_EXPECTED_ARRAY_OR_NULL : Z_EXPECTED_ARRAY; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -1731,7 +1725,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_array(_arg, &dest, check_null, 1))) { \
 			_expected_type = check_null ? Z_EXPECTED_ARRAY_OR_NULL : Z_EXPECTED_ARRAY; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -1745,7 +1738,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_iterable(_arg, &dest, check_null))) { \
 		_expected_type = check_null ? Z_EXPECTED_ITERABLE_OR_NULL : Z_EXPECTED_ITERABLE; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
@@ -1760,7 +1752,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_bool(_arg, &dest, &is_null, check_null, _i))) { \
 			_expected_type = check_null ? Z_EXPECTED_BOOL_OR_NULL : Z_EXPECTED_BOOL; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -1773,8 +1764,9 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 /* old "C" */
 #define Z_PARAM_CLASS_EX(dest, check_null, deref) \
 		Z_PARAM_PROLOGUE(deref, 0); \
+		_error = dest ? ZSTR_VAL((dest)->name) : NULL; \
 		if (UNEXPECTED(!zend_parse_arg_class(_arg, &dest, _i, check_null))) { \
-			_error_code = ZPP_ERROR_FAILURE; \
+			_expected_type = check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME; \
 			break; \
 		}
 
@@ -1788,7 +1780,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_obj_or_class_name(_arg, &dest, allow_null))) { \
 		_expected_type = allow_null ? Z_EXPECTED_OBJECT_OR_CLASS_NAME_OR_NULL : Z_EXPECTED_OBJECT_OR_CLASS_NAME; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
@@ -1802,7 +1793,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_obj_or_str(_arg, &destination_object, NULL, &destination_string, allow_null, _i))) { \
 		_expected_type = allow_null ? Z_EXPECTED_OBJECT_OR_STRING_OR_NULL : Z_EXPECTED_OBJECT_OR_STRING; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
@@ -1817,11 +1807,10 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	if (UNEXPECTED(!zend_parse_arg_obj_or_str(_arg, &destination_object, base_ce, &destination_string, allow_null, _i))) { \
 		if (base_ce) { \
 			_error = ZSTR_VAL((base_ce)->name); \
-			_error_code = allow_null ? ZPP_ERROR_WRONG_CLASS_OR_STRING_OR_NULL : ZPP_ERROR_WRONG_CLASS_OR_STRING; \
+			_expected_type = allow_null ? Z_EXPECTED_CLASS_OR_STRING_OR_NULL : Z_EXPECTED_CLASS_OR_STRING; \
 			break; \
 		} else { \
 			_expected_type = allow_null ? Z_EXPECTED_OBJECT_OR_STRING_OR_NULL : Z_EXPECTED_OBJECT_OR_STRING; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		} \
 	}
@@ -1837,7 +1826,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest, &is_null, check_null, _i))) { \
 			_expected_type = check_null ? Z_EXPECTED_DOUBLE_OR_NULL : Z_EXPECTED_DOUBLE; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -1851,12 +1839,8 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, free_trampoline) \
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error, free_trampoline))) { \
-			if (!_error) { \
-				_expected_type = check_null ? Z_EXPECTED_FUNC_OR_NULL : Z_EXPECTED_FUNC; \
-				_error_code = ZPP_ERROR_WRONG_ARG; \
-			} else { \
-				_error_code = check_null ? ZPP_ERROR_WRONG_CALLBACK_OR_NULL : ZPP_ERROR_WRONG_CALLBACK; \
-			} \
+			ZEND_ASSERT(_error); \
+			_expected_type = check_null ? Z_EXPECTED_FUNC_OR_NULL : Z_EXPECTED_FUNC; \
 			break; \
 		} \
 
@@ -1883,7 +1867,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 0, separate))) { \
 			_expected_type = check_null ? Z_EXPECTED_ARRAY_OR_NULL : Z_EXPECTED_ARRAY; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -1900,7 +1883,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_array_ht_or_long(_arg, &dest_ht, &dest_long, &is_null, allow_null, _i))) { \
 		_expected_type = allow_null ? Z_EXPECTED_ARRAY_OR_LONG_OR_NULL : Z_EXPECTED_ARRAY_OR_LONG; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
@@ -1915,7 +1897,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 1, separate))) { \
 			_expected_type = check_null ? Z_EXPECTED_ARRAY_OR_NULL : Z_EXPECTED_ARRAY; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -1930,7 +1911,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, _i))) { \
 			_expected_type = check_null ? Z_EXPECTED_LONG_OR_NULL : Z_EXPECTED_LONG; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -1945,7 +1925,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_number(_arg, &dest, check_null, _i))) { \
 		_expected_type = check_null ? Z_EXPECTED_NUMBER_OR_NULL : Z_EXPECTED_NUMBER; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
@@ -1959,7 +1938,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_number_or_str(_arg, &dest, check_null, _i))) { \
 		_expected_type = check_null ? Z_EXPECTED_NUMBER_OR_STRING_OR_NULL : Z_EXPECTED_NUMBER_OR_STRING; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
@@ -1974,7 +1952,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, NULL, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -1989,7 +1966,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, NULL, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -2005,11 +1981,10 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, _ce, check_null))) { \
 			if (_ce) { \
 				_error = ZSTR_VAL((_ce)->name); \
-				_error_code = check_null ? ZPP_ERROR_WRONG_CLASS_OR_NULL : ZPP_ERROR_WRONG_CLASS; \
+				_expected_type = check_null ? Z_EXPECTED_CLASS_OR_NULL : Z_EXPECTED_CLASS; \
 				break; \
 			} else { \
 				_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
-				_error_code = ZPP_ERROR_WRONG_ARG; \
 				break; \
 			} \
 		}
@@ -2026,11 +2001,10 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		if (UNEXPECTED(!zend_parse_arg_obj(_arg, &dest, _ce, check_null))) { \
 			if (_ce) { \
 				_error = ZSTR_VAL((_ce)->name); \
-				_error_code = check_null ? ZPP_ERROR_WRONG_CLASS_OR_NULL : ZPP_ERROR_WRONG_CLASS; \
+				_expected_type = check_null ? Z_EXPECTED_CLASS_OR_NULL : Z_EXPECTED_CLASS; \
 				break; \
 			} else { \
 				_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
-				_error_code = ZPP_ERROR_WRONG_ARG; \
 				break; \
 			} \
 		}
@@ -2045,7 +2019,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(0, 0); \
 		if (UNEXPECTED(!zend_parse_arg_obj_or_long(_arg, &dest_obj, _ce, &dest_long, &is_null, allow_null, _i))) { \
 			_error = ZSTR_VAL((_ce)->name); \
-			_error_code = allow_null ? ZPP_ERROR_WRONG_CLASS_OR_LONG_OR_NULL : ZPP_ERROR_WRONG_CLASS_OR_LONG; \
+			_expected_type = allow_null ? Z_EXPECTED_CLASS_OR_LONG_OR_NULL : Z_EXPECTED_CLASS_OR_LONG; \
 			break; \
 		}
 
@@ -2067,7 +2041,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_path(_arg, &dest, &dest_len, check_null, _i))) { \
 			_expected_type = check_null ? Z_EXPECTED_PATH_OR_NULL : Z_EXPECTED_PATH; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -2082,7 +2055,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_path_str(_arg, &dest, check_null, _i))) { \
 			_expected_type = check_null ? Z_EXPECTED_PATH_OR_NULL : Z_EXPECTED_PATH; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -2097,7 +2069,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_resource(_arg, &dest, check_null))) { \
 			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -2112,7 +2083,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_string(_arg, &dest, &dest_len, check_null, _i))) { \
 			_expected_type = check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -2127,7 +2097,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_str(_arg, &dest, check_null, _i))) { \
 			_expected_type = check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
@@ -2164,7 +2133,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 			dest_num = 0; \
 		} \
 		if (UNEXPECTED(ZEND_CALL_INFO(execute_data) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) { \
-			_error_code = ZPP_ERROR_UNEXPECTED_EXTRA_NAMED; \
+			_expected_type = Z_EXPECTED_NO_EXTRA_NAMED; \
 			break; \
 		} \
 	} while (0);
@@ -2192,7 +2161,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_array_ht_or_str(_arg, &dest_ht, &dest_str, allow_null, _i))) { \
 		_expected_type = allow_null ? Z_EXPECTED_ARRAY_OR_STRING_OR_NULL : Z_EXPECTED_ARRAY_OR_STRING; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
@@ -2206,7 +2174,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_str_or_long(_arg, &dest_str, &dest_long, &is_null, allow_null, _i))) { \
 		_expected_type = allow_null ? Z_EXPECTED_STRING_OR_LONG_OR_NULL : Z_EXPECTED_STRING_OR_LONG; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
 
