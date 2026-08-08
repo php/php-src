@@ -69,6 +69,10 @@ PHP                                                                        NEWS
   . Fixed out-of-bounds write when shm_attach() opens an existing segment with
     a size larger than the segment actually is. (David Carlier)
 
+- Zip:
+  . Fixed ZipArchive::addGlob() and ZipArchive::addPattern() ignoring their
+    default options when no options array is given. (David Carlier)
+
 30 Jul 2026, PHP 8.4.24
 
 - BCMath:
