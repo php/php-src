@@ -455,7 +455,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			use_proxy = 1;
 			transport_string = zend_string_copy(Z_STR_P(tmpzval));
 		} else {
-			transport_string = zend_strpprintf(0, "%s://%s:" ZEND_LONG_FMT, use_ssl ? "ssl" : "tcp", ZSTR_VAL(resource->host), resource->port);
+			transport_string = zend_strpprintf(0, "%s://%pS:" ZEND_LONG_FMT, use_ssl ? "ssl" : "tcp", resource->host, resource->port);
 		}
 	}
 
