@@ -17573,6 +17573,15 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, const zend_op *opline) {
 	return skip;
 }
 
+static void jit_frameless_cleanup_reentry_copies(zend_jit_ctx *jit, const zend_op *opline)
+{
+	ir_ref if_copies = ir_IF(ir_LOAD_A(jit_EG(frameless_reentry_copies)));
+	ir_IF_TRUE_cold(if_copies);
+	ir_CALL_2(IR_VOID, ir_CONST_ADDR((size_t)zend_frameless_cleanup_reentry_copies_for_handler),
+		jit_FP(jit), ir_CONST_ADDR((size_t)opline));
+	ir_MERGE_WITH_EMPTY_FALSE(if_copies);
+}
+
 static void jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
 {
 	jit_SET_EX_OPLINE(jit, opline);
@@ -17593,6 +17602,7 @@ static void jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
 		ir_MERGE_WITH(skip_observer);
 	}
 
+	jit_frameless_cleanup_reentry_copies(jit, opline);
 	zend_jit_check_exception(jit);
 }
 
@@ -17632,6 +17642,7 @@ static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint3
 		ir_MERGE_WITH(skip_observer);
 	}
 
+	jit_frameless_cleanup_reentry_copies(jit, opline);
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	zend_jit_check_exception(jit);
 }
@@ -17686,6 +17697,7 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 		ir_MERGE_WITH(skip_observer);
 	}
 
+	jit_frameless_cleanup_reentry_copies(jit, opline);
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) != 0
@@ -17767,6 +17779,7 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 		ir_MERGE_WITH(skip_observer);
 	}
 
+	jit_frameless_cleanup_reentry_copies(jit, opline);
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
 	bool op1_undef = false;

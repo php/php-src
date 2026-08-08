@@ -2558,6 +2558,7 @@ ZEND_API zend_result zend_std_cast_object_tostring(zend_object *readobj, zval *w
 			zend_class_entry *ce = readobj->ce;
 			if (ce->__tostring) {
 				zval retval;
+				zend_frameless_protect_args_for_reentry();
 				GC_ADDREF(readobj);
 				zend_call_known_instance_method_with_0_params(ce->__tostring, readobj, &retval);
 				zend_object_release(readobj);
