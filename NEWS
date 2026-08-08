@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-23120 (Stack overflow when comparing deeply nested DOM nodes
     with DOMNode::isEqualNode()). (Weilin Du)
 
+- LibXML:
+  . Fixed bug GH-22752 (Build failure with libxml 2.15). (David Carlier)
+
 - MBString:
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
     offset in a non-UTF-8 encoding). (Eyüp Can Akman)
