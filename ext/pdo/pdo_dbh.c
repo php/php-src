@@ -73,20 +73,15 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 	pdo_error_type *pdo_err = &dbh->error_code;
 	const char *msg;
 
-	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
-#if 0
-		/* BUG: if user is running in silent mode and hits an error at the driver level
-		 * when they use the PDO methods to call up the error information, they may
-		 * get bogus information */
-		return;
-#endif
-	}
-
 	if (stmt) {
 		pdo_err = &stmt->error_code;
 	}
 
 	memcpy(*pdo_err, sqlstate, sizeof(pdo_error_type));
+
+	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
+		return;
+	}
 
 	/* hash sqlstate to error messages */
 	msg = pdo_sqlstate_state_to_description(*pdo_err);
