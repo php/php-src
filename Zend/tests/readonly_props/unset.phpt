@@ -54,6 +54,33 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+class Test4 {
+    public readonly int $prop = 1;
+
+    public function __construct() {
+        try {
+            unset($this->prop);
+        } catch (Error $e) {
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+        }
+    }
+
+    public function __get($name) {
+        echo __METHOD__, "\n"; // lazy pattern does not work
+        $this->prop = 2;
+        return $this->prop;
+    }
+}
+
+$test = new Test4;
+var_dump($test->prop); // Don't call __get.
+try {
+    unset($test->prop);
+} catch (Error $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+var_dump($test->prop); // Still don't call __get.
+
 ?>
 --EXPECT--
 Cannot unset readonly property Test::$prop
@@ -62,3 +89,7 @@ int(1)
 int(1)
 Cannot unset readonly property Test2::$prop
 Cannot unset protected(set) readonly property Test3::$prop from global scope
+Error: Cannot unset readonly property Test4::$prop
+int(1)
+Error: Cannot unset readonly property Test4::$prop
+int(1)
