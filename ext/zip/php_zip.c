@@ -58,6 +58,12 @@ static int le_zip_entry;
 	}
 /* }}} */
 
+#ifdef HAVE_ENCRYPTION
+#define PHP_ZIP_DEFAULT_OPTIONS { .enc_method = -1, .comp_method = -1, .flags = ZIP_FL_OVERWRITE }
+#else
+#define PHP_ZIP_DEFAULT_OPTIONS { .comp_method = -1, .flags = ZIP_FL_OVERWRITE }
+#endif
+
 /* {{{ php_zip_set_file_comment */
 static bool php_zip_set_file_comment(struct zip *za, zip_uint64_t index, const char *comment, size_t comment_len)
 {
@@ -366,13 +372,6 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 /* {{{ */
 {
 	zval *option;
-
-	/* default values */
-	opts->flags = ZIP_FL_OVERWRITE;
-	opts->comp_method = -1; /* -1 to not change default */
-#ifdef HAVE_ENCRYPTION
-	opts->enc_method = -1;  /* -1 to not change default */
-#endif
 
 	if ((option = zend_hash_str_find(options, "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
 		if (Z_TYPE_P(option) != IS_FALSE && Z_TYPE_P(option) != IS_TRUE) {
@@ -1709,7 +1708,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	size_t  path_len = 1;
 	zend_long glob_flags = 0;
 	HashTable *options = NULL;
-	zip_options opts = {0};
+	zip_options opts = PHP_ZIP_DEFAULT_OPTIONS;
 	int found;
 	zend_string *pattern;
 
