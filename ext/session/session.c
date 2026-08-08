@@ -97,6 +97,9 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 #define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\013\014"
 #define SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "=,;.[ \\t\\r\\n\\013\\014"
 
+#define SESSION_FORBIDDEN_COOKIE_CHARS ",; \t\r\n\013\014"
+#define SESSION_FORBIDDEN_COOKIE_CHARS_FOR_ERROR_MSG ",; \\t\\r\\n\\013\\014"
+
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
 
 static zend_result php_session_send_cookie(void);
@@ -761,6 +764,18 @@ static PHP_INI_MH(OnUpdateSessionStr)
 	return OnUpdateStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
+static PHP_INI_MH(OnUpdateSessionCookieStr)
+{
+	if (new_value && strpbrk(ZSTR_VAL(new_value), SESSION_FORBIDDEN_COOKIE_CHARS) != NULL) {
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			php_error_docref(NULL, E_WARNING, "\"%s\" must not contain any of the following characters \"" SESSION_FORBIDDEN_COOKIE_CHARS_FOR_ERROR_MSG "\"", ZSTR_VAL(entry->name));
+		}
+		return FAILURE;
+	}
+
+	return OnUpdateSessionStr(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+}
+
 static PHP_INI_MH(OnUpdateSessionSameSite)
 {
 	SESSION_CHECK_ACTIVE_STATE;
@@ -948,8 +963,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.gc_maxlifetime",       "1440",      PHP_INI_ALL,    OnUpdateSessionLong,          gc_maxlifetime,     php_ps_globals, ps_globals)
 	PHP_INI_ENTRY("session.serialize_handler",        "php",       PHP_INI_ALL,    OnUpdateSerializer)
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",      "0",         PHP_INI_ALL,    OnUpdateCookieLifetime,       cookie_lifetime,    php_ps_globals, ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_path",          "/",         PHP_INI_ALL,    OnUpdateSessionStr,           cookie_path,        php_ps_globals, ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_domain",        "",          PHP_INI_ALL,    OnUpdateSessionStr,           cookie_domain,      php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_path",          "/",         PHP_INI_ALL,    OnUpdateSessionCookieStr,     cookie_path,        php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_domain",        "",          PHP_INI_ALL,    OnUpdateSessionCookieStr,     cookie_domain,      php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_secure",      "0",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_secure,      php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_partitioned", "0",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_partitioned, php_ps_globals, ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_httponly",    "1",         PHP_INI_ALL,    OnUpdateSessionBool,          cookie_httponly,    php_ps_globals, ps_globals)
