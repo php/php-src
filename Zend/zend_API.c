@@ -380,7 +380,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(
 {
 	zend_string *func_name;
 	const char *arg_name;
-	char *message = NULL;
 	if (EG(exception)) {
 		return;
 	}
@@ -388,12 +387,12 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(
 	func_name = get_function_or_method_name(function);
 	arg_name = get_function_arg_name(function, arg_num);
 
-	zend_vspprintf(&message, 0, format, va);
-	zend_throw_error(error_ce, "%s(): Argument #%d%s%s%s %s",
+	zend_string *message = zend_vstrpprintf(0, format, va);
+	zend_throw_error(error_ce, "%s(): Argument #%d%s%s%s %pS",
 		ZSTR_VAL(func_name), arg_num,
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
 	);
-	efree(message);
+	zend_string_release(message);
 	zend_string_release(func_name);
 }
 
