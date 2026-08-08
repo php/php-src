@@ -14,13 +14,13 @@ set_error_handler(function() {
         echo 'Internal handler' . PHP_EOL;
     });
 
-    $triggerInternalNotice++; // warnings while handling the error should go into internal handler
+	trigger_error('Error', E_USER_WARNING); // warnings while handling the error should go into internal handler
 
     restore_error_handler();
 });
 
-$triggerNotice1++;
-$triggerNotice2++;
+trigger_error('Error', E_USER_WARNING);
+trigger_error('Error', E_USER_WARNING);
 ?>
 --EXPECT--
 Second handler

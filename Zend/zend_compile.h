@@ -978,7 +978,7 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void);
 
 #define zend_try_exception_handler() do { \
 		if (UNEXPECTED(EG(exception))) { \
-			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) { \
+			if (ZEND_FCC_INITIALIZED(EG(user_exception_handler))) { \
 				zend_user_exception_handler(); \
 			} \
 		} \

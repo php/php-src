@@ -27,6 +27,7 @@
 #include "zend_variables.h"
 #include "zend_execute.h"
 #include "zend_type_info.h"
+#include "zend_user_functions.h"
 #include "zend_frameless_function.h"
 
 BEGIN_EXTERN_C()
@@ -40,29 +41,6 @@ typedef struct _zend_function_entry {
 	const zend_frameless_function_info *frameless_function_infos;
 	const char *doc_comment;
 } zend_function_entry;
-
-typedef struct _zend_fcall_info {
-	size_t size;
-	zval function_name;
-	zval *retval;
-	zval *params;
-	zend_object *object;
-	uint32_t param_count;
-	uint32_t consumed_args;
-	/* This hashtable can also contain positional arguments (with integer keys),
-	 * which will be appended to the normal params[]. This makes it easier to
-	 * integrate APIs like call_user_func_array(). The usual restriction that
-	 * there may not be position arguments after named arguments applies. */
-	HashTable *named_params;
-} zend_fcall_info;
-
-typedef struct _zend_fcall_info_cache {
-	zend_function *function_handler;
-	zend_class_entry *calling_scope;
-	zend_class_entry *called_scope;
-	zend_object *object; /* Instance of object for method calls */
-	zend_object *closure; /* Closure reference, only if the callable *is* the object */
-} zend_fcall_info_cache;
 
 #define ZEND_NS_NAME(ns, name)			ns "\\" name
 
@@ -338,9 +316,6 @@ typedef struct _zend_fcall_info_cache {
 
 #define CE_BACKED_ENUM_TABLE(ce) \
 	zend_class_backed_enum_table(ce)
-
-#define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
-#define ZEND_FCC_INITIALIZED(fcc) ((fcc).function_handler != NULL)
 
 static zend_always_inline uint32_t zend_fci_consumed_arg(uint32_t arg_index) {
 	return arg_index < 32 ? (UINT32_C(1) << arg_index) : UINT32_C(0);
@@ -704,14 +679,6 @@ ZEND_API zend_result _call_user_function_impl(zval *object, zval *function_name,
 
 #define call_user_function_named(function_table, object, function_name, retval_ptr, param_count, params, named_params) \
 	_call_user_function_impl(object, function_name, retval_ptr, param_count, params, named_params)
-
-#ifndef __cplusplus
-# define empty_fcall_info (zend_fcall_info) {0}
-# define empty_fcall_info_cache (zend_fcall_info_cache) {0}
-#else
-# define empty_fcall_info zend_fcall_info {}
-# define empty_fcall_info_cache zend_fcall_info_cache {}
-#endif
 
 /** Build zend_call_info/cache from a zval*
  *
