@@ -10,7 +10,7 @@ try {
     new SoapClient(__DIR__ . '/bug50698_2.wsdl');
     echo "Call: \"new SoapClient(__DIR__.'/bug50698_2.wsdl');\" should throw an exception of type 'SoapFault'";
 } catch (SoapFault $e) {
-    if ($e->faultcode == 'WSDL' && $e->faultstring == 'SOAP-ERROR: Parsing WSDL: Could not find any usable binding services in WSDL.') {
+    if ($e->faultcode == 'WSDL' && $e->faultstring == 'SoapClient::__construct(): Parsing WSDL: Could not find any usable binding services in WSDL.') {
         echo "ok\n";
     } else {
         echo "Call: \"new SoapClient(__DIR__.'/bug50698_2.wsdl');\" threw a SoapFault with an incorrect faultcode or faultmessage.";

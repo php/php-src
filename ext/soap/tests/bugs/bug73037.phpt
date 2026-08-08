@@ -136,43 +136,43 @@ cleanup:
 --EXPECT--
 Iteration 0
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
 Iteration 1
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
 Iteration 2
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
 Iteration 3
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
 Iteration 4
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
 Iteration 5
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
 Iteration 6
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 
-Function 'CATALOG' doesn't exist
+SoapServer::handle(): Function 'CATALOG' doesn't exist
 

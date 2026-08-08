@@ -1,5 +1,5 @@
 --TEST--
-Bug #44686 (SOAP-ERROR: Parsing WSDL with references)
+Bug #44686 (Parsing WSDL with references)
 --EXTENSIONS--
 soap
 --INI--
