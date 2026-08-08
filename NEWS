@@ -97,6 +97,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
+  . Fixed bug GH-23120 (Stack overflow when comparing deeply nested DOM nodes
+    with DOMNode::isEqualNode()). (Weilin Du)
 
 - Embed:
   . Made php-cli functionality available in embed builds. (henderkes)
