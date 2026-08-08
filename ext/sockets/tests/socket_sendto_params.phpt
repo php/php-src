@@ -8,9 +8,9 @@ sockets
     try {
         $s_w = socket_sendto($s_c, "foo", -1, MSG_OOB, '127.0.0.1');
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     socket_close($s_c);
 ?>
 --EXPECT--
-socket_sendto(): Argument #3 ($length) must be greater than or equal to 0
+ValueError: socket_sendto(): Argument #3 ($length) must be greater than or equal to 0
