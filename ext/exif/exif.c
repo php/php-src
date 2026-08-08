@@ -110,7 +110,7 @@ ZEND_INI_MH(OnUpdateEncode)
 		size_t return_size;
 		if (FAILURE == zend_multibyte_parse_encoding_list(ZSTR_VAL(new_value), ZSTR_LEN(new_value),
 	&return_list, &return_size, 0)) {
-			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%s'", ZSTR_VAL(new_value));
+			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%pS'", new_value);
 			return FAILURE;
 		}
 		pefree((void *) return_list, 0);
@@ -125,7 +125,7 @@ ZEND_INI_MH(OnUpdateDecode)
 		size_t return_size;
 		if (FAILURE == zend_multibyte_parse_encoding_list(ZSTR_VAL(new_value), ZSTR_LEN(new_value),
 	&return_list, &return_size, 0)) {
-			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%s'", ZSTR_VAL(new_value));
+			php_error_docref(NULL, E_WARNING, "Illegal encoding ignored: '%pS'", new_value);
 			return FAILURE;
 		}
 		pefree((void *) return_list, 0);
