@@ -3443,9 +3443,6 @@ lxb_url_host_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
 
     if (lxb_url_is_ipv4(parser, domain->data, end)) {
         status = lxb_url_ipv4_parse(parser, domain->data, end, &ipv4);
-
-        (void) lexbor_str_destroy(domain, mraw, false);
-
         if (status != LXB_STATUS_OK) {
             return status;
         }
