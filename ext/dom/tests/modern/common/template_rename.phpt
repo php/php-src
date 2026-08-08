@@ -20,7 +20,7 @@ var_dump($template->innerHTML);
 try {
     $template->rename($template->namespaceURI, 'screwthis');
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // These shouldn't be changed!
@@ -30,6 +30,6 @@ var_dump($template->innerHTML);
 ?>
 --EXPECT--
 string(16) "a<div>foo</div>b"
-It is not possible to rename the template element because it hosts a document fragment
+DOMException: It is not possible to rename the template element because it hosts a document fragment
 string(8) "TEMPLATE"
 string(16) "a<div>foo</div>b"

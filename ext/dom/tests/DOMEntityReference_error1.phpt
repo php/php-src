@@ -8,9 +8,9 @@ try {
     new DOMEntityReference('!');
 } catch (DOMException $e) {
     var_dump($e->getCode() === DOM_INVALID_CHARACTER_ERR);
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 bool(true)
-Invalid Character Error
+DOMException: Invalid Character Error

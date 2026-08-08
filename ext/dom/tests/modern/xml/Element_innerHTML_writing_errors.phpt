@@ -19,7 +19,7 @@ function test($child, $html) {
     try {
         $child->innerHTML = $html;
     } catch (DOMException $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($dom->saveXML() === $original);
 }
@@ -33,15 +33,15 @@ test($child, '<!ENTITY foo "content">');
 
 ?>
 --EXPECT--
-XML fragment is not well-formed
+DOMException: XML fragment is not well-formed
 bool(true)
-XML fragment is not well-formed
+DOMException: XML fragment is not well-formed
 bool(true)
-XML fragment is not well-formed
+DOMException: XML fragment is not well-formed
 bool(true)
-XML fragment is not well-formed
+DOMException: XML fragment is not well-formed
 bool(true)
-XML fragment is not well-formed
+DOMException: XML fragment is not well-formed
 bool(true)
-XML fragment is not well-formed
+DOMException: XML fragment is not well-formed
 bool(true)

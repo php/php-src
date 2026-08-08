@@ -19,7 +19,7 @@ echo $dom->saveXML();
 try {
     $dom->version = new MyThrowingStringable;
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->version);
 echo $dom->saveXML();
@@ -28,6 +28,6 @@ echo $dom->saveXML();
 string(3) "1.0"
 string(6) "foobar"
 <?xml version="foobar"?>
-An exception was thrown
+Exception: An exception was thrown
 string(6) "foobar"
 <?xml version="foobar"?>

@@ -13,12 +13,12 @@ $attr->value = "hello";
 try {
     $element->appendChild($attr);
 } catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($attr->value);
 
 ?>
 --EXPECT--
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 string(5) "hello"

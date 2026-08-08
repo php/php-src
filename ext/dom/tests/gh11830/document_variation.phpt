@@ -27,7 +27,7 @@ function test($method) {
     try {
         $doc->documentElement->firstElementChild->$method($testElement, $otherElement);
     } catch (\DOMException $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     echo $otherDoc->saveXML();
@@ -41,7 +41,7 @@ test("after");
 test("replaceWith");
 ?>
 --EXPECT--
-Wrong Document Error
+DOMException: Wrong Document Error
 <?xml version="1.0"?>
 <other/>
 <?xml version="1.0"?>
@@ -49,7 +49,7 @@ Wrong Document Error
     <alone/>
     <child/>
 </container>
-Wrong Document Error
+DOMException: Wrong Document Error
 <?xml version="1.0"?>
 <other/>
 <?xml version="1.0"?>
@@ -57,7 +57,7 @@ Wrong Document Error
     <alone/>
     <child/>
 </container>
-Wrong Document Error
+DOMException: Wrong Document Error
 <?xml version="1.0"?>
 <other/>
 <?xml version="1.0"?>
@@ -65,7 +65,7 @@ Wrong Document Error
     <alone/>
     <child/>
 </container>
-Wrong Document Error
+DOMException: Wrong Document Error
 <?xml version="1.0"?>
 <other/>
 <?xml version="1.0"?>
@@ -73,7 +73,7 @@ Wrong Document Error
     <alone/>
     <child/>
 </container>
-Wrong Document Error
+DOMException: Wrong Document Error
 <?xml version="1.0"?>
 <other/>
 <?xml version="1.0"?>

@@ -14,7 +14,7 @@ foreach ($elements as $i) {
     try {
         $i->previousSibling->nodeValue = '';
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -25,8 +25,8 @@ print_r($arr);
 
 ?>
 --EXPECT--
-Attempt to assign property "nodeValue" on null
-Attempt to assign property "nodeValue" on null
+Error: Attempt to assign property "nodeValue" on null
+Error: Attempt to assign property "nodeValue" on null
 Array
 (
     [0] => Value

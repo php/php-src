@@ -10,8 +10,8 @@ $e = $doc->createElement('e');
 try {
     $e->appendChild($doc);
 } catch (DOMException $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Hierarchy Request Error
+DOMException: Hierarchy Request Error

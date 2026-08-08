@@ -13,7 +13,7 @@ $b->appendChild($c);
 try {
 	$b->replaceChild($a, $c);
 } catch (DOMException $e) {
-	echo "DOMException: " . $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

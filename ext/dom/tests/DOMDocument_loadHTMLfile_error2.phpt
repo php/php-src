@@ -12,16 +12,16 @@ $doc = new DOMDocument();
 try {
     $result = $doc->loadHTMLFile("");
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $doc = new DOMDocument();
 try {
     $result = $doc->loadHTMLFile("text.html\0something");
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-DOMDocument::loadHTMLFile(): Argument #1 ($filename) must not be empty
-DOMDocument::loadHTMLFile(): Argument #1 ($filename) must not contain any null bytes
+ValueError: DOMDocument::loadHTMLFile(): Argument #1 ($filename) must not be empty
+ValueError: DOMDocument::loadHTMLFile(): Argument #1 ($filename) must not contain any null bytes

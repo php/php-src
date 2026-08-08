@@ -27,7 +27,7 @@ unset($decl);
 try {
     var_dump($iter->current()->publicId);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

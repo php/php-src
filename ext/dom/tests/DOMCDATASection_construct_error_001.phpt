@@ -10,8 +10,8 @@ dom
     try {
         $section = new DOMCDataSection();
     } catch (TypeError $e) {
-        echo $e->getMessage();
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 ?>
 --EXPECT--
-DOMCdataSection::__construct() expects exactly 1 argument, 0 given
+ArgumentCountError: DOMCdataSection::__construct() expects exactly 1 argument, 0 given

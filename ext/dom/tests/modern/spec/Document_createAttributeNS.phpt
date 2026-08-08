@@ -12,7 +12,7 @@ function testErrorCase($dom, $ns, $qname) {
         $dom->createAttributeNS($ns, $qname);
     } catch (DOMException $e) {
         $ns_readable = is_null($ns) ? 'null' : "\"$ns\"";
-        echo "($ns_readable, \"$qname\"): {$e->getMessage()}\n";
+        echo "($ns_readable, \"$qname\"): ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -68,13 +68,13 @@ echo $dom->saveHtml(), "\n";
 ?>
 --EXPECT--
 --- Error cases ---
-("", "bar:bar"): Namespace Error
-(null, "bar:bar"): Namespace Error
-("urn:a", "@"): Invalid Character Error
-("urn:a", "foo:bar:baz"): Invalid Character Error
-("http://www.w3.org/2000/xmlns", "xmlns"): Namespace Error
-("http://www.w3.org/2000/xmlns", "xmlns:bar"): Namespace Error
-("http://www.w3.org/2000/xmlns", "xml:foo"): Namespace Error
+("", "bar:bar"): DOMException: Namespace Error
+(null, "bar:bar"): DOMException: Namespace Error
+("urn:a", "@"): DOMException: Invalid Character Error
+("urn:a", "foo:bar:baz"): DOMException: Invalid Character Error
+("http://www.w3.org/2000/xmlns", "xmlns"): DOMException: Namespace Error
+("http://www.w3.org/2000/xmlns", "xmlns:bar"): DOMException: Namespace Error
+("http://www.w3.org/2000/xmlns", "xml:foo"): DOMException: Namespace Error
 
 --- Normal cases ---
 Attr: xmlns:foo
