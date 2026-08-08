@@ -232,7 +232,7 @@ ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len)
 	ZVAL_UNDEF(dst);																		\
 	if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), dst, ctype) == FAILURE) {					\
 		zend_error(E_WARNING,																\
-			"Object of class %s could not be converted to %s", ZSTR_VAL(Z_OBJCE_P(op)->name),\
+			"Object of class %pS could not be converted to %s", Z_OBJCE_P(op)->name,        \
 		zend_get_type_by_const(ctype));														\
 	} 																						\
 
@@ -795,7 +795,7 @@ try_again:
 				return;
 			}
 			if (!EG(exception)) {
-				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
+				zend_throw_error(NULL, "Object of class %pS could not be converted to string", Z_OBJCE_P(op)->name);
 			}
 			zval_ptr_dtor(op);
 			ZVAL_EMPTY_STRING(op);
@@ -933,7 +933,7 @@ ZEND_API void ZEND_COLD zend_incompatible_double_to_long_error(double d)
 }
 ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string *s)
 {
-	zend_error(E_DEPRECATED, "Implicit conversion from float-string \"%s\" to int loses precision", ZSTR_VAL(s));
+	zend_error(E_DEPRECATED, "Implicit conversion from float-string \"%pS\" to int loses precision", s);
 }
 ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d)
 {
@@ -941,7 +941,7 @@ ZEND_API void ZEND_COLD zend_oob_double_to_long_error(double d)
 }
 ZEND_API void ZEND_COLD zend_oob_string_to_long_error(const zend_string *s)
 {
-	zend_error_unchecked(E_WARNING, "The float-string \"%s\" is not representable as an int, cast occurred", ZSTR_VAL(s));
+	zend_error(E_WARNING, "The float-string \"%pS\" is not representable as an int, cast occurred", s);
 }
 
 ZEND_API void ZEND_COLD zend_nan_coerced_to_type_warning(uint8_t type)
@@ -1084,7 +1084,7 @@ try_again:
 				return Z_STR(tmp);
 			}
 			if (!EG(exception)) {
-				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
+				zend_throw_error(NULL, "Object of class %pS could not be converted to string", Z_OBJCE_P(op)->name);
 			}
 			return try ? NULL : ZSTR_EMPTY_ALLOC();
 		}
@@ -2910,7 +2910,7 @@ ZEND_API bool ZEND_FASTCALL zend_object_is_true(const zval *op) /* {{{ */
 	if (zobj->handlers->cast_object(zobj, &tmp, _IS_BOOL) == SUCCESS) {
 		return Z_TYPE(tmp) == IS_TRUE;
 	}
-	zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to bool", ZSTR_VAL(zobj->ce->name));
+	zend_error(E_RECOVERABLE_ERROR, "Object of class %pS could not be converted to bool", zobj->ce->name);
 	return false;
 }
 /* }}} */
