@@ -16,7 +16,8 @@ register_shutdown_function(static function (): void {
 });
 
 $fiber = new Fiber(static function (): void {
-    str_repeat('X', PHP_INT_MAX);
+    $allocSize = PHP_INT_SIZE <= PHP_SYS_SIZE ? PHP_INT_MAX : 2 ** (PHP_SYS_SIZE * 8 - 1) - 1;
+    str_repeat('X', $allocSize);
 });
 $fiber->start();
 
