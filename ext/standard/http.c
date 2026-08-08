@@ -71,7 +71,7 @@ try_again:
 		case IS_OBJECT:
 			ZEND_ASSERT(Z_OBJCE_P(scalar)->ce_flags & ZEND_ACC_ENUM);
 			if (Z_OBJCE_P(scalar)->enum_backing_type == IS_UNDEF) {
-				zend_value_error("Unbacked enum %s cannot be converted to a string", ZSTR_VAL(Z_OBJCE_P(scalar)->name));
+				zend_value_error("Unbacked enum %pS cannot be converted to a string", Z_OBJCE_P(scalar)->name);
 				return;
 			}
 			scalar = zend_enum_fetch_case_value(Z_OBJ_P(scalar));
@@ -256,7 +256,7 @@ static zend_result cache_request_parse_body_option(HashTable *options, zval *opt
 			zend_string *errstr;
 			result = zend_ini_parse_quantity(Z_STR_P(option), &errstr);
 			if (errstr) {
-				zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+				zend_error(E_WARNING, "%pS", errstr);
 				zend_string_release(errstr);
 			}
 		} else if (Z_TYPE_P(option) == IS_LONG) {
@@ -313,7 +313,7 @@ static zend_result cache_request_parse_body_options(HashTable *options)
 				break;
 		}
 
-		zend_value_error("Invalid key \"%s\" in $options argument", ZSTR_VAL(key));
+		zend_value_error("Invalid key \"%pS\" in $options argument", key);
 		return FAILURE;
 	} ZEND_HASH_FOREACH_END();
 
