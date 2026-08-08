@@ -78,11 +78,11 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 
 	zend_error_noreturn(E_ERROR,
 		can_extend
-			? "%s %s cannot implement interface %s, extend Exception or Error instead"
-			: "%s %s cannot implement interface %s",
+			? "%s %pS cannot implement interface %pS, extend Exception or Error instead"
+			: "%s %pS cannot implement interface %pS",
 		zend_get_object_type_uc(class_type),
-		ZSTR_VAL(class_type->name),
-		ZSTR_VAL(interface->name));
+		class_type->name,
+		interface->name);
 	return FAILURE;
 }
 /* }}} */
@@ -497,8 +497,8 @@ ZEND_METHOD(ErrorException, getSeverity)
 		tmp = zend_hash_find(ht, key);                                      \
 		if (tmp) {                                                          \
 			if (UNEXPECTED(Z_TYPE_P(tmp) != IS_STRING)) {                   \
-				zend_error(E_WARNING, "Value for %s is not a string",       \
-					ZSTR_VAL(key));                                         \
+				zend_error(E_WARNING, "Value for %pS is not a string",      \
+					key);                                                   \
 				smart_str_appends(str, "[unknown]");                        \
 			} else {                                                        \
 				smart_str_append(str, Z_STR_P(tmp));                        \
@@ -774,7 +774,7 @@ ZEND_METHOD(Exception, __toString)
 		}
 
 		if ((Z_OBJCE_P(exception) == zend_ce_type_error || Z_OBJCE_P(exception) == zend_ce_argument_count_error) && strstr(ZSTR_VAL(message), ", called in ")) {
-			zend_string *real_message = zend_strpprintf_unchecked(0, "%S and defined", message);
+			zend_string *real_message = zend_strpprintf(0, "%pS and defined", message);
 			zend_string_release_ex(message, 0);
 			message = real_message;
 		}
@@ -789,11 +789,11 @@ ZEND_METHOD(Exception, __toString)
 			zval message_zv;
 			ZVAL_STR(&message_zv, message);
 
-			str = zend_strpprintf_unchecked(0, "%S: %S in %S:" ZEND_LONG_FMT "\nStack trace:\n%S%s%S",
+			str = zend_strpprintf(0, "%pS: %pS in %pS:" ZEND_LONG_FMT "\nStack trace:\n%pS%s%pS",
 				name, message, file, line,
 				tmp_trace, ZSTR_LEN(prev_str) ? "\n\nNext " : "", prev_str);
 		} else {
-			str = zend_strpprintf_unchecked(0, "%S in %S:" ZEND_LONG_FMT "\nStack trace:\n%S%s%S",
+			str = zend_strpprintf(0, "%pS in %pS:" ZEND_LONG_FMT "\nStack trace:\n%pS%s%pS",
 				name, file, line,
 				tmp_trace, ZSTR_LEN(prev_str) ? "\n\nNext " : "", prev_str);
 		}
@@ -1002,7 +1002,7 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 				zend_unwrap_reference(&tmp);
 			}
 			if (Z_TYPE(tmp) != IS_STRING) {
-				zend_error(E_WARNING, "%s::__toString() must return a string", ZSTR_VAL(ce_exception->name));
+				zend_error(E_WARNING, "%pS::__toString() must return a string", ce_exception->name);
 			} else {
 				zend_update_property_ex(i_get_exception_base(ex), ex, ZSTR_KNOWN(ZEND_STR_STRING), &tmp);
 			}
@@ -1020,8 +1020,8 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 			}
 
 			zend_error_va(E_WARNING, (file && ZSTR_LEN(file) > 0) ? file : NULL, line,
-				"Uncaught %s in exception handling during call to %s::__toString()",
-				ZSTR_VAL(Z_OBJCE(zv)->name), ZSTR_VAL(ce_exception->name));
+				"Uncaught %pS in exception handling during call to %pS::__toString()",
+				Z_OBJCE(zv)->name, ce_exception->name);
 
 			if (file) {
 				zend_string_release_ex(file, 0);
@@ -1034,7 +1034,7 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 
 		zend_error_va(severity | E_DONT_BAIL,
 			(file && ZSTR_LEN(file) > 0) ? file : NULL, line,
-			"Uncaught %S\n  thrown", str);
+			"Uncaught %pS\n  thrown", str);
 
 		zend_string_release_ex(str, 0);
 		zend_string_release_ex(file, 0);
@@ -1042,7 +1042,7 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 		/* We successfully unwound, nothing more to do.
 		 * We still return FAILURE in this case, as further execution should still be aborted. */
 	} else {
-		zend_error(severity, "Uncaught exception %s", ZSTR_VAL(ce_exception->name));
+		zend_error(severity, "Uncaught exception %pS", ce_exception->name);
 	}
 
 	OBJ_RELEASE(ex);
@@ -1063,7 +1063,7 @@ ZEND_NORETURN void zend_exception_uncaught_error(const char *format, ...) {
 
 	zend_string *exception_str = zval_get_string(&exception_zv);
 	zend_error_noreturn(E_ERROR,
-		"%s: Uncaught %s", ZSTR_VAL(prefix), ZSTR_VAL(exception_str));
+		"%pS: Uncaught %pS", prefix, exception_str);
 }
 
 ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
