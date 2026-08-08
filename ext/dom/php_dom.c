@@ -1982,13 +1982,14 @@ void php_dom_normalize_legacy(xmlNodePtr nodep)
 					continue;
 				}
 				break;
-			case XML_ELEMENT_NODE:
+			case XML_ELEMENT_NODE: {
 				xmlAttrPtr attr = child->properties;
 				while (attr != NULL) {
 					php_dom_normalize_legacy((xmlNodePtr) attr);
 					attr = attr->next;
 				}
 				break;
+			}
 			default:
 				break;
 		}
