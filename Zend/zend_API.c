@@ -89,7 +89,7 @@ ZEND_API ZEND_COLD void zend_wrong_property_read(const zval *object, zval *prope
 {
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", ZSTR_VAL(property_name), zend_zval_value_name(object));
+	zend_error(E_WARNING, "Attempt to read property \"%pS\" on %s", property_name, zend_zval_value_name(object));
 	zend_tmp_string_release(tmp_property_name);
 }
 
@@ -201,7 +201,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void) /* 
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 	zend_string *func_name = get_active_function_or_method_name();
 
-	zend_argument_count_error("%s() expects exactly 0 arguments, %" PRIu32 " given", ZSTR_VAL(func_name), num_args);
+	zend_argument_count_error("%pS() expects exactly 0 arguments, %" PRIu32 " given", func_name, num_args);
 
 	zend_string_release(func_name);
 }
@@ -213,8 +213,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t
 	zend_string *func_name = get_active_function_or_method_name();
 
 	zend_argument_count_error(
-		"%s() expects %s %d argument%s, %d given",
-		ZSTR_VAL(func_name),
+		"%pS() expects %s %d argument%s, %d given",
+		func_name,
 		min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
 		num_args < min_num_args ? min_num_args : max_num_args,
 		(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
@@ -389,8 +389,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(
 	arg_name = get_function_arg_name(function, arg_num);
 
 	zend_vspprintf(&message, 0, format, va);
-	zend_throw_error(error_ce, "%s(): Argument #%d%s%s%s %s",
-		ZSTR_VAL(func_name), arg_num,
+	zend_throw_error(error_ce, "%pS(): Argument #%d%s%s%s %s",
+		func_name, arg_num,
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
 	);
 	efree(message);
@@ -467,14 +467,14 @@ ZEND_API ZEND_COLD void zend_argument_must_not_be_empty_error(uint32_t arg_num)
 ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, const zend_class_entry *old_ce)
 {
 	if (old_ce->type == ZEND_INTERNAL_CLASS) {
-		zend_error(type, "Cannot redeclare %s %s",
+		zend_error(type, "Cannot redeclare %s %pS",
 			zend_get_object_type(old_ce),
-			ZSTR_VAL(new_name));
+			new_name);
 	} else {
-		zend_error(type, "Cannot redeclare %s %s (previously declared in %s:%d)",
+		zend_error(type, "Cannot redeclare %s %pS (previously declared in %pS:%d)",
 			zend_get_object_type(old_ce),
-			ZSTR_VAL(new_name),
-			ZSTR_VAL(old_ce->info.user.filename),
+			new_name,
+			old_ce->info.user.filename,
 			old_ce->info.user.line_start);
 	}
 }
@@ -502,13 +502,13 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 	*pce = zend_lookup_class(class_name);
 	if (ce_base) {
 		if ((!*pce || !instanceof_function(*pce, ce_base))) {
-			zend_argument_type_error(num, "must be a class name derived from %s, %s given", ZSTR_VAL(ce_base->name), ZSTR_VAL(class_name));
+			zend_argument_type_error(num, "must be a class name derived from %pS, %pS given", ce_base->name, class_name);
 			*pce = NULL;
 			return 0;
 		}
 	}
 	if (!*pce) {
-		zend_argument_type_error(num, "must be a valid class name, %s given", ZSTR_VAL(class_name));
+		zend_argument_type_error(num, "must be a valid class name, %pS given", class_name);
 		return 0;
 	}
 	return 1;
@@ -533,8 +533,8 @@ static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32
 	zend_string *type_str = zend_type_to_string(arg_info->type);
 	const char *type = type_str ? ZSTR_VAL(type_str) : fallback_type;
 	zend_error(E_DEPRECATED,
-		"%s(): Passing null to parameter #%" PRIu32 "%s%s%s of type %s is deprecated",
-		ZSTR_VAL(func_name), arg_num,
+		"%pS(): Passing null to parameter #%" PRIu32 "%s%s%s of type %s is deprecated",
+		func_name, arg_num,
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "",
 		type);
 	zend_string_release(func_name);
@@ -1006,7 +1006,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				if (!zend_parse_arg_object(arg, p, ce, check_null)) {
 					if (ce) {
 						if (check_null) {
-							zend_spprintf(error, 0, "must be of type ?%s, %s given", ZSTR_VAL(ce->name), zend_zval_value_name(arg));
+							zend_spprintf(error, 0, "must be of type ?%pS, %s given", ce->name, zend_zval_value_name(arg));
 							return "";
 						} else {
 							return ZSTR_VAL(ce->name);
@@ -1039,15 +1039,15 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				}
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base))) {
-						zend_spprintf(error, 0, "must be a class name derived from %s%s, %s given",
-							ZSTR_VAL(ce_base->name), check_null ? " or null" : "", Z_STRVAL_P(arg));
+						zend_spprintf(error, 0, "must be a class name derived from %pS%s, %pS given",
+							ce_base->name, check_null ? " or null" : "", Z_STR_P(arg));
 						*pce = NULL;
 						return "";
 					}
 				}
 				if (!*pce) {
-					zend_spprintf(error, 0, "must be a valid class name%s, %s given",
-						check_null ? " or null" : "", Z_STRVAL_P(arg));
+					zend_spprintf(error, 0, "must be a valid class name%s, %pS given",
+						check_null ? " or null" : "", Z_STR_P(arg));
 					return "";
 				}
 				break;
@@ -1145,9 +1145,9 @@ static ZEND_COLD void zend_parse_parameters_debug_error(const char *msg) {
 	const zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope
 		? ZSTR_VAL(active_function->common.scope->name) : "";
-	zend_error_noreturn(E_CORE_ERROR, "%s%s%s(): %s",
+	zend_error_noreturn(E_CORE_ERROR, "%s%s%pS(): %s",
 		class_name, class_name[0] ? "::" : "",
-		ZSTR_VAL(active_function->common.function_name), msg);
+		active_function->common.function_name, msg);
 }
 
 static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, va_list *va, int flags) /* {{{ */
@@ -1232,8 +1232,8 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
 			zend_string *func_name = get_active_function_or_method_name();
 
-			zend_argument_count_error("%s() expects %s %d argument%s, %d given",
-				ZSTR_VAL(func_name),
+			zend_argument_count_error("%pS() expects %s %d argument%s, %d given",
+				func_name,
 				min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
 				num_args < min_num_args ? min_num_args : max_num_args,
 				(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
@@ -1349,8 +1349,8 @@ ZEND_API zend_result zend_parse_method_parameters(uint32_t num_args, zval *this_
 		*object = this_ptr;
 
 		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce)) {
-			zend_error_noreturn(E_CORE_ERROR, "%s::%s() must be derived from %s::%s()",
-				ZSTR_VAL(Z_OBJCE_P(this_ptr)->name), get_active_function_name(), ZSTR_VAL(ce->name), get_active_function_name());
+			zend_error_noreturn(E_CORE_ERROR, "%pS::%s() must be derived from %pS::%s()",
+				Z_OBJCE_P(this_ptr)->name, get_active_function_name(), ce->name, get_active_function_name());
 		}
 
 		retval = zend_parse_va_args(num_args, p, &va, flags);
@@ -1382,8 +1382,8 @@ ZEND_API zend_result zend_parse_method_parameters_ex(int flags, uint32_t num_arg
 
 		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce)) {
 			if (!(flags & ZEND_PARSE_PARAMS_QUIET)) {
-				zend_error_noreturn(E_CORE_ERROR, "%s::%s() must be derived from %s::%s()",
-					ZSTR_VAL(ce->name), get_active_function_name(), ZSTR_VAL(Z_OBJCE_P(this_ptr)->name), get_active_function_name());
+				zend_error_noreturn(E_CORE_ERROR, "%pS::%s() must be derived from %pS::%s()",
+					ce->name, get_active_function_name(), Z_OBJCE_P(this_ptr)->name, get_active_function_name());
 			}
 			va_end(va);
 			return FAILURE;
@@ -1787,12 +1787,12 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 				}
 			} else {
 				if (UNEXPECTED(object->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
-					zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
-						ZSTR_VAL(object->ce->name), property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
+					zend_throw_error(NULL, "Cannot create dynamic property %pS::$%s",
+						object->ce->name, property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
 					return;
 				} else if (!(object->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
-						ZSTR_VAL(object->ce->name), property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
+					zend_error(E_DEPRECATED, "Creation of dynamic property %pS::$%s is deprecated",
+						object->ce->name, property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
 				}
 
 				prop = zend_hash_update(zend_std_get_properties_ex(object), key, prop);
@@ -1800,11 +1800,11 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 			}
 		} else {
 			if (UNEXPECTED(object->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
-				zend_throw_error(NULL, "Cannot create dynamic property %s::$" ZEND_LONG_FMT, ZSTR_VAL(object->ce->name), h);
+				zend_throw_error(NULL, "Cannot create dynamic property %pS::$" ZEND_LONG_FMT, object->ce->name, h);
 				return;
 			} else if (!(object->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-				zend_error(E_DEPRECATED, "Creation of dynamic property %s::$" ZEND_LONG_FMT " is deprecated",
-					ZSTR_VAL(object->ce->name), h);
+				zend_error(E_DEPRECATED, "Creation of dynamic property %pS::$" ZEND_LONG_FMT " is deprecated",
+					object->ce->name, h);
 			}
 
 			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
@@ -1822,14 +1822,14 @@ static zend_always_inline zend_result _object_and_properties_init(zval *arg, zen
 {
 	if (UNEXPECTED(class_type->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
 		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_throw_error(NULL, "Cannot instantiate interface %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(NULL, "Cannot instantiate interface %pS", class_type->name);
 		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
-			zend_throw_error(NULL, "Cannot instantiate trait %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(NULL, "Cannot instantiate trait %pS", class_type->name);
 		} else if (class_type->ce_flags & ZEND_ACC_ENUM) {
-			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(NULL, "Cannot instantiate enum %pS", class_type->name);
 		} else {
 			ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
-			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(NULL, "Cannot instantiate abstract class %pS", class_type->name);
 		}
 		ZVAL_NULL(arg);
 		Z_OBJ_P(arg) = NULL;
@@ -1903,7 +1903,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 			zend_string *arg_name = NULL;
 			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
 			ZEND_ASSERT(arg_name != NULL);
-			zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
+			zend_throw_error(NULL, "Unknown named parameter $%pS", arg_name);
 			/* Do not call destructor, free object, and set arg to IS_UNDEF */
 			zend_object_store_ctor_failed(obj);
 			zval_ptr_dtor(arg);
@@ -2685,21 +2685,21 @@ static void zend_check_magic_method_args(
 {
 	if (fptr->common.num_args != num_args) {
 		if (num_args == 0) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+			zend_error(error_type, "Method %pS::%pS() cannot take arguments",
+				ce->name, fptr->common.function_name);
 		} else if (num_args == 1) {
-			zend_error(error_type, "Method %s::%s() must take exactly 1 argument",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+			zend_error(error_type, "Method %pS::%pS() must take exactly 1 argument",
+				ce->name, fptr->common.function_name);
 		} else {
-			zend_error(error_type, "Method %s::%s() must take exactly %" PRIu32 " arguments",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name), num_args);
+			zend_error(error_type, "Method %pS::%pS() must take exactly %" PRIu32 " arguments",
+				ce->name, fptr->common.function_name, num_args);
 		}
 		return;
 	}
 	for (uint32_t i = 0; i < num_args; i++) {
 		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, i + 1)) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments by reference",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+			zend_error(error_type, "Method %pS::%pS() cannot take arguments by reference",
+				ce->name, fptr->common.function_name);
 			return;
 		}
 	}
@@ -2711,10 +2711,10 @@ static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_
 			ZEND_TYPE_IS_SET(fptr->common.arg_info[arg_num].type)
 			 && !(ZEND_TYPE_FULL_MASK(fptr->common.arg_info[arg_num].type) & arg_type)
 		) {
-			zend_error(error_type, "%s::%s(): Parameter #%d ($%s) must be of type %s when declared",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
-				arg_num + 1, ZSTR_VAL(fptr->common.arg_info[arg_num].name),
-				ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(arg_type))));
+			zend_error(error_type, "%pS::%pS(): Parameter #%d ($%pS) must be of type %pS when declared",
+				ce->name, fptr->common.function_name,
+				arg_num + 1, fptr->common.arg_info[arg_num].name,
+				zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(arg_type)));
 		}
 }
 
@@ -2722,7 +2722,7 @@ static void zend_check_magic_method_return_type(const zend_class_entry *ce, cons
 {
 	if (return_type == MAY_BE_VOID) {
 		if (fptr->common.fn_flags & ZEND_ACC_NODISCARD) {
-			zend_error_noreturn(error_type, "Method %s::%s cannot be #[\\NoDiscard]", ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+			zend_error_noreturn(error_type, "Method %pS::%pS cannot be #[\\NoDiscard]", ce->name, fptr->common.function_name);
 		}
 	}
 
@@ -2744,9 +2744,9 @@ static void zend_check_magic_method_return_type(const zend_class_entry *ce, cons
 	}
 
 	if (extra_types || (is_complex_type && return_type != MAY_BE_OBJECT)) {
-		zend_error(error_type, "%s::%s(): Return type must be %s when declared",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
-			ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(return_type))));
+		zend_error(error_type, "%pS::%pS(): Return type must be %pS when declared",
+			ce->name, fptr->common.function_name,
+			zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(return_type)));
 	}
 }
 
@@ -2754,8 +2754,8 @@ static void zend_check_magic_method_non_static(
 		const zend_class_entry *ce, const zend_function *fptr, int error_type)
 {
 	if (fptr->common.fn_flags & ZEND_ACC_STATIC) {
-		zend_error(error_type, "Method %s::%s() cannot be static",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		zend_error(error_type, "Method %pS::%pS() cannot be static",
+			ce->name, fptr->common.function_name);
 	}
 }
 
@@ -2763,8 +2763,8 @@ static void zend_check_magic_method_static(
 		const zend_class_entry *ce, const zend_function *fptr, int error_type)
 {
 	if (!(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
-		zend_error(error_type, "Method %s::%s() must be static",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		zend_error(error_type, "Method %pS::%pS() must be static",
+			ce->name, fptr->common.function_name);
 	}
 }
 
@@ -2773,8 +2773,8 @@ static void zend_check_magic_method_public(
 {
 	// TODO: Remove this warning after adding proper visibility handling.
 	if (!(fptr->common.fn_flags & ZEND_ACC_PUBLIC)) {
-		zend_error(E_WARNING, "The magic method %s::%s() must have public visibility",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		zend_error(E_WARNING, "The magic method %pS::%pS() must have public visibility",
+			ce->name, fptr->common.function_name);
 	}
 }
 
@@ -2782,12 +2782,12 @@ static void zend_check_magic_method_no_return_type(
 		const zend_class_entry *ce, const zend_function *fptr, int error_type)
 {
 	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_error_noreturn(error_type, "Method %s::%s() cannot declare a return type",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		zend_error_noreturn(error_type, "Method %pS::%pS() cannot declare a return type",
+			ce->name, fptr->common.function_name);
 	}
 
 	if (fptr->common.fn_flags & ZEND_ACC_NODISCARD) {
-		zend_error_noreturn(error_type, "Method %s::%s cannot be #[\\NoDiscard]", ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+		zend_error_noreturn(error_type, "Method %pS::%pS cannot be #[\\NoDiscard]", ce->name, fptr->common.function_name);
 	}
 }
 
@@ -2855,8 +2855,8 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		zend_check_magic_method_public(ce, fptr);
 		zend_check_magic_method_return_type(ce, fptr, error_type, (MAY_BE_ARRAY | MAY_BE_NULL));
 		if ((fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) && ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & MAY_BE_NULL) {
-			zend_error(E_DEPRECATED, "Returning null from %s::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead",
-				ZSTR_VAL(ce->name));
+			zend_error(E_DEPRECATED, "Returning null from %pS::__debugInfo() is deprecated, make the return type non-nullable and return an empty array instead",
+				ce->name);
 		}
 	} else if (zend_string_equals_literal(lcname, ZEND_SERIALIZE_FUNC_NAME)) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
@@ -3090,7 +3090,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		if (ptr->flags & UINT32_MAX) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
 				if (ptr->flags != ZEND_ACC_DEPRECATED && scope) {
-					zend_error(error_type, "Invalid access level for %s::%s() - access must be exactly one of public, protected or private", ZSTR_VAL(scope->name), ptr->fname);
+					zend_error(error_type, "Invalid access level for %pS::%s() - access must be exactly one of public, protected or private", scope->name, ptr->fname);
 				}
 				internal_function->fn_flags = ZEND_ACC_PUBLIC | ptr->flags;
 			} else {
@@ -3142,8 +3142,8 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		 * interface. */
 		if (scope && zend_string_equals_literal_ci(internal_function->function_name, ZEND_TOSTRING_FUNC_LCNAME) &&
 				!(internal_function->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-			zend_error(E_CORE_WARNING, "%s::__toString() implemented without string return type",
-				ZSTR_VAL(scope->name));
+			zend_error(E_CORE_WARNING, "%pS::__toString() implemented without string return type",
+				scope->name);
 			internal_arg_info = (zend_internal_arg_info *) arg_info_toString + 1;
 			internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 			internal_function->num_args = internal_function->required_num_args = 0;
@@ -3165,7 +3165,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			}
 		} else {
 			if (scope && (scope->ce_flags & ZEND_ACC_INTERFACE)) {
-				zend_error(error_type, "Interface %s cannot contain non abstract method %s()", ZSTR_VAL(scope->name), ptr->fname);
+				zend_error(error_type, "Interface %pS cannot contain non abstract method %s()", scope->name, ptr->fname);
 				return FAILURE;
 			}
 			if (!internal_function->handler) {
@@ -3823,6 +3823,11 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 
 static zend_always_inline bool zend_is_method_callable(zend_string *callable, const zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
 {
+	// In a number of places, zend_string pointers are read and included in
+	// the error. NOT using `%pS` to include null bytes in the results, since the
+	// `error` out parameter is a char pointer; if null bytes were kept then
+	// they would be treated as the end of the overall error message.
+	// TODO: make the error pointer be a zend_string pointer.
 	zend_class_entry *ce_org = fcc->calling_scope;
 	bool retval = false;
 	zend_string *mname;
@@ -3885,13 +3890,15 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 
 		ftable = &fcc->calling_scope->function_table;
 		if (ce_org && !instanceof_function(ce_org, fcc->calling_scope)) {
+			// NOT using %pS, see above
 			if (error) zend_spprintf(error, 0, "class %s is not a subclass of %s", ZSTR_VAL(ce_org->name), ZSTR_VAL(fcc->calling_scope->name));
 			return 0;
 		}
 		if (ce_org && !suppress_deprecation) {
+			// Can use %pS here since this message isn't stored in the `error`
 			zend_error(E_DEPRECATED,
-				"Callables of the form [\"%s\", \"%s\"] are deprecated",
-				ZSTR_VAL(ce_org->name), ZSTR_VAL(callable));
+				"Callables of the form [\"%pS\", \"%pS\"] are deprecated",
+				ce_org->name, callable);
 		}
 		mname = zend_string_init(ZSTR_VAL(callable) + class_name_len + 2, mlen, 0);
 	} else if (ce_org) {
@@ -3903,6 +3910,7 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 	} else {
 		/* We already checked for plain function before. */
 		if (error) {
+			// NOT using %pS, see above
 			zend_spprintf(error, 0, "function \"%s\" not found or invalid function name", ZSTR_VAL(callable));
 		}
 		return 0;
@@ -3993,11 +4001,13 @@ get_function_via_handler:
 			if (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				retval = false;
 				if (error) {
+					// NOT using %pS, see above
 					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 				}
 			} else if (!fcc->object && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				retval = false;
 				if (error) {
+					// NOT using %pS, see above
 					zend_spprintf(error, 0, "non-static method %s::%s() cannot be called statically", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 				}
 			}
@@ -4010,6 +4020,7 @@ get_function_via_handler:
 						if (*error) {
 							efree(*error);
 						}
+						// NOT using %pS, see above
 						zend_spprintf(error, 0, "cannot access %s method %s::%s()", zend_visibility_string(fcc->function_handler->common.fn_flags), ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
 					}
 					retval = false;
@@ -4018,8 +4029,10 @@ get_function_via_handler:
 		}
 	} else if (error) {
 		if (fcc->calling_scope) {
+			// NOT using %pS, see above
 			zend_spprintf(error, 0, "class %s does not have a method \"%s\"", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(mname));
 		} else {
+			// NOT using %pS, see above
 			zend_spprintf(error, 0, "function %s() does not exist", ZSTR_VAL(mname));
 		}
 	}
@@ -4506,15 +4519,15 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	} else if (UNEXPECTED(access_type & ZEND_ACC_PPP_SET_MASK)) {
 		if (!ZEND_TYPE_IS_SET(type)) {
 			zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
-				"Property with asymmetric visibility %s::$%s must have type",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				"Property with asymmetric visibility %pS::$%pS must have type",
+				ce->name, name);
 		}
 		uint32_t get_visibility = zend_visibility_to_set_visibility(access_type & ZEND_ACC_PPP_MASK);
 		uint32_t set_visibility = access_type & ZEND_ACC_PPP_SET_MASK;
 		if (get_visibility > set_visibility) {
 			zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
-				"Visibility of property %s::$%s must not be weaker than set visibility",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				"Visibility of property %pS::$%pS must not be weaker than set visibility",
+				ce->name, name);
 		}
 		/* Remove equivalent set visibility. */
 		if (((access_type & (ZEND_ACC_PUBLIC|ZEND_ACC_PUBLIC_SET)) == (ZEND_ACC_PUBLIC|ZEND_ACC_PUBLIC_SET))
@@ -4826,7 +4839,7 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		if (!(flags & ZEND_ACC_PUBLIC)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface constant %s::%s must be public", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface constant %pS::%pS must be public", ce->name, name);
 		}
 	}
 
@@ -4864,7 +4877,7 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 
 	if (!zend_hash_add_ptr(&ce->constants_table, name, c)) {
 		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
-			"Cannot redefine class constant %s::%s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			"Cannot redefine class constant %pS::%pS", ce->name, name);
 	}
 
 	return c;
@@ -5344,7 +5357,7 @@ ZEND_API zend_result zend_get_default_from_internal_arg_info(
 	}
 
 #if 0
-	fprintf(stderr, "Evaluating %s via AST\n", ZSTR_VAL(default_value));
+	fprintf(stderr, "Evaluating %pS via AST\n", default_value);
 #endif
 	return get_default_via_ast(default_value_zval, ZSTR_VAL(default_value));
 }
