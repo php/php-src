@@ -82,8 +82,8 @@ static zend_never_inline ZEND_COLD void zp_args_underflow(
 			"exactly" : "at least";
 
 	zend_argument_count_error(
-		"Partial application of %s() expects %s %d arguments, %d given",
-		ZSTR_VAL(symbol), limit, expected, args);
+		"Partial application of %pS() expects %s %d arguments, %d given",
+		symbol, limit, expected, args);
 
 	zend_string_release(symbol);
 }
@@ -94,8 +94,8 @@ static zend_never_inline ZEND_COLD void zp_args_overflow(
 	zend_string *symbol = get_function_or_method_name(function);
 
 	zend_argument_count_error(
-		"Partial application of %s() expects at most %d arguments, %d given",
-		ZSTR_VAL(symbol), expected, args);
+		"Partial application of %pS() expects at most %d arguments, %d given",
+		symbol, expected, args);
 
 	zend_string_release(symbol);
 }
@@ -109,8 +109,8 @@ static zend_result zp_args_check(const zend_function *function,
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(extra_named_args, zend_string *key, zval *arg) {
 			if (UNEXPECTED(Z_IS_PLACEHOLDER_P(arg))) {
 				zend_throw_error(NULL,
-						"Cannot use named placeholder for unknown or variadic parameter $%s",
-						ZSTR_VAL(key));
+						"Cannot use named placeholder for unknown or variadic parameter $%pS",
+						key);
 				return FAILURE;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -221,7 +221,7 @@ static zp_names *zp_assign_names(uint32_t argc, zval *argv,
 		zend_string *orig_name = zp_get_func_param_name(function, function->common.num_args);
 		zend_string *new_name;
 		for (uint32_t n = 0;; n++) {
-			new_name = zend_strpprintf_unchecked(0, "%S%" PRIu32, orig_name, n);
+			new_name = zend_strpprintf(0, "%pS%" PRIu32, orig_name, n);
 			if (!zp_name_exists(names, argc, new_name)) {
 				break;
 			}
@@ -242,7 +242,7 @@ static zp_names *zp_assign_names(uint32_t argc, zval *argv,
 		zend_string *new_name = zend_string_copy(orig_name);
 		while (zp_name_exists(names, argc, new_name)) {
 			zend_string_release(new_name);
-			new_name = zend_strpprintf_unchecked(0, "%S%" PRIu32, orig_name, n);
+			new_name = zend_strpprintf(0, "%pS%" PRIu32, orig_name, n);
 			n++;
 		}
 		names->params[offset] = new_name;
@@ -677,8 +677,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	zend_op_array *op_array = NULL;
 
 	if (UNEXPECTED(function->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
-		const char *format = "Cannot call %S() dynamically";
-		zend_throw_error(NULL, format, function->common.function_name);
+		zend_throw_error(NULL, "Cannot call %pS() dynamically", function->common.function_name);
 		return NULL;
 	}
 
@@ -979,7 +978,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 		const char *tmp = getenv("DUMP_PFA_AST");
 		if (tmp && ZEND_ATOL(tmp)) {
 			zend_string *str = zend_ast_export("", closure_ast, "");
-			fprintf(stderr, "PFA AST: %s\n", ZSTR_VAL(str));
+			fprintf(stderr, "PFA AST: %pS\n", str);
 			zend_string_release(str);
 		}
 	}
@@ -1082,8 +1081,8 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 			zend_string *need_msg = zend_type_to_string_resolved(arg_info->type,
 					function->common.scope);
 			zend_argument_type_error_ex(function, offset + 1,
-					"must be of type %s, %s given",
-					ZSTR_VAL(need_msg), zend_zval_value_name(var));
+					"must be of type %pS, %s given",
+					need_msg, zend_zval_value_name(var));
 			zend_string_release(need_msg);
 			zval_ptr_dtor(result);
 			ZVAL_NULL(result);

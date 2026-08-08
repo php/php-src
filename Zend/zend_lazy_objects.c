@@ -234,14 +234,14 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 
 	/* Internal classes are not supported */
 	if (UNEXPECTED(reflection_ce->type == ZEND_INTERNAL_CLASS && reflection_ce != zend_standard_class_def)) {
-		zend_throw_error(NULL, "Cannot make instance of internal class lazy: %s is internal", ZSTR_VAL(reflection_ce->name));
+		zend_throw_error(NULL, "Cannot make instance of internal class lazy: %pS is internal", reflection_ce->name);
 		return NULL;
 	}
 
 	for (zend_class_entry *parent = reflection_ce->parent; parent; parent = parent->parent) {
 		if (UNEXPECTED(parent->type == ZEND_INTERNAL_CLASS && parent != zend_standard_class_def)) {
-			zend_throw_error(NULL, "Cannot make instance of internal class lazy: %s inherits internal class %s",
-				ZSTR_VAL(reflection_ce->name), ZSTR_VAL(parent->name));
+			zend_throw_error(NULL, "Cannot make instance of internal class lazy: %pS inherits internal class %pS",
+				reflection_ce->name, parent->name);
 			return NULL;
 		}
 	}
@@ -513,17 +513,17 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT)) {
-		zend_type_error("Lazy proxy factory must return an instance of a class compatible with %s, %s returned",
-				ZSTR_VAL(obj->ce->name),
+		zend_type_error("Lazy proxy factory must return an instance of a class compatible with %pS, %s returned",
+				obj->ce->name,
 				zend_zval_value_name(&retval));
 		zval_ptr_dtor(&retval);
 		goto fail;
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT || !zend_lazy_object_compatible(Z_OBJ(retval), obj))) {
-		zend_type_error("The real instance class %s is not compatible with the proxy class %s. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.",
+		zend_type_error("The real instance class %s is not compatible with the proxy class %pS. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.",
 				zend_zval_value_name(&retval),
-				ZSTR_VAL(obj->ce->name));
+				obj->ce->name);
 		zval_ptr_dtor(&retval);
 		goto fail;
 	}
