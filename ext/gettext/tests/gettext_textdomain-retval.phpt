@@ -22,21 +22,21 @@ echo textdomain('foo'), "\n";
 try {
 	textdomain('0');
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	textdomain('');
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 test
 test
 foo
-textdomain(): Argument #1 ($domain) cannot be zero
-textdomain(): Argument #1 ($domain) must not be empty
+ValueError: textdomain(): Argument #1 ($domain) cannot be zero
+ValueError: textdomain(): Argument #1 ($domain) must not be empty
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09

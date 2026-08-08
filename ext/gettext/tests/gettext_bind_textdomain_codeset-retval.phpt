@@ -7,13 +7,13 @@ gettext
     try {
     	bind_textdomain_codeset(false,false);
     } catch (ValueError $e) {
-	    echo $e->getMessage() . PHP_EOL;
+	    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     try {
     	bind_textdomain_codeset("", "UTF-8");
     } catch (ValueError $e) {
-	    echo $e->getMessage() . PHP_EOL;
+	    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     // bind_textdomain_codeset() always returns false on musl
@@ -28,8 +28,8 @@ gettext
     echo "Done\n";
 ?>
 --EXPECT--
-bind_textdomain_codeset(): Argument #1 ($domain) must not be empty
-bind_textdomain_codeset(): Argument #1 ($domain) must not be empty
+ValueError: bind_textdomain_codeset(): Argument #1 ($domain) must not be empty
+ValueError: bind_textdomain_codeset(): Argument #1 ($domain) must not be empty
 bool(true)
 Done
 --CREDITS--
