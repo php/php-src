@@ -56,7 +56,7 @@ ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_long_or_null_to_lexbo
 
 ZEND_ATTRIBUTE_NONNULL static zend_always_inline zend_string *lexbor_str_to_zend_string(const lexbor_str_t *lexbor_str)
 {
-	return zend_string_init((const char *) lexbor_str->data, lexbor_str->length, 0);
+	return zend_string_init((const char *) lexbor_str->data, lexbor_str->length, false);
 }
 
 ZEND_ATTRIBUTE_NONNULL static bool get_reason_from_error_type(const lxb_url_error_type_t error_type, const char **error_str)
@@ -573,7 +573,8 @@ PHP_RINIT_FUNCTION(uri_parser_whatwg)
 	}
 
 	memcpy(lexbor_custom_url_map, lxb_url_map, sizeof(lxb_url_map));
-	lexbor_custom_url_map[37] = -1; /* % is percent-encoded */
+	ZEND_STATIC_ASSERT(sizeof(lxb_url_map) == sizeof(lexbor_custom_url_map), "The size of lxb_url_map must be equal to the size of lexbor_custom_url_map");
+	lexbor_custom_url_map['%'] = -1; /* % is percent-encoded */
 
 	return SUCCESS;
 
@@ -662,144 +663,73 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, const php_uri_rec
 	return smart_str_extract(&uri_str);
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_userinfo_component(const char *str, const size_t str_length)
+static zend_string *php_uri_parser_whatwg_percent_encode_component(const char *str, const size_t str_length, const lxb_url_map_type_t map, const bool space_as_plus)
 {
 	lexbor_str_t lexbor_str = {0};
 
 	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_USERINFO, false, lexbor_custom_url_map
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, map, space_as_plus, lexbor_custom_url_map
 	);
+
 	if (status != LXB_STATUS_OK) {
 		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
 		return NULL;
 	}
 
 	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_userinfo_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_USERINFO, false);
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_opaque_host_component(const char *str, const size_t str_length)
 {
-	lexbor_str_t lexbor_str = {0};
-
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_C0, false, lexbor_custom_url_map
-	);
-	if (status != LXB_STATUS_OK) {
-		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
-		return NULL;
-	}
-
-	return lexbor_str_to_zend_string(&lexbor_str);
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_C0, false);
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_path_component(const char *str, const size_t str_length)
 {
-	lexbor_str_t lexbor_str = {0};
-
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_PATH, false, lexbor_custom_url_map
-	);
-	if (status != LXB_STATUS_OK) {
-		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
-		return NULL;
-	}
-
-	return lexbor_str_to_zend_string(&lexbor_str);
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_PATH, false);
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_opaque_path_component(const char *str, const size_t str_length)
 {
-	lexbor_str_t lexbor_str = {0};
-
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_C0, false, lexbor_custom_url_map
-	);
-	if (status != LXB_STATUS_OK) {
-		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
-		return NULL;
-	}
-
-	return lexbor_str_to_zend_string(&lexbor_str);
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_C0, false);
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_path_segment_component(const char *str, const size_t str_length)
 {
-	lexbor_str_t lexbor_str = {0};
+	ZEND_ASSERT((lexbor_custom_url_map['/'] & LXB_URL_MAP_PATH) == 0);
 
-	lexbor_custom_url_map[47] |= LXB_URL_MAP_PATH;
+	lexbor_custom_url_map['/'] |= LXB_URL_MAP_PATH;
 
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_PATH, false, lexbor_custom_url_map
-	);
+	zend_string *result = php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_PATH, false);
 
-	lexbor_custom_url_map[47] &= ~LXB_URL_MAP_PATH;
+	lexbor_custom_url_map['/'] &= ~LXB_URL_MAP_PATH;
 
-	if (status != LXB_STATUS_OK) {
-		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
-		return NULL;
-	}
-
-	return lexbor_str_to_zend_string(&lexbor_str);
+	return result;
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_query_component(const char *str, const size_t str_length)
 {
-	lexbor_str_t lexbor_str = {0};
-
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_QUERY, false, lexbor_custom_url_map
-	);
-	if (status != LXB_STATUS_OK) {
-		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
-		return NULL;
-	}
-
-	return lexbor_str_to_zend_string(&lexbor_str);
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_QUERY, false);
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_special_query_component(const char *str, const size_t str_length)
 {
-	lexbor_str_t lexbor_str = {0};
-
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_SPECIAL_QUERY, false, lexbor_custom_url_map
-	);
-	if (status != LXB_STATUS_OK) {
-		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
-		return NULL;
-	}
-
-	return lexbor_str_to_zend_string(&lexbor_str);
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_SPECIAL_QUERY, false);
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_form_query_component(const char *str, const size_t str_length)
 {
-	lexbor_str_t lexbor_str = {0};
-
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_X_WWW_FORM, true, lexbor_custom_url_map
-	);
-	if (status != LXB_STATUS_OK) {
-		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
-		return NULL;
-	}
-
-	return lexbor_str_to_zend_string(&lexbor_str);
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_X_WWW_FORM, true);
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_fragment_component(const char *str, const size_t str_length)
 {
-	lexbor_str_t lexbor_str = {0};
-
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_FRAGMENT, false, lexbor_custom_url_map
-	);
-	if (status != LXB_STATUS_OK) {
-		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
-		return NULL;
-	}
-
-	return lexbor_str_to_zend_string(&lexbor_str);
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_FRAGMENT, false);
 }
 
 static void php_uri_parser_whatwg_destroy(void *uri)
