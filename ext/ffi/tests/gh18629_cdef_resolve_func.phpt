@@ -9,8 +9,8 @@ ffi.enable=1
 try {
 	$ffi = FFI::cdef("void nonexistent_ffi_test_func(void);");
 } catch (\FFI\Exception $e) {
-	echo $e->getMessage() . "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Failed resolving C function 'nonexistent_ffi_test_func'
+FFI\Exception: Failed resolving C function 'nonexistent_ffi_test_func'
