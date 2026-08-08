@@ -2508,6 +2508,9 @@ PHP_FUNCTION(session_create_id)
 		int limit = 3;
 		while (limit--) {
 			new_id = PS(mod)->s_create_sid(&PS(mod_data));
+			if (!new_id) {
+				break;
+			}
 			if (!PS(mod)->s_validate_sid || (PS(mod_user_implemented) && Z_ISUNDEF(PS(mod_user_names).ps_validate_sid))) {
 				break;
 			} else {
@@ -2529,6 +2532,9 @@ PHP_FUNCTION(session_create_id)
 		zend_string_release_ex(new_id, 0);
 	} else {
 		smart_str_free(&id);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		php_error_docref(NULL, E_WARNING, "Failed to create new ID");
 		RETURN_FALSE;
 	}
