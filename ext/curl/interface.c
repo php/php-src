@@ -1666,6 +1666,23 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 	CURLcode error = CURLE_OK;
 	zend_long lval;
 
+	if (Z_TYPE_P(zvalue) == IS_OBJECT
+		&& instanceof_function(Z_OBJCE_P(zvalue), zend_ce_sensitive_parameter_value))
+	{
+		zval rv;
+		zval *inner_value;
+
+		inner_value = zend_read_property_ex(
+			zend_ce_sensitive_parameter_value,
+			Z_OBJ_P(zvalue),
+			ZSTR_KNOWN(ZEND_STR_VALUE),
+			0,
+			&rv
+		);
+
+		zvalue = inner_value;
+	}
+
 	switch (option) {
 		/* Callable options */
 		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_WRITE, write, PHP_CURL_STDOUT);
