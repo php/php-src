@@ -134,7 +134,7 @@ static xmlNodePtr sxe_get_element_by_offset(php_sxe_object *sxe, zend_long offse
 			return NULL;
 		}
 	}
-	while (node && nodendx <= offset) {
+	while (node && (offset < 0 || nodendx <= offset)) {
 		if (node->type == XML_ELEMENT_NODE && match_ns(node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 			if (sxe->iter.type == SXE_ITER_CHILD || (
 				sxe->iter.type == SXE_ITER_ELEMENT && xmlStrEqual(node->name, BAD_CAST ZSTR_VAL(sxe->iter.name)))) {
@@ -319,11 +319,13 @@ long_dim:
 				if (node) {
 					node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
 				} else if (type == BP_VAR_W || type == BP_VAR_RW) {
-					if (member && cnt < Z_LVAL_P(member)) {
+					if (member && (Z_LVAL_P(member) < 0 || cnt < Z_LVAL_P(member))) {
 						php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
 					}
-					node = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, NULL);
-					node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
+					if (!member || Z_LVAL_P(member) >= 0) {
+						node = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, NULL);
+						node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
+					}
 				}
 			} else {
 				/* In BP_VAR_IS mode only return a proper node if it actually exists. */
@@ -586,10 +588,14 @@ next_iter:
 					newnode = xmlNewTextChild(mynode, NULL, (xmlChar *)Z_STRVAL_P(member), value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
 				}
 			} else if (!member || Z_TYPE_P(member) == IS_LONG) {
-				if (member && cnt < Z_LVAL_P(member)) {
+				if (member && (Z_LVAL_P(member) < 0 || cnt < Z_LVAL_P(member))) {
 					php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
 				}
-				newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
+				if (member && Z_LVAL_P(member) < 0) {
+					value = &EG(error_zval);
+				} else {
+					newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
+				}
 			}
 		} else if (attribs) {
 			if (Z_TYPE_P(member) == IS_LONG) {
