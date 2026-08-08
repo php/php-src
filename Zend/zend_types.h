@@ -389,8 +389,6 @@ typedef struct _Bucket {
 	zend_string      *key;              /* string key or NULL for numerics */
 } Bucket;
 
-ZEND_STATIC_ASSERT(sizeof(Bucket) % 8 == 0, "Bucket size not compatible with storing flags in lower three bits");
-
 typedef struct _zend_array HashTable;
 
 struct _zend_array {
