@@ -35,6 +35,7 @@ zend_class_entry *php_uri_ce_rfc3986_uri;
 zend_class_entry *php_uri_ce_rfc3986_uri_type;
 zend_class_entry *php_uri_ce_rfc3986_uri_host_type;
 zend_class_entry *php_uri_ce_whatwg_url;
+zend_class_entry *php_uri_ce_whatwg_url_percent_encoding_mode;
 zend_class_entry *php_uri_ce_comparison_mode;
 zend_class_entry *php_uri_ce_exception;
 zend_class_entry *php_uri_ce_error;
@@ -1065,6 +1066,59 @@ PHP_METHOD(Uri_WhatWg_Url, __debugInfo)
 	RETURN_ARR(uri_get_debug_properties(uri_object));
 }
 
+PHP_FUNCTION(Uri_WhatWg_url_percent_encode)
+{
+	zend_string *input;
+	zend_enum_Uri_WhatWg_UrlPercentEncodingMode mode;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(input)
+		Z_PARAM_ENUM(mode, php_uri_ce_whatwg_url_percent_encoding_mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_string *str;
+
+	switch (mode) {
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Username:
+			ZEND_FALLTHROUGH;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Password:
+			str = php_uri_parser_whatwg_percent_encode_userinfo_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_OpaqueHost:
+			str = php_uri_parser_whatwg_percent_encode_opaque_host_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Path:
+			str = php_uri_parser_whatwg_percent_encode_path_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_OpaquePath:
+			str = php_uri_parser_whatwg_percent_encode_opaque_path_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_PathSegment:
+			str = php_uri_parser_whatwg_percent_encode_path_segment_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Query:
+			str = php_uri_parser_whatwg_percent_encode_query_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_SpecialQuery:
+			str = php_uri_parser_whatwg_percent_encode_special_query_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_FormQuery:
+			str = php_uri_parser_whatwg_percent_encode_form_query_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Fragment:
+			str = php_uri_parser_whatwg_percent_encode_fragment_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			break;
+		default: ZEND_UNREACHABLE();
+	}
+
+	if (str == NULL) {
+		zend_throw_exception(php_uri_ce_error, "Cannot percent-encode input", 0);
+		RETURN_THROWS();
+	}
+
+	RETURN_NEW_STR(str);
+}
+
 PHP_METHOD(Uri_Rfc3986_UriBuilder, reset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1335,6 +1389,8 @@ static PHP_MINIT_FUNCTION(uri)
 	object_handlers_whatwg_uri.free_obj = php_uri_object_handler_free;
 	object_handlers_whatwg_uri.clone_obj = php_uri_object_handler_clone;
 
+	php_uri_ce_whatwg_url_percent_encoding_mode = register_class_Uri_WhatWg_UrlPercentEncodingMode();
+
 	php_uri_ce_comparison_mode = register_class_Uri_UriComparisonMode();
 	php_uri_ce_exception = register_class_Uri_UriException(zend_ce_exception);
 	php_uri_ce_error = register_class_Uri_UriError(zend_ce_error);
@@ -1403,7 +1459,7 @@ zend_module_entry uri_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	uri_deps,
 	"uri",                          /* Extension name */
-	NULL,                           /* zend_function_entry */
+	ext_functions,                           /* zend_function_entry */
 	PHP_MINIT(uri),                 /* PHP_MINIT - Module initialization */
 	PHP_MSHUTDOWN(uri),             /* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(uri),                 /* PHP_RINIT - Request initialization */

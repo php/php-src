@@ -26,21 +26,6 @@
 #define LXB_URL_BUFFER_SIZE 4096
 #define LXB_URL_BUFFER_NUM_SIZE 128
 
-
-typedef enum {
-    LXB_URL_MAP_UNDEF         = 0x00,
-    LXB_URL_MAP_C0            = 0x01,
-    LXB_URL_MAP_FRAGMENT      = 0x02,
-    LXB_URL_MAP_QUERY         = 0x04,
-    LXB_URL_MAP_SPECIAL_QUERY = 0x08,
-    LXB_URL_MAP_PATH          = 0x10,
-    LXB_URL_MAP_USERINFO      = 0x20,
-    LXB_URL_MAP_COMPONENT     = 0x40,
-    LXB_URL_MAP_X_WWW_FORM    = 0x80,
-    LXB_URL_MAP_ALL           = 0xff
-}
-lxb_url_map_type_t;
-
 typedef enum {
     LXB_URL_HOST_OPT_UNDEF       = 0 << 0,
     LXB_URL_HOST_OPT_NOT_SPECIAL = 1 << 0,
@@ -61,267 +46,6 @@ typedef struct {
     size_t out_size;
 }
 lxb_url_search_params_ctx_t;
-
-
-static const uint8_t lxb_url_map[256] =
-{
-    LXB_URL_MAP_ALL, /* 0x00 */
-    LXB_URL_MAP_ALL, /* 0x01 */
-    LXB_URL_MAP_ALL, /* 0x02 */
-    LXB_URL_MAP_ALL, /* 0x03 */
-    LXB_URL_MAP_ALL, /* 0x04 */
-    LXB_URL_MAP_ALL, /* 0x05 */
-    LXB_URL_MAP_ALL, /* 0x06 */
-    LXB_URL_MAP_ALL, /* 0x07 */
-    LXB_URL_MAP_ALL, /* 0x08 */
-    LXB_URL_MAP_ALL, /* 0x09 */
-    LXB_URL_MAP_ALL, /* 0x0a */
-    LXB_URL_MAP_ALL, /* 0x0b */
-    LXB_URL_MAP_ALL, /* 0x0c */
-    LXB_URL_MAP_ALL, /* 0x0d */
-    LXB_URL_MAP_ALL, /* 0x0e */
-    LXB_URL_MAP_ALL, /* 0x0f */
-    LXB_URL_MAP_ALL, /* 0x10 */
-    LXB_URL_MAP_ALL, /* 0x11 */
-    LXB_URL_MAP_ALL, /* 0x12 */
-    LXB_URL_MAP_ALL, /* 0x13 */
-    LXB_URL_MAP_ALL, /* 0x14 */
-    LXB_URL_MAP_ALL, /* 0x15 */
-    LXB_URL_MAP_ALL, /* 0x16 */
-    LXB_URL_MAP_ALL, /* 0x17 */
-    LXB_URL_MAP_ALL, /* 0x18 */
-    LXB_URL_MAP_ALL, /* 0x19 */
-    LXB_URL_MAP_ALL, /* 0x1a */
-    LXB_URL_MAP_ALL, /* 0x1b */
-    LXB_URL_MAP_ALL, /* 0x1c */
-    LXB_URL_MAP_ALL, /* 0x1d */
-    LXB_URL_MAP_ALL, /* 0x1e */
-    LXB_URL_MAP_ALL, /* 0x1f */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x20 ( ) */
-    LXB_URL_MAP_X_WWW_FORM, /* 0x21 (!) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x22 (") */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x23 (#) */
-    LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x24 ($) */
-    LXB_URL_MAP_X_WWW_FORM, /* 0x25 (%) */
-    LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x26 (&) */
-    LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_X_WWW_FORM, /* 0x27 (') */
-    LXB_URL_MAP_X_WWW_FORM, /* 0x28 (() */
-    LXB_URL_MAP_X_WWW_FORM, /* 0x29 ()) */
-    LXB_URL_MAP_UNDEF, /* 0x2a (*) */
-    LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x2b (+) */
-    LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x2c (,) */
-    LXB_URL_MAP_UNDEF, /* 0x2d (-) */
-    LXB_URL_MAP_UNDEF, /* 0x2e (.) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x2f (/) */
-    LXB_URL_MAP_UNDEF, /* 0x30 (0) */
-    LXB_URL_MAP_UNDEF, /* 0x31 (1) */
-    LXB_URL_MAP_UNDEF, /* 0x32 (2) */
-    LXB_URL_MAP_UNDEF, /* 0x33 (3) */
-    LXB_URL_MAP_UNDEF, /* 0x34 (4) */
-    LXB_URL_MAP_UNDEF, /* 0x35 (5) */
-    LXB_URL_MAP_UNDEF, /* 0x36 (6) */
-    LXB_URL_MAP_UNDEF, /* 0x37 (7) */
-    LXB_URL_MAP_UNDEF, /* 0x38 (8) */
-    LXB_URL_MAP_UNDEF, /* 0x39 (9) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3a (:) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3b (;) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3c (<) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3d (=) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_QUERY|LXB_URL_MAP_SPECIAL_QUERY|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3e (>) */
-    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x3f (?) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x40 (@) */
-    LXB_URL_MAP_UNDEF, /* 0x41 (A) */
-    LXB_URL_MAP_UNDEF, /* 0x42 (B) */
-    LXB_URL_MAP_UNDEF, /* 0x43 (C) */
-    LXB_URL_MAP_UNDEF, /* 0x44 (D) */
-    LXB_URL_MAP_UNDEF, /* 0x45 (E) */
-    LXB_URL_MAP_UNDEF, /* 0x46 (F) */
-    LXB_URL_MAP_UNDEF, /* 0x47 (G) */
-    LXB_URL_MAP_UNDEF, /* 0x48 (H) */
-    LXB_URL_MAP_UNDEF, /* 0x49 (I) */
-    LXB_URL_MAP_UNDEF, /* 0x4a (J) */
-    LXB_URL_MAP_UNDEF, /* 0x4b (K) */
-    LXB_URL_MAP_UNDEF, /* 0x4c (L) */
-    LXB_URL_MAP_UNDEF, /* 0x4d (M) */
-    LXB_URL_MAP_UNDEF, /* 0x4e (N) */
-    LXB_URL_MAP_UNDEF, /* 0x4f (O) */
-    LXB_URL_MAP_UNDEF, /* 0x50 (P) */
-    LXB_URL_MAP_UNDEF, /* 0x51 (Q) */
-    LXB_URL_MAP_UNDEF, /* 0x52 (R) */
-    LXB_URL_MAP_UNDEF, /* 0x53 (S) */
-    LXB_URL_MAP_UNDEF, /* 0x54 (T) */
-    LXB_URL_MAP_UNDEF, /* 0x55 (U) */
-    LXB_URL_MAP_UNDEF, /* 0x56 (V) */
-    LXB_URL_MAP_UNDEF, /* 0x57 (W) */
-    LXB_URL_MAP_UNDEF, /* 0x58 (X) */
-    LXB_URL_MAP_UNDEF, /* 0x59 (Y) */
-    LXB_URL_MAP_UNDEF, /* 0x5a (Z) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5b ([) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5c (\) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5d (]) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_PATH|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x5e (^) */
-    LXB_URL_MAP_UNDEF, /* 0x5f (_) */
-    LXB_URL_MAP_PATH|LXB_URL_MAP_FRAGMENT|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x60 (`) */
-    LXB_URL_MAP_UNDEF, /* 0x61 (a) */
-    LXB_URL_MAP_UNDEF, /* 0x62 (b) */
-    LXB_URL_MAP_UNDEF, /* 0x63 (c) */
-    LXB_URL_MAP_UNDEF, /* 0x64 (d) */
-    LXB_URL_MAP_UNDEF, /* 0x65 (e) */
-    LXB_URL_MAP_UNDEF, /* 0x66 (f) */
-    LXB_URL_MAP_UNDEF, /* 0x67 (g) */
-    LXB_URL_MAP_UNDEF, /* 0x68 (h) */
-    LXB_URL_MAP_UNDEF, /* 0x69 (i) */
-    LXB_URL_MAP_UNDEF, /* 0x6a (j) */
-    LXB_URL_MAP_UNDEF, /* 0x6b (k) */
-    LXB_URL_MAP_UNDEF, /* 0x6c (l) */
-    LXB_URL_MAP_UNDEF, /* 0x6d (m) */
-    LXB_URL_MAP_UNDEF, /* 0x6e (n) */
-    LXB_URL_MAP_UNDEF, /* 0x6f (o) */
-    LXB_URL_MAP_UNDEF, /* 0x70 (p) */
-    LXB_URL_MAP_UNDEF, /* 0x71 (q) */
-    LXB_URL_MAP_UNDEF, /* 0x72 (r) */
-    LXB_URL_MAP_UNDEF, /* 0x73 (s) */
-    LXB_URL_MAP_UNDEF, /* 0x74 (t) */
-    LXB_URL_MAP_UNDEF, /* 0x75 (u) */
-    LXB_URL_MAP_UNDEF, /* 0x76 (v) */
-    LXB_URL_MAP_UNDEF, /* 0x77 (w) */
-    LXB_URL_MAP_UNDEF, /* 0x78 (x) */
-    LXB_URL_MAP_UNDEF, /* 0x79 (y) */
-    LXB_URL_MAP_UNDEF, /* 0x7a (z) */
-    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x7b ({) */
-    LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x7c (|) */
-    LXB_URL_MAP_PATH|LXB_URL_MAP_USERINFO|LXB_URL_MAP_COMPONENT|LXB_URL_MAP_X_WWW_FORM, /* 0x7d (}) */
-    LXB_URL_MAP_X_WWW_FORM, /* 0x7e (~) */
-    LXB_URL_MAP_ALL, /* 0x7f */
-    LXB_URL_MAP_ALL, /* 0x80 */
-    LXB_URL_MAP_ALL, /* 0x81 */
-    LXB_URL_MAP_ALL, /* 0x82 */
-    LXB_URL_MAP_ALL, /* 0x83 */
-    LXB_URL_MAP_ALL, /* 0x84 */
-    LXB_URL_MAP_ALL, /* 0x85 */
-    LXB_URL_MAP_ALL, /* 0x86 */
-    LXB_URL_MAP_ALL, /* 0x87 */
-    LXB_URL_MAP_ALL, /* 0x88 */
-    LXB_URL_MAP_ALL, /* 0x89 */
-    LXB_URL_MAP_ALL, /* 0x8a */
-    LXB_URL_MAP_ALL, /* 0x8b */
-    LXB_URL_MAP_ALL, /* 0x8c */
-    LXB_URL_MAP_ALL, /* 0x8d */
-    LXB_URL_MAP_ALL, /* 0x8e */
-    LXB_URL_MAP_ALL, /* 0x8f */
-    LXB_URL_MAP_ALL, /* 0x90 */
-    LXB_URL_MAP_ALL, /* 0x91 */
-    LXB_URL_MAP_ALL, /* 0x92 */
-    LXB_URL_MAP_ALL, /* 0x93 */
-    LXB_URL_MAP_ALL, /* 0x94 */
-    LXB_URL_MAP_ALL, /* 0x95 */
-    LXB_URL_MAP_ALL, /* 0x96 */
-    LXB_URL_MAP_ALL, /* 0x97 */
-    LXB_URL_MAP_ALL, /* 0x98 */
-    LXB_URL_MAP_ALL, /* 0x99 */
-    LXB_URL_MAP_ALL, /* 0x9a */
-    LXB_URL_MAP_ALL, /* 0x9b */
-    LXB_URL_MAP_ALL, /* 0x9c */
-    LXB_URL_MAP_ALL, /* 0x9d */
-    LXB_URL_MAP_ALL, /* 0x9e */
-    LXB_URL_MAP_ALL, /* 0x9f */
-    LXB_URL_MAP_ALL, /* 0xa0 */
-    LXB_URL_MAP_ALL, /* 0xa1 */
-    LXB_URL_MAP_ALL, /* 0xa2 */
-    LXB_URL_MAP_ALL, /* 0xa3 */
-    LXB_URL_MAP_ALL, /* 0xa4 */
-    LXB_URL_MAP_ALL, /* 0xa5 */
-    LXB_URL_MAP_ALL, /* 0xa6 */
-    LXB_URL_MAP_ALL, /* 0xa7 */
-    LXB_URL_MAP_ALL, /* 0xa8 */
-    LXB_URL_MAP_ALL, /* 0xa9 */
-    LXB_URL_MAP_ALL, /* 0xaa */
-    LXB_URL_MAP_ALL, /* 0xab */
-    LXB_URL_MAP_ALL, /* 0xac */
-    LXB_URL_MAP_ALL, /* 0xad */
-    LXB_URL_MAP_ALL, /* 0xae */
-    LXB_URL_MAP_ALL, /* 0xaf */
-    LXB_URL_MAP_ALL, /* 0xb0 */
-    LXB_URL_MAP_ALL, /* 0xb1 */
-    LXB_URL_MAP_ALL, /* 0xb2 */
-    LXB_URL_MAP_ALL, /* 0xb3 */
-    LXB_URL_MAP_ALL, /* 0xb4 */
-    LXB_URL_MAP_ALL, /* 0xb5 */
-    LXB_URL_MAP_ALL, /* 0xb6 */
-    LXB_URL_MAP_ALL, /* 0xb7 */
-    LXB_URL_MAP_ALL, /* 0xb8 */
-    LXB_URL_MAP_ALL, /* 0xb9 */
-    LXB_URL_MAP_ALL, /* 0xba */
-    LXB_URL_MAP_ALL, /* 0xbb */
-    LXB_URL_MAP_ALL, /* 0xbc */
-    LXB_URL_MAP_ALL, /* 0xbd */
-    LXB_URL_MAP_ALL, /* 0xbe */
-    LXB_URL_MAP_ALL, /* 0xbf */
-    LXB_URL_MAP_ALL, /* 0xc0 */
-    LXB_URL_MAP_ALL, /* 0xc1 */
-    LXB_URL_MAP_ALL, /* 0xc2 */
-    LXB_URL_MAP_ALL, /* 0xc3 */
-    LXB_URL_MAP_ALL, /* 0xc4 */
-    LXB_URL_MAP_ALL, /* 0xc5 */
-    LXB_URL_MAP_ALL, /* 0xc6 */
-    LXB_URL_MAP_ALL, /* 0xc7 */
-    LXB_URL_MAP_ALL, /* 0xc8 */
-    LXB_URL_MAP_ALL, /* 0xc9 */
-    LXB_URL_MAP_ALL, /* 0xca */
-    LXB_URL_MAP_ALL, /* 0xcb */
-    LXB_URL_MAP_ALL, /* 0xcc */
-    LXB_URL_MAP_ALL, /* 0xcd */
-    LXB_URL_MAP_ALL, /* 0xce */
-    LXB_URL_MAP_ALL, /* 0xcf */
-    LXB_URL_MAP_ALL, /* 0xd0 */
-    LXB_URL_MAP_ALL, /* 0xd1 */
-    LXB_URL_MAP_ALL, /* 0xd2 */
-    LXB_URL_MAP_ALL, /* 0xd3 */
-    LXB_URL_MAP_ALL, /* 0xd4 */
-    LXB_URL_MAP_ALL, /* 0xd5 */
-    LXB_URL_MAP_ALL, /* 0xd6 */
-    LXB_URL_MAP_ALL, /* 0xd7 */
-    LXB_URL_MAP_ALL, /* 0xd8 */
-    LXB_URL_MAP_ALL, /* 0xd9 */
-    LXB_URL_MAP_ALL, /* 0xda */
-    LXB_URL_MAP_ALL, /* 0xdb */
-    LXB_URL_MAP_ALL, /* 0xdc */
-    LXB_URL_MAP_ALL, /* 0xdd */
-    LXB_URL_MAP_ALL, /* 0xde */
-    LXB_URL_MAP_ALL, /* 0xdf */
-    LXB_URL_MAP_ALL, /* 0xe0 */
-    LXB_URL_MAP_ALL, /* 0xe1 */
-    LXB_URL_MAP_ALL, /* 0xe2 */
-    LXB_URL_MAP_ALL, /* 0xe3 */
-    LXB_URL_MAP_ALL, /* 0xe4 */
-    LXB_URL_MAP_ALL, /* 0xe5 */
-    LXB_URL_MAP_ALL, /* 0xe6 */
-    LXB_URL_MAP_ALL, /* 0xe7 */
-    LXB_URL_MAP_ALL, /* 0xe8 */
-    LXB_URL_MAP_ALL, /* 0xe9 */
-    LXB_URL_MAP_ALL, /* 0xea */
-    LXB_URL_MAP_ALL, /* 0xeb */
-    LXB_URL_MAP_ALL, /* 0xec */
-    LXB_URL_MAP_ALL, /* 0xed */
-    LXB_URL_MAP_ALL, /* 0xee */
-    LXB_URL_MAP_ALL, /* 0xef */
-    LXB_URL_MAP_ALL, /* 0xf0 */
-    LXB_URL_MAP_ALL, /* 0xf1 */
-    LXB_URL_MAP_ALL, /* 0xf2 */
-    LXB_URL_MAP_ALL, /* 0xf3 */
-    LXB_URL_MAP_ALL, /* 0xf4 */
-    LXB_URL_MAP_ALL, /* 0xf5 */
-    LXB_URL_MAP_ALL, /* 0xf6 */
-    LXB_URL_MAP_ALL, /* 0xf7 */
-    LXB_URL_MAP_ALL, /* 0xf8 */
-    LXB_URL_MAP_ALL, /* 0xf9 */
-    LXB_URL_MAP_ALL, /* 0xfa */
-    LXB_URL_MAP_ALL, /* 0xfb */
-    LXB_URL_MAP_ALL, /* 0xfc */
-    LXB_URL_MAP_ALL, /* 0xfd */
-    LXB_URL_MAP_ALL, /* 0xfe */
-    LXB_URL_MAP_ALL, /* 0xff */
-};
 
 /*
  * U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),
@@ -567,13 +291,6 @@ lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
                                       const lxb_encoding_data_t *encoding,
                                       lxb_url_map_type_t enmap,
                                       bool space_as_plus);
-
-static lxb_status_t
-lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
-                                   const lxb_char_t *end, lexbor_str_t *str,
-                                   lexbor_mraw_t *mraw,
-                                   lxb_url_map_type_t enmap,
-                                   bool space_as_plus);
 
 static lxb_status_t
 lxb_url_host_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
@@ -3280,12 +2997,13 @@ lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
     return LXB_STATUS_OK;
 }
 
-static lxb_status_t
-lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
+lxb_status_t
+lxb_url_percent_encode_after_utf_8_ex(const lxb_char_t *data,
                                    const lxb_char_t *end, lexbor_str_t *str,
                                    lexbor_mraw_t *mraw,
                                    lxb_url_map_type_t enmap,
-                                   bool space_as_plus)
+                                   bool space_as_plus,
+                                   const uint8_t *url_map)
 {
     size_t length;
     lxb_status_t status;
@@ -3298,7 +3016,7 @@ lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
     /* Only valid for UTF-8. */
 
     while (p < end) {
-        if (lxb_url_map[*p++] & enmap) {
+        if (url_map[*p++] & enmap) {
             length += 2;
         }
     }
@@ -3317,7 +3035,7 @@ lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
         if (space_as_plus && c == ' ') {
             *pd++ = '+';
         }
-        else if (lxb_url_map[c] & enmap) {
+        else if (url_map[c] & enmap) {
             *pd++ = '%';
             *pd++ = lexbor_str_res_char_to_two_hex_value[c][0];
             *pd++ = lexbor_str_res_char_to_two_hex_value[c][1];
@@ -3333,6 +3051,16 @@ lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
     str->length += pd - &str->data[str->length];
 
     return LXB_STATUS_OK;
+}
+
+lxb_status_t
+lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
+                                   const lxb_char_t *end, lexbor_str_t *str,
+                                   lexbor_mraw_t *mraw,
+                                   lxb_url_map_type_t enmap,
+                                   bool space_as_plus)
+{
+    return lxb_url_percent_encode_after_utf_8_ex(data, end, str, mraw, enmap, space_as_plus, lxb_url_map);
 }
 
 static lxb_status_t

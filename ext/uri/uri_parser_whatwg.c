@@ -25,6 +25,7 @@
 ZEND_TLS lexbor_mraw_t lexbor_mraw = {0};
 ZEND_TLS lxb_url_parser_t lexbor_parser = {0};
 ZEND_TLS lxb_unicode_idna_t lexbor_idna = {0};
+ZEND_TLS uint8_t lexbor_custom_url_map[256];
 
 static const size_t lexbor_mraw_byte_size = 8192;
 
@@ -51,6 +52,11 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(const zval *value
 		lexbor_str->data = (lxb_char_t *) "";
 		lexbor_str->length = 0;
 	}
+}
+
+ZEND_ATTRIBUTE_NONNULL static zend_always_inline zend_string *lexbor_str_to_zend_string(const lexbor_str_t *lexbor_str)
+{
+	return zend_string_init((const char *) lexbor_str->data, lexbor_str->length, 0);
 }
 
 /**
@@ -578,6 +584,9 @@ PHP_RINIT_FUNCTION(uri_parser_whatwg)
 		goto fail;
 	}
 
+	memcpy(lexbor_custom_url_map, lxb_url_map, sizeof(lxb_url_map));
+	lexbor_custom_url_map[37] = -1; /* % is percent-encoded */
+
 	return SUCCESS;
 
  fail:
@@ -663,6 +672,146 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, const php_uri_rec
 	}
 
 	return smart_str_extract(&uri_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_userinfo_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_USERINFO, false, lexbor_custom_url_map
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_opaque_host_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_C0, false, lexbor_custom_url_map
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_path_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_PATH, false, lexbor_custom_url_map
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_opaque_path_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_C0, false, lexbor_custom_url_map
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_path_segment_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	lexbor_custom_url_map[47] |= LXB_URL_MAP_PATH;
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_PATH, false, lexbor_custom_url_map
+	);
+
+	lexbor_custom_url_map[47] &= ~LXB_URL_MAP_PATH;
+
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_query_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_QUERY, false, lexbor_custom_url_map
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_special_query_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_SPECIAL_QUERY, false, lexbor_custom_url_map
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_form_query_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_X_WWW_FORM, true, lexbor_custom_url_map
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_fragment_component(const char *str, const size_t str_length)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
+		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, LXB_URL_MAP_FRAGMENT, false, lexbor_custom_url_map
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	return lexbor_str_to_zend_string(&lexbor_str);
 }
 
 static void php_uri_parser_whatwg_destroy(void *uri)

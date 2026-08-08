@@ -1,6 +1,11 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: bfd9247fa79baf877d600134c9ef615ec5ca9cea
+ * Stub hash: d78664a7710d76025170fb4ab053f6b991d9ede4
  * Has decl header: yes */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Uri_WhatWg_url_percent_encode, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, mode, Uri\\WhatWg\\\125rlPercentEncodingMode, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_reset, 0, 0, IS_STATIC, 0)
 ZEND_END_ARG_INFO()
@@ -219,6 +224,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Uri_WhatWg_Url___debugInfo arginfo_class_Uri_Rfc3986_Uri___serialize
 
+ZEND_FUNCTION(Uri_WhatWg_url_percent_encode);
 ZEND_METHOD(Uri_Rfc3986_UriBuilder, reset);
 ZEND_METHOD(Uri_Rfc3986_UriBuilder, setScheme);
 ZEND_METHOD(Uri_Rfc3986_UriBuilder, setUserInfo);
@@ -282,6 +288,11 @@ ZEND_METHOD(Uri_WhatWg_Url, resolve);
 ZEND_METHOD(Uri_WhatWg_Url, __serialize);
 ZEND_METHOD(Uri_WhatWg_Url, __unserialize);
 ZEND_METHOD(Uri_WhatWg_Url, __debugInfo);
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("Uri\\WhatWg", "url_percent_encode"), zif_Uri_WhatWg_url_percent_encode, arginfo_Uri_WhatWg_url_percent_encode, 0, NULL, NULL)
+	ZEND_FE_END
+};
 
 static const zend_function_entry class_Uri_Rfc3986_UriBuilder_methods[] = {
 	ZEND_ME(Uri_Rfc3986_UriBuilder, reset, arginfo_class_Uri_Rfc3986_UriBuilder_reset, ZEND_ACC_PUBLIC)
@@ -638,6 +649,33 @@ static zend_class_entry *register_class_Uri_WhatWg_Url(void)
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "withpassword", sizeof("withpassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Uri_WhatWg_UrlPercentEncodingMode(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Uri\\WhatWg\\UrlPercentEncodingMode", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Username", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Password", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "OpaqueHost", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Path", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "OpaquePath", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "PathSegment", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Query", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "SpecialQuery", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "FormQuery", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Fragment", NULL);
 
 	return class_entry;
 }
