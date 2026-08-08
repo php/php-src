@@ -1903,9 +1903,26 @@ static void dom_merge_adjacent_exclusive_text_nodes(xmlNodePtr node)
 	}
 }
 
+static zend_always_inline bool dom_normalize_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Maximum call stack size reached. Infinite recursion?");
+		}
+		return true;
+	}
+#endif
+	return false;
+}
+
 /* {{{ void php_dom_normalize_legacy(xmlNodePtr nodep) */
 void php_dom_normalize_legacy(xmlNodePtr nodep)
 {
+	if (UNEXPECTED(dom_normalize_check_stack_limit())) {
+		return;
+	}
+
 	xmlNodePtr child = nodep->children;
 	while(child != NULL) {
 		switch (child->type) {
@@ -1938,6 +1955,10 @@ void php_dom_normalize_legacy(xmlNodePtr nodep)
 /* https://dom.spec.whatwg.org/#dom-node-normalize */
 void php_dom_normalize_modern(xmlNodePtr this)
 {
+	if (UNEXPECTED(dom_normalize_check_stack_limit())) {
+		return;
+	}
+
 	/* for each descendant exclusive Text node node of this: */
 	xmlNodePtr node = this->children;
 	while (node != NULL) {
