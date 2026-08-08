@@ -4161,6 +4161,13 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 	zend_ulong num_key;
 	int ret;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return 0;
+	}
+#endif
+
 	ZEND_HASH_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {
 		src_zval = src_entry;
 		ZVAL_DEREF(src_zval);
