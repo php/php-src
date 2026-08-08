@@ -18,10 +18,10 @@ $table = array("AB" => "Alberta",
 "MB" => "Manitoba",
 "NB" => "Nouveau-Brunswick",
 "NL" => "Terre-Neuve-et-Labrador",
-"NS" => "Nouvelle-Écosse",
+"NS" => "Nouvelle-ï¿½cosse",
 "ON" => "Ontario",
-"PE" => "Île-du-Prince-Édouard",
-"QC" => "Québec",
+"PE" => "ï¿½le-du-Prince-ï¿½douard",
+"QC" => "Quï¿½bec",
 "SK" => "Saskatchewan",
 "NT" => "Territoires du Nord-Ouest",
 "NU" => "Nunavut",
@@ -29,26 +29,27 @@ $table = array("AB" => "Alberta",
 asort($table, SORT_LOCALE_STRING);
 var_dump($table);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant SORT_LOCALE_STRING is deprecated since 8.6, use one of the Collator::*sort*() methods instead in %s on line %d
 array(13) {
   ["AB"]=>
   string(7) "Alberta"
   ["BC"]=>
   string(20) "Colombie-Britannique"
   ["PE"]=>
-  string(21) "Île-du-Prince-Édouard"
+  string(21) "ï¿½le-du-Prince-ï¿½douard"
   ["MB"]=>
   string(8) "Manitoba"
   ["NB"]=>
   string(17) "Nouveau-Brunswick"
   ["NS"]=>
-  string(15) "Nouvelle-Écosse"
+  string(15) "Nouvelle-ï¿½cosse"
   ["NU"]=>
   string(7) "Nunavut"
   ["ON"]=>
   string(7) "Ontario"
   ["QC"]=>
-  string(6) "Québec"
+  string(6) "Quï¿½bec"
   ["SK"]=>
   string(12) "Saskatchewan"
   ["NL"]=>

@@ -26,6 +26,7 @@ var_dump($obj);
 
 ?>
 --EXPECTF--
+Deprecated: array_walk(): Passing an object for argument #1 $array to array_walk() is deprecated, call get_object_vars() first instead in %s on line %d
 TypeError: Cannot assign string to reference held by property C::$a of type int
 lazy proxy object(C)#%d (1) {
   ["instance"]=>

@@ -38,6 +38,8 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing array_walk() : object functionality ***
+
+Deprecated: array_walk(): Passing an object for argument #1 $array to array_walk() is deprecated, call get_object_vars() first instead in %s on line %d
 string(18) "%r\0%rMyClass%r\0%rpri_value"
 int(10)
 int(1)

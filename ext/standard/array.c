@@ -1511,6 +1511,14 @@ PHP_FUNCTION(array_walk)
 		Z_PARAM_ZVAL(userdata)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Passing an object for argument #1 $array to array_walk() is deprecated, call get_object_vars() first instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	php_array_walk(&context, array, userdata, /* recursive */ false);
 	RETURN_TRUE;
 }
@@ -1529,6 +1537,15 @@ PHP_FUNCTION(array_walk_recursive)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(userdata)
 	ZEND_PARSE_PARAMETERS_END();
+
+
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Passing an object for argument #1 $array to array_walk_recursive() is deprecated, call get_object_vars() first instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
 
 	php_array_walk(&context, array, userdata, /* recursive */ true);
 	RETURN_TRUE;
