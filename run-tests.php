@@ -34,9 +34,9 @@ Synopsis:
     php run-tests.php [options] [files] [directories]
 
 Options:
-    -j<workers> Run up to <workers> simultaneous testing processes in parallel for
-                quicker testing on systems with multiple logical processors.
-                Note that this is experimental feature.
+    -j<workers> Run up to <workers> simultaneous testing processes. By default,
+                the worker count is detected automatically. Use -j1 to run
+                tests sequentially.
 
     -l <file>   Read the testfiles to be executed from <file>. After the test
                 has finished all failed tests are written to the same <file>.
@@ -356,6 +356,7 @@ function main(): void
     $shuffle = false;
     $bless = false;
     $workers = null;
+    $workersExplicit = false;
     $context_line_count = 3;
     $num_repeats = 1;
     $show_progress = true;
@@ -417,6 +418,7 @@ function main(): void
 
             switch ($switch) {
                 case 'j':
+                    $workersExplicit = true;
                     $workers = substr($argv[$i], 2);
                     if ($workers == 0 || !preg_match('/^\d+$/', $workers)) {
                         error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
@@ -646,6 +648,17 @@ function main(): void
         }
     }
 
+    if (!$workersExplicit && (!$selected_tests || count($test_files) > 1)) {
+        $workers = get_default_worker_count();
+        if ($workers !== null
+                && ($valgrind !== null || isset($environment['SKIP_ASAN']))) {
+            $workers = min($workers, 2);
+        }
+        if ($workers !== null && !can_create_parallel_worker_socket()) {
+            $workers = null;
+        }
+    }
+
     if ($online === null && !isset($environment['SKIP_ONLINE_TESTS'])) {
         $online = false;
     }
@@ -808,6 +821,53 @@ function main(): void
     }
 }
 
+function get_default_worker_count(): ?int
+{
+    if (IS_WINDOWS) {
+        $workerCount = getenv('NUMBER_OF_PROCESSORS');
+        return is_string($workerCount) ? parse_default_worker_count($workerCount) : null;
+    }
+
+    $commands = [
+        'nproc 2>/dev/null',
+        'getconf _NPROCESSORS_ONLN 2>/dev/null',
+        'getconf NPROCESSORS_ONLN 2>/dev/null',
+        'sysctl -n hw.logicalcpu 2>/dev/null',
+        'sysctl -n hw.ncpu 2>/dev/null',
+    ];
+    foreach ($commands as $command) {
+        $workerCount = shell_exec($command);
+        if (is_string($workerCount)
+                && ($workerCount = parse_default_worker_count($workerCount)) !== null) {
+            return $workerCount;
+        }
+    }
+
+    return null;
+}
+
+function parse_default_worker_count(string $workerCount): ?int
+{
+    $workerCount = trim($workerCount);
+    if (preg_match('/^[0-9]+$/D', $workerCount) !== 1) {
+        return null;
+    }
+
+    $workerCount = (int) $workerCount;
+    return $workerCount >= 2 ? min($workerCount, 10) : null;
+}
+
+function can_create_parallel_worker_socket(): bool
+{
+    $socket = @stream_socket_server('tcp://127.0.0.1:0');
+    if ($socket === false) {
+        return false;
+    }
+
+    fclose($socket);
+    return true;
+}
+
 function verify_config(string $php): void
 {
     if (empty($php) || !file_exists($php)) {
@@ -830,7 +890,7 @@ function write_information(array $user_tests, $phpdbg): void
     $escaped_no_file_cache = escaped_shell_string_from($no_file_cache);
 
     // Get info from php
-    $info_file = __DIR__ . '/run-test-info.php';
+    $info_file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'run-test-info-' . getmypid() . '.php';
     @unlink($info_file);
     $php_info = '<?php echo "
 PHP_SAPI    : " , PHP_SAPI , "
@@ -1676,10 +1736,10 @@ escape:
                             // - If this is running a small enough number of tests,
                             //   reduce the batch size to give batches to more workers.
                             $files = [];
-                            $maxBatchSize = $valgrind ? 1 : ($shuffle ? 4 : 32);
+                            $maxBatchSize = $valgrind ? 1 : 4;
                             $averageFilesPerWorker = max(1, (int) ceil($totalFileCount / count($workerProcs)));
                             $batchSize = min($maxBatchSize, $averageFilesPerWorker);
-                            while (count($files) <= $batchSize && $file = array_pop($test_files)) {
+                            while (count($files) < $batchSize && $file = array_pop($test_files)) {
                                 foreach ($fileConflictsWith[$file] as $conflictKey) {
                                     if (isset($activeConflicts[$conflictKey])) {
                                         $waitingTests[$conflictKey][] = $file;

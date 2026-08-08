@@ -192,6 +192,11 @@ When you are testing your test case it's really important to make sure that you 
 temporary resources (eg files) that you used in the test. There is a special ``--CLEAN--`` section
 to help you do this — see `here <#clean>`_.
 
+Tests run in parallel by default. Mutable resources such as files, directories, ports, database
+objects, and IPC identifiers must therefore be unique to each test. Read-only fixtures may be
+shared. If a resource cannot be isolated, declare the narrowest applicable conflict using
+``--CONFLICTS--`` or a ``CONFLICTS`` file.
+
 Another good check is to look at what lines of code in the PHP source your test case covers. This is
 easy to do, there are some instructions on the `PHP Wiki
 <https://wiki.php.net/doc/articles/writing-tests>`_.
