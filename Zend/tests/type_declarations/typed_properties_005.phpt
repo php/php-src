@@ -13,7 +13,7 @@ new class(new Dummy) {
 };
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot assign Dummy to property class@anonymous::$std of type stdClass in %s:%d
+Fatal error: Uncaught TypeError: Cannot assign Dummy to property class@anonymous%0%s::$std of type stdClass in %s:%d
 Stack trace:
 #0 %s(%d): class@anonymous->__construct(Object(Dummy))
 #1 {main}
