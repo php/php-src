@@ -473,6 +473,44 @@ static void buffer_append_spaces(smart_str *buf, int num_spaces)
 	memset(target, ' ', num_spaces);
 }
 
+static size_t php_var_export_compute_escaped_string_len(const char *str, size_t len, bool escape_nul)
+{
+	size_t i, escaped_len = len;
+	for (i = 0; i < len; ++i) {
+		char c = str[i];
+		if (c == '\'' || c == '\\') {
+			escaped_len += 1;
+		} else if (escape_nul && c == '\0') {
+			escaped_len += 11;
+		}
+	}
+	return escaped_len;
+}
+
+static void php_var_export_append_escaped(smart_str *buf, const char *str, size_t len, bool escape_nul)
+{
+	size_t escaped_len = php_var_export_compute_escaped_string_len(str, len, escape_nul);
+
+	smart_str_appendc(buf, '\'');
+	if (escaped_len == len) {
+		smart_str_appendl(buf, str, len);
+	} else {
+		char *target = smart_str_extend(buf, escaped_len);
+		for (size_t i = 0; i < len; i++) {
+			char c = str[i];
+			if (c == '\'' || c == '\\') {
+				*target++ = '\\';
+				*target++ = c;
+			} else if (escape_nul && c == '\0') {
+				target = zend_mempcpy(target, "' . \"\\0\" . '", 12);
+			} else {
+				*target++ = c;
+			}
+		}
+	}
+	smart_str_appendc(buf, '\'');
+}
+
 static zend_result php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
@@ -481,18 +519,10 @@ static zend_result php_array_element_export(zval *zv, zend_ulong index, zend_str
 		smart_str_appendl(buf, " => ", 4);
 
 	} else { /* string key */
-		zend_string *tmp_str;
-		zend_string *ckey = php_addcslashes(key, "'\\", 2);
-		tmp_str = php_str_to_str(ZSTR_VAL(ckey), ZSTR_LEN(ckey), "\0", 1, "' . \"\\0\" . '", 12);
-
 		buffer_append_spaces(buf, level + 1);
 
-		smart_str_appendc(buf, '\'');
-		smart_str_append(buf, tmp_str);
-		smart_str_appendl(buf, "' => ", 5);
-
-		zend_string_free(ckey);
-		zend_string_free(tmp_str);
+		php_var_export_append_escaped(buf, ZSTR_VAL(key), ZSTR_LEN(key), /* escape_nul */ true);
+		smart_str_appendl(buf, " => ", 4);
 	}
 	zend_result result = php_var_export_ex(zv, level + 2, buf);
 
@@ -509,15 +539,9 @@ static zend_result php_object_element_export(zval *zv, zend_ulong index, zend_st
 	if (key != NULL) {
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
-		zend_string *pname_esc;
 
 		zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
-		pname_esc = php_addcslashes_str(prop_name, prop_name_len, "'\\", 2);
-
-		smart_str_appendc(buf, '\'');
-		smart_str_append(buf, pname_esc);
-		smart_str_appendc(buf, '\'');
-		zend_string_release_ex(pname_esc, 0);
+		php_var_export_append_escaped(buf, prop_name, prop_name_len, /* escape_nul */ false);
 	} else {
 		smart_str_append_long(buf, (zend_long) index);
 	}
@@ -533,7 +557,6 @@ static zend_result php_object_element_export(zval *zv, zend_ulong index, zend_st
 PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
-	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
 	zval *val;
@@ -564,15 +587,7 @@ again:
 				buf, Z_DVAL_P(struc), (int) PG(serialize_precision), /* zero_fraction */ true);
 			break;
 		case IS_STRING:
-			ztmp = php_addcslashes(Z_STR_P(struc), "'\\", 2);
-			ztmp2 = php_str_to_str(ZSTR_VAL(ztmp), ZSTR_LEN(ztmp), "\0", 1, "' . \"\\0\" . '", 12);
-
-			smart_str_appendc(buf, '\'');
-			smart_str_append(buf, ztmp2);
-			smart_str_appendc(buf, '\'');
-
-			zend_string_free(ztmp);
-			zend_string_free(ztmp2);
+			php_var_export_append_escaped(buf, Z_STRVAL_P(struc), Z_STRLEN_P(struc), /* escape_nul */ true);
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
