@@ -1146,7 +1146,7 @@ static bool php_xml_check_string_method_arg(
 	zend_function *method_ptr = zend_hash_find_ptr_lc(&ce->function_table, method_name);
 	if (!method_ptr) {
 		if (arg_num) {
-			zend_argument_value_error(arg_num, "method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(method_name));
+			zend_argument_value_error(arg_num, "method %pS::%pS() does not exist", ce->name, method_name);
 		}
 		return false;
 	}
@@ -1170,8 +1170,8 @@ static bool php_xml_check_string_method_arg(
 		zend_fcc_dtor(&parser_to_check->fcc_field); \
 		bool status = php_xml_check_string_method_arg(0, new_this_obj, method_name, &parser_to_check->fcc_field); \
 		if (status == false) { \
-			zend_argument_value_error(2, "cannot safely swap to object of class %s as method \"%s\" does not exist, which was set via " handler_set_method, \
-			ZSTR_VAL(new_this_obj->ce->name), ZSTR_VAL(method_name)); \
+			zend_argument_value_error(2, "cannot safely swap to object of class %pS as method \"%pS\" does not exist, which was set via " handler_set_method, \
+			new_this_obj->ce->name, method_name); \
 			zend_string_release(method_name); \
 			RETURN_THROWS(); \
 		} \
