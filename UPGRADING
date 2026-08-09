@@ -200,6 +200,14 @@ PHP 8.6 UPGRADE NOTES
     SplFileObject::seek() past EOF now produces the same key() value as
     SplTempFileObject; the two previously returned different values.
 
+- SimpleXML:
+  . SimpleXMLElement::__construct() now raises a ValueError when the $data
+    argument contains NUL bytes, matching simplexml_load_file(). With
+    $dataIsURL set it previously truncated the path at the first NUL byte.
+    Without it the string went to libxml, which at default options rejects a
+    NUL on current versions but accepts the truncated document on older ones
+    and under LIBXML_RECOVER.
+
 - Standard:
   . array_intersect() with at least two arrays now converts values to strings
     while scanning its inputs instead of during sort comparisons. This can
