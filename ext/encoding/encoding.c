@@ -96,6 +96,7 @@ static zend_string *base16_encode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = len * 2;
+	ZSTR_VAL(result)[len * 2] = '\0';
 	return result;
 }
 
@@ -155,6 +156,7 @@ static zend_string *base16_decode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = dst_idx;
+	ZSTR_VAL(result)[dst_idx] = '\0';
 	return result;
 }
 
@@ -214,7 +216,11 @@ static zend_string *base16_decode_impl(const char *data, size_t len, zend_enum_E
 		constant_time = (zend_enum_fetch_case_id(Z_OBJ_P(timing_obj)) == ZEND_ENUM_Encoding_TimingMode_Constant);
 	}
 
-	RETURN_STR(base16_decode_impl(data, data_len, variant, mode, constant_time));
+	zend_string *result = base16_decode_impl(data, data_len, variant, mode, constant_time);
+	if (!result) {
+		return;
+	}
+	RETURN_STR(result);
 }
 
 /* ===================== Base32 ===================== */
@@ -376,6 +382,7 @@ static zend_string *base32_encode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
+	ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
 	return result;
 }
 
@@ -491,6 +498,7 @@ static zend_string *base32_decode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = dst_idx;
+	ZSTR_VAL(result)[dst_idx] = '\0';
 	return result;
 }
 
@@ -556,7 +564,11 @@ PHP_FUNCTION(Encoding_base32_decode) {
 		constant_time = (zend_enum_fetch_case_id(Z_OBJ_P(timing_obj)) == ZEND_ENUM_Encoding_TimingMode_Constant);
 	}
 
-	RETURN_STR(base32_decode_impl(data, data_len, variant, mode, constant_time));
+	zend_string *result = base32_decode_impl(data, data_len, variant, mode, constant_time);
+	if (!result) {
+		return;
+	}
+	RETURN_STR(result);
 }
 
 /* ===================== Base58 ===================== */
@@ -644,6 +656,7 @@ static zend_string *base58_encode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
+	ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
 	efree(output);
 
 	return result;
@@ -728,6 +741,7 @@ static zend_string *base58_decode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
+	ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
 	efree(output);
 
 	return result;
@@ -772,7 +786,11 @@ PHP_FUNCTION(Encoding_base58_decode) {
 		variant = (zend_enum_Encoding_Base58)zend_enum_fetch_case_id(Z_OBJ_P(variant_obj));
 	}
 
-	RETURN_STR(base58_decode_impl(data, data_len, variant));
+	zend_string *result = base58_decode_impl(data, data_len, variant);
+	if (!result) {
+		return;
+	}
+	RETURN_STR(result);
 }
 
 /* ===================== Base64 ===================== */
@@ -920,6 +938,7 @@ static zend_string *base64_encode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
+	ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
 	return result;
 }
 
@@ -1033,6 +1052,7 @@ static zend_string *base64_decode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = dst_idx;
+	ZSTR_VAL(result)[dst_idx] = '\0';
 	return result;
 }
 
@@ -1089,7 +1109,11 @@ PHP_FUNCTION(Encoding_base64_decode) {
 		mode = (zend_enum_Encoding_DecodingMode)zend_enum_fetch_case_id(Z_OBJ_P(decoding_obj));
 	}
 
-	RETURN_STR(base64_decode_impl(data, data_len, variant, mode));
+	zend_string *result = base64_decode_impl(data, data_len, variant, mode);
+	if (!result) {
+		return;
+	}
+	RETURN_STR(result);
 }
 
 /* ===================== Base85 ===================== */
@@ -1313,6 +1337,7 @@ static zend_string *base85_encode_impl(const char *data, size_t len, zend_enum_E
 		}
 
 		ZSTR_LEN(result) = dst - ZSTR_VAL(result);
+		ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
 	}
 
 	return result;
@@ -1423,6 +1448,7 @@ static zend_string *base85_decode_impl(const char *data, size_t len, zend_enum_E
 	}
 
 	ZSTR_LEN(result) = dst_idx;
+	ZSTR_VAL(result)[dst_idx] = '\0';
 	return result;
 }
 
@@ -1472,7 +1498,11 @@ PHP_FUNCTION(Encoding_base85_decode) {
 
 	zend_enum_Encoding_DecodingMode mode = ZEND_ENUM_Encoding_DecodingMode_Strict;
 
-	RETURN_STR(base85_decode_impl(data, data_len, variant, mode));
+	zend_string *result = base85_decode_impl(data, data_len, variant, mode);
+	if (!result) {
+		return;
+	}
+	RETURN_STR(result);
 }
 
 /* ===================== Module Registration ===================== */

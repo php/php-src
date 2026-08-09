@@ -28,5 +28,5 @@ try {
 
 ?>
 --EXPECTF--
-UnableToDecodeException
-UnableToDecodeException
+Encoding\UnableToDecodeException
+Encoding\UnableToDecodeException
