@@ -5,49 +5,57 @@ zend_test
 --FILE--
 <?php
 
-class Foo {}
+$types = require 'types.inc';
 
-var_dump(zend_string_or_object("string"));
-var_dump(zend_string_or_object(1));
-var_dump(zend_string_or_object(null));
-var_dump(zend_string_or_object(new stdClass()));
-var_dump(zend_string_or_object(new Foo()));
-
-try {
-    zend_string_or_object([]);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
-}
-
-var_dump(zend_string_or_object_or_null("string"));
-var_dump(zend_string_or_object_or_null(1));
-var_dump(zend_string_or_object_or_null(null));
-var_dump(zend_string_or_object_or_null(new stdClass()));
-var_dump(zend_string_or_object_or_null(new Foo()));
-
-try {
-    zend_string_or_object_or_null([]);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+foreach ($types as $name => $type) {
+    echo "Using $name:\n";
+	try {
+		var_dump(zend_string_or_object($type));
+	} catch (Throwable $e) {
+		echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+	}
+	try {
+		var_dump(zend_string_or_object_or_null($type));
+	} catch (Throwable $e) {
+		echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+	}
 }
 
 ?>
 --EXPECTF--
-string(6) "string"
-string(1) "1"
+Using null:
 
 Deprecated: zend_string_or_object(): Passing null to parameter #1 ($param) of type object|string is deprecated in %s on line %d
 string(0) ""
+NULL
+Using false:
+string(0) ""
+string(0) ""
+Using true:
+string(1) "1"
+string(1) "1"
+Using 42:
+string(2) "42"
+string(2) "42"
+Using 73.5:
+string(4) "73.5"
+string(4) "73.5"
+Using 'string':
+string(6) "string"
+string(6) "string"
+Using []:
+TypeError: zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
+TypeError: zend_string_or_object_or_null(): Argument #1 ($param) must be of type object|string|null, array given
+Using new stdClass():
 object(stdClass)#1 (0) {
 }
-object(Foo)#1 (0) {
+object(stdClass)#1 (0) {
 }
-zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
-string(6) "string"
-string(1) "1"
-NULL
-object(stdClass)#2 (0) {
+Using new S():
+object(S)#2 (0) {
 }
-object(Foo)#2 (0) {
+object(S)#2 (0) {
 }
-zend_string_or_object_or_null(): Argument #1 ($param) must be of type object|string|null, array given
+Using STDOUT:
+TypeError: zend_string_or_object(): Argument #1 ($param) must be of type object|string, resource given
+TypeError: zend_string_or_object_or_null(): Argument #1 ($param) must be of type object|string|null, resource given
