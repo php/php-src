@@ -43,6 +43,12 @@ float(73.5)
 Using 'string':
 string(6) "string"
 string(6) "string"
+Using '15':
+string(2) "15"
+string(2) "15"
+Using '56.7':
+string(4) "56.7"
+string(4) "56.7"
 Using []:
 TypeError: zend_number_or_string(): Argument #1 ($param) must be of type string|int|float, array given
 TypeError: zend_number_or_string_or_null(): Argument #1 ($param) must be of type string|int|float|null, array given

@@ -13,6 +13,8 @@ return [
 	'42' => 42,
 	'73.5' => 73.5,
 	"'string'" => 'string',
+	"'15'" => '15',
+	"'56.7'" => '56.7',
 	'[]' => [],
 	'new stdClass()' => new stdClass(),
 	'new S()' => new S(),

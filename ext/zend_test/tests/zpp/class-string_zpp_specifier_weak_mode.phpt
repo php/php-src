@@ -33,6 +33,10 @@ Using 73.5:
 TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, 73.5 given
 Using 'string':
 TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, string given
+Using '15':
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, 15 given
+Using '56.7':
+TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be a valid class name, 56.7 given
 Using []:
 TypeError: zend_object_init_with_constructor(): Argument #1 ($class) must be of type string, array given
 Using new stdClass():

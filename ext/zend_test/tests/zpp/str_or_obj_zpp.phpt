@@ -43,6 +43,12 @@ string(4) "73.5"
 Using 'string':
 string(6) "string"
 string(6) "string"
+Using '15':
+string(2) "15"
+string(2) "15"
+Using '56.7':
+string(4) "56.7"
+string(4) "56.7"
 Using []:
 TypeError: zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
 TypeError: zend_string_or_object_or_null(): Argument #1 ($param) must be of type object|string|null, array given
