@@ -1139,47 +1139,38 @@ PHP_FUNCTION(Encoding_base64_decode) {
 
 /* ===================== Base85 ===================== */
 
-static const char base85_adobe_table[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~";
-static const char base85_z85_table[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+<=>@^_[]{}\"(,)/%";
+static const char base85_adobe_table[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";
+static const char base85_z85_table[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#";
 static const char base85_git_table[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!@$%^&*()-=+;:<>|~.#";
 
 static const uint8_t base85_adobe_reverse[256] = {
 	[0 ... 255] = 0xFF,
-	['0'] = 0,  ['1'] = 1,  ['2'] = 2,  ['3'] = 3,  ['4'] = 4,  ['5'] = 5,  ['6'] = 6,  ['7'] = 7,
-	['8'] = 8,  ['9'] = 9,
-	['A'] = 10, ['B'] = 11, ['C'] = 12, ['D'] = 13, ['E'] = 14, ['F'] = 15, ['G'] = 16, ['H'] = 17,
-	['I'] = 18, ['J'] = 19, ['K'] = 20, ['L'] = 21, ['M'] = 22, ['N'] = 23, ['O'] = 24, ['P'] = 25,
-	['Q'] = 26, ['R'] = 27, ['S'] = 28, ['T'] = 29, ['U'] = 30, ['V'] = 31, ['W'] = 32, ['X'] = 33,
-	['Y'] = 34, ['Z'] = 35,
-	['a'] = 36, ['b'] = 37, ['c'] = 38, ['d'] = 39, ['e'] = 40, ['f'] = 41, ['g'] = 42, ['h'] = 43,
-	['i'] = 44, ['j'] = 45, ['k'] = 46, ['l'] = 47, ['m'] = 48, ['n'] = 49, ['o'] = 50, ['p'] = 51,
-	['q'] = 52, ['r'] = 53, ['s'] = 54, ['t'] = 55, ['u'] = 56, ['v'] = 57, ['w'] = 58, ['x'] = 59,
-	['y'] = 60, ['z'] = 61,
-	['!'] = 62, ['#'] = 63, ['$'] = 64, ['%'] = 65, ['&'] = 66,
-	['('] = 67, [')'] = 68, ['*'] = 69, ['+'] = 70,
-	['-'] = 71,
-	['<'] = 72, ['='] = 73, ['>'] = 74, ['?'] = 75, ['@'] = 76,
-	['^'] = 77, ['_'] = 78, ['`'] = 79,
-	['{'] = 80, ['|'] = 81, ['}'] = 82, ['~'] = 83
+	['!'] = 0,  ['"'] = 1,  ['\#'] = 2,  ['$'] = 3,  ['%'] = 4,  ['&'] = 5,  ['\''] = 6,  ['('] = 7,
+	[')'] = 8,  ['*'] = 9,  ['+'] = 10,  [','] = 11,  ['-'] = 12,  ['.'] = 13,  ['/'] = 14,  ['0'] = 15,
+	['1'] = 16,  ['2'] = 17,  ['3'] = 18,  ['4'] = 19,  ['5'] = 20,  ['6'] = 21,  ['7'] = 22,  ['8'] = 23,
+	['9'] = 24,  [':'] = 25,  [';'] = 26,  ['<'] = 27,  ['='] = 28,  ['>'] = 29,  ['?'] = 30,  ['@'] = 31,
+	['A'] = 32,  ['B'] = 33,  ['C'] = 34,  ['D'] = 35,  ['E'] = 36,  ['F'] = 37,  ['G'] = 38,  ['H'] = 39,
+	['I'] = 40,  ['J'] = 41,  ['K'] = 42,  ['L'] = 43,  ['M'] = 44,  ['N'] = 45,  ['O'] = 46,  ['P'] = 47,
+	['Q'] = 48,  ['R'] = 49,  ['S'] = 50,  ['T'] = 51,  ['U'] = 52,  ['V'] = 53,  ['W'] = 54,  ['X'] = 55,
+	['Y'] = 56,  ['Z'] = 57,  ['['] = 58,  ['\\'] = 59,  [']'] = 60,  ['^'] = 61,  ['_'] = 62,  ['`'] = 63,
+	['a'] = 64,  ['b'] = 65,  ['c'] = 66,  ['d'] = 67,  ['e'] = 68,  ['f'] = 69,  ['g'] = 70,  ['h'] = 71,
+	['i'] = 72,  ['j'] = 73,  ['k'] = 74,  ['l'] = 75,  ['m'] = 76,  ['n'] = 77,  ['o'] = 78,  ['p'] = 79,
+	['q'] = 80,  ['r'] = 81,  ['s'] = 82,  ['t'] = 83,  ['u'] = 84
 };
 
 static const uint8_t base85_z85_reverse[256] = {
 	[0 ... 255] = 0xFF,
 	['0'] = 0,  ['1'] = 1,  ['2'] = 2,  ['3'] = 3,  ['4'] = 4,  ['5'] = 5,  ['6'] = 6,  ['7'] = 7,
-	['8'] = 8,  ['9'] = 9,
-	['a'] = 10, ['b'] = 11, ['c'] = 12, ['d'] = 13, ['e'] = 14, ['f'] = 15, ['g'] = 16, ['h'] = 17,
-	['i'] = 18, ['j'] = 19, ['k'] = 20, ['l'] = 21, ['m'] = 22, ['n'] = 23, ['o'] = 24, ['p'] = 25,
-	['q'] = 26, ['r'] = 27, ['s'] = 28, ['t'] = 29, ['u'] = 30, ['v'] = 31, ['w'] = 32, ['x'] = 33,
-	['y'] = 34, ['z'] = 35,
-	['A'] = 36, ['B'] = 37, ['C'] = 38, ['D'] = 39, ['E'] = 40, ['F'] = 41, ['G'] = 42, ['H'] = 43,
-	['I'] = 44, ['J'] = 45, ['K'] = 46, ['L'] = 47, ['M'] = 48, ['N'] = 49, ['O'] = 50, ['P'] = 51,
-	['Q'] = 52, ['R'] = 53, ['S'] = 54, ['T'] = 55, ['U'] = 56, ['V'] = 57, ['W'] = 58, ['X'] = 59,
-	['Y'] = 60, ['Z'] = 61,
-	['.'] = 62, ['-'] = 63, [':'] = 64, ['+'] = 65, ['<'] = 66, ['='] = 67, ['>'] = 68, ['@'] = 69,
-	['^'] = 70, ['_'] = 71,
-	['['] = 72, [']'] = 73,
-	['{'] = 74, ['}'] = 75, ['"'] = 76,
-	['('] = 77, [')'] = 78, [','] = 79, ['/'] = 80, ['%'] = 81
+	['8'] = 8,  ['9'] = 9,  ['a'] = 10,  ['b'] = 11,  ['c'] = 12,  ['d'] = 13,  ['e'] = 14,  ['f'] = 15,
+	['g'] = 16,  ['h'] = 17,  ['i'] = 18,  ['j'] = 19,  ['k'] = 20,  ['l'] = 21,  ['m'] = 22,  ['n'] = 23,
+	['o'] = 24,  ['p'] = 25,  ['q'] = 26,  ['r'] = 27,  ['s'] = 28,  ['t'] = 29,  ['u'] = 30,  ['v'] = 31,
+	['w'] = 32,  ['x'] = 33,  ['y'] = 34,  ['z'] = 35,  ['A'] = 36,  ['B'] = 37,  ['C'] = 38,  ['D'] = 39,
+	['E'] = 40,  ['F'] = 41,  ['G'] = 42,  ['H'] = 43,  ['I'] = 44,  ['J'] = 45,  ['K'] = 46,  ['L'] = 47,
+	['M'] = 48,  ['N'] = 49,  ['O'] = 50,  ['P'] = 51,  ['Q'] = 52,  ['R'] = 53,  ['S'] = 54,  ['T'] = 55,
+	['U'] = 56,  ['V'] = 57,  ['W'] = 58,  ['X'] = 59,  ['Y'] = 60,  ['Z'] = 61,  ['.'] = 62,  ['-'] = 63,
+	[':'] = 64,  ['+'] = 65,  ['='] = 66,  ['^'] = 67,  ['!'] = 68,  ['/'] = 69,  ['*'] = 70,  ['?'] = 71,
+	['&'] = 72,  ['<'] = 73,  ['>'] = 74,  ['('] = 75,  [')'] = 76,  ['['] = 77,  [']'] = 78,  ['{'] = 79,
+	['}'] = 80,  ['@'] = 81,  ['%'] = 82,  ['$'] = 83,  ['#'] = 84
 };
 
 static const uint8_t base85_git_reverse[256] = {
@@ -1218,7 +1209,6 @@ static zend_string *base85_encode_impl(const char *data, size_t len, zend_enum_E
 			break;
 	}
 
-	/* Check padding validity */
 	if (padding == ZEND_ENUM_Encoding_PaddingMode_PreservePadding && !uses_padding) {
 		zend_value_error("PaddingMode::PreservePadding is not supported for variant %s",
 			variant == ZEND_ENUM_Encoding_Base85_Z85 ? "Base85::Z85" : "Base85::Git");
@@ -1234,133 +1224,94 @@ static zend_string *base85_encode_impl(const char *data, size_t len, zend_enum_E
 	bool strip_padding = (padding == ZEND_ENUM_Encoding_PaddingMode_StripPadding);
 	bool add_markers = uses_padding && !strip_padding;
 
-	/* Z85 requires input to be multiple of 4 */
 	if (variant == ZEND_ENUM_Encoding_Base85_Z85 && len % 4 != 0) {
 		zend_value_error("Z85 encoding requires input length to be a multiple of 4");
 		return NULL;
 	}
 
-	size_t encoded_len = (len + 3) / 4 * 5;
-	if (strip_padding || !uses_padding) {
-		/* For variants without padding, or when stripping, we still need to encode partial blocks */
-		/* but we won't have the padding chars */
-		size_t remainder = len % 4;
-		if (remainder && uses_padding) {
-			size_t pad = 5 - ((remainder * 5 + 3) / 4);
-			encoded_len -= pad;
+	/* Calculate total output length */
+	size_t full_blocks = len / 4;
+	size_t remainder = len % 4;
+	size_t total_chars = full_blocks * 5;
+	if (remainder) {
+		if (strip_padding) {
+			total_chars += remainder;
+		} else {
+			total_chars += remainder + 1;
 		}
 	}
+	if (add_markers) total_chars += 4;
 
-	zend_string *result;
+	zend_string *result = zend_string_alloc(total_chars, 0);
+	char *dst = ZSTR_VAL(result);
+
 	if (add_markers) {
-		/* Adobe: <~ ... ~> */
-		result = zend_string_alloc(encoded_len + 4, 0);
-		ZSTR_VAL(result)[0] = '<';
-		ZSTR_VAL(result)[1] = '~';
-		ZSTR_VAL(result)[encoded_len + 2] = '~';
-		ZSTR_VAL(result)[encoded_len + 3] = '>';
-		char *dst = ZSTR_VAL(result) + 2;
-
-		size_t i = 0;
-		while (i < len) {
-			uint32_t nbits;
-			size_t bytes_left = len - i;
-			size_t chars_to_read = bytes_left < 4 ? bytes_left : 4;
-
-			nbits = 0;
-			for (size_t j = 0; j < chars_to_read; j++) {
-				nbits = (nbits << 8) | (uint8_t)data[i + j];
-			}
-			nbits <<= (4 - chars_to_read) * 8;
-
-			int total_chars = (chars_to_read * 8 + 3) / 4;
-			for (int c = total_chars - 1; c >= 0; c--) {
-				*dst++ = table[(nbits >> (c * 5)) & 0x1F] + (table[(nbits >> (c * 5)) & 0x1F] > 127 ? 0 : 0);
-			}
-
-			/* Fix: base85 uses 85-based encoding, not 32 */
-			/* Re-do with proper base85 */
-			i += chars_to_read;
-		}
-		/* We'll fix this properly below */
-
-		zend_string_efree(result);
+		*dst++ = '<';
+		*dst++ = '~';
 	}
 
-	/* Proper Base85 encoding */
-	{
-		size_t total_chars = 0;
-		if (add_markers) total_chars += 2; /* <~ */
+	for (size_t i = 0; i < len; i += 4) {
+		size_t bytes_left = len - i;
+		size_t bytes_in_block = bytes_left < 4 ? bytes_left : 4;
 
-		for (size_t i = 0; i < len; i += 4) {
-			size_t bytes_left = len - i;
-			size_t chars_to_read = bytes_left < 4 ? bytes_left : 4;
-			int block_chars = 0;
-			if (chars_to_read == 4) {
-				block_chars = 5;
-			} else if (strip_padding || !uses_padding) {
-				block_chars = chars_to_read;
-			} else {
-				block_chars = chars_to_read + 1;
-			}
-			total_chars += block_chars;
+		uint32_t n = 0;
+		for (size_t j = 0; j < bytes_in_block; j++) {
+			n = (n << 8) | (uint8_t)data[i + j];
 		}
 
-		if (add_markers) total_chars += 2; /* ~> */
-
-		result = zend_string_alloc(total_chars, 0);
-		char *dst = ZSTR_VAL(result);
-
-		if (add_markers) {
-			*dst++ = '<';
-			*dst++ = '~';
-		}
-
-		size_t i = 0;
-		while (i < len) {
-			size_t bytes_left = len - i;
-			size_t chars_to_read = bytes_left < 4 ? bytes_left : 4;
-
-			uint32_t nbits = 0;
-			for (size_t j = 0; j < chars_to_read; j++) {
-				nbits = (nbits << 8) | (uint8_t)data[i + j];
-			}
-
-			if (chars_to_read == 4) {
-				/* Full block: 5 chars */
-				*dst++ = table[nbits / 85 / 85 / 85 / 85 % 85];
-				*dst++ = table[nbits / 85 / 85 / 85 % 85];
-				*dst++ = table[nbits / 85 / 85 % 85];
-				*dst++ = table[nbits / 85 % 85];
-				*dst++ = table[nbits % 85];
+		if (bytes_in_block == 4) {
+			/* Full block: encode as 5 base-85 digits, MSD first */
+			if (n == 0 && variant == ZEND_ENUM_Encoding_Base85_Adobe) {
+				/* Adobe: all-zero block encoded as single 'z' */
+				*dst++ = 'z';
 			} else {
-				if (strip_padding || !uses_padding) {
-					/* No padding: output only as many chars as input bytes */
-					for (int c = chars_to_read - 1; c >= 0; c--) {
-						*dst++ = table[(nbits >> (c * 8)) & 0xFF];
-					}
-				} else {
-					/* With padding: output chars_to_read + 1 chars */
-					int total = chars_to_read + 1;
-					for (int c = total - 1; c >= 0; c--) {
-						*dst++ = table[nbits % 85];
-						nbits /= 85;
-					}
+				uint32_t t = n;
+				int digits[5];
+				for (int d = 4; d >= 0; d--) {
+					digits[d] = t % 85;
+					t /= 85;
+				}
+				for (int d = 0; d < 5; d++) {
+					*dst++ = table[digits[d]];
 				}
 			}
+		} else {
+			/* Partial block: left-shift to align, then divide by 85 */
+			n <<= (4 - bytes_in_block) * 8;
 
-			i += chars_to_read;
+			if (strip_padding) {
+				/* Output only bytes_in_block chars */
+				uint32_t t = n;
+				int digits[5];
+				for (int d = 4; d >= 0; d--) {
+					digits[d] = t % 85;
+					t /= 85;
+				}
+				for (int d = 0; d < (int)bytes_in_block; d++) {
+					*dst++ = table[digits[d]];
+				}
+			} else {
+				/* Output bytes_in_block + 1 chars */
+				uint32_t t = n;
+				int digits[5];
+				for (int d = 4; d >= 0; d--) {
+					digits[d] = t % 85;
+					t /= 85;
+				}
+				for (int d = 0; d <= (int)bytes_in_block; d++) {
+					*dst++ = table[digits[d]];
+				}
+			}
 		}
-
-		if (add_markers) {
-			*dst++ = '~';
-			*dst++ = '>';
-		}
-
-		ZSTR_LEN(result) = dst - ZSTR_VAL(result);
-		ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
 	}
 
+	if (add_markers) {
+		*dst++ = '~';
+		*dst++ = '>';
+	}
+
+	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
+	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 	return result;
 }
 
@@ -1390,86 +1341,118 @@ static zend_string *base85_decode_impl(const char *data, size_t len, zend_enum_E
 	bool forgiving = (mode == ZEND_ENUM_Encoding_DecodingMode_Forgiving);
 
 	/* For Adobe variant, strip <~ and ~> markers if present */
-	size_t start = 0;
 	if (variant == ZEND_ENUM_Encoding_Base85_Adobe && len >= 4 && data[0] == '<' && data[1] == '~') {
-		start = 2;
-		size_t end = len;
 		if (data[len - 2] == '~' && data[len - 1] == '>') {
-			end -= 2;
+			data += 2;
+			len -= 2;
 		} else if (forgiving) {
-			end = len; /* forgive missing closing marker */
+			data += 2;
+			len -= 2;
 		} else {
 			THROW_UNABLE_TO_DECODE("Invalid Adobe Base85 format: missing closing marker");
 			return NULL;
 		}
-		len = end - start;
-		data += start;
 	}
 
-	/* Count content and validate */
+	/* Collect non-whitespace characters */
+	uint8_t *content = emalloc(len);
 	size_t content_len = 0;
 	for (size_t i = 0; i < len; i++) {
 		uint8_t c = (uint8_t)data[i];
 		if (is_base64_whitespace(c)) {
 			continue;
 		}
-		content_len++;
+		content[content_len++] = c;
 	}
 
 	/* Z85 requires multiple of 5 */
 	if (variant == ZEND_ENUM_Encoding_Base85_Z85 && content_len % 5 != 0) {
+		efree(content);
 		THROW_UNABLE_TO_DECODE("Z85 encoded data must have length multiple of 5");
 		return NULL;
 	}
 
-	size_t out_len = (content_len * 4) / 5;
-	zend_string *result = zend_string_alloc(out_len, 0);
-	char *dst = ZSTR_VAL(result);
-	size_t dst_idx = 0;
+	/* Calculate output length and allocate */
+	size_t full_blocks = 0;
+	size_t z_blocks = 0;
+	size_t remainder = content_len;
 
-	uint32_t nbits = 0;
-	int chars_read = 0;
-
-	for (size_t i = 0; i < len; i++) {
-		uint8_t c = (uint8_t)data[i];
-
-		if (is_base64_whitespace(c)) {
-			continue;
-		}
-
-		uint8_t val = reverse_table[c];
-
-		if (val == 0xFF || val >= 85) {
-			zend_string_efree(result);
-			THROW_UNABLE_TO_DECODE("Invalid Base85 character");
-			return NULL;
-		}
-
-		nbits = nbits * 85 + val;
-		chars_read++;
-
-		if (chars_read == 5 || (chars_read == 4 && variant == ZEND_ENUM_Encoding_Base85_Z85)) {
-			if (chars_read == 5) {
-				for (int j = 3; j >= 0; j--) {
-					if (dst_idx < out_len) {
-						dst[dst_idx++] = (char)((nbits >> (j * 8)) & 0xFF);
-					}
-				}
+	for (size_t i = 0; i < remainder; ) {
+		if (content[i] == 'z' && variant == ZEND_ENUM_Encoding_Base85_Adobe) {
+			z_blocks++;
+			i++;
+			remainder--;
+		} else {
+			if (remainder >= 5) {
+				full_blocks++;
+				i += 5;
+				remainder -= 5;
 			} else {
-				/* 4 chars -> 3 bytes for padded variant */
-				for (int j = 2; j >= 0; j--) {
-					if (dst_idx < out_len) {
-						dst[dst_idx++] = (char)((nbits >> (j * 8)) & 0xFF);
-					}
-				}
+				break;
 			}
-			nbits = 0;
-			chars_read = 0;
 		}
 	}
 
-	ZSTR_LEN(result) = dst_idx;
-	ZSTR_VAL(result)[dst_idx] = '\0';
+	size_t out_len = full_blocks * 4 + z_blocks * 4;
+	if (remainder) {
+		out_len += remainder - 1;
+	}
+
+	zend_string *result = zend_string_alloc(out_len, 0);
+	char *dst = ZSTR_VAL(result);
+
+	/* Decode content */
+	size_t i = 0;
+	while (i < content_len) {
+		if (content[i] == 'z' && variant == ZEND_ENUM_Encoding_Base85_Adobe) {
+			/* Adobe 'z' shortcut: 4 zero bytes */
+			*dst++ = '\0';
+			*dst++ = '\0';
+			*dst++ = '\0';
+			*dst++ = '\0';
+			i++;
+			continue;
+		}
+
+		/* Count characters in this block (non-'z') */
+		size_t block_start = i;
+		size_t chars_in_block = 0;
+		while (i < content_len && chars_in_block < 5) {
+			if (content[i] == 'z' && variant == ZEND_ENUM_Encoding_Base85_Adobe) {
+				break; /* 'z' starts a new block */
+			}
+			i++;
+			chars_in_block++;
+		}
+
+		/* Decode this block */
+		uint32_t n = 0;
+		size_t pad_count = 5 - chars_in_block;
+		for (size_t j = block_start; j < i; j++) {
+			uint8_t val = reverse_table[content[j]];
+			if (val == 0xFF || val >= 85) {
+				efree(content);
+				zend_string_efree(result);
+				THROW_UNABLE_TO_DECODE("Invalid Base85 character");
+				return NULL;
+			}
+			n = n * 85 + val;
+		}
+		/* Pad with 84 ('u') for partial blocks */
+		for (size_t j = 0; j < pad_count; j++) {
+			n = n * 85 + 84;
+		}
+
+		/* Extract bytes */
+		size_t bytes_to_output = (chars_in_block == 5) ? 4 : (chars_in_block - 1);
+		for (size_t j = 0; j < bytes_to_output; j++) {
+			*dst++ = (char)((n >> ((4 - j - 1) * 8)) & 0xFF);
+		}
+	}
+
+	efree(content);
+	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
+	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 	return result;
 }
 
