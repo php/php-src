@@ -1757,7 +1757,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 			if (Z_TYPE_P(ncpu) == IS_STRING) {
 				zend_ulong tmp;
 				if (!ZEND_HANDLE_NUMERIC(Z_STR_P(ncpu), tmp)) {
-					zend_argument_value_error(2, "cpu id invalid value (%s)", ZSTR_VAL(Z_STR_P(ncpu)));
+					zend_argument_value_error(2, "cpu id invalid value (%pS)", Z_STR_P(ncpu));
 					PCNTL_CPU_DESTROY(mask);
 					RETURN_THROWS();
 				}
