@@ -67,6 +67,10 @@ PHP                                                                        NEWS
   . Fixed segfault in ReflectionMethod::createFromMethodName() on an
     uninstantiable subclass. (iliaal)
 
+- SimpleXML:
+  . Fixed integer element offsets that cannot resolve aliasing an existing
+    element. (iliaal)
+
 - Standard:
   . Added the "filter.max_filter_count" stream context option for php://filter
     URLs. Using more than 16 filters without configuring this option is now
