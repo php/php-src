@@ -9,12 +9,12 @@ $ch = curl_init();
 
 try {
     curl_setopt($ch, CURLOPT_URL, $url);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (ValueError $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 Done
 --EXPECT--
-curl_setopt(): cURL option CURLOPT_URL must not contain any null bytes
+ValueError: curl_setopt(): cURL option CURLOPT_URL must not contain any null bytes
 Done
