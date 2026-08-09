@@ -237,6 +237,7 @@ xmlCtxtReadMemory
 xmlCtxtReset
 xmlCtxtResetLastError
 xmlCtxtResetPush
+xmlCtxtSetOptions
 xmlCtxtUseOptions
 xmlCurrentChar
 xmlDebugCheckDocument
