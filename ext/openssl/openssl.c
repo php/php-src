@@ -741,7 +741,7 @@ static PHP_INI_MH(OnUpdateLibCtx)
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
 			int err_type = stage == ZEND_INI_STAGE_RUNTIME ? E_WARNING : E_ERROR;
-			php_error_docref(NULL, err_type, "OpenSSL libctx \"%s\" cannot be found", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "OpenSSL libctx \"%pS\" cannot be found", new_value);
 		}
 		return FAILURE;
 	}

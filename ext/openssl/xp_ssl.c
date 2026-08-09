@@ -1493,8 +1493,8 @@ static zend_result php_openssl_enable_server_sni(
 					local_cert_str, resolved_cert_path_buff, 0, false, false,
 					"SNI_server_certs local_cert in ssl stream context", stream)) {
 				php_stream_warn(stream, OpenFailed,
-					"Failed setting local cert chain file `%s'; could not open file",
-					ZSTR_VAL(local_cert_str)
+					"Failed setting local cert chain file `%pS'; could not open file",
+					local_cert_str
 				);
 				zend_string_release(local_cert_str);
 				return FAILURE;
@@ -1518,8 +1518,8 @@ static zend_result php_openssl_enable_server_sni(
 					local_pk_str, resolved_pk_path_buff, 0, false, false,
 					"SNI_server_certs local_pk in ssl stream context", stream)) {
 				php_stream_warn(stream, OpenFailed,
-					"Failed setting local private key file `%s';  could not open file",
-					ZSTR_VAL(local_pk_str)
+					"Failed setting local private key file `%pS';  could not open file",
+					local_pk_str
 				);
 				zend_string_release(local_pk_str);
 				return FAILURE;
@@ -1532,8 +1532,8 @@ static zend_result php_openssl_enable_server_sni(
 				ctx = php_openssl_create_sni_server_ctx(stream, resolved_path_buff, resolved_path_buff);
 			} else {
 				php_stream_warn(stream, NotFound,
-						"Failed setting local cert chain file `%s'; file not found",
-						Z_STRVAL_P(current)
+						"Failed setting local cert chain file `%pS'; file not found",
+						Z_STR_P(current)
 				);
 			}
 		} else {
