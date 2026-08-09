@@ -656,12 +656,12 @@ static zend_result mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND *
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-				zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
+				zend_throw_error(NULL, "%pS object is already closed", intern->zo.ce->name);
 				return FAILURE;
 		  	}
 			mysql = (MY_MYSQL*) my_res->ptr;
 			if (my_res->status < MYSQLI_STATUS_VALID) {
-				zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(intern->zo.ce->name));
+				zend_throw_error(NULL, "%pS object is not fully initialized", intern->zo.ce->name);
 				return FAILURE;
 			}
 			(*out_array)[current++] = mysql->mysql;
@@ -690,7 +690,7 @@ static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zva
 			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
-				zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
+				zend_throw_error(NULL, "%pS object is already closed", intern->zo.ce->name);
 				return FAILURE;
 		  	}
 			mysql = (MY_MYSQL *) my_res->ptr;
