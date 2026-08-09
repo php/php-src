@@ -3303,7 +3303,6 @@ const CURLOPT_MAIL_RCPT_ALLOWFAILS = UNKNOWN;
  * @var int
  * @cvalue CURLOPT_MAIL_RCPT_ALLOWFAILS
  */
-#[\Deprecated(since: '8.7', message: 'renamed to CURLOPT_MAIL_RCPT_ALLOWFAILS')]
 const CURLOPT_MAIL_RCPT_ALLLOWFAILS = UNKNOWN;
 # else
 /**
@@ -3315,7 +3314,6 @@ const CURLOPT_MAIL_RCPT_ALLOWFAILS = UNKNOWN;
  * @var int
  * @cvalue CURLOPT_MAIL_RCPT_ALLLOWFAILS
  */
-#[\Deprecated(since: '8.7', message: 'renamed to CURLOPT_MAIL_RCPT_ALLOWFAILS')]
 const CURLOPT_MAIL_RCPT_ALLLOWFAILS = UNKNOWN;
 # endif
 #endif
