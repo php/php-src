@@ -36,7 +36,7 @@ static zend_result php_xsl_xslt_apply_params(xsltTransformContextPtr ctxt, HashT
 
 		int result = xsltQuoteOneUserParam(ctxt, (const xmlChar *) ZSTR_VAL(string_key), (const xmlChar *) Z_STRVAL_P(value));
 		if (result < 0) {
-			php_error_docref(NULL, E_WARNING, "Could not apply parameter \"%s\"", ZSTR_VAL(string_key));
+			php_error_docref(NULL, E_WARNING, "Could not apply parameter \"%pS\"", string_key);
 			return FAILURE;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -307,8 +307,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 
 	if (style == NULL) {
 		zend_string *name = get_active_function_or_method_name();
-		zend_throw_error(NULL, "%s() can only be called after a stylesheet has been imported",
-			ZSTR_VAL(name));
+		zend_throw_error(NULL, "%pS() can only be called after a stylesheet has been imported",
+			name);
 		zend_string_release(name);
 		return NULL;
 	}
@@ -454,8 +454,8 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 
 			if (!instanceof_function(ret_class, current_ce)) {
 				xmlFreeDoc(newdocp);
-				zend_argument_type_error(2, "must be a class name compatible with %s, %s given",
-					ZSTR_VAL(current_class_name), ZSTR_VAL(ret_class->name)
+				zend_argument_type_error(2, "must be a class name compatible with %pS, %pS given",
+					current_class_name, ret_class->name
 				);
 				RETURN_THROWS();
 			}
