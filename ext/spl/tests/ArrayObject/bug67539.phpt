@@ -16,5 +16,10 @@ function badsort($a, $b) {
 
 $it->uksort('badsort');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method ArrayIterator::uksort() is deprecated since 8.6 in %s on line %d
+
+Deprecated: Method ArrayIterator::serialize() is deprecated since 8.6 in %s on line %d
+
+Deprecated: Method ArrayIterator::unserialize() is deprecated since 8.6 in %s on line %d
 Error: Modification of ArrayObject during sorting is prohibited
