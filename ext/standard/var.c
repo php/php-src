@@ -467,14 +467,11 @@ PHP_FUNCTION(debug_zval_dump)
 }
 /* }}} */
 
-#define buffer_append_spaces(buf, num_spaces) \
-	do { \
-		char *tmp_spaces; \
-		size_t tmp_spaces_len; \
-		tmp_spaces_len = spprintf(&tmp_spaces, 0,"%*c", num_spaces, ' '); \
-		smart_str_appendl(buf, tmp_spaces, tmp_spaces_len); \
-		efree(tmp_spaces); \
-	} while(0);
+static void buffer_append_spaces(smart_str *buf, int num_spaces)
+{
+	char *target = smart_str_extend(buf, (size_t) num_spaces);
+	memset(target, ' ', num_spaces);
+}
 
 static zend_result php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
 {
