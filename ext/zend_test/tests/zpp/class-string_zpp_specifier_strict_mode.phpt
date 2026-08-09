@@ -7,24 +7,7 @@ zend_test
 
 declare(strict_types=1);
 
-class S {
-	public function __toString(): string {
-		return 'S class';
-	}
-}
-
-$types = [
-	null,
-	false,
-	true,
-	42,
-	73.5,
-	'string',
-	[],
-	new stdClass(),
-	new S(),
-	STDOUT,
-];
+$types = require 'types.inc';
 
 foreach ($types as $type) {
 	/* Use zend_object_init_with_constructor() function as it used Z_PARAM_CLASS */
