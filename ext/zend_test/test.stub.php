@@ -304,6 +304,11 @@ namespace {
 	function zend_bool_slow_zpp(bool $param): bool {}
 	function zend_bool_or_null_slow_zpp(bool|null $param): bool|null {}
 
+	function zend_int(int $param): int {}
+	function zend_int_or_null(int|null $param): int|null {}
+	function zend_int_slow_zpp(int $param): int {}
+	function zend_int_or_null_slow_zpp(int|null $param): int|null {}
+
     function zend_string_or_object(object|string $param): object|string {}
 
     function zend_string_or_object_or_null(object|string|null $param): object|string|null {}
