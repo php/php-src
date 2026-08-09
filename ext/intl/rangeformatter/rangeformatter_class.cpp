@@ -184,13 +184,13 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     INTL_G(error_level) = 0;
 
     if (U_FAILURE(error)) {
-        intl_error_set(NULL, error, "Failed to format number range");
+        intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to format number range");
     }
 
     zend_string *ret = intl_charFromString(result, &error);
 
     if (U_FAILURE(error)) {
-        intl_error_set(NULL, error, "Failed to convert result to UTF-8");
+        intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to convert result to UTF-8");
     }
 
     INTL_G(use_exceptions) = old_use_exception;
