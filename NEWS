@@ -42,6 +42,8 @@ PHP                                                                        NEWS
     string. (Weilin Du)
   . Fixed IntlListFormatter::__construct() leaving stale global error state
     after successful calls. (Weilin Du)
+  . Fixed IntlNumberRangeFormatter leaving stale global error state after
+    successful createFromSkeleton() and format() calls. (Weilin Du)
   . Implemented GH-20255 (Add a predefined calendar constant in
     IntlDateFormatter for the proleptic gregorian calendar). (David Carlier)
   . Added SpoofChecker::areBidiConfusable(). (David Carlier)
