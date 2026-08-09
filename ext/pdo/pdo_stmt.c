@@ -35,7 +35,7 @@
 #define PHP_STMT_GET_OBJ \
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(ZEND_THIS); \
 	if (!stmt->dbh) { \
-		zend_throw_error(NULL, "%s object is uninitialized", ZSTR_VAL(Z_OBJ(EX(This))->ce->name)); \
+		zend_throw_error(NULL, "%pS object is uninitialized", Z_OBJ(EX(This))->ce->name); \
 		RETURN_THROWS(); \
 	} \
 
@@ -302,7 +302,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 			/* Should this always be an Error? */
 			char *tmp;
 			/* TODO Error? */
-			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", ZSTR_VAL(param->name));
+			spprintf(&tmp, 0, "Did not find column name '%pS' in the defined columns; it will not be bound", param->name);
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp);
 			efree(tmp);
 		}
@@ -1206,8 +1206,8 @@ PHP_METHOD(PDOStatement, fetchAll)
 		case PDO_FETCH_FUNC: /* Cannot be a default fetch mode */
 			if (ZEND_NUM_ARGS() != 2) {
 				zend_string *func = get_active_function_or_method_name();
-				zend_argument_count_error("%s() expects exactly 2 argument for PDO::FETCH_FUNC, %d given",
-					ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_argument_count_error("%pS() expects exactly 2 argument for PDO::FETCH_FUNC, %d given",
+					func, ZEND_NUM_ARGS());
 				zend_string_release(func);
 				RETURN_THROWS();
 			}
@@ -1219,8 +1219,8 @@ PHP_METHOD(PDOStatement, fetchAll)
 		case PDO_FETCH_COLUMN:
 			if (ZEND_NUM_ARGS() > 2) {
 				zend_string *func = get_active_function_or_method_name();
-				zend_argument_count_error("%s() expects at most 2 argument for the fetch mode provided, %d given",
-					ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_argument_count_error("%pS() expects at most 2 argument for the fetch mode provided, %d given",
+					func, ZEND_NUM_ARGS());
 				zend_string_release(func);
 				RETURN_THROWS();
 			}
@@ -1245,8 +1245,8 @@ PHP_METHOD(PDOStatement, fetchAll)
 			/* No support for PDO_FETCH_INTO which takes 2 args??? */
 			if (ZEND_NUM_ARGS() > 1) {
 				zend_string *func = get_active_function_or_method_name();
-				zend_argument_count_error("%s() expects exactly 1 argument for the fetch mode provided, %d given",
-				ZSTR_VAL(func), ZEND_NUM_ARGS());
+				zend_argument_count_error("%pS() expects exactly 1 argument for the fetch mode provided, %d given",
+				func, ZEND_NUM_ARGS());
 				zend_string_release(func);
 				RETURN_THROWS();
 			}
@@ -1644,8 +1644,8 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 		case PDO_FETCH_KEY_PAIR:
 			if (variadic_num_args != 0) {
 				zend_string *func = get_active_function_or_method_name();
-				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
-					ZSTR_VAL(func), mode_arg_num, total_num_args);
+				zend_argument_count_error("%pS() expects exactly %d arguments for the fetch mode provided, %d given",
+					func, mode_arg_num, total_num_args);
 				zend_string_release(func);
 				return false;
 			}
@@ -1654,8 +1654,8 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 		case PDO_FETCH_COLUMN:
 			if (variadic_num_args != 1) {
 				zend_string *func = get_active_function_or_method_name();
-				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
-					ZSTR_VAL(func), arg1_arg_num, total_num_args);
+				zend_argument_count_error("%pS() expects exactly %d arguments for the fetch mode provided, %d given",
+					func, arg1_arg_num, total_num_args);
 				zend_string_release(func);
 				return false;
 			}
@@ -1675,8 +1675,8 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
 				if (variadic_num_args != 0) {
 					zend_string *func = get_active_function_or_method_name();
-					zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
-						ZSTR_VAL(func), mode_arg_num, total_num_args);
+					zend_argument_count_error("%pS() expects exactly %d arguments for the fetch mode provided, %d given",
+						func, mode_arg_num, total_num_args);
 					zend_string_release(func);
 					return false;
 				}
@@ -1684,16 +1684,16 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				zend_class_entry *cep;
 				if (variadic_num_args == 0) {
 					zend_string *func = get_active_function_or_method_name();
-					zend_argument_count_error("%s() expects at least %d arguments for the fetch mode provided, %d given",
-						ZSTR_VAL(func), arg1_arg_num, total_num_args);
+					zend_argument_count_error("%pS() expects at least %d arguments for the fetch mode provided, %d given",
+						func, arg1_arg_num, total_num_args);
 					zend_string_release(func);
 					return false;
 				}
 				/* constructor_arguments can be null/not passed */
 				if (variadic_num_args > 2) {
 					zend_string *func = get_active_function_or_method_name();
-					zend_argument_count_error("%s() expects at most %d arguments for the fetch mode provided, %d given",
-						ZSTR_VAL(func), constructor_arg_num, total_num_args);
+					zend_argument_count_error("%pS() expects at most %d arguments for the fetch mode provided, %d given",
+						func, constructor_arg_num, total_num_args);
 					zend_string_release(func);
 					return false;
 				}
@@ -1729,8 +1729,8 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 		case PDO_FETCH_INTO:
 			if (total_num_args != arg1_arg_num) {
 				zend_string *func = get_active_function_or_method_name();
-				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
-					ZSTR_VAL(func), arg1_arg_num, total_num_args);
+				zend_argument_count_error("%pS() expects exactly %d arguments for the fetch mode provided, %d given",
+					func, arg1_arg_num, total_num_args);
 				zend_string_release(func);
 				return false;
 			}
@@ -2154,7 +2154,7 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 	if (!stmt->dbh) {
-		zend_throw_error(NULL, "%s object is uninitialized", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "%pS object is uninitialized", ce->name);
 		return NULL;
 	}
 
@@ -2220,7 +2220,7 @@ static zval *row_prop_read(zend_object *object, zend_string *name, int type, voi
 		//	if (is_numeric) {
 		//		zend_value_error("Invalid column index");
 		//	} else {
-		//		zend_throw_error(NULL, "No column named \"%s\" exists", ZSTR_VAL(name));
+		//		zend_throw_error(NULL, "No column named \"%pS\" exists", name);
 		//	}
 		//}
 		//return &EG(uninitialized_zval);
