@@ -226,6 +226,58 @@ static ZEND_FUNCTION(zend_delref)
 }
 
 /* BEGIN ZPP test functions */
+static ZEND_FUNCTION(zend_bool)
+{
+	bool v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_BOOL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(v);
+}
+
+static ZEND_FUNCTION(zend_bool_or_null)
+{
+	bool v;
+	bool is_null;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_BOOL_OR_NULL(v, is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	RETURN_BOOL(v);
+}
+
+static ZEND_FUNCTION(zend_bool_slow_zpp)
+{
+	bool v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(v);
+}
+
+static ZEND_FUNCTION(zend_bool_or_null_slow_zpp)
+{
+	bool v;
+	bool is_null;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b!", &v, &is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	RETURN_BOOL(v);
+}
+
 /* Tests Z_PARAM_OBJ_OR_STR */
 static ZEND_FUNCTION(zend_string_or_object)
 {
