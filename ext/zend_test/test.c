@@ -225,6 +225,7 @@ static ZEND_FUNCTION(zend_delref)
 	RETURN_NULL();
 }
 
+/* BEGIN ZPP test functions */
 /* Tests Z_PARAM_OBJ_OR_STR */
 static ZEND_FUNCTION(zend_string_or_object)
 {
@@ -276,41 +277,6 @@ static ZEND_FUNCTION(zend_string_or_stdclass)
 	} else {
 		RETURN_OBJ_COPY(object);
 	}
-}
-
-static ZEND_FUNCTION(zend_test_compile_string)
-{
-	zend_string *source_string = NULL;
-	zend_string *filename = NULL;
-	zend_long position = ZEND_COMPILE_POSITION_AT_OPEN_TAG;
-
-	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_STR(source_string)
-		Z_PARAM_PATH_STR(filename)
-		Z_PARAM_LONG(position)
-	ZEND_PARSE_PARAMETERS_END();
-
-	zend_op_array *op_array = NULL;
-
-	op_array = compile_string(source_string, ZSTR_VAL(filename), position);
-
-	if (op_array) {
-		zval retval;
-
-		zend_try {
-			ZVAL_UNDEF(&retval);
-			zend_execute(op_array, &retval);
-		} zend_catch {
-			destroy_op_array(op_array);
-			efree_size(op_array, sizeof(zend_op_array));
-			zend_bailout();
-		} zend_end_try();
-
-		destroy_op_array(op_array);
-		efree_size(op_array, sizeof(zend_op_array));
-	}
-
-	return;
 }
 
 /* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
@@ -376,6 +342,77 @@ static ZEND_FUNCTION(zend_number_or_string_or_null)
 	}
 }
 
+/* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
+static ZEND_FUNCTION(zend_iterable)
+{
+	zval *arg1, *arg2;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ITERABLE(arg1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ITERABLE_OR_NULL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+}
+
+static ZEND_FUNCTION(zend_iterable_legacy)
+{
+	zval *arg1, *arg2;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ITERABLE(arg1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ITERABLE_OR_NULL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(arg1);
+}
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable_legacy, 0, 1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, arg1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry ext_function_legacy[] = {
+	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
+	ZEND_FE_END
+};
+/* END ZPP test functions */
+
+static ZEND_FUNCTION(zend_test_compile_string)
+{
+	zend_string *source_string = NULL;
+	zend_string *filename = NULL;
+	zend_long position = ZEND_COMPILE_POSITION_AT_OPEN_TAG;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(source_string)
+		Z_PARAM_PATH_STR(filename)
+		Z_PARAM_LONG(position)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_op_array *op_array = NULL;
+
+	op_array = compile_string(source_string, ZSTR_VAL(filename), position);
+
+	if (op_array) {
+		zval retval;
+
+		zend_try {
+			ZVAL_UNDEF(&retval);
+			zend_execute(op_array, &retval);
+		} zend_catch {
+			destroy_op_array(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
+			zend_bailout();
+		} zend_end_try();
+
+		destroy_op_array(op_array);
+		efree_size(op_array, sizeof(zend_op_array));
+	}
+
+	return;
+}
+
 static ZEND_FUNCTION(zend_weakmap_attach)
 {
 	zval *value;
@@ -434,41 +471,6 @@ static ZEND_FUNCTION(zend_test_override_libxml_global_state)
 	ZEND_DIAGNOSTIC_IGNORED_END
 }
 #endif
-
-/* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
-static ZEND_FUNCTION(zend_iterable)
-{
-	zval *arg1, *arg2;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ITERABLE(arg1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ITERABLE_OR_NULL(arg2)
-	ZEND_PARSE_PARAMETERS_END();
-}
-
-static ZEND_FUNCTION(zend_iterable_legacy)
-{
-	zval *arg1, *arg2;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ITERABLE(arg1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ITERABLE_OR_NULL(arg2)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_COPY(arg1);
-}
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable_legacy, 0, 1, IS_ITERABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, arg1, IS_ITERABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry ext_function_legacy[] = {
-	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
-	ZEND_FE_END
-};
 
 /* Call a method on a class or object using zend_call_method() */
 static ZEND_FUNCTION(zend_call_method)
