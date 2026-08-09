@@ -88,6 +88,8 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     zend_long collapse;
     zend_long identityFallback;
 
+    intl_error_reset(NULL);
+
     ZEND_PARSE_PARAMETERS_START(4,4)
         Z_PARAM_STRING(skeleton, skeleton_len)
         Z_PARAM_STRING(locale, locale_len)
@@ -158,7 +160,10 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     zval *start;
     zval *end;
 
+    intl_error_reset(NULL);
+
     IntlNumberRangeFormatter_object* obj = Z_INTL_RANGEFORMATTER_P(ZEND_THIS);
+    intl_error_reset(RANGEFORMATTER_ERROR_P(obj));
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_NUMBER(start)
