@@ -42,6 +42,7 @@
 #include "zend_max_execution_timer.h"
 #include "zend_strtod.h"
 #include "zend_lazy_objects.h"
+#include "zend_user_functions.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -241,8 +242,9 @@ struct _zend_executor_globals {
 
 	int user_error_handler_error_reporting;
 	bool exception_ignore_args;
-	zval user_error_handler;
-	zval user_exception_handler;
+	int current_executed_error_handler_stack_position;
+	zend_fcall_info_cache user_error_handler;
+	zend_fcall_info_cache user_exception_handler;
 	zend_stack user_error_handlers_error_reporting;
 	zend_stack user_error_handlers;
 	zend_stack user_exception_handlers;

@@ -20,7 +20,7 @@ set_error_handler(function() {
 restore_error_handler();
 restore_error_handler();
 
-$triggerNotice++;
+trigger_error('Error', E_USER_WARNING);
 ?>
 --EXPECT--
 Second handler

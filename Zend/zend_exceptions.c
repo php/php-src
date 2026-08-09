@@ -183,7 +183,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 			return;
 		}
 		if (EG(exception)) {
-			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF
+			if (ZEND_FCC_INITIALIZED(EG(user_exception_handler))
 			 && !zend_is_unwind_exit(EG(exception))
 			 && !zend_is_graceful_exit(EG(exception))) {
 				zend_user_exception_handler();

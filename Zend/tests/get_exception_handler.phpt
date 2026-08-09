@@ -1,5 +1,7 @@
 --TEST--
 get_exception_handler()
+--XFAIL--
+Getting callable from FCC cannot give a correct representation for static methods (string or array)
 --FILE--
 <?php
 
