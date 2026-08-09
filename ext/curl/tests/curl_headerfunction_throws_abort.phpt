@@ -25,7 +25,7 @@ curl_setopt($ch, CURLOPT_HEADERFUNCTION,
 try {
     curl_exec($ch);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(curl_errno($ch) === CURLE_WRITE_ERROR);
@@ -39,7 +39,7 @@ var_dump(curl_errno($ch) === CURLE_OK);
 ?>
 --EXPECTF--
 Test: header function throws exception
-header exception
+Exception: header exception
 bool(true)
 Test: header function is null
 bool(true)

@@ -28,7 +28,7 @@ curl_setopt($ch, CURLOPT_READFUNCTION,
 try {
     curl_exec($ch);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(curl_errno($ch) === CURLE_ABORTED_BY_CALLBACK);
@@ -42,7 +42,7 @@ var_dump(curl_errno($ch) === CURLE_OK);
 ?>
 --EXPECTF--
 Test: read function throws exception
-read exception
+Exception: read exception
 bool(true)
 Test: read function is null
 bool(true)
