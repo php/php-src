@@ -36,7 +36,7 @@ var_dump(array_keys($result));
 try {
     array_intersect([], [], new stdClass());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -52,4 +52,4 @@ array(1) {
   [0]=>
   int(10)
 }
-array_intersect(): Argument #3 must be of type array, stdClass given
+TypeError: array_intersect(): Argument #3 must be of type array, stdClass given

@@ -67,13 +67,13 @@ class ThrowingStringableValue {
 try {
     array_intersect(['value'], [new ThrowingStringableValue(), 'value']);
 } catch (RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     array_intersect([''], [new stdClass()]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 set_error_handler(static function (int $code, string $message): never {
@@ -82,7 +82,7 @@ set_error_handler(static function (int $code, string $message): never {
 try {
     array_intersect([[1]], [[2]]);
 } catch (ErrorException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 } finally {
     restore_error_handler();
 }
@@ -98,6 +98,6 @@ bool(true)
 bool(true)
 null,false,true,zero-float,float,resource,object
 bool(true)
-conversion failed
-Object of class stdClass could not be converted to string
-Array to string conversion
+RuntimeException: conversion failed
+Error: Object of class stdClass could not be converted to string
+ErrorException: Array to string conversion
