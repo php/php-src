@@ -16,11 +16,15 @@
 #include <config.h>
 #endif
 
+#include "php_spl.h"
+#include "zend_attributes.h"
+#include "php_spl_arginfo.h"
+#include "zend_autoload.h"
+#include "zend_exceptions.h"
+#include "zend_interfaces.h"
 #include "php.h"
 #include "php_main.h"
 #include "ext/standard/info.h"
-#include "php_spl.h"
-#include "php_spl_arginfo.h"
 #include "spl_functions.h"
 #include "spl_array.h"
 #include "spl_directory.h"
@@ -30,9 +34,6 @@
 #include "spl_dllist.h"
 #include "spl_fixedarray.h"
 #include "spl_heap.h"
-#include "zend_autoload.h"
-#include "zend_exceptions.h"
-#include "zend_interfaces.h"
 
 ZEND_TLS zend_string *spl_autoload_extensions;
 
@@ -552,6 +553,7 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_fixedarray)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
 
+	register_php_spl_symbols(module_number);
 	return SUCCESS;
 }
 /* }}} */

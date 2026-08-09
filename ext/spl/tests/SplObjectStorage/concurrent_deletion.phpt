@@ -12,7 +12,7 @@ class EvilStorage extends SplObjectStorage {
         if ($this->mutate) {
             $victim[new stdClass()] = null;
         }
-        return spl_object_hash($obj);
+        return spl_object_id($obj);
     }
 }
 
