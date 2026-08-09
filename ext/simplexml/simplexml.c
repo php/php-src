@@ -139,7 +139,7 @@ static xmlNodePtr sxe_get_element_by_offset(php_sxe_object *sxe, zend_long offse
 			return NULL;
 		}
 	}
-	while (node && nodendx <= offset) {
+	while (node && (offset < 0 || nodendx <= offset)) {
 		if (node->type == XML_ELEMENT_NODE && match_ns(node, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 			if (sxe->iter.type == SXE_ITER_CHILD || (
 				sxe->iter.type == SXE_ITER_ELEMENT && xmlStrEqual(node->name, BAD_CAST ZSTR_VAL(sxe->iter.name)))) {
@@ -303,14 +303,16 @@ long_dim:
 			}
 			if (!member || Z_TYPE_P(member) == IS_LONG) {
 				zend_long cnt = 0;
+				bool appendable = true;
 				xmlNodePtr mynode = node;
 
 				if (sxe->iter.type == SXE_ITER_CHILD) {
 					node = php_sxe_get_first_node_non_destructive(sxe, node);
 				}
 				if (sxe->iter.type == SXE_ITER_NONE) {
-					if (member && Z_LVAL_P(member) > 0) {
-						php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only 0 such elements exist", mynode->name, Z_LVAL_P(member));
+					if (member && Z_LVAL_P(member) != 0) {
+						node = NULL;
+						appendable = false;
 					}
 				} else if (member) {
 					node = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node, &cnt);
@@ -320,11 +322,13 @@ long_dim:
 				if (node) {
 					node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
 				} else if (type == BP_VAR_W || type == BP_VAR_RW) {
-					if (member && cnt < Z_LVAL_P(member)) {
+					if (member && (Z_LVAL_P(member) < 0 || cnt < Z_LVAL_P(member))) {
 						php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
 					}
-					node = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, NULL);
-					node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
+					if (appendable && (!member || Z_LVAL_P(member) >= 0)) {
+						node = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, NULL);
+						node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
+					}
 				}
 			} else {
 				/* In BP_VAR_IS mode only return a proper node if it actually exists. */
@@ -519,19 +523,18 @@ long_dim:
 			if (!member || Z_TYPE_P(member) == IS_LONG) {
 				if (node->type == XML_ATTRIBUTE_NODE) {
 					zend_throw_error(NULL, "Cannot create duplicate attribute");
-					if (value_str) {
-						zend_string_release(value_str);
-					}
-					return &EG(error_zval);
+					value = &EG(error_zval);
+					goto out;
 				}
 
 				if (sxe->iter.type == SXE_ITER_NONE) {
-					newnode = node;
-					++counter;
-					if (member && Z_LVAL_P(member) > 0) {
+					if (member && Z_LVAL_P(member) != 0) {
 						php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only 0 such elements exist", mynode->name, Z_LVAL_P(member));
 						value = &EG(error_zval);
+						goto out;
 					}
+					newnode = node;
+					++counter;
 				} else if (member) {
 					newnode = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node, &cnt);
 					if (newnode) {
@@ -578,10 +581,14 @@ next_iter:
 					newnode = xmlNewTextChild(mynode, NULL, (xmlChar *)Z_STRVAL_P(member), value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
 				}
 			} else if (!member || Z_TYPE_P(member) == IS_LONG) {
-				if (member && cnt < Z_LVAL_P(member)) {
+				if (member && (Z_LVAL_P(member) < 0 || cnt < Z_LVAL_P(member))) {
 					php_error_docref(NULL, E_WARNING, "Cannot add element %s number " ZEND_LONG_FMT " when only " ZEND_LONG_FMT " such elements exist", mynode->name, Z_LVAL_P(member), cnt);
 				}
-				newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
+				if (member && Z_LVAL_P(member) < 0) {
+					value = &EG(error_zval);
+				} else {
+					newnode = xmlNewTextChild(mynode->parent, mynode->ns, mynode->name, value_str ? (xmlChar *)ZSTR_VAL(value_str) : NULL);
+				}
 			}
 		} else {
 			if (Z_TYPE_P(member) == IS_LONG) {
@@ -592,6 +599,7 @@ next_iter:
 		}
 	}
 
+out:
 	if (member == &tmp_zv) {
 		zval_ptr_dtor_str(&tmp_zv);
 	}
