@@ -70,6 +70,8 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Fixed integer element offsets that cannot resolve aliasing an existing
     element. (iliaal)
+  . SimpleXMLElement::__construct() now raises a ValueError when the $data
+    argument contains NUL bytes. (iliaal)
 
 - Standard:
   . Added the "filter.max_filter_count" stream context option for php://filter

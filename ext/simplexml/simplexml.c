@@ -2283,18 +2283,17 @@ PHP_FUNCTION(simplexml_load_string)
 PHP_METHOD(SimpleXMLElement, __construct)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
-	char           *data;
+	zend_string    *data;
 	zend_string    *ns = zend_empty_string;
-	size_t             data_len;
 	xmlDocPtr       docp;
 	zend_long            options = 0;
 	bool       is_url = false, isprefix = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lbSb", &data, &data_len, &options, &is_url, &ns, &isprefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|lbSb", &data, &options, &is_url, &ns, &isprefix) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
+	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(data))) {
 		zend_argument_error(zend_ce_exception, 1, "is too long");
 		RETURN_THROWS();
 	}
@@ -2308,7 +2307,7 @@ PHP_METHOD(SimpleXMLElement, __construct)
 	}
 
 	PHP_LIBXML_SANITIZE_GLOBALS(read_file_or_memory);
-	docp = is_url ? xmlReadFile(data, NULL, (int)options) : xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
+	docp = is_url ? xmlReadFile(ZSTR_VAL(data), NULL, (int)options) : xmlReadMemory(ZSTR_VAL(data), (int)ZSTR_LEN(data), NULL, NULL, (int)options);
 	PHP_LIBXML_RESTORE_GLOBALS(read_file_or_memory);
 
 	if (!docp) {
