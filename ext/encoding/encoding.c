@@ -587,8 +587,8 @@ static const uint8_t base58_bitcoin_reverse[256] = {
 	['V'] = 28, ['W'] = 29, ['X'] = 30, ['Y'] = 31, ['Z'] = 32,
 	['a'] = 33, ['b'] = 34, ['c'] = 35, ['d'] = 36, ['e'] = 37, ['f'] = 38,
 	['g'] = 39, ['h'] = 40, ['i'] = 41, ['j'] = 42, ['k'] = 43, ['m'] = 44,
-	['n'] = 45, ['p'] = 46, ['q'] = 47, ['r'] = 48, ['s'] = 49, ['t'] = 50,
-	['u'] = 51, ['v'] = 52, ['w'] = 53, ['x'] = 54, ['y'] = 55, ['z'] = 56
+	['n'] = 45, ['o'] = 46, ['p'] = 47, ['q'] = 48, ['r'] = 49, ['s'] = 50, ['t'] = 51,
+	['u'] = 52, ['v'] = 53, ['w'] = 54, ['x'] = 55, ['y'] = 56, ['z'] = 57
 };
 
 static const uint8_t base58_flickr_reverse[256] = {
@@ -597,13 +597,13 @@ static const uint8_t base58_flickr_reverse[256] = {
 	['6'] = 5,  ['7'] = 6,  ['8'] = 7,  ['9'] = 8,
 	['a'] = 9,  ['b'] = 10, ['c'] = 11, ['d'] = 12, ['e'] = 13, ['f'] = 14, ['g'] = 15,
 	['h'] = 16, ['i'] = 17, ['j'] = 18, ['k'] = 19,
-	['m'] = 20, ['n'] = 21,
-	['p'] = 22, ['q'] = 23, ['r'] = 24, ['s'] = 25, ['t'] = 26, ['u'] = 27,
-	['v'] = 28, ['w'] = 29, ['x'] = 30, ['y'] = 31, ['z'] = 32,
-	['A'] = 33, ['B'] = 34, ['C'] = 35, ['D'] = 36, ['E'] = 37, ['F'] = 38,
-	['G'] = 39, ['H'] = 40, ['J'] = 41, ['K'] = 42, ['L'] = 43, ['M'] = 44,
-	['N'] = 45, ['P'] = 46, ['Q'] = 47, ['R'] = 48, ['S'] = 49, ['T'] = 50,
-	['U'] = 51, ['V'] = 52, ['W'] = 53, ['X'] = 54, ['Y'] = 55, ['Z'] = 56
+	['m'] = 20, ['n'] = 21, ['o'] = 22,
+	['p'] = 23, ['q'] = 24, ['r'] = 25, ['s'] = 26, ['t'] = 27, ['u'] = 28,
+	['v'] = 29, ['w'] = 30, ['x'] = 31, ['y'] = 32, ['z'] = 33,
+	['A'] = 34, ['B'] = 35, ['C'] = 36, ['D'] = 37, ['E'] = 38, ['F'] = 39,
+	['G'] = 40, ['H'] = 41, ['J'] = 42, ['K'] = 43, ['L'] = 44, ['M'] = 45,
+	['N'] = 46, ['P'] = 47, ['Q'] = 48, ['R'] = 49, ['S'] = 50, ['T'] = 51,
+	['U'] = 52, ['V'] = 53, ['W'] = 54, ['X'] = 55, ['Y'] = 56, ['Z'] = 57
 };
 
 static zend_string *base58_encode_impl(const char *data, size_t len, zend_enum_Encoding_Base58 variant) {
@@ -627,7 +627,9 @@ static zend_string *base58_encode_impl(const char *data, size_t len, zend_enum_E
 	/* Process each input byte: multiply accumulated number by 256, add byte */
 	for (size_t i = zeros; i < len; i++) {
 		uint32_t carry = (uint8_t)data[i];
-		for (size_t j = out_begin; j < out_end; j++) {
+		size_t j = out_end;
+		while (j > out_begin) {
+			j--;
 			carry += (uint32_t)output[j] * 256;
 			output[j] = (uint8_t)(carry % 58);
 			carry /= 58;
@@ -666,83 +668,102 @@ static zend_string *base58_decode_impl(const char *data, size_t len, zend_enum_E
 	const uint8_t *reverse_table = (variant == ZEND_ENUM_Encoding_Base58_Bitcoin)
 		? base58_bitcoin_reverse : base58_flickr_reverse;
 
-	/* Count leading '1' characters (zeros in base58) */
+	/* Count leading '1' characters (zeros in base58) and validate all chars */
 	size_t zeros = 0;
-	for (size_t i = 0; i < len; i++) {
-		uint8_t c = (uint8_t)data[i];
-		if (c == ' ' || c == '\t' || c == '\n' || c == '\r') continue;
-		if (reverse_table[c] == 0) {
-			zeros++;
-		} else {
-			break;
-		}
-	}
-
-	/* Count non-whitespace content length */
 	size_t content_len = 0;
+	bool past_leading = false;
 	for (size_t i = 0; i < len; i++) {
 		uint8_t c = (uint8_t)data[i];
 		if (c == ' ' || c == '\t' || c == '\n' || c == '\r') continue;
-		content_len++;
-	}
-
-	/* Max output size: ceil(content_len * log(58) / log(256)) */
-	size_t max_out_len = (content_len * 74 + 100) / 100 + 1;
-	uint8_t *output = ecalloc(max_out_len, sizeof(uint8_t));
-
-	/* Decode: for each char, multiply accumulated number by 58 and add value */
-	for (size_t i = 0; i < len; i++) {
-		uint8_t c = (uint8_t)data[i];
-		if (c == ' ' || c == '\t' || c == '\n' || c == '\r') continue;
-
 		uint8_t val = reverse_table[c];
 		if (val == 0xFF) {
-			efree(output);
 			THROW_UNABLE_TO_DECODE("Invalid Base58 character");
 			return NULL;
 		}
+		if (!past_leading) {
+			if (val == 0) zeros++;
+			else past_leading = true;
+		}
+		content_len++;
+	}
 
-		uint32_t carry = val;
-		for (size_t j = 0; j < max_out_len; j++) {
-			uint32_t temp = (uint32_t)output[j] * 58 + carry;
-			output[j] = (uint8_t)(temp % 256);
-			carry = temp / 256;
-			if (carry == 0) break;
+	/* Parse non-zero digits into base58 digit array (LSB first) */
+	size_t num_digits = content_len - zeros;
+	if (num_digits == 0) {
+		zend_string *result = zend_string_alloc(zeros, 0);
+		memset(ZSTR_VAL(result), 0, zeros);
+		ZSTR_VAL(result)[zeros] = '\0';
+		return result;
+	}
+
+	uint8_t *digits = emalloc(num_digits);
+	size_t di = 0;
+	past_leading = false;
+	for (size_t i = 0; i < len; i++) {
+		uint8_t c = (uint8_t)data[i];
+		if (c == ' ' || c == '\t' || c == '\n' || c == '\r') continue;
+		if (!past_leading) {
+			if (reverse_table[c] == 0) continue;
+			past_leading = true;
+		}
+		digits[di++] = reverse_table[c];
+	}
+
+	/* digits[] holds the base58 number with digits[0] = MSD, digits[num_digits-1] = LSD */
+	/* Reverse to get LSD first */
+	for (size_t i = 0; i < num_digits / 2; i++) {
+		uint8_t tmp = digits[i];
+		digits[i] = digits[num_digits - 1 - i];
+		digits[num_digits - 1 - i] = tmp;
+	}
+
+	/* Repeatedly divide by 256, collecting remainders as output bytes */
+	size_t max_out_len = (content_len * 74 + 100) / 100 + 1;
+	uint8_t *output = ecalloc(max_out_len, sizeof(uint8_t));
+	size_t out_idx = 0;
+
+	size_t d_begin = 0;
+	size_t d_end = num_digits;
+
+		while (d_begin < d_end) {
+		uint32_t carry = 0;
+		for (size_t j = d_end; j > d_begin; ) {
+			j--;
+			uint32_t temp = carry * 58 + digits[j];
+			digits[j] = (uint8_t)(temp / 256);
+			carry = temp % 256;
+		}
+		if (out_idx < max_out_len) {
+			output[out_idx++] = (uint8_t)carry;
+		}
+		/* Skip trailing zeros (MSD side) in digit array */
+		while (d_begin < d_end && digits[d_end - 1] == 0) {
+			d_end--;
 		}
 	}
 
-	/* Reverse to get big-endian byte order */
-	for (size_t i = 0; i < max_out_len / 2; i++) {
+	/* output[] is LSB first, reverse to get big-endian */
+	for (size_t i = 0; i < out_idx / 2; i++) {
 		uint8_t tmp = output[i];
-		output[i] = output[max_out_len - 1 - i];
-		output[max_out_len - 1 - i] = tmp;
+		output[i] = output[out_idx - 1 - i];
+		output[out_idx - 1 - i] = tmp;
 	}
 
-	/* Find actual output length (skip leading zeros) */
-	size_t out_len = 0;
-	while (out_len < max_out_len && output[out_len] == 0) {
-		out_len++;
-	}
-
-	size_t decoded_len = zeros + (max_out_len - out_len);
-	if (decoded_len == 0) {
-		decoded_len = zeros;
-	}
-
+	size_t decoded_len = zeros + out_idx;
 	zend_string *result = zend_string_alloc(decoded_len, 0);
 	char *dst = ZSTR_VAL(result);
 
 	for (size_t i = 0; i < zeros; i++) {
 		*dst++ = 0;
 	}
-
-	for (size_t i = out_len; i < max_out_len; i++) {
+	for (size_t i = 0; i < out_idx; i++) {
 		*dst++ = output[i];
 	}
 
 	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
 	ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
 	efree(output);
+	efree(digits);
 
 	return result;
 }
