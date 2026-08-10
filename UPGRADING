@@ -470,6 +470,10 @@ PHP 8.6 UPGRADE NOTES
   . Passing objects to mb_convert_variables() is now deprecated
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_vars_parameter_of_mb_convert_variables
 
+- MySQLi:
+  . The mysqli_get_charset() function is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_mysqli_get_charset
+
 - SPL:
   . The spl_classes() function is now deprecated, use
     ReflectionExtension::getClassNames() instead.

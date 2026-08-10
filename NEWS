@@ -17,6 +17,12 @@ PHP                                                                        NEWS
     -d error_include_args=On). (David Carlier)
   . Fixed GH-23121 (is_callable() wrongly accepts objects with no get_closure
     handler). (David Carlier)
+  . Passing a 3rd argument to define() is now deprecated. (Girgias)
+  . Naming a function readonly is now deprecated. (Girgias)
+
+- BZ2:
+  . Passing an object for the Bzip2 {de}compression stream filter is now
+    deprecated. Use get_object_vars() on the object instead. (Girgias)
 
 - Curl:
   . Improved cURL option validation errors to include the option name.
@@ -60,6 +66,12 @@ PHP                                                                        NEWS
   . Fixed IntlNumberRangeFormatter::format() crash when the formatting fails.
     (David Carlier)
 
+- MbString:
+  . Passing objects to mb_convert_variables() is now deprecated. (Girgias)
+
+- MySQLi:
+  . The mysqli_get_charset() function is now deprecated. (Kamil Tekiela)
+
 - PDO:
   . Fixed pdo_raise_impl_error() emitting a warning under ERRMODE_SILENT.
     (iliaal)
@@ -91,6 +103,24 @@ PHP                                                                        NEWS
   . Fixed segfault when comparing uninitialized SimpleXMLElement
     instances. (iliaal)
 
+- SPL:
+  . The spl_classes() function is now deprecated, use
+    ReflectionExtension::getClassNames() instead. (Girgias)
+  . The spl_object_hash() function is now deprecated, use spl_object_id()
+    instead. (Girgias)
+  . The following ArrayIterator methods are now deprecated:
+    * ArrayIterator::getFlags()
+    * ArrayIterator::setFlags()
+    * ArrayIterator::asort()
+    * ArrayIterator::ksort()
+    * ArrayIterator::uasort()
+    * ArrayIterator::uksort()
+    * ArrayIterator::natsort()
+    * ArrayIterator::natcasesort()
+    * ArrayIterator::unserialize()
+    * ArrayIterator::serialize()
+    (Girgias)
+
 - Standard:
   . Added the "filter.max_filter_count" stream context option for php://filter
     URLs. Using more than 16 filters without configuring this option is now
@@ -108,10 +138,33 @@ PHP                                                                        NEWS
     shutdown re-registration). (David Carlier)
   . Io\Poll\Context::wait() now takes a Time\Duration object as a timeout.
     (timwolla)
+  . Passing an object to array_walk{_recursive} is now deprecated. Use
+    get_object_vars() on the object instead. (Girgias)
+  . The is_double() function is now deprecated, use is_float() instead.
+    (Girgias)
+  . The is_long() and is_integer() functions are now deprecated, use is_int()
+    instead. (Girgias)
+  . The doubleval() function is now deprecated, use floatval() instead.
+    (Girgias)
+  . The strcoll() function is now deprecated, use Collator::compare() instead.
+    (Girgias)
+  . The SORT_LOCALE_STRING constant for the family of sort functions is now
+    deprecated, use one of the following functions instead:
+    * Collator::sort()
+    * Collator::asort()
+    * Collator::sort()
+    * Collator::sortWithSortKeys()
+    (Girgias)
 
 - XSL:
   . Fixed use-after-free when a DOMDocument subclass __clone() retains the
     stylesheet copy made by XSLTProcessor::importStylesheet(). (iliaal)
+
+- Zlib
+  . Passing an object for the zlib deflate and inflate stream filter is now
+    deprecated. Use get_object_vars() on the object instead. (Girgias)
+  . Passing an object to the $option argument to deflate_init and inflate_init
+    is now deprecated. Use get_object_vars() on the object instead. (Girgias)
 
 30 Jul 2026, PHP 8.6.0alpha3
 
