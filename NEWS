@@ -67,6 +67,8 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Fixed integer element offsets that cannot resolve aliasing an existing
     element. (iliaal)
+  . Fixed segfault when comparing uninitialized SimpleXMLElement
+    instances. (iliaal)
 
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
