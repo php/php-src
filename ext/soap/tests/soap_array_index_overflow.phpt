@@ -80,9 +80,9 @@ test_overflow(
 test_boundary_position();
 ?>
 --EXPECT--
-arrayType: SOAP-ERROR: Encoding: array index out of range
-offset: SOAP-ERROR: Encoding: array index out of range
-position: SOAP-ERROR: Encoding: array index out of range
+arrayType: SoapClient::__call(): Encoding: array index out of range
+offset: SoapClient::__call(): Encoding: array index out of range
+position: SoapClient::__call(): Encoding: array index out of range
 array(1) {
   [2147483646]=>
   string(5) "value"

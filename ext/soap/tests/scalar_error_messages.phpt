@@ -47,6 +47,6 @@ run_case('long', 'xsd:long', 'abc');
 run_case('base64Binary node', 'xsd:base64Binary', '<value>abc</value>');
 ?>
 --EXPECT--
-double: SOAP-ERROR: Encoding: Invalid value for type 'double'
-long: SOAP-ERROR: Encoding: Invalid value for type 'long'
-base64Binary node: SOAP-ERROR: Encoding: Type 'base64Binary' value must contain a single text or CDATA node
+double: SoapClient::__soapCall(): Encoding: Invalid value for type 'double'
+long: SoapClient::__soapCall(): Encoding: Invalid value for type 'long'
+base64Binary node: SoapClient::__soapCall(): Encoding: Type 'base64Binary' value must contain a single text or CDATA node

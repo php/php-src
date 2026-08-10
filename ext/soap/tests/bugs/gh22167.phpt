@@ -105,24 +105,24 @@ foreach ($cases as $name => $schema) {
 }
 ?>
 --EXPECT--
-minOccurs: SOAP-ERROR: Parsing Schema: minOccurs value is out of range
-maxOccurs: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-negative minOccurs: SOAP-ERROR: Parsing Schema: minOccurs value is out of range
-negative maxOccurs: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-minExclusive: SOAP-ERROR: Parsing Schema: minExclusive value is out of range
-minInclusive: SOAP-ERROR: Parsing Schema: minInclusive value is out of range
-maxExclusive: SOAP-ERROR: Parsing Schema: maxExclusive value is out of range
-maxInclusive: SOAP-ERROR: Parsing Schema: maxInclusive value is out of range
-totalDigits: SOAP-ERROR: Parsing Schema: totalDigits value is out of range
-fractionDigits: SOAP-ERROR: Parsing Schema: fractionDigits value is out of range
-length: SOAP-ERROR: Parsing Schema: length value is out of range
-minLength: SOAP-ERROR: Parsing Schema: minLength value is out of range
-maxLength: SOAP-ERROR: Parsing Schema: maxLength value is out of range
-leading whitespace numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-leading plus numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-leading zero numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-leading numeric-string with trailing data: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-negative out-of-range numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-decimal numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
-exponent numeric-string: SOAP-ERROR: Parsing Schema: maxOccurs value is out of range
+minOccurs: SoapClient::__construct(): Parsing Schema: minOccurs value is out of range
+maxOccurs: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+negative minOccurs: SoapClient::__construct(): Parsing Schema: minOccurs value is out of range
+negative maxOccurs: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+minExclusive: SoapClient::__construct(): Parsing Schema: minExclusive value is out of range
+minInclusive: SoapClient::__construct(): Parsing Schema: minInclusive value is out of range
+maxExclusive: SoapClient::__construct(): Parsing Schema: maxExclusive value is out of range
+maxInclusive: SoapClient::__construct(): Parsing Schema: maxInclusive value is out of range
+totalDigits: SoapClient::__construct(): Parsing Schema: totalDigits value is out of range
+fractionDigits: SoapClient::__construct(): Parsing Schema: fractionDigits value is out of range
+length: SoapClient::__construct(): Parsing Schema: length value is out of range
+minLength: SoapClient::__construct(): Parsing Schema: minLength value is out of range
+maxLength: SoapClient::__construct(): Parsing Schema: maxLength value is out of range
+leading whitespace numeric-string: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+leading plus numeric-string: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+leading zero numeric-string: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+leading numeric-string with trailing data: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+negative out-of-range numeric-string: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+decimal numeric-string: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
+exponent numeric-string: SoapClient::__construct(): Parsing Schema: maxOccurs value is out of range
 fractional numeric-string within int range: parsed

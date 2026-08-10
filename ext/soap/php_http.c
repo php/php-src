@@ -1526,7 +1526,7 @@ static zend_string* get_http_body(php_stream *stream, bool close, zend_string *h
 						  break;
 						}
 						len_size += len_read;
-	 					http_buf_size += len_read;
+						http_buf_size += len_read;
 					}
 
 					/* Eat up '\r' '\n' */

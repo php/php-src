@@ -1693,7 +1693,7 @@ PHP_METHOD(SoapServer, handle)
 			call_status = call_user_function(EG(function_table), NULL, &function_name, &retval, num_params, params);
 		}
 	} else {
-		php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
+		php_error_docref(NULL, E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
 	}
 
 	if (EG(exception)) {
@@ -2499,7 +2499,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 	}
 
 	zend_try {
-	 	if (sdl != NULL) {
+		if (sdl != NULL) {
 			fn = get_function(sdl, ZSTR_VAL(function), ZSTR_LEN(function));
 			if (fn != NULL) {
 				sdlBindingPtr binding = fn->binding;
@@ -2523,7 +2523,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 					request = serialize_function_call(this_ptr, fn, NULL, fnb->input.ns, real_args, arg_count, soap_version, soap_headers);
 					ret = do_request(this_ptr, request, location_c_str, fnb->soapAction, soap_version, one_way, &response);
 				} else {
-	 				request = serialize_function_call(this_ptr, fn, NULL, sdl->target_ns, real_args, arg_count, soap_version, soap_headers);
+					request = serialize_function_call(this_ptr, fn, NULL, sdl->target_ns, real_args, arg_count, soap_version, soap_headers);
 					ret = do_request(this_ptr, request, location_c_str, NULL, soap_version, one_way, &response);
 				}
 
@@ -2548,12 +2548,12 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 				zval_ptr_dtor(&response);
 
-	 		} else {
-	 			smart_str error = {0};
-	 			smart_str_appends(&error,"Function (\"");
+			} else {
+				smart_str error = {0};
+				smart_str_appends(&error,"Function (\"");
 				smart_str_append(&error,function);
-	 			smart_str_appends(&error,"\") is not a valid method for this service");
-	 			smart_str_0(&error);
+				smart_str_appends(&error,"\") is not a valid method for this service");
+				smart_str_0(&error);
 				add_soap_fault_en(this_ptr, "Client", ZSTR_VAL(error.s));
 				smart_str_free(&error);
 			}
@@ -2569,7 +2569,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 				}
 				request = serialize_function_call(this_ptr, NULL, ZSTR_VAL(function), ZSTR_VAL(call_uri), real_args, arg_count, soap_version, soap_headers);
 
-		 		if (soap_action == NULL) {
+				if (soap_action == NULL) {
 					smart_str_append(&action, call_uri);
 					smart_str_appendc(&action, '#');
 					smart_str_append(&action, function);
@@ -2580,7 +2580,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 				ret = do_request(this_ptr, request, ZSTR_VAL(location), ZSTR_VAL(action.s), soap_version, 0, &response);
 
-		 		smart_str_free(&action);
+				smart_str_free(&action);
 				xmlFreeDoc(request);
 				request = NULL;
 
@@ -2602,7 +2602,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 				zval_ptr_dtor(&response);
 			}
-	 	}
+		}
 
 		zval *fault = Z_CLIENT_SOAP_FAULT_P(this_ptr);
 		if (!ret) {
@@ -3098,7 +3098,7 @@ static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fau
 				if (strcmp(fault_code,"Client") == 0 ||
 				    strcmp(fault_code,"Server") == 0 ||
 				    strcmp(fault_code,"VersionMismatch") == 0 ||
-			  	  strcmp(fault_code,"MustUnderstand") == 0) {
+				    strcmp(fault_code,"MustUnderstand") == 0) {
 					ZVAL_STRING(Z_FAULT_CODENS_P(obj), SOAP_1_1_ENV_NAMESPACE);
 				}
 			} else if (soap_version == SOAP_1_2) {
@@ -4104,7 +4104,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		ns = xmlNewNs(envelope, BAD_CAST(SOAP_1_2_ENV_NAMESPACE), BAD_CAST(SOAP_1_2_ENV_NS_PREFIX));
 		xmlSetNs(envelope, ns);
 	} else {
-		soap_error0(E_ERROR, "Unknown SOAP version");
+		php_error_docref(NULL, E_ERROR, "Unknown SOAP version");
 	}
 	xmlDocSetRootElement(doc, envelope);
 
