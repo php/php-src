@@ -88,14 +88,14 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     zend_long collapse;
     zend_long identityFallback;
 
-    intl_error_reset(NULL);
-
     ZEND_PARSE_PARAMETERS_START(4,4)
         Z_PARAM_STRING(skeleton, skeleton_len)
         Z_PARAM_STRING(locale, locale_len)
         Z_PARAM_LONG(collapse)
         Z_PARAM_LONG(identityFallback)
     ZEND_PARSE_PARAMETERS_END();
+
+    intl_error_reset(NULL);
 
     if (locale_len == 0) {
         locale = (char *)intl_locale_get_default();
@@ -162,15 +162,16 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     zval *start;
     zval *end;
 
-    intl_error_reset(NULL);
-
     IntlNumberRangeFormatter_object* obj = Z_INTL_RANGEFORMATTER_P(ZEND_THIS);
-    intl_error_reset(RANGEFORMATTER_ERROR_P(obj));
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_NUMBER(start)
         Z_PARAM_NUMBER(end)
     ZEND_PARSE_PARAMETERS_END();
+
+    intl_errors_reset(RANGEFORMATTER_ERROR_P(obj));
+
+    ZEND_ASSERT(RANGEFORMATTER_OBJECT(obj) != NULL);
 
     UErrorCode error = U_ZERO_ERROR;
 
