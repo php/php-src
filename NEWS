@@ -74,6 +74,8 @@ PHP                                                                        NEWS
     nested arrays). (Lazizbek Ergashev)
   . Fixed bug GH-23113 (Stack overflow in array_replace_recursive() with deeply
     nested arrays). (Lazizbek Ergashev)
+  . Fixed bug GH-23115 (Stack overflow in compact() with deeply nested
+    arrays). (Lazizbek Ergashev)
 
 - Streams:
   . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
