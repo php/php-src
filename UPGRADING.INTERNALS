@@ -211,6 +211,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 ========================
 
 - Abstract:
+  . run-tests.php now runs in parallel by default, using up to 10 automatically
+    detected workers. Pass -j1 for sequential execution. --asan, --msan, and
+    Valgrind default to at most two workers.
   . Minimum required PHP version found on the host system for running scripts
     like build/gen_stub.php during development has been updated from 7.4 to 8.1.
   . build/gen_stub.php may now generate a _decl.h file in addition to
