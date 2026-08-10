@@ -62,6 +62,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval *nzval);
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval *val);
 PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx);
+PHPAPI void var_invoke_delayed_calls(php_unserialize_data_t *var_hash);
 PHPAPI void var_destroy(php_unserialize_data_t *var_hash);
 
 #endif /* PHP_VAR_H */
