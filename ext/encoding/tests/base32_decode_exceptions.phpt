@@ -10,8 +10,6 @@ use Encoding\UnableToDecodeException;
 
 use function Encoding\base32_decode;
 
-$encodedAscii = "JBSWY3DPEB3W64TMMQQQ====";
-
 try {
     base32_decode("JBSWY3DPEB3W64TMMQQQ");
     echo "No exception\n";
@@ -19,8 +17,11 @@ try {
     echo $e::class, "\n";
 }
 
+$big = "IJUWO===";
+var_dump(base32_decode($big));
+
 try {
-    base32_decode($encodedAscii, variant: Base32::Crockford);
+    base32_decode($big, variant: Base32::Crockford);
     echo "No exception\n";
 } catch (UnableToDecodeException $e) {
     echo $e::class, "\n";
@@ -29,4 +30,5 @@ try {
 ?>
 --EXPECTF--
 Encoding\UnableToDecodeException
+string(3) "Big"
 Encoding\UnableToDecodeException
