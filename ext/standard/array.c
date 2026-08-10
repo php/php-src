@@ -2692,7 +2692,7 @@ PHP_FUNCTION(extract)
 }
 /* }}} */
 
-static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry, uint32_t pos) /* {{{ */
+static zend_result php_compact_var(HashTable *eg_active_symbol_table, zval *return_value, zval *entry, uint32_t pos) /* {{{ */
 {
 	zval *value_ptr, data;
 
@@ -2710,34 +2710,43 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			}
 		} else {
 			php_error_docref_unchecked(NULL, E_WARNING, "Undefined variable $%S", Z_STR_P(entry));
+			/* A user error handler may have thrown. */
+			return EG(exception) ? FAILURE : SUCCESS;
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
+		zend_result result = SUCCESS;
+
 #ifdef ZEND_CHECK_STACK_LIMIT
 		if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
 			zend_call_stack_size_error();
-			return;
+			return FAILURE;
 		}
 #endif
 		if (Z_REFCOUNTED_P(entry)) {
 			if (Z_IS_RECURSIVE_P(entry)) {
 				zend_throw_error(NULL, "Recursion detected");
-				return;
+				return FAILURE;
 			}
 			Z_PROTECT_RECURSION_P(entry);
 		}
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(entry), value_ptr) {
-			php_compact_var(eg_active_symbol_table, return_value, value_ptr, pos);
-			if (UNEXPECTED(EG(exception))) {
+			if (UNEXPECTED(php_compact_var(eg_active_symbol_table, return_value, value_ptr, pos) == FAILURE)) {
+				result = FAILURE;
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
 		if (Z_REFCOUNTED_P(entry)) {
 			Z_UNPROTECT_RECURSION_P(entry);
 		}
+
+		return result;
 	} else {
 		php_error_docref(NULL, E_WARNING, "Argument #%d must be string or array of strings, %s given", pos, zend_zval_value_name(entry));
-		return;
+		/* A user error handler may have thrown. */
+		return EG(exception) ? FAILURE : SUCCESS;
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -2769,8 +2778,7 @@ PHP_FUNCTION(compact)
 	}
 
 	for (i = 0; i < num_args; i++) {
-		php_compact_var(symbol_table, return_value, &args[i], i + 1);
-		if (UNEXPECTED(EG(exception))) {
+		if (UNEXPECTED(php_compact_var(symbol_table, return_value, &args[i], i + 1) == FAILURE)) {
 			RETURN_THROWS();
 		}
 	}
