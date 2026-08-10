@@ -85,6 +85,8 @@ PHP                                                                        NEWS
     element. (iliaal)
   . SimpleXMLElement::__construct() now raises a ValueError when the $data
     argument contains NUL bytes. (iliaal)
+  . Fixed segfault when comparing uninitialized SimpleXMLElement
+    instances. (iliaal)
 
 - Standard:
   . Added the "filter.max_filter_count" stream context option for php://filter
