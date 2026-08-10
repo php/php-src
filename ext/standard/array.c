@@ -1465,6 +1465,13 @@ static zend_result php_array_walk(
 	 * levels of recursion. */
 	zend_fcall_info fci = context->fci;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return FAILURE;
+	}
+#endif
+
 	if (zend_hash_num_elements(target_hash) == 0) {
 		return result;
 	}
