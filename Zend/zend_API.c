@@ -1129,18 +1129,6 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 }
 /* }}} */
 
-ZEND_API zend_result zend_parse_parameter(int flags, uint32_t arg_num, zval *arg, const char *spec, ...)
-{
-	va_list va;
-	zend_result ret;
-
-	va_start(va, spec);
-	ret = zend_parse_arg(arg_num, arg, &va, &spec, flags);
-	va_end(va);
-
-	return ret;
-}
-
 static ZEND_COLD void zend_parse_parameters_debug_error(const char *msg) {
 	const zend_function *active_function = EG(current_execute_data)->func;
 	const char *class_name = active_function->common.scope
