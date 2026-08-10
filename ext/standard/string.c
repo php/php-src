@@ -840,7 +840,6 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 	const char *p1 = ZSTR_VAL(str);
 	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
 	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
-	zval  tmp;
 
 	if (p2 == NULL) {
 		/*
@@ -855,7 +854,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 		positions[found++] = p1;
 		do {
 			if (found >= allocated) {
-				allocated = found + EXPLODE_ALLOC_STEP;/* make sure we have enough memory */
+				allocated *= 2;/* make sure we have enough memory */
 				positions = erealloc(ZEND_VOIDP(positions), allocated*sizeof(char *));
 			}
 			positions[found++] = p1 = p2 + ZSTR_LEN(delim);
@@ -864,9 +863,15 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 
 		to_return = limit + found;
 		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
-		for (i = 0; i < to_return; i++) { /* this checks also for to_return > 0 */
-			ZVAL_STRINGL(&tmp, positions[i], (positions[i+1] - ZSTR_LEN(delim)) - positions[i]);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+		if (to_return > 0) {
+			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (i = 0; i < to_return; i++) {
+					ZEND_HASH_FILL_GROW();
+					ZEND_HASH_FILL_SET_STR(zend_string_init_fast(positions[i], (positions[i+1] - ZSTR_LEN(delim)) - positions[i]));
+					ZEND_HASH_FILL_NEXT();
+				}
+			} ZEND_HASH_FILL_END();
 		}
 		efree((void *)positions);
 	}
