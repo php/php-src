@@ -983,6 +983,9 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 
 	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(glue);
 
+	/* Converting an element may call __toString(), which can destroy pieces. */
+	GC_TRY_ADDREF(pieces);
+
 	ZEND_HASH_FOREACH_VAL(pieces, tmp) {
 		if (EXPECTED(Z_TYPE_P(tmp) == IS_STRING)) {
 			ptr->str = Z_STR_P(tmp);
@@ -1042,6 +1045,7 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 	}
 
 	free_alloca(strings, use_heap);
+	GC_TRY_DTOR_NO_REF(pieces);
 	RETURN_NEW_STR(str);
 }
 /* }}} */
