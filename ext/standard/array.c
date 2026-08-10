@@ -611,6 +611,13 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 	zend_long cnt = 0;
 	zval *element;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_call_stack_size_error();
+		return 0;
+	}
+#endif
+
 	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
 		if (GC_IS_RECURSIVE(ht)) {
 			php_error_docref(NULL, E_WARNING, "Recursion detected");
@@ -624,6 +631,9 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 		ZVAL_DEREF(element);
 		if (Z_TYPE_P(element) == IS_ARRAY) {
 			cnt += php_count_recursive(Z_ARRVAL_P(element));
+			if (UNEXPECTED(EG(exception))) {
+				break;
+			}
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -656,6 +666,9 @@ PHP_FUNCTION(count)
 				cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
 			} else {
 				cnt = php_count_recursive(Z_ARRVAL_P(array));
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
 			}
 			RETURN_LONG(cnt);
 			break;

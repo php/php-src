@@ -78,6 +78,8 @@ PHP                                                                        NEWS
     nested arrays). (Lazizbek Ergashev)
   . Fixed bug GH-23115 (Stack overflow in compact() with deeply nested
     arrays). (Lazizbek Ergashev)
+  . Fixed stack overflow in count() with COUNT_RECURSIVE and deeply nested
+    arrays. (Lazizbek Ergashev)
 
 - Streams:
   . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
