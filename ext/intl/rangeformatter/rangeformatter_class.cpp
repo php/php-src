@@ -138,6 +138,8 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
 
         INTL_G(use_exceptions) = old_use_exception;
         INTL_G(error_level) = old_error_level;
+
+        RETURN_THROWS();
     }
 
     LocalizedNumberRangeFormatter* nrf = new LocalizedNumberRangeFormatter(
@@ -183,18 +185,28 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     INTL_G(use_exceptions) = true;
     INTL_G(error_level) = 0;
 
+    zend_string *ret = NULL;
+
     if (U_FAILURE(error)) {
         intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to format number range");
-    }
+    } else {
+        ret = intl_charFromString(result, &error);
 
-    zend_string *ret = intl_charFromString(result, &error);
+        if (UNEXPECTED(ret == NULL)) {
+            if (U_SUCCESS(error)) {
+                error = U_ILLEGAL_ARGUMENT_ERROR;
+            }
 
-    if (U_FAILURE(error)) {
-        intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to convert result to UTF-8");
+            intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to convert result to UTF-8");
+        }
     }
 
     INTL_G(use_exceptions) = old_use_exception;
     INTL_G(error_level) = old_error_level;
+
+    if (UNEXPECTED(ret == NULL)) {
+        RETURN_THROWS();
+    }
 
     RETVAL_NEW_STR(ret);
 }
