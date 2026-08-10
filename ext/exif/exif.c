@@ -4415,7 +4415,7 @@ static bool exif_scan_HEIF_header(image_info_type *ImageInfo, unsigned char *buf
 		}
 		if (box.type == FOURCC("meta")) {
 			limit = box.size - box_header_size;
-			if (limit < 36) {
+			if (limit < 36 || limit > ImageInfo->FileSize) {
 				break;
 			}
 			data = (unsigned char *)emalloc(limit);
