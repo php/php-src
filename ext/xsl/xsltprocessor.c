@@ -227,6 +227,12 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 
 	php_libxml_node_object *clone_lxml_obj = Z_LIBXML_NODE_P(&clone_zv);
 
+	if (GC_REFCOUNT(clone) > 1 || clone_lxml_obj->document->refcount > 1) {
+		OBJ_RELEASE(clone);
+		zend_argument_value_error(1, "must not have its clone retained by __clone()");
+		RETURN_THROWS();
+	}
+
 	PHP_LIBXML_SANITIZE_GLOBALS(parse);
 	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	xmlSubstituteEntitiesDefault(1);

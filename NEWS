@@ -90,6 +90,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
     $this->stream during the close flush). (iliaal)
 
+- XSL:
+  . Fixed use-after-free when a DOMDocument subclass __clone() retains the
+    stylesheet copy made by XSLTProcessor::importStylesheet(). (iliaal)
+
 30 Jul 2026, PHP 8.5.9
 
 - Core:
