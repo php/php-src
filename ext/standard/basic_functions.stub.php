@@ -2239,7 +2239,7 @@ function inet_pton(string $ip): string|false {}
 /* metaphone.c */
 
 /** @refcount 1 */
-#[\Deprecated(since: '8.6')]
+#[\Deprecated(since: '8.6', message: 'use a userland phonetic matching library instead')]
 function metaphone(string $string, int $max_phonemes = 0): string {}
 
 /* {{{ head.c */

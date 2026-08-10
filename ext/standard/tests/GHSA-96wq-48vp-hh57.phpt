@@ -14,9 +14,10 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 <?php
 
 $str = str_repeat('0', 2 * (1024 ** 3) - 2) . 'AE';
-@metaphone($str, 1);
+metaphone($str, 1);
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 ===DONE===
