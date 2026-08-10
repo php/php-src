@@ -15,9 +15,7 @@ require_once 'skipifconnectfailure.inc';
     // Make sure that client, connection and result charsets are all the
     // same. Not sure whether this is strictly necessary.
     if (!$mysqli->set_charset('utf8'))
-        printf("[%d] %s\n", $mysqli->errno, $mysqli->errno);
-
-    $charsetInfo = $mysqli->get_charset();
+        printf("[%d] %s\n", $mysqli->errno, $mysqli->error);
 
     if (!$res = $mysqli->query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
         printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
