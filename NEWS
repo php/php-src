@@ -2,15 +2,28 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.25
 
+- Core:
+  . Fixed bug GH-23088 (Stack overflow when comparing deeply nested arrays).
+    (Lazizbek Ergashev)
+
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
 - DOM:
+  . Fixed bug GH-23116 (Stack overflow when normalizing a deeply nested
+    DOMDocument). (Lazizbek Ergashev)
+  . Fixed bug GH-23117 (Stack overflow when normalizing a deeply nested
+    Dom\XMLDocument). (Lazizbek Ergashev)
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
   . Fixed bug GH-22447 (UAF at dom_objects_free_storage when setting an
     attribute node that collides by local name with a namespaced
     attribute). (David Carlier)
+  . Fixed bug GH-23120 (Stack overflow when comparing deeply nested DOM nodes
+    with DOMNode::isEqualNode()). (Weilin Du)
+
+- LibXML:
+  . Fixed bug GH-22752 (Build failure with libxml 2.15). (David Carlier)
 
 - MBString:
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
@@ -46,6 +59,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23043 (broken session id code can cause zend_mm_heap
     corrupted). (ndossche)
 
+- SimpleXML:
+  . Fixed integer element offsets that cannot resolve aliasing an existing
+    element. (iliaal)
+
 - Sockets:
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
@@ -53,6 +70,10 @@ PHP                                                                        NEWS
   . Fix leak when trying to close db if blob stream is still open. (ndossche)
 
 - Standard:
+  . Fixed bug GH-23111 (Stack overflow in array_walk_recursive() with deeply
+    nested arrays). (Lazizbek Ergashev)
+  . Fixed bug GH-23113 (Stack overflow in array_replace_recursive() with deeply
+    nested arrays). (Lazizbek Ergashev)
   . Fixed bug GH-23115 (Stack overflow in compact() with deeply nested
     arrays). (Lazizbek Ergashev)
 
@@ -63,6 +84,10 @@ PHP                                                                        NEWS
 - Sysvshm:
   . Fixed out-of-bounds write when shm_attach() opens an existing segment with
     a size larger than the segment actually is. (David Carlier)
+
+- Zip:
+  . Fixed ZipArchive::addGlob() and ZipArchive::addPattern() ignoring their
+    default options when no options array is given. (David Carlier)
 
 30 Jul 2026, PHP 8.4.24
 
