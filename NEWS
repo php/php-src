@@ -56,6 +56,8 @@ PHP                                                                        NEWS
   . Added SpoofChecker::areBidiConfusable(). (David Carlier)
   . Added SpoofChecker::getBidiSkeleton(). (Weilin Du)
   . Added SpoofChecker::getSkeleton(). (David Carlier)
+  . Fixed IntlNumberRangeFormatter::format() crash when the formatting fails.
+    (David Carlier)
 
 - PDO:
   . Fixed pdo_raise_impl_error() emitting a warning under ERRMODE_SILENT.

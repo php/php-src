@@ -88,14 +88,14 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     zend_long collapse;
     zend_long identityFallback;
 
-    intl_error_reset(NULL);
-
     ZEND_PARSE_PARAMETERS_START(4,4)
         Z_PARAM_STRING(skeleton, skeleton_len)
         Z_PARAM_STRING(locale, locale_len)
         Z_PARAM_LONG(collapse)
         Z_PARAM_LONG(identityFallback)
     ZEND_PARSE_PARAMETERS_END();
+
+    intl_error_reset(NULL);
 
     if (locale_len == 0) {
         locale = (char *)intl_locale_get_default();
@@ -138,6 +138,8 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
 
         INTL_G(use_exceptions) = old_use_exception;
         INTL_G(error_level) = old_error_level;
+
+        RETURN_THROWS();
     }
 
     LocalizedNumberRangeFormatter* nrf = new LocalizedNumberRangeFormatter(
@@ -160,15 +162,16 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     zval *start;
     zval *end;
 
-    intl_error_reset(NULL);
-
     IntlNumberRangeFormatter_object* obj = Z_INTL_RANGEFORMATTER_P(ZEND_THIS);
-    intl_error_reset(RANGEFORMATTER_ERROR_P(obj));
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_NUMBER(start)
         Z_PARAM_NUMBER(end)
     ZEND_PARSE_PARAMETERS_END();
+
+    intl_errors_reset(RANGEFORMATTER_ERROR_P(obj));
+
+    ZEND_ASSERT(RANGEFORMATTER_OBJECT(obj) != NULL);
 
     UErrorCode error = U_ZERO_ERROR;
 
@@ -183,18 +186,28 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     INTL_G(use_exceptions) = true;
     INTL_G(error_level) = 0;
 
+    zend_string *ret = NULL;
+
     if (U_FAILURE(error)) {
         intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to format number range");
-    }
+    } else {
+        ret = intl_charFromString(result, &error);
 
-    zend_string *ret = intl_charFromString(result, &error);
+        if (UNEXPECTED(ret == NULL)) {
+            if (U_SUCCESS(error)) {
+                error = U_ILLEGAL_ARGUMENT_ERROR;
+            }
 
-    if (U_FAILURE(error)) {
-        intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to convert result to UTF-8");
+            intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to convert result to UTF-8");
+        }
     }
 
     INTL_G(use_exceptions) = old_use_exception;
     INTL_G(error_level) = old_error_level;
+
+    if (UNEXPECTED(ret == NULL)) {
+        RETURN_THROWS();
+    }
 
     RETVAL_NEW_STR(ret);
 }
