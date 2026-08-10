@@ -85,6 +85,10 @@ PHP                                                                        NEWS
   . Fixed out-of-bounds write when shm_attach() opens an existing segment with
     a size larger than the segment actually is. (David Carlier)
 
+- XSL:
+  . Fixed use-after-free when a DOMDocument subclass __clone() retains the
+    stylesheet copy made by XSLTProcessor::importStylesheet(). (iliaal)
+
 - Zip:
   . Fixed ZipArchive::addGlob() and ZipArchive::addPattern() ignoring their
     default options when no options array is given. (David Carlier)
