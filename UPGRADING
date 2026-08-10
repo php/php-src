@@ -447,6 +447,15 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
   . Making __construct() and __destruct() a Generator is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
+  . Naming a function readonly is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_the_possibility_to_name_a_function_readonly
+  . Passing a 3rd argument to define() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_define_with_case_insensitive_being_specified
+
+- BZ2
+  . Passing an object for the Bzip2 {de}compression stream filter is now
+    deprecated. Use get_object_vars() on the object instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_as_parameters_to_the_bzip2decompress_and_bzip2compress_stream_filters
 
 - GMP
   . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
@@ -457,12 +466,62 @@ PHP 8.6 UPGRADE NOTES
   . Mbregex has been deprecated, because the underlying Oniguruma library
     is no longer maintained.
     RFC: https://wiki.php.net/rfc/eol-oniguruma
+  . Passing objects to mb_convert_variables() is now deprecated
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_vars_parameter_of_mb_convert_variables
+
+- SPL:
+  . The spl_classes() function is now deprecated, use
+    ReflectionExtension::getClassNames() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_spl_classes
+  . The spl_object_hash() function is now deprecated, use spl_object_id()
+    instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_spl_object_hash
+  . The following ArrayIterator methods are now deprecated:
+    * ArrayIterator::getFlags()
+    * ArrayIterator::setFlags()
+    * ArrayIterator::asort()
+    * ArrayIterator::ksort()
+    * ArrayIterator::uasort()
+    * ArrayIterator::uksort()
+    * ArrayIterator::natsort()
+    * ArrayIterator::natcasesort()
+    * ArrayIterator::unserialize()
+    * ArrayIterator::serialize()
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_arrayiterator_methods_that_inherit_arrayobject_implementation
 
 - Standard:
   . Using more than 16 filters in a php://filter URL without configuring the
     "filter.max_filter_count" stream context option now emits an E_DEPRECATED
     warning. Use stream_filter_append() or configure this option explicitly.
     RFC: https://wiki.php.net/rfc/limit-maximum-number-of-filter-chains
+  . Passing an object to array_walk{_recursive} is now deprecated. Use
+    get_object_vars() on the object instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_array_parameter_of_array_walk_and_array_walk_recursive
+  . The is_double() function is now deprecated, use is_float() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_double
+  . The is_long() and is_integer() functions are now deprecated, use is_int()
+    instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_integer
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_long
+  . The doubleval() function is now deprecated, use floatval() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_doubleval
+  . The strcoll() function is now deprecated, use Collator::compare() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_strcoll
+  . The SORT_LOCALE_STRING constant for the family of sort functions is now
+    deprecated, use one of the following functions instead:
+    * Collator::sort()
+    * Collator::asort()
+    * Collator::sort()
+    * Collator::sortWithSortKeys()
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_sort_locale_string_flag_for_sort_functions
+
+- Zlib
+  . Passing an object for the zlib deflate and inflate stream filter is now
+    deprecated. Use get_object_vars() on the object instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_as_parameters_to_the_zlibinflate_and_zlibdeflate_stream_filters
+  . Passing an object to the $option argument to deflate_init and inflate_init
+    is now deprecated. Use get_object_vars() on the object instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_options_parameter_of_deflate_init_and_inflate_init
 
 ========================================
 5. Changed Functions
