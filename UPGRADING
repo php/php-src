@@ -490,6 +490,9 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_arrayiterator_methods_that_inherit_arrayobject_implementation
 
 - Standard:
+  . metaphone() is deprecated.
+    Please use a userland phonetic matching library instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_metaphone_function
   . Using more than 16 filters in a php://filter URL without configuring the
     "filter.max_filter_count" stream context option now emits an E_DEPRECATED
     warning. Use stream_filter_append() or configure this option explicitly.
