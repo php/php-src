@@ -857,7 +857,7 @@ jobs:
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
-      PARALLEL: -j2
+      PARALLEL: ${{ matrix.asan && '-j2' || fromJson(inputs.branch).config.default_run_test_jobs }}
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
       ASAN: "${{ matrix.asan && '1' || '0' }}"
       CLANG_TOOLSET: "${{ matrix.clang && '1' || '0' }}"
