@@ -66,13 +66,14 @@ static zend_always_inline zval *php_uri_deref(zval *zv)
 	return zv;
 }
 
-#define Z_RFC3986_URI_PROP_SCHEME_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
-#define Z_RFC3986_URI_PROP_USERINFO_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
-#define Z_RFC3986_URI_PROP_HOST_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
-#define Z_RFC3986_URI_PROP_PORT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
-#define Z_RFC3986_URI_PROP_PATH_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
-#define Z_RFC3986_URI_PROP_QUERY_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
-#define Z_RFC3986_URI_PROP_FRAGMENT_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
+#define Z_RFC3986_URI_PROP_SCHEME_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_RFC3986_URI_PROP_USERINFO_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_RFC3986_URI_PROP_HOST_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
+#define Z_RFC3986_URI_PROP_PORT_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
+#define Z_RFC3986_URI_PROP_PATH_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 4)
+#define Z_RFC3986_URI_PROP_PATH_DEREF_P(zv) php_uri_deref(Z_RFC3986_URI_PROP_PATH_P(zv))
+#define Z_RFC3986_URI_PROP_QUERY_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
+#define Z_RFC3986_URI_PROP_FRAGMENT_DEREF_P(zv) php_uri_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
 
 static HashTable *uri_get_debug_properties(php_uri_object *object)
 {
@@ -1069,14 +1070,17 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, reset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	convert_to_null(Z_RFC3986_URI_PROP_SCHEME_P(ZEND_THIS));
-	convert_to_null(Z_RFC3986_URI_PROP_USERINFO_P(ZEND_THIS));
-	convert_to_null(Z_RFC3986_URI_PROP_HOST_P(ZEND_THIS));
-	convert_to_null(Z_RFC3986_URI_PROP_PORT_P(ZEND_THIS));
-	zval_ptr_dtor(Z_RFC3986_URI_PROP_PATH_P(ZEND_THIS));
+	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	zval *property = object->properties_table;
+	const zval *end = property + object->ce->default_properties_count;
+
+	while (property != end) {
+		zend_object_dtor_property(object, property);
+		ZVAL_NULL(property);
+		property++;
+	}
+
 	ZVAL_EMPTY_STRING(Z_RFC3986_URI_PROP_PATH_P(ZEND_THIS));
-	convert_to_null(Z_RFC3986_URI_PROP_QUERY_P(ZEND_THIS));
-	convert_to_null(Z_RFC3986_URI_PROP_FRAGMENT_P(ZEND_THIS));
 
 	RETVAL_COPY(ZEND_THIS);
 }
@@ -1219,13 +1223,13 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, build)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(base_url, php_uri_ce_rfc3986_uri)
 	ZEND_PARSE_PARAMETERS_END();
 
-	const zval *scheme = Z_RFC3986_URI_PROP_SCHEME_P(ZEND_THIS);
-	const zval *userinfo = Z_RFC3986_URI_PROP_USERINFO_P(ZEND_THIS);
-	const zval *host = Z_RFC3986_URI_PROP_HOST_P(ZEND_THIS);
-	const zval *port = Z_RFC3986_URI_PROP_PORT_P(ZEND_THIS);
-	const zval *path = Z_RFC3986_URI_PROP_PATH_P(ZEND_THIS);
-	const zval *query = Z_RFC3986_URI_PROP_QUERY_P(ZEND_THIS);
-	const zval *fragment = Z_RFC3986_URI_PROP_FRAGMENT_P(ZEND_THIS);
+	const zval *scheme = Z_RFC3986_URI_PROP_SCHEME_DEREF_P(ZEND_THIS);
+	const zval *userinfo = Z_RFC3986_URI_PROP_USERINFO_DEREF_P(ZEND_THIS);
+	const zval *host = Z_RFC3986_URI_PROP_HOST_DEREF_P(ZEND_THIS);
+	const zval *port = Z_RFC3986_URI_PROP_PORT_DEREF_P(ZEND_THIS);
+	const zval *path = Z_RFC3986_URI_PROP_PATH_DEREF_P(ZEND_THIS);
+	const zval *query = Z_RFC3986_URI_PROP_QUERY_DEREF_P(ZEND_THIS);
+	const zval *fragment = Z_RFC3986_URI_PROP_FRAGMENT_DEREF_P(ZEND_THIS);
 
 	php_uri_parser_rfc3986_uris *base_uris = NULL;
 	if (base_url != NULL) {
