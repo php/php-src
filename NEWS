@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23120 (Stack overflow when comparing deeply nested DOM nodes
     with DOMNode::isEqualNode()). (Weilin Du)
 
+- Exif:
+  . Fixed exif_read_data() allocating a HEIF meta box larger than the file
+    it came from. (iliaal)
+
 - Intl:
   . Fixed IntlListFormatter::__construct() leaving stale global error state
     after successful calls. (Weilin Du)
