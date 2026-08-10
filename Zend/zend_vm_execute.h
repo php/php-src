@@ -7638,6 +7638,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CONST_HANDLER
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -9795,6 +9799,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMPVAR_HANDLE
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -10645,6 +10653,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_UNUSED_HANDLE
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -12177,6 +12189,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZE
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -19997,6 +20013,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CONST_HANDLER(Z
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -20437,6 +20457,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMPVAR_HANDLER(
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -20898,6 +20922,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -21298,6 +21326,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -25175,6 +25207,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CONST_HANDLER(Z
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -27473,6 +27509,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMPVAR_HANDLER(
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -29372,6 +29412,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -31751,6 +31795,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -33890,6 +33938,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CONST_HANDLE
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -35635,6 +35687,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMPVAR_HANDL
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -36177,6 +36233,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDL
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -38112,6 +38172,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(Z
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -43321,6 +43385,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZE
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -46883,6 +46951,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMPVAR_HANDLER(Z
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -48689,6 +48761,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(Z
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
@@ -52285,6 +52361,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_
 			}
 		}
 	} else {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+		}
+
 		/* If no value was specified yield null */
 		ZVAL_NULL(&generator->value);
 	}
