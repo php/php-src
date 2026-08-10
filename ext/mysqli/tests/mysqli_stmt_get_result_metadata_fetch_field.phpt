@@ -15,8 +15,6 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_set_charset($link, 'utf8'))
         printf("[%d] %s\n", mysqli_errno($link), mysqli_errno($link));
 
-    $charsetInfo = mysqli_get_charset($link);
-
     if (!($stmt = mysqli_stmt_init($link)) ||
         !mysqli_stmt_prepare($stmt, "SELECT id, label, id + 1 as _id,  concat(label, '_') ___label FROM test ORDER BY id ASC LIMIT 3") ||
         !mysqli_stmt_execute($stmt))
@@ -42,9 +40,10 @@ require_once 'skipifconnectfailure.inc';
             Label column, result set charset.
             All of the following columns are "too hot" - too server dependent
             */
-            if ($field->length != $charsetInfo->max_length) {
+            $charMaxLength = 3;
+            if ($field->length != $charMaxLength) {
                 printf("[005] Expecting length %d got %d\n",
-                    $charsetInfo->max_length, $field->max_length);
+                    $charMaxLength, $field->max_length);
             }
         }
     }

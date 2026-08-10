@@ -61,8 +61,6 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_set_charset($link, 'utf8'))
         printf("[%d] %s\n", mysqli_errno($link), mysqli_errno($link));
 
-    $charsetInfo = mysqli_get_charset($link);
-
     if (!$res = mysqli_query($link, "SELECT id, label FROM test ORDER BY id LIMIT 1", MYSQLI_USE_RESULT)) {
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
@@ -80,9 +78,10 @@ require_once 'skipifconnectfailure.inc';
     $field = mysqli_fetch_field($res);
     var_dump($field);
     /* label column, result set charset */
-    if ($field->length != $charsetInfo->max_length) {
+    $charMaxLength = 3;
+    if ($field->length != $charMaxLength) {
         printf("[005] Expecting length %d got %d\n",
-            $charsetInfo->max_length, $field->max_length);
+            $charMaxLength, $field->max_length);
     }
 
     var_dump(mysqli_field_tell($res));
