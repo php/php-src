@@ -108,6 +108,10 @@ PHP                                                                        NEWS
   . Io\Poll\Context::wait() now takes a Time\Duration object as a timeout.
     (timwolla)
 
+- XSL:
+  . Fixed use-after-free when a DOMDocument subclass __clone() retains the
+    stylesheet copy made by XSLTProcessor::importStylesheet(). (iliaal)
+
 30 Jul 2026, PHP 8.6.0alpha3
 
 - Core:
