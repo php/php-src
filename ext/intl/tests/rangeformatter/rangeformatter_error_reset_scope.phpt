@@ -31,7 +31,7 @@ try {
 try {
     $formatter->format([], 2);
 } catch (TypeError $error) {
-    echo $error->getMessage(), PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 
 var_dump(intl_get_error_code() !== 0);
@@ -44,7 +44,7 @@ try {
         IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE
     );
 } catch (TypeError $error) {
-    echo $error->getMessage(), PHP_EOL;
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 
 var_dump(intl_get_error_code() !== 0);
@@ -56,9 +56,9 @@ var_dump($formatter->getErrorCode());
 
 ?>
 --EXPECT--
-IntlNumberRangeFormatter::format(): Argument #1 ($start) must be of type int|float, array given
+TypeError: IntlNumberRangeFormatter::format(): Argument #1 ($start) must be of type int|float, array given
 bool(true)
-IntlNumberRangeFormatter::createFromSkeleton(): Argument #1 ($skeleton) must be of type string, array given
+TypeError: IntlNumberRangeFormatter::createFromSkeleton(): Argument #1 ($skeleton) must be of type string, array given
 bool(true)
 int(0)
 int(0)
