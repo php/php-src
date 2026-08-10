@@ -2696,13 +2696,6 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 {
 	zval *value_ptr, data;
 
-#ifdef ZEND_CHECK_STACK_LIMIT
-	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
-		zend_call_stack_size_error();
-		return;
-	}
-#endif
-
 	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if ((value_ptr = zend_hash_find_ind(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
@@ -2719,6 +2712,12 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			php_error_docref_unchecked(NULL, E_WARNING, "Undefined variable $%S", Z_STR_P(entry));
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
+#ifdef ZEND_CHECK_STACK_LIMIT
+		if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+			zend_call_stack_size_error();
+			return;
+		}
+#endif
 		if (Z_REFCOUNTED_P(entry)) {
 			if (Z_IS_RECURSIVE_P(entry)) {
 				zend_throw_error(NULL, "Recursion detected");
@@ -2728,6 +2727,9 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 		}
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(entry), value_ptr) {
 			php_compact_var(eg_active_symbol_table, return_value, value_ptr, pos);
+			if (UNEXPECTED(EG(exception))) {
+				break;
+			}
 		} ZEND_HASH_FOREACH_END();
 		if (Z_REFCOUNTED_P(entry)) {
 			Z_UNPROTECT_RECURSION_P(entry);
@@ -2768,6 +2770,9 @@ PHP_FUNCTION(compact)
 
 	for (i = 0; i < num_args; i++) {
 		php_compact_var(symbol_table, return_value, &args[i], i + 1);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 }
 /* }}} */

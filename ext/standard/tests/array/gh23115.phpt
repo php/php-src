@@ -13,15 +13,29 @@ if (getenv('SKIP_ASAN')) {
 zend.max_allowed_stack_size=256K
 --FILE--
 <?php
+/* Two elements per nesting level: the sibling must not be visited once the
+ * stack limit error has been thrown, so only one Error is thrown. */
 $names = [];
 for ($i = 0; $i < 30000; $i++) {
-    $names = [$names];
+    $names = [$names, []];
 }
+
 try {
     compact($names);
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), "\n";
+    var_dump($e->getPrevious());
+}
+
+try {
+    compact($names, $names);
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), "\n";
+    var_dump($e->getPrevious());
 }
 ?>
 --EXPECTF--
 Error: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+NULL
+Error: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+NULL
