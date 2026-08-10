@@ -25,7 +25,7 @@ echo $html->saveHtml(), "\n";
 <container xmlns="some:ns" xmlns:bar="another:ns">
     <x>
         <subcontainer>
-            <test xmlns="x:y"/>
+            <test xmlns="xy:z"/>
             <child2/>
         </subcontainer>
         <subcontainer2>

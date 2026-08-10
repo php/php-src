@@ -223,3 +223,146 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 	}
 }
+
+/* {{{ Runs an ICU skeleton generator over a UTF-8 string, preflighting the result buffer */
+template <typename F>
+static zend_string *spoofchecker_skeleton(Spoofchecker_object *co, zend_string *string, F&& skeletonfn)
+{
+	if (UNEXPECTED(ZSTR_LEN(string) > INT32_MAX)) {
+		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
+		intl_errors_set(SPOOFCHECKER_ERROR_P(co), SPOOFCHECKER_ERROR_CODE(co),
+			"Failed to convert input string to UTF-16");
+		return nullptr;
+	}
+
+	u_strFromUTF8(nullptr, 0, nullptr, ZSTR_VAL(string), (int32_t) ZSTR_LEN(string),
+		SPOOFCHECKER_ERROR_CODE_P(co));
+	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co)) && SPOOFCHECKER_ERROR_CODE(co) != U_BUFFER_OVERFLOW_ERROR) {
+		intl_errors_set(SPOOFCHECKER_ERROR_P(co), SPOOFCHECKER_ERROR_CODE(co),
+			"Failed to convert input string to UTF-16");
+		return nullptr;
+	}
+	SPOOFCHECKER_ERROR_CODE(co) = U_ZERO_ERROR;
+
+	int32_t result_len = skeletonfn(nullptr, 0, SPOOFCHECKER_ERROR_CODE_P(co));
+	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co)) && SPOOFCHECKER_ERROR_CODE(co) != U_BUFFER_OVERFLOW_ERROR) {
+		intl_errors_set(SPOOFCHECKER_ERROR_P(co), SPOOFCHECKER_ERROR_CODE(co),
+			"Failed to generate skeleton");
+		return nullptr;
+	}
+
+	zend_string *result = zend_string_alloc(result_len, false);
+	int32_t result_capacity = result_len < INT32_MAX ? result_len + 1 : result_len;
+	SPOOFCHECKER_ERROR_CODE(co) = U_ZERO_ERROR;
+	result_len = skeletonfn(ZSTR_VAL(result), result_capacity, SPOOFCHECKER_ERROR_CODE_P(co));
+	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		zend_string_release(result);
+		intl_errors_set(SPOOFCHECKER_ERROR_P(co), SPOOFCHECKER_ERROR_CODE(co),
+			"Failed to generate skeleton");
+		return nullptr;
+	}
+	SPOOFCHECKER_ERROR_CODE(co) = U_ZERO_ERROR;
+	ZSTR_LEN(result) = result_len;
+	ZSTR_VAL(result)[result_len] = '\0';
+	return result;
+}
+/* }}} */
+
+/* {{{ Get the confusable skeleton for an identifier */
+U_CFUNC PHP_METHOD(Spoofchecker, getSkeleton)
+{
+	zend_string *string;
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+
+	zend_string *result = spoofchecker_skeleton(co, string,
+		[&](char *dest, int32_t capacity, UErrorCode *status) {
+			/* The type parameter is deprecated since ICU 58 and must be 0. */
+			return uspoof_getSkeletonUTF8(co->uspoof, 0, ZSTR_VAL(string),
+				(int32_t) ZSTR_LEN(string), dest, capacity, status);
+		});
+	if (result == nullptr) {
+		RETURN_FALSE;
+	}
+	RETURN_STR(result);
+}
+/* }}} */
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+/* {{{ Get the confusable skeleton for an identifier in a given text direction */
+U_CFUNC PHP_METHOD(Spoofchecker, getBidiSkeleton)
+{
+	zend_long direction;
+	zend_string *string;
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(direction)
+		Z_PARAM_STR(string)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+
+	if (direction != UBIDI_LTR && direction != UBIDI_RTL) {
+		zend_argument_value_error(1, "must be either Spoofchecker::LTR or Spoofchecker::RTL");
+		RETURN_THROWS();
+	}
+
+	zend_string *result = spoofchecker_skeleton(co, string,
+		[&](char *dest, int32_t capacity, UErrorCode *status) {
+			return uspoof_getBidiSkeletonUTF8(co->uspoof, (UBiDiDirection) direction,
+				ZSTR_VAL(string), (int32_t) ZSTR_LEN(string), dest, capacity, status);
+		});
+	if (result == nullptr) {
+		RETURN_FALSE;
+	}
+	RETURN_STR(result);
+}
+/* }}} */
+
+/* {{{ Checks if a given text contains any confusable characters, for a given text direction */
+U_CFUNC PHP_METHOD(Spoofchecker, areBidiConfusable)
+{
+	uint32_t ret = 0;
+	zend_long direction;
+	zend_string *s1, *s2;
+	zval *error_code = NULL;
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_LONG(direction)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(error_code)
+	ZEND_PARSE_PARAMETERS_END();
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+
+	if (direction != UBIDI_LTR && direction != UBIDI_RTL) {
+		zend_argument_value_error(1, "must be either Spoofchecker::LTR or Spoofchecker::RTL");
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(ZSTR_LEN(s1) > INT32_MAX || ZSTR_LEN(s2) > INT32_MAX)) {
+		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
+	} else {
+		ret = uspoof_areBidiConfusableUTF8(co->uspoof, (UBiDiDirection)direction, ZSTR_VAL(s1), (int32_t)ZSTR_LEN(s1), ZSTR_VAL(s2), (int32_t)ZSTR_LEN(s2), SPOOFCHECKER_ERROR_CODE_P(co));
+	}
+	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		RETURN_TRUE;
+	}
+
+	if (error_code) {
+		ZEND_TRY_ASSIGN_REF_LONG(error_code, ret);
+	}
+	RETVAL_BOOL(ret != 0);
+}
+/* }}} */
+#endif

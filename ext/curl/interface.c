@@ -32,11 +32,6 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
-/* As of curl 7.11.1 this is no longer defined inside curl.h */
-#ifndef HttpPost
-#define HttpPost curl_httppost
-#endif
-
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -67,10 +62,39 @@ ZEND_DECLARE_MODULE_GLOBALS(curl)
 # define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
+// php_curl_option_get_name(CURLOPT_HTTPHEADER) -> "HTTPHEADER"
+static const char * php_curl_option_get_name(zend_long option) {
+
+#if LIBCURL_VERSION_NUM >= 0x074900
+	const struct curl_easyoption * opt = curl_easy_option_by_id(option);
+	if (EXPECTED(opt != NULL)) {
+		return opt->name;
+	}
+#endif
+
+	const char prefix[] = "CURLOPT_";
+	const size_t prefix_len = sizeof(prefix) - 1;
+	zend_string *key;
+	zend_constant *constant;
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(zend_constants), key, constant) {
+		if (!key
+			|| Z_TYPE(constant->value) != IS_LONG
+			|| strncmp(ZSTR_VAL(key), prefix, prefix_len) != 0) {
+			continue;
+		}
+
+		if (Z_LVAL(constant->value) == option) {
+			return ZSTR_VAL(key) + prefix_len;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return "UNKNOWN_OPTION";
+}
+
 static zend_result php_curl_option_str(php_curl *ch, zend_long option, const char *str, const size_t len)
 {
 	if (zend_char_has_nul_byte(str, len)) {
-		zend_value_error("%s(): cURL option must not contain any null bytes", get_active_function_name());
+		zend_value_error("%s(): cURL option CURLOPT_%s must not contain any null bytes", get_active_function_name(), php_curl_option_get_name(option));
 		return FAILURE;
 	}
 
@@ -405,7 +429,6 @@ static zend_object *curl_clone_obj(zend_object *object) {
 
 	clone_object = curl_create_object(curl_ce);
 	clone_ch = curl_from_obj(clone_object);
-	init_curl_handle(clone_ch);
 
 	ch = curl_from_obj(object);
 	cp = curl_easy_duphandle(ch->cp);
@@ -414,6 +437,7 @@ static zend_object *curl_clone_obj(zend_object *object) {
 		return &clone_ch->std;
 	}
 
+	init_curl_handle(clone_ch);
 	clone_ch->cp = cp;
 	_php_setup_easy_copy_handlers(clone_ch, ch);
 
@@ -559,6 +583,8 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				/* TODO Check callback returns an int or something castable to int */
 				length = php_curl_get_long(&retval);
+			} else {
+				length = -1;
 			}
 
 			zval_ptr_dtor(&argv[0]);
@@ -608,14 +634,14 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 static int curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = 0;
+	int rval = 1; // error
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_progress() called\n");
 	fprintf(stderr, "clientp = %p, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
 	if (!ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
-		return rval;
+		return 0; // ok
 	}
 
 	zval args[5];
@@ -635,8 +661,8 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		/* TODO Check callback returns an int or something castable to int */
-		if (0 != php_curl_get_long(&retval)) {
-			rval = 1;
+		if (0 == php_curl_get_long(&retval)) {
+			rval = 0; // ok
 		}
 	}
 
@@ -649,14 +675,14 @@ static int curl_progress(void *clientp, double dltotal, double dlnow, double ult
 static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = 0;
+	int rval = 1; // error
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_xferinfo() called\n");
 	fprintf(stderr, "clientp = %p, dltotal = %ld, dlnow = %ld, ultotal = %ld, ulnow = %ld\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
-	if (!ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
-		return rval;
+	if (UNEXPECTED(!ZEND_FCC_INITIALIZED(ch->handlers.xferinfo))) {
+		return 0; // ok
 	}
 
 	zval argv[5];
@@ -676,8 +702,8 @@ static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, cu
 	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		/* TODO Check callback returns an int or something castable to int */
-		if (0 != php_curl_get_long(&retval)) {
-			rval = 1;
+		if (0 == php_curl_get_long(&retval)) {
+			rval = 0; // ok
 		}
 	}
 
@@ -690,13 +716,13 @@ static int curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, cu
 static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_local_ip, int conn_primary_port, int conn_local_port)
 {
 	php_curl *ch = (php_curl *)clientp;
-	int rval = CURL_PREREQFUNC_OK;
+	int rval = CURL_PREREQFUNC_ABORT;
 
 	// when CURLOPT_PREREQFUNCTION is set to null, curl_prereqfunction still
 	// gets called. Return CURL_PREREQFUNC_OK immediately in this case to avoid
 	// zend_call_known_fcc() with an uninitialized FCC.
-	if (!ZEND_FCC_INITIALIZED(ch->handlers.prereq)) {
-		return rval;
+	if (UNEXPECTED(!ZEND_FCC_INITIALIZED(ch->handlers.prereq))) {
+		return CURL_PREREQFUNC_OK;
 	}
 
 #if PHP_CURL_DEBUG
@@ -728,6 +754,7 @@ static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_
 				zend_value_error("The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT");
 			}
 		} else {
+			zval_ptr_dtor(&retval);
 			zend_type_error("The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT");
 		}
 	}
@@ -823,10 +850,18 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 					length = MIN(nmemb, Z_STRLEN(retval));
 					memcpy(data, Z_STRVAL(retval), length);
 				} else if (Z_TYPE(retval) == IS_LONG) {
-					length = Z_LVAL_P(&retval);
+					zend_long long_rv = Z_LVAL_P(&retval);
+					if (long_rv == 0 || long_rv == CURL_READFUNC_ABORT || long_rv == CURL_READFUNC_PAUSE) {
+						length = (size_t) long_rv;
+					} else {
+						zend_value_error("The CURLOPT_READFUNCTION callback must return a string or CURL_READFUNC_ABORT or CURL_READFUNC_PAUSE");
+						length = CURL_READFUNC_ABORT;
+					}
 				}
 				// TODO Do type error if invalid type?
 				zval_ptr_dtor(&retval);
+			} else {
+				length = CURL_READFUNC_ABORT;
 			}
 
 			zval_ptr_dtor(&argv[0]);
@@ -921,6 +956,8 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 				// TODO: Check for valid int type for return value
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				length = php_curl_get_long(&retval);
+			} else {
+				length = -1;
 			}
 			zval_ptr_dtor(&argv[0]);
 			zval_ptr_dtor(&argv[1]);
@@ -1110,7 +1147,7 @@ void init_curl_handle(php_curl *ch)
 
 	memset(&ch->err, 0, sizeof(struct _php_curl_error));
 
-	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
+	zend_llist_init(&ch->to_free->post,  sizeof(struct curl_httppost *), (llist_dtor_func_t)curl_free_post,   0);
 	zend_llist_init(&ch->to_free->stream, sizeof(struct mime_data_cb_arg *), (llist_dtor_func_t)curl_free_cb_arg, 0);
 
 	zend_hash_init(&ch->to_free->slist, 4, NULL, curl_free_slist, 0);
@@ -2024,7 +2061,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 						ch->handlers.write->method = PHP_CURL_FILE;
 						ZVAL_COPY(&ch->handlers.write->stream, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						zend_value_error("%s(): The file handle provided for CURLOPT_FILE must be writable", get_active_function_name());
 						return FAILURE;
 					}
 					break;
@@ -2042,7 +2079,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 						ch->handlers.write_header->method = PHP_CURL_FILE;
 						ZVAL_COPY(&ch->handlers.write_header->stream, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						zend_value_error("%s(): The file handle provided for CURLOPT_WRITEHEADER must be writable", get_active_function_name());
 						return FAILURE;
 					}
 					break;
@@ -2071,7 +2108,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 						zval_ptr_dtor(&ch->handlers.std_err);
 						ZVAL_COPY(&ch->handlers.std_err, zvalue);
 					} else {
-						zend_value_error("%s(): The provided file handle must be writable", get_active_function_name());
+						zend_value_error("%s(): The file handle provided for CURLOPT_STDERR must be writable", get_active_function_name());
 						return FAILURE;
 					}
 					ZEND_FALLTHROUGH;
@@ -2098,43 +2135,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			HashTable *ph;
 			zend_string *val, *tmp_val;
 			struct curl_slist *slist = NULL;
-			const char *name = NULL;
-
-			switch (option) {
-				case CURLOPT_HTTPHEADER:
-					name = "CURLOPT_HTTPHEADER";
-					break;
-				case CURLOPT_QUOTE:
-					name = "CURLOPT_QUOTE";
-					break;
-				case CURLOPT_HTTP200ALIASES:
-					name = "CURLOPT_HTTP200ALIASES";
-					break;
-				case CURLOPT_POSTQUOTE:
-					name = "CURLOPT_POSTQUOTE";
-					break;
-				case CURLOPT_PREQUOTE:
-					name = "CURLOPT_PREQUOTE";
-					break;
-				case CURLOPT_TELNETOPTIONS:
-					name = "CURLOPT_TELNETOPTIONS";
-					break;
-				case CURLOPT_MAIL_RCPT:
-					name = "CURLOPT_MAIL_RCPT";
-					break;
-				case CURLOPT_RESOLVE:
-					name = "CURLOPT_RESOLVE";
-					break;
-				case CURLOPT_PROXYHEADER:
-					name = "CURLOPT_PROXYHEADER";
-					break;
-				case CURLOPT_CONNECT_TO:
-					name = "CURLOPT_CONNECT_TO";
-					break;
-			}
 
 			if (Z_TYPE_P(zvalue) != IS_ARRAY) {
-				zend_type_error("%s(): The %s option must have an array value", get_active_function_name(), name);
+				zend_type_error("%s(): The CURLOPT_%s option must have an array value", get_active_function_name(), php_curl_option_get_name(option));
 				return FAILURE;
 			}
 
@@ -2146,7 +2149,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				if (zend_str_has_nul_byte(val)) {
 					curl_slist_free_all(slist);
 					zend_tmp_string_release(tmp_val);
-					zend_value_error("%s(): cURL option %s must not contain any null bytes", get_active_function_name(), name);
+					zend_value_error("%s(): cURL option CURLOPT_%s must not contain any null bytes", get_active_function_name(), php_curl_option_get_name(option));
 					return FAILURE;
 				}
 

@@ -12,9 +12,9 @@ class Options {
 try {
     deflate_init(ZLIB_ENCODING_DEFLATE, new Options());
 } catch (TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-deflate_init(): Argument #2 ($options) the value for option "level" must be of type int, null given
+TypeError: deflate_init(): Argument #2 ($options) the value for option "level" must be of type int, null given

@@ -15,7 +15,7 @@ var_dump(mb_ereg_search_setpos(50)); // OK
 try {
     var_dump(mb_ereg_search_setpos(-1)); // Error
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 mb_ereg_search_init($test_str);
@@ -26,12 +26,12 @@ foreach($positions as $pos) {
     try {
         var_dump(mb_ereg_search_setpos($pos));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     try {
         var_dump(mb_ereg_search_getpos());
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 ?>
@@ -42,7 +42,7 @@ Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, because th
 bool(true)
 
 Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
+ValueError: mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
 Deprecated: Function mb_ereg_search_init() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 
@@ -65,7 +65,7 @@ int(20)
 * Position: 21 :
 
 Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
+ValueError: mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
 Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 int(20)
@@ -73,7 +73,7 @@ int(20)
 * Position: 25 :
 
 Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
+ValueError: mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
 Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 int(20)
@@ -105,7 +105,7 @@ int(0)
 * Position: -30 :
 
 Deprecated: Function mb_ereg_search_setpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
-mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
+ValueError: mb_ereg_search_setpos(): Argument #1 ($offset) is out of range
 
 Deprecated: Function mb_ereg_search_getpos() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 int(0)

@@ -9,7 +9,7 @@ echo "\n-- Testing hash() function with invalid hash algorithm --\n";
 try {
     hash('foo', '');
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -17,4 +17,4 @@ try {
 *** Testing hash() : error conditions ***
 
 -- Testing hash() function with invalid hash algorithm --
-hash(): Argument #1 ($algo) must be a valid hashing algorithm
+ValueError: hash(): Argument #1 ($algo) must be a valid hashing algorithm

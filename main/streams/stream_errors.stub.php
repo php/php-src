@@ -132,7 +132,6 @@ final readonly class StreamError
     public string $wrapperName;
     public int $severity;
     public bool $terminating;
-    public ?string $param;
 }
 
 class StreamException extends Exception

@@ -16,7 +16,7 @@ $s->setFlags(SplFileObject::READ_CSV);
 try {
     $s->setCsvControl('|', 'two');
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -24,4 +24,4 @@ try {
 unlink('csv_control_data_error002.csv');
 ?>
 --EXPECT--
-SplFileObject::setCsvControl(): Argument #2 ($enclosure) must be a single character
+ValueError: SplFileObject::setCsvControl(): Argument #2 ($enclosure) must be a single character

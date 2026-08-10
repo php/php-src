@@ -339,11 +339,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				value = &group_long;
 			}
 
-			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
+			RETURN_BOOL(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL));
 		} else {
 #ifndef PHP_WIN32
 /* On Windows, we expect regular chgrp to fail silently by default */
@@ -480,11 +476,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 				value = &user_long;
 			}
 
-			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
+			RETURN_BOOL(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL));
 		} else {
 #ifndef PHP_WIN32
 /* On Windows, we expect regular chown to fail silently by default */
@@ -638,11 +630,7 @@ PHP_FUNCTION(touch)
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
 		if(wrapper && wrapper->wops->stream_metadata) {
-			if(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_TOUCH, newtime, NULL)) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
+			RETURN_BOOL(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_TOUCH, newtime, NULL));
 		} else {
 			php_stream *stream;
 			if(!filetime_is_null || !fileatime_is_null) {
@@ -742,14 +730,12 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 	const char *local = NULL;
 	php_stream_wrapper *wrapper = NULL;
 
+	ZEND_ASSERT(!zend_str_has_nul_byte(filename));
+	/* Quick check for empty file paths */
+	if (!ZSTR_LEN(filename)) {
+		RETURN_FALSE;
+	}
 	if (IS_ACCESS_CHECK(type)) {
-		if (!ZSTR_LEN(filename) || zend_str_has_nul_byte(filename)) {
-			if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
-				php_error_docref(NULL, E_WARNING, "Filename contains null byte");
-			}
-			RETURN_FALSE;
-		}
-
 		if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
 				&& php_check_open_basedir(local)) {
 			RETURN_FALSE;
@@ -811,13 +797,6 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		}
 
 		if (!wrapper) {
-			if (!ZSTR_LEN(filename) || zend_str_has_nul_byte(filename)) {
-				if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
-					php_error_docref(NULL, E_WARNING, "Filename contains null byte");
-				}
-				RETURN_FALSE;
-			}
-
 			if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
 			 && php_check_open_basedir(local)) {
 				RETURN_FALSE;
@@ -1008,7 +987,7 @@ ZEND_NAMED_FUNCTION(name) { \
 	zend_string *filename; \
 	\
 	ZEND_PARSE_PARAMETERS_START(1, 1) \
-		Z_PARAM_STR(filename) \
+		Z_PARAM_PATH_STR(filename) \
 	ZEND_PARSE_PARAMETERS_END(); \
 	\
 	php_stat(filename, funcnum, return_value); \

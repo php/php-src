@@ -11,14 +11,14 @@ $poll_ctx = pt_new_stream_poll();
 $watcher1w = pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write], "socket_data_1");
 pt_stream_poll_add($poll_ctx, $socket2w, [Io\Poll\Event::Write], "socket_data_2");
 
-pt_expect_events($poll_ctx->wait(0), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromSeconds(0)), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket_data_1'],
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket_data_2']
 ]);
 
 $watcher1w->remove();
 
-pt_expect_events($poll_ctx->wait(0), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromSeconds(0)), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket_data_2']
 ]);
 

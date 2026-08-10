@@ -1,15 +1,135 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0alpha3
+?? ??? ????, PHP 8.6.0beta1
+
+- Streams:
+  . Fixed file_put_contents() LOCK_EX early return leaking stream error
+    operation depth. (iliaal)
+
+- Core:
+  . Changed run-tests.php to run test subprocesses without a shell where
+    possible. (NickSdot)
+  . Fixed GH-23083 (SEGV build_trace_args in zend_exceptions.c with
+    -d error_include_args=On). (David Carlier)
+  . Fixed GH-23121 (is_callable() wrongly accepts objects with no get_closure
+    handler). (David Carlier)
+
+- Curl:
+  . Improved cURL option validation errors to include the option name.
+    (Sjoerd Langkemper)
+  . Raise a value error when the callback registered with CURLOPT_READFUNCTION
+    returns an unexpected long. (Sjoerd Langkemper)
+  . Fix bug GH-16513 (curl: exceptions in callbacks do not abort the request).
+    (Sjoerd Langkemper)
+
+- Date:
+  . Update timelib to 2026.02. (Derick, timwolla)
+  . Added Time\Duration. (timwolla, Derick)
+
+- DOM:
+  . Fixed bug GH-23116 (Stack overflow when normalizing a deeply nested
+    DOMDocument). (Lazizbek Ergashev)
+  . Fixed bug GH-23117 (Stack overflow when normalizing a deeply nested
+    Dom\XMLDocument). (Lazizbek Ergashev)
+
+- GMP:
+  . Added optional $definitely_prime output parameter to gmp_prevprime().
+    (Weilin Du)
+  . Added gmp_powm_sec(). (Weilin Du)
+
+- Intl:
+  . Added static methods IntlDatePatternGenerator::getSkeleton() and
+    IntlDatePatternGenerator::getBaseSkeleton(). (Weilin Du)
+  . Fixed Collator::sort(), collator_sort(), Collator::asort(), and
+    collator_asort() to report UTF-8/UTF-16 conversion errors through the intl
+    error handler instead of emitting a warning and continuing with an empty
+    string. (Weilin Du)
+  . Fixed IntlListFormatter::__construct() leaving stale global error state
+    after successful calls. (Weilin Du)
+  . Fixed IntlNumberRangeFormatter leaving stale global error state after
+    successful createFromSkeleton() and format() calls. (Weilin Du)
+  . Implemented GH-20255 (Add a predefined calendar constant in
+    IntlDateFormatter for the proleptic gregorian calendar). (David Carlier)
+  . Added SpoofChecker::areBidiConfusable(). (David Carlier)
+  . Added SpoofChecker::getBidiSkeleton(). (Weilin Du)
+  . Added SpoofChecker::getSkeleton(). (David Carlier)
+
+- PDO_ODBC:
+  . Fixed bug GH-23016 (NULL values in long columns come back as garbage
+    binary strings). (Calvin Buckley, iliaal)
+
+- Readline:
+  . Fixed the interactive shell not waiting for the pager process to exit.
+    (Weilin Du)
+
+- Reflection:
+  . Added ReflectionAttribute::inNamespace(),
+    ReflectionAttribute::getNamespaceName(), and
+    ReflectionAttribute::getShortName(). (Girgias)
+  . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).
+    (DanielEScherzer)
+  . Fixed ReflectionProperty::isLazy() and skipLazyInitialization() using the
+    parent slot when a child class hooks an inherited property. (iliaal)
+  . Fixed segfault in ReflectionMethod::createFromMethodName() on an
+    uninstantiable subclass. (iliaal)
+
+- SimpleXML:
+  . Fixed integer element offsets that cannot resolve aliasing an existing
+    element. (iliaal)
+  . SimpleXMLElement::__construct() now raises a ValueError when the $data
+    argument contains NUL bytes. (iliaal)
+
+- Standard:
+  . Added the "filter.max_filter_count" stream context option for php://filter
+    URLs. Using more than 16 filters without configuring this option is now
+    deprecated. (Sjoerd Langkemper)
+  . Improved performance of array_intersect(). (mehmetcansahin)
+  . Fixed bug GH-23006 (phpcredits() full-page HTML title says phpinfo()).
+    (Weilin Du)
+  . The following functions now raise a ValueError when the $filename argument
+    contains NUL bytes: fileperms(), fileinode(), filesize(), fileowner(),
+    filegroup(), fileatime(), filemtime(), filectime(), filetype(),
+    is_writable(), is_readable(), is_executable(), is_file(), is_dir(),
+    is_link(), file_exists(), lstat(), stat(). (Girgias)
+  . Fixed bug GH-22818 (stream_filter_register() orphaned user_filter_map on
+    shutdown re-registration). (David Carlier)
+  . Io\Poll\Context::wait() now takes a Time\Duration object as a timeout.
+    (timwolla)
+
+30 Jul 2026, PHP 8.6.0alpha3
 
 - Core:
   . Implemented partial function application RFC. (Arnaud)
+  . Fixed bug GH-22263 (reset typed property default on every unserialize
+    failure path). (David Carlier)
+  . Fixed bug GH-18985 (Wrong line numbers for match with constant arms).
+    (ilutov)
+  . Fixed bug GH-18847 (SEGV in zend_fetch_debug_backtrace() when the memory
+    limit is reached while the tracing JIT enters a call frame). (Arnaud,
+    iliaal)
+
+- DOM:
+  . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
+    declares a default value for the attribute). (iliaal)
+  . Fixed bug GH-23120 (Stack overflow when comparing deeply nested DOM nodes
+    with DOMNode::isEqualNode()). (Weilin Du)
+
+- Embed:
+  . Made php-cli functionality available in embed builds. (henderkes)
 
 - GMP:
+  . Added gmp_prevprime(). (Weilin Du, David Carlier)
   . Fixed GMP power and shift operators to reject GMP right operands outside
     the unsigned long range instead of silently truncating them. (Weilin Du)
   . Fixed GMP integer string parsing to reject strings containing NUL bytes
     instead of silently truncating them. (Weilin Du)
+  . Fixed GMP error messages that referenced outdated parameter names.
+    (Weilin Du)
+
+- Intl:
+  . Fixed grammatical issues in Normalizer invalid form and IntlCalendar time
+    zone offset error messages. (Weilin Du)
+  . Removed the dependency on the ICU IO library. (Weilin Du)
 
 - ODBC:
   . Fixed bug GH-22668 (Heap buffer over-read when a column value exceeds the
@@ -26,19 +146,50 @@ PHP                                                                        NEWS
   . Fixed bug GH-22665 (Out-of-bounds write when the ODBC driver reports a
     diagnostic message length beyond the error buffer). (iliaal)
 
+- Phar:
+  . Fixed grammatical issues and outdated terminology in Phar error messages.
+    (Weilin Du)
+
 - Reflection:
   . Fixed bug GH-22681 (Reflection*::__toString() truncates on null bytes).
     (DanielEScherzer)
+
+- SOAP:
+  . Fixed header injection through the Content-Type context option, the
+    soapaction and the cookie names and values. (David Carlier)
+  . Fixed the SoapClient and SoapServer "classmap" option to reject arrays
+    containing integer keys, and made SoapClient throw TypeError/ValueError
+    for invalid "classmap" options. (Weilin Du, David Carlier)
+
+- MBString:
+  . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
+    offset in a non-UTF-8 encoding). (Eyüp Can Akman)
+  . Fixed bug GH-21036 (mb_ereg_search_getregs() crashes after mb_eregi()
+    invalidates the regex cache). (Matthias Goergens)
+
+- PCRE:
+  . Fixed bug GH-21134 (Crash with \C + UTF-8). Using \C in UTF-8 patterns is
+    now forbidden. (Arnaud)
 
 - Sockets:
   . Fixed socket_set_option() validation error messages for UDP_SEGMENT and
     TCP_USER_TIMEOUT, and SO_LINGER options. (Weilin Du)
   . Fixed various memory related issues in ext/sockets. (David Carlier)
 
+- Standard:
+  . Fixed setlocale() to reject locale names containing NUL bytes instead of
+    silently truncating them, and to reject arrays passed after the $locales
+    argument or additional arguments passed after an array $locales argument.
+    (Weilin Du)
+
 - Streams:
   . Added a new IO copy API used by php_stream_copy_to_stream_ex() that
     leverages platform primitives (sendfile, splice, copy_file_range,
     TransmitFile) for faster stream copying. (Jakub Zelenka, David Carlier)
+  . Fixed bug GH-22841 (php_stream_copy_to_stream_ex() drops progress
+    notifications when using the copy fast path). (David Carlier)
+  . Fixed bug GH-15836 (Use-after-free when a user stream filter accesses
+    $this->stream during the close flush). (iliaal)
 
 16 Jul 2026, PHP 8.6.0alpha2
 
@@ -116,6 +267,8 @@ PHP                                                                        NEWS
     preloaded trait). (iliaal)
 
 - OpenSSL:
+  . Added $salt_length parameter to openssl_sign() and openssl_verify() with
+    new OPENSSL_RSA_PSS_SALTLEN_* constants. (Jakub Zelenka)
   . Fixed timeout for supplemental read at end of a blocking stream in SSL
     stream wrapper. (ilutov)
   . Fixed stream_socket_get_crypto_status() after supplemental read. (ilutov)
@@ -190,7 +343,7 @@ PHP                                                                        NEWS
   . Fix OSS-Fuzz #429429090 (Failed assertion on unset() with uninitialized
     container). (ilutov)
   . Fixed GH-20564 (Don't call autoloaders with pending exception). (ilutov)
-  . Fix deprecation now showing when accessing null key of an array with JIT.
+  . Fix deprecation not showing when accessing null key of an array with JIT.
     (alexandre-daubois)
   . Fixed bug GH-20174 (Assertion failure in
     ReflectionProperty::skipLazyInitialization after failed LazyProxy
@@ -217,6 +370,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . TSRM: make CG, EG, SCNG and AG compile-time offsets. (henderkes)
   . Deprecate returning values from __construct() and __destruct(). (timwolla)
+  . base_convert, bindex, hexdec and octdec now raise a notice when they cannot
+    precisely convert the given number. (Sjoerd Langkemper)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)
@@ -334,6 +489,8 @@ PHP                                                                        NEWS
     and Openssl\Session class. (Jakub Zelenka)
   . Added TLS external PSK support for streams with new context options and
     Openssl\Psk class. (Jakub Zelenka)
+  . Added TLS 1.3 early data (0-RTT) support for streams with new context
+    options early_data, max_early_data and early_data_cb. (Jakub Zelenka)
   . Added stream crypto status for exposing OpenSSL WANT_READ / WANT_WRITE.
     (Jakub Zelenka)
 
@@ -492,7 +649,8 @@ PHP                                                                        NEWS
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
     socket context options. (Jakub Zelenka)
   . Added so_reuseaddr streams context socket option that allows disabling
-    address reuse. (Jakub Zelenka)
+    address resuse. (Jakub Zelenka)
+  . Added so_linger stream socket context option. (Jakub Zelenka)
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)

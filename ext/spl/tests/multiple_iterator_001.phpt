@@ -16,12 +16,12 @@ foreach($m as $value) {
 try {
     var_dump($m->current());
 } catch (RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($m->key());
 } catch (RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $m->attachIterator($iter1);
@@ -38,12 +38,12 @@ foreach($m as $key => $value) {
 try {
     $m->current();
 } catch(RuntimeException $e) {
-    echo "RuntimeException thrown: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $m->key();
 } catch(RuntimeException $e) {
-    echo "RuntimeException thrown: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Flags = MultipleIterator::MIT_NEED_ANY | MultipleIterator::MIT_KEYS_NUMERIC --\n";
@@ -71,7 +71,7 @@ $m->rewind();
 try {
     $m->current();
 } catch(InvalidArgumentException $e) {
-    echo "InvalidArgumentException thrown: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Flags |= MultipleIterator::MIT_KEYS_ASSOC --\n";
@@ -89,7 +89,7 @@ echo "-- Associate with invalid value --\n";
 try {
     $m->attachIterator($iter3, new stdClass());
 } catch(TypeError $e) {
-    echo "TypeError thrown: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Associate with duplicate value --\n";
@@ -97,7 +97,7 @@ echo "-- Associate with duplicate value --\n";
 try {
     $m->attachIterator($iter3, "iter1");
 } catch(InvalidArgumentException $e) {
-    echo "InvalidArgumentException thrown: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Count, contains, detach, count, contains, iterate --\n";
@@ -114,8 +114,8 @@ foreach($m as $key => $value) {
 ?>
 --EXPECTF--
 -- Default flags, no iterators --
-Called current() on an invalid iterator
-Called key() on an invalid iterator
+RuntimeException: Called current() on an invalid iterator
+RuntimeException: Called key() on an invalid iterator
 -- Default flags, MultipleIterator::MIT_NEED_ALL | MultipleIterator::MIT_KEYS_NUMERIC --
 bool(true)
 array(3) {
@@ -151,8 +151,8 @@ array(3) {
   [2]=>
   string(6) "string"
 }
-RuntimeException thrown: Called current() with non valid sub iterator
-RuntimeException thrown: Called key() with non valid sub iterator
+RuntimeException: Called current() with non valid sub iterator
+RuntimeException: Called key() with non valid sub iterator
 -- Flags = MultipleIterator::MIT_NEED_ANY | MultipleIterator::MIT_KEYS_NUMERIC --
 bool(true)
 array(3) {
@@ -255,7 +255,7 @@ array(3) {
   int(3)
 }
 -- Flags |= MultipleIterator::MIT_KEYS_ASSOC, with iterator associated with NULL --
-InvalidArgumentException thrown: Sub-Iterator is associated with NULL
+InvalidArgumentException: Sub-Iterator is associated with NULL
 -- Flags |= MultipleIterator::MIT_KEYS_ASSOC --
 array(3) {
   ["iter1"]=>
@@ -307,9 +307,9 @@ array(3) {
   int(3)
 }
 -- Associate with invalid value --
-TypeError thrown: MultipleIterator::attachIterator(): Argument #2 ($info) must be of type string|int|null, stdClass given
+TypeError: MultipleIterator::attachIterator(): Argument #2 ($info) must be of type string|int|null, stdClass given
 -- Associate with duplicate value --
-InvalidArgumentException thrown: Key duplication error
+InvalidArgumentException: Key duplication error
 -- Count, contains, detach, count, contains, iterate --
 int(3)
 bool(true)

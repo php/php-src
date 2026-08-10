@@ -30,7 +30,7 @@ echo "Check db was closed\n";
 try {
     var_dump($results->numColumns());
 } catch (\Error $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo "Done\n";
 ?>
@@ -50,5 +50,5 @@ array(2) {
 Closing database
 bool(true)
 Check db was closed
-The SQLite3Result object has not been correctly initialised or is already closed
+Error: The SQLite3Result object has not been correctly initialised or is already closed
 Done

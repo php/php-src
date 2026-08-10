@@ -46,7 +46,7 @@ foreach($funcs as $idx => $func)
     try {
         spl_autoload_register($func);
     } catch (TypeError $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         var_dump(count(spl_autoload_functions()));
         continue;
     }
@@ -57,7 +57,7 @@ foreach($funcs as $idx => $func)
         try {
             var_dump(class_exists("NoExistingTestClass", true));
         } catch (Exception $e) {
-            echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
     }
 

@@ -16,9 +16,9 @@ try {
     $test = new IteratorIterator($arrayIterator, 1, 1, 1);
     $test = new IteratorIterator($arrayIterator, 1, 1, 1, 1);
 } catch (TypeError $e){
-  echo $e->getMessage() . "\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-IteratorIterator::__construct() expects at most 2 arguments, 3 given
+ArgumentCountError: IteratorIterator::__construct() expects at most 2 arguments, 3 given

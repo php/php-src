@@ -1976,7 +1976,6 @@ function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
 function time_sleep_until(float $timestamp): bool {}
 #endif
 
-/** @refcount 1 */
 function get_current_user(): string {}
 
 /** @return string|array<int|string, string|array>|false */

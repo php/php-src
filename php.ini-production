@@ -1035,7 +1035,7 @@ cli_server.color = On
 [Pcre]
 ; PCRE library backtracking limit.
 ; https://php.net/pcre.backtrack-limit
-;pcre.backtrack_limit=100000
+;pcre.backtrack_limit=1000000
 
 ; PCRE library recursion limit.
 ; Please note that if you set this value to a high number you may consume all

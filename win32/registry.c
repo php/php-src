@@ -49,9 +49,9 @@ static int OpenPhpRegistryKey(char* sub_key, HKEY *hKey)
 			LONG ret;
 
 			main_key_len = strlen(*key_name);
-			reg_key = emalloc(main_key_len + sub_key_len + 1);
-			memcpy(reg_key, *key_name, main_key_len);
-			memcpy(reg_key + main_key_len, sub_key, sub_key_len + 1);
+			reg_key = zend_cstr_concat(
+				*key_name, main_key_len,
+				sub_key, sub_key_len);
 			ret = RegOpenKeyEx(HKEY_LOCAL_MACHINE, reg_key, 0, KEY_READ, hKey);
 			efree(reg_key);
 

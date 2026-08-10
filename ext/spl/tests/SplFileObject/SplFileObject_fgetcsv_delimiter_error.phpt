@@ -20,7 +20,7 @@ $fo->setCsvControl(escape: '');
 try {
     var_dump($fo->fgetcsv('invalid'));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -28,4 +28,4 @@ try {
 unlink('SplFileObject__fgetcsv3.csv');
 ?>
 --EXPECT--
-SplFileObject::fgetcsv(): Argument #1 ($separator) must be a single character
+ValueError: SplFileObject::fgetcsv(): Argument #1 ($separator) must be a single character

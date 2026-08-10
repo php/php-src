@@ -53,7 +53,7 @@ LIVE RANGES:
      5: 0009 - 0013 (tmp/var)
 
 plusn:
-     ; (lines=4, args=2, vars=2, tmps=1)
+     ; (lines=4, args=2, vars=2, tmps=%d)
      ; (after optimizer)
      ; %s
 0000 CV0($x) = RECV 1

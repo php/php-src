@@ -57,7 +57,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(
 
 			if (UNEXPECTED(offset_mins <= -24 * 60 || offset_mins >= 24 * 60)) {
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-					"object has an time zone offset that's too large");
+					"object has a time zone offset that is too large");
 				return NULL;
 			}
 

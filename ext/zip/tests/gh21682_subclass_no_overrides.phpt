@@ -11,16 +11,16 @@ try {
     serialize($zip);
     echo "ERROR: should have thrown\n";
 } catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     unserialize('O:5:"MyZip":0:{}');
     echo "ERROR: should have thrown\n";
 } catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Serialization of 'MyZip' is not allowed, override __serialize() and __unserialize() to implement it
-Unserialization of 'MyZip' is not allowed, override __serialize() and __unserialize() to implement it
+Exception: Serialization of 'MyZip' is not allowed, override __serialize() and __unserialize() to implement it
+Exception: Unserialization of 'MyZip' is not allowed, override __serialize() and __unserialize() to implement it

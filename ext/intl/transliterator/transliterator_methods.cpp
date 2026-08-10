@@ -223,15 +223,13 @@ U_CFUNC PHP_FUNCTION( transliterator_create_inverse )
 /* }}} */
 
 /* {{{ Return an array with the registered transliterator IDs. */
-U_CFUNC PHP_FUNCTION( transliterator_list_ids )
+PHP_INTL_FUNCTION_WITH_ERROR_RESET(transliterator_list_ids)
 {
 	UEnumeration  *en;
 	const UChar	  *elem;
 	int32_t		  elem_len;
 	int32_t		  count;
 	UErrorCode	  status = U_ZERO_ERROR;
-
-	intl_error_reset( nullptr );
 
 	ZEND_PARSE_PARAMETERS_NONE();
 

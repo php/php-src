@@ -1052,7 +1052,10 @@ static void zend_optimize(zend_op_array      *op_array,
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_BEFORE_OPTIMIZER) {
-		zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "before optimizer", NULL);
+		uint32_t additional_dump_flags = (ctx->debug_level & ZEND_DUMP_LINE_NUMBERS_PASSTHRU)
+			? ZEND_DUMP_LINE_NUMBERS
+			: 0;
+		zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES|additional_dump_flags, "before optimizer", NULL);
 	}
 
 	/* pass 1 (Simple local optimizations)

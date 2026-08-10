@@ -51,49 +51,49 @@ var_dump($passed);
 try {
     var_dump(gmp_import('a', -1));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_import('a', 0));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // Invalid data lengths
 try {
     var_dump(gmp_import('a', 2));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_import('aa', 3));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_import(str_repeat('a', 100), 64));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // Invalid options
 try {
     var_dump(gmp_import('a', 1, GMP_MSW_FIRST | GMP_LSW_FIRST));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_import('a', 1, GMP_BIG_ENDIAN | GMP_LITTLE_ENDIAN));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 bool(true)
-gmp_import(): Argument #2 ($word_size) must be greater than or equal to 1
-gmp_import(): Argument #2 ($word_size) must be greater than or equal to 1
-gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
-gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
-gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
-gmp_import(): Argument #3 ($flags) cannot use multiple word order options
-gmp_import(): Argument #3 ($flags) cannot use multiple endian options
+ValueError: gmp_import(): Argument #2 ($word_size) must be greater than or equal to 1
+ValueError: gmp_import(): Argument #2 ($word_size) must be greater than or equal to 1
+ValueError: gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
+ValueError: gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
+ValueError: gmp_import(): Argument #1 ($data) must be a multiple of argument #2 ($word_size)
+ValueError: gmp_import(): Argument #3 ($flags) cannot use multiple word order options
+ValueError: gmp_import(): Argument #3 ($flags) cannot use multiple endian options

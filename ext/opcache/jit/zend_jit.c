@@ -2447,6 +2447,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_FETCH_OBJ_FUNC_ARG:
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
 					case ZEND_FETCH_OBJ_W:
@@ -2484,11 +2485,31 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
 							break;
 						}
-						if (!zend_jit_fetch_obj(&ctx, opline, op_array, ssa, ssa_op,
-								op1_info, op1_addr, 0, ce, ce_is_instanceof, on_this, 0, 0, NULL,
-								RES_REG_ADDR(), IS_UNKNOWN,
-								zend_may_throw(opline, ssa_op, op_array, ssa))) {
-							goto jit_failure;
+						if (opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG) {
+							/* FETCH_OBJ_FUNC_ARG's by-value fetch dispatches into the
+							 * FETCH_OBJ_R handler, which may take the SIMPLE_GET hook fast
+							 * path and push a getter frame; by-ref dispatches into
+							 * FETCH_OBJ_W. The function JIT may keep values solely in
+							 * registers, so we must NOT exit to the VM (stale stack slots).
+							 * Inline the by-value path through zend_jit_fetch_obj, which runs
+							 * the hook getter inside a helper and keeps all registers live.
+							 * The by-ref path has no SIMPLE_GET fast path, so the generic
+							 * handler (a full C call, safe under register allocation) is used.
+							 * This mirrors the tracing JIT fix for GH-21006 (GH-21369); the
+							 * runtime by-ref check is required because the passing mode is
+							 * only known once the callee is resolved via namespace fallback.
+							 * See GH-22857. */
+							if (!zend_jit_fetch_obj_func_arg(jit, opline, op_array, ssa, ssa_op,
+									op1_info, op1_addr, ce, ce_is_instanceof, on_this, RES_REG_ADDR())) {
+								goto jit_failure;
+							}
+						} else {
+							if (!zend_jit_fetch_obj(&ctx, opline, op_array, ssa, ssa_op,
+									op1_info, op1_addr, 0, ce, ce_is_instanceof, on_this, 0, 0, NULL,
+									RES_REG_ADDR(), IS_UNKNOWN,
+									zend_may_throw(opline, ssa_op, op_array, ssa))) {
+								goto jit_failure;
+							}
 						}
 						goto done;
 					case ZEND_FETCH_STATIC_PROP_R:
@@ -3724,6 +3745,16 @@ int zend_jit_check_support(void)
 {
 	int i;
 
+#ifdef ZEND_JIT_USE_APPLE_MAP_JIT
+	if (!pthread_jit_write_protect_supported_np()) {
+		zend_accel_error(ACCEL_LOG_WARNING,
+			"Apple Silicon ZTS JIT requires pthread_jit_write_protect_np() support. JIT disabled.");
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
+		return FAILURE;
+	}
+#endif
+
 	if (zend_execute_ex != execute_ex) {
 		if (zend_dtrace_enabled) {
 			zend_error(E_WARNING, "JIT is incompatible with DTrace. JIT disabled.");
@@ -3791,11 +3822,6 @@ void zend_jit_startup(void *buf, size_t size, bool reattached)
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
 			"Unable to share JIT buffer across fork using minherit(): %s (%d)",
 			strerror(error), error);
-	}
-	if (!pthread_jit_write_protect_supported_np()) {
-		munmap(buf, size);
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
-			"Apple Silicon ZTS JIT requires pthread_jit_write_protect_np() support");
 	}
 #endif
 

@@ -16,7 +16,7 @@ var_dump( finfo_file( $finfo, $magicFile ) );
 try {
     var_dump( finfo_file( $finfo, $magicFile.chr(0).$magicFile) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -25,4 +25,4 @@ try {
 string(28) "text/x-php; charset=us-ascii"
 string(22) "PHP script, ASCII text"
 string(29) "text/x-file; charset=us-ascii"
-finfo_file(): Argument #2 ($filename) must not contain any null bytes
+ValueError: finfo_file(): Argument #2 ($filename) must not contain any null bytes

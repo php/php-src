@@ -25,21 +25,22 @@ static zend_string *get_http_headers(php_stream *socketd);
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
 
-static void soap_smart_str_append_header_value(smart_str *dest, const zend_string *value, const char *header_name)
+static void soap_smart_str_append_header_value_ex(smart_str *dest, const char *src, size_t len, const char *header_name)
 {
-	const char *src = ZSTR_VAL(value);
-	size_t len = ZSTR_LEN(value);
 	size_t i = 0;
 	while (i < len && src[i] != '\r' && src[i] != '\n') {
 		i++;
 	}
+	smart_str_appendl(dest, src, i);
 	if (i < len) {
-		smart_str_appendl(dest, src, i);
 		php_error_docref(NULL, E_WARNING,
 			"Header %s value contains newline characters and has been truncated", header_name);
-	} else {
-		smart_str_append(dest, value);
 	}
+}
+
+static void soap_smart_str_append_header_value(smart_str *dest, const zend_string *value, const char *header_name)
+{
+	soap_smart_str_append_header_value_ex(dest, ZSTR_VAL(value), ZSTR_LEN(value), header_name);
 }
 
 /* Proxy HTTP Authentication */
@@ -656,13 +657,13 @@ try_again:
 				Z_STRLEN_P(tmp) > 0
 			) {
 				smart_str_append_const(&soap_headers, "Content-Type: ");
-				smart_str_append(&soap_headers, Z_STR_P(tmp));
+				soap_smart_str_append_header_value(&soap_headers, Z_STR_P(tmp), "Content-Type");
 			} else {
 				smart_str_append_const(&soap_headers, "Content-Type: application/soap+xml; charset=utf-8");
 			}
 			if (soapaction) {
 				smart_str_append_const(&soap_headers,"; action=\"");
-				smart_str_appends(&soap_headers, soapaction);
+				soap_smart_str_append_header_value_ex(&soap_headers, soapaction, strlen(soapaction), "SOAPAction");
 				smart_str_append_const(&soap_headers,"\"");
 			}
 			smart_str_append_const(&soap_headers,"\r\n");
@@ -673,14 +674,14 @@ try_again:
 				Z_STRLEN_P(tmp) > 0
 			) {
 				smart_str_append_const(&soap_headers, "Content-Type: ");
-				smart_str_append(&soap_headers, Z_STR_P(tmp));
+				soap_smart_str_append_header_value(&soap_headers, Z_STR_P(tmp), "Content-Type");
 				smart_str_append_const(&soap_headers, "\r\n");
 			} else {
 				smart_str_append_const(&soap_headers, "Content-Type: text/xml; charset=utf-8\r\n");
 			}
 			if (soapaction) {
 				smart_str_append_const(&soap_headers, "SOAPAction: \"");
-				smart_str_appends(&soap_headers, soapaction);
+				soap_smart_str_append_header_value_ex(&soap_headers, soapaction, strlen(soapaction), "SOAPAction");
 				smart_str_append_const(&soap_headers, "\"\r\n");
 			}
 		}
@@ -892,9 +893,9 @@ try_again:
 								smart_str_appends(&soap_headers, "; ");
 							}
 							first_cookie = false;
-							smart_str_append(&soap_headers, key);
+							soap_smart_str_append_header_value(&soap_headers, key, "Cookie");
 							smart_str_appendc(&soap_headers, '=');
-							smart_str_append(&soap_headers, Z_STR_P(value));
+							soap_smart_str_append_header_value(&soap_headers, Z_STR_P(value), "Cookie");
 						}
 					}
 				}

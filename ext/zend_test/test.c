@@ -54,6 +54,9 @@ static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_gen_stub_flag_compatibility_test;
 static zend_class_entry *zend_attribute_test_class;
 static zend_class_entry *zend_test_trait;
+static zend_class_entry *zend_test_trait_for_internal_class;
+static zend_class_entry *zend_test_trait_for_internal_class2;
+static zend_class_entry *zend_test_class_with_traits;
 static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_repeatable_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
@@ -1305,6 +1308,18 @@ static ZEND_METHOD(_ZendTestTrait, testMethod)
 	RETURN_TRUE;
 }
 
+static ZEND_METHOD(_ZendTestTraitForInternalClass, traitMethod)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG(789);
+}
+
+static ZEND_METHOD(_ZendTestTraitForInternalClass2, traitMethod2)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG(101);
+}
+
 static ZEND_METHOD(ZendTestNS_Foo, method)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1607,6 +1622,9 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_attribute_test_class = register_class_ZendAttributeTest();
 
 	zend_test_trait = register_class__ZendTestTrait();
+	zend_test_trait_for_internal_class = register_class__ZendTestTraitForInternalClass();
+	zend_test_trait_for_internal_class2 = register_class__ZendTestTraitForInternalClass2();
+	zend_test_class_with_traits = register_class__ZendTestClassWithTraits(zend_test_trait_for_internal_class, zend_test_trait_for_internal_class2);
 
 	register_test_symbols(module_number);
 

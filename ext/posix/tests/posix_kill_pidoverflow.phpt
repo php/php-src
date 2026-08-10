@@ -11,15 +11,15 @@ pcntl
 try {
 	posix_kill(PHP_INT_MAX, SIGTERM);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	posix_kill(PHP_INT_MIN, SIGTERM);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-posix_kill(): Argument #1 ($process_id) must be between %i and %d
-posix_kill(): Argument #1 ($process_id) must be between %i and %d
+ValueError: posix_kill(): Argument #1 ($process_id) must be between %i and %d
+ValueError: posix_kill(): Argument #1 ($process_id) must be between %i and %d
