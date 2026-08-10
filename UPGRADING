@@ -441,6 +441,7 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Using "namespace" as a class constant name is deprecated.
   . Specifying a return type of array|null / ?array for __debugInfo() is now
     deprecated. Specify array instead.
   . Returning values from __construct() and __destruct() is now deprecated.
