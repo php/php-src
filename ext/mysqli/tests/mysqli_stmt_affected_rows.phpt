@@ -14,10 +14,12 @@ require_once 'skipifconnectfailure.inc';
         printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);
     }
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, 'DROP TABLE IF EXISTS test') ||
-        !mysqli_stmt_execute($stmt)) {
+    if (!$stmt = mysqli_prepare($link, 'DROP TABLE IF EXISTS test')) {
+        printf("[000] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt)) {
         printf("[003] Failed to drop old test table: [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
     }
 
@@ -30,59 +32,71 @@ require_once 'skipifconnectfailure.inc';
         printf("[005] Expecting int/0, got %s/'%s'\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1, 'a')") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (1, 'a')")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (100, 'z')")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[007] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
         printf("[008] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (100, 'z')")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         // NOTE: the error message varies with the MySQL Server version, dump only the error code!
         printf("[009] [%d] (error message varies with the MySQL Server version, check the error code)\n", mysqli_stmt_errno($stmt));
 
     /* an error occurred: affected rows should return -1 */
     if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
-        printf("[010] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
+        printf("[010] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[011] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (2 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
         printf("[012] Expecting int/2, got %s/%s\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (2, 'b'), (3, 'c')") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (2, 'b'), (3, 'c')")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[013] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (2 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
         printf("[014] Expecting int/2, got %s/%s\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT IGNORE INTO test(id, label) VALUES (1, 'a')") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "INSERT IGNORE INTO test(id, label) VALUES (1, 'a')")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[015] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
@@ -95,40 +109,48 @@ require_once 'skipifconnectfailure.inc';
     mysqli_free_result($res);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) SELECT id + 10, label FROM test") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) SELECT id + 10, label FROM test")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[018] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if ($num !== ($tmp = mysqli_stmt_affected_rows($stmt)))
         printf("[019] Expecting int/%d, got %s/%s\n", $num, gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "REPLACE INTO test(id, label) values (4, 'd')") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "REPLACE INTO test(id, label) values (4, 'd')")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[020] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (2 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
         printf("[021] Expecting int/2, got %s/%s\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "REPLACE INTO test(id, label) values (5, 'e')") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "REPLACE INTO test(id, label) values (5, 'e')")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[022] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
         printf("[023] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "UPDATE test SET label = 'a' WHERE id = 2") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "UPDATE test SET label = 'a' WHERE id = 2")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[024] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
@@ -142,10 +164,12 @@ require_once 'skipifconnectfailure.inc';
         printf("[027] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "UPDATE test SET label = 'a' WHERE id = 100") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "UPDATE test SET label = 'a' WHERE id = 100")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[028] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
@@ -174,10 +198,12 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_stmt_free_result($stmt);
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, 'SELECT label FROM test WHERE 1 = 2') ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, 'SELECT label FROM test WHERE 1 = 2')) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[036] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     /* use it like num_rows */
@@ -212,10 +238,12 @@ require_once 'skipifconnectfailure.inc';
         printf("[045] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
 
     mysqli_stmt_close($stmt);
-    $stmt = mysqli_stmt_init($link);
 
-    if (!mysqli_stmt_prepare($stmt, "DROP TABLE IF EXISTS test") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "DROP TABLE IF EXISTS test")) {
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
+    if (!mysqli_stmt_execute($stmt))
         printf("[046] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     mysqli_stmt_close($stmt);

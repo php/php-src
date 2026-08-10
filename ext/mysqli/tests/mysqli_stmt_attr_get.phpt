@@ -15,8 +15,7 @@ require_once 'skipifconnectfailure.inc';
         MYSQLI_STMT_ATTR_CURSOR_TYPE,
     );
 
-    $stmt = mysqli_stmt_init($link);
-    mysqli_stmt_prepare($stmt, 'SELECT * FROM test');
+    $stmt = mysqli_prepare($link, 'SELECT * FROM test');
 
     try {
         mysqli_stmt_attr_get($stmt, -100);

@@ -12,8 +12,7 @@ require_once 'skipifconnectfailure.inc';
     require_once 'table.inc';
 
     $bind_res = $id = null;
-    if (!($stmt = mysqli_stmt_init($link)) ||
-        !mysqli_stmt_prepare($stmt, "SELECT id, label FROM test") ||
+    if (!($stmt = mysqli_prepare($link, "SELECT id, label FROM test")) ||
         !mysqli_stmt_execute($stmt) ||
         !($result = mysqli_stmt_result_metadata($stmt)) ||
         !mysqli_stmt_bind_result($stmt, $id, $bind_res) ||
@@ -26,8 +25,7 @@ require_once 'skipifconnectfailure.inc';
     mysqli_free_result($result);
     mysqli_stmt_close($stmt);
 
-    if (!($stmt = mysqli_stmt_init($link)) ||
-        !mysqli_stmt_prepare($stmt, "SELECT id, label FROM test") ||
+    if (!($stmt = mysqli_prepare($link, "SELECT id, label FROM test")) ||
         !mysqli_stmt_execute($stmt) ||
         !($result = mysqli_stmt_result_metadata($stmt)) ||
         !mysqli_stmt_bind_result($stmt, $id, $bind_res)) {
