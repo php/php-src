@@ -22,6 +22,10 @@
 #include "encoding_arginfo.h"
 #include "encoding_decl.h"
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic ignored "-Woverride-init"
+#endif
+
 /* Class entries */
 static zend_class_entry *encoding_ce_EncodingError;
 static zend_class_entry *encoding_ce_EncodingException;
@@ -366,10 +370,10 @@ static zend_string *base32_encode_impl(const char *data, size_t len, zend_enum_E
 			nbits = (nbits << 8) | (uint8_t)data[i + j];
 		}
 
-		int total_chars = (chars_to_read * 8 + 4) / 5;
+		size_t total_chars = (chars_to_read * 8 + 4) / 5;
 		nbits <<= (uint64_t)(total_chars * 5 - chars_to_read * 8);
-		for (int c = total_chars - 1; c >= 0; c--) {
-			*dst++ = table[(nbits >> (c * 5)) & 0x1F];
+		for (size_t c = 0; c < total_chars; c++) {
+			*dst++ = table[(nbits >> ((total_chars - 1 - c) * 5)) & 0x1F];
 		}
 
 		if (uses_padding && !strip_padding && chars_to_read < 5) {
@@ -382,8 +386,9 @@ static zend_string *base32_encode_impl(const char *data, size_t len, zend_enum_E
 		i += chars_to_read;
 	}
 
-	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
-	ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
+	size_t result_len = (size_t)(dst - ZSTR_VAL(result));
+	ZSTR_LEN(result) = result_len;
+	ZSTR_VAL(result)[result_len] = '\0';
 	return result;
 }
 
@@ -658,8 +663,9 @@ static zend_string *base58_encode_impl(const char *data, size_t len, zend_enum_E
 		*dst++ = table[output[i]];
 	}
 
-	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
-	ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
+	size_t result_len = (size_t)(dst - ZSTR_VAL(result));
+	ZSTR_LEN(result) = result_len;
+	ZSTR_VAL(result)[result_len] = '\0';
 	efree(output);
 
 	return result;
@@ -761,8 +767,9 @@ static zend_string *base58_decode_impl(const char *data, size_t len, zend_enum_E
 		*dst++ = output[i];
 	}
 
-	ZSTR_LEN(result) = dst - ZSTR_VAL(result);
-	ZSTR_VAL(result)[dst - ZSTR_VAL(result)] = '\0';
+	size_t result_len = (size_t)(dst - ZSTR_VAL(result));
+	ZSTR_LEN(result) = result_len;
+	ZSTR_VAL(result)[result_len] = '\0';
 	efree(output);
 	efree(digits);
 
@@ -1267,9 +1274,9 @@ static zend_string *base85_encode_impl(const char *data, size_t len, zend_enum_E
 				*dst++ = 'z';
 			} else {
 				uint32_t t = n;
-				int digits[5];
+				uint8_t digits[5];
 				for (int d = 4; d >= 0; d--) {
-					digits[d] = t % 85;
+					digits[d] = (uint8_t)(t % 85);
 					t /= 85;
 				}
 				for (int d = 0; d < 5; d++) {
@@ -1283,9 +1290,9 @@ static zend_string *base85_encode_impl(const char *data, size_t len, zend_enum_E
 			if (strip_padding) {
 				/* Output only bytes_in_block chars */
 				uint32_t t = n;
-				int digits[5];
+				uint8_t digits[5];
 				for (int d = 4; d >= 0; d--) {
-					digits[d] = t % 85;
+					digits[d] = (uint8_t)(t % 85);
 					t /= 85;
 				}
 				for (int d = 0; d < (int)bytes_in_block; d++) {
@@ -1294,9 +1301,9 @@ static zend_string *base85_encode_impl(const char *data, size_t len, zend_enum_E
 			} else {
 				/* Output bytes_in_block + 1 chars */
 				uint32_t t = n;
-				int digits[5];
+				uint8_t digits[5];
 				for (int d = 4; d >= 0; d--) {
-					digits[d] = t % 85;
+					digits[d] = (uint8_t)(t % 85);
 					t /= 85;
 				}
 				for (int d = 0; d <= (int)bytes_in_block; d++) {
@@ -1318,24 +1325,19 @@ static zend_string *base85_encode_impl(const char *data, size_t len, zend_enum_E
 
 static zend_string *base85_decode_impl(const char *data, size_t len, zend_enum_Encoding_Base85 variant, zend_enum_Encoding_DecodingMode mode) {
 	const uint8_t *reverse_table;
-	bool uses_padding;
 
 	switch (variant) {
 		case ZEND_ENUM_Encoding_Base85_Adobe:
 			reverse_table = base85_adobe_reverse;
-			uses_padding = true;
 			break;
 		case ZEND_ENUM_Encoding_Base85_Z85:
 			reverse_table = base85_z85_reverse;
-			uses_padding = false;
 			break;
 		case ZEND_ENUM_Encoding_Base85_Git:
 			reverse_table = base85_git_reverse;
-			uses_padding = false;
 			break;
 		default:
 			reverse_table = base85_adobe_reverse;
-			uses_padding = true;
 			break;
 	}
 
