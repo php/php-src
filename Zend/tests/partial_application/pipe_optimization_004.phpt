@@ -70,7 +70,7 @@ $_main:
      ; (lines=3, args=0, vars=0, tmps=%d)
      ; (after optimizer)
      ; %s:1-10
-0000 T0 = DECLARE_LAMBDA_FUNCTION 0
+0000 T0 = DECLARE_LAMBDA_FUNCTION %d 0
 0001 FREE T0
 0002 RETURN int(1)
 
