@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-22782 (Const expr FCC crashes under preloading). (Arnaud)
+  . Fixed bug GH-23088 (Stack overflow when comparing deeply nested arrays).
+    (Lazizbek Ergashev)
 
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)

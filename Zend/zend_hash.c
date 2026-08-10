@@ -3213,6 +3213,13 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 		return 0;
 	}
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_throw_error(NULL, "Maximum call stack size reached during comparison");
+		return ZEND_UNCOMPARABLE;
+	}
+#endif
+
 	/* It's enough to protect only one of the arrays.
 	 * The second one may be referenced from the first and this may cause
 	 * false recursion detection.
