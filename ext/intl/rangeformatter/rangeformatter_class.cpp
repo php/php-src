@@ -88,6 +88,8 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, createFromSkeleton)
     zend_long collapse;
     zend_long identityFallback;
 
+    intl_error_reset(NULL);
+
     ZEND_PARSE_PARAMETERS_START(4,4)
         Z_PARAM_STRING(skeleton, skeleton_len)
         Z_PARAM_STRING(locale, locale_len)
@@ -158,7 +160,10 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     zval *start;
     zval *end;
 
+    intl_error_reset(NULL);
+
     IntlNumberRangeFormatter_object* obj = Z_INTL_RANGEFORMATTER_P(ZEND_THIS);
+    intl_error_reset(RANGEFORMATTER_ERROR_P(obj));
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_NUMBER(start)
@@ -179,13 +184,13 @@ U_CFUNC PHP_METHOD(IntlNumberRangeFormatter, format)
     INTL_G(error_level) = 0;
 
     if (U_FAILURE(error)) {
-        intl_error_set(NULL, error, "Failed to format number range");
+        intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to format number range");
     }
 
     zend_string *ret = intl_charFromString(result, &error);
 
     if (U_FAILURE(error)) {
-        intl_error_set(NULL, error, "Failed to convert result to UTF-8");
+        intl_errors_set(RANGEFORMATTER_ERROR_P(obj), error, "Failed to convert result to UTF-8");
     }
 
     INTL_G(use_exceptions) = old_use_exception;
