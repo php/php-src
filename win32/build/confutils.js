@@ -1109,16 +1109,23 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	return p;
 }
 
+function is_parallel_build_enabled()
+{
+	return typeof PHP_PARALLEL_BUILD != "undefined" && PHP_PARALLEL_BUILD == "yes";
+}
+
 /* XXX check whether some manifest was originally supplied, otherwise keep using the default. */
 function generate_version_info_manifest(makefiletarget)
 {
 	var manifest_name = makefiletarget + ".manifest";
+	var build_deps = !MODE_PHPIZE && is_parallel_build_enabled()
+		? "generated_files " : "";
 
 	if (MODE_PHPIZE) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": " + PHP_DIR + "\\build\\default.manifest");
 		MFO.WriteLine("\t" + CMD_MOD2 + "copy " + PHP_DIR + "\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest >nul");
 	} else {
-		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": win32\\build\\default.manifest");
+		MFO.WriteLine("$(BUILD_DIR)\\" + manifest_name + ": " + build_deps + "win32\\build\\default.manifest");
 		MFO.WriteLine("\t" + CMD_MOD2 + "copy $(PHP_SRC_DIR)\\win32\\build\\default.manifest $(BUILD_DIR)\\" + makefiletarget + ".manifest >nul");
 	}
 
@@ -1140,6 +1147,8 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	var project_url = "https://www.php.net";
 	var project_header = creditspath + "/php_" + basename + ".h";
 	var versioning = "";
+	var build_deps = !MODE_PHPIZE && is_parallel_build_enabled()
+		? "generated_files " : "";
 
 	if (sapi) {
 		var internal_name = basename.toUpperCase() + " SAPI";
@@ -1197,7 +1206,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	 * Use user supplied template.rc if it exists
 	 */
 	if (FSO.FileExists(creditspath + '\\template.rc')) {
-		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": " + creditspath + "\\template.rc");
+		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": " + build_deps + creditspath + "\\template.rc");
 		MFO.WriteLine("\t" + CMD_MOD1 + "$(RC) /nologo $(BASE_INCLUDES) /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"' +
 			makefiletarget + '\\"" /d PRODUCT_NAME="\\"' + res_prod_name +
@@ -1213,7 +1222,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning +
 			'\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" $(PHP_DIR)\\build\\template.rc');
 	} else {
-		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": win32\\build\\template.rc");
+		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": " + build_deps + "win32\\build\\template.rc");
 		MFO.WriteLine("\t" + CMD_MOD1 + "$(RC) /nologo  $(BASE_INCLUDES) /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
 			+ makefiletarget + '\\"" /d URL="\\"' + project_url +
@@ -1613,6 +1622,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 	var i;
 	var tv;
 	var src, obj, sym, flags;
+	var parallel_build = is_parallel_build_enabled();
 
 	if (target == null) {
 		target = "php";
@@ -1712,7 +1722,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 		srcs_by_dir[build_dir].push(i);
 	}
 
-	if (!duplicate_sources) {
+	if (!duplicate_sources && !parallel_build) {
 		/* Create makefile build targets and dependencies. */
 		MFO.WriteLine(objs_line + ": " + srcs_line);
 	}
@@ -1730,7 +1740,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 		var mangle_dir = k.replace(new RegExp("[\\\\/.-]", "g"), "_");
 		var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
 
-		if (VS_TOOLSET) {
+		if (VS_TOOLSET && !parallel_build) {
 			ADD_FLAG(bd_flags_name, "/Fd" + sub_build + d);
 		}
 
@@ -1797,7 +1807,36 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 		}
 
 		if (!duplicate_sources) {
-			if (PHP_MP_DISABLED) {
+			if (parallel_build) {
+				for (var j in srcs_by_dir[k]) {
+					src = file_list[srcs_by_dir[k][j]];
+
+					var _tmp = src.split("\\");
+					var filename = _tmp.pop();
+					obj = sub_build + d + filename.replace(re, ".obj");
+
+					/* A parallel make needs one recipe owner per output. Generated files are
+					 * an explicit prerequisite instead of relying on nmake's serial order. */
+					MFO.WriteLine(obj + ": generated_files " + dir + "\\" + src);
+
+					var pdb_flag = "";
+					if (VS_TOOLSET) {
+						/* Concurrent cl.exe processes must not share a PDB/IDB file. */
+						pdb_flag = " /Fd" + sub_build + d + filename.replace(re, ".pdb");
+					}
+
+					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ")" + pdb_flag + " /c " + dir + "\\" + src + " /Fo" + obj);
+
+					if ("clang" == PHP_ANALYZER) {
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
+					} else if ("cppcheck" == PHP_ANALYZER) {
+						MFO.WriteLine("\t\"" + CMD_MOD1 + "$(CPPCHECK)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + analyzer_base_flags + " " + dir + "\\" + src);
+					} else if (PHP_ANALYZER == "pvs") {
+						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ")" + pdb_flag + " /c " + dir + "\\" + src + " --source-file " + dir + "\\" + src
+							+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
+					}
+				}
+			} else if (PHP_MP_DISABLED) {
 				for (var j in srcs_by_dir[k]) {
 					src = file_list[srcs_by_dir[k][j]];
 
@@ -3322,7 +3361,12 @@ function toolset_setup_common_cflags()
 	}
 
 	if (VS_TOOLSET) {
-		ADD_FLAG("CFLAGS", " /FD ");
+		/* /FD is only used by the Visual Studio IDE and prevents sccache from
+		 * recognizing command-line builds. Parallel builds already use a unique
+		 * /Fd program database for every object. */
+		if (!is_parallel_build_enabled()) {
+			ADD_FLAG("CFLAGS", " /FD ");
+		}
 
 		// fun stuff: MS deprecated ANSI stdio and similar functions
 		// disable annoying warnings.  In addition, time_t defaults
@@ -3356,7 +3400,9 @@ function toolset_setup_common_cflags()
 		/* This is only in effect for CXX sources, __cplusplus is not defined in C sources. */
 		ADD_FLAG("CFLAGS", "/Zc:__cplusplus");
 
-		ADD_FLAG("CFLAGS", "/d2FuncCache1");
+		/* MSVC accepts '-' as an option prefix. The slash-prefixed lowercase
+		 * form is otherwise mistaken for an input path by sccache. */
+		ADD_FLAG("CFLAGS", "-d2FuncCache1");
 
 		if (VCVERS >= 1930) {
 			ADD_FLAG("CFLAGS", "/Zc:preprocessor");

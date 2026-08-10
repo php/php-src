@@ -150,7 +150,14 @@ if "%ASAN%" equ "1" set ASAN_OPTS=--asan
 
 mkdir c:\tests_tmp
 
-nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK %ASAN_OPTS% --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
+set TEST_SHARD_OPTS=
+if %TEST_SHARDS% GTR 1 (
+	%PHP_BUILD_DIR%\php.exe .github\scripts\generate_test_shard.php %TEST_SHARD% %TEST_SHARDS% %RUNNER_TEMP%\php-test-shard.txt
+	if errorlevel 1 exit /b 3
+	set TEST_SHARD_OPTS=-r %RUNNER_TEMP%\php-test-shard.txt
+)
+
+nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK %ASAN_OPTS% --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL% %TEST_SHARD_OPTS%"
 
 set EXIT_CODE=%errorlevel%
 

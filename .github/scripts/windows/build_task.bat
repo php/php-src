@@ -41,6 +41,7 @@ if "%CLANG_TOOLSET%" equ "1" (
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
+	--enable-parallel-build ^
 	--disable-debug-pack ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
@@ -49,9 +50,23 @@ cmd /c configure.bat ^
 	--disable-test-ini
 if %errorlevel% neq 0 exit /b 3
 
-nmake /NOLOGO
+if "%CLANG_TOOLSET%" equ "1" goto build_clang
+
+sccache --zero-stats
+jom /NOLOGO CC="sccache cl.exe"
 if %errorlevel% neq 0 exit /b 3
-nmake /NOLOGO comtest.dll
+jom /NOLOGO CC="sccache cl.exe" comtest.dll
 if %errorlevel% neq 0 exit /b 3
+sccache --show-stats
+sccache --stop-server
+goto build_complete
+
+:build_clang
+jom /NOLOGO
+if %errorlevel% neq 0 exit /b 3
+jom /NOLOGO comtest.dll
+if %errorlevel% neq 0 exit /b 3
+
+:build_complete
 
 exit /b 0
