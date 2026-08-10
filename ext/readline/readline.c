@@ -74,10 +74,7 @@ ZEND_GET_MODULE(readline)
 
 PHP_MINIT_FUNCTION(readline)
 {
-#if HAVE_LIBREADLINE
-		/* libedit don't need this call which set the tty in cooked mode */
 	using_history();
-#endif
 	ZVAL_UNDEF(&_readline_completion);
 #if HAVE_RL_CALLBACK_READ_CHAR
 	ZVAL_UNDEF(&_prepped_callback);
