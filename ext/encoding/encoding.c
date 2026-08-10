@@ -888,7 +888,7 @@ static zend_string *base64_encode_impl(const char *data, size_t len, zend_enum_E
 			break;
 		case ZEND_ENUM_Encoding_Base64_UrlSafe:
 			table = base64_urlsafe_table;
-			uses_padding = true;
+			uses_padding = false;
 			break;
 		case ZEND_ENUM_Encoding_Base64_Imap:
 			table = base64_imap_table;
