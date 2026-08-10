@@ -1490,18 +1490,23 @@ PHP_FUNCTION(Encoding_base85_decode) {
 	char *data;
 	size_t data_len;
 	zval *variant_obj;
+	zval *decoding_obj = NULL;
 	zval *timing_obj = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_OBJECT_OF_CLASS(variant_obj, encoding_ce_Base85)
 		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJECT_OF_CLASS(decoding_obj, encoding_ce_DecodingMode)
 		Z_PARAM_OBJECT_OF_CLASS(timing_obj, encoding_ce_TimingMode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_enum_Encoding_Base85 variant = (zend_enum_Encoding_Base85)zend_enum_fetch_case_id(Z_OBJ_P(variant_obj));
 
 	zend_enum_Encoding_DecodingMode mode = ZEND_ENUM_Encoding_DecodingMode_Strict;
+	if (decoding_obj) {
+		mode = (zend_enum_Encoding_DecodingMode)zend_enum_fetch_case_id(Z_OBJ_P(decoding_obj));
+	}
 
 	zend_string *result = base85_decode_impl(data, data_len, variant, mode);
 	if (!result) {

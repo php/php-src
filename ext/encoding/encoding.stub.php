@@ -136,5 +136,5 @@ namespace Encoding
     /**
      * @throws UnableToDecodeException
      */
-    function base85_decode(string $data, Base85 $variant, TimingMode $timingMode = TimingMode::Variable): string {}
+     function base85_decode(string $data, Base85 $variant, DecodingMode $decodingMode = DecodingMode::Strict, TimingMode $timingMode = TimingMode::Variable): string {}
 }

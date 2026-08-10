@@ -1,5 +1,5 @@
 /* This is a generated file, edit encoding.stub.php instead.
- * Stub hash: 32b3e846abe2dbc53ff290a7a3b528cd8bff3d71
+ * Stub hash: ada1d3a8882e099da6ed20ce66a7c6ebacf95dee
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Encoding_base16_encode, 0, 1, IS_STRING, 0)
@@ -61,6 +61,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Encoding_base85_decode, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, Encoding\\Base85, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, decodingMode, Encoding\\DecodingMode, 0, "Encoding\\DecodingMode::Strict")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timingMode, Encoding\\TimingMode, 0, "Encoding\\TimingMode::Variable")
 ZEND_END_ARG_INFO()
 

@@ -1,8 +1,8 @@
 /* This is a generated file, edit encoding.stub.php instead.
- * Stub hash: 32b3e846abe2dbc53ff290a7a3b528cd8bff3d71 */
+ * Stub hash: ada1d3a8882e099da6ed20ce66a7c6ebacf95dee */
 
-#ifndef ZEND_ENCODING_DECL_32b3e846abe2dbc53ff290a7a3b528cd8bff3d71_H
-#define ZEND_ENCODING_DECL_32b3e846abe2dbc53ff290a7a3b528cd8bff3d71_H
+#ifndef ZEND_ENCODING_DECL_ada1d3a8882e099da6ed20ce66a7c6ebacf95dee_H
+#define ZEND_ENCODING_DECL_ada1d3a8882e099da6ed20ce66a7c6ebacf95dee_H
 
 typedef enum zend_enum_Encoding_Base16 {
 	ZEND_ENUM_Encoding_Base16_Upper = 1,
@@ -49,4 +49,4 @@ typedef enum zend_enum_Encoding_TimingMode {
 	ZEND_ENUM_Encoding_TimingMode_Constant = 2,
 } zend_enum_Encoding_TimingMode;
 
-#endif /* ZEND_ENCODING_DECL_32b3e846abe2dbc53ff290a7a3b528cd8bff3d71_H */
+#endif /* ZEND_ENCODING_DECL_ada1d3a8882e099da6ed20ce66a7c6ebacf95dee_H */
