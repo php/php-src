@@ -68,7 +68,7 @@ class Test4 {
     public function __get($name) {
         echo __METHOD__, "\n"; // lazy pattern does not work
         $this->prop = 2;
-        return $this->prop;
+        throw new Exception('Unreachable');
     }
 }
 

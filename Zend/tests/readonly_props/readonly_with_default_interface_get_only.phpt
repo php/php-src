@@ -13,5 +13,5 @@ class C implements I {
 
 var_dump(new C()->prop);
 ?>
---EXPECTF--
+--EXPECT--
 int(42)
