@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.5.10
+?? ??? ????, PHP 8.5.11
+
+
+27 Aug 2026, PHP 8.5.10
 
 - Core:
   . Fixed bug GH-22782 (Const expr FCC crashes under preloading). (Arnaud)
