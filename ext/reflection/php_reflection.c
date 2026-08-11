@@ -5919,6 +5919,15 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			Z_PARAM_ZVAL(value)
 		ZEND_PARSE_PARAMETERS_END();
 
+		if (!instanceof_function(object->ce, intern->ce)) {
+			zend_string *method_name = get_active_function_or_method_name();
+			zend_error(E_DEPRECATED, "Calling %pS() with a given object that is not an instance of the class this property was declared in is deprecated", method_name);
+			zend_string_release(method_name);
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		object->handlers->write_property(object, ref->unmangled_name, value, ref->cache_slot);
