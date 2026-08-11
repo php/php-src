@@ -483,6 +483,9 @@ PHP 8.6 UPGRADE NOTES
   . Calling ReflectionProperty::setRawValue() with an object that is not an
     instance of the class on which the property was declared is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_reflectionpropertysetvalue_and_reflectionpropertysetrawvalue_with_wrong_types
+  . Calling ReflectionMethod::invoke() or ReflectionMethod::invokeArgs() with
+    an object and a static method is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_reflectionmethodinvoke_and_reflectionmethodinvokeargs_with_objects_for_static_methods
 
 - SPL:
   . The spl_classes() function is now deprecated, use
