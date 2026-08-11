@@ -1,5 +1,7 @@
 --TEST--
 GH-23204 (Use-after-free when __toString() destroys the array being read)
+--CREDITS--
+iluuu1994
 --FILE--
 <?php
 class Unset_ implements Stringable {
