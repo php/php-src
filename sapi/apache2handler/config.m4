@@ -96,7 +96,7 @@ if test "$PHP_APXS2" != "no"; then
 
   dnl httpd dlopen's libphp.so without linking against it, so _tsrm_ls_cache can't
   dnl use initial-exec (overflows the static TLS surplus)
-  AS_VAR_APPEND([CFLAGS], [" -DTSRM_TLS_MODEL_USE_GLOBAL_DYNAMIC"])
+  php_tsrm_dlopened_sapi=yes
 
   php_sapi_apache2handler_type=shared
   AS_CASE([$host_alias],

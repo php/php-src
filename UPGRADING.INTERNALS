@@ -33,6 +33,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
+  . Added --with-tsrm-tls-model (initial-exec, global-dynamic, auto) to pick the
+    TLS model for the ZTS globals cache; auto uses global-dynamic for dlopen()ed
+    SAPIs. Forcing initial-exec there needs a larger static TLS surplus: set
+    GLIBC_TUNABLES=glibc.rtld.optional_static_tls=8192 for the host process.
 
 ========================
 3. Module changes
