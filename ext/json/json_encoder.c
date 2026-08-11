@@ -182,7 +182,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			smart_str_appendc(buf, ',');
 		}
 
-		bool empty = ZSTR_VAL(buf->s)[ZSTR_LEN(buf->s) - 1] != ',';
+		bool empty = !zend_string_ends_with_literal(buf->s, ",");
 		if (!empty) {
 			/* Drop the trailing comma. */
 			ZSTR_LEN(buf->s)--;
@@ -312,7 +312,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 			smart_str_appendc(buf, ',');
 		} ZEND_HASH_FOREACH_END();
 
-		empty = ZSTR_VAL(buf->s)[ZSTR_LEN(buf->s) - 1] != ',';
+		empty = !zend_string_ends_with_literal(buf->s, ",");
 		if (!empty) {
 			/* Drop the trailing comma. */
 			ZSTR_LEN(buf->s)--;

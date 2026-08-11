@@ -1519,8 +1519,8 @@ static void zend_accel_add_key(zend_string *key, zend_accel_hash_entry *bucket)
 
 static zend_always_inline bool is_phar_file(const zend_string *filename)
 {
-	return filename && ZSTR_LEN(filename) >= sizeof(".phar") &&
-		!memcmp(ZSTR_VAL(filename) + ZSTR_LEN(filename) - (sizeof(".phar")-1), ".phar", sizeof(".phar")-1) &&
+	return filename && ZSTR_LEN(filename) > sizeof(".phar") - 1 &&
+		zend_string_ends_with_literal(filename, ".phar") &&
 		!strstr(ZSTR_VAL(filename), "://");
 }
 
