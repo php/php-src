@@ -58,13 +58,14 @@ static inline bool fpm_unix_is_id(const char* name)
 
 static bool fpm_unix_parse_uid(struct fpm_worker_pool_s *wp, const char *name, uid_t *uid)
 {
+	uintmax_t sentinel = (uintmax_t) ((uid_t) -1);
 	uintmax_t max = (uid_t) -1 > (uid_t) 0
-		? (uintmax_t) ((uid_t) -2)
+		? sentinel
 		: (UINTMAX_C(1) << (sizeof(uid_t) * CHAR_BIT - 1)) - 1;
 
 	errno = 0;
 	uintmax_t value = strtoumax(name, NULL, 10);
-	if (errno == ERANGE || value > max) {
+	if (errno == ERANGE || value > max || value == sentinel) {
 		zlog(ZLOG_ERROR, "[pool %s] user ID '%s' is out of range", wp->config->name, name);
 		return false;
 	}
@@ -75,13 +76,14 @@ static bool fpm_unix_parse_uid(struct fpm_worker_pool_s *wp, const char *name, u
 
 static bool fpm_unix_parse_gid(struct fpm_worker_pool_s *wp, const char *name, gid_t *gid)
 {
+	uintmax_t sentinel = (uintmax_t) ((gid_t) -1);
 	uintmax_t max = (gid_t) -1 > (gid_t) 0
-		? (uintmax_t) ((gid_t) -2)
+		? sentinel
 		: (UINTMAX_C(1) << (sizeof(gid_t) * CHAR_BIT - 1)) - 1;
 
 	errno = 0;
 	uintmax_t value = strtoumax(name, NULL, 10);
-	if (errno == ERANGE || value > max) {
+	if (errno == ERANGE || value > max || value == sentinel) {
 		zlog(ZLOG_ERROR, "[pool %s] group ID '%s' is out of range", wp->config->name, name);
 		return false;
 	}
