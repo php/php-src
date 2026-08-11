@@ -152,7 +152,8 @@ TSRM_API bool tsrm_is_managed_thread(void);
 # define __has_attribute(x) 0
 #endif
 
-#if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__MUSL__) || defined(__HAIKU__)
+#if !__has_attribute(tls_model) || defined(__FreeBSD__) || defined(__NetBSD__) \
+	|| defined(__MUSL__) || defined(__HAIKU__) || defined(_AIX)
 # define TSRM_TLS_MODEL_ATTR
 # define TSRM_TLS_MODEL_DEFAULT
 #elif __PIC__
