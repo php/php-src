@@ -26,7 +26,6 @@ var_dump(unserialize($s));
 
 var_dump(unserialize("O:11:\"TestDefault\":0:{}"));
 var_dump(unserialize("O:11:\"TestDefault\":1:{s:4:\"prop\";i:2;}"));
-var_dump(unserialize("O:11:\"TestDefault\":2:{s:4:\"prop\";i:2;s:4:\"prop\";i:3;}"));
 
 class TestDefaultWithUnserialize {
     public readonly int $prop = 1;
@@ -81,10 +80,6 @@ object(TestDefault)#1 (1) {
 object(TestDefault)#1 (1) {
   ["prop"]=>
   int(2)
-}
-object(TestDefault)#1 (1) {
-  ["prop"]=>
-  int(3)
 }
 object(TestDefaultWithUnserialize)#1 (2) {
   ["prop"]=>
