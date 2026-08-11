@@ -55,6 +55,13 @@ PHP                                                                        NEWS
   . Fixed bug GH-23016 (NULL values in long columns come back as garbage
     binary strings). (Calvin Buckley, iliaal)
 
+- PDO_PGSQL:
+  . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
+    loop when cleaning up a fetch left in a COPY, a use-after-free when a
+    statement with emulated or disabled prepares is destroyed, a connection
+    left busy for the next fetch, and rows delivered from a result another
+    statement took over. (KentarouTakeda)
+
 - Reflection:
   . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).
     (DanielEScherzer)

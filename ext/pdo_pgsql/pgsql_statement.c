@@ -66,12 +66,12 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 {
 	pdo_pgsql_db_handle *H = S->H;
 
-	if (S->is_running_unbuffered && S->result && (fin_mode & FIN_ABORT)) {
+	/* a buffered query may have already drained this statement's stream */
+	if (S->is_running_unbuffered && H->running_stmt == S && S->result && (fin_mode & FIN_ABORT)) {
 		PGcancel *cancel = PQgetCancel(H->server);
 		char errbuf[256];
 		PQcancel(cancel, errbuf, 256);
 		PQfreeCancel(cancel);
-		S->is_running_unbuffered = false;
 	}
 
 	if (S->result) {
@@ -80,7 +80,7 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		S->result = NULL;
 	}
 
-	if (S->is_running_unbuffered) {
+	if (S->is_running_unbuffered && H->running_stmt == S) {
 		/* https://postgresql.org/docs/current/libpq-async.html:
 		 * "PQsendQuery cannot be called again until PQgetResult has returned NULL"
 		 * And as all single-row functions are connection-wise instead of statement-wise,
@@ -90,8 +90,35 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		//       instead of discarding results we could store them to their statement
 		//       so that their fetch() will get them (albeit not in lazy mode anymore).
 		while ((S->result = PQgetResult(H->server))) {
+			ExecStatusType status = PQresultStatus(S->result);
+
 			PQclear(S->result);
 			S->result = NULL;
+
+			/* PQgetResult() keeps handing out the same result while the
+			 * connection is copying: only these calls can end it */
+			if (status == PGRES_COPY_IN || status == PGRES_COPY_BOTH) {
+				/* fail a copy in, so that abandoning a statement cannot
+				 * commit it; a replication stream only accepts a clean end */
+				const char *error = status == PGRES_COPY_IN
+					? "COPY terminated by PDO"
+					: NULL;
+
+				if (PQputCopyEnd(H->server, error) < 0) {
+					break;
+				}
+			}
+			if (status == PGRES_COPY_OUT || status == PGRES_COPY_BOTH) {
+				char *buf;
+				int nbytes;
+
+				while ((nbytes = PQgetCopyData(H->server, &buf, 0)) > 0) {
+					PQfreemem(buf);
+				}
+				if (nbytes < -1) {
+					break;
+				}
+			}
 		}
 		S->is_running_unbuffered = false;
 	}
@@ -113,9 +140,6 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 		}
 
 		S->is_prepared = false;
-		if (H->running_stmt == S) {
-			H->running_stmt = NULL;
-		}
 	}
 }
 
@@ -125,6 +149,10 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	bool server_obj_usable = php_pdo_stmt_valid_db_obj_handle(stmt);
 
 	pgsql_stmt_finish(S, FIN_DISCARD|(server_obj_usable ? FIN_CLOSE|FIN_ABORT : 0));
+
+	if (server_obj_usable && S->H->running_stmt == S) {
+		S->H->running_stmt = NULL;
+	}
 
 	if (S->stmt_name) {
 		efree(S->stmt_name);
@@ -561,7 +589,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			return 0;
 		}
 	} else {
-		if (S->is_running_unbuffered && S->current_row >= stmt->row_count) {
+		if (S->is_running_unbuffered && S->H->running_stmt == S && S->current_row >= stmt->row_count) {
 			ExecStatusType status;
 
 			/* @todo in unbuffered mode, PQ allows multiple queries to be passed:
@@ -590,12 +618,12 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			S->current_row = 0;
 
 			if (!stmt->row_count) {
-				S->is_running_unbuffered = false;
 				/* libpq requires looping until getResult returns null */
 				pgsql_stmt_finish(S, 0);
 			}
 		}
-		if (S->current_row < stmt->row_count) {
+		/* another statement may have taken over and freed the result */
+		if (S->result && S->current_row < stmt->row_count) {
 			S->current_row++;
 			return 1;
 		} else {
