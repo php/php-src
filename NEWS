@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23117 (Stack overflow when normalizing a deeply nested
     Dom\XMLDocument). (Lazizbek Ergashev)
 
+- Exif:
+  . Fixed exif_read_data() allocating a HEIF meta box larger than the file
+    it came from. (iliaal)
+
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
     (Weilin Du)
