@@ -299,44 +299,43 @@ static zend_class_entry *register_class_ArrayIterator(zend_class_entry *class_en
 
 
 	zend_attribute *attribute_Deprecated_func_getflags_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "getflags", sizeof("getflags") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	zend_string *attribute_Deprecated_func_getflags_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_getflags_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_getflags_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_getflags_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_setflags_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setflags", sizeof("setflags") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_setflags_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_setflags_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_setflags_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_asort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "asort", sizeof("asort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_asort_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_asort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_asort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_ksort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "ksort", sizeof("ksort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_ksort_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_ksort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_ksort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_uasort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "uasort", sizeof("uasort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_uasort_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_uasort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_uasort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_uksort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "uksort", sizeof("uksort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_uksort_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_uksort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_uksort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_natsort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "natsort", sizeof("natsort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_natsort_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_natsort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_natsort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_natcasesort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "natcasesort", sizeof("natcasesort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_natcasesort_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_natcasesort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_natcasesort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_unserialize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "unserialize", sizeof("unserialize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_unserialize_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_unserialize_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_unserialize_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_serialize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "serialize", sizeof("serialize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_serialize_0->args[0].value, attribute_Deprecated_func_getflags_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_serialize_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_serialize_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	return class_entry;

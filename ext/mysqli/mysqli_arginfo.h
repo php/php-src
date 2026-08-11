@@ -1168,8 +1168,7 @@ static void register_mysqli_symbols(int module_number)
 	attribute_Deprecated_func_mysqli_execute_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mysqli_get_charset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_get_charset", sizeof("mysqli_get_charset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mysqli_get_charset_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[0].value, attribute_Deprecated_func_mysqli_get_charset_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mysqli_get_charset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mysqli_get_charset_0_arg1_str = zend_string_init("did you mean mysqli_character_set_name()?", strlen("did you mean mysqli_character_set_name()?"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[1].value, attribute_Deprecated_func_mysqli_get_charset_0_arg1_str);
@@ -1468,8 +1467,7 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_attribute *attribute_Deprecated_func_get_charset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "get_charset", sizeof("get_charset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_get_charset_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[0].value, attribute_Deprecated_func_get_charset_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_get_charset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_get_charset_0_arg1_str = zend_string_init("did you mean mysqli_character_set_name()?", strlen("did you mean mysqli_character_set_name()?"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[1].value, attribute_Deprecated_func_get_charset_0_arg1_str);
