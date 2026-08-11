@@ -47,12 +47,12 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 int(0)
 int(-2)
 int(-1)
 int(-1)
-Cannot increment a reference held by property class@anonymous::$bar of type ?int past its maximal value
-Cannot increment a reference held by property class@anonymous::$bar of type ?int past its maximal value
-Cannot decrement a reference held by property class@anonymous::$bar of type ?int past its minimal value
-Cannot decrement a reference held by property class@anonymous::$bar of type ?int past its minimal value
+Cannot increment a reference held by property class@anonymous%0%s:2$%x::$bar of type ?int past its maximal value
+Cannot increment a reference held by property class@anonymous%0%s:2$%x::$bar of type ?int past its maximal value
+Cannot decrement a reference held by property class@anonymous%0%s:2$%x::$bar of type ?int past its minimal value
+Cannot decrement a reference held by property class@anonymous%0%s:2$%x::$bar of type ?int past its minimal value

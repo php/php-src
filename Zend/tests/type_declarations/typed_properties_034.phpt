@@ -36,13 +36,13 @@ try {
 
 var_dump($foo);
 ?>
---EXPECT--
+--EXPECTF--
 int(42)
-Cannot assign null to property class@anonymous::$baz of type int
+Cannot assign null to property class@anonymous%0%s:2$0::$baz of type int
 int(1)
 int(10)
 int(10)
-Cannot assign null to reference held by property class@anonymous::$baz of type int
+Cannot assign null to reference held by property class@anonymous%0%s:2$%x::$baz of type int
 object(class@anonymous)#1 (2) {
   ["bar"]=>
   &int(10)

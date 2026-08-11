@@ -90,7 +90,7 @@ ZEND_FUNCTION(clone)
 	const zend_function *clone = ce->clone;
 
 	if (UNEXPECTED(zobj->handlers->clone_obj == NULL)) {
-		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %s", ZSTR_VAL(ce->name));
+		zend_throw_error(NULL, "Trying to clone an uncloneable object of class %pS", ce->name);
 		RETURN_THROWS();
 	}
 
@@ -102,7 +102,7 @@ ZEND_FUNCTION(clone)
 	zend_object *cloned;
 	if (zend_hash_num_elements(with) > 0) {
 		if (UNEXPECTED(!zobj->handlers->clone_obj_with)) {
-			zend_throw_error(NULL, "Cloning objects of class %s with updated properties is not supported", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Cloning objects of class %pS with updated properties is not supported", ce->name);
 			RETURN_THROWS();
 		}
 
@@ -1220,7 +1220,7 @@ ZEND_FUNCTION(class_alias)
 			RETURN_FALSE;
 		}
 	} else {
-		zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(class_name));
+		zend_error(E_WARNING, "Class \"%pS\" not found", class_name);
 		RETURN_FALSE;
 	}
 }
