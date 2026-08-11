@@ -299,6 +299,8 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Readonly properties may now declare default values.
+    RFC: https://wiki.php.net/rfc/readonly_property_defaults
   . It is now possible to use reference assign on WeakMap without the key
     needing to be present beforehand.
   . It is now possible to define the __debugInfo() magic method on enums.

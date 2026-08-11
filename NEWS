@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   . Changed run-tests.php to run in parallel by default, using up to 10
     automatically detected workers. Pass -j1 for sequential execution.
     (NickSdot)
+  . Allowed readonly properties to declare default values. (NickSdot)
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
   . Fixed GH-23083 (SEGV build_trace_args in zend_exceptions.c with
