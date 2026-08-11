@@ -60,7 +60,7 @@ static bool fpm_unix_parse_uid(struct fpm_worker_pool_s *wp, const char *name, u
 {
 	uintmax_t sentinel = (uintmax_t) ((uid_t) -1);
 	uintmax_t max = (uid_t) -1 > (uid_t) 0
-		? sentinel
+		? (uintmax_t) ((uid_t) -1)
 		: (UINTMAX_C(1) << (sizeof(uid_t) * CHAR_BIT - 1)) - 1;
 
 	errno = 0;
@@ -78,7 +78,7 @@ static bool fpm_unix_parse_gid(struct fpm_worker_pool_s *wp, const char *name, g
 {
 	uintmax_t sentinel = (uintmax_t) ((gid_t) -1);
 	uintmax_t max = (gid_t) -1 > (gid_t) 0
-		? sentinel
+		? (uintmax_t) ((gid_t) -1)
 		: (UINTMAX_C(1) << (sizeof(gid_t) * CHAR_BIT - 1)) - 1;
 
 	errno = 0;
