@@ -589,7 +589,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			return 0;
 		}
 	} else {
-		if (S->is_running_unbuffered && S->current_row >= stmt->row_count) {
+		if (S->is_running_unbuffered && S->H->running_stmt == S && S->current_row >= stmt->row_count) {
 			ExecStatusType status;
 
 			/* @todo in unbuffered mode, PQ allows multiple queries to be passed:

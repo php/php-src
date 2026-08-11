@@ -60,6 +60,8 @@ PHP                                                                        NEWS
     connection busy for the next one. (KentarouTakeda)
   . Fixed a lazy fetch returning a row of NULLs after another statement
     took over the connection. (KentarouTakeda)
+  . Fixed a lazy fetch reading rows of another statement after a buffered
+    query took over the connection. (KentarouTakeda)
 
 - Reflection:
   . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).
