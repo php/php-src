@@ -4742,11 +4742,11 @@ static void preload_load(size_t orig_map_ptr_static_last)
 	size_t old_map_ptr_last = CG(map_ptr_last);
 	if (zend_map_ptr_static_last != ZCSG(map_ptr_static_last) || old_map_ptr_last != ZCSG(map_ptr_last)) {
 		CG(map_ptr_last) = ZCSG(map_ptr_last);
-		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(ZCSG(map_ptr_last) + 1, 4096);
+		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(ZCSG(map_ptr_last) + 1, ZEND_MAP_PTR_CHUNK_SIZE);
 		zend_map_ptr_static_last = ZCSG(map_ptr_static_last);
 
 		/* Grow map_ptr table as needed, but allocate once for static + regular map_ptrs */
-		size_t new_static_size = ZEND_MM_ALIGNED_SIZE_EX(zend_map_ptr_static_last, 4096);
+		size_t new_static_size = ZEND_MM_ALIGNED_SIZE_EX(zend_map_ptr_static_last, ZEND_MAP_PTR_CHUNK_SIZE);
 		if (zend_map_ptr_static_size != new_static_size) {
 			void *new_base = pemalloc((new_static_size + CG(map_ptr_size)) * sizeof(void *), 1);
 			if (CG(map_ptr_real_base)) {
