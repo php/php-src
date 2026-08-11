@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.25
+?? ??? ????, PHP 8.4.26
+
+
+27 Aug 2026, PHP 8.4.25
 
 - Core:
   . Fixed bug GH-23088 (Stack overflow when comparing deeply nested arrays).
