@@ -550,12 +550,30 @@ class my_mysqli_fake_server_conn
         fwrite($this->conn, $payload);
     }
 
-    public function read($bytes_len = 1024)
+    public function read(): void
     {
-        // wait 20ms to fill the buffer
-        usleep(20000);
-        $data = fread($this->conn, $bytes_len);
-        if ($data) {
+        $data = '';
+
+        while (true)
+        {
+            if (null === $packet = $this->read_packet()) {
+                break;
+            }
+
+            $data .= $packet;
+
+            $is_command_packet = $packet[3] === "\0";
+            $is_stmt_close = isset($packet[4]) && ord($packet[4]) === 0x19;
+
+            // no server response to stmt close; read next client command
+            if ($is_command_packet && $is_stmt_close) {
+                continue;
+            }
+
+            break;
+        }
+
+        if ($data !== '') {
             fprintf(STDERR, "[*] Received: %s\n", bin2hex($data));
         }
     }
@@ -587,7 +605,6 @@ class my_mysqli_fake_server_conn
         $this->send($this->packets_to_bytes($packets), "Stmt prepare items");
     }
 
-
     public function send_server_stmt_prepare_data_response(string $field_name): void
     {
         $packets = $this->packet_generator->server_stmt_prepare_data_response($field_name);
@@ -610,6 +627,40 @@ class my_mysqli_fake_server_conn
     {
         $packets = $this->packet_generator->server_query_execute_data_response($field_name);
         $this->send($this->packets_to_bytes($packets), "Query execute data $field_name");
+    }
+
+    private function read_packet(): ?string
+    {
+        $packet = '';
+        $packet_length = 4;
+
+        while (strlen($packet) < $packet_length)
+        {
+            if (false === $chunk = fread($this->conn, $packet_length - strlen($packet))) {
+                throw new RuntimeException('Failed to read packet from client');
+            }
+
+            if ($chunk === '' && $packet === '') {
+                return null;
+            }
+
+            if ($chunk === '') {
+                throw new RuntimeException('Client disconnected mid-packet');
+            }
+
+            $packet .= $chunk;
+
+            if (strlen($packet) !== 4) {
+                continue;
+            }
+
+            // bytes 1-3 = little-endian payload length
+            $packet_length += ord($packet[0])
+                | (ord($packet[1]) << 8)
+                | (ord($packet[2]) << 16);
+        }
+
+        return $packet;
     }
 }
 
@@ -663,7 +714,7 @@ function my_mysqli_test_tabular_response_def_over_read(my_mysqli_fake_server_con
     $conn->send_server_ok();
     $conn->read();
     $conn->send($trrh, "Malicious Tabular Response [Extract heap through buffer over-read]");
-    $conn->read(65536);
+    $conn->read();
 }
 
 function my_mysqli_test_upsert_response_filename_over_read(my_mysqli_fake_server_conn $conn): void
@@ -680,7 +731,7 @@ function my_mysqli_test_upsert_response_filename_over_read(my_mysqli_fake_server
     $conn->send_server_ok();
     $conn->read();
     $conn->send($trrh, "Malicious Tabular Response [Extract heap through buffer over-read]");
-    $conn->read(65536);
+    $conn->read();
 }
 
 function my_mysqli_test_auth_response_message_over_read(my_mysqli_fake_server_conn $conn): void
@@ -709,7 +760,7 @@ function my_mysqli_test_stmt_response_row_over_read_string(my_mysqli_fake_server
     $conn->send_server_stmt_prepare_items_response();
     $conn->read();
     $conn->send($conn->packets_to_bytes($rh), "Malicious Stmt Response for items [Extract heap through buffer over-read]");
-    $conn->read(65536);
+    $conn->read();
 }
 
 function my_mysqli_test_stmt_response_row_over_read_two_fields(
@@ -732,7 +783,7 @@ function my_mysqli_test_stmt_response_row_over_read_two_fields(
         $conn->packets_to_bytes($rh),
         "Malicious Stmt Response for data $field_name [Extract heap through buffer over-read]"
     );
-    $conn->read(65536);
+    $conn->read();
 }
 
 function my_mysqli_test_stmt_response_row_over_read_int(my_mysqli_fake_server_conn $conn): void
@@ -784,9 +835,9 @@ function my_mysqli_test_stmt_response_row_read_two_fields(my_mysqli_fake_server_
     $field_names = array_keys(my_mysqli_data_fields());
     foreach ($field_names as $field_name) {
         $conn->send_server_stmt_prepare_data_response($field_name);
-        $conn->read(65536);
+        $conn->read();
         $conn->send_server_stmt_execute_data_response($field_name);
-        $conn->read(65536);
+        $conn->read();
     }
 }
 
@@ -802,7 +853,7 @@ function my_mysqli_test_query_response_row_length_overflow(my_mysqli_fake_server
     $conn->send_server_ok();
     $conn->read();
     $conn->send($conn->packets_to_bytes($rh), "Malicious Query Response for data strval field [length overflow]");
-    $conn->read(65536);
+    $conn->read();
 }
 
 function my_mysqli_test_query_response_row_read_two_fields(my_mysqli_fake_server_conn $conn): void
