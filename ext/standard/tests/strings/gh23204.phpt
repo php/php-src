@@ -1,7 +1,7 @@
 --TEST--
 GH-23204 (Use-after-free when __toString() destroys the array being read)
 --CREDITS--
-iluuu1994
+e1abrador
 --FILE--
 <?php
 class Unset_ implements Stringable {
@@ -40,7 +40,7 @@ $c = [new Boom, 2, 3, 4];
 try {
     implode(",", $c);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class UnsetPats implements Stringable {
@@ -96,7 +96,7 @@ destroyed: X,2,3,4
 NULL
 appended: X,2,3,4
 count: 5
-boom
+Exception: boom
 strtr: X234
 strtr single: Xbb
 str_replace search: zzzz
