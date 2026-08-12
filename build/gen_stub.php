@@ -174,7 +174,7 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             reportFilePutContents($arginfoFile, $arginfoCode);
             if ($declCode !== '') {
                 reportFilePutContents($declFile, $declCode);
-            } else if (file_exists($declFile)) {
+            } elseif (file_exists($declFile)) {
                 unlink($declFile);
             }
         }
@@ -1469,7 +1469,7 @@ class FuncInfo {
             if ($this->alias) {
                 if ($this->alias instanceof MethodName) {
                     $name = "zim_" . $this->alias->getDeclarationClassName() . "_" . $this->alias->methodName;
-                } else if ($this->alias instanceof FunctionName) {
+                } elseif ($this->alias instanceof FunctionName) {
                     $name = "zif_" . $this->alias->getNonNamespacedName();
                 } else {
                     throw new Error("Cannot happen");
@@ -1488,7 +1488,7 @@ class FuncInfo {
                     return rtrim($flagsCode) . "\n";
                 }
             }
-        } else if ($this->name instanceof FunctionName) {
+        } elseif ($this->name instanceof FunctionName) {
             $functionName = $this->name->getFunctionName();
             $declarationName = $this->alias ? $this->alias->getNonNamespacedName() : $this->name->getDeclarationName();
             $name = "zif_$declarationName";
@@ -1881,7 +1881,7 @@ ENDCOMMENT
         $returnType = $this->return->getMethodSynopsisType();
         if ($returnType === null) {
             $returnDescriptionPara->appendChild(new DOMText("Description."));
-        } else if (count($returnType->types) === 1) {
+        } elseif (count($returnType->types) === 1) {
             $type = $returnType->types[0];
 
             $descriptionNode = match ($type->name) {
@@ -4249,7 +4249,7 @@ class FileInfo {
             if ($tag->name === 'generate-function-entries') {
                 $this->generateFunctionEntries = true;
                 $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
-            } else if ($tag->name === 'generate-legacy-arginfo') {
+            } elseif ($tag->name === 'generate-legacy-arginfo') {
                 if ($tag->value && !in_array((int) $tag->value, ALL_PHP_VERSION_IDS, true)) {
                     throw new Exception(
                         "Legacy PHP version must be one of: \"" . PHP_70_VERSION_ID . "\" (PHP 7.0), \"" . PHP_80_VERSION_ID . "\" (PHP 8.0), " .
@@ -4260,12 +4260,12 @@ class FileInfo {
                 }
 
                 $this->minimumPhpVersionIdCompatibility = ($tag->value ? (int) $tag->value : PHP_70_VERSION_ID);
-            } else if ($tag->name === 'generate-class-entries') {
+            } elseif ($tag->name === 'generate-class-entries') {
                 $this->generateClassEntries = true;
                 $this->declarationPrefix = $tag->value ? $tag->value . " " : "";
-            } else if ($tag->name === 'undocumentable') {
+            } elseif ($tag->name === 'undocumentable') {
                 $this->isUndocumentable = true;
-            } else if ($tag->name === 'generate-c-enums') {
+            } elseif ($tag->name === 'generate-c-enums') {
                 $this->generateCEnums = true;
             }
         }
@@ -4457,7 +4457,7 @@ class FileInfo {
                                 AttributeInfo::createFromGroups($classStmt->attrGroups)
                             );
                         }
-                    } else if ($classStmt instanceof Stmt\Property) {
+                    } elseif ($classStmt instanceof Stmt\Property) {
                         if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
                             throw new Exception("Visibility modifier is required");
                         }
@@ -4474,7 +4474,7 @@ class FileInfo {
                                 AttributeInfo::createFromGroups($classStmt->attrGroups)
                             );
                         }
-                    } else if ($classStmt instanceof Stmt\ClassMethod) {
+                    } elseif ($classStmt instanceof Stmt\ClassMethod) {
                         if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
                             throw new Exception("Visibility modifier is required");
                         }
@@ -4488,13 +4488,13 @@ class FileInfo {
                             $this->isUndocumentable,
                             $this->getMinimumPhpVersionIdCompatibility()
                         );
-                    } else if ($classStmt instanceof Stmt\EnumCase) {
+                    } elseif ($classStmt instanceof Stmt\EnumCase) {
                         $enumCaseInfos[] = new EnumCaseInfo(
                             new EnumCaseName($className, $classStmt->name->toString()),
                             $classStmt->expr,
                             $classStmt->expr ? $prettyPrinter->prettyPrintExpr($classStmt->expr) : null,
                         );
-                    } else if ($classStmt instanceof TraitUse) {
+                    } elseif ($classStmt instanceof TraitUse) {
                         if ($classStmt->adaptations) {
                             throw new Exception("Trait adaptations are not supported");
                         }
@@ -4541,22 +4541,22 @@ class FileInfo {
             $text = trim($comment->getText());
             if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
                 $conds[] = $matches[1];
-            } else if (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
+            } elseif (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
                 $conds[] = "defined($matches[1])";
-            } else if (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
+            } elseif (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
                 $conds[] = "!defined($matches[1])";
-            } else if (preg_match('/^#\s*else$/', $text)) {
+            } elseif (preg_match('/^#\s*else$/', $text)) {
                 if (empty($conds)) {
                     throw new Exception("Encountered else without corresponding #if");
                 }
                 $cond = array_pop($conds);
                 $conds[] = "!($cond)";
-            } else if (preg_match('/^#\s*endif$/', $text)) {
+            } elseif (preg_match('/^#\s*endif$/', $text)) {
                 if (empty($conds)) {
                     throw new Exception("Encountered #endif without corresponding #if");
                 }
                 array_pop($conds);
-            } else if ($text[0] === '#') {
+            } elseif ($text[0] === '#') {
                 throw new Exception("Unrecognized preprocessor directive \"$text\"");
             }
         }
@@ -4954,7 +4954,7 @@ function parseFunctionLike(
 
             if ($preferRef) {
                 $sendBy = ArgInfo::SEND_PREFER_REF;
-            } else if ($param->byRef) {
+            } elseif ($param->byRef) {
                 $sendBy = ArgInfo::SEND_BY_REF;
             } else {
                 $sendBy = ArgInfo::SEND_BY_VAL;
@@ -5253,9 +5253,9 @@ function parseClass(
     } elseif ($class instanceof Interface_) {
         $classKind = "interface";
         $extends = $class->extends;
-    } else if ($class instanceof Trait_) {
+    } elseif ($class instanceof Trait_) {
         $classKind = "trait";
-    } else if ($class instanceof Enum_) {
+    } elseif ($class instanceof Enum_) {
         $classKind = "enum";
         $implements = $class->implements;
     } else {
@@ -6316,7 +6316,7 @@ foreach (array_unique($locations) as $location) {
         if ($fileInfo) {
             $fileInfos[] = $fileInfo;
         }
-    } else if (is_dir($location)) {
+    } elseif (is_dir($location)) {
         array_push($fileInfos, ...processDirectory($location, $context));
     } else {
         echo "$location is neither a file nor a directory.\n";
