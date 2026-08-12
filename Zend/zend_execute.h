@@ -488,8 +488,6 @@ ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_arra
 
 ZEND_API void zend_fetch_dimension_const(zval *result, const zval *container, zval *dim, int type);
 
-ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
-
 ZEND_API bool zend_gcc_global_regs(void);
 
 #define ZEND_USER_OPCODE_CONTINUE   0 /* execute next opcode */
@@ -507,7 +505,6 @@ ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table);
 ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *execute_data);
-ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf);
 ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num);
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer);
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield);

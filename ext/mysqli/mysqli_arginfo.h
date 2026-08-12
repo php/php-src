@@ -1,5 +1,5 @@
 /* This is a generated file, edit mysqli.stub.php instead.
- * Stub hash: dc804bc50cd0a0e14dafc0e03564d5699d641db0 */
+ * Stub hash: d31c6ff508415337f4536e8e476168882e769158 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -862,7 +862,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_free_result, arginfo_mysqli_free_result)
 	ZEND_FE(mysqli_get_connection_stats, arginfo_mysqli_get_connection_stats)
 	ZEND_FE(mysqli_get_client_stats, arginfo_mysqli_get_client_stats)
-	ZEND_FE(mysqli_get_charset, arginfo_mysqli_get_charset)
+	ZEND_RAW_FENTRY("mysqli_get_charset", zif_mysqli_get_charset, arginfo_mysqli_get_charset, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mysqli_get_client_info, arginfo_mysqli_get_client_info)
 	ZEND_FE(mysqli_get_client_version, arginfo_mysqli_get_client_version)
 	ZEND_FE(mysqli_get_links_stats, arginfo_mysqli_get_links_stats)
@@ -948,7 +948,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("connect", zif_mysqli_connect, arginfo_class_mysqli_connect, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("dump_debug_info", zif_mysqli_dump_debug_info, arginfo_class_mysqli_dump_debug_info, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("debug", zif_mysqli_debug, arginfo_class_mysqli_debug, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("get_charset", zif_mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("get_charset", zif_mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("execute_query", zif_mysqli_execute_query, arginfo_class_mysqli_execute_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("get_client_info", zif_mysqli_get_client_info, arginfo_class_mysqli_get_client_info, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("get_connection_stats", zif_mysqli_get_connection_stats, arginfo_class_mysqli_get_connection_stats, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1166,6 +1166,13 @@ static void register_mysqli_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_mysqli_execute_0_arg1_str = zend_string_init("use mysqli_stmt_execute() instead", strlen("use mysqli_stmt_execute() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_execute_0->args[1].value, attribute_Deprecated_func_mysqli_execute_0_arg1_str);
 	attribute_Deprecated_func_mysqli_execute_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_mysqli_get_charset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_get_charset", sizeof("mysqli_get_charset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_mysqli_get_charset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_mysqli_get_charset_0_arg1_str = zend_string_init("did you mean mysqli_character_set_name()?", strlen("did you mean mysqli_character_set_name()?"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[1].value, attribute_Deprecated_func_mysqli_get_charset_0_arg1_str);
+	attribute_Deprecated_func_mysqli_get_charset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mysqli_kill_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_kill", sizeof("mysqli_kill") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_kill_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
@@ -1458,6 +1465,13 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "change_user", sizeof("change_user") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_get_charset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "get_charset", sizeof("get_charset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_get_charset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_get_charset_0_arg1_str = zend_string_init("did you mean mysqli_character_set_name()?", strlen("did you mean mysqli_character_set_name()?"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[1].value, attribute_Deprecated_func_get_charset_0_arg1_str);
+	attribute_Deprecated_func_get_charset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_get_client_info_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "get_client_info", sizeof("get_client_info") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_get_client_info_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));

@@ -1,5 +1,5 @@
 /* This is a generated file, edit spl_array.stub.php instead.
- * Stub hash: c52e89992bd3c04877daab47f4328af0b6ce619e */
+ * Stub hash: c50ad88a1603d7805b7b77b60bd9c9bf0aa0a008 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -226,16 +226,16 @@ static const zend_function_entry class_ArrayIterator_methods[] = {
 	ZEND_RAW_FENTRY("append", zim_ArrayObject_append, arginfo_class_ArrayIterator_append, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getArrayCopy", zim_ArrayObject_getArrayCopy, arginfo_class_ArrayIterator_getArrayCopy, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("count", zim_ArrayObject_count, arginfo_class_ArrayIterator_count, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("getFlags", zim_ArrayObject_getFlags, arginfo_class_ArrayIterator_getFlags, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("setFlags", zim_ArrayObject_setFlags, arginfo_class_ArrayIterator_setFlags, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("asort", zim_ArrayObject_asort, arginfo_class_ArrayIterator_asort, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("ksort", zim_ArrayObject_ksort, arginfo_class_ArrayIterator_ksort, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("uasort", zim_ArrayObject_uasort, arginfo_class_ArrayIterator_uasort, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("uksort", zim_ArrayObject_uksort, arginfo_class_ArrayIterator_uksort, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("natsort", zim_ArrayObject_natsort, arginfo_class_ArrayIterator_natsort, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("natcasesort", zim_ArrayObject_natcasesort, arginfo_class_ArrayIterator_natcasesort, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("unserialize", zim_ArrayObject_unserialize, arginfo_class_ArrayIterator_unserialize, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("serialize", zim_ArrayObject_serialize, arginfo_class_ArrayIterator_serialize, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getFlags", zim_ArrayObject_getFlags, arginfo_class_ArrayIterator_getFlags, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("setFlags", zim_ArrayObject_setFlags, arginfo_class_ArrayIterator_setFlags, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("asort", zim_ArrayObject_asort, arginfo_class_ArrayIterator_asort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("ksort", zim_ArrayObject_ksort, arginfo_class_ArrayIterator_ksort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("uasort", zim_ArrayObject_uasort, arginfo_class_ArrayIterator_uasort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("uksort", zim_ArrayObject_uksort, arginfo_class_ArrayIterator_uksort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("natsort", zim_ArrayObject_natsort, arginfo_class_ArrayIterator_natsort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("natcasesort", zim_ArrayObject_natcasesort, arginfo_class_ArrayIterator_natcasesort, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("unserialize", zim_ArrayObject_unserialize, arginfo_class_ArrayIterator_unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("serialize", zim_ArrayObject_serialize, arginfo_class_ArrayIterator_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("__serialize", zim_ArrayObject___serialize, arginfo_class_ArrayIterator___serialize, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("__unserialize", zim_ArrayObject___unserialize, arginfo_class_ArrayIterator___unserialize, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(ArrayIterator, rewind, arginfo_class_ArrayIterator_rewind, ZEND_ACC_PUBLIC)
@@ -296,6 +296,47 @@ static zend_class_entry *register_class_ArrayIterator(zend_class_entry *class_en
 	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", sizeof("ARRAY_AS_PROPS") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_ARRAY_AS_PROPS_name, true);
+
+
+	zend_attribute *attribute_Deprecated_func_getflags_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "getflags", sizeof("getflags") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_getflags_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_getflags_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_setflags_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setflags", sizeof("setflags") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_setflags_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_setflags_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_asort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "asort", sizeof("asort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_asort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_asort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_ksort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "ksort", sizeof("ksort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_ksort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_ksort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_uasort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "uasort", sizeof("uasort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_uasort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_uasort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_uksort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "uksort", sizeof("uksort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_uksort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_uksort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_natsort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "natsort", sizeof("natsort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_natsort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_natsort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_natcasesort_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "natcasesort", sizeof("natcasesort") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_natcasesort_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_natcasesort_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_unserialize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "unserialize", sizeof("unserialize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_unserialize_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_unserialize_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_serialize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "serialize", sizeof("serialize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
+	ZVAL_STR(&attribute_Deprecated_func_serialize_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_serialize_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	return class_entry;
 }

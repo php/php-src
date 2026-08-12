@@ -446,7 +446,6 @@ typedef struct {
 } zend_error_handling;
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_save_error_handling(zend_error_handling *current);
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current);
 ZEND_API void zend_restore_error_handling(const zend_error_handling *saved);
 ZEND_API void zend_begin_record_errors(void);

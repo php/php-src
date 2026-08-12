@@ -32,4 +32,3 @@ Stack trace:
   thrown in <?php
 require("sumfile.php");
 ?> on line %d
-

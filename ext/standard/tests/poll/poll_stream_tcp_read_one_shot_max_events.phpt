@@ -20,7 +20,7 @@ for ($i = 0; $i < count($clients); $i++) {
 // them, and each oneshot event must be delivered exactly once.
 $seen = [];
 for ($round = 1; $round <= 2; $round++) {
-    $watchers = $poll_ctx->wait(0, 100000, 4);
+    $watchers = $poll_ctx->wait(Time\Duration::fromMicroseconds(100000), 4);
     echo "Round $round count: " . count($watchers) . "\n";
     foreach ($watchers as $watcher) {
         $data = $watcher->getData();
@@ -36,7 +36,7 @@ echo "Seen: " . implode(',', array_keys($seen)) . "\n";
 
 // Every oneshot watcher fired once, so new data must not be reported
 pt_write_sleep($clients[0], "more data");
-pt_expect_events($poll_ctx->wait(0, 100000), []);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), []);
 
 ?>
 --EXPECT--

@@ -443,6 +443,7 @@ static zend_result php_session_initialize(void)
 	if (!PS(id) || !ZSTR_VAL(PS(id))[0]) {
 		if (PS(id)) {
 			zend_string_release_ex(PS(id), false);
+			PS(id) = NULL;
 		}
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
@@ -459,6 +460,7 @@ static zend_result php_session_initialize(void)
 		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE
 	) {
 		zend_string_release_ex(PS(id), false);
+		PS(id) = NULL;
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
 			PS(id) = php_session_create_id(NULL);
@@ -2419,6 +2421,7 @@ PHP_FUNCTION(session_regenerate_id)
 			/* Try to generate non-existing ID */
 			while (limit-- && PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == SUCCESS) {
 				zend_string_release_ex(PS(id), false);
+				PS(id) = NULL;
 				PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 				if (!PS(id)) {
 					PS(mod)->s_close(&PS(mod_data));
@@ -2481,6 +2484,9 @@ PHP_FUNCTION(session_create_id)
 		int limit = 3;
 		while (limit--) {
 			new_id = PS(mod)->s_create_sid(&PS(mod_data));
+			if (!new_id) {
+				break;
+			}
 			if (!PS(mod)->s_validate_sid || (PS(mod_user_implemented) && Z_ISUNDEF(PS(mod_user_names).ps_validate_sid))) {
 				break;
 			} else {
@@ -2502,6 +2508,9 @@ PHP_FUNCTION(session_create_id)
 		zend_string_release_ex(new_id, false);
 	} else {
 		smart_str_free(&id);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		php_error_docref(NULL, E_WARNING, "Failed to create new ID");
 		RETURN_FALSE;
 	}

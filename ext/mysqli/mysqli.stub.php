@@ -797,6 +797,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_get_charset
      */
+    #[\Deprecated(since: '8.6', message: 'did you mean mysqli_character_set_name()?')]
     public function get_charset(): ?object {}
 
     /**
@@ -1463,6 +1464,7 @@ function mysqli_get_connection_stats(mysqli $mysql): array {}
 function mysqli_get_client_stats(): array {}
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'did you mean mysqli_character_set_name()?')]
 function mysqli_get_charset(mysqli $mysql): ?object {}
 
 /** @refcount 1 */

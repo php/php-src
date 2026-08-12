@@ -13,10 +13,10 @@ $q = msg_get_queue(0, 0600);
 try {
 	msg_send($q, 1, new Test, true);
 } catch (\TypeError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 } finally {
 	msg_remove_queue($q);
 }
 ?>
 --EXPECT--
-Test::__serialize() must return an array
+TypeError: Test::__serialize() must return an array

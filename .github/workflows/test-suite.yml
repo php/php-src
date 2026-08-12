@@ -852,12 +852,12 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.7.1
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.8.2
       PHP_BUILD_CRT: ${{ fromJson(inputs.branch).jobs.WINDOWS.config.vs_crt_version }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
-      PARALLEL: -j2
+      PARALLEL: ${{ matrix.asan && '-j2' || fromJson(inputs.branch).config.default_run_test_jobs }}
       OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
       ASAN: "${{ matrix.asan && '1' || '0' }}"
       CLANG_TOOLSET: "${{ matrix.clang && '1' || '0' }}"
@@ -919,6 +919,7 @@ jobs:
         with:
           ref: ${{ fromJson(inputs.branch).ref }}
           fetch-depth: 0
+          filter: blob:none
       # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
       # and other operations, so we disable it during benchmarking.
       - name: Disable ASLR

@@ -9,8 +9,8 @@ $cls = new SplTempFileObject();
 try {
 	$cls->ftruncate(-1);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-SplFileObject::ftruncate(): Argument #1 ($size) must be greater than or equal to 0
+ValueError: SplFileObject::ftruncate(): Argument #1 ($size) must be greater than or equal to 0

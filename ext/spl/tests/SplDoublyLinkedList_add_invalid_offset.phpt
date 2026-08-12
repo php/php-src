@@ -6,8 +6,8 @@ try {
     $dll = new SplDoublyLinkedList();
     var_dump($dll->add(12,'Offset 12 should not exist'));
 } catch (OutOfRangeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Exception: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range
+OutOfRangeException: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range

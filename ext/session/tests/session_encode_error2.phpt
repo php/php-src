@@ -34,7 +34,7 @@ foreach($inputs as $input) {
     try {
         $_SESSION[$input] = "Hello World!";
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(session_encode());
     var_dump(session_destroy());

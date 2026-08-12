@@ -192,6 +192,11 @@ When you are testing your test case it's really important to make sure that you 
 temporary resources (eg files) that you used in the test. There is a special ``--CLEAN--`` section
 to help you do this — see `here <#clean>`_.
 
+Tests run in parallel by default. Mutable resources such as files, directories, ports, database
+objects, and IPC identifiers must therefore be unique to each test. Read-only fixtures may be
+shared. If a resource cannot be isolated, declare the narrowest applicable conflict using
+``--CONFLICTS--`` or a ``CONFLICTS`` file.
+
 Another good check is to look at what lines of code in the PHP source your test case covers. This is
 easy to do, there are some instructions on the `PHP Wiki
 <https://wiki.php.net/doc/articles/writing-tests>`_.
@@ -591,9 +596,10 @@ Example 1 (full): :ref:`sample001.phpt`
 on the first line. If the test was part of a TestFest event, then # followed by the name of the
 event and the date (YYYY-MM-DD) on the second line.
 
-**Required:** No. For newly created tests this section should no longer be included, as test
-authorship is already accurately tracked by Git. If multiple authors should be credited, the
-`Co-authored-by` tag in the commit message may be used.
+**Required:** No. For newly created tests the section should no longer be used for simple authorship
+claims or listing all contributors who edited the test; as it is already accurately tracked by Git.
+It may be used if more specific attribution is useful, for example to credit the original reporter
+of a bug or a contributor who is not credited via `Co-authored-by` tag.
 
 **Format:** Name Email [Event]
 

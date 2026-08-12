@@ -234,11 +234,6 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 	return ptr;
 }
 
-ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data, uint32_t var)
-{
-	return EX_VAR(var);
-}
-
 ZEND_API bool zend_gcc_global_regs(void)
 {
   #if defined(HAVE_GCC_GLOBAL_REGS)
@@ -1070,7 +1065,7 @@ ZEND_API bool zend_never_inline zend_verify_property_type(const zend_property_in
 	return i_zend_verify_property_type(info, property, strict);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr EXECUTE_DATA_DC)
+static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_info *info, zval *property_val, zval *value, zend_refcounted **garbage_ptr, bool check_writable EXECUTE_DATA_DC)
 {
 	zval tmp;
 
@@ -1079,7 +1074,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 			zend_readonly_property_modification_error(info);
 			return &EG(uninitialized_zval);
 		}
-		if (info->flags & ZEND_ACC_PPP_SET_MASK && !zend_asymmetric_property_has_set_access(info)) {
+		if (check_writable && (info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(info)) {
 			zend_asymmetric_visibility_property_modification_error(info, "modify");
 			return &EG(uninitialized_zval);
 		}
@@ -4654,7 +4649,7 @@ static zend_always_inline zend_generator *zend_get_running_generator(EXECUTE_DAT
 }
 /* }}} */
 
-ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf) /* {{{ */
+static void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_execute_data *call, uint32_t op_num, zend_get_gc_buffer *buf) /* {{{ */
 {
 	zend_op *opline = EX(func)->op_array.opcodes + op_num;
 	int level;

@@ -5387,14 +5387,9 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_typecheck(result, args, IS_NULL);
 	} else if (zend_string_equals_literal(lcname, "is_bool")) {
 		return zend_compile_func_typecheck(result, args, _IS_BOOL);
-	} else if (zend_string_equals_literal(lcname, "is_long")
-		|| zend_string_equals_literal(lcname, "is_int")
-		|| zend_string_equals_literal(lcname, "is_integer")
-	) {
+	} else if (zend_string_equals_literal(lcname, "is_int")) {
 		return zend_compile_func_typecheck(result, args, IS_LONG);
-	} else if (zend_string_equals_literal(lcname, "is_float")
-		|| zend_string_equals_literal(lcname, "is_double")
-	) {
+	} else if (zend_string_equals_literal(lcname, "is_float")) {
 		return zend_compile_func_typecheck(result, args, IS_DOUBLE);
 	} else if (zend_string_equals_literal(lcname, "is_string")) {
 		return zend_compile_func_typecheck(result, args, IS_STRING);
@@ -5410,9 +5405,7 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_cast(result, args, _IS_BOOL);
 	} else if (zend_string_equals_literal(lcname, "intval")) {
 		return zend_compile_func_cast(result, args, IS_LONG);
-	} else if (zend_string_equals_literal(lcname, "floatval")
-		|| zend_string_equals_literal(lcname, "doubleval")
-	) {
+	} else if (zend_string_equals_literal(lcname, "floatval")) {
 		return zend_compile_func_cast(result, args, IS_DOUBLE);
 	} else if (zend_string_equals_literal(lcname, "strval")) {
 		return zend_compile_func_cast(result, args, IS_STRING);
@@ -5916,6 +5909,8 @@ static void zend_compile_static_var_common(zend_string *var_name, zval *value, u
 	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, NULL);
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(var_name);
+
+	ZEND_STATIC_ASSERT(sizeof(Bucket) % 8 == 0, "Bucket size not compatible with storing flags in lower three bits");
 	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | mode;
 }
 /* }}} */
@@ -8580,8 +8575,8 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 
 		value = zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval));
 		if (!value) {
-			zend_error_noreturn_unchecked(E_COMPILE_ERROR,
-				"Cannot use variable $%S twice", var_name);
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use variable $%pS twice", var_name);
 		}
 
 		CG(zend_lineno) = zend_ast_get_lineno(var_name_ast);
@@ -8929,6 +8924,10 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			"__autoload() is no longer supported, use spl_autoload_register() instead");
 	}
 
+	if (zend_string_equals_literal_ci(unqualified_name, "readonly")) {
+		zend_error(E_DEPRECATED, "Calling a function “readonly” is deprecated");
+	}
+
 	if (zend_string_equals_literal_ci(unqualified_name, "assert")) {
 		zend_error(E_COMPILE_ERROR,
 			"Defining a custom assert() function is not allowed, "
@@ -8942,6 +8941,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 				opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
 				opline->op2.num = func_ref;
+				opline->extended_value = (uint32_t)-1;
 			} else {
 				opline = get_next_op();
 				opline->opcode = ZEND_DECLARE_FUNCTION;
@@ -9130,6 +9130,23 @@ static zend_op_array *zend_compile_func_decl_ex(
 	}
 
 	zend_compile_stmt(stmt_ast);
+
+	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
+		zend_op_array *declaring_op_array = orig_oparray_context.op_array;
+
+		if ((op_array->fn_flags & ZEND_ACC_STATIC)
+		 && !op_array->static_variables
+		 /* Don't cache closures in main, as those would leak without a proper
+		  * cleanup mechanism. */
+		 && declaring_op_array->function_name
+		 && declaring_op_array->last) {
+			zend_op *declare_lambda_op = &declaring_op_array->opcodes[declaring_op_array->last - 1];
+			if (declare_lambda_op->opcode == ZEND_DECLARE_LAMBDA_FUNCTION) {
+				declare_lambda_op->extended_value = declaring_op_array->cache_size;
+				declaring_op_array->cache_size += sizeof(void *);
+			}
+		}
+	}
 
 	if (is_method) {
 		CG(zend_lineno) = decl->start_lineno;
@@ -9478,11 +9495,6 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		if (flags & ZEND_ACC_READONLY) {
 			if (!ZEND_TYPE_IS_SET(type)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Readonly property %s::$%s must have type",
-					ZSTR_VAL(ce->name), ZSTR_VAL(name));
-			}
-			if (!Z_ISUNDEF(value_zv)) {
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Readonly property %s::$%s cannot have default value",
 					ZSTR_VAL(ce->name), ZSTR_VAL(name));
 			}
 			if (flags & ZEND_ACC_STATIC) {

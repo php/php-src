@@ -568,13 +568,25 @@ ZEND_FUNCTION(define)
 		Z_PARAM_BOOL(non_cs)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (ZEND_NUM_ARGS() == 3) {
+		zend_error(E_DEPRECATED,
+			"define(): Argument #3 ($case_insensitive) is ignored and treated as false since declaration of case-insensitive constants is no longer supported, passing the argument explicitly is unnecessary"
+		);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_argument_value_error(1, "cannot be a class constant");
 		RETURN_THROWS();
 	}
 
 	if (non_cs) {
-		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported");
+		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported, this will be an error in PHP 9.0");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (Z_TYPE_P(val) == IS_ARRAY && Z_REFCOUNTED_P(val)) {
@@ -945,6 +957,11 @@ ZEND_FUNCTION(get_class_methods)
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (ce == zend_ce_closure) {
+		ZVAL_STR_COPY(&method_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
+	}
 }
 /* }}} */
 
@@ -1070,7 +1087,6 @@ flf_clean:;
 
 static zend_always_inline void _class_exists_impl(zval *return_value, zend_string *name, bool autoload, int flags, int skip_flags) /* {{{ */
 {
-	zend_string *lcname;
 	const zend_class_entry *ce;
 
 	if (ZSTR_HAS_CE_CACHE(name)) {
@@ -1083,14 +1099,10 @@ static zend_always_inline void _class_exists_impl(zval *return_value, zend_strin
 	if (!autoload) {
 		if (ZSTR_VAL(name)[0] == '\\') {
 			/* Ignore leading "\" */
-			lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+			ce = zend_hash_str_find_ptr_lc(EG(class_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
 		} else {
-			lcname = zend_string_tolower(name);
+			ce = zend_hash_find_ptr_lc(EG(class_table), name);
 		}
-
-		ce = zend_hash_find_ptr(EG(class_table), lcname);
-		zend_string_release_ex(lcname, 0);
 	} else {
 		ce = zend_lookup_class(name);
 	}
@@ -1172,7 +1184,6 @@ ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
 	bool exists;
-	zend_string *lcname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(name)
@@ -1180,14 +1191,10 @@ ZEND_FUNCTION(function_exists)
 
 	if (ZSTR_VAL(name)[0] == '\\') {
 		/* Ignore leading "\" */
-		lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-		zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+		exists = zend_hash_str_find_ptr_lc(EG(function_table), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1) != NULL;
 	} else {
-		lcname = zend_string_tolower(name);
+		exists = zend_hash_find_ptr_lc(EG(function_table), name) != NULL;
 	}
-
-	exists = zend_hash_exists(EG(function_table), lcname);
-	zend_string_release_ex(lcname, 0);
 
 	RETURN_BOOL(exists);
 }

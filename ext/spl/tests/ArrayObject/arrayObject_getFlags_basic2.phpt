@@ -21,9 +21,13 @@ int(3)
 
 Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
 int(3)
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 int(3)
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
+
+Deprecated: Method ArrayIterator::getFlags() is deprecated since 8.6 in %s on line %d
 int(3)
 
 Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d

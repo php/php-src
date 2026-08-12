@@ -120,7 +120,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
-	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot;
+	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot, *jmp_slot, *assign_obj_slots;
 
 	if (op_array->last_literal) {
 		uint32_t j;
@@ -439,14 +439,15 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_clean(&hash);
 		op_array->last_literal = j;
 
-		const_slot = zend_arena_alloc(&ctx->arena, j * 7 * sizeof(int));
-		memset(const_slot, -1, j * 7 * sizeof(int));
+		const_slot = zend_arena_alloc(&ctx->arena, j * 8 * sizeof(int));
+		memset(const_slot, -1, j * 8 * sizeof(int));
 		class_slot = const_slot + j;
 		func_slot = class_slot + j;
 		bind_var_slot = func_slot + j;
 		property_slot = bind_var_slot + j;
 		method_slot = property_slot + j;
 		jmp_slot = method_slot + j;
+		assign_obj_slots = jmp_slot + j;
 
 		/* Update opcodes to use new literals table */
 		cache_size = zend_op_array_extension_handles * sizeof(void*);
@@ -500,6 +501,19 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_ASSIGN_OBJ:
+					if (opline->op2_type == IS_CONST) {
+						if (opline->op1_type == IS_UNUSED &&
+							assign_obj_slots[opline->op2.constant] >= 0) {
+							opline->extended_value = assign_obj_slots[opline->op2.constant];
+						} else {
+							opline->extended_value = cache_size;
+							cache_size += 3 * sizeof(void *);
+							if (opline->op1_type == IS_UNUSED) {
+								assign_obj_slots[opline->op2.constant] = opline->extended_value;
+							}
+						}
+					}
+					break;
 				case ZEND_ASSIGN_OBJ_REF:
 				case ZEND_FETCH_OBJ_R:
 				case ZEND_FETCH_OBJ_W:
@@ -742,6 +756,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_CALLABLE_CONVERT:
+				case ZEND_DECLARE_LAMBDA_FUNCTION:
 					if (opline->extended_value != (uint32_t)-1) {
 						opline->extended_value = cache_size;
 						cache_size += sizeof(void *);

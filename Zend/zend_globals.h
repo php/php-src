@@ -326,6 +326,7 @@ struct _zend_executor_globals {
 
 	HashTable callable_convert_cache;
 	HashTable partial_function_application_cache;
+	zend_stack lambda_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

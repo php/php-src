@@ -304,7 +304,6 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *forma
 /* PHPAPI void php_error(int type, const char *format, ...); */
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...);
 END_EXTERN_C()
 
 #define zenderror phperror

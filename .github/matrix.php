@@ -187,6 +187,7 @@ $repository = $argv[5] ?? null;
 foreach ($branches as &$branch) {
     $php_version = $branch['version'][0] . '.' . $branch['version'][1];
     $branch['jobs'] = select_jobs($repository, $trigger, $nightly, $labels, $php_version, $branch['ref'], $all_variations);
+    $branch['config']['default_run_test_jobs'] = version_compare($php_version, '8.6', '>=') ? '' : '-j2';
     $branch['config']['ubuntu_version'] = version_compare($php_version, '8.5', '>=') ? '24.04' : '22.04';
 }
 

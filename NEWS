@@ -1,6 +1,61 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0beta1
+?? ??? ????, PHP 8.6.0beta2
+
+- Core:
+  . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
+    next() call on the inner generator). (iliaal)
+
+- PDO_PGSQL:
+  . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
+    loop when cleaning up a fetch left in a COPY, a use-after-free when a
+    statement with emulated or disabled prepares is destroyed, a connection
+    left busy for the next fetch, and rows delivered from a result another
+    statement took over. (KentarouTakeda)
+
+13 Aug 2026, PHP 8.6.0beta1
+
+- Core:
+  . Deprecated "namespace" as a class constant name. (NickSdot)
+  . Changed run-tests.php to run in parallel by default, using up to 10
+    automatically detected workers. Pass -j1 for sequential execution.
+    (NickSdot)
+  . Allowed readonly properties to declare default values. (NickSdot)
+  . Changed run-tests.php to run test subprocesses without a shell where
+    possible. (NickSdot)
+  . Fixed GH-23083 (SEGV build_trace_args in zend_exceptions.c with
+    -d error_include_args=On). (David Carlier)
+  . Fixed GH-23121 (is_callable() wrongly accepts objects with no get_closure
+    handler). (David Carlier)
+  . Passing a 3rd argument to define() is now deprecated. (Girgias)
+  . Naming a function readonly is now deprecated. (Girgias)
+  . Added stateless closure cache. (ilutov)
+
+- BZ2:
+  . Passing an object for the Bzip2 {de}compression stream filter is now
+    deprecated. Use get_object_vars() on the object instead. (Girgias)
+
+- Curl:
+  . Improved cURL option validation errors to include the option name.
+    (Sjoerd Langkemper)
+  . Raise a value error when the callback registered with CURLOPT_READFUNCTION
+    returns an unexpected long. (Sjoerd Langkemper)
+  . Fix bug GH-16513 (curl: exceptions in callbacks do not abort the request).
+    (Sjoerd Langkemper)
+
+- Date:
+  . Update timelib to 2026.02. (Derick, timwolla)
+  . Added Time\Duration. (timwolla, Derick)
+
+- DOM:
+  . Fixed bug GH-23116 (Stack overflow when normalizing a deeply nested
+    DOMDocument). (Lazizbek Ergashev)
+  . Fixed bug GH-23117 (Stack overflow when normalizing a deeply nested
+    Dom\XMLDocument). (Lazizbek Ergashev)
+
+- Exif:
+  . Fixed exif_read_data() allocating a HEIF meta box larger than the file
+    it came from. (iliaal)
 
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
@@ -8,22 +63,88 @@ PHP                                                                        NEWS
   . Added gmp_powm_sec(). (Weilin Du)
 
 - Intl:
+  . Added static methods IntlDatePatternGenerator::getSkeleton() and
+    IntlDatePatternGenerator::getBaseSkeleton(). (Weilin Du)
   . Fixed Collator::sort(), collator_sort(), Collator::asort(), and
     collator_asort() to report UTF-8/UTF-16 conversion errors through the intl
     error handler instead of emitting a warning and continuing with an empty
     string. (Weilin Du)
   . Fixed IntlListFormatter::__construct() leaving stale global error state
     after successful calls. (Weilin Du)
+  . Fixed IntlNumberRangeFormatter leaving stale global error state after
+    successful createFromSkeleton() and format() calls. (Weilin Du)
+  . Implemented GH-20255 (Add a predefined calendar constant in
+    IntlDateFormatter for the proleptic gregorian calendar). (David Carlier)
+  . Added SpoofChecker::areBidiConfusable(). (David Carlier)
+  . Added SpoofChecker::getBidiSkeleton(). (Weilin Du)
+  . Added SpoofChecker::getSkeleton(). (David Carlier)
+  . Fixed IntlNumberRangeFormatter::format() crash when the formatting fails.
+    (David Carlier)
+
+- MbString:
+  . Passing objects to mb_convert_variables() is now deprecated. (Girgias)
+
+- MySQLi:
+  . The mysqli_get_charset() function is now deprecated. (Kamil Tekiela)
+
+- PDO:
+  . Fixed pdo_raise_impl_error() emitting a warning under ERRMODE_SILENT.
+    (iliaal)
+
+- PDO_ODBC:
+  . Fixed bug GH-23016 (NULL values in long columns come back as garbage
+    binary strings). (Calvin Buckley, iliaal)
+
+- Readline:
+  . Fixed the interactive shell not waiting for the pager process to exit.
+    (Weilin Du)
 
 - Reflection:
   . Added ReflectionAttribute::inNamespace(),
     ReflectionAttribute::getNamespaceName(), and
     ReflectionAttribute::getShortName(). (Girgias)
+  . Fixed bug GH-22905 (Reflection exception messages truncate on null bytes).
+    (DanielEScherzer)
+  . Fixed ReflectionProperty::isLazy() and skipLazyInitialization() using the
+    parent slot when a child class hooks an inherited property. (iliaal)
+  . Fixed segfault in ReflectionMethod::createFromMethodName() on an
+    uninstantiable subclass. (iliaal)
+
+- SimpleXML:
+  . Fixed integer element offsets that cannot resolve aliasing an existing
+    element. (iliaal)
+  . SimpleXMLElement::__construct() now raises a ValueError when the $data
+    argument contains NUL bytes. (iliaal)
+  . Fixed segfault when comparing uninitialized SimpleXMLElement
+    instances. (iliaal)
+
+- SPL:
+  . The spl_classes() function is now deprecated, use
+    ReflectionExtension::getClassNames() instead. (Girgias)
+  . The spl_object_hash() function is now deprecated, use spl_object_id()
+    instead. (Girgias)
+  . The following ArrayIterator methods are now deprecated:
+    * ArrayIterator::getFlags()
+    * ArrayIterator::setFlags()
+    * ArrayIterator::asort()
+    * ArrayIterator::ksort()
+    * ArrayIterator::uasort()
+    * ArrayIterator::uksort()
+    * ArrayIterator::natsort()
+    * ArrayIterator::natcasesort()
+    * ArrayIterator::unserialize()
+    * ArrayIterator::serialize()
+    (Girgias)
 
 - Standard:
   . Added the "filter.max_filter_count" stream context option for php://filter
     URLs. Using more than 16 filters without configuring this option is now
     deprecated. (Sjoerd Langkemper)
+  . The metaphone() function is now deprecated, use a userland phonetic
+    matching library instead. (Weilin Du)
+  . Improved performance of array_intersect(). (mehmetcansahin)
+  . Fixed bug GH-23006 (phpcredits() full-page HTML title says phpinfo()).
+    (Weilin Du)
   . The following functions now raise a ValueError when the $filename argument
     contains NUL bytes: fileperms(), fileinode(), filesize(), fileowner(),
     filegroup(), fileatime(), filemtime(), filectime(), filetype(),
@@ -31,6 +152,39 @@ PHP                                                                        NEWS
     is_link(), file_exists(), lstat(), stat(). (Girgias)
   . Fixed bug GH-22818 (stream_filter_register() orphaned user_filter_map on
     shutdown re-registration). (David Carlier)
+  . Io\Poll\Context::wait() now takes a Time\Duration object as a timeout.
+    (timwolla)
+  . Passing an object to array_walk{_recursive} is now deprecated. Use
+    get_object_vars() on the object instead. (Girgias)
+  . The is_double() function is now deprecated, use is_float() instead.
+    (Girgias)
+  . The is_long() and is_integer() functions are now deprecated, use is_int()
+    instead. (Girgias)
+  . The doubleval() function is now deprecated, use floatval() instead.
+    (Girgias)
+  . The strcoll() function is now deprecated, use Collator::compare() instead.
+    (Girgias)
+  . The SORT_LOCALE_STRING constant for the family of sort functions is now
+    deprecated, use one of the following functions instead:
+    * Collator::sort()
+    * Collator::asort()
+    * Collator::sort()
+    * Collator::sortWithSortKeys()
+    (Girgias)
+
+- Streams:
+  . Fixed file_put_contents() LOCK_EX early return leaking stream error
+    operation depth. (iliaal)
+
+- XSL:
+  . Fixed use-after-free when a DOMDocument subclass __clone() retains the
+    stylesheet copy made by XSLTProcessor::importStylesheet(). (iliaal)
+
+- Zlib
+  . Passing an object for the zlib deflate and inflate stream filter is now
+    deprecated. Use get_object_vars() on the object instead. (Girgias)
+  . Passing an object to the $option argument to deflate_init and inflate_init
+    is now deprecated. Use get_object_vars() on the object instead. (Girgias)
 
 30 Jul 2026, PHP 8.6.0alpha3
 
@@ -47,6 +201,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-22825 (DOMElement::setAttribute() fails silently when the DTD
     declares a default value for the attribute). (iliaal)
+  . Fixed bug GH-23120 (Stack overflow when comparing deeply nested DOM nodes
+    with DOMNode::isEqualNode()). (Weilin Du)
 
 - Embed:
   . Made php-cli functionality available in embed builds. (henderkes)
@@ -583,7 +739,8 @@ PHP                                                                        NEWS
   . Added so_keepalive, tcp_keepidle, tcp_keepintvl and tcp_keepcnt stream
     socket context options. (Jakub Zelenka)
   . Added so_reuseaddr streams context socket option that allows disabling
-    address reuse. (Jakub Zelenka)
+    address resuse. (Jakub Zelenka)
+  . Added so_linger stream socket context option. (Jakub Zelenka)
   . Fixed bug GH-20370 (User stream filters could violate typed property
     constraints). (alexandre-daubois)
   . Allowed filtered streams to be casted as fd for select. (Jakub Zelenka)

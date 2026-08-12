@@ -17,6 +17,7 @@
 #include "php_incomplete_class.h"
 #include "zend_portability.h"
 #include "zend_exceptions.h"
+#include "zend_objects.h"
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1018     /* 1024 - offsetof(php_unserialize_data, entries) / sizeof(void*) */
@@ -300,6 +301,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 					zval param;
 					ZVAL_COPY(&param, &var_dtor_hash->data[i + 1]);
 
+					zend_object_set_properties_reinitable(Z_OBJ_P(zv), /* reinitable */ true);
 					BG(serialize_lock)++;
 					zend_call_known_instance_method_with_1_params(
 						Z_OBJCE_P(zv)->__unserialize, Z_OBJ_P(zv), NULL, &param);
@@ -308,6 +310,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
 					BG(serialize_lock)--;
+					zend_object_set_properties_reinitable(Z_OBJ_P(zv), /* reinitable */ false);
 					zval_ptr_dtor(&param);
 				} else {
 					GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
@@ -1249,7 +1252,7 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* Check for unserialize callback */
-		if (PG(unserialize_callback_func) == NULL) {
+		if (PG(unserialize_callback_func) == NULL || zend_string_equals(PG(unserialize_callback_func), zend_empty_string)) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;

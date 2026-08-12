@@ -295,6 +295,21 @@ rewritten to comply with these rules.
 1. Extensions should be well tested using `*.phpt` tests. Read more at
     [qa.php.net](https://qa.php.net/write-test.php) documentation.
 
+2. When testing exceptions, assert the error class in the catch block.
+
+```diff
+  try {
+      throw new ValueError('foo');
+  } catch (ValueError $e) {
+-     echo $e->getMessage(), "\n";
++     echo $e::class, ': ', $e->getMessage(), "\n";
+  }
+
+  --EXPECT--
+- foo
++ ValueError: foo
+```
+
 ## New and experimental functions
 
 To reduce the problems normally associated with the first public implementation

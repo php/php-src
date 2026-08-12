@@ -13,7 +13,7 @@ var_dump($a->count());
 try {
     $b = new SplFixedArray(-10);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 /* resize and negative value */
@@ -21,7 +21,7 @@ $b = new SplFixedArray();
 try {
     $b->setSize(-5);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 /* calling __construct() twice */
@@ -47,7 +47,7 @@ try {
         var_dump($v);
     }
 } catch (\Error $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 //non-long indexes
@@ -63,14 +63,14 @@ var_dump(empty($a["3"]));
 --EXPECTF--
 int(0)
 int(0)
-SplFixedArray::__construct(): Argument #1 ($size) must be greater than or equal to 0
-SplFixedArray::setSize(): Argument #1 ($size) must be greater than or equal to 0
+ValueError: SplFixedArray::__construct(): Argument #1 ($size) must be greater than or equal to 0
+ValueError: SplFixedArray::setSize(): Argument #1 ($size) must be greater than or equal to 0
 NULL
 int(0)
 int(0)
 object(SplFixedArray)#%d (0) {
 }
-string(52) "An iterator cannot be used with foreach by reference"
+Error: An iterator cannot be used with foreach by reference
 bool(false)
 string(3) "foo"
 bool(true)

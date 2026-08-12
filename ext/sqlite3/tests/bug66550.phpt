@@ -16,8 +16,8 @@ $db->close();
 try {
     $stmt->reset();
 } catch (\Error $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-The SQLite3 object has not been correctly initialised or is already closed
+Error: The SQLite3 object has not been correctly initialised or is already closed

@@ -360,6 +360,11 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 
 static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags);
 
+static void zend_jit_preserve_parent_regs(zend_jit_ctx *jit,
+                                          zend_ssa *ssa,
+                                          zend_jit_trace_info *parent,
+                                          uint32_t exit_num);
+
 typedef struct _zend_jit_stub {
 	const char *name;
 	int (*stub)(zend_jit_ctx *jit);
@@ -17351,6 +17356,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 static int zend_jit_deoptimizer_start(zend_jit_ctx        *jit,
                                       zend_string         *name,
                                       uint32_t             trace_num,
+                                      zend_jit_trace_info *parent,
                                       uint32_t             exit_num)
 {
 	zend_jit_init_ctx(jit, (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL) ? 0 : IR_START_BR_TARGET);
@@ -17362,6 +17368,8 @@ static int zend_jit_deoptimizer_start(zend_jit_ctx        *jit,
 	jit->name = zend_string_copy(name);
 
 	jit->ctx.flags |= IR_SKIP_PROLOGUE;
+
+	zend_jit_preserve_parent_regs(jit, NULL, parent, exit_num);
 
 	return 1;
 }
@@ -17399,6 +17407,21 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 		jit->ctx.flags |= IR_SKIP_PROLOGUE;
 	}
 
+	zend_jit_preserve_parent_regs(jit, ssa, parent, exit_num);
+
+	ir_STORE(jit_EG(jit_trace_num), ir_CONST_U32(trace_num));
+
+	return 1;
+}
+
+static void zend_jit_preserve_parent_regs(zend_jit_ctx *jit,
+                                          zend_ssa *ssa,
+                                          zend_jit_trace_info *parent,
+                                          uint32_t exit_num)
+{
+	/* Emit early RLOADs of registers used for deoptimization to prevent
+	 * clobbering. zend_jit_deopt_rload() will reference these. */
+
 	if (parent) {
 		int i;
 		int parent_vars_count = parent->exit_info[exit_num].stack_size;
@@ -17406,7 +17429,6 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 			parent->stack_map +
 			parent->exit_info[exit_num].stack_offset;
 
-		/* prevent clobbering of registers used for deoptimization */
 		for (i = 0; i < parent_vars_count; i++) {
 			if (STACK_FLAGS(parent_stack, i) != ZREG_CONST
 			 && STACK_REG(parent_stack, i) != ZREG_NONE) {
@@ -17450,10 +17472,6 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 			ir_RLOAD_A(parent->exit_info[exit_num].poly_this.reg);
 		}
 	}
-
-	ir_STORE(jit_EG(jit_trace_num), ir_CONST_U32(trace_num));
-
-	return 1;
 }
 
 static int zend_jit_trace_begin_loop(zend_jit_ctx *jit)

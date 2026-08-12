@@ -18,19 +18,19 @@ file_put_contents($testfile, "hello");
 try {
     posix_access($testfile, -1);
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     posix_access($testfile, 01000); // S_ISVTX bit (sticky)
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     posix_access($testfile, 02000); // S_ISGID bit
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 if (posix_access($testfile, POSIX_R_OK | POSIX_W_OK)) {
@@ -47,8 +47,8 @@ if (posix_access($testfile, POSIX_F_OK)) {
 @unlink(__DIR__ . '/testfile.txt');
 ?>
 --EXPECTF--
-posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
-posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
-posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
+ValueError: posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
+ValueError: posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
+ValueError: posix_access(): Argument #2 ($flags) must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK
 Read/write access OK
 File exists OK

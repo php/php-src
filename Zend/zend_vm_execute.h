@@ -1006,7 +1006,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_STATIC
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
-		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
+		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage, /* check_writable */ true EXECUTE_DATA_CC);
 
 
 	} else {
@@ -1044,7 +1044,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_STATIC
 	value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
-		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
+		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage, /* check_writable */ true EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 	} else {
 		value = zend_assign_to_variable_ex(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES(), &garbage);
@@ -1082,7 +1082,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_ASSIGN_STATIC
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
-		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
+		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage, /* check_writable */ true EXECUTE_DATA_CC);
 
 
 	} else {
@@ -5914,33 +5914,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DECLARE_CLASS
 	SAVE_OPLINE();
 	do_bind_class(RT_CONSTANT(opline, opline->op1), (opline->op2_type == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_function *func;
-	zval *object;
-	zend_class_entry *called_scope;
-
-	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
-	if (Z_TYPE(EX(This)) == IS_OBJECT) {
-		called_scope = Z_OBJCE(EX(This));
-		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||
-				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
-			object = NULL;
-		} else {
-			object = &EX(This);
-		}
-	} else {
-		called_scope = Z_CE(EX(This));
-		object = NULL;
-	}
-	SAVE_OPLINE();
-	zend_create_closure(EX_VAR(opline->result.var), func,
-		EX(func)->op_array.scope, called_scope, object);
-
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_YIELD_FROM_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -24575,7 +24548,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -24732,7 +24705,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -24887,7 +24860,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -27283,7 +27256,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -27439,7 +27412,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -27593,7 +27566,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -31110,7 +31083,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -31267,7 +31240,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -31422,7 +31395,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -32928,6 +32901,46 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CLONE_SPEC_UN
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_function *func;
+	zval *object;
+	zend_class_entry *called_scope;
+
+	if (opline->extended_value != (uint32_t)-1) {
+		zend_object *closure = CACHED_PTR(opline->extended_value);
+		if (closure) {
+			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
+
+	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
+	if (Z_TYPE(EX(This)) == IS_OBJECT) {
+		called_scope = Z_OBJCE(EX(This));
+		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||
+				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
+			object = NULL;
+		} else {
+			object = &EX(This);
+		}
+	} else {
+		called_scope = Z_CE(EX(This));
+		object = NULL;
+	}
+	SAVE_OPLINE();
+	zend_create_closure(EX_VAR(opline->result.var), func,
+		EX(func)->op_array.scope, called_scope, object);
+	if (opline->extended_value != (uint32_t)-1) {
+		zend_object *closure = Z_OBJ_P(EX_VAR(opline->result.var));
+		GC_ADDREF(closure);
+		CACHE_PTR(opline->extended_value, closure);
+		zend_stack_push(&EG(lambda_cache), &closure);
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_FETCH_CLASS_NAME_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	uint32_t fetch_type;
@@ -33644,7 +33657,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -33802,7 +33815,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -33958,7 +33971,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -35766,7 +35779,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -35923,7 +35936,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -36078,7 +36091,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -38362,7 +38375,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -38520,7 +38533,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -38676,7 +38689,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -42731,7 +42744,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -42889,7 +42902,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -43045,7 +43058,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -46554,7 +46567,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -46711,7 +46724,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -46866,7 +46879,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -51673,7 +51686,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -51831,7 +51844,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -51987,7 +52000,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -53954,7 +53967,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_STATIC_PROP
 	value = RT_CONSTANT((opline+1), (opline+1)->op1);
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
-		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
+		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage, /* check_writable */ true EXECUTE_DATA_CC);
 
 
 	} else {
@@ -53992,7 +54005,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_STATIC_PROP
 	value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
-		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
+		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage, /* check_writable */ true EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 	} else {
 		value = zend_assign_to_variable_ex(prop, value, IS_TMP_VAR, EX_USES_STRICT_TYPES(), &garbage);
@@ -54030,7 +54043,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_ASSIGN_STATIC_PROP
 	value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
-		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage EXECUTE_DATA_CC);
+		value = zend_assign_to_typed_prop(prop_info, prop, value, &garbage, /* check_writable */ true EXECUTE_DATA_CC);
 
 
 	} else {
@@ -58746,33 +58759,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DECLARE_CLASS_SPEC
 	SAVE_OPLINE();
 	do_bind_class(RT_CONSTANT(opline, opline->op1), (opline->op2_type == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_function *func;
-	zval *object;
-	zend_class_entry *called_scope;
-
-	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
-	if (Z_TYPE(EX(This)) == IS_OBJECT) {
-		called_scope = Z_OBJCE(EX(This));
-		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||
-				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
-			object = NULL;
-		} else {
-			object = &EX(This);
-		}
-	} else {
-		called_scope = Z_CE(EX(This));
-		object = NULL;
-	}
-	SAVE_OPLINE();
-	zend_create_closure(EX_VAR(opline->result.var), func,
-		EX(func)->op_array.scope, called_scope, object);
-
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_YIELD_FROM_SPEC_CONST_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -77205,7 +77191,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -77362,7 +77348,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -77517,7 +77503,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -79913,7 +79899,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -80069,7 +80055,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -80223,7 +80209,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -83740,7 +83726,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -83897,7 +83883,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -84052,7 +84038,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -85558,6 +85544,46 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CLONE_SPEC_UNUSED_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_function *func;
+	zval *object;
+	zend_class_entry *called_scope;
+
+	if (opline->extended_value != (uint32_t)-1) {
+		zend_object *closure = CACHED_PTR(opline->extended_value);
+		if (closure) {
+			ZVAL_OBJ_COPY(EX_VAR(opline->result.var), closure);
+			ZEND_VM_NEXT_OPCODE();
+		}
+	}
+
+	func = (zend_function *) EX(func)->op_array.dynamic_func_defs[opline->op2.num];
+	if (Z_TYPE(EX(This)) == IS_OBJECT) {
+		called_scope = Z_OBJCE(EX(This));
+		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||
+				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
+			object = NULL;
+		} else {
+			object = &EX(This);
+		}
+	} else {
+		called_scope = Z_CE(EX(This));
+		object = NULL;
+	}
+	SAVE_OPLINE();
+	zend_create_closure(EX_VAR(opline->result.var), func,
+		EX(func)->op_array.scope, called_scope, object);
+	if (opline->extended_value != (uint32_t)-1) {
+		zend_object *closure = Z_OBJ_P(EX_VAR(opline->result.var));
+		GC_ADDREF(closure);
+		CACHE_PTR(opline->extended_value, closure);
+		zend_stack_push(&EG(lambda_cache), &closure);
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_FETCH_CLASS_NAME_SPEC_UNUSED_TAILCALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	uint32_t fetch_type;
@@ -86274,7 +86300,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -86432,7 +86458,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -86588,7 +86614,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -88396,7 +88422,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -88553,7 +88579,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -88708,7 +88734,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -90992,7 +91018,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -91150,7 +91176,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -91306,7 +91332,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -95361,7 +95387,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -95519,7 +95545,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -95675,7 +95701,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -99184,7 +99210,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -99341,7 +99367,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -99496,7 +99522,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -104201,7 +104227,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -104359,7 +104385,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -104515,7 +104541,7 @@ assign_obj_simple:
 				property_val = OBJ_PROP(zobj, prop_offset);
 				if (Z_TYPE_P(property_val) != IS_UNDEF) {
 					if (prop_info != NULL) {
-						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage, /* check_writable */ false EXECUTE_DATA_CC);
 						goto free_and_exit_assign_obj;
 					} else {
 fast_assign_obj:
@@ -109287,7 +109313,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_MAKE_REF_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_DECLARE_FUNCTION_SPEC_LABEL,
-			(void*)&&ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_LABEL,
+			(void*)&&ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED_LABEL,
 			(void*)&&ZEND_DECLARE_CONST_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_DECLARE_CLASS_SPEC_CONST_LABEL,
 			(void*)&&ZEND_DECLARE_CLASS_DELAYED_SPEC_CONST_CONST_LABEL,
@@ -111297,11 +111323,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_DECLARE_CLASS_SPEC_CONST)
 				ZEND_DECLARE_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_DECLARE_CLASS_SPEC_CONST)
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST):
-				VM_TRACE(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST)
-				ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				VM_TRACE_OP_END(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_YIELD_FROM_SPEC_CONST):
 				VM_TRACE(ZEND_YIELD_FROM_SPEC_CONST)
@@ -114121,6 +114142,11 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_CLONE_SPEC_UNUSED)
 				ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_CLONE_SPEC_UNUSED)
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED):
+				VM_TRACE(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED)
+				ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				VM_TRACE_OP_END(ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_CLASS_NAME_SPEC_UNUSED):
 				VM_TRACE(ZEND_FETCH_CLASS_NAME_SPEC_UNUSED)
@@ -118255,7 +118281,7 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLER,
 		ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
-		ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_HANDLER,
+		ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED_HANDLER,
 		ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER,
 		ZEND_DECLARE_CLASS_SPEC_CONST_HANDLER,
 		ZEND_DECLARE_CLASS_DELAYED_SPEC_CONST_CONST_HANDLER,
@@ -121743,7 +121769,7 @@ void zend_vm_init(void)
 		ZEND_NULL_TAILCALL_HANDLER,
 		ZEND_MAKE_REF_SPEC_CV_UNUSED_TAILCALL_HANDLER,
 		ZEND_DECLARE_FUNCTION_SPEC_TAILCALL_HANDLER,
-		ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_TAILCALL_HANDLER,
+		ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_UNUSED_TAILCALL_HANDLER,
 		ZEND_DECLARE_CONST_SPEC_CONST_CONST_TAILCALL_HANDLER,
 		ZEND_DECLARE_CLASS_SPEC_CONST_TAILCALL_HANDLER,
 		ZEND_DECLARE_CLASS_DELAYED_SPEC_CONST_CONST_TAILCALL_HANDLER,

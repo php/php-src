@@ -29,7 +29,7 @@ try {
     // This one should fail
     var_dump($db->query('CREATE TABLE test (a, b);'));
 } catch (\Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -40,4 +40,4 @@ object(PDOStatement)#%d (1) {
   string(9) "SELECT 1;"
 }
 Trampoline for authorizer
-SQLSTATE[HY000]: General error: 23 not authorized
+PDOException: SQLSTATE[HY000]: General error: 23 not authorized

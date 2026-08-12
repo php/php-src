@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_poll.stub.php instead.
- * Stub hash: a7450146c5b3b3f3486611c83a55cf0cc932b27a
+ * Stub hash: 2f52b00fd6dfc62291e0dd288ffd68547b29bdaa
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Backend_getAvailableBackends, 0, 0, IS_ARRAY, 0)
@@ -56,8 +56,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Poll_Context_add, 0, 2, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Context_wait, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeoutSeconds, IS_LONG, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeoutMicroseconds, IS_LONG, 0, "0")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timeout, Time\\Duration, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxEvents, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 

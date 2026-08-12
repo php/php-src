@@ -22,7 +22,7 @@
 PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
-		php_print_info_htmlhead();
+		php_print_info_htmlhead("phpcredits()");
 	}
 
 	if (!sapi_module.phpinfo_as_text) {

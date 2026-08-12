@@ -225,7 +225,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(zpp_error error_code, uint32_t num, char *name, zend_expected_type expected_type, const zval *arg) /* {{{ */
 {
 	switch (error_code) {
 		case ZPP_ERROR_WRONG_CALLBACK:
@@ -261,7 +261,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_FAILURE:
 			ZEND_ASSERT(EG(exception) && "Should have produced an error already");
 			break;
-		default: ZEND_UNREACHABLE();
+		case ZPP_ERROR_OK:
+			ZEND_UNREACHABLE();
 	}
 }
 /* }}} */
@@ -485,27 +486,29 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_clas
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null) /* {{{ */
 {
-	zend_class_entry *ce_base = *pce;
+	const zend_class_entry *ce_base = *pce;
 
 	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*pce = NULL;
 		return 1;
 	}
-	if (!try_convert_to_string(arg)) {
+	zend_string *class_name;
+	if (!zend_parse_arg_str(arg, &class_name, check_null, num)) {
 		*pce = NULL;
+		zend_wrong_parameter_error(ZPP_ERROR_WRONG_ARG, num, NULL, check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING, arg);
 		return 0;
 	}
 
-	*pce = zend_lookup_class(Z_STR_P(arg));
+	*pce = zend_lookup_class(class_name);
 	if (ce_base) {
 		if ((!*pce || !instanceof_function(*pce, ce_base))) {
-			zend_argument_type_error(num, "must be a class name derived from %s, %s given", ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
+			zend_argument_type_error(num, "must be a class name derived from %s, %s given", ZSTR_VAL(ce_base->name), ZSTR_VAL(class_name));
 			*pce = NULL;
 			return 0;
 		}
 	}
 	if (!*pce) {
-		zend_argument_type_error(num, "must be a valid class name, %s given", Z_STRVAL_P(arg));
+		zend_argument_type_error(num, "must be a valid class name, %s given", ZSTR_VAL(class_name));
 		return 0;
 	}
 	return 1;
@@ -1125,18 +1128,6 @@ static zend_result zend_parse_arg(uint32_t arg_num, zval *arg, va_list *va, cons
 	return SUCCESS;
 }
 /* }}} */
-
-ZEND_API zend_result zend_parse_parameter(int flags, uint32_t arg_num, zval *arg, const char *spec, ...)
-{
-	va_list va;
-	zend_result ret;
-
-	va_start(va, spec);
-	ret = zend_parse_arg(arg_num, arg, &va, &spec, flags);
-	va_end(va);
-
-	return ret;
-}
 
 static ZEND_COLD void zend_parse_parameters_debug_error(const char *msg) {
 	const zend_function *active_function = EG(current_execute_data)->func;
@@ -4237,7 +4228,7 @@ again:
 			}
 
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == FAILURE) {
+			if (!Z_OBJ_HANDLER_P(callable, get_closure) || Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == FAILURE) {
 				if (error) *error = estrdup("no array or string given");
 				return 0;
 			}
@@ -4830,6 +4821,9 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 	if (zend_string_equals_ci(name, ZSTR_KNOWN(ZEND_STR_CLASS))) {
 		zend_error_noreturn(ce->type == ZEND_INTERNAL_CLASS ? E_CORE_ERROR : E_COMPILE_ERROR,
 				"A class constant must not be called 'class'; it is reserved for class name fetching");
+	} else if (zend_string_equals_literal_ci(name, "namespace")) {
+		zend_error(E_DEPRECATED, "Declaring %s constant called 'namespace' is deprecated",
+			zend_get_object_type(ce));
 	}
 
 	if (Z_TYPE_P(value) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR_P(value))) {
@@ -5193,17 +5187,11 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 }
 /* }}} */
 
-ZEND_API void zend_save_error_handling(zend_error_handling *current) /* {{{ */
-{
-	current->handling = EG(error_handling);
-	current->exception = EG(exception_class);
-}
-/* }}} */
-
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current) /* {{{ */
 {
 	if (current) {
-		zend_save_error_handling(current);
+		current->handling = EG(error_handling);
+		current->exception = EG(exception_class);
 	}
 	ZEND_ASSERT(error_handling == EH_THROW || exception_class == NULL);
 	EG(error_handling) = error_handling;

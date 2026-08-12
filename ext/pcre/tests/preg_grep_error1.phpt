@@ -25,18 +25,17 @@ foreach ($values as $value) {
     try {
         var_dump(preg_grep($value, $array));
     } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 $value = new stdclass(); //Object
 try {
     var_dump(preg_grep($value, $array));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-
 Warning: preg_grep(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_grep_error1.php on line %d
 bool(false)
 
@@ -48,11 +47,11 @@ bool(false)
 
 Warning: preg_grep(): Unknown modifier 'F' in %spreg_grep_error1.php on line %d
 bool(false)
-preg_grep(): Argument #1 ($pattern) must be of type string, array given
+TypeError: preg_grep(): Argument #1 ($pattern) must be of type string, array given
 array(2) {
   [1]=>
   string(3) "abc"
   [2]=>
   string(4) "test"
 }
-preg_grep(): Argument #1 ($pattern) must be of type string, stdClass given
+TypeError: preg_grep(): Argument #1 ($pattern) must be of type string, stdClass given

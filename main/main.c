@@ -824,7 +824,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
 
-	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateStrNotEmpty,			unserialize_callback_func,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateStr,			unserialize_callback_func,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator.output",	"&",		PHP_INI_ALL,		OnUpdateStrNotEmpty,	arg_separator.output,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator.input",	"&",		PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateStrNotEmpty,	arg_separator.input,	php_core_globals,	core_globals)
@@ -1241,21 +1241,12 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, int type, const char *forma
 
 /* {{{ php_error_docref */
 /* Generate an error which links to docref or the php.net documentation if docref is NULL */
-#define php_error_docref_impl(docref, type, format) do {\
-		va_list args; \
-		va_start(args, format); \
-		php_verror(docref, type, format, args); \
-		va_end(args); \
-	} while (0)
-
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 {
-	php_error_docref_impl(docref, type, format);
-}
-
-PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...)
-{
-	php_error_docref_impl(docref, type, format);
+	va_list args;
+	va_start(args, format);
+	php_verror(docref, type, format, args);
+	va_end(args);
 }
 /* }}} */
 

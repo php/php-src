@@ -78,6 +78,7 @@ const SORT_STRING = UNKNOWN;
  * @var int
  * @cvalue PHP_SORT_LOCALE_STRING
  */
+#[\Deprecated(message: "use one of the Collator::*sort*() methods instead", since: "8.6")]
 const SORT_LOCALE_STRING = UNKNOWN;
 /**
  * @var int
@@ -2238,6 +2239,7 @@ function inet_pton(string $ip): string|false {}
 /* metaphone.c */
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'use a userland phonetic matching library instead')]
 function metaphone(string $string, int $max_phonemes = 0): string {}
 
 /* {{{ head.c */
@@ -2319,6 +2321,7 @@ function strcspn(string $string, string $characters, int $offset = 0, ?int $leng
 function nl_langinfo(int $item): string|false {}
 #endif
 
+#[\Deprecated(message: "use Collator::compare() instead", since: "8.6")]
 function strcoll(string $string1, string $string2): int {}
 
 /**
@@ -3634,6 +3637,7 @@ function intval(mixed $value, int $base = 10): int {}
 function floatval(mixed $value): float {}
 
 /** @alias floatval */
+#[\Deprecated(message: "use floatval() instead", since: "8.6")]
 function doubleval(mixed $value): float {}
 
 /**
@@ -3667,9 +3671,11 @@ function is_bool(mixed $value): bool {}
 function is_int(mixed $value): bool {}
 
 /** @alias is_int */
+#[\Deprecated(message: "use is_int() instead", since: "8.6")]
 function is_integer(mixed $value): bool {}
 
 /** @alias is_int */
+#[\Deprecated(message: "use is_int() instead", since: "8.6")]
 function is_long(mixed $value): bool {}
 
 /**
@@ -3678,6 +3684,7 @@ function is_long(mixed $value): bool {}
 function is_float(mixed $value): bool {}
 
 /** @alias is_float */
+#[\Deprecated(message: "use is_float() instead", since: "8.6")]
 function is_double(mixed $value): bool {}
 
 /**
