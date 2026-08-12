@@ -36,6 +36,7 @@ typedef enum {
 	PHP_USER_CACHE_REASON_BACKEND_NOT_INITIALIZED_BEFORE_WORKER,
 	PHP_USER_CACHE_REASON_BACKEND_INITIALIZED_AFTER_WORKER,
 	PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE,
+	PHP_USER_CACHE_REASON_APACHE_BOUNDARY_UNAVAILABLE,
 	PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE,
 	PHP_USER_CACHE_REASON_REQUEST_SHUTDOWN
 } php_user_cache_reason;
@@ -101,11 +102,18 @@ ZEND_API bool php_user_cache_startup_default_context_storage(void);
 ZEND_API php_user_cache_partition *php_user_cache_partition_create(const char *name);
 ZEND_API bool php_user_cache_partition_startup_storage(php_user_cache_partition *partition);
 ZEND_API void php_user_cache_partition_activate(php_user_cache_partition *partition);
+/* Activate a request partition keyed by a caller-composed boundary id; the
+ * id does not need to be NUL-terminated. */
+ZEND_API void php_user_cache_activate_boundary_partition_by_id(
+	const char *sapi_prefix,
+	const char *boundary,
+	size_t boundary_len,
+	php_user_cache_reason failure_reason
+);
 /* Activate a request partition using DOCUMENT_ROOT or SERVER_NAME. */
 ZEND_API void php_user_cache_activate_boundary_partition(
 	const char *sapi_prefix,
 	const char *(*get_env)(const char *name),
-	void (*log_message)(const char *message),
 	php_user_cache_reason failure_reason
 );
 ZEND_API void php_user_cache_boundary_partitions_shutdown(void);

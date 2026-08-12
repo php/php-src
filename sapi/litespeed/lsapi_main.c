@@ -517,11 +517,6 @@ static void sapi_lsapi_log_message(const char *message, int syslog_type_int)
 }
 /* }}} */
 
-static void lsapi_user_cache_log_message(const char *message)
-{
-    sapi_lsapi_log_message(message, 0);
-}
-
 static const char *lsapi_user_cache_get_boundary_value(const char *name)
 {
     return sapi_lsapi_getenv(name, 0);
@@ -532,7 +527,6 @@ static void lsapi_user_cache_activate_request_partition(void)
     php_user_cache_activate_boundary_partition(
         "litespeed",
         lsapi_user_cache_get_boundary_value,
-        lsapi_user_cache_log_message,
         PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE
     );
 }
@@ -1658,7 +1652,6 @@ static PHP_MINIT_FUNCTION(litespeed)
 static PHP_MSHUTDOWN_FUNCTION(litespeed)
 {
     zend_hash_destroy(&user_config_cache);
-    php_user_cache_boundary_partitions_shutdown();
 
     /* UNREGISTER_INI_ENTRIES(); */
     return SUCCESS;

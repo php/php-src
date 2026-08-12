@@ -158,10 +158,15 @@ static zend_class_entry *user_cache_pool_status_ce;
 static zend_object_handlers user_cache_object_handlers;
 static zend_object_handlers user_cache_status_object_handlers;
 static zend_object_handlers user_cache_pool_status_object_handlers;
-static uint32_t user_cache_boundary_partition_count = 0;
-static bool user_cache_boundary_limit_logged = false;
-static bool user_cache_boundary_startup_failed_logged = false;
 static uint64_t user_cache_self_pid = 0;
+static uint32_t user_cache_boundary_partition_count = 0;
+static bool user_cache_boundary_creation_disabled = false;
+static bool user_cache_boundary_startup_failed_logged = false;
+#ifdef ZTS
+/* Serializes boundary partition lookup/creation and, transitively, all
+ * request-time mutation of php_user_cache_partitions. */
+static MUTEX_T user_cache_boundary_partitions_mutex = NULL;
+#endif
 #ifndef ZEND_WIN32
 static bool user_cache_self_pid_uncached = false;
 static bool user_cache_pid_atfork_registered = false;
@@ -177,8 +182,11 @@ php_user_cache_context php_user_cache_context_state = {
 #endif
 };
 bool php_user_cache_runtime_opted_in = false;
-/* Append-only; cgi/lsapi boundary partitions are added lazily at request
- * activation, and those SAPIs are single-threaded, so no locking is needed. */
+/* Append-only. Partitions are added eagerly before workers exist
+ * (apache2handler config stage, FPM master) or lazily through boundary
+ * partition creation, which holds the boundary partitions lock so threaded
+ * SAPIs cannot race the thread-shutdown traversal in
+ * user_cache_claim_header_is_attached(). */
 php_user_cache_partition *php_user_cache_partitions = NULL;
 
 static void user_cache_object_free(zend_object *obj);
@@ -1258,6 +1266,10 @@ static zend_object *user_cache_availability_enum_case(php_user_cache_reason reas
 			case_id = ZEND_ENUM_UserCache_CacheAvailability_UnavailableByCgiFastCgiBoundary;
 
 			break;
+		case PHP_USER_CACHE_REASON_APACHE_BOUNDARY_UNAVAILABLE:
+			case_id = ZEND_ENUM_UserCache_CacheAvailability_UnavailableByApacheBoundary;
+
+			break;
 		case PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE:
 			case_id = ZEND_ENUM_UserCache_CacheAvailability_UnavailableByLsapiBoundary;
 
@@ -2200,12 +2212,31 @@ static bool user_cache_format_boundary_key_prefix(char *prefix, size_t prefix_si
 	return true;
 }
 
-static char *user_cache_build_boundary_key(const char *boundary, size_t *key_len)
+void php_user_cache_boundary_partitions_lock(void)
 {
-	size_t boundary_len, prefix_len;
-	char *boundary_key, prefix[64];
+#ifdef ZTS
+	if (user_cache_boundary_partitions_mutex != NULL) {
+		tsrm_mutex_lock(user_cache_boundary_partitions_mutex);
+	}
+#endif
+}
 
-	boundary_len = strlen(boundary);
+void php_user_cache_boundary_partitions_unlock(void)
+{
+#ifdef ZTS
+	if (user_cache_boundary_partitions_mutex != NULL) {
+		tsrm_mutex_unlock(user_cache_boundary_partitions_mutex);
+	}
+#endif
+}
+
+static char *user_cache_build_boundary_key(
+		const char *boundary,
+		size_t boundary_len,
+		size_t *key_len)
+{
+	size_t prefix_len;
+	char *boundary_key, prefix[64];
 
 	if (!user_cache_format_boundary_key_prefix(prefix, sizeof(prefix), &prefix_len)) {
 		return NULL;
@@ -2221,7 +2252,8 @@ static char *user_cache_build_boundary_key(const char *boundary, size_t *key_len
 	}
 
 	memcpy(boundary_key, prefix, prefix_len);
-	memcpy(boundary_key + prefix_len, boundary, boundary_len + 1);
+	memcpy(boundary_key + prefix_len, boundary, boundary_len);
+	boundary_key[prefix_len + boundary_len] = '\0';
 
 	*key_len = prefix_len + boundary_len;
 
@@ -2251,17 +2283,25 @@ static php_user_cache_boundary_partition *user_cache_create_boundary_partition(
 		const char *sapi_prefix,
 		const char *boundary,
 		size_t boundary_len,
-		zend_ulong boundary_hash,
-		void (*log_message)(const char *message))
+		zend_ulong boundary_hash)
 {
 	php_user_cache_boundary_partition *entry;
-	char partition_name[128];
+	char partition_name[128], limit_message[256];
+
+	if (user_cache_boundary_creation_disabled) {
+		return NULL;
+	}
 
 	if (user_cache_boundary_partition_count >= PHP_USER_CACHE_MAX_BOUNDARY_PARTITIONS) {
-		if (!user_cache_boundary_limit_logged) {
-			log_message("UserCache disabled for this request because the cache boundary partition limit was reached");
-			user_cache_boundary_limit_logged = true;
-		}
+		user_cache_boundary_creation_disabled = true;
+		snprintf(
+			limit_message,
+			sizeof(limit_message),
+			"UserCache boundary partition limit (%u) reached; creation of new partitions has been disabled "
+			"for this process; existing partitions remain available",
+			PHP_USER_CACHE_MAX_BOUNDARY_PARTITIONS
+		);
+		php_log_err(limit_message);
 
 		return NULL;
 	}
@@ -2485,23 +2525,27 @@ static void user_cache_activate_request_unavailable(php_user_cache_reason reason
 static php_user_cache_partition *user_cache_boundary_partition_get(
 		const char *sapi_prefix,
 		const char *boundary,
-		void (*log_message)(const char *message))
+		size_t supplied_boundary_len)
 {
 	php_user_cache_boundary_partition *entry;
 	zend_ulong boundary_hash;
 	size_t boundary_len;
 	char *boundary_key;
 
-	boundary_key = user_cache_build_boundary_key(boundary, &boundary_len);
+	boundary_key = user_cache_build_boundary_key(boundary, supplied_boundary_len, &boundary_len);
 	if (boundary_key == NULL) {
 		return NULL;
 	}
 
 	boundary_hash = zend_inline_hash_func(boundary_key, boundary_len);
+
+	php_user_cache_boundary_partitions_lock();
+
 	entry = user_cache_find_boundary_partition(boundary_key, boundary_len, boundary_hash);
 	if (entry == NULL) {
-		entry = user_cache_create_boundary_partition(sapi_prefix, boundary_key, boundary_len, boundary_hash, log_message);
+		entry = user_cache_create_boundary_partition(sapi_prefix, boundary_key, boundary_len, boundary_hash);
 		if (entry == NULL) {
+			php_user_cache_boundary_partitions_unlock();
 			free(boundary_key);
 
 			return NULL;
@@ -2513,29 +2557,25 @@ static php_user_cache_partition *user_cache_boundary_partition_get(
 	if (!php_user_cache_partition_startup_storage(entry->partition) &&
 		!user_cache_boundary_startup_failed_logged
 	) {
-		log_message("UserCache partition startup failed; UserCache will be unavailable");
+		php_log_err("UserCache partition startup failed; UserCache will be unavailable");
 		user_cache_boundary_startup_failed_logged = true;
 	}
+
+	php_user_cache_boundary_partitions_unlock();
 
 	return entry->partition;
 }
 
-ZEND_API void php_user_cache_activate_boundary_partition(
+ZEND_API void php_user_cache_activate_boundary_partition_by_id(
 		const char *sapi_prefix,
-		const char *(*get_env)(const char *name),
-		void (*log_message)(const char *message),
+		const char *boundary,
+		size_t boundary_len,
 		php_user_cache_reason failure_reason)
 {
-	const char *boundary;
 	php_user_cache_partition *partition = NULL;
 
-	boundary = get_env("DOCUMENT_ROOT");
-	if (boundary == NULL || boundary[0] == '\0') {
-		boundary = get_env("SERVER_NAME");
-	}
-
-	if (boundary != NULL && boundary[0] != '\0') {
-		partition = user_cache_boundary_partition_get(sapi_prefix, boundary, log_message);
+	if (boundary != NULL && boundary_len != 0) {
+		partition = user_cache_boundary_partition_get(sapi_prefix, boundary, boundary_len);
 	}
 
 	if (partition == NULL) {
@@ -2547,9 +2587,31 @@ ZEND_API void php_user_cache_activate_boundary_partition(
 	php_user_cache_partition_activate(partition);
 }
 
+ZEND_API void php_user_cache_activate_boundary_partition(
+		const char *sapi_prefix,
+		const char *(*get_env)(const char *name),
+		php_user_cache_reason failure_reason)
+{
+	const char *boundary;
+
+	boundary = get_env("DOCUMENT_ROOT");
+	if (boundary == NULL || boundary[0] == '\0') {
+		boundary = get_env("SERVER_NAME");
+	}
+
+	php_user_cache_activate_boundary_partition_by_id(
+		sapi_prefix,
+		boundary,
+		boundary != NULL ? strlen(boundary) : 0,
+		failure_reason
+	);
+}
+
 ZEND_API void php_user_cache_boundary_partitions_shutdown(void)
 {
 	php_user_cache_boundary_partition *entry, *next;
+
+	php_user_cache_boundary_partitions_lock();
 
 	entry = user_cache_boundary_partitions;
 	while (entry != NULL) {
@@ -2561,8 +2623,10 @@ ZEND_API void php_user_cache_boundary_partitions_shutdown(void)
 
 	user_cache_boundary_partitions = NULL;
 	user_cache_boundary_partition_count = 0;
-	user_cache_boundary_limit_logged = false;
+	user_cache_boundary_creation_disabled = false;
 	user_cache_boundary_startup_failed_logged = false;
+
+	php_user_cache_boundary_partitions_unlock();
 }
 
 ZEND_API void php_user_cache_opt_in(void)
@@ -2604,6 +2668,12 @@ static void user_cache_minit(void)
 {
 	php_user_cache_context *prev_ctx;
 
+#ifdef ZTS
+	if (user_cache_boundary_partitions_mutex == NULL) {
+		user_cache_boundary_partitions_mutex = tsrm_mutex_alloc();
+	}
+#endif
+
 #ifndef ZEND_WIN32
 	user_cache_self_pid = php_user_cache_current_pid();
 	if (!user_cache_pid_atfork_registered &&
@@ -2637,6 +2707,14 @@ static void user_cache_mshutdown(void)
 	php_user_cache_context *prev_ctx;
 
 	user_cache_partitions_shutdown();
+	php_user_cache_boundary_partitions_shutdown();
+
+#ifdef ZTS
+	if (user_cache_boundary_partitions_mutex != NULL) {
+		tsrm_mutex_free(user_cache_boundary_partitions_mutex);
+		user_cache_boundary_partitions_mutex = NULL;
+	}
+#endif
 
 	UC_G(active_partition) = NULL;
 
