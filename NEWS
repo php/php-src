@@ -192,8 +192,6 @@ PHP                                                                        NEWS
   . Implemented partial function application RFC. (Arnaud)
   . Fixed bug GH-22263 (reset typed property default on every unserialize
     failure path). (David Carlier)
-  . Fixed bug GH-18985 (Wrong line numbers for match with constant arms).
-    (ilutov)
   . Fixed bug GH-18847 (SEGV in zend_fetch_debug_backtrace() when the memory
     limit is reached while the tracing JIT enters a call frame). (Arnaud,
     iliaal)
