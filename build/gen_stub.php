@@ -2988,7 +2988,7 @@ class StringBuilder {
      *   - freeing the zend_string, if needed
      *
      * @param string $varName
-     * @param string $strContent
+     * @param string $content
      * @param ?int $minPHPCompatibility
      * @param bool $interned
      * @return string[]
@@ -5036,7 +5036,7 @@ function parseFunctionLike(
 }
 
 /**
- * @param array<int, array<int, AttributeGroup> $attributes
+ * @param array<int, array<int, AttributeGroup>> $attributes
  */
 function parseConstLike(
     PrettyPrinterAbstract $prettyPrinter,
@@ -5129,7 +5129,7 @@ function parseConstLike(
 }
 
 /**
- * @param array<int, array<int, AttributeGroup> $attributes
+ * @param array<int, array<int, AttributeGroup>> $attributes
  */
 function parseProperty(
     Name $class,
