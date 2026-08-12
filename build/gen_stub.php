@@ -4749,7 +4749,7 @@ class DocCommentTag {
 
     public function getVariableName(): string {
         $value = $this->value;
-        if ($value === null || strlen($value) === 0) {
+        if ($value === null || $value === '') {
             throw new Exception("@$this->name doesn't have any value");
         }
 
