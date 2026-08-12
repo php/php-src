@@ -21,15 +21,21 @@ $expected = [true, true, false, "UTF-8", "UTF-8"];
 // "foo" is unbound, so in the first call, you will get false instead
 // of a string.
 //
-// bind_textdomain_codeset() always returns false on musl
-// because musl only supports UTF-8. For more information:
+// Prior to v1.2.6, bind_textdomain_codeset() always returns false on
+// musl because musl only supports UTF-8. For more information:
 //
 //   * https://github.com/php/doc-en/issues/4311,
 //   * https://github.com/php/php-src/issues/17163
 //
 $expected_musl = [false, true, false, false, false];
 
-var_dump($results === $expected || $results === $expected_musl);
+// As of v1.2.6, bind_textdomain_codeset() returns "UTF-8" in all
+// three cases on musl because UTF-8 is the only supported codeset.
+$expected_musl126 = [false, true, "UTF-8", "UTF-8", "UTF-8"];
+
+var_dump($results === $expected
+         || $results === $expected_musl
+         || $results === $expected_musl126);
 ?>
 --EXPECT--
 bool(true)
