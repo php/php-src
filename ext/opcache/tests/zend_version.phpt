@@ -14,14 +14,12 @@ var_dump($v);
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=7, args=0, vars=1, tmps=%d)
+     ; (lines=5, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s.php:%s
-0000 INIT_FCALL 0 %d string("zend_version")
-0001 T1 = DO_ICALL
-0002 ASSIGN CV0($v) T1
-0003 INIT_FCALL 1 %d string("var_dump")
-0004 SEND_VAR CV0($v) 1
-0005 DO_ICALL
-0006 RETURN int(1)
+0000 ASSIGN CV0($v) string("%s")
+0001 INIT_FCALL 1 %d string("var_dump")
+0002 SEND_VAR CV0($v) 1
+0003 DO_ICALL
+0004 RETURN int(1)
 string(%d) "%s"

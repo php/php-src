@@ -15,7 +15,10 @@ function exit(string|int $status = 0): never {}
 /** @alias exit */
 function die(string|int $status = 0): never {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @compile-time-eval
+ */
 function zend_version(): string {}
 
 /** @forbid-dynamic-calls */
