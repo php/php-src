@@ -13,6 +13,9 @@ PHP                                                                        NEWS
     left busy for the next fetch, and rows delivered from a result another
     statement took over. (KentarouTakeda)
 
+- Readline:
+  . Fixed class constant completion in the interactive shell. (Weilin Du)
+
 13 Aug 2026, PHP 8.6.0beta1
 
 - Core:

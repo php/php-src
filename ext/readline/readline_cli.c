@@ -529,6 +529,7 @@ TODO:
 	} else {
 		char *lc_text;
 		const char *class_name_end;
+		const char *constant_text = text;
 		zend_string *class_name = NULL;
 		zend_class_entry *ce = NULL;
 
@@ -541,6 +542,7 @@ TODO:
 				zend_string_release_ex(class_name, 0);
 				return NULL;
 			}
+			constant_text = class_name_end + 2;
 			lc_text = zend_str_tolower_dup(class_name_end + 2, textlen - 2 - class_name_len);
 			textlen -= (class_name_len + 2);
 		} else {
@@ -557,7 +559,7 @@ TODO:
 				ZEND_FALLTHROUGH;
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
+				retval = cli_completion_generator_define(constant_text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
 				if (retval || ce) {
 					break;
 				}
