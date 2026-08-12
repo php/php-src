@@ -3972,7 +3972,7 @@ class ClassInfo {
             return null;
         }
 
-        $type = $typeOverride !== null ? $typeOverride : $classInfo->type;
+        $type = $typeOverride ?? $classInfo->type;
 
         $ooElement = $doc->createElement("oo$type");
         $ooElement->appendChild(new DOMText("\n$indentation "));
