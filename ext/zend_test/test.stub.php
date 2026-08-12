@@ -324,6 +324,9 @@ namespace {
 	function zend_object_slow_zpp(object $param): object {}
 	function zend_object_or_null_slow_zpp(object|null $param): object|null {}
 
+	function zend_obj(object $param): object {}
+	function zend_obj_or_null(object|null $param): object|null {}
+
 	function zend_class_name(string $param): string {}
 	function zend_class_name_or_null(string|null $param): string|null {}
 	function zend_class_name_slow_zpp(string $param): string {}
