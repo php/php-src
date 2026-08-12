@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0beta2
 
+- Core:
+  . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
+    next() call on the inner generator). (iliaal)
+
 - PDO_PGSQL:
   . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
     loop when cleaning up a fetch left in a COPY, a use-after-free when a
