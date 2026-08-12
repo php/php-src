@@ -15,17 +15,17 @@ $cache->clear();
 
 class UserCacheDeferredPromotionDate extends DateTime
 {
-	private string $cachedSelfHash;
+	private int $cachedSelfId;
 
 	public function __construct(string $time, DateTimeZone $timezone)
 	{
 		parent::__construct($time, $timezone);
-		$this->cachedSelfHash = spl_object_hash($this);
+		$this->cachedSelfId = spl_object_id($this);
 	}
 
-	public function cachedSelfHash(): string
+	public function cachedSelfId(): int
 	{
-		return $this->cachedSelfHash;
+		return $this->cachedSelfId;
 	}
 }
 
@@ -36,7 +36,7 @@ if ($pid === 0) {
 		'first' => $date,
 		'second' => $date,
 		'nested' => ['label' => 'original'],
-		'storedHash' => $date->cachedSelfHash(),
+		'storedId' => $date->cachedSelfId(),
 	];
 
 	var_dump($cache->store('payload', $payload));
@@ -77,10 +77,10 @@ var_dump($secondNestedUnchanged);
 echo "third unchanged by second: ";
 var_dump($third['first']->format('Y-m-d H:i:s.u e') === '2026-07-03 12:34:56.123456 Asia/Tokyo');
 var_dump($third['nested']['label'] === 'original');
-echo "object hashes preserved as stored: ";
-var_dump($first['first']->cachedSelfHash() === $first['storedHash']);
-var_dump($second['first']->cachedSelfHash() === $second['storedHash']);
-var_dump($third['first']->cachedSelfHash() === $third['storedHash']);
+echo "object ids preserved as stored: ";
+var_dump($first['first']->cachedSelfId() === $first['storedId']);
+var_dump($second['first']->cachedSelfId() === $second['storedId']);
+var_dump($third['first']->cachedSelfId() === $third['storedId']);
 ?>
 --EXPECTF--
 bool(true)
@@ -93,6 +93,6 @@ second unchanged by first: bool(true)
 bool(true)
 third unchanged by second: bool(true)
 bool(true)
-object hashes preserved as stored: bool(true)
+object ids preserved as stored: bool(true)
 bool(true)
 bool(true)
