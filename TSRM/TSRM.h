@@ -188,7 +188,7 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #define TSRMG_FAST_BULK_STATIC(offset, type)	((type) (((char*) TSRMLS_CACHE)+(offset)))
 struct _zend_tsrm_ls_cache;
 #if defined(ZEND_WIN32) && !defined(LIBZEND_EXPORTS)
-/* Windows can't dllexport the TLS struct, so outside Zend each module
+/* Windows can't dllexport __declspec(thread) symbols, so outside Zend each module
  * keeps a per-module `void *` pointer and reaches EG/CG via the resource-id indirection. */
 # define ZEND_TSRMLS_CACHE_T void *
 # define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache TSRM_TLS_MODEL_ATTR = NULL;
