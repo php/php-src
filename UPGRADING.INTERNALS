@@ -21,6 +21,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The sapi_force_http_10() function was removed.
 - The sapi_get_fd() function was removed.
 - The sapi_get_target_uid() and sapi_get_target_gid() functions were removed.
+- The ZTS symbols compiler_globals_offset and executor_globals_offset have been
+  removed: CG()/EG() now reach the globals through a __thread struct.
 
 ========================
 2. Build system changes
