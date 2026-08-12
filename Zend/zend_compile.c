@@ -11591,10 +11591,20 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+/* In read context a constant is compiled to a temporary, and may be substituted at
+ * compile time. In write context (e.g. CONST->prop = 1) it must be fetched at runtime
+ * into a VAR instead, so that the write targets the referenced object. Compile-time
+ * substitution must be skipped there, as the resulting IS_CONST operand is not a valid
+ * container for the property opcodes. */
+static zend_always_inline bool zend_is_const_read_context(uint8_t type)
+{
+	return type == BP_VAR_R || type == BP_VAR_IS;
+}
+
 static void zend_emit_fetch_constant(znode *result, zend_string *resolved_name, bool unqualified_in_namespace, uint8_t type)
 {
 	zend_op *opline = zend_emit_op(result, ZEND_FETCH_CONSTANT, NULL, NULL);
-	if (type == BP_VAR_R || type == BP_VAR_IS) {
+	if (zend_is_const_read_context(type)) {
 		opline->result_type = IS_TMP_VAR;
 		result->op_type = IS_TMP_VAR;
 	}
@@ -11629,7 +11639,8 @@ static void zend_compile_const(znode *result, const zend_ast *ast, uint8_t type)
 			}
 			last = list->child[list->children-1];
 		}
-		if (last && last->kind == ZEND_AST_HALT_COMPILER) {
+		if (last && last->kind == ZEND_AST_HALT_COMPILER
+		 && zend_is_const_read_context(type)) {
 			result->op_type = IS_CONST;
 			ZVAL_LONG(&result->u.constant, Z_LVAL_P(zend_ast_get_zval(last->child[0])));
 			zend_string_release_ex(resolved_name, 0);
@@ -11637,7 +11648,8 @@ static void zend_compile_const(znode *result, const zend_ast *ast, uint8_t type)
 		}
 	}
 
-	if (zend_try_ct_eval_const(&result->u.constant, resolved_name, is_fully_qualified)) {
+	if (zend_is_const_read_context(type)
+	 && zend_try_ct_eval_const(&result->u.constant, resolved_name, is_fully_qualified)) {
 		result->op_type = IS_CONST;
 		zend_string_release_ex(resolved_name, 0);
 		return;
@@ -11674,7 +11686,8 @@ static void zend_compile_class_const(znode *result, zend_ast *ast, uint8_t type)
 		if (Z_TYPE_P(const_zv) == IS_STRING) {
 			zend_string *const_str = Z_STR_P(const_zv);
 			zend_string *resolved_name = zend_resolve_class_name_ast(class_ast);
-			if (zend_try_ct_eval_class_const(&result->u.constant, resolved_name, const_str)) {
+			if (zend_is_const_read_context(type)
+			 && zend_try_ct_eval_class_const(&result->u.constant, resolved_name, const_str)) {
 				result->op_type = IS_CONST;
 				zend_string_release_ex(resolved_name, 0);
 				return;
@@ -11688,7 +11701,7 @@ static void zend_compile_class_const(znode *result, zend_ast *ast, uint8_t type)
 	zend_compile_expr(&const_node, const_ast);
 
 	opline = zend_emit_op(result, ZEND_FETCH_CLASS_CONSTANT, NULL, &const_node);
-	if (type == BP_VAR_R || type == BP_VAR_IS) {
+	if (zend_is_const_read_context(type)) {
 		opline->result_type = IS_TMP_VAR;
 		result->op_type = IS_TMP_VAR;
 	}
