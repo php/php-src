@@ -16,7 +16,7 @@ function curl_cli_server_start() {
     $bound = null;
     stream_set_blocking($pipes[2], false);
     for ($i = 0; $i < 60; $i++) {
-        usleep(50000); // 50ms per try
+        usleep(20000); // 20ms per try
         $status = proc_get_status($handle);
         if (empty($status['running'])) {
             echo "Server is not running\n";
@@ -45,7 +45,6 @@ function curl_cli_server_start() {
     //       it might not be listening yet...need to wait until fsockopen() call returns
     $error = "Unable to connect to server\n";
     for ($i=0; $i < 60; $i++) {
-        usleep(50000); // 50ms per try
         $status = proc_get_status($handle);
         $fp = @fsockopen("tcp://$bound");
         // Failure, the server is no longer running
@@ -58,6 +57,7 @@ function curl_cli_server_start() {
             $error = '';
             break;
         }
+        usleep(20000); // 20ms per try
     }
 
     if ($fp) {
@@ -79,7 +79,7 @@ function curl_cli_server_start() {
                 if (!($status && $status['running'])) {
                     break;
                 }
-                usleep(50000);
+                usleep(20000);
             }
         },
         $handle
