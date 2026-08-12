@@ -9,7 +9,7 @@ PHP                                                                        NEWS
 - Readline:
   . Fixed the interactive shell not waiting for the pager process to exit.
     (Weilin Du)
-
+  . Fixed class constant completion in the interactive shell. (Weilin Du)
 
 27 Aug 2026, PHP 8.5.10
 
@@ -80,9 +80,6 @@ PHP                                                                        NEWS
     parent slot when a child class hooks an inherited property. (iliaal)
   . Fixed segfault in ReflectionMethod::createFromMethodName() on an
     uninstantiable subclass. (iliaal)
-
-- Readline:
-  . Fixed class constant completion in the interactive shell. (Weilin Du)
 
 - Session:
   . Fix corruption in mod_mm. (ndossche)
