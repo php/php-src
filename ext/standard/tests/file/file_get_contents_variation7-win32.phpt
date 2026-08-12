@@ -10,8 +10,8 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 echo "*** Testing file_get_contents() : variation ***\n";
-$mainDir = "fileGetContentsVar7.dir";
-$subDir = "fileGetContentsVar7Sub";
+$mainDir = "fileGetContentsVar7Win32.dir";
+$subDir = "fileGetContentsVar7Win32Sub";
 $absMainDir = __DIR__."\\".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."\\".$subDir;
@@ -41,7 +41,7 @@ $allDirs = array(
   $unixifiedDir,
 );
 
-$filename = 'FileGetContentsVar7.tmp';
+$filename = 'FileGetContentsVar7Win32.tmp';
 $absFile = $absSubDir.'/'.$filename;
 $h = fopen($absFile,"w");
 fwrite($h, "contents read");
@@ -60,11 +60,11 @@ echo "\n*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$mainDir = "fileGetContentsVar7.dir";
-$subDir = "fileGetContentsVar7Sub";
+$mainDir = "fileGetContentsVar7Win32.dir";
+$subDir = "fileGetContentsVar7Win32Sub";
 $absMainDir = __DIR__."/".$mainDir;
 $absSubDir = $absMainDir."/".$subDir;
-$filename = 'FileGetContentsVar7.tmp';
+$filename = 'FileGetContentsVar7Win32.tmp';
 $absFile = $absSubDir.'/'.$filename;
 unlink($absFile);
 rmdir($absSubDir);
@@ -87,12 +87,12 @@ string(%d) "contents read"
 
 -- Iteration 5 --
 
-Warning: file_get_contents(%sfileGetContentsVar7.dir\fileGetContentsVar7Sub\..\\\fileGetContentsVar7Sub\\..\\..\fileGetContentsVar7Sub\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(%sfileGetContentsVar7Win32.dir\fileGetContentsVar7Win32Sub\..\\\fileGetContentsVar7Win32Sub\\..\\..\fileGetContentsVar7Win32Sub\FileGetContentsVar7Win32.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file_get_contents(%sfileGetContentsVar7.dir\fileGetContentsVar7Sub\BADDIR\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(%sfileGetContentsVar7Win32.dir\fileGetContentsVar7Win32Sub\BADDIR\FileGetContentsVar7Win32.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -109,7 +109,7 @@ string(%d) "contents read"
 
 -- Iteration 11 --
 
-Warning: file_get_contents(BADDIR\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(BADDIR\FileGetContentsVar7Win32.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 12 --
