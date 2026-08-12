@@ -597,6 +597,7 @@ void ts_free_thread(void)
 void ts_free_id(ts_rsrc_id id)
 {/*{{{*/
 	int rsrc_id = TSRM_UNSHUFFLE_RSRC_ID(id);
+	THREAD_T this_thread = tsrm_thread_id();
 
 	tsrm_mutex_lock(tsmm_mutex);
 
@@ -608,7 +609,9 @@ void ts_free_id(ts_rsrc_id id)
 
 			while (p) {
 				if (p->count > rsrc_id && p->storage[rsrc_id]) {
-					if (resource_types_table) {
+					/* A __thread block of a foreign thread is inaccessible. */
+					if (resource_types_table
+					 && (!resource_types_table[rsrc_id].tls_addr || p->thread_id == this_thread)) {
 						if (resource_types_table[rsrc_id].dtor) {
 							resource_types_table[rsrc_id].dtor(p->storage[rsrc_id]);
 						}
@@ -632,15 +635,20 @@ void ts_free_id(ts_rsrc_id id)
 TSRM_API void ts_apply_for_id(ts_rsrc_id id, void (*cb)(void *))
 {
 	int rsrc_id = TSRM_UNSHUFFLE_RSRC_ID(id);
+	THREAD_T this_thread = tsrm_thread_id();
 
 	tsrm_mutex_lock(tsmm_mutex);
 
 	if (tsrm_tls_table && resource_types_table) {
+		bool tls_backed = resource_types_table[rsrc_id].tls_addr != NULL;
+
 		for (int i = 0; i < tsrm_tls_table_size; i++) {
 			tsrm_tls_entry *p = tsrm_tls_table[i];
 
 			while (p) {
-				if (p->count > rsrc_id && p->storage[rsrc_id]) {
+				/* A __thread block of a foreign thread is inaccessible. */
+				if (p->count > rsrc_id && p->storage[rsrc_id]
+				 && (!tls_backed || p->thread_id == this_thread)) {
 					cb(p->storage[rsrc_id]);
 				}
 				p = p->next;
