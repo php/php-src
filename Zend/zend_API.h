@@ -960,8 +960,6 @@ static zend_always_inline const char *zend_get_object_type_uc(const zend_class_e
 
 ZEND_API bool zend_is_iterable(const zval *iterable);
 
-ZEND_API bool zend_is_countable(const zval *countable);
-
 ZEND_API void zend_convert_internal_arg_info(zend_arg_info *new_arg_info,
 		const zend_internal_arg_info *arg_info, bool is_return_info,
 		bool permanent);
