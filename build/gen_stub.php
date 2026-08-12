@@ -2652,7 +2652,7 @@ class ConstInfo extends VariableLike
     public function getDeclaration(array $allConstInfos): string
     {
         $type = $this->phpDocType ?? $this->type;
-        $simpleType = $type ? $type->tryToSimpleType() : null;
+        $simpleType = $type?->tryToSimpleType();
         if ($simpleType && $simpleType->name === "mixed") {
             $simpleType = null;
         }
