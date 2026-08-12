@@ -61,7 +61,20 @@ ZEND_API void zend_win_tsrm_cache_init(bool alloc)
 {
 	if (alloc) {
 		zend_win_tsrm_cache_slot = TlsAlloc();
-		ZEND_ASSERT(zend_win_tsrm_cache_slot < 64); /* must be a direct TEB TlsSlot */
+		if (zend_win_tsrm_cache_slot == TLS_OUT_OF_INDEXES) {
+			fprintf(stderr, "PHP Startup: TlsAlloc() failed, no TLS slot available "
+				"for the ZTS globals cache\n");
+			abort();
+		}
+		if (zend_win_tsrm_cache_slot >= TLS_MINIMUM_AVAILABLE) {
+			/* Beyond the first TLS_MINIMUM_AVAILABLE slots the loader uses
+			 * TEB->TlsExpansionSlots, which the inline gs:[] read in
+			 * ZEND_TSRM_CACHE_PTR cannot reach. */
+			fprintf(stderr, "PHP Startup: TlsAlloc() returned slot %lu, but only the "
+				"first %d direct TEB slots are usable for the ZTS globals cache\n",
+				zend_win_tsrm_cache_slot, TLS_MINIMUM_AVAILABLE);
+			abort();
+		}
 	}
 	TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
 }
