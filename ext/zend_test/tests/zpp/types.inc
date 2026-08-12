@@ -7,14 +7,14 @@ class S {
 }
 
 return [
-	null,
-	false,
-	true,
-	42,
-	73.5,
-	'string',
-	[],
-	new stdClass(),
-	new S(),
-	STDOUT,
+	'null' => null,
+	'false' => false,
+	'true' => true,
+	'42' => 42,
+	'73.5' => 73.5,
+	"'string'" => 'string',
+	'[]' => [],
+	'new stdClass()' => new stdClass(),
+	'new S()' => new S(),
+	'STDOUT' => STDOUT,
 ];
