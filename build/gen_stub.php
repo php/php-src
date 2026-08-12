@@ -2306,9 +2306,9 @@ class EvaluatedValue
         if ($this->type->isNull()) {
             $code .= "\tZVAL_NULL(&$zvalName);\n";
         } elseif ($this->type->isBool()) {
-            if ($cExpr == 'true') {
+            if ($cExpr === 'true') {
                 $code .= "\tZVAL_TRUE(&$zvalName);\n";
-            } elseif ($cExpr == 'false') {
+            } elseif ($cExpr === 'false') {
                 $code .= "\tZVAL_FALSE(&$zvalName);\n";
             } else {
                 $code .= "\tZVAL_BOOL(&$zvalName, $cExpr);\n";
@@ -2328,7 +2328,7 @@ class EvaluatedValue
                 $code .= "\tZVAL_STR(&$zvalName, $forStringDef);\n";
             }
         } elseif ($this->type->isArray()) {
-            if ($cExpr == '[]') {
+            if ($cExpr === '[]') {
                 $code .= "\tZVAL_EMPTY_ARRAY(&$zvalName);\n";
             } else {
                 throw new Exception("Unimplemented default value");
