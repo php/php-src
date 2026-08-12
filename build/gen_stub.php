@@ -2994,7 +2994,7 @@ class StringBuilder {
      * @param string $content
      * @param ?int $minPHPCompatibility
      * @param bool $interned
-     * @return string[]
+     * @return array{0: string, 1: string, 2: string}
      */
     public static function getString(
         string $varName,
@@ -3322,7 +3322,7 @@ class AttributeInfo {
             $initValue = '';
             if ($arg->value instanceof Node\Scalar\String_) {
                 $strVal = $arg->value->value;
-                [$strInit, $strUse, $strRelease] = StringBuilder::getString(
+                [$strInit, $strUse] = StringBuilder::getString(
                     'unused',
                     $strVal,
                     $phpVersionIdMinimumCompatibility
@@ -3348,7 +3348,7 @@ class AttributeInfo {
                 $code .= $initValue;
             }
             if ($arg->name) {
-                [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
+                [$stringInit, $nameCode] = StringBuilder::getString(
                     "",
                     $arg->name->name,
                     $phpVersionIdMinimumCompatibility,
