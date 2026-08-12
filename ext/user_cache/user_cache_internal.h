@@ -757,6 +757,10 @@ extern php_user_cache_context php_user_cache_context_state;
 extern bool php_user_cache_runtime_opted_in;
 extern php_user_cache_partition *php_user_cache_partitions;
 
+/* Guards boundary partition lookup/creation and request-time additions to
+ * php_user_cache_partitions; no-ops on non-ZTS builds. */
+void php_user_cache_boundary_partitions_lock(void);
+void php_user_cache_boundary_partitions_unlock(void);
 uint64_t php_user_cache_cached_pid(void);
 void php_user_cache_reset_runtime(void);
 void php_user_cache_reset_storage(void);

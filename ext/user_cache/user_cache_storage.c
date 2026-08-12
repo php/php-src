@@ -3937,18 +3937,26 @@ void php_user_cache_optimistic_reader_end(php_user_cache_header *header, uint32_
 static bool user_cache_claim_header_is_attached(const php_user_cache_header *header)
 {
 	const php_user_cache_partition *partition;
+	bool attached = false;
 
 	if (user_cache_storage_holds_header(&php_user_cache_context_state.storage, header)) {
 		return true;
 	}
 
+	/* Threaded SAPI request activation may append boundary partitions
+	 * concurrently; hold their lock while walking the list. */
+	php_user_cache_boundary_partitions_lock();
+
 	for (partition = php_user_cache_partitions; partition != NULL; partition = partition->next) {
 		if (user_cache_storage_holds_header(&partition->context.storage, header)) {
-			return true;
+			attached = true;
+			break;
 		}
 	}
 
-	return false;
+	php_user_cache_boundary_partitions_unlock();
+
+	return attached;
 }
 
 /* Release this thread's graph pin slot claims: the process outlives the

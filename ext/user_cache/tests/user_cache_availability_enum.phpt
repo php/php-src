@@ -11,6 +11,7 @@ user_cache.shm_size=16M
 foreach (UserCache\CacheAvailability::cases() as $case) {
     echo $case->name, "\n";
 }
+
 ?>
 --EXPECT--
 Available
@@ -20,5 +21,6 @@ UnavailableBySharedMemoryInitializationFailed
 UnavailableByBackendNotInitializedBeforeWorkerStartup
 UnavailableByBackendInitializedAfterWorkerStartup
 UnavailableByCgiFastCgiBoundary
+UnavailableByApacheBoundary
 UnavailableByLsapiBoundary
 UnavailableByUnknownReason
