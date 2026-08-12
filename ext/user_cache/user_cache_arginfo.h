@@ -1,5 +1,5 @@
 /* This is a generated file, edit user_cache.stub.php instead.
- * Stub hash: 15c0335391960e42d2dae1e221b4c3f9bc88686b
+ * Stub hash: 8eec428bec19b14b6512b0c2ea607eba5945fac7
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UserCache_CacheStatus___construct, 0, 0, 0)
@@ -244,6 +244,8 @@ static zend_class_entry *register_class_UserCache_CacheAvailability(void)
 	zend_enum_add_case_cstr(class_entry, "UnavailableByBackendInitializedAfterWorkerStartup", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "UnavailableByCgiFastCgiBoundary", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "UnavailableByApacheBoundary", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "UnavailableByLsapiBoundary", NULL);
 

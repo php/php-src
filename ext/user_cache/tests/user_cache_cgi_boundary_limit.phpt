@@ -1,5 +1,5 @@
 --TEST--
-CGI/FastCGI: UserCache\Cache partitions cache data by boundary
+CGI/FastCGI: UserCache disables new boundary partitions and logs after the limit
 --CONFLICTS--
 all
 --SKIPIF--
@@ -72,18 +72,16 @@ function user_cache_cgi_name_value(string $name, string $value): string
 {
     $nameLen = strlen($name);
     $valueLen = strlen($value);
-    $encoded = '';
 
-    $encoded .= $nameLen < 128 ? chr($nameLen) : pack('N', $nameLen | 0x80000000);
-    $encoded .= $valueLen < 128 ? chr($valueLen) : pack('N', $valueLen | 0x80000000);
-
-    return $encoded . $name . $value;
+    return ($nameLen < 128 ? chr($nameLen) : pack('N', $nameLen | 0x80000000))
+        . ($valueLen < 128 ? chr($valueLen) : pack('N', $valueLen | 0x80000000))
+        . $name
+        . $value;
 }
 
 function user_cache_cgi_params(array $params): string
 {
     $body = '';
-
     foreach ($params as $name => $value) {
         $body .= user_cache_cgi_name_value($name, $value);
     }
@@ -94,7 +92,6 @@ function user_cache_cgi_params(array $params): string
 function user_cache_cgi_read_exact($fp, int $length): string
 {
     $buffer = '';
-
     while (strlen($buffer) < $length && !feof($fp)) {
         $chunk = fread($fp, $length - strlen($buffer));
         if ($chunk === false) {
@@ -117,7 +114,7 @@ function user_cache_cgi_read_exact($fp, int $length): string
     return $buffer;
 }
 
-function user_cache_cgi_request(int $port, string $script, string $docRoot, string $serverName, string $query): string
+function user_cache_cgi_request(int $port, string $script, string $docRoot, string $host, string $query): string
 {
     $fp = @stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 2);
     if ($fp === false) {
@@ -130,8 +127,8 @@ function user_cache_cgi_request(int $port, string $script, string $docRoot, stri
         'SCRIPT_NAME' => '/index.php',
         'QUERY_STRING' => $query,
         'REQUEST_METHOD' => 'GET',
-        'SERVER_NAME' => $serverName,
-        'HTTP_HOST' => $serverName,
+        'SERVER_NAME' => $host,
+        'HTTP_HOST' => $host,
         'DOCUMENT_ROOT' => $docRoot,
         'REQUEST_URI' => '/index.php' . ($query !== '' ? '?' . $query : ''),
         'SERVER_PROTOCOL' => 'HTTP/1.1',
@@ -146,7 +143,6 @@ function user_cache_cgi_request(int $port, string $script, string $docRoot, stri
 
     $stdout = '';
     $stderr = '';
-
     while (!feof($fp)) {
         $header = user_cache_cgi_read_exact($fp, 8);
         $type = ord($header[1]);
@@ -165,7 +161,6 @@ function user_cache_cgi_request(int $port, string $script, string $docRoot, stri
             break;
         }
     }
-
     fclose($fp);
 
     if ($stderr !== '') {
@@ -177,92 +172,56 @@ function user_cache_cgi_request(int $port, string $script, string $docRoot, stri
     return trim($parts[1] ?? $stdout);
 }
 
-function user_cache_cgi_wait($process, array $pipes, int $port, string $script, string $docRoot, string $serverName): void
-{
-    for ($i = 0; $i < 50; $i++) {
-        $status = proc_get_status($process);
-        if (!$status['running']) {
-            throw new RuntimeException(stream_get_contents($pipes[2]));
-        }
-
-        try {
-            user_cache_cgi_request($port, $script, $docRoot, $serverName, 'action=fetch');
-            return;
-        } catch (Throwable) {
-            usleep(100000);
-        }
-    }
-
-    throw new RuntimeException(stream_get_contents($pipes[2]) ?: 'php-cgi did not become ready');
-}
-
 function user_cache_cgi_rm_rf(string $path): void
 {
     if (!file_exists($path)) {
         return;
     }
-
     if (!is_dir($path) || is_link($path)) {
         unlink($path);
         return;
     }
-
     foreach (scandir($path) as $entry) {
-        if ($entry === '.' || $entry === '..') {
-            continue;
+        if ($entry !== '.' && $entry !== '..') {
+            user_cache_cgi_rm_rf($path . DIRECTORY_SEPARATOR . $entry);
         }
-        user_cache_cgi_rm_rf($path . DIRECTORY_SEPARATOR . $entry);
     }
-
     rmdir($path);
 }
 
-$root = sys_get_temp_dir() . '/php-user-cache-cgi-boundary-' . getmypid();
-$alphaRoot = $root . '/alpha';
-$betaRoot = $root . '/beta';
+$root = sys_get_temp_dir() . '/php-user-cache-cgi-boundary-limit-' . getmypid();
+$docRoot = $root . '/site';
+$log = $root . '/error.log';
 $process = null;
 $pipes = [];
 
 user_cache_cgi_rm_rf($root);
-mkdir($alphaRoot, 0777, true);
-mkdir($betaRoot, 0777, true);
-
-$script = <<<'PHP'
+mkdir($docRoot, 0777, true);
+file_put_contents($docRoot . '/index.php', <<<'PHP'
 <?php
 $cache = UserCache\Cache::getPool('default');
-$key = 'cgi-boundary-key';
-$complexKey = 'cgi-boundary-complex-key';
 $action = $_GET['action'] ?? 'fetch';
 $host = $_SERVER['SERVER_NAME'] ?? 'unknown';
-
-if ($action === 'clear') {
-    $cache->clear();
-} elseif ($action === 'seed') {
-    $cache->store($key, $host . '-value');
-    $cache->store($complexKey, ['host' => $host, 'nested' => ['value' => 42]]);
+if ($action === 'seed') {
+    $cache->store('key', $host . '-value');
 }
-
-$status = UserCache\Cache::getStatus();
-$complex = $cache->fetch($complexKey, ['host' => 'MISS', 'nested' => ['value' => 'MISS']]);
-echo $host, ':', $cache->fetch($key, 'MISS'), ':', $complex['host'], ':', $complex['nested']['value'], ':', ($status->getAvailability() === UserCache\CacheAvailability::Available ? 'available' : $status->getAvailability()->name), "\n";
-PHP;
-
-file_put_contents($alphaRoot . '/index.php', $script);
-file_put_contents($betaRoot . '/index.php', $script);
+$availability = UserCache\Cache::getStatus()->getAvailability();
+echo $host, ':', $cache->fetch('key', 'MISS'), ':', $availability->name, "\n";
+PHP);
 file_put_contents($root . '/php.ini', implode("\n", [
     'user_cache.enable=1',
-    'user_cache.shm_size=32M',
+    'user_cache.shm_size=1M',
     'opcache.file_update_protection=0',
+    'display_errors=0',
+    'log_errors=1',
+    'error_log=' . $log,
 ]));
 
 try {
-    $phpCgi = user_cache_cgi_binary();
     $port = user_cache_cgi_free_port();
-    $alphaScript = $alphaRoot . '/index.php';
-    $betaScript = $betaRoot . '/index.php';
-
+    $script = $docRoot . '/index.php';
     $process = proc_open(
-        [$phpCgi, '-c', $root, '-b', "127.0.0.1:$port"],
+        [user_cache_cgi_binary(), '-c', $root, '-b', "127.0.0.1:$port"],
         [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']],
         $pipes,
         $root
@@ -273,28 +232,48 @@ try {
     stream_set_blocking($pipes[1], false);
     stream_set_blocking($pipes[2], false);
 
-    user_cache_cgi_wait($process, $pipes, $port, $alphaScript, $alphaRoot, 'alpha.local');
-    user_cache_cgi_request($port, $alphaScript, $alphaRoot, 'alpha.local', 'action=clear');
-    user_cache_cgi_request($port, $betaScript, $betaRoot, 'beta.local', 'action=clear');
-
-    $checks = [
-        [$alphaScript, $alphaRoot, 'alpha.local', 'action=seed', 'alpha.local:alpha.local-value:alpha.local:42:available'],
-        [$alphaScript, $alphaRoot, 'alpha.local', 'action=fetch', 'alpha.local:alpha.local-value:alpha.local:42:available'],
-        [$alphaScript, $alphaRoot, 'beta.local', 'action=fetch', 'beta.local:MISS:MISS:MISS:available'],
-        [$alphaScript, $alphaRoot, 'beta.local', 'action=seed', 'beta.local:beta.local-value:beta.local:42:available'],
-        [$alphaScript, $alphaRoot, 'alpha.local', 'action=fetch', 'alpha.local:alpha.local-value:alpha.local:42:available'],
-        [$betaScript, $betaRoot, 'beta.local', 'action=fetch', 'beta.local:MISS:MISS:MISS:available'],
-        [$betaScript, $betaRoot, 'beta.local', 'action=seed', 'beta.local:beta.local-value:beta.local:42:available'],
-        [$alphaScript, $alphaRoot, 'alpha.local', 'action=fetch', 'alpha.local:alpha.local-value:alpha.local:42:available'],
-        [$betaScript, $betaRoot, 'beta.local', 'action=fetch', 'beta.local:beta.local-value:beta.local:42:available'],
-    ];
-
-    foreach ($checks as [$file, $docRoot, $serverName, $query, $expected]) {
-        $actual = user_cache_cgi_request($port, $file, $docRoot, $serverName, $query);
-        if ($actual !== $expected) {
-            $stderr = stream_get_contents($pipes[2]);
-            throw new RuntimeException("Expected $expected, got $actual" . ($stderr !== '' ? "\n$stderr" : ''));
+    for ($i = 0; $i < 50; $i++) {
+        try {
+            user_cache_cgi_request($port, $script, $docRoot, 'host01.local', 'action=fetch');
+            break;
+        } catch (Throwable) {
+            usleep(100000);
         }
+    }
+
+    $expected = 'host01.local:host01.local-value:Available';
+    $actual = user_cache_cgi_request($port, $script, $docRoot, 'host01.local', 'action=seed');
+    if ($actual !== $expected) {
+        throw new RuntimeException("Expected $expected, got $actual");
+    }
+
+    for ($i = 2; $i <= 32; $i++) {
+        $host = sprintf('host%02d.local', $i);
+        $expected = $host . ':MISS:Available';
+        $actual = user_cache_cgi_request($port, $script, $docRoot, $host, 'action=fetch');
+        if ($actual !== $expected) {
+            throw new RuntimeException("Expected $expected, got $actual");
+        }
+    }
+
+    foreach (['host33.local', 'host34.local'] as $host) {
+        $expected = $host . ':MISS:UnavailableByCgiFastCgiBoundary';
+        $actual = user_cache_cgi_request($port, $script, $docRoot, $host, 'action=seed');
+        if ($actual !== $expected) {
+            throw new RuntimeException("Expected $expected, got $actual");
+        }
+    }
+
+    $expected = 'host01.local:host01.local-value:Available';
+    $actual = user_cache_cgi_request($port, $script, $docRoot, 'host01.local', 'action=fetch');
+    if ($actual !== $expected) {
+        throw new RuntimeException("Expected $expected, got $actual");
+    }
+
+    $contents = is_file($log) ? file_get_contents($log) : '';
+    $needle = 'UserCache boundary partition limit (32) reached; creation of new partitions has been disabled';
+    if (substr_count($contents, $needle) !== 1) {
+        throw new RuntimeException("Expected one boundary-limit error-log entry, got:\n" . $contents);
     }
 
     echo "Done\n";
@@ -305,7 +284,6 @@ try {
     }
     user_cache_cgi_rm_rf($root);
 }
-
 ?>
 --EXPECT--
 Done
