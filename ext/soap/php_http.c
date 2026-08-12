@@ -341,7 +341,7 @@ static php_stream* http_connect(zval* this_ptr, php_uri *uri, bool use_ssl, php_
 static bool in_domain(const zend_string *host, const zend_string *domain)
 {
 	if (ZSTR_VAL(domain)[0] == '.') {
-		return ZSTR_LEN(host) > ZSTR_LEN(domain) && zend_string_ends_with(host, domain);
+		return zend_string_ends_with(host, domain);
 	} else {
 		return zend_string_equals(host, domain);
 	}

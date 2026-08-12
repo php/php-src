@@ -3426,13 +3426,10 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 		return FAILURE;
 	}
 
-	if (ZSTR_LEN(tmp) == 0) {
-		zend_tmp_string_release(tmp_tmp);
-		return SUCCESS;
-	}
-
 	int result;
-	if (!zend_string_ends_with_literal(tmp, "\n")) {
+	if (ZSTR_LEN(tmp) == 0) {
+		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), 0);
+	} else if (!zend_string_ends_with_literal(tmp, "\n")) {
 		char *zquery = zend_cstr_append_char(
 			ZSTR_VAL(tmp), ZSTR_LEN(tmp), '\n');
 		result = PQputCopyData(pgsql, zquery, ZSTR_LEN(tmp) + 1);
