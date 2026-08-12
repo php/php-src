@@ -1408,9 +1408,7 @@ class FuncInfo {
             return null;
         }
 
-        $name = $this->alias ?? $this->name;
-
-        return $name->getDeclaration();
+        return ($this->alias ?? $this->name)->getDeclaration();
     }
 
     public function getFramelessDeclaration(): ?string {
