@@ -4205,7 +4205,7 @@ class ClassInfo {
         $indentation = str_repeat(" ", $indentationLevel);
 
         $classSynopsis->appendChild(new DOMText("\n\n$indentation"));
-        $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "$inheritedLabel");
+        $classSynopsisInfo = $doc->createElement("classsynopsisinfo", $inheritedLabel);
         $classSynopsisInfo->setAttribute("role", "comment");
         $classSynopsis->appendChild($classSynopsisInfo);
 
