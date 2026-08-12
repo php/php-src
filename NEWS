@@ -60,6 +60,9 @@ PHP                                                                        NEWS
   . Fixed segfault in ReflectionMethod::createFromMethodName() on an
     uninstantiable subclass. (iliaal)
 
+- Readline:
+  . Fixed class constant completion in the interactive shell. (Weilin Du)
+
 - Session:
   . Fix corruption in mod_mm. (ndossche)
   . Fixed bug GH-23043 (broken session id code can cause zend_mm_heap
