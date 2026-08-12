@@ -24,21 +24,21 @@ class UserCacheDateModel
 	}
 }
 
-class UserCacheSelfHashDateTime extends DateTime
+class UserCacheSelfIdDateTime extends DateTime
 {
-	private string $cachedSelfHash;
-	public string $publicSelfHash;
+	private int $cachedSelfId;
+	public int $publicSelfId;
 
 	public function __construct(string $time, DateTimeZone $timezone)
 	{
 		parent::__construct($time, $timezone);
-		$this->cachedSelfHash = spl_object_hash($this);
-		$this->publicSelfHash = spl_object_hash($this);
+		$this->cachedSelfId = spl_object_id($this);
+		$this->publicSelfId = spl_object_id($this);
 	}
 
-	public function cachedSelfHash(): string
+	public function cachedSelfId(): int
 	{
-		return $this->cachedSelfHash;
+		return $this->cachedSelfId;
 	}
 }
 
@@ -75,17 +75,17 @@ class UserCacheMagicDateTime extends DateTime
 	}
 }
 
-class UserCacheMagicSelfHashDateTime extends DateTime
+class UserCacheMagicSelfIdDateTime extends DateTime
 {
 	public static int $serializeCount = 0;
 	public static int $unserializeCount = 0;
 
-	private string $constructedObjectId;
+	private int $constructedObjectId;
 
 	public function __construct(string $time, DateTimeZone $timezone)
 	{
 		parent::__construct($time, $timezone);
-		$this->constructedObjectId = spl_object_hash($this);
+		$this->constructedObjectId = spl_object_id($this);
 	}
 
 	public function __serialize(): array
@@ -99,10 +99,10 @@ class UserCacheMagicSelfHashDateTime extends DateTime
 	{
 		self::$unserializeCount++;
 		parent::__unserialize($data);
-		$this->constructedObjectId = spl_object_hash($this);
+		$this->constructedObjectId = spl_object_id($this);
 	}
 
-	public function constructedObjectId(): string
+	public function constructedObjectId(): int
 	{
 		return $this->constructedObjectId;
 	}
@@ -236,9 +236,9 @@ $payload = [
 	'taggedTimezone' => new UserCacheTaggedTimeZone('Europe/Paris', 'paris'),
 	'taggedInterval' => new UserCacheTaggedInterval('P1Y2M3DT4H5M6S', 'window', 9),
 	'relativeInterval' => DateInterval::createFromDateString('2 days 4 hours'),
-	'selfHash' => new UserCacheSelfHashDateTime('2026-06-15 10:15:00.333333', new DateTimeZone('UTC')),
+	'selfId' => new UserCacheSelfIdDateTime('2026-06-15 10:15:00.333333', new DateTimeZone('UTC')),
 	'magicDate' => new UserCacheMagicDateTime('2026-06-15 10:45:00.654321', new DateTimeZone('UTC'), 'magic'),
-	'magicSelfHash' => new UserCacheMagicSelfHashDateTime('2026-06-15 11:45:00.111111', new DateTimeZone('UTC')),
+	'magicSelfId' => new UserCacheMagicSelfIdDateTime('2026-06-15 11:45:00.111111', new DateTimeZone('UTC')),
 	'magicFiltered' => new UserCacheMagicFilteredDateTime('2026-06-15 12:00:00.222222', new DateTimeZone('UTC'), 'filtered'),
 	'wakefulDate' => new UserCacheWakefulDateTime('2026-06-15 12:15:00.987654', new DateTimeZone('UTC'), 'wakeful'),
 ];
@@ -269,11 +269,11 @@ var_dump($fetched['taggedInterval']->describe());
 var_dump($fetched['relativeInterval'] instanceof DateInterval);
 var_dump($fetched['relativeInterval']->format('%d %h'));
 
-var_dump($fetched['selfHash'] instanceof UserCacheSelfHashDateTime);
-var_dump($fetched['selfHash']->cachedSelfHash() === $payload['selfHash']->cachedSelfHash());
-var_dump($fetched['selfHash']->cachedSelfHash() !== spl_object_hash($fetched['selfHash']));
-var_dump($fetched['selfHash']->publicSelfHash === spl_object_hash($payload['selfHash']));
-var_dump($fetched['selfHash']->publicSelfHash === spl_object_hash($fetched['selfHash']));
+var_dump($fetched['selfId'] instanceof UserCacheSelfIdDateTime);
+var_dump($fetched['selfId']->cachedSelfId() === $payload['selfId']->cachedSelfId());
+var_dump($fetched['selfId']->cachedSelfId() !== spl_object_id($fetched['selfId']));
+var_dump($fetched['selfId']->publicSelfId === spl_object_id($payload['selfId']));
+var_dump($fetched['selfId']->publicSelfId === spl_object_id($fetched['selfId']));
 
 var_dump($fetched['magicDate'] instanceof UserCacheMagicDateTime);
 var_dump($fetched['magicDate']->format('Y-m-d H:i:s.u e'));
@@ -281,12 +281,12 @@ var_dump($fetched['magicDate']->label());
 var_dump(UserCacheMagicDateTime::$serializeCount);
 var_dump(UserCacheMagicDateTime::$unserializeCount);
 
-var_dump($fetched['magicSelfHash'] instanceof UserCacheMagicSelfHashDateTime);
-var_dump($fetched['magicSelfHash']->format('Y-m-d H:i:s.u e'));
-var_dump($fetched['magicSelfHash']->constructedObjectId() === spl_object_hash($fetched['magicSelfHash']));
-var_dump($fetched['magicSelfHash']->constructedObjectId() !== spl_object_hash($payload['magicSelfHash']));
-var_dump(UserCacheMagicSelfHashDateTime::$serializeCount);
-var_dump(UserCacheMagicSelfHashDateTime::$unserializeCount);
+var_dump($fetched['magicSelfId'] instanceof UserCacheMagicSelfIdDateTime);
+var_dump($fetched['magicSelfId']->format('Y-m-d H:i:s.u e'));
+var_dump($fetched['magicSelfId']->constructedObjectId() === spl_object_id($fetched['magicSelfId']));
+var_dump($fetched['magicSelfId']->constructedObjectId() !== spl_object_id($payload['magicSelfId']));
+var_dump(UserCacheMagicSelfIdDateTime::$serializeCount);
+var_dump(UserCacheMagicSelfIdDateTime::$unserializeCount);
 
 var_dump($fetched['magicFiltered'] instanceof UserCacheMagicFilteredDateTime);
 var_dump($fetched['magicFiltered']->format('Y-m-d H:i:s.u e'));
