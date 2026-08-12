@@ -1157,9 +1157,11 @@ class VersionFlags {
 
     /**
      * Keys are the PHP versions, values are arrays of flags
+     * @var array<int, string[]> $flagsByVersion
      */
     private array $flagsByVersion;
 
+    /** @param string[] $baseFlags */
     public function __construct(array $baseFlags) {
         $this->flagsByVersion = [];
         foreach (ALL_PHP_VERSION_IDS as $version) {
