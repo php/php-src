@@ -2262,21 +2262,18 @@ class EvaluatedValue
                     }
 
                     $constType = ($const->phpDocType ?? $const->type)->tryToSimpleType();
-                    if ($constType) {
-                        if ($constType->isBool()) {
-                            return true;
-                        } elseif ($constType->isInt()) {
-                            return 1;
-                        } elseif ($constType->isFloat()) {
-                            return M_PI;
-                        } elseif ($constType->isString()) {
-                            return $const->name;
-                        } elseif ($constType->isArray()) {
-                            return [];
-                        }
+                    if ($constType === null) {
+                        return null;
                     }
 
-                    return null;
+                    return match (true) {
+                        $constType->isBool() => true,
+                        $constType->isInt() => 1,
+                        $constType->isFloat() => M_PI,
+                        $constType->isString() => $const->name,
+                        $constType->isArray() => [],
+                        default => null,
+                    };
                 }
 
                 throw new Exception("Constant " . $constName . " cannot be found");
