@@ -21,10 +21,20 @@ $zip = null;
 
 var_dump(stream_get_contents($stream) === $data);
 fclose($stream);
+
+// Same with getStreamName()
+$zip = new ZipArchive;
+$zip->open($name, ZipArchive::RDONLY);
+$stream = $zip->getStreamName('entry.txt', ZipArchive::FL_UNCHANGED);
+$zip = null;
+
+var_dump(stream_get_contents($stream) === $data);
+fclose($stream);
 ?>
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/gh17787.zip');
 ?>
 --EXPECT--
+bool(true)
 bool(true)
