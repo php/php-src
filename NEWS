@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- Readline:
+  . Fixed class constant completion in the interactive shell. (Weilin Du)
+
 27 Aug 2026, PHP 8.4.25
 
 - Core:
@@ -59,9 +62,6 @@ PHP                                                                        NEWS
     parent slot when a child class hooks an inherited property. (iliaal)
   . Fixed segfault in ReflectionMethod::createFromMethodName() on an
     uninstantiable subclass. (iliaal)
-
-- Readline:
-  . Fixed class constant completion in the interactive shell. (Weilin Du)
 
 - Session:
   . Fix corruption in mod_mm. (ndossche)
