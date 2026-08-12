@@ -274,7 +274,9 @@ try {
     stream_set_blocking($pipes[2], false);
 
     user_cache_cgi_wait($process, $pipes, $port, $alphaScript, $alphaRoot, 'alpha.local');
+
     user_cache_cgi_request($port, $alphaScript, $alphaRoot, 'alpha.local', 'action=clear');
+    user_cache_cgi_request($port, $alphaScript, $alphaRoot, 'beta.local', 'action=clear');
     user_cache_cgi_request($port, $betaScript, $betaRoot, 'beta.local', 'action=clear');
 
     $checks = [

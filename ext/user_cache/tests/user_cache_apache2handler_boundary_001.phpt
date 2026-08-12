@@ -104,7 +104,9 @@ $key = 'apache2handler-boundary-key';
 $action = $_GET['action'] ?? 'fetch';
 $host = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? 'unknown';
 
-if ($action === 'seed') {
+if ($action === 'clear') {
+    $cache->clear();
+} elseif ($action === 'seed') {
     $cache->store($key, $host . '-value');
 }
 
@@ -185,6 +187,9 @@ try {
     stream_set_blocking($pipes[2], false);
 
     user_cache_apache_wait($process, $pipes, $port);
+
+    user_cache_apache_request($port, 'alpha.local', '/index.php?action=clear');
+    user_cache_apache_request($port, 'beta.local', '/index.php?action=clear');
 
     $checks = [
         ['alpha.local', '/index.php?action=seed', 'alpha.local:alpha.local-value:default'],
