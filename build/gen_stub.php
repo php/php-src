@@ -5928,7 +5928,7 @@ function collectEnumSynopsisItemDescriptions(string $className, DOMElement $syno
             continue;
         }
 
-        $enumCaseName = $enumCaseNames[0]->textContent;
+        $enumCaseName = $enumCaseNames->item(0)->textContent;
 
         $enumCaseDescriptionElements["$className::$enumCaseName"] = $enumItemDescription;
     }
