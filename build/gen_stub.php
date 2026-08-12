@@ -1607,7 +1607,7 @@ class FuncInfo {
 
         $flags = new VersionFlags($flags);
 
-        if ($this->isMethod() === false && $this->supportsCompileTimeEval) {
+        if (!$this->isMethod() && $this->supportsCompileTimeEval) {
             $flags->addForVersionsAbove("ZEND_ACC_COMPILE_TIME_EVAL", PHP_82_VERSION_ID);
         }
 
