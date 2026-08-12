@@ -90,7 +90,9 @@ foreach (['alpha.local', 'beta.local'] as $host) {
 $cache = UserCache\Cache::getPool('default');
 $host = $_SERVER['HTTP_HOST'] ?? 'unknown';
 $action = $_GET['action'] ?? 'fetch';
-if ($action === 'seed') {
+if ($action === 'clear') {
+    $cache->clear();
+} elseif ($action === 'seed') {
     $cache->store('dynamic-boundary-key', $host . '-value');
 }
 echo $host, ':', $cache->fetch('dynamic-boundary-key', 'MISS'), ':', UserCache\Cache::getStatus()->getAvailability()->name, "\n";
@@ -177,6 +179,9 @@ try {
             usleep(100000);
         }
     }
+
+    user_cache_apache_request($port, 'alpha.local', '/index.php?action=clear');
+    user_cache_apache_request($port, 'beta.local', '/index.php?action=clear');
 
     $checks = [
         ['alpha.local', '/index.php?action=seed', 'alpha.local:alpha.local-value:Available'],
