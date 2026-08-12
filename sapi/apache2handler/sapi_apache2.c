@@ -34,6 +34,7 @@
 #include "ext/standard/php_standard.h"
 #include "ext/user_cache/php_user_cache.h"
 
+#include "apr_file_info.h"
 #include "apr_strings.h"
 #include "ap_config.h"
 #include "util_filter.h"
@@ -67,6 +68,9 @@ ZEND_TSRMLS_CACHE_DEFINE()
 
 typedef struct _php_apache_user_cache_partition_entry {
 	const server_rec *server;
+	const char *server_identity;
+	const char *configured_document_root;
+	const char *configured_hostname;
 	php_user_cache_partition *partition;
 	struct _php_apache_user_cache_partition_entry *next;
 } php_apache_user_cache_partition_entry;
@@ -468,23 +472,134 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	return OK;
 }
 
+static const char *php_apache_user_cache_normalize_document_root(apr_pool_t *pool, const char *document_root)
+{
+	char *normalized;
+
+	if (document_root == NULL || document_root[0] == '\0') {
+		return NULL;
+	}
+
+	if (apr_filepath_merge(
+			&normalized,
+			NULL,
+			document_root,
+			APR_FILEPATH_NOTRELATIVE,
+			pool
+		) == APR_SUCCESS
+	) {
+		return normalized;
+	}
+
+	return apr_pstrdup(pool, document_root);
+}
+
+static const char *php_apache_user_cache_normalize_hostname(apr_pool_t *pool, const char *hostname)
+{
+	char *normalized;
+	size_t len;
+
+	if (hostname == NULL || hostname[0] == '\0') {
+		return NULL;
+	}
+
+	normalized = apr_pstrdup(pool, hostname);
+	ap_str_tolower(normalized);
+
+	/* A terminal DNS root label does not identify a different host. */
+	len = strlen(normalized);
+	if (len > 1 && normalized[len - 1] == '.') {
+		normalized[len - 1] = '\0';
+	}
+
+	return normalized;
+}
+
 /* Linear over the vhost list, run once per request. */
-static php_user_cache_partition *php_apache_user_cache_partition_for_server(const server_rec *server)
+static php_apache_user_cache_partition_entry *php_apache_user_cache_partition_entry_for_server(
+		const server_rec *server)
 {
 	php_apache_user_cache_partition_entry *entry;
 
 	for (entry = php_apache_user_cache_partitions; entry != NULL; entry = entry->next) {
 		if (entry->server == server) {
-			return entry->partition;
+			return entry;
 		}
 	}
 
 	return NULL;
 }
 
+static void php_apache_user_cache_activate_request_partition(request_rec *r)
+{
+	php_apache_user_cache_partition_entry *entry;
+	const char *document_root, *hostname;
+	const char *boundary;
+
+	entry = php_apache_user_cache_partition_entry_for_server(r->server);
+	document_root = php_apache_user_cache_normalize_document_root(r->pool, ap_context_document_root(r));
+	if (document_root == NULL) {
+		document_root = php_apache_user_cache_normalize_document_root(r->pool, ap_document_root(r));
+	}
+	hostname = php_apache_user_cache_normalize_hostname(r->pool, ap_get_server_name(r));
+
+	/* Preserve the eagerly initialized partition for the configured primary
+	 * host only when Apache resolved the configured document root.  Aliases and
+	 * request-time mappings get deterministic per-host partitions instead. */
+	if (entry != NULL &&
+		entry->partition != NULL &&
+		entry->configured_hostname != NULL &&
+		entry->configured_document_root != NULL &&
+		hostname != NULL &&
+		document_root != NULL &&
+		strcasecmp(hostname, entry->configured_hostname) == 0 &&
+		strcmp(document_root, entry->configured_document_root) == 0
+	) {
+		php_user_cache_partition_activate(entry->partition);
+
+		return;
+	}
+
+	if (entry == NULL ||
+		entry->server_identity == NULL ||
+		hostname == NULL ||
+		document_root == NULL
+	) {
+		php_user_cache_activate_boundary_partition_by_id(
+			"apache2handler",
+			NULL,
+			0,
+			PHP_USER_CACHE_REASON_APACHE_BOUNDARY_UNAVAILABLE
+		);
+
+		return;
+	}
+
+	/* This ID is automatic and stable across Apache workers.  Host is included
+	 * even when two aliases resolve to the same directory because PHP cannot
+	 * establish that they belong to one trust domain. */
+	boundary = apr_psprintf(
+		r->pool,
+		"server:%" APR_SIZE_T_FMT ":%s;document-root:%" APR_SIZE_T_FMT ":%s;host:%" APR_SIZE_T_FMT ":%s",
+		(apr_size_t) strlen(entry->server_identity),
+		entry->server_identity,
+		(apr_size_t) strlen(document_root),
+		document_root,
+		(apr_size_t) strlen(hostname),
+		hostname
+	);
+	php_user_cache_activate_boundary_partition_by_id(
+		"apache2handler",
+		boundary,
+		strlen(boundary),
+		PHP_USER_CACHE_REASON_APACHE_BOUNDARY_UNAVAILABLE
+	);
+}
+
 static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec *server)
 {
 	const char *hostname, *partition_name;
+	core_server_config *core_config;
 	php_apache_user_cache_partition_entry *entry;
 	server_rec *cur;
 	unsigned int i;
@@ -492,8 +607,8 @@ static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec 
 	/* The partition entries are pool-allocated (freed with pconf); the
 	 * php_user_cache_partition objects created below are owned by the
 	 * user_cache extension and released together in its MSHUTDOWN
-	 * (user_cache_partitions_shutdown), so no cgi/lsapi-style SAPI
-	 * shutdown hook is required here. */
+	 * (user_cache_partitions_shutdown), so no SAPI-side shutdown hook is
+	 * required here. */
 	php_apache_user_cache_partitions = NULL;
 	php_user_cache_opt_in();
 
@@ -510,6 +625,13 @@ static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec 
 
 		entry = apr_pcalloc(pconf, sizeof(*entry));
 		entry->server = cur;
+		entry->server_identity = partition_name;
+		entry->configured_hostname = php_apache_user_cache_normalize_hostname(pconf, cur->server_hostname);
+		core_config = ap_get_core_module_config(cur->module_config);
+		entry->configured_document_root = php_apache_user_cache_normalize_document_root(
+			pconf,
+			core_config != NULL ? core_config->ap_document_root : NULL
+		);
 		entry->partition = php_user_cache_partition_create(partition_name);
 		if (entry->partition == NULL) {
 			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "Unable to allocate UserCache partition");
@@ -616,7 +738,7 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 
 	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
 
-	php_user_cache_partition_activate(php_apache_user_cache_partition_for_server(r->server));
+	php_apache_user_cache_activate_request_partition(r);
 
 	if (php_request_startup() == FAILURE) {
 		php_user_cache_partition_activate(NULL);

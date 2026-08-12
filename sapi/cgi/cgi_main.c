@@ -799,19 +799,82 @@ static const char *cgi_user_cache_getenv(const char *name)
 	return getenv(name);
 }
 
-static void cgi_user_cache_log_message(const char *message)
-{
-	sapi_cgi_log_message(message, 0);
-}
-
 static void cgi_user_cache_activate_request_partition(void)
 {
-	php_user_cache_activate_boundary_partition(
+	const char *document_root = cgi_user_cache_getenv("DOCUMENT_ROOT");
+	const char *server_name = cgi_user_cache_getenv("SERVER_NAME");
+	const char *http_host = cgi_user_cache_getenv("HTTP_HOST");
+	size_t document_root_len, server_name_len, http_host_len, boundary_size;
+	char *boundary;
+	int boundary_len;
+
+	if ((server_name == NULL || server_name[0] == '\0') &&
+		(http_host == NULL || http_host[0] == '\0')
+	) {
+		php_user_cache_activate_boundary_partition_by_id(
+			"cgi-fcgi",
+			NULL,
+			0,
+			PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+		);
+
+		return;
+	}
+
+	if (document_root == NULL) {
+		document_root = "";
+	}
+	if (server_name == NULL) {
+		server_name = "";
+	}
+	if (http_host == NULL) {
+		http_host = "";
+	}
+	document_root_len = strlen(document_root);
+	server_name_len = strlen(server_name);
+	http_host_len = strlen(http_host);
+
+	/* Three decimal digits per size_t byte over-cover each length prefix,
+	 * and the component lengths cannot overflow the sum: each component is
+	 * a live NUL-terminated string in this address space. */
+	boundary_size = sizeof("document-root::;server-name::;http-host::") +
+		3 * (sizeof(size_t) * 3) +
+		document_root_len + server_name_len + http_host_len;
+	boundary = malloc(boundary_size);
+	if (boundary == NULL) {
+		php_user_cache_activate_boundary_partition_by_id(
+			"cgi-fcgi",
+			NULL,
+			0,
+			PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+		);
+
+		return;
+	}
+
+	/* Length-prefix every component so untrusted FastCGI values cannot create
+	 * ambiguous identities.  HTTP_HOST is intentionally included: PHP cannot
+	 * prove that two host aliases belong to the same application, so the safe
+	 * default is to keep them in different cache namespaces. */
+	boundary_len = snprintf(
+		boundary,
+		boundary_size,
+		"document-root:%zu:%s;server-name:%zu:%s;http-host:%zu:%s",
+		document_root_len,
+		document_root,
+		server_name_len,
+		server_name,
+		http_host_len,
+		http_host
+	);
+	ZEND_ASSERT(boundary_len > 0 && (size_t) boundary_len < boundary_size);
+	php_user_cache_activate_boundary_partition_by_id(
 		"cgi-fcgi",
-		cgi_user_cache_getenv,
-		cgi_user_cache_log_message,
+		boundary,
+		(size_t) boundary_len,
 		PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
 	);
+	free(boundary);
 }
 
 /* {{{ php_cgi_ini_activate_user_config */
@@ -1596,7 +1659,6 @@ static PHP_MINIT_FUNCTION(cgi)
 static PHP_MSHUTDOWN_FUNCTION(cgi)
 {
 	zend_hash_destroy(&CGIG(user_config_cache));
-	php_user_cache_boundary_partitions_shutdown();
 
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
