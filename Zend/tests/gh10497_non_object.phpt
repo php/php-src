@@ -86,6 +86,14 @@ echo "unset() did not error\n";
 var_dump(TRUE, C::INT, C::STR);
 var_dump(isset(C::INT->prop));
 
+try {
+    __COMPILER_HALT_OFFSET__->prop = 1;
+} catch (Error $e) {
+    echo $e::class, $e->getMessage(), "\n";
+}
+
+__halt_compiler();
+
 ?>
 --EXPECT--
 Attempt to assign property "prop" on true
@@ -103,3 +111,4 @@ bool(true)
 int(5)
 string(3) "str"
 bool(false)
+ErrorAttempt to assign property "prop" on int

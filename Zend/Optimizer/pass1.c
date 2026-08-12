@@ -124,12 +124,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			break;
 
 		case ZEND_FETCH_CONSTANT:
-			if (opline->result_type == IS_VAR) {
-				/* The constant is fetched in write context (e.g. CONST->prop = 1).
-				 * Substituting it would leave the following property opcode with an
-				 * IS_CONST container, for which no handler exists. */
-				break;
-			}
 			if (opline->op2_type == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING &&
 				zend_string_equals_literal(Z_STR(ZEND_OP2_LITERAL(opline)), "__COMPILER_HALT_OFFSET__")) {
@@ -167,10 +161,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 		case ZEND_FETCH_CLASS_CONSTANT: {
 			bool is_prototype;
-			if (opline->result_type == IS_VAR) {
-				/* Fetched in write context, see ZEND_FETCH_CONSTANT above. */
-				break;
-			}
 			const zend_class_constant *cc = zend_fetch_class_const_info(ctx->script, op_array, opline, &is_prototype);
 			if (!cc || is_prototype) {
 				break;
