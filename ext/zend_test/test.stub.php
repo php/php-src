@@ -319,6 +319,27 @@ namespace {
 	function zend_number_slow_zpp(int|float $param): int|float {}
 	function zend_number_or_null_slow_zpp(int|float|null $param): int|float|null {}
 
+    /**
+     * @param resource $param
+     * @return resource
+     */
+	function zend_resource($param) {}
+    /**
+     * @param resource|null $param
+     * @return resource|null
+     */
+	function zend_resource_or_null($param) {}
+    /**
+     * @param resource $param
+     * @return resource
+     */
+	function zend_resource_slow_zpp($param) {}
+    /**
+     * @param resource|null $param
+     * @return resource|null
+     */
+	function zend_resource_or_null_slow_zpp($param) {}
+
     function zend_string_or_object(object|string $param): object|string {}
 
     function zend_string_or_object_or_null(object|string|null $param): object|string|null {}

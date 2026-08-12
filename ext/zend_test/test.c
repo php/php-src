@@ -432,6 +432,56 @@ static ZEND_FUNCTION(zend_number_or_null_slow_zpp)
 	RETURN_COPY(v);
 }
 
+static ZEND_FUNCTION(zend_resource)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_resource_or_null)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_resource_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_resource_or_null_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r!", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
 /* Tests Z_PARAM_OBJ_OR_STR */
 static ZEND_FUNCTION(zend_string_or_object)
 {

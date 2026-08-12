@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 644affbfdb8223583e0c401fa1243a84ed4636ad
+ * Stub hash: ed33b9480f56ed1261bba98db9fb99b2ee5373b5
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)
@@ -82,6 +82,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_zend_number_slow_zpp arginfo_zend_bool
 
 #define arginfo_zend_number_or_null_slow_zpp arginfo_zend_bool
+
+#define arginfo_zend_resource arginfo_zend_bool
+
+#define arginfo_zend_resource_or_null arginfo_zend_bool
+
+#define arginfo_zend_resource_slow_zpp arginfo_zend_bool
+
+#define arginfo_zend_resource_or_null_slow_zpp arginfo_zend_bool
 
 #define arginfo_zend_string_or_object arginfo_zend_bool
 
@@ -324,6 +332,10 @@ static ZEND_FUNCTION(zend_number);
 static ZEND_FUNCTION(zend_number_or_null);
 static ZEND_FUNCTION(zend_number_slow_zpp);
 static ZEND_FUNCTION(zend_number_or_null_slow_zpp);
+static ZEND_FUNCTION(zend_resource);
+static ZEND_FUNCTION(zend_resource_or_null);
+static ZEND_FUNCTION(zend_resource_slow_zpp);
+static ZEND_FUNCTION(zend_resource_or_null_slow_zpp);
 static ZEND_FUNCTION(zend_string_or_object);
 static ZEND_FUNCTION(zend_string_or_object_or_null);
 static ZEND_FUNCTION(zend_string_or_stdclass);
@@ -448,6 +460,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_number_or_null, arginfo_zend_number_or_null)
 	ZEND_FE(zend_number_slow_zpp, arginfo_zend_number_slow_zpp)
 	ZEND_FE(zend_number_or_null_slow_zpp, arginfo_zend_number_or_null_slow_zpp)
+	ZEND_FE(zend_resource, arginfo_zend_resource)
+	ZEND_FE(zend_resource_or_null, arginfo_zend_resource_or_null)
+	ZEND_FE(zend_resource_slow_zpp, arginfo_zend_resource_slow_zpp)
+	ZEND_FE(zend_resource_or_null_slow_zpp, arginfo_zend_resource_or_null_slow_zpp)
 	ZEND_FE(zend_string_or_object, arginfo_zend_string_or_object)
 	ZEND_FE(zend_string_or_object_or_null, arginfo_zend_string_or_object_or_null)
 	ZEND_FE(zend_string_or_stdclass, arginfo_zend_string_or_stdclass)
