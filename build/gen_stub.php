@@ -1418,6 +1418,8 @@ class FuncInfo {
             return null;
         }
 
+        assert($this->name instanceof FunctionName);
+
         $code = '';
         $infos = '';
         foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
@@ -1439,6 +1441,7 @@ class FuncInfo {
     }
 
     private function getFramelessFunctionInfosName(): string {
+        assert($this->name instanceof FunctionName);
         return $this->name->getFramelessFunctionInfosName();
     }
 
@@ -1447,6 +1450,7 @@ class FuncInfo {
             if ($this->isMethod()) {
                 throw new Exception('Frameless methods are not supported yet');
             }
+            assert($this->name instanceof FunctionName);
             if ($this->name->getNamespace()) {
                 throw new Exception('Namespaced direct calls to frameless functions are not supported yet');
             }
@@ -1460,6 +1464,7 @@ class FuncInfo {
         $flagsByPhpVersions = $this->getArginfoFlagsByPhpVersions();
 
         if ($this->isMethod()) {
+            assert($this->name instanceof MethodName);
             $zendName = '"' . $this->name->methodName . '"';
             if ($this->alias) {
                 if ($this->alias instanceof MethodName) {
