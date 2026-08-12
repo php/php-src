@@ -13,6 +13,7 @@ $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 $ini = getenv('TEST_PHP_EXTRA_ARGS');
 
 putenv('TERM=VT100');
+putenv('INPUTRC=/dev/null');
 
 $code = <<<'PHP'
 class Foo {
