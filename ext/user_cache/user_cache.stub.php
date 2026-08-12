@@ -16,6 +16,7 @@ enum CacheAvailability
 	case UnavailableByBackendNotInitializedBeforeWorkerStartup;
 	case UnavailableByBackendInitializedAfterWorkerStartup;
 	case UnavailableByCgiFastCgiBoundary;
+	case UnavailableByApacheBoundary;
 	case UnavailableByLsapiBoundary;
 	case UnavailableByUnknownReason;
 }
