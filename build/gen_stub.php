@@ -864,7 +864,7 @@ class ConstName extends AbstractConstName {
 
     public function getDeclarationName(): string
     {
-        return $this->name->toString();
+        throw new Exception("ConstName does not have a declaration name");
     }
 }
 
@@ -2579,6 +2579,7 @@ class ConstInfo extends VariableLike
 
     protected function getFieldSynopsisDefaultLinkend(): string
     {
+        assert($this->name instanceof ClassConstName);
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
         return "$className.constants." . strtolower(str_replace("_", "-", trim($this->name->getDeclarationName(), "_")));
