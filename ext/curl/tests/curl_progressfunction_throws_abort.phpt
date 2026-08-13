@@ -26,7 +26,7 @@ curl_setopt($ch, CURLOPT_PROGRESSFUNCTION,
 try {
     curl_exec($ch);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(curl_errno($ch) === CURLE_ABORTED_BY_CALLBACK);
@@ -40,7 +40,7 @@ var_dump(curl_errno($ch) === CURLE_OK);
 ?>
 --EXPECTF--
 Test: progress function throws exception
-info exception
+Exception: info exception
 bool(true)
 Test: progress function is null
 bool(true)
