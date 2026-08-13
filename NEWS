@@ -6,6 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- Opcache:
+  . Fixed tracing JIT reading an undefined property slot as NULL in
+    isset($obj->prop[$key]): a lazy object stayed uninitialized, and a property
+    removed by unset() never reached __isset()/__get(). (EdmondDantes)
+
 27 Aug 2026, PHP 8.4.25
 
 - Core:
