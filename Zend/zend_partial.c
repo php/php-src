@@ -1125,7 +1125,7 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 	}
 
 	zend_class_entry *called_scope;
-	zval object;
+	zend_object *object;
 
 	if (Z_TYPE_P(this_ptr) == IS_OBJECT) {
 		called_scope = Z_OBJCE_P(this_ptr);
@@ -1134,13 +1134,13 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 	}
 
 	if (Z_TYPE_P(this_ptr) == IS_OBJECT && !zp_is_static_closure(function)) {
-		ZVAL_COPY_VALUE(&object, this_ptr);
+		object = Z_OBJ_P(this_ptr);
 	} else {
-		ZVAL_UNDEF(&object);
+		object = NULL;
 	}
 
 	zend_create_partial_closure(result, (zend_function*)op_array,
-			function->common.scope, called_scope, &object,
+			function->common.scope, called_scope, object,
 			(function->common.fn_flags & ZEND_ACC_CLOSURE) != 0);
 
 	zp_bind(result, function, argc, argv, extra_named_params, const_args);
