@@ -340,6 +340,9 @@ namespace {
 	function zend_object_sdtClass_slow_zpp(stdClass $param): stdClass {}
 	function zend_object_sdtClass_or_null_slow_zpp(stdClass|null $param): stdClass|null {}
 
+	function zend_obj_sdtClass(stdClass $param): stdClass {}
+	function zend_obj_sdtClass_or_null(stdClass|null $param): stdClass|null {}
+
     /**
      * @param resource $param
      * @return resource

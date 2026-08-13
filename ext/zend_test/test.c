@@ -632,6 +632,31 @@ static ZEND_FUNCTION(zend_object_sdtClass_or_null_slow_zpp)
 	RETURN_COPY(v);
 }
 
+static ZEND_FUNCTION(zend_obj_sdtClass)
+{
+	zend_object *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS(v, zend_standard_class_def)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_OBJ_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_obj_sdtClass_or_null)
+{
+	zend_object *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(v, zend_standard_class_def)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_OBJ_COPY(v);
+}
+
 static ZEND_FUNCTION(zend_resource)
 {
 	zval *v;
