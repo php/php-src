@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- Zip:
+  . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
+    is freed while the stream is still open). (Eyüp Can Akman)
+
 27 Aug 2026, PHP 8.4.25
 
 - Core:
@@ -62,10 +66,6 @@ PHP                                                                        NEWS
 
 - Readline:
   . Fixed class constant completion in the interactive shell. (Weilin Du)
-
-- Zip:
-  . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
-    is freed while the stream is still open). (Eyüp Can Akman)
 
 - Session:
   . Fix corruption in mod_mm. (ndossche)
