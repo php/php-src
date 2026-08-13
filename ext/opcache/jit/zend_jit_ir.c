@@ -204,10 +204,10 @@ static size_t tsrm_tls_index = -1;
 static size_t tsrm_tls_offset = -1;
 
 # define EG_TLS_OFFSET(field) \
-	(tsrm_ls_cache_tcb_offset + offsetof(zend_tsrm_ls_cache, eg) + offsetof(zend_executor_globals, field))
+	(offsetof(zend_tsrm_ls_cache, eg) + offsetof(zend_executor_globals, field))
 
 # define CG_TLS_OFFSET(field) \
-	(tsrm_ls_cache_tcb_offset + offsetof(zend_tsrm_ls_cache, cg) + offsetof(zend_compiler_globals, field))
+	(offsetof(zend_tsrm_ls_cache, cg) + offsetof(zend_compiler_globals, field))
 
 # define jit_EG(_field) \
 	ir_ADD_OFFSET(jit_TLS(jit), EG_TLS_OFFSET(_field))
@@ -529,8 +529,6 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 
 	if (tsrm_ls_cache_tcb_offset == 0 && tsrm_tls_index == -1) {
 		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
-	} else if (tsrm_ls_cache_tcb_offset) {
-		jit->tls = ir_TLS(0, IR_NULL);
 	} else {
 # ifdef ZEND_OPCACHE_SHM_REATTACHMENT
 		/* Different processes may load TLS variables in a different order, so
@@ -548,11 +546,11 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 		ir_ref tls_array = ir_TLS(-1, offset);
 
 		ir_ref index = ir_LOAD_A(ir_CONST_ADDR(&tsrm_tls_index));
-		jit->tls = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(ir_ADD_A(tls_array, index)), tsrm_tls_offset));
+		jit->tls = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(ir_ADD_A(tls_array, index)), tsrm_tls_offset + offsetof(zend_tsrm_ls_cache, self)));
 # else
 		jit->tls = ir_TLS(
-				tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
-				tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
+				tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset + offsetof(zend_tsrm_ls_cache, self) : tsrm_tls_index,
+				tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset + offsetof(zend_tsrm_ls_cache, self));
 # endif
 	}
 
