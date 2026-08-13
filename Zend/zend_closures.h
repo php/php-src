@@ -39,7 +39,7 @@ ZEND_API void zend_create_fake_closure(zval *res, zend_function *op_array, zend_
 ZEND_API void zend_create_partial_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zend_object *this_ptr, bool partial_of_closure);
 ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
 ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
-ZEND_API zval* zend_get_closure_this_ptr(zval *obj);
+ZEND_API zend_object* zend_get_closure_this_ptr(zval *obj);
 
 END_EXTERN_C()
 
