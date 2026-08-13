@@ -561,6 +561,30 @@ static zend_ast *zp_compile_forwarding_call(
 			args_ast = zend_ast_list_add(args_ast, default_value_ast);
 		} else if (zp_is_const_arg(const_args, offset)) {
 			ZEND_ASSERT(Z_TYPE(argv[offset]) < IS_OBJECT);
+
+			/* This argument never changes, so we can burn it into the op_array
+			 * and check its type ahead of time. */
+
+			zend_arg_info *arg_info;
+			if (offset < function->common.num_args) {
+				arg_info = &function->common.arg_info[offset];
+			} else if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
+				arg_info = &function->common.arg_info[function->common.num_args];
+			} else {
+				arg_info = NULL;
+			}
+			if (arg_info && ZEND_TYPE_IS_SET(arg_info->type)
+					&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, &argv[offset],
+						/* current_frame */ true, /* is_internal */ false))) {
+				zend_string *need_msg = zend_type_to_string_resolved(arg_info->type,
+						function->common.scope);
+				zend_argument_type_error_ex(function, offset + 1,
+						"must be of type %s, %s given",
+						ZSTR_VAL(need_msg), zend_zval_value_name(&argv[offset]));
+				zend_string_release(need_msg);
+				goto error;
+			}
+
 			args_ast = zend_ast_list_add(args_ast, zend_ast_create_zval(&argv[offset]));
 		} else {
 			args_ast = zend_ast_list_add(args_ast, zend_ast_create(ZEND_AST_VAR,
