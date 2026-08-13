@@ -128,6 +128,24 @@ TypeError: zend_number(): Argument #1 ($param) must be of type int|float, string
 TypeError: zend_number_or_null(): Argument #1 ($param) must be of type int|float|null, string given
 TypeError: zend_number_slow_zpp(): Argument #1 ($param) must be of type int|float, string given
 TypeError: zend_number_or_null_slow_zpp(): Argument #1 ($param) must be of type int|float|null, string given
+Using 'stdClass':
+TypeError: zend_number(): Argument #1 ($param) must be of type int|float, string given
+TypeError: zend_number_or_null(): Argument #1 ($param) must be of type int|float|null, string given
+TypeError: zend_number_slow_zpp(): Argument #1 ($param) must be of type int|float, string given
+TypeError: zend_number_or_null_slow_zpp(): Argument #1 ($param) must be of type int|float|null, string given
+TypeError: zend_number(): Argument #1 ($param) must be of type int|float, string given
+TypeError: zend_number_or_null(): Argument #1 ($param) must be of type int|float|null, string given
+TypeError: zend_number_slow_zpp(): Argument #1 ($param) must be of type int|float, string given
+TypeError: zend_number_or_null_slow_zpp(): Argument #1 ($param) must be of type int|float|null, string given
+Using anon class name:
+TypeError: zend_number(): Argument #1 ($param) must be of type int|float, string given
+TypeError: zend_number_or_null(): Argument #1 ($param) must be of type int|float|null, string given
+TypeError: zend_number_slow_zpp(): Argument #1 ($param) must be of type int|float, string given
+TypeError: zend_number_or_null_slow_zpp(): Argument #1 ($param) must be of type int|float|null, string given
+TypeError: zend_number(): Argument #1 ($param) must be of type int|float, string given
+TypeError: zend_number_or_null(): Argument #1 ($param) must be of type int|float|null, string given
+TypeError: zend_number_slow_zpp(): Argument #1 ($param) must be of type int|float, string given
+TypeError: zend_number_or_null_slow_zpp(): Argument #1 ($param) must be of type int|float|null, string given
 Using []:
 TypeError: zend_number(): Argument #1 ($param) must be of type int|float, array given
 TypeError: zend_number_or_null(): Argument #1 ($param) must be of type int|float|null, array given

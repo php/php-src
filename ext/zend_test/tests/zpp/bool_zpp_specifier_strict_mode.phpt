@@ -128,6 +128,24 @@ TypeError: zend_bool(): Argument #1 ($param) must be of type bool, string given
 TypeError: zend_bool_or_null(): Argument #1 ($param) must be of type ?bool, string given
 TypeError: zend_bool_slow_zpp(): Argument #1 ($param) must be of type bool, string given
 TypeError: zend_bool_or_null_slow_zpp(): Argument #1 ($param) must be of type ?bool, string given
+Using 'stdClass':
+TypeError: zend_bool(): Argument #1 ($param) must be of type bool, string given
+TypeError: zend_bool_or_null(): Argument #1 ($param) must be of type ?bool, string given
+TypeError: zend_bool_slow_zpp(): Argument #1 ($param) must be of type bool, string given
+TypeError: zend_bool_or_null_slow_zpp(): Argument #1 ($param) must be of type ?bool, string given
+TypeError: zend_bool(): Argument #1 ($param) must be of type bool, string given
+TypeError: zend_bool_or_null(): Argument #1 ($param) must be of type ?bool, string given
+TypeError: zend_bool_slow_zpp(): Argument #1 ($param) must be of type bool, string given
+TypeError: zend_bool_or_null_slow_zpp(): Argument #1 ($param) must be of type ?bool, string given
+Using anon class name:
+TypeError: zend_bool(): Argument #1 ($param) must be of type bool, string given
+TypeError: zend_bool_or_null(): Argument #1 ($param) must be of type ?bool, string given
+TypeError: zend_bool_slow_zpp(): Argument #1 ($param) must be of type bool, string given
+TypeError: zend_bool_or_null_slow_zpp(): Argument #1 ($param) must be of type ?bool, string given
+TypeError: zend_bool(): Argument #1 ($param) must be of type bool, string given
+TypeError: zend_bool_or_null(): Argument #1 ($param) must be of type ?bool, string given
+TypeError: zend_bool_slow_zpp(): Argument #1 ($param) must be of type bool, string given
+TypeError: zend_bool_or_null_slow_zpp(): Argument #1 ($param) must be of type ?bool, string given
 Using []:
 TypeError: zend_bool(): Argument #1 ($param) must be of type bool, array given
 TypeError: zend_bool_or_null(): Argument #1 ($param) must be of type ?bool, array given

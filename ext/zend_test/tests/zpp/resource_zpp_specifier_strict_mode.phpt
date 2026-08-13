@@ -128,6 +128,24 @@ TypeError: zend_resource(): Argument #1 ($param) must be of type resource, strin
 TypeError: zend_resource_or_null(): Argument #1 ($param) must be of type resource or null, string given
 TypeError: zend_resource_slow_zpp(): Argument #1 ($param) must be of type resource, string given
 TypeError: zend_resource_or_null_slow_zpp(): Argument #1 ($param) must be of type resource or null, string given
+Using 'stdClass':
+TypeError: zend_resource(): Argument #1 ($param) must be of type resource, string given
+TypeError: zend_resource_or_null(): Argument #1 ($param) must be of type resource or null, string given
+TypeError: zend_resource_slow_zpp(): Argument #1 ($param) must be of type resource, string given
+TypeError: zend_resource_or_null_slow_zpp(): Argument #1 ($param) must be of type resource or null, string given
+TypeError: zend_resource(): Argument #1 ($param) must be of type resource, string given
+TypeError: zend_resource_or_null(): Argument #1 ($param) must be of type resource or null, string given
+TypeError: zend_resource_slow_zpp(): Argument #1 ($param) must be of type resource, string given
+TypeError: zend_resource_or_null_slow_zpp(): Argument #1 ($param) must be of type resource or null, string given
+Using anon class name:
+TypeError: zend_resource(): Argument #1 ($param) must be of type resource, string given
+TypeError: zend_resource_or_null(): Argument #1 ($param) must be of type resource or null, string given
+TypeError: zend_resource_slow_zpp(): Argument #1 ($param) must be of type resource, string given
+TypeError: zend_resource_or_null_slow_zpp(): Argument #1 ($param) must be of type resource or null, string given
+TypeError: zend_resource(): Argument #1 ($param) must be of type resource, string given
+TypeError: zend_resource_or_null(): Argument #1 ($param) must be of type resource or null, string given
+TypeError: zend_resource_slow_zpp(): Argument #1 ($param) must be of type resource, string given
+TypeError: zend_resource_or_null_slow_zpp(): Argument #1 ($param) must be of type resource or null, string given
 Using []:
 TypeError: zend_resource(): Argument #1 ($param) must be of type resource, array given
 TypeError: zend_resource_or_null(): Argument #1 ($param) must be of type resource or null, array given

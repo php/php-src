@@ -128,6 +128,24 @@ TypeError: zend_int(): Argument #1 ($param) must be of type int, string given
 TypeError: zend_int_or_null(): Argument #1 ($param) must be of type ?int, string given
 TypeError: zend_int_slow_zpp(): Argument #1 ($param) must be of type int, string given
 TypeError: zend_int_or_null_slow_zpp(): Argument #1 ($param) must be of type ?int, string given
+Using 'stdClass':
+TypeError: zend_int(): Argument #1 ($param) must be of type int, string given
+TypeError: zend_int_or_null(): Argument #1 ($param) must be of type ?int, string given
+TypeError: zend_int_slow_zpp(): Argument #1 ($param) must be of type int, string given
+TypeError: zend_int_or_null_slow_zpp(): Argument #1 ($param) must be of type ?int, string given
+TypeError: zend_int(): Argument #1 ($param) must be of type int, string given
+TypeError: zend_int_or_null(): Argument #1 ($param) must be of type ?int, string given
+TypeError: zend_int_slow_zpp(): Argument #1 ($param) must be of type int, string given
+TypeError: zend_int_or_null_slow_zpp(): Argument #1 ($param) must be of type ?int, string given
+Using anon class name:
+TypeError: zend_int(): Argument #1 ($param) must be of type int, string given
+TypeError: zend_int_or_null(): Argument #1 ($param) must be of type ?int, string given
+TypeError: zend_int_slow_zpp(): Argument #1 ($param) must be of type int, string given
+TypeError: zend_int_or_null_slow_zpp(): Argument #1 ($param) must be of type ?int, string given
+TypeError: zend_int(): Argument #1 ($param) must be of type int, string given
+TypeError: zend_int_or_null(): Argument #1 ($param) must be of type ?int, string given
+TypeError: zend_int_slow_zpp(): Argument #1 ($param) must be of type int, string given
+TypeError: zend_int_or_null_slow_zpp(): Argument #1 ($param) must be of type ?int, string given
 Using []:
 TypeError: zend_int(): Argument #1 ($param) must be of type int, array given
 TypeError: zend_int_or_null(): Argument #1 ($param) must be of type ?int, array given

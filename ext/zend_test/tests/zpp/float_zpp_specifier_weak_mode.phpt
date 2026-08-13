@@ -134,6 +134,24 @@ float(56.7)
 float(56.7)
 float(56.7)
 float(56.7)
+Using 'stdClass':
+TypeError: zend_float(): Argument #1 ($param) must be of type float, string given
+TypeError: zend_float_or_null(): Argument #1 ($param) must be of type ?float, string given
+TypeError: zend_float_slow_zpp(): Argument #1 ($param) must be of type float, string given
+TypeError: zend_float_or_null_slow_zpp(): Argument #1 ($param) must be of type ?float, string given
+TypeError: zend_float(): Argument #1 ($param) must be of type float, string given
+TypeError: zend_float_or_null(): Argument #1 ($param) must be of type ?float, string given
+TypeError: zend_float_slow_zpp(): Argument #1 ($param) must be of type float, string given
+TypeError: zend_float_or_null_slow_zpp(): Argument #1 ($param) must be of type ?float, string given
+Using anon class name:
+TypeError: zend_float(): Argument #1 ($param) must be of type float, string given
+TypeError: zend_float_or_null(): Argument #1 ($param) must be of type ?float, string given
+TypeError: zend_float_slow_zpp(): Argument #1 ($param) must be of type float, string given
+TypeError: zend_float_or_null_slow_zpp(): Argument #1 ($param) must be of type ?float, string given
+TypeError: zend_float(): Argument #1 ($param) must be of type float, string given
+TypeError: zend_float_or_null(): Argument #1 ($param) must be of type ?float, string given
+TypeError: zend_float_slow_zpp(): Argument #1 ($param) must be of type float, string given
+TypeError: zend_float_or_null_slow_zpp(): Argument #1 ($param) must be of type ?float, string given
 Using []:
 TypeError: zend_float(): Argument #1 ($param) must be of type float, array given
 TypeError: zend_float_or_null(): Argument #1 ($param) must be of type ?float, array given

@@ -49,18 +49,24 @@ string(2) "15"
 Using '56.7':
 string(4) "56.7"
 string(4) "56.7"
+Using 'stdClass':
+string(8) "stdClass"
+string(8) "stdClass"
+Using anon class name:
+string(%d) "class@anonymous%s"
+string(%d) "class@anonymous%s"
 Using []:
 TypeError: zend_string_or_object(): Argument #1 ($param) must be of type object|string, array given
 TypeError: zend_string_or_object_or_null(): Argument #1 ($param) must be of type object|string|null, array given
 Using new stdClass():
-object(stdClass)#1 (0) {
+object(stdClass)#2 (0) {
 }
-object(stdClass)#1 (0) {
+object(stdClass)#2 (0) {
 }
 Using new S():
-object(S)#2 (0) {
+object(S)#3 (0) {
 }
-object(S)#2 (0) {
+object(S)#3 (0) {
 }
 Using STDOUT:
 TypeError: zend_string_or_object(): Argument #1 ($param) must be of type object|string, resource given

@@ -134,6 +134,24 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+Using 'stdClass':
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+Using anon class name:
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 Using []:
 TypeError: zend_bool(): Argument #1 ($param) must be of type bool, array given
 TypeError: zend_bool_or_null(): Argument #1 ($param) must be of type ?bool, array given
