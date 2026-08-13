@@ -15,7 +15,7 @@ function curl_cli_server_start() {
     // First, wait for the dev server to declare itself ready.
     $bound = null;
     stream_set_blocking($pipes[2], false);
-    for ($i = 0; $i < 60; $i++) {
+    for ($i = 0; $i < 150; $i++) {
         usleep(20000); // 20ms per try
         $status = proc_get_status($handle);
         if (empty($status['running'])) {
@@ -44,7 +44,7 @@ function curl_cli_server_start() {
     // note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'
     //       it might not be listening yet...need to wait until fsockopen() call returns
     $error = "Unable to connect to server\n";
-    for ($i=0; $i < 60; $i++) {
+    for ($i=0; $i < 150; $i++) {
         $status = proc_get_status($handle);
         $fp = @fsockopen("tcp://$bound");
         // Failure, the server is no longer running
@@ -74,7 +74,7 @@ function curl_cli_server_start() {
         function($handle) {
             proc_terminate($handle);
             /* Wait for server to shutdown */
-            for ($i = 0; $i < 60; $i++) {
+            for ($i = 0; $i < 150; $i++) {
                 $status = proc_get_status($handle);
                 if (!($status && $status['running'])) {
                     break;
