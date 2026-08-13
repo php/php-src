@@ -44,9 +44,9 @@ typedef struct _php_com_dotnet_object {
 	HashTable *id_of_name_cache;
 } php_com_dotnet_object;
 
-static inline bool php_com_is_valid_object(zval *zv)
+static inline bool php_com_is_valid_object(zend_object *obj)
 {
-	zend_class_entry *ce = Z_OBJCE_P(zv);
+	const zend_class_entry *ce = obj->ce;
 	return zend_string_equals_literal(ce->name, "com") ||
 		zend_string_equals_literal(ce->name, "dotnet") ||
 		zend_string_equals_literal(ce->name, "variant");
@@ -54,7 +54,7 @@ static inline bool php_com_is_valid_object(zval *zv)
 
 #define CDNO_FETCH(zv)			(php_com_dotnet_object*)Z_OBJ_P(zv)
 #define CDNO_FETCH_VERIFY(obj, zv)	do { \
-	if (!php_com_is_valid_object(zv)) { \
+	if (!php_com_is_valid_object(Z_OBJ_P(zv))) { \
 		php_com_throw_exception(E_UNEXPECTED, "expected a variant object"); \
 		return; \
 	} \
@@ -99,8 +99,8 @@ zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_fu
 		WORD flags,	VARIANT *v, int nargs, zval *args);
 
 /* com_wrapper.c */
-PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name);
-PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val);
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zend_object *val, GUID *sinkid, HashTable *id_to_name);
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zend_object *val);
 
 /* com_persist.c */
 void php_com_persist_minit(INIT_FUNC_ARGS);
