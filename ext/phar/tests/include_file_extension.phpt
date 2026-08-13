@@ -1,5 +1,5 @@
 --TEST--
-Phar: only files ending in .phar are automatically interpreted as Phar archives
+Phar: .phar in a directory name does not trigger automatic archive detection
 --EXTENSIONS--
 phar
 zlib
@@ -10,13 +10,12 @@ phar.require_hash=0
 <?php
 $base = __DIR__ . '/' . basename(__FILE__, '.php');
 $targets = [
-    $base . '.phar',
     $base . '.phar.png',
     $base . '.pharabcd/archive.html',
 ];
 
-if (!is_dir(dirname($targets[2]))) {
-    mkdir(dirname($targets[2]));
+if (!is_dir(dirname($targets[1]))) {
+    mkdir(dirname($targets[1]));
 }
 
 foreach ($targets as $i => $target) {
@@ -41,15 +40,13 @@ foreach ($targets as $i => $target) {
 --CLEAN--
 <?php
 $base = __DIR__ . '/' . basename(__FILE__, '.clean.php');
-@unlink($base . '.phar');
 @unlink($base . '.phar.png');
 @unlink($base . '.pharabcd/archive.html');
-for ($i = 0; $i < 3; $i++) {
+for ($i = 0; $i < 2; $i++) {
     @unlink($base . ".source-$i.phar.zip");
 }
 @rmdir($base . '.pharabcd');
 ?>
 --EXPECT--
 bool(true)
-bool(false)
 bool(false)

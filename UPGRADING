@@ -54,8 +54,8 @@ PHP 8.6 UPGRADE NOTES
 
 - Phar:
   . Files are only automatically interpreted as Phar archives when included
-    if their paths end in ".phar". Previously, any path containing ".phar"
-    was sufficient.
+    if ".phar" occurs in the filename component of their paths. Previously,
+    it could occur in a directory name.
 
 - GMP:
   . GMP power and shift operators now throw ValueError when GMP right operands
