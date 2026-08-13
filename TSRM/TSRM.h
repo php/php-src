@@ -161,7 +161,7 @@ TSRM_API bool tsrm_is_managed_thread(void);
 	|| defined(__MUSL__) || defined(__HAIKU__) || defined(_AIX)
 # define TSRM_TLS_MODEL_ATTR
 # define TSRM_TLS_MODEL_DEFAULT
-#elif defined(__PIC__) && !defined(__PIE__)
+#elif (defined(__PIC__) && !defined(__PIE__)) || !defined(ZEND_ENABLE_STATIC_TSRMLS_CACHE)
 # if defined(TSRM_TLS_MODEL_USE_GLOBAL_DYNAMIC)
 #  define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("global-dynamic")))
 #  define TSRM_TLS_MODEL_GLOBAL_DYNAMIC
