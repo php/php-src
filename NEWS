@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - Readline:
   . Fixed class constant completion in the interactive shell. (Weilin Du)
 
+- Zip:
+  . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
+    is freed while the stream is still open). (Eyüp Can Akman)
+
 13 Aug 2026, PHP 8.6.0beta1
 
 - Core:
