@@ -23,6 +23,16 @@ PHP 8.6 UPGRADE NOTES
   . ??/empty() on a magic property no longer call __get() when __isset()
     has materialised the property by writing into the property table.
     The freshly-written value is returned directly. isset() is unaffected.
+  . Writing to a property of a constant is no longer rejected at compile time
+    with "Cannot use temporary expression in write context". Such code now
+    compiles, and behaves as it does for a plain variable holding the same
+    value: the write succeeds if the constant holds an object, and otherwise
+    raises an Error at runtime (unset() on a non-object is a silent no-op).
+    Code that previously failed to compile therefore now runs up to the point
+    of the write. Enum cases are class constants, so writing to or unsetting
+    an enum case property now raises the usual readonly property Error at
+    runtime; enum case properties remain immutable.
+    RFC: https://wiki.php.net/rfc/const_object_property_write
 
 - Curl:
   . The callback registered with CURLOPT_READFUNCTION now throws a ValueError
@@ -309,6 +319,18 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/override_constants
   . Implemented partial function application
     RFC: https://wiki.php.net/rfc/partial_function_application_v2
+  . Object properties may now be written through a constant holding the
+    object, for both global and class constants:
+
+        const OBJ = new stdClass;
+        OBJ->prop = 42;
+        Cls::OBJ->prop = 42;
+
+    This includes compound assignment, increment/decrement, isset()/unset(),
+    passing by reference and nested property chains. The constant binding
+    itself remains immutable, and dimension writes on constants
+    (e.g. CONST[0] = 1) continue to be rejected.
+    RFC: https://wiki.php.net/rfc/const_object_property_write
 
 - Curl:
   . curl_getinfo() return array now includes a new size_delivered key, which
