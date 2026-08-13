@@ -268,7 +268,20 @@ static int php_zip_extract_file(struct zip * za, char *dest, const char *file, s
 	n = 0;
 
 	while ((n=zip_fread(zf, b, sizeof(b))) > 0) {
-		php_stream_write(stream, b, n);
+		if (php_stream_write(stream, b, n) != n) {
+			n = -1;
+			break;
+		}
+	}
+
+	if (n < 0) {
+		zip_error_t *ziperr = zip_file_get_error(zf);
+		if (zip_error_code_zip(ziperr) != ZIP_ER_OK) {
+			php_error_docref(NULL, E_WARNING, "Cannot extract \"%s\": \"%s\"", file, zip_error_strerror(ziperr));
+		}
+		php_stream_close(stream);
+		zip_fclose(zf);
+		goto done;
 	}
 
 	if (stream->wrapper->wops->stream_metadata) {
@@ -279,7 +292,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, const char *file, s
 	}
 
 	php_stream_close(stream);
-	n = zip_fclose(zf);
+	n = zip_fclose(zf) == 0 ? 0 : -1;
 
 done:
 	efree(fullpath);
@@ -2972,7 +2985,20 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	buffer = zend_string_safe_alloc(1, len, 0, 0);
 	zip_int64_t n = zip_fread(zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
-	if (n < 1) {
+	if (n > 0 && (zip_uint64_t)n == sb.size) {
+		char tmp;
+		if (zip_fread(zf, &tmp, 1) < 0) {
+			n = -1;
+		}
+	}
+	if (n < 0) {
+		zip_error_t *ziperr = zip_file_get_error(zf);
+		php_error_docref(NULL, E_WARNING, "Cannot read entry: %s", zip_error_strerror(ziperr));
+		zip_fclose(zf);
+		zend_string_efree(buffer);
+		RETURN_FALSE;
+	}
+	if (n == 0) {
 		zip_fclose(zf);
 		zend_string_efree(buffer);
 		RETURN_EMPTY_STRING();
