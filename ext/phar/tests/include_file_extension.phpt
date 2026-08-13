@@ -1,5 +1,5 @@
 --TEST--
-Phar: .phar in a directory name does not trigger automatic archive detection
+Phar: only .phar extensions in file names trigger automatic archive detection
 --EXTENSIONS--
 phar
 zlib
@@ -12,6 +12,8 @@ $base = __DIR__ . '/' . basename(__FILE__, '.php');
 $targets = [
     $base . '.phar.png',
     $base . '.pharabcd/archive.html',
+    $base . '.pharma.report.txt',
+    $base . '.pharma.phar.html',
 ];
 
 if (!is_dir(dirname($targets[1]))) {
@@ -42,7 +44,9 @@ foreach ($targets as $i => $target) {
 $base = __DIR__ . '/' . basename(__FILE__, '.clean.php');
 @unlink($base . '.phar.png');
 @unlink($base . '.pharabcd/archive.html');
-for ($i = 0; $i < 2; $i++) {
+@unlink($base . '.pharma.report.txt');
+@unlink($base . '.pharma.phar.html');
+for ($i = 0; $i < 4; $i++) {
     @unlink($base . ".source-$i.phar.zip");
 }
 @rmdir($base . '.pharabcd');
@@ -50,3 +54,5 @@ for ($i = 0; $i < 2; $i++) {
 --EXPECT--
 bool(true)
 bool(false)
+bool(false)
+bool(true)

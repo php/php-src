@@ -18,7 +18,8 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fixed Phar archives being automatically detected when ".phar" only occurs
-    in a directory name in an included file's path. (Weilin Du)
+    in a directory name or is not a filename extension in an included file's
+    path. (Weilin Du)
 
 - Readline:
   . Fixed class constant completion in the interactive shell. (Weilin Du)

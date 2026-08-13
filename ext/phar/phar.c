@@ -3177,7 +3177,14 @@ static bool phar_has_marker_in_filename(const zend_string *filename)
 		basename = backslash;
 	}
 #endif
-	return strstr(basename ? basename + 1 : path, ".phar") != NULL;
+	const char *marker = basename ? basename + 1 : path;
+	while ((marker = strstr(marker, ".phar"))) {
+		marker += sizeof(".phar") - 1;
+		if (*marker == '\0' || *marker == '.') {
+			return true;
+		}
+	}
+	return false;
 }
 
 static zend_string *phar_resolve_path(zend_string *filename)
