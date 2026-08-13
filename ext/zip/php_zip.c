@@ -135,6 +135,30 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 # define CWD_STATE_ALLOC(l) emalloc(l)
 # define CWD_STATE_FREE(s)  efree(s)
 
+/* {{{ php_zip_file_error
+ Entry error code, plus its message when message is not NULL.
+ zip_error_t and its accessors only exist since libzip 1.0. */
+static int php_zip_file_error(struct zip_file *zf, const char **message)
+{
+#if LIBZIP_VERSION_MAJOR < 1
+	int zep, syp;
+
+	zip_file_error_get(zf, &zep, &syp);
+	if (message) {
+		*message = zip_file_strerror(zf);
+	}
+	return zep;
+#else
+	zip_error_t *err = zip_file_get_error(zf);
+
+	if (message) {
+		*message = zip_error_strerror(err);
+	}
+	return zip_error_code_zip(err);
+#endif
+}
+/* }}} */
+
 /* {{{ php_zip_extract_file */
 static int php_zip_extract_file(struct zip * za, char *dest, const char *file, size_t file_len, zip_int64_t idx)
 {
@@ -275,9 +299,10 @@ static int php_zip_extract_file(struct zip * za, char *dest, const char *file, s
 	}
 
 	if (n < 0) {
-		zip_error_t *ziperr = zip_file_get_error(zf);
-		if (zip_error_code_zip(ziperr) != ZIP_ER_OK) {
-			php_error_docref(NULL, E_WARNING, "Cannot extract \"%s\": \"%s\"", file, zip_error_strerror(ziperr));
+		const char *message;
+
+		if (php_zip_file_error(zf, &message) != ZIP_ER_OK) {
+			php_error_docref(NULL, E_WARNING, "Cannot extract \"%s\": \"%s\"", file, message);
 		}
 		php_stream_close(stream);
 		zip_fclose(zf);
@@ -2966,10 +2991,6 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 		PHP_ZIP_STAT_INDEX(intern, index, flags, sb);
 	}
 
-	if (sb.size < 1) {
-		RETURN_EMPTY_STRING();
-	}
-
 	if (len < 1) {
 		len = sb.size;
 	}
@@ -2984,16 +3005,35 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	}
 
 	buffer = zend_string_safe_alloc(1, len, 0, 0);
-	zip_int64_t n = zip_fread(zf, ZSTR_VAL(buffer), ZSTR_LEN(buffer));
-	if (n > 0 && (zip_uint64_t)n == sb.size) {
+
+	/* zip_fread() may return short reads, a truncated entry must not pass for a complete one. */
+	zip_int64_t n = 0;
+	while ((zip_uint64_t)n < ZSTR_LEN(buffer)) {
+		zip_int64_t rd = zip_fread(zf, ZSTR_VAL(buffer) + n, ZSTR_LEN(buffer) - n);
+
+		if (rd < 0) {
+			n = -1;
+			break;
+		}
+		if (rd == 0) {
+			break;
+		}
+		n += rd;
+	}
+
+	if (n >= 0 && (zip_uint64_t)n == sb.size) {
+		/* The whole entry has been consumed, read past its last byte so that
+		 * libzip reaches the end of the stream and validates the CRC. */
 		char tmp;
 		if (zip_fread(zf, &tmp, 1) < 0) {
 			n = -1;
 		}
 	}
 	if (n < 0) {
-		zip_error_t *ziperr = zip_file_get_error(zf);
-		php_error_docref(NULL, E_WARNING, "Cannot read entry: %s", zip_error_strerror(ziperr));
+		const char *message;
+
+		php_zip_file_error(zf, &message);
+		php_error_docref(NULL, E_WARNING, "Cannot read entry: %s", message);
 		zip_fclose(zf);
 		zend_string_efree(buffer);
 		RETURN_FALSE;
