@@ -63,6 +63,10 @@ PHP                                                                        NEWS
 - Readline:
   . Fixed class constant completion in the interactive shell. (Weilin Du)
 
+- Zip:
+  . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
+    is freed while the stream is still open). (Eyüp Can Akman)
+
 - Session:
   . Fix corruption in mod_mm. (ndossche)
   . Fixed bug GH-23043 (broken session id code can cause zend_mm_heap
