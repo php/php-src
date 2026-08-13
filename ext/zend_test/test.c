@@ -507,6 +507,31 @@ static ZEND_FUNCTION(zend_obj_or_null)
 	RETURN_OBJ_COPY(v);
 }
 
+static ZEND_FUNCTION(zend_obj_or_class_name)
+{
+	zend_class_entry *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_CLASS_NAME(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR_COPY(v->name);
+}
+
+static ZEND_FUNCTION(zend_obj_or_class_name_or_null)
+{
+	zend_class_entry *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_CLASS_NAME_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_STR_COPY(v->name);
+}
+
 static ZEND_FUNCTION(zend_class_name)
 {
 	zend_class_entry *v = NULL;

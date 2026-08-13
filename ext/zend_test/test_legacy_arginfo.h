@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: dfaf2f073e5a5bb028297448002c9ffe40bce307
+ * Stub hash: 6499804aa782b477d471188835bce331e1c02137
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)
@@ -94,6 +94,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_zend_obj arginfo_zend_bool
 
 #define arginfo_zend_obj_or_null arginfo_zend_bool
+
+#define arginfo_zend_obj_or_class_name arginfo_zend_bool
+
+#define arginfo_zend_obj_or_class_name_or_null arginfo_zend_bool
 
 #define arginfo_zend_class_name arginfo_zend_bool
 
@@ -358,6 +362,8 @@ static ZEND_FUNCTION(zend_object_slow_zpp);
 static ZEND_FUNCTION(zend_object_or_null_slow_zpp);
 static ZEND_FUNCTION(zend_obj);
 static ZEND_FUNCTION(zend_obj_or_null);
+static ZEND_FUNCTION(zend_obj_or_class_name);
+static ZEND_FUNCTION(zend_obj_or_class_name_or_null);
 static ZEND_FUNCTION(zend_class_name);
 static ZEND_FUNCTION(zend_class_name_or_null);
 static ZEND_FUNCTION(zend_class_name_slow_zpp);
@@ -496,6 +502,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_object_or_null_slow_zpp, arginfo_zend_object_or_null_slow_zpp)
 	ZEND_FE(zend_obj, arginfo_zend_obj)
 	ZEND_FE(zend_obj_or_null, arginfo_zend_obj_or_null)
+	ZEND_FE(zend_obj_or_class_name, arginfo_zend_obj_or_class_name)
+	ZEND_FE(zend_obj_or_class_name_or_null, arginfo_zend_obj_or_class_name_or_null)
 	ZEND_FE(zend_class_name, arginfo_zend_class_name)
 	ZEND_FE(zend_class_name_or_null, arginfo_zend_class_name_or_null)
 	ZEND_FE(zend_class_name_slow_zpp, arginfo_zend_class_name_slow_zpp)
