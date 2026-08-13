@@ -2835,7 +2835,6 @@ function is_flaky_output(string $output): bool
         'connection refused',
         'deadlock',
         'mailbox already exists',
-        'no response from',
         'timed out',
     ];
     $regex = '(\b(' . implode('|', $messages) . ')\b)i';
