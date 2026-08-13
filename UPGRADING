@@ -21,17 +21,17 @@ PHP 8.6 UPGRADE NOTES
 
 - Core:
   . ??/empty() on a magic property no longer call __get() when __isset()
-    has materialised the property by writing into the property table.
+    has materialized the property by writing into the property table.
     The freshly-written value is returned directly. isset() is unaffected.
+
+- COM
+  . It is no longer possible to clone variant objects, this is because
+    the cloning behavior was ill defined.
 
 - Curl:
   . The callback registered with CURLOPT_READFUNCTION now throws a ValueError
     when returning an integer other than 0, CURL_READFUNC_ABORT or
     CURL_READFUNC_PAUSE.
-
-- COM
-  . It is no longer possible to clone variant objects, this is because
-    the cloning behaviour was ill defined.
 
 - DOM:
   . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
@@ -53,9 +53,9 @@ PHP 8.6 UPGRADE NOTES
     types / values and raise a TypeError / ValueError accordingly.
 
 - GMP:
-  . GMP power and shift operators now throw ValueError when GMP right operands
+  . GMP power and shift operators now throw a ValueError when GMP right operands
     are outside the unsigned long range, instead of silently truncating them.
-  . GMP integer string parsing now throw ValueError strings containing NUL
+  . GMP integer string parsing now throws a ValueError for strings containing NUL
     bytes, instead of silently truncating them.
 
 - Intl:
@@ -98,6 +98,13 @@ PHP 8.6 UPGRADE NOTES
     execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
     This is consistent with other preg_* functions.
 
+- PGSQL:
+  . pg_fetch_object() now reports the ValueError for a non-empty
+    $constructor_args on a class without a constructor on the
+    $constructor_args argument instead of $class. Errors raised when
+    the requested class is not instantiable (abstract, interface, enum)
+    now surface before the row is fetched.
+
 - Phar:
   . Phar::mungServer() now raises a ValueError when an invalid argument value
     is passed instead of being silently ignored.
@@ -106,13 +113,6 @@ PHP 8.6 UPGRADE NOTES
     the reserved magic ".phar" directory through that form.
   . Phar::addEmptyDir() now treats non-magic names that merely share the
     ".phar" prefix as ordinary directories.
-
-- PGSQL:
-  . pg_fetch_object() now reports the ValueError for a non-empty
-    $constructor_args on a class without a constructor on the
-    $constructor_args argument instead of $class. Errors raised when
-    the requested class is not instantiable (abstract, interface, enum)
-    now surface before the row is fetched.
 
 - Posix:
   . posix_access() now raises a ValueError when an invalid $flags
@@ -164,6 +164,14 @@ PHP 8.6 UPGRADE NOTES
     platform's key_t range instead of passing a truncated key to the operating
     system.
 
+- SimpleXML:
+  . SimpleXMLElement::__construct() now raises a ValueError when the $data
+    argument contains NUL bytes, matching simplexml_load_file(). With
+    $dataIsURL set it previously truncated the path at the first NUL byte.
+    Without it the string went to libxml, which at default options rejects a
+    NUL on current versions but accepts the truncated document on older ones
+    and under LIBXML_RECOVER.
+
 - SOAP:
   . The "classmap" option of SoapClient and SoapServer now rejects arrays
     containing integer keys. Previously, sparse integer-keyed and mixed-keyed
@@ -199,14 +207,6 @@ PHP 8.6 UPGRADE NOTES
   . SplFileObject::next() past EOF no longer increments key() without bound.
     SplFileObject::seek() past EOF now produces the same key() value as
     SplTempFileObject; the two previously returned different values.
-
-- SimpleXML:
-  . SimpleXMLElement::__construct() now raises a ValueError when the $data
-    argument contains NUL bytes, matching simplexml_load_file(). With
-    $dataIsURL set it previously truncated the path at the first NUL byte.
-    Without it the string went to libxml, which at default options rejects a
-    NUL on current versions but accepts the truncated document on older ones
-    and under LIBXML_RECOVER.
 
 - Standard:
   . array_intersect() with at least two arrays now converts values to strings
@@ -419,7 +419,7 @@ PHP 8.6 UPGRADE NOTES
     sockets. A positive value enables lingering for that many seconds, zero
     or a negative value disables it. Values above 65535 are clamped as the
     linger time is limited to an unsigned short on some platforms.
-  . Allowed casting casting filtered streams as file descriptor for select.
+  . Allowed casting filtered streams as file descriptor for select.
   . Added the "write_seek_mode stream" filter parameter for the bz2, iconv,
     zlib, and string stream filters. This parameter must be set via an
     associative array where the key is "write_seek_mode stream" and the
@@ -561,7 +561,7 @@ PHP 8.6 UPGRADE NOTES
   . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
     includes the function name and argument index ($modulus).
 
-- mysqli:
+- MySQLi:
   . The return structure of mysqli_get_charset() no longer contains the
     undocumented "comment" element. The value of "charsetnr" is now set to a
     constant 0 as this number was an implementation detail that should not have
@@ -612,7 +612,7 @@ PHP 8.6 UPGRADE NOTES
   . SpoofChecker::getBidiSkeleton()
   . SpoofChecker::getSkeleton()
 
-- mysqli:
+- MySQLi:
   . Added mysqli::quote_string() and mysqli_quote_string().
     RFC: https://wiki.php.net/rfc/mysqli_quote_string
 
@@ -705,7 +705,7 @@ PHP 8.6 UPGRADE NOTES
 - Hash:
   . The bundled version of xxHash was upgraded to 0.8.2.
 
-- mysqli
+- MySQLi:
   . Added new constant MYSQLI_OPT_COMPRESS.
 
 - Opcache
@@ -741,7 +741,7 @@ PHP 8.6 UPGRADE NOTES
   . EAI_SERVICE.
   . EAI_ADDRFAMILY.
   . EAI_SYSTEM.
-  . EAI_OVERFLOW
+  . EAI_OVERFLOW.
   . EAI_INPROGRESS.
   . EAI_CANCELED.
   . EAI_NOTCANCELED.
@@ -751,9 +751,9 @@ PHP 8.6 UPGRADE NOTES
 
 - Standard
   . ARRAY_FILTER_USE_VALUE.
-  . STREAM_CRYPTO_STATUS_NONE
-  . STREAM_CRYPTO_STATUS_WANT_READ
-  . STREAM_CRYPTO_STATUS_WANT_WRITE
+  . STREAM_CRYPTO_STATUS_NONE.
+  . STREAM_CRYPTO_STATUS_WANT_READ.
+  . STREAM_CRYPTO_STATUS_WANT_WRITE.
 
 ========================================
 11. Changes to INI File Handling
@@ -766,7 +766,7 @@ PHP 8.6 UPGRADE NOTES
     directive to NULL or an empty string at runtime now leaves the previously
     configured detection order unchanged.
 
-- Mysqli:
+- MySQLi:
   . mysqli.default_port now checks the validity of the value which should be
     between 0 and 65535 included.
 
