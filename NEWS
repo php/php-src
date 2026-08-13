@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed the interactive shell not waiting for the pager process to exit.
     (Weilin Du)
 
+- Zip:
+  . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
+    is freed while the stream is still open). (Eyüp Can Akman)
+
 
 27 Aug 2026, PHP 8.5.10
 
