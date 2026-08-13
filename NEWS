@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- Zip:
+  . Fixed ZipArchive::extractTo() and ZipArchive::getFrom*() reporting success
+    on corrupted entries. (David Carlier)
+
 27 Aug 2026, PHP 8.4.25
 
 - Core:
