@@ -16,6 +16,10 @@ PHP                                                                        NEWS
     left busy for the next fetch, and rows delivered from a result another
     statement took over. (KentarouTakeda)
 
+- Phar:
+  . Fixed files whose paths merely contain ".phar" being automatically
+    interpreted as Phar archives when included. (Weilin Du)
+
 - Readline:
   . Fixed class constant completion in the interactive shell. (Weilin Du)
 

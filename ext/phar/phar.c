@@ -3186,7 +3186,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 	if (!file_handle || !file_handle->filename) {
 		return phar_orig_compile_file(file_handle, type);
 	}
-	if (strstr(ZSTR_VAL(file_handle->filename), ".phar") && !strstr(ZSTR_VAL(file_handle->filename), "://")) {
+	if (zend_string_ends_with_literal(file_handle->filename, ".phar") && !strstr(ZSTR_VAL(file_handle->filename), "://")) {
 		if (SUCCESS == phar_open_from_filename(ZSTR_VAL(file_handle->filename), ZSTR_LEN(file_handle->filename), NULL, 0, &phar, NULL)) {
 			if (phar->is_zip || phar->is_tar) {
 				zend_file_handle f;
