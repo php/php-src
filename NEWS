@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- LDAP:
+  . Fixed bug GH-23244 (Can not set LDAP_OPT_NETWORK_TIMEOUT on PHP 8.4).
+    (Weilin Du)
+
 27 Aug 2026, PHP 8.4.25
 
 - Core:
