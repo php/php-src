@@ -206,10 +206,10 @@ static size_t tsrm_tls_index = -1;
 static size_t tsrm_tls_offset = -1;
 
 # define EG_TLS_OFFSET(field) \
-	(tsrm_ls_cache_tcb_offset + offsetof(zend_tsrm_ls_cache, eg) + offsetof(zend_executor_globals, field))
+	(offsetof(zend_tsrm_ls_cache, eg) + offsetof(zend_executor_globals, field))
 
 # define CG_TLS_OFFSET(field) \
-	(tsrm_ls_cache_tcb_offset + offsetof(zend_tsrm_ls_cache, cg) + offsetof(zend_compiler_globals, field))
+	(offsetof(zend_tsrm_ls_cache, cg) + offsetof(zend_compiler_globals, field))
 
 # define jit_EG(_field) \
 	ir_ADD_OFFSET(jit_TLS(jit), EG_TLS_OFFSET(_field))
@@ -521,10 +521,17 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 
 	if (tsrm_ls_cache_tcb_offset == 0 && tsrm_tls_index == -1) {
 		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
-	} else if (tsrm_ls_cache_tcb_offset) {
-		jit->tls = ir_TLS(0, IR_NULL);
 	} else {
-		jit->tls = ir_TLS(tsrm_tls_index, tsrm_tls_offset + offsetof(zend_tsrm_ls_cache, self));
+		/* ir_TLS() loads the word stored at _tsrm_ls_cache, so read the "self"
+		 * back-pointer to end up with the address of the cache struct itself.
+		 * The globals live inside it, not behind its first (`cache`) field. */
+		jit->tls = ir_TLS(
+				tsrm_ls_cache_tcb_offset
+					? tsrm_ls_cache_tcb_offset + offsetof(zend_tsrm_ls_cache, self)
+					: tsrm_tls_index,
+				tsrm_ls_cache_tcb_offset
+					? IR_NULL
+					: tsrm_tls_offset + offsetof(zend_tsrm_ls_cache, self));
 	}
 
 	return jit->tls;
