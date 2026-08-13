@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- DOM:
+  . Fixed a crash in DOMXPath when a php:function callback receives a nodeset
+    and a later callback returns a node from another document. (iliaal)
+
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
 
