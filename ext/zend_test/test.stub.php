@@ -371,6 +371,9 @@ namespace {
     function zend_obj_stdclass_or_string(stdClass|string|null $param): stdClass|string {}
     function zend_obj_stdclass_or_string_or_null(stdClass|string|null $param): stdClass|string|null {}
 
+    function zend_obj_stdclass_or_int(stdClass|int|null $param): stdClass|int {}
+    function zend_obj_stdclass_or_int_or_null(stdClass|int|null $param): stdClass|int|null {}
+
     function zend_number_or_string(string|int|float $param): string|int|float {}
 
     function zend_number_or_string_or_null(string|int|float|null $param): string|int|float|null {}

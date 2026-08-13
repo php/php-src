@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 01451f7b0c0e673c67e06a79f102f14229c67737
+ * Stub hash: 4d728e740122add9d4c91f5c1abb5f5017690636
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
@@ -177,6 +177,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_obj_stdclass_or_string_or_null, 0, 1, stdClass, MAY_BE_STRING|MAY_BE_NULL)
 	ZEND_ARG_OBJ_TYPE_MASK(0, param, stdClass, MAY_BE_STRING|MAY_BE_NULL, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_obj_stdclass_or_int, 0, 1, stdClass, MAY_BE_LONG)
+	ZEND_ARG_OBJ_TYPE_MASK(0, param, stdClass, MAY_BE_LONG|MAY_BE_NULL, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_zend_obj_stdclass_or_int_or_null, 0, 1, stdClass, MAY_BE_LONG|MAY_BE_NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, param, stdClass, MAY_BE_LONG|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_zend_number_or_string, 0, 1, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE)
@@ -465,6 +473,8 @@ static ZEND_FUNCTION(zend_string_or_object);
 static ZEND_FUNCTION(zend_string_or_object_or_null);
 static ZEND_FUNCTION(zend_obj_stdclass_or_string);
 static ZEND_FUNCTION(zend_obj_stdclass_or_string_or_null);
+static ZEND_FUNCTION(zend_obj_stdclass_or_int);
+static ZEND_FUNCTION(zend_obj_stdclass_or_int_or_null);
 static ZEND_FUNCTION(zend_number_or_string);
 static ZEND_FUNCTION(zend_number_or_string_or_null);
 static ZEND_FUNCTION(zend_iterable);
@@ -639,6 +649,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_string_or_object_or_null, arginfo_zend_string_or_object_or_null)
 	ZEND_FE(zend_obj_stdclass_or_string, arginfo_zend_obj_stdclass_or_string)
 	ZEND_FE(zend_obj_stdclass_or_string_or_null, arginfo_zend_obj_stdclass_or_string_or_null)
+	ZEND_FE(zend_obj_stdclass_or_int, arginfo_zend_obj_stdclass_or_int)
+	ZEND_FE(zend_obj_stdclass_or_int_or_null, arginfo_zend_obj_stdclass_or_int_or_null)
 	ZEND_FE(zend_number_or_string, arginfo_zend_number_or_string)
 	ZEND_FE(zend_number_or_string_or_null, arginfo_zend_number_or_string_or_null)
 	ZEND_FE(zend_iterable, arginfo_zend_iterable)

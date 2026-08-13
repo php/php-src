@@ -691,6 +691,41 @@ static ZEND_FUNCTION(zend_obj_stdclass_or_string_or_null)
 	}
 }
 
+static ZEND_FUNCTION(zend_obj_stdclass_or_int)
+{
+	zend_long l;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG(object, zend_standard_class_def, l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_LONG(l);
+	}
+}
+
+static ZEND_FUNCTION(zend_obj_stdclass_or_int_or_null)
+{
+	zend_long l;
+	zend_object *object;
+	bool is_null;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(object, zend_standard_class_def, l, is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_null) {
+		RETURN_NULL();
+	} else if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_LONG(l);
+	}
+}
+
 static ZEND_FUNCTION(zend_resource)
 {
 	zval *v;
