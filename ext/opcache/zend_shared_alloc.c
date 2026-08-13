@@ -645,7 +645,7 @@ void zend_accel_shared_protect(bool protected)
 		return;
 	}
 
-#ifdef ZTS
+# ifdef ZTS
 	/* Memory protection is process-wide, so overlapping writers must be tracked across threads. */
 	tsrm_mutex_lock(zts_protect_lock);
 	if (protected) {
@@ -660,15 +660,15 @@ void zend_accel_shared_protect(bool protected)
 	} else if (ZCG(unprotect_depth)++ == 0) {
 		zts_unprotected_threads++;
 	}
-#endif
+# endif
 
-#ifdef HAVE_MPROTECT
+# ifdef HAVE_MPROTECT
 	const int mode = protected ? PROT_READ : PROT_READ|PROT_WRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode);
 	}
-#elif defined(ZEND_WIN32)
+# elif defined(ZEND_WIN32)
 	const int mode = protected ? PAGE_READONLY : PAGE_READWRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
@@ -677,11 +677,11 @@ void zend_accel_shared_protect(bool protected)
 			zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Failed to protect memory");
 		}
 	}
-#endif
+# endif
 
-#ifdef ZTS
+# ifdef ZTS
 	tsrm_mutex_unlock(zts_protect_lock);
-#endif
+# endif
 #endif
 }
 
