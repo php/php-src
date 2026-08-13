@@ -2808,11 +2808,22 @@ static inline bool zend_is_unticked_stmt(const zend_ast *ast) /* {{{ */
 
 static inline bool zend_can_write_to_variable(const zend_ast *ast) /* {{{ */
 {
+	bool via_prop = false;
+
 	while (
 		ast->kind == ZEND_AST_DIM
 		|| ast->kind == ZEND_AST_PROP
 	) {
+		via_prop |= ast->kind == ZEND_AST_PROP;
 		ast = ast->child[0];
+	}
+
+	/* Object properties may be written through a constant holding the object,
+	 * as long as the write passes through at least one property fetch. A write
+	 * to the constant itself, or to a dimension of it, still targets a
+	 * temporary and remains illegal. */
+	if (via_prop && (ast->kind == ZEND_AST_CONST || ast->kind == ZEND_AST_CLASS_CONST)) {
+		return true;
 	}
 
 	return zend_is_variable_or_call(ast) && !zend_ast_is_short_circuited(ast);

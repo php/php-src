@@ -327,9 +327,9 @@ PHP 8.6 UPGRADE NOTES
         Cls::OBJ->prop = 42;
 
     This includes compound assignment, increment/decrement, isset()/unset(),
-    passing by reference and nested property chains. The constant binding
-    itself remains immutable, and dimension writes on constants
-    (e.g. CONST[0] = 1) continue to be rejected.
+    passing by reference, destructuring assignment, by-reference foreach and
+    nested property chains. The constant binding itself remains immutable, and
+    dimension writes on constants (e.g. CONST[0] = 1) continue to be rejected.
     RFC: https://wiki.php.net/rfc/const_object_property_write
 
 - Curl:
