@@ -657,6 +657,40 @@ static ZEND_FUNCTION(zend_obj_sdtClass_or_null)
 	RETURN_OBJ_COPY(v);
 }
 
+static ZEND_FUNCTION(zend_obj_stdclass_or_string)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(object, zend_standard_class_def, str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else {
+		RETURN_OBJ_COPY(object);
+	}
+}
+
+static ZEND_FUNCTION(zend_obj_stdclass_or_string_or_null)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(object, zend_standard_class_def, str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_NULL();
+	}
+}
+
 static ZEND_FUNCTION(zend_resource)
 {
 	zval *v;
@@ -732,42 +766,6 @@ static ZEND_FUNCTION(zend_string_or_object_or_null)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJ_OR_STR_OR_NULL(object, str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (str) {
-		RETURN_STR_COPY(str);
-	} else if (object) {
-		RETURN_OBJ_COPY(object);
-	} else {
-		RETURN_NULL();
-	}
-}
-
-/* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR */
-static ZEND_FUNCTION(zend_string_or_stdclass)
-{
-	zend_string *str;
-	zend_object *object;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS_OR_STR(object, zend_standard_class_def, str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (str) {
-		RETURN_STR_COPY(str);
-	} else {
-		RETURN_OBJ_COPY(object);
-	}
-}
-
-/* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
-static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
-{
-	zend_string *str;
-	zend_object *object;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(object, zend_standard_class_def, str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
