@@ -8413,7 +8413,7 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
 	zend_function *func;
-	zval *object;
+	zend_object *object;
 	zend_class_entry *called_scope;
 
 	if (opline->extended_value != (uint32_t)-1) {
@@ -8431,7 +8431,7 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, UNUSED, NUM, NUM|CACHE_SLOT)
 				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
 			object = NULL;
 		} else {
-			object = &EX(This);
+			object = Z_OBJ(EX(This));
 		}
 	} else {
 		called_scope = Z_CE(EX(This));

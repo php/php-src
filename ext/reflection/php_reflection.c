@@ -3334,7 +3334,7 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 	{
 		RETURN_OBJ_COPY(Z_OBJ_P(obj));
 	}
-	zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
+	zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), Z_OBJ_P(obj));
 }
 /* }}} */
 
