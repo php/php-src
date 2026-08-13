@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
     DOMDocument::xinclude(). (iliaal)
+  . Fixed a crash in DOMXPath when a php:function callback receives a nodeset
+    and a later callback returns a node from another document. (iliaal)
 
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
