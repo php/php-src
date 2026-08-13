@@ -1,5 +1,5 @@
 --TEST--
-Test Z_PARAM_OBJ_OR_STR() and Z_PARAM_OBJ_OR_STR_OR_NULL
+Test Z_PARAM_OBJ_OR_STR() and Z_PARAM_OBJ_OR_STR_OR_NULL (weak_mode)
 --EXTENSIONS--
 zend_test
 --FILE--
