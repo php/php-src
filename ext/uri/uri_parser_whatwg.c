@@ -25,7 +25,7 @@
 ZEND_TLS lexbor_mraw_t lexbor_mraw = {0};
 ZEND_TLS lxb_url_parser_t lexbor_parser = {0};
 ZEND_TLS lxb_unicode_idna_t lexbor_idna = {0};
-ZEND_TLS uint8_t lexbor_custom_url_map[256];
+ZEND_TLS uint8_t lexbor_custom_url_map[256] = {0};
 
 static const size_t lexbor_mraw_byte_size = 8192;
 
@@ -555,9 +555,7 @@ static zend_result php_uri_parser_whatwg_fragment_write(void *uri, const zval *v
 
 PHP_RINIT_FUNCTION(uri_parser_whatwg)
 {
-	lxb_status_t status;
-	
-	status = lexbor_mraw_init(&lexbor_mraw, lexbor_mraw_byte_size);
+	lxb_status_t status = lexbor_mraw_init(&lexbor_mraw, lexbor_mraw_byte_size);
 	if (status != LXB_STATUS_OK) {
 		goto fail;
 	}
@@ -572,8 +570,7 @@ PHP_RINIT_FUNCTION(uri_parser_whatwg)
 		goto fail;
 	}
 
-	memcpy(lexbor_custom_url_map, lxb_url_map, sizeof(lxb_url_map));
-	ZEND_STATIC_ASSERT(sizeof(lxb_url_map) == sizeof(lexbor_custom_url_map), "The size of lxb_url_map must be equal to the size of lexbor_custom_url_map");
+	memcpy(lexbor_custom_url_map, lxb_url_get_percent_encoding_map(), sizeof(lexbor_custom_url_map));
 	lexbor_custom_url_map['%'] = -1; /* % is percent-encoded */
 
 	return SUCCESS;
@@ -667,8 +664,8 @@ static zend_string *php_uri_parser_whatwg_percent_encode_component(const char *s
 {
 	lexbor_str_t lexbor_str = {0};
 
-	const lexbor_status_t status = lxb_url_percent_encode_after_utf_8_ex(
-		(lxb_char_t *) str, (lxb_char_t *) str + str_length, &lexbor_str, lexbor_parser.mraw, map, space_as_plus, lexbor_custom_url_map
+	const lexbor_status_t status = lxb_url_percent_encode_utf_8(
+		(lxb_char_t *) str, str_length, &lexbor_str, lexbor_parser.mraw, lexbor_custom_url_map, map, space_as_plus
 	);
 
 	if (status != LXB_STATUS_OK) {
