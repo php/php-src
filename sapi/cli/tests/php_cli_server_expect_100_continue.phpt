@@ -1,17 +1,17 @@
 --TEST--
-curl with expect 100-continue against PHP development server
+Expect 100-continue behavior in PHP development server
 --EXTENSIONS--
 curl
 --FILE--
 <?php
-include 'server.inc';
-$host = curl_cli_server_start();
+include 'php_cli_server.inc';
+$server = php_cli_server_start();
 
 // Generate a POST body larger than 1MB to trigger Expect: 100-continue
 $body = str_repeat('A', 1024 * 1024 + 1);
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "{$host}/get.inc?test=input");
+curl_setopt($ch, CURLOPT_URL, PHP_CLI_SERVER_ADDRESS);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 
