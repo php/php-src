@@ -4251,7 +4251,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 3, 5) static int extract_helper(const phar_archiv
 			if (FAILURE == phar_extract_file(overwrite, entry, path_to, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
-	} else if (ZSTR_LEN(search) > 0 && '/' == ZSTR_VAL(search)[ZSTR_LEN(search) - 1]) {
+	} else if (zend_string_ends_with_literal(search, "/")) {
 		/* ends in "/" -- extract all entries having that prefix */
 		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (!zend_string_starts_with(entry->filename, search)) continue;

@@ -1015,7 +1015,7 @@ PHP_FUNCTION(odbc_execute)
 
 			if (ZSTR_LEN(tmpstr) > 2 &&
 				ZSTR_VAL(tmpstr)[0] == '\'' &&
-				ZSTR_VAL(tmpstr)[ZSTR_LEN(tmpstr) - 1] == '\'') {
+				zend_string_ends_with_literal(tmpstr, "'")) {
 
 				if (UNEXPECTED(zend_str_has_nul_byte(tmpstr))) {
 					odbc_release_params(result, params);

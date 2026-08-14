@@ -3427,13 +3427,13 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 	}
 
 	int result;
-	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(tmp)[ZSTR_LEN(tmp) - 1] != '\n') {
+	if (ZSTR_LEN(tmp) == 0 || zend_string_ends_with_literal(tmp, "\n")) {
+		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+	} else {
 		char *zquery = zend_cstr_append_char(
 			ZSTR_VAL(tmp), ZSTR_LEN(tmp), '\n');
 		result = PQputCopyData(pgsql, zquery, ZSTR_LEN(tmp) + 1);
 		efree(zquery);
-	} else {
-		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 	}
 
 	zend_tmp_string_release(tmp_tmp);
