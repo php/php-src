@@ -957,11 +957,6 @@ ZEND_FUNCTION(get_class_methods)
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	if (ce == zend_ce_closure) {
-		ZVAL_STR_COPY(&method_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
-		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
-	}
 }
 /* }}} */
 
@@ -1004,23 +999,10 @@ ZEND_FUNCTION(method_exists)
 		zend_object *obj = Z_OBJ_P(klass);
 		func = Z_OBJ_HT_P(klass)->get_method(&obj, method_name, NULL);
 		if (func != NULL) {
-			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-				/* Returns true for the fake Closure's __invoke */
-				RETVAL_BOOL(func->common.scope == zend_ce_closure
-					&& zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME));
-
-				zend_string_release_ex(func->common.function_name, 0);
-				zend_free_trampoline(func);
-				return;
-			}
+			ZEND_ASSERT((func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) == 0
+				&& "Closure::__invoke() should have been handled already");
 			RETURN_TRUE;
 		}
-	} else {
-	    /* Returns true for fake Closure::__invoke */
-	    if (ce == zend_ce_closure
-	        && zend_string_equals_literal_ci(method_name, ZEND_INVOKE_FUNC_NAME)) {
-	        RETURN_TRUE;
-	    }
 	}
 	RETURN_FALSE;
 }
