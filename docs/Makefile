@@ -4,33 +4,29 @@
 # If people set these on the make command line, use 'em
 
 SPHINXBUILD ?= sphinx-build
+MDFORMAT ?= mdformat
 
 SOURCEDIR = source
 BUILDDIR = build
-RSTFMT = rstfmt
-RSTFMTFLAGS = -w 100
 
 rwildcard = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
-FILES = $(call rwildcard,$(SOURCEDIR),*.rst)
+MARKDOWN_FILES = $(call rwildcard,$(SOURCEDIR),*.md) $(call rwildcard,$(SOURCEDIR),*.rst)
 
 all : html
 
-.PHONY : check-formatting clean html preflight
+.PHONY : check-formatting clean format html
 .SUFFIXES : # Disable legacy behavior
 
 check-formatting :
-	$(RSTFMT) $(RSTFMTFLAGS) --check $(SOURCEDIR)
+	$(MDFORMAT) --check $(MARKDOWN_FILES)
 
 clean :
-	rm -rf -- $(wildcard $(SOURCEDIR)/.~ $(BUILDDIR))
+	rm -rf -- $(BUILDDIR)
 
-html : preflight
+format :
+	$(MDFORMAT) $(MARKDOWN_FILES)
+
+html :
 	$(SPHINXBUILD) -M $@ $(SOURCEDIR) $(BUILDDIR)
 	@printf 'Browse the \e]8;;%s\e\\%s\e]8;;\e\\.\n' \
 		"file://$(abspath $(BUILDDIR))/$@/index.$@" "php-src html docs locally"
-
-preflight : $(SOURCEDIR)/.~
-
-$(SOURCEDIR)/.~ : $(FILES)
-	$(RSTFMT) $(RSTFMTFLAGS) $?
-	touch $@

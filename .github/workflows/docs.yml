@@ -22,6 +22,8 @@ jobs:
         run: pip install -r docs/requirements.txt
       - name: Check formatting
         run: make -C docs check-formatting
+      - name: Build
+        run: make -C docs html
       - name: Publish
         if: github.event_name == 'push'
         uses: sphinx-notes/pages@v3

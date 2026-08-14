@@ -27,12 +27,11 @@ your browser.
 
 ## Formatting
 
-The files in this documentation are formatted using the
-[``rstfmt``](https://github.com/dzhu/rstfmt) tool.
+The files in this documentation are formatted using
+[mdformat](https://mdformat.readthedocs.io/) with its
+[MyST plugin](https://github.com/executablebooks/mdformat-myst).
 
 ```bash
-rstfmt -w 100 source
+make format
+make check-formatting
 ```
-
-This tool is not perfect. It breaks on custom directives, so we might switch to
-either a fork or something else in the future.
