@@ -2837,15 +2837,20 @@ static void spl_append_it_record_empty_generator(spl_dual_it_object *intern) /* 
 	}
 } /* }}} */
 
-static void spl_append_it_fetch(spl_dual_it_object *intern, bool record_empty) /* {{{*/
+static void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
 {
 	while (true) {
-		bool may_record = record_empty && intern->inner.ce == zend_ce_generator;
 		if (spl_dual_it_valid(intern) == SUCCESS) {
 			break;
 		}
-		if (may_record) {
-			spl_append_it_record_empty_generator(intern);
+		if (intern->inner.ce == zend_ce_generator) {
+			zend_generator *generator = (zend_generator *) Z_OBJ(intern->inner.zobject);
+			/* A generator that finished while initialising never yielded, so it is
+			 * empty and can be skipped. One that yielded was consumed and still
+			 * reports "Cannot rewind a generator that was already run". */
+			if (generator->flags & ZEND_GENERATOR_AT_FIRST_YIELD) {
+				spl_append_it_record_empty_generator(intern);
+			}
 		}
 		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
 		if (spl_append_it_next_iterator(intern) != SUCCESS) {
@@ -2860,7 +2865,7 @@ static void spl_append_it_next(spl_dual_it_object *intern) /* {{{ */
 	if (spl_dual_it_valid(intern) == SUCCESS) {
 		spl_dual_it_next(intern, 1);
 	}
-	spl_append_it_fetch(intern, false);
+	spl_append_it_fetch(intern);
 } /* }}} */
 
 /* {{{ Create an AppendIterator */
@@ -2910,7 +2915,7 @@ PHP_METHOD(AppendIterator, append)
 		do {
 			spl_append_it_next_iterator(intern);
 		} while (Z_OBJ(intern->inner.zobject) != Z_OBJ_P(it));
-		spl_append_it_fetch(intern, true);
+		spl_append_it_fetch(intern);
 	}
 } /* }}} */
 
@@ -2942,7 +2947,7 @@ PHP_METHOD(AppendIterator, rewind)
 
 	intern->u.append.iterator->funcs->rewind(intern->u.append.iterator);
 	if (spl_append_it_next_iterator(intern) == SUCCESS) {
-		spl_append_it_fetch(intern, false);
+		spl_append_it_fetch(intern);
 	}
 } /* }}} */
 

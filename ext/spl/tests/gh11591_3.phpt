@@ -34,13 +34,20 @@ $outer->offsetUnset(0);
 $outer->offsetSet(1, $generator);
 values($iterator);
 
-echo "replace with unstarted generator\n";
+echo "replace with non-empty generator\n";
 $generator = emptyGenerator();
 $iterator = new AppendIterator();
 $iterator->append($generator);
 $outer = $iterator->getArrayIterator();
 $outer->offsetUnset(0);
-$outer->offsetSet(0, emptyGenerator());
+$outer->offsetSet(0, (function () { yield 'NEW'; })());
+values($iterator);
+
+echo "empty appended after valid entry\n";
+$iterator = new AppendIterator();
+$iterator->append(new ArrayIterator(['A']));
+$iterator->append(emptyGenerator());
+values($iterator);
 values($iterator);
 ?>
 --EXPECT--
@@ -50,6 +57,17 @@ array(0) {
 reinsert other key
 array(0) {
 }
-replace with unstarted generator
-array(0) {
+replace with non-empty generator
+array(1) {
+  [0]=>
+  string(3) "NEW"
+}
+empty appended after valid entry
+array(1) {
+  [0]=>
+  string(1) "A"
+}
+array(1) {
+  [0]=>
+  string(1) "A"
 }
