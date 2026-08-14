@@ -1,22 +1,22 @@
 # PHP build system V5 overview
 
-- supports Makefile.ins during transition phase
-- not-really-portable Makefile includes have been eliminated
-- supports separate build directories without VPATH by using explicit rules only
-- does not waste disk-space/CPU-time for building temporary libraries =>
+* supports Makefile.ins during transition phase
+* not-really-portable Makefile includes have been eliminated
+* supports separate build directories without VPATH by using explicit rules only
+* does not waste disk-space/CPU-time for building temporary libraries =>
   especially noticeable on slower systems
-- slow recursive make replaced with one global Makefile
-- eases integration of proper dependencies
-- abandoning the "one library per directory" concept
-- improved integration of the CLI
-- several new targets:
-  - `build-modules`: builds and copies dynamic modules into `modules/`
-  - `install-cli`: installs the CLI only, so that the install-sapi target does
+* slow recursive make replaced with one global Makefile
+* eases integration of proper dependencies
+* abandoning the "one library per directory" concept
+* improved integration of the CLI
+* several new targets:
+  * `build-modules`: builds and copies dynamic modules into `modules/`
+  * `install-cli`: installs the CLI only, so that the install-sapi target does
     only what its name says
-- finally abandoned automake
-- changed some configure-time constructs to run at buildconf-time
-- upgraded shtool to 1.5.4
-- removed `$(moduledir)` (use `EXTENSION_DIR`)
+* finally abandoned automake
+* changed some configure-time constructs to run at buildconf-time
+* upgraded shtool to 1.5.4
+* removed `$(moduledir)` (use `EXTENSION_DIR`)
 
 ## The reason for a new system
 

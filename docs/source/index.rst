@@ -1,27 +1,24 @@
 # php-src docs
 
 ```{toctree}
----
-caption: Introduction
-hidden: true
----
+   :caption: Introduction
+   :hidden:
+
 introduction/high-level-overview
 introduction/ides/index
 ```
 
 ```{toctree}
----
-caption: Core
-hidden: true
----
+   :caption: Core
+   :hidden:
+
 core/data-structures/index
 ```
 
 ```{toctree}
----
-caption: Miscellaneous
-hidden: true
----
+   :caption: Miscellaneous
+   :hidden:
+
 miscellaneous/stubs
 miscellaneous/writing-tests
 miscellaneous/running-tests
@@ -52,8 +49,8 @@ no way around reading lots and lots of code, asking questions of somebody with e
 lot of time. Luckily, many core developers are eager to help. Here are some ways you can get in
 touch.
 
-- [Discord](https://phpc.chat) (`#php-internals` channel)
-- [R11 on StackOverflow](https://chat.stackoverflow.com/rooms/11/php)
+-  [Discord](https://phpc.chat) (`#php-internals` channel)
+-  [R11 on StackOverflow](https://chat.stackoverflow.com/rooms/11/php)
 
 ## Prerequisites
 

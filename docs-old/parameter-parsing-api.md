@@ -24,7 +24,7 @@ int zend_parse_parameters_ex(int flags, int num_args, char *type_spec, ...);
 
 The `zend_parse_parameters()` function takes the number of parameters passed to
 the extension function, the type specifier string, and the list of pointers to
-variables to store the results in. The \_ex() version also takes 'flags' argument
+variables to store the results in. The _ex() version also takes 'flags' argument
 -- current only `ZEND_PARSE_PARAMS_QUIET` can be used as 'flags' to specify that
 the function should operate quietly and not output any error messages.
 
@@ -61,7 +61,7 @@ See also
 The following list shows the type specifier, its meaning, and the parameter types
 that need to be passed by address. All passed parameters are set if the PHP
 parameter is non-optional and untouched if optional and the parameter is not
-present. The only exception is O where the zend_class_entry\* has to be provided
+present. The only exception is O where the zend_class_entry* has to be provided
 on input and is used to verify the PHP parameter is an instance of that class.
 
 ```txt
@@ -96,18 +96,18 @@ z  - the actual zval (zval*)
 
 The following characters also have a meaning in the specifier string:
 
-- `|` - indicates that the remaining parameters are optional, they should be
+* `|` - indicates that the remaining parameters are optional, they should be
   initialized to default values by the extension since they will not be touched
   by the parsing function if they are not passed to it.
-- `/` - use SEPARATE_ZVAL() on the parameter it follows
-- `!` - the parameter it follows can be of specified type or NULL. If NULL is
+* `/` - use SEPARATE_ZVAL() on the parameter it follows
+* `!` - the parameter it follows can be of specified type or NULL. If NULL is
   passed, and the output for such type is a pointer, then the output pointer is
   set to a native NULL pointer. For 'b', 'l' and 'd', an extra argument of type
-  bool\* must be passed after the corresponding bool\*, zend_long\* or
-  double\* arguments, respectively. A non-zero value will be written to the
+  bool* must be passed after the corresponding bool*, zend_long* or
+  double* arguments, respectively. A non-zero value will be written to the
   bool if a PHP NULL is passed.
-  For `f` use the `ZEND_FCI_INITIALIZED(fci)` macro to check if a callable
-  has been provided and `!ZEND_FCI_INITIALIZED(fci)` to check if a PHP NULL
+  For `f` use the ``ZEND_FCI_INITIALIZED(fci)`` macro to check if a callable
+  has been provided and ``!ZEND_FCI_INITIALIZED(fci)`` to check if a PHP NULL
   is passed.
 
 ## Note on 64bit compatibility
@@ -119,7 +119,7 @@ and `size_t` to strings length (i.e. for "s" you need to pass char `*` and
 
 Both mistakes might cause memory corruptions and segfaults:
 
-- 1
+* 1
 
 ```c
 char *str;
@@ -127,7 +127,7 @@ long str_len; /* XXX THIS IS WRONG!! Use size_t instead. */
 zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len)
 ```
 
-- 2
+* 2
 
 ```c
 int num; /* XXX THIS IS WRONG!! Use zend_long instead. */

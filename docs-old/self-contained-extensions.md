@@ -3,8 +3,8 @@
 A self-contained extension can be distributed independently of the PHP source.
 To create such an extension, two things are required:
 
-- Configuration file (config.m4)
-- Source code for your module
+* Configuration file (config.m4)
+* Source code for your module
 
 We will describe now how to create these and how to put things together.
 
@@ -12,14 +12,12 @@ We will describe now how to create these and how to put things together.
 
 While the result will run on any system, a developer's setup needs these tools:
 
-- GNU autoconf
-- GNU m4
+* GNU autoconf
+* GNU m4
 
 All of these are available from
 
-```
-ftp://ftp.gnu.org/pub/gnu/
-```
+    ftp://ftp.gnu.org/pub/gnu/
 
 ## Converting an existing extension
 
@@ -146,10 +144,10 @@ an existing module called `foo`.
    automatically be able to use `--with-foo=shared[,..]` or
    `--enable-foo=shared[,..]`.
 
-1. In `config.m4`, use `PHP_NEW_EXTENSION([foo],.., [$ext_shared])` to enable
+2. In `config.m4`, use `PHP_NEW_EXTENSION([foo],.., [$ext_shared])` to enable
    building the extension.
 
-1. Add the following lines to your C source file:
+3. Add the following lines to your C source file:
 
 ```c
 #ifdef COMPILE_DL_FOO
@@ -164,7 +162,7 @@ points to be regarded.
 
 1. Add `LICENSE` or `COPYING` to the `package.xml`
 
-1. The following should be defined in one of the extension header files
+2. The following should be defined in one of the extension header files
 
 ```c
 #define PHP_FOO_VERSION "1.2.3"

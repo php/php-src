@@ -9,17 +9,18 @@ itself. Let's look at the type first.
 ## zval types
 
 ```c
-#define IS_UNDEF     0 /* A variable that was never written to. */
-#define IS_NULL      1
-#define IS_FALSE     2
-#define IS_TRUE      3
-#define IS_LONG      4 /* An integer value. */
-#define IS_DOUBLE    5 /* A floating point value. */
-#define IS_STRING    6
-#define IS_ARRAY     7
-#define IS_OBJECT    8
-#define IS_RESOURCE  9
-#define IS_REFERENCE 10
+
+   #define IS_UNDEF     0 /* A variable that was never written to. */
+   #define IS_NULL      1
+   #define IS_FALSE     2
+   #define IS_TRUE      3
+   #define IS_LONG      4 /* An integer value. */
+   #define IS_DOUBLE    5 /* A floating point value. */
+   #define IS_STRING    6
+   #define IS_ARRAY     7
+   #define IS_OBJECT    8
+   #define IS_RESOURCE  9
+   #define IS_REFERENCE 10
 ```
 
 These simple integer constants determine what value is currently stored in a variable. If you are a
@@ -34,26 +35,27 @@ require some additional memory to store the actual value of the variable.
 ## zend_value
 
 ```c
-typedef union _zend_value {
-    zend_long         lval; /* long value, i.e. int. */
-    double            dval; /* double value, i.e. float. */
-    zend_refcounted  *counted;
-    zend_string      *str;
-    zend_array       *arr;
-    zend_object      *obj;
-    zend_resource    *res;
-    zend_reference   *ref;
-    // Less important for now.
-    zend_ast_ref     *ast;
-    zval             *zv;
-    void             *ptr;
-    zend_class_entry *ce;
-    zend_function    *func;
-    struct {
-        uint32_t w1;
-        uint32_t w2;
-    } ww;
-} zend_value;
+
+   typedef union _zend_value {
+       zend_long         lval; /* long value, i.e. int. */
+       double            dval; /* double value, i.e. float. */
+       zend_refcounted  *counted;
+       zend_string      *str;
+       zend_array       *arr;
+       zend_object      *obj;
+       zend_resource    *res;
+       zend_reference   *ref;
+       // Less important for now.
+       zend_ast_ref     *ast;
+       zval             *zv;
+       void             *ptr;
+       zend_class_entry *ce;
+       zend_function    *func;
+       struct {
+           uint32_t w1;
+           uint32_t w2;
+       } ww;
+   } zend_value;
 ```
 
 A C union is a data type that may store any one of its members at a time, by being (at least) as big
@@ -74,34 +76,35 @@ Together, the value and the tag make up the `zval`, along with some other fields
 intimidating at first. We'll go over it step by step.
 
 ```c
-typedef struct _zval_struct zval;
 
-struct _zval_struct {
-    zend_value value;
-    union {
-        uint32_t type_info;
-        struct {
-            ZEND_ENDIAN_LOHI_3(
-                uint8_t type, /* active type */
-                uint8_t type_flags,
-                union {
-                    uint16_t extra; /* not further specified */
-                } u)
-        } v;
-    } u1;
-    union {
-        uint32_t next;           /* hash collision chain */
-        uint32_t cache_slot;     /* cache slot (for RECV_INIT) */
-        uint32_t opline_num;     /* opline number (for FAST_CALL) */
-        uint32_t lineno;         /* line number (for ast nodes) */
-        uint32_t num_args;       /* arguments number for EX(This) */
-        uint32_t fe_pos;         /* foreach position */
-        uint32_t fe_iter_idx;    /* foreach iterator index */
-        uint32_t guard;          /* recursion and single property guard */
-        uint32_t constant_flags; /* constant flags */
-        uint32_t extra;          /* not further specified */
-    } u2;
-};
+   typedef struct _zval_struct zval;
+
+   struct _zval_struct {
+       zend_value value;
+       union {
+           uint32_t type_info;
+           struct {
+               ZEND_ENDIAN_LOHI_3(
+                   uint8_t type, /* active type */
+                   uint8_t type_flags,
+                   union {
+                       uint16_t extra; /* not further specified */
+                   } u)
+           } v;
+       } u1;
+       union {
+           uint32_t next;           /* hash collision chain */
+           uint32_t cache_slot;     /* cache slot (for RECV_INIT) */
+           uint32_t opline_num;     /* opline number (for FAST_CALL) */
+           uint32_t lineno;         /* line number (for ast nodes) */
+           uint32_t num_args;       /* arguments number for EX(This) */
+           uint32_t fe_pos;         /* foreach position */
+           uint32_t fe_iter_idx;    /* foreach iterator index */
+           uint32_t guard;          /* recursion and single property guard */
+           uint32_t constant_flags; /* constant flags */
+           uint32_t extra;          /* not further specified */
+       } u2;
+   };
 ```
 
 `zval.value` reserves space for the actual variable data, as discussed above.
@@ -122,18 +125,29 @@ access them, concealing some of the implementation details of the `zval` struct.
 there's a `_P`-suffixed variant that performs the same operation on a pointer to the given
 `zval`.
 
-**`zval` macros**
+~~~{list-table} `zval` macros
+   :header-rows: 1
 
-| Macro                   | Description                                                                             |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| `Z_TYPE[_P]`            | Access the `zval.u1.v.type` part of the type flags, containing the `IS_*` type.         |
-| `Z_LVAL[_P]`            | Access the underlying `int` value.                                                      |
-| `Z_DVAL[_P]`            | Access the underlying `float` value.                                                    |
-| `Z_STR[_P]`             | Access the underlying `zend_string` pointer.                                            |
-| `Z_STRVAL[_P]`          | Access the strings raw `char *` pointer.                                                |
-| `Z_STRLEN[_P]`          | Access the strings length.                                                              |
-| `ZVAL_COPY_VALUE(t, s)` | Copy one `zval` to another, including type and value.                                   |
-| `ZVAL_COPY(t, s)`       | Same as `ZVAL_COPY_VALUE`, but if the value is reference counted, increase the counter. |
+   -  -  Macro
+      -  Description
+   -  -  `Z_TYPE[_P]`
+      -  Access the `zval.u1.v.type` part of the type flags, containing the `IS_*` type.
+   -  -  `Z_LVAL[_P]`
+      -  Access the underlying `int` value.
+   -  -  `Z_DVAL[_P]`
+      -  Access the underlying `float` value.
+   -  -  `Z_STR[_P]`
+      -  Access the underlying `zend_string` pointer.
+   -  -  `Z_STRVAL[_P]`
+      -  Access the strings raw `char *` pointer.
+   -  -  `Z_STRLEN[_P]`
+      -  Access the strings length.
+   -  -  `ZVAL_COPY_VALUE(t, s)`
+      -  Copy one `zval` to another, including type and value.
+   -  -  `ZVAL_COPY(t, s)`
+      -  Same as `ZVAL_COPY_VALUE`, but if the value is reference counted, increase the counter.
+
+~~~
 
 <!-- _todo: There are many more. -->
 
@@ -142,11 +156,12 @@ there's a `_P`-suffixed variant that performs the same operation on a pointer to
 `zval`s are sometimes used internally with types that don't exist in userland.
 
 ```c
-#define IS_CONSTANT_AST 11
-#define IS_INDIRECT     12
-#define IS_PTR          13
-#define IS_ALIAS_PTR    14
-#define _IS_ERROR       15
+
+   #define IS_CONSTANT_AST 11
+   #define IS_INDIRECT     12
+   #define IS_PTR          13
+   #define IS_ALIAS_PTR    14
+   #define _IS_ERROR       15
 ```
 
 `IS_CONSTANT_AST` is used to represent constant values (the right hand side of `const`,
@@ -177,18 +192,19 @@ or function, the `zval.value.ce` or `zval.value.func` fields may be used, respec
 detail in its own chapter.
 
 ```c
-/* Fake types used only for type hinting.
- * These are allowed to overlap with the types below. */
-#define IS_CALLABLE 12
-#define IS_ITERABLE 13
-#define IS_VOID     14
-#define IS_STATIC   15
-#define IS_MIXED    16
-#define IS_NEVER    17
 
-/* used for casts */
-#define _IS_BOOL   18
-#define _IS_NUMBER 19
+   /* Fake types used only for type hinting.
+    * These are allowed to overlap with the types below. */
+   #define IS_CALLABLE 12
+   #define IS_ITERABLE 13
+   #define IS_VOID     14
+   #define IS_STATIC   15
+   #define IS_MIXED    16
+   #define IS_NEVER    17
+
+   /* used for casts */
+   #define _IS_BOOL   18
+   #define _IS_NUMBER 19
 ```
 
 These flags are never actually stored in `zval.u1`. They are used for type hinting and in the

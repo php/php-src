@@ -1,9 +1,8 @@
 # Data structures
 
 ```{toctree}
----
-hidden: true
----
+   :hidden:
+
 zval
 reference-counting
 zend_string

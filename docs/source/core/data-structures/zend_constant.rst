@@ -6,12 +6,13 @@ PHP constants (referring to non-class constants) are stored in a dedicated struc
 ## definition
 
 ```c
-typedef struct _zend_constant {
-    zval value;
-    zend_string *name;
-    zend_string *filename;
-    HashTable *attributes;
-} zend_constant;
+
+   typedef struct _zend_constant {
+       zval value;
+       zend_string *name;
+       zend_string *filename;
+       HashTable *attributes;
+   } zend_constant;
 ```
 
 The `value` field stores both the value itself and some metadata. The `name` and `filename`
@@ -29,11 +30,12 @@ This extra information is placed in the `uint32_t` field `value.u2.constant_flag
 The bottom 16 bits are used to hold flags about the constant
 
 ```c
-#define CONST_PERSISTENT     (1<<0) /* Persistent */
-#define CONST_NO_FILE_CACHE  (1<<1) /* Can't be saved in file cache */
-#define CONST_DEPRECATED     (1<<2) /* Deprecated */
-#define CONST_OWNED          (1<<3) /* constant should be destroyed together
-                                         with class */
+
+   #define CONST_PERSISTENT     (1<<0) /* Persistent */
+   #define CONST_NO_FILE_CACHE  (1<<1) /* Can't be saved in file cache */
+   #define CONST_DEPRECATED     (1<<2) /* Deprecated */
+   #define CONST_OWNED          (1<<3) /* constant should be destroyed together
+                                            with class */
 ```
 
 These bottom 16 bits can be accessed with the `ZEND_CONSTANT_FLAGS()` macro, which is given a

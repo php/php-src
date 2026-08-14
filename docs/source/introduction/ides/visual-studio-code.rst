@@ -26,19 +26,21 @@ To generate the `compile_commands.json` file, you can use the [compiledb](https:
 `pip`, and then prefix your `make` command accordingly:
 
 ```bash
-# Install compiledb
-pip install compiledb
-# Compile php-src and generate compile_commands.json
-compiledb make -j8
+
+   # Install compiledb
+   pip install compiledb
+   # Compile php-src and generate compile_commands.json
+   compiledb make -j8
 ```
 
 To tell the C/C++ extension to use the `compile_commands.json` file, add the following to your
 `settings.json` file:
 
 ```json
-{
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json"
-}
+
+   {
+       "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json"
+   }
 ```
 
 ## clangd
@@ -50,9 +52,10 @@ conjunction with the C/C++ extension. For the two extensions not to clash, add t
 `settings.json` file:
 
 ```json
-{
-    "C_Cpp.intelliSenseEngine": "disabled"
-}
+
+   {
+       "C_Cpp.intelliSenseEngine": "disabled"
+   }
 ```
 
 Follow the [official installation instructions for clangd](https://clangd.llvm.org/installation.html), and then install the [clangd extension](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd).
@@ -62,11 +65,12 @@ By default, `clangd` will auto-include header files on completion. php-src heade
 peculiar, so you might want to disable this option in your `settings.json` file:
 
 ```json
-{
-    "clangd.arguments": [
-        "-header-insertion=never"
-    ]
-}
+
+   {
+       "clangd.arguments": [
+           "-header-insertion=never"
+       ]
+   }
 ```
 
 ## gdb
@@ -77,35 +81,36 @@ course, you will need `gdb` installed on your system, and php-src must be compil
 file:
 
 ```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "(gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/sapi/cli/php",
-            "args": [
-                // Any options you want to test with
-                // "-dopcache.enable_cli=1",
-                "${relativeFile}",
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            // Useful if you build with --enable-address-sanitizer
-            "environment": [
-                { "name": "USE_ZEND_ALLOC", "value": "0" },
-                { "name": "USE_TRACKED_ALLOC", "value": "1" },
-                { "name": "LSAN_OPTIONS", "value": "detect_leaks=0" },
-            ],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                { "text": "source ${workspaceFolder}/.gdbinit" },
-            ]
-        }
-    ]
-}
+
+   {
+       "version": "0.2.0",
+       "configurations": [
+           {
+               "name": "(gdb) Launch",
+               "type": "cppdbg",
+               "request": "launch",
+               "program": "${workspaceFolder}/sapi/cli/php",
+               "args": [
+                   // Any options you want to test with
+                   // "-dopcache.enable_cli=1",
+                   "${relativeFile}",
+               ],
+               "stopAtEntry": false,
+               "cwd": "${workspaceFolder}",
+               // Useful if you build with --enable-address-sanitizer
+               "environment": [
+                   { "name": "USE_ZEND_ALLOC", "value": "0" },
+                   { "name": "USE_TRACKED_ALLOC", "value": "1" },
+                   { "name": "LSAN_OPTIONS", "value": "detect_leaks=0" },
+               ],
+               "externalConsole": false,
+               "MIMode": "gdb",
+               "setupCommands": [
+                   { "text": "source ${workspaceFolder}/.gdbinit" },
+               ]
+           }
+       ]
+   }
 ```
 
 Set any breakpoint in your C code, open a `php` (or `phpt`) file and start debugging from the

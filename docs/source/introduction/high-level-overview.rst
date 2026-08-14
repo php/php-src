@@ -12,20 +12,21 @@ many concepts from other compilers and interpreters.
 The goal of the interpreter is to read the users source files, and to simulate the users intent.
 This process can be split into distinct phases that are easier to understand and implement.
 
-- Tokenization - splitting whole source files into words, called tokens.
-- Parsing - building a tree structure from tokens, called AST (abstract syntax tree).
-- Compilation - traversing the AST and building a list of operations, called opcodes.
-- Interpretation - reading and executing opcodes.
+-  Tokenization - splitting whole source files into words, called tokens.
+-  Parsing - building a tree structure from tokens, called AST (abstract syntax tree).
+-  Compilation - traversing the AST and building a list of operations, called opcodes.
+-  Interpretation - reading and executing opcodes.
 
 php-src as a whole can be seen as a pipeline consisting of these stages, using the input of the
 previous phase and producing some output for the next.
 
 ```haskell
-source_code
-  |> tokenizer   -- tokens
-  |> parser      -- ast
-  |> compiler    -- opcodes
-  |> interpreter
+
+   source_code
+     |> tokenizer   -- tokens
+     |> parser      -- ast
+     |> compiler    -- opcodes
+     |> interpreter
 ```
 
 Let's go into each phase in a bit more detail.
@@ -37,26 +38,28 @@ and splitting it into a list of words and symbols. Tokens generally consist of a
 integer constant representing the token, and a lexeme, the literal string used in the source code.
 
 ```php
-if ($cond) {
-    echo "Cond is true\n";
-}
+
+   if ($cond) {
+       echo "Cond is true\n";
+   }
 ```
 
 ```text
-T_IF                       "if"
-T_WHITESPACE               " "
-                           "("
-T_VARIABLE                 "$cond"
-                           ")"
-T_WHITESPACE               " "
-                           "{"
-T_WHITESPACE               "\n    "
-T_ECHO                     "echo"
-T_WHITESPACE               " "
-T_CONSTANT_ENCAPSED_STRING '"Cond is true\n"'
-                           ";"
-T_WHITESPACE               "\n"
-                           "}"
+
+   T_IF                       "if"
+   T_WHITESPACE               " "
+                              "("
+   T_VARIABLE                 "$cond"
+                              ")"
+   T_WHITESPACE               " "
+                              "{"
+   T_WHITESPACE               "\n    "
+   T_ECHO                     "echo"
+   T_WHITESPACE               " "
+   T_CONSTANT_ENCAPSED_STRING '"Cond is true\n"'
+                              ";"
+   T_WHITESPACE               "\n"
+                              "}"
 ```
 
 While tokenizers are not difficult to write by hand, PHP uses a tool called `re2c` to automate
@@ -75,18 +78,19 @@ tree structure from the tokens to more closely reflect the source code the way h
 Here is a simplified example of what an AST from the tokens above might look like.
 
 ```text
-ZEND_AST_IF {
-    ZEND_AST_IF_ELEM {
-        ZEND_AST_VAR {
-            ZEND_AST_ZVAL { "cond" },
-        },
-        ZEND_AST_STMT_LIST {
-            ZEND_AST_ECHO {
-                ZEND_AST_ZVAL { "Cond is true\n" },
-            },
-        },
-    },
-}
+
+   ZEND_AST_IF {
+       ZEND_AST_IF_ELEM {
+           ZEND_AST_VAR {
+               ZEND_AST_ZVAL { "cond" },
+           },
+           ZEND_AST_STMT_LIST {
+               ZEND_AST_ECHO {
+                   ZEND_AST_ZVAL { "Cond is true\n" },
+               },
+           },
+       },
+   }
 ```
 
 Each AST node has a type and may have children. They also store their original position in the
@@ -122,9 +126,10 @@ number of instructions, before going to the next node.
 Here's what the surprisingly compact opcodes for the AST above might look like:
 
 ```text
-0000 JMPZ CV0($cond) 0002
-0001 ECHO string("Cond is true\n")
-0002 RETURN int(1)
+
+   0000 JMPZ CV0($cond) 0002
+   0001 ECHO string("Cond is true\n")
+   0002 RETURN int(1)
 ```
 
 ## Interpretation
@@ -139,11 +144,11 @@ the generated `Zend/zend_vm_opcodes.h` file. The behavior of each instruction is
 
 Let's step through the opcodes form the example above:
 
-- We start at the top, i.e. `JMPZ`. If its first operand contains a "falsy" value, it will jump
-  to the instruction encoded in its second operand. If it is truthy, it will simply fall-through to
-  the next instruction.
-- The `ECHO` instruction prints its first operand.
-- The `RETURN` operand terminates the current function.
+-  We start at the top, i.e. `JMPZ`. If its first operand contains a "falsy" value, it will jump
+   to the instruction encoded in its second operand. If it is truthy, it will simply fall-through to
+   the next instruction.
+-  The `ECHO` instruction prints its first operand.
+-  The `RETURN` operand terminates the current function.
 
 With these simple rules, we can see that the interpreter will `echo` only when `$cond` is
 truthy, and skip over the `echo` otherwise.

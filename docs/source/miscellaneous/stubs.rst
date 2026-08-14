@@ -4,17 +4,18 @@ Stub files are pieces of PHP code which only contain declarations. They do not i
 code, but instead contain empty function and method bodies. A very basic stub looks like this:
 
 ```php
-<?php
-/** @var string */
-const ANIMAL = "Elephant";
-/** @var float */
-const WEIGHT = 6.8;
 
-class Atmosphere {
-    public function calculateBar(): float {}
-}
+   <?php
+   /** @var string */
+   const ANIMAL = "Elephant";
+   /** @var float */
+   const WEIGHT = 6.8;
 
-function fahrenheitToCelsius(float $fahrenheitToCelsius): float {}
+   class Atmosphere {
+       public function calculateBar(): float {}
+   }
+
+   function fahrenheitToCelsius(float $fahrenheitToCelsius): float {}
 ```
 
 Any kind of symbol can be declared via stubs. Every type can be used, with the exception of
@@ -23,21 +24,22 @@ PHP attributes. Namespaces can also be used by adding a top-level `namespace` de
 using namespace blocks:
 
 ```php
-<?php
-namespace {
-    /** @var string */
-    const ANIMAL = "Elephant";
-    /** @var float */
-    const WEIGHT_TON = 6.8;
 
-    class Atmosphere {
-        public function calculateBar(): float {}
-    }
-}
+   <?php
+   namespace {
+       /** @var string */
+       const ANIMAL = "Elephant";
+       /** @var float */
+       const WEIGHT_TON = 6.8;
 
-namespace Algorithms {
-    function fahrenheitToCelsius(float $fahrenheit): float {}
-}
+       class Atmosphere {
+           public function calculateBar(): float {}
+       }
+   }
+
+   namespace Algorithms {
+       function fahrenheitToCelsius(float $fahrenheit): float {}
+   }
 ```
 
 The above example declares the global constants `ANIMAL` and `WEIGHT_TON`, and the class
@@ -65,15 +67,16 @@ code can be generated is a huge benefit.
 The arginfo file matching our first example looks like:
 
 ```c
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e4ed788d54a20272a92a3f6618b73d48ec848f97 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelsius, 0, 1, IS_DOUBLE, 0)
-    ZEND_ARG_TYPE_INFO(0, fahrenheitToCelsius, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
+   /* This is a generated file, edit the .stub.php file instead.
+    * Stub hash: e4ed788d54a20272a92a3f6618b73d48ec848f97 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Atmosphere_calculateBar, 0, 0, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelsius, 0, 1, IS_DOUBLE, 0)
+       ZEND_ARG_TYPE_INFO(0, fahrenheitToCelsius, IS_DOUBLE, 0)
+   ZEND_END_ARG_INFO()
+
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Atmosphere_calculateBar, 0, 0, IS_DOUBLE, 0)
+   ZEND_END_ARG_INFO()
 ```
 
 The hash that is included in the file makes sure that stub files are not reprocessed unless the stub
@@ -100,22 +103,24 @@ contain references to constants.
 In the example below, we define a function with an optional argument, referencing a constant:
 
 ```php
-<?php
-/** @var string */
-const ANIMAL = "Elephant";
 
-function formatName(string $defaultName = ANIMAL . " Mc" . ANIMAL . "Face"): string {}
+   <?php
+   /** @var string */
+   const ANIMAL = "Elephant";
+
+   function formatName(string $defaultName = ANIMAL . " Mc" . ANIMAL . "Face"): string {}
 ```
 
 This will result in the following arginfo:
 
 ```c
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a9685164284e73f47b15838122b631ebdfef23d6 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_formatName, 0, 0, IS_STRING, 0)
-    ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, defaultName, IS_STRING, 0, "ANIMAL . \" Mc\" . ANIMAL . \"Face\"")
-ZEND_END_ARG_INFO()
+   /* This is a generated file, edit the .stub.php file instead.
+    * Stub hash: a9685164284e73f47b15838122b631ebdfef23d6 */
+
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_formatName, 0, 0, IS_STRING, 0)
+       ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, defaultName, IS_STRING, 0, "ANIMAL . \" Mc\" . ANIMAL . \"Face\"")
+   ZEND_END_ARG_INFO()
 ```
 
 You can only use constants as long as they are defined in the same stub file.
@@ -123,18 +128,20 @@ You can only use constants as long as they are defined in the same stub file.
 If this is not possible, then the stub declaring the constant should be included with `require`:
 
 ```php
-// constants.stub.php
-<?php
-/** @var string */
-const ANIMAL = "Elephant";
+
+   // constants.stub.php
+   <?php
+   /** @var string */
+   const ANIMAL = "Elephant";
 ```
 
 ```php
-// example.stub.php
-<?php
-require "constants.stub.php";
 
-function foo(string $param = ANIMAL): string {}
+   // example.stub.php
+   <?php
+   require "constants.stub.php";
+
+   function foo(string $param = ANIMAL): string {}
 ```
 
 Sometimes arguments have to be passed by reference, or by using the `ZEND_SEND_PREFER_REF` flag.
@@ -144,21 +151,23 @@ To signal parsing by reference, use the usual `&` syntax.
 To include the `ZEND_SEND_PREFER_REF` flag, use the `@prefer-ref` PHPDoc tag:
 
 ```php
-<?php
-/**
- * @param array $herd
- * @prefer-ref $elephantName
- */
-function addElephantsToHerd(&$herd, string $elephantName): string {}
+
+   <?php
+   /**
+    * @param array $herd
+    * @prefer-ref $elephantName
+    */
+   function addElephantsToHerd(&$herd, string $elephantName): string {}
 ```
 
 This results in the following arginfo file:
 
 ```c
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_addElephantsToHerd, 0, 2, IS_STRING, 0)
-    ZEND_ARG_INFO(1, herd)
-    ZEND_ARG_TYPE_INFO(ZEND_SEND_PREFER_REF, elephantName, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_addElephantsToHerd, 0, 2, IS_STRING, 0)
+       ZEND_ARG_INFO(1, herd)
+       ZEND_ARG_TYPE_INFO(ZEND_SEND_PREFER_REF, elephantName, IS_STRING, 0)
+   ZEND_END_ARG_INFO()
 ```
 
 ## Generating Function Entries
@@ -168,38 +177,40 @@ Besides arginfo structures, function entries themselves can also be generated vi
 In order to generate these, add the file-level `@generate-function-entries` PHPDoc tag:
 
 ```php
-<?php
-/** @generate-function-entries */
 
-class Atmosphere {
-   public function calculateBar(): float {}
-}
+   <?php
+   /** @generate-function-entries */
 
-function fahrenheitToCelsius(float $fahrenheit): float {}
+   class Atmosphere {
+      public function calculateBar(): float {}
+   }
+
+   function fahrenheitToCelsius(float $fahrenheit): float {}
 ```
 
 Now, the following C code is generated:
 
 ```c
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelsius, 0, 1, IS_DOUBLE, 0)
-    ZEND_ARG_TYPE_INFO(0, fahrenheit, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Atmosphere_calculateBar, 0, 0, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelsius, 0, 1, IS_DOUBLE, 0)
+       ZEND_ARG_TYPE_INFO(0, fahrenheit, IS_DOUBLE, 0)
+   ZEND_END_ARG_INFO()
 
-ZEND_FUNCTION(fahrenheitToCelsius);
-ZEND_METHOD(Atmosphere, calculateBar);
+   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Atmosphere_calculateBar, 0, 0, IS_DOUBLE, 0)
+   ZEND_END_ARG_INFO()
 
-static const zend_function_entry ext_functions[] = {
-    ZEND_FE(fahrenheitToCelsius, arginfo_fahrenheitToCelsius)
-    ZEND_FE_END
-};
+   ZEND_FUNCTION(fahrenheitToCelsius);
+   ZEND_METHOD(Atmosphere, calculateBar);
 
-static const zend_function_entry class_Atmosphere_methods[] = {
-    ZEND_ME(Atmosphere, calculateBar, arginfo_class_Atmosphere_calculateBar, ZEND_ACC_PUBLIC)
-    ZEND_FE_END
-};
+   static const zend_function_entry ext_functions[] = {
+       ZEND_FE(fahrenheitToCelsius, arginfo_fahrenheitToCelsius)
+       ZEND_FE_END
+   };
+
+   static const zend_function_entry class_Atmosphere_methods[] = {
+       ZEND_ME(Atmosphere, calculateBar, arginfo_class_Atmosphere_calculateBar, ZEND_ACC_PUBLIC)
+       ZEND_FE_END
+   };
 ```
 
 The generated `ext_functions` variable must be passed as the `functions` member of
@@ -208,32 +219,33 @@ The generated `ext_functions` variable must be passed as the `functions` member 
 The generated `class_Atmosphere_methods` must be used when registering the `Atmosphere` class:
 
 ```c
-INIT_CLASS_ENTRY(ce, "Atmosphere", class_Atmosphere_methods);
+
+   INIT_CLASS_ENTRY(ce, "Atmosphere", class_Atmosphere_methods);
 ```
 
 Additional meta information can be attached to functions, with the following PHPDoc tags:
 
-- `@deprecated`: Triggers the usual deprecation notice when the function/method is called. As of
-  PHP 8.4 the `#[Deprecated]` attribute should be used instead.
+-  `@deprecated`: Triggers the usual deprecation notice when the function/method is called. As of
+   PHP 8.4 the `#[Deprecated]` attribute should be used instead.
 
-- `@alias`: If a function/method is an alias of another function/method, then the aliased
-  function/method name has to be provided as value. E.g. the function `sizeof()` has the `@alias count` annotation.
+-  `@alias`: If a function/method is an alias of another function/method, then the aliased
+   function/method name has to be provided as value. E.g. the function `sizeof()` has the `@alias count` annotation.
 
-- `@implementation-alias`: This is very similar to `@alias` with some semantic differences.
-  These aliases exists purely to avoid duplicating some code, but there is no other connection
-  between the alias and the aliased function or method.
+-  `@implementation-alias`: This is very similar to `@alias` with some semantic differences.
+   These aliases exists purely to avoid duplicating some code, but there is no other connection
+   between the alias and the aliased function or method.
 
-  A notable example is `Error::getCode()`, which has the `@implementation-alias Exception::getCode` annotation.
+   A notable example is `Error::getCode()`, which has the `@implementation-alias Exception::getCode` annotation.
 
-  The difference between `@alias` and `@implementation-alias` is very nuanced and is only
-  observable in the manual.
+   The difference between `@alias` and `@implementation-alias` is very nuanced and is only
+   observable in the manual.
 
-- `@tentative-return-type`: By using this annotation, the return type declaration is reclassified
-  as a [tentative return type](https://wiki.php.net/rfc/internal_method_return_types).
+-  `@tentative-return-type`: By using this annotation, the return type declaration is reclassified
+   as a [tentative return type](https://wiki.php.net/rfc/internal_method_return_types).
 
-- `@genstubs-expose-comment-block`: By adding this annotation at the beginning of a PHPDoc block,
-  the content of the PHPDoc block will be exposed for
-  `ReflectionFunctionAbstract::getDocComment()`. This feature was added in PHP 8.4.
+-  `@genstubs-expose-comment-block`: By adding this annotation at the beginning of a PHPDoc block,
+   the content of the PHPDoc block will be exposed for
+   `ReflectionFunctionAbstract::getDocComment()`. This feature was added in PHP 8.4.
 
 ## Generating Class Entries
 
@@ -246,64 +258,67 @@ superfluous.
 Given the following stub:
 
 ```php
- <?php
- /** @generate-class-entries */
 
-enum Number: string {
-    /** @var string */
-    public const ONE = "one";
+    <?php
+    /** @generate-class-entries */
 
-    case One = Number::ONE;
-    case Two = Number::TWO;
-}
+   enum Number: string {
+       /** @var string */
+       public const ONE = "one";
 
-class Elephant extends stdClass {
-    /** @cvalue M_PI */
-    public const float PI = UNKNOWN;
+       case One = Number::ONE;
+       case Two = Number::TWO;
+   }
 
-    public readonly string $name;
-}
+   class Elephant extends stdClass {
+       /** @cvalue M_PI */
+       public const float PI = UNKNOWN;
+
+       public readonly string $name;
+   }
 ```
 
 The following arginfo file is generated:
 
 ```c
-static const zend_function_entry class_Number_methods[] = {
-    ZEND_FE_END
-};
 
-static const zend_function_entry class_Elephant_methods[] = {
-    ZEND_FE_END
-};
+   static const zend_function_entry class_Number_methods[] = {
+       ZEND_FE_END
+   };
 
-static zend_class_entry *register_class_Number(void)
-{
-    zend_class_entry *class_entry = zend_register_internal_enum("Number", IS_STRING, class_Number_methods);
+   static const zend_function_entry class_Elephant_methods[] = {
+       ZEND_FE_END
+   };
 
-    ...
+   static zend_class_entry *register_class_Number(void)
+   {
+       zend_class_entry *class_entry = zend_register_internal_enum("Number", IS_STRING, class_Number_methods);
 
-    return class_entry;
-}
+       ...
 
-static zend_class_entry *register_class_Elephant(zend_class_entry *class_entry_stdClass)
-{
-    zend_class_entry ce, *class_entry;
+       return class_entry;
+   }
 
-    INIT_CLASS_ENTRY(ce, "Elephant", class_Elephant_methods);
-    class_entry = zend_register_internal_class_ex(&ce, class_entry_stdClass);
+   static zend_class_entry *register_class_Elephant(zend_class_entry *class_entry_stdClass)
+   {
+       zend_class_entry ce, *class_entry;
 
-    ...
+       INIT_CLASS_ENTRY(ce, "Elephant", class_Elephant_methods);
+       class_entry = zend_register_internal_class_ex(&ce, class_entry_stdClass);
 
-    return class_entry;
-}
+       ...
+
+       return class_entry;
+   }
 ```
 
 The generated `register_class_*()` functions must be used to register these classes in the
 `PHP_MINIT_FUNCTION` directly:
 
 ```c
-zend_class_entry *number_ce = register_class_Number();
-zend_class_entry *elephpant_ce = register_class_Elephant(zend_standard_class_def);
+
+   zend_class_entry *number_ce = register_class_Number();
+   zend_class_entry *elephpant_ce = register_class_Elephant(zend_standard_class_def);
 ```
 
 Class dependencies, such as the parent class or implemented interface, have to be passed to the
@@ -312,53 +327,58 @@ register function. In the example above, we passed the class entry for `stdClass
 
 Like functions and methods, classes also support meta information passed via PHPDoc tags:
 
-- `@deprecated`: triggers a deprecation notice when the class is used
-- `@strict-properties`: adds the `ZEND_ACC_NO_DYNAMIC_PROPERTIES` flag for the class (as of PHP
-  8.0), which disallow dynamic properties.
-- `@not-serializable`: adds the `ZEND_ACC_NOT_SERIALIZABLE` flag for the class (as of PHP 8.1),
-  which prevents the serialization of the class.
-- `@genstubs-expose-comment-block`: By adding this tag at the beginning of a PHPDoc block, the
-  content of the PHPDoc block will be exposed for `ReflectionClass::getDocComment()`. This feature
-  is only available as of PHP 8.4.
+-  `@deprecated`: triggers a deprecation notice when the class is used
+
+-  `@strict-properties`: adds the `ZEND_ACC_NO_DYNAMIC_PROPERTIES` flag for the class (as of PHP
+   8.0), which disallow dynamic properties.
+
+-  `@not-serializable`: adds the `ZEND_ACC_NOT_SERIALIZABLE` flag for the class (as of PHP 8.1),
+   which prevents the serialization of the class.
+
+-  `@genstubs-expose-comment-block`: By adding this tag at the beginning of a PHPDoc block, the
+   content of the PHPDoc block will be exposed for `ReflectionClass::getDocComment()`. This feature
+   is only available as of PHP 8.4.
 
 This is an example with all the flags:
 
 ```php
-<?php
-/**
- * @generate-class-entries
- */
 
-/**
- * @deprecated
- * @not-serializable
- * @strict-properties */
-/** @genstubs-expose-comment-block
- * This is a comment
- * @see https://www.php.net */
-class Elephant extends stdClass {
-   public readonly string $name;
-}
+   <?php
+   /**
+    * @generate-class-entries
+    */
+
+   /**
+    * @deprecated
+    * @not-serializable
+    * @strict-properties */
+   /** @genstubs-expose-comment-block
+    * This is a comment
+    * @see https://www.php.net */
+   class Elephant extends stdClass {
+      public readonly string $name;
+   }
 ```
 
 Resulting in these changes:
 
 ```c
-...
 
-static zend_class_entry *register_class_Elephant(zend_class_entry *class_entry_stdClass)
-{
-    zend_class_entry ce, *class_entry;
+   ...
 
-    INIT_CLASS_ENTRY(ce, "Elephant", class_Elephant_methods);
-    class_entry = zend_register_internal_class_ex(&ce, class_entry_stdClass);
-    class_entry->ce_flags |= ZEND_ACC_DEPRECATED|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
-    class_entry->doc_comment = zend_string_init_interned("/**\n * This is a comment\n * @see https://www.php.net */", 55, 1);
+   static zend_class_entry *register_class_Elephant(zend_class_entry *class_entry_stdClass)
+   {
+       zend_class_entry ce, *class_entry;
 
-...
+       INIT_CLASS_ENTRY(ce, "Elephant", class_Elephant_methods);
+       class_entry = zend_register_internal_class_ex(&ce, class_entry_stdClass);
+       class_entry->ce_flags |= ZEND_ACC_DEPRECATED|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+       class_entry->doc_comment = zend_string_init_interned("/**\n * This is a comment\n * @see https://www.php.net */", 55, 1);
 
-    return class_entry;
-}
+   ...
+
+       return class_entry;
+   }
 ```
 
 ## Generating Global Constants and Attributes
@@ -371,36 +391,38 @@ include a `register_{$stub_file_name}_symbols()` file.
 Given the following file:
 
 ```php
-// example.stub.php
-<?php
-/** @generate-class-entries */
 
-/** @var string */
-const ANIMAL = "Elephant";
+   // example.stub.php
+   <?php
+   /** @generate-class-entries */
 
-/**
-* @var float
-* @cvalue M_PI
-*/
-const BAR = UNKNOWN;
+   /** @var string */
+   const ANIMAL = "Elephant";
 
-function connect(#[\SensitiveParameter] string $connectionString): string {}
+   /**
+   * @var float
+   * @cvalue M_PI
+   */
+   const BAR = UNKNOWN;
+
+   function connect(#[\SensitiveParameter] string $connectionString): string {}
 ```
 
 The following C function will be generated in order to register the two global constants and the
 attribute. The name of this file is `example.stub.php`:
 
 ```c
-...
 
-static void register_example_symbols(int module_number)
-{
-    REGISTER_STRING_CONSTANT("ANIMAL", "Elephant", CONST_PERSISTENT);
-    REGISTER_DOUBLE_CONSTANT("BAR", M_PI, CONST_PERSISTENT);
+   ...
+
+   static void register_example_symbols(int module_number)
+   {
+       REGISTER_STRING_CONSTANT("ANIMAL", "Elephant", CONST_PERSISTENT);
+       REGISTER_DOUBLE_CONSTANT("BAR", M_PI, CONST_PERSISTENT);
 
 
-    zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "connect", sizeof("connect") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
-}
+       zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "connect", sizeof("connect") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+   }
 ```
 
 Similarly to class registration functions, the generated `register_{$stub_file_name}_symbols()`
@@ -408,12 +430,13 @@ functions must be used in `PHP_MINIT_FUNCTION`, to make the global constants an 
 available:
 
 ```c
-PHP_MINIT_FUNCTION(example)
-{
-    register_example_symbols(module_number);
 
-    return SUCCESS;
-}
+   PHP_MINIT_FUNCTION(example)
+   {
+       register_example_symbols(module_number);
+
+       return SUCCESS;
+   }
 ```
 
 Global constants always need to have their type specified with a `@var` PHPDoc tag. The type for
@@ -431,11 +454,12 @@ with `@cvalue M_PI` to the C-level constant `M_PI` (define by PHP's internals).
 
 Constants can take the following extra meta information passed via PHPDoc tags:
 
-- `@deprecated`: Triggers a deprecation notice when the constant is used. As of PHP 8.5 the
-  `#[Deprecated]` attribute should be used instead.
-- `@genstubs-expose-comment-block`: By adding this tag at the beginning of a PHPDoc block, the
-  content of the PHPDoc block will be exposed for `ReflectionClass::getDocComment()`. This feature
-  is only available as of PHP 8.4.
+-  `@deprecated`: Triggers a deprecation notice when the constant is used. As of PHP 8.5 the
+   `#[Deprecated]` attribute should be used instead.
+
+-  `@genstubs-expose-comment-block`: By adding this tag at the beginning of a PHPDoc block, the
+   content of the PHPDoc block will be exposed for `ReflectionClass::getDocComment()`. This feature
+   is only available as of PHP 8.4.
 
 ## Maintaining Backward Compatibility
 
@@ -456,11 +480,12 @@ PHPDoc tag, without any value. In this case, an additional `_legacy_arginfo.h` f
 generated. You can include this file conditionally, such as:
 
 ```
-#if (PHP_VERSION_ID >= 80000)
-# include "example_arginfo.h"
-#else
-# include "example_legacy_arginfo.h"
-#endif
+
+   #if (PHP_VERSION_ID >= 80000)
+   # include "example_arginfo.h"
+   #else
+   # include "example_legacy_arginfo.h"
+   #endif
 ```
 
 When `@generate-legacy-arginfo` is passed the minimum PHP version ID that needs to be supported,
@@ -474,80 +499,82 @@ In this example we add a PHP 8.0 compatibility requirement to a slightly modifie
 previous example:
 
 ```php
-<?php
-/**
- * @generate-class-entries
- * @generate-legacy-arginfo 80000
- */
 
-enum Number: string {
-   case One;
-}
-
-/**
- * @strict-properties
- * @not-serializable */
-class Elephant {
+   <?php
    /**
-    * @cvalue M_PI
-    * @var float
+    * @generate-class-entries
+    * @generate-legacy-arginfo 80000
     */
-   public const float PI = UNKNOWN;
 
-   public readonly string $name;
-}
+   enum Number: string {
+      case One;
+   }
+
+   /**
+    * @strict-properties
+    * @not-serializable */
+   class Elephant {
+      /**
+       * @cvalue M_PI
+       * @var float
+       */
+      public const float PI = UNKNOWN;
+
+      public readonly string $name;
+   }
 ```
 
 Then notice the `#if (PHP_VERSION_ID >= ...)` conditions in the generated arginfo file:
 
 ```c
-...
 
-#if (PHP_VERSION_ID >= 80100)
-static zend_class_entry *register_class_Number(void)
-{
-    zend_class_entry *class_entry = zend_register_internal_enum("Number", IS_STRING, class_Number_methods);
+   ...
 
-    zend_enum_add_case_cstr(class_entry, "One", NULL);
+   #if (PHP_VERSION_ID >= 80100)
+   static zend_class_entry *register_class_Number(void)
+   {
+       zend_class_entry *class_entry = zend_register_internal_enum("Number", IS_STRING, class_Number_methods);
 
-    return class_entry;
-}
-#endif
+       zend_enum_add_case_cstr(class_entry, "One", NULL);
 
-static zend_class_entry *register_class_Elephant(void)
-{
-    zend_class_entry ce, *class_entry;
+       return class_entry;
+   }
+   #endif
 
-    INIT_CLASS_ENTRY(ce, "Elephant", class_Elephant_methods);
-    class_entry = zend_register_internal_class_ex(&ce, NULL);
-#if (PHP_VERSION_ID >= 80100)
-    class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
-#elif (PHP_VERSION_ID >= 80000)
-    class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
-#endif
+   static zend_class_entry *register_class_Elephant(void)
+   {
+       zend_class_entry ce, *class_entry;
 
-    zval const_PI_value;
-    ZVAL_DOUBLE(&const_PI_value, M_PI);
-    zend_string *const_PI_name = zend_string_init_interned("PI", sizeof("PI") - 1, 1);
-#if (PHP_VERSION_ID >= 80300)
-    zend_declare_typed_class_constant(class_entry, const_PI_name, &const_PI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
-#else
-    zend_declare_class_constant_ex(class_entry, const_PI_name, &const_PI_value, ZEND_ACC_PUBLIC, NULL);
-#endif
-    zend_string_release(const_PI_name);
+       INIT_CLASS_ENTRY(ce, "Elephant", class_Elephant_methods);
+       class_entry = zend_register_internal_class_ex(&ce, NULL);
+   #if (PHP_VERSION_ID >= 80100)
+       class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+   #elif (PHP_VERSION_ID >= 80000)
+       class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+   #endif
 
-    zval property_name_default_value;
-    ZVAL_UNDEF(&property_name_default_value);
-    zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
-#if (PHP_VERSION_ID >= 80100)
-    zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-#elif (PHP_VERSION_ID >= 80000)
-    zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-#endif
-    zend_string_release(property_name_name);
+       zval const_PI_value;
+       ZVAL_DOUBLE(&const_PI_value, M_PI);
+       zend_string *const_PI_name = zend_string_init_interned("PI", sizeof("PI") - 1, 1);
+   #if (PHP_VERSION_ID >= 80300)
+       zend_declare_typed_class_constant(class_entry, const_PI_name, &const_PI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
+   #else
+       zend_declare_class_constant_ex(class_entry, const_PI_name, &const_PI_value, ZEND_ACC_PUBLIC, NULL);
+   #endif
+       zend_string_release(const_PI_name);
 
-    return class_entry;
-}
+       zval property_name_default_value;
+       ZVAL_UNDEF(&property_name_default_value);
+       zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+   #if (PHP_VERSION_ID >= 80100)
+       zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+   #elif (PHP_VERSION_ID >= 80000)
+       zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+   #endif
+       zend_string_release(property_name_name);
+
+       return class_entry;
+   }
 ```
 
 The preprocessor conditions are necessary because enumerations (`enum`), `readonly` properties,
@@ -579,11 +606,12 @@ function can only return newly created non-scalar values, its `refcount` can be 
 An example from the built-in functions:
 
 ```php
-/**
- * @return array<int, string>
- * @refcount 1
- */
-function get_declared_classes(): array {}
+
+   /**
+    * @return array<int, string>
+    * @refcount 1
+    */
+   function get_declared_classes(): array {}
 ```
 
 Functions can be evaluated at compile-time if their arguments are known in compile-time, and their
@@ -607,51 +635,53 @@ Since only arity-based optimizations are supported, the tag has the form: `@fram
 The stub of `in_array()` is a good example:
 
 ```php
-/**
- * @compile-time-eval
- * @frameless-function {"arity": 2}
- * @frameless-function {"arity": 3}
- */
-function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
+
+   /**
+    * @compile-time-eval
+    * @frameless-function {"arity": 2}
+    * @frameless-function {"arity": 3}
+    */
+   function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 ```
 
 Apart from being compile-time evaluable, it has a frameless function counterpart for both the 2 and
 the 3-parameter signatures:
 
 ```c
-/* The regular in_array() function */
-PHP_FUNCTION(in_array)
-{
-    php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-}
 
-/* The frameless version of the in_array() function when 2 arguments are passed */
-ZEND_FRAMELESS_FUNCTION(in_array, 2)
-{
-    zval *value, *array;
+   /* The regular in_array() function */
+   PHP_FUNCTION(in_array)
+   {
+       php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+   }
 
-    Z_FLF_PARAM_ZVAL(1, value);
-    Z_FLF_PARAM_ARRAY(2, array);
+   /* The frameless version of the in_array() function when 2 arguments are passed */
+   ZEND_FRAMELESS_FUNCTION(in_array, 2)
+   {
+       zval *value, *array;
 
-    _php_search_array(return_value, value, array, false, 0);
+       Z_FLF_PARAM_ZVAL(1, value);
+       Z_FLF_PARAM_ARRAY(2, array);
 
-flf_clean:;
-}
+       _php_search_array(return_value, value, array, false, 0);
 
-/* The frameless version of the in_array() function when 3 arguments are passed */
-ZEND_FRAMELESS_FUNCTION(in_array, 3)
-{
-    zval *value, *array;
-    bool strict;
+   flf_clean:;
+   }
 
-    Z_FLF_PARAM_ZVAL(1, value);
-    Z_FLF_PARAM_ARRAY(2, array);
-    Z_FLF_PARAM_BOOL(3, strict);
+   /* The frameless version of the in_array() function when 3 arguments are passed */
+   ZEND_FRAMELESS_FUNCTION(in_array, 3)
+   {
+       zval *value, *array;
+       bool strict;
 
-    _php_search_array(return_value, value, array, strict, 0);
+       Z_FLF_PARAM_ZVAL(1, value);
+       Z_FLF_PARAM_ARRAY(2, array);
+       Z_FLF_PARAM_BOOL(3, strict);
 
-flf_clean:;
-}
+       _php_search_array(return_value, value, array, strict, 0);
+
+   flf_clean:;
+   }
 ```
 
 ## Generating Signatures for the Manual
@@ -701,12 +731,13 @@ In order to suppress the error when the check is false positive, the `@no-verify
 should be applied to the alias:
 
 ```php
-/**
- * @param resource $bz
- * @implementation-alias fwrite
- * @no-verify Uses different parameter name
- */
-function bzwrite($bz, string $data, ?int $length = null): int|false {}
+
+   /**
+    * @param resource $bz
+    * @implementation-alias fwrite
+    * @no-verify Uses different parameter name
+    */
+   function bzwrite($bz, string $data, ?int $length = null): int|false {}
 ```
 
 Besides aliases, the contents of the documentation can also be validated by providing the
@@ -718,19 +749,20 @@ the specified path.
 
 This feature performs the following validations:
 
-- Detecting missing global constants
-- Detecting missing classes
-- Detecting missing methods
-- Detecting incorrectly documented alias functions or methods
+-  Detecting missing global constants
+-  Detecting missing classes
+-  Detecting missing methods
+-  Detecting incorrectly documented alias functions or methods
 
 Running it with the stub examples that are used in this guide, the following warnings are shown:
 
 ```shell
-Warning: Missing class synopsis for Number
-Warning: Missing class synopsis for Elephant
-Warning: Missing class synopsis for Atmosphere
-Warning: Missing method synopsis for fahrenheitToCelsius()
-Warning: Missing method synopsis for Atmosphere::calculateBar()
+
+   Warning: Missing class synopsis for Number
+   Warning: Missing class synopsis for Elephant
+   Warning: Missing class synopsis for Atmosphere
+   Warning: Missing method synopsis for fahrenheitToCelsius()
+   Warning: Missing method synopsis for Atmosphere::calculateBar()
 ```
 
 ## Parameter Statistics

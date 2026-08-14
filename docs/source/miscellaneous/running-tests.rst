@@ -8,7 +8,8 @@ tests folders under the source root directory using the PHP CLI binary.
 work). Therefore you can execute the script as follows:
 
 ```shell
-sapi/cli/php [-c /path/to/php.ini] run-tests.php [ext/foo/tests/GLOB]
+
+   sapi/cli/php [-c /path/to/php.ini] run-tests.php [ext/foo/tests/GLOB]
 ```
 
 ## Which php executable does make test use?
@@ -46,8 +47,9 @@ the GLOB is expanded by the shell and any file with extension `*.phpt` is regard
 Tester can easily execute tests selectively with as follows:
 
 ```shell
-./sapi/cli/php run-tests.php ext/mbstring/*
-./sapi/cli/php run-tests.php ext/mbstring/020.phpt
+
+   ./sapi/cli/php run-tests.php ext/mbstring/*
+   ./sapi/cli/php run-tests.php ext/mbstring/020.phpt
 ```
 
 ## Test Runner Options
@@ -59,9 +61,10 @@ You can set options by specifying them on the command line when you run `php run
 you use `make test` through the `TEST_PHP_ARGS` environment variable:
 
 ```shell
-php run-tests.php -j24
-# or
-TEST_PHP_ARGS="-j24" make test
+
+   php run-tests.php -j24
+   # or
+   TEST_PHP_ARGS="-j24" make test
 ```
 
 ### Running Tests in Parallel
@@ -69,7 +72,8 @@ TEST_PHP_ARGS="-j24" make test
 The test runner can run tests in parallel, by using the `-j` option:
 
 ```shell
-php run-tests.php -j24 ext/date/*.phpt
+
+   php run-tests.php -j24 ext/date/*.phpt
 ```
 
 ## Test results
@@ -78,11 +82,11 @@ Test results are printed to standard output. If there is a failed test, the `run
 saves the result, the expected result and the code executed to the test script directory. For
 example, if `ext/myext/tests/myext.phpt` fails to pass, the following files are created:
 
-- `ext/myext/tests/myext.php` - actual test file executed
-- `ext/myext/tests/myext.log` - log of test execution (L)
-- `ext/myext/tests/myext.exp` - expected output (E)
-- `ext/myext/tests/myext.out` - output from test script (O)
-- `ext/myext/tests/myext.diff` - diff of .out and .exp (D)
+-  `ext/myext/tests/myext.php` - actual test file executed
+-  `ext/myext/tests/myext.log` - log of test execution (L)
+-  `ext/myext/tests/myext.exp` - expected output (E)
+-  `ext/myext/tests/myext.out` - output from test script (O)
+-  `ext/myext/tests/myext.diff` - diff of .out and .exp (D)
 
 Failed tests are always bugs. Either the test is bugged or not considering factors applying to the
 tester's environment, or there is a bug in PHP. If this is a known bug, we strive to provide bug
@@ -111,32 +115,33 @@ the environment variable `REPORT_EXIT_STATUS` to `1`, and make test will set the
 Example script to be run by cron:
 
 ```shell
-========== qa-test.sh =============
-#!/bin/sh
 
-CO_DIR=$HOME/cvs/php7
-MYMAIL=qa-test@domain.com
-TMPDIR=/var/tmp
-TODAY=`date +"%Y%m%d"`
+   ========== qa-test.sh =============
+   #!/bin/sh
 
-# Make sure compilation environment is correct
-CONFIGURE_OPTS='--disable-all --enable-cli --with-pcre'
-export MAKE=gmake
-export CC=gcc
+   CO_DIR=$HOME/cvs/php7
+   MYMAIL=qa-test@domain.com
+   TMPDIR=/var/tmp
+   TODAY=`date +"%Y%m%d"`
 
-# Set test environment
-export NO_INTERACTION=1
-export REPORT_EXIT_STATUS=1
+   # Make sure compilation environment is correct
+   CONFIGURE_OPTS='--disable-all --enable-cli --with-pcre'
+   export MAKE=gmake
+   export CC=gcc
 
-cd $CO_DIR
-cvs update . >>$TMPDIR/phpqatest.$TODAY
-./cvsclean ; ./buildconf ; ./configure $CONFIGURE_OPTS ; $MAKE
-$MAKE test >>$TMPDIR/phpqatest.$TODAY 2>&1
-if test $? -gt 0
-then
-        cat $TMPDIR/phpqatest.$TODAY | mail -s"PHP-QA Test Failed for $TODAY" $MYMAIL
-fi
-========== end of qa-test.sh =============
+   # Set test environment
+   export NO_INTERACTION=1
+   export REPORT_EXIT_STATUS=1
+
+   cd $CO_DIR
+   cvs update . >>$TMPDIR/phpqatest.$TODAY
+   ./cvsclean ; ./buildconf ; ./configure $CONFIGURE_OPTS ; $MAKE
+   $MAKE test >>$TMPDIR/phpqatest.$TODAY 2>&1
+   if test $? -gt 0
+   then
+           cat $TMPDIR/phpqatest.$TODAY | mail -s"PHP-QA Test Failed for $TODAY" $MYMAIL
+   fi
+   ========== end of qa-test.sh =============
 ```
 
 > [!NOTE]
@@ -154,13 +159,15 @@ Specific tests can also be executed, like running tests for a certain extension.
 do like so (for example the standard library):
 
 ```shell
-make test TESTS=ext/standard.
+
+   make test TESTS=ext/standard.
 ```
 
 Where `TESTS=` points to a directory containing .phpt files or a single .phpt file like:
 
 ```shell
-make test TESTS=tests/basic/001.phpt.
+
+   make test TESTS=tests/basic/001.phpt.
 ```
 
 You can also pass options directly to the underlying script that runs the test suite

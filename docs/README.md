@@ -27,11 +27,4 @@ your browser.
 
 ## Formatting
 
-The files in this documentation are formatted using
-[mdformat](https://mdformat.readthedocs.io/) with its
-[MyST plugin](https://github.com/executablebooks/mdformat-myst).
-
-```bash
-make format
-make check-formatting
-```
+Formatting is temporarily not enforced during the Markdown migration.

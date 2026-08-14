@@ -1,6 +1,4 @@
 Sphinx
-mdformat==1.0.0
-mdformat-myst==0.3.0
 myst-parser>=5.1
 sphinx-design
 sphinxawesome-theme

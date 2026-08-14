@@ -1,7 +1,6 @@
 # An overview of the PHP streams abstraction
 
-> [!WARNING]
-> Some prototypes in this file are out of date.
+WARNING: some prototypes in this file are out of date.
 
 ## Why streams?
 
@@ -52,21 +51,21 @@ PHPAPI php_stream *php_stream_open_wrapper(const char *path, const char *mode,
 
 Where:
 
-- `path` is the file or resource to open.
-- `mode` is the stdio compatible mode eg: "wb", "rb" etc.
-- `options` is a combination of the following values:
-  - `IGNORE_PATH` (default) - don't use include path to search for the file
-  - `USE_PATH` - use include path to search for the file
-  - `IGNORE_URL` - do not use plugin wrappers
-  - `REPORT_ERRORS` - show errors in a standard format if something goes wrong.
-  - `STREAM_MUST_SEEK` - If you really need to be able to seek the stream and
+* `path` is the file or resource to open.
+* `mode` is the stdio compatible mode eg: "wb", "rb" etc.
+* `options` is a combination of the following values:
+  * `IGNORE_PATH` (default) - don't use include path to search for the file
+  * `USE_PATH` - use include path to search for the file
+  * `IGNORE_URL` - do not use plugin wrappers
+  * `REPORT_ERRORS` - show errors in a standard format if something goes wrong.
+  * `STREAM_MUST_SEEK` - If you really need to be able to seek the stream and
     don't need to be able to write to the original file/URL, use this option to
     arrange for the stream to be copied (if needed) into a stream that can be
     seek()ed.
-- `opened_path` is used to return the path of the actual file opened, but if you
+* `opened_path` is used to return the path of the actual file opened, but if you
   used `STREAM_MUST_SEEK`, may not be valid. You are responsible for
   `efree()ing` `opened_path`.
-- `opened_path` may be (and usually is) `NULL`.
+* `opened_path` may be (and usually is) `NULL`.
 
 If you need to open a specific stream, or convert standard resources into
 streams there are a range of functions to do this defined in `php_streams.h`. A
@@ -148,27 +147,22 @@ It returns one of the following values:
 `make_seekable` will always set newstream to be the stream that is valid if the
 function succeeds. When you have finished, remember to close the stream.
 
-> [!NOTE]
-> If you only need to seek forward, there is no need to call this function, as
-> `php_stream_seek` can emulate forward seeking when the whence parameter is
-> `SEEK_CUR`.
+NOTE: If you only need to seek forward, there is no need to call this function,
+as the `php_stream_seek` can emulate forward seeking when the whence parameter
+is `SEEK_CUR`.
 
-> [!NOTE]
-> Writing to the stream may not affect the original source, so it only makes
-> sense to use this for read-only use.
+NOTE: Writing to the stream may not affect the original source, so it only makes
+sense to use this for read-only use.
 
-> [!NOTE]
-> If the origstream is network based, this function will block until the whole
-> contents have been downloaded.
+NOTE: If the origstream is network based, this function will block until the
+whole contents have been downloaded.
 
-> [!NOTE]
-> Never call this function with an origstream that is referenced as a resource!
-> It will close the origstream on success, and this can lead to a crash when the
-> resource is later used/released.
+NOTE: Never call this function with an origstream that is referenced as a
+resource! It will close the origstream on success, and this can lead to a crash
+when the resource is later used/released.
 
-> [!NOTE]
-> If you are opening a stream and need it to be seekable, use the
-> `STREAM_MUST_SEEK` option to `php_stream_open_wrapper()`.
+NOTE: If you are opening a stream and need it to be seekable, use the
+`STREAM_MUST_SEEK` option to php_stream_open_wrapper();
 
 ```c
 PHPAPI int php_stream_supports_lock(php_stream * stream);
@@ -211,7 +205,7 @@ PHP_STREAM_AS_SOCKETD - a socket descriptor
 
 If you ask a socket stream for a `FILE*`, the abstraction will use fdopen to
 create it for you. Be warned that doing so may cause buffered data to be lost
-if you mix ANSI stdio calls on the FILE\* with php stream calls on the stream.
+if you mix ANSI stdio calls on the FILE* with php stream calls on the stream.
 
 If your system has the fopencookie function, php streams can synthesize a
 `FILE*` on top of any stream, which is useful for SSL sockets, memory based
@@ -297,17 +291,17 @@ PHPAPI php_stream * php_stream_alloc(php_stream_ops * ops, void * abstract,
         size_t bufsize, int persistent, const char * mode)
 ```
 
-- `ops` is a pointer to the implementation,
-- `abstract` holds implementation specific data that is relevant to this
+* `ops` is a pointer to the implementation,
+* `abstract` holds implementation specific data that is relevant to this
   instance of the stream,
-- `bufsize` is the size of the buffer to use - if 0, then buffering at the
+* `bufsize` is the size of the buffer to use - if 0, then buffering at the
   stream
-- `level` will be disabled (recommended for underlying sources that implement
+* `level` will be disabled (recommended for underlying sources that implement
   their own buffering - such a `FILE*`)
-- `persistent` controls how the memory is to be allocated - persistently so that
+* `persistent` controls how the memory is to be allocated - persistently so that
   it lasts across requests, or non-persistently so that it is freed at the end
   of a request (it uses pemalloc),
-- `mode` is the stdio-like mode of operation - php streams places no real
+* `mode` is the stdio-like mode of operation - php streams places no real
   meaning in the mode parameter, except that it checks for a `w` in the string
   when attempting to write (this may change).
 
@@ -316,14 +310,14 @@ into a `FILE*`, so it should be compatible with the mode parameter of `fopen()`.
 
 ## Writing your own stream implementation
 
-- **RULE #1**: when writing your own streams: make sure you have configured PHP
+* **RULE #1**: when writing your own streams: make sure you have configured PHP
   with `--enable-debug`.
   Some great great pains have been taken to hook into the Zend memory manager to
   help track down allocation problems. It will also help you spot incorrect use
   of the STREAMS_DC, STREAMS_CC and the semi-private STREAMS_REL_CC macros for
   function definitions.
 
-- RULE #2: Please use the stdio stream as a reference; it will help you
+* RULE #2: Please use the stdio stream as a reference; it will help you
   understand the semantics of the stream operations, and it will always be more
   up to date than these docs :-)
 

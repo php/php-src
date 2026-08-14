@@ -10,42 +10,42 @@ scared about writing to ([php-qa@lists.php.net](mailto:php-qa@lists.php.net)) �
 
 So what are phpt tests?
 
-> A phpt test is a little script used by the php internal and quality assurance teams to test PHP's
-> functionality. It can be used with new releases to make sure they can do all the things that
-> previous releases can, or to help find bugs in current releases. By writing phpt tests you are
-> helping to make PHP more stable.
+   A phpt test is a little script used by the php internal and quality assurance teams to test PHP's
+   functionality. It can be used with new releases to make sure they can do all the things that
+   previous releases can, or to help find bugs in current releases. By writing phpt tests you are
+   helping to make PHP more stable.
 
 What skills are needed to write a phpt test?
 
-> All that is really needed to write a phpt test is a basic understanding of the PHP language, a
-> text editor, and a way to get the results of your code. That is it. So if you have been writing
-> and running PHP scripts already — you have everything you need.
+   All that is really needed to write a phpt test is a basic understanding of the PHP language, a
+   text editor, and a way to get the results of your code. That is it. So if you have been writing
+   and running PHP scripts already — you have everything you need.
 
 What do you write phpt tests on?
 
-> Basically you can write a phpt test on one of the various php functions available. You can write
-> a test on a basic language function (a string function or an array function) , or a function
-> provided by one of PHP's numerous extensions (a mysql function or a image function or a mcrypt
-> function).
->
-> You can find out what functions already have phpt tests by looking in the [html version](https://github.com/php/php-src) of the git repository (`ext/standard/tests/` is a good place
-> to start looking — though not all the tests currently written are in there).
->
-> If you want more guidance than that you can always ask the PHP Quality Assurance Team on their
-> mailing list ([php-qa@lists.php.net](mailto:php-qa@lists.php.net)) where they would like you to direct your attentions.
+   Basically you can write a phpt test on one of the various php functions available. You can write
+   a test on a basic language function (a string function or an array function) , or a function
+   provided by one of PHP's numerous extensions (a mysql function or a image function or a mcrypt
+   function).
+
+   You can find out what functions already have phpt tests by looking in the [html version](https://github.com/php/php-src) of the git repository (`ext/standard/tests/` is a good place
+   to start looking — though not all the tests currently written are in there).
+
+   If you want more guidance than that you can always ask the PHP Quality Assurance Team on their
+   mailing list ([php-qa@lists.php.net](mailto:php-qa@lists.php.net)) where they would like you to direct your attentions.
 
 How is a phpt test used?
 
-> When a test is called by the `run-tests.php` script it takes various parts of the phpt file to
-> name and create a .php file. That .php file is then executed. The output of the .php file is then
-> compared to a different section of the phpt file. If the output of the script "matches" the
-> output provided in the phpt script — it passes.
+   When a test is called by the `run-tests.php` script it takes various parts of the phpt file to
+   name and create a .php file. That .php file is then executed. The output of the .php file is then
+   compared to a different section of the phpt file. If the output of the script "matches" the
+   output provided in the phpt script — it passes.
 
 What should a phpt test do?
 
-> Basically — it should try and break the PHP function. It should check not only the functions
-> normal parameters, but it should also check edge cases. Intentionally generating an error is
-> allowed and encouraged.
+   Basically — it should try and break the PHP function. It should check not only the functions
+   normal parameters, but it should also check edge cases. Intentionally generating an error is
+   allowed and encouraged.
 
 ## Writing phpt Tests
 
@@ -54,16 +54,16 @@ What should a phpt test do?
 Phpt tests follow a very strict naming convention. This is done to easily identify what each phpt
 test is for. Tests should be named according to the following list:
 
-- Tests for bugs
-  - `bug<bugid>.phpt` (`bug17123.phpt`)
-- Tests for a function's basic behaviour
-  - `<functionname>_basic.phpt` (`dba_open_basic.phpt`)
-- Tests for a function's error behaviour
-  - `<functionname>_error.phpt` (`dba_open_error.phpt`)
-- Tests for variations in a function's behaviour
-  - `<functionname>_variation.phpt` (`dba_open_variation.phpt`)
-- General tests for extensions
-  - `<extname><no>.phpt` (`dba_003.phpt`)
+-  Tests for bugs
+   -  `bug<bugid>.phpt` (`bug17123.phpt`)
+-  Tests for a function's basic behaviour
+   -  `<functionname>_basic.phpt` (`dba_open_basic.phpt`)
+-  Tests for a function's error behaviour
+   -  `<functionname>_error.phpt` (`dba_open_error.phpt`)
+-  Tests for variations in a function's behaviour
+   -  `<functionname>_variation.phpt` (`dba_open_variation.phpt`)
+-  General tests for extensions
+   -  `<extname><no>.phpt` (`dba_003.phpt`)
 
 The convention of using \_basic, \_error and \_variation was introduced when we found that writing a
 single test case for each function resulted in unacceptably large test cases. It's quite hard to
@@ -104,16 +104,17 @@ below illustrates a minimal test.
 *ext/standard/tests/strings/strtr.phpt*
 
 ```php
---TEST--
-strtr() function — basic test for strtr()
---FILE--
-<?php
-/* Do not change this test it is a README.TESTING example. */
-$trans = array("hello"=>"hi", "hi"=>"hello", "a"=>"A", "world"=>"planet");
-var_dump(strtr("# hi all, I said hello world! #", $trans));
-?>
---EXPECT--
-string(32) "# hello All, I sAid hi planet! #"
+
+   --TEST--
+   strtr() function — basic test for strtr()
+   --FILE--
+   <?php
+   /* Do not change this test it is a README.TESTING example. */
+   $trans = array("hello"=>"hi", "hi"=>"hello", "a"=>"A", "world"=>"planet");
+   var_dump(strtr("# hi all, I said hello world! #", $trans));
+   ?>
+   --EXPECT--
+   string(32) "# hello All, I sAid hi planet! #"
 ```
 
 As you can see the file is divided into several sections. The TEST section holds a one line title of
@@ -137,29 +138,29 @@ provide you with information that can help you find out what went wrong:
 
 foo.diff
 
-> A diff file between the expected output (be it in EXPECT, EXPECTF or another option) and the
-> actual output.
+   A diff file between the expected output (be it in EXPECT, EXPECTF or another option) and the
+   actual output.
 
 foo.exp
 
-> The expected output.
+   The expected output.
 
 foo.log
 
-> A log containing expected output, actual output and results. Most likely very similar to info in
-> the other files.
+   A log containing expected output, actual output and results. Most likely very similar to info in
+   the other files.
 
 foo.out
 
-> The actual output of your .phpt test part.
+   The actual output of your .phpt test part.
 
 foo.php
 
-> The php code that was executed for this test.
+   The php code that was executed for this test.
 
 foo.sh
 
-> An executable file that executes the test for you as it was executed during failure.
+   An executable file that executes the test for you as it was executed during failure.
 
 ### Testing your test cases
 
@@ -210,13 +211,15 @@ Make sure that any test touching parsing or display of dates uses a hard-defined
 preferable 'UTC'. It is important that this is defined in the file section using:
 
 ```php
-date_default_timezone_set('UTC');
+
+   date_default_timezone_set('UTC');
 ```
 
 and not in the INI section. This is because of the order in which settings are checked which is:
 
 ```
-date_default_timezone_set() -> TZ environmental -> INI setting -> System Setting
+
+   date_default_timezone_set() -> TZ environmental -> INI setting -> System Setting
 ```
 
 If a TZ environmental variable is found the INI setting will be ignored.
@@ -225,46 +228,51 @@ Tests that run, or only have matching EXPECT output, on 32bit platforms can use 
 like:
 
 ```php
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only");
-?>
+
+   --SKIPIF--
+   <?php
+   if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only");
+   ?>
 ```
 
 Tests for 64bit platforms can use:
 
 ```php
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
-?>
+
+   --SKIPIF--
+   <?php
+   if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
+   ?>
 ```
 
 To run a test only on Windows:
 
 ```php
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
-?>
+
+   --SKIPIF--
+   <?php
+   if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
+   ?>
 ```
 
 To run a test only on Linux:
 
 ```php
---SKIPIF--
-<?php
-if (!stristr(PHP_OS, "Linux")) die("skip this test is Linux platforms only");
-?>
+
+   --SKIPIF--
+   <?php
+   if (!stristr(PHP_OS, "Linux")) die("skip this test is Linux platforms only");
+   ?>
 ```
 
 To skip a test on Mac OS X Darwin:
 
 ```php
---SKIPIF--
-<?php
-if (!stristr(PHP_OS, "Darwin")) die("skip this test is for Mac OS X platforms only");
-?>
+
+   --SKIPIF--
+   <?php
+   if (!stristr(PHP_OS, "Darwin")) die("skip this test is for Mac OS X platforms only");
+   ?>
 ```
 
 ## Examples
@@ -285,18 +293,19 @@ See also [EXPECTF](#expectf) details.
 */ext/standard/tests/strings/str_shuffle.phpt*
 
 ```php
---TEST--
-Testing str_shuffle.
---FILE--
-<?php
-/* Do not change this test it is a README.TESTING example. */
-$s = '123';
-var_dump(str_shuffle($s));
-var_dump($s);
-?>
---EXPECTF--
-string(3) "%s"
-string(3) "123"
+
+   --TEST--
+   Testing str_shuffle.
+   --FILE--
+   <?php
+   /* Do not change this test it is a README.TESTING example. */
+   $s = '123';
+   var_dump(str_shuffle($s));
+   var_dump($s);
+   ?>
+   --EXPECTF--
+   string(3) "%s"
+   string(3) "123"
 ```
 
 ### EXPECTREGEX
@@ -308,18 +317,19 @@ otherwise they would be interpreted as a regular expression.
 */ext/standard/tests/strings/strings001.phpt*
 
 ```php
---TEST--
-Test whether strstr() and strrchr() are binary safe.
---FILE--
-<?php
-/* Do not change this test it is a README.TESTING example. */
-$s = "alabala nica".chr(0)."turska panica";
-var_dump(strstr($s, "nic"));
-var_dump(strrchr($s," nic"));
-?>
---EXPECTREGEX--
-string\(18\) \"nica\x00turska panica\"
-string\(19\) \" nica\x00turska panica\"
+
+   --TEST--
+   Test whether strstr() and strrchr() are binary safe.
+   --FILE--
+   <?php
+   /* Do not change this test it is a README.TESTING example. */
+   $s = "alabala nica".chr(0)."turska panica";
+   var_dump(strstr($s, "nic"));
+   var_dump(strrchr($s," nic"));
+   ?>
+   --EXPECTREGEX--
+   string\(18\) \"nica\x00turska panica\"
+   string\(19\) \" nica\x00turska panica\"
 ```
 
 ### EXTENSIONS
@@ -331,13 +341,14 @@ and skip the test if it's not there.
 */ext/sodium/tests/crypto_scalarmult.phpt*
 
 ```php
---TEST--
-Check for libsodium scalarmult
---EXTENSIONS--
-sodium
---FILE--
-<?php
-$n = sodium_hex2bin("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb");
+
+   --TEST--
+   Check for libsodium scalarmult
+   --EXTENSIONS--
+   sodium
+   --FILE--
+   <?php
+   $n = sodium_hex2bin("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb");
 ```
 
 ### SKIPIF
@@ -351,16 +362,17 @@ why the test should skip.
 *ext/sodium/tests/pwhash_argon2i.phpt*
 
 ```php
---TEST--
-Check for libsodium argon2i
---EXTENSIONS--
-sodium
---SKIPIF--
-<?php
-if (!defined('SODIUM_CRYPTO_PWHASH_SALTBYTES')) print "skip libsodium without argon2i";
-?>
---FILE--
-[snip]
+
+   --TEST--
+   Check for libsodium argon2i
+   --EXTENSIONS--
+   sodium
+   --SKIPIF--
+   <?php
+   if (!defined('SODIUM_CRYPTO_PWHASH_SALTBYTES')) print "skip libsodium without argon2i";
+   ?>
+   --FILE--
+   [snip]
 ```
 
 Test script and `SKIPIF` code should be directly written into `\*.phpt`. However, it is
@@ -384,20 +396,21 @@ The PHP code in the `--CLEAN--` section is executed separately from the code in 
 section. For example, this code:
 
 ```php
---TEST--
-Will fail to clean up
---FILE--
-<?php
-          $temp_filename = "fred.tmp";
-          $fp = fopen($temp_filename, "w");
-          fwrite($fp, "Hello Boys!");
-          fclose($fp);
-?>
---CLEAN--
-<?php
-          unlink($temp_filename);
-?>
---EXPECT--
+
+   --TEST--
+   Will fail to clean up
+   --FILE--
+   <?php
+             $temp_filename = "fred.tmp";
+             $fp = fopen($temp_filename, "w");
+             fwrite($fp, "Hello Boys!");
+             fclose($fp);
+   ?>
+   --CLEAN--
+   <?php
+             unlink($temp_filename);
+   ?>
+   --EXPECT--
 ```
 
 will not remove the temporary file because the variable \$temp_filename is not defined in the
@@ -406,21 +419,22 @@ will not remove the temporary file because the variable \$temp_filename is not d
 Here is a better way to write the code:
 
 ```php
---TEST--
-This will remove temporary files
---FILE--
-<?php
-        $temp_filename = __DIR__."/fred.tmp";
-        $fp = fopen($temp_filename, "w");
-        fwrite ($fp, "Hello Boys!\n");
-        fclose($fp);
-?>
---CLEAN--
-<?php
-        $temp_filename = __DIR__."/fred.tmp";
-        unlink($temp_filename);
-?>
---EXPECT--
+
+   --TEST--
+   This will remove temporary files
+   --FILE--
+   <?php
+           $temp_filename = __DIR__."/fred.tmp";
+           $fp = fopen($temp_filename, "w");
+           fwrite ($fp, "Hello Boys!\n");
+           fclose($fp);
+   ?>
+   --CLEAN--
+   <?php
+           $temp_filename = __DIR__."/fred.tmp";
+           unlink($temp_filename);
+   ?>
+   --EXPECT--
 ```
 
 Note the use of the `__DIR__` construct which will ensure that the temporary file is created in
@@ -490,23 +504,24 @@ line consisting only of `===DONE===`.
 Here is an example:
 
 ```php
---TEST--
-Test hypot() — dealing with mixed number/character input
---INI--
-precision=14
---FILE--
-<?php
-$a="23abc";
-$b=-33;
-echo "$a :$b ";
-$res = hypot($a, $b);
-var_dump($res);
-?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
-23abc :-33 float(40.224370722238)
-===DONE===
+
+   --TEST--
+   Test hypot() — dealing with mixed number/character input
+   --INI--
+   precision=14
+   --FILE--
+   <?php
+   $a="23abc";
+   $b=-33;
+   echo "$a :$b ";
+   $res = hypot($a, $b);
+   var_dump($res);
+   ?>
+   ===DONE===
+   <?php exit(0); ?>
+   --EXPECTF--
+   23abc :-33 float(40.224370722238)
+   ===DONE===
 ```
 
 If executed as PHP script the output will stop after the code on the `--FILE--` section has been
@@ -527,8 +542,9 @@ run.
 Example 1 (snippet):
 
 ```text
---TEST--
-Test filter_input() with GET and POST data.
+
+   --TEST--
+   Test filter_input() with GET and POST data.
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -546,8 +562,9 @@ information, this section is completely ignored by the test binary.
 Example 1 (snippet):
 
 ```text
---DESCRIPTION--
-This test covers both valid and invalid usages of filter_input() with INPUT_GET and INPUT_POST data and several different filter sanitizers.
+
+   --DESCRIPTION--
+   This test covers both valid and invalid usages of filter_input() with INPUT_GET and INPUT_POST data and several different filter sanitizers.
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -568,8 +585,9 @@ of a bug or a contributor who is not credited via `Co-authored-by` tag.
 Example 1 (snippet):
 
 ```text
---CREDITS--
-Felipe Pena
+
+   --CREDITS--
+   Felipe Pena
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -577,9 +595,10 @@ Example 1 (full): {ref}`sample001.phpt`
 Example 2 (snippet):
 
 ```text
---CREDITS--
-Zoe Slattery zoe@php.net
-# TestFest Munich 2009-05-19
+
+   --CREDITS--
+   Zoe Slattery zoe@php.net
+   # TestFest Munich 2009-05-19
 ```
 
 Example 2 (full): {ref}`sample002.phpt`
@@ -604,8 +623,9 @@ of PHP 7.2.0. The "flaky" convention is supported as of PHP 8.2.25 and PHP 8.3.1
 Example 1 (snippet):
 
 ```php
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("Skipped: filter extension required."); ?>
+
+   --SKIPIF--
+   <?php if (!extension_loaded("filter")) die("Skipped: filter extension required."); ?>
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -613,8 +633,9 @@ Example 1 (full): {ref}`sample001.phpt`
 Example 2 (snippet):
 
 ```php
---SKIPIF--
-<?php include('skipif.inc'); ?>
+
+   --SKIPIF--
+   <?php include('skipif.inc'); ?>
 ```
 
 Example 2 (full): {ref}`sample003.phpt`
@@ -622,8 +643,9 @@ Example 2 (full): {ref}`sample003.phpt`
 Example 3 (snippet):
 
 ```php
---SKIPIF--
-<?php if (getenv('SKIP_ASAN')) die('xfail Startup failure leak'); ?>
+
+   --SKIPIF--
+   <?php if (getenv('SKIP_ASAN')) die('xfail Startup failure leak'); ?>
 ```
 
 Example 3 (full): {ref}`xfailif.phpt`
@@ -631,11 +653,12 @@ Example 3 (full): {ref}`xfailif.phpt`
 Example 4 (snippet):
 
 ```php
---SKIPIF--
-<?php
-if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
-        die("flaky Occasionally segfaults on macOS for unknown reasons");
-}
+
+   --SKIPIF--
+   <?php
+   if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+           die("flaky Occasionally segfaults on macOS for unknown reasons");
+   }
 ```
 
 #### `--CONFLICTS--`
@@ -656,8 +679,9 @@ the contents of the `--CONFLICTS--` section.
 Example 1 (snippet):
 
 ```text
---CONFLICTS--
-server
+
+   --CONFLICTS--
+   server
 ```
 
 Example 1 (full): {ref}`conflicts_1.phpt`
@@ -690,8 +714,9 @@ STDIN, STDOUT, and/or STDERR.
 Example 1 (snippet):
 
 ```text
---CAPTURE_STDIO--
-STDIN STDERR
+
+   --CAPTURE_STDIO--
+   STDIN STDERR
 ```
 
 Example 1 (full): {ref}`capture_stdio_1.phpt`
@@ -699,8 +724,9 @@ Example 1 (full): {ref}`capture_stdio_1.phpt`
 Example 2 (snippet):
 
 ```text
---CAPTURE_STDIO--
-STDIN STDOUT
+
+   --CAPTURE_STDIO--
+   STDIN STDOUT
 ```
 
 Example 2 (full): {ref}`capture_stdio_2.phpt`
@@ -708,8 +734,9 @@ Example 2 (full): {ref}`capture_stdio_2.phpt`
 Example 3 (snippet):
 
 ```text
---CAPTURE_STDIO--
-STDIN STDOUT STDERR
+
+   --CAPTURE_STDIO--
+   STDIN STDOUT STDERR
 ```
 
 Example 3(full): {ref}`capture_stdio_3.phpt`
@@ -728,10 +755,11 @@ aren't loaded prior to running the test, this section loads them.
 Example 1 (snippet):
 
 ```text
---EXTENSIONS--
-curl
-imagick
-tokenizer
+
+   --EXTENSIONS--
+   curl
+   imagick
+   tokenizer
 ```
 
 Example 1 (full): {ref}`extensions.phpt`
@@ -750,8 +778,9 @@ Requirements: PHP CGI binary.
 Example 1 (snippet):
 
 ```text
---POST--
-c=<p>string</p>&d=12345.7
+
+   --POST--
+   c=<p>string</p>&d=12345.7
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -759,17 +788,18 @@ Example 1 (full): {ref}`sample001.phpt`
 Example 2 (snippet):
 
 ```xml
---POST--
-<SOAP-ENV:Envelope
-  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
-  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:si="http://soapinterop.org/xsd">
-  <SOAP-ENV:Body>
-        <ns1:test xmlns:ns1="http://testuri.org" />
-  </SOAP-ENV:Body>
-</SOAP-ENV:Envelope>
+
+   --POST--
+   <SOAP-ENV:Envelope
+     SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+     xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:si="http://soapinterop.org/xsd">
+     <SOAP-ENV:Body>
+           <ns1:test xmlns:ns1="http://testuri.org" />
+     </SOAP-ENV:Body>
+   </SOAP-ENV:Envelope>
 ```
 
 Example 2 (full): {ref}`sample005.phpt`
@@ -791,18 +821,19 @@ Requirements: PHP CGI binary.
 Example 1 (snippet):
 
 ```text
---POST_RAW--
-Content-type: multipart/form-data, boundary=AaB03x
 
---AaB03x content-disposition: form-data; name="field1"
+   --POST_RAW--
+   Content-type: multipart/form-data, boundary=AaB03x
 
-Joe Blow
---AaB03x
-content-disposition: form-data; name="pics"; filename="file1.txt"
-Content-Type: text/plain
+   --AaB03x content-disposition: form-data; name="field1"
 
-abcdef123456789
---AaB03x--
+   Joe Blow
+   --AaB03x
+   content-disposition: form-data; name="pics"; filename="file1.txt"
+   Content-Type: text/plain
+
+   abcdef123456789
+   --AaB03x--
 ```
 
 Example 1 (full): {ref}`sample006.phpt`
@@ -823,10 +854,11 @@ Requirements: PHP CGI binary.
 Example 1 (snippet):
 
 ```text
---PUT--
-Content-Type: text/json
 
-{"name":"default output handler","type":0,"flags":112,"level":0,"chunk_size":0,"buffer_size":16384,"buffer_used":3}
+   --PUT--
+   Content-Type: text/json
+
+   {"name":"default output handler","type":0,"flags":112,"level":0,"chunk_size":0,"buffer_size":16384,"buffer_used":3}
 ```
 
 #### `--GZIP_POST--`
@@ -843,17 +875,18 @@ the use of the CGI binary instead of the usual CLI one.
 Example 1 (snippet):
 
 ```xml
---GZIP_POST--
-<SOAP-ENV:Envelope
-  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
-  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:si="http://soapinterop.org/xsd">
-  <SOAP-ENV:Body>
-        <ns1:test xmlns:ns1="http://testuri.org" />
-  </SOAP-ENV:Body>
-</SOAP-ENV:Envelope>
+
+   --GZIP_POST--
+   <SOAP-ENV:Envelope
+     SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+     xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:si="http://soapinterop.org/xsd">
+     <SOAP-ENV:Body>
+           <ns1:test xmlns:ns1="http://testuri.org" />
+     </SOAP-ENV:Body>
+   </SOAP-ENV:Envelope>
 ```
 
 Example 1 (full): {ref}`sample005.phpt`
@@ -874,18 +907,19 @@ Requirements:
 Example 1 (snippet):
 
 ```xml
---DEFLATE_POST--
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<SOAP-ENV:Envelope
-  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
-  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:si="http://soapinterop.org/xsd">
-  <SOAP-ENV:Body>
-        <ns1:test xmlns:ns1="http://testuri.org" />
-  </SOAP-ENV:Body>
-</SOAP-ENV:Envelope>
+
+   --DEFLATE_POST--
+   <?xml version="1.0" encoding="ISO-8859-1"?>
+   <SOAP-ENV:Envelope
+     SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+     xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:si="http://soapinterop.org/xsd">
+     <SOAP-ENV:Body>
+           <ns1:test xmlns:ns1="http://testuri.org" />
+     </SOAP-ENV:Body>
+   </SOAP-ENV:Envelope>
 ```
 
 Example 1 (full): {ref}`sample007.phpt`
@@ -904,8 +938,9 @@ Requirements: PHP CGI binary.
 Example 1 (snippet):
 
 ```text
---GET--
-a=<b>test</b>&b=http://example.com
+
+   --GET--
+   a=<b>test</b>&b=http://example.com
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -913,8 +948,9 @@ Example 1 (full): {ref}`sample001.phpt`
 Example 2 (snippet):
 
 ```text
---GET--
-ar[elm1]=1234&ar[elm2]=0660&a=0234
+
+   --GET--
+   ar[elm1]=1234&ar[elm2]=0660&a=0234
 ```
 
 Example 2 (full): {ref}`sample008.phpt`
@@ -935,8 +971,9 @@ Requirements: PHP CGI binary.
 Example 1 (snippet):
 
 ```
---COOKIE--
-hello=World;goodbye=MrChips
+
+   --COOKIE--
+   hello=World;goodbye=MrChips
 ```
 
 Example 1 (full): {ref}`sample002.phpt`
@@ -954,9 +991,10 @@ Example 1 (full): {ref}`sample002.phpt`
 Example 1 (snippet):
 
 ```text
---STDIN--
-fooBar
-use this to input some thing to the php script
+
+   --STDIN--
+   fooBar
+   use this to input some thing to the php script
 ```
 
 Example 1 (full): {ref}`sample009.phpt`
@@ -972,14 +1010,15 @@ that is not a valid ini setting may cause failures.
 
 The following is a list of all tags and what they are used to represent:
 
-- `{PWD}`: Represents the directory of the file containing the `--INI--` section.
-- `{TMP}`: Represents the system's temporary directory. Available as of PHP 7.2.19 and 7.3.6.
+-  `{PWD}`: Represents the directory of the file containing the `--INI--` section.
+-  `{TMP}`: Represents the system's temporary directory. Available as of PHP 7.2.19 and 7.3.6.
 
 Example 1 (snippet):
 
 ```text
---INI--
-precision=14
+
+   --INI--
+   precision=14
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -987,12 +1026,13 @@ Example 1 (full): {ref}`sample001.phpt`
 Example 2 (snippet):
 
 ```text
---INI--
-session.use_cookies=0
-session.cache_limiter=
-register_globals=1
-session.serialize_handler=php
-session.save_handler=files
+
+   --INI--
+   session.use_cookies=0
+   session.cache_limiter=
+   register_globals=1
+   session.serialize_handler=php
+   session.save_handler=files
 ```
 
 Example 2 (full): {ref}`sample003.phpt`
@@ -1008,8 +1048,9 @@ Example 2 (full): {ref}`sample003.phpt`
 Example 1 (snippet):
 
 ```text
---ARGS--
---arg value --arg=value -avalue -a=value -a value
+
+   --ARGS--
+   --arg value --arg=value -avalue -a=value -a value
 ```
 
 Example 1 (full): {ref}`sample010.phpt`
@@ -1026,10 +1067,11 @@ array.
 Example 1 (snippet):
 
 ```text
---ENV--
-SCRIPT_NAME=/frontcontroller10.php
-REQUEST_URI=/frontcontroller10.php/hi
-PATH_INFO=/hi
+
+   --ENV--
+   SCRIPT_NAME=/frontcontroller10.php
+   REQUEST_URI=/frontcontroller10.php/hi
+   PATH_INFO=/hi
 ```
 
 Example 1 (full): {ref}`sample018.phpt`
@@ -1046,21 +1088,22 @@ to them as it would be run in the phpdbg prompt.
 Example 1 (snippet):
 
 ```text
---PHPDBG--
-b
-4
-b
-del
-0
-b
-5
-r
-b
-del
-1
-r
-y
-q
+
+   --PHPDBG--
+   b
+   4
+   b
+   del
+   0
+   b
+   5
+   r
+   b
+   del
+   1
+   r
+   y
+   q
 ```
 
 Example 1 (full): {ref}`phpdbg_1.phpt`
@@ -1076,23 +1119,24 @@ Example 1 (full): {ref}`phpdbg_1.phpt`
 Example 1 (snippet):
 
 ```php
---FILE--
-<?php
-ini_set('html_errors', false);
-var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_STRIPPED));
-var_dump(filter_input(INPUT_GET, "b", FILTER_SANITIZE_URL));
-var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_SPECIAL_CHARS, array(1,2,3,4,5)));
-var_dump(filter_input(INPUT_GET, "b", FILTER_VALIDATE_FLOAT, new stdClass));
-var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_STRIPPED, array(5,6,7,8)));
-var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_FLOAT));
-var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_SPECIAL_CHARS));
-var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_INT));
-var_dump(filter_var(new stdClass, "d"));
-var_dump(filter_input(INPUT_POST, "c", "", ""));
-var_dump(filter_var("", "", "", "", ""));
-var_dump(filter_var(0, 0, 0, 0, 0));
-echo "Done\n";
-?>
+
+   --FILE--
+   <?php
+   ini_set('html_errors', false);
+   var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_STRIPPED));
+   var_dump(filter_input(INPUT_GET, "b", FILTER_SANITIZE_URL));
+   var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_SPECIAL_CHARS, array(1,2,3,4,5)));
+   var_dump(filter_input(INPUT_GET, "b", FILTER_VALIDATE_FLOAT, new stdClass));
+   var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_STRIPPED, array(5,6,7,8)));
+   var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_FLOAT));
+   var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_SPECIAL_CHARS));
+   var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_INT));
+   var_dump(filter_var(new stdClass, "d"));
+   var_dump(filter_input(INPUT_POST, "c", "", ""));
+   var_dump(filter_var("", "", "", "", ""));
+   var_dump(filter_var(0, 0, 0, 0, 0));
+   echo "Done\n";
+   ?>
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -1112,11 +1156,12 @@ time you won't need this section.
 Example 1 (snippet):
 
 ```php
---FILEEOF--
-<?php
-eval("echo 'Hello'; // comment");
-echo " World";
-//last line comment
+
+   --FILEEOF--
+   <?php
+   eval("echo 'Hello'; // comment");
+   echo " World";
+   //last line comment
 ```
 
 Example 1 (full): {ref}`sample011.phpt`
@@ -1138,8 +1183,9 @@ subdirectory.
 Example 1 (snippet):
 
 ```text
---FILE_EXTERNAL--
-files/file012.inc
+
+   --FILE_EXTERNAL--
+   files/file012.inc
 ```
 
 Example 1 (full): {ref}`sample012.phpt`
@@ -1165,13 +1211,14 @@ Last note, the array in this section must be returned to work.
 Example 1 (snippet):
 
 ```php
---REDIRECTTEST--
-return array(
-  'ENV' => array(
-          'PDOTEST_DSN' => 'sqlite2::memory:'
-        ),
-  'TESTS' => 'ext/pdo/tests'
-  );
+
+   --REDIRECTTEST--
+   return array(
+     'ENV' => array(
+             'PDOTEST_DSN' => 'sqlite2::memory:'
+           ),
+     'TESTS' => 'ext/pdo/tests'
+     );
 ```
 
 Example 1 (full): {ref}`sample013.phpt`
@@ -1183,28 +1230,29 @@ Example 1 (full): {ref}`sample013.phpt`
 Example 2 (snippet):
 
 ```php
---REDIRECTTEST--
-# magic auto-configuration
 
-$config = array(
-  'TESTS' => 'ext/pdo/tests'
-);
+   --REDIRECTTEST--
+   # magic auto-configuration
 
-if (false !== getenv('PDO_MYSQL_TEST_DSN')) {
-  # user set them from their shell
-  $config['ENV']['PDOTEST_DSN'] = getenv('PDO_MYSQL_TEST_DSN');
-  $config['ENV']['PDOTEST_USER'] = getenv('PDO_MYSQL_TEST_USER');
-  $config['ENV']['PDOTEST_PASS'] = getenv('PDO_MYSQL_TEST_PASS');
-  if (false !== getenv('PDO_MYSQL_TEST_ATTR')) {
-        $config['ENV']['PDOTEST_ATTR'] = getenv('PDO_MYSQL_TEST_ATTR');
-  }
-} else {
-  $config['ENV']['PDOTEST_DSN'] = 'mysql:host=localhost;dbname=test';
-  $config['ENV']['PDOTEST_USER'] = 'root';
-  $config['ENV']['PDOTEST_PASS'] = '';
-}
+   $config = array(
+     'TESTS' => 'ext/pdo/tests'
+   );
 
-return $config;
+   if (false !== getenv('PDO_MYSQL_TEST_DSN')) {
+     # user set them from their shell
+     $config['ENV']['PDOTEST_DSN'] = getenv('PDO_MYSQL_TEST_DSN');
+     $config['ENV']['PDOTEST_USER'] = getenv('PDO_MYSQL_TEST_USER');
+     $config['ENV']['PDOTEST_PASS'] = getenv('PDO_MYSQL_TEST_PASS');
+     if (false !== getenv('PDO_MYSQL_TEST_ATTR')) {
+           $config['ENV']['PDOTEST_ATTR'] = getenv('PDO_MYSQL_TEST_ATTR');
+     }
+   } else {
+     $config['ENV']['PDOTEST_DSN'] = 'mysql:host=localhost;dbname=test';
+     $config['ENV']['PDOTEST_USER'] = 'root';
+     $config['ENV']['PDOTEST_PASS'] = '';
+   }
+
+   return $config;
 ```
 
 Example 2 (full): {ref}`sample014.phpt`
@@ -1225,7 +1273,8 @@ be run as CGI, even if there is no `--POST--` or `--GET--` sections in the test 
 Example 1 (snippet):
 
 ```text
---CGI--
+
+   --CGI--
 ```
 
 Example 1 (full): {ref}`sample016.phpt`
@@ -1250,8 +1299,9 @@ being used.
 Example 1 (snippet):
 
 ```text
---XFAIL--
-This bug might be still open on aix5.2-ppc64 and hpux11.23-ia64
+
+   --XFAIL--
+   This bug might be still open on aix5.2-ppc64 and hpux11.23-ia64
 ```
 
 Example 1 (full): {ref}`sample017.phpt`
@@ -1276,8 +1326,9 @@ is being used.
 Example 1 (snippet):
 
 ```
---FLAKY--
-This test frequently fails in CI
+
+   --FLAKY--
+   This test frequently fails in CI
 ```
 
 Example 1 (full): flaky.phpt
@@ -1299,9 +1350,10 @@ Example 1 (snippet):
 Example 1 (snippet):
 
 ```text
---EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
-Status: 403 Access Denied
+
+   --EXPECTHEADERS--
+   Content-type: text/html; charset=UTF-8
+   Status: 403 Access Denied
 ```
 
 Example 1 (full): {ref}`sample018.phpt`
@@ -1322,13 +1374,14 @@ the test script exactly for the test to pass.
 Example 1 (snippet):
 
 ```text
---EXPECT--
-array(2) {
-  ["hello"]=>
-  string(5) "World"
-  ["goodbye"]=>
-  string(7) "MrChips"
-}
+
+   --EXPECT--
+   array(2) {
+     ["hello"]=>
+     string(5) "World"
+     ["goodbye"]=>
+     string(7) "MrChips"
+   }
 ```
 
 Example 1 (full): {ref}`sample002.phpt`
@@ -1345,19 +1398,21 @@ expected output from.
 Example 1 (snippet):
 
 ```text
---EXPECT_EXTERNAL--
-test001.expected.txt
+
+   --EXPECT_EXTERNAL--
+   test001.expected.txt
 ```
 
 *test001.expected.txt*
 
 ```php
-array(2) {
-  ["hello"]=>
-  string(5) "World"
-  ["goodbye"]=>
-  string(7) "MrChips"
-}
+
+   array(2) {
+     ["hello"]=>
+     string(5) "World"
+     ["goodbye"]=>
+     string(7) "MrChips"
+   }
 ```
 
 #### `--EXPECTF--`
@@ -1375,49 +1430,50 @@ platforms.
 
 The following is a list of all tags and what they are used to represent:
 
-> - `%e`: Represents a directory separator, for example / on Linux.
-> - `%s`: One or more of anything (character or white space) except the end of line character.
-> - `%S`: Zero or more of anything (character or white space) except the end of line character.
-> - `%a`: One or more of anything (character or white space) including the end of line
->   character.
-> - `%A`: Zero or more of anything (character or white space) including the end of line
->   character.
-> - `%w`: Zero or more white space characters.
-> - `%i`: A signed integer value, for example +3142, -3142, 3142.
-> - `%d`: An unsigned integer value, for example 123456.
-> - `%x`: One or more hexadecimal character. That is, characters in the range 0-9, a-f, A-F.
-> - `%f`: A floating point number, for example: 3.142, -3.142, 3.142E-10, 3.142e+10.
-> - `%c`: A single character of any sort (.).
-> - `%r...%r`: Any string (...) enclosed between two `%r` will be treated as a regular
->   expression.
+   -  `%e`: Represents a directory separator, for example / on Linux.
+   -  `%s`: One or more of anything (character or white space) except the end of line character.
+   -  `%S`: Zero or more of anything (character or white space) except the end of line character.
+   -  `%a`: One or more of anything (character or white space) including the end of line
+      character.
+   -  `%A`: Zero or more of anything (character or white space) including the end of line
+      character.
+   -  `%w`: Zero or more white space characters.
+   -  `%i`: A signed integer value, for example +3142, -3142, 3142.
+   -  `%d`: An unsigned integer value, for example 123456.
+   -  `%x`: One or more hexadecimal character. That is, characters in the range 0-9, a-f, A-F.
+   -  `%f`: A floating point number, for example: 3.142, -3.142, 3.142E-10, 3.142e+10.
+   -  `%c`: A single character of any sort (.).
+   -  `%r...%r`: Any string (...) enclosed between two `%r` will be treated as a regular
+      expression.
 
 Example 1 (snippet):
 
 ```text
---EXPECTF--
-string(4) "test"
-string(18) "http://example.com"
-string(27) "&#60;b&#62;test&#60;/b&#62;"
 
-Notice: Object of class stdClass could not be converted to int in %ssample001.php on line %d
-bool(false)
-string(6) "string"
-float(12345.7)
-string(29) "&#60;p&#62;string&#60;/p&#62;"
-bool(false)
+   --EXPECTF--
+   string(4) "test"
+   string(18) "http://example.com"
+   string(27) "&#60;b&#62;test&#60;/b&#62;"
 
-Warning: filter_var() expects parameter 2 to be long, string given in %s011.php on line %d
-NULL
+   Notice: Object of class stdClass could not be converted to int in %ssample001.php on line %d
+   bool(false)
+   string(6) "string"
+   float(12345.7)
+   string(29) "&#60;p&#62;string&#60;/p&#62;"
+   bool(false)
 
-Warning: filter_input() expects parameter 3 to be long, string given in %s011.php on line %d
-NULL
+   Warning: filter_var() expects parameter 2 to be long, string given in %s011.php on line %d
+   NULL
 
-Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d
-NULL
+   Warning: filter_input() expects parameter 3 to be long, string given in %s011.php on line %d
+   NULL
 
-Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d
-NULL
-Done
+   Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d
+   NULL
+
+   Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d
+   NULL
+   Done
 ```
 
 Example 1 (full): {ref}`sample001.phpt`
@@ -1425,27 +1481,28 @@ Example 1 (full): {ref}`sample001.phpt`
 Example 2 (snippet):
 
 ```text
---EXPECTF--
-Warning: bzopen() expects exactly 2 parameters, 0 given in %s on line %d NULL
 
-Warning: bzopen(): '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
-bool(false)
+   --EXPECTF--
+   Warning: bzopen() expects exactly 2 parameters, 0 given in %s on line %d NULL
 
-Warning: bzopen(): filename cannot be empty in %s on line %d
-bool(false)
+   Warning: bzopen(): '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+   bool(false)
 
-Warning: bzopen(): filename cannot be empty in %s on line %d
-bool(false)
+   Warning: bzopen(): filename cannot be empty in %s on line %d
+   bool(false)
 
-Warning: bzopen(): 'x' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
-bool(false)
+   Warning: bzopen(): filename cannot be empty in %s on line %d
+   bool(false)
 
-Warning: bzopen(): 'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
-bool(false)
+   Warning: bzopen(): 'x' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+   bool(false)
 
-Warning: bzopen(no_such_file): failed to open stream: No such file or directory in %s on line %d
-bool(false)
-resource(%d) of type (stream) Done
+   Warning: bzopen(): 'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+   bool(false)
+
+   Warning: bzopen(no_such_file): failed to open stream: No such file or directory in %s on line %d
+   bool(false)
+   resource(%d) of type (stream) Done
 ```
 
 Example 2 (full): {ref}`sample019.phpt`
@@ -1453,17 +1510,18 @@ Example 2 (full): {ref}`sample019.phpt`
 Example 3 (snippet):
 
 ```text
---EXPECTF--
-object(DOMNodeList)#%d (0) {
-}
-int(0)
-bool(true)
-bool(true)
-string(0) ""
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+
+   --EXPECTF--
+   object(DOMNodeList)#%d (0) {
+   }
+   int(0)
+   bool(true)
+   bool(true)
+   string(0) ""
+   bool(true)
+   bool(true)
+   bool(false)
+   bool(false)
 ```
 
 Example 2 (full): {ref}`sample020.phpt`
@@ -1490,24 +1548,25 @@ between subsequent runs of a test or when run on different platforms.
 Example 1 (snippet):
 
 ```text
---EXPECTREGEX--
-M_E       : 2.718281[0-9]*
-M_LOG2E   : 1.442695[0-9]*
-M_LOG10E  : 0.434294[0-9]*
-M_LN2     : 0.693147[0-9]*
-M_LN10    : 2.302585[0-9]*
-M_PI      : 3.141592[0-9]*
-M_PI_2    : 1.570796[0-9]*
-M_PI_4    : 0.785398[0-9]*
-M_1_PI    : 0.318309[0-9]*
-M_2_PI    : 0.636619[0-9]*
-M_SQRTPI  : 1.772453[0-9]*
-M_2_SQRTPI: 1.128379[0-9]*
-M_LNPI    : 1.144729[0-9]*
-M_EULER   : 0.577215[0-9]*
-M_SQRT2   : 1.414213[0-9]*
-M_SQRT1_2 : 0.707106[0-9]*
-M_SQRT3   : 1.732050[0-9]*
+
+   --EXPECTREGEX--
+   M_E       : 2.718281[0-9]*
+   M_LOG2E   : 1.442695[0-9]*
+   M_LOG10E  : 0.434294[0-9]*
+   M_LN2     : 0.693147[0-9]*
+   M_LN10    : 2.302585[0-9]*
+   M_PI      : 3.141592[0-9]*
+   M_PI_2    : 1.570796[0-9]*
+   M_PI_4    : 0.785398[0-9]*
+   M_1_PI    : 0.318309[0-9]*
+   M_2_PI    : 0.636619[0-9]*
+   M_SQRTPI  : 1.772453[0-9]*
+   M_2_SQRTPI: 1.128379[0-9]*
+   M_LNPI    : 1.144729[0-9]*
+   M_EULER   : 0.577215[0-9]*
+   M_SQRT2   : 1.414213[0-9]*
+   M_SQRT1_2 : 0.707106[0-9]*
+   M_SQRT3   : 1.732050[0-9]*
 ```
 
 Example 1 (full): {ref}`sample021.phpt`
@@ -1515,22 +1574,23 @@ Example 1 (full): {ref}`sample021.phpt`
 Example 2 (snippet):
 
 ```text
---EXPECTF--
-*** Testing imap_append() : basic functionality ***
-Create a new mailbox for test
-Create a temporary mailbox and add 0 msgs
-.. mailbox '%s' created
-Add a couple of msgs to new mailbox {%s}INBOX.%s
-bool(true)
-bool(true)
-Msg Count after append : 2
-List the msg headers
-array(2) {
-  [0]=>
-  string(%d) "%w%s       1)%s webmaster@something. Test message (%d chars)"
-  [1]=>
-  string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
-}
+
+   --EXPECTF--
+   *** Testing imap_append() : basic functionality ***
+   Create a new mailbox for test
+   Create a temporary mailbox and add 0 msgs
+   .. mailbox '%s' created
+   Add a couple of msgs to new mailbox {%s}INBOX.%s
+   bool(true)
+   bool(true)
+   Msg Count after append : 2
+   List the msg headers
+   array(2) {
+     [0]=>
+     string(%d) "%w%s       1)%s webmaster@something. Test message (%d chars)"
+     [1]=>
+     string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
+   }
 ```
 
 Example 2 (full): {ref}`sample025.phpt`
@@ -1538,11 +1598,12 @@ Example 2 (full): {ref}`sample025.phpt`
 Example 3 (snippet):
 
 ```text
---EXPECTREGEX--
-string\(4\) \"-012\"
-string\(8\) \"2d303132\"
-(string\(13\) \"   4294967284\"|string\(20\) \"18446744073709551604\")
-(string\(26\) \"20202034323934393637323834\"|string\(40\) \"3138343436373434303733373039353531363034\")
+
+   --EXPECTREGEX--
+   string\(4\) \"-012\"
+   string\(8\) \"2d303132\"
+   (string\(13\) \"   4294967284\"|string\(20\) \"18446744073709551604\")
+   (string\(26\) \"20202034323934393637323834\"|string\(40\) \"3138343436373434303733373039353531363034\")
 ```
 
 Example 3 (full): {ref}`sample023.phpt`
@@ -1580,10 +1641,11 @@ without them being removed by the `--CLEAN--` section.
 Example 1 (snippet):
 
 ```php
---CLEAN--
-<?php
-unlink(__DIR__.'/DomDocument_save_basic.tmp');
-?>
+
+   --CLEAN--
+   <?php
+   unlink(__DIR__.'/DomDocument_save_basic.tmp');
+   ?>
 ```
 
 Example 1 (full): {ref}`sample024.phpt`
@@ -1591,10 +1653,11 @@ Example 1 (full): {ref}`sample024.phpt`
 Example 2 (snippet):
 
 ```php
---CLEAN--
-<?php
-require_once('clean.inc');
-?>
+
+   --CLEAN--
+   <?php
+   require_once('clean.inc');
+   ?>
 ```
 
 Example 2 (full): {ref}`sample025.phpt`
@@ -1602,12 +1665,13 @@ Example 2 (full): {ref}`sample025.phpt`
 Example 3 (snippet):
 
 ```php
---CLEAN--
-<?php
-$key = ftok(__DIR__.'/003.phpt', 'q');
-$s = shm_attach($key);
-shm_remove($s);
-?>
+
+   --CLEAN--
+   <?php
+   $key = ftok(__DIR__.'/003.phpt', 'q');
+   $s = shm_attach($key);
+   shm_remove($s);
+   ?>
 ```
 
 Example 3 (full): {ref}`sample022.phpt`
@@ -1617,1157 +1681,1192 @@ Example 3 (full): {ref}`sample022.phpt`
 #### capture_stdio_1.phpt
 
 ```php
---TEST--
-Test covering the I/O stdin and stdout streams.
---DESCRIPTION--
-This tests checks if the output of stdin and stdout I/O streams match the
-expected content.
---CAPTURE_STDIO--
-STDIN STDERR
---FILE--
-<?php
-echo "Hello, world. This is sent to the stdout I/O stream\n";
-fwrite(STDERR, "This is error sent to the stderr I/O stream\n");
-?>
---EXPECT--
-This is error sent to the stderr I/O stream
+
+   --TEST--
+   Test covering the I/O stdin and stdout streams.
+   --DESCRIPTION--
+   This tests checks if the output of stdin and stdout I/O streams match the
+   expected content.
+   --CAPTURE_STDIO--
+   STDIN STDERR
+   --FILE--
+   <?php
+   echo "Hello, world. This is sent to the stdout I/O stream\n";
+   fwrite(STDERR, "This is error sent to the stderr I/O stream\n");
+   ?>
+   --EXPECT--
+   This is error sent to the stderr I/O stream
 ```
 
 #### capture_stdio_2.phpt
 
 ```php
---TEST--
-Test covering the I/O stdin and stderr streams.
---DESCRIPTION--
-This tests checks if the output of stdin and stderr I/O streams match the
-expected content.
---CAPTURE_STDIO--
-STDIN STDOUT
---FILE--
-<?php
-echo "Hello, world. This is sent to the stdout I/O stream\n";
-fwrite(STDERR, "This is error sent to the stderr I/O stream\n");
-?>
---EXPECT--
-Hello, world. This is sent to the stdout I/O stream
+
+   --TEST--
+   Test covering the I/O stdin and stderr streams.
+   --DESCRIPTION--
+   This tests checks if the output of stdin and stderr I/O streams match the
+   expected content.
+   --CAPTURE_STDIO--
+   STDIN STDOUT
+   --FILE--
+   <?php
+   echo "Hello, world. This is sent to the stdout I/O stream\n";
+   fwrite(STDERR, "This is error sent to the stderr I/O stream\n");
+   ?>
+   --EXPECT--
+   Hello, world. This is sent to the stdout I/O stream
 ```
 
 #### capture_stdio_3.phpt
 
 ```php
---TEST--
-Test covering the all standard I/O streams.
---DESCRIPTION--
-This tests checks if the output of stdin, stdout and stderr I/O streams match
-the expected content.
---CAPTURE_STDIO--
-STDIN STDOUT STDERR
---FILE--
-<?php
-echo "Hello, world. This is sent to the stdout I/O stream\n";
-fwrite(STDERR, "This is error sent to the stderr I/O stream\n");
-?>
---EXPECT--
-Hello, world. This is sent to the stdout I/O stream
-This is error sent to the stderr I/O stream
+
+   --TEST--
+   Test covering the all standard I/O streams.
+   --DESCRIPTION--
+   This tests checks if the output of stdin, stdout and stderr I/O streams match
+   the expected content.
+   --CAPTURE_STDIO--
+   STDIN STDOUT STDERR
+   --FILE--
+   <?php
+   echo "Hello, world. This is sent to the stdout I/O stream\n";
+   fwrite(STDERR, "This is error sent to the stderr I/O stream\n");
+   ?>
+   --EXPECT--
+   Hello, world. This is sent to the stdout I/O stream
+   This is error sent to the stderr I/O stream
 ```
 
 #### clean.php
 
 ```php
-<?php
-include_once(__DIR__ . '/imap_include.inc');
 
-$imap_stream = imap_open($default_mailbox, $username, $password);
+   <?php
+   include_once(__DIR__ . '/imap_include.inc');
 
-// delete all msgs in default mailbox, i.e INBOX
-$check = imap_check($imap_stream);
-for ($i = 1; $i <= $check->Nmsgs; $i++) {
-  imap_delete($imap_stream, $i);
-}
+   $imap_stream = imap_open($default_mailbox, $username, $password);
 
-$mailboxes = imap_getmailboxes($imap_stream, $server, '*');
+   // delete all msgs in default mailbox, i.e INBOX
+   $check = imap_check($imap_stream);
+   for ($i = 1; $i <= $check->Nmsgs; $i++) {
+     imap_delete($imap_stream, $i);
+   }
 
-foreach($mailboxes as $value) {
-  // Only delete mailboxes with our prefix
-  if (preg_match('/\{.*?\}INBOX\.(.+)/', $value->name, $match) == 1) {
-    if (strlen($match[1]) >= strlen($mailbox_prefix)
-    && substr_compare($match[1], $mailbox_prefix, 0, strlen($mailbox_prefix)) == 0) {
-      imap_deletemailbox($imap_stream, $value->name);
-    }
-  }
-}
+   $mailboxes = imap_getmailboxes($imap_stream, $server, '*');
 
-imap_close($imap_stream, CL_EXPUNGE);
-?>
+   foreach($mailboxes as $value) {
+     // Only delete mailboxes with our prefix
+     if (preg_match('/\{.*?\}INBOX\.(.+)/', $value->name, $match) == 1) {
+       if (strlen($match[1]) >= strlen($mailbox_prefix)
+       && substr_compare($match[1], $mailbox_prefix, 0, strlen($mailbox_prefix)) == 0) {
+         imap_deletemailbox($imap_stream, $value->name);
+       }
+     }
+   }
+
+   imap_close($imap_stream, CL_EXPUNGE);
+   ?>
 ```
 
 #### conflicts_1.phpt
 
 ```php
---TEST--
-Test get_headers() function : test with context
---CONFLICTS--
-server
---FILE--
-<?php
 
-include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
-php_cli_server_start('header("X-Request-Method: ".$_SERVER["REQUEST_METHOD"]);');
+   --TEST--
+   Test get_headers() function : test with context
+   --CONFLICTS--
+   server
+   --FILE--
+   <?php
 
-$opts = array(
-    'http' => array(
-    'method' => 'HEAD'
-  )
-);
+   include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
+   php_cli_server_start('header("X-Request-Method: ".$_SERVER["REQUEST_METHOD"]);');
 
-$context = stream_context_create($opts);
-$headers = get_headers("http://".PHP_CLI_SERVER_ADDRESS, 1, $context);
-echo $headers["X-Request-Method"]."\n";
+   $opts = array(
+       'http' => array(
+       'method' => 'HEAD'
+     )
+   );
 
-stream_context_set_default($opts);
-$headers = get_headers("http://".PHP_CLI_SERVER_ADDRESS, 1);
-echo $headers["X-Request-Method"]."\n";
+   $context = stream_context_create($opts);
+   $headers = get_headers("http://".PHP_CLI_SERVER_ADDRESS, 1, $context);
+   echo $headers["X-Request-Method"]."\n";
 
-echo "Done";
-?>
---EXPECT--
-HEAD
-HEAD
-Done
+   stream_context_set_default($opts);
+   $headers = get_headers("http://".PHP_CLI_SERVER_ADDRESS, 1);
+   echo $headers["X-Request-Method"]."\n";
+
+   echo "Done";
+   ?>
+   --EXPECT--
+   HEAD
+   HEAD
+   Done
 ```
 
 #### extensions.phpt
 
 ```php
---TEST--
-phpt EXTENSIONS directive with shared extensions
---DESCRIPTION--
-This test covers the presence of some loaded extensions with a list of additional
-extensions to be loaded when running test.
---EXTENSIONS--
-curl
-imagick
-tokenizer
---FILE--
-<?php
-var_dump(extension_loaded(&apos;curl&apos;));
-var_dump(extension_loaded(&apos;imagick&apos;));
-var_dump(extension_loaded(&apos;tokenizer&apos;));
-?>
---EXPECT--
-bool(true)
-bool(true)
-bool(true)
+
+   --TEST--
+   phpt EXTENSIONS directive with shared extensions
+   --DESCRIPTION--
+   This test covers the presence of some loaded extensions with a list of additional
+   extensions to be loaded when running test.
+   --EXTENSIONS--
+   curl
+   imagick
+   tokenizer
+   --FILE--
+   <?php
+   var_dump(extension_loaded(&apos;curl&apos;));
+   var_dump(extension_loaded(&apos;imagick&apos;));
+   var_dump(extension_loaded(&apos;tokenizer&apos;));
+   ?>
+   --EXPECT--
+   bool(true)
+   bool(true)
+   bool(true)
 ```
 
 #### file012.phpt
 
 ```php
-<?php
-  echo "hello world\n";
-?>
+
+   <?php
+     echo "hello world\n";
+   ?>
 ```
 
 #### phpdbg_1.phpt
 
 ```php
---TEST--
-Test deleting breakpoints
---PHPDBG--
-b 4
-b del 0
-b 5
-r
-b del 1
-r
-y
-q
---EXPECTF--
-[Successful compilation of %s]
-prompt> [Breakpoint #0 added at %s:4]
-prompt> [Deleted breakpoint #0]
-prompt> [Breakpoint #1 added at %s:5]
-prompt> 12
-[Breakpoint #1 at %s:5, hits: 1]
->00005: echo $i++;
- 00006: echo $i++;
- 00007:
-prompt> [Deleted breakpoint #1]
-prompt> Do you really want to restart execution? (type y or n): 1234
-[Script ended normally]
-prompt>
---FILE--
-<?php
-$i = 1;
-echo $i++;
-echo $i++;
-echo $i++;
-echo $i++;
+
+   --TEST--
+   Test deleting breakpoints
+   --PHPDBG--
+   b 4
+   b del 0
+   b 5
+   r
+   b del 1
+   r
+   y
+   q
+   --EXPECTF--
+   [Successful compilation of %s]
+   prompt> [Breakpoint #0 added at %s:4]
+   prompt> [Deleted breakpoint #0]
+   prompt> [Breakpoint #1 added at %s:5]
+   prompt> 12
+   [Breakpoint #1 at %s:5, hits: 1]
+   >00005: echo $i++;
+    00006: echo $i++;
+    00007:
+   prompt> [Deleted breakpoint #1]
+   prompt> Do you really want to restart execution? (type y or n): 1234
+   [Script ended normally]
+   prompt>
+   --FILE--
+   <?php
+   $i = 1;
+   echo $i++;
+   echo $i++;
+   echo $i++;
+   echo $i++;
 ```
 
 #### sample001.phpt
 
 ```php
---TEST--
-Test filter_input() with GET and POST data.
---DESCRIPTION--
-This test covers both valid and invalid usages of
-filter_input() with INPUT_GET and INPUT_POST data
-and several different filter sanitizers.
---CREDITS--
-Felipe Pena <felipe@php.net>
---INI--
-precision=14
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("Skipped: filter extension required."); ?>
---GET--
-a=<b>test</b>&b=https://example.com
---POST--
-c=<p>string</p>&d=12345.7
---FILE--
-<?php
-ini_set('html_errors', false);
-var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_STRIPPED));
-var_dump(filter_input(INPUT_GET, "b", FILTER_SANITIZE_URL));
-var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_SPECIAL_CHARS, array(1,2,3,4,5)));
-var_dump(filter_input(INPUT_GET, "b", FILTER_VALIDATE_FLOAT, new stdClass));
-var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_STRIPPED, array(5,6,7,8)));
-var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_FLOAT));
-var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_SPECIAL_CHARS));
-var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_INT));
-var_dump(filter_var(new stdClass, "d"));
-var_dump(filter_input(INPUT_POST, "c", "", ""));
-var_dump(filter_var("", "", "", "", ""));
-var_dump(filter_var(0, 0, 0, 0, 0));
-echo "Done\n";
-?>
---EXPECTF--
-string(4) "test"
-string(19) "https://example.com"
-string(27) "&#60;b&#62;test&#60;/b&#62;"
 
-Notice: Object of class stdClass could not be converted to int in %ssample001.php on line %d
-bool(false)
-string(6) "string"
-float(12345.7)
-string(29) "&#60;p&#62;string&#60;/p&#62;"
-bool(false)
+   --TEST--
+   Test filter_input() with GET and POST data.
+   --DESCRIPTION--
+   This test covers both valid and invalid usages of
+   filter_input() with INPUT_GET and INPUT_POST data
+   and several different filter sanitizers.
+   --CREDITS--
+   Felipe Pena <felipe@php.net>
+   --INI--
+   precision=14
+   --SKIPIF--
+   <?php if (!extension_loaded("filter")) die("Skipped: filter extension required."); ?>
+   --GET--
+   a=<b>test</b>&b=https://example.com
+   --POST--
+   c=<p>string</p>&d=12345.7
+   --FILE--
+   <?php
+   ini_set('html_errors', false);
+   var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_STRIPPED));
+   var_dump(filter_input(INPUT_GET, "b", FILTER_SANITIZE_URL));
+   var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_SPECIAL_CHARS, array(1,2,3,4,5)));
+   var_dump(filter_input(INPUT_GET, "b", FILTER_VALIDATE_FLOAT, new stdClass));
+   var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_STRIPPED, array(5,6,7,8)));
+   var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_FLOAT));
+   var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_SPECIAL_CHARS));
+   var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_INT));
+   var_dump(filter_var(new stdClass, "d"));
+   var_dump(filter_input(INPUT_POST, "c", "", ""));
+   var_dump(filter_var("", "", "", "", ""));
+   var_dump(filter_var(0, 0, 0, 0, 0));
+   echo "Done\n";
+   ?>
+   --EXPECTF--
+   string(4) "test"
+   string(19) "https://example.com"
+   string(27) "&#60;b&#62;test&#60;/b&#62;"
 
-Warning: filter_var() expects parameter 2 to be long, string given in %ssample001.php on line %d
-NULL
+   Notice: Object of class stdClass could not be converted to int in %ssample001.php on line %d
+   bool(false)
+   string(6) "string"
+   float(12345.7)
+   string(29) "&#60;p&#62;string&#60;/p&#62;"
+   bool(false)
 
-Warning: filter_input() expects parameter 3 to be long, string given in %ssample001.php on line %d
-NULL
+   Warning: filter_var() expects parameter 2 to be long, string given in %ssample001.php on line %d
+   NULL
 
-Warning: filter_var() expects at most 3 parameters, 5 given in %ssample001.php on line %d
-NULL
+   Warning: filter_input() expects parameter 3 to be long, string given in %ssample001.php on line %d
+   NULL
 
-Warning: filter_var() expects at most 3 parameters, 5 given in %ssample001.php on line %d
-NULL
-Done
+   Warning: filter_var() expects at most 3 parameters, 5 given in %ssample001.php on line %d
+   NULL
+
+   Warning: filter_var() expects at most 3 parameters, 5 given in %ssample001.php on line %d
+   NULL
+   Done
 ```
 
 #### sample002.phpt
 
 ```php
---TEST--
-Test receipt of cookie data.
---CREDITS--
-Zoe Slattery zoe@php.net
-# TestFest Munich 2009-05-19
---COOKIE--
-hello=World;goodbye=MrChips
---FILE--
-<?php
-var_dump($_COOKIE);
-?>
---EXPECT--
-array(2) {
-  ["hello"]=>
-  string(5) "World"
-  ["goodbye"]=>
-  string(7) "MrChips"
-}
+
+   --TEST--
+   Test receipt of cookie data.
+   --CREDITS--
+   Zoe Slattery zoe@php.net
+   # TestFest Munich 2009-05-19
+   --COOKIE--
+   hello=World;goodbye=MrChips
+   --FILE--
+   <?php
+   var_dump($_COOKIE);
+   ?>
+   --EXPECT--
+   array(2) {
+     ["hello"]=>
+     string(5) "World"
+     ["goodbye"]=>
+     string(7) "MrChips"
+   }
 ```
 
 #### sample003.phpt
 
 ```php
---TEST--
-session object deserialization
---SKIPIF--
-<?php include('skipif.inc'); ?>
---INI--
-session.use_cookies=0
-session.cache_limiter=
-register_globals=1
-session.serialize_handler=php
-session.save_handler=files
---FILE--
-<?php
-error_reporting(E_ALL);
 
-class foo {
-    public $bar = "ok";
-    function method() { $this->yes++; }
-}
+   --TEST--
+   session object deserialization
+   --SKIPIF--
+   <?php include('skipif.inc'); ?>
+   --INI--
+   session.use_cookies=0
+   session.cache_limiter=
+   register_globals=1
+   session.serialize_handler=php
+   session.save_handler=files
+   --FILE--
+   <?php
+   error_reporting(E_ALL);
 
-session_id("abtest");
-session_start();
-session_decode('baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}');
+   class foo {
+       public $bar = "ok";
+       function method() { $this->yes++; }
+   }
 
-$baz->method();
-$arr[3]->method();
+   session_id("abtest");
+   session_start();
+   session_decode('baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}');
 
-var_dump($baz);
-var_dump($arr);
-session_destroy();
---EXPECT--
-object(foo)#1 (2) {
-  ["bar"]=>
-  string(2) "ok"
-  ["yes"]=>
-  int(2)
-}
-array(1) {
-  [3]=>
-  object(foo)#2 (2) {
-    ["bar"]=>
-    string(2) "ok"
-    ["yes"]=>
-    int(2)
-  }
-}
+   $baz->method();
+   $arr[3]->method();
+
+   var_dump($baz);
+   var_dump($arr);
+   session_destroy();
+   --EXPECT--
+   object(foo)#1 (2) {
+     ["bar"]=>
+     string(2) "ok"
+     ["yes"]=>
+     int(2)
+   }
+   array(1) {
+     [3]=>
+     object(foo)#2 (2) {
+       ["bar"]=>
+       string(2) "ok"
+       ["yes"]=>
+       int(2)
+     }
+   }
 ```
 
 #### sample005.phpt
 
 ```php
---TEST--
-SOAP Server 19: compressed request (gzip)
---SKIPIF--
-<?php
-  if (php_sapi_name()=='cli') echo 'skip';
-  require_once('skipif2.inc');
-  if (!extension_loaded('zlib')) die('skip zlib extension not available');
-?>
---INI--
-precision=14
---GZIP_POST--
-<SOAP-ENV:Envelope
-  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
-  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:si="http://soapinterop.org/xsd">
-  <SOAP-ENV:Body>
-    <ns1:test xmlns:ns1="http://testuri.org" />
-  </SOAP-ENV:Body>
-</SOAP-ENV:Envelope>
---FILE--
-<?php
-function test() {
-  return "Hello World";
-}
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
-$server->handle();
-echo "ok\n";
-?>
---EXPECT--
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testuri.org" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:testResponse><return xsi:type="xsd:string">Hello World</return></ns1:testResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
-ok
+   --TEST--
+   SOAP Server 19: compressed request (gzip)
+   --SKIPIF--
+   <?php
+     if (php_sapi_name()=='cli') echo 'skip';
+     require_once('skipif2.inc');
+     if (!extension_loaded('zlib')) die('skip zlib extension not available');
+   ?>
+   --INI--
+   precision=14
+   --GZIP_POST--
+   <SOAP-ENV:Envelope
+     SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+     xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:si="http://soapinterop.org/xsd">
+     <SOAP-ENV:Body>
+       <ns1:test xmlns:ns1="http://testuri.org" />
+     </SOAP-ENV:Body>
+   </SOAP-ENV:Envelope>
+   --FILE--
+   <?php
+   function test() {
+     return "Hello World";
+   }
+
+   $server = new soapserver(null,array('uri'=>"http://testuri.org"));
+   $server->addfunction("test");
+   $server->handle();
+   echo "ok\n";
+   ?>
+   --EXPECT--
+   <?xml version="1.0" encoding="UTF-8"?>
+   <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testuri.org" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:testResponse><return xsi:type="xsd:string">Hello World</return></ns1:testResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+   ok
 ```
 
 #### sample006.phpt
 
 ```php
---TEST--
-is_uploaded_file() function
---CREDITS--
-Dave Kelsey <d_kelsey@uk.ibm.com>
---SKIPIF--
-<?php if (php_sapi_name()=='cli') die('skip'); ?>
---POST_RAW--
-Content-type: multipart/form-data, boundary=AaB03x
 
---AaB03x
-content-disposition: form-data; name="field1"
+   --TEST--
+   is_uploaded_file() function
+   --CREDITS--
+   Dave Kelsey <d_kelsey@uk.ibm.com>
+   --SKIPIF--
+   <?php if (php_sapi_name()=='cli') die('skip'); ?>
+   --POST_RAW--
+   Content-type: multipart/form-data, boundary=AaB03x
 
-Joe Blow
---AaB03x
-content-disposition: form-data; name="pics"; filename="file1.txt"
-Content-Type: text/plain
+   --AaB03x
+   content-disposition: form-data; name="field1"
 
-abcdef123456789
---AaB03x--
---FILE--
-<?php
-// uploaded file
-var_dump(is_uploaded_file($_FILES['pics']['tmp_name']));
+   Joe Blow
+   --AaB03x
+   content-disposition: form-data; name="pics"; filename="file1.txt"
+   Content-Type: text/plain
 
-// not an uploaded file
-var_dump(is_uploaded_file($_FILES['pics']['name']));
+   abcdef123456789
+   --AaB03x--
+   --FILE--
+   <?php
+   // uploaded file
+   var_dump(is_uploaded_file($_FILES['pics']['tmp_name']));
 
-// not an uploaded file
-var_dump(is_uploaded_file('random_filename.txt'));
+   // not an uploaded file
+   var_dump(is_uploaded_file($_FILES['pics']['name']));
 
-// not an uploaded file
-var_dump(is_uploaded_file('__FILE__'));
+   // not an uploaded file
+   var_dump(is_uploaded_file('random_filename.txt'));
 
-// Error cases
-var_dump(is_uploaded_file());
-var_dump(is_uploaded_file('a', 'b'));
+   // not an uploaded file
+   var_dump(is_uploaded_file('__FILE__'));
 
-?>
---EXPECTF--
-bool(true)
-bool(false)
-bool(false)
-bool(false)
+   // Error cases
+   var_dump(is_uploaded_file());
+   var_dump(is_uploaded_file('a', 'b'));
 
-Warning: is_uploaded_file() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+   ?>
+   --EXPECTF--
+   bool(true)
+   bool(false)
+   bool(false)
+   bool(false)
 
-Warning: is_uploaded_file() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+   Warning: is_uploaded_file() expects exactly 1 parameter, 0 given in %s on line %d
+   NULL
+
+   Warning: is_uploaded_file() expects exactly 1 parameter, 2 given in %s on line %d
+   NULL
 ```
 
 #### sample007.phpt
 
 ```php
---TEST--
-SOAP Server 20: compressed request (deflate)
---SKIPIF--
-<?php
-  if (php_sapi_name()=='cli') echo 'skip';
-  require_once('skipif2.inc');
-  if (!extension_loaded('zlib')) die('skip zlib extension not available');
-?>
---INI--
-precision=14
---DEFLATE_POST--
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<SOAP-ENV:Envelope
-  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
-  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:si="http://soapinterop.org/xsd">
-  <SOAP-ENV:Body>
-    <ns1:test xmlns:ns1="http://testuri.org" />
-  </SOAP-ENV:Body>
-</SOAP-ENV:Envelope>
---FILE--
-<?php
-function test() {
-  return "Hello World";
-}
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
-$server->handle();
-echo "ok\n";
-?>
---EXPECT--
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testuri.org" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:testResponse><return xsi:type="xsd:string">Hello World</return></ns1:testResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
-ok
+   --TEST--
+   SOAP Server 20: compressed request (deflate)
+   --SKIPIF--
+   <?php
+     if (php_sapi_name()=='cli') echo 'skip';
+     require_once('skipif2.inc');
+     if (!extension_loaded('zlib')) die('skip zlib extension not available');
+   ?>
+   --INI--
+   precision=14
+   --DEFLATE_POST--
+   <?xml version="1.0" encoding="ISO-8859-1"?>
+   <SOAP-ENV:Envelope
+     SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+     xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:si="http://soapinterop.org/xsd">
+     <SOAP-ENV:Body>
+       <ns1:test xmlns:ns1="http://testuri.org" />
+     </SOAP-ENV:Body>
+   </SOAP-ENV:Envelope>
+   --FILE--
+   <?php
+   function test() {
+     return "Hello World";
+   }
+
+   $server = new soapserver(null,array('uri'=>"http://testuri.org"));
+   $server->addfunction("test");
+   $server->handle();
+   echo "ok\n";
+   ?>
+   --EXPECT--
+   <?xml version="1.0" encoding="UTF-8"?>
+   <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testuri.org" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:testResponse><return xsi:type="xsd:string">Hello World</return></ns1:testResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+   ok
 ```
 
 #### sample008.phpt
 
 ```php
---TEST--
-GET/POST/REQUEST Test with input_filter
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
---POST--
-d=379
---GET--
-ar[elm1]=1234&ar[elm2]=0660&a=0234
---FILE--
-<?php
-$ret = filter_input(INPUT_GET, 'a', FILTER_VALIDATE_INT);
-var_dump($ret);
 
-$ret = filter_input(INPUT_GET, 'a', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL));
-var_dump($ret);
+   --TEST--
+   GET/POST/REQUEST Test with input_filter
+   --SKIPIF--
+   <?php if (!extension_loaded("filter")) die("skip"); ?>
+   --POST--
+   d=379
+   --GET--
+   ar[elm1]=1234&ar[elm2]=0660&a=0234
+   --FILE--
+   <?php
+   $ret = filter_input(INPUT_GET, 'a', FILTER_VALIDATE_INT);
+   var_dump($ret);
 
-$ret = filter_input(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_REQUIRE_ARRAY));
-var_dump($ret);
+   $ret = filter_input(INPUT_GET, 'a', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL));
+   var_dump($ret);
 
-$ret = filter_input(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL|FILTER_REQUIRE_ARRAY));
-var_dump($ret);
+   $ret = filter_input(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_REQUIRE_ARRAY));
+   var_dump($ret);
 
-?>
---EXPECT--
-bool(false)
-int(156)
-array(2) {
-  ["elm1"]=>
-  int(1234)
-  ["elm2"]=>
-  bool(false)
-}
-array(2) {
-  ["elm1"]=>
-  int(1234)
-  ["elm2"]=>
-  int(432)
-}
+   $ret = filter_input(INPUT_GET, 'ar', FILTER_VALIDATE_INT, array('flags'=>FILTER_FLAG_ALLOW_OCTAL|FILTER_REQUIRE_ARRAY));
+   var_dump($ret);
+
+   ?>
+   --EXPECT--
+   bool(false)
+   int(156)
+   array(2) {
+     ["elm1"]=>
+     int(1234)
+     ["elm2"]=>
+     bool(false)
+   }
+   array(2) {
+     ["elm1"]=>
+     int(1234)
+     ["elm2"]=>
+     int(432)
+   }
 ```
 
 #### sample009.phpt
 
 ```php
---TEST--
-STDIN input
---FILE--
-<?php
-var_dump(stream_get_contents(STDIN));
-?>
---STDIN--
-fooBar
-use this to input some thing to the php script
---EXPECT--
-string(54) "fooBar
-use this to input some thing to the php script
-"
+
+   --TEST--
+   STDIN input
+   --FILE--
+   <?php
+   var_dump(stream_get_contents(STDIN));
+   ?>
+   --STDIN--
+   fooBar
+   use this to input some thing to the php script
+   --EXPECT--
+   string(54) "fooBar
+   use this to input some thing to the php script
+   "
 ```
 
 #### sample010.phpt
 
 ```php
---TEST--
-getopt#005 (Required values)
---ARGS--
---arg value --arg=value -avalue -a=value -a value
---INI--
-register_argc_argv=On
-variables_order=GPS
---FILE--
-<?php
-  var_dump(getopt("a:", array("arg:")));
-?>
---EXPECT--
-array(2) {
-  ["arg"]=>
-  array(2) {
-    [0]=>
-    string(5) "value"
-    [1]=>
-    string(5) "value"
-  }
-  ["a"]=>
-  array(3) {
-    [0]=>
-    string(5) "value"
-    [1]=>
-    string(5) "value"
-    [2]=>
-    string(5) "value"
-  }
-}
+
+   --TEST--
+   getopt#005 (Required values)
+   --ARGS--
+   --arg value --arg=value -avalue -a=value -a value
+   --INI--
+   register_argc_argv=On
+   variables_order=GPS
+   --FILE--
+   <?php
+     var_dump(getopt("a:", array("arg:")));
+   ?>
+   --EXPECT--
+   array(2) {
+     ["arg"]=>
+     array(2) {
+       [0]=>
+       string(5) "value"
+       [1]=>
+       string(5) "value"
+     }
+     ["a"]=>
+     array(3) {
+       [0]=>
+       string(5) "value"
+       [1]=>
+       string(5) "value"
+       [2]=>
+       string(5) "value"
+     }
+   }
 ```
 
 #### sample011.phpt
 
 ```php
---TEST--
-Bug #35382 (Comment in end of file produces fatal error)
---FILEEOF--
-<?php
-eval("echo 'Hello'; // comment");
-echo " World";
-//last line comment
---EXPECTF--
-Hello World
+
+   --TEST--
+   Bug #35382 (Comment in end of file produces fatal error)
+   --FILEEOF--
+   <?php
+   eval("echo 'Hello'; // comment");
+   echo " World";
+   //last line comment
+   --EXPECTF--
+   Hello World
 ```
 
 #### sample012.phpt
 
 ```php
---TEST--
-sample test for file_external
---FILE_EXTERNAL--
-files/file012.inc
---EXPECT--
-hello world
+
+   --TEST--
+   sample test for file_external
+   --FILE_EXTERNAL--
+   files/file012.inc
+   --EXPECT--
+   hello world
 ```
 
 #### sample013.phpt
 
 ```php
---TEST--
-SQLite2
---SKIPIF--
-<?php # vim:ft=php
-if (!extension_loaded('pdo') || !extension_loaded('sqlite')) print 'skip'; ?>
---REDIRECTTEST--
-return array(
-  'ENV' => array(
-      'PDOTEST_DSN' => 'sqlite2::memory:'
-    ),
-  'TESTS' => 'ext/pdo/tests'
-  );
+
+   --TEST--
+   SQLite2
+   --SKIPIF--
+   <?php # vim:ft=php
+   if (!extension_loaded('pdo') || !extension_loaded('sqlite')) print 'skip'; ?>
+   --REDIRECTTEST--
+   return array(
+     'ENV' => array(
+         'PDOTEST_DSN' => 'sqlite2::memory:'
+       ),
+     'TESTS' => 'ext/pdo/tests'
+     );
 ```
 
 #### sample014.phpt
 
 ```php
---TEST--
-MySQL
---SKIPIF--
-<?php # vim:ft=php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) print 'skip not loaded';
-?>
---REDIRECTTEST--
-# magic auto-configuration
 
-$config = array(
-  'TESTS' => 'ext/pdo/tests'
-);
+   --TEST--
+   MySQL
+   --SKIPIF--
+   <?php # vim:ft=php
+   if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) print 'skip not loaded';
+   ?>
+   --REDIRECTTEST--
+   # magic auto-configuration
 
-if (false !== getenv('PDO_MYSQL_TEST_DSN')) {
-  # user set them from their shell
-  $config['ENV']['PDOTEST_DSN'] = getenv('PDO_MYSQL_TEST_DSN');
-  $config['ENV']['PDOTEST_USER'] = getenv('PDO_MYSQL_TEST_USER');
-  $config['ENV']['PDOTEST_PASS'] = getenv('PDO_MYSQL_TEST_PASS');
-  if (false !== getenv('PDO_MYSQL_TEST_ATTR')) {
-    $config['ENV']['PDOTEST_ATTR'] = getenv('PDO_MYSQL_TEST_ATTR');
-  }
-} else {
-  $config['ENV']['PDOTEST_DSN'] = 'mysql:host=localhost;dbname=test';
-  $config['ENV']['PDOTEST_USER'] = 'root';
-  $config['ENV']['PDOTEST_PASS'] = '';
-}
+   $config = array(
+     'TESTS' => 'ext/pdo/tests'
+   );
 
-return $config;
+   if (false !== getenv('PDO_MYSQL_TEST_DSN')) {
+     # user set them from their shell
+     $config['ENV']['PDOTEST_DSN'] = getenv('PDO_MYSQL_TEST_DSN');
+     $config['ENV']['PDOTEST_USER'] = getenv('PDO_MYSQL_TEST_USER');
+     $config['ENV']['PDOTEST_PASS'] = getenv('PDO_MYSQL_TEST_PASS');
+     if (false !== getenv('PDO_MYSQL_TEST_ATTR')) {
+       $config['ENV']['PDOTEST_ATTR'] = getenv('PDO_MYSQL_TEST_ATTR');
+     }
+   } else {
+     $config['ENV']['PDOTEST_DSN'] = 'mysql:host=localhost;dbname=test';
+     $config['ENV']['PDOTEST_USER'] = 'root';
+     $config['ENV']['PDOTEST_PASS'] = '';
+   }
+
+   return $config;
 ```
 
 #### sample016.phpt
 
 ```php
---TEST--
-Test get variables with CGI binary
---GET--
-hello=World&goodbye=MrChips
---CGI--
---FILE--
-<?php
-var_dump($_GET);
-?>
---EXPECT--
-array(2) {
-  ["hello"]=>
-  string(5) "World"
-  ["goodbye"]=>
-  string(7) "MrChips"
-}
+
+   --TEST--
+   Test get variables with CGI binary
+   --GET--
+   hello=World&goodbye=MrChips
+   --CGI--
+   --FILE--
+   <?php
+   var_dump($_GET);
+   ?>
+   --EXPECT--
+   array(2) {
+     ["hello"]=>
+     string(5) "World"
+     ["goodbye"]=>
+     string(7) "MrChips"
+   }
 ```
 
 #### sample017.phpt
 
 ```php
---TEST--
-PDO Common: Bug #34630 (inserting streams as LOBs)
---SKIPIF--
-<?php # vim:ft=php
-if (!extension_loaded('pdo')) die('skip');
-$dir = getenv('REDIR_TEST_DIR');
-if (false == $dir) die('skip no driver');
-require_once $dir . 'pdo_test.inc';
-PDOTest::skip();
-?>
---FILE--
-<?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
-require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
-$db = PDOTest::factory();
 
-$driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
-$is_oci = $driver == 'oci';
+   --TEST--
+   PDO Common: Bug #34630 (inserting streams as LOBs)
+   --SKIPIF--
+   <?php # vim:ft=php
+   if (!extension_loaded('pdo')) die('skip');
+   $dir = getenv('REDIR_TEST_DIR');
+   if (false == $dir) die('skip no driver');
+   require_once $dir . 'pdo_test.inc';
+   PDOTest::skip();
+   ?>
+   --FILE--
+   <?php
+   if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
+   require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+   $db = PDOTest::factory();
 
-if ($is_oci) {
-  $db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val BLOB)');
-} else {
-  $db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val VARCHAR(256))');
-}
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+   $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+   $is_oci = $driver == 'oci';
 
-$fp = tmpfile();
-fwrite($fp, "I am the LOB data");
-rewind($fp);
+   if ($is_oci) {
+     $db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val BLOB)');
+   } else {
+     $db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val VARCHAR(256))');
+   }
+   $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-if ($is_oci) {
-  /* oracle is a bit different; you need to initiate a transaction otherwise
-   * the empty blob will be committed implicitly when the statement is
-   * executed */
-  $db->beginTransaction();
-  $insert = $db->prepare("insert into test (id, val) values (1, EMPTY_BLOB()) RETURNING val INTO :blob");
-} else {
-  $insert = $db->prepare("insert into test (id, val) values (1, :blob)");
-}
-$insert->bindValue(':blob', $fp, PDO::PARAM_LOB);
-$insert->execute();
-$insert = null;
+   $fp = tmpfile();
+   fwrite($fp, "I am the LOB data");
+   rewind($fp);
 
-$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-var_dump($db->query("SELECT * from test")->fetchAll(PDO::FETCH_ASSOC));
+   if ($is_oci) {
+     /* oracle is a bit different; you need to initiate a transaction otherwise
+      * the empty blob will be committed implicitly when the statement is
+      * executed */
+     $db->beginTransaction();
+     $insert = $db->prepare("insert into test (id, val) values (1, EMPTY_BLOB()) RETURNING val INTO :blob");
+   } else {
+     $insert = $db->prepare("insert into test (id, val) values (1, :blob)");
+   }
+   $insert->bindValue(':blob', $fp, PDO::PARAM_LOB);
+   $insert->execute();
+   $insert = null;
 
-?>
---XFAIL--
-This bug might be still open on aix5.2-ppc64 and hpux11.23-ia64
---EXPECT--
-array(1) {
-  [0]=>
-  array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["val"]=>
-    string(17) "I am the LOB data"
-  }
-}
+   $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
+   var_dump($db->query("SELECT * from test")->fetchAll(PDO::FETCH_ASSOC));
+
+   ?>
+   --XFAIL--
+   This bug might be still open on aix5.2-ppc64 and hpux11.23-ia64
+   --EXPECT--
+   array(1) {
+     [0]=>
+     array(2) {
+       ["id"]=>
+       string(1) "1"
+       ["val"]=>
+       string(17) "I am the LOB data"
+     }
+   }
 ```
 
 #### sample018.phpt
 
 ```php
---TEST--
-Phar front controller rewrite access denied [cache_list]
---INI--
-default_charset=UTF-8
-phar.cache_list={PWD}/frontcontroller10.php
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
---ENV--
-SCRIPT_NAME=/frontcontroller10.php
-REQUEST_URI=/frontcontroller10.php/hi
-PATH_INFO=/hi
---FILE_EXTERNAL--
-files/frontcontroller4.phar
---EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
-Status: 403 Access Denied
---EXPECT--
-<html>
- <head>
-  <title>Access Denied</title>
- </head>
- <body>
-  <h1>403 - File /hi Access Denied</h1>
- </body>
-</html>
+
+   --TEST--
+   Phar front controller rewrite access denied [cache_list]
+   --INI--
+   default_charset=UTF-8
+   phar.cache_list={PWD}/frontcontroller10.php
+   --SKIPIF--
+   <?php if (!extension_loaded("phar")) die("skip"); ?>
+   --ENV--
+   SCRIPT_NAME=/frontcontroller10.php
+   REQUEST_URI=/frontcontroller10.php/hi
+   PATH_INFO=/hi
+   --FILE_EXTERNAL--
+   files/frontcontroller4.phar
+   --EXPECTHEADERS--
+   Content-type: text/html; charset=UTF-8
+   Status: 403 Access Denied
+   --EXPECT--
+   <html>
+    <head>
+     <title>Access Denied</title>
+    </head>
+    <body>
+     <h1>403 - File /hi Access Denied</h1>
+    </body>
+   </html>
 ```
 
 #### sample019.phpt
 
 ```php
---TEST--
-bzopen() and invalid parameters
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
---FILE--
-<?php
 
-var_dump(bzopen());
-var_dump(bzopen("", ""));
-var_dump(bzopen("", "r"));
-var_dump(bzopen("", "w"));
-var_dump(bzopen("", "x"));
-var_dump(bzopen("", "rw"));
-var_dump(bzopen("no_such_file", "r"));
+   --TEST--
+   bzopen() and invalid parameters
+   --SKIPIF--
+   <?php if (!extension_loaded("bz2")) print "skip"; ?>
+   --FILE--
+   <?php
 
-$fp = fopen(__FILE__,"r");
-var_dump(bzopen($fp, "r"));
+   var_dump(bzopen());
+   var_dump(bzopen("", ""));
+   var_dump(bzopen("", "r"));
+   var_dump(bzopen("", "w"));
+   var_dump(bzopen("", "x"));
+   var_dump(bzopen("", "rw"));
+   var_dump(bzopen("no_such_file", "r"));
 
-echo "Done\n";
-?>
---EXPECTF--
-Warning: bzopen() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
+   $fp = fopen(__FILE__,"r");
+   var_dump(bzopen($fp, "r"));
 
-Warning: bzopen(): '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
-bool(false)
+   echo "Done\n";
+   ?>
+   --EXPECTF--
+   Warning: bzopen() expects exactly 2 parameters, 0 given in %s on line %d
+   NULL
 
-Warning: bzopen(): filename cannot be empty in %s on line %d
-bool(false)
+   Warning: bzopen(): '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+   bool(false)
 
-Warning: bzopen(): filename cannot be empty in %s on line %d
-bool(false)
+   Warning: bzopen(): filename cannot be empty in %s on line %d
+   bool(false)
 
-Warning: bzopen(): 'x' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
-bool(false)
+   Warning: bzopen(): filename cannot be empty in %s on line %d
+   bool(false)
 
-Warning: bzopen(): 'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
-bool(false)
+   Warning: bzopen(): 'x' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+   bool(false)
 
-Warning: bzopen(no_such_file): failed to open stream: No such file or directory in %s on line %d
-bool(false)
-resource(%d) of type (stream)
-Done
+   Warning: bzopen(): 'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
+   bool(false)
+
+   Warning: bzopen(no_such_file): failed to open stream: No such file or directory in %s on line %d
+   bool(false)
+   resource(%d) of type (stream)
+   Done
 ```
 
 #### sample020.phpt
 
 ```php
---TEST--
-Bug #42082 (NodeList length zero should be empty)
---FILE--
-<?php
-$doc = new DOMDocument();
-$xpath = new DOMXPath($doc);
-$nodes = $xpath->query('*');
-var_dump($nodes);
-var_dump($nodes->length);
-$length = $nodes->length;
-var_dump(empty($nodes->length), empty($length));
 
-$doc->loadXML("<element></element>");
-var_dump($doc->firstChild->nodeValue, empty($doc->firstChild->nodeValue), isset($doc->firstChild->nodeValue));
-var_dump(empty($doc->nodeType), empty($doc->firstChild->nodeType))
-?>
---EXPECTF--
-object(DOMNodeList)#%d (0) {
-}
-int(0)
-bool(true)
-bool(true)
-string(0) ""
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+   --TEST--
+   Bug #42082 (NodeList length zero should be empty)
+   --FILE--
+   <?php
+   $doc = new DOMDocument();
+   $xpath = new DOMXPath($doc);
+   $nodes = $xpath->query('*');
+   var_dump($nodes);
+   var_dump($nodes->length);
+   $length = $nodes->length;
+   var_dump(empty($nodes->length), empty($length));
+
+   $doc->loadXML("<element></element>");
+   var_dump($doc->firstChild->nodeValue, empty($doc->firstChild->nodeValue), isset($doc->firstChild->nodeValue));
+   var_dump(empty($doc->nodeType), empty($doc->firstChild->nodeType))
+   ?>
+   --EXPECTF--
+   object(DOMNodeList)#%d (0) {
+   }
+   int(0)
+   bool(true)
+   bool(true)
+   string(0) ""
+   bool(true)
+   bool(true)
+   bool(false)
+   bool(false)
 ```
 
 #### sample021.phpt
 
 ```php
---TEST--
-Math constants
---INI--
-precision=14
---FILE--
-<?php
-$constants = array(
-    "M_E",
-    "M_LOG2E",
-    "M_LOG10E",
-    "M_LN2",
-    "M_LN10",
-    "M_PI",
-    "M_PI_2",
-    "M_PI_4",
-    "M_1_PI",
-    "M_2_PI",
-    "M_SQRTPI",
-    "M_2_SQRTPI",
-    "M_LNPI",
-    "M_EULER",
-    "M_SQRT2",
-    "M_SQRT1_2",
-    "M_SQRT3"
-);
-foreach($constants as $constant) {
-    printf("%-10s: %s\n", $constant, constant($constant));
-}
-?>
---EXPECTREGEX--
-M_E       : 2.718281[0-9]*
-M_LOG2E   : 1.442695[0-9]*
-M_LOG10E  : 0.434294[0-9]*
-M_LN2     : 0.693147[0-9]*
-M_LN10    : 2.302585[0-9]*
-M_PI      : 3.141592[0-9]*
-M_PI_2    : 1.570796[0-9]*
-M_PI_4    : 0.785398[0-9]*
-M_1_PI    : 0.318309[0-9]*
-M_2_PI    : 0.636619[0-9]*
-M_SQRTPI  : 1.772453[0-9]*
-M_2_SQRTPI: 1.128379[0-9]*
-M_LNPI    : 1.144729[0-9]*
-M_EULER   : 0.577215[0-9]*
-M_SQRT2   : 1.414213[0-9]*
-M_SQRT1_2 : 0.707106[0-9]*
-M_SQRT3   : 1.732050[0-9]*
+
+   --TEST--
+   Math constants
+   --INI--
+   precision=14
+   --FILE--
+   <?php
+   $constants = array(
+       "M_E",
+       "M_LOG2E",
+       "M_LOG10E",
+       "M_LN2",
+       "M_LN10",
+       "M_PI",
+       "M_PI_2",
+       "M_PI_4",
+       "M_1_PI",
+       "M_2_PI",
+       "M_SQRTPI",
+       "M_2_SQRTPI",
+       "M_LNPI",
+       "M_EULER",
+       "M_SQRT2",
+       "M_SQRT1_2",
+       "M_SQRT3"
+   );
+   foreach($constants as $constant) {
+       printf("%-10s: %s\n", $constant, constant($constant));
+   }
+   ?>
+   --EXPECTREGEX--
+   M_E       : 2.718281[0-9]*
+   M_LOG2E   : 1.442695[0-9]*
+   M_LOG10E  : 0.434294[0-9]*
+   M_LN2     : 0.693147[0-9]*
+   M_LN10    : 2.302585[0-9]*
+   M_PI      : 3.141592[0-9]*
+   M_PI_2    : 1.570796[0-9]*
+   M_PI_4    : 0.785398[0-9]*
+   M_1_PI    : 0.318309[0-9]*
+   M_2_PI    : 0.636619[0-9]*
+   M_SQRTPI  : 1.772453[0-9]*
+   M_2_SQRTPI: 1.128379[0-9]*
+   M_LNPI    : 1.144729[0-9]*
+   M_EULER   : 0.577215[0-9]*
+   M_SQRT2   : 1.414213[0-9]*
+   M_SQRT1_2 : 0.707106[0-9]*
+   M_SQRT3   : 1.732050[0-9]*
 ```
 
 #### sample022.phpt
 
 ```php
---TEST--
-shm_detach() tests
---SKIPIF--
-<?php if (!extension_loaded("sysvshm")) print "skip"; ?>
---FILE--
-<?php
 
-$key = ftok(__DIR__.'/003.phpt', 'q');
+   --TEST--
+   shm_detach() tests
+   --SKIPIF--
+   <?php if (!extension_loaded("sysvshm")) print "skip"; ?>
+   --FILE--
+   <?php
 
-var_dump(shm_detach());
-var_dump(shm_detach(1,1));
+   $key = ftok(__DIR__.'/003.phpt', 'q');
 
-$s = shm_attach($key);
+   var_dump(shm_detach());
+   var_dump(shm_detach(1,1));
 
-var_dump(shm_detach($s));
-var_dump(shm_detach($s));
-shm_remove($s);
+   $s = shm_attach($key);
 
-var_dump(shm_detach(0));
-var_dump(shm_detach(1));
-var_dump(shm_detach(-1));
+   var_dump(shm_detach($s));
+   var_dump(shm_detach($s));
+   shm_remove($s);
 
-echo "Done\n";
-?>
---CLEAN--
-<?php
-$key = ftok(__DIR__."/003.phpt", 'q');
-$s = shm_attach($key);
-shm_remove($s);
-?>
---EXPECTF--
-Warning: shm_detach() expects exactly 1 parameter, 0 given in %ssample022.php on line %d
-NULL
+   var_dump(shm_detach(0));
+   var_dump(shm_detach(1));
+   var_dump(shm_detach(-1));
 
-Warning: shm_detach() expects exactly 1 parameter, 2 given in %ssample022.php on line %d
-NULL
-bool(true)
+   echo "Done\n";
+   ?>
+   --CLEAN--
+   <?php
+   $key = ftok(__DIR__."/003.phpt", 'q');
+   $s = shm_attach($key);
+   shm_remove($s);
+   ?>
+   --EXPECTF--
+   Warning: shm_detach() expects exactly 1 parameter, 0 given in %ssample022.php on line %d
+   NULL
 
-Warning: shm_detach(): %d is not a valid sysvshm resource in %ssample022.php on line %d
-bool(false)
+   Warning: shm_detach() expects exactly 1 parameter, 2 given in %ssample022.php on line %d
+   NULL
+   bool(true)
 
-Warning: shm_remove(): %d is not a valid sysvshm resource in %ssample022.php on line %d
+   Warning: shm_detach(): %d is not a valid sysvshm resource in %ssample022.php on line %d
+   bool(false)
 
-Warning: shm_detach() expects parameter 1 to be resource, integer given in %ssample022.php on line %d
-NULL
+   Warning: shm_remove(): %d is not a valid sysvshm resource in %ssample022.php on line %d
 
-Warning: shm_detach() expects parameter 1 to be resource, integer given in %ssample022.php on line %d
-NULL
+   Warning: shm_detach() expects parameter 1 to be resource, integer given in %ssample022.php on line %d
+   NULL
 
-Warning: shm_detach() expects parameter 1 to be resource, integer given in %ssample022.php on line %d
-NULL
-Done
+   Warning: shm_detach() expects parameter 1 to be resource, integer given in %ssample022.php on line %d
+   NULL
+
+   Warning: shm_detach() expects parameter 1 to be resource, integer given in %ssample022.php on line %d
+   NULL
+   Done
 ```
 
 #### sample023.phpt
 
 ```php
---TEST--
-Bug #23894 (sprintf() decimal specifiers problem)
---FILE--
-<?php
-$a = -12.3456;
-$test = sprintf("%04d", $a);
-var_dump($test, bin2hex($test));
-$test = sprintf("% 13u", $a);
-var_dump($test, bin2hex($test));
-?>
---EXPECTREGEX--
-string\(4\) \"-012\"
-string\(8\) \"2d303132\"
-(string\(13\) \"   4294967284\"|string\(20\) \"18446744073709551604\")
-(string\(26\) \"20202034323934393637323834\"|string\(40\) \"3138343436373434303733373039353531363034\")
+
+   --TEST--
+   Bug #23894 (sprintf() decimal specifiers problem)
+   --FILE--
+   <?php
+   $a = -12.3456;
+   $test = sprintf("%04d", $a);
+   var_dump($test, bin2hex($test));
+   $test = sprintf("% 13u", $a);
+   var_dump($test, bin2hex($test));
+   ?>
+   --EXPECTREGEX--
+   string\(4\) \"-012\"
+   string\(8\) \"2d303132\"
+   (string\(13\) \"   4294967284\"|string\(20\) \"18446744073709551604\")
+   (string\(26\) \"20202034323934393637323834\"|string\(40\) \"3138343436373434303733373039353531363034\")
 ```
 
 #### sample024.phpt
 
 ```php
---TEST--
-DOMDocument::save  Test basic function of save method
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
---FILE--
-<?php
-$doc = new DOMDocument('1.0');
-$doc->formatOutput = true;
 
-$root = $doc->createElement('book');
+   --TEST--
+   DOMDocument::save  Test basic function of save method
+   --SKIPIF--
+   <?php
+   require_once('skipif.inc');
+   ?>
+   --FILE--
+   <?php
+   $doc = new DOMDocument('1.0');
+   $doc->formatOutput = true;
 
-$root = $doc->appendChild($root);
+   $root = $doc->createElement('book');
 
-$title = $doc->createElement('title');
-$title = $root->appendChild($title);
+   $root = $doc->appendChild($root);
 
-$text = $doc->createTextNode('This is the title');
-$text = $title->appendChild($text);
+   $title = $doc->createElement('title');
+   $title = $root->appendChild($title);
 
-$temp_filename = __DIR__.'/DomDocument_save_basic.tmp';
+   $text = $doc->createTextNode('This is the title');
+   $text = $title->appendChild($text);
 
-echo 'Wrote: ' . $doc->save($temp_filename) . ' bytes'; // Wrote: 72 bytes
-?>
---CLEAN--
-<?php
-  unlink(__DIR__.'/DomDocument_save_basic.tmp');
-?>
---EXPECTF--
-Wrote: 72 bytes
+   $temp_filename = __DIR__.'/DomDocument_save_basic.tmp';
+
+   echo 'Wrote: ' . $doc->save($temp_filename) . ' bytes'; // Wrote: 72 bytes
+   ?>
+   --CLEAN--
+   <?php
+     unlink(__DIR__.'/DomDocument_save_basic.tmp');
+   ?>
+   --EXPECTF--
+   Wrote: 72 bytes
 ```
 
 #### sample025.phpt
 
 ```php
---TEST--
-Test imap_append() function : basic functionality
---SKIPIF--
-<?php
-require_once(__DIR__.'/skipif.inc');
-?>
---FILE--
-<?php
-/* Prototype  : bool imap_append  ( resource $imap_stream  , string $mailbox  , string $message  [, string $options  ] )
- * Description: Append a string message to a specified mailbox.
- * Source code: ext/imap/php_imap.c
- */
 
-echo "*** Testing imap_append() : basic functionality ***\n";
+   --TEST--
+   Test imap_append() function : basic functionality
+   --SKIPIF--
+   <?php
+   require_once(__DIR__.'/skipif.inc');
+   ?>
+   --FILE--
+   <?php
+   /* Prototype  : bool imap_append  ( resource $imap_stream  , string $mailbox  , string $message  [, string $options  ] )
+    * Description: Append a string message to a specified mailbox.
+    * Source code: ext/imap/php_imap.c
+    */
 
-require_once(__DIR__.'/imap_include.inc');
+   echo "*** Testing imap_append() : basic functionality ***\n";
 
-echo "Create a new mailbox for test\n";
-$imap_stream = setup_test_mailbox("", 0);
-if (!is_resource($imap_stream)) {
-    exit("TEST FAILED: Unable to create test mailbox\n");
-}
+   require_once(__DIR__.'/imap_include.inc');
 
-$mb_details = imap_mailboxmsginfo($imap_stream);
-echo "Add a couple of msgs to new mailbox " . $mb_details->Mailbox . "\n";
-var_dump(imap_append($imap_stream, $mb_details->Mailbox
-                   , "From: webmaster@something.com\r\n"
-                   . "To: info@something.com\r\n"
-                   . "Subject: Test message\r\n"
-                   . "\r\n"
-                   . "this is a test message, please ignore\r\n"
-                   ));
+   echo "Create a new mailbox for test\n";
+   $imap_stream = setup_test_mailbox("", 0);
+   if (!is_resource($imap_stream)) {
+       exit("TEST FAILED: Unable to create test mailbox\n");
+   }
 
-var_dump(imap_append($imap_stream, $mb_details->Mailbox
-                   , "From: webmaster@something.com\r\n"
-                   . "To: info@something.com\r\n"
-                   . "Subject: Another test\r\n"
-                   . "\r\n"
-                   . "this is another test message, please ignore it too!!\r\n"
-                   ));
+   $mb_details = imap_mailboxmsginfo($imap_stream);
+   echo "Add a couple of msgs to new mailbox " . $mb_details->Mailbox . "\n";
+   var_dump(imap_append($imap_stream, $mb_details->Mailbox
+                      , "From: webmaster@something.com\r\n"
+                      . "To: info@something.com\r\n"
+                      . "Subject: Test message\r\n"
+                      . "\r\n"
+                      . "this is a test message, please ignore\r\n"
+                      ));
 
-$check = imap_check($imap_stream);
-echo "Msg Count after append : ". $check->Nmsgs . "\n";
+   var_dump(imap_append($imap_stream, $mb_details->Mailbox
+                      , "From: webmaster@something.com\r\n"
+                      . "To: info@something.com\r\n"
+                      . "Subject: Another test\r\n"
+                      . "\r\n"
+                      . "this is another test message, please ignore it too!!\r\n"
+                      ));
 
-echo "List the msg headers\n";
-var_dump(imap_headers($imap_stream));
+   $check = imap_check($imap_stream);
+   echo "Msg Count after append : ". $check->Nmsgs . "\n";
 
-imap_close($imap_stream);
-?>
---CLEAN--
-<?php
-require_once('clean.inc');
-?>
---EXPECTF--
-*** Testing imap_append() : basic functionality ***
-Create a new mailbox for test
-Create a temporary mailbox and add 0 msgs
-.. mailbox '%s' created
-Add a couple of msgs to new mailbox {%s}INBOX.%s
-bool(true)
-bool(true)
-Msg Count after append : 2
-List the msg headers
-array(2) {
-  [0]=>
-  string(%d) "%w%s       1)%s webmaster@something. Test message (%d chars)"
-  [1]=>
-  string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
-}
+   echo "List the msg headers\n";
+   var_dump(imap_headers($imap_stream));
+
+   imap_close($imap_stream);
+   ?>
+   --CLEAN--
+   <?php
+   require_once('clean.inc');
+   ?>
+   --EXPECTF--
+   *** Testing imap_append() : basic functionality ***
+   Create a new mailbox for test
+   Create a temporary mailbox and add 0 msgs
+   .. mailbox '%s' created
+   Add a couple of msgs to new mailbox {%s}INBOX.%s
+   bool(true)
+   bool(true)
+   Msg Count after append : 2
+   List the msg headers
+   array(2) {
+     [0]=>
+     string(%d) "%w%s       1)%s webmaster@something. Test message (%d chars)"
+     [1]=>
+     string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
+   }
 ```
 
 #### sample026.phpt
 
 ```php
---TEST--
-SPL: ArrayIterator implementing RecursiveIterator
---FILE--
-<?php
 
-$array = array(1, 2 => array(21, 22 => array(221, 222), 23 => array(231)), 3);
+   --TEST--
+   SPL: ArrayIterator implementing RecursiveIterator
+   --FILE--
+   <?php
 
-$dir = new RecursiveIteratorIterator(new RecursiveArrayIterator($array), RecursiveIteratorIterator::LEAVES_ONLY);
+   $array = array(1, 2 => array(21, 22 => array(221, 222), 23 => array(231)), 3);
 
-foreach ($dir as $file) {
-    print "$file\n";
-}
+   $dir = new RecursiveIteratorIterator(new RecursiveArrayIterator($array), RecursiveIteratorIterator::LEAVES_ONLY);
 
-?>
-===DONE===
-<?php exit(0); ?>
---EXPECT--
-1
-21
-221
-222
-231
-3
+   foreach ($dir as $file) {
+       print "$file\n";
+   }
+
+   ?>
+   ===DONE===
+   <?php exit(0); ?>
+   --EXPECT--
+   1
+   21
+   221
+   222
+   231
+   3
 ```
 
 #### skipif2.phpt
 
 ```php
-<?php
-  if (!extension_loaded('soap')) die('skip soap extension not available');
-?>
+
+   <?php
+     if (!extension_loaded('soap')) die('skip soap extension not available');
+   ?>
 ```
 
 #### skipif.phpt
 
 ```php
-<?php
-// This script prints "skip" if condition does not meet.
-if (!extension_loaded("session") && ini_get("enable_dl")) {
-  $dlext = (substr(PHP_OS, 0, 3) == "WIN") ? ".dll" : ".so";
-  @dl("session$dlext");
-}
-if (!extension_loaded("session")) {
-    die("skip Session module not loaded");
-}
-$save_path = ini_get("session.save_path");
-if ($save_path) {
-  if (!file_exists($save_path)) {
-    die("skip Session save_path doesn't exist");
-  }
 
-  if ($save_path && !@is_writable($save_path)) {
-    if (($p = strpos($save_path, ';')) !== false) {
-      $save_path = substr($save_path, ++$p);
-    }
-    if (!@is_writable($save_path)) {
-      die("skip\n");
-    }
-  }
-}
-?>
+   <?php
+   // This script prints "skip" if condition does not meet.
+   if (!extension_loaded("session") && ini_get("enable_dl")) {
+     $dlext = (substr(PHP_OS, 0, 3) == "WIN") ? ".dll" : ".so";
+     @dl("session$dlext");
+   }
+   if (!extension_loaded("session")) {
+       die("skip Session module not loaded");
+   }
+   $save_path = ini_get("session.save_path");
+   if ($save_path) {
+     if (!file_exists($save_path)) {
+       die("skip Session save_path doesn't exist");
+     }
+
+     if ($save_path && !@is_writable($save_path)) {
+       if (($p = strpos($save_path, ';')) !== false) {
+         $save_path = substr($save_path, ++$p);
+       }
+       if (!@is_writable($save_path)) {
+         die("skip\n");
+       }
+     }
+   }
+   ?>
 ```
 
 #### xfailif.phpt
 
 ```php
---TEST--
-Handling of errors during linking
---INI--
-opcache.enable=1
-opcache.enable_cli=1
-opcache.optimization_level=-1
-opcache.preload={PWD}/preload_inheritance_error_ind.inc
---SKIPIF--
-<?php
-require_once('skipif.inc');
-if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
-?>
---FILE--
-<?php
-echo "Foobar\n";
-?>
---EXPECTF--
-Fatal error: Declaration of B::foo($bar) must be compatible with A::foo() in %spreload_inheritance_error.inc on line 8
+
+   --TEST--
+   Handling of errors during linking
+   --INI--
+   opcache.enable=1
+   opcache.enable_cli=1
+   opcache.optimization_level=-1
+   opcache.preload={PWD}/preload_inheritance_error_ind.inc
+   --SKIPIF--
+   <?php
+   require_once('skipif.inc');
+   if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
+   ?>
+   --FILE--
+   <?php
+   echo "Foobar\n";
+   ?>
+   --EXPECTF--
+   Fatal error: Declaration of B::foo($bar) must be compatible with A::foo() in %spreload_inheritance_error.inc on line 8
 ```

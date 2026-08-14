@@ -16,19 +16,20 @@ the reference count. Once the reference count reaches zero, we know the value is
 anywhere, and that it may be freed.
 
 ```php
-$a = new stdClass; // RC 1
-$b = $a;           // RC 2
-unset($a);         // RC 1
-unset($b);         // RC 0, free
+
+   $a = new stdClass; // RC 1
+   $b = $a;           // RC 2
+   unset($a);         // RC 1
+   unset($b);         // RC 0, free
 ```
 
 Reference counting is needed for types that store auxiliary data, which are the following:
 
-- Strings
-- Arrays
-- Objects
-- References
-- Resources
+-  Strings
+-  Arrays
+-  Objects
+-  References
+-  Resources
 
 These are either reference types (objects, references and resources) or they are large types that
 don't fit in a single `zend_value` directly (strings, arrays). Simpler types either don't store a
@@ -38,22 +39,23 @@ value at all (`null`, `false`, `true`) or their value is small enough to fit dir
 All of the reference counted types share a common initial struct sequence.
 
 ```c
-typedef struct _zend_refcounted_h {
-    uint32_t refcount; /* reference counter 32-bit */
-    union {
-        uint32_t type_info;
-    } u;
-} zend_refcounted_h;
 
- struct _zend_string {
-     zend_refcounted_h gc;
-     // ...
- };
+   typedef struct _zend_refcounted_h {
+       uint32_t refcount; /* reference counter 32-bit */
+       union {
+           uint32_t type_info;
+       } u;
+   } zend_refcounted_h;
 
- struct _zend_array {
-     zend_refcounted_h gc;
-     // ...
- };
+    struct _zend_string {
+        zend_refcounted_h gc;
+        // ...
+    };
+
+    struct _zend_array {
+        zend_refcounted_h gc;
+        // ...
+    };
 ```
 
 The `zend_refcounted_h` struct is simple. It contains the reference count, and a `type_info`
@@ -68,23 +70,64 @@ use the provided macros. There are macros that work with reference counted types
 with `GC_`, or macros that work on `zval` values, usually prefixed with `Z_`. Unfortunately,
 naming is not always consistent.
 
-**`zval` macros**
+~~~{list-table} `zval` macros
+   :header-rows: 1
 
-| Macro              | Non-RC [^non-rc] | Description                                                                            |
-| ------------------ | ---------------- | -------------------------------------------------------------------------------------- |
-| `Z_REFCOUNT[_P]`   | No               | Returns the reference count.                                                           |
-| `Z_ADDREF[_P]`     | No               | Increases the reference count.                                                         |
-| `Z_TRY_ADDREF[_P]` | Yes              | Increases the reference count. May be called on any `zval`.                            |
-| `zval_ptr_dtor`    | Yes              | Decreases the reference count and frees the value if the reference count reaches zero. |
+   -  -  Macro
+      -  Non-RC [^non-rc]
+      -  Description
 
-**`zend_refcounted_h` macros**
+   -  -  `Z_REFCOUNT[_P]`
+      -  No
+      -  Returns the reference count.
 
-| Macro               | Immutable [^immutable] | Description                                                                            |
-| ------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
-| `GC_REFCOUNT[_P]`   | Yes                    | Returns the reference count.                                                           |
-| `GC_ADDREF[_P]`     | No                     | Increases the reference count.                                                         |
-| `GC_TRY_ADDREF[_P]` | Yes                    | Increases the reference count.                                                         |
-| `GC_DTOR[_P]`       | Yes                    | Decreases the reference count and frees the value if the reference count reaches zero. |
+   -  -  `Z_ADDREF[_P]`
+      -  No
+      -  Increases the reference count.
+
+   -  -  `Z_TRY_ADDREF[_P]`
+      -  Yes
+      -  Increases the reference count. May be called on any `zval`.
+
+   -  -  `zval_ptr_dtor`
+      -  Yes
+      -  Decreases the reference count and frees the value if the reference count reaches zero.
+
+~~~
+
+[^non-rc]:
+
+    Whether the macro works with non-reference counted types. If it does, the operation is usually a
+    no-op. If it does not, using the macro on these values is undefined behavior.
+
+~~~{list-table} `zend_refcounted_h` macros
+   :header-rows: 1
+
+   -  -  Macro
+      -  Immutable [^immutable]
+      -  Description
+
+   -  -  `GC_REFCOUNT[_P]`
+      -  Yes
+      -  Returns the reference count.
+
+   -  -  `GC_ADDREF[_P]`
+      -  No
+      -  Increases the reference count.
+
+   -  -  `GC_TRY_ADDREF[_P]`
+      -  Yes
+      -  Increases the reference count.
+
+   -  -  `GC_DTOR[_P]`
+      -  Yes
+      -  Decreases the reference count and frees the value if the reference count reaches zero.
+
+~~~
+
+[^immutable]:
+
+    Whether the macro works with immutable types, described under [Immutable reference counted types](#immutable-reference-counted-types).
 
 ## Separation
 
@@ -101,11 +144,12 @@ we are the values sole owner. However, if the value has a reference count of >1,
 fresh copy before modifying it. This process is called separation or CoW (copy on write).
 
 ```php
-$a = [1, 2, 3]; // RC 1
-$b = $a;        // RC 2
-$b[] = 4;       // Separation, $a RC 1, $b RC 1
-var_dump($a);   // [1, 2, 3]
-var_dump($b);   // [1, 2, 3, 4]
+
+   $a = [1, 2, 3]; // RC 1
+   $b = $a;        // RC 2
+   $b[] = 4;       // Separation, $a RC 1, $b RC 1
+   var_dump($a);   // [1, 2, 3]
+   var_dump($b);   // [1, 2, 3, 4]
 ```
 
 ## Immutable reference counted types
@@ -130,12 +174,13 @@ read-only and trigger a hardware exception if the code accidentally attempts to 
 Sometimes, reference counting is not enough. Consider the following example:
 
 ```php
-$a = new stdClass;
-$b = new stdClass;
-$a->b = $b;
-$b->a = $a;
-unset($a);
-unset($b);
+
+   $a = new stdClass;
+   $b = new stdClass;
+   $a->b = $b;
+   $b->a = $a;
+   unset($a);
+   unset($b);
 ```
 
 When this code finishes, the reference count of both instances of `stdClass` will still be 1, as
@@ -150,12 +195,13 @@ href="todo">Cycle collector</a> chapter.
 ## GC flags
 
 ```c
-/* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
-#define GC_NOT_COLLECTABLE  (1<<4)
-#define GC_PROTECTED        (1<<5) /* used for recursion detection */
-#define GC_IMMUTABLE        (1<<6) /* can't be changed in place */
-#define GC_PERSISTENT       (1<<7) /* allocated using malloc */
-#define GC_PERSISTENT_LOCAL (1<<8) /* persistent, but thread-local */
+
+   /* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
+   #define GC_NOT_COLLECTABLE  (1<<4)
+   #define GC_PROTECTED        (1<<5) /* used for recursion detection */
+   #define GC_IMMUTABLE        (1<<6) /* can't be changed in place */
+   #define GC_PERSISTENT       (1<<7) /* allocated using malloc */
+   #define GC_PERSISTENT_LOCAL (1<<8) /* persistent, but thread-local */
 ```
 
 The `GC_NOT_COLLECTABLE` flag indicates that the value may not be involved in a reference cycle.
@@ -177,8 +223,3 @@ information.
 The `GC_PERSISTENT_LOCAL` flag indicates that a `GC_PERSISTENT` value is only accessible in one
 thread, and is thus still safe to modify. This flag is only used in debug builds to satisfy an
 `assert`.
-
-[^non-rc]: Whether the macro works with non-reference counted types. If it does, the operation is usually a
-    no-op. If it does not, using the macro on these values is undefined behavior.
-
-[^immutable]: Whether the macro works with immutable types, described under [Immutable reference counted types](#immutable-reference-counted-types).
