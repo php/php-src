@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed ZipArchive::extractTo() and ZipArchive::getFrom*() reporting success
     on corrupted entries. (David Carlier)
 
+- SAPI:
+  . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
+
 27 Aug 2026, PHP 8.4.25
 
 - Core:
