@@ -145,7 +145,8 @@ array(1) {
 }
 Cannot traverse an already closed generator
 moved
-Cannot traverse an already closed generator
+array(0) {
+}
 append during traversal
 AB
 externally closed
@@ -156,4 +157,5 @@ reentrant unset
 array(0) {
 }
 reentrant move
-Cannot traverse an already closed generator
+array(0) {
+}
