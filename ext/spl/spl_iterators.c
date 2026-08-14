@@ -2801,15 +2801,10 @@ static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{
 		intern->u.append.iterator->funcs->get_current_key(
 			intern->u.append.iterator, &intern->u.append.current_key);
 		if (intern->u.append.empty_generators) {
-			zval *keys = zend_hash_index_find(intern->u.append.empty_generators,
+			zval *dummy = zend_hash_index_find(intern->u.append.empty_generators,
 				zend_object_to_weakref_key(Z_OBJ_P(it)));
-			if (keys) {
-				bool known_empty = Z_TYPE(intern->u.append.current_key) == IS_LONG
-					? zend_hash_index_exists(Z_ARRVAL_P(keys), Z_LVAL(intern->u.append.current_key))
-					: zend_hash_exists(Z_ARRVAL_P(keys), Z_STR(intern->u.append.current_key));
-				if (known_empty) {
-					return SUCCESS;
-				}
+			if (dummy) {
+				return SUCCESS;
 			}
 		}
 		intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, it, 0);
@@ -2831,20 +2826,14 @@ static void spl_append_it_record_empty_generator(spl_dual_it_object *intern) /* 
 		zend_hash_init(intern->u.append.empty_generators, 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zval *keys = zend_hash_index_find(intern->u.append.empty_generators,
+	zval *dummy = zend_hash_index_find(intern->u.append.empty_generators,
 		zend_object_to_weakref_key(Z_OBJ(intern->inner.zobject)));
-	if (!keys) {
-		zval new_keys;
-		array_init(&new_keys);
-		keys = zend_weakrefs_hash_add(intern->u.append.empty_generators,
-			Z_OBJ(intern->inner.zobject), &new_keys);
-		ZEND_ASSERT(keys != NULL);
-	}
-
-	if (Z_TYPE(intern->u.append.current_key) == IS_LONG) {
-		zend_hash_index_add_empty_element(Z_ARRVAL_P(keys), Z_LVAL(intern->u.append.current_key));
-	} else {
-		zend_hash_add_empty_element(Z_ARRVAL_P(keys), Z_STR(intern->u.append.current_key));
+	if (!dummy) {
+		zval empty_zval;
+		ZVAL_NULL(&empty_zval);
+		dummy = zend_weakrefs_hash_add(intern->u.append.empty_generators,
+			Z_OBJ(intern->inner.zobject), &empty_zval);
+		ZEND_ASSERT(dummy != NULL);
 	}
 } /* }}} */
 
