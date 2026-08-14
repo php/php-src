@@ -64,8 +64,8 @@ member, but never both at the same time. However, it doesn't know which member i
 Remembering this is our job, and that's exactly what the `IS_*` constants are for.
 
 The top members of `zend_value` mostly mirror the `IS_*` constants, with the exception of
-`counted`. `counted` polymorphically refers to any <a href="todo">reference counted</a> value, including
-strings, arrays, objects, resources and references. `null` and `bool` are missing from
+`counted`. `counted` polymorphically refers to any [reference-counted](reference-counting.md) value,
+including strings, arrays, objects, resources and references. `null` and `bool` are missing from
 `zend_value` because their types are self-contained.
 
 The rest of the fields aren't important for now.
@@ -111,8 +111,8 @@ intimidating at first. We'll go over it step by step.
 
 `zval.u1` stores the variable type, the given `IS_*` constant, along with some other flags. It's
 definition looks a bit complicated. You can think of the entire field as a 4 byte integer, split
-into 3 parts. `v.type` stores the actual variable type, `v.type_flags` is used for some <a
-href="todo">reference counting</a> flags, and `v.u.extra` is pretty much unused.
+into 3 parts. `v.type` stores the actual variable type, `v.type_flags` is used for some
+[reference-counting](reference-counting.md) flags, and `v.u.extra` is pretty much unused.
 
 `zval.u2` defines some more storage for various contexts that is often unoccupied. It's there
 because the memory would otherwise be wasted due to padding, so we may as well make use of it. We'll
@@ -149,8 +149,6 @@ there's a `_P`-suffixed variant that performs the same operation on a pointer to
 
 ~~~
 
-<!-- _todo: There are many more. -->
-
 ## Other zval types
 
 `zval`s are sometimes used internally with types that don't exist in userland.
@@ -168,15 +166,13 @@ there's a `_P`-suffixed variant that performs the same operation on a pointer to
 property/parameter initializers, etc.) before they are evaluated. The evaluation of a constant
 expression is not always possible during compilation, because they may contain references to values
 only available at runtime. Until that evaluation is possible, the constants contain the AST of the
-expression rather than the concrete values. Check the <a href="todo">parser</a> chapter for more information
-on ASTs. When this flag is set, the `zval.value.ast` union member is set accordingly.
+expression rather than the concrete values. When this flag is set, the `zval.value.ast` union member
+is set accordingly.
 
 `IS_INDIRECT` indicates that the `zval.value.zv` member is populated. This field stores a
 pointer to some other `zval`. This type is mainly used in two situations, namely for intermediate
 values between `FETCH` and `ASSIGN` instructions, and for the sharing of variables in the symbol
 table.
-
-<!-- _todo: There are many more. -->
 
 `IS_PTR` is used for pointers to arbitrary data. Most commonly, this type is used internally for
 `HashTable`, as `HashTable` may only store `zval` values. For example, `EG(class_table)`
@@ -188,8 +184,7 @@ Otherwise, it is essentially the same as `IS_PTR`. Arbitrary data is accessed th
 `zval.value.ptr`, and casted to the correct type depending on context. If `ptr` stores a class
 or function, the `zval.value.ce` or `zval.value.func` fields may be used, respectively.
 
-`_IS_ERROR` is used as an error value for some <a href="todo">object handlers</a>. It is described in more
-detail in its own chapter.
+`_IS_ERROR` is used as an error value for some object handlers.
 
 ```c
 
@@ -208,7 +203,7 @@ detail in its own chapter.
 ```
 
 These flags are never actually stored in `zval.u1`. They are used for type hinting and in the
-<a href="todo">object handler</a> API.
+object handler API.
 
 This only leaves the `zval.value.ww` field. In short, this field is used on 32-bit platforms when
 copying data from one `zval` to another. Normally, `zval.value.counted` is copied as a generic

@@ -100,8 +100,6 @@ Like with tokenization, we use a tool called `Bison` to generate the parser impl
 grammar specification. The grammar lives in the `Zend/zend_language_parser.y` file. Check the
 [Bison documentation](https://www.gnu.org/software/bison/manual/) for details. Luckily, the syntax is quite approachable.
 
-Parsing is described in more detail in its <a href="todo">dedicated chapter</a>.
-
 ## Compilation
 
 Computers don't understand human language, or even programming languages. They only understand
@@ -154,7 +152,7 @@ With these simple rules, we can see that the interpreter will `echo` only when `
 truthy, and skip over the `echo` otherwise.
 
 That's it! This is how PHP works, fundamentally. Of course, we skipped over a ton of details. The VM
-is quite complex, and will be discussed separately in the <a href="todo">virtual machine</a> chapter.
+is quite complex.
 
 ## Opcache
 

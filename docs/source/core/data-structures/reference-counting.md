@@ -189,8 +189,7 @@ they reference each other. This is called a reference cycle.
 PHP implements a cycle collector that detects such cycles and frees values that are only reachable
 through their own references. The cycle collector will record values that may be involved in a
 cycle, and run when this buffer becomes full. It is also possible to invoke it explicitly by calling
-the `gc_collect_cycles()` function. The cycle collectors design is described in the <a
-href="todo">Cycle collector</a> chapter.
+the `gc_collect_cycles()` function.
 
 ## GC flags
 
@@ -217,8 +216,7 @@ again.
 
 The `GC_PERSISTENT` flag indicates that the value was allocated using `malloc`, instead of PHPs
 own allocator. Usually, such values are alive for the entire lifetime of the process, instead of
-being freed at the end of the request. See the <a href="todo">Zend allocator</a> chapter for more
-information.
+being freed at the end of the request.
 
 The `GC_PERSISTENT_LOCAL` flag indicates that a `GC_PERSISTENT` value is only accessible in one
 thread, and is thus still safe to modify. This flag is only used in debug builds to satisfy an

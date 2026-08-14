@@ -115,5 +115,3 @@ file:
 
 Set any breakpoint in your C code, open a `php` (or `phpt`) file and start debugging from the
 "Run and Debug" tab in the sidebar.
-
-<!-- _todo: lldb should work mostly the same, I believe. It's available by default on macOS, and as such might be more convenient. -->
