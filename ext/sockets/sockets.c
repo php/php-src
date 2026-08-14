@@ -2341,13 +2341,26 @@ PHP_FUNCTION(socket_set_option)
 
 #ifdef SO_ATTACH_REUSEPORT_CBPF
 		case SO_ATTACH_REUSEPORT_CBPF: {
+			if (level != SOL_SOCKET) {
+				php_error_docref(NULL, E_WARNING, "Invalid level");
+				RETURN_FALSE;
+			}
+			if (Z_TYPE_P(arg4) != IS_LONG) {
+				zend_argument_type_error(4, "must be of type int when argument #3 ($option) is SO_ATTACH_REUSEPORT_CBPF, %s given", zend_zval_value_name(arg4));
+				RETURN_THROWS();
+			}
 			zend_long cbpf_val = zval_get_long(arg4);
 
 			if (!cbpf_val) {
+#ifdef SO_DETACH_REUSEPORT_BPF
 				ov = 1;
 				optlen = sizeof(ov);
 				opt_ptr = &ov;
-				optname = SO_DETACH_BPF;
+				optname = SO_DETACH_REUSEPORT_BPF;
+#else
+				php_error_docref(NULL, E_WARNING, "Detaching a reuseport CBPF filter is unsupported");
+				RETURN_FALSE;
+#endif
 			} else {
 				uint32_t k = (uint32_t)cbpf_val;
 

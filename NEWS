@@ -28,6 +28,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
     (Weilin Du)
 
+- Sockets:
+  . Fixed socket_set_option() with SO_ATTACH_REUSEPORT_CBPF and a zero value,
+    which detached the classic BPF filter instead of the reuseport program.
+    (David Carlier)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)

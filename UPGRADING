@@ -199,6 +199,16 @@ PHP 8.6 UPGRADE NOTES
     rules" message. Code that compares the exact message may need to be
     updated.
 
+- Sockets:
+  . socket_set_option() with SO_ATTACH_REUSEPORT_CBPF now requires an int
+    $value and a $level of SOL_SOCKET. Any other value type throws a TypeError
+    instead of being coerced, and any other level raises a warning and returns
+    false.
+  . socket_set_option() with SO_ATTACH_REUSEPORT_CBPF and a $value of 0 now
+    detaches the reuseport filter through SO_DETACH_REUSEPORT_BPF. It
+    previously used SO_DETACH_BPF, an alias of SO_DETACH_FILTER, which left the
+    reuseport program attached.
+
 - Sodium:
   . The password-hashing functions sodium_crypto_pwhash(),
     sodium_crypto_pwhash_str(),
@@ -860,6 +870,7 @@ PHP 8.6 UPGRADE NOTES
   . EAI_ALLDONE.
   . EAI_INTR.
   . EAI_IDN_ENCODE.
+  . SO_DETACH_REUSEPORT_BPF (Linux only).
 
 - Standard:
   . ARRAY_FILTER_USE_VALUE.
