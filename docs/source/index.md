@@ -13,6 +13,7 @@ introduction/ides/index
    :hidden:
 
 core/data-structures/index
+core/output-buffering
 ```
 
 ```{toctree}
