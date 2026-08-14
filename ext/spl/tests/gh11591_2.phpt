@@ -118,6 +118,19 @@ $generator = (function () use (&$iterator, &$generator): Generator {
 })();
 $iterator->append($generator);
 values($iterator);
+
+echo "throwing\n";
+$iterator = new AppendIterator();
+try {
+    $iterator->append((function (): Generator {
+        if (false) {
+            yield;
+        }
+        throw new RuntimeException('boom');
+    })());
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
 duplicate
@@ -157,3 +170,5 @@ array(0) {
 reentrant move
 array(0) {
 }
+throwing
+boom

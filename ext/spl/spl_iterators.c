@@ -121,7 +121,6 @@ typedef struct _spl_dual_it_object {
 		} caching;
 		struct {
 			zval                  zarrayit;
-			zval                  current_key;
 			zend_object_iterator *iterator;
 			HashTable            *empty_generators;
 		} append;
@@ -2031,9 +2030,7 @@ static void spl_dual_it_free_storage(zend_object *_object)
 		if (object->u.append.empty_generators) {
 			zend_weakrefs_hash_destroy(object->u.append.empty_generators);
 			FREE_HASHTABLE(object->u.append.empty_generators);
-		}
-		if (!Z_ISUNDEF(object->u.append.current_key)) {
-			zval_ptr_dtor(&object->u.append.current_key);
+			object->u.append.empty_generators = NULL;
 		}
 		if (Z_TYPE(object->u.append.zarrayit) != IS_UNDEF) {
 			zval_ptr_dtor(&object->u.append.zarrayit);
@@ -2778,10 +2775,6 @@ PHP_METHOD(EmptyIterator, next)
 static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
 {
 	spl_dual_it_free(intern);
-	if (!Z_ISUNDEF(intern->u.append.current_key)) {
-		zval_ptr_dtor(&intern->u.append.current_key);
-		ZVAL_UNDEF(&intern->u.append.current_key);
-	}
 
 	if (!Z_ISUNDEF(intern->inner.zobject)) {
 		zval_ptr_dtor(&intern->inner.zobject);
@@ -2798,8 +2791,6 @@ static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{
 		it  = intern->u.append.iterator->funcs->get_current_data(intern->u.append.iterator);
 		ZVAL_COPY(&intern->inner.zobject, it);
 		intern->inner.ce = Z_OBJCE_P(it);
-		intern->u.append.iterator->funcs->get_current_key(
-			intern->u.append.iterator, &intern->u.append.current_key);
 		if (intern->u.append.empty_generators) {
 			zval *dummy = zend_hash_index_find(intern->u.append.empty_generators,
 				zend_object_to_weakref_key(Z_OBJ_P(it)));
@@ -2882,7 +2873,6 @@ PHP_METHOD(AppendIterator, __construct)
 	}
 
 	intern->dit_type = DIT_AppendIterator;
-	ZVAL_UNDEF(&intern->u.append.current_key);
 	intern->u.append.empty_generators = NULL;
 	object_init_with_constructor(&intern->u.append.zarrayit, spl_ce_ArrayIterator, 0, NULL, NULL);
 	intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
