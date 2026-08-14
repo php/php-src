@@ -49,6 +49,13 @@ $iterator->append(new ArrayIterator(['A']));
 $iterator->append(emptyGenerator());
 values($iterator);
 values($iterator);
+
+echo "empty generator behind wrapper\n";
+$iterator = new AppendIterator();
+$iterator->append(new IteratorIterator(emptyGenerator()));
+$iterator->append(new ArrayIterator(['A']));
+values($iterator);
+values($iterator);
 ?>
 --EXPECT--
 reinsert same key
@@ -63,6 +70,15 @@ array(1) {
   string(3) "NEW"
 }
 empty appended after valid entry
+array(1) {
+  [0]=>
+  string(1) "A"
+}
+array(1) {
+  [0]=>
+  string(1) "A"
+}
+empty generator behind wrapper
 array(1) {
   [0]=>
   string(1) "A"
