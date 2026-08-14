@@ -17,6 +17,13 @@ core/output-buffering
 ```
 
 ```{toctree}
+   :caption: Extensions
+   :hidden:
+
+extensions/parameter-parsing
+```
+
+```{toctree}
    :caption: Miscellaneous
    :hidden:
 
