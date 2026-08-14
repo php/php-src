@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- Opcache:
+  . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
+
 - Readline:
   . Fixed the interactive shell not waiting for the pager process to exit.
     (Weilin Du)
