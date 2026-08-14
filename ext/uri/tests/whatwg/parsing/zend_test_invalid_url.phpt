@@ -1,15 +1,15 @@
 --TEST--
-Test the Lexbor-based URI parser
+Test zend_test_uri_parser() with an invalid Uri\WhatWg\Url
 --EXTENSIONS--
 zend_test
 --FILE--
 <?php
 
 try {
-  var_dump(zend_test_uri_parser('invalid uri', "Uri\\WhatWg\\Url"));
+    var_dump(zend_test_uri_parser('invalid uri', "Uri\\WhatWg\\Url"));
 } catch (Throwable $e) {
-  echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-  var_dump($e->errors);
+    echo $e::class, ': ', $e->getMessage(), "\n";
+    var_dump($e->errors);
 }
 
 ?>

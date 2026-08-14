@@ -1,5 +1,5 @@
 --TEST--
-Test UrlValidationError constructor error handling
+Test Uri\WhatWg\UrlValidationError constructor reentry
 --FILE--
 <?php
 
