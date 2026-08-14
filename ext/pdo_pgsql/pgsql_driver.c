@@ -297,31 +297,6 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY) == PDO_CURSOR_SCROLL;
 
-	if (scrollable) {
-		if (S->cursor_name) {
-			efree(S->cursor_name);
-		}
-		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
-		emulate = 1;
-	} else if (driver_options) {
-		if (pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares) == 1) {
-			emulate = 1;
-		}
-		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares) == 1) {
-			execute_only = 1;
-		}
-	} else {
-		emulate = H->emulate_prepares;
-		execute_only = H->disable_prepares;
-	}
-
-	if (emulate) {
-		stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
-	} else {
-		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
-		stmt->named_rewrite_template = "$%d";
-	}
-
 	S->is_unbuffered =
 		driver_options
 		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH))
@@ -361,6 +336,31 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 		S->is_unbuffered = true;
 	}
 #endif
+
+	if (scrollable) {
+		if (S->cursor_name) {
+			efree(S->cursor_name);
+		}
+		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
+		emulate = 1;
+	} else if (driver_options) {
+		if (pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares) == 1) {
+			emulate = 1;
+		}
+		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares) == 1) {
+			execute_only = 1;
+		}
+	} else {
+		emulate = H->emulate_prepares;
+		execute_only = H->disable_prepares;
+	}
+
+	if (emulate) {
+		stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+	} else {
+		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
+		stmt->named_rewrite_template = "$%d";
+	}
 
 	ret = pdo_parse_params(stmt, sql, &nsql);
 
