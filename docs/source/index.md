@@ -21,6 +21,7 @@ core/output-buffering
    :hidden:
 
 extensions/parameter-parsing
+extensions/unbundled-extensions
 ```
 
 ```{toctree}
