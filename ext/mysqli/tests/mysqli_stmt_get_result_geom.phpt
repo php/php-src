@@ -34,14 +34,8 @@ mysqli
             }
         }
 
-        if (!$stmt = mysqli_stmt_init($link)) {
-            printf("[%04d] [%d] %s\n", $offset + 6, mysqli_errno($link), mysqli_error($link));
-            return false;
-        }
-
-        if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test")) {
-            printf("[%04d] [%d] %s\n", $offset + 7, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-            mysqli_stmt_close($stmt);
+        if (!($stmt = mysqli_prepare($link, "SELECT id, label FROM test"))) {
+            printf("[%04d] [%d] %s\n", $offset + 7, mysqli_errno($link), mysqli_error($link));
             return false;
         }
 
@@ -66,13 +60,8 @@ mysqli
         while ($row = mysqli_fetch_assoc($res)) {
             $bind_res = &$row['label'];
 
-            if (!$stmt2 = mysqli_stmt_init($link)) {
+            if (!($stmt2 = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (?, ?)"))) {
                 printf("[%04d] [%d] %s\n", $offset + 11, mysqli_errno($link), mysqli_error($link));
-                return false;
-            }
-
-            if (!mysqli_stmt_prepare($stmt2, "INSERT INTO test(id, label) VALUES (?, ?)")) {
-                printf("[%04d] [%d] %s\n", $offset + 12, mysqli_stmt_errno($stmt2), mysqli_stmt_error($stmt2));
                 return false;
             }
 

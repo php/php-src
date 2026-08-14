@@ -95,7 +95,9 @@ PHP                                                                        NEWS
   . Passing objects to mb_convert_variables() is now deprecated. (Girgias)
 
 - MySQLi:
-  . The mysqli_get_charset() function is now deprecated. (Kamil Tekiela)
+  . The mysqli_get_charset() function and mysqli::get_charset() method are now deprecated. (Kamil Tekiela)
+  . The mysqli_stmt_init() function and mysqli::stmt_init() method are now deprecated. (Kamil Tekiela)
+  . Instantiation of mysqli_stmt without providing the $query parameter is now deprecated. (Kamil Tekiela)
 
 - PDO:
   . Fixed pdo_raise_impl_error() emitting a warning under ERRMODE_SILENT.

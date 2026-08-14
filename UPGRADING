@@ -476,8 +476,11 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_vars_parameter_of_mb_convert_variables
 
 - MySQLi:
-  . The mysqli_get_charset() function is now deprecated.
+  . The mysqli_get_charset() function and mysqli::get_charset() method are now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_mysqli_get_charset
+  . The mysqli_stmt_init() function, mysqli::stmt_init() method, and calling mysqli_stmt constructor
+    without providing the $query parameter are now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_mysqlistmt_init
 
 - Reflection:
   . Calling ReflectionProperty::setValue() with an object that is not an

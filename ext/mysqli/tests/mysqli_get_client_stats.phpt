@@ -310,13 +310,12 @@ mysqli.allow_local_infile=1
     mysqli_get_client_stats_assert_eq('flushed_normal_sets', $info, $expected, $test_counter);
 
     print "Testing buffered Prepared Statements...\n";
-    if (!$stmt = mysqli_stmt_init($link))
-        printf("[%03d] stmt_init() failed, [%d] %s\n",
+    if (!$stmt = mysqli_prepare($link, 'SELECT id, label FROM test'))
+        printf("[%03d] mysqli_prepare() failed, [%d] %s\n",
             ++$test_counter, mysqli_errno($link), mysqli_error($link));
 
-    if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test') ||
-            !mysqli_stmt_execute($stmt))
-        printf("[%03d] prepare/execute failed, [%d] %s\n",
+    if (!mysqli_stmt_execute($stmt))
+        printf("[%03d] mysqli_stmt_execute() failed, [%d] %s\n",
             ++$test_counter, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     /* by default PS is unbuffered - no change */
