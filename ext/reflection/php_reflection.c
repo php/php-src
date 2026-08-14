@@ -296,12 +296,11 @@ static void _function_string(smart_str *str, const zend_function *fptr, const ze
 static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char *indent);
 static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent);
 static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent);
-static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
 static void _extension_string(smart_str *str, const zend_module_entry *module);
 static void _zend_extension_string(smart_str *str, const zend_extension *extension);
 
 /* {{{ _class_string */
-static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent)
+static void _class_string(smart_str *str, zend_class_entry *ce, zend_object *obj, const char *indent)
 {
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->doc_comment) {
@@ -310,7 +309,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 		smart_str_appendc(str, '\n');
 	}
 
-	if (obj && Z_TYPE_P(obj) == IS_OBJECT) {
+	if (obj) {
 		smart_str_append_printf(str, "%sObject of class [ ", indent);
 	} else {
 		const char *kind = "Class";
@@ -492,8 +491,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	}
 	smart_str_append_printf(str, "%s  }\n", indent);
 
-	if (obj && Z_TYPE_P(obj) == IS_OBJECT) {
-		HashTable *properties = zend_get_properties_no_lazy_init(Z_OBJ_P(obj));
+	if (obj) {
+		HashTable *properties = zend_get_properties_no_lazy_init(obj);
 		smart_str prop_str = {0};
 
 		count = 0;
@@ -527,7 +526,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 				zend_function *closure;
 				/* see if this is a closure */
 				if (obj && is_closure_invoke(ce, mptr->common.function_name)
-					&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
+					&& (closure = zend_get_closure_invoke_method(obj)) != NULL)
 				{
 					mptr = closure;
 				} else {
@@ -4260,7 +4259,7 @@ ZEND_METHOD(ReflectionClass, __toString)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
-	_class_string(&str, ce, &intern->obj, "");
+	_class_string(&str, ce, Z_ISUNDEF(intern->obj) ? NULL : Z_OBJ(intern->obj), "");
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
