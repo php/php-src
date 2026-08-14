@@ -1347,7 +1347,15 @@ static double safe_pow(double base, double exponent)
 		zend_power_base_0_exponent_lt_0_error();
 	}
 
+#if XPFPA_HAVE_CW
+	{
+		XPFPA_DECLARE
+		XPFPA_SWITCH_DOUBLE_EXTENDED();
+		XPFPA_RETURN_DOUBLE(pow(base, exponent));
+	}
+#else
 	return pow(base, exponent);
+#endif
 }
 
 static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
