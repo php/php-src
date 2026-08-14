@@ -7,7 +7,7 @@ $uri = new Uri\Rfc3986\Uri("https://example.com");
 
 try {
     $uri->resolve("á");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -15,7 +15,7 @@ $url = new Uri\WhatWg\Url("https://example.com");
 
 try {
     $url->resolve("https://1.2.3.4.5");
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

@@ -29,25 +29,25 @@ var_dump($uri6->getHost());
 
 try {
     $uri3->withHost("test.com:8080");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $uri3->withHost("t%3As%2Ft.com"); // t:s/t.com
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $uri3->withHost("t:s/t.com");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $uri2->withHost("");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -59,7 +59,7 @@ var_dump($uri2->getHost());
 
 try {
     $uri1->withHost(null);
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -77,25 +77,25 @@ var_dump($url5->getAsciiHost());
 
 try {
     $url3->withHost("test.com:8080");
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $url3->withHost("t%3As%2Ft.com"); // t:s/t.com
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $url3->withHost("t:s/t.com");     // t:s/t.com
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $url2->withHost(null);
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

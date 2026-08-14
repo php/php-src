@@ -25,7 +25,7 @@ var_dump($uri2->getPort());
 
 try {
     $uri4->withUserInfo("u:s/r");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

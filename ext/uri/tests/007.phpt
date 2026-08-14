@@ -5,13 +5,13 @@ Test URI creation errors
 
 try {
     new Uri\Rfc3986\Uri("https://example.com:8080@username:password/path?q=r#fragment");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     new Uri\WhatWg\Url("https://example.com:8080@username:password/path?q=r#fragment");
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump($e->errors);
 }

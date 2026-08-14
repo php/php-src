@@ -17,13 +17,13 @@ var_dump($uri3->getFragment());
 
 try {
     $uri3->withFragment(" ");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $uri1->withFragment("#fragment2");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

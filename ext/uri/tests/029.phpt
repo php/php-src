@@ -37,7 +37,7 @@ var_dump($uri5->getQuery());
 
 try {
     $uri5->withQuery("#");
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

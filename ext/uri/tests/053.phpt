@@ -12,25 +12,25 @@ $r = new Uri\WhatWg\InvalidUrlException(
 
 try {
     $r->__construct("foo");
-} catch (Error $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $r->__construct("bar", []);
-} catch (Error $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $r->__construct("baz", [], 0);
-} catch (Error $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $r->__construct("qax", [], 0, null);
-} catch (Error $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

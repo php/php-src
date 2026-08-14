@@ -5,7 +5,7 @@ Test UrlValidationErrorType singleton
 
 try {
     new \Uri\WhatWg\Url('http://localhost:99999');
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump($e->errors[0]->type === \Uri\WhatWg\UrlValidationErrorType::PortOutOfRange);
 }

@@ -9,7 +9,7 @@ use Uri\WhatWg\UrlValidationErrorType;
 
 try {
     new InvalidUrlException('message', ['foo']);
-} catch (ValueError $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -17,7 +17,7 @@ try {
     new InvalidUrlException('message', [
         1 => new UrlValidationError('context', UrlValidationErrorType::HostMissing, true)
     ]);
-} catch (ValueError $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

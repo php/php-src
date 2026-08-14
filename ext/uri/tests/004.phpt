@@ -8,7 +8,7 @@ var_dump(Uri\Rfc3986\Uri::parse(""));
 
 try {
     new Uri\WhatWg\Url("");
-} catch (Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

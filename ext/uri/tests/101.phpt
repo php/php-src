@@ -7,7 +7,7 @@ zend_test
 
 try {
   var_dump(zend_test_uri_parser('invalid uri', "Uri\\WhatWg\\Url"));
-} catch (\Uri\WhatWg\InvalidUrlException $e) {
+} catch (Throwable $e) {
   echo $e::class, ': ', $e->getMessage(), PHP_EOL;
   var_dump($e->errors);
 }

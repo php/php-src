@@ -7,7 +7,7 @@ $r = new Uri\WhatWg\UrlValidationError('foo', Uri\WhatWg\UrlValidationErrorType:
 
 try {
     $r->__construct('bar', Uri\WhatWg\UrlValidationErrorType::HostMissing, false);
-} catch (Error $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

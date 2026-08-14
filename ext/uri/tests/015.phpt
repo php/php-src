@@ -9,14 +9,14 @@ uri
 try {
     $reflectionClass = new ReflectionClass(Uri\Rfc3986\Uri::class);
     $reflectionClass->newInstanceWithoutConstructor();
-} catch (ReflectionException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $reflectionClass = new ReflectionClass(Uri\WhatWg\Url::class);
     $reflectionClass->newInstanceWithoutConstructor();
-} catch (ReflectionException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

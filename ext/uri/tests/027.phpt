@@ -29,7 +29,7 @@ var_dump($uri2->getPort());
 
 try {
     $uri1->withPort(1);
-} catch (Uri\InvalidUriException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
