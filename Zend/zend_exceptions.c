@@ -83,7 +83,6 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 		zend_get_object_type_uc(class_type),
 		ZSTR_VAL(class_type->name),
 		ZSTR_VAL(interface->name));
-	return FAILURE;
 }
 /* }}} */
 
