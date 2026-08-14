@@ -130,6 +130,22 @@ static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
 #define ZSTR_MAX_OVERHEAD (ZEND_MM_ALIGNED_SIZE(_ZSTR_HEADER_SIZE + 1))
 #define ZSTR_MAX_LEN (SIZE_MAX - ZSTR_MAX_OVERHEAD)
 
+/* True when a zend_long is too large to be used as a zend_string length.
+ * zend_string_alloc() and zend_string_safe_alloc() add the header and the
+ * terminating NUL to the requested length without checking for overflow, so a
+ * length above ZSTR_MAX_LEN wraps to a tiny allocation carrying a huge
+ * ZSTR_LEN. Callers must reject negative values separately.
+ *
+ * Always false where zend_long is no wider than size_t: a non-negative
+ * zend_long cannot exceed ZSTR_MAX_LEN there. Note that the same is not true
+ * of a size_t operand, which is why plain comparisons against ZSTR_MAX_LEN are
+ * used for those. */
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+# define ZEND_LONG_ZSTR_LEN_OVFL(zlong) UNEXPECTED((zlong) > (zend_long) ZSTR_MAX_LEN)
+#else
+# define ZEND_LONG_ZSTR_LEN_OVFL(zlong) (0)
+#endif
+
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
 	GC_SET_REFCOUNT(str, 1); \
