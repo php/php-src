@@ -745,9 +745,9 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_host(const zen
 	}
 
 	const char *first = ZSTR_VAL(host);
-	const char *last = ZSTR_VAL(host) + ZSTR_LEN(host) - 1;
+	const char *last = ZSTR_VAL(host) + ZSTR_LEN(host);
 
-	while (first <= last && php_uri_whatwg_is_ascii_tab_or_newline((unsigned char) *first)) {
+	while (first < last && php_uri_whatwg_is_ascii_tab_or_newline((unsigned char) *first)) {
 		first++;
 	}
 
@@ -756,18 +756,14 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_host(const zen
 		return SUCCESS;
 	}
 
-	while (first <= last && php_uri_whatwg_is_ascii_tab_or_newline((unsigned char) *last)) {
+	while (first < last && php_uri_whatwg_is_ascii_tab_or_newline((unsigned char) *last)) {
 		last--;
 	}
 
-	if (*last != ']') {
-		return php_uri_parser_whatwg_component_error("host", LXB_URL_ERROR_TYPE_IPV6_UNCLOSED);
-	}
-
-	lxb_char_t *stripped_host = emalloc(last - first);
+	lxb_char_t *stripped_host = emalloc(last - first + 1);
 	size_t stripped_host_len = 0;
 
-	for (const char *i = first + 1; i < last; i++) {
+	for (const char *i = first; i < last; i++) {
 		const unsigned char uc = (unsigned char) *i;
 
 		if (!php_uri_whatwg_is_ascii_tab_or_newline(uc)) {
@@ -777,10 +773,10 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_host(const zen
 	stripped_host[stripped_host_len] = '\0';
 
 	uint16_t ipv6[8];
-	const lxb_status_t result = lxb_url_ipv6_parse(
+	const lxb_status_t result = lxb_url_parse_host_ipv6(
 		&lexbor_parser,
 		stripped_host,
-		stripped_host + stripped_host_len,
+		stripped_host_len,
 		ipv6
 	);
 
