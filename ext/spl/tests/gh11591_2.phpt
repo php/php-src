@@ -20,11 +20,8 @@ echo "duplicate\n";
 $generator = emptyGenerator();
 $iterator = new AppendIterator();
 $iterator->append($generator);
-try {
-    $iterator->append($generator);
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
+$iterator->append($generator);
+values($iterator);
 
 echo "replacement\n";
 $iterator = new AppendIterator();
@@ -124,7 +121,8 @@ values($iterator);
 ?>
 --EXPECT--
 duplicate
-Cannot traverse an already closed generator
+array(0) {
+}
 replacement
 array(1) {
   [0]=>
