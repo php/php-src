@@ -2378,8 +2378,8 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		}
 
 		/* Abstract method signatures from the trait must be satisfied. An inherited
-		 * private method is not accessible from the using class, so allow the abstract
-		 * trait method to replace it below instead of treating it as an implementation. */
+		 * private method is not accessible from the using class, so it does not
+		 * satisfy the requirement; only a private method from the class itself does. */
 		if ((fn->common.fn_flags & ZEND_ACC_ABSTRACT)
 				&& (!(existing_fn->common.fn_flags & ZEND_ACC_PRIVATE)
 					|| fixup_trait_scope(existing_fn, ce) == ce)) {
