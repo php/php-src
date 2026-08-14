@@ -26,7 +26,6 @@ myst_enable_extensions = [
     'tasklist',
 ]
 myst_heading_anchors = 6
-source_suffix = {'.rst': 'markdown'}
 templates_path = ['_templates']
 html_theme = 'sphinxawesome_theme'
 html_static_path = ['_static']
