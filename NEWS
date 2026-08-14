@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
     is freed while the stream is still open). (Eyüp Can Akman)
 
+- SAPI:
+  . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
+
 13 Aug 2026, PHP 8.6.0beta1
 
 - Core:
