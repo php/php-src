@@ -30517,6 +30517,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_MAKE_REF_SPEC
 			zend_error(E_NOTICE, "Only variables should be assigned by reference");
 			if (UNEXPECTED(EG(exception))) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -50087,6 +50088,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_MAKE_REF_SPEC
 			if (UNEXPECTED(EG(exception))) {
 
 
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -83164,6 +83166,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MAKE_REF_SPEC_VAR_
 			zend_error(E_NOTICE, "Only variables should be assigned by reference");
 			if (UNEXPECTED(EG(exception))) {
 				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -102632,6 +102635,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_MAKE_REF_SPEC_CV_U
 			if (UNEXPECTED(EG(exception))) {
 
 
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
 		}

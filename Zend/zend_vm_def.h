@@ -9398,6 +9398,7 @@ ZEND_VM_HANDLER(140, ZEND_MAKE_REF, VAR|CV, UNUSED)
 			zend_error(E_NOTICE, "Only variables should be assigned by reference");
 			if (UNEXPECTED(EG(exception))) {
 				FREE_OP1();
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			}
 		}
