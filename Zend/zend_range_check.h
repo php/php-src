@@ -57,8 +57,12 @@
 # define ZEND_SIZE_T_UINT_OVFL(size) (0)
 #endif
 
-/* Comparison zend_long vs size_t */
+/* zend_long vs size_t checks. */
 #if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+# define ZEND_LONG_SIZE_T_OVFL(zlong) UNEXPECTED((zlong) > (zend_long)SIZE_MAX)
+# define ZEND_LONG_FITS_SIZE_T(zlong) EXPECTED((zlong) >= 0 && (zlong) <= (zend_long)SIZE_MAX)
+# define ZEND_LONG_NOT_FITS_SIZE_T(zlong) UNEXPECTED((zlong) < 0 || (zlong) > (zend_long)SIZE_MAX)
+
 # define ZEND_SIZE_T_GT_ZEND_LONG(size, zlong) ((zlong) < 0 || ((zlong) < SIZE_MAX && (size) > (size_t)(zlong)))
 # define ZEND_SIZE_T_GT_ZEND_ULONG(size, zulong) (zulong < SIZE_MAX && (size) > (size_t)(zulong))
 # define ZEND_SIZE_T_GTE_ZEND_LONG(size, zlong) ((zlong) < 0 || ((zlong) <= SIZE_MAX && (size) >= (size_t)(zlong)))
@@ -68,6 +72,10 @@
 # define ZEND_SIZE_T_LTE_ZEND_LONG(size, zlong) ((zlong) > SIZE_MAX || ((zlong) >= 0 && (size) <= (size_t)(zlong)))
 # define ZEND_SIZE_T_LTE_ZEND_ULONG(size, zulong) ((zulong) > SIZE_MAX || (size) <= (size_t)(zlong))
 #else
+# define ZEND_LONG_SIZE_T_OVFL(zlong) (0)
+# define ZEND_LONG_FITS_SIZE_T(zlong) EXPECTED((zlong) >= 0)
+# define ZEND_LONG_NOT_FITS_SIZE_T(zlong) UNEXPECTED((zlong) < 0)
+
 # define ZEND_SIZE_T_GT_ZEND_LONG(size, zlong) ((zlong) < 0 || (size) > (size_t)(zlong))
 # define ZEND_SIZE_T_GT_ZEND_ULONG(size, zulong) ((size) > (size_t)(zulong))
 # define ZEND_SIZE_T_GTE_ZEND_LONG(size, zlong) ((zlong) < 0 || (size) >= (size_t)(zlong))
@@ -77,5 +85,14 @@
 # define ZEND_SIZE_T_LTE_ZEND_LONG(size, zlong) ((zlong) >= 0 && (size) <= (size_t)(zlong))
 # define ZEND_SIZE_T_LTE_ZEND_ULONG(size, zulong) ((size) <= (size_t)(zulong))
 #endif
+
+# define ZEND_LONG_GT_SIZE_T(zlong, size) ZEND_SIZE_T_LT_ZEND_LONG(size, zlong)
+# define ZEND_ULONG_GT_SIZE_T(zulong, size) ZEND_SIZE_T_LT_ZEND_ULONG(size, zulong)
+# define ZEND_LONG_GTE_SIZE_T(zlong, size) ZEND_SIZE_T_LTE_ZEND_LONG(size, zlong)
+# define ZEND_ULONG_GTE_SIZE_T(zulong, size) ZEND_SIZE_T_LTE_ZEND_ULONG(size, zulong)
+# define ZEND_LONG_LT_SIZE_T(zlong, size) ZEND_SIZE_T_GT_ZEND_LONG(size, zlong)
+# define ZEND_ULONG_LT_SIZE_T(zulong, size) ZEND_SIZE_T_GT_ZEND_ULONG(size, zulong)
+# define ZEND_LONG_LTE_SIZE_T(zlong, size) ZEND_SIZE_T_GTE_ZEND_LONG(size, zlong)
+# define ZEND_ULONG_LTE_SIZE_T(zulong, size) ZEND_SIZE_T_GTE_ZEND_ULONG(size, zulong)
 
 #endif /* ZEND_RANGE_CHECK_H */
