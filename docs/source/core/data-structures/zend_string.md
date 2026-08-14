@@ -22,9 +22,9 @@ the strings length, along with some other fields. It looks as follows:
    };
 ```
 
-The `gc` field is used for {doc}`./reference-counting`. The `h` field contains a hash value, which is
-used for hash table lookups. The `len` field stores the length of the string in bytes, and the `val`
-field contains the actual string data.
+The `gc` field is used for {doc}`../memory-management/reference-counting`. The `h` field contains a hash value,
+which is used for hash table lookups. The `len` field stores the length of the string in bytes, and
+the `val` field contains the actual string data.
 
 You may wonder why the `val` field is declared as `char val[1]`. This is called the [struct
 hack](https://www.geeksforgeeks.org/struct-hack/) in C. It is used to create structs with a flexible size, namely by allowing the last element
@@ -145,7 +145,7 @@ strings.
 
    -  -  `zend_string_separate(s)`
       -  Duplicates the string if the reference count is greater than 1. See
-         {doc}`./reference-counting` for details.
+         {doc}`../memory-management/reference-counting` for details.
 
    -  -  `zend_string_realloc(s, l, p)`
 
@@ -167,9 +167,9 @@ Programs use some strings many times. For example, if your program declares a cl
 `MyClass`, it would be wasteful to allocate a new string `"MyClass"` every time it is referenced
 within your program. Instead, when repeated strings are expected, php-src uses a technique called
 string interning. Essentially, this is just a simple `HashTable` where existing interned strings are
-stored. When creating a new interned string, php-src first checks the interned string
-buffer. If it finds it there, it can return a pointer to the existing string. If it doesn't, it
-allocates a new string and adds it to the buffer.
+stored. When creating a new interned string, php-src first checks the interned string buffer. If it
+finds it there, it can return a pointer to the existing string. If it doesn't, it allocates a new
+string and adds it to the buffer.
 
 ```c
 

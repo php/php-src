@@ -1,4 +1,4 @@
-# Reference counting
+# Reference Counting
 
 In languages like C, when you need memory for storing data for an indefinite period of time or in a
 large amount, you call `malloc` and `free` to acquire and release blocks of memory of some size.

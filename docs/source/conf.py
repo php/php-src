@@ -67,3 +67,17 @@ theme_options = ThemeOptions(
 )
 html_theme_options = asdict(theme_options)
 pygments_style = 'sphinx'
+
+
+redirects = {
+    'core/data-structures/reference-counting': '../memory-management/reference-counting.html',
+}
+
+
+def generate_redirects(_app):
+    for source, target in redirects.items():
+        yield source, {'redirect_url': target}, 'redirect.html'
+
+
+def setup(app):
+    app.connect('html-collect-pages', generate_redirects)

@@ -64,9 +64,9 @@ member, but never both at the same time. However, it doesn't know which member i
 Remembering this is our job, and that's exactly what the `IS_*` constants are for.
 
 The top members of `zend_value` mostly mirror the `IS_*` constants, with the exception of
-`counted`. `counted` polymorphically refers to any [reference-counted](reference-counting.md) value,
-including strings, arrays, objects, resources and references. `null` and `bool` are missing from
-`zend_value` because their types are self-contained.
+`counted`. `counted` polymorphically refers to any [reference-counted](../memory-management/reference-counting.md)
+value, including strings, arrays, objects, resources and references. `null` and `bool` are missing
+from `zend_value` because their types are self-contained.
 
 The rest of the fields aren't important for now.
 
@@ -112,7 +112,8 @@ intimidating at first. We'll go over it step by step.
 `zval.u1` stores the variable type, the given `IS_*` constant, along with some other flags. It's
 definition looks a bit complicated. You can think of the entire field as a 4 byte integer, split
 into 3 parts. `v.type` stores the actual variable type, `v.type_flags` is used for some
-[reference-counting](reference-counting.md) flags, and `v.u.extra` is pretty much unused.
+[reference-counting](../memory-management/reference-counting.md) flags, and `v.u.extra` is pretty
+much unused.
 
 `zval.u2` defines some more storage for various contexts that is often unoccupied. It's there
 because the memory would otherwise be wasted due to padding, so we may as well make use of it. We'll
