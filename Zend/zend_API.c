@@ -3238,12 +3238,9 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		while (ptr->fname) {
 			fname_len = strlen(ptr->fname);
-			lowercase_name = zend_string_alloc(fname_len, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lowercase_name), ptr->fname, fname_len);
-			if (zend_hash_exists(target_function_table, lowercase_name)) {
+			if (zend_hash_str_find_ptr_lc(target_function_table, ptr->fname, fname_len) != NULL) {
 				zend_error(error_type, "Function registration failed - duplicate name - %s%s%s", scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
 			}
-			zend_string_efree(lowercase_name);
 			ptr++;
 		}
 		zend_unregister_functions(functions, count, target_function_table);
