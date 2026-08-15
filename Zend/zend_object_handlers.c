@@ -2061,17 +2061,14 @@ static zend_always_inline zend_function *get_static_method_fallback(
 
 ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, zend_string *function_name, const zval *key) /* {{{ */
 {
-	zend_string *lc_function_name;
+	zend_function *fbc;
 	if (EXPECTED(key != NULL)) {
-		lc_function_name = Z_STR_P(key);
+		fbc = zend_hash_find_ptr(&ce->function_table, Z_STR_P(key));
 	} else {
-		lc_function_name = zend_string_tolower(function_name);
+		fbc = zend_hash_find_ptr_lc(&ce->function_table, function_name);
 	}
 
-	zend_function *fbc;
-	zval *func = zend_hash_find(&ce->function_table, lc_function_name);
-	if (EXPECTED(func)) {
-		fbc = Z_FUNC_P(func);
+	if (EXPECTED(fbc)) {
 		if (!(fbc->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			const zend_class_entry *scope = zend_get_executed_scope();
 			ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_PUBLIC));
@@ -2085,10 +2082,6 @@ ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, z
 		}
 	} else {
 		fbc = get_static_method_fallback(ce, function_name);
-	}
-
-	if (UNEXPECTED(!key)) {
-		zend_string_release_ex(lc_function_name, 0);
 	}
 
 	if (EXPECTED(fbc)) {
