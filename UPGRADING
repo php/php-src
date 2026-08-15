@@ -789,6 +789,13 @@ PHP 8.6 UPGRADE NOTES
 12. Windows Support
 ========================================
 
+- Core:
+  . The official Windows builds now use Visual Studio 2026 (VS18).
+
+- OpenSSL:
+  . The OpenSSL library used by the official Windows builds has been upgraded
+    to OpenSSL 4.
+
 ========================================
 13. Other Changes
 ========================================
