@@ -44,6 +44,6 @@ var_dump(session_status() === PHP_SESSION_ACTIVE);
 
 ?>
 --EXPECT--
-Error: Session id must be a string
+TypeError: Session id must be of type string, null given
 Exception: create_sid failed
 bool(true)

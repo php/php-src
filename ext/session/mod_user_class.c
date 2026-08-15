@@ -51,6 +51,7 @@ PHP_METHOD(SessionHandler, open)
 	} zend_end_try();
 
 	if (SUCCESS == ret) {
+		ZEND_ASSERT(PS(mod_data) && "opened default session must have mod_data");
 		PS(mod_user_is_open) = true;
 	}
 
@@ -142,13 +143,18 @@ PHP_METHOD(SessionHandler, gc)
 
 PHP_METHOD(SessionHandler, create_sid)
 {
-	zend_string *id;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	PS_SANITY_CHECK;
+	if (!PS(mod_user_is_open)) {
+		php_error_docref(NULL, E_WARNING, "Parent session handler is not open, defaulting to session_create_id()");
+		RETURN_STR(php_session_create_id(NULL));
+	}
 
-	id = PS(default_mod)->s_create_sid(&PS(mod_data));
+	zend_string *id = PS(default_mod)->s_create_sid(&PS(mod_data));
+	if (UNEXPECTED(id == NULL)) {
+		zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+	}
 
 	RETURN_STR(id);
 }
