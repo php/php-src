@@ -635,9 +635,9 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 	} else if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
 		guards = Z_ARRVAL_P(zv);
 		ZEND_ASSERT(guards != NULL);
-		zv = zend_hash_find(guards, member);
-		if (zv != NULL) {
-			return (uint32_t*)(((uintptr_t)Z_PTR_P(zv)) & ~1);
+		void *guard = zend_hash_find_ptr(guards, member);
+		if (guard != NULL) {
+			return (uint32_t*)(((uintptr_t)guard) & ~1);
 		}
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
