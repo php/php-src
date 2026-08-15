@@ -294,13 +294,9 @@ static zend_never_inline int is_protected_compatible_scope(const zend_class_entr
 
 static zend_never_inline zend_property_info *zend_get_parent_private_property(const zend_class_entry *scope, const zend_class_entry *ce, zend_string *member) /* {{{ */
 {
-	zval *zv;
-	zend_property_info *prop_info;
-
 	if (scope != ce && scope && is_derived_class(ce, scope)) {
-		zv = zend_hash_find(&scope->properties_info, member);
-		if (zv != NULL) {
-			prop_info = (zend_property_info*)Z_PTR_P(zv);
+		zend_property_info *prop_info = zend_hash_find_ptr(&scope->properties_info, member);
+		if (prop_info != NULL) {
 			if ((prop_info->flags & ZEND_ACC_PRIVATE)
 			 && prop_info->ce == scope) {
 				return prop_info;
@@ -364,7 +360,6 @@ static zend_always_inline const zend_class_entry *get_fake_or_executed_scope(voi
 
 static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, const zend_property_info **info_ptr) /* {{{ */
 {
-	zval *zv;
 	zend_property_info *property_info;
 	uint32_t flags;
 	uintptr_t offset;
@@ -375,7 +370,7 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 	}
 
 	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)
-	 || UNEXPECTED((zv = zend_hash_find(&ce->properties_info, member)) == NULL)) {
+	 || UNEXPECTED((property_info = zend_hash_find_ptr(&ce->properties_info, member)) == NULL)) {
 		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0') && ZSTR_LEN(member) != 0) {
 			if (!silent) {
 				zend_bad_property_name();
@@ -390,7 +385,6 @@ dynamic:
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	}
 
-	property_info = (zend_property_info*)Z_PTR_P(zv);
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
@@ -474,12 +468,11 @@ static ZEND_COLD void zend_wrong_offset(zend_class_entry *ce, zend_string *membe
 
 ZEND_API zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent) /* {{{ */
 {
-	zval *zv;
 	zend_property_info *property_info;
 	uint32_t flags;
 
 	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)
-	 || EXPECTED((zv = zend_hash_find(&ce->properties_info, member)) == NULL)) {
+	 || EXPECTED((property_info = zend_hash_find_ptr(&ce->properties_info, member)) == NULL)) {
 		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0') && ZSTR_LEN(member) != 0) {
 			if (!silent) {
 				zend_bad_property_name();
@@ -490,7 +483,6 @@ dynamic:
 		return NULL;
 	}
 
-	property_info = (zend_property_info*)Z_PTR_P(zv);
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
