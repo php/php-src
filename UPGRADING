@@ -205,6 +205,8 @@ PHP 8.6 UPGRADE NOTES
   . SplFileObject::next() past EOF no longer increments key() without bound.
     SplFileObject::seek() past EOF now produces the same key() value as
     SplTempFileObject; the two previously returned different values.
+  . DirectoryIterator::key() now returns int|string, 
+    and DirectoryIterator::current() returns string|SplFileInfo|static.
 
 - SimpleXML:
   . SimpleXMLElement::__construct() now raises a ValueError when the $data
