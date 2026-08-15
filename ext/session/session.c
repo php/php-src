@@ -2158,6 +2158,9 @@ PHP_FUNCTION(session_set_save_handler)
 		} else if (zend_hash_find_ptr(object_methods, create_sid_name)) {
 			/* For BC reasons we accept methods even if the class does not implement the interface */
 			SESSION_SET_USER_HANDLER_OO(ps_create_sid, zend_string_copy(create_sid_name));
+		} else {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Providing an object to argument #1 ($sessionhandler) which does not have the create_sid() method defined is deprecated");
 		}
 		zend_string_release_ex(create_sid_name, false);
 
@@ -2179,6 +2182,9 @@ PHP_FUNCTION(session_set_save_handler)
 			if (zend_hash_find_ptr(object_methods, validate_sid_name)) {
 				/* For BC reasons we accept methods even if the class does not implement the interface */
 				SESSION_SET_USER_HANDLER_OO(ps_validate_sid, zend_string_copy(validate_sid_name));
+			} else {
+				php_error_docref(NULL, E_DEPRECATED,
+					"Providing an object to argument #1 ($sessionhandler) which does not have the validateId() method defined is deprecated");
 			}
 			if (zend_hash_find_ptr(object_methods, update_timestamp_name)) {
 				/* For BC reasons we accept methods even if the class does not implement the interface */
@@ -2929,6 +2935,20 @@ static PHP_GINIT_FUNCTION(ps)
 	ps_globals->random_seeded = false;
 }
 
+static int session_handler_interface_gets_implemented(zend_class_entry *self, zend_class_entry *class) {
+	if (!zend_hash_str_exists(&class->function_table, ZEND_STRL("create_sid"))) {
+		zend_error(E_WARNING,
+			"Class %s implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0",
+			ZSTR_VAL(class->name));
+	}
+	if (!zend_hash_str_exists(&class->function_table, ZEND_STRL("validateid"))) {
+		zend_error(E_WARNING,
+			"Class %s implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0",
+			ZSTR_VAL(class->name));
+	}
+	return SUCCESS;
+}
+
 static PHP_MINIT_FUNCTION(session)
 {
 	zend_register_auto_global(zend_string_init_interned(ZEND_STRL("_SESSION"), true), false, NULL);
@@ -2947,6 +2967,7 @@ static PHP_MINIT_FUNCTION(session)
 
 	/* Register interfaces */
 	php_session_iface_entry = register_class_SessionHandlerInterface();
+	php_session_iface_entry->interface_gets_implemented = session_handler_interface_gets_implemented;
 
 	php_session_id_iface_entry = register_class_SessionIdInterface();
 
