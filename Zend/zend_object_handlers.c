@@ -2615,12 +2615,13 @@ is_string:
 ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
 {
 	zend_class_entry *ce = obj->ce;
-	const zval *func = zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
+	zend_function *func = zend_hash_find_ex_ptr(
+		&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE), /* known_hash */ true);
 
 	if (func == NULL) {
 		return FAILURE;
 	}
-	*fptr_ptr = Z_FUNC_P(func);
+	*fptr_ptr = func;
 	*ce_ptr = ce;
 	*obj_ptr = obj;
 
