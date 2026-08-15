@@ -429,9 +429,9 @@ static zend_result php_session_initialize(void)
 	}
 
 	/* Open session handler first */
-	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE
-		/* || PS(mod_data) == NULL */ /* FIXME: open must set valid PS(mod_data) with success */
-	) {
+	const zend_result open_status = PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name));
+	/* NOTE: PS(mod_data) might be null if the session is a custom userland session handler */
+	if (open_status == FAILURE) {
 		php_session_abort();
 		if (!EG(exception)) {
 			php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
@@ -2399,7 +2399,10 @@ PHP_FUNCTION(session_regenerate_id)
 	zend_string_release_ex(PS(id), false);
 	PS(id) = NULL;
 
-	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
+	/* Open session handler first */
+	const zend_result open_status = PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name));
+	/* NOTE: PS(mod_data) might be null if the session is a custom userland session handler */
+	if (open_status == FAILURE) {
 		PS(session_status) = php_session_none;
 		if (!EG(exception)) {
 			zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
@@ -2480,6 +2483,7 @@ PHP_FUNCTION(session_create_id)
 		}
 	}
 
+	/* NOTE: PS(mod_data) might be null if the session is a custom userland session handler */
 	if (!PS(in_save_handler) && PS(session_status) == php_session_active) {
 		int limit = 3;
 		while (limit--) {
