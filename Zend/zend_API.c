@@ -2399,9 +2399,6 @@ ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, z
 
 ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 {
-	size_t name_len;
-	zend_string *lcname;
-
 	if (module->module_started) {
 		return SUCCESS;
 	}
@@ -2413,20 +2410,15 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 
 		while (dep->name) {
 			if (dep->type == MODULE_DEP_REQUIRED) {
-				zend_module_entry *req_mod;
+				zend_module_entry *req_mod = zend_hash_str_find_ptr_lc(
+					&module_registry, dep->name, strlen(dep->name));
 
-				name_len = strlen(dep->name);
-				lcname = zend_string_alloc(name_len, 0);
-				zend_str_tolower_copy(ZSTR_VAL(lcname), dep->name, name_len);
-
-				if ((req_mod = zend_hash_find_ptr(&module_registry, lcname)) == NULL || !req_mod->module_started) {
-					zend_string_efree(lcname);
+				if (req_mod == NULL || !req_mod->module_started) {
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module \"%s\" because required module \"%s\" is not loaded", module->name, dep->name);
 					module->module_started = 0;
 					return FAILURE;
 				}
-				zend_string_efree(lcname);
 			}
 			++dep;
 		}
@@ -2614,17 +2606,12 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, i
 
 		while (dep->name) {
 			if (dep->type == MODULE_DEP_CONFLICTS) {
-				name_len = strlen(dep->name);
-				lcname = zend_string_alloc(name_len, 0);
-				zend_str_tolower_copy(ZSTR_VAL(lcname), dep->name, name_len);
-
-				if (zend_hash_exists(&module_registry, lcname) || zend_get_extension(dep->name)) {
-					zend_string_efree(lcname);
+				if (zend_hash_str_find_ptr_lc(&module_registry, dep->name, strlen(dep->name)) != NULL
+						|| zend_get_extension(dep->name)) {
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module \"%s\" because conflicting module \"%s\" is already loaded", module->name, dep->name);
 					return NULL;
 				}
-				zend_string_efree(lcname);
 			}
 			++dep;
 		}
