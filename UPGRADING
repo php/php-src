@@ -164,6 +164,8 @@ PHP 8.6 UPGRADE NOTES
   . SplFileObject::next() past EOF no longer increments key() without bound.
     SplFileObject::seek() past EOF now produces the same key() value as
     SplTempFileObject; the two previously returned different values.
+  . DirectoryIterator::key() now returns int|string, 
+    and DirectoryIterator::current() returns string|SplFileInfo|static.
 
 - Standard:
   . Form feed (\f) is now added in the default trimmed characters of trim(),
