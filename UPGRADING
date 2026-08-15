@@ -433,8 +433,8 @@ PHP 8.5 UPGRADE NOTES
   . The finfo_close() function has been deprecated.
     As finfo objects are freed automatically.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_finfo_close
-  . The $context parameter of the finfo_buffer() function has been deprecated
-    as it is ignored.
+  . The $context parameter of the finfo_buffer() and finfo::buffer() functions
+    has been deprecated as it is ignored.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_context_parameter_for_finfo_buffer
 
 - GD:
