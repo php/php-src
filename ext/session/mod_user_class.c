@@ -158,3 +158,22 @@ PHP_METHOD(SessionHandler, create_sid)
 
 	RETURN_STR(id);
 }
+
+PHP_METHOD(SessionHandler, validateId)
+{
+	zend_string *id;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &id) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	PS_SANITY_CHECK;
+	if (!PS(mod_user_is_open)) {
+		php_error_docref(NULL, E_WARNING, "Parent session handler is not open, ignoring ID validation");
+		RETURN_TRUE;
+	}
+
+	zend_result status = PS(default_mod)->s_validate_sid(&PS(mod_data), id);
+
+	RETURN_BOOL(status == SUCCESS);
+}
