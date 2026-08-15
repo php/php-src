@@ -3802,7 +3802,6 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 	HashTable *ftable;
 	bool call_via_handler = false;
 	zend_class_entry *scope;
-	zval *zv;
 
 	fcc->calling_scope = NULL;
 
@@ -3888,8 +3887,7 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 		if (fcc->function_handler) {
 			retval = true;
 		}
-	} else if ((zv = zend_hash_find(ftable, lmname)) != NULL) {
-		fcc->function_handler = Z_PTR_P(zv);
+	} else if ((fcc->function_handler = zend_hash_find_ptr(ftable, lmname)) != NULL) {
 		retval = true;
 		if ((fcc->function_handler->op_array.fn_flags & ZEND_ACC_CHANGED) &&
 		    !strict_class) {
@@ -3897,10 +3895,8 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 			if (scope &&
 			    instanceof_function(fcc->function_handler->common.scope, scope)) {
 
-				zv = zend_hash_find(&scope->function_table, lmname);
-				if (zv != NULL) {
-					zend_function *priv_fbc = Z_PTR_P(zv);
-
+				zend_function *priv_fbc = zend_hash_find_ptr(&scope->function_table, lmname);
+				if (priv_fbc != NULL) {
 					if ((priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE)
 					 && priv_fbc->common.scope == scope) {
 						fcc->function_handler = priv_fbc;

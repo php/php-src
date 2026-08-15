@@ -1756,13 +1756,9 @@ ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset) /* {{{
 
 static zend_never_inline zend_function *zend_get_parent_private_method(const zend_class_entry *scope, const zend_class_entry *ce, zend_string *function_name) /* {{{ */
 {
-	zval *func;
-	zend_function *fbc;
-
 	if (scope != ce && scope && is_derived_class(ce, scope)) {
-		func = zend_hash_find(&scope->function_table, function_name);
-		if (func != NULL) {
-			fbc = Z_FUNC_P(func);
+		zend_function *fbc = zend_hash_find_ptr(&scope->function_table, function_name);
+		if (fbc != NULL) {
 			if ((fbc->common.fn_flags & ZEND_ACC_PRIVATE)
 			 && fbc->common.scope == scope) {
 				return fbc;
@@ -1979,7 +1975,6 @@ ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(const zend_f
 ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key) /* {{{ */
 {
 	zend_object *zobj = *obj_ptr;
-	zval *func;
 	zend_function *fbc;
 	zend_string *lc_method_name;
 	ALLOCA_FLAG(use_heap);
@@ -1994,7 +1989,8 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 		zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
 	}
 
-	if (UNEXPECTED((func = zend_hash_find(&zobj->ce->function_table, lc_method_name)) == NULL)) {
+	fbc = zend_hash_find_ptr(&zobj->ce->function_table, lc_method_name);
+	if (UNEXPECTED(fbc == NULL)) {
 		if (UNEXPECTED(!key)) {
 			ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 		}
@@ -2004,8 +2000,6 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 			return NULL;
 		}
 	}
-
-	fbc = Z_FUNC_P(func);
 
 	/* Check access level */
 	if (fbc->op_array.fn_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
