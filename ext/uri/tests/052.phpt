@@ -7,15 +7,15 @@ $r = new Uri\WhatWg\UrlValidationError('foo', Uri\WhatWg\UrlValidationErrorType:
 
 try {
     $r->__construct('bar', Uri\WhatWg\UrlValidationErrorType::HostMissing, false);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($r);
 
 ?>
 --EXPECTF--
-Cannot modify readonly property Uri\WhatWg\UrlValidationError::$context
+Error: Cannot modify readonly property Uri\WhatWg\UrlValidationError::$context
 object(Uri\WhatWg\UrlValidationError)#%d (%d) {
   ["context"]=>
   string(3) "foo"
