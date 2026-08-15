@@ -890,7 +890,7 @@ try_again:
 
 	/* yield from was used, try another resume. */
 	if (UNEXPECTED(generator->execute_data && generator->execute_data->opline->opcode == ZEND_YIELD_FROM)) {
-		delegator = generator;
+		delegator = generator->node.parent ? generator : orig_generator;
 		generator = zend_generator_get_current(orig_generator);
 		goto try_again;
 	}
