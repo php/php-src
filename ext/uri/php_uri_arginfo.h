@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: bfd9247fa79baf877d600134c9ef615ec5ca9cea
+ * Stub hash: b15c2938e8b7eb1f9cfedfb788cf35254280f253
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_Rfc3986_UriBuilder_reset, 0, 0, IS_STATIC, 0)
@@ -275,6 +275,7 @@ ZEND_METHOD(Uri_WhatWg_Url, withPassword);
 ZEND_METHOD(Uri_WhatWg_Url, getAsciiHost);
 ZEND_METHOD(Uri_WhatWg_Url, getUnicodeHost);
 ZEND_METHOD(Uri_WhatWg_Url, getHostType);
+ZEND_METHOD(Uri_WhatWg_Url, getFragment);
 ZEND_METHOD(Uri_WhatWg_Url, equals);
 ZEND_METHOD(Uri_WhatWg_Url, toAsciiString);
 ZEND_METHOD(Uri_WhatWg_Url, toUnicodeString);
@@ -365,7 +366,7 @@ static const zend_function_entry class_Uri_WhatWg_Url_methods[] = {
 	ZEND_RAW_FENTRY("withPath", zim_Uri_Rfc3986_Uri_withPath, arginfo_class_Uri_WhatWg_Url_withPath, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getQuery", zim_Uri_Rfc3986_Uri_getQuery, arginfo_class_Uri_WhatWg_Url_getQuery, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("withQuery", zim_Uri_Rfc3986_Uri_withQuery, arginfo_class_Uri_WhatWg_Url_withQuery, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("getFragment", zim_Uri_Rfc3986_Uri_getFragment, arginfo_class_Uri_WhatWg_Url_getFragment, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Uri_WhatWg_Url, getFragment, arginfo_class_Uri_WhatWg_Url_getFragment, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("withFragment", zim_Uri_Rfc3986_Uri_withFragment, arginfo_class_Uri_WhatWg_Url_withFragment, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Uri_WhatWg_Url, equals, arginfo_class_Uri_WhatWg_Url_equals, ZEND_ACC_PUBLIC)
 	ZEND_ME(Uri_WhatWg_Url, toAsciiString, arginfo_class_Uri_WhatWg_Url_toAsciiString, ZEND_ACC_PUBLIC)
