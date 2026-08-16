@@ -968,11 +968,6 @@ PHP_METHOD(Uri_WhatWg_Url, getHostType)
 	php_uri_parser_whatwg_host_type_read(uri_object->uri, return_value);
 }
 
-PHP_METHOD(Uri_WhatWg_Url, getFragment)
-{
-	php_uri_property_read_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_URI_PROPERTY_NAME_FRAGMENT, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_UNICODE);
-}
-
 PHP_METHOD(Uri_WhatWg_Url, equals)
 {
 	zend_object *that_object;
