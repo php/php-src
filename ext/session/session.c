@@ -2410,7 +2410,13 @@ PHP_FUNCTION(session_regenerate_id)
 			RETURN_FALSE;
 		}
 	}
+
 	PS(mod)->s_close(&PS(mod_data));
+
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Session ID cannot be regenerated because the save handler closed the session");
+		RETURN_FALSE;
+	}
 
 	/* New session data */
 	if (PS(session_vars)) {
