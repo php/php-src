@@ -349,8 +349,8 @@ class DateTime implements DateTimeInterface
     /** @tentative-return-type */
     public static function createFromImmutable(DateTimeImmutable $object): static {}
 
-    /** @return static */
-    public static function createFromInterface(DateTimeInterface $object): DateTime {} // TODO return type should be static
+    /** @tentative-return-type */
+    public static function createFromInterface(DateTimeInterface $object): static {}
 
     /**
      * @tentative-return-type
@@ -400,7 +400,7 @@ class DateTime implements DateTimeInterface
      * @tentative-return-type
      * @alias date_timezone_set
      */
-    public function setTimezone(DateTimeZone $timezone): DateTime {}
+    public function setTimezone(DateTimeZone $timezone): static {}
 
     /**
      * @tentative-return-type
@@ -414,25 +414,25 @@ class DateTime implements DateTimeInterface
      * @tentative-return-type
      * @alias date_time_set
      */
-    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTime {}
+    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): static {}
 
     /**
      * @tentative-return-type
      * @alias date_date_set
      */
-    public function setDate(int $year, int $month, int $day): DateTime {}
+    public function setDate(int $year, int $month, int $day): static {}
 
     /**
      * @tentative-return-type
      * @alias date_isodate_set
      */
-    public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTime {}
+    public function setISODate(int $year, int $week, int $dayOfWeek = 1): static {}
 
     /**
      * @tentative-return-type
      * @alias date_timestamp_set
      */
-    public function setTimestamp(int $timestamp): DateTime {}
+    public function setTimestamp(int $timestamp): static {}
 
     public function setMicrosecond(int $microsecond): static {}
 
@@ -462,13 +462,13 @@ class DateTimeImmutable implements DateTimeInterface
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
-    public static function __set_state(array $array): DateTimeImmutable {}
+    public static function __set_state(array $array): static {}
 
     /**
      * @tentative-return-type
      * @alias date_create_immutable_from_format
      */
-    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): static|false {}
 
     /** @tentative-return-type */
     public static function createFromTimestamp(int|float $timestamp): static {}
@@ -517,35 +517,35 @@ class DateTimeImmutable implements DateTimeInterface
 
     /** @tentative-return-type */
     #[\NoDiscard(message: "as DateTimeImmutable::modify() does not modify the object itself")]
-    public function modify(string $modifier): DateTimeImmutable {}
+    public function modify(string $modifier): static {}
 
     /** @tentative-return-type */
     #[\NoDiscard(message: "as DateTimeImmutable::add() does not modify the object itself")]
-    public function add(DateInterval $interval): DateTimeImmutable {}
+    public function add(DateInterval $interval): static {}
 
     /** @tentative-return-type */
     #[\NoDiscard(message: "as DateTimeImmutable::sub() does not modify the object itself")]
-    public function sub(DateInterval $interval): DateTimeImmutable {}
+    public function sub(DateInterval $interval): static {}
 
     /** @tentative-return-type */
     #[\NoDiscard(message: "as DateTimeImmutable::setTimezone() does not modify the object itself")]
-    public function setTimezone(DateTimeZone $timezone): DateTimeImmutable {}
+    public function setTimezone(DateTimeZone $timezone): static {}
 
     /** @tentative-return-type */
     #[\NoDiscard(message: "as DateTimeImmutable::setTime() does not modify the object itself")]
-    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTimeImmutable {}
+    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): static {}
 
     /** @tentative-return-type */
     #[\NoDiscard(message: "as DateTimeImmutable::setDate() does not modify the object itself")]
-    public function setDate(int $year, int $month, int $day): DateTimeImmutable {}
+    public function setDate(int $year, int $month, int $day): static {}
 
     /** @tentative-return-type */
     #[\NoDiscard(message: "as DateTimeImmutable::setISODate() does not modify the object itself")]
-    public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTimeImmutable {}
+    public function setISODate(int $year, int $week, int $dayOfWeek = 1): static {}
 
     /** @tentative-return-type */
     #[\NoDiscard(message: "as DateTimeImmutable::setTimestamp() does not modify the object itself")]
-    public function setTimestamp(int $timestamp): DateTimeImmutable {}
+    public function setTimestamp(int $timestamp): static {}
 
     #[\NoDiscard(message: "as DateTimeImmutable::setMicrosecond() does not modify the object itself")]
     public function setMicrosecond(int $microsecond): static {}
@@ -553,8 +553,8 @@ class DateTimeImmutable implements DateTimeInterface
     /** @tentative-return-type */
     public static function createFromMutable(DateTime $object): static {}
 
-    /** @return static */
-    public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {} // TODO return type should be static
+    /** @tentative-return-type */
+    public static function createFromInterface(DateTimeInterface $object): static {}
 }
 
 class DateTimeZone
@@ -639,7 +639,7 @@ class DateTimeZone
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
-    public static function __set_state(array $array): DateTimeZone {}
+    public static function __set_state(array $array): static {}
 }
 
 class DateInterval
@@ -649,7 +649,7 @@ class DateInterval
     /**
      * @tentative-return-type
      */
-    public static function createFromDateString(string $datetime): DateInterval {}
+    public static function createFromDateString(string $datetime): static {}
 
     /**
      * @tentative-return-type
@@ -666,7 +666,7 @@ class DateInterval
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
-    public static function __set_state(array $array): DateInterval {}
+    public static function __set_state(array $array): static {}
 }
 
 class DatePeriod implements IteratorAggregate
@@ -743,7 +743,7 @@ class DatePeriod implements IteratorAggregate
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
-    public static function __set_state(array $array): DatePeriod {}
+    public static function __set_state(array $array): static {}
 
     public function getIterator(): Iterator {}
 }
