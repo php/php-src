@@ -32,7 +32,7 @@ try {
         throw new Exception(sprintf('Contents of file2.txt ("%s") is invalid, expected "%s"', $fileContent, $expectedContent));
     }
 } catch(Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 ===DONE===

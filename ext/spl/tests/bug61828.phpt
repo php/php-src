@@ -7,9 +7,9 @@ $x = new DirectoryIterator('.');
 try {
     $x->__construct('/tmp');
 } catch (\Error $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Directory object is already initialized
+Error: Directory object is already initialized

@@ -17,7 +17,7 @@ try
 }
 catch(OutOfBoundsException $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $it->seek(2);
@@ -29,7 +29,7 @@ try
 }
 catch(OutOfBoundsException $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $it->next();
@@ -41,7 +41,7 @@ var_dump($it->valid());
 int(1)
 2=>3
 int(2)
-Cannot seek to 0 which is below the offset 1
+OutOfBoundsException: Cannot seek to 0 which is below the offset 1
 int(3)
-Cannot seek to 3 which is behind offset 1 plus count 2
+OutOfBoundsException: Cannot seek to 3 which is behind offset 1 plus count 2
 bool(false)

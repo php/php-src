@@ -9,12 +9,12 @@ class InvalidDestructor {
         try {
             var_dump($obj[2]);
         } catch (Throwable $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         try {
             var_dump($obj[4]);
         } catch (Throwable $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -28,5 +28,5 @@ $obj->setSize(2);
 ?>
 --EXPECT--
 string(10) "AAAAAAAAAA"
-Index invalid or out of range
-Index invalid or out of range
+OutOfBoundsException: Index invalid or out of range
+OutOfBoundsException: Index invalid or out of range

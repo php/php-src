@@ -278,6 +278,7 @@ PHP_RINIT_FUNCTION( intl )
 PHP_RSHUTDOWN_FUNCTION( intl )
 {
 	INTL_G(current_collator) = NULL;
+	INTL_G(current_collator_error) = NULL;
 	if (INTL_G(grapheme_iterator)) {
 		grapheme_close_global_iterator(  );
 		INTL_G(grapheme_iterator) = NULL;

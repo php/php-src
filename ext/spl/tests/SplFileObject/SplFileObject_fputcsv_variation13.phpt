@@ -13,7 +13,7 @@ $fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv_variation13.csv', 'w')
 try {
     var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '"'));
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 unset($fo);
@@ -27,5 +27,5 @@ unlink($file);
 ?>
 --EXPECT--
 *** Testing fputcsv() : with default enclosure & delimiter of two chars ***
-SplFileObject::fputcsv(): Argument #2 ($separator) must be a single character
+ValueError: SplFileObject::fputcsv(): Argument #2 ($separator) must be a single character
 Done

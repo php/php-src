@@ -73,7 +73,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
         && ($all_jobs || !$no_jobs || $test_benchmarking)
         // push trigger is restricted to official repository.
         && ($repository === 'php/php-src' || $trigger === 'pull_request')) {
-        $jobs['BENCHMARKING']['config']['integrated_opcache'] = version_compare($php_version, '8.5', '>=');
+        $jobs['BENCHMARKING'] = true;
     }
     if ($all_jobs || $test_community) {
         $jobs['COMMUNITY']['matrix'] = version_compare($php_version, '8.4', '>=')
@@ -187,7 +187,9 @@ $repository = $argv[5] ?? null;
 foreach ($branches as &$branch) {
     $php_version = $branch['version'][0] . '.' . $branch['version'][1];
     $branch['jobs'] = select_jobs($repository, $trigger, $nightly, $labels, $php_version, $branch['ref'], $all_variations);
+    $branch['config']['default_run_test_jobs'] = version_compare($php_version, '8.6', '>=') ? '' : '-j2';
     $branch['config']['ubuntu_version'] = version_compare($php_version, '8.5', '>=') ? '24.04' : '22.04';
+    $branch['config']['integrated_opcache'] = version_compare($php_version, '8.5', '>=');
 }
 
 echo "All variations:";

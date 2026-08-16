@@ -101,6 +101,32 @@ static inline size_t zend_call_stack_default_size(void)
 #ifdef __sun
 	return 8 * 4096;
 #endif
+#ifdef _AIX
+	/*
+	 * default pthread stack limit is 96 KB on 32-bit, 192 KB on 64-bit
+	 * https://www.ibm.com/docs/en/aix/7.1.0?topic=programming-threads-library-options
+	 */
+#ifdef HAVE_PTHREAD_GETTHRDS_NP /* if we have pthread linked (not in libc) */
+	if (pthread_self() != 1) {
+#ifdef __64BIT__
+		return 192 * 1024;
+#else
+		return 96 * 1024;
+#endif
+	}
+#endif
+	/*
+	 * default AIX ulimit -s value is allegedly 32 MB, default values per:
+	 * https://www.ibm.com/docs/en/aix/7.1.0?topic=u-ulimit-command
+	 * N.B.: the the file uses 512b blocks, but the command uses kilobytes
+	 * https://www.ibm.com/support/pages/ibm-aix-security-ulimit-and-ulimit-d-output-differs-value-etcsecuritylimits
+	 *
+	 * note PASE uses an unlimited stack size by default, which is capped
+	 * at the PowerPC segment size (256 MB)
+	 */
+	return 32 * 1024 * 1024;
+#endif
+
 
 	return 2 * 1024 * 1024;
 }

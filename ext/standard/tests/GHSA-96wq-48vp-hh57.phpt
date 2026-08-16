@@ -18,5 +18,6 @@ metaphone($str, 1);
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
+Deprecated: Function metaphone() is deprecated since 8.6, use a userland phonetic matching library instead in %s on line %d
 ===DONE===

@@ -10,4 +10,4 @@ if(PHP_OS_FAMILY !== "Windows")
 --FILE--
 <?php echo sys_get_temp_dir(); ?>
 --EXPECT--
-C:\\Windows
+C:\Windows

@@ -15,15 +15,15 @@ try {
 	    'w'
     );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 Locale::setDefault('xx');
 try {
     new IntlDateFormatter(Locale::getDefault());
 } catch (\ValueError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 --EXPECT--
-IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid
-IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid
+ValueError: IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid
+ValueError: IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid

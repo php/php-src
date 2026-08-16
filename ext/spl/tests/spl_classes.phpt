@@ -8,5 +8,6 @@ Testfest 2009 Munich
 <?php
 var_dump(is_array(spl_classes()));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function spl_classes() is deprecated since 8.6, use ReflectionExtension::getClassNames() instead in %s on line %d
 bool(true)

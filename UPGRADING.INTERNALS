@@ -14,6 +14,19 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Breaking changes:
+  . String formatting functions now support the custom conversion specifiers
+    'pS' (zend_string*) and 'pp' (same as 'p'). Following the 'p' specifier with
+    an alpha-numeric character other than 'S' or 'p' is now an error.
+
+    Examples:
+
+    zend_string *str;
+    zend_spprintf("%pS", str);  // valid, same as "%S"
+    zend_spprintf("%pp", str);  // valid, same as "%p"
+    zend_spprintf("%pA", str);  // invalid
+    zend_spprintf("%ppA", str); // valid, same as zend_spprintf("%p%c", str, 'A')
+
 - Removed:
   . The misnamed ZVAL_IS_NULL() has been removed. Use Z_ISNULL() instead.
   . The zval_is_true() alias of zend_is_true() has been removed. Call
@@ -83,6 +96,47 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The php_error_docref1() and php_error_docref2() functions have been
     removed, instead rely on the error_include_args INI option to show the
     arguments to functions in a consistent manner.
+  . The following PHP stream functions prefixed with _ have been removed,
+    and the macro without it has become the canonical function name:
+    * _php_stream_cast()
+    * _php_stream_free_enclosed()
+    * _php_stream_free()
+    * _php_stream_seek()
+    * _php_stream_tell()
+    * _php_stream_read()
+    * _php_stream_write()
+    * _php_stream_fill_read_buffer()
+    * _php_stream_printf()
+    * _php_stream_eof()
+    * _php_stream_getc()
+    * _php_stream_putc()
+    * _php_stream_flush()
+    * _php_stream_sync()
+    * _php_stream_get_line()
+    * _php_stream_puts()
+    * _php_stream_stat()
+    * _php_stream_mkdir()
+    * _php_stream_rmdir()
+    * _php_stream_readdir()
+    * _php_stream_set_option()
+    * _php_stream_get_url_stream_wrappers_hash()
+    * _php_get_stream_filters_hash()
+    * _php_stream_mmap_unmap()
+    * _php_stream_mmap_unmap_ex()
+    * _php_stream_filter_prepend()
+    * _php_stream_filter_append()
+    * _php_stream_filter_flush()
+  . The PHP stream function _php_stream_stat_path() has been renamed to
+    php_stream_stat_path_ex()
+  . The PHP stream function _php_stream_scandir() was removed,
+    insted the PHP macro php_stream_scandir() is now a function as the
+    flags parameter was never used.
+  . The PHP stream function _php_stream_flush() was removed,
+    instead the PHP macro php_stream_flush() is now a proper function.
+  . The zend_save_error_handling() function was removed.
+  . The zend_parse_parameter() function has been removed, use one fo the
+    zend_parse_arg_TYPE() APIs instead.
+  . The zend_is_countable() function was removed.
 
 - Changed:
   . Internal functions that return by reference are now expected to
@@ -113,8 +167,16 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . EG(in_autoload) was renamed to EG(autoload_current_classnames) and no
     longer is a pointer, but a directly embedded HashTable struct.
   . Extended php_stream_filter_ops with seek method.
+  . php_print_info_htmlhead() now takes a title argument.
   . zend_argument_error_variadic() now takes a new 'function' parameter.
   . The param argument in the php_verror() function has been removed.
+  . The php_stream_wrapper_log_error() signature changed from
+    (wrapper, options, fmt, ...) to
+    (wrapper, context, options, severity, terminating, code, fmt, ...).
+    To keep the previous behaviour pass NULL for the context, or the context at
+    hand if there is one, E_WARNING for the severity, and
+    ZEND_ENUM_StreamErrorCode_Generic for the code. terminating should be true
+    only if the error aborts the operation.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
@@ -138,6 +200,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_reflection_property_set_raw_value() to expose the functionality of
     ReflectionProperty::setRawValueWithoutLazyInitialization() and
     ReflectionProperty::setRawValue() to C extensions.
+  . Added zend_object_set_properties_reinitable() to centralise temporarily
+    allowing reinitialisation of initialised readonly properties during
+    controlled operations such as cloning and unserialisation.
   . Added zend_argument_error_ex(), zend_argument_type_error_ex(),
     zend_argument_value_error_ex().
   . Added zend_ast_dup().
@@ -154,12 +219,16 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     strings from one or more buffers.
   . Added zend_string_ends_with() and related variants.
   . Added trait support for internal classes.
+  . Added do_php_cli().
 
 ========================
 2. Build system changes
 ========================
 
 - Abstract:
+  . run-tests.php now runs in parallel by default, using up to 10 automatically
+    detected workers. Pass -j1 for sequential execution. --asan, --msan, and
+    Valgrind default to at most two workers.
   . Minimum required PHP version found on the host system for running scripts
     like build/gen_stub.php during development has been updated from 7.4 to 8.1.
   . build/gen_stub.php may now generate a _decl.h file in addition to
@@ -190,6 +259,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added a new function CHECK_HEADER() which is intended to be used instead of
     the CHECK_HEADER_ADD_INCLUDE().
 
+- Embed:
+  . The CLI SAPI can not be disabled when building the embed SAPI
+    (--enable-embed is incompatible with --disable-cli).
+
 ========================
 3. Module changes
 ========================
@@ -205,6 +278,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     direct U_ICU_VERSION_* guards for supported ICU API variants.
   . The internal grapheme_get_break_iterator() helper no longer accepts a
     stack buffer argument; pass only the UErrorCode* status argument.
+  . Added PHP_INTL_FUNCTION_WITH_ERROR_RESET() for procedural functions that
+    reset the global error. Use it instead of PHP_FUNCTION() followed by a
+    manual intl_error_reset(NULL) call.
+  . IC_METHOD() now resets the global error before entering the method
+    implementation. IntlChar methods should no longer reset it manually.
 
 - ext/mbstring:
   . Added GB18030-2022 to default encoding list for zh-CN.
@@ -270,3 +348,6 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 
 - AG and SCNG are now allocated with ts_allocate_tls_id() and live in native
   __thread storage on ZTS builds.
+
+- php-cli functionality is now available in embed builds via the do_php_cli()
+  function.

@@ -15,7 +15,7 @@ $c = imagecolorclosest($im, 255,0,255);
 try {
   imagecolorsforindex($im, $c);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 $im = null;
 
@@ -53,7 +53,7 @@ $c = imagecolorclosestalpha($im, 255,0,255,100);
 try {
   imagecolorsforindex($im, $c);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 $im = null;
 
@@ -82,7 +82,7 @@ print_r(imagecolorsforindex($im, $c));
 ?>
 --EXPECT--
 FF00FF
-imagecolorsforindex(): Argument #2 ($color) is out of range
+ValueError: imagecolorsforindex(): Argument #2 ($color) is out of range
 Array
 (
     [red] => 255
@@ -105,7 +105,7 @@ Array
     [alpha] => 0
 )
 64FF00FF
-imagecolorsforindex(): Argument #2 ($color) is out of range
+ValueError: imagecolorsforindex(): Argument #2 ($color) is out of range
 Array
 (
     [red] => 255

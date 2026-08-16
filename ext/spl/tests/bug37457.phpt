@@ -64,7 +64,7 @@ try
 }
 catch (Exception $e)
 {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -75,4 +75,4 @@ Collection::valid
 Collection::current
 Collection::key
 TestFilter::accept
-string(17) "Failure in Accept"
+Exception: Failure in Accept

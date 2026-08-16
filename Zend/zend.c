@@ -746,7 +746,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->internal_run_time_cache = NULL;
 	if (compiler_globals->map_ptr_last || zend_map_ptr_static_size) {
 		/* Allocate map_ptr table */
-		compiler_globals->map_ptr_size = ZEND_MM_ALIGNED_SIZE_EX(compiler_globals->map_ptr_last, 4096);
+		compiler_globals->map_ptr_size = ZEND_MM_ALIGNED_SIZE_EX(compiler_globals->map_ptr_last, ZEND_MAP_PTR_CHUNK_SIZE);
 		void *base = pemalloc((zend_map_ptr_static_size + compiler_globals->map_ptr_size) * sizeof(void*), 1);
 		compiler_globals->map_ptr_real_base = base;
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(base);
@@ -1815,7 +1815,6 @@ ZEND_API void zend_free_recorded_errors(void)
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
 	va_list va;
-	char *message = NULL;
 
 	if (!exception_ce) {
 		exception_ce = zend_ce_error;
@@ -1827,16 +1826,20 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	}
 
 	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
+	zend_string *message = zend_vstrpprintf(0, format, va);
 
 	//TODO: we can't convert compile-time errors to exceptions yet???
 	if (EG(current_execute_data) && !CG(in_compilation)) {
-		zend_throw_exception(exception_ce, message, 0);
+		// %S is used for zend_string pointers by smart str printing, but normally
+		// is for wide character strings and so compilers complain if this is inline
+		// Use "%S" so that the message can contain null bytes.
+		const char *format = "%S";
+		zend_throw_exception_ex(exception_ce, 0, format, message);
 	} else {
-		zend_error_noreturn(E_ERROR, "%s", message);
+		zend_error_noreturn(E_ERROR, "%s", ZSTR_VAL(message));
 	}
 
-	efree(message);
+	zend_string_release(message);
 	va_end(va);
 }
 /* }}} */
@@ -2061,7 +2064,7 @@ ZEND_API void *zend_map_ptr_new(void)
 
 	if (CG(map_ptr_last) >= CG(map_ptr_size)) {
 		/* Grow map_ptr table */
-		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
+		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, ZEND_MAP_PTR_CHUNK_SIZE);
 		CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), (zend_map_ptr_static_size + CG(map_ptr_size)) * sizeof(void*), 1);
 		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
 	}
@@ -2076,17 +2079,17 @@ ZEND_API void *zend_map_ptr_new_static(void)
 	void **ptr;
 
 	if (zend_map_ptr_static_last >= zend_map_ptr_static_size) {
-		zend_map_ptr_static_size += 4096;
+		zend_map_ptr_static_size += ZEND_MAP_PTR_CHUNK_SIZE;
 		/* Grow map_ptr table */
 		void *new_base = pemalloc((zend_map_ptr_static_size + CG(map_ptr_size)) * sizeof(void*), 1);
 		if (CG(map_ptr_real_base)) {
-			memcpy((void **)new_base + 4096, CG(map_ptr_real_base), (CG(map_ptr_last) + zend_map_ptr_static_size - 4096) * sizeof(void *));
+			memcpy((void **)new_base + ZEND_MAP_PTR_CHUNK_SIZE, CG(map_ptr_real_base), (CG(map_ptr_last) + zend_map_ptr_static_size - ZEND_MAP_PTR_CHUNK_SIZE) * sizeof(void *));
 			pefree(CG(map_ptr_real_base), 1);
 		}
 		CG(map_ptr_real_base) = new_base;
 		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(new_base);
 	}
-	ptr = (void**)CG(map_ptr_real_base) + (zend_map_ptr_static_last & 4095);
+	ptr = (void**)CG(map_ptr_real_base) + (zend_map_ptr_static_last & ZEND_MAP_PTR_CHUNK_MASK);
 	*ptr = NULL;
 	zend_map_ptr_static_last++;
 	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
@@ -2099,7 +2102,7 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 
 		if (last >= CG(map_ptr_size)) {
 			/* Grow map_ptr table */
-			CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(last, 4096);
+			CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(last, ZEND_MAP_PTR_CHUNK_SIZE);
 			CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), (zend_map_ptr_static_size + CG(map_ptr_size)) * sizeof(void*), 1);
 			CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
 		}

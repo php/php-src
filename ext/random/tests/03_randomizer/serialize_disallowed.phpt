@@ -9,9 +9,9 @@ use Random\Randomizer;
 try {
     serialize(new Randomizer(new Secure()));
 } catch (Exception $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Serialization of 'Random\Engine\Secure' is not allowed
+Exception: Serialization of 'Random\Engine\Secure' is not allowed

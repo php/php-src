@@ -28,20 +28,6 @@
 
 
 typedef enum {
-    LXB_URL_MAP_UNDEF         = 0x00,
-    LXB_URL_MAP_C0            = 0x01,
-    LXB_URL_MAP_FRAGMENT      = 0x02,
-    LXB_URL_MAP_QUERY         = 0x04,
-    LXB_URL_MAP_SPECIAL_QUERY = 0x08,
-    LXB_URL_MAP_PATH          = 0x10,
-    LXB_URL_MAP_USERINFO      = 0x20,
-    LXB_URL_MAP_COMPONENT     = 0x40,
-    LXB_URL_MAP_X_WWW_FORM    = 0x80,
-    LXB_URL_MAP_ALL           = 0xff
-}
-lxb_url_map_type_t;
-
-typedef enum {
     LXB_URL_HOST_OPT_UNDEF       = 0 << 0,
     LXB_URL_HOST_OPT_NOT_SPECIAL = 1 << 0,
     LXB_URL_HOST_OPT_DECODE      = 1 << 1,
@@ -563,7 +549,7 @@ lxb_url_path_fix_windows_drive(lxb_url_t *url, lxb_char_t *sbuf,
 static lxb_status_t
 lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
                                       const lxb_char_t *end, lexbor_str_t *str,
-                                      lexbor_mraw_t *mraw,
+                                      lexbor_mraw_t *mraw, const uint8_t *url_map,
                                       const lxb_encoding_data_t *encoding,
                                       lxb_url_map_type_t enmap,
                                       bool space_as_plus);
@@ -571,7 +557,7 @@ lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
 static lxb_status_t
 lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
                                    const lxb_char_t *end, lexbor_str_t *str,
-                                   lexbor_mraw_t *mraw,
+                                   lexbor_mraw_t *mraw, const uint8_t *url_map,
                                    lxb_url_map_type_t enmap,
                                    bool space_as_plus);
 
@@ -1757,9 +1743,9 @@ again:
                         tmp = (pswd != NULL) ? pswd - 1 : p;
 
                         if (tmp > begin) {
-                            status = lxb_url_percent_encode_after_utf_8(begin, tmp,
-                                                        &url->username, url->mraw,
-                                                        LXB_URL_MAP_USERINFO, false);
+                            status = lxb_url_percent_encode_after_utf_8(begin,
+                                    tmp, &url->username, url->mraw, lxb_url_map,
+                                    LXB_URL_MAP_USERINFO, false);
                             if (status != LXB_STATUS_OK) {
                                 lxb_url_parse_return(orig_data, buf, status);
                             }
@@ -1768,8 +1754,8 @@ again:
 
                     if (pswd != NULL && p > pswd) {
                         status = lxb_url_percent_encode_after_utf_8(pswd, p,
-                                                    &url->password, url->mraw,
-                                                    LXB_URL_MAP_USERINFO, false);
+                                        &url->password, url->mraw, lxb_url_map,
+                                        LXB_URL_MAP_USERINFO, false);
                         if (status != LXB_STATUS_OK) {
                             lxb_url_parse_return(orig_data, buf, status);
                         }
@@ -2319,8 +2305,8 @@ again:
             if (p >= end) {
                 tmp_str.data = NULL;
 
-                status = lxb_url_percent_encode_after_utf_8(begin, p,
-                                                            &tmp_str, url->mraw,
+                status = lxb_url_percent_encode_after_utf_8(begin, p, &tmp_str,
+                                                            url->mraw, lxb_url_map,
                                                             LXB_URL_MAP_C0, false);
                 if (status != LXB_STATUS_OK) {
                     lxb_url_parse_return(orig_data, buf, status);
@@ -2336,8 +2322,8 @@ again:
             if (c == '#' || c == '?') {
                 tmp_str.data = NULL;
 
-                status = lxb_url_percent_encode_after_utf_8(begin, p,
-                                                            &tmp_str, url->mraw,
+                status = lxb_url_percent_encode_after_utf_8(begin, p, &tmp_str,
+                                                            url->mraw, lxb_url_map,
                                                             LXB_URL_MAP_C0, false);
                 if (status != LXB_STATUS_OK) {
                     lxb_url_parse_return(orig_data, buf, status);
@@ -2407,7 +2393,8 @@ again:
 
                 status = lxb_url_percent_encode_after_encoding(begin, p,
                                                                &url->query,
-                                                               url->mraw, enc,
+                                                               url->mraw,
+                                                               lxb_url_map, enc,
                                                                map_type, false);
                 if (status != LXB_STATUS_OK) {
                     lxb_url_parse_return(orig_data, buf, status);
@@ -2461,7 +2448,7 @@ again:
         }
 
         status = lxb_url_percent_encode_after_utf_8(begin, p, &url->fragment,
-                                                    url->mraw,
+                                                    url->mraw, lxb_url_map,
                                                     LXB_URL_MAP_FRAGMENT, false);
         lxb_url_parse_return(orig_data, buf, status);
 
@@ -3161,10 +3148,23 @@ lxb_url_scheme_find(const lxb_char_t *data, size_t length)
     return &lxb_url_scheme_res[LXB_URL_SCHEMEL_TYPE__UNKNOWN];
 }
 
+lxb_status_t
+lxb_url_percent_encode_encoding(const lxb_char_t *data, size_t length,
+                                lexbor_str_t *str, lexbor_mraw_t *mraw,
+                                const uint8_t *url_map,
+                                const lxb_encoding_data_t *encoding,
+                                lxb_url_map_type_t enmap,
+                                bool space_as_plus)
+{
+    return lxb_url_percent_encode_after_encoding(data, data + length, str, mraw,
+                                                 url_map, encoding, enmap,
+                                                 space_as_plus);
+}
+
 static lxb_status_t
 lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
                                       const lxb_char_t *end, lexbor_str_t *str,
-                                      lexbor_mraw_t *mraw,
+                                      lexbor_mraw_t *mraw, const uint8_t *url_map,
                                       const lxb_encoding_data_t *encoding,
                                       lxb_url_map_type_t enmap,
                                       bool space_as_plus)
@@ -3182,7 +3182,8 @@ lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
 
     if (encoding->encoding == LXB_ENCODING_UTF_8) {
         return lxb_url_percent_encode_after_utf_8(data, end, str, mraw,
-                                                  enmap, space_as_plus);
+                                                  url_map, enmap,
+                                                  space_as_plus);
     }
 
     lxb_url_encoding_init(encoding, &encode);
@@ -3193,7 +3194,7 @@ lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
     /* Only valid for UTF-8. */
 
     while (p < end) {
-        if (lxb_url_map[*p++] & enmap) {
+        if (url_map[*p++] & enmap) {
             length += 2;
         }
     }
@@ -3249,7 +3250,7 @@ lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
                     return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
                 }
             }
-            else if (lxb_url_map[c] & enmap) {
+            else if (url_map[c] & enmap) {
                 percent[1] = lexbor_str_res_char_to_two_hex_value[c][0];
                 percent[2] = lexbor_str_res_char_to_two_hex_value[c][1];
 
@@ -3280,10 +3281,20 @@ lxb_url_percent_encode_after_encoding(const lxb_char_t *data,
     return LXB_STATUS_OK;
 }
 
+lxb_status_t
+lxb_url_percent_encode_utf_8(const lxb_char_t *data, size_t length,
+                             lexbor_str_t *str, lexbor_mraw_t *mraw,
+                             const uint8_t *url_map, lxb_url_map_type_t enmap,
+                             bool space_as_plus)
+{
+    return lxb_url_percent_encode_after_utf_8(data, data + length, str, mraw,
+                                              url_map, enmap, space_as_plus);
+}
+
 static lxb_status_t
 lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
                                    const lxb_char_t *end, lexbor_str_t *str,
-                                   lexbor_mraw_t *mraw,
+                                   lexbor_mraw_t *mraw, const uint8_t *url_map,
                                    lxb_url_map_type_t enmap,
                                    bool space_as_plus)
 {
@@ -3298,7 +3309,7 @@ lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
     /* Only valid for UTF-8. */
 
     while (p < end) {
-        if (lxb_url_map[*p++] & enmap) {
+        if (url_map[*p++] & enmap) {
             length += 2;
         }
     }
@@ -3317,7 +3328,7 @@ lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
         if (space_as_plus && c == ' ') {
             *pd++ = '+';
         }
-        else if (lxb_url_map[c] & enmap) {
+        else if (url_map[c] & enmap) {
             *pd++ = '%';
             *pd++ = lexbor_str_res_char_to_two_hex_value[c][0];
             *pd++ = lexbor_str_res_char_to_two_hex_value[c][1];
@@ -3333,6 +3344,12 @@ lxb_url_percent_encode_after_utf_8(const lxb_char_t *data,
     str->length += pd - &str->data[str->length];
 
     return LXB_STATUS_OK;
+}
+
+const uint8_t *
+lxb_url_get_percent_encoding_map(void)
+{
+    return lxb_url_map;
 }
 
 static lxb_status_t
@@ -3752,6 +3769,46 @@ lxb_url_is_ipv4(lxb_url_parser_t *parser, const lxb_char_t *data,
     return status != LXB_STATUS_ERROR;
 }
 
+lxb_status_t
+lxb_url_parse_host_ipv6(lxb_url_parser_t *parser, const lxb_char_t *data,
+                        size_t length, uint16_t *ipv6)
+{
+    lxb_status_t status;
+    lxb_url_parser_t self_parser;
+
+    if (parser == NULL) {
+        parser = &self_parser;
+
+        parser->log = NULL;
+        parser->idna = NULL;
+        parser->buffer = NULL;
+    }
+
+    if (data < data + length && *data == '[') {
+        if (data[length - 1] != ']') {
+            (void) lxb_url_log_append(parser, &data[length - 1],
+                                      LXB_URL_ERROR_TYPE_IPV6_UNCLOSED);
+
+            status = LXB_STATUS_ERROR_UNEXPECTED_DATA;
+
+            goto done;
+        }
+
+        data += 1;
+        length -= 2;
+    }
+
+    status = lxb_url_ipv6_parse(parser, data, data + length, ipv6);
+
+done:
+
+    if (parser == &self_parser) {
+        lxb_url_parser_destroy(parser, false);
+    }
+
+    return status;
+}
+
 static lxb_status_t
 lxb_url_ipv6_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
                    const lxb_char_t *end, uint16_t *ipv6)
@@ -3762,6 +3819,8 @@ lxb_url_ipv6_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
     lxb_status_t status;
     const lxb_char_t *p;
     lxb_url_error_type_t err_type;
+
+    memset(ipv6, 0x00, sizeof(uint16_t) * 8);
 
     piece = ipv6;
     compress = NULL;
@@ -4023,7 +4082,7 @@ lxb_url_opaque_host_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
     host->type = LXB_URL_HOST_TYPE_OPAQUE;
 
     return lxb_url_percent_encode_after_utf_8(data, end, &host->u.opaque, mraw,
-                                              LXB_URL_MAP_C0, false);
+                                              lxb_url_map, LXB_URL_MAP_C0, false);
 }
 
 static lxb_status_t
@@ -4302,7 +4361,8 @@ lxb_url_api_username_set(lxb_url_t *url,
 
     return lxb_url_percent_encode_after_utf_8(username, username + length,
                                               &url->username, url->mraw,
-                                              LXB_URL_MAP_USERINFO, false);
+                                              lxb_url_map, LXB_URL_MAP_USERINFO,
+                                              false);
 }
 
 lxb_status_t
@@ -4322,7 +4382,8 @@ lxb_url_api_password_set(lxb_url_t *url,
 
     return lxb_url_percent_encode_after_utf_8(password, password + length,
                                               &url->password, url->mraw,
-                                              LXB_URL_MAP_USERINFO, false);
+                                              lxb_url_map, LXB_URL_MAP_USERINFO,
+                                              false);
 }
 
 lxb_status_t

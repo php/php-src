@@ -52,4 +52,3 @@ dimanche 1 janvier 2012 ap. J.-C. à 00:00:00 temps universel coordonné
 bool(false)
 string(9) "gregorian"
 string(3) "UTC"
-

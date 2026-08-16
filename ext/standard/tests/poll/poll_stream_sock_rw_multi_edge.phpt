@@ -15,32 +15,32 @@ $poll_ctx = pt_new_stream_poll();
 pt_stream_poll_add($poll_ctx, $socket1r, [Io\Poll\Event::Read, Io\Poll\Event::EdgeTriggered], "socket1_data");
 pt_stream_poll_add($poll_ctx, $socket1w, [Io\Poll\Event::Write, Io\Poll\Event::EdgeTriggered], "socket2_data");
 
-pt_expect_events($poll_ctx->wait(0), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromSeconds(0)), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data']
 ]);
 
-pt_expect_events($poll_ctx->wait(0), []);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromSeconds(0)), []);
 
 fwrite($socket1w, "test data");
-pt_expect_events($poll_ctx->wait(0, 100000), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), [
     ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data', 'read' => 'test data']
 ]);
 
 fwrite($socket1w, "more data");
-pt_expect_events($poll_ctx->wait(0, 100000), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), [
     ['events' => [Io\Poll\Event::Write], 'data' => 'socket2_data'],
     ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data']
 ]);
 
-pt_expect_events($poll_ctx->wait(0, 100000), []);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), []);
 
 fwrite($socket1w, " and even more data");
-pt_expect_events($poll_ctx->wait(0, 100000), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), [
     ['events' => [Io\Poll\Event::Read], 'data' => 'socket1_data', 'read' => 'more data and even more data']
 ]);
 
 fclose($socket1r);
-pt_expect_events($poll_ctx->wait(0, 100000), [
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), [
     [
         'events' => ['default' => [Io\Poll\Event::Write, Io\Poll\Event::HangUp]],
         'data' => 'socket2_data'
@@ -48,7 +48,7 @@ pt_expect_events($poll_ctx->wait(0, 100000), [
 ], $poll_ctx);
 
 fclose($socket1w);
-pt_expect_events($poll_ctx->wait(0, 100000), []);
+pt_expect_events($poll_ctx->wait(Time\Duration::fromMicroseconds(100000)), []);
 
 ?>
 --EXPECT--

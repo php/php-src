@@ -15,8 +15,8 @@ $reflection = new ReflectionFunction('test');
 try {
     var_dump($reflection->getAttributes()[0]->newInstance());
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Attribute::__construct(): Argument #1 ($flags) must be of type int, ZendTestUnitEnum given
+Error: Attribute::__construct(): Argument #1 ($flags) must be of type int, ZendTestUnitEnum given

@@ -19,7 +19,7 @@ while (($data = $file->fgetcsv(',', '"', ''))) {
 try {
     var_dump((string) $file);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- Use csv control ---\n";
@@ -35,7 +35,7 @@ foreach ($file as $row) {
 try {
     var_dump((string) $file);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

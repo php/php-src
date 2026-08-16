@@ -99,7 +99,7 @@ static zend_result spl_object_storage_get_hash(zend_hash_key *key, spl_SplObject
 		ZVAL_OBJ(&param, obj);
 		ZVAL_UNDEF(&rv);
 		spl_object_storage_get_hash_depth++;
-		zend_call_method_with_1_params(&intern->std, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, &param);
+		zend_call_known_function(intern->fptr_get_hash, &intern->std, intern->std.ce, &rv, 1, &param, NULL);
 		spl_object_storage_get_hash_depth--;
 		if (UNEXPECTED(Z_ISUNDEF(rv))) {
 			/* An exception has occurred */
@@ -747,7 +747,11 @@ PHP_METHOD(SplObjectStorage, count)
 	}
 
 	if (mode == PHP_COUNT_RECURSIVE) {
-		RETURN_LONG(php_count_recursive(&intern->storage));
+		zend_long count = php_count_recursive(&intern->storage);
+		if (UNEXPECTED(count < 0)) {
+			RETURN_THROWS();
+		}
+		RETURN_LONG(count);
 	}
 
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));

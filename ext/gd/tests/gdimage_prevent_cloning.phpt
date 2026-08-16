@@ -9,7 +9,7 @@ try {
     $img_src = imagecreatetruecolor(32, 32);
     $img_dst = clone $img_src;
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

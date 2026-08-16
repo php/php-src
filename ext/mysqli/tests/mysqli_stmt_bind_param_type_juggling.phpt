@@ -24,13 +24,8 @@ require_once 'skipifconnectfailure.inc';
             return false;
         }
 
-        if (!$stmt = mysqli_stmt_init($link)) {
+        if (!$stmt = mysqli_prepare($link, "INSERT INTO test(col1, col2) VALUES (?, ?)")) {
             printf("[%03d + 3] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
-            return false;
-        }
-
-        if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(col1, col2) VALUES (?, ?)")) {
-            printf("[%03d + 4] [%d] %s\n", $offset, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
             return false;
         }
 

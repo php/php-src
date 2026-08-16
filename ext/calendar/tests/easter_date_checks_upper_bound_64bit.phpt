@@ -14,8 +14,8 @@ putenv('TZ=UTC');
 try {
     easter_date(293274701009);
 } catch (ValueError $ex) {
-    echo "{$ex->getMessage()}\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-easter_date(): Argument #1 ($year) must be a year before 2.000.000.000 (inclusive)
+ValueError: easter_date(): Argument #1 ($year) must be a year before 2.000.000.000 (inclusive)

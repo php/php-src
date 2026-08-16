@@ -333,8 +333,7 @@ static zend_always_inline bool php_stream_zend_parse_arg_into_stream(
 #define PHP_Z_PARAM_STREAM_OR_NULL(dest) PHP_Z_PARAM_STREAM_EX(dest, true)
 
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
-#define php_stream_free_enclosed(stream_enclosed, close_options) _php_stream_free_enclosed((stream_enclosed), (close_options))
-PHPAPI int _php_stream_free_enclosed(php_stream *stream_enclosed, int close_options);
+PHPAPI int php_stream_free_enclosed(php_stream *stream_enclosed, int close_options);
 
 PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream);
 #define PHP_STREAM_PERSISTENT_SUCCESS	0 /* id exists */
@@ -352,91 +351,68 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 #define PHP_STREAM_FREE_CLOSE_CASTED		(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE)
 #define PHP_STREAM_FREE_CLOSE_PERSISTENT	(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PERSISTENT)
 
-PHPAPI int _php_stream_free(php_stream *stream, int close_options);
-#define php_stream_free(stream, close_options)	_php_stream_free((stream), (close_options))
-#define php_stream_close(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE)
-#define php_stream_pclose(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE_PERSISTENT)
+PHPAPI int php_stream_free(php_stream *stream, int close_options);
+#define php_stream_close(stream)	php_stream_free((stream), PHP_STREAM_FREE_CLOSE)
+#define php_stream_pclose(stream)	php_stream_free((stream), PHP_STREAM_FREE_CLOSE_PERSISTENT)
 
-PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence);
-#define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET)
-#define php_stream_seek(stream, offset, whence)	_php_stream_seek((stream), (offset), (whence))
+PHPAPI int php_stream_seek(php_stream *stream, zend_off_t offset, int whence);
+#define php_stream_rewind(stream)	php_stream_seek((stream), 0L, SEEK_SET)
 
-PHPAPI zend_off_t _php_stream_tell(const php_stream *stream);
-#define php_stream_tell(stream)	_php_stream_tell((stream))
+PHPAPI zend_off_t php_stream_tell(const php_stream *stream);
 
-PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t count);
-#define php_stream_read(stream, buf, count)		_php_stream_read((stream), (buf), (count))
+PHPAPI ssize_t php_stream_read(php_stream *stream, char *buf, size_t count);
 
 PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len);
 
-PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t count);
-#define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str))
-#define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count))
+PHPAPI ssize_t php_stream_write(php_stream *stream, const char *buf, size_t count);
+#define php_stream_write_string(stream, str)	php_stream_write(stream, str, strlen(str))
 
-PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size);
-#define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size))
+PHPAPI zend_result php_stream_fill_read_buffer(php_stream *stream, size_t size);
 
-PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPAPI ssize_t php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 
-/* php_stream_printf macro & function require */
-#define php_stream_printf _php_stream_printf
+PHPAPI bool php_stream_eof(php_stream *stream);
 
-PHPAPI bool _php_stream_eof(php_stream *stream);
-#define php_stream_eof(stream)	_php_stream_eof((stream))
+PHPAPI int php_stream_getc(php_stream *stream);
 
-PHPAPI int _php_stream_getc(php_stream *stream);
-#define php_stream_getc(stream)	_php_stream_getc((stream))
+PHPAPI int php_stream_putc(php_stream *stream, int c);
 
-PHPAPI int _php_stream_putc(php_stream *stream, int c);
-#define php_stream_putc(stream, c)	_php_stream_putc((stream), (c))
+PHPAPI int php_stream_flush(php_stream *stream);
 
-PHPAPI int _php_stream_flush(php_stream *stream, int closing);
-#define php_stream_flush(stream)	_php_stream_flush((stream), 0)
+PHPAPI int php_stream_sync(php_stream *stream, bool data_only);
 
-PHPAPI int _php_stream_sync(php_stream *stream, bool data_only);
-#define php_stream_sync(stream, d)	    _php_stream_sync((stream), (d))
+PHPAPI char *php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len);
+#define php_stream_gets(stream, buf, maxlen)	php_stream_get_line((stream), (buf), (maxlen), NULL)
 
-PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len);
-#define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL)
-
-#define php_stream_get_line(stream, buf, maxlen, retlen) _php_stream_get_line((stream), (buf), (maxlen), (retlen))
 PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, const char *delim, size_t delim_len);
 
 /* Returns true if buffer has been appended, false on error */
-PHPAPI bool _php_stream_puts(php_stream *stream, const char *buf);
-#define php_stream_puts(stream, buf)	_php_stream_puts((stream), (buf))
+PHPAPI bool php_stream_puts(php_stream *stream, const char *buf);
 
-PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb);
-#define php_stream_stat(stream, ssb)	_php_stream_stat((stream), (ssb))
+PHPAPI int php_stream_stat(php_stream *stream, php_stream_statbuf *ssb);
 
-PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context);
-#define php_stream_stat_path(path, ssb)	_php_stream_stat_path((path), 0, (ssb), NULL)
-#define php_stream_stat_path_ex(path, flags, ssb, context)	_php_stream_stat_path((path), (flags), (ssb), (context))
+PHPAPI int php_stream_stat_path_ex(const char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context);
+#define php_stream_stat_path(path, ssb)	php_stream_stat_path_ex((path), 0, (ssb), NULL)
 
-PHPAPI int _php_stream_mkdir(const char *path, int mode, int options, php_stream_context *context);
-#define php_stream_mkdir(path, mode, options, context)	_php_stream_mkdir(path, mode, options, context)
+PHPAPI int php_stream_mkdir(const char *path, int mode, int options, php_stream_context *context);
 
-PHPAPI int _php_stream_rmdir(const char *path, int options, php_stream_context *context);
-#define php_stream_rmdir(path, options, context)	_php_stream_rmdir(path, options, context)
+PHPAPI int php_stream_rmdir(const char *path, int options, php_stream_context *context);
 
 PHPAPI php_stream *_php_stream_opendir(const char *path, int options, php_stream_context *context STREAMS_DC);
 #define php_stream_opendir(path, options, context)	_php_stream_opendir((path), (options), (context) STREAMS_CC)
-PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent);
-#define php_stream_readdir(dirstream, dirent)	_php_stream_readdir((dirstream), (dirent))
+PHPAPI php_stream_dirent *php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent);
 #define php_stream_closedir(dirstream)	php_stream_close((dirstream))
 #define php_stream_rewinddir(dirstream)	php_stream_rewind((dirstream))
 
 PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b);
 PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string **b);
 
-PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], int flags, php_stream_context *context,
+PHPAPI int php_stream_scandir(const char *dirname, zend_string **namelist[], php_stream_context *context,
 			int (*compare) (const zend_string **a, const zend_string **b));
-#define php_stream_scandir(dirname, namelist, context, compare) _php_stream_scandir((dirname), (namelist), 0, (context), (compare))
 
-PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam);
-#define php_stream_set_option(stream, option, value, ptrvalue)	_php_stream_set_option((stream), (option), (value), (ptrvalue))
+PHPAPI int php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam);
 
-#define php_stream_set_chunk_size(stream, size) _php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL)
+#define php_stream_set_chunk_size(stream, size) php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL)
 
 END_EXTERN_C()
 
@@ -475,8 +451,8 @@ END_EXTERN_C()
 /* whether or not locking is supported */
 #define PHP_STREAM_LOCK_SUPPORTED		1
 
-#define php_stream_supports_lock(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED) == 0 ? 1 : 0)
-#define php_stream_lock(stream, mode)		_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL)
+#define php_stream_supports_lock(stream)	(php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED) == 0 ? 1 : 0)
+#define php_stream_lock(stream, mode)		php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL)
 
 /* option code used by the php_stream_xport_XXX api */
 #define PHP_STREAM_OPTION_XPORT_API			7 /* see php_stream_transport.h */
@@ -487,15 +463,14 @@ END_EXTERN_C()
 #define PHP_STREAM_TRUNCATE_SUPPORTED	0
 #define PHP_STREAM_TRUNCATE_SET_SIZE	1	/* ptrparam is a pointer to a size_t */
 
-#define php_stream_truncate_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+#define php_stream_truncate_supported(stream)	(php_stream_set_option((stream), PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
 BEGIN_EXTERN_C()
-PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize);
-#define php_stream_truncate_set_size(stream, size)	_php_stream_truncate_set_size((stream), (size))
+PHPAPI int php_stream_truncate_set_size(php_stream *stream, size_t newsize);
 END_EXTERN_C()
 
 #define PHP_STREAM_OPTION_META_DATA_API		11 /* ptrparam is a zval* to which to add metadata information */
-#define php_stream_populate_meta_data(stream, zv)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_META_DATA_API, 0, zv) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+#define php_stream_populate_meta_data(stream, zv)	(php_stream_set_option((stream), PHP_STREAM_OPTION_META_DATA_API, 0, zv) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
 /* Check if the stream is still "live"; for sockets/pipes this means the socket
  * is still connected; for files, this does not really have meaning */
@@ -510,7 +485,7 @@ END_EXTERN_C()
 #define PHP_STREAM_SYNC_FSYNC 1
 #define PHP_STREAM_SYNC_FDSYNC 2
 
-#define php_stream_sync_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+#define php_stream_sync_supported(stream)	(php_stream_set_option((stream), PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
 
 
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
@@ -564,11 +539,10 @@ END_EXTERN_C()
 #define PHP_STREAM_CAST_INTERNAL	0x20000000	/* stream cast for internal use */
 #define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE | PHP_STREAM_CAST_INTERNAL)
 BEGIN_EXTERN_C()
-PHPAPI zend_result _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
+PHPAPI zend_result php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
 END_EXTERN_C()
 /* use this to check if a stream can be cast into another form */
-#define php_stream_can_cast(stream, as)	_php_stream_cast((stream), (as), NULL, 0)
-#define php_stream_cast(stream, as, ret, show_err)	_php_stream_cast((stream), (as), (ret), (show_err))
+#define php_stream_can_cast(stream, as)	php_stream_cast((stream), (as), NULL, 0)
 
 /* use this to check if a stream is of a particular type:
  * PHPAPI int php_stream_is(php_stream *stream, php_stream_ops *ops); */
@@ -660,11 +634,9 @@ PHPAPI php_stream_make_seekable_status _php_stream_make_seekable(php_stream *ori
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC)
 
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
-PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(void);
-#define php_stream_get_url_stream_wrappers_hash()	_php_stream_get_url_stream_wrappers_hash()
+PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash(void);
 PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
-PHPAPI HashTable *_php_get_stream_filters_hash(void);
-#define php_get_stream_filters_hash()	_php_get_stream_filters_hash()
+PHPAPI HashTable *php_get_stream_filters_hash(void);
 PHPAPI HashTable *php_get_stream_filters_hash_global(void);
 extern const php_stream_wrapper_ops *php_stream_user_wrapper_ops;
 

@@ -1255,7 +1255,7 @@ PHP_FUNCTION(get_current_user)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_STRING(php_get_current_user());
+	RETURN_STR_COPY(php_get_current_user());
 }
 /* }}} */
 
@@ -1434,7 +1434,7 @@ PHP_FUNCTION(error_get_last)
 		ZVAL_STR_COPY(&tmp, PG(last_error_file));
 		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 
-		ZVAL_LONG(&tmp, PG(last_error_lineno));
+		ZVAL_LONG(&tmp, (zend_long)PG(last_error_lineno));
 		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 
 		if (!Z_ISUNDEF(EG(last_fatal_error_backtrace))) {

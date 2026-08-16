@@ -13,40 +13,40 @@ class Test {
 $test = new Test;
 $test->prop = PHP_INT_MAX;
 $x = $test->prop++;
-var_dump(is_double($test->prop));
+var_dump(is_float($test->prop));
 
 $test->prop = PHP_INT_MAX;
 $x = ++$test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_float($test->prop));
 
 $test->prop = PHP_INT_MIN;
 $x = $test->prop--;
-var_dump(is_double($test->prop));
+var_dump(is_float($test->prop));
 
 $test->prop = PHP_INT_MIN;
 $x = --$test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_float($test->prop));
 
 $test = new Test;
 $test->prop = PHP_INT_MAX;
 $r =& $test->prop;
 $x = $test->prop++;
-var_dump(is_double($test->prop));
+var_dump(is_float($test->prop));
 
 $test->prop = PHP_INT_MAX;
 $x = ++$test->prop;
 $r =& $test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_float($test->prop));
 
 $test->prop = PHP_INT_MIN;
 $x = $test->prop--;
 $r =& $test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_float($test->prop));
 
 $test->prop = PHP_INT_MIN;
 $x = --$test->prop;
 $r =& $test->prop;
-var_dump(is_double($test->prop));
+var_dump(is_float($test->prop));
 
 /* Incrementing a non-int|float property past int min/max is an error,
  * even if the result of the overflow (a float) would technically be allowed

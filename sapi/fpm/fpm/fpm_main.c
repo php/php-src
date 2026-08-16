@@ -1078,7 +1078,7 @@ static void init_request_info(void)
 			int script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
-				env_document_root = FCGI_PUTENV(request, "DOCUMENT_ROOT", PG(doc_root));
+				env_document_root = FCGI_PUTENV(request, "DOCUMENT_ROOT", ZSTR_VAL(PG(doc_root)));
 			}
 
 			if (!apache_was_here && env_path_translated != NULL && env_redirect_url != NULL &&
@@ -1636,7 +1636,7 @@ int main(int argc, char *argv[])
 			case 'm': /* list compiled in modules */
 				cgi_sapi_module.startup(&cgi_sapi_module);
 				php_output_activate();
-				SG(headers_sent) = 1;
+				SG(headers_sent) = true;
 				php_printf("[PHP Modules]\n");
 				print_modules();
 				php_printf("\n[Zend Modules]\n");
@@ -1674,7 +1674,7 @@ int main(int argc, char *argv[])
 			case PHP_GETOPT_INVALID_ARG:
 				cgi_sapi_module.startup(&cgi_sapi_module);
 				php_output_activate();
-				SG(headers_sent) = 1;
+				SG(headers_sent) = true;
 				php_cgi_usage(argv[0]);
 				php_output_end_all();
 				php_output_deactivate();
@@ -1689,7 +1689,7 @@ int main(int argc, char *argv[])
 					php_module_shutdown();
 					return FPM_EXIT_SOFTWARE;
 				}
-				SG(headers_sent) = 1;
+				SG(headers_sent) = true;
 				SG(request_info).no_headers = 1;
 
 				php_print_version(&sapi_module);
@@ -1710,7 +1710,7 @@ int main(int argc, char *argv[])
 			php_module_shutdown();
 			return FPM_EXIT_SOFTWARE;
 		}
-		SG(headers_sent) = 1;
+		SG(headers_sent) = true;
 		SG(request_info).no_headers = 1;
 		php_print_info(0xFFFFFFFF);
 		php_request_shutdown((void *) 0);
@@ -1723,7 +1723,7 @@ int main(int argc, char *argv[])
 	if (argc != php_optind) {
 		cgi_sapi_module.startup(&cgi_sapi_module);
 		php_output_activate();
-		SG(headers_sent) = 1;
+		SG(headers_sent) = true;
 		php_cgi_usage(argv[0]);
 		php_output_end_all();
 		php_output_deactivate();

@@ -3167,6 +3167,26 @@ static size_t phar_zend_stream_fsizer(void *handle) /* {{{ */
 
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type);
 
+static bool phar_has_marker_in_filename(const zend_string *filename)
+{
+	const char *path = ZSTR_VAL(filename);
+	const char *basename = zend_memrchr(path, '/', ZSTR_LEN(filename));
+#ifdef PHP_WIN32
+	const char *backslash = zend_memrchr(path, '\\', ZSTR_LEN(filename));
+	if (backslash && (!basename || backslash > basename)) {
+		basename = backslash;
+	}
+#endif
+	const char *marker = basename ? basename + 1 : path;
+	while ((marker = strstr(marker, ".phar"))) {
+		marker += sizeof(".phar") - 1;
+		if (*marker == '\0' || *marker == '.') {
+			return true;
+		}
+	}
+	return false;
+}
+
 static zend_string *phar_resolve_path(zend_string *filename)
 {
 	zend_string *ret = phar_find_in_include_path(filename);
@@ -3186,7 +3206,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 	if (!file_handle || !file_handle->filename) {
 		return phar_orig_compile_file(file_handle, type);
 	}
-	if (strstr(ZSTR_VAL(file_handle->filename), ".phar") && !strstr(ZSTR_VAL(file_handle->filename), "://")) {
+	if (phar_has_marker_in_filename(file_handle->filename) && !strstr(ZSTR_VAL(file_handle->filename), "://")) {
 		if (SUCCESS == phar_open_from_filename(ZSTR_VAL(file_handle->filename), ZSTR_LEN(file_handle->filename), NULL, 0, &phar, NULL)) {
 			if (phar->is_zip || phar->is_tar) {
 				zend_file_handle f;

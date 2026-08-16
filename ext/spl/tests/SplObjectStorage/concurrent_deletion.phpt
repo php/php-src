@@ -12,7 +12,7 @@ class EvilStorage extends SplObjectStorage {
         if ($this->mutate) {
             $victim[new stdClass()] = null;
         }
-        return spl_object_hash($obj);
+        return spl_object_id($obj);
     }
 }
 
@@ -33,7 +33,7 @@ $other->mutate = true;
 try {
     $victim->removeAllExcept($other);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(count($victim), count($other));
@@ -48,15 +48,15 @@ $other->mutate = true;
 try {
     $other->addAll($victim);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(count($victim), count($other));
 ?>
 --EXPECT--
-Modification of SplObjectStorage during getHash() is prohibited
+Error: Modification of SplObjectStorage during getHash() is prohibited
 int(1024)
 int(1024)
-Modification of SplObjectStorage during getHash() is prohibited
+Error: Modification of SplObjectStorage during getHash() is prohibited
 int(1024)
 int(1024)

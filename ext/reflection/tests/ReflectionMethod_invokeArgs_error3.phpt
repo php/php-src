@@ -65,7 +65,7 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 Non-instance:
 string(72) "Given object is not an instance of the class this method was declared in"
 
@@ -75,6 +75,8 @@ Exception: Using $this when not in object context
 NULL
 
 Private method:
+
+Deprecated: Calling ReflectionMethod::invokeArgs() for static method TestClass::privateMethod() does not need an object parameter in %s on line %d
 Called privateMethod()
 NULL
 

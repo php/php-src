@@ -930,6 +930,18 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 }
 /* }}} */
 
+static bool soap_class_map_has_only_string_keys(const HashTable *class_map)
+{
+	zend_string *key;
+	ZEND_HASH_FOREACH_STR_KEY(class_map, key) {
+		if (UNEXPECTED(key == NULL)) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
+}
+
 /* {{{ SoapServer constructor */
 PHP_METHOD(SoapServer, __construct)
 {
@@ -1007,8 +1019,7 @@ PHP_METHOD(SoapServer, __construct)
 				zend_argument_type_error(2, "\"classmap\" option must be of type array, %s given", zend_zval_type_name(class_map_zv));
 				goto cleanup;
 			}
-			// TODO: this still accepts mixed keys arrays and not all numerically indexed arrays are packed
-			if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(class_map_zv)))) {
+			if (UNEXPECTED(!soap_class_map_has_only_string_keys(Z_ARRVAL_P(class_map_zv)))) {
 				zend_argument_value_error(2, "\"classmap\" option must be an associative array");
 				goto cleanup;
 			}
@@ -1632,11 +1643,7 @@ PHP_METHOD(SoapServer, handle)
 			if (zend_hash_find_ptr_lc(function_table, Z_STR(h->function_name)) != NULL ||
 			    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 			     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
-				if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
-					call_status = call_user_function(NULL, soap_obj, &h->function_name, &h->retval, h->num_params, h->parameters);
-				} else {
-					call_status = call_user_function(EG(function_table), NULL, &h->function_name, &h->retval, h->num_params, h->parameters);
-				}
+				call_status = call_user_function(NULL, soap_obj, &h->function_name, &h->retval, h->num_params, h->parameters);
 				if (call_status != SUCCESS) {
 					php_error_docref(NULL, E_WARNING, "Function '%s' call failed", Z_STRVAL(h->function_name));
 					return;
@@ -1670,16 +1677,12 @@ PHP_METHOD(SoapServer, handle)
 	if (zend_hash_find_ptr_lc(function_table, Z_STR(function_name)) != NULL ||
 	    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 	     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
-		if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
-			call_status = call_user_function(NULL, soap_obj, &function_name, &retval, num_params, params);
-			if (service->type == SOAP_CLASS) {
-				if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-					zval_ptr_dtor(soap_obj);
-					soap_obj = NULL;
-				}
+		call_status = call_user_function(NULL, soap_obj, &function_name, &retval, num_params, params);
+		if (service->type == SOAP_CLASS) {
+			if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
+				zval_ptr_dtor(soap_obj);
+				soap_obj = NULL;
 			}
-		} else {
-			call_status = call_user_function(EG(function_table), NULL, &function_name, &retval, num_params, params);
 		}
 	} else {
 		php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
@@ -2104,6 +2107,20 @@ PHP_METHOD(SoapClient, __construct)
 		RETURN_THROWS();
 	}
 
+	if (options != NULL) {
+		zval *classmap = zend_hash_str_find(Z_ARRVAL_P(options), "classmap", sizeof("classmap")-1);
+		if (classmap != NULL) {
+			if (UNEXPECTED(Z_TYPE_P(classmap) != IS_ARRAY)) {
+				zend_argument_type_error(2, "\"classmap\" option must be of type array, %s given", zend_zval_type_name(classmap));
+				RETURN_THROWS();
+			}
+			if (UNEXPECTED(!soap_class_map_has_only_string_keys(Z_ARRVAL_P(classmap)))) {
+				zend_argument_value_error(2, "\"classmap\" option must be an associative array");
+				RETURN_THROWS();
+			}
+		}
+	}
+
 	SOAP_CLIENT_BEGIN_CODE();
 
 	cache_wsdl = SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0;
@@ -2132,14 +2149,6 @@ PHP_METHOD(SoapClient, __construct)
 					(Z_LVAL_P(tmp) == SOAP_LITERAL || Z_LVAL_P(tmp) == SOAP_ENCODED)) {
 				ZVAL_LONG(Z_CLIENT_USE_P(this_ptr), Z_LVAL_P(tmp));
 			}
-		}
-
-		if ((tmp = zend_hash_str_find(ht, "stream_context", sizeof("stream_context")-1)) != NULL &&
-				Z_TYPE_P(tmp) == IS_RESOURCE) {
-			context = php_stream_context_from_zval(tmp, 1);
-			Z_ADDREF_P(tmp);
-		} else {
-			context = php_stream_context_alloc();
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "location", sizeof("location")-1)) != NULL &&
@@ -2187,17 +2196,6 @@ PHP_METHOD(SoapClient, __construct)
 				}
 			}
 		}
-		if ((tmp = zend_hash_str_find(ht, "local_cert", sizeof("local_cert")-1)) != NULL &&
-		    Z_TYPE_P(tmp) == IS_STRING) {
-			if (!context) {
-				context = php_stream_context_alloc();
-			}
-			php_stream_context_set_option(context, "ssl", "local_cert", tmp);
-			if ((tmp = zend_hash_str_find(ht, "passphrase", sizeof("passphrase")-1)) != NULL &&
-			    Z_TYPE_P(tmp) == IS_STRING) {
-				php_stream_context_set_option(context, "ssl", "passphrase", tmp);
-			}
-		}
 		if ((tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_TRACE))) != NULL &&
 		    (Z_TYPE_P(tmp) == IS_TRUE ||
 		     (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == 1))) {
@@ -2233,10 +2231,27 @@ PHP_METHOD(SoapClient, __construct)
 		}
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			if (UNEXPECTED(HT_IS_PACKED(Z_ARRVAL_P(tmp)))) {
-				php_error_docref(NULL, E_ERROR, "'classmap' option must be an associative array");
-			}
 			ZVAL_COPY(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);
+		}
+
+		if ((tmp = zend_hash_str_find(ht, "stream_context", sizeof("stream_context")-1)) != NULL &&
+				Z_TYPE_P(tmp) == IS_RESOURCE) {
+			context = php_stream_context_from_zval(tmp, 1);
+			Z_ADDREF_P(tmp);
+		} else {
+			context = php_stream_context_alloc();
+		}
+
+		if ((tmp = zend_hash_str_find(ht, "local_cert", sizeof("local_cert")-1)) != NULL &&
+		    Z_TYPE_P(tmp) == IS_STRING) {
+			if (!context) {
+				context = php_stream_context_alloc();
+			}
+			php_stream_context_set_option(context, "ssl", "local_cert", tmp);
+			if ((tmp = zend_hash_str_find(ht, "passphrase", sizeof("passphrase")-1)) != NULL &&
+			    Z_TYPE_P(tmp) == IS_STRING) {
+				php_stream_context_set_option(context, "ssl", "passphrase", tmp);
+			}
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "typemap", sizeof("typemap")-1)) != NULL &&
@@ -2313,6 +2328,7 @@ PHP_METHOD(SoapClient, __construct)
 	if (typemap_ht) {
 		soap_client_object_fetch(Z_OBJ_P(this_ptr))->typemap = soap_create_typemap(sdl, typemap_ht);
 	}
+
 	SOAP_CLIENT_END_CODE();
 }
 /* }}} */

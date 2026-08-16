@@ -3820,7 +3820,7 @@ static bool mb_recursive_find_strings(zval *var, const unsigned char **val_list,
 	return false;
 }
 
-static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_encoding, const mbfl_encoding* to_encoding)
+static bool mb_recursive_convert_variable(uint32_t arg_num, zval *var, const mbfl_encoding* from_encoding, const mbfl_encoding* to_encoding)
 {
 	zval *entry, *orig_var;
 
@@ -3836,6 +3836,15 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 		zval_ptr_dtor(orig_var);
 		ZVAL_STR(orig_var, ret);
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
+		if (Z_TYPE_P(var) == IS_OBJECT) {
+			php_error_docref(NULL, E_DEPRECATED,
+				"Passing an object for argument #%" PRIu32 " $vars to mb_convert_variables() is deprecated, call get_object_vars() first instead",
+				arg_num
+			);
+			if (UNEXPECTED(EG(exception))) {
+				return true;
+			}
+		}
 		HashTable *ht = HASH_OF(var);
 		HashTable *orig_ht = ht;
 
@@ -3872,7 +3881,7 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 					}
 				}
 
-				if (mb_recursive_convert_variable(entry, from_encoding, to_encoding)) {
+				if (mb_recursive_convert_variable(arg_num, entry, from_encoding, to_encoding)) {
 					if (ht && ht != orig_ht) {
 						GC_TRY_UNPROTECT_RECURSION(ht);
 					}
@@ -3889,6 +3898,14 @@ static bool mb_recursive_convert_variable(zval *var, const mbfl_encoding* from_e
 		}
 		if (orig_ht) {
 			GC_TRY_UNPROTECT_RECURSION(orig_ht);
+		}
+	} else if (Z_TYPE_P(var) != IS_UNDEF) { /* Ignore unset properties */
+		php_error_docref(NULL, E_WARNING,
+			"Argument #%" PRIu32 " must be of type string|array|object or only contain entries of type string|array|object, %s given",
+			arg_num, zend_zval_type_name(var)
+		);
+		if (UNEXPECTED(EG(exception))) {
+			return true;
 		}
 	}
 
@@ -3985,7 +4002,7 @@ PHP_FUNCTION(mb_convert_variables)
 	for (size_t n = 0; n < argc; n++) {
 		zval *zv = &args[n];
 		ZVAL_DEREF(zv);
-		if (mb_recursive_convert_variable(zv, from_encoding, to_encoding)) {
+		if (mb_recursive_convert_variable(n + 3, zv, from_encoding, to_encoding)) {
 			if (!EG(exception)) {
 				php_error_docref(NULL, E_WARNING, "Cannot handle recursive references");
 			}

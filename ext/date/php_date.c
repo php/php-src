@@ -18,6 +18,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_versioning.h"
 #include "php_date.h"
+#include "php_time.h"
 #include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -386,6 +387,7 @@ static PHP_GINIT_FUNCTION(date)
 	date_globals->default_timezone = NULL;
 	date_globals->timezone = NULL;
 	date_globals->tzcache = NULL;
+	date_globals->duration_cache = NULL;
 }
 /* }}} */
 
@@ -418,6 +420,10 @@ PHP_RSHUTDOWN_FUNCTION(date)
 		efree(DATEG(timezone));
 	}
 	DATEG(timezone) = NULL;
+	if (DATEG(duration_cache)) {
+		zend_object_release(DATEG(duration_cache));
+	}
+	DATEG(duration_cache) = NULL;
 
 	return SUCCESS;
 }
@@ -447,6 +453,7 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_INI_ENTRIES();
 	date_register_classes();
 	register_php_date_symbols(module_number);
+	PHP_MINIT(date_time)(INIT_FUNC_ARGS_PASSTHRU);
 
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;

@@ -59,9 +59,8 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_free_result($res);
 
-    $stmt = mysqli_stmt_init($link);
-    /* Depending on your version, the MySQL server migit not support this */
-    if ($stmt->prepare('EXPLAIN SELECT t1.*, t2.* FROM test AS t1, test AS t2') && $stmt->execute()) {
+    /* Depending on your version, the MySQL server might not support this */
+    if (($stmt = $link->prepare('EXPLAIN SELECT t1.*, t2.* FROM test AS t1, test AS t2')) && $stmt->execute()) {
         if (!mysqli_stmt_store_result($stmt))
             printf("[008] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 

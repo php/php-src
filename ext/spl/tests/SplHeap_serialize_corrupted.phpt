@@ -28,7 +28,7 @@ try {
     serialize($heap);
     echo "FAIL: Serialization should have thrown\n";
 } catch (Exception $e) {
-    echo "Serialization failed: " . $e->getMessage() . "\n";
+    echo 'Serialization failed: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class ThrowingPQ extends SplPriorityQueue {
@@ -56,12 +56,12 @@ try {
     serialize($pq);
     echo "FAIL: PQ Serialization should have thrown\n";
 } catch (Exception $e) {
-    echo "PQ Serialization failed: " . $e->getMessage() . "\n";
+    echo 'PQ Serialization failed: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 Heap is corrupted: YES
-Serialization failed: Heap is corrupted, heap properties are no longer ensured.
+Serialization failed: RuntimeException: Heap is corrupted, heap properties are no longer ensured.
 PriorityQueue is corrupted: YES
-PQ Serialization failed: Heap is corrupted, heap properties are no longer ensured.
+PQ Serialization failed: RuntimeException: Heap is corrupted, heap properties are no longer ensured.

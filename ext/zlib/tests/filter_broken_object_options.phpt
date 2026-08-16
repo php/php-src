@@ -17,5 +17,8 @@ stream_filter_append($fp, 'zlib.inflate', STREAM_FILTER_WRITE, new Params);
 fwrite($fp, "Hello world, hopefully not broken\n");
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: stream_filter_append(): Passing an object for filter parameters for zlib.deflate is deprecated, call get_object_vars() first instead in %s on line %d
+
+Deprecated: stream_filter_append(): Passing an object for filter parameters for zlib.inflate is deprecated, call get_object_vars() first instead in %s on line %d
 Hello world, hopefully not broken

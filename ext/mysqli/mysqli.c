@@ -674,6 +674,8 @@ PHP_METHOD(mysqli_stmt, __construct)
 			RETURN_FALSE;
 		}
 		mysqli_resource->status = MYSQLI_STATUS_VALID;
+	} else {
+		zend_error(E_DEPRECATED, "Instantiation of mysqli_stmt without providing the $query parameter is deprecated");
 	}
 }
 

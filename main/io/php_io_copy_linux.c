@@ -21,11 +21,12 @@
 
 #if !defined(HAVE_COPY_FILE_RANGE) && defined(__NR_copy_file_range)
 #define HAVE_COPY_FILE_RANGE 1
-static inline ssize_t copy_file_range(
+static inline ssize_t php_copy_file_range(
 		int fd_in, off_t *off_in, int fd_out, off_t *off_out, size_t len, unsigned int flags)
 {
 	return syscall(__NR_copy_file_range, fd_in, off_in, fd_out, off_out, len, flags);
 }
+#define copy_file_range php_copy_file_range
 #endif
 
 #ifdef HAVE_SENDFILE

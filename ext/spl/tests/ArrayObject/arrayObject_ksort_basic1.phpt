@@ -15,7 +15,7 @@ var_dump($ao1);
 try {
     var_dump($ao2->ksort('blah'));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($ao2);
 var_dump($ao2->ksort(SORT_STRING));
@@ -35,7 +35,7 @@ object(ArrayObject)#%d (1) {
     int(3)
   }
 }
-ArrayObject::ksort(): Argument #1 ($flags) must be of type int, string given
+TypeError: ArrayObject::ksort(): Argument #1 ($flags) must be of type int, string given
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   array(4) {

@@ -203,6 +203,7 @@ void init_executor(void) /* {{{ */
 
 	zend_hash_init(&EG(callable_convert_cache), 8, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&EG(partial_function_application_cache), 8, NULL, zend_partial_op_array_dtor, 0);
+	zend_stack_init(&EG(lambda_cache), sizeof(zend_object *));
 
 	EG(active) = 1;
 }
@@ -267,6 +268,14 @@ void shutdown_destructors(void) /* {{{ */
 	} zend_end_try();
 }
 /* }}} */
+
+static void lambda_dtor(zend_object **closure_ptr)
+{
+	zend_object *closure = *closure_ptr;
+	if (GC_DELREF(closure) == 0) {
+		zend_objects_store_del(closure);
+	}
+}
 
 /* Free values held by the executor. */
 ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
@@ -421,6 +430,7 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 
 		zend_hash_clean(&EG(callable_convert_cache));
 		zend_hash_clean(&EG(partial_function_application_cache));
+		zend_stack_clean(&EG(lambda_cache), (void (*)(void *)) lambda_dtor, 1);
 
 #if ZEND_DEBUG
 		if (!CG(unclean_shutdown)) {
@@ -1100,9 +1110,9 @@ cleanup_args:
 }
 /* }}} */
 
-ZEND_API void zend_call_known_function(
+ZEND_API void zend_call_known_function_ex(
 		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
-		uint32_t param_count, zval *params, HashTable *named_params)
+		uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args)
 {
 	zval retval;
 	zend_fcall_info fci;
@@ -1116,7 +1126,7 @@ ZEND_API void zend_call_known_function(
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.named_params = named_params;
-	fci.consumed_args = 0;
+	fci.consumed_args = consumed_args;
 	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
 	fcic.function_handler = fn;
@@ -1191,7 +1201,6 @@ ZEND_API bool zend_is_valid_class_name(const zend_string *name) {
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, uint32_t flags) /* {{{ */
 {
 	zend_class_entry *ce = NULL;
-	zval *zv;
 	zend_string *lc_name;
 	zend_string *autoload_name;
 	uint32_t ce_cache = 0;
@@ -1219,12 +1228,11 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		}
 	}
 
-	zv = zend_hash_find(EG(class_table), lc_name);
-	if (zv) {
+	ce = zend_hash_find_ptr(EG(class_table), lc_name);
+	if (ce) {
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
-		ce = (zend_class_entry*)Z_PTR_P(zv);
 		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
 			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
 				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&

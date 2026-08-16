@@ -32,7 +32,7 @@ $_main:
 0004 DECLARE_FUNCTION string("foo") 0
 0005 INIT_FCALL_BY_NAME 0 string("foo")
 0006 SEND_VAL_EX int(2) string("b")
-0007 T0 = CALLABLE_CONVERT_PARTIAL 3
+0007 T0 = CALLABLE_CONVERT_PARTIAL %d string("{closure:%s}")
 0008 INIT_DYNAMIC_CALL 1 T0
 0009 SEND_VAL_EX int(1) 1
 0010 DO_FCALL
@@ -54,7 +54,7 @@ $_main:
      ; (lines=4, args=0, vars=1, tmps=%d)
      ; (after optimizer)
      ; %s:1-9
-0000 T1 = DECLARE_LAMBDA_FUNCTION 0
+0000 T1 = DECLARE_LAMBDA_FUNCTION %d 0
 0001 BIND_LEXICAL T1 CV0($b)
 0002 FREE T1
 0003 RETURN int(1)

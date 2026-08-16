@@ -148,6 +148,7 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_attr_getstack
   pthread_get_stackaddr_np
   pthread_getattr_np
+  pthread_getthrds_np
   pthread_stackseg_np
   strnlen
 ]))

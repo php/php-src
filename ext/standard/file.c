@@ -474,6 +474,7 @@ PHP_FUNCTION(file_put_contents)
 		if (php_memnstr(filename, "://", sizeof("://") - 1, filename + filename_len)) {
 			if (strncasecmp(filename, "file://", sizeof("file://") - 1)) {
 				php_error_docref(NULL, E_WARNING, "Exclusive locks may only be set for regular files");
+				php_stream_error_operation_end(context);
 				RETURN_FALSE;
 			}
 		}

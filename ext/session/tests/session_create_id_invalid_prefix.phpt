@@ -16,13 +16,13 @@ var_dump(session_create_id('%'));
 try {
     var_dump(session_create_id('ABTgdPs68S3M4HMaqKwj33TzqLMv5PHpWQxJbfpeogEhrJRY7o9f33pKLCmhf0tXCtoBkIu0yxXYCSHfJhPd2miPUW4MIpd91dnEiOwWDfaBnfdJZOwgvgmYLSfDGaebqmnCAoyuzlcq2j59nNRhccgJIkr9ytY3RwFTTXszpcjpx6mlJuG9GksKAhPsnnaEwSEb0eFyqvn80gYI2roKSjaFSmJxg0xgXuCF4csMo8DxiSvovho5QTKx5u7h8VyQL'));
 } catch (Throwable $e) {
-    echo $e::class . ': ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(session_create_id("AB\0CD"));
 } catch (Throwable $e) {
-    echo $e::class . ': ' . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

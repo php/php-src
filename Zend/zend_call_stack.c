@@ -36,7 +36,8 @@
 #endif /* ZEND_WIN32 */
 #if (defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)) || \
     defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || \
-    defined(__NetBSD__) || defined(__DragonFly__) || defined(__sun)
+    defined(__NetBSD__) || defined(__DragonFly__) || defined(__sun) || \
+    defined(_AIX)
 # include <pthread.h>
 #endif
 #if defined(__FreeBSD__) || defined(__DragonFly__)
@@ -788,6 +789,79 @@ static bool zend_call_stack_get_solaris(zend_call_stack *stack)
 }
 #endif /* defined(__sun) */
 
+#if defined(_AIX)
+static bool zend_call_stack_get_aix_pthread(zend_call_stack *stack)
+{
+#ifdef HAVE_PTHREAD_GETTHRDS_NP
+	pthread_t pt = pthread_self();
+	struct __pthrdsinfo thread_info = {0};
+	/*
+	 * We don't need the register buffer since we only call the function
+	 * on our own thread, and since the register buffer is only used for
+	 * suspended threads...
+	 */
+	int regsz = 0;
+
+	if (pthread_getthrds_np(&pt, PTHRDSINFO_QUERY_ALL, &thread_info,
+				sizeof(thread_info), NULL, &regsz)) {
+		return false;
+	}
+
+	/*
+	 * These can be null in rare situations, allegedly with user-provided
+	 * stacks with pthread (according to OpenJDK)
+	 */
+	if (!(thread_info.__pi_stackend && thread_info.__pi_stackaddr)) {
+		return false;
+	}
+
+	/*
+	 * The top of the stack (stackend) is not page aligned, there's some
+	 * internal stuff above it. Thankfully, we don't need page alignment.
+	 *
+	 * The size is a little weird. The stacksize field for child threads
+	 * is smaller than subtracting the bottom (stackaddr) from the top;
+	 * it's about 0x888 to 0x1888 above stackaddr. I'm assuming it rounds
+	 * the bottom of the stack to page alignment? The main thread size is
+	 * the same as end - addr, but it is variable between systems; also
+	 * assuming there's stuff at the top of the stack that gets taken off,
+	 * regardless of maximum declared size.
+	 *
+	 * A somewhat crude diagram is available here:
+	 * https://www.ibm.com/docs/en/aix/7.2.0?topic=tuning-thread-environment-variables
+	 *
+	 * pthread->pt_stk.st_limit is __pi_stackend,
+	 * above that is internal pthread junk close to the end of page
+	 * pthread->pt_stk.st_base is __pi_stackaddr,
+	 * below that is the red zone
+	 */
+	stack->base = thread_info.__pi_stackend;
+	stack->max_size = thread_info.__pi_stackend - thread_info.__pi_stackaddr;
+	return true;
+#else
+	/* pthread likely not linked in; default NTS build behaviour */
+	return false;
+#endif
+}
+
+static bool zend_call_stack_get_aix(zend_call_stack *stack)
+{
+	/*
+	 * While we could use /proc on AIX (and the implementation basically
+	 * like the Solaris one, as the procfs is similar), it doesn't work on
+	 * PASE. The pthread API works even on the main thread, so we should
+	 * use it when we have pthread linked (always with ZTS, maybe not with
+	 * NTS builds).
+	 */
+	return zend_call_stack_get_aix_pthread(stack);
+}
+#else
+static bool zend_call_stack_get_aix(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(_AIX) */
+
 /** Get the stack information for the calling thread */
 ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 {
@@ -820,6 +894,10 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 	}
 
 	if (zend_call_stack_get_solaris(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_aix(stack)) {
 		return true;
 	}
 

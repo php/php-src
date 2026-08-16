@@ -9,14 +9,14 @@ calendar
 try {
     cal_days_in_month(-1, 4, 2017);
 } catch (ValueError $ex) {
-    echo "{$ex->getMessage()}\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 try{
     cal_days_in_month(CAL_GREGORIAN,20, 2009);
 } catch (ValueError $ex) {
-    echo "{$ex->getMessage()}\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-cal_days_in_month(): Argument #1 ($calendar) must be a valid calendar ID
-Invalid date
+ValueError: cal_days_in_month(): Argument #1 ($calendar) must be a valid calendar ID
+ValueError: Invalid date

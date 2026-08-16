@@ -13,9 +13,9 @@ try {
         echo "should not reach here\n";
     }
 } catch (UnexpectedValueException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-Cannot deserialize ArrayObject with iterator class 'GlobIterator'; this class is not derived from ArrayIterator
+UnexpectedValueException: Cannot deserialize ArrayObject with iterator class 'GlobIterator'; this class is not derived from ArrayIterator

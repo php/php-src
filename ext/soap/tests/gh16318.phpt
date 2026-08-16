@@ -26,11 +26,11 @@ foreach ([$test1, $test2] as $test) {
     try {
         $client->__soapCall("echoStructArray", array($test), array("soapaction"=>"http://soapinterop.org/","uri"=>"http://soapinterop.org/"));
     } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
-Recursive array cannot be encoded
-Recursive array cannot be encoded
+ValueError: Recursive array cannot be encoded
+ValueError: Recursive array cannot be encoded

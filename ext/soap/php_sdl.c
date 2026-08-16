@@ -3179,8 +3179,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		unsigned char digest[16];
 		size_t len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
-		char *user = php_get_current_user();
-		size_t user_len = user ? strlen(user) + 1 : 0;
+		zend_string *user = php_get_current_user();
 
 		/* System architecture identification (see bug #70951) */
 		static const char ids[] = {SIZEOF_ZEND_LONG, SOAP_BIG_ENDIAN};
@@ -3191,13 +3190,13 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		PHP_MD5Update(&md5_context, ids, sizeof(ids));
 		PHP_MD5Final(digest, &md5_context);
 		make_digest(md5str, digest);
-		key = emalloc(len+sizeof("/wsdl-")-1+user_len+2+sizeof(md5str));
+		key = emalloc(len+sizeof("/wsdl-")-1+ZSTR_LEN(user)+1+2+sizeof(md5str));
 		memcpy(key,SOAP_GLOBAL(cache_dir),len);
 		memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
 		len += sizeof("/wsdl-")-1;
-		if (user_len) {
-			memcpy(key+len, user, user_len-1);
-			len += user_len-1;
+		if (ZSTR_LEN(user)) {
+			memcpy(key+len, ZSTR_VAL(user), ZSTR_LEN(user));
+			len += ZSTR_LEN(user);
 			key[len++] = '-';
 		}
 		if (WSDL_CACHE_VERSION <= 0x9f) {

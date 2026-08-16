@@ -38,6 +38,6 @@ test('Proxy', $obj);
 ?>
 --EXPECT--
 # Ghost
-ReflectionException: Can not use skipLazyInitialization on dynamic property C::$dyn
+ReflectionException: Cannot use skipLazyInitialization() on dynamic property C::$dyn
 # Proxy
-ReflectionException: Can not use skipLazyInitialization on dynamic property C::$dyn
+ReflectionException: Cannot use skipLazyInitialization() on dynamic property C::$dyn

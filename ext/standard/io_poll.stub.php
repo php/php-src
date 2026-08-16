@@ -86,7 +86,7 @@ namespace Io\Poll {
         public function add(Handle $handle, array $events, mixed $data = null): Watcher {}
 
         /** @return list<Watcher> */
-        public function wait(?int $timeoutSeconds = null, int $timeoutMicroseconds = 0, ?int $maxEvents = null): array {}
+        public function wait(?\Time\Duration $timeout = null, ?int $maxEvents = null): array {}
 
         public function getBackend(): Backend {}
     }

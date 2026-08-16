@@ -105,6 +105,7 @@ releases.
     * php-8.4.0 (initial GA)
     * php-8.4.9 (periodic bugfix or security release)
 
+12. Ensure you are familiar with our procedure for [merging upwards][].
 
 ## Packaging a non-stable release (alpha/beta/RC)
 
@@ -321,7 +322,7 @@ slightly different steps. We'll call attention where the steps differ.
     git add main/php_version.h Zend/zend.h configure.ac
     git merge --continue
     ```
-    
+
     Be sure to set up a merge driver for the `NEWS` file as described in
     the [Git FAQ page on the PHP wiki][gitfaq-mandatory].
 
@@ -543,25 +544,38 @@ slightly different steps. We'll call attention where the steps differ.
 
 ## Packaging a stable release
 
-1. Check out the *patch-level version branch* for the release
-   (e.g., `PHP-8.1.7`).
+1. Check out the *patch-level version branch* for the release.
+
+   ```
+   git switch PHP-X.Y.Z
+   ```
 
    > 💬 **Hint** \
    > You should have created this branch when packaging the non-stable release
    > candidate for this version. If it is for a PHP-X.Y.0 version, then the branch
    > was created as part of the final planned release candidate, PHP-X.Y.0RC4.
 
-2. If a CVE commit needs to be merged to the release, have it committed to
-   the base branches and [merged upwards as usual][] (e.g. commit the CVE fix
-   to 7.2, merge to 7.3, 7.4, etc.). Then, you can cherry-pick it into the
-   patch-level version branch for this release.
+2. If the upcoming release is a security release, you will have been informed
+   about it by the security release manager (SRM) by Tuesday noon (UTC).
 
-   Commit these changes and push the patch-level version branch. Ensure
-   that CI is still passing (see above).
+   > 💬 **Hint** \
+   > If you haven't set up a git remote for the security repo yet, do so:
+   > ```bash
+   > git remote add security git@github.com:php/php-src-security.git
+   > ```
 
-   > 💡 **Tip** \
-   > Don't forget to update `NEWS` manually in an extra commit to the
-   > patch-level version branch.
+   The SRM will provide you with a branch to merge in your
+   *patch-level version branch*.
+
+   ```bash
+   git fetch security
+   git merge security/PHP-X.Y.Z-security
+   git push upstream PHP-X.Y.Z
+   ```
+
+   > 💬 **Hint** \
+   > You do not need to merge this back into PHP-X.Y; the SRM will take care
+   > of it.
 
 3. Run the `./scripts/dev/credits` script in the patch-level version branch,
    and commit the changes in the credits files in `ext/standard`.
@@ -1182,7 +1196,7 @@ volunteers to begin the selection process for the next release managers.
 [Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
 [PHP 8.3 is now for PHP 8.3.21-dev]: https://github.com/php/php-src/commit/b57f425cfe20a11003253427424cc0517483550b
 [GitHub command line tool]: https://cli.github.com
-[merged upwards as usual]: https://wiki.php.net/vcs/gitworkflow
+[merging upwards]: https://wiki.php.net/vcs/gitworkflow
 [Update versions for PHP 8.1.7]: https://github.com/php/php-src/commit/d35e577a1bd0b35b9386cea97cddc73fd98eed6d
 [Update NEWS for PHP 8.1.7]: https://github.com/php/php-src/commit/b241f07f52ca9f87bf52be81817f475e6e727439
 [Announce PHP 8.1.6]: https://github.com/php/web-php/commit/9f796a96c65f07e45845ec248933bfb0010b94a9

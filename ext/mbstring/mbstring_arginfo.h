@@ -450,128 +450,112 @@ static void register_mbstring_symbols(int module_number)
 #if defined(HAVE_MBREGEX)
 
 	zend_attribute *attribute_Deprecated_func_mb_regex_encoding_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_regex_encoding", sizeof("mb_regex_encoding") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_regex_encoding_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_regex_encoding_0->args[0].value, attribute_Deprecated_func_mb_regex_encoding_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_regex_encoding_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_regex_encoding_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_regex_encoding_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_regex_encoding_0->args[1].value, attribute_Deprecated_func_mb_regex_encoding_0_arg1_str);
 	attribute_Deprecated_func_mb_regex_encoding_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg", sizeof("mb_ereg") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_0->args[0].value, attribute_Deprecated_func_mb_ereg_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_0->args[1].value, attribute_Deprecated_func_mb_ereg_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_eregi_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_eregi", sizeof("mb_eregi") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_eregi_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_0->args[0].value, attribute_Deprecated_func_mb_eregi_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_eregi_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_eregi_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_0->args[1].value, attribute_Deprecated_func_mb_eregi_0_arg1_str);
 	attribute_Deprecated_func_mb_eregi_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_replace_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_replace", sizeof("mb_ereg_replace") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_replace_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_0->args[0].value, attribute_Deprecated_func_mb_ereg_replace_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_replace_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_replace_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_0->args[1].value, attribute_Deprecated_func_mb_ereg_replace_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_replace_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_eregi_replace_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_eregi_replace", sizeof("mb_eregi_replace") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_eregi_replace_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_replace_0->args[0].value, attribute_Deprecated_func_mb_eregi_replace_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_replace_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_eregi_replace_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_eregi_replace_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_eregi_replace_0->args[1].value, attribute_Deprecated_func_mb_eregi_replace_0_arg1_str);
 	attribute_Deprecated_func_mb_eregi_replace_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_replace_callback_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_replace_callback", sizeof("mb_ereg_replace_callback") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_replace_callback_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_callback_0->args[0].value, attribute_Deprecated_func_mb_ereg_replace_callback_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_callback_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_replace_callback_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_replace_callback_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_replace_callback_0->args[1].value, attribute_Deprecated_func_mb_ereg_replace_callback_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_replace_callback_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_split_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_split", sizeof("mb_split") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_split_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_split_0->args[0].value, attribute_Deprecated_func_mb_split_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_split_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_split_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_split_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_split_0->args[1].value, attribute_Deprecated_func_mb_split_0_arg1_str);
 	attribute_Deprecated_func_mb_split_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_match_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_match", sizeof("mb_ereg_match") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_match_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_match_0->args[0].value, attribute_Deprecated_func_mb_ereg_match_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_match_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_match_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_match_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_match_0->args[1].value, attribute_Deprecated_func_mb_ereg_match_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_match_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_search_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_search", sizeof("mb_ereg_search") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_search_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_search_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_search_pos_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_search_pos", sizeof("mb_ereg_search_pos") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_pos_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_pos_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_pos_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_pos_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_search_pos_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_search_pos_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_pos_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_pos_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_pos_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_search_regs_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_search_regs", sizeof("mb_ereg_search_regs") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_regs_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_regs_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_regs_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_regs_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_search_regs_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_search_regs_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_regs_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_regs_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_regs_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_search_init_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_search_init", sizeof("mb_ereg_search_init") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_init_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_init_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_init_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_init_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_search_init_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_search_init_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_init_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_init_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_search_getregs_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_search_getregs", sizeof("mb_ereg_search_getregs") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_getregs_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getregs_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_getregs_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getregs_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_search_getregs_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_search_getregs_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getregs_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_getregs_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_getregs_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_search_getpos_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_search_getpos", sizeof("mb_ereg_search_getpos") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_getpos_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getpos_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_getpos_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getpos_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_search_getpos_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_search_getpos_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_getpos_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_getpos_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_getpos_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_ereg_search_setpos_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_ereg_search_setpos", sizeof("mb_ereg_search_setpos") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_ereg_search_setpos_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_setpos_0->args[0].value, attribute_Deprecated_func_mb_ereg_search_setpos_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_setpos_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_ereg_search_setpos_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_ereg_search_setpos_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_ereg_search_setpos_0->args[1].value, attribute_Deprecated_func_mb_ereg_search_setpos_0_arg1_str);
 	attribute_Deprecated_func_mb_ereg_search_setpos_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mb_regex_set_options_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mb_regex_set_options", sizeof("mb_regex_set_options") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mb_regex_set_options_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mb_regex_set_options_0->args[0].value, attribute_Deprecated_func_mb_regex_set_options_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mb_regex_set_options_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mb_regex_set_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mb_regex_set_options_0_arg1_str = zend_string_init("because the underlying library is no longer maintained", strlen("because the underlying library is no longer maintained"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mb_regex_set_options_0->args[1].value, attribute_Deprecated_func_mb_regex_set_options_0_arg1_str);

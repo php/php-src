@@ -797,6 +797,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_get_charset
      */
+    #[\Deprecated(since: '8.6', message: 'did you mean mysqli_character_set_name()?')]
     public function get_charset(): ?object {}
 
     /**
@@ -995,6 +996,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_stmt_init
      */
+    #[\Deprecated(since: '8.6', message: 'use mysqli::prepare() instead')]
     public function stmt_init(): mysqli_stmt|false {}
 
     /**
@@ -1463,6 +1465,7 @@ function mysqli_get_connection_stats(mysqli $mysql): array {}
 function mysqli_get_client_stats(): array {}
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'did you mean mysqli_character_set_name()?')]
 function mysqli_get_charset(mysqli $mysql): ?object {}
 
 /** @refcount 1 */
@@ -1608,6 +1611,7 @@ function mysqli_stmt_get_result(mysqli_stmt $statement): mysqli_result|false {}
 function mysqli_stmt_get_warnings(mysqli_stmt $statement): mysqli_warning|false {}
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'use mysqli_prepare() instead')]
 function mysqli_stmt_init(mysqli $mysql): mysqli_stmt|false {}
 
 /** @refcount 1 */

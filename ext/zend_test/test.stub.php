@@ -299,15 +299,80 @@ namespace {
 
     function zend_delref(mixed $variable): void {}
 
+	function zend_bool(bool $param): bool {}
+	function zend_bool_or_null(bool|null $param): bool|null {}
+	function zend_bool_slow_zpp(bool $param): bool {}
+	function zend_bool_or_null_slow_zpp(bool|null $param): bool|null {}
+
+	function zend_int(int $param): int {}
+	function zend_int_or_null(int|null $param): int|null {}
+	function zend_int_slow_zpp(int $param): int {}
+	function zend_int_or_null_slow_zpp(int|null $param): int|null {}
+
+	function zend_float(float $param): float {}
+	function zend_float_or_null(float|null $param): float|null {}
+	function zend_float_slow_zpp(float $param): float {}
+	function zend_float_or_null_slow_zpp(float|null $param): float|null {}
+
+	function zend_number(int|float $param): int|float {}
+	function zend_number_or_null(int|float|null $param): int|float|null {}
+	function zend_number_slow_zpp(int|float $param): int|float {}
+	function zend_number_or_null_slow_zpp(int|float|null $param): int|float|null {}
+
+	function zend_object(object $param): object {}
+	function zend_object_or_null(object|null $param): object|null {}
+	function zend_object_slow_zpp(object $param): object {}
+	function zend_object_or_null_slow_zpp(object|null $param): object|null {}
+
+	function zend_obj(object $param): object {}
+	function zend_obj_or_null(object|null $param): object|null {}
+
+	function zend_obj_or_class_name(object|string $param): string {}
+	function zend_obj_or_class_name_or_null(object|string|null $param): string|null {}
+
+	function zend_class_name(string $param): string {}
+	function zend_class_name_or_null(string|null $param): string|null {}
+	function zend_class_name_slow_zpp(string $param): string {}
+	function zend_class_name_or_null_slow_zpp(string|null $param): string|null {}
+
+	function zend_object_sdtClass(stdClass $param): stdClass {}
+	function zend_object_sdtClass_or_null(stdClass|null $param): stdClass|null {}
+	function zend_object_sdtClass_slow_zpp(stdClass $param): stdClass {}
+	function zend_object_sdtClass_or_null_slow_zpp(stdClass|null $param): stdClass|null {}
+
+	function zend_obj_sdtClass(stdClass $param): stdClass {}
+	function zend_obj_sdtClass_or_null(stdClass|null $param): stdClass|null {}
+
+    /**
+     * @param resource $param
+     * @return resource
+     */
+	function zend_resource($param) {}
+    /**
+     * @param resource|null $param
+     * @return resource|null
+     */
+	function zend_resource_or_null($param) {}
+    /**
+     * @param resource $param
+     * @return resource
+     */
+	function zend_resource_slow_zpp($param) {}
+    /**
+     * @param resource|null $param
+     * @return resource|null
+     */
+	function zend_resource_or_null_slow_zpp($param) {}
+
     function zend_string_or_object(object|string $param): object|string {}
 
     function zend_string_or_object_or_null(object|string|null $param): object|string|null {}
 
-    /** @param stdClass|string $param */
-    function zend_string_or_stdclass($param): stdClass|string {}
+    function zend_obj_stdclass_or_string(stdClass|string|null $param): stdClass|string {}
+    function zend_obj_stdclass_or_string_or_null(stdClass|string|null $param): stdClass|string|null {}
 
-    /** @param stdClass|string|null $param */
-    function zend_string_or_stdclass_or_null($param): stdClass|string|null {}
+    function zend_obj_stdclass_or_int(stdClass|int|null $param): stdClass|int {}
+    function zend_obj_stdclass_or_int_or_null(stdClass|int|null $param): stdClass|int|null {}
 
     function zend_number_or_string(string|int|float $param): string|int|float {}
 

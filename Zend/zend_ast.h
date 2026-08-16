@@ -233,6 +233,8 @@ typedef struct _zend_ast_fcc {
 	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
 	zend_ast_attr attr; /* Additional attribute, use depending on node type */
 	uint32_t lineno;    /* Line number */
+	zend_string *filename;
+	zend_string *name;
 	zend_ast *args;
 	ZEND_MAP_PTR_DEF(zend_function *, fptr);
 } zend_ast_fcc;

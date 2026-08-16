@@ -31,8 +31,8 @@ $teLoader = new teLoader();
 try {
     new teChild();
 } catch (Throwable $e) {
-    echo "Exception: ", $e->getMessage() , "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Exception: Class "teException" not found
+Error: Class "teException" not found

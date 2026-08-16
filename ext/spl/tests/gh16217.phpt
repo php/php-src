@@ -9,13 +9,13 @@ function uninitialized(): SplFileObject {
 try {
     (new ReflectionMethod(SplFileObject::class, "fputcsv"))->invoke(uninitialized(), []);
 } catch (Error $e) {
-    echo "fputcsv: ", $e->getMessage(), "\n";
+    echo 'fputcsv: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     (new ReflectionMethod(SplFileObject::class, "next"))->invoke(uninitialized());
 } catch (Error $e) {
-    echo "next: ", $e->getMessage(), "\n";
+    echo 'next: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $obj = uninitialized();
@@ -23,13 +23,13 @@ $obj = uninitialized();
 try {
     (new ReflectionMethod(SplFileObject::class, "next"))->invoke($obj);
 } catch (Error $e) {
-    echo "next (READ_AHEAD): ", $e->getMessage(), "\n";
+    echo 'next (READ_AHEAD): ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECT--
-fputcsv: Object not initialized
-next: Object not initialized
-next (READ_AHEAD): Object not initialized
+fputcsv: Error: Object not initialized
+next: Error: Object not initialized
+next (READ_AHEAD): Error: Object not initialized
 Done

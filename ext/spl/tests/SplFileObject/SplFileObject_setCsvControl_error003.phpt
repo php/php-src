@@ -18,7 +18,7 @@ $s->setFlags(SplFileObject::READ_CSV);
 try {
     $s->setCsvControl('|', '\'', 'three');
 } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -26,4 +26,4 @@ try {
 unlink('csv_control_data_error003.csv');
 ?>
 --EXPECT--
-SplFileObject::setCsvControl(): Argument #3 ($escape) must be empty or a single character
+ValueError: SplFileObject::setCsvControl(): Argument #3 ($escape) must be empty or a single character
