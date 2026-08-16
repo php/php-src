@@ -263,6 +263,7 @@ namespace Uri\WhatWg {
         /** @implementation-alias Uri\Rfc3986\Uri::withQuery */
         public function withQuery(?string $query): static {}
 
+        /** @implementation-alias Uri\Rfc3986\Uri::getFragment */
         public function getFragment(): ?string {}
 
         /** @implementation-alias Uri\Rfc3986\Uri::withFragment */
