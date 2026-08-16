@@ -10,4 +10,4 @@ class MyDateTime extends DateTime
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of MyDateTime::setTime(int $hour, int $minute, int $second = 0, bool $microsecond = false): DateTime must be compatible with DateTime::setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): static in %s on line %d
+Fatal error: Declaration of MyDateTime::setTime(int $hour, int $minute, int $second = 0, bool $microsecond = false): DateTime must be compatible with DateTime::setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTime in %s on line %d

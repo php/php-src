@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_date.stub.php instead.
- * Stub hash: 90bad5a5d3100d611d237c4aec07b26cf831f52c */
+ * Stub hash: 0e01f68589a71eae2f789ef6de330ac27724ba47 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -303,7 +303,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTime_getTimezone arginfo_class_DateTimeInterface_getTimezone
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_setTimezone, 0, 1, IS_STATIC, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setTimezone, 0, 1, DateTime, 0)
 	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 0)
 ZEND_END_ARG_INFO()
 
@@ -311,26 +311,26 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTime_getMicrosecond arginfo_time
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_setTime, 0, 2, IS_STATIC, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setTime, 0, 2, DateTime, 0)
 	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, minute, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, second, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microsecond, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_setDate, 0, 3, IS_STATIC, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setDate, 0, 3, DateTime, 0)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, day, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_setISODate, 0, 2, IS_STATIC, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setISODate, 0, 2, DateTime, 0)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, week, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dayOfWeek, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_setTimestamp, 0, 1, IS_STATIC, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setTimestamp, 0, 1, DateTime, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -354,7 +354,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutabl
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DateTimeImmutable_createFromFormat, 0, 2, MAY_BE_STATIC|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateTimeImmutable_createFromFormat, 0, 2, DateTimeImmutable, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
@@ -386,15 +386,32 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_sub arginfo_class_DateTimeImmutable_add
 
-#define arginfo_class_DateTimeImmutable_setTimezone arginfo_class_DateTime_setTimezone
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setTimezone, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DateTimeImmutable_setTime arginfo_class_DateTime_setTime
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setTime, 0, 2, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, minute, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, second, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microsecond, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DateTimeImmutable_setDate arginfo_class_DateTime_setDate
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setDate, 0, 3, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, day, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DateTimeImmutable_setISODate arginfo_class_DateTime_setISODate
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setISODate, 0, 2, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, week, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dayOfWeek, IS_LONG, 0, "1")
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DateTimeImmutable_setTimestamp arginfo_class_DateTime_setTimestamp
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setTimestamp, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_setMicrosecond arginfo_class_DateTime_setMicrosecond
 

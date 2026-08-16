@@ -400,7 +400,7 @@ class DateTime implements DateTimeInterface
      * @tentative-return-type
      * @alias date_timezone_set
      */
-    public function setTimezone(DateTimeZone $timezone): static {}
+    public function setTimezone(DateTimeZone $timezone): DateTime {}
 
     /**
      * @tentative-return-type
@@ -414,25 +414,25 @@ class DateTime implements DateTimeInterface
      * @tentative-return-type
      * @alias date_time_set
      */
-    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): static {}
+    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTime {}
 
     /**
      * @tentative-return-type
      * @alias date_date_set
      */
-    public function setDate(int $year, int $month, int $day): static {}
+    public function setDate(int $year, int $month, int $day): DateTime {}
 
     /**
      * @tentative-return-type
      * @alias date_isodate_set
      */
-    public function setISODate(int $year, int $week, int $dayOfWeek = 1): static {}
+    public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTime {}
 
     /**
      * @tentative-return-type
      * @alias date_timestamp_set
      */
-    public function setTimestamp(int $timestamp): static {}
+    public function setTimestamp(int $timestamp): DateTime {}
 
     public function setMicrosecond(int $microsecond): static {}
 
@@ -468,7 +468,7 @@ class DateTimeImmutable implements DateTimeInterface
      * @tentative-return-type
      * @alias date_create_immutable_from_format
      */
-    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): static|false {}
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
 
     /** @tentative-return-type */
     public static function createFromTimestamp(int|float $timestamp): static {}
