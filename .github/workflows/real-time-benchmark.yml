@@ -119,14 +119,14 @@ jobs:
         with:
           repository: '${{ env.REPOSITORY }}'
           ref: '${{ env.COMMIT }}'
-          fetch-depth: 100
+          filter: blob:none
           path: 'php-version-benchmarks/tmp/php_${{ env.ID }}'
       - name: Checkout php-src (baseline version)
         uses: actions/checkout@v6
         with:
           repository: '${{ env.REPOSITORY }}'
           ref: '${{ env.BASELINE_COMMIT }}'
-          fetch-depth: 100
+          filter: blob:none
           path: 'php-version-benchmarks/tmp/php_baseline'
       - name: Setup benchmark results
         run: |
@@ -141,6 +141,7 @@ jobs:
           repository: php/real-time-benchmark-data
           ssh-key: ${{ secrets.PHP_VERSION_BENCHMARK_RESULTS_DEPLOY_KEY }}
           path: 'php-version-benchmarks/docs/results'
+          fetch-depth: 1
       - name: Setup PHP config - baseline PHP version
         run: |
           set -e
@@ -296,18 +297,20 @@ jobs:
         run: |
           set -ex
 
-          sed -i "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md"
-
           cd ./php-version-benchmarks/docs/results
-          git pull --autostash
+          git pull
           if [ -e ".git/MERGE_HEAD" ]; then
             echo "Merging, can't proceed"
             exit 1
           fi
+
+          sed -i "s|#ARTIFACT_URL#|${{ steps.upload.outputs.artifact-url }}|g" "${NEWEST_RESULT_DIRECTORY}result.md"
+
           git add .
           if git diff --cached --quiet; then
             exit 1
           fi
+
           git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
           git push
       - name: Comment results
