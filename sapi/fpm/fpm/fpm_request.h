@@ -4,9 +4,9 @@
 #define FPM_REQUEST_H 1
 
 /* hanging in accept() */
-void fpm_request_accepting(void);
+void fpm_request_accepting(bool fistAccept);
 /* start reading fastcgi request from very first byte */
-void fpm_request_reading_headers(void);
+void fpm_request_reading_headers(bool keptAlive);
 /* not a stage really but a point in the php code, where all request params have become known to sapi */
 void fpm_request_info(void);
 /* the script is executing */
