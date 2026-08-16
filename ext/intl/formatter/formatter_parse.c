@@ -27,19 +27,20 @@
 
 #define ICU_LOCALE_BUG 1
 
-static bool numfmt_utf8_offset_to_utf16(const char *str, size_t str_len, int32_t *position)
+static bool numfmt_utf8_offset_to_utf16(const char *str, size_t str_len, int32_t *position, UErrorCode *status)
 {
 	int32_t utf16_position;
-	UErrorCode status = U_ZERO_ERROR;
 
 	if (*position < 0 || (size_t) *position > str_len) {
 		return true;
 	}
 
-	u_strFromUTF8(NULL, 0, &utf16_position, str, *position, &status);
-	if (status != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(status)) {
+	*status = U_ZERO_ERROR;
+	u_strFromUTF8(NULL, 0, &utf16_position, str, *position, status);
+	if (*status != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(*status)) {
 		return false;
 	}
+	*status = U_ZERO_ERROR;
 
 	*position = utf16_position;
 	return true;
@@ -96,9 +97,9 @@ PHP_FUNCTION( numfmt_parse )
 	/* Convert given string to UTF-16. */
 	intl_convert_utf8_to_utf16(&sstr, &sstr_len, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
-	if (zposition && !numfmt_utf8_offset_to_utf16(str, str_len, &position)) {
+	if (zposition && !numfmt_utf8_offset_to_utf16(str, str_len, &position, &INTL_DATA_ERROR_CODE(nfo))) {
 		efree(sstr);
-		RETURN_FALSE;
+		INTL_METHOD_CHECK_STATUS(nfo, "Invalid UTF-8 offset");
 	}
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
@@ -190,9 +191,9 @@ PHP_FUNCTION( numfmt_parse_currency )
 
 	if(zposition) {
 		position = (int32_t) zval_get_long(zposition);
-		if (!numfmt_utf8_offset_to_utf16(str, str_len, &position)) {
+		if (!numfmt_utf8_offset_to_utf16(str, str_len, &position, &INTL_DATA_ERROR_CODE(nfo))) {
 			efree(sstr);
-			RETURN_FALSE;
+			INTL_METHOD_CHECK_STATUS(nfo, "Invalid UTF-8 offset");
 		}
 		position_p = &position;
 	}

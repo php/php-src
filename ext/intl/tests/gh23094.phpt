@@ -15,6 +15,7 @@ var_dump($offset);
 $offset = 1;
 var_dump($formatter->parse("\u{00E9}123", NumberFormatter::TYPE_INT32, $offset));
 var_dump($offset);
+var_dump(intl_is_failure($formatter->getErrorCode()));
 
 $formatter = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
 $offset = strlen($prefix);
@@ -28,6 +29,7 @@ $currency = null;
 var_dump($formatter->parseCurrency("\u{00E9}$123.45", $currency, $offset));
 var_dump($currency);
 var_dump($offset);
+var_dump(intl_is_failure($formatter->getErrorCode()));
 
 ?>
 --EXPECT--
@@ -35,9 +37,11 @@ int(123)
 int(7)
 bool(false)
 int(1)
+bool(true)
 float(123.45)
 string(3) "USD"
 int(11)
 bool(false)
 NULL
 int(1)
+bool(true)
