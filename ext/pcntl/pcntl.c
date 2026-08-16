@@ -57,28 +57,48 @@
 #include <errno.h>
 #if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY) || defined(HAVE_SCHED_GETCPU)
 #include <sched.h>
+#if defined(__linux__) && defined(CPU_ALLOC)
+#define PCNTL_CPUSET_DYNAMIC 1
+typedef cpu_set_t *PCNTL_CPUSET_T;
+ #define PCNTL_CPUSET(mask) (mask)
+ #define PCNTL_CPUSET_SIZE(mask, sz) (sz)
+ #define PCNTL_CPU_ISSET(i, mask, sz) CPU_ISSET_S(i, sz, mask)
+ #define PCNTL_CPU_SET(i, mask, sz) CPU_SET_S(i, sz, mask)
+ #define PCNTL_CPU_ALLOC(mask, sz, maxcpus)					\
+	do {										\
+		(sz) = MAX(CPU_ALLOC_SIZE(maxcpus), sizeof(cpu_set_t));			\
+		(mask) = ecalloc(1, (sz));						\
+	} while (0)
+ #define PCNTL_CPU_DESTROY(mask) efree(mask)
+#else
 #if defined(__FreeBSD__)
 #include <sys/types.h>
 #include <sys/cpuset.h>
 typedef cpuset_t cpu_set_t;
 #endif
- #define PCNTL_CPUSET(mask) &mask
- #define PCNTL_CPUSET_SIZE(mask) sizeof(mask)
- #define PCNTL_CPU_ISSET(i, mask) CPU_ISSET(i, &mask)
- #define PCNTL_CPU_SET(i, mask) CPU_SET(i, &mask)
- #define PCNTL_CPU_ZERO(mask) CPU_ZERO(&mask)
+typedef cpu_set_t PCNTL_CPUSET_T;
+ #define PCNTL_CPUSET(mask) (&(mask))
+ #define PCNTL_CPUSET_SIZE(mask, sz) (sz)
+ #define PCNTL_CPU_ISSET(i, mask, sz) CPU_ISSET(i, &(mask))
+ #define PCNTL_CPU_SET(i, mask, sz) CPU_SET(i, &(mask))
+ #define PCNTL_CPU_ALLOC(mask, sz, maxcpus)	\
+	do {					\
+		CPU_ZERO(&(mask));		\
+		(sz) = sizeof(mask);		\
+	} while (0)
  #define PCNTL_CPU_DESTROY(mask) ((void)0)
+#endif
 #elif defined(__NetBSD__)
 #include <sys/syscall.h>
 #include <sched.h>
-typedef cpuset_t *cpu_set_t;
+typedef cpuset_t *PCNTL_CPUSET_T;
  #define sched_getaffinity(p, c, m) syscall(SYS__sched_getaffinity, p, 0, c, m)
  #define sched_setaffinity(p, c, m) syscall(SYS__sched_setaffinity, p, 0, c, m)
- #define PCNTL_CPUSET(mask) mask
- #define PCNTL_CPUSET_SIZE(mask) cpuset_size(mask)
- #define PCNTL_CPU_ISSET(i, mask) cpuset_isset((cpuid_t)i, mask)
- #define PCNTL_CPU_SET(i, mask) cpuset_set((cpuid_t)i, mask)
- #define PCNTL_CPU_ZERO(mask)										\
+ #define PCNTL_CPUSET(mask) (mask)
+ #define PCNTL_CPUSET_SIZE(mask, sz) (sz)
+ #define PCNTL_CPU_ISSET(i, mask, sz) cpuset_isset((cpuid_t)i, mask)
+ #define PCNTL_CPU_SET(i, mask, sz) cpuset_set((cpuid_t)i, mask)
+ #define PCNTL_CPU_ALLOC(mask, sz, maxcpus)								\
 	do {												\
 		mask = cpuset_create(); 								\
 		if (UNEXPECTED(!mask)) {								\
@@ -86,24 +106,27 @@ typedef cpuset_t *cpu_set_t;
 			RETURN_FALSE;   								\
 		}											\
 		cpuset_zero(mask);									\
+		(sz) = cpuset_size(mask);								\
 	} while(0)
  #define PCNTL_CPU_DESTROY(mask) cpuset_destroy(mask)
  #define HAVE_SCHED_SETAFFINITY 1
 #elif defined(HAVE_PSET_BIND)
 #include <sys/pset.h>
-typedef psetid_t cpu_set_t;
- #define sched_getaffinity(p, c, m) pset_bind(PS_QUERY, P_PID, p, &m)
- #define sched_setaffinity(p, c, m) pset_bind(m, P_PID, (p <= 0 ? getpid() : p), NULL)
+typedef psetid_t PCNTL_CPUSET_T;
+ #define sched_getaffinity(p, c, m) ((void)(c), pset_bind(PS_QUERY, P_PID, p, &m))
+ #define sched_setaffinity(p, c, m) ((void)(c), pset_bind(m, P_PID, (p <= 0 ? getpid() : p), NULL))
  #define PCNTL_CPUSET(mask) mask
- #define PCNTL_CPU_ISSET(i, mask) (pset_assign(PS_QUERY, (processorid_t)i, &query) == 0 && query == mask)
- #define PCNTL_CPU_SET(i, mask) pset_assign(mask, (processorid_t)i, NULL)
- #define PCNTL_CPU_ZERO(mask) 														\
+ #define PCNTL_CPUSET_SIZE(mask, sz) (sz)
+ #define PCNTL_CPU_ISSET(i, mask, sz) (pset_assign(PS_QUERY, (processorid_t)i, &query) == 0 && query == mask)
+ #define PCNTL_CPU_SET(i, mask, sz) pset_assign(mask, (processorid_t)i, NULL)
+ #define PCNTL_CPU_ALLOC(mask, sz, maxcpus) 											\
 	psetid_t query;																	\
 	do {																			\
 		if (UNEXPECTED(pset_create(&mask) != 0)) {									\
 			php_error_docref(NULL, E_WARNING, "pset_create: %s", strerror(errno));	\
 			RETURN_FALSE;															\
 		}																			\
+		(sz) = sizeof(mask);														\
 	 } while (0)
  #define PCNTL_CPU_DESTROY(mask) 													\
 	do {																			\
@@ -1678,11 +1701,46 @@ PHP_FUNCTION(pcntl_setns)
 #endif
 
 #ifdef HAVE_SCHED_SETAFFINITY
+static zend_long pcntl_cpu_count(void)
+{
+	errno = 0;
+	zend_long maxcpus = sysconf(_SC_NPROCESSORS_CONF);
+	if (UNEXPECTED(maxcpus < 0)) {
+		PCNTL_G(last_error) = errno ? errno : EINVAL;
+		php_error_docref(NULL, E_WARNING, "Cannot determine the number of cpus");
+	}
+
+	return maxcpus;
+}
+
+#ifdef PCNTL_CPUSET_DYNAMIC
+#define PCNTL_CPUSET_MAX_SIZE (1024 * 1024)
+
+static bool pcntl_getaffinity(pid_t pid, PCNTL_CPUSET_T *mask, size_t *sz)
+{
+	while (sched_getaffinity(pid, *sz, *mask) != 0) {
+		if (errno != EINVAL || *sz >= PCNTL_CPUSET_MAX_SIZE) {
+			return false;
+		}
+
+		efree(*mask);
+		*sz *= 2;
+		*mask = ecalloc(1, *sz);
+	}
+
+	return true;
+}
+#else
+# define pcntl_getaffinity(pid, mask, sz) \
+	(sched_getaffinity(pid, PCNTL_CPUSET_SIZE(*(mask), *(sz)), PCNTL_CPUSET(*(mask))) == 0)
+#endif
+
 PHP_FUNCTION(pcntl_getcpuaffinity)
 {
 	zend_long pid;
 	bool pid_is_null = 1;
-	cpu_set_t mask;
+	PCNTL_CPUSET_T mask;
+	size_t sz;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -1691,10 +1749,15 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 
 	// 0 == getpid in this context, we're just saving a syscall
 	pid = pid_is_null ? 0 : pid;
+	zend_long maxcpus = pcntl_cpu_count();
 
-	PCNTL_CPU_ZERO(mask);
+	if (UNEXPECTED(maxcpus < 0)) {
+		RETURN_FALSE;
+	}
 
-	if (sched_getaffinity(pid, PCNTL_CPUSET_SIZE(mask), PCNTL_CPUSET(mask)) != 0) {
+	PCNTL_CPU_ALLOC(mask, sz, maxcpus);
+
+	if (!pcntl_getaffinity(pid, &mask, &sz)) {
 		PCNTL_CPU_DESTROY(mask);
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
@@ -1714,12 +1777,11 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 		RETURN_FALSE;
 	}
 
-	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
 	array_init(return_value);
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
-	for (zend_ulong i = 0; i < maxcpus; i ++) {
-		if (PCNTL_CPU_ISSET(i, mask)) {
+	for (zend_long i = 0; i < maxcpus; i ++) {
+		if (PCNTL_CPU_ISSET(i, mask, sz)) {
 			add_next_index_long(return_value, i);
 		}
 	}
@@ -1730,8 +1792,9 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 {
 	zend_long pid;
 	bool pid_is_null = 1;
-	cpu_set_t mask;
+	PCNTL_CPUSET_T mask;
 	zval *hmask = NULL, *ncpu;
+	size_t sz;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -1747,8 +1810,13 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 	// 0 == getpid in this context, we're just saving a syscall
 	pid = pid_is_null ? 0 : pid;
-	zend_long maxcpus = sysconf(_SC_NPROCESSORS_CONF);
-	PCNTL_CPU_ZERO(mask);
+	zend_long maxcpus = pcntl_cpu_count();
+
+	if (UNEXPECTED(maxcpus < 0)) {
+		RETURN_FALSE;
+	}
+
+	PCNTL_CPU_ALLOC(mask, sz, maxcpus);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), ncpu) {
 		ZVAL_DEREF(ncpu);
@@ -1773,17 +1841,17 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		}
 
 		if (cpu < 0 || cpu >= maxcpus) {
-			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_LONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
 			PCNTL_CPU_DESTROY(mask);
 			RETURN_THROWS();
 		}
 
-		if (!PCNTL_CPU_ISSET(cpu, mask)) {
-			PCNTL_CPU_SET(cpu, mask);
+		if (!PCNTL_CPU_ISSET(cpu, mask, sz)) {
+			PCNTL_CPU_SET(cpu, mask, sz);
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (sched_setaffinity(pid, PCNTL_CPUSET_SIZE(mask), PCNTL_CPUSET(mask)) != 0) {
+	if (sched_setaffinity(pid, PCNTL_CPUSET_SIZE(mask, sz), PCNTL_CPUSET(mask)) != 0) {
 		PCNTL_CPU_DESTROY(mask);
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
