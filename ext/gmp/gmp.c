@@ -159,7 +159,7 @@ static bool gmp_zend_parse_arg_into_mpz(zval *arg, mpz_ptr *destination_mpz_ptr,
 #define GMP_Z_PARAM_INTO_MPZ_PTR(destination_mpz_ptr) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!gmp_zend_parse_arg_into_mpz(_arg, &destination_mpz_ptr, _i))) { \
-		_error_code = ZPP_ERROR_FAILURE; \
+		_expected_type = Z_EXPECTED_FAILURE; \
 		if (!EG(exception)) { \
 			zend_argument_type_error(_i, "must be of type GMP|string|int, %s given", zend_zval_value_name(_arg)); \
 		} \

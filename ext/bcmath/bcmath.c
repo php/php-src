@@ -1399,7 +1399,7 @@ failure:
 		zend_parse_arg_str_or_long(_arg, &(dest_str), &(dest_long), &_dummy, 0, _i)))) { \
 		zend_argument_type_error(_i, "must be of type int, string, or %s, %s given", \
 			ZSTR_VAL(bcmath_number_ce->name), zend_zval_value_name(_arg));             \
-		_error_code = ZPP_ERROR_FAILURE; \
+		_expected_type = Z_EXPECTED_FAILURE; \
  		break; \
  	}
 
