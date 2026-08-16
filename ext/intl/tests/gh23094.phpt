@@ -12,6 +12,10 @@ $offset = strlen($prefix);
 var_dump($formatter->parse($prefix . '123', NumberFormatter::TYPE_INT32, $offset));
 var_dump($offset);
 
+$offset = 1;
+var_dump($formatter->parse("\u{00E9}123", NumberFormatter::TYPE_INT32, $offset));
+var_dump($offset);
+
 $formatter = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
 $offset = strlen($prefix);
 $currency = null;
@@ -19,10 +23,21 @@ var_dump($formatter->parseCurrency($prefix . '$123.45', $currency, $offset));
 var_dump($currency);
 var_dump($offset);
 
+$offset = 1;
+$currency = null;
+var_dump($formatter->parseCurrency("\u{00E9}$123.45", $currency, $offset));
+var_dump($currency);
+var_dump($offset);
+
 ?>
 --EXPECT--
 int(123)
 int(7)
+bool(false)
+int(1)
 float(123.45)
 string(3) "USD"
 int(11)
+bool(false)
+NULL
+int(1)
