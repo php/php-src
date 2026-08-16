@@ -172,6 +172,12 @@ DBA_UPDATE_FUNC(lmdb)
 	int rc;
 	MDB_val k, v;
 
+	if (LMDB_IT(cur)) {
+		mdb_cursor_close(LMDB_IT(cur));
+		LMDB_IT(cur) = NULL;
+		mdb_txn_abort(LMDB_IT(txn));
+	}
+
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, 0, &LMDB_IT(txn));
 	if (rc) {
 		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
@@ -243,6 +249,12 @@ DBA_DELETE_FUNC(lmdb)
 	int rc;
 	MDB_val k;
 
+	if (LMDB_IT(cur)) {
+		mdb_cursor_close(LMDB_IT(cur));
+		LMDB_IT(cur) = NULL;
+		mdb_txn_abort(LMDB_IT(txn));
+	}
+
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, 0, &LMDB_IT(txn));
 	if (rc) {
 		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
@@ -313,6 +325,10 @@ DBA_NEXTKEY_FUNC(lmdb)
 	int rc;
 	MDB_val k, v;
 	zend_string *ret = NULL;
+
+	if (!LMDB_IT(cur)) {
+		return NULL;
+	}
 
 	rc = mdb_txn_renew(LMDB_IT(txn));
 	if (rc) {
