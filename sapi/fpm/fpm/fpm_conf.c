@@ -1814,6 +1814,74 @@ static void fpm_conf_dump(void)
 	}
 }
 
+static bool fpm_conf_test_process_max(void)
+{
+	if (fpm_global_config.process_max <= 0) {
+		return true;
+	}
+
+	int total_start_children = 0;
+	for (const struct fpm_worker_pool_s *wp = fpm_worker_all_pools; wp; wp = wp->next) {
+		switch (wp->config->pm) {
+			case PM_STYLE_STATIC:
+				total_start_children += wp->config->pm_max_children;
+				break;
+			case PM_STYLE_DYNAMIC:
+				total_start_children += wp->config->pm_start_servers;
+				break;
+			case PM_STYLE_ONDEMAND:
+				/* Starts with 0 children. */
+				break;
+		}
+	}
+	if (total_start_children > fpm_global_config.process_max) {
+		zlog(ZLOG_ERROR, "process.max (%d) must not be less than the total number of children that start initially across all pools (%d)",
+			fpm_global_config.process_max, total_start_children);
+		return false;
+	}
+
+	return true;
+}
+
+static struct fpm_worker_pool_s *fpm_conf_test_current_wp;
+static bool fpm_conf_test_ini_errors_emitted;
+
+static void fpm_conf_test_error_cb(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message)
+{
+	zlog(ZLOG_ERROR, "[pool %s] %s", fpm_conf_test_current_wp->config->name, ZSTR_VAL(message));
+	fpm_conf_test_ini_errors_emitted = true;
+}
+
+static bool fpm_conf_test_defines(struct fpm_worker_pool_s *wp)
+{
+	struct { struct key_value_s *list; int mode; } sources[] = {
+		{ wp->config->php_values, ZEND_INI_USER },
+		{ wp->config->php_admin_values, ZEND_INI_SYSTEM },
+	};
+
+	for (int i = 0; i < (sizeof(sources) / sizeof(sources[0])); i++) {
+		for (struct key_value_s *kv = sources[i].list; kv; kv = kv->next) {
+			if (!strcmp(kv->key, "extension") || !strcmp(kv->key, "disable_functions")) {
+				continue;
+			}
+
+			fpm_conf_test_current_wp = wp;
+			void (*old_zend_error_cb)(int, zend_string *, const uint32_t, zend_string *) = zend_error_cb;
+			zend_error_cb = fpm_conf_test_error_cb;
+			int ret = fpm_php_zend_ini_alter_master(kv->key, strlen(kv->key), kv->value, strlen(kv->value), sources[i].mode, PHP_INI_STAGE_ACTIVATE);
+			zend_error_cb = old_zend_error_cb;
+
+			if (ret == FAILURE) {
+				zlog(ZLOG_ERROR, "[pool %s] Unknown '%s' setting", wp->config->name, kv->key);
+				return false;
+			} else if (fpm_conf_test_ini_errors_emitted) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 {
 	int ret;
@@ -1867,6 +1935,16 @@ int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 	if (test_conf) {
 		for (struct fpm_worker_pool_s *wp = fpm_worker_all_pools; wp; wp = wp->next) {
 			if (!fpm_unix_test_config(wp)) {
+				return -1;
+			}
+		}
+
+		if (!fpm_conf_test_process_max()) {
+			return -1;
+		}
+
+		for (struct fpm_worker_pool_s *wp = fpm_worker_all_pools; wp; wp = wp->next) {
+			if (!fpm_conf_test_defines(wp)) {
 				return -1;
 			}
 		}
