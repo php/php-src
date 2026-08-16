@@ -26,5 +26,5 @@ $response = curl_exec($ch);
 var_dump($response);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(28) "Content-length: =2147483748="
