@@ -41,3 +41,9 @@ mv make_x86_64_ms_pe_gas.asm make_x86_64_ms_pe_gas.S
 # add extra files
 git restore LICENSE
 git restore save_xmm_x86_64_ms_masm.asm # added in GH-18352, not an upstream boost.context file
+
+# patch customized files
+# gates the Cortex-M0 (ARMv6-M) fallback in the ARM fcontext assembly on
+# __ARM_ARCH_6M__ instead of __ARM_ARCH < 7, which also matched classic ARMv6
+# and emitted a DT_TEXTREL there; drop once fixed upstream in boost.context
+git apply -v ../../.github/scripts/download-bundled/boost-context.arm.patch
