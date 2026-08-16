@@ -50,6 +50,12 @@ class WithDeprecatedTrait {
 
 #[DelayedTargetValidation]
 #[Deprecated] // Does something here
+interface DeprecatedInterface {}
+
+class ImplementsDeprecatedInterface implements DeprecatedInterface {}
+
+#[DelayedTargetValidation]
+#[Deprecated] // Does something here
 function demoFn() {
 	echo __FUNCTION__ . "\n";
 	return 456;
@@ -70,6 +76,8 @@ var_dump(GLOBAL_CONST);
 ?>
 --EXPECTF--
 Deprecated: Trait DeprecatedTrait used by WithDeprecatedTrait is deprecated in %s on line %d
+
+Deprecated: Interface DeprecatedInterface implemented by ImplementsDeprecatedInterface is deprecated in %s on line %d
 Got: example
 
 Deprecated: Method DemoClass::printVal() is deprecated in %s on line %d
