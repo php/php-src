@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
 
 - Zip:
+  . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
+    garbage collected). (Weilin Du, ndossche)
   . Fixed ZipArchive::extractTo() and ZipArchive::getFrom*() reporting success
     on corrupted entries. (David Carlier)
 
