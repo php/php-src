@@ -1884,7 +1884,7 @@ PHP_FUNCTION(ini_parse_quantity)
 	RETVAL_LONG(zend_ini_parse_quantity(shorthand, &errstr));
 
 	if (errstr) {
-		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_error(E_WARNING, "%pS", errstr);
 		zend_string_release(errstr);
 	}
 }
@@ -1930,7 +1930,7 @@ PHP_FUNCTION(ini_get_all)
 
 	if (extname) {
 		if ((module = zend_hash_find_ptr(&module_registry, extname)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Extension \"%s\" cannot be found", ZSTR_VAL(extname));
+			php_error_docref(NULL, E_WARNING, "Extension \"%pS\" cannot be found", extname);
 			RETURN_FALSE;
 		}
 		module_number = module->module_number;
@@ -2401,7 +2401,7 @@ PHP_FUNCTION(move_uploaded_file)
 	if (successful) {
 		zend_hash_del(SG(rfc1867_uploaded_files), path);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Unable to move \"%s\" to \"%s\"", ZSTR_VAL(path), ZSTR_VAL(new_path));
+		php_error_docref(NULL, E_WARNING, "Unable to move \"%pS\" to \"%pS\"", path, new_path);
 	}
 
 	RETURN_BOOL(successful);

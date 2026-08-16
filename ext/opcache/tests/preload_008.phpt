@@ -15,6 +15,6 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 <?php
 var_dump(get_anon());
 ?>
---EXPECT--
-object(class@anonymous)#1 (0) {
+--EXPECTF--
+object(class@anonymous%0%s:65$%x)#1 (0) {
 }

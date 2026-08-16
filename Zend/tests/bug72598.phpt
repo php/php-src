@@ -18,9 +18,9 @@ new class {
 ?>
 --EXPECTF--
 Warning: ref(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
-object(class@anonymous)#1 (0) {
+object(class@anonymous%0%s:6$%x)#1 (0) {
 }
 
 Warning: ref(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
-object(class@anonymous)#1 (0) {
+object(class@anonymous%0%s:6$%x)#1 (0) {
 }

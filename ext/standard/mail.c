@@ -131,7 +131,7 @@ static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, zv
 	switch(Z_TYPE_P(val)) {
 		case IS_STRING:
 			if (php_mail_build_headers_check_field_name(key) != SUCCESS) {
-				zend_value_error("Header name \"%s\" contains invalid characters", ZSTR_VAL(key));
+				zend_value_error("Header name \"%pS\" contains invalid characters", key);
 				return;
 			}
 
@@ -141,20 +141,20 @@ static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, zv
 				case NO_HEADER_ERROR:
 					break;
 				case CONTAINS_LF_ONLY:
-					zend_value_error("Header \"%s\" contains LF character that is not allowed in the header", ZSTR_VAL(key));
+					zend_value_error("Header \"%pS\" contains LF character that is not allowed in the header", key);
 					return;
 				case CONTAINS_CR_ONLY:
-					zend_value_error("Header \"%s\" contains CR character that is not allowed in the header", ZSTR_VAL(key));
+					zend_value_error("Header \"%pS\" contains CR character that is not allowed in the header", key);
 					return;
 				case CONTAINS_CRLF:
-					zend_value_error("Header \"%s\" contains CRLF characters that are used as a line separator and are not allowed in the header", ZSTR_VAL(key));
+					zend_value_error("Header \"%pS\" contains CRLF characters that are used as a line separator and are not allowed in the header", key);
 					return;
 				case CONTAINS_NULL:
-					zend_value_error("Header \"%s\" contains NULL character that is not allowed in the header", ZSTR_VAL(key));
+					zend_value_error("Header \"%pS\" contains NULL character that is not allowed in the header", key);
 					return;
 				default:
 					// fallback
-					zend_value_error("Header \"%s\" has invalid format, or contains invalid characters", ZSTR_VAL(key));
+					zend_value_error("Header \"%pS\" has invalid format, or contains invalid characters", key);
 					return;
 			}
 			smart_str_append(s, key);
@@ -166,7 +166,7 @@ static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, zv
 			php_mail_build_headers_elems(s, key, val);
 			break;
 		default:
-			zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
+			zend_type_error("Header \"%pS\" must be of type array|string, %s given", key, zend_zval_value_name(val));
 	}
 }
 
@@ -178,12 +178,12 @@ static void php_mail_build_headers_elems(smart_str *s, const zend_string *key, z
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
 		if (tmp_key) {
-			zend_type_error("Header \"%s\" must only contain numeric keys, \"%s\" found", ZSTR_VAL(key), ZSTR_VAL(tmp_key));
+			zend_type_error("Header \"%pS\" must only contain numeric keys, \"%pS\" found", key, tmp_key);
 			break;
 		}
 		ZVAL_DEREF(tmp_val);
 		if (Z_TYPE_P(tmp_val) != IS_STRING) {
-			zend_type_error("Header \"%s\" must only contain values of type string, %s found", ZSTR_VAL(key), zend_zval_value_name(tmp_val));
+			zend_type_error("Header \"%pS\" must only contain values of type string, %s found", key, zend_zval_value_name(tmp_val));
 			break;
 		}
 		php_mail_build_headers_elem(s, key, tmp_val);
@@ -201,7 +201,7 @@ do { \
 		} \
 		php_mail_build_headers_elems(&s, key, val); \
 	} else { \
-		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val)); \
+		zend_type_error("Header \"%pS\" must be of type array|string, %s given", key, zend_zval_value_name(val)); \
 	} \
 } while(0)
 

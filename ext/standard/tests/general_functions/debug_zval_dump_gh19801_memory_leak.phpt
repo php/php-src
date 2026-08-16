@@ -25,7 +25,7 @@ object(stdClass)#2 (1) refcount(%d){
   reference refcount(%d) {
     array(1) packed refcount(%d){
       [0]=>
-      object(class@anonymous)#1 (0) refcount(%d){
+      object(class@anonymous%0%s:4$%x)#1 (0) refcount(%d){
       }
     }
   }

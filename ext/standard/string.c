@@ -1304,7 +1304,7 @@ PHP_FUNCTION(str_decrement)
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(str) >= 1 && ZSTR_VAL(str)[0] == '0') {
-		zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+		zend_argument_value_error(1, "\"%pS\" is out of decrement range", str);
 		RETURN_THROWS();
 	}
 
@@ -1331,7 +1331,7 @@ PHP_FUNCTION(str_decrement)
 	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
 		if (ZSTR_LEN(decremented) == 1) {
 			zend_string_efree(decremented);
-			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+			zend_argument_value_error(1, "\"%pS\" is out of decrement range", str);
 			RETURN_THROWS();
 		}
 		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);

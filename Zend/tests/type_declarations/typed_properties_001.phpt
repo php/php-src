@@ -21,7 +21,7 @@ var_dump(new class(1, 2.2, true, ["four"], new stdClass) {
 });
 ?>
 --EXPECTF--
-object(class@anonymous)#%d (6) {
+object(class@anonymous%0%s:2$%x)#1 (6) {
   ["int"]=>
   int(1)
   ["float"]=>

@@ -89,8 +89,8 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	if (Z_TYPE_P(zv) == IS_UNDEF) {
 		ZEND_ASSERT(ZEND_TYPE_IS_SET(prop_info->type));
 		zend_string *type_str = zend_type_to_string(prop_info->type);
-		php_printf("%*cuninitialized(%s)\n",
-			level + 1, ' ', ZSTR_VAL(type_str));
+		php_printf("%*cuninitialized(%pS)\n",
+			level + 1, ' ', type_str);
 		zend_string_release(type_str);
 	} else {
 		php_var_dump(zv, level + 2);
@@ -174,7 +174,7 @@ again:
 			zend_class_entry *ce = Z_OBJCE_P(struc);
 			if ((ce->ce_flags & ZEND_ACC_ENUM) && ce->__debugInfo == NULL) {
 				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(struc));
-				php_printf("%senum(%s::%s)\n", COMMON, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
+				php_printf("%senum(%pS::%pS)\n", COMMON, ce->name, Z_STR_P(case_name_zval));
 				return;
 			}
 			zend_object *zobj = Z_OBJ_P(struc);
@@ -188,12 +188,12 @@ again:
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
 				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(struc));
-				php_printf("%senum(%s::%s) (%d) {\n", COMMON, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval), myht ? zend_array_count(myht) : 0);
+				php_printf("%senum(%pS::%pS) (%d) {\n", COMMON, ce->name, Z_STR_P(case_name_zval), myht ? zend_array_count(myht) : 0);
 			} else {
 				class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 				const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
 
-				php_printf("%s%sobject(%s)#%d (%d) {\n", COMMON, prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
+				php_printf("%s%sobject(%pS)#%d (%d) {\n", COMMON, prefix, class_name, Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
 				zend_string_release_ex(class_name, 0);
 			}
 
@@ -309,8 +309,8 @@ static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, z
 	}
 	if (prop_info && Z_TYPE_P(zv) == IS_UNDEF) {
 		zend_string *type_str = zend_type_to_string(prop_info->type);
-		php_printf("%*cuninitialized(%s)\n",
-			level + 1, ' ', ZSTR_VAL(type_str));
+		php_printf("%*cuninitialized(%pS)\n",
+			level + 1, ' ', type_str);
 		zend_string_release(type_str);
 	} else {
 		php_debug_zval_dump(zv, level + 2);
@@ -404,7 +404,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 		const char *prefix = php_var_dump_object_prefix(Z_OBJ_P(struc));
 
-		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", prefix, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
+		php_printf("%sobject(%pS)#%d (%d) refcount(%u){\n", prefix, class_name, Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
 		zend_string_release_ex(class_name, 0);
 		if (myht) {
 			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
@@ -864,7 +864,7 @@ static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *
 
 	if (Z_TYPE(retval) != IS_ARRAY) {
 		zval_ptr_dtor(&retval);
-		php_error_docref(NULL, E_WARNING, "%s::__sleep() should return an array only containing the names of instance-variables to serialize", ZSTR_VAL(obj->ce->name));
+		php_error_docref(NULL, E_WARNING, "%pS::__sleep() should return an array only containing the names of instance-variables to serialize", obj->ce->name);
 		return NULL;
 	}
 
@@ -886,7 +886,7 @@ static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{
 
 	if (Z_TYPE_P(retval) != IS_ARRAY) {
 		zval_ptr_dtor(retval);
-		zend_type_error("%s::__serialize() must return an array", ZSTR_VAL(Z_OBJCE_P(obj)->name));
+		zend_type_error("%pS::__serialize() must return an array", Z_OBJCE_P(obj)->name);
 		return FAILURE;
 	}
 
@@ -915,7 +915,7 @@ static int php_var_serialize_try_add_sleep_prop(
 
 	if (!zend_hash_add(ht, name, val)) {
 		php_error_docref(NULL, E_WARNING,
-			"\"%s\" is returned from __sleep() multiple times", ZSTR_VAL(error_name));
+			"\"%pS\" is returned from __sleep() multiple times", error_name);
 		return SUCCESS;
 	}
 
@@ -941,8 +941,8 @@ static int php_var_serialize_get_sleep_props(
 		ZVAL_DEREF(name_val);
 		if (Z_TYPE_P(name_val) != IS_STRING) {
 			php_error_docref(NULL, E_WARNING,
-					"%s::__sleep() should return an array only containing the names of instance-variables to serialize",
-					ZSTR_VAL(ce->name));
+					"%pS::__sleep() should return an array only containing the names of instance-variables to serialize",
+					ce->name);
 		}
 
 		name = zval_get_tmp_string(name_val, &tmp_name);
@@ -989,7 +989,7 @@ static int php_var_serialize_get_sleep_props(
 		}
 
 		php_error_docref(NULL, E_WARNING,
-			"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
+			"\"%pS\" returned as member variable from __sleep() but does not exist", name);
 		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1137,8 +1137,8 @@ again:
 				uint32_t count;
 
 				if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
-					zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed",
-						ZSTR_VAL(ce->name));
+					zend_throw_exception_ex(NULL, 0, "Serialization of '%pS' is not allowed",
+						ce->name);
 					return;
 				}
 
@@ -1450,7 +1450,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 					goto cleanup;
 				}
 				if (UNEXPECTED(!zend_is_valid_class_name(name))) {
-					zend_value_error("%s(): Option \"allowed_classes\" must be an array of class names, \"%s\" given", function_name, ZSTR_VAL(name));
+					zend_value_error("%s(): Option \"allowed_classes\" must be an array of class names, \"%pS\" given", function_name, name);
 					zend_tmp_string_release(tmp_str);
 					goto cleanup;
 				}

@@ -28,19 +28,19 @@ var_dump(
 );
 
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   ["this"]=>
-  object(class@anonymous)#1 (0) {
+  object(class@anonymous%0%s:4$%x)#1 (0) {
   }
 }
 array(1) {
   ["this"]=>
-  object(class@anonymous)#1 (0) {
+  object(class@anonymous%0%s:12$%x)#1 (0) {
   }
 }
 array(1) {
   ["this"]=>
-  object(class@anonymous)#1 (0) {
+  object(class@anonymous%0%s:20$%x)#1 (0) {
   }
 }

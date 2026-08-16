@@ -19,10 +19,10 @@ $y = $test->y;
 var_dump($y);
 var_dump($y[0]->inner);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
-  object(class@anonymous)#2 (0) {
+  object(class@anonymous%0%s:8$%x)#2 (0) {
   }
   [1]=>
   int(1)

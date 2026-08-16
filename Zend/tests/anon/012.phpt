@@ -4,8 +4,8 @@ Ensure correct unmangling of private property names for anonymous class instance
 <?php
 var_dump(new class { private $foo; });
 ?>
---EXPECT--
-object(class@anonymous)#1 (1) {
+--EXPECTF--
+object(class@anonymous%0%s:2$%x)#1 (1) {
   ["foo":"class@anonymous":private]=>
   NULL
 }

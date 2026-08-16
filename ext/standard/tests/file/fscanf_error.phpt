@@ -55,14 +55,14 @@ $file_path = __DIR__;
 $filename = "$file_path/fscanf_error.tmp";
 unlink($filename);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fscanf() for error conditions ***
 fscanf(): supplied resource is not a valid File-Handle resource
 Different numbers of variable names and field specifiers
 array(0) {
 }
-Bad scan conversion character "
-Bad scan conversion character "
+Bad scan conversion character "%0"
+Bad scan conversion character "%0"
 Bad scan conversion character "."
 Bad scan conversion character "m"
 
