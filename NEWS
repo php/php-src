@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- Intl:
+  . Fixed a crash when converting with a cloned UConverter that uses
+    toUCallback/fromUCallback. (iliaal)
+
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
 
