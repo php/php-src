@@ -250,7 +250,7 @@ PHP_DOM_EXPORT void php_dom_ns_compat_mark_attribute_list(php_dom_libxml_ns_mapp
 		ns->next = NULL;
 		php_libxml_set_old_ns(node->doc, ns);
 		xmlAttrPtr added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
-		if (UNEXPECTED(added != NULL)) {
+		if (added != NULL) {
 			if (first_ns_attr == NULL) {
 				first_ns_attr = added;
 			}
