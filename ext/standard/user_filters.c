@@ -207,7 +207,23 @@ php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (buckets_in->head) {
+		php_stream_bucket *bucket;
+		do {
+			bucket = buckets_in->head;
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
+		} while (buckets_in->head);
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+	}
+
+	/* Filter could've broken contract and added buckets anyway. */
+	if (ret == PSFS_FEED_ME && buckets_out->head) {
+		php_stream_bucket *bucket;
+		do {
+			bucket = buckets_out->head;
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
+		} while (buckets_out->head);
 	}
 
 	/* filter resources are cleaned up by the stream destructor,
