@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
 
+- Intl:
+  . Fixed bug GH-23094 (NumberFormatter parsing offsets use UTF-16 positions
+    for UTF-8 strings). (ColumbusLabs)
+
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
 
