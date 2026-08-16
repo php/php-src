@@ -573,7 +573,8 @@ struct _pdo_stmt_t {
 	 * bindParam() for its prepared statements, if false, PDO should
 	 * emulate prepare and bind on its behalf */
 	uint16_t supports_placeholders:2;
-	uint16_t reserved: 12;
+	uint16_t in_operation:1;
+	uint16_t reserved: 11;
 
 	/* keep track of bound input parameters.  Some drivers support
 	 * input/output parameters, but you can't rely on that working */
