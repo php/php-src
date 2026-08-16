@@ -210,6 +210,13 @@ ZEND_API void zend_vm_stack_destroy(void)
 {
 	zend_vm_stack stack = EG(vm_stack);
 
+	while (EG(vm_stack_page_cache) != NULL) {
+		zend_vm_stack cached = EG(vm_stack_page_cache);
+		EG(vm_stack_page_cache) = cached->prev;
+		efree(cached);
+	}
+	EG(vm_stack_page_cache_count) = 0;
+
 	while (stack != NULL) {
 		zend_vm_stack p = stack->prev;
 		efree(stack);

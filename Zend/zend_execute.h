@@ -325,7 +325,14 @@ ZEND_API void zend_vm_stack_destroy(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
-	zend_vm_stack page = (zend_vm_stack)emalloc(size);
+	zend_vm_stack page = EG(vm_stack_page_cache);
+
+	if (page != NULL && EXPECTED((size_t)((char*)page->end - (char*)page) == size)) {
+		EG(vm_stack_page_cache) = page->prev;
+		EG(vm_stack_page_cache_count)--;
+	} else {
+		page = (zend_vm_stack)emalloc(size);
+	}
 
 	page->top = ZEND_VM_STACK_ELEMENTS(page);
 	page->end = (zval*)((char*)page + size);
@@ -421,7 +428,14 @@ static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_in
 		EG(vm_stack_top) = prev->top;
 		EG(vm_stack_end) = prev->end;
 		EG(vm_stack) = prev;
-		efree(p);
+		if (EG(vm_stack_page_cache_count) < 32
+			&& (size_t)((char*)p->end - (char*)p) == EG(vm_stack_page_size)) {
+			p->prev = EG(vm_stack_page_cache);
+			EG(vm_stack_page_cache) = p;
+			EG(vm_stack_page_cache_count)++;
+		} else {
+			efree(p);
+		}
 	} else {
 		EG(vm_stack_top) = (zval*)call;
 	}
