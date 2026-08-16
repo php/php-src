@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed ZipArchive::extractTo() and ZipArchive::getFrom*() reporting success
     on corrupted entries. (David Carlier)
+  . Fixed phpinfo() reporting AES-192 and AES-256 encryption support based on
+    AES-128 support. (Weilin Du)
 
 - SAPI:
   . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
