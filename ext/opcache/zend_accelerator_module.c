@@ -93,6 +93,11 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 {
+	if (accel_startup_ok) {
+		zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer cannot be changed when OPcache is already set up.");
+		return FAILURE;
+	}
+
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 	zend_long size = zend_ini_parse_quantity_warn(new_value, entry->name);
 
