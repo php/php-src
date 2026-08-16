@@ -9,6 +9,11 @@ PHP                                                                        NEWS
     class constants via OBJ->prop = $val). (Khaled Alam)
   . Reverted GH-22833, which attempted to fix bug GH-18985. (ilutov)
 
+- Curl:
+  . Set content length using CURLOPT_POSTFIELDSIZE_LARGE instead of
+    CURLOPT_POSTFIELDSIZE. This makes it possible to post strings larger than
+    2GB on some platforms, e.g. Windows. (Sjoerd Langkemper)
+
 - DOM:
   . Fixed bug GH-22624 (use-after-free via DOMNameSpaceNode after
     DOMDocument::xinclude()). (David Carlier)
