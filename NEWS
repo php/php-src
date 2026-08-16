@@ -20,6 +20,10 @@ PHP                                                                        NEWS
     left busy for the next fetch, and rows delivered from a result another
     statement took over. (KentarouTakeda)
 
+- Intl:
+  . Fixed grapheme_strrev() treating UBRK_DONE as a byte index and leaving
+    the result without a terminating NUL. (iliaal)
+
 - Phar:
   . Fixed Phar archives being automatically detected when ".phar" only occurs
     in a directory name or is not a filename extension in an included file's
