@@ -25,10 +25,9 @@ function read_pipe($pipe): string
     return $chunk;
 }
 
-$cmd = [
-    getenv("TEST_PHP_EXECUTABLE"),
-    __DIR__ . '/proc_open_sockets2.inc'
-];
+$php = getenv("TEST_PHP_EXECUTABLE");
+$args = getenv("TEST_PHP_EXTRA_ARGS");
+$cmd = "$php $args " . __DIR__ . '/proc_open_sockets2.inc';
 
 $spec = [
     ['pipe', 'r'],
