@@ -41,6 +41,8 @@ PHP                                                                        NEWS
   . Fixed grapheme_str_split() treating UBRK_DONE as a byte index. (iliaal)
   . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
     read. (iliaal)
+  . Fixed a use-after-free when IntlRuleBasedBreakIterator is constructed
+    from compiled rules. (iliaal)
 
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
