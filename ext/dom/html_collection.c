@@ -101,7 +101,7 @@ PHP_METHOD(Dom_HTMLCollection, namedItem)
 zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if (UNEXPECTED(!offset)) {
-		zend_throw_error(NULL, "Cannot append to %s", ZSTR_VAL(object->ce->name));
+		zend_throw_error(NULL, "Cannot append to %pS", object->ce->name);
 		return NULL;
 	}
 
