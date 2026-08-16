@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
     DOMDocument::xinclude(). (iliaal)
 
+- Intl:
+  . Fixed a use-after-free when IntlRuleBasedBreakIterator is constructed
+    from compiled rules. (iliaal)
+
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
 
