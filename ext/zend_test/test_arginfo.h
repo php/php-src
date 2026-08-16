@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bf65e1dd1eeeeec46687a76a7ea6554cd1971dfc */
+ * Stub hash: 90fded8eabc29d73f7c83ae91ea7685fe286545f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -1028,6 +1028,28 @@ static zend_class_entry *register_class_ZendTestPropertyAttribute(void)
 	zval attribute_Attribute_class_ZendTestPropertyAttribute_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestPropertyAttribute_0_arg0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestPropertyAttribute_0->args[0].value, &attribute_Attribute_class_ZendTestPropertyAttribute_0_arg0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestAttributeAddsInterface(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestAttributeAddsInterface", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zend_string *attribute_name_Attribute_class_ZendTestAttributeAddsInterface_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ZendTestAttributeAddsInterface_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttributeAddsInterface_0, 1);
+	zend_string_release(attribute_name_Attribute_class_ZendTestAttributeAddsInterface_0);
+	zval attribute_Attribute_class_ZendTestAttributeAddsInterface_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttributeAddsInterface_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestAttributeAddsInterface_0->args[0].value, &attribute_Attribute_class_ZendTestAttributeAddsInterface_0_arg0);
 
 	return class_entry;
 }
