@@ -73,6 +73,12 @@ typedef struct _php_zip_archive {
 	/* libzip reads buffers until the archive is closed, can outlive the object. */
 	char **buffers;
 	int buffers_cnt;
+#ifdef HAVE_PROGRESS_CALLBACK
+	zval progress_callback;
+#endif
+#ifdef HAVE_CANCEL_CALLBACK
+	zval cancel_callback;
+#endif
 } php_zip_archive;
 
 /* Extends zend object */
@@ -86,12 +92,6 @@ typedef struct _ze_zip_object {
 	zip_int64_t last_id;
 	int err_zip;
 	int err_sys;
-#ifdef HAVE_PROGRESS_CALLBACK
-	zval progress_callback;
-#endif
-#ifdef HAVE_CANCEL_CALLBACK
-	zval cancel_callback;
-#endif
 	zend_object zo;
 } ze_zip_object;
 
