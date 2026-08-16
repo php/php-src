@@ -3289,9 +3289,9 @@ static PHP_MINFO_FUNCTION(zip)
 	php_info_print_table_row(2, "AES-128 encryption",
 		zip_encryption_method_supported(ZIP_EM_AES_128, 1) ? "Yes" : "No");
 	php_info_print_table_row(2, "AES-192 encryption",
-		zip_encryption_method_supported(ZIP_EM_AES_128, 1) ? "Yes" : "No");
+		zip_encryption_method_supported(ZIP_EM_AES_192, 1) ? "Yes" : "No");
 	php_info_print_table_row(2, "AES-256 encryption",
-		zip_encryption_method_supported(ZIP_EM_AES_128, 1) ? "Yes" : "No");
+		zip_encryption_method_supported(ZIP_EM_AES_256, 1) ? "Yes" : "No");
 #endif
 
 	php_info_print_table_end();
