@@ -111,6 +111,9 @@ PHP                                                                        NEWS
     properties after running out of memory while escaping a property name.
     (adapik)
 
+- LDAP:
+  . Fix crash in ldap_exop_sync() when $response_data is omitted. (lacatoire)
+
 - MBString:
   . Fixed bug GH-23958 (truncated encoding names resolving to full names). (Kamil Tekiela)
   . Fixed out-of-bounds read in php_mb_rfc1867_getword() on a multibyte lead
