@@ -16,8 +16,6 @@ error_log = {{FILE:LOG}}
 listen = {{ADDR}}
 pm = static
 pm.max_children = 1
-php_admin_value[opcache.enable] = 1
-php_admin_value[opcache.enable_cli] = 1
 php_admin_value[opcache.interned_strings_buffer] = 8
 EOT;
 
@@ -28,12 +26,11 @@ opcache_reset();
 echo "ok";
 EOT;
 
+$opcache = ini_get('extension_dir') . DIRECTORY_SEPARATOR . 'opcache.' . PHP_SHLIB_SUFFIX;
+$extraArgs = is_file($opcache) ? ['-dzend_extension=' . $opcache] : [];
+
 $tester = new FPM\Tester($cfg, $code);
-$tester->start(iniEntries: [
-    'opcache.enable' => '1',
-    'opcache.enable_cli' => '1',
-    'opcache.interned_strings_buffer' => '0',
-]);
+$tester->start($extraArgs, iniEntries: ['opcache.interned_strings_buffer' => '0']);
 $tester->expectLogStartNotices();
 $tester->request()->expectBody('ok');
 $tester->request()->expectBody('ok');
