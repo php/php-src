@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed grapheme_strrev() treating UBRK_DONE as a byte index and leaving
     the result without a terminating NUL. (iliaal)
+  . Fixed a double-free when Calendar::createInstance() or
+    IntlCalendar::fromDateTime() fails after adopting a TimeZone. (iliaal)
 
 - Phar:
   . Fixed Phar archives being automatically detected when ".phar" only occurs
