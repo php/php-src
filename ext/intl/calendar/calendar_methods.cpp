@@ -96,7 +96,6 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(intlcal_create_instance)
 	Calendar *cal = Calendar::createInstance(timeZone,
 		Locale::createFromName(locale_str), status);
 	if (UNEXPECTED(cal == NULL)) {
-		delete timeZone;
 		intl_error_set(NULL, status, "Error creating ICU Calendar object");
 		RETURN_NULL();
 	}
@@ -1073,7 +1072,6 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(intlcal_from_date_time)
 	cal = Calendar::createInstance(timeZone,
 		Locale::createFromName(locale_str), status);
 	if (UNEXPECTED(cal == NULL)) {
-		delete timeZone;
 		intl_error_set(NULL, status,
 			"error creating ICU Calendar object");
 		goto error;
