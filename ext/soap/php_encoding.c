@@ -2312,13 +2312,15 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				if (EG(exception)) {
 					goto iterator_done;
 				}
-				array_set_zval_key(Z_ARRVAL(array_copy), &key, val);
-				zval_ptr_dtor(val);
+				zend_result status = array_set_zval_key(Z_ARRVAL(array_copy), &key, val);
 				zval_ptr_dtor(&key);
+				if (status == FAILURE) {
+					goto iterator_done;
+				}
 			} else {
+				Z_TRY_ADDREF_P(val);
 				add_next_index_zval(&array_copy, val);
 			}
-			Z_TRY_ADDREF_P(val);
 
 			iter->funcs->move_forward(iter);
 			if (EG(exception)) {
