@@ -260,8 +260,8 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 				zend_throw_exception_ex(
 					php_filter_failed_exception_ce,
 					0,
-					"filter validation failed: object of type %s has no __toString() method",
-					ZSTR_VAL(ce->name)
+					"filter validation failed: object of type %pS has no __toString() method",
+					ce->name
 				);
 				ZVAL_NULL(value);
 				return;
@@ -292,9 +292,9 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 			zend_throw_exception_ex(
 				php_filter_failed_exception_ce,
 				0,
-				"filter validation failed: filter %s not satisfied by '%s'",
+				"filter validation failed: filter %s not satisfied by '%pS'",
 				filter_func.name,
-				ZSTR_VAL(copy_for_throwing)
+				copy_for_throwing
 			);
 			zend_string_release(copy_for_throwing);
 			return;
@@ -699,8 +699,8 @@ PHP_FUNCTION(filter_input)
 			zend_throw_exception_ex(
 				php_filter_failed_exception_ce,
 				0,
-				"input value '%s' not found",
-				ZSTR_VAL(var)
+				"input value '%pS' not found",
+				var
 			);
 			RETURN_THROWS();
 		}
