@@ -4133,12 +4133,13 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 						GC_TRY_UNPROTECT_RECURSION(thash);
 					}
 					if (!ret) {
+						zval_ptr_dtor(&tmp);
 						return 0;
 					}
 				} else {
 					Z_TRY_ADDREF_P(src_zval);
 					zval *zv = zend_hash_next_index_insert(Z_ARRVAL_P(dest_zval), src_zval);
-					if (EXPECTED(!zv)) {
+					if (UNEXPECTED(!zv)) {
 						Z_TRY_DELREF_P(src_zval);
 						zend_cannot_add_element();
 						return 0;
