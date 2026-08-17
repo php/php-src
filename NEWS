@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
     DOMDocument::xinclude(). (iliaal)
+  . Fixed bug GH-23331 (UAF when node_list_unlink() skips attribute children
+    that still have a live wrapper). (iliaal)
 
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
