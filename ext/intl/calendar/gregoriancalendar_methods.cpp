@@ -168,7 +168,6 @@ static void _php_intlgregcal_constructor_body(
 			if (gcal) {
 				delete gcal;
 			}
-			delete tz;
 			if (!is_constructor) {
 				zval_ptr_dtor(return_value);
 				RETVAL_NULL();
