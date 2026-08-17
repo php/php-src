@@ -12,11 +12,8 @@ interface CombinedInterface extends SessionIdInterface, SessionUpdateTimestampHa
 abstract class CombinedFirst implements CombinedInterface, SessionHandlerInterface {}
 abstract class CombinedLast implements SessionHandlerInterface, CombinedInterface {}
 
-interface OwnMethods {
-    public function create_sid(): string;
-    public function validateId(string $id): bool;
-}
-abstract class OwnMethodsLast implements SessionHandlerInterface, OwnMethods {}
+interface NestedInterface extends CombinedInterface {}
+abstract class NestedLast implements SessionHandlerInterface, NestedInterface {}
 
 abstract class MissingBoth implements SessionHandlerInterface {}
 abstract class MissingValidateId implements SessionHandlerInterface, SessionIdInterface {}
