@@ -1437,14 +1437,13 @@ void node_list_unlink(xmlNodePtr node)
 	dom_object *wrapper;
 
 	while (node != NULL) {
+		xmlNodePtr next = node->next;
 
 		wrapper = php_dom_object_get_data(node);
 
 		if (wrapper != NULL ) {
 			xmlUnlinkNode(node);
-		} else {
-			if (node->type == XML_ENTITY_REF_NODE)
-				break;
+		} else if (node->type != XML_ENTITY_REF_NODE) {
 			node_list_unlink(node->children);
 
 			switch (node->type) {
@@ -1461,7 +1460,7 @@ void node_list_unlink(xmlNodePtr node)
 
 		}
 
-		node = node->next;
+		node = next;
 	}
 }
 /* }}} end node_list_unlink */
