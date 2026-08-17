@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
     DOMDocument::xinclude(). (iliaal)
+  . Fixed a use-after-free when Dom\Element::setAttributeNS() replaces the
+    value of an attribute whose child still has a live wrapper. (iliaal)
 
 - Intl:
   . Fixed a double-free when IntlGregorianCalendar construction fails after
