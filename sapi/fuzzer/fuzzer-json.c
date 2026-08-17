@@ -41,7 +41,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	memcpy(data, Data, Size);
 	data[Size] = '\0';
 
-	int options[12] = {
+	static const int options[] = {
 		0,
 		PHP_JSON_OBJECT_AS_ARRAY,
 		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_BIGINT_AS_STRING,
@@ -53,13 +53,20 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		PHP_JSON_BIGINT_AS_STRING | PHP_JSON_INVALID_UTF8_IGNORE,
 		PHP_JSON_BIGINT_AS_STRING | PHP_JSON_INVALID_UTF8_SUBSTITUTE,
 		PHP_JSON_INVALID_UTF8_IGNORE,
-		PHP_JSON_INVALID_UTF8_SUBSTITUTE
+		PHP_JSON_INVALID_UTF8_SUBSTITUTE,
+		PHP_JSON_ALLOW_COMMENTS,
+		PHP_JSON_ALLOW_TRAILING_COMMAS,
+		PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS,
+		PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_BIGINT_AS_STRING
+			| PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS,
+		PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS | PHP_JSON_INVALID_UTF8_IGNORE,
+		PHP_JSON_ALLOW_COMMENTS | PHP_JSON_ALLOW_TRAILING_COMMAS | PHP_JSON_INVALID_UTF8_SUBSTITUTE,
 	};
 
-	for (int index = 0; index < 12; ++index) {
+	for (size_t i = 0; i < sizeof(options) / sizeof(options[0]); ++i) {
 		zval result;
 		php_json_parser parser;
-		php_json_parser_init(&parser, &result, data, Size, options[index], MAX_DEPTH);
+		php_json_parser_init(&parser, &result, data, Size, options[i], MAX_DEPTH);
 		bool decoded = php_json_yyparse(&parser) == SUCCESS;
 		if (decoded) {
 			zval_ptr_dtor(&result);
@@ -67,10 +74,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
 		/* json_validate() must agree with json_decode(). Only compare when decoding to arrays,
 		 * as decoding to objects additionally rejects property names starting with a NUL byte. */
-		if (options[index] == PHP_JSON_OBJECT_AS_ARRAY
-				|| options[index] == (PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_INVALID_UTF8_IGNORE)) {
+		if (options[i] == PHP_JSON_OBJECT_AS_ARRAY
+				|| options[i] == (PHP_JSON_OBJECT_AS_ARRAY | PHP_JSON_INVALID_UTF8_IGNORE)) {
 			bool valid = php_json_validate_ex(data, Size,
-				options[index] & PHP_JSON_INVALID_UTF8_IGNORE, MAX_DEPTH);
+				options[i] & PHP_JSON_INVALID_UTF8_IGNORE, MAX_DEPTH);
 			ZEND_ASSERT(valid == decoded);
 		}
 	}

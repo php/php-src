@@ -92,6 +92,17 @@ const JSON_THROW_ON_ERROR = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue PHP_JSON_ALLOW_COMMENTS
+ */
+const JSON_ALLOW_COMMENTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_JSON_ALLOW_TRAILING_COMMAS
+ */
+const JSON_ALLOW_TRAILING_COMMAS = UNKNOWN;
+
+/**
+ * @var int
  * @cvalue PHP_JSON_ERROR_NONE
  */
 const JSON_ERROR_NONE = UNKNOWN;
