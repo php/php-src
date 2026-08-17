@@ -792,6 +792,12 @@ PHP 8.6 UPGRADE NOTES
 - Core:
   . The official Windows builds now use Visual Studio 2026 (VS18).
 
+- LibXML:
+  . The libxml2 library used by the official Windows builds has been upgraded
+    to version 2.15.3. As a result, DOMDocument::$documentURI for documents
+    loaded from a local file now contains a native filesystem path instead of
+    a file URI.
+
 - OpenSSL:
   . The OpenSSL library used by the official Windows builds has been upgraded
     to OpenSSL 4.
