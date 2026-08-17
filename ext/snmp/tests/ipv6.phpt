@@ -6,13 +6,13 @@ Boris Lytochkin
 snmp
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY === 'Windows') die('xfail SNMP tests might possibly fail on Windows');
 require_once(__DIR__.'/skipif.inc');
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
     die("skip no IPv6 support");
 }
+if (PHP_OS_FAMILY === 'Windows') die('xfail SNMP tests might possibly fail on Windows');
 ?>
 --FILE--
 <?php

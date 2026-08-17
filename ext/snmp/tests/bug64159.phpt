@@ -6,8 +6,8 @@ Boris Lytochkin
 snmp
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY === 'Windows') die('xfail SNMP tests might possibly fail on Windows');
 require_once(__DIR__.'/skipif.inc');
+if (PHP_OS_FAMILY === 'Windows') die('xfail SNMP tests might possibly fail on Windows');
 ?>
 --ENV--
 MIBS=noneXistent
