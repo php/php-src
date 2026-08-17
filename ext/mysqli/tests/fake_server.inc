@@ -758,7 +758,7 @@ function my_mysqli_test_stmt_response_row_over_read_two_fields(
         $conn->packets_to_bytes($rh),
         "Malicious Stmt Response for data $field_name [Extract heap through buffer over-read]"
     );
-    $conn->read(65536);
+    $conn->read_packets(2);
 }
 
 function my_mysqli_test_stmt_response_row_over_read_int(my_mysqli_fake_server_conn $conn): void
