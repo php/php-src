@@ -560,6 +560,32 @@ class my_mysqli_fake_server_conn
         }
     }
 
+    private function read_bytes(int $length): string
+    {
+        $data = '';
+        while (strlen($data) < $length) {
+            $chunk = fread($this->conn, $length - strlen($data));
+            if ($chunk === false || $chunk === '') {
+                throw new RuntimeException("Failed to read $length bytes from the client");
+            }
+            $data .= $chunk;
+        }
+        return $data;
+    }
+
+    public function read_packets(int $packet_count): void
+    {
+        $data = '';
+        for ($i = 0; $i < $packet_count; $i++) {
+            $header = $this->read_bytes(4);
+            $packet_length = ord($header[0])
+                | (ord($header[1]) << 8)
+                | (ord($header[2]) << 16);
+            $data .= $header . $this->read_bytes($packet_length);
+        }
+        fprintf(STDERR, "[*] Received: %s\n", bin2hex($data));
+    }
+
     public function close()
     {
         fclose($this->conn);
@@ -778,15 +804,15 @@ function my_mysqli_test_stmt_response_row_over_read_bit(my_mysqli_fake_server_co
 function my_mysqli_test_stmt_response_row_read_two_fields(my_mysqli_fake_server_conn $conn): void
 {
     $conn->send_server_greetings();
-    $conn->read();
+    $conn->read_packets(1);
     $conn->send_server_ok();
-    $conn->read();
+    $conn->read_packets(1);
     $field_names = array_keys(my_mysqli_data_fields());
     foreach ($field_names as $field_name) {
         $conn->send_server_stmt_prepare_data_response($field_name);
-        $conn->read(65536);
+        $conn->read_packets(1);
         $conn->send_server_stmt_execute_data_response($field_name);
-        $conn->read(65536);
+        $conn->read_packets(2);
     }
 }
 
