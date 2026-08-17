@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     DOMDocument::xinclude()). (David Carlier)
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
     DOMDocument::xinclude(). (iliaal)
+  . Fixed a crash in DOMXPath when a php:function callback receives a nodeset
+    and a later callback returns a node from another document. (iliaal)
 
 - PDO_PGSQL:
   . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
