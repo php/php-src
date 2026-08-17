@@ -2935,11 +2935,12 @@ static PHP_GINIT_FUNCTION(ps)
 	ps_globals->random_seeded = false;
 }
 
-/* Sibling interfaces are not merged into the function table yet when this runs */
-static bool session_class_implements_interface(const zend_class_entry *class, const zend_class_entry *iface)
+/* The interfaces listed after SessionHandlerInterface have not had their abstract methods
+ * inherited into the function table yet, so look them up in the interface list as well. */
+static bool session_interfaces_declare_method(const zend_class_entry *ce, const char *name, size_t name_len)
 {
-	for (uint32_t i = 0; i < class->num_interfaces; i++) {
-		if (instanceof_function(class->interfaces[i], iface)) {
+	for (uint32_t i = 0; i < ce->num_interfaces; i++) {
+		if (zend_hash_str_exists(&ce->interfaces[i]->function_table, name, name_len)) {
 			return true;
 		}
 	}
@@ -2948,13 +2949,13 @@ static bool session_class_implements_interface(const zend_class_entry *class, co
 
 static int session_handler_interface_gets_implemented(zend_class_entry *self, zend_class_entry *class) {
 	if (!zend_hash_str_exists(&class->function_table, ZEND_STRL("create_sid"))
-		&& !session_class_implements_interface(class, php_session_id_iface_entry)) {
+		&& !session_interfaces_declare_method(class, ZEND_STRL("create_sid"))) {
 		zend_error(E_WARNING,
 			"Class %s implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0",
 			ZSTR_VAL(class->name));
 	}
 	if (!zend_hash_str_exists(&class->function_table, ZEND_STRL("validateid"))
-		&& !session_class_implements_interface(class, php_session_update_timestamp_iface_entry)) {
+		&& !session_interfaces_declare_method(class, ZEND_STRL("validateid"))) {
 		zend_error(E_WARNING,
 			"Class %s implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0",
 			ZSTR_VAL(class->name));
