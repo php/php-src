@@ -19,6 +19,8 @@ session_set_save_handler(new class implements SessionHandlerInterface {
     public function read(string $id): string|false { return ''; }
     public function destroy(string $id): bool { return true; }
     public function gc(int $max_lifetime): int|false { return 0; }
+    public function create_sid(): string { return 'usercachesid'; }
+    public function validateId(string $id): bool { return true; }
 
     public function write(string $id, string $data): bool {
         echo "in shutdown window\n";
