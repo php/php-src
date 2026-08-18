@@ -145,6 +145,11 @@ PHP_FUNCTION(ftp_connect)
 		RETURN_THROWS();
 	}
 
+	if (port < 0 || port > 65535) {
+		zend_argument_value_error(2, "must be between 0 and 65535");
+		RETURN_THROWS();
+	}
+
 	if (timeout_sec <= 0) {
 		zend_argument_value_error(3, "must be greater than 0");
 		RETURN_THROWS();
@@ -184,6 +189,11 @@ PHP_FUNCTION(ftp_ssl_connect)
 	zend_long		timeout_sec = FTP_DEFAULT_TIMEOUT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (port < 0 || port > 65535) {
+		zend_argument_value_error(2, "must be between 0 and 65535");
 		RETURN_THROWS();
 	}
 
