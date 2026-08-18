@@ -71,6 +71,8 @@ pygments_style = 'sphinx'
 
 redirects = {
     'core/data-structures/reference-counting': '../memory-management/reference-counting.html',
+    'miscellaneous/running-tests': '../testing/running-tests/index.html',
+    'miscellaneous/writing-tests': '../testing/writing-tests/index.html',
 }
 
 
