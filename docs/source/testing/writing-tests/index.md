@@ -100,7 +100,7 @@ Comments help. Not an essay — just a couple of lines on what the objective of 
 seem completely obvious to you as you write it, but it might not be to someone looking at it later
 on.
 
-## Minimal Test
+## Minimal Test Layout
 
 A test must contain the sections TEST, FILE and either EXPECT or EXPECTF at a minimum. The example
 below illustrates a minimal test.
@@ -128,7 +128,7 @@ when generating a .php file. The FILE section is used as the body of the .php fi
 to open and close your php tags. The EXPECT section is the part used as a comparison to see if the
 test passes. It is a good idea to generate output with var_dump() calls.
 
-## Analyzing failing tests
+## Analyzing Failures
 
 While writing tests you will probably run into tests not passing while you think they should. The
 'make test' command provides you with debug information. Several files will be added per test in the
@@ -192,7 +192,7 @@ level of PHP you have tested it on and what platform(s) you've run it on. Someon
 group will review your test and reply to you. They may ask for some changes or suggest better ways
 to do things, or they may commit it to PHP.
 
-## Writing Portable PHP Tests
+## Portability
 
 Writing portable tests can be hard if you don't have access to all the many platforms that PHP can
 run on. Do your best. If in doubt, don't disable a test. It is better that the test runs in as many

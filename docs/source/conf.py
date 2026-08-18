@@ -123,13 +123,9 @@ redirects = {
             '#expectregex-1': f'{_writing_tests_sections_url}#expectregex',
             '#phpt-test-basics': _writing_tests_url,
             '#writing-phpt-tests': _writing_tests_url,
-            '#basic-format': f'{_writing_tests_url}#minimal-test',
-            '#analyzing-failing-tests': (
-                f'{_writing_tests_url}#analyzing-failing-tests'
-            ),
-            '#writing-portable-php-tests': (
-                f'{_writing_tests_url}#writing-portable-php-tests'
-            ),
+            '#basic-format': f'{_writing_tests_url}#minimal-test-layout',
+            '#analyzing-failing-tests': f'{_writing_tests_url}#analyzing-failures',
+            '#writing-portable-php-tests': f'{_writing_tests_url}#portability',
         },
     },
 }
