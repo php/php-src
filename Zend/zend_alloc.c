@@ -147,6 +147,9 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #ifndef ZEND_MM_HEAP_PROTECTION
 # define ZEND_MM_HEAP_PROTECTION 1 /* protect heap against corruptions       */
 #endif
+#ifndef ZEND_MM_FREELIST_RANDOM
+# define ZEND_MM_FREELIST_RANDOM 1 /* randomize the layout of the free lists */
+#endif
 
 #if ZEND_MM_HEAP_PROTECTION
 /* Define ZEND_MM_MIN_USEABLE_BIN_SIZE to the size of two pointers */
@@ -215,6 +218,9 @@ typedef zend_mm_bitset zend_mm_page_map[ZEND_MM_PAGE_MAP_LEN];     /* 64B */
 #define ZEND_MM_NRUN(bin_num, offset)    (ZEND_MM_IS_SRUN | ZEND_MM_IS_LRUN | ((bin_num) << ZEND_MM_SRUN_BIN_NUM_OFFSET) | ((offset) << ZEND_MM_NRUN_OFFSET_OFFSET))
 
 #define ZEND_MM_BINS 30
+
+/* Upper bound of bin_elements[], see ZEND_MM_BINS_INFO */
+#define ZEND_MM_MAX_BIN_ELEMENTS (ZEND_MM_PAGE_SIZE / ZEND_MM_MIN_SMALL_SIZE)
 
 #if UINTPTR_MAX == UINT64_MAX
 #  define BSWAPPTR(u) ZEND_BYTES_SWAP64(u)
@@ -1334,12 +1340,22 @@ static zend_always_inline zend_mm_free_slot *zend_mm_get_next_free_slot(zend_mm_
 # define zend_mm_get_next_free_slot(heap, bin_num, slot) (slot)->next_free_slot
 #endif /* ZEND_MM_HEAP_PROTECTION */
 
+#if ZEND_MM_FREELIST_RANDOM
+static zend_always_inline zend_mm_free_slot *zend_mm_bin_slot(zend_mm_bin *bin, uint32_t num, uint32_t slot_size)
+{
+	return (zend_mm_free_slot*)((char*)bin + num * slot_size);
+}
+#endif /* ZEND_MM_FREELIST_RANDOM */
+
 static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint32_t bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_chunk *chunk;
 	int page_num;
 	zend_mm_bin *bin;
-	zend_mm_free_slot *p, *end;
+	zend_mm_free_slot *p;
+#if !ZEND_MM_FREELIST_RANDOM
+	zend_mm_free_slot *end;
+#endif
 
 #if ZEND_DEBUG
 	bin = (zend_mm_bin*)zend_mm_alloc_pages(heap, bin_pages[bin_num], bin_data_size[bin_num] ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1363,6 +1379,55 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 		} while (i < bin_pages[bin_num]);
 	}
 
+#if ZEND_MM_FREELIST_RANDOM
+	/* Hand out the slots of a fresh bin in a random order, so that an attacker
+	 * can't reliably predict which slot a given allocation will land in, nor
+	 * the relative order of two consecutive allocations. */
+	{
+		const uint32_t slot_size = bin_data_size[bin_num];
+		const uint32_t count = bin_elements[bin_num];
+		uint32_t order[ZEND_MM_MAX_BIN_ELEMENTS];
+		uint32_t rnd[ZEND_MM_MAX_BIN_ELEMENTS - 1];
+
+		ZEND_ASSERT(count >= 2 && count <= ZEND_MM_MAX_BIN_ELEMENTS);
+
+		zend_random_bytes_insecure(&heap->rand_state, rnd, (count - 1) * sizeof(*rnd));
+
+		/* Inside-out Fisher-Yates: fill and shuffle in a single pass. Each
+		 * rnd[] value is mapped onto [0, i] with a multiply-shift rather than
+		 * a modulo. */
+		order[0] = 0;
+		for (uint32_t i = 1; i < count; i++) {
+			uint32_t j = ((uint64_t)rnd[i - 1] * (i + 1)) >> 32;
+			if (j == i) {
+				order[i] = i;
+			} else {
+				order[i] = order[j];
+				order[j] = i;
+			}
+		}
+
+		/* create a linked list out of every element but the first one */
+		heap->free_slot[bin_num] = zend_mm_bin_slot(bin, order[1], slot_size);
+		for (uint32_t i = 1; i < count; i++) {
+			p = zend_mm_bin_slot(bin, order[i], slot_size);
+			if (i + 1 < count) {
+				zend_mm_set_next_free_slot(heap, bin_num, p, zend_mm_bin_slot(bin, order[i + 1], slot_size));
+			} else {
+				/* terminate list using NULL */
+				p->next_free_slot = NULL;
+			}
+#if ZEND_DEBUG
+			do {
+				zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + slot_size - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+				dbg->size = 0;
+			} while (0);
+#endif
+		}
+
+		return zend_mm_bin_slot(bin, order[0], slot_size);
+	}
+#else
 	/* create a linked list of elements from 1 to last */
 	end = (zend_mm_free_slot*)((char*)bin + (bin_data_size[bin_num] * (bin_elements[bin_num] - 1)));
 	heap->free_slot[bin_num] = p = (zend_mm_free_slot*)((char*)bin + bin_data_size[bin_num]);
@@ -1388,6 +1453,7 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 
 	/* return first element */
 	return bin;
+#endif /* ZEND_MM_FREELIST_RANDOM */
 }
 
 static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, int bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
