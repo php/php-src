@@ -28,6 +28,9 @@ PHP 8.7 UPGRADE NOTES
     converted to an int.
   . Nested arrays in CURLOPT_POSTFIELDS now throw a TypeError, instead of being
     silently converted to the string "Array".
+  . Negative values for CURLOPT_POSTREDIR are now rejected, making
+    curl_setopt() return false, instead of being silently interpreted as a
+    combination of redirect types.
 
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
