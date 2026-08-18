@@ -28,6 +28,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
 
+- PDO:
+  . Fixed a leak when a persistent connection failed a liveness check
+    with no other live PDO handle. (iliaal)
+
 - Readline:
   . Fixed the interactive shell not waiting for the pager process to exit.
     (Weilin Du)
