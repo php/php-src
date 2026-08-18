@@ -18,7 +18,7 @@ function do_redirect($code, $postredir_value = null) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "{$host}/get.inc?test=redirect&code={$code}");
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, 'foo=bar');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, 'postdata was kept in redirect');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     if ($postredir_value !== null) {
@@ -27,65 +27,33 @@ function do_redirect($code, $postredir_value = null) {
     return trim(curl_exec($ch));
 }
 
-echo "default 301: ";
-echo do_redirect(301), PHP_EOL;
+$options = [null, CURL_REDIR_POST_301, CURL_REDIR_POST_302, CURL_REDIR_POST_303, CURL_REDIR_POST_ALL, 0];
+$codes = [301, 302, 303];
 
-echo "default 302: ";
-echo do_redirect(302), PHP_EOL;
-
-echo "default 303: ";
-echo do_redirect(303), PHP_EOL;
-
-echo "301 on, code 301: ";
-echo do_redirect(301, CURL_REDIR_POST_301), PHP_EOL;
-
-echo "301 on, code 302: ";
-echo do_redirect(302, CURL_REDIR_POST_301), PHP_EOL;
-
-echo "301 on, code 303: ";
-echo do_redirect(303, CURL_REDIR_POST_301), PHP_EOL;
-
-echo "302 on, code 301: ";
-echo do_redirect(301, CURL_REDIR_POST_302), PHP_EOL;
-
-echo "302 on, code 302: ";
-echo do_redirect(302, CURL_REDIR_POST_302), PHP_EOL;
-
-echo "302 on, code 303: ";
-echo do_redirect(303, CURL_REDIR_POST_302), PHP_EOL;
-
-echo "303 on, code 301: ";
-echo do_redirect(301, CURL_REDIR_POST_303), PHP_EOL;
-
-echo "303 on, code 302: ";
-echo do_redirect(302, CURL_REDIR_POST_303), PHP_EOL;
-
-echo "303 on, code 303: ";
-echo do_redirect(303, CURL_REDIR_POST_303), PHP_EOL;
-
-echo "ALL on, code 301: ";
-echo do_redirect(301, CURL_REDIR_POST_ALL), PHP_EOL;
-
-echo "ALL on, code 302: ";
-echo do_redirect(302, CURL_REDIR_POST_ALL), PHP_EOL;
-
-echo "ALL on, code 303: ";
-echo do_redirect(303, CURL_REDIR_POST_ALL), PHP_EOL;
+foreach ($options as $option) {
+    foreach ($codes as $code) {
+        echo "code: $code; option ", var_export($option, true), ': ';
+        echo do_redirect($code, $option), "\n";
+    }
+}
 
 ?>
 --EXPECT--
-default 301: string(0) ""
-default 302: string(0) ""
-default 303: string(0) ""
-301 on, code 301: string(7) "foo=bar"
-301 on, code 302: string(0) ""
-301 on, code 303: string(0) ""
-302 on, code 301: string(0) ""
-302 on, code 302: string(7) "foo=bar"
-302 on, code 303: string(0) ""
-303 on, code 301: string(0) ""
-303 on, code 302: string(0) ""
-303 on, code 303: string(7) "foo=bar"
-ALL on, code 301: string(7) "foo=bar"
-ALL on, code 302: string(7) "foo=bar"
-ALL on, code 303: string(7) "foo=bar"
+code: 301; option NULL: string(0) ""
+code: 302; option NULL: string(0) ""
+code: 303; option NULL: string(0) ""
+code: 301; option 1: string(29) "postdata was kept in redirect"
+code: 302; option 1: string(0) ""
+code: 303; option 1: string(0) ""
+code: 301; option 2: string(0) ""
+code: 302; option 2: string(29) "postdata was kept in redirect"
+code: 303; option 2: string(0) ""
+code: 301; option 4: string(0) ""
+code: 302; option 4: string(0) ""
+code: 303; option 4: string(29) "postdata was kept in redirect"
+code: 301; option 7: string(29) "postdata was kept in redirect"
+code: 302; option 7: string(29) "postdata was kept in redirect"
+code: 303; option 7: string(29) "postdata was kept in redirect"
+code: 301; option 0: string(0) ""
+code: 302; option 0: string(0) ""
+code: 303; option 0: string(0) ""
