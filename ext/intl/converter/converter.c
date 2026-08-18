@@ -393,6 +393,7 @@ static bool php_converter_set_encoding(php_converter_object *objval,
 	}
 
 	if (objval && !php_converter_set_callbacks(objval, cnv)) {
+		ucnv_close(cnv);
 		return false;
 	}
 
