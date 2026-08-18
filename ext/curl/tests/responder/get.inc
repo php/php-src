@@ -50,7 +50,8 @@
       // A 307 preserves the method and body, so libcurl must rewind the upload
       // (via CURLOPT_SEEKFUNCTION) before resending it to the new location.
       $target = $_GET['target'] ?? 'input';
-      header('Location: /get.inc?test=' . $target, true, $_GET['code'] ?? 307);
+      $code = $_GET['code'] ?? 307;
+      header('Location: /get.inc?test=' . $target, true, $code);
       break;
     default:
       echo "Hello World!\n";
