@@ -6,7 +6,10 @@
     <link rel="canonical" href="{{ redirect_url }}">
     <title>Redirecting&hellip;</title>
     <script>
-      window.location.replace({{ redirect_url | tojson }} + window.location.hash);
+      const anchorRedirects = {{ redirect_anchors | default({}) | tojson }};
+      const redirectUrl = anchorRedirects[window.location.hash]
+        || {{ redirect_url | tojson }} + window.location.hash;
+      window.location.replace(redirectUrl);
     </script>
   </head>
   <body>

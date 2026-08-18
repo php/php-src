@@ -69,16 +69,75 @@ html_theme_options = asdict(theme_options)
 pygments_style = 'sphinx'
 
 
+_writing_tests_url = '../testing/writing-tests/index.html'
+_writing_tests_sections_url = '../testing/writing-tests/sections/index.html'
+_writing_tests_samples_url = '../testing/writing-tests/samples/index.html'
+
+_writing_tests_section_anchors = '''
+test description credits skipif conflicts whitespace-sensitive capture-stdio extensions post
+post-raw put gzip-post deflate-post get cookie stdin ini args env phpdbg file fileeof file-external
+redirecttest cgi xfail flaky expectheaders expect expect-external expectf expectf-external
+expectregex expectregex-external clean
+'''.split()
+
+_writing_tests_sample_anchors = '''
+capture-stdio-1-phpt capture-stdio-2-phpt capture-stdio-3-phpt clean-php conflicts-1-phpt
+extensions-phpt file012-phpt phpdbg-1-phpt sample001-phpt sample002-phpt sample003-phpt
+sample005-phpt sample006-phpt sample007-phpt sample008-phpt sample009-phpt sample010-phpt
+sample011-phpt sample012-phpt sample013-phpt sample014-phpt sample016-phpt sample017-phpt
+sample018-phpt sample019-phpt sample020-phpt sample021-phpt sample022-phpt sample023-phpt
+sample024-phpt sample025-phpt sample026-phpt skipif2-phpt skipif-phpt xfailif-phpt
+'''.split()
+
+
+def _anchor_redirects(url, anchors):
+    return {f'#{anchor}': f'{url}#{anchor}' for anchor in anchors}
+
+
 redirects = {
-    'core/data-structures/reference-counting': '../memory-management/reference-counting.html',
-    'miscellaneous/running-tests': '../testing/running-tests/index.html',
-    'miscellaneous/writing-tests': '../testing/writing-tests/index.html',
+    'core/data-structures/reference-counting': {
+        'redirect_url': '../memory-management/reference-counting.html',
+    },
+    'miscellaneous/running-tests': {
+        'redirect_url': '../testing/running-tests/index.html',
+    },
+    'miscellaneous/writing-tests': {
+        'redirect_url': _writing_tests_url,
+        'redirect_anchors': {
+            **_anchor_redirects(
+                _writing_tests_sections_url,
+                _writing_tests_section_anchors,
+            ),
+            **_anchor_redirects(
+                _writing_tests_samples_url,
+                _writing_tests_sample_anchors,
+            ),
+            '#reference': _writing_tests_sections_url,
+            '#phpt-sections': _writing_tests_sections_url,
+            '#phpt-structure-details': _writing_tests_sections_url,
+            '#examples': _writing_tests_sections_url,
+            '#samples': _writing_tests_samples_url,
+            '#skipif-1': f'{_writing_tests_sections_url}#skipif',
+            '#extensions-1': f'{_writing_tests_sections_url}#extensions',
+            '#expectf-1': f'{_writing_tests_sections_url}#expectf',
+            '#expectregex-1': f'{_writing_tests_sections_url}#expectregex',
+            '#phpt-test-basics': _writing_tests_url,
+            '#writing-phpt-tests': _writing_tests_url,
+            '#basic-format': f'{_writing_tests_url}#minimal-test',
+            '#analyzing-failing-tests': (
+                f'{_writing_tests_url}#analyzing-failing-tests'
+            ),
+            '#writing-portable-php-tests': (
+                f'{_writing_tests_url}#writing-portable-php-tests'
+            ),
+        },
+    },
 }
 
 
 def generate_redirects(_app):
-    for source, target in redirects.items():
-        yield source, {'redirect_url': target}, 'redirect.html'
+    for source, context in redirects.items():
+        yield source, context, 'redirect.html'
 
 
 def setup(app):
