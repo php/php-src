@@ -1,6 +1,6 @@
-# API adjustment to the old output control code
+# Output Buffering
 
-Everything now resides beneath the php_output namespace, and there's an API call
+Everything resides beneath the `php_output` namespace, and there's an API call
 for every output handler op.
 
     Checking output control layers status:
@@ -54,11 +54,11 @@ for every output handler op.
         // php_ob_end_buffers(0);
         php_output_discard_all();
 
-    Stopping (and dropping) one output buffer:
+    Finalising and removing one output handler:
         // php_ob_end_buffer(1, 0)
         php_output_end();
 
-    Stopping (and dropping) all output buffers:
+    Finalising and removing all output handlers:
         // php_ob_end_buffers(1, 0);
         php_output_end_all();
 
@@ -106,7 +106,7 @@ for every output handler op.
         // not possible with old API
         if ((flags & PHP_OUTPUT_HANDLER_CLEAN) && (flags & PHP_OUTPUT_HANDLER_FINAL)) { ... }
 
-## Output handler hooks
+## Output Handler Hooks
 
 The output handler can change its abilities at runtime. For example, the gz handler can
 remove the CLEANABLE and REMOVABLE bits when the first output has passed through it;
