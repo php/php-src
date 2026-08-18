@@ -14,6 +14,13 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
+try {
+    Uri\WhatWg\Url::parse('invalid uri', errors: $f->x);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
+TypeError: Cannot assign array to reference held by property Foo::$x of type string
 TypeError: Cannot assign array to reference held by property Foo::$x of type string

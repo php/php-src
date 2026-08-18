@@ -23,8 +23,15 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
+try {
+    new \Uri\Rfc3986\Uri('https://example.com:4242424269424242426942424242694242424269');
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 9223372036854775807
 2147483647
+Uri\InvalidUriException: The port is out of range
 Uri\InvalidUriException: The port is out of range
