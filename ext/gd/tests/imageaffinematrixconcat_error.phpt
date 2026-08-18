@@ -6,8 +6,8 @@ gd
 <?php
 try {
     imageaffinematrixconcat([1, 0, 0, 1, 0, 0], []);
-} catch (ValueError $exception) {
-    echo $exception::class, ': ', $exception->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
