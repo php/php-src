@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
 
+- PDO:
+  . Fixed persistent connections with a colon in the username or password
+    reusing another connection's handle. (iliaal)
+
 - Standard:
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
