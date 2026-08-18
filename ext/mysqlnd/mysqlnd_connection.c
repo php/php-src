@@ -354,14 +354,37 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const c
 
 
 /* {{{ mysqlnd_conn_data::restart_psession */
-static void
+static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn)
 {
 	DBG_ENTER("mysqlnd_conn_data::restart_psession");
-	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_REUSED);
-	conn->current_result = NULL;
-	conn->last_message.s = NULL;
-	DBG_VOID_RETURN;
+
+	enum_func_status ret = conn->command->reset_connection(conn);
+	if (ret == PASS) {
+		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_REUSED);
+		conn->current_result = NULL;
+		conn->last_message.s = NULL;
+
+		/* COM_RESET_CONNECTION reverts the session charset to the server
+		 * default. A charset requested as a connection option (DSN charset=,
+		 * MYSQLI_SET_CHARSET_NAME) is part of establishing the connection, so
+		 * re-apply it to match a fresh connect. A charset chosen afterwards
+		 * with set_charset() is not restored - the caller reapplies that
+		 * itself - but realign the cached charset (used for escaping) with the
+		 * now-reset connection. */
+		if (conn->options->charset_name) {
+			ret = conn->m->set_charset(conn, conn->options->charset_name);
+		} else if (conn->greet_charset) {
+			conn->charset = conn->greet_charset;
+		}
+
+		/* Re-execute any MYSQL_INIT_COMMAND commands. */
+		if (ret == PASS) {
+			ret = conn->m->execute_init_commands(conn);
+		}
+	}
+
+	DBG_RETURN(ret);
 }
 /* }}} */
 

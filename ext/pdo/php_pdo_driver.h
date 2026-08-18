@@ -32,7 +32,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20240423
+#define PDO_DRIVER_API	20260502
 
 /* Doctrine hardcodes these constants, avoid changing their values. */
 enum pdo_param_type {
@@ -268,6 +268,15 @@ typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
  * You may set this handler to NULL, which is equivalent to returning SUCCESS. */
 typedef zend_result (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh);
 
+/* called when a persistent connection is pulled from the pool for reuse, to
+ * reset any server-side session state left over from the previous request.
+ * Return SUCCESS if the connection was reset and is ready for reuse, FAILURE
+ * otherwise (PDO will then discard it). A successful reset also implies the
+ * connection is alive, so when this handler is present PDO does not also call
+ * check_liveness. You may set this handler to NULL, in which case PDO falls
+ * back to check_liveness. */
+typedef zend_result (*pdo_dbh_reset_connection_func)(pdo_dbh_t *dbh);
+
 /* called at request end for each persistent dbh; this gives the driver
  * the opportunity to safely release resources that only have per-request
  * scope */
@@ -313,6 +322,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_txn_func		in_transaction;
 	pdo_dbh_get_gc_func		get_gc;
 	pdo_dbh_sql_scanner		scanner;
+	pdo_dbh_reset_connection_func	reset_connection;
 };
 
 /* }}} */
