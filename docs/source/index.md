@@ -28,12 +28,18 @@ extensions/unbundled-extensions
 ```
 
 ```{toctree}
+   :caption: Testing
+   :hidden:
+
+testing/running-tests/index
+testing/writing-tests/index
+```
+
+```{toctree}
    :caption: Miscellaneous
    :hidden:
 
 miscellaneous/stubs
-miscellaneous/writing-tests
-miscellaneous/running-tests
 ```
 
 Welcome to the php-src documentation!
