@@ -10,7 +10,7 @@ include 'server.inc';
 $host = curl_cli_server_start();
 
 $header_file = tempnam(sys_get_temp_dir(), 'curl-writeheader');
-$fp = fopen($header_file, 'w');
+$fp = fopen($header_file, 'w') or die('failed to open header output file');
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "{$host}/get.inc?test=contenttype");
