@@ -803,7 +803,7 @@ PHP_FUNCTION(unpack)
 
 
 	if (offset < 0 || offset > inputlen) {
-		zend_argument_value_error(3, "must be contained in argument #2 ($data)");
+		zend_argument_value_error(3, "must be contained in argument #2 ($string)");
 		RETURN_THROWS();
 	}
 
