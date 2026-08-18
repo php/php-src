@@ -94,7 +94,11 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 static ZEND_INI_MH(OnUpdateInternedStringsBuffer)
 {
 	if (accel_startup_ok) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer cannot be changed when OPcache is already set up.");
+		if (strcmp(sapi_module.name, "fpm-cgi") == 0) {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.interned_strings_buffer] in an individual pool's configuration?\n");
+		} else {
+			zend_accel_error(ACCEL_LOG_WARNING, "opcache.interned_strings_buffer cannot be changed when OPcache is already set up.");
+		}
 		return FAILURE;
 	}
 
