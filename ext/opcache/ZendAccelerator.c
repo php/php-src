@@ -2073,6 +2073,9 @@ const zend_op_array *zend_accel_pfa_cache_get(
 				zend_emit_recorded_errors_ex(persistent_script->num_warnings,
 						persistent_script->warnings);
 			}
+			if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
+				zend_map_ptr_extend(ZCSG(map_ptr_last));
+			}
 		}
 	} else {
 		op_array = zend_hash_find_ptr(&EG(partial_function_application_cache), key);
