@@ -57,7 +57,7 @@ $errors = [
 
 foreach ($errors as $error) {
 	$value = defined($error) ? constant($error) : 'undefined';
-	echo $error, '=', $value, PHP_EOL;
+	echo $error, '=', $value, "\n";
 }
 
 --EXPECT--

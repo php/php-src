@@ -5,6 +5,10 @@ curl
 --SKIPIF--
 <?php
 if (getenv('SKIP_ONLINE_TESTS')) die('skip Online test');
+$curl_version = curl_version();
+if ($curl_version['version_number'] < 0x075400) {
+    exit("skip: test works only with curl >= 7.84.0");
+}
 ?>
 --FILE--
 <?php

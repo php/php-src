@@ -19,8 +19,7 @@ curl_exec($ch);
 // The header string contains the full request header line(s).
 $headers = rtrim(curl_getinfo($ch, CURLINFO_HEADER_OUT));
 echo "With CURLINFO_HEADER_OUT=1:\n";
-echo $headers;
-echo "\n---\n";
+echo $headers, "\n---\n";
 
 // Toggling back to 0 should clear the buffer; next getinfo returns false.
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Request-num: 2']);
