@@ -126,7 +126,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_THROWS();
 	}
 	if (variant != INTL_IDN_VARIANT_UTS46) {
-		zend_argument_value_error(2, "must be INTL_IDNA_VARIANT_UTS46");
+		zend_argument_value_error(3, "must be INTL_IDNA_VARIANT_UTS46");
 		RETURN_THROWS();
 	}
 	/* don't check options; it wasn't checked before */
