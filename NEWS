@@ -38,6 +38,7 @@ PHP                                                                        NEWS
     for UTF-8 strings). (ColumbusLabs)
   . Fixed Locale::parseLocale() reading past a trailing '-' or '_'.
     (iliaal, Xuyang Zhang)
+  . Fixed grapheme_str_split() treating UBRK_DONE as a byte index. (iliaal)
 
 - Phar:
   . Fixed Phar archives being automatically detected when ".phar" only occurs

@@ -908,9 +908,9 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 				add_next_index_stringl(return_value, pstr, pos - current);
 				end = pstr + pos - current;
 				i = 0;
+				pstr += pos - current;
+				current = pos;
 			}
-			pstr += pos - current;
-			current = pos;
 		} else {
 			i += 1;
 		}
