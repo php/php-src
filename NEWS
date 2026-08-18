@@ -93,6 +93,8 @@ PHP                                                                        NEWS
     argument number for $timeout). (lacatoire)
   . Fixed bug GH-23576 (Next index for array returned from array_keys() is
     wrong). (Lazizbek Ergashev)
+  . Fixed fseek() accepting $whence values that do not fit in an int, which
+    were silently truncated onto a valid seek constant. (lacatoire)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
