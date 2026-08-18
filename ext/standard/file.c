@@ -1104,6 +1104,10 @@ PHPAPI PHP_FUNCTION(fseek)
 		Z_PARAM_LONG(whence)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (whence < INT_MIN || whence > INT_MAX) {
+		RETURN_LONG(-1);
+	}
+
 	php_stream_error_operation_begin();
 	RETVAL_LONG(php_stream_seek(stream, offset, (int) whence));
 	php_stream_error_operation_end_for_stream(stream);

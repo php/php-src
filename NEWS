@@ -34,6 +34,8 @@ PHP                                                                        NEWS
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
   . Io\Poll\Context::wait() now rejects a $maxEvents value greater than
     INT_MAX instead of truncating it. (marc-mabe)
+  . Fixed fseek() accepting $whence values that do not fit in an int, which
+    were silently truncated onto a valid seek constant. (lacatoire)
 
 
 27 Aug 2026, PHP 8.6.0beta2
