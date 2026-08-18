@@ -1,40 +1,37 @@
-# How to create a self-contained PHP extension
+# Unbundled Extensions
 
-A self-contained extension can be distributed independently of the PHP source.
-To create such an extension, two things are required:
+An unbundled extension is maintained and distributed independently of php-src.
+The PHP build system refers to these as self-contained extensions. To create
+one, two things are required:
 
-* Configuration file (config.m4)
+* Configuration file (`config.m4`)
 * Source code for your module
 
 We will describe now how to create these and how to put things together.
 
-## Preparing your system
+## Preparing Your System
 
-While the result will run on any system, a developer's setup needs these tools:
+A developer's setup needs these tools in addition to a C compiler and `make`:
 
-* GNU autoconf
-* GNU m4
+* [GNU Autoconf](https://www.gnu.org/software/autoconf/)
+* [GNU M4](https://www.gnu.org/software/m4/)
 
-All of these are available from
+## Converting an Existing Extension
 
-    ftp://ftp.gnu.org/pub/gnu/
-
-## Converting an existing extension
-
-Just to show you how easy it is to create a self-contained extension, we will
-convert an embedded extension into a self-contained one. Install PHP and execute
-the following commands.
+Just to show you how easy it is to create an unbundled extension, we will
+convert a bundled extension into an unbundled one. Install PHP, including
+its development tools and headers, and execute the following commands.
 
 ```bash
 mkdir /tmp/newext
 cd /tmp/newext
 ```
 
-You now have an empty directory. We will copy the files from the mysqli
+You now have an empty directory. We will copy the files from the dl_test
 extension:
 
 ```bash
-cp -rp php-src/ext/mysqli/* .
+cp -R /path/to/php-src/ext/dl_test/. .
 ```
 
 It is time to finish the module. Run:
@@ -43,22 +40,19 @@ It is time to finish the module. Run:
 phpize
 ```
 
-You can now ship the contents of the directory - the extension can live
-completely on its own.
+The extension can now be built independently of the PHP source tree.
 
 The user instructions boil down to
 
 ```bash
 ./configure \
-    [--with-php-config=/path/to/php-config] \
-    [--with-mysqli=MYSQL-DIR]
+    [--with-php-config=/path/to/php-config]
+make
+make test
 make install
 ```
 
-The MySQL module will either use the embedded MySQL client library or the MySQL
-installation in MYSQL-DIR.
-
-## Defining the new extension
+## Defining the New Extension
 
 Our demo extension is called "foobar".
 
@@ -68,15 +62,12 @@ header files, but that is not important here).
 The demo extension does not reference any external libraries (that is important,
 because the user does not need to specify anything).
 
-`LTLIBRARY_SOURCES` specifies the names of the sources files. You can name an
-arbitrary number of source files here.
+## Creating the M4 Configuration File
 
-## Creating the M4 configuration file
-
-The m4 configuration can perform additional checks. For a self-contained
+The m4 configuration can perform additional checks. For an unbundled
 extension, you do not need more than a few macro calls.
 
-```m4
+```text
 PHP_ARG_ENABLE([foobar],
   [whether to enable foobar],
   [AS_HELP_STRING([--enable-foobar],
@@ -91,24 +82,30 @@ fi
 extension will be enabled by `PHP_NEW_EXTENSION` in shared mode.
 
 The first argument of `PHP_NEW_EXTENSION` describes the name of the extension.
-The second names the source-code files. The third passes `$ext_shared` which is
-set by `PHP_ARG_ENABLE/WITH` to `PHP_NEW_EXTENSION`.
+The second names the source-code files. The third passes `$ext_shared`, which is
+set by `PHP_ARG_ENABLE` or `PHP_ARG_WITH`, to `PHP_NEW_EXTENSION`.
 
 Please use always `PHP_ARG_ENABLE` or `PHP_ARG_WITH`. Even if you do not plan to
 distribute your module with PHP, these facilities allow you to integrate your
 module easily into the main PHP module framework.
 
-## Create source files
+## Creating Source Files
 
-`ext_skel.php` can be of great help when creating the common code for all
-modules in PHP for you and also writing basic function definitions and C code
-for handling arguments passed to your functions. See `./ext/ext_skel.php --help`
-for further information.
+`ext_skel.php` creates a current extension skeleton, including configuration,
+source, stub and test files. From the root of the PHP source tree, run:
+
+```bash
+php ext/ext_skel.php --ext foobar --vendor vendor_name
+```
+
+The generated source includes basic function definitions and an example of
+handling function arguments. See `php ext/ext_skel.php --help` for further
+information.
 
 As for the rest, you are currently alone here. There are a lot of existing
 modules, use a simple module as a starting point and add your own code.
 
-## Creating the self-contained extension
+## Creating the Unbundled Extension
 
 Put `config.m4` and the source files into one directory. Then, run `phpize`
 (this is installed during `make install` by PHP).
@@ -122,29 +119,31 @@ For example, if you configured PHP with `--prefix=/php`, you would run
 This will automatically copy the necessary build files and create configure from
 your `config.m4`.
 
-And that's it. You now have a self-contained extension.
+And that's it. You now have an unbundled extension.
 
-## Installing a self-contained extension
+## Installing an Unbundled Extension
 
 An extension can be installed by running:
 
 ```bash
 ./configure \
     [--with-php-config=/path/to/php-config]
+make
+make test
 make install
 ```
 
-## Adding shared module support to a module
+## Adding Shared Module Support to a Module
 
-In order to be useful, a self-contained extension must be loadable as a shared
+In order to be useful, an unbundled extension must be loadable as a shared
 module. The following will explain now how you can add shared module support to
 an existing module called `foo`.
 
 1. In `config.m4`, use `PHP_ARG_WITH/PHP_ARG_ENABLE`. Then you will
-   automatically be able to use `--with-foo=shared[,..]` or
-   `--enable-foo=shared[,..]`.
+   automatically be able to use `--with-foo=shared[,DIR]` or
+   `--enable-foo=shared`.
 
-2. In `config.m4`, use `PHP_NEW_EXTENSION([foo],.., [$ext_shared])` to enable
+2. In `config.m4`, use `PHP_NEW_EXTENSION([foo], [foo.c], [$ext_shared])` to enable
    building the extension.
 
 3. Add the following lines to your C source file:
@@ -154,19 +153,3 @@ an existing module called `foo`.
     ZEND_GET_MODULE(foo)
 #endif
 ```
-
-## PECL site conformity
-
-If you plan to release an extension to the PECL website, there are several
-points to be regarded.
-
-1. Add `LICENSE` or `COPYING` to the `package.xml`
-
-2. The following should be defined in one of the extension header files
-
-```c
-#define PHP_FOO_VERSION "1.2.3"
-```
-
-This macro has to be used within your foo_module_entry to indicate the
-extension version.
