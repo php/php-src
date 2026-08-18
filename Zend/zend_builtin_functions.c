@@ -714,6 +714,18 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 		if (!instance_ce) {
 			RETURN_FALSE;
 		}
+	} else if (Z_TYPE_P(obj) == IS_STRING) {
+		zend_string *function_name = get_active_function_or_method_name();
+		zend_error(
+			E_DEPRECATED,
+			"Calling %pS() with a string when $allow_string is false",
+			function_name
+		);
+		zend_string_release(function_name);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+		RETURN_FALSE;
 	} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 		instance_ce = Z_OBJCE_P(obj);
 	} else {
