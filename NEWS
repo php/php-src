@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     and a later callback returns a node from another document. (iliaal)
   . Fixed bug GH-23331 (UAF when node_list_unlink() skips attribute children
     that still have a live wrapper). (iliaal)
+  . Fixed a use-after-free when Dom\Element::setAttributeNS() replaces the
+    value of an attribute whose child still has a live wrapper. (iliaal)
 
 - PDO_PGSQL:
   . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
