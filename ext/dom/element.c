@@ -1059,6 +1059,10 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 	if (errorcode == 0) {
 		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
+		xmlNodePtr existing = (xmlNodePtr) xmlHasNsProp(elemp, localname, ns == NULL ? NULL : ns->href);
+		if (existing != NULL && existing->type != XML_ATTRIBUTE_DECL) {
+			node_list_unlink(existing->children);
+		}
 		xmlAttrPtr attr = xmlSetNsProp(elemp, ns, localname, BAD_CAST value);
 		if (UNEXPECTED(attr == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
