@@ -776,6 +776,7 @@ PHP_FUNCTION( locale_get_keywords )
 					zend_string_efree( kw_value_str );
 				}
 				zend_array_destroy(Z_ARR_P(return_value));
+				uenum_close( e );
 				RETURN_FALSE;
 			}
 

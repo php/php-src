@@ -15,6 +15,8 @@ PHP                                                                        NEWS
     the ICU constructor adopts the TimeZone. (iliaal)
   . Fixed bug GH-23094 (NumberFormatter parsing offsets use UTF-16 positions
     for UTF-8 strings). (ColumbusLabs)
+  . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
+    read. (iliaal)
 
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
