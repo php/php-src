@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.28
 
+- DOM:
+  . Fixed bug GH-23352 (UAF reading an attribute value node retained across
+    DOMDocument::adoptNode()). (David Carlier)
+
 - Opcache:
   . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
     hook with minimal tracing JIT). (ndossche)
