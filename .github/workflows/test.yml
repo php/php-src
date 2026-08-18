@@ -34,7 +34,7 @@ concurrency:
 jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
-    if: github.repository == 'php/php-src' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    if: (github.repository == 'php/php-src' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && !contains(github.event.pull_request.labels.*.name, 'Merge')
     runs-on: ubuntu-latest
     outputs:
       all_variations: ${{ steps.set-matrix.outputs.all_variations }}
