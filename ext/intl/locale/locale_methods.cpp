@@ -281,7 +281,7 @@ static zend_off_t getSingletonPos(const char* str)
 					break;
 				} else {
 					/* delimiter found; check for singleton */
-					if( isIDSeparator(*(str+i+2)) ){
+					if( (size_t)i + 2 < len && isIDSeparator(*(str+i+2)) ){
 						/* a singleton; so send the position of separator before singleton */
 						result = i+1;
 						break;
