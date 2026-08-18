@@ -66,7 +66,7 @@ bool php_dom_is_node_connected(const xmlNode *node)
 		if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
 			return true;
 		}
-		node = node->parent;
+		node = php_dom_parent_node(node);
 	} while (node != NULL);
 	return false;
 }
@@ -244,7 +244,7 @@ static zend_result dom_node_parent_get(dom_object *obj, zval *retval, bool only_
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	xmlNodePtr nodeparent = nodep->parent;
+	xmlNodePtr nodeparent = php_dom_parent_node(nodep);
 	if (!nodeparent || (only_element && nodeparent->type != XML_ELEMENT_NODE)) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
@@ -2412,7 +2412,7 @@ static bool dom_node_contains(xmlNodePtr thisp, xmlNodePtr otherp)
 		if (otherp == thisp) {
 			return true;
 		}
-		otherp = otherp->parent;
+		otherp = php_dom_parent_node(otherp);
 	} while (otherp);
 
 	return false;
@@ -2470,7 +2470,7 @@ Since:
 PHP_METHOD(DOMNode, getRootNode)
 {
 	zval *id;
-	xmlNodePtr thisp;
+	xmlNodePtr thisp, tmp;
 	dom_object *intern;
 	/* Unused now because we don't support the shadow DOM nodes. Options only influence shadow DOM nodes. */
 	zval *options;
@@ -2482,8 +2482,8 @@ PHP_METHOD(DOMNode, getRootNode)
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
-	while (thisp->parent) {
-		thisp = thisp->parent;
+	while ((tmp = php_dom_parent_node(thisp))) {
+		thisp = tmp;
 	}
 
 	DOM_RET_OBJ(thisp, intern);
@@ -2559,9 +2559,9 @@ static void dom_node_compare_document_position(INTERNAL_FUNCTION_PARAMETERS, zen
 	}
 	bool node2_is_ancestor_of_node1 = false;
 	size_t node1_depth = 0;
-	xmlNodePtr node1_root = node1;
-	while (node1_root->parent) {
-		node1_root = node1_root->parent;
+	xmlNodePtr node1_root = node1, tmp;
+	while ((tmp = php_dom_parent_node(node1_root))) {
+		node1_root = tmp;
 		if (node1_root == node2) {
 			node2_is_ancestor_of_node1 = true;
 		}
@@ -2570,8 +2570,8 @@ static void dom_node_compare_document_position(INTERNAL_FUNCTION_PARAMETERS, zen
 	bool node1_is_ancestor_of_node2 = false;
 	size_t node2_depth = 0;
 	xmlNodePtr node2_root = node2;
-	while (node2_root->parent) {
-		node2_root = node2_root->parent;
+	while ((tmp = php_dom_parent_node(node2_root))) {
+		node2_root = tmp;
 		if (node2_root == node1) {
 			node1_is_ancestor_of_node2 = true;
 		}
