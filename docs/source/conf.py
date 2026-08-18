@@ -125,6 +125,9 @@ redirects = {
             '#writing-phpt-tests': _writing_tests_url,
             '#basic-format': f'{_writing_tests_url}#minimal-test-layout',
             '#analyzing-failing-tests': f'{_writing_tests_url}#analyzing-failures',
+            '#what-should-i-do-with-my-test-case-when-ive-written-and-tested-it': (
+                _writing_tests_url
+            ),
             '#writing-portable-php-tests': f'{_writing_tests_url}#portability',
         },
     },

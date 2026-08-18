@@ -182,16 +182,6 @@ shared. If a resource cannot be isolated, declare the narrowest applicable confl
 Another good check is to look at what lines of code in the PHP source your test case covers. This is
 easy to do, there are some instructions on the [PHP Wiki](https://wiki.php.net/doc/articles/writing-tests).
 
-## What should I do with my test case when I've written and tested it?
-
-The next step is to get someone to review it. If it's short you can paste it into a note and send it
-to [php-qa@lists.php.net](mailto:php-qa@lists.php.net). If the test is a bit too long for that then put it somewhere were people
-can download it ([pastebin](https://pastebin.com/) is sometimes used). Appending tests to notes as
-files doesn't work well - so please don't do that. Your note to [php-qa@lists.php.net](mailto:php-qa@lists.php.net) should say what
-level of PHP you have tested it on and what platform(s) you've run it on. Someone from the PHP QA
-group will review your test and reply to you. They may ask for some changes or suggest better ways
-to do things, or they may commit it to PHP.
-
 ## Portability
 
 Writing portable tests can be hard if you don't have access to all the many platforms that PHP can
