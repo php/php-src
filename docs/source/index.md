@@ -15,6 +15,7 @@ introduction/ides/index
 core/data-structures/index
 core/memory-management/index
 core/output-buffering
+core/streams/index
 ```
 
 ```{toctree}
