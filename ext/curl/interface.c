@@ -1843,6 +1843,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_TCP_KEEPCNT:
 #endif
 		case CURLOPT_FOLLOWLOCATION:
+		case CURLOPT_POSTREDIR:
 			lval = zval_get_long(zvalue);
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
 				(PG(open_basedir) && *PG(open_basedir)) && (lval & CURLPROTO_FILE)) {
@@ -2208,11 +2209,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_TIMEVALUE_LARGE:
 			lval = zval_get_long(zvalue);
 			error = curl_easy_setopt(ch->cp, option, (curl_off_t)lval);
-			break;
-
-		case CURLOPT_POSTREDIR:
-			lval = zval_get_long(zvalue);
-			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, (long) (lval & CURL_REDIR_POST_ALL));
 			break;
 
 		/* the following options deal with files, therefore the open_basedir check
