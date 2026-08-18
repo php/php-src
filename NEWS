@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed a double-free when IntlGregorianCalendar construction fails after
     the ICU constructor adopts the TimeZone. (iliaal)
+  . Fixed bug GH-23094 (NumberFormatter parsing offsets use UTF-16 positions
+    for UTF-8 strings). (ColumbusLabs)
 
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
