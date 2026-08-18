@@ -1,5 +1,5 @@
 /* This is a generated file, edit readline.stub.php instead.
- * Stub hash: 7a314f75d9a89a9ea4d525515bb6bacdf7be6746 */
+ * Stub hash: 848e798481f62ee09cfd8cc3dfa6b0814cfdd979 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_readline, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prompt, IS_STRING, 1, "null")
@@ -28,7 +28,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_readline_write_history arginfo_readline_read_history
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_completion_function, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_completion_function, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 

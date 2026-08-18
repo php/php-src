@@ -606,6 +606,12 @@ PHP 8.6 UPGRADE NOTES
 - Phar:
   . Phar::mungServer() now supports reference values.
 
+- Readline:
+  . readline_completion_function() now declares true as its return type. The
+    function assigns a static callback and then tests whether the assignment
+    landed, which is a tautology; an invalid callback throws a TypeError via
+    ZPP before the function body is reached.
+
 - Sockets:
   . socket_addrinfo_lookup() now has an additional optional argument $error
     when not null, and on failure, gives the error code (one of the EAI_*
