@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed GH-10497 (Allow direct mutation of objects stored in constants or
     class constants via OBJ->prop = $val). (Khaled Alam)
   . Reverted GH-22833, which attempted to fix bug GH-18985. (ilutov)
+  . Using the return statement in a finally block is now deprecated.
+    (aldemeery)
 
 - Curl:
   . Set content length using CURLOPT_POSTFIELDSIZE_LARGE instead of
