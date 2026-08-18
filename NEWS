@@ -202,6 +202,8 @@ PHP                                                                        NEWS
     specified number base. (Sjoerd Langkemper)
   . Improved performance of in_array() and array_search() in strict mode when
     searching for a string. (Alexander Danilov)
+  . Fixed fseek() accepting $whence values that do not fit in an int, which
+    were silently truncated onto a valid seek constant. (lacatoire)
 
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
