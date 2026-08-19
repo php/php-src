@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed a leak when a persistent connection failed a liveness check
     with no other live PDO handle. (iliaal)
 
+- SAPI:
+  . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
+
 - Standard:
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
@@ -41,9 +44,6 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed ZipArchive::extractTo() and ZipArchive::getFrom*() reporting success
     on corrupted entries. (David Carlier)
-
-- SAPI:
-  . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
 
 27 Aug 2026, PHP 8.4.25
 
