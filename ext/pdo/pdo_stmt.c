@@ -1717,19 +1717,16 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 	uint32_t arg1_arg_num = mode_arg_num + 1;
 	uint32_t constructor_arg_num = mode_arg_num + 2;
 	uint32_t total_num_args = mode_arg_num + variadic_num_args;
+	zend_long fetch_type = mode & ~PDO_FETCH_FLAGS;
+	zend_long fetch_column = 0;
+	zend_class_entry *fetch_class = NULL;
+	zend_array *fetch_ctor_args = NULL;
+	zend_object *fetch_into = NULL;
+	zval old_ctor_args;
+	zval old_into;
 
-	switch (stmt->default_fetch_type) {
-		case PDO_FETCH_INTO:
-			if (!Z_ISUNDEF(stmt->fetch.into)) {
-				zval_ptr_dtor(&stmt->fetch.into);
-				ZVAL_UNDEF(&stmt->fetch.into);
-			}
-			break;
-		default:
-			;
-	}
-
-	stmt->default_fetch_type = PDO_FETCH_BOTH;
+	ZVAL_UNDEF(&old_ctor_args);
+	ZVAL_UNDEF(&old_into);
 
 	flags = mode & PDO_FETCH_FLAGS;
 
@@ -1737,7 +1734,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 		return false;
 	}
 
-	switch (mode & ~PDO_FETCH_FLAGS) {
+	switch (fetch_type) {
 		case PDO_FETCH_USE_DEFAULT:
 		case PDO_FETCH_LAZY:
 		case PDO_FETCH_ASSOC:
@@ -1772,13 +1769,11 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				zend_argument_value_error(arg1_arg_num, "must be greater than or equal to 0");
 				return false;
 			}
-			stmt->fetch.column = Z_LVAL(args[0]);
+			fetch_column = Z_LVAL(args[0]);
 			break;
 
 		case PDO_FETCH_CLASS: {
 			HashTable *constructor_args = NULL;
-			/* Undef constructor arguments */
-			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 			/* Gets its class name from 1st column */
 			if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
 				if (variadic_num_args != 0) {
@@ -1788,7 +1783,6 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					zend_string_release(func);
 					return false;
 				}
-				stmt->fetch.cls.ce = NULL;
 			} else {
 				zend_class_entry *cep;
 				if (variadic_num_args == 0) {
@@ -1827,15 +1821,17 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 						constructor_args = Z_ARRVAL(args[1]);
 					}
 				}
-				stmt->fetch.cls.ce = cep;
+				fetch_class = cep;
 
 				/* If constructor arguments are present and not empty */
 				if (constructor_args) {
-					ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(constructor_args));
+					if (!cep->constructor) {
+						zend_throw_error(NULL, "User-supplied statement does not accept constructor arguments");
+						return false;
+					}
+					fetch_ctor_args = zend_array_dup(constructor_args);
 				}
 			}
-
-			do_fetch_class_prepare(stmt);
 			break;
 		}
 		case PDO_FETCH_INTO:
@@ -1851,14 +1847,52 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				return false;
 			}
 
-			ZVAL_COPY(&stmt->fetch.into, &args[0]);
+			fetch_into = Z_OBJ(args[0]);
 			break;
 		default:
 			zend_argument_value_error(mode_arg_num, "must be one of the PDO::FETCH_* constants");
 			return false;
 	}
 
+	if ((stmt->default_fetch_type & ~PDO_FETCH_FLAGS) == PDO_FETCH_INTO) {
+		ZVAL_COPY_VALUE(&old_into, &stmt->fetch.into);
+		ZVAL_UNDEF(&stmt->fetch.into);
+	} else if ((stmt->default_fetch_type & ~PDO_FETCH_FLAGS) == PDO_FETCH_CLASS) {
+		do_fetch_opt_finish(stmt, 0);
+		ZVAL_COPY_VALUE(&old_ctor_args, &stmt->fetch.cls.ctor_args);
+		ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
+	} else {
+		do_fetch_opt_finish(stmt, 1);
+	}
+
+	switch (fetch_type) {
+		case PDO_FETCH_COLUMN:
+			stmt->fetch.column = fetch_column;
+			break;
+		case PDO_FETCH_CLASS:
+			stmt->fetch.cls.ce = fetch_class;
+			if (fetch_ctor_args) {
+				ZVAL_ARR(&stmt->fetch.cls.ctor_args, fetch_ctor_args);
+			} else {
+				ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
+			}
+			do_fetch_class_prepare(stmt);
+			break;
+		case PDO_FETCH_INTO:
+			ZVAL_OBJ_COPY(&stmt->fetch.into, fetch_into);
+			break;
+		default:
+			break;
+	}
+
 	stmt->default_fetch_type = mode;
+
+	if (!Z_ISUNDEF(old_into)) {
+		zval_ptr_dtor(&old_into);
+	}
+	if (!Z_ISUNDEF(old_ctor_args)) {
+		zval_ptr_dtor(&old_ctor_args);
+	}
 
 	return true;
 }
@@ -1874,8 +1908,6 @@ PHP_METHOD(PDOStatement, setFetchMode)
 	}
 
 	PHP_STMT_GET_OBJ;
-
-	do_fetch_opt_finish(stmt, 1);
 
 	if (!pdo_stmt_setup_fetch_mode(stmt, fetch_mode, 1, args, num_args)) {
 		RETURN_THROWS();
