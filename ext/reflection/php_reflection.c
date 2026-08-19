@@ -3238,8 +3238,7 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	char *lcname = zend_str_tolower_dup(method_name, method_name_len);
 
 	zend_function *mptr;
-	if (ce == zend_ce_closure && orig_obj && (method_name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
-		&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+	if (ce == zend_ce_closure && orig_obj && zend_string_equals_cstr(ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE), lcname, method_name_len)
 		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
 	{
 		/* Store the original closure object so we can validate it in invoke/invokeArgs.
@@ -4499,15 +4498,26 @@ ZEND_METHOD(ReflectionClass, getMethods)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zend_function *mptr) {
-		_addmethod(mptr, ce, Z_ARRVAL_P(return_value), filter);
-	} ZEND_HASH_FOREACH_END();
-
-	// No need for instanceof_function, the Closure class is final
-	if (ce != zend_ce_closure) {
+	if (EXPECTED(ce != zend_ce_closure)) {
+		array_init_size(return_value, zend_hash_num_elements(&ce->function_table));
+		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zend_function *mptr) {
+			_addmethod(mptr, ce, Z_ARRVAL_P(return_value), filter);
+		} ZEND_HASH_FOREACH_END();
 		return;
 	}
+
+	/* For Closure we need to special case the __invoke() method.
+	 * This is so we can get accurate information about parameters. */
+	if ((filter & ZEND_ACC_PUBLIC) == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
+	array_init_size(return_value, zend_hash_num_elements(&ce->function_table));
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zend_function *mptr) {
+		if (zend_string_equals_ci(mptr->common.function_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) {
+			continue;
+		}
+		_addmethod(mptr, ce, Z_ARRVAL_P(return_value), filter);
+	} ZEND_HASH_FOREACH_END();
 	bool has_obj = Z_TYPE(intern->obj) != IS_UNDEF;
 	zval obj_tmp;
 	zend_object *obj;
@@ -4518,9 +4528,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 		obj = Z_OBJ(intern->obj);
 	}
 	zend_function *closure = zend_get_closure_invoke_method(obj);
-	if (closure
-		&& !_addmethod(closure, ce, Z_ARRVAL_P(return_value), filter)
-	) {
+	if (closure && !_addmethod(closure, ce, Z_ARRVAL_P(return_value), filter)) {
 		_free_function(closure);
 	}
 	if (!has_obj) {
