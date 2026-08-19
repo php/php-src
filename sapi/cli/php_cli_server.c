@@ -2836,6 +2836,8 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	char *php_optarg = NULL;
 	int php_optind = 1;
 	int c, r;
+	bool html_errors;
+	zend_result server_ctor_result;
 	const char *server_bind_address = NULL;
 	extern const opt_struct OPTIONS[];
 	const char *document_root = NULL;
@@ -2907,7 +2909,12 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 		router = argv[php_optind];
 	}
 
-	if (FAILURE == php_cli_server_ctor(&server, server_bind_address, document_root, router)) {
+	/* Startup diagnostics are written to a terminal, not an HTTP response. */
+	html_errors = PG(html_errors);
+	PG(html_errors) = false;
+	server_ctor_result = php_cli_server_ctor(&server, server_bind_address, document_root, router);
+	PG(html_errors) = html_errors;
+	if (FAILURE == server_ctor_result) {
 		return 1;
 	}
 	sapi_module.phpinfo_as_text = 0;
