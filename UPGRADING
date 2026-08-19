@@ -162,6 +162,12 @@ PHP 8.6 UPGRADE NOTES
         explicitly set this to "None" (and also set session.cookie_secure
         to 1).
     RFC: https://wiki.php.net/rfc/session_security_defaults
+  . SessionHandler::validateId() has been added and delegates to the
+    configured save handler. A subclass that declares validateId() without
+    a return type now emits a deprecation notice for the tentative bool
+    return type. A subclass that overrides open() without calling
+    parent::open() keeps its previous behavior and emits a warning when an
+    ID is validated.
 
 - Shmop:
   . shmop_open() now raises a ValueError when the $key argument is outside the

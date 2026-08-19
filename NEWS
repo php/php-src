@@ -61,6 +61,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug GH-23056 (missing handler name in session write warning).
     (lazerg)
+  . SessionHandler::validateId() is now implemented, so
+    session.use_strict_mode applies to the built-in handler. (Girgias)
 
 - Zip:
   . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
