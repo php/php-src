@@ -12,14 +12,14 @@ $reader = new XMLReader();
 
 try {
     $reader->read();
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     $reader->next();
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $reader->close();
@@ -40,8 +40,8 @@ $reader->close();
 
 ?>
 --EXPECT--
-Data must be loaded before reading
-Data must be loaded before reading
+Error: Data must be loaded before reading
+Error: Data must be loaded before reading
 node1
 bool(true)
 node3
