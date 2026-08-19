@@ -2270,7 +2270,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 
 		if (!persistent_script) {
 			/* try to find cached script by full real path */
-			zend_accel_hash_entry *bucket;
 
 			/* open file to resolve the path */
 		    if (file_handle->type == ZEND_HANDLE_FILENAME
@@ -2286,7 +2285,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		    }
 
 			if (file_handle->opened_path) {
-				bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path);
+				zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path);
 
 				if (bucket) {
 					persistent_script = (zend_persistent_script *)bucket->data;

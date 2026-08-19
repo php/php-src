@@ -552,7 +552,6 @@ static void compress_block(zend_op_array *op_array, zend_basic_block *block)
 static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int new_pred) {
 	zend_basic_block *block = &ssa->cfg.blocks[block_id];
 	int *predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
-	zend_ssa_phi *phi;
 
 	int old_pred_idx = -1;
 	int new_pred_idx = -1;
@@ -579,7 +578,7 @@ static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int n
 		);
 
 		/* Also remove the corresponding phi node entries */
-		for (phi = ssa->blocks[block_id].phis; phi; phi = phi->next) {
+		for (zend_ssa_phi *phi = ssa->blocks[block_id].phis; phi; phi = phi->next) {
 			if (phi->pi >= 0) {
 				if (phi->pi == old_pred || phi->pi == new_pred) {
 					zend_ssa_rename_var_uses(
@@ -604,7 +603,6 @@ static void zend_ssa_replace_control_link(const zend_op_array *op_array, zend_ss
 	const zend_basic_block *src = &ssa->cfg.blocks[from];
 	const zend_basic_block *old = &ssa->cfg.blocks[to];
 	const zend_basic_block *dst = &ssa->cfg.blocks[new_to];
-	zend_op *opline;
 
 	for (uint32_t i = 0; i < src->successors_count; i++) {
 		if (src->successors[i] == to) {
@@ -613,7 +611,7 @@ static void zend_ssa_replace_control_link(const zend_op_array *op_array, zend_ss
 	}
 
 	if (src->len > 0) {
-		opline = op_array->opcodes + src->start + src->len - 1;
+		zend_op *opline = op_array->opcodes + src->start + src->len - 1;
 		switch (opline->opcode) {
 			case ZEND_JMP:
 			case ZEND_FAST_CALL:

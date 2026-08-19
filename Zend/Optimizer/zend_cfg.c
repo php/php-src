@@ -109,7 +109,6 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 	zend_mark_reachable(op_array->opcodes, cfg, blocks + start);
 
 	if (op_array->last_try_catch) {
-		zend_basic_block *b;
 		int changed;
 		uint32_t *block_map = cfg->map;
 
@@ -120,7 +119,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 			for (uint32_t j = 0; j < op_array->last_try_catch; j++) {
 
 				/* check for jumps into the middle of try block */
-				b = blocks + block_map[op_array->try_catch_array[j].try_op];
+				zend_basic_block *b = blocks + block_map[op_array->try_catch_array[j].try_op];
 				if (!(b->flags & ZEND_BB_REACHABLE)) {
 					zend_basic_block *end;
 
@@ -198,11 +197,10 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 	}
 
 	if (cfg->flags & ZEND_FUNC_FREE_LOOP_VAR) {
-		zend_basic_block *b;
 		uint32_t *block_map = cfg->map;
 
 		/* Mark blocks that are unreachable, but free a loop var created in a reachable block. */
-		for (b = blocks; b < blocks + cfg->blocks_count; b++) {
+		for (zend_basic_block *b = blocks; b < blocks + cfg->blocks_count; b++) {
 			if (b->flags & ZEND_BB_REACHABLE) {
 				continue;
 			}
