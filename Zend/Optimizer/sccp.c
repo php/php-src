@@ -587,20 +587,19 @@ static inline zend_result ct_eval_assign_dim(zval *result, zval *value, const zv
 	}
 }
 
-static inline zend_result fetch_obj_prop(zval **result, const zval *op1, const zval *op2) {
+static inline zval* fetch_obj_prop(const zval *op1, const zval *op2) {
 	switch (Z_TYPE_P(op2)) {
 		case IS_STRING:
-			*result = zend_symtable_find(Z_ARR_P(op1), Z_STR_P(op2));
-			return SUCCESS;
+			return zend_symtable_find(Z_ARR_P(op1), Z_STR_P(op2));
 		default:
-			return FAILURE;
+			return NULL;
 	}
 }
 
 static inline zend_result ct_eval_fetch_obj(zval *result, const zval *op1, const zval *op2) {
 	if (IS_PARTIAL_OBJECT(op1)) {
-		zval *value;
-		if (fetch_obj_prop(&value, op1, op2) == SUCCESS && value && !IS_BOT(value)) {
+		const zval *value = fetch_obj_prop(op1, op2);
+		if (value && !IS_BOT(value)) {
 			ZVAL_COPY(result, value);
 			return SUCCESS;
 		}
@@ -610,10 +609,7 @@ static inline zend_result ct_eval_fetch_obj(zval *result, const zval *op1, const
 
 static inline zend_result ct_eval_isset_obj(zval *result, uint32_t extended_value, const zval *op1, const zval *op2) {
 	if (IS_PARTIAL_OBJECT(op1)) {
-		zval *value;
-		if (fetch_obj_prop(&value, op1, op2) == FAILURE) {
-			return FAILURE;
-		}
+		zval *value = fetch_obj_prop(op1, op2);
 		if (!value || IS_BOT(value)) {
 			return FAILURE;
 		}
