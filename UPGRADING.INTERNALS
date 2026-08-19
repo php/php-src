@@ -174,3 +174,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - tsrm_shutdown() and the bundled library-unload hooks automatically disarm
   thread-exit cleanup. Embedders must stop and join all PHP worker threads
   before calling tsrm_shutdown() or unloading PHP.
+
+- sapi_getenv now returns a zend_string* that must be freed by the caller.
+  Previously, it returned a char* that was allocated on Windows and pointed
+  to an OS-provided buffer on Unix.
