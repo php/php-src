@@ -136,7 +136,7 @@ static inline void php_session_headers_already_sent_error(int severity, const ch
 
 static inline void php_session_session_already_started_error(int severity, const char *message) {
 	if (PS(session_started_filename) != NULL) {
-		php_error_docref(NULL, severity, "%s (started from %s on line %"PRIu32")", message, ZSTR_VAL(PS(session_started_filename)), PS(session_started_lineno));
+		php_error_docref(NULL, severity, "%s (started from %pS on line %"PRIu32")", message, PS(session_started_filename), PS(session_started_lineno));
 	} else if (PS(auto_start)) {
 		/* This option can't be changed at runtime, so we can assume it's because of this */
 		php_error_docref(NULL, severity, "%s (session started automatically)", message);
@@ -434,7 +434,7 @@ static zend_result php_session_initialize(void)
 	if (open_status == FAILURE) {
 		php_session_abort();
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+			php_error_docref(NULL, E_WARNING, "Failed to initialize storage module: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 		}
 		return FAILURE;
 	}
@@ -449,7 +449,7 @@ static zend_result php_session_initialize(void)
 		if (!PS(id)) {
 			php_session_abort();
 			if (!EG(exception)) {
-				zend_throw_error(NULL, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+				zend_throw_error(NULL, "Failed to create session ID: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 			}
 			return FAILURE;
 		}
@@ -481,7 +481,7 @@ static zend_result php_session_initialize(void)
 		php_session_abort();
 		/* FYI: Some broken save handlers return FAILURE for non-existent session ID, this is incorrect */
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+			php_error_docref(NULL, E_WARNING, "Failed to read session data: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 		}
 		return FAILURE;
 	}
@@ -545,14 +545,14 @@ static void php_session_save_current_state(bool write)
 				if (!PS(mod_user_implemented)) {
 					php_error_docref(NULL, E_WARNING, "Failed to write session data (%s). Please "
 									 "verify that the current setting of session.save_path "
-									 "is correct (%s)",
+									 "is correct (%pS)",
 									 PS(mod)->s_name,
-									 ZSTR_VAL(PS(save_path)));
+									 PS(save_path));
 				} else {
 					zend_string *callable_name = zend_get_callable_name(handler_function);
 					php_error_docref(NULL, E_WARNING, "Failed to write session data using user "
-									 "defined save handler. (session.save_path: %s, handler: %s)", ZSTR_VAL(PS(save_path)),
-									 ZSTR_VAL(callable_name));
+									 "defined save handler. (session.save_path: %pS, handler: %pS)", PS(save_path),
+									 callable_name);
 					zend_string_release_ex(callable_name, false);
 				}
 			}
@@ -599,7 +599,7 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 	if (PG(modules_activated) && !new_module) {
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "Session save handler \"%s\" cannot be found", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "Session save handler \"%pS\" cannot be found", new_value);
 		}
 
 		return FAILURE;
@@ -637,7 +637,7 @@ static PHP_INI_MH(OnUpdateSerializer)
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "Serialization handler \"%s\" cannot be found", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "Serialization handler \"%pS\" cannot be found", new_value);
 		}
 		return FAILURE;
 	}
@@ -654,7 +654,7 @@ static PHP_INI_MH(OnUpdateSaveDir)
 
 	if (zend_str_has_nul_byte(new_value)) {
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, E_WARNING, "\"%s\" must not contain null bytes", ZSTR_VAL(entry->name));
+			php_error_docref(NULL, E_WARNING, "\"%pS\" must not contain null bytes", entry->name);
 		}
 		return FAILURE;
 	}
@@ -704,7 +704,7 @@ static PHP_INI_MH(OnUpdateName)
 
 		/* Do not output error when restoring ini options. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, err_type, "session.name \"%s\" must not be numeric, empty, contain null bytes or any of the following characters \"" SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "\"", ZSTR_VAL(new_value));
+			php_error_docref(NULL, err_type, "session.name \"%pS\" must not be numeric, empty, contain null bytes or any of the following characters \"" SESSION_FORBIDDEN_CHARS_FOR_ERROR_MSG "\"", new_value);
 		}
 		return FAILURE;
 	}
@@ -756,7 +756,7 @@ static PHP_INI_MH(OnUpdateSessionStr)
 
 	if (new_value && zend_str_has_nul_byte(new_value)) {
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, E_WARNING, "\"%s\" must not contain null bytes", ZSTR_VAL(entry->name));
+			php_error_docref(NULL, E_WARNING, "\"%pS\" must not contain null bytes", entry->name);
 		}
 		return FAILURE;
 	}
@@ -929,7 +929,7 @@ static PHP_INI_MH(OnUpdateRefererCheck)
 
 	if (zend_str_has_nul_byte(new_value)) {
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			php_error_docref(NULL, E_WARNING, "\"%s\" must not contain null bytes", ZSTR_VAL(entry->name));
+			php_error_docref(NULL, E_WARNING, "\"%pS\" must not contain null bytes", entry->name);
 		}
 		return FAILURE;
 	}
@@ -1109,7 +1109,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 		if (memchr(ZSTR_VAL(key), PS_DELIMITER, ZSTR_LEN(key))) {
 			smart_str_free(&buf);
 			fail = true;
-			php_error_docref(NULL, E_WARNING, "Failed to write session data. Data contains invalid key \"%s\"", ZSTR_VAL(key));
+			php_error_docref(NULL, E_WARNING, "Failed to write session data. Data contains invalid key \"%pS\"", key);
 			break;
 		}
 		smart_str_appendc(&buf, PS_DELIMITER);
@@ -1896,7 +1896,7 @@ PHP_FUNCTION(session_set_cookie_params)
 					samesite = zval_get_string(value);
 					found++;
 				} else {
-					php_error_docref(NULL, E_WARNING, "Argument #1 ($lifetime_or_options) contains an unrecognized key \"%s\"", ZSTR_VAL(key));
+					php_error_docref(NULL, E_WARNING, "Argument #1 ($lifetime_or_options) contains an unrecognized key \"%pS\"", key);
 				}
 			} else {
 				php_error_docref(NULL, E_WARNING, "Argument #1 ($lifetime_or_options) cannot contain numeric keys");
@@ -2054,7 +2054,7 @@ PHP_FUNCTION(session_module_name)
 			RETURN_THROWS();
 		}
 		if (!_php_find_ps_module(ZSTR_VAL(name))) {
-			php_error_docref(NULL, E_WARNING, "Session handler module \"%s\" cannot be found", ZSTR_VAL(name));
+			php_error_docref(NULL, E_WARNING, "Session handler module \"%pS\" cannot be found", name);
 
 			zval_ptr_dtor_str(return_value);
 			RETURN_FALSE;
@@ -2375,7 +2375,7 @@ PHP_FUNCTION(session_regenerate_id)
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
 			if (!EG(exception)) {
-				php_error_docref(NULL, E_WARNING, "Session object destruction failed. ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+				php_error_docref(NULL, E_WARNING, "Session object destruction failed. ID: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 			}
 			RETURN_FALSE;
 		}
@@ -2394,7 +2394,7 @@ PHP_FUNCTION(session_regenerate_id)
 		if (ret == FAILURE) {
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
-			php_error_docref(NULL, E_WARNING, "Session write failed. ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+			php_error_docref(NULL, E_WARNING, "Session write failed. ID: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 			RETURN_FALSE;
 		}
 	}
@@ -2414,7 +2414,7 @@ PHP_FUNCTION(session_regenerate_id)
 	if (open_status == FAILURE) {
 		PS(session_status) = php_session_none;
 		if (!EG(exception)) {
-			zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+			zend_throw_error(NULL, "Failed to open session: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 		}
 		RETURN_THROWS();
 	}
@@ -2423,7 +2423,7 @@ PHP_FUNCTION(session_regenerate_id)
 	if (!PS(id)) {
 		PS(session_status) = php_session_none;
 		if (!EG(exception)) {
-			zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+			zend_throw_error(NULL, "Failed to create new session ID: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 		}
 		RETURN_THROWS();
 	}
@@ -2439,7 +2439,7 @@ PHP_FUNCTION(session_regenerate_id)
 					PS(mod)->s_close(&PS(mod_data));
 					PS(session_status) = php_session_none;
 					if (!EG(exception)) {
-						zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+						zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 					}
 					RETURN_THROWS();
 				}
@@ -2453,7 +2453,7 @@ PHP_FUNCTION(session_regenerate_id)
 		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
 		if (!EG(exception)) {
-			zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, ZSTR_VAL(PS(save_path)));
+			zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %pS)", PS(mod)->s_name, PS(save_path));
 		}
 		RETURN_THROWS();
 	}
@@ -2675,8 +2675,8 @@ PHP_FUNCTION(session_start)
 							tmp = zval_get_long(value);
 						} else {
 							if (is_numeric_str_function(Z_STR_P(value), &tmp, NULL) != IS_LONG) {
-								zend_type_error("%s(): Option \"%s\" value must be of type compatible with int, \"%s\" given",
-										get_active_function_name(), ZSTR_VAL(str_idx), Z_STRVAL_P(value)
+								zend_type_error("%s(): Option \"%pS\" value must be of type compatible with int, \"%pS\" given",
+										get_active_function_name(), str_idx, Z_STR_P(value)
 									       );
 								RETURN_THROWS();
 							}
@@ -2686,14 +2686,14 @@ PHP_FUNCTION(session_start)
 						zend_string *tmp_val;
 						zend_string *val = zval_get_tmp_string(value, &tmp_val);
 						if (php_session_start_set_ini(str_idx, val) == FAILURE) {
-							php_error_docref(NULL, E_WARNING, "Setting option \"%s\" failed", ZSTR_VAL(str_idx));
+							php_error_docref(NULL, E_WARNING, "Setting option \"%pS\" failed", str_idx);
 						}
 						zend_tmp_string_release(tmp_val);
 					}
 					break;
 				default:
-					zend_type_error("%s(): Option \"%s\" must be of type string|int|bool, %s given",
-							get_active_function_name(), ZSTR_VAL(str_idx), zend_zval_value_name(value)
+					zend_type_error("%s(): Option \"%pS\" must be of type string|int|bool, %s given",
+							get_active_function_name(), str_idx, zend_zval_value_name(value)
 						       );
 					RETURN_THROWS();
 			}
