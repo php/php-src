@@ -242,7 +242,7 @@ static const mbfl_encoding *php_mb_get_encoding(zend_string *encoding_name, uint
 
 		encoding = mbfl_name2encoding(ZSTR_VAL(encoding_name));
 		if (!encoding) {
-			zend_argument_value_error(arg_num, "must be a valid encoding, \"%s\" given", ZSTR_VAL(encoding_name));
+			zend_argument_value_error(arg_num, "must be a valid encoding, \"%pS\" given", encoding_name);
 			return NULL;
 		} else if (encoding->no_encoding <= mbfl_no_encoding_qprint) {
 			if (encoding == &mbfl_encoding_base64) {
@@ -408,7 +408,7 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 				*entry++ = encoding;
 				n++;
 			} else {
-				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
+				zend_argument_value_error(arg_num, "contains invalid encoding \"%pS\"", encoding_str);
 				zend_tmp_string_release(tmp_encoding_str);
 				efree(ZEND_VOIDP(list));
 				return FAILURE;
@@ -1219,7 +1219,7 @@ PHP_FUNCTION(mb_language)
 	} else {
 		zend_string *ini_name = ZSTR_INIT_LITERAL("mbstring.language", false);
 		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
-			zend_argument_value_error(1, "must be a valid language, \"%s\" given", ZSTR_VAL(name));
+			zend_argument_value_error(1, "must be a valid language, \"%pS\" given", name);
 			zend_string_release_ex(ini_name, false);
 			RETURN_THROWS();
 		}
@@ -4671,7 +4671,7 @@ PHP_FUNCTION(mb_send_mail)
 				break;
 
 			default:
-				php_error_docref(NULL, E_WARNING, "Unsupported transfer encoding \"%s\" - will be regarded as 8bit", Z_STRVAL_P(s));
+				php_error_docref(NULL, E_WARNING, "Unsupported transfer encoding \"%pS\" - will be regarded as 8bit", Z_STR_P(s));
 				body_enc =	&mbfl_encoding_8bit;
 				break;
 		}
@@ -6573,7 +6573,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 		if (!charset) {
 			RETURN_THROWS();
 		} else if (charset->mime_name == NULL || charset->mime_name[0] == '\0' || charset == &mbfl_encoding_qprint) {
-			zend_argument_value_error(2, "\"%s\" cannot be used for MIME header encoding", ZSTR_VAL(charset_name));
+			zend_argument_value_error(2, "\"%pS\" cannot be used for MIME header encoding", charset_name);
 			RETURN_THROWS();
 		}
 	} else {
