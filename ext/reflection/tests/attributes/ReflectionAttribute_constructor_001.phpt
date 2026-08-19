@@ -17,9 +17,9 @@ $rm = new ReflectionMethod($attribute, "__construct");
 
 try {
     var_dump($rm->invoke($attribute, 0, 1, 2));
-} catch (ReflectionException $exception) {
-    echo $exception->getMessage();
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot directly instantiate ReflectionAttribute
+ReflectionException: Cannot directly instantiate ReflectionAttribute

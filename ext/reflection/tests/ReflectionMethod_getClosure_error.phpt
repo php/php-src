@@ -32,8 +32,8 @@ $fakeobj = new StdClass();
 echo "\n-- Testing ReflectionMethod::getClosure() function with invalid object --\n";
 try {
         var_dump( $method->getClosure( $fakeobj ) );
-} catch( Exception $e ) {
-        var_dump( $e->getMessage() );
+} catch( Throwable $e ) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -41,4 +41,4 @@ try {
 *** Testing ReflectionMethod::getClosure() : error conditions ***
 
 -- Testing ReflectionMethod::getClosure() function with invalid object --
-string(72) "Given object is not an instance of the class this method was declared in"
+ReflectionException: Given object is not an instance of the class this method was declared in
