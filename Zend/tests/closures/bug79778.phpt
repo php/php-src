@@ -11,8 +11,8 @@ print_r($closure1);
 
 try {
     $closure1();
-} catch (\Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($closure1);
@@ -49,7 +49,7 @@ Closure Object
         )
 
 )
-Undefined constant "CONST_REF"
+Error: Undefined constant "CONST_REF"
 object(Closure)#%d (4) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
