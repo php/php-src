@@ -116,7 +116,7 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECT--
-Error: Object of class mysqli could not be converted to string
+TypeError: mysqli_result::fetch_object(): Argument #1 ($class) must be a valid class name, mysqli given
 ArgumentCountError: mysqli_result::fetch_object() expects at most 2 arguments, 3 given
 TypeError: mysqli_result::fetch_object(): Argument #2 ($constructor_args) must be of type array, null given
 ArgumentCountError: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
