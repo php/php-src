@@ -1019,10 +1019,15 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 		smart_str_appendc(&buf, ':');
 		next = current->next;
 
+		/* Serializing an element can run user code, which may remove this
+		 * element (and its neighbour) from the list, so hold a reference on
+		 * both for the duration of the call. */
+		SPL_LLIST_ADDREF(current);
 		SPL_LLIST_CHECK_ADDREF(next);
 
 		php_var_serialize(&buf, &current->data, &var_hash);
 
+		SPL_LLIST_DELREF(current);
 		SPL_LLIST_CHECK_DELREF_EX(next, break;);
 
 		current = next;
