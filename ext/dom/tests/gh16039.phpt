@@ -9,23 +9,23 @@ $dom = new DOMDocument;
 $element = $dom->appendChild($dom->createElement('root'));
 try {
     $element->prepend('x', new DOMEntity);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveXML();
 $dom->strictErrorChecking = false; // Should not have influence
 try {
     $element->prepend('x', new DOMEntity);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveXML();
 
 ?>
 --EXPECT--
-Invalid State Error
+DOMException: Invalid State Error
 <?xml version="1.0"?>
 <root/>
-Invalid State Error
+DOMException: Invalid State Error
 <?xml version="1.0"?>
 <root/>

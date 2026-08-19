@@ -12,10 +12,10 @@ $dom->appendChild($dom->createElement("foo"));
 
 try {
     $dom->prepend($dom->createElement("bar"));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot have more than one element child in a document
+DOMException: Cannot have more than one element child in a document
