@@ -19,19 +19,18 @@ if (!$socket) {
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_REUSEADDR, true));
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_REUSEPORT, true));
 try {
-	socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, array());
+	socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, []);
 } catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, SKF_AD_CPU));
 var_dump(socket_bind($socket, '0.0.0.0'));
 socket_listen($socket);
 socket_close($socket);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
-
-Warning: socket_set_option(): Unable to set socket option [2]: No such file or directory in %s on line %d
+TypeError: socket_set_option(): Argument #4 ($value) must be of type int when argument #3 ($option) is SO_ATTACH_REUSEPORT_CBPF, array given
 bool(true)
 bool(true)
