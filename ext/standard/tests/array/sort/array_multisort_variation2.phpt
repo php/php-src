@@ -101,8 +101,8 @@ foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
         var_dump( array_multisort($ar1, $value) );
-    } catch (\ValueError | \TypeError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 };
 
@@ -117,82 +117,82 @@ bool(true)
 bool(true)
 
 --int 12345--
-array_multisort(): Argument #2 must be a valid sort flag
+ValueError: array_multisort(): Argument #2 must be a valid sort flag
 
 --int -12345--
-array_multisort(): Argument #2 must be a valid sort flag
+ValueError: array_multisort(): Argument #2 must be a valid sort flag
 
 --float 10.5--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --float -10.5--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --float 12.3456789000e10--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --float -12.3456789000e10--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --float .5--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --empty array--
-Array sizes are inconsistent
+ValueError: Array sizes are inconsistent
 
 --int indexed array--
-Array sizes are inconsistent
+ValueError: Array sizes are inconsistent
 
 --associative array--
 bool(true)
 
 --nested arrays--
-Array sizes are inconsistent
+ValueError: Array sizes are inconsistent
 
 --uppercase NULL--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --lowercase null--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --lowercase true--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --lowercase false--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --uppercase TRUE--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --uppercase FALSE--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --empty string DQ--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --empty string SQ--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --string DQ--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --string SQ--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --mixed case string--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --heredoc--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --instance of classWithToString--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --instance of classWithoutToString--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --undefined var--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag
 
 --unset var--
-array_multisort(): Argument #2 must be an array or a sort flag
+TypeError: array_multisort(): Argument #2 must be an array or a sort flag

@@ -26,10 +26,10 @@ try
 {
     array_walk($fruits, 'test', $myobj);
 }
-catch(Exception $e)
+catch(Throwable $e)
 {
-    echo "Caught: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Caught: Error
+Exception: Error

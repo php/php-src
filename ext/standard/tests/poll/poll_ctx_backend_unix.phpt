@@ -18,11 +18,11 @@ $backend = $poll_ctx->getBackend();
 var_dump($backend->name);
 try {
     new Io\Poll\Context(Io\Poll\Backend::WSAPoll);
-} catch (\Io\Poll\BackendUnavailableException $e) {
-    var_dump($e->getMessage());
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 enum(Io\Poll\Backend::%s)
 string(4) "Poll"
-string(29) "Backend WSAPoll not available"
+Io\Poll\BackendUnavailableException: Backend WSAPoll not available
