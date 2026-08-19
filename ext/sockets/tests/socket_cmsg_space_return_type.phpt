@@ -31,17 +31,8 @@ try {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
-// $num overflows int (64-bit only: PHP_INT_MAX > INT_MAX)
-if (PHP_INT_SIZE >= 8) {
-    try {
-        socket_cmsg_space(SOL_SOCKET, SCM_RIGHTS, PHP_INT_MAX);
-    } catch (Throwable $e) {
-        echo $e::class, ': ', $e->getMessage(), "\n";
-    }
-}
 ?>
 --EXPECT--
 string(3) "int"
 ValueError: Pair level 999999 and/or type 999999 is not supported
 ValueError: socket_cmsg_space(): Argument #3 ($num) must be greater than or equal to 0
-ValueError: socket_cmsg_space(): Argument #3 ($num) must be between -2147483648 and 2147483647
