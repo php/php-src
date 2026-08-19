@@ -776,15 +776,13 @@ try_again:
 		return;
 	}
 
-	if (UNEXPECTED((delegator->flags & ZEND_GENERATOR_DO_INIT) != 0 && !Z_ISUNDEF(generator->value))) {
-		/* We must not advance Generator if we yield from a Generator being currently run */
-		orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
-		return;
+	if (UNEXPECTED((delegator->flags & ZEND_GENERATOR_DO_INIT) != 0)) {
+		delegator->flags &= ~ZEND_GENERATOR_DO_INIT;
+		if (UNEXPECTED(!Z_ISUNDEF(generator->value))) {
+			/* We must not advance an already initialized delegate on first resumption */
+			return;
+		}
 	}
-
-	/* The flag applies to this resume only: if it stays set on a delegating
-	 * generator other than orig_generator, it suppresses a later resume of it */
-	delegator->flags &= ~ZEND_GENERATOR_DO_INIT;
 
 	if (EG(active_fiber)) {
 		orig_generator->flags |= ZEND_GENERATOR_IN_FIBER;
