@@ -12,11 +12,11 @@ function test() {
 }
 try {
     test();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 Warning: Undefined array key 0 in %s on line %d
-Attempt to assign property "y" on null
+Error: Attempt to assign property "y" on null
