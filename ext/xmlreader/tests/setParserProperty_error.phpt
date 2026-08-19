@@ -12,10 +12,10 @@ $reader = new XMLReader();
 $reader->XML($xml);
 try {
     $reader->setParserProperty(-1, true);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 $reader->close();
 ?>
 --EXPECT--
-XMLReader::setParserProperty(): Argument #1 ($property) must be a valid parser property
+ValueError: XMLReader::setParserProperty(): Argument #1 ($property) must be a valid parser property
