@@ -22,10 +22,10 @@ var_dump($pdo->query('SELECT 1;')->fetchAll());
 $pdo = MySQLPDOTest::factory(Pdo\Mysql::class, null, $attr, true);
 var_dump($pdo->query('SELECT 1;')->fetchAll());
 
-$pdo = MySQLPDOTest::factory(Pdo::class, null, $attr, false);
+$pdo = MySQLPDOTest::factory(PDO::class, null, $attr, false);
 var_dump($pdo->query('SELECT 1;')->fetchAll());
 
-$pdo = MySQLPDOTest::factory(Pdo::class, null, $attr, true);
+$pdo = MySQLPDOTest::factory(PDO::class, null, $attr, true);
 var_dump($pdo->query('SELECT 1;')->fetchAll());
 ?>
 --EXPECT--

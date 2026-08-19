@@ -11,8 +11,8 @@ $client = new SoapClient(__DIR__."/round4_groupI_xsd.wsdl",array("trace"=>1,"exc
 $client->echoSimpleTypesAsComplexType(array("inputInteger"=>34,
                                             "inputFloat"=>12.345,
                                             "inputString"=>"arg"));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round4_groupI_xsd.inc");
 echo "ok\n";
 ?>

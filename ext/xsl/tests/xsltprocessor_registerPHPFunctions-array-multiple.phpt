@@ -9,7 +9,7 @@ xsl
 --FILE--
 <?php
 include __DIR__ .'/prepare.inc';
-$phpfuncxsl = new domDocument();
+$phpfuncxsl = new DOMDocument();
 $phpfuncxsl->load(__DIR__."/phpfunc.xsl");
 if(!$phpfuncxsl) {
   echo "Error while parsing the xsl document\n";

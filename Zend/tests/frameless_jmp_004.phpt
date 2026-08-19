@@ -10,7 +10,7 @@ function declare_local_class_exists() {
     }
 }
 declare_local_class_exists();
-var_dump(CLASS_EXISTS('Foo'));
+var_dump(class_exists('Foo'));
 ?>
 --EXPECT--
 string(16) "Foo\class_exists"

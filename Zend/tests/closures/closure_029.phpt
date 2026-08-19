@@ -9,6 +9,6 @@ var_dump(@function(&$x) use ($y, $z) { } instanceof closure);
 
 ?>
 --EXPECT--
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)

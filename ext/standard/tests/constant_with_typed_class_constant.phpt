@@ -10,10 +10,10 @@ class Foo {
 
 define("C", new stdClass());
 
-var_dump(constant("FOO::CONST1"));
+var_dump(constant("Foo::CONST1"));
 
 try {
-    constant("FOO::CONST2");
+    constant("Foo::CONST2");
 } catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }

@@ -9,7 +9,7 @@ var_dump($uri->toRawString());
 var_dump($uri->getPath());
 var_dump($uri->getRawPath());
 
-$url = new Uri\Whatwg\Url("https://example.com/foo/bar%2Fbaz");
+$url = new Uri\WhatWg\Url("https://example.com/foo/bar%2Fbaz");
 
 var_dump($url->toAsciiString());
 var_dump($url->getPath());

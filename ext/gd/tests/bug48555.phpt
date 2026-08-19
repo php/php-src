@@ -10,10 +10,10 @@ gd
 <?php
 $cwd = __DIR__;
 $font = "$cwd/Tuffy.ttf";
-$box = ImageFTBBox(14, 0, $font, "Text without line-break");
+$box = imageftbbox(14, 0, $font, "Text without line-break");
 //echo 'Top without line-break: ' . $box[7] . "\n";
 $without_line_break = $box[7];
-$box = ImageFTBBox(14, 0, $font, "Text with\nline-break\none more");
+$box = imageftbbox(14, 0, $font, "Text with\nline-break\none more");
 //echo 'Top with line-break: ' . $box[7] . "\n";
 $with_line_break = $box[7];
 

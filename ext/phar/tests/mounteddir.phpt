@@ -53,7 +53,7 @@ foreach ($out as $b) {
 }
 $out = array();
 foreach (new Phar($pname . '/testit') as $b) {
-    $out[] = $b->getPathName();
+    $out[] = $b->getPathname();
 }
 sort($out);
 foreach ($out as $b) {

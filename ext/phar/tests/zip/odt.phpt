@@ -8,9 +8,9 @@ zlib
 $a = new PharData(__DIR__ . '/files/odt.odt');
 foreach (new RecursiveIteratorIterator($a, RecursiveIteratorIterator::LEAVES_ONLY) as $b) {
     if ($b->isDir()) {
-        echo "dir " . $b->getPathName() . "\n";
+        echo "dir " . $b->getPathname() . "\n";
     } else {
-        echo $b->getPathName() . "\n";
+        echo $b->getPathname() . "\n";
     }
 }
 // this next line is for increased code coverage

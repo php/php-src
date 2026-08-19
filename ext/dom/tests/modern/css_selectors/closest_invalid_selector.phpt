@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString("<root/>");
+$dom = Dom\XMLDocument::createFromString("<root/>");
 
 try {
   var_dump($dom->documentElement->closest('@invalid'));

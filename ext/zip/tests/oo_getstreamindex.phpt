@@ -8,7 +8,7 @@ zip
 $name = __DIR__ . '/getstream.zip';
 
 $zip = new ZipArchive;
-$r = $zip->open($name, ZIPARCHIVE::CREATE);
+$r = $zip->open($name, ZipArchive::CREATE);
 $zip->addFromString('foo.txt', 'foo');
 $zip->addFromString('bar.txt', 'bar');
 $zip->close();

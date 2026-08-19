@@ -12,8 +12,8 @@ set_error_handler("myErrorHandler");
 
 $a = 1;
 $b = 1;
-$c = new stdclass;
-$d = new stdclass;
+$c = new stdClass;
+$d = new stdClass;
 
 try {
     var_dump(openssl_cms_decrypt($a, $b, $c, $d));

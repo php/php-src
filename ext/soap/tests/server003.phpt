@@ -4,8 +4,8 @@ SOAP Server 3: all functions
 soap
 --FILE--
 <?php
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction(SOAP_FUNCTIONS_ALL);
+$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server->addFunction(SOAP_FUNCTIONS_ALL);
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

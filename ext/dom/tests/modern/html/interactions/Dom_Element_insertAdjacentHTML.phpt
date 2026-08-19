@@ -24,8 +24,8 @@ function test(string $html) {
 
         $div->insertAdjacentHTML($position, $html);
 
-        echo $dom->saveXML(), "\n";
-        echo $dom->saveHTML(), "\n";
+        echo $dom->saveXml(), "\n";
+        echo $dom->saveHtml(), "\n";
         var_dump($div->childNodes->length);
         var_dump($dom->body->childNodes->length);
     }

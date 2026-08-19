@@ -657,7 +657,7 @@ class PharCommand extends CLICommand
         try {
             foreach($dir as $file) {
                 if ((empty($stub) || $file->getRealPath() != $stub->getRealPath()) && !is_dir($file)) {
-                    self::phar_add_file($phar, $level, $dir->getSubPathName(), $file, $compress, $noloader);
+                    self::phar_add_file($phar, $level, $dir->getSubPathname(), $file, $compress, $noloader);
                 }
             }
         } catch(Exception $e) {

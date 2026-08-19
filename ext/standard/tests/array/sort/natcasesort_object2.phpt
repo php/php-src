@@ -23,7 +23,7 @@ class for_string_natcasesort
     }
 
     // return string value
-    function __tostring() {
+    function __toString() {
         return (string)$this->public_class_value;
     }
 

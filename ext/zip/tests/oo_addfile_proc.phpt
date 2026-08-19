@@ -14,7 +14,7 @@ include __DIR__ . '/utils.inc';
 $file = __DIR__ . '/__tmp_oo_addfile_proc.zip';
 
 $zip = new ZipArchive;
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
 	exit('failed');
 }
 if (!$zip->addFile('/proc/cpuinfo', 'cpu.txt', 0, ZipArchive::LENGTH_UNCHECKED)) {
@@ -24,7 +24,7 @@ if (!$zip->addFile('/proc/meminfo', 'mem.txt', 0, ZipArchive::LENGTH_UNCHECKED))
 	echo "failed\n";
 }
 
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
 	dump_entries_name($zip);
 	$zip->close();
 } else {

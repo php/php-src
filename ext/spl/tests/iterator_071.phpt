@@ -10,7 +10,7 @@ $recArrIt = new RecursiveArrayIterator([
 
 class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
 
-    function nextelement(): void {
+    function nextElement(): void {
         echo __METHOD__."\n";
     }
 }
@@ -22,15 +22,15 @@ foreach ($recItIt as $key => $val) echo "$key\n";
 
 ?>
 --EXPECT--
-MyRecursiveIteratorIterator::nextelement
+MyRecursiveIteratorIterator::nextElement
 0
-MyRecursiveIteratorIterator::nextelement
+MyRecursiveIteratorIterator::nextElement
 1
-MyRecursiveIteratorIterator::nextelement
+MyRecursiveIteratorIterator::nextElement
 0
-MyRecursiveIteratorIterator::nextelement
+MyRecursiveIteratorIterator::nextElement
 0
-MyRecursiveIteratorIterator::nextelement
+MyRecursiveIteratorIterator::nextElement
 1
-MyRecursiveIteratorIterator::nextelement
+MyRecursiveIteratorIterator::nextElement
 1

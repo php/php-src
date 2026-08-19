@@ -15,7 +15,7 @@ if (DIRECTORY_SEPARATOR == '\\') {
 }
 $data = str_replace('compress.zlib://ext/dom/tests/','compress.zlib://'.$reldir."/", $data);
 
-$dom = new domdocument;
+$dom = new DOMDocument;
 $dom->loadXML($data);
 $dom->xinclude();
 print $dom->saveXML()."\n";
@@ -25,7 +25,7 @@ foreach ($dom->documentElement->childNodes as $node) {
 
 $dom = Dom\XMLDocument::createFromString($data);
 $dom->xinclude();
-print $dom->saveXML()."\n";
+print $dom->saveXml()."\n";
 foreach ($dom->documentElement->childNodes as $node) {
     print $node->nodeName."\n";
 }

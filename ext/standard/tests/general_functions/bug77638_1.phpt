@@ -4,7 +4,7 @@ Bug #77638 (var_export'ing certain class instances segfaults)
 com_dotnet
 --FILE--
 <?php
-var_export(new COM("Scripting.Dictionary"));
+var_export(new com("Scripting.Dictionary"));
 ?>
 --EXPECT--
 \com::__set_state(array(

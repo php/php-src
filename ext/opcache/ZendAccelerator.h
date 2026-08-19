@@ -109,9 +109,8 @@ typedef enum _zend_accel_restart_reason {
 } zend_accel_restart_reason;
 
 typedef struct _zend_early_binding {
-	zend_string *lcname;
+	zend_string *name;
 	zend_string *rtd_key;
-	zend_string *lc_parent_name;
 	uint32_t cache_slot;
 } zend_early_binding;
 

@@ -18,7 +18,7 @@ class Base
     use T1;
 }
 
-class Child extends base
+class Child extends Base
 {
 
 }

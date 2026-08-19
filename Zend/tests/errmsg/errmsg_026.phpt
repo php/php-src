@@ -3,7 +3,7 @@ errmsg: cannot redeclare class
 --FILE--
 <?php
 
-class stdclass {
+class stdClass {
 }
 
 echo "Done\n";

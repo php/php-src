@@ -5,7 +5,7 @@ phar
 --FILE--
 <?php
 $phar = new PharData(__DIR__ . '/bug75102.tar');
-var_dump(file_get_contents($phar['test.txt']->getPathName()));
+var_dump(file_get_contents($phar['test.txt']->getPathname()));
 ?>
 --EXPECT--
 string(9) "yada yada"

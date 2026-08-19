@@ -13,7 +13,8 @@ try {
 }
 
 class FooBar { public static $prop = 42; }
-var_dump("foo$bar"::$prop);
+$Bar = "Bar";
+var_dump("Foo$Bar"::$prop);
 
 function foobar() { return 42; }
 var_dump("foo$bar"());

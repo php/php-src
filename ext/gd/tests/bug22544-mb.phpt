@@ -10,11 +10,11 @@ if (!(imagetypes() & IMG_PNG)) {
 ?>
 --FILE--
 <?php
-    $image = imageCreateTruecolor(640, 100);
-    $transparent = imageColorAllocate($image, 0, 0, 0);
-    $red = imageColorAllocate($image, 255, 50, 50);
-    imageColorTransparent($image, $transparent);
-    imageFilledRectangle($image, 0, 0, 640-1, 100-1, $transparent);
+    $image = imagecreatetruecolor(640, 100);
+    $transparent = imagecolorallocate($image, 0, 0, 0);
+    $red = imagecolorallocate($image, 255, 50, 50);
+    imagecolortransparent($image, $transparent);
+    imagefilledrectangle($image, 0, 0, 640-1, 100-1, $transparent);
     include_once __DIR__ . '/func.inc';
     test_image_equals_file(__DIR__ . '/bug22544私はガラスを食べられます.png', $image);
 ?>

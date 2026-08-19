@@ -15,6 +15,6 @@ var_dump(class_exists(1));
 ?>
 --EXPECT--
 bool(false)
-bool(true)
+bool(false)
 bool(false)
 bool(false)

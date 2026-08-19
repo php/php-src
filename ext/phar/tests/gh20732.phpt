@@ -1,11 +1,11 @@
 --TEST--
-GH-20732 (Phar::LoadPhar undefined behavior when loading directory)
+GH-20732 (Phar::loadPhar undefined behavior when loading directory)
 --EXTENSIONS--
 phar
 --FILE--
 <?php
 try {
-    @Phar::LoadPhar('.');
+    @Phar::loadPhar('.');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }

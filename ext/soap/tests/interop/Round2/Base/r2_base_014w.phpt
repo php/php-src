@@ -13,8 +13,8 @@ class SOAPStruct {
 
 $client = new SoapClient(__DIR__."/round2_base.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoStruct(new SOAPStruct('arg',34,325.325));
-echo $client->__getlastrequest();
-$HTTP_RAW_POST_DATA = $client->__getlastrequest();
+echo $client->__getLastRequest();
+$HTTP_RAW_POST_DATA = $client->__getLastRequest();
 include("round2_base.inc");
 echo "ok\n";
 ?>

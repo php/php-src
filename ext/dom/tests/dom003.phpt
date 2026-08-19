@@ -5,13 +5,13 @@ dom
 --FILE--
 <?php
 
-$dom = new domdocument;
+$dom = new DOMDocument;
 $dom->load(__DIR__."/book.xml");
 $rootNode = $dom->documentElement;
 print "--- Catch exception with try/catch\n";
 try {
     $rootNode->appendChild($rootNode);
-} catch (domexception $e) {
+} catch (DOMException $e) {
     ob_start();
     var_dump($e);
     $contents = ob_get_contents();

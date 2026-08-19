@@ -3,7 +3,7 @@ Bug #51987 (Datetime fails to parse an ISO 8601 ordinal date (extended format))
 --FILE--
 <?php
 date_default_timezone_set('Europe/London');
-$d2 = new Datetime('1985-102');
+$d2 = new DateTime('1985-102');
 var_dump($d2);
 ?>
 --EXPECTF--

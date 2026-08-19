@@ -18,4 +18,4 @@ var_dump(trait_exists('FOO\\ITEST'));
 --EXPECT--
 bool(false)
 bool(true)
-bool(true)
+bool(false)

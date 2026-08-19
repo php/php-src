@@ -12,5 +12,8 @@ $inc->__INVOKE($n);
 var_dump($n);
 
 ?>
---EXPECT--
-int(2)
+--EXPECTF--
+Fatal error: Uncaught Error: Call to undefined method Closure::__INVOKE() in %s:%d
+Stack trace:
+#%d {main}
+  thrown in %s on line %d

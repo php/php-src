@@ -27,7 +27,7 @@ $zip->addFromString('bar', __FILE__);
 $zip->addFromString(chr(0x91), __FILE__, ZipArchive::FL_ENC_CP437);
 $zip->addFromString('€', __FILE__, ZipArchive::FL_ENC_UTF_8);
 
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
     dump_entries_name($zip);
     $zip->close();
 } else {

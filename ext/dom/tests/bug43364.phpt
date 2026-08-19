@@ -30,8 +30,8 @@ $xml = <<<DOC
 </root>
 DOC;
 
-$doc = new DomDocument();
-$doc->loadXml($xml);
+$doc = new DOMDocument();
+$doc->loadXML($xml);
 $doc->xinclude();
 
 $count = loopElements(array($doc->documentElement));

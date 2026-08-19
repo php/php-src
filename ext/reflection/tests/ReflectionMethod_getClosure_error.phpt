@@ -27,7 +27,7 @@ $staticclass = new ReflectionClass( 'StaticExample' );
 $method = $class->getMethod( 'foo' );
 $staticmethod = $staticclass->getMethod( 'foo' );
 $object = new Example();
-$fakeobj = new StdClass();
+$fakeobj = new stdClass();
 
 echo "\n-- Testing ReflectionMethod::getClosure() function with invalid object --\n";
 try {

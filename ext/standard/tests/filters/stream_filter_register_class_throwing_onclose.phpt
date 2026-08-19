@@ -1,9 +1,9 @@
 --TEST--
-stream_filter_register() with a class that has a onclose method that throws
+stream_filter_register() with a class that has a onClose method that throws
 --FILE--
 <?php
 class foo extends php_user_filter {
-	public function onclose(): void {
+	public function onClose(): void {
 		throw new Exception("No");
 	}
 }
@@ -25,6 +25,6 @@ bool(false)
 
 Fatal error: Uncaught Exception: No in %s:%d
 Stack trace:
-#0 [internal function]: foo->onclose()
+#0 [internal function]: foo->onClose()
 #1 {main}
   thrown in %s on line %d

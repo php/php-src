@@ -67,7 +67,7 @@ if (php_ini_loaded_file()) {
 }
 $code = <<<'PHP'
 $s = new SoapServer(NULL, array('uri' => 'http://here'));
-$s->setObject(new stdclass());
+$s->setObject(new stdClass());
 $s->handle();
 PHP;
 

@@ -26,7 +26,7 @@ PHP;
 
 php_cli_server_start($code, null, $args);
 
-$client = new soapclient(NULL, [
+$client = new SoapClient(NULL, [
   'location' => 'http://' . PHP_CLI_SERVER_ADDRESS,
   'uri' => 'misc-uri',
   'soap_version' => SOAP_1_2,
@@ -52,7 +52,7 @@ else
 /*
  * In case of an empty content-type, let's fallback to the default content.
  */
-$client2 = new soapclient(NULL, [
+$client2 = new SoapClient(NULL, [
   'location' => 'http://' . PHP_CLI_SERVER_ADDRESS,
   'uri' => 'misc-uri',
   'soap_version' => SOAP_1_2,

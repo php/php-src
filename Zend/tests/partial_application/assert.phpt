@@ -42,4 +42,4 @@ AssertionError: (no message)
 # PFA call:
 AssertionError: (no message)
 # Upper-case assert():
-AssertionError: (no message)
+Error: Call to undefined function ASSERT()

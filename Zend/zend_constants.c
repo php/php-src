@@ -439,39 +439,19 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, const zend_class_entry *
 		return ret_constant;
 	}
 
-	/* non-class constant */
-	if ((colon = zend_memrchr(name, '\\', name_len)) != NULL) {
-		/* compound constant name */
-		int prefix_len = colon - name;
-		size_t const_name_len = name_len - prefix_len - 1;
-		const char *constant_name = colon + 1;
-		char *lcname;
-		size_t lcname_len;
-		ALLOCA_FLAG(use_heap)
-
-		/* Lowercase the namespace portion */
-		lcname_len = prefix_len + 1 + const_name_len;
-		lcname = do_alloca(lcname_len + 1, use_heap);
-		zend_str_tolower_copy(lcname, name, prefix_len);
-
-		lcname[prefix_len] = '\\';
-		memcpy(lcname + prefix_len + 1, constant_name, const_name_len + 1);
-
-		c = zend_hash_str_find_ptr(EG(zend_constants), lcname, lcname_len);
-		free_alloca(lcname, use_heap);
-
-		if (!c) {
-			if (flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
-				/* name requires runtime resolution, need to check non-namespaced name */
-				c = zend_get_constant_str_impl(constant_name, const_name_len);
-			}
-		}
+	/* non-class constant — the namespace portion is case-sensitive */
+	if (cname) {
+		c = zend_get_constant_ptr(cname);
 	} else {
-		if (cname) {
-			c = zend_get_constant_ptr(cname);
-		} else {
-			c = zend_get_constant_str_impl(name, name_len);
-		}
+		c = zend_get_constant_str_impl(name, name_len);
+	}
+
+	if (!c && (flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE)
+			&& (colon = zend_memrchr(name, '\\', name_len)) != NULL) {
+		/* name requires runtime resolution, need to check non-namespaced name */
+		const char *constant_name = colon + 1;
+		size_t const_name_len = name_len - (constant_name - name);
+		c = zend_get_constant_str_impl(constant_name, const_name_len);
 	}
 
 	if (!c) {
@@ -509,7 +489,6 @@ static void* zend_hash_add_constant(HashTable *ht, zend_string *key, const zend_
 
 ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 {
-	zend_string *lowercase_name = NULL;
 	zend_string *name;
 	zend_constant *ret = NULL;
 	bool persistent = (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT) != 0;
@@ -518,15 +497,9 @@ ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
 
-	const char *slash = strrchr(ZSTR_VAL(c->name), '\\');
-	if (slash) {
-		lowercase_name = zend_string_init(ZSTR_VAL(c->name), ZSTR_LEN(c->name), persistent);
-		zend_str_tolower(ZSTR_VAL(lowercase_name), slash - ZSTR_VAL(c->name));
-		lowercase_name = zend_new_interned_string(lowercase_name);
-		name = lowercase_name;
-	} else {
-		name = c->name;
-	}
+	/* Constants are stored under their canonical name — the namespace
+	 * portion is case-sensitive like everything else. */
+	name = c->name;
 
 	c->filename = NULL;
 	if (ZEND_CONSTANT_MODULE_NUMBER(c) == PHP_USER_CONSTANT) {
@@ -553,9 +526,6 @@ ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 			zval_ptr_dtor_nogc(&c->value);
 		}
 	}
-	if (lowercase_name) {
-		zend_string_release(lowercase_name);
-	}
 	return ret;
 }
 
@@ -565,8 +535,8 @@ void zend_constant_add_attributes(zend_constant *c, HashTable *attributes) {
 
 	zend_attribute *deprecated_attribute = zend_get_attribute_str(
 		c->attributes,
-		"deprecated",
-		strlen("deprecated")
+		"Deprecated",
+		strlen("Deprecated")
 	);
 
 	if (deprecated_attribute) {

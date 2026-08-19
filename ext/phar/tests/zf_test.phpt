@@ -30,7 +30,7 @@ __HALT_COMPILER();
 $phar->stopBuffering();
 
 foreach(new RecursiveIteratorIterator($phar) as $path) {
-    echo str_replace('\\', '/', $path->getPathName()) . "\n";
+    echo str_replace('\\', '/', $path->getPathname()) . "\n";
 }
 
 ?>

@@ -7,8 +7,8 @@ dom
 require_once("dom_test.inc");
 
 echo "Test 1: accessing single nodes from php\n";
-$dom = new domDocument;
-$dom->loadxml($xmlstr);
+$dom = new DOMDocument;
+$dom->loadXML($xmlstr);
 if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
@@ -69,7 +69,7 @@ $children = $attrs->item(0)->childNodes;
 print_node_list($children);
 
 echo "--------- Add child to root\n";
-$myelement = new domElement("Silly", "Symphony");
+$myelement = new DOMElement("Silly", "Symphony");
 $newchild = $rootnode->appendChild($myelement);
 print_node($newchild);
 print $dom->saveXML();
@@ -77,7 +77,7 @@ print "\n";
 
 echo "--------- Find element by tagname\n";
 echo "    Using dom\n";
-$children = $dom->getElementsByTagname("Silly");
+$children = $dom->getElementsByTagName("Silly");
 print_node_list($children);
 
 echo "    Using elem\n";
@@ -88,7 +88,7 @@ echo "--------- Unlink Node\n";
 print_node($children->item(0));
 $rootnode->removeChild($children->item(0));
 print_node_list($rootnode->childNodes);
-print $dom->savexml();
+print $dom->saveXML();
 
 echo "--------- Find element by id\n";
 print ("Not implemented\n");

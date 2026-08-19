@@ -9,8 +9,8 @@ echo "*** Testing get_parent_class() : variation ***\n";
 class caseSensitivityTest {}
 class caseSensitivityTestChild extends caseSensitivityTest {}
 
-var_dump(get_parent_class('CasesensitivitytestCHILD'));
-var_dump(get_parent_class(new CasesensitivitytestCHILD));
+var_dump(get_parent_class('caseSensitivityTestChild'));
+var_dump(get_parent_class(new caseSensitivityTestChild));
 
 echo "Done";
 ?>

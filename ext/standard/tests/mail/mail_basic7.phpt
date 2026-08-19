@@ -133,7 +133,7 @@ try {
 }
 
 try {
-    mail($to, $subject, $message, ['foo7' => array(new StdClass)]);
+    mail($to, $subject, $message, ['foo7' => array(new stdClass)]);
 } catch (TypeError|ValueError $exception) {
     echo get_class($exception) . ": " . $exception->getMessage() . "\n";
 }

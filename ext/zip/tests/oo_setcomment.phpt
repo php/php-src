@@ -11,7 +11,7 @@ $file = $dirname . 'oo_setcomment.zip';
 @unlink($file);
 
 $zip = new ZipArchive;
-if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
+if (!$zip->open($file, ZipArchive::CREATE)) {
     exit('failed');
 }
 
@@ -31,7 +31,7 @@ var_dump($zip->setArchiveComment('archive'));
 
 var_dump($zip->setArchiveComment('archive'));
 
-if (!$zip->status == ZIPARCHIVE::ER_OK) {
+if (!$zip->status == ZipArchive::ER_OK) {
     echo "failed to write zip\n";
 }
 $zip->close();

@@ -37,25 +37,7 @@ $foo["bar"]->onBaz[] = function() {};
 var_dump($foo->bar->onBaz);
 ?>
 --EXPECTF--
-array(1) {
-  [0]=>
-  object(Closure)#%d (3) {
-    ["name"]=>
-    string(%d) "{closure:%s:%d}"
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(%d)
-  }
-}
-array(1) {
-  [0]=>
-  object(Closure)#%d (3) {
-    ["name"]=>
-    string(%d) "{closure:%s:%d}"
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(%d)
-  }
-}
+Fatal error: Uncaught Error: Interface "arrayAccess" not found in %s:%d
+Stack trace:
+#%d {main}
+  thrown in %s on line %d

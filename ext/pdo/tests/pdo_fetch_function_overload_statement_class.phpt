@@ -37,7 +37,7 @@ class DerivedStatement extends PDOStatement
 $derived = $db->prepare('SELECT id, val FROM pdo_fetch_function_overload_statement_class', [PDO::ATTR_STATEMENT_CLASS => ['DerivedStatement', ['Overloaded', $db]]]);
 var_dump(get_class($derived));
 $derived->execute();
-var_dump($derived->fetchAll(PDO::FETCH_FUNC, [$derived, 'retrieve']));
+var_dump($derived->fetchAll(PDO::FETCH_FUNC, [$derived, 'reTrieve']));
 
 ?>
 --CLEAN--

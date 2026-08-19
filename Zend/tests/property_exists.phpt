@@ -35,7 +35,7 @@ class A extends aParent {
 
 A::staticTest();
 
-$a = new a;
+$a = new A;
 $a->nonstaticTest();
 
 ?>

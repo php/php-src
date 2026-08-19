@@ -15,7 +15,7 @@ class Logger {
 
 class B
 {
-    const LOG_LEVEL = 'Info';
+    const LOG_LEVEL = 'info';
     public function test()
     {
         $logger = new \Logger();

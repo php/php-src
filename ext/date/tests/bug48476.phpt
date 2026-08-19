@@ -26,7 +26,7 @@ try {
 clone $o;
 
 try {
-    var_dump(timezone_location_get(clone new MyDateTimezone));
+    var_dump(timezone_location_get(clone new MyDateTimeZone));
 } catch (Error $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }

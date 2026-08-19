@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString('<!DOCTYPE html><html><head><title>Test</title></head><body><div></div><p>Hello, World!</p></body></html>');
+$dom = Dom\HTMLDocument::createFromString('<!DOCTYPE html><html><head><title>Test</title></head><body><div></div><p>Hello, World!</p></body></html>');
 var_dump($dom->getElementsByTagName('body')[0]->innerHTML);
 var_dump($dom->getElementsByTagName('head')[0]->innerHTML);
 var_dump($dom->getElementsByTagName('html')[0]->innerHTML);

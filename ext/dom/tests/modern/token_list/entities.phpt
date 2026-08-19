@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE root [
     <!ENTITY ent "foo">
@@ -23,7 +23,7 @@ var_dump($list->contains("foo"));
 
 $list->add("test");
 
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

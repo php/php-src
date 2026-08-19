@@ -5,31 +5,31 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $el = $dom->createElementNS('urn:a', 'root');
 $dom->appendChild($el);
 $el->innerHTML = '<p>foo</p><p xmlns="">bar</p>';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $el->innerHTML = '';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $el->innerHTML = '&amp;';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 $el->innerHTML = '&lt;foo&gt;';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "----------------\n";
 
-$dom = DOM\XMLDocument::createFromString('<root/>');
+$dom = Dom\XMLDocument::createFromString('<root/>');
 $child = $dom->documentElement->appendChild($dom->createElementNS('urn:a', 'child'));
 $child->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'urn:b');
 $child->innerHTML = '<default/>';
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 var_dump($child->namespaceURI);
 var_dump($child->firstChild->namespaceURI);
 
 echo "----------------\n";
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <root xmlns="urn:a" xmlns:b="urn:b" xmlns:c="urn:c">
     <b:child a="none" b:b="b" c:c="c"/>
     <c:child a="none" b:b="b" c:c="c"/>
@@ -41,7 +41,7 @@ $dom = DOM\XMLDocument::createFromString(<<<XML
 </root>
 XML);
 $dom->documentElement->innerHTML = $dom->documentElement->innerHTML;
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "----------------\n";
 $dom->documentElement->innerHTML = <<<XML
@@ -50,7 +50,7 @@ $dom->documentElement->innerHTML = <<<XML
     <c:child/>
 </child>
 XML;
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

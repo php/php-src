@@ -30,11 +30,11 @@ object(foo)#%d (2) {
   ["a"]=>
   object(Closure)#%d (5) {
     ["name"]=>
-    string(%d) "{closure:%s:%d}"
+    string(%d) "{closure:foo::x():%d}"
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(%d)
+    int(9)
     ["static"]=>
     array(1) {
       ["a"]=>
@@ -44,10 +44,10 @@ object(foo)#%d (2) {
     *RECURSION*
   }
 }
-bool(true)
+bool(false)
 bool(true)
 
 Fatal error: Uncaught Error: Cannot access private property foo::$test in %s:%d
 Stack trace:
-#0 {main}
+#%d {main}
   thrown in %s on line %d

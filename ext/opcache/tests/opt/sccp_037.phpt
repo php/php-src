@@ -6,7 +6,7 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 --FILE--
 <?php
-[!![[new ERROR]]];
+[!![[new Error]]];
 ?>
 DONE
 --EXPECT--

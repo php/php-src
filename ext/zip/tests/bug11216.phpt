@@ -5,7 +5,7 @@ zip
 --FILE--
 <?php
 $archive = new ZipArchive();
-$archive->open('__test.zip', ZIPARCHIVE::CREATE);
+$archive->open('__test.zip', ZipArchive::CREATE);
 var_dump($archive->addEmptyDir('test'));
 print_r($archive);
 var_dump($archive->addEmptyDir('test'));

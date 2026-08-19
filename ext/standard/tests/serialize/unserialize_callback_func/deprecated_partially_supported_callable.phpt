@@ -23,7 +23,7 @@ class TesterChild extends TesterParent {
     }
 }
 
-$s = 'O:3:"FOO":0:{}';
+$s = 'O:3:"Foo":0:{}';
 try {
 	$o = unserialize($s);
 	var_dump($o);

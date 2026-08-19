@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root class="A B C D"/>');
+$dom = Dom\XMLDocument::createFromString('<root class="A B C D"/>');
 $list = $dom->documentElement->classList;
 
 

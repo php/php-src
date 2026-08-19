@@ -4,7 +4,7 @@ setAuthorizer() cycle leak
 sqlite3
 --FILE--
 <?php
-class Foo extends Sqlite3 {
+class Foo extends SQLite3 {
     public function __construct() {
         parent::__construct(":memory:");
         $this->setAuthorizer([$this, "foo"]);

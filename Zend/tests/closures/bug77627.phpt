@@ -11,5 +11,5 @@ var_dump(method_exists($closure, "__INVOKE"));
 ?>
 --EXPECT--
 bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)

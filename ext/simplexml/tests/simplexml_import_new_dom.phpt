@@ -13,7 +13,7 @@ foreach ($books as $book) {
 }
 
 $s->book[0]->title = "test";
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

@@ -8,7 +8,7 @@ $empty_dir = __DIR__ . "/empty";
 
 $i = new RecursiveDirectoryIterator($empty_dir, FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO); // Note the absence of FilesystemIterator::SKIP_DOTS
 foreach ($i as $key => $value) {
-    $dirs[] = $value->getFileName();
+    $dirs[] = $value->getFilename();
 }
 
 @rmdir($empty_dir);

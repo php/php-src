@@ -9,7 +9,7 @@ $n = $xml->addChild("node", "value");
 $n->addAttribute("a", "b");
 $n->addAttribute("c", "d", "http://bar.com");
 $n->addAttribute("foo:e", "f", "http://bar.com");
-print_r($xml->asXml());
+print_r($xml->asXML());
 ?>
 --EXPECTF--
 Warning: SimpleXMLElement::addAttribute(): Attribute requires prefix for namespace in %sbug43221.php on line %d

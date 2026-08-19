@@ -37,7 +37,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 	unlink($del);
 }
 var_dump($zip->lastId);
-if ($zip->status == ZIPARCHIVE::ER_OK) {
+if ($zip->status == ZipArchive::ER_OK) {
     if (!verify_entries($zip, [
         "bar",
         "foobar/",

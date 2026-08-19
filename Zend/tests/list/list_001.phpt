@@ -3,9 +3,9 @@
 --FILE--
 <?php
 
-list($a, list($b)) = array(new stdclass, array(new stdclass));
+list($a, list($b)) = array(new stdClass, array(new stdClass));
 var_dump($a, $b);
-[$a, [$b]] = array(new stdclass, array(new stdclass));
+[$a, [$b]] = array(new stdClass, array(new stdClass));
 var_dump($a, $b);
 
 ?>

@@ -4,7 +4,7 @@ Property name lookup error
 com_dotnet
 --FILE--
 <?php
-$dict = new COM("Scripting.Dictionary");
+$dict = new com("Scripting.Dictionary");
 try {
     $dict->unknownProperty;
 } catch (com_exception $ex) {

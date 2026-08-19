@@ -18,7 +18,7 @@ var_dump(rtrim($tidy->value));
 echo "-------\n";
 
 var_dump(tidy_get_root($tidy)->child[0]->isHtml());
-var_dump(tidy_get_root($tidy)->child[0]->child[0]->isPHP());
+var_dump(tidy_get_root($tidy)->child[0]->child[0]->isPhp());
 var_dump(tidy_get_root($tidy)->child[0]->child[0]->isAsp());
 var_dump(tidy_get_root($tidy)->child[0]->child[0]->isJste());
 var_dump(tidy_get_root($tidy)->child[0]->child[0]->type === TIDY_NODETYPE_PHP);

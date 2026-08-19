@@ -11,7 +11,7 @@ $cal = new IntlGregorianCalendar(2012,04,17,17,35,36);
 
 $dt = $cal->toDateTime();
 
-var_dump($dt->format("c"), $dt->getTimeZone()->getName());
+var_dump($dt->format("c"), $dt->getTimezone()->getName());
 ?>
 --EXPECTF--
 Deprecated: Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d

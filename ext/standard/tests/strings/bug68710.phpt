@@ -4,7 +4,7 @@ CVE-2014-8142 fix)
 --FILE--
 <?php
 for ($i=4; $i<100; $i++) {
-    $m = new StdClass();
+    $m = new stdClass();
 
     $u = array(1);
 
