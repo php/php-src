@@ -6,21 +6,21 @@ zend.assertions=1
 <?php
 try {
     assert(!is_float(0.0));
-} catch (AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     assert(!is_float(1.1));
-} catch (AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     assert(!is_float(1234.5678));
-} catch (AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-assert(): assert(!is_float(0.0)) failed
-assert(): assert(!is_float(1.1)) failed
-assert(): assert(!is_float(1234.5678)) failed
+AssertionError: assert(!is_float(0.0))
+AssertionError: assert(!is_float(1.1))
+AssertionError: assert(!is_float(1234.5678))

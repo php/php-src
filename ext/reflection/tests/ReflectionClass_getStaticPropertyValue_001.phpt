@@ -35,15 +35,15 @@ echo "\nRetrieving non-existent values from A with no default value:\n";
 try {
     var_dump($rcA->getStaticPropertyValue("protectedDoesNotExist"));
     echo "you should not see this";
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump($rcA->getStaticPropertyValue("privateDoesNotExist"));
     echo "you should not see this";
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -61,5 +61,5 @@ string(17) "changed protected"
 string(14) "changed public"
 
 Retrieving non-existent values from A with no default value:
-Property A::$protectedDoesNotExist does not exist
-Property A::$privateDoesNotExist does not exist
+ReflectionException: Property A::$protectedDoesNotExist does not exist
+ReflectionException: Property A::$privateDoesNotExist does not exist

@@ -19,15 +19,15 @@ var_dump($arr[$fp]);
 $obj = new stdClass;
 try {
     var_dump($arr[$obj]);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $arr1 = Array(1,2,3);
 try {
     var_dump($arr[$arr1]);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -50,6 +50,6 @@ int(1)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
-Cannot access offset of type stdClass on array
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type stdClass on array
+TypeError: Cannot access offset of type array on array
 Done

@@ -42,8 +42,8 @@ var_dump(isset($map[$obj]));
 var_dump(!empty($map[$obj]));
 try {
     var_dump($map[$obj]);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // It's okay to unset an object that's not in the map.
@@ -138,7 +138,7 @@ object(WeakMap)#1 (0) {
 }
 bool(false)
 bool(false)
-Object stdClass#2 not contained in WeakMap
+Error: Object stdClass#2 not contained in WeakMap
 
 Indirect modification:
 object(WeakMap)#1 (2) {

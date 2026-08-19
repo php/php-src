@@ -13,8 +13,8 @@ var_dump($comment->substringData(2, -2));
 echo $dom->saveHtml($comment), "\n";
 try {
     var_dump($comment->substringData(-2, 2));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 
@@ -24,5 +24,5 @@ string(9) "foobarbaz"
 <!--foobarbaz-->
 string(7) "obarbaz"
 <!--foobarbaz-->
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->

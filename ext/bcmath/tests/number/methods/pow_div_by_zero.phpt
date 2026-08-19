@@ -20,22 +20,22 @@ foreach ($values as $value) {
         echo "{$value} ** {$exponent}: {$type}\n";
         try {
             $num->pow($exponent);
-        } catch (Error $e) {
-            echo $e->getMessage() . "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
 ?>
 --EXPECT--
 0 ** -3: int
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -2: string
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -2: object
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -3: int
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -2: string
-Negative power of zero
+DivisionByZeroError: Negative power of zero
 0 ** -2: object
-Negative power of zero
+DivisionByZeroError: Negative power of zero

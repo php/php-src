@@ -10,10 +10,10 @@ fclose($h);
 
 try {
     XMLWriter::toStream($h);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-XMLWriter::toStream(): supplied resource is not a valid stream resource
+TypeError: XMLWriter::toStream(): supplied resource is not a valid stream resource

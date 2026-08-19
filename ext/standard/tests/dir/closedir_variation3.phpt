@@ -14,8 +14,8 @@ var_dump($fp = fopen(__FILE__, 'r'));
 echo "\n-- Try to close the file pointer using closedir() --\n";
 try {
     var_dump(closedir($fp));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "\n-- Check file pointer: --\n";
 var_dump($fp);
@@ -31,7 +31,7 @@ if(is_resource($fp)) {
 resource(%d) of type (stream)
 
 -- Try to close the file pointer using closedir() --
-closedir(): Argument #1 ($dir_handle) must be a valid Directory resource
+TypeError: closedir(): Argument #1 ($dir_handle) must be a valid Directory resource
 
 -- Check file pointer: --
 resource(%d) of type (stream)

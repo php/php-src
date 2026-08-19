@@ -19,8 +19,8 @@ class B extends A {
 $a = new A;
 try {
     $a->prop = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($a->prop);
 
@@ -30,7 +30,7 @@ var_dump($b->prop);
 
 ?>
 --EXPECT--
-Cannot write to get-only virtual property A::$prop
+Error: Cannot write to get-only virtual property A::$prop
 A::A::$prop::get
 int(42)
 B::B::$prop::set

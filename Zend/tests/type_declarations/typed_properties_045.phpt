@@ -15,8 +15,8 @@ class Foo {
                 var_dump($val);
                 try {
                     $val = [];
-                } catch (Error $e) {
-                    echo $e->getMessage(), "\n";
+                } catch (Throwable $e) {
+                    echo $e::class, ': ', $e->getMessage(), "\n";
                 }
             }
         }
@@ -33,8 +33,8 @@ foreach ($foo as $k => &$val) {
     try {
         $val = [];
         var_dump($foo->$k);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 $foo->test();
@@ -42,10 +42,10 @@ $foo->test();
 --EXPECT--
 int(0)
 int(20)
-Cannot assign array to reference held by property Foo::$bar of type int
+TypeError: Cannot assign array to reference held by property Foo::$bar of type int
 float(0.5)
 float(20)
-Cannot assign array to reference held by property Foo::$baz of type float
+TypeError: Cannot assign array to reference held by property Foo::$baz of type float
 float(0.5)
 float(20)
-Cannot assign array to reference held by property Foo::$privateProp of type float
+TypeError: Cannot assign array to reference held by property Foo::$privateProp of type float

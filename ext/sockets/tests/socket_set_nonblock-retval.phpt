@@ -13,11 +13,11 @@ $socket2 = socket_create_listen(0);
 socket_close($socket2);
 try {
     var_dump(socket_set_nonblock($socket2));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 bool(true)
-socket_set_nonblock(): Argument #1 ($socket) has already been closed
+Error: socket_set_nonblock(): Argument #1 ($socket) has already been closed

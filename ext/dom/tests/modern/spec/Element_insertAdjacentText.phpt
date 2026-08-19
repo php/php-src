@@ -9,8 +9,8 @@ $dom = Dom\HTMLDocument::createEmpty();
 $foo = $dom->appendChild($dom->createElement("foo"));
 try {
     $foo->insertAdjacentText(Dom\AdjacentPosition::BeforeBegin, "bar");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $foo->insertAdjacentText(Dom\AdjacentPosition::AfterBegin, "bar");
@@ -23,7 +23,7 @@ var_dump($foo->firstChild->nextSibling->textContent);
 
 ?>
 --EXPECT--
-Cannot insert text as a child of a document
+DOMException: Cannot insert text as a child of a document
 <foo>barbaz</foo>
 string(3) "bar"
 string(3) "baz"

@@ -20,23 +20,23 @@ $anon = new class {
 var_dump($readonly_anon->field);
 try {
     $readonly_anon->field = 123;
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($readonly_anon->field);
 
 var_dump($anon->field);
 try {
     $anon->field = 123;
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($anon->field);
 
 ?>
 --EXPECT--
 int(2)
-Cannot modify readonly property class@anonymous::$field
+Error: Cannot modify readonly property class@anonymous::$field
 int(2)
 int(2)
 int(123)

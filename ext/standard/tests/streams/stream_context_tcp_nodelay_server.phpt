@@ -37,4 +37,3 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 server-delay:conn-nodelay
-

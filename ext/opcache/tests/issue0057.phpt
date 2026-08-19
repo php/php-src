@@ -29,10 +29,10 @@ function dummy($query) {
 
 try {
     dummy(0);
-} catch (Exception $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-exception
+Exception: exception

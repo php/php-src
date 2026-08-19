@@ -7,8 +7,8 @@ function gen() {
     $gen = yield;
     try {
         $gen->next();
-    } catch (Error $e) {
-        echo "\nException: " . $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $gen->next();
 }
@@ -19,7 +19,7 @@ $gen->next();
 
 ?>
 --EXPECTF--
-Exception: Cannot resume an already running generator
+Error: Cannot resume an already running generator
 
 Fatal error: Uncaught Error: Cannot resume an already running generator in %s:%d
 Stack trace:
