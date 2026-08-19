@@ -12447,7 +12447,9 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
+/* Keep this out of zend_compile_expr(): the two form a recursion cycle, so inlining merges this
+ * frame into every nesting level of an expression, tripling the stack needed to compile it. */
+static zend_never_inline void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 {
 	/* CG(zend_lineno) = ast->lineno; */
 	CG(zend_lineno) = zend_ast_get_lineno(ast);
