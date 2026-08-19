@@ -244,6 +244,10 @@ PHP                                                                        NEWS
   . Passing an object to the $option argument to deflate_init and inflate_init
     is now deprecated. Use get_object_vars() on the object instead. (Girgias)
 
+- Streams:
+  . Fixed memory leaks when a user stream filter returns PSFS_PASS_ON without
+    processing all input buckets. (Matthias Goergens)
+
 30 Jul 2026, PHP 8.6.0alpha3
 
 - Core:
