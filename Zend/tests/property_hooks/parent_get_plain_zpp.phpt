@@ -18,10 +18,10 @@ class B extends A {
 $b = new B();
 try {
     var_dump($b->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-A::$prop::get() expects exactly 0 arguments, 1 given
+ArgumentCountError: A::$prop::get() expects exactly 0 arguments, 1 given

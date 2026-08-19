@@ -16,17 +16,17 @@ $c = new C();
 
 try {
     $c->prop1 = 'hello world';
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $c->prop2 = 'hello world';
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot modify private(set) property C::$prop1 from global scope
-Cannot modify private(set) property C::$prop2 from global scope
+Error: Cannot modify private(set) property C::$prop1 from global scope
+Error: Cannot modify private(set) property C::$prop2 from global scope

@@ -15,8 +15,8 @@ try {
     $a = foxcache("dolor");
     $a += "sit";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("5 amet,");
@@ -26,8 +26,8 @@ try {
     $a = foxcache("adipiscing");
     $a -= "elit,";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("11 sed");
@@ -37,8 +37,8 @@ try {
     $a = foxcache("eiusmod");
     $a *= "tempor";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("17 incididunt");
@@ -48,8 +48,8 @@ try {
     $a = foxcache("labore");
     $a /= "et";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("23 dolore");
@@ -59,8 +59,8 @@ try {
     $a = foxcache("aliqua.");
     $a **= "Ut";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("31 enim");
@@ -70,8 +70,8 @@ try {
     $a = foxcache("minim");
     $a %= "veniam,";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("41 minim");
@@ -80,8 +80,8 @@ try {
     var_dump($a);
     $a = foxcache("quis");
     $a <<= "nostrud";
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($a);
 echo "---", PHP_EOL;
@@ -92,8 +92,8 @@ try {
     $a = foxcache("laboris");
     $a >>= "nisi";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("59 ut");
@@ -106,15 +106,15 @@ try {
     $a = foxcache("ex");
     $a |= 73;
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $a = foxcache(79);
     $a |= "ea";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("83 commodo");
@@ -127,15 +127,15 @@ try {
     $a = foxcache("Duis");
     $a &= 103;
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $a = foxcache(107);
     $a &= "aute";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "---", PHP_EOL;
 $a = foxcache("109 irure");
@@ -148,15 +148,15 @@ try {
     $a = foxcache("in");
     $a ^= 137;
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $a = foxcache(139);
     $a ^= "reprehenderit";
     var_dump($a);
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -164,35 +164,35 @@ Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(5)
-Unsupported operand types: string + string
+TypeError: Unsupported operand types: string + string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(-2)
-Unsupported operand types: string - string
+TypeError: Unsupported operand types: string - string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(143)
-Unsupported operand types: string * string
+TypeError: Unsupported operand types: string * string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 float(0.8947368421052632)
-Unsupported operand types: string / string
+TypeError: Unsupported operand types: string / string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 float(3.0910586430935376E+39)
-Unsupported operand types: string ** string
+TypeError: Unsupported operand types: string ** string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -206,7 +206,7 @@ Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(%d)
-Unsupported operand types: string << string
+TypeError: Unsupported operand types: string << string
 string(4) "quis"
 ---
 
@@ -214,7 +214,7 @@ Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
-Unsupported operand types: string >> string
+TypeError: Unsupported operand types: string >> string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -222,8 +222,8 @@ int(63)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(71)
-Unsupported operand types: string | int
-Unsupported operand types: int | string
+TypeError: Unsupported operand types: string | int
+TypeError: Unsupported operand types: int | string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -231,8 +231,8 @@ int(81)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(97)
-Unsupported operand types: string & int
-Unsupported operand types: int & string
+TypeError: Unsupported operand types: string & int
+TypeError: Unsupported operand types: int & string
 ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -240,5 +240,5 @@ int(28)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(252)
-Unsupported operand types: string ^ int
-Unsupported operand types: int ^ string
+TypeError: Unsupported operand types: string ^ int
+TypeError: Unsupported operand types: int ^ string
