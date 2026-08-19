@@ -258,7 +258,7 @@ typedef struct _zend_utility_functions {
 	zend_result (*stream_open_function)(zend_file_handle *handle);
 	void (*printf_to_smart_string_function)(smart_string *buf, const char *format, va_list ap);
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
-	char *(*getenv_function)(const char *name, size_t name_len);
+	zend_string *(*getenv_function)(const char *name, size_t name_len);
 	zend_string *(*resolve_path_function)(zend_string *filename);
 	zend_result (*random_bytes_function)(void *bytes, size_t size, char *errstr, size_t errstr_size);
 	void (*random_bytes_insecure_function)(zend_random_bytes_insecure_state *state, void *bytes, size_t size);
@@ -369,7 +369,7 @@ extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
-extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
+extern ZEND_API zend_string *(*zend_getenv)(const char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 /* Generate 'size' random bytes into 'bytes' with the OS CSPRNG. */
 extern ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(

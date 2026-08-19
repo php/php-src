@@ -723,13 +723,9 @@ PHP_FUNCTION(getenv)
 	}
 
 	if (!local_only) {
-		/* SAPI method returns an emalloc()'d string */
-		char *ptr = sapi_getenv(str, str_len);
+		zend_string *ptr = sapi_getenv(str, str_len);
 		if (ptr) {
-			// TODO: avoid reallocation ???
-			RETVAL_STRING(ptr);
-			efree(ptr);
-			return;
+			RETURN_STR(ptr);
 		}
 	}
 
