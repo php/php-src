@@ -1046,8 +1046,13 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 				/* Only accept string and Stringable(?) as int/foat/bool are not valid class names */
 				if (UNEXPECTED(Z_TYPE_P(arg) != IS_STRING)) {
 					if (Z_TYPE_P(arg) != IS_OBJECT || !zend_parse_arg_str_slow(arg, arg_num)) {
-						zend_spprintf(error, 0, "must be a valid class name%s, %s given",
-							check_null ? " or null" : "", zend_zval_value_name(arg));
+						*pce = NULL;
+						/* __toString may throw */
+						if (!EG(exception)) {
+							zend_spprintf(error, 0, "must be a valid class name%s, %s given",
+								check_null ? " or null" : "", zend_zval_value_name(arg));
+						}
+						*pce = NULL;
 						return "";
 					}
 					/* Object was converted to string */
