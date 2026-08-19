@@ -5,10 +5,10 @@ FiberError cannot be constructed in user code
 
 try {
     new FiberError;
-} catch (Error $exception) {
-    echo $exception->getMessage(), "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-The "FiberError" class is reserved for internal use and cannot be manually instantiated
+Error: The "FiberError" class is reserved for internal use and cannot be manually instantiated
