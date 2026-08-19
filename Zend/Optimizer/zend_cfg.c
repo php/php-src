@@ -22,7 +22,7 @@
 #include "zend_optimizer_internal.h"
 #include "zend_sort.h"
 
-static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_block *b) /* {{{ */
+static void zend_mark_reachable(const zend_op *opcodes, const zend_cfg *cfg, zend_basic_block *b) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 
@@ -101,7 +101,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 }
 /* }}} */
 
-static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg, uint32_t start) /* {{{ */
+static void zend_mark_reachable_blocks(const zend_op_array *op_array, const zend_cfg *cfg, uint32_t start) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 
@@ -110,7 +110,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 
 	if (op_array->last_try_catch) {
 		int changed;
-		uint32_t *block_map = cfg->map;
+		const uint32_t *block_map = cfg->map;
 
 		do {
 			changed = 0;
@@ -197,7 +197,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 	}
 
 	if (cfg->flags & ZEND_FUNC_FREE_LOOP_VAR) {
-		uint32_t *block_map = cfg->map;
+		const uint32_t *block_map = cfg->map;
 
 		/* Mark blocks that are unreachable, but free a loop var created in a reachable block. */
 		for (zend_basic_block *b = blocks; b < blocks + cfg->blocks_count; b++) {
@@ -208,7 +208,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 			for (uint32_t j = b->start; j < b->start + b->len; j++) {
 				zend_op *opline = &op_array->opcodes[j];
 				if (zend_optimizer_is_loop_var_free(opline)) {
-					zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
+					const zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
 					if (def_opline) {
 						uint32_t def_block = block_map[def_opline - op_array->opcodes];
 						if (blocks[def_block].flags & ZEND_BB_REACHABLE) {
@@ -223,7 +223,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 }
 /* }}} */
 
-void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, const zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 	uint32_t i;
@@ -555,7 +555,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_SWITCH_STRING:
 			case ZEND_MATCH:
 			{
-				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
+				const HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
 				zval *zv;
 				uint32_t s = 0;
 
@@ -589,7 +589,7 @@ ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* 
 {
 	zend_basic_block *b;
 	zend_basic_block *blocks = cfg->blocks;
-	zend_basic_block *end = blocks + cfg->blocks_count;
+	const zend_basic_block *end = blocks + cfg->blocks_count;
 	uint32_t edges = 0;
 	int *predecessors;
 
@@ -648,7 +648,7 @@ ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* 
 static void compute_postnum_recursive(
 		int *postnum, uint32_t *cur, const zend_cfg *cfg, int block_num) /* {{{ */
 {
-	zend_basic_block *block = &cfg->blocks[block_num];
+	const zend_basic_block *block = &cfg->blocks[block_num];
 	if (postnum[block_num] != -1) {
 		return;
 	}
@@ -757,7 +757,7 @@ ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, ze
 }
 /* }}} */
 
-static bool dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
+static bool dominates(const zend_basic_block *blocks, int a, int b) /* {{{ */
 {
 	while (blocks[b].level > blocks[a].level) {
 		b = blocks[b].idom;

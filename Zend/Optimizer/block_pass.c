@@ -105,7 +105,7 @@ static void strip_nops(const zend_op_array *op_array, zend_basic_block *b)
 }
 
 static uint32_t get_const_switch_target(const zend_cfg *cfg, const zend_op_array *op_array, const zend_basic_block *block, zend_op *opline, const zval *val) {
-	HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+	const HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 	zval *zv;
 	if ((opline->opcode == ZEND_SWITCH_LONG && Z_TYPE_P(val) != IS_LONG)
 			|| (opline->opcode == ZEND_SWITCH_STRING && Z_TYPE_P(val) != IS_STRING)) {

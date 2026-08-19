@@ -2058,7 +2058,7 @@ const zend_op_array *zend_accel_pfa_cache_get(
 		const uint32_t *declaring_lineno_ptr, const zend_function *called_function, bool cacheable_in_shm)
 {
 	zend_string *key = zend_accel_pfa_key(declaring_lineno_ptr, called_function);
-	zend_op_array *op_array = NULL;
+	const zend_op_array *op_array = NULL;
 
 	/* A PFA is SHM-cacheable if the declaring op_array and called_function are
 	 * cached. */
