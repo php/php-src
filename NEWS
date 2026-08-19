@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
+  . Fixed bug GH-23232 (is_callable('\::method') asks the autoloader for an
+    empty class name). (spawnia)
 
 - DOM:
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
