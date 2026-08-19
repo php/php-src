@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed a use-after-free when Dom\Element::setAttributeNS() replaces the
     value of an attribute whose child still has a live wrapper. (iliaal)
 
+- GD:
+  . Fixed imageaffinematrixget() and imageaffinematrixconcat() reporting the
+    wrong argument in error messages. (Weilin Du)
+
 - PDO:
   . Fixed a leak when a persistent connection failed a liveness check
     with no other live PDO handle. (iliaal)

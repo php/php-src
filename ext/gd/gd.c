@@ -4171,7 +4171,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SCALE: {
 			double x, y;
 			if (Z_TYPE_P(options) != IS_ARRAY) {
-				zend_argument_type_error(1, "must be of type array when using translate or scale");
+				zend_argument_type_error(2, "must be of type array when using translate or scale");
 				RETURN_THROWS();
 			}
 
@@ -4253,7 +4253,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(z_m2)) != 6) {
-		zend_argument_value_error(1, "must have 6 elements");
+		zend_argument_value_error(2, "must have 6 elements");
 		RETURN_THROWS();
 	}
 
