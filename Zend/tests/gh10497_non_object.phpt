@@ -5,20 +5,20 @@ GH-10497: Writing to a property of a non-object constant reports a runtime error
 
 try {
     TRUE->prop = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     NULL->prop = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     PHP_INT_MAX->prop = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class C {
@@ -33,47 +33,47 @@ class C {
 
 try {
     C::INT->prop = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     C::STR->prop = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     C::ARR->prop = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     C::fromSelf();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Other write contexts: compound assignment, unset() and by-reference arguments.
 try {
     C::INT->prop++;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     C::INT->prop .= 'x';
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 function byRef(&$v) {}
 
 try {
     byRef(C::INT->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // As for plain variables, unsetting a property of a non-object is a silent no-op.
@@ -85,27 +85,27 @@ var_dump(isset(C::INT->prop));
 
 try {
     __COMPILER_HALT_OFFSET__->prop = 1;
-} catch (Error $e) {
-    echo $e::class, $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 __halt_compiler();
 
 ?>
 --EXPECT--
-Attempt to assign property "prop" on true
-Attempt to assign property "prop" on null
-Attempt to assign property "prop" on int
-Attempt to assign property "prop" on int
-Attempt to assign property "prop" on string
-Attempt to assign property "prop" on array
-Attempt to assign property "prop" on int
-Attempt to increment/decrement property "prop" on int
-Attempt to assign property "prop" on int
-Attempt to modify property "prop" on int
+Error: Attempt to assign property "prop" on true
+Error: Attempt to assign property "prop" on null
+Error: Attempt to assign property "prop" on int
+Error: Attempt to assign property "prop" on int
+Error: Attempt to assign property "prop" on string
+Error: Attempt to assign property "prop" on array
+Error: Attempt to assign property "prop" on int
+Error: Attempt to increment/decrement property "prop" on int
+Error: Attempt to assign property "prop" on int
+Error: Attempt to modify property "prop" on int
 unset() did not error
 bool(true)
 int(5)
 string(3) "str"
 bool(false)
-ErrorAttempt to assign property "prop" on int
+Error: Attempt to assign property "prop" on int

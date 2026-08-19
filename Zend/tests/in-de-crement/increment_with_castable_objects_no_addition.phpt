@@ -13,64 +13,64 @@ $nf = new NumericCastableNoOperations(58.3);
 /* Check normal arithmetic */
 try {
     var_dump($l + 1);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump($f + 1);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump($nl + 1);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump($nf + 1);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /* Decrement */
 try {
     $l++;
     var_dump($l);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $f++;
     var_dump($f);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $nl++;
     var_dump($nl);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $nf++;
     var_dump($nf);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Unsupported operand types: LongCastableNoOperations + int
-Unsupported operand types: FloatCastableNoOperations + int
+TypeError: Unsupported operand types: LongCastableNoOperations + int
+TypeError: Unsupported operand types: FloatCastableNoOperations + int
 int(53)
 float(59.3)
-Cannot increment LongCastableNoOperations
-Cannot increment FloatCastableNoOperations
+TypeError: Cannot increment LongCastableNoOperations
+TypeError: Cannot increment FloatCastableNoOperations
 int(53)
 float(59.3)

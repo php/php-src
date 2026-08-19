@@ -27,8 +27,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 try {
     $foo->test();
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 set_error_handler(null);
 
@@ -44,40 +44,40 @@ var_dump(get_parent_class("i"));
 
 try {
     get_parent_class("");
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     get_parent_class("[[[[");
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     get_parent_class(" ");
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(get_parent_class(new stdclass));
 
 try {
     get_parent_class(array());
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     get_parent_class(1);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
-Calling get_parent_class() without arguments is deprecated
+Exception: Calling get_parent_class() without arguments is deprecated
 
 Deprecated: Calling get_parent_class() without arguments is deprecated in %s on line %d
 bool(false)
@@ -90,10 +90,10 @@ bool(false)
 string(3) "foo"
 bool(false)
 bool(false)
-get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, "" given
-get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, "[[[[" given
-get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, " " given
+TypeError: get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, "" given
+TypeError: get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, "[[[[" given
+TypeError: get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, " " given
 bool(false)
-get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
-get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
+TypeError: get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
+TypeError: get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given
 Done

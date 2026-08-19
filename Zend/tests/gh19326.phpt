@@ -25,12 +25,12 @@ $fiber->start();
 
 try {
     $b->throw(new Exception('test'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $fiber->resume();
 
 ?>
 --EXPECT--
-Cannot resume an already running generator
+Error: Cannot resume an already running generator
