@@ -32,8 +32,8 @@ $vars = array(
 foreach ($vars as $var) {
     try {
         settype($var, "resource");
-    } catch (ValueError $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
     var_dump($var);
 }
@@ -41,22 +41,22 @@ foreach ($vars as $var) {
 echo "Done\n";
 ?>
 --EXPECTF--
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 string(6) "string"
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 string(7) "8754456"
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 string(0) ""
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 string(1) "%0"
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 int(9876545)
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 float(0.1)
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 array(0) {
 }
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 array(3) {
   [0]=>
   int(1)
@@ -65,15 +65,15 @@ array(3) {
   [2]=>
   int(3)
 }
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 bool(false)
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 bool(true)
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 NULL
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 resource(%d) of type (stream)
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 object(test)#%d (0) {
 }
 Done

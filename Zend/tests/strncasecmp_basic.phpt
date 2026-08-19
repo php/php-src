@@ -5,8 +5,8 @@ strncasecmp() tests
 
 try {
     var_dump(strncasecmp("", "", -1));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(strncasecmp("aef", "dfsgbdf", 0));
@@ -19,7 +19,7 @@ var_dump(strncasecmp("01", "01", 1000));
 
 ?>
 --EXPECT--
-strncasecmp(): Argument #3 ($length) must be greater than or equal to 0
+ValueError: strncasecmp(): Argument #3 ($length) must be greater than or equal to 0
 int(0)
 int(-3)
 int(0)

@@ -21,13 +21,13 @@ function test() {
 
 try {
     var_dump(test());
-} catch (Exception $e) {
+} catch (Throwable $e) {
     do {
-        echo $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
         $e = $e->getPrevious();
     } while ($e);
 }
 ?>
 --EXPECTF--
 Deprecated: Returning from a finally block is deprecated in %s on line %d
-1
+Exception: 1

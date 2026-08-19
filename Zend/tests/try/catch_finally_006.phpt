@@ -17,9 +17,9 @@ function foo ($a) {
 
 try {
    var_dump(foo("para"));
-} catch (Exception $e) {
+} catch (Throwable $e) {
     "caught exception" . PHP_EOL;
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
