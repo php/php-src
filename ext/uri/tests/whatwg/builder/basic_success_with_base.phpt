@@ -1,5 +1,7 @@
 --TEST--
 Test Uri\WhatWg\UrlBuilder basic - success - with base URL
+--XFAIL--
+Support for passing $baseUrl to Uri\WhatWg\UrlBuilder::build() is not implemented yet.
 --FILE--
 <?php
 

@@ -687,7 +687,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_none(const zen
 
 static zend_always_inline bool php_uri_whatwg_is_ascii_tab_or_newline(const unsigned char c)
 {
-	return c == 0x09 || c == 0x0A || c == 0x0D; /* \t \n \r */
+	return c == '\t' || c == '\n' || c == '\r';
 }
 
 static zend_always_inline bool php_uri_parser_whatwg_is_alpha(const unsigned char c)

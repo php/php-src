@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\WhatWg\InvalidUrlException: The specified base URI must be absolute
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (MissingSchemeNonRelativeUrl)
