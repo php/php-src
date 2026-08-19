@@ -36,8 +36,8 @@ $foo = new FooChild();
 $foo->setBar('bar');
 try {
     unset($foo->bar);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo->bar ?? 'unset');
 
@@ -52,16 +52,16 @@ var_dump($foo->bar ?? 'unset');
 $foo->setSecret('beep');
 try {
     $foo->unsetSecret();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo->secret ?? 'unset');
 
 ?>
 --EXPECT--
-Cannot unset protected(set) property Foo::$bar from global scope
+Error: Cannot unset protected(set) property Foo::$bar from global scope
 string(3) "bar"
 string(5) "unset"
 string(5) "unset"
-Cannot unset private(set) property Foo::$secret from scope FooChild
+Error: Cannot unset private(set) property Foo::$secret from scope FooChild
 string(4) "beep"
