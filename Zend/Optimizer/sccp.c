@@ -387,7 +387,7 @@ static inline zend_result fetch_array_elem(zval **result, const zval *op1, const
 	}
 }
 
-static inline zend_result ct_eval_fetch_dim(zval *result, const zval *op1, const zval *op2, int support_strings) {
+static inline zend_result ct_eval_fetch_dim(zval *result, const zval *op1, const zval *op2, bool support_strings) {
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
 		zval *value;
 		if (fetch_array_elem(&value, op1, op2) == SUCCESS && value && !IS_BOT(value)) {
@@ -1301,7 +1301,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 					SKIP_IF_TOP(data);
 
-					if (ct_eval_fetch_dim(&tmp, op1, op2, 0) == SUCCESS) {
+					if (ct_eval_fetch_dim(&tmp, op1, op2, false) == SUCCESS) {
 						if (IS_BOT(data)) {
 							dup_partial_array(&zv, op1);
 							ct_eval_del_array_elem(&zv, op2);
