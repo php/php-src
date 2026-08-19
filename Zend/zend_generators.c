@@ -823,7 +823,7 @@ try_again:
 			EG(current_execute_data) = original_execute_data;
 			EG(jit_trace_num) = original_jit_trace_num;
 
-			orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
+			orig_generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
 			generator->flags &= ~(ZEND_GENERATOR_CURRENTLY_RUNNING | ZEND_GENERATOR_IN_FIBER);
 			return;
 		}
@@ -886,7 +886,6 @@ try_again:
 		} else {
 			generator = zend_generator_get_current(orig_generator);
 			zend_generator_throw_exception(generator, NULL);
-			orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 			delegator = orig_generator;
 			goto try_again;
 		}
@@ -904,7 +903,7 @@ try_again:
 		goto try_again;
 	}
 
-	orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
+	orig_generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
 }
 /* }}} */
 
