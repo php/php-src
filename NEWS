@@ -47,6 +47,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23088 (Stack overflow when comparing deeply nested arrays).
     (Lazizbek Ergashev)
 
+- SimpleXML:
+  . Fixed bug GH-12171 (SimpleXML property-proxy equality ignores element
+    names). (iliaal)
+
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
