@@ -9,9 +9,9 @@ ffi.enable=1
 $x = FFI::cdef()->new("int*");
 try {
 	$y = $x->foo;
-} catch (\FFI\Exception $e) {
-	echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Attempt to read field 'foo' of non C struct/union
+FFI\Exception: Attempt to read field 'foo' of non C struct/union
