@@ -79,6 +79,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-22857 (Function JIT emits wrong code for FETCH_OBJ_FUNC_ARG on a
     property hook getter, losing register-held variables). (Zhao Hao)
+  . Fixed crash in observer API calling cases() on an enum preloaded with
+    opcache_compile_file(). (Thomas Atkinson)
 
 - OpenSSL:
   . Fix missing error check on invalid alpn protocols. (ndossche)
