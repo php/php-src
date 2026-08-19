@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- SPL:
+  . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
+    __serialize() removes an element). (David Carlier)
+
 
 10 Sep 2026, PHP 8.6.0beta3
 
