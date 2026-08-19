@@ -471,7 +471,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				break;
 			case ZEND_TYPE_CHECK:
 optimize_type_check:
-				if (opline->extended_value == (1 << IS_TRUE) || opline->extended_value == (1 << IS_FALSE)) {
+				if (opline->extended_value == MAY_BE_TRUE || opline->extended_value == MAY_BE_FALSE) {
 					if (opline->op1_type == IS_TMP_VAR &&
 						!zend_bitset_in(used_ext, VAR_NUM(opline->op1.var))) {
 						src = VAR_SOURCE(opline->op1);
@@ -486,7 +486,7 @@ optimize_type_check:
 									 * T = BOOL_NOT(X) + TYPE_CHECK(T, FALSE) -> BOOL(X), NOP
 									 */
 									src->opcode =
-										((src->opcode == ZEND_BOOL) == (opline->extended_value == (1 << IS_TRUE))) ?
+										((src->opcode == ZEND_BOOL) == (opline->extended_value == MAY_BE_TRUE)) ?
 										ZEND_BOOL : ZEND_BOOL_NOT;
 									COPY_NODE(src->result, opline->result);
 									SET_VAR_SOURCE(src);
