@@ -5057,7 +5057,7 @@ static bool date_period_initialize(timelib_time **st, timelib_time **et, timelib
 
 	if (errors->error_count > 0) {
 		retval = false;
-		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "Unknown or bad format(%pS)", format);
+		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "Unknown or bad format (%pS)", format);
 		if (b) {
 			timelib_time_dtor(b);
 		}
