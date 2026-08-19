@@ -217,7 +217,7 @@ SAPI_API zend_result sapi_register_input_filter(unsigned int (*input_filter)(int
 
 SAPI_API zend_result sapi_flush(void);
 SAPI_API zend_stat_t *sapi_get_stat(void);
-SAPI_API char *sapi_getenv(const char *name, size_t name_len);
+SAPI_API zend_string *sapi_getenv(const char *name, size_t name_len);
 
 SAPI_API char *sapi_get_default_content_type(void);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header);
@@ -246,7 +246,7 @@ struct _sapi_module_struct {
 	size_t (*ub_write)(const char *str, size_t str_length);
 	void (*flush)(void *server_context);
 	zend_stat_t *(*get_stat)(void);
-	char *(*getenv)(const char *name, size_t name_len);
+	zend_string *(*getenv)(const char *name, size_t name_len);
 
 	void (*sapi_error)(int type, const char *error_msg, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
