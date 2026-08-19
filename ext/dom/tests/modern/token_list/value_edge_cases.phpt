@@ -12,8 +12,8 @@ var_dump($list->value);
 
 try {
     $list->value = "\0";
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($list->value);
@@ -21,5 +21,5 @@ var_dump($list->value);
 ?>
 --EXPECT--
 string(0) ""
-Value must not contain any null bytes
+ValueError: Value must not contain any null bytes
 string(0) ""

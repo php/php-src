@@ -7,30 +7,30 @@ dom
 $dom = Dom\HTMLDocument::createEmpty();
 try {
     $dom->createCDATASection("foo");
-} catch (DOMException $e) {
+} catch (Throwable $e) {
     var_dump($e->getCode());
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $dom->createCDATASection("]]>");
-} catch (DOMException $e) {
+} catch (Throwable $e) {
     var_dump($e->getCode());
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $dom = Dom\XMLDocument::createEmpty();
 try {
     $dom->createCDATASection("]]>");
-} catch (DOMException $e) {
+} catch (Throwable $e) {
     var_dump($e->getCode());
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $dom->createCDATASection("]>");
 ?>
 --EXPECT--
 int(9)
-This operation is not supported for HTML documents
+DOMException: This operation is not supported for HTML documents
 int(9)
-This operation is not supported for HTML documents
+DOMException: This operation is not supported for HTML documents
 int(5)
-Invalid character sequence "]]>" in CDATA section
+DOMException: Invalid character sequence "]]>" in CDATA section

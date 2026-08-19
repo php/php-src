@@ -12,14 +12,14 @@ class Demo extends DOMXPath {
 $demo = new Demo;
 try {
     var_dump($demo);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump($demo->document);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -28,5 +28,5 @@ object(Demo)#1 (1) {
   ["registerNodeNamespaces"]=>
   bool(true)
 }
-Invalid State Error
-Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
