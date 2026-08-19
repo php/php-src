@@ -78,8 +78,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(round($input, 14));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 };
@@ -141,25 +141,25 @@ float(1)
 float(0)
 
 -- Iteration 17 --
-round(): Argument #1 ($num) must be of type int|float, string given
+TypeError: round(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 18 --
-round(): Argument #1 ($num) must be of type int|float, string given
+TypeError: round(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 19 --
-round(): Argument #1 ($num) must be of type int|float, array given
+TypeError: round(): Argument #1 ($num) must be of type int|float, array given
 
 -- Iteration 20 --
-round(): Argument #1 ($num) must be of type int|float, string given
+TypeError: round(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 21 --
-round(): Argument #1 ($num) must be of type int|float, string given
+TypeError: round(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 22 --
-round(): Argument #1 ($num) must be of type int|float, string given
+TypeError: round(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 23 --
-round(): Argument #1 ($num) must be of type int|float, classA given
+TypeError: round(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 24 --
 
@@ -172,4 +172,4 @@ Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is de
 float(0)
 
 -- Iteration 26 --
-round(): Argument #1 ($num) must be of type int|float, resource given
+TypeError: round(): Argument #1 ($num) must be of type int|float, resource given

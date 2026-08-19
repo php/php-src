@@ -11,8 +11,8 @@ $context = stream_context_create([
 
 try {
     $stream = fopen('php://nonexistent', 'r', false, $context);
-} catch (StreamException $e) {
-    echo "Caught: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
     echo "Code: " . $e->getCode() . "\n";
     
     $errors = $e->getErrors();
@@ -25,7 +25,7 @@ try {
 
 ?>
 --EXPECTF--
-Caught: Failed to open stream: operation failed
+StreamException: Failed to open stream: operation failed
 Code: 21
 Wrapper: PHP
 Error code name: OpenFailed

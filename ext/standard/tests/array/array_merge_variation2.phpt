@@ -86,8 +86,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump( array_merge($arr1, $input) );
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 };
@@ -100,55 +100,55 @@ echo "Done";
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1 --
-array_merge(): Argument #2 must be of type array, int given
+TypeError: array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 2 --
-array_merge(): Argument #2 must be of type array, int given
+TypeError: array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 3 --
-array_merge(): Argument #2 must be of type array, int given
+TypeError: array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 4 --
-array_merge(): Argument #2 must be of type array, int given
+TypeError: array_merge(): Argument #2 must be of type array, int given
 
 -- Iteration 5 --
-array_merge(): Argument #2 must be of type array, float given
+TypeError: array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 6 --
-array_merge(): Argument #2 must be of type array, float given
+TypeError: array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 7 --
-array_merge(): Argument #2 must be of type array, float given
+TypeError: array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 8 --
-array_merge(): Argument #2 must be of type array, float given
+TypeError: array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 9 --
-array_merge(): Argument #2 must be of type array, float given
+TypeError: array_merge(): Argument #2 must be of type array, float given
 
 -- Iteration 10 --
-array_merge(): Argument #2 must be of type array, null given
+TypeError: array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 11 --
-array_merge(): Argument #2 must be of type array, null given
+TypeError: array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 12 --
-array_merge(): Argument #2 must be of type array, true given
+TypeError: array_merge(): Argument #2 must be of type array, true given
 
 -- Iteration 13 --
-array_merge(): Argument #2 must be of type array, false given
+TypeError: array_merge(): Argument #2 must be of type array, false given
 
 -- Iteration 14 --
-array_merge(): Argument #2 must be of type array, true given
+TypeError: array_merge(): Argument #2 must be of type array, true given
 
 -- Iteration 15 --
-array_merge(): Argument #2 must be of type array, false given
+TypeError: array_merge(): Argument #2 must be of type array, false given
 
 -- Iteration 16 --
-array_merge(): Argument #2 must be of type array, string given
+TypeError: array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 17 --
-array_merge(): Argument #2 must be of type array, string given
+TypeError: array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 18 --
 array(2) {
@@ -159,23 +159,23 @@ array(2) {
 }
 
 -- Iteration 19 --
-array_merge(): Argument #2 must be of type array, string given
+TypeError: array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 20 --
-array_merge(): Argument #2 must be of type array, string given
+TypeError: array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 21 --
-array_merge(): Argument #2 must be of type array, string given
+TypeError: array_merge(): Argument #2 must be of type array, string given
 
 -- Iteration 22 --
-array_merge(): Argument #2 must be of type array, classA given
+TypeError: array_merge(): Argument #2 must be of type array, classA given
 
 -- Iteration 23 --
-array_merge(): Argument #2 must be of type array, null given
+TypeError: array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 24 --
-array_merge(): Argument #2 must be of type array, null given
+TypeError: array_merge(): Argument #2 must be of type array, null given
 
 -- Iteration 25 --
-array_merge(): Argument #2 must be of type array, resource given
+TypeError: array_merge(): Argument #2 must be of type array, resource given
 Done

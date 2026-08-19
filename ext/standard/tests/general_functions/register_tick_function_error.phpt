@@ -6,9 +6,9 @@ declare(ticks=1);
 
 try {
     register_tick_function("a");
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-register_tick_function(): Argument #1 ($callback) must be a valid callback, function "a" not found or invalid function name
+TypeError: register_tick_function(): Argument #1 ($callback) must be a valid callback, function "a" not found or invalid function name

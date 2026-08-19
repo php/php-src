@@ -9,11 +9,11 @@ var_dump(
 );
 try {
     $a[] = "bar";
-} catch (Error $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 int(1)
 bool(true)
-Cannot add element to the array as the next element is already occupied
+Error: Cannot add element to the array as the next element is already occupied

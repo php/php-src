@@ -9,11 +9,11 @@ var_dump(stream_get_contents($tmp, 2, 1));
 
 try {
     stream_get_contents($tmp, -2);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 string(2) "bc"
-stream_get_contents(): Argument #2 ($length) must be greater than or equal to -1
+ValueError: stream_get_contents(): Argument #2 ($length) must be greater than or equal to -1

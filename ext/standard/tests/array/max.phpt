@@ -7,20 +7,20 @@ precision=14
 
 try {
     var_dump(max(1));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(max(array()));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(max(new stdclass));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(max(2,1,2));
@@ -33,9 +33,9 @@ var_dump(max(0, true, false, true));
 
 ?>
 --EXPECT--
-max(): Argument #1 ($value) must be of type array, int given
-max(): Argument #1 ($value) must contain at least one element
-max(): Argument #1 ($value) must be of type array, stdClass given
+TypeError: max(): Argument #1 ($value) must be of type array, int given
+ValueError: max(): Argument #1 ($value) must contain at least one element
+TypeError: max(): Argument #1 ($value) must be of type array, stdClass given
 int(2)
 float(2.11)
 string(1) "t"

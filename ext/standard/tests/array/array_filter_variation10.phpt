@@ -32,7 +32,7 @@ echo "*** Testing array_filter() : usage variations - 'callback' expecting secon
 try {
     var_dump( array_filter($small, 'dump', false) );
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "*** Testing array_filter() with various use types ***\n";
@@ -45,8 +45,8 @@ var_dump(array_filter($mixed, 'is_numeric', 0));
 
 try {
     var_dump(array_filter($mixed, 'is_numeric', ARRAY_FILTER_USE_BOTH));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done"
@@ -73,7 +73,7 @@ array(3) {
   NULL
 }
 *** Testing array_filter() : usage variations - 'callback' expecting second argument ***
-Exception: Too few arguments to function dump(), 1 passed and exactly 2 expected
+ArgumentCountError: Too few arguments to function dump(), 1 passed and exactly 2 expected
 *** Testing array_filter() with various use types ***
 array(2) {
   [1]=>
@@ -87,5 +87,5 @@ array(2) {
   ["b"]=>
   int(2)
 }
-is_numeric() expects exactly 1 argument, 2 given
+ArgumentCountError: is_numeric() expects exactly 1 argument, 2 given
 Done

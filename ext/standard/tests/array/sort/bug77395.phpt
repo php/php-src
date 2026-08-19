@@ -13,9 +13,9 @@ $data = [['aa'=> 'bb',], ['aa'=> 'bb',],];
 
 try {
     array_multisort(array_column($data, 'bb'),SORT_DESC, $data); // PHP Warning error
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Array sizes are inconsistent
+ValueError: Array sizes are inconsistent
