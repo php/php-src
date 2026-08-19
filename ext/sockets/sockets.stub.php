@@ -2313,7 +2313,7 @@ function socket_sendmsg(Socket $socket, array $message, int $flags = 0): int|fal
 
 function socket_recvmsg(Socket $socket, array &$message, int $flags = 0): int|false {}
 
-function socket_cmsg_space(int $level, int $type, int $num = 0): ?int {}
+function socket_cmsg_space(int $level, int $type, int $num = 0): int {}
 
 /**
  * @return array<int, AddressInfo>|false

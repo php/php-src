@@ -1,5 +1,5 @@
 /* This is a generated file, edit sockets.stub.php instead.
- * Stub hash: 5e71ef16f2121bd6c75794673d0e0a394759ff8b */
+ * Stub hash: 711d3b84051445917c4a8a1d0cdc1d0c6328be07 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -174,7 +174,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_recvmsg, 0, 2, MAY_BE_LON
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_cmsg_space, 0, 2, IS_LONG, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_cmsg_space, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, level, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, num, IS_LONG, 0, "0")
