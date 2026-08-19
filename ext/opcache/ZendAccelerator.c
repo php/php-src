@@ -127,7 +127,7 @@ bool fallback_process = false; /* process uses file cache fallback */
 #endif
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
-static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
+static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_entry *ce, const zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
 static zend_class_entry* (*accelerator_orig_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);
 static zend_result (*accelerator_orig_zend_stream_open_function)(zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(zend_string *filename);
@@ -2529,7 +2529,7 @@ static zend_always_inline zend_inheritance_cache_entry* zend_accel_inheritance_c
 	return NULL;
 }
 
-static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
+static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, const zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
 {
 	bool needs_autoload;
 	zend_inheritance_cache_entry *entry = ce->inheritance_cache;

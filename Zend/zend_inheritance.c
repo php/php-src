@@ -31,7 +31,7 @@
 #include "zend_constants.h"
 #include "zend_observer.h"
 
-ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
+ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, const zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
 
 /* Unresolved means that class declarations that are currently not available are needed to
