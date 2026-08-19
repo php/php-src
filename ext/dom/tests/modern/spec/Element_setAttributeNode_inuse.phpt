@@ -20,5 +20,5 @@ echo $dom1->saveHtml(), "\n";
 
 ?>
 --EXPECT--
-Inuse Attribute Error
+In Use Attribute Error
 <container my-attribute="1"><element></element></container>

@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     2GB on some platforms, e.g. Windows. (Sjoerd Langkemper)
 
 - DOM:
+  . Fixed a typo in the DOMException message for INUSE_ATTRIBUTE_ERR.
+    (Weilin Du)
   . Fixed bug GH-22624 (use-after-free via DOMNameSpaceNode after
     DOMDocument::xinclude()). (David Carlier)
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
