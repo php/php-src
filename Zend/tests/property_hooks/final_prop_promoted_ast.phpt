@@ -6,12 +6,12 @@ try {
     assert(false && new class {
         public function __construct(public final $prop) {}
     });
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-assert(false && new class {
+AssertionError: assert(false && new class {
     public function __construct(public final $prop) {
     }
 

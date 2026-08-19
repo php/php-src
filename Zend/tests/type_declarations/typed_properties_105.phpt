@@ -17,4 +17,3 @@ var_dump(array_key_exists('c', $defaults));
 array(0) {
 }
 bool(false)
-

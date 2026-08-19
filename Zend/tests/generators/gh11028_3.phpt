@@ -14,9 +14,9 @@ function generator() {
 try {
     var_dump([...generator()]);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Deprecated: Returning from a finally block is deprecated in %s on line %d
-exception
+Exception: exception

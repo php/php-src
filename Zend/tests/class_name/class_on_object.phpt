@@ -16,8 +16,8 @@ function test() {
 }
 try {
     test();
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -25,4 +25,4 @@ try {
 string(8) "stdClass"
 string(8) "stdClass"
 string(8) "stdClass"
-Cannot use "::class" on null
+TypeError: Cannot use "::class" on null

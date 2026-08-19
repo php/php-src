@@ -5,10 +5,10 @@ Pipe precedence 005
 
 try {
     assert(false && 1 |> (fn() => 2));
-} catch (AssertionError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(false && 1 |> (fn() => 2))
+AssertionError: assert(false && 1 |> (fn() => 2))

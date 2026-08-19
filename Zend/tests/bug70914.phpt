@@ -9,9 +9,9 @@ $db = new PDO('sqlite::memory:');
 $st = $db->query('SELECT 1');
 try {
     $re = $st->fetchObject('%Z');
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-PDOStatement::fetchObject(): Argument #1 ($class) must be a valid class name, %Z given
+TypeError: PDOStatement::fetchObject(): Argument #1 ($class) must be a valid class name, %Z given

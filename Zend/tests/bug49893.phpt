@@ -6,8 +6,8 @@ class A {
     function __destruct() {
         try {
             throw new Exception("2");
-        } catch (Exception $e) {
-            echo $e->getMessage() . "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -20,10 +20,10 @@ class B {
 }
 try {
     $b = new B();
-} catch(Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch(Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-2
-1
+Exception: 2
+Exception: 1

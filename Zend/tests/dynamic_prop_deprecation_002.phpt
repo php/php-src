@@ -10,9 +10,9 @@ $a = new class{};
 try {
     [&$a->y];
 } catch (Throwable $ex) {
-	echo "Exception: " .$ex->getMessage() . "\n";
+	echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 Err: Creation of dynamic property class@anonymous::$y is deprecated
-Exception: Cannot create dynamic property class@anonymous::$y
+Error: Cannot create dynamic property class@anonymous::$y

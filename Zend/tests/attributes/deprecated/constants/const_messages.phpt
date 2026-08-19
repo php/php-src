@@ -46,4 +46,3 @@ Deprecated: Constant DeprecatedConst5 is deprecated since 1.0, use DEPRECATED_CO
 
 Deprecated: Constant DeprecatedConst6 is deprecated since 1.0 in %s on line %d
 6
-

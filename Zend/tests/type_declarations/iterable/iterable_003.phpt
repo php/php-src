@@ -20,7 +20,7 @@ var_dump(bar());
 try {
     baz();
 } catch (Throwable $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -31,4 +31,4 @@ object(Generator)#%d (1) {
   ["function"]=>
   string(17) "{closure:bar():7}"
 }
-baz(): Return value must be of type Traversable|array, int returned
+TypeError: baz(): Return value must be of type Traversable|array, int returned

@@ -13,4 +13,3 @@ var_dump(D::HW);
 ?>
 --EXPECTF--
 Fatal error: Constant expression contains invalid operations in %sgh7771_3.php(7) : eval()'d code on line 1
-

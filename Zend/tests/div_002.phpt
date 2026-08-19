@@ -8,8 +8,8 @@ $b = array(1);
 
 try {
     var_dump($a / $b);
-} catch (Error $e) {
-    echo "\nException: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $c = $a / $b;
@@ -18,7 +18,7 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Exception: Unsupported operand types: array / array
+TypeError: Unsupported operand types: array / array
 
 Fatal error: Uncaught TypeError: Unsupported operand types: array / array in %s:%d
 Stack trace:

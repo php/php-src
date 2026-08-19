@@ -28,17 +28,17 @@ $foo = new Foo(1, 1);
 
 try {
     $foo->wrongCloneOld();
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     $foo->wrongCloneNew();
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot modify readonly property Foo::$bar
-Cannot modify readonly property Foo::$baz
+Error: Cannot modify readonly property Foo::$bar
+Error: Cannot modify readonly property Foo::$baz
