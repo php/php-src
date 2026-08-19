@@ -19,15 +19,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-#if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
+#if defined(__linux__)
+# include <php_config.h>
+# if defined(HAVE_MEMFD_CREATE)
+#  include <sys/mman.h>
 # endif
-# include <sys/mman.h>
 #endif
 
 #include <errno.h>
