@@ -17,6 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
 # ifndef _GNU_SOURCE
 #  define _GNU_SOURCE
