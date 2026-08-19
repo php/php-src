@@ -782,6 +782,10 @@ try_again:
 		return;
 	}
 
+	/* The flag applies to this resume only: if it stays set on a delegating
+	 * generator other than orig_generator, it suppresses a later resume of it */
+	delegator->flags &= ~ZEND_GENERATOR_DO_INIT;
+
 	if (EG(active_fiber)) {
 		orig_generator->flags |= ZEND_GENERATOR_IN_FIBER;
 		generator->flags |= ZEND_GENERATOR_IN_FIBER;
@@ -890,7 +894,7 @@ try_again:
 
 	/* yield from was used, try another resume. */
 	if (UNEXPECTED(generator->execute_data && generator->execute_data->opline->opcode == ZEND_YIELD_FROM)) {
-		delegator = generator->node.parent ? generator : orig_generator;
+		delegator = generator;
 		generator = zend_generator_get_current(orig_generator);
 		goto try_again;
 	}

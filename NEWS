@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
   . Fixed bug GH-23301 (Nested "yield from" yields a value twice when the
-    middle generator ends with "yield from []"). (Lazizbek Ergashev)
+    middle generator delegates again). (Lazizbek Ergashev)
 
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
