@@ -37,4 +37,4 @@ array(2) {
   ["aa"]=>
   int(4)
 }
-get_class_vars(): Argument #1 ($class) must be a valid class name, Unknown given
+get_class_vars(): Argument #1 ($class) must be a valid class name, "Unknown" given

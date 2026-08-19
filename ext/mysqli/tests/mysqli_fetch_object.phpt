@@ -146,5 +146,5 @@ NULL
 NULL
 mysqli_result object is already closed
 TypeError: mysqli_fetch_object(): Argument #3 ($constructor_args) must be of type array, string given
-TypeError: mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, this_class_does_not_exist given
+TypeError: mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, "this_class_does_not_exist" given
 done!
