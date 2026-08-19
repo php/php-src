@@ -1527,9 +1527,11 @@ static zend_always_inline void zend_mm_free_heap(zend_mm_heap *heap, void *ptr Z
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 		if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
 			zend_mm_free_small(heap, ptr, ZEND_MM_SRUN_BIN_NUM(info));
-		} else /* if (info & ZEND_MM_IS_LRUN) */ {
-			int pages_count = ZEND_MM_LRUN_PAGES(info);
+		} else {
+			/* A freed large run has a zeroed map entry, so this also rejects double frees. */
+			ZEND_MM_CHECK(info & ZEND_MM_IS_LRUN, "zend_mm_heap corrupted");
 
+			int pages_count = ZEND_MM_LRUN_PAGES(info);
 			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "zend_mm_heap corrupted");
 			zend_mm_free_large(heap, chunk, page_num, pages_count);
 		}
@@ -1557,7 +1559,8 @@ static size_t zend_mm_size(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZEND_
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 		if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
 			return bin_data_size[ZEND_MM_SRUN_BIN_NUM(info)];
-		} else /* if (info & ZEND_MM_IS_LARGE_RUN) */ {
+		} else {
+			ZEND_MM_CHECK(info & ZEND_MM_IS_LRUN, "zend_mm_heap corrupted");
 			return ZEND_MM_LRUN_PAGES(info) * ZEND_MM_PAGE_SIZE;
 		}
 #endif
@@ -1752,7 +1755,8 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 				return ret;
 			}  while (0);
 
-		} else /* if (info & ZEND_MM_IS_LARGE_RUN) */ {
+		} else {
+			ZEND_MM_CHECK(info & ZEND_MM_IS_LRUN, "zend_mm_heap corrupted");
 			ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(page_offset, ZEND_MM_PAGE_SIZE) == 0, "zend_mm_heap corrupted");
 			old_size = ZEND_MM_LRUN_PAGES(info) * ZEND_MM_PAGE_SIZE;
 			if (size > ZEND_MM_MAX_SMALL_SIZE && size <= ZEND_MM_MAX_LARGE_SIZE) {
