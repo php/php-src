@@ -40,38 +40,38 @@ echo "\n";
 
 try {
     printf("%.*G\n", "foo", 1.5);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     printf("%.*G\n", -100, 1.5);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     printf("%.*s\n", -1, "Foo");
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     printf("%*G\n", -1, $f);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     printf("%9999999999999999999999.f\n", $f);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     printf("%.9999999999999999999999f\n", $f);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -104,9 +104,9 @@ foo
      1.235
      1.235
 
-Precision must be an integer
-Precision must be between -1 and 2147483647
-Precision -1 is only supported for %g, %G, %h and %H
-Width must be between 0 and 2147483647
-Width must be between 0 and 2147483647
-Precision must be between 0 and 2147483647
+ValueError: Precision must be an integer
+ValueError: Precision must be between -1 and 2147483647
+ValueError: Precision -1 is only supported for %g, %G, %h and %H
+ValueError: Width must be between 0 and 2147483647
+ValueError: Width must be between 0 and 2147483647
+ValueError: Precision must be between 0 and 2147483647

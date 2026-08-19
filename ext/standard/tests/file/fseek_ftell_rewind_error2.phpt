@@ -11,8 +11,8 @@ $fp = fopen(__FILE__, "r");
 fclose($fp);
 try {
     var_dump(ftell($fp));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -20,5 +20,5 @@ echo "Done\n";
 --EXPECT--
 *** Testing ftell() : error conditions ***
 -- Testing ftell with closed/unset file handle --
-ftell(): Argument #1 ($stream) must be an open stream resource
+TypeError: ftell(): Argument #1 ($stream) must be an open stream resource
 Done

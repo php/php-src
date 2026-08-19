@@ -53,8 +53,8 @@ echo "assert_options(ASSERT_CALLBACK) => [".assert_options(ASSERT_CALLBACK)."]\n
 echo "ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n";
 try {
     var_dump($r2=assert(0 != 0));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo"\n";
 
@@ -133,7 +133,7 @@ Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options(
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 assert_options(ASSERT_CALLBACK) => [c1]
 ini.get("assert.callback") => [f2]
-Invalid callback c1, function "c1" not found or invalid function name
+Error: Invalid callback c1, function "c1" not found or invalid function name
 
 Reset callback options to use a class method
 

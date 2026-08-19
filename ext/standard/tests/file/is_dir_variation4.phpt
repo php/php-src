@@ -31,8 +31,8 @@ foreach($dirs_arr as $dir) {
   echo "\n-- Iteration $count --\n";
   try {
     var_dump( is_dir($file_path."/".$dir ) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $count++;
 }

@@ -34,8 +34,8 @@ chmod(__DIR__ . "/gh7875.mail.log", 0444);
 try {
 	mail('recipient@example.com', 'Subject', 'Body', []);
 	echo 'Not Reached';
-} catch (\Exception $e) {
-	echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump(file_exists(__DIR__ . "/gh7875.mail.out"));
 }
 ?>
@@ -46,5 +46,5 @@ try {
 @unlink(__DIR__ . "/gh7875.mail.out");
 ?>
 --EXPECTF--
-mail(): Failed to open stream: Permission denied
+ErrorException: mail(): Failed to open stream: Permission denied
 bool(false)

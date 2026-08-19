@@ -11,26 +11,26 @@ var_dump(str_word_count($str));
 
 try {
     var_dump(str_word_count($str, 3));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(str_word_count($str, 123));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(str_word_count($str, -1));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(str_word_count($str, 999999999));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($str);
@@ -87,10 +87,10 @@ array(6) {
   string(5) "today"
 }
 int(6)
-str_word_count(): Argument #2 ($format) must be a valid format value
-str_word_count(): Argument #2 ($format) must be a valid format value
-str_word_count(): Argument #2 ($format) must be a valid format value
-str_word_count(): Argument #2 ($format) must be a valid format value
+ValueError: str_word_count(): Argument #2 ($format) must be a valid format value
+ValueError: str_word_count(): Argument #2 ($format) must be a valid format value
+ValueError: str_word_count(): Argument #2 ($format) must be a valid format value
+ValueError: str_word_count(): Argument #2 ($format) must be a valid format value
 string(53) "Hello friend, you're
     looking          good today!"
 int(5)

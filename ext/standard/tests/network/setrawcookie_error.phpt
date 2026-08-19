@@ -9,28 +9,28 @@ ob_start();
 
 try {
     setrawcookie('');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     setrawcookie('invalid=');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     setrawcookie('name', 'invalid;');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     setrawcookie('name', 'value', 100, 'invalid;');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     setrawcookie('name', 'value', 100, 'path', 'invalid;');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 if (PHP_INT_SIZE == 8) {
@@ -50,11 +50,11 @@ var_dump(headers_list());
 --EXPECTHEADERS--
 
 --EXPECTF--
-setrawcookie(): Argument #1 ($name) must not be empty
-setrawcookie(): Argument #1 ($name) cannot contain "=", ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
-setrawcookie(): Argument #2 ($value) cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
-setrawcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
-setrawcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+ValueError: setrawcookie(): Argument #1 ($name) must not be empty
+ValueError: setrawcookie(): Argument #1 ($name) cannot contain "=", ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+ValueError: setrawcookie(): Argument #2 ($value) cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+ValueError: setrawcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+ValueError: setrawcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
 bool(true)
 array(1) {
   [0]=>

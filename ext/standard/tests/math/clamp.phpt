@@ -22,14 +22,14 @@ function check_clamp_result($value, $min, $max) {
 function check_clamp_exception($value, $min, $max) {
     try {
         var_dump(clamp($value, $min, $max));
-    } catch (ValueError $error) {
-        echo $error->getMessage(), "\n";
+    } catch (Throwable $error) {
+        echo $error::class, ': ', $error->getMessage(), "\n";
     }
 
     try {
         var_dump(make_clamp_fcc()($value, $min, $max));
-    } catch (ValueError $error) {
-        echo $error->getMessage(), "\n";
+    } catch (Throwable $error) {
+        echo $error::class, ': ', $error->getMessage(), "\n";
     }
 }
 
@@ -92,13 +92,13 @@ int(10)
 InvalidArgumentException
 RuntimeException
 LogicException
-clamp(): Argument #2 ($min) must not be NAN
-clamp(): Argument #2 ($min) must not be NAN
-clamp(): Argument #3 ($max) must not be NAN
-clamp(): Argument #3 ($max) must not be NAN
-clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
-clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
-clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
-clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
-clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
-clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+ValueError: clamp(): Argument #2 ($min) must not be NAN
+ValueError: clamp(): Argument #2 ($min) must not be NAN
+ValueError: clamp(): Argument #3 ($max) must not be NAN
+ValueError: clamp(): Argument #3 ($max) must not be NAN
+ValueError: clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+ValueError: clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+ValueError: clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+ValueError: clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+ValueError: clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)
+ValueError: clamp(): Argument #2 ($min) must be smaller than or equal to argument #3 ($max)

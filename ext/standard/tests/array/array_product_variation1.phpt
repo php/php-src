@@ -53,4 +53,3 @@ array
 
 Warning: array_product(): Multiplication is not supported on type array in %s on line %d
 int(1)
-

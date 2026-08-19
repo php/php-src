@@ -18,8 +18,8 @@ $bar = null;
 if (!is_countable($bar)) {
     try {
         count($bar);
-    } catch (\TypeError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
@@ -28,4 +28,4 @@ bool(true)
 bool(true)
 bool(false)
 int(2)
-count(): Argument #1 ($value) must be of type Countable|array, null given
+TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given

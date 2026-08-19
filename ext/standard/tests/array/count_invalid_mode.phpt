@@ -17,8 +17,8 @@ $modes = [
 foreach ($modes as $mode) {
     try {
         var_dump(count([], $mode));
-    } catch (\ValueError $error) {
-        echo $error->getMessage() . \PHP_EOL;
+    } catch (\Throwable $error) {
+        echo $error::class, ': ', $error->getMessage(), "\n";
     }
 }
 ?>
@@ -27,7 +27,7 @@ int(0)
 int(0)
 int(0)
 int(0)
-count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
-count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
+ValueError: count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
+ValueError: count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
 int(0)
 int(0)

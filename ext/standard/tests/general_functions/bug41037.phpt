@@ -7,8 +7,8 @@ function a() {
     echo "hello\n";
     try {
         unregister_tick_function('a');
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -20,7 +20,7 @@ declare (ticks=1) {
 ?>
 --EXPECT--
 hello
-Registered tick function cannot be unregistered while it is being executed
+Error: Registered tick function cannot be unregistered while it is being executed
 Done
 hello
-Registered tick function cannot be unregistered while it is being executed
+Error: Registered tick function cannot be unregistered while it is being executed

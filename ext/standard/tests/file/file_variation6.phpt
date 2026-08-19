@@ -11,8 +11,8 @@ fclose($fd);
 for ($flags = 0; $flags <= 32; $flags++) {
     try {
         var_dump(file($filepath, $flags));
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -95,14 +95,14 @@ array(3) {
   [2]=>
   string(6) "Line 3"
 }
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
 array(3) {
   [0]=>
   string(7) "Line 1
@@ -175,12 +175,12 @@ array(3) {
   [2]=>
   string(6) "Line 3"
 }
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
-file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value
+ValueError: file(): Argument #2 ($flags) must be a valid flag value

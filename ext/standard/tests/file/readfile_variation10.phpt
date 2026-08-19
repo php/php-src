@@ -35,8 +35,8 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo "-- testing '$name' --\n";
     try {
         readfile($name);
-    } catch (\TypeError|\ValueError $e) {
-        echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>

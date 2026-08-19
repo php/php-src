@@ -6,8 +6,8 @@ GH-19300 (Nested array_multisort invocation with error breaks) - error variation
 function error_handle($level, $message, $file = '', $line = 0){
     try {
         array_multisort($a, SORT_ASC); // Trigger multisort abort
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 set_error_handler('error_handle');
@@ -22,10 +22,10 @@ var_dump(array_multisort($inputs, SORT_NUMERIC));
 var_dump($inputs);
 ?>
 --EXPECT--
-array_multisort(): Argument #1 ($array) must be an array or a sort flag
-array_multisort(): Argument #1 ($array) must be an array or a sort flag
-array_multisort(): Argument #1 ($array) must be an array or a sort flag
-array_multisort(): Argument #1 ($array) must be an array or a sort flag
+TypeError: array_multisort(): Argument #1 ($array) must be an array or a sort flag
+TypeError: array_multisort(): Argument #1 ($array) must be an array or a sort flag
+TypeError: array_multisort(): Argument #1 ($array) must be an array or a sort flag
+TypeError: array_multisort(): Argument #1 ($array) must be an array or a sort flag
 bool(true)
 array(3) {
   [0]=>

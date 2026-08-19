@@ -5,8 +5,8 @@ GH-14775: Range negative step overflow
 $var = -PHP_INT_MAX - 1;
 try {
 	range($var,1,$var);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 --EXPECTF--
-range(): Argument #3 ($step) must be greater than %s
+ValueError: range(): Argument #3 ($step) must be greater than %s

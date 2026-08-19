@@ -9,9 +9,9 @@ display_errors=false
 <?php
 try {
     file_get_contents("http://checkip.dyndns.com",null,null,0,-1);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-file_get_contents(): Argument #5 ($length) must be greater than or equal to 0
+ValueError: file_get_contents(): Argument #5 ($length) must be greater than or equal to 0

@@ -10,8 +10,8 @@ fclose($fp);
 
 try {
     var_dump(flock($fp, LOCK_SH|LOCK_NB));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /*
@@ -41,8 +41,8 @@ var_dump(flock($fp, -1));
 
 try {
     var_dump(flock($fp, 0));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -52,7 +52,7 @@ $file = __DIR__."/flock.dat";
 unlink($file);
 ?>
 --EXPECT--
-flock(): Argument #1 ($stream) must be an open stream resource
+TypeError: flock(): Argument #1 ($stream) must be an open stream resource
 bool(true)
 bool(true)
 bool(true)
@@ -66,4 +66,4 @@ int(0)
 bool(true)
 int(0)
 bool(true)
-flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
+ValueError: flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN

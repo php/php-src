@@ -5,9 +5,9 @@ Bug #71220 (Null pointer deref (segfault) in compact via ob_start)
 ob_start("compact");
 try {
     ob_end_clean();
-} catch (\Error $e) {
-    echo $e->getMessage();
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot call compact() dynamically
+Error: Cannot call compact() dynamically

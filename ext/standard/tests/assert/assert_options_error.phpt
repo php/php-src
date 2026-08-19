@@ -5,10 +5,10 @@ assert_options() - unknown assert option.
 <?php
 try {
     assert_options(1000);
-} catch (\ValueError $e) {
-    echo $e->getMessage();
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
-assert_options(): Argument #1 ($option) must be an ASSERT_* constant
+ValueError: assert_options(): Argument #1 ($option) must be an ASSERT_* constant

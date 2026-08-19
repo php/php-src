@@ -31,8 +31,8 @@ foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
   try {
     var_dump( is_file( $file_path."/".$file ) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   clearstatcache();
   $count++;
