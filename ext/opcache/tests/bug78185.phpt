@@ -38,4 +38,3 @@ foreach (glob($pattern) as $p) {
 ?>
 --EXPECTF--
 string(%d) "%s78185.php.bin"
-
