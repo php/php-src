@@ -32,17 +32,6 @@ PHP                                                                        NEWS
   . Fixed imageaffinematrixget() and imageaffinematrixconcat() reporting the
     wrong argument in error messages. (Weilin Du)
 
-- PDO:
-  . Fixed a leak when a persistent connection failed a liveness check
-    with no other live PDO handle. (iliaal)
-
-- PDO_PGSQL:
-  . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
-    loop when cleaning up a fetch left in a COPY, a use-after-free when a
-    statement with emulated or disabled prepares is destroyed, a connection
-    left busy for the next fetch, and rows delivered from a result another
-    statement took over. (KentarouTakeda)
-
 - Intl:
   . Fixed grapheme_strrev() treating UBRK_DONE as a byte index and leaving
     the result without a terminating NUL. (iliaal)
@@ -54,6 +43,17 @@ PHP                                                                        NEWS
     (iliaal, Xuyang Zhang)
   . Fixed grapheme_str_split() treating UBRK_DONE as a byte index. (iliaal)
 
+- PDO:
+  . Fixed a leak when a persistent connection failed a liveness check
+    with no other live PDO handle. (iliaal)
+
+- PDO_PGSQL:
+  . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
+    loop when cleaning up a fetch left in a COPY, a use-after-free when a
+    statement with emulated or disabled prepares is destroyed, a connection
+    left busy for the next fetch, and rows delivered from a result another
+    statement took over. (KentarouTakeda)
+
 - Phar:
   . Fixed Phar archives being automatically detected when ".phar" only occurs
     in a directory name or is not a filename extension in an included file's
@@ -61,6 +61,9 @@ PHP                                                                        NEWS
 
 - Readline:
   . Fixed class constant completion in the interactive shell. (Weilin Du)
+
+- SAPI:
+  . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
 
 - Session:
   . Fixed bug GH-23056 (missing handler name in session write warning).
@@ -71,9 +74,6 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
     is freed while the stream is still open). (Eyüp Can Akman)
-
-- SAPI:
-  . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
 
 13 Aug 2026, PHP 8.6.0beta1
 
