@@ -89,7 +89,7 @@ typedef struct snmp_session php_snmp_session;
 	} \
 }
 
-static int mib_needs_reset;
+static bool mib_needs_reset;
 
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
