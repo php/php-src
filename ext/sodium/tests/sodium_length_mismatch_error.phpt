@@ -12,8 +12,8 @@ foreach (['sodium_add', 'sodium_memcmp', 'sodium_compare'] as $function) {
     try {
         $first = $short;
         $function($first, $long);
-    } catch (SodiumException $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -24,8 +24,8 @@ foreach ((new ReflectionFunction('sodium_add'))->getParameters() as $parameter) 
 
 ?>
 --EXPECT--
-sodium_add(): Argument #1 ($string1) and argument #2 ($string2) must have the same length
-sodium_memcmp(): Argument #1 ($string1) and argument #2 ($string2) must have the same length
-sodium_compare(): Argument #1 ($string1) and argument #2 ($string2) must have the same length
+SodiumException: sodium_add(): Argument #1 ($string1) and argument #2 ($string2) must have the same length
+SodiumException: sodium_memcmp(): Argument #1 ($string1) and argument #2 ($string2) must have the same length
+SodiumException: sodium_compare(): Argument #1 ($string1) and argument #2 ($string2) must have the same length
 $string1
 $string2
