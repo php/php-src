@@ -3,12 +3,17 @@ Test Uri\Rfc3986\Uri serialization and unserialization
 --FILE--
 <?php
 
-$uri1 = new Uri\Rfc3986\Uri("https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists");
-$serializedUri1 = serialize($uri1);
-$uri2 = unserialize($serializedUri1);
+$uri1 = new Uri\Rfc3986\Uri(
+    "https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"
+);
 
+$serializedUri1 = serialize($uri1);
 var_dump($serializedUri1);
+
+$uri2 = unserialize($serializedUri1);
 var_dump($uri2);
+var_dump($uri2->toRawString());
+var_dump($uri2->toString());
 
 ?>
 --EXPECTF--
@@ -31,3 +36,5 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["fragment"]=>
   string(11) "hash-exists"
 }
+string(99) "https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"
+string(99) "https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"

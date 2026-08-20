@@ -1,5 +1,5 @@
 --TEST--
-Test JSON encoding Uri\WhatWg\Url
+Test Uri\WhatWg\Url json_encode() - success
 --FILE--
 <?php
 

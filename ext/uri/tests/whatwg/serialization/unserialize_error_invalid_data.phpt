@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url unserialization with invalid data
+Test Uri\WhatWg\Url unserialize() - error - invalid data
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri parsing with a relative base URI
+Test Uri\Rfc3986\Uri parsing - basic - base URI is a relative reference
 --FILE--
 <?php
 

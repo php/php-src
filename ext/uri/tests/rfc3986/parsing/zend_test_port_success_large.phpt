@@ -1,5 +1,5 @@
 --TEST--
-Test the handling large ports for the uri struct
+Test the handling of large ports for the uri struct
 --EXTENSIONS--
 zend_test
 --FILE--
