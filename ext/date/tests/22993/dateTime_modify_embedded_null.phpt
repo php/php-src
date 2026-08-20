@@ -7,10 +7,10 @@ $now = new DateTime();
 
 try {
     $now->modify("foo\0bar");
-} catch (DateMalformedStringException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-DateTime::modify(): Failed to parse time string (foo%0bar) at position %s
+DateMalformedStringException: DateTime::modify(): Failed to parse time string (foo%0bar) at position %s

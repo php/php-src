@@ -5,10 +5,10 @@ GH-22993: DatePeriod::createFromISO8601String() rejects embedded NUL byte
 
 try {
     DatePeriod::createFromISO8601String("foo\0bar");
-} catch (ValueError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-DatePeriod::createFromISO8601String(): Argument #1 ($specification) must not contain any null bytes
+ValueError: DatePeriod::createFromISO8601String(): Argument #1 ($specification) must not contain any null bytes

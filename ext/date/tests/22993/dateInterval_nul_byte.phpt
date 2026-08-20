@@ -15,4 +15,10 @@ Fatal error: Uncaught ValueError: DateInterval::__construct(): Argument #1 ($dur
 Stack trace:
 #0 %s(%d): DateInterval->__construct('foo\x00bar')
 #1 {main}
-  thrown in %s on line %d
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECTF--
+ValueError: DateInterval::__construct(): Argument #1 ($duration) must not contain any null bytes
