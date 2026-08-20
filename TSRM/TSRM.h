@@ -191,11 +191,9 @@ struct _zend_tsrm_ls_cache;
 /* Windows can't dllexport __declspec(thread) symbols, so outside Zend each module
  * keeps a per-module `void *` pointer and reaches EG/CG via the resource-id indirection. */
 # define ZEND_TSRMLS_CACHE_T void *
-# define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache TSRM_TLS_MODEL_ATTR = NULL;
 # define TSRMLS_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache = NULL;
 #else
 # define ZEND_TSRMLS_CACHE_T struct _zend_tsrm_ls_cache
-# define TSRMLS_MAIN_CACHE_DEFINE()
 # define TSRMLS_CACHE_DEFINE()
 #endif
 #ifdef __cplusplus
@@ -219,7 +217,6 @@ struct _zend_tsrm_ls_cache;
 
 #define TSRMG_STATIC(id, type, element)
 #define TSRMLS_MAIN_CACHE_EXTERN()
-#define TSRMLS_MAIN_CACHE_DEFINE()
 #define TSRMLS_CACHE_EXTERN()
 #define TSRMLS_CACHE_DEFINE()
 #define TSRMLS_CACHE_UPDATE()
