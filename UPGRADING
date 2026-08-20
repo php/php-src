@@ -462,6 +462,7 @@ PHP 8.6 UPGRADE NOTES
 
 - Core:
   . Using "namespace" as a class constant name is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_using_namespace_as_a_class_constant_name
   . Using the return statement in a finally block is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_returning_from_a_finally_block
   . Specifying a return type of array|null / ?array for __debugInfo() is now
