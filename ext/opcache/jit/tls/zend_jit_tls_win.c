@@ -44,7 +44,6 @@ zend_result zend_jit_resolve_tsrm_ls_cache_offsets(
 
 	if (offset >= size) {
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: offset >= size");
-		return FAILURE;
 	}
 
 	*module_index  = _tls_index * sizeof(void*);
