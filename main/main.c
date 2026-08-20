@@ -2750,14 +2750,14 @@ PHPAPI zend_result php_lint_script(zend_file_handle *file)
 /* {{{ php_reserve_tsrm_memory */
 PHPAPI void php_reserve_tsrm_memory(void)
 {
-	/* CG/EG live in native __thread storage and need no reserved TSRM space. */
+	/* CG/EG/GC globals live in native __thread storage and need no
+	 * reserved TSRM space. */
 	tsrm_reserve(
 		TSRM_ALIGNED_SIZE(sizeof(zend_ini_scanner_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(virtual_cwd_globals)) +
 #ifdef ZEND_SIGNALS
 		TSRM_ALIGNED_SIZE(sizeof(zend_signal_globals_t)) +
 #endif
-		TSRM_ALIGNED_SIZE(zend_gc_globals_size()) +
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_accel_globals)) +
