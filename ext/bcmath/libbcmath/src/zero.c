@@ -45,6 +45,10 @@ bool bc_is_zero_for_scale(bc_num num, size_t scale)
 		return true;
 	}
 
+	if (scale > num->n_scale) {
+		scale = num->n_scale;
+	}
+
 	/* Initialize */
 	count = num->n_len + scale;
 	nptr = num->n_value;

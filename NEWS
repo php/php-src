@@ -55,6 +55,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23088 (Stack overflow when comparing deeply nested arrays).
     (Lazizbek Ergashev)
 
+- BCMath:
+  . Fixed out-of-bounds read in bc_is_zero_for_scale() when scale exceeds
+    n_scale. (iliaal)
+
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
