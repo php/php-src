@@ -1,14 +1,13 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - host - IPv4
+Test Uri\WhatWg\Url parsing - scheme - extra slashes
 --FILE--
 <?php
 
-$url = Uri\WhatWg\Url::parse("https://192.168.0.1");
+$url = Uri\WhatWg\Url::parse("HTTPS://////EXAMPLE.com");
 
 var_dump($url);
 var_dump($url->toUnicodeString());
 var_dump($url->toAsciiString());
-var_dump($url->getAsciiHost());
 
 ?>
 --EXPECTF--
@@ -20,7 +19,7 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["password"]=>
   NULL
   ["host"]=>
-  string(11) "192.168.0.1"
+  string(11) "example.com"
   ["port"]=>
   NULL
   ["path"]=>
@@ -30,6 +29,5 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-string(20) "https://192.168.0.1/"
-string(20) "https://192.168.0.1/"
-string(11) "192.168.0.1"
+string(20) "https://example.com/"
+string(20) "https://example.com/"

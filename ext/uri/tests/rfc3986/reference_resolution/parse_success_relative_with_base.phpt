@@ -1,15 +1,13 @@
 --TEST--
-Test Uri\Rfc3986\Uri parsing - host - IPv4
+Test Uri\Rfc3986\Uri reference resolution - parse() - relative reference with base URI
 --FILE--
 <?php
 
-$uri = Uri\Rfc3986\Uri::parse("https://192.168.0.1");
+$uri = Uri\Rfc3986\Uri::parse("/with-base", new Uri\Rfc3986\Uri("https://example.com"));
 
 var_dump($uri);
 var_dump($uri->toRawString());
 var_dump($uri->toString());
-var_dump($uri->getRawHost());
-var_dump($uri->getHost());
 
 ?>
 --EXPECTF--
@@ -21,17 +19,15 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["password"]=>
   NULL
   ["host"]=>
-  string(11) "192.168.0.1"
+  string(11) "example.com"
   ["port"]=>
   NULL
   ["path"]=>
-  string(0) ""
+  string(10) "/with-base"
   ["query"]=>
   NULL
   ["fragment"]=>
   NULL
 }
-string(19) "https://192.168.0.1"
-string(19) "https://192.168.0.1"
-string(11) "192.168.0.1"
-string(11) "192.168.0.1"
+string(29) "https://example.com/with-base"
+string(29) "https://example.com/with-base"

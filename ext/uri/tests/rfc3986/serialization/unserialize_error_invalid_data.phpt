@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri unserialization with invalid data
+Test Uri\Rfc3986\Uri unserialize() - error - invalid data
 --FILE--
 <?php
 

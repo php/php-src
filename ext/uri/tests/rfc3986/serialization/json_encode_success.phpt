@@ -1,5 +1,5 @@
 --TEST--
-Test JSON encoding Uri\Rfc3986\Uri
+Test Uri\Rfc3986\Uri json_encode() - success
 --FILE--
 <?php
 
