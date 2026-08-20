@@ -1487,7 +1487,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		/* This is very inefficient for a large number of errors.
 		 * Use pow2 realloc if it becomes a problem. */
 		uint32_t new_num_errors = EG(num_errors) + 1;
-		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info*) * new_num_errors);
+		EG(errors) = safe_erealloc(EG(errors), new_num_errors, sizeof(zend_error_info*), 0);
 		EG(errors)[EG(num_errors)] = info;
 		EG(num_errors) = new_num_errors;
 
