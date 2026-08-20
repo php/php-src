@@ -1677,7 +1677,7 @@ PHP_FUNCTION(snmp_init_mib)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(mibdirs)
+		Z_PARAM_PATH_STR_OR_NULL(mibdirs)
 	ZEND_PARSE_PARAMETERS_END();
 
 	// If the mibdirs has been changed, we need to reset the MIB tree at the end of the request
