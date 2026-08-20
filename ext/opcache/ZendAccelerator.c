@@ -2732,7 +2732,7 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 				zend_reset_cache_vars();
 				zend_accel_hash_clean(&ZCSG(hash));
 
-				if (ZCG(accel_directives).interned_strings_buffer) {
+				if (ZCSG(interned_strings).saved_top) {
 					accel_interned_strings_restore_state();
 				}
 
