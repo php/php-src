@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed imageaffinematrixget() and imageaffinematrixconcat() reporting the
     wrong argument in error messages. (Weilin Du)
+  . Fixed imageaffinematrixget() to enforce the documented array|float type
+    for the $options parameter. (Weilin Du)
 
 - Intl:
   . Fixed grapheme_strrev() treating UBRK_DONE as a byte index and leaving

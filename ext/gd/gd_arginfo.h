@@ -1,5 +1,5 @@
 /* This is a generated file, edit gd.stub.php instead.
- * Stub hash: 2cdc0b485d9b62bb9021973d3c8cce0169b21ac0 */
+ * Stub hash: 21f8a978b8e54da880315dd9dfeecaf0f7d5593b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -538,7 +538,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageaffinematrixget, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
-	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_TYPE_MASK(0, options, MAY_BE_ARRAY|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageaffinematrixconcat, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
