@@ -336,9 +336,7 @@ TSRM_API void tsrm_reserve(size_t size)
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {/*{{{*/
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new fast resource id, %d bytes", size));
-
 	tsrm_mutex_lock(tsmm_mutex);
-
 	size = TSRM_ALIGNED_SIZE(size);
 	if (tsrm_reserved_size - tsrm_reserved_pos < size) {
 		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fast resource"));
