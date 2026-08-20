@@ -762,11 +762,10 @@ function imagescale(GdImage $image, int $width, int $height = -1, int $mode = IM
 function imageaffine(GdImage $image, array $affine, ?array $clip = null): GdImage|false {}
 
 /**
- * @param array|float $options
  * @refcount 1
  * @return array<int, float>|false
  */
-function imageaffinematrixget(int $type, $options): array|false {}
+function imageaffinematrixget(int $type, array|float $options): array|false {}
 
 /**
  * @return array<int, float>|false

@@ -51,6 +51,9 @@ PHP 8.6 UPGRADE NOTES
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter their array arguments
     types / values and raise a TypeError / ValueError accordingly.
+  . imageaffinematrixget() now enforces the documented array|float type for the
+    $options parameter, including the corresponding weak and strict typing
+    behavior.
 
 - GMP:
   . GMP power and shift operators now throw a ValueError when GMP right operands
