@@ -50,6 +50,11 @@ PHP                                                                        NEWS
   . Fixed a crash when SQLite3::close() is called from a userland callback.
     (Ilia Alshanetsky)
 
+- Standard:
+  . Fixed three Windows-only proc_open() defects: an uninitialized
+    PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
+    lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
+
 - XSL:
   . Fixed bug GH-23730 (use-after-free when XSLTProcessor::importStylesheet()
     is called during a transformation). (David Carlier)
