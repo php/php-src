@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     next() call on the inner generator). (iliaal)
   . Fixed bug GH-23301 (Nested "yield from" yields a value twice when the
     middle generator delegates again). (Lazizbek Ergashev)
+  . Fixed bug GH-23332 (Saturation of the HashTable iterator counter leads to
+    UAF). (luizmenos, iliaal)
 
 - DOM:
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
