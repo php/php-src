@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed a leak when a persistent connection failed a liveness check
     with no other live PDO handle. (iliaal)
 
+- PDO:
+  . Fixed persistent connections with a colon in the username or password
+    reusing another connection's handle. (iliaal)
+
 - Standard:
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
