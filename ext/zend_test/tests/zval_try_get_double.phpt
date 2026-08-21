@@ -32,8 +32,8 @@ set_error_handler(static function (int $errno, string $errstr): never {
 });
 try {
     zend_test_zval_try_get_double("42 with trailing data");
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -124,4 +124,4 @@ array(2) {
   ["failed"]=>
   bool(false)
 }
-A non-numeric value encountered
+Exception: A non-numeric value encountered
