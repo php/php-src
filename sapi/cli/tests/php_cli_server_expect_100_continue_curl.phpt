@@ -1,5 +1,9 @@
 --TEST--
-Expect 100-continue behavior in PHP development server
+Expect 100-continue behavior in PHP development server (curl)
+--SKIPIF--
+<?php
+include "skipif.inc";
+?>
 --EXTENSIONS--
 curl
 --FILE--
