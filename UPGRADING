@@ -620,6 +620,10 @@ PHP 8.6 UPGRADE NOTES
     directive (or null if it has none), independent of values set in php.ini,
     on the command line, or at runtime.
 
+- Zip:
+  . zip_entry_close() return type has been narrowed from bool to true. The
+    function already always returned true.
+
 ========================================
 6. New Functions
 ========================================
