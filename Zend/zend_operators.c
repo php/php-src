@@ -1059,7 +1059,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API double ZEND_FASTCALL zval_try_get_double(const zval *op, bool *failed) /* {{{ */
+static zend_never_inline double ZEND_FASTCALL zendi_try_get_double(const zval *op, bool *failed) /* {{{ */
 {
 	*failed = false;
 try_again:
@@ -1119,6 +1119,15 @@ try_again:
 	}
 }
 /* }}} */
+
+ZEND_API double ZEND_FASTCALL zval_try_get_double(const zval *op, bool *failed)
+{
+	if (EXPECTED(Z_TYPE_P(op) == IS_DOUBLE)) {
+		*failed = false;
+		return Z_DVAL_P(op);
+	}
+	return zendi_try_get_double(op, failed);
+}
 
 static zend_always_inline zend_string* __zval_get_string_func(const zval *op, bool try) /* {{{ */
 {

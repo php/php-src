@@ -16,6 +16,8 @@ foreach ([
     "1e3",
     "not numeric",
     [],
+    new FloatCastableNoOperations(42.5),
+    new LongCastableNoOperations(42),
 ] as $value) {
     var_dump(zend_test_zval_try_get_double($value));
 }
@@ -89,6 +91,18 @@ array(2) {
   float(0)
   ["failed"]=>
   bool(true)
+}
+array(2) {
+  ["value"]=>
+  float(0)
+  ["failed"]=>
+  bool(true)
+}
+array(2) {
+  ["value"]=>
+  float(42.5)
+  ["failed"]=>
+  bool(false)
 }
 array(2) {
   ["value"]=>
