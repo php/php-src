@@ -47,8 +47,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}
   cancel-in-progress: false
 jobs:
-  REAL_TIME_BENCHMARK:
-    name: REAL_TIME_BENCHMARK
+  benchmark:
+    name: Run the benchmark
     if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     env:
@@ -95,7 +95,7 @@ jobs:
             echo "RUN_MICRO_BENCH=${{ inputs.run_micro_bench }}" >> $GITHUB_ENV
           fi
 
-      - name: Install dependencies
+      - name: Install Terraform
         run: |
           set -e
           sudo apt-get update
@@ -114,20 +114,6 @@ jobs:
           ref: 'main'
           fetch-depth: 1
           path: 'php-version-benchmarks'
-      - name: Checkout php-src (benchmarked version)
-        uses: actions/checkout@v6
-        with:
-          repository: '${{ env.REPOSITORY }}'
-          ref: '${{ env.COMMIT }}'
-          filter: blob:none
-          path: 'php-version-benchmarks/tmp/php_${{ env.ID }}'
-      - name: Checkout php-src (baseline version)
-        uses: actions/checkout@v6
-        with:
-          repository: '${{ env.REPOSITORY }}'
-          ref: '${{ env.BASELINE_COMMIT }}'
-          filter: blob:none
-          path: 'php-version-benchmarks/tmp/php_baseline'
       - name: Setup benchmark results
         run: |
           git config --global user.name "Benchmark"
@@ -175,8 +161,6 @@ jobs:
 
             PHP_JIT=${{ env.JIT }}
           EOF
-
-          git clone ./php-version-benchmarks/tmp/php_baseline/ ./php-version-benchmarks/tmp/php_baseline_jit
       - name: Setup PHP config - previous PHP version
         if: github.event_name != 'workflow_dispatch'
         run: |
@@ -186,8 +170,8 @@ jobs:
           if [ -f "$DATABASE" ]; then
             LAST_RESULT_SHA="$(tail -n 2 "$DATABASE" | head -n 1 | cut -f 6)"
           else
-            YESTERDAY="$(date -d "-2 day 23:59:59" '+%Y-%m-%d %H:%M:%S')"
-            LAST_RESULT_SHA="$(cd ./php-version-benchmarks/tmp/php_${{ env.ID }}/ && git --no-pager log --until="$YESTERDAY" -n 1 --pretty='%H')"
+            YESTERDAY="$(date -d "-2 day 23:59:59" "+%Y-%m-%dT%H:%M:%SZ")"
+            LAST_RESULT_SHA="$(gh api "/repos/${{ github.repository }}/commits?sha=${{ env.BRANCH }}&until=$YESTERDAY&per_page=1" --jq '.[0].sha')"
           fi
 
           echo "LAST_RESULT_SHA=$LAST_RESULT_SHA" >> $GITHUB_ENV
@@ -216,23 +200,6 @@ jobs:
 
             PHP_JIT=0
           EOF
-      - name: Setup PHP config - benchmarked PHP version with JIT
-        if: env.JIT == '1'
-        run: |
-          set -e
-
-          cat << EOF > ./php-version-benchmarks/config/php/this_jit.ini
-            PHP_NAME="PHP - ${{ env.BRANCH }} (JIT)"
-            PHP_ID=php_${{ env.ID }}_jit
-
-            PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
-            PHP_BRANCH=${{ env.BRANCH }}
-            PHP_COMMIT=${{ env.COMMIT }}
-
-            PHP_JIT=${{ env.JIT }}
-          EOF
-
-          git clone ./php-version-benchmarks/tmp/php_${{ env.ID }}/ ./php-version-benchmarks/tmp/php_${{ env.ID }}_jit
       - name: Setup test config
         run: |
           set -e
@@ -281,8 +248,8 @@ jobs:
         run: |
           set -e
           
-          ./php-version-benchmarks/benchmark.sh run aws
-          
+          ./php-version-benchmarks/benchmark.sh run aws --no-destroy
+
           echo "NEWEST_RESULT_DIRECTORY=$(ls -td ${{ github.workspace }}/php-version-benchmarks/docs/results/${{ env.YEAR }}/*/ | head -1)" >> $GITHUB_ENV
       - name: Upload artifacts
         id: upload
@@ -295,7 +262,7 @@ jobs:
       - name: Commit results
         if: github.repository == 'php/php-src' && github.event_name != 'workflow_dispatch'
         run: |
-          set -ex
+          set -e
 
           cd ./php-version-benchmarks/docs/results
           git pull
@@ -318,5 +285,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd ./php-version-benchmarks/tmp/php_${{ env.ID }}
           gh pr comment ${{ inputs.pull_request }} --body-file "${NEWEST_RESULT_DIRECTORY}result.md" --repo ${{ github.repository }}
+      - name: Destroy infrastructure
+        if: always()
+        run: |
+          set -e
+
+          ./php-version-benchmarks/benchmark.sh destroy aws
