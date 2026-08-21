@@ -695,7 +695,7 @@ static void init_startup_info(STARTUPINFOW *si, descriptorspec_item *descriptors
 
 static void init_process_info(PROCESS_INFORMATION *pi)
 {
-	memset(&pi, 0, sizeof(pi));
+	memset(pi, 0, sizeof(*pi));
 }
 
 /* on success, returns length of *comspec, which then needs to be efree'd by caller */
@@ -746,7 +746,7 @@ out:
 
 static zend_result convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 {
-	wchar_t *comspec;
+	wchar_t *comspec = NULL;
 	size_t len = find_comspec_nt(&comspec);
 	if (len == 0) {
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
@@ -829,7 +829,7 @@ static zend_result set_proc_descriptor_to_blackhole(descriptorspec_item *desc)
 #ifdef PHP_WIN32
 	desc->childend = CreateFileA("nul", GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
-	if (desc->childend == NULL) {
+	if (desc->childend == INVALID_HANDLE_VALUE) {
 		php_error_docref(NULL, E_WARNING, "Failed to open nul");
 		return FAILURE;
 	}
