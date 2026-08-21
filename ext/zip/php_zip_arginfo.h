@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_zip.stub.php instead.
- * Stub hash: 206d9be6640ee7e94d68d7e075ab61bf3188cab3 */
+ * Stub hash: 8f2b42d73dd8ff8729ddeff8396fa6d563eb13cb */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -19,7 +19,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zip_entry_open, 0, 2, _IS_BOOL, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 0, "\"rb\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zip_entry_close, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zip_entry_close, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_INFO(0, zip_entry)
 ZEND_END_ARG_INFO()
 
