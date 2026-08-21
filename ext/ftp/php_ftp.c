@@ -424,6 +424,10 @@ PHP_FUNCTION(ftp_chmod)
 	}
 	GET_FTPBUF(ftp, z_ftp);
 
+	if (zend_validate_file_permission(mode, 2, "mode") == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	if (!ftp_chmod(ftp, mode, filename, filename_len)) {
 		if (*ftp->inbuf) {
 			php_error_docref(NULL, E_WARNING, "%s", ftp->inbuf);
