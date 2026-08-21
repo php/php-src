@@ -91,6 +91,7 @@ ZEND_API FILE *(*zend_fopen)(zend_string *filename, zend_string **opened_path);
 ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
+ZEND_API zend_signal_interrupt_result (*zend_signal_interrupt_function)(void);
 ZEND_API void (*zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
@@ -972,6 +973,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_resolve_path = utility_functions->resolve_path_function;
 
 	zend_interrupt_function = NULL;
+	zend_signal_interrupt_function = zend_signal_interrupt;
 
 #ifdef HAVE_DTRACE
 /* build with dtrace support */
