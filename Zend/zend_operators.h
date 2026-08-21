@@ -323,6 +323,7 @@ ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
 ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict);
 ZEND_API zend_long    ZEND_FASTCALL zval_try_get_long(const zval *op, bool *failed);
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(const zval *op);
+ZEND_API double       ZEND_FASTCALL zval_try_get_double(const zval *op, bool *failed);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(const zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(const zval *op);
 

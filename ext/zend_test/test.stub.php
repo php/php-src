@@ -406,6 +406,8 @@ namespace {
 
     function zend_test_refcount(mixed $value): int {}
 
+    function zend_test_zval_try_get_double(mixed $value): array {}
+
     function zend_test_zend_ini_parse_quantity(string $str): int {}
     function zend_test_zend_ini_parse_uquantity(string $str): int {}
 

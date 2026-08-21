@@ -1138,6 +1138,25 @@ static ZEND_FUNCTION(zend_test_refcount)
 	RETURN_LONG(Z_REFCOUNT_P(value));
 }
 
+static ZEND_FUNCTION(zend_test_zval_try_get_double)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	bool failed;
+	double result = zval_try_get_double(value, &failed);
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+	add_assoc_double(return_value, "value", result);
+	add_assoc_bool(return_value, "failed", failed);
+}
+
 static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
