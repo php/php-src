@@ -18,8 +18,8 @@
 
 #include <locale.h>
 #ifdef ZTS
-#include "ext/standard/php_string.h" /* for localeconv_r() */
-#define LCONV_DECIMAL_POINT (*lconv.decimal_point)
+#include "ext/standard/php_string.h" /* for localeconv_decimal_point() */
+#define LCONV_DECIMAL_POINT localeconv_decimal_point()
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
 #endif
@@ -221,9 +221,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 	char *s = NULL;
 	size_t s_len = 0;
 	bool is_negative = false;
-#ifdef ZTS
-	struct lconv lconv;
-#else
+#ifndef ZTS
 	struct lconv *lconv;
 #endif
 
@@ -256,9 +254,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 		case 'E':
 		case 'f':
 		case 'F':
-#ifdef ZTS
-			localeconv_r(&lconv);
-#else
+#ifndef ZTS
 			lconv = localeconv();
 #endif
 			s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision,
@@ -285,9 +281,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 
 			char decimal_point = '.';
 			if (fmt == 'g' || fmt == 'G') {
-#ifdef ZTS
-				localeconv_r(&lconv);
-#else
+#ifndef ZTS
 				lconv = localeconv();
 #endif
 				decimal_point = LCONV_DECIMAL_POINT;
