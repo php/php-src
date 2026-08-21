@@ -768,7 +768,7 @@ static zend_class_entry *register_class__ZendTestInterface(void)
 	zval const_DUMMY_value;
 	ZVAL_LONG(&const_DUMMY_value, 0);
 	zend_string *const_DUMMY_name = zend_string_init_interned("DUMMY", sizeof("DUMMY") - 1, true);
-	zend_string *const_DUMMY_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.2\n         */", 102, 1);
+	zend_string *const_DUMMY_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.2\n         */", 98, 1);
 	zend_declare_class_constant_ex(class_entry, const_DUMMY_name, &const_DUMMY_value, ZEND_ACC_PUBLIC, const_DUMMY_comment);
 	zend_string_release_ex(const_DUMMY_name, true);
 
@@ -1160,7 +1160,7 @@ static zend_class_entry *register_class_ZendTestPropertyAttribute(void)
 	zval property_parameter_default_value;
 	ZVAL_NULL(&property_parameter_default_value);
 	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, true);
-	zend_string *property_parameter_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.4\n         */", 102, 1);
+	zend_string *property_parameter_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.4\n         */", 98, 1);
 	zend_declare_property_ex(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, property_parameter_comment);
 	zend_string_release_ex(property_parameter_name, true);
 
