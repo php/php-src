@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed grapheme_str_split() treating UBRK_DONE as a byte index. (iliaal)
 
 - Opcache:
+  . Fixed bug GH-22216 (spurious opcache.memory_consumption warning on each new
+    ZTS thread; the directive is also reported as 0 in worker threads).
+    (Daisuke Komazaki)
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
 
 - PDO:
