@@ -939,7 +939,7 @@ ZEND_ATTRIBUTE_NONNULL static int phar_tar_setupmetadata(zval *zv, void *argumen
 	}
 
 	/* now we are dealing with regular files, so look for metadata */
-	zend_string *lookfor = zend_strpprintf_unchecked(0, ".phar/.metadata/%S/.metadata.bin", entry->filename);
+	zend_string *lookfor = zend_strpprintf(0, ".phar/.metadata/%pS/.metadata.bin", entry->filename);
 
 	if (!phar_metadata_tracker_has_data(&entry->metadata_tracker, entry->is_persistent)) {
 		zend_hash_del(&entry->phar->manifest, lookfor);
