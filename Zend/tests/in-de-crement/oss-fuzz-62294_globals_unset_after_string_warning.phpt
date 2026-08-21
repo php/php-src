@@ -25,14 +25,14 @@ var_dump(++$x);
 ?>
 --EXPECT--
 POST DEC
-Decrement on non-numeric string has no effect and is deprecated
 string(1) " "
+Decrement on non-numeric string has no effect and is deprecated
 PRE DEC
+string(1) " "
 Decrement on non-numeric string has no effect and is deprecated
-string(1) " "
 POST INC
-Increment on non-numeric string is deprecated, use str_increment() instead
 string(1) " "
+Increment on non-numeric string is deprecated, use str_increment() instead
 PRE INC
-Increment on non-numeric string is deprecated, use str_increment() instead
 string(1) " "
+Increment on non-numeric string is deprecated, use str_increment() instead

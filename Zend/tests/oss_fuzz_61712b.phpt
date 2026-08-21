@@ -16,5 +16,5 @@ $c->a %= 10;
 var_dump($c->a);
 ?>
 --EXPECT--
+int(0)
 Undefined property: C::$a
-int(5)

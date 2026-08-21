@@ -102,6 +102,11 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(ZEND_OPC
 {
 	zend_execute_data *old_execute_data;
 
+	if (UNEXPECTED(EG(deferred_errors).size)) {
+		EX(opline) = opline;
+		zend_flush_deferred_errors();
+	}
+
 	if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 		zend_clean_and_cache_symbol_table(EX(symbol_table));
 	}
@@ -1115,6 +1120,14 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 
 			if (execute_data->prev_execute_data == prev_execute_data) {
 				/* Enter into function */
+				if (UNEXPECTED(EG(deferred_errors).size)) {
+					EX(opline) = opline;
+					zend_flush_deferred_errors();
+					if (UNEXPECTED(EG(exception))) {
+						stop = ZEND_JIT_TRACE_STOP_EXCEPTION;
+						break;
+					}
+				}
 				prev_call = NULL;
 				if (level > ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
 					stop = ZEND_JIT_TRACE_STOP_TOO_DEEP;

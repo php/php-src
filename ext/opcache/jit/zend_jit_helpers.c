@@ -3437,6 +3437,15 @@ static void ZEND_FASTCALL zend_jit_exception_in_interrupt_handler_helper(void)
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_check_deferred_errors(zend_execute_data *execute_data)
+{
+	if (EG(deferred_errors).size && execute_data->call) {
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	} else {
+		zend_flush_deferred_errors();
+	}
+}
+
 static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t count)
 {
 	zend_string *ret;

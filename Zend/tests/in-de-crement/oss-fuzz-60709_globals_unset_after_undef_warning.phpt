@@ -21,16 +21,16 @@ var_dump(++$x);
 ?>
 --EXPECT--
 POST DEC
+NULL
 Undefined variable $x
 Decrement on type null has no effect, this will change in the next major version of PHP
-NULL
 POST INC
-Undefined variable $x
 NULL
+Undefined variable $x
 PRE DEC
+NULL
 Undefined variable $x
 Decrement on type null has no effect, this will change in the next major version of PHP
-NULL
 PRE INC
-Undefined variable $x
 int(1)
+Undefined variable $x

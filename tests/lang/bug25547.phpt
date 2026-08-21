@@ -22,9 +22,9 @@ print_r($output);
 echo "Done";
 ?>
 --EXPECT--
-handler(Undefined array key "foo")
 Array
 (
     [foo] => 1
 )
+handler(Undefined array key "foo")
 Done

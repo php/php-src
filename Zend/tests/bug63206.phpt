@@ -22,8 +22,10 @@ set_error_handler(function() {
 $triggerNotice1++;
 $triggerNotice2++;
 ?>
---EXPECT--
+--EXPECTF--
 Second handler
-Internal handler
+
+Warning: Undefined variable $triggerInternalNotice in %s on line %d
 Second handler
-Internal handler
+
+Warning: Undefined variable $triggerInternalNotice in %s on line %d

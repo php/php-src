@@ -28,4 +28,13 @@ try {
 
 ?>
 --EXPECT--
+object(Closure)#2 (2) {
+  ["function"]=>
+  string(13) "Foo::myMethod"
+  ["parameter"]=>
+  array(1) {
+    ["$foo"]=>
+    string(10) "<required>"
+  }
+}
 Caught: Calling static trait method Foo::myMethod is deprecated, it should only be called on a class using the trait

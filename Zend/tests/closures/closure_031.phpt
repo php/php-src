@@ -15,5 +15,5 @@ try {
 }
 ?>
 --EXPECT--
-Warning: Undefined property: Closure::$a
 NULL
+Warning: Undefined property: Closure::$a

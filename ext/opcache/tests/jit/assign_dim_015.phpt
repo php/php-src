@@ -14,5 +14,5 @@ $my_var[] = $y;
 ?>
 DONE
 --EXPECT--
-Error: Undefined variable $y
 DONE
+Error: Undefined variable $y
