@@ -1830,11 +1830,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 
 	//TODO: we can't convert compile-time errors to exceptions yet???
 	if (EG(current_execute_data) && !CG(in_compilation)) {
-		// %S is used for zend_string pointers by smart str printing, but normally
-		// is for wide character strings and so compilers complain if this is inline
-		// Use "%S" so that the message can contain null bytes.
-		const char *format = "%S";
-		zend_throw_exception_ex(exception_ce, 0, format, message);
+		zend_throw_exception_ex(exception_ce, 0, "%pS", message);
 	} else {
 		zend_error_noreturn(E_ERROR, "%s", ZSTR_VAL(message));
 	}

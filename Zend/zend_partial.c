@@ -701,8 +701,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	zend_op_array *op_array = NULL;
 
 	if (UNEXPECTED(function->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
-		const char *format = "Cannot call %S() dynamically";
-		zend_throw_error(NULL, format, function->common.function_name);
+		zend_throw_error(NULL, "Cannot call %pS() dynamically", function->common.function_name);
 		return NULL;
 	}
 
