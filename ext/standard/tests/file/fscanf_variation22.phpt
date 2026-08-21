@@ -76,7 +76,7 @@ $file_path = __DIR__;
 $filename = "$file_path/fscanf_variation22.tmp";
 unlink($filename);
 ?>
---EXPECT--
+--EXPECTF--
 *** Test fscanf(): different char format types with resource ***
 
 -- iteration 1 --
@@ -186,11 +186,13 @@ bool(false)
 -- iteration 11 --
 array(1) {
   [0]=>
-  string(8) "Resource"
+  string(%d) "Resource id #%d
+"
 }
 array(1) {
   [0]=>
-  string(8) "Resource"
+  string(%d) "Resource id #%d
+"
 }
 bool(false)
 
