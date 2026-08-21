@@ -1086,21 +1086,26 @@ static zend_always_inline void php_dom_transfer_document_ref_single_node(xmlNode
 	}
 }
 
-static void php_dom_transfer_document_ref(xmlNodePtr node, php_libxml_ref_obj *new_document)
+static zend_always_inline void php_dom_transfer_document_ref_single_aux(xmlNodePtr node, php_libxml_ref_obj *new_document)
 {
-	if (node->children) {
-		php_dom_transfer_document_ref(node->children, new_document);
-	}
-
-	while (node) {
-		if (node->type == XML_ELEMENT_NODE) {
-			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
-				php_dom_transfer_document_ref_single_node((xmlNodePtr) attr, new_document);
+	php_dom_transfer_document_ref_single_node(node, new_document);
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			php_dom_transfer_document_ref_single_node((xmlNodePtr) attr, new_document);
+			for (xmlNodePtr child = attr->children; child; child = child->next) {
+				php_dom_transfer_document_ref_single_node((xmlNodePtr) child, new_document);
 			}
 		}
+	}
+}
 
-		php_dom_transfer_document_ref_single_node(node, new_document);
-		node = node->next;
+static void php_dom_transfer_document_ref(xmlNodePtr node, php_libxml_ref_obj *new_document)
+{
+	php_dom_transfer_document_ref_single_aux(node, new_document);
+	xmlNodePtr tmp = node->children;
+	while (tmp) {
+		php_dom_transfer_document_ref_single_aux(tmp, new_document);
+		tmp = php_dom_next_in_tree_order(tmp, node);
 	}
 }
 
