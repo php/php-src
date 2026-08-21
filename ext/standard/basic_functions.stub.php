@@ -1641,6 +1641,18 @@ function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
  * @compile-time-eval
  */
 function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
+/**
+ * Searches a portion of the array for a given value and returns the first corresponding key if successful
+ * @param mixed $needle The value to search for
+ * @param array $haystack The array to search in
+ * @param int $offset Start searching from this position (0-indexed)
+ * @param ?int $length Limit the search to this many elements after $offset
+ * @param bool $strict Use strict comparison
+ * @return int|string|false The key for $needle if found, false otherwise
+ * @refcount 1
+ */
+function array_search_range(mixed $needle, array $haystack, int $offset = 0, ?int $length = null, bool $strict = false): int|string|false {}
+
 
 /**
  * @prefer-ref $array
