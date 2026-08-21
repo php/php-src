@@ -1898,12 +1898,20 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 		 * finished reading the body. Send 100 Continue before the client
 		 * sends the request body. */
 		smart_str buffer = { 0 };
+		bool send_failed = true;
 		append_http_status_line(&buffer, client->parser.http_major * 100 + client->parser.http_minor, 100, 0);
 		smart_str_appendl(&buffer, "\r\n", 2);
 		smart_str_0(&buffer);
-		php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+		zend_try {
+			php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+			send_failed = false;
+		} zend_end_try();
 		smart_str_free(&buffer);
 		client->expect_continue = false;
+		if (send_failed) {
+			*errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
+			return -1;
+		}
 	}
 	if (nbytes_consumed != (size_t)nbytes_read && !client->too_large_post) {
 		if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
