@@ -31,6 +31,7 @@ char *get_token_type_name(int token_type);
 
 
 PHP_MINIT_FUNCTION(tokenizer);
+PHP_RINIT_FUNCTION(tokenizer);
 PHP_MINFO_FUNCTION(tokenizer);
 
 #endif	/* PHP_TOKENIZER_H */
