@@ -247,6 +247,11 @@ xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep);
 	__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node; \
 }
 
+static zend_always_inline xmlNodePtr php_dom_parent_node(const xmlNode *nodep)
+{
+	return nodep->type == XML_DOCUMENT_FRAG_NODE ? NULL : nodep->parent;
+}
+
 static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php_libxml_cache_tag *cache_tag, const php_libxml_ref_obj *doc_ptr)
 {
 	ZEND_ASSERT(doc_ptr != NULL);
