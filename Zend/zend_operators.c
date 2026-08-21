@@ -1107,8 +1107,6 @@ try_again:
 				ZEND_ASSERT(Z_TYPE(dst) == IS_DOUBLE);
 				return Z_DVAL(dst);
 			}
-		/* Uninitialized typed properties may be represented as IS_UNDEF here. */
-		case IS_UNDEF:
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			*failed = true;
