@@ -426,6 +426,12 @@ too_few_args:
 		}
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(outputsize, 1, 0))) {
+		efree(formatcodes);
+		efree(formatargs);
+		RETURN_THROWS();
+	}
+
 	output = zend_string_alloc(outputsize, 0);
 	outputpos = 0;
 	currentarg = 0;

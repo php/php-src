@@ -2167,6 +2167,10 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 		chunks++;
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(chunks, endlen, srclen))) {
+		return NULL;
+	}
+
 	dest = zend_string_safe_alloc(chunks, endlen, srclen, 0);
 
 	for (p = src, q = ZSTR_VAL(dest); p < (src + srclen - chunklen + 1); ) {
@@ -2222,6 +2226,9 @@ PHP_FUNCTION(chunk_split)
 	}
 
 	result = php_chunk_split(ZSTR_VAL(str), ZSTR_LEN(str), end, endlen, (size_t)chunklen);
+	if (UNEXPECTED(!result)) {
+		RETURN_THROWS();
+	}
 
 	RETURN_STR(result);
 }
@@ -5563,6 +5570,10 @@ PHP_FUNCTION(str_repeat)
 	if (ZSTR_LEN(input_str) == 0 || mult == 0)
 		RETURN_EMPTY_STRING();
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(ZSTR_LEN(input_str), mult, 0))) {
+		RETURN_THROWS();
+	}
+
 	/* Initialize the result string */
 	result = zend_string_safe_alloc(ZSTR_LEN(input_str), mult, 0, 0);
 	result_len = ZSTR_LEN(input_str) * mult;
@@ -5872,6 +5883,9 @@ PHP_FUNCTION(str_pad)
 	}
 
 	num_pad_chars = pad_length - ZSTR_LEN(input);
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(1, ZSTR_LEN(input), num_pad_chars))) {
+		RETURN_THROWS();
+	}
 	result = zend_string_safe_alloc(1, ZSTR_LEN(input), num_pad_chars, 0);
 	ZSTR_LEN(result) = 0;
 
@@ -6213,6 +6227,10 @@ PHP_FUNCTION(str_split)
 		GC_TRY_ADDREF(str);
 		add_next_index_str(return_value, str);
 		return;
+	}
+
+	if (UNEXPECTED(zend_array_alloc_size_exceeds_memory(((ZSTR_LEN(str) - 1) / split_length) + 1, true))) {
+		RETURN_THROWS();
 	}
 
 	array_init_size(return_value, (uint32_t)(((ZSTR_LEN(str) - 1) / split_length) + 1));

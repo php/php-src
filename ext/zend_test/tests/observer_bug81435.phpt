@@ -49,6 +49,16 @@ a();
   <!-- init bailout() -->
   <!-- init array_map() -->
   <!-- init str_repeat() -->
-
-Fatal error: Allowed memory size of 20971520 bytes exhausted %s in %s on line %d
+  <!-- Exception: MemoryError -->
 </a>
+<!-- init Error::__toString() -->
+<!-- init Error::getTraceAsString() -->
+
+Fatal error: Uncaught MemoryError: The resulting string is too large to fit in the configured memory limit in %s:%d
+Stack trace:
+#0 [internal function]: str_repeat('\xFF', 100000000)
+#1 %s(%d): array_map('str_repeat', Array, Array)
+#2 %s(%d): bailout(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+#3 %s(%d): a()
+#4 {main}
+  thrown in %s on line %d

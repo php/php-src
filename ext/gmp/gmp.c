@@ -695,6 +695,11 @@ static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 		num_len++;
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(num_len, 1, 0))) {
+		ZVAL_EMPTY_STRING(result);
+		return;
+	}
+
 	str = zend_string_alloc(num_len, 0);
 	mpz_get_str(ZSTR_VAL(str), base, gmpnum);
 
@@ -863,6 +868,10 @@ ZEND_FUNCTION(gmp_export)
 		}
 		size_t bits_per_word = (size_t) size * 8;
 		size_t count = (size_in_base_2 + bits_per_word - 1) / bits_per_word;
+
+		if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(count, size, 0))) {
+			RETURN_THROWS();
+		}
 
 		zend_string *out_string = zend_string_safe_alloc(count, size, 0, 0);
 		mpz_export(ZSTR_VAL(out_string), NULL, order, size, endian, 0, gmpnumber);

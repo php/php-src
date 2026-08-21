@@ -25,12 +25,15 @@ try {
 }
 
 $php_int_max_pad_length = PHP_INT_MAX;
-var_dump( str_pad($input, $php_int_max_pad_length) );
+try {
+    var_dump( str_pad($input, $php_int_max_pad_length) );
+} catch (\MemoryError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing str_pad() function: with large value for for 'pad_length' argument ***
 str_pad(): Argument #2 ($length) must be of type int, float given
-
-Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+The resulting string is too large to fit in the configured memory limit

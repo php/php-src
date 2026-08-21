@@ -78,12 +78,37 @@ int(2)
           </Fiber::suspend>
           <!-- init str_repeat() -->
           <str_repeat>
-
-Fatal error: Allowed memory size of 104857600 bytes exhausted %s on line %d
+            <!-- Exception: MemoryError -->
           </str_repeat>
+          <!-- Exception: MemoryError -->
         </{closure:%s:%d}>
 <!-- switching from fiber %s to %s -->
-<returned '%s'>
+<threw '%s'>
 <!-- destroy: %s -->
+        <!-- Exception: MemoryError -->
       </Fiber::resume>
+      <!-- Exception: MemoryError -->
     </file '%s'>
+    <!-- init Error::__toString() -->
+    <Error::__toString>
+      <!-- init Error::getTraceAsString() -->
+      <Error::getTraceAsString>
+      </Error::getTraceAsString>
+    </Error::__toString>
+
+Fatal error: Uncaught MemoryError: The resulting string is too large to fit in the configured memory limit in %s:%d
+Stack trace:
+#0 %s(%d): str_repeat('A', 200000000)
+#1 [internal function]: {closure:%s:%d}()
+#2 %s(%d): Fiber->resume()
+#3 {main}
+  thrown in %s on line %d
+<!-- switching from fiber %s to %s -->
+<destroying '%s'>
+    <!-- Exception: GracefulExit -->
+  </Fiber::suspend>
+  <!-- Exception: GracefulExit -->
+</{closure:%s:%d}>
+<!-- switching from fiber %s to %s -->
+<destroyed '%s'>
+<!-- destroy: %s -->

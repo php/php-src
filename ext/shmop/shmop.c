@@ -245,6 +245,10 @@ PHP_FUNCTION(shmop_read)
 	startaddr = shmop->addr + start;
 	zend_long bytes = count ? count : shmop->size - start;
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(bytes, 1, 0))) {
+		RETURN_THROWS();
+	}
+
 	return_string = zend_string_init(startaddr, bytes, 0);
 
 	RETURN_NEW_STR(return_string);

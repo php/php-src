@@ -547,6 +547,10 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 				}
 				PRINTF_DEBUG(("sprintf: width=%d\n", width));
 
+				if (width > 0 && UNEXPECTED(zend_string_alloc_size_exceeds_memory(width, 1, 0))) {
+					goto fail;
+				}
+
 				/* after width and argnum comes precision */
 				if (*format == '.') {
 					format++;

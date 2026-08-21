@@ -2115,6 +2115,9 @@ PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_le
 		zend_argument_value_error(1, "must be less than or equal to %d", INT_MAX);
 		return NULL;
 	}
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(buffer_length, 1, 0))) {
+		return NULL;
+	}
 	buffer = zend_string_alloc(buffer_length, 0);
 
 	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(buffer_length, length);
