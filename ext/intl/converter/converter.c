@@ -961,6 +961,9 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 
 	zend_objects_clone_members(&(objval->obj), &(oldobj->obj));
 
+	php_converter_resolve_callback(&objval->to_cache, &objval->obj, ZEND_STRL("toUCallback"));
+	php_converter_resolve_callback(&objval->from_cache, &objval->obj, ZEND_STRL("fromUCallback"));
+
 	/* Newly cloned object deliberately does not inherit error state from original object */
 
 	return retval;
