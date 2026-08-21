@@ -163,12 +163,15 @@ jobs:
           EOF
       - name: Setup PHP config - previous PHP version
         if: github.event_name != 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
 
           DATABASE="./php-version-benchmarks/docs/results/${{ env.YEAR }}/database.tsv"
           if [ -f "$DATABASE" ]; then
             LAST_RESULT_SHA="$(tail -n 2 "$DATABASE" | head -n 1 | cut -f 6)"
+            LAST_RESULT_SHA="$(gh api "/repos/${{ github.repository }}/commits/$LAST_RESULT_SHA" --jq '.sha')"
           else
             YESTERDAY="$(date -d "-2 day 23:59:59" "+%Y-%m-%dT%H:%M:%SZ")"
             LAST_RESULT_SHA="$(gh api "/repos/${{ github.repository }}/commits?sha=${{ env.BRANCH }}&until=$YESTERDAY&per_page=1" --jq '.[0].sha')"
