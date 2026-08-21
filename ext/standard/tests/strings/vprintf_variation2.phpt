@@ -83,9 +83,9 @@ foreach($values as $value) {
     $result = vprintf($format,$value);
     echo "\n";
     var_dump($result);
-  } catch (\Throwable $e) {
+  } catch (\TypeError $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
-  } catch (\Throwable $e) {
+  } catch (\ValueError $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $counter++;

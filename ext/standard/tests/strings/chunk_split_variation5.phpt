@@ -34,9 +34,9 @@ for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration $count --\n";
   try {
     var_dump( chunk_split($str, $values[$count], $ending) );
-  } catch (Throwable $e) {
+  } catch (TypeError $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
-  } catch (\Throwable $e) {
+  } catch (\ValueError $e) {
       echo $e::class, ': ', $e->getMessage(), "\n";
   }
 }
