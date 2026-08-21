@@ -90,9 +90,9 @@ bool(false)
 string(3) "foo"
 bool(false)
 bool(false)
-get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
-get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
-get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, "" given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, "[[[[" given
+get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, " " given
 bool(false)
 get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, array given
 get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, int given

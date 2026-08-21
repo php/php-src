@@ -284,6 +284,16 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(uint32_t n
 		return;
 	}
 
+	if (Z_TYPE_P(arg) == IS_STRING && (
+		expected_type == Z_EXPECTED_CLASS_NAME ||
+		expected_type == Z_EXPECTED_CLASS_NAME_OR_NULL ||
+		expected_type == Z_EXPECTED_OBJECT_OR_CLASS_NAME ||
+		expected_type == Z_EXPECTED_OBJECT_OR_CLASS_NAME_OR_NULL
+	)) {
+		zend_argument_type_error(num, "must be %s, \"%s\" given", expected_error[expected_type], Z_STRVAL_P(arg));
+		return;
+	}
+
 	zend_argument_type_error(num, "must be %s, %s given", expected_error[expected_type], zend_zval_value_name(arg));
 }
 /* }}} */
@@ -492,23 +502,28 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 		*pce = NULL;
 		return 1;
 	}
-	zend_string *class_name;
-	if (!zend_parse_arg_str(arg, &class_name, check_null, num)) {
-		*pce = NULL;
-		zend_wrong_parameter_error(ZPP_ERROR_WRONG_ARG, num, NULL, check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING, arg);
-		return 0;
+	/* Only accept string and Stringable(?) as int/foat/bool are not valid class names */
+	if (UNEXPECTED(Z_TYPE_P(arg) != IS_STRING)) {
+		if (Z_TYPE_P(arg) != IS_OBJECT || !zend_parse_arg_str_slow(arg, num)) {
+			*pce = NULL;
+			zend_wrong_parameter_type_error(num, check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME, arg);
+			return 0;
+		}
+		/* Object was converted to string */
+		ZEND_ASSERT(Z_TYPE_P(arg) == IS_STRING);
 	}
+	zend_string *class_name = Z_STR_P(arg);
 
 	*pce = zend_lookup_class(class_name);
 	if (ce_base) {
 		if ((!*pce || !instanceof_function(*pce, ce_base))) {
-			zend_argument_type_error(num, "must be a class name derived from %s, %s given", ZSTR_VAL(ce_base->name), ZSTR_VAL(class_name));
+			zend_argument_type_error(num, "must be a class name derived from %s, \"%s\" given", ZSTR_VAL(ce_base->name), ZSTR_VAL(class_name));
 			*pce = NULL;
 			return 0;
 		}
 	}
 	if (!*pce) {
-		zend_argument_type_error(num, "must be a valid class name, %s given", ZSTR_VAL(class_name));
+		zend_wrong_parameter_type_error(num, check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME, arg);
 		return 0;
 	}
 	return 1;
@@ -1020,33 +1035,42 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 
 		case 'C':
 			{
-				zend_class_entry *lookup, **pce = va_arg(*va, zend_class_entry **);
-				zend_class_entry *ce_base = *pce;
+				zend_class_entry **pce = va_arg(*va, zend_class_entry **);
+				const zend_class_entry *ce_base = *pce;
 
 				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 					*pce = NULL;
 					break;
 				}
-				if (!try_convert_to_string(arg)) {
-					*pce = NULL;
-					return ""; /* try_convert_to_string() throws an exception */
-				}
 
-				if ((lookup = zend_lookup_class(Z_STR_P(arg))) == NULL) {
-					*pce = NULL;
-				} else {
-					*pce = lookup;
+				/* Only accept string and Stringable(?) as int/foat/bool are not valid class names */
+				if (UNEXPECTED(Z_TYPE_P(arg) != IS_STRING)) {
+					if (Z_TYPE_P(arg) != IS_OBJECT || !zend_parse_arg_str_slow(arg, arg_num)) {
+						*pce = NULL;
+						/* __toString may throw */
+						if (!EG(exception)) {
+							zend_spprintf(error, 0, "must be a valid class name%s, %s given",
+								check_null ? " or null" : "", zend_zval_value_name(arg));
+						}
+						*pce = NULL;
+						return "";
+					}
+					/* Object was converted to string */
+					ZEND_ASSERT(Z_TYPE_P(arg) == IS_STRING);
 				}
+				zend_string *class_name = Z_STR_P(arg);
+
+				*pce = zend_lookup_class(class_name);
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base))) {
-						zend_spprintf(error, 0, "must be a class name derived from %s%s, %s given",
+						zend_spprintf(error, 0, "must be a class name derived from %s%s, \"%s\" given",
 							ZSTR_VAL(ce_base->name), check_null ? " or null" : "", Z_STRVAL_P(arg));
 						*pce = NULL;
 						return "";
 					}
 				}
 				if (!*pce) {
-					zend_spprintf(error, 0, "must be a valid class name%s, %s given",
+					zend_spprintf(error, 0, "must be a valid class name%s, \"%s\" given",
 						check_null ? " or null" : "", Z_STRVAL_P(arg));
 					return "";
 				}
