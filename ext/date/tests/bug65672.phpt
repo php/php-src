@@ -41,16 +41,16 @@ array(1) {
 }
 bool(false)
 
-Deprecated: Creation of dynamic property DatePeriod@anonymous::$dynamic1 is deprecated in %s on line %d
+Deprecated: Creation of dynamic property class@anonymous::$dynamic1 is deprecated in %s on line %d
 string(7) "dynamic"
 
-Deprecated: Creation of dynamic property DatePeriod@anonymous::$dynamic2 is deprecated in %s on line %d
+Deprecated: Creation of dynamic property class@anonymous::$dynamic2 is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(5) "array"
 }
 
-Deprecated: Creation of dynamic property DatePeriod@anonymous::$dynamic3 is deprecated in %s on line %d
+Deprecated: Creation of dynamic property class@anonymous::$dynamic3 is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(5) "array"
