@@ -130,7 +130,7 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
 	bool unicode_warned = false;
 
-	do {
+	while (*prompt_spec) {
 		if (*prompt_spec == '\\') {
 			switch (prompt_spec[1]) {
 			case '\\':
@@ -198,8 +198,12 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 				smart_str_appendc(&retval, '?');
 			}
 		}
-	} while (++prompt_spec && *prompt_spec);
+		++prompt_spec;
+	}
 	smart_str_0(&retval);
+	if (!retval.s) {
+		return ZSTR_EMPTY_ALLOC();
+	}
 	return retval.s;
 }
 /* }}} */
