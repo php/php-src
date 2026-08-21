@@ -4101,10 +4101,12 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 		}
 
 		if (lretdata) {
-			ZEND_TRY_ASSIGN_REF_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+			if (retdata) {
+				ZEND_TRY_ASSIGN_REF_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+			}
 			ldap_memfree(lretdata->bv_val);
 			ldap_memfree(lretdata);
-		} else {
+		} else if (retdata) {
 			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retdata);
 		}
 
