@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
 
+- Readline:
+  . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
+    set to an empty string. (Ilia Alshanetsky)
+
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)
