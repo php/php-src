@@ -2091,6 +2091,84 @@ PHP_FUNCTION(openssl_csr_export)
 }
 /* }}} */
 
+/* php_openssl_parse_validity_range */
+/* convert an array of either integers or strings to a pair of time_t values
+ * representing the notBefore and notAfter times for a certificate.
+ * If the array values are strings, they must either be a valid numeric string
+ * representing the unix timestamp, or they must be an ASN.1 timestamp.
+ */
+static int php_openssl_parse_validity_range(zval *validity, time_t *notBefore, time_t *notAfter) {
+	zval *tmp;
+	zend_long lval;
+	double dval;
+	ASN1_TIME *t;
+	time_t from = -1;
+	time_t to = -1;
+
+	if (Z_TYPE_P(validity) != IS_ARRAY ||
+	if ((tmp = zend_hash_index_find(Z_ARRVAL_P(validity), 2)) != NULL) {
+		php_error_docref(NULL, E_WARNING, "Too many timestamps");
+		return FAILURE;
+	}
+	if ((tmp = zend_hash_index_find(Z_ARRVAL_P(validity), 1)) == NULL) {
+		php_error_docref(NULL, E_WARNING, "Too few timestamps");
+		return FAILURE;
+	}
+	if ((tmp = zend_hash_index_find(Z_ARRVAL_P(validity), 0)) != NULL &&
+	    ((Z_TYPE_P(tmp) == IS_LONG) || (Z_TYPE_P(tmp) == IS_STRING))) {
+		if (Z_TYPE_P(tmp) == IS_LONG) {
+			from = Z_LVAL_P(tmp);
+		} else if (Z_TYPE_P(tmp) == IS_STRING) {
+			switch (is_numeric_string(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &lval, &dval, 0)) {
+				case IS_LONG:
+					from = lval;
+					break;
+				case IS_DOUBLE:
+					from = (int) dval;
+					break;
+				default:
+					t = ASN1_UTCTIME_new();
+					if (ASN1_TIME_set_string(t, Z_STRVAL_P(tmp))) {
+						from = php_openssl_asn1_time_to_time_t(t);
+					}
+					ASN1_UTCTIME_free(t);
+			}
+		}
+	}
+	if (from == -1) {
+		php_error_docref(NULL, E_WARNING, "Invalid certificate start timestamp");
+		return FAILURE;
+	}
+	if ((tmp = zend_hash_index_find(Z_ARRVAL_P(validity), 1)) != NULL &&
+	    ((Z_TYPE_P(tmp) == IS_LONG) || (Z_TYPE_P(tmp) == IS_STRING))) {
+		if (Z_TYPE_P(tmp) == IS_LONG) {
+			to = Z_LVAL_P(tmp);
+		} else {
+			switch (is_numeric_string(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &lval, &dval, 0)) {
+				case IS_LONG:
+					to = lval;
+					break;
+				case IS_DOUBLE:
+					to = (int) dval;
+					break;
+				default:
+					t = ASN1_UTCTIME_new();
+					if (ASN1_TIME_set_string(t, Z_STRVAL_P(tmp))) {
+						to = php_openssl_asn1_time_to_time_t(t);
+					}
+					ASN1_UTCTIME_free(t);
+			}
+		}
+	}
+	if (to == -1) {
+		php_error_docref(NULL, E_WARNING, "Invalid certificate end timestamp");
+		return FAILURE;
+	}
+	*notBefore = from;
+	*notAfter = to;
+	return SUCCESS;
+}
+
 /* {{{ Signs a cert with another CERT */
 PHP_FUNCTION(openssl_csr_sign)
 {
@@ -2103,6 +2181,7 @@ PHP_FUNCTION(openssl_csr_sign)
 	zend_string *cert_str;
 	zval *zpkey, *args = NULL;
 	zend_long num_days;
+	zval *validity = NULL;
 	zend_long serial = Z_L(0);
 	zend_string *serial_hex = NULL;
 	X509 *cert = NULL, *new_cert = NULL;
@@ -2110,8 +2189,9 @@ PHP_FUNCTION(openssl_csr_sign)
 	int i;
 	bool new_cert_used = false;
 	struct php_x509_request req;
+	time_t notBefore = -1, notAfter = -1;
 
-	ZEND_PARSE_PARAMETERS_START(4, 7)
+	ZEND_PARSE_PARAMETERS_START(4, 8)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zpkey)
@@ -2120,6 +2200,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		Z_PARAM_ARRAY_OR_NULL(args)
 		Z_PARAM_LONG(serial)
 		Z_PARAM_STR_OR_NULL(serial_hex)
+		Z_PARAM_ARRAY_OR_NULL(validity)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_FALSE;
@@ -2153,9 +2234,21 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-	if (num_days < 0 || num_days > LONG_MAX / 86400) {
-		php_error_docref(NULL, E_WARNING, "Days must be between 0 and %ld", LONG_MAX / 86400);
-		goto cleanup;
+	/* If 'validity' is present, 'days' will be ignored.
+	 * 'validity' must contain two values, the starting time and the ending
+	 * time for the validity period.  Each of the values are expected to be
+	 * either a numeric value representing a unix timestamp, or a string
+	 * containing an ASN.1 timestamp.
+	 */
+	if (validity != NULL) {
+		if (php_openssl_parse_validity_range(validity, &notBefore, &notAfter) != SUCCESS) {
+			goto cleanup;
+		}
+	} else {
+		if (num_days < 0 || num_days > LONG_MAX / 86400) {
+			php_error_docref(NULL, E_WARNING, "Days must be between 0 and %ld", LONG_MAX / 86400);
+			goto cleanup;
+		}
 	}
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == FAILURE) {
@@ -2232,8 +2325,11 @@ PHP_FUNCTION(openssl_csr_sign)
 		php_openssl_store_errors();
 		goto cleanup;
 	}
-	if (!X509_gmtime_adj(X509_getm_notBefore(new_cert), 0)
-		|| !X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days)) {
+	if (validity != NULL) {
+		ASN1_TIME_set(X509_getm_notBefore(new_cert), notBefore);
+		ASN1_TIME_set(X509_getm_notAfter(new_cert), notAfter);
+	} else if (!X509_gmtime_adj(X509_getm_notBefore(new_cert), 0)
+		   || !X509_gmtime_adj(X509_getm_notAfter(new_cert), 60*60*24*num_days)) {
 		php_openssl_store_errors();
 		goto cleanup;
 	}
