@@ -23,19 +23,26 @@ $zip->close();
 function testCallback(string $filename, string $type): void {
     $zip = new ZipArchive;
     $zip->open($filename);
+    $callbackState = new stdClass;
+    $callbackStateRef = WeakReference::create($callbackState);
     if ($type === 'progress') {
-        var_dump($zip->registerProgressCallback(0.5, static function (float $rate): void {}));
+        var_dump($zip->registerProgressCallback(0.5, static function (float $rate) use ($callbackState): void {}));
     } else {
-        var_dump($zip->registerCancelCallback(static function (): int { return 0; }));
+        var_dump($zip->registerCancelCallback(static function () use ($callbackState): int { return 0; }));
     }
     $zip->addFromString("$type.txt", 'late');
     $stream = $zip->getStream('entry.txt');
+    if (!is_resource($stream)) {
+        throw new Exception('Failed to open entry stream');
+    }
     $weakRef = WeakReference::create($zip);
-    unset($zip);
+    unset($callbackState, $zip);
 
     var_dump($weakRef->get());
+    var_dump($callbackStateRef->get() !== null);
     var_dump(stream_get_contents($stream));
     fclose($stream);
+    var_dump($callbackStateRef->get());
     echo "$type done\n";
 }
 
@@ -49,9 +56,13 @@ testCallback($filename, 'cancel');
 --EXPECT--
 bool(true)
 NULL
+bool(true)
 string(8) "contents"
+NULL
 progress done
 bool(true)
 NULL
+bool(true)
 string(8) "contents"
+NULL
 cancel done

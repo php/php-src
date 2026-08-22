@@ -9,6 +9,20 @@ class Holder extends ZipArchive {
     public $bag = [];
 }
 
+class ResurrectingHolder extends Holder {
+    public function __destruct() {
+        $GLOBALS['resurrected'] = $this;
+    }
+}
+
+function getEntryStream(ZipArchive $zip) {
+    $stream = $zip->getStream('entry.txt');
+    if (!is_resource($stream)) {
+        throw new Exception('Failed to open entry stream');
+    }
+    return $stream;
+}
+
 $filename = __DIR__ . '/gh23276.zip';
 
 $zip = new Holder;
@@ -18,7 +32,7 @@ $zip->close();
 
 // An archive holding its own stream in a property must be destroyed.
 $zip->open($filename, ZipArchive::RDONLY);
-$zip->stream = $zip->getStream('entry.txt');
+$zip->stream = getEntryStream($zip);
 $weakRef = WeakReference::create($zip);
 unset($zip);
 var_dump($weakRef->get());
@@ -26,7 +40,7 @@ var_dump($weakRef->get());
 // Same through an indirect edge (property -> array -> resource).
 $zip = new Holder;
 $zip->open($filename, ZipArchive::RDONLY);
-$zip->bag[] = $zip->getStream('entry.txt');
+$zip->bag[] = getEntryStream($zip);
 $weakRef = WeakReference::create($zip);
 unset($zip);
 gc_collect_cycles();
@@ -37,22 +51,36 @@ $a = new Holder;
 $b = new Holder;
 $a->open($filename, ZipArchive::RDONLY);
 $b->open($filename, ZipArchive::RDONLY);
-$a->stream = $b->getStream('entry.txt');
-$b->stream = $a->getStream('entry.txt');
+$a->stream = getEntryStream($b);
+$b->stream = getEntryStream($a);
 $weakRef = WeakReference::create($a);
 unset($a, $b);
 gc_collect_cycles();
 var_dump($weakRef->get());
 
-// An externally held stream no longer keeps the object alive, but it must still keep the underlying archive readable.
+// A resurrected object must retain a usable stream.
+$zip = new ResurrectingHolder;
+$zip->open($filename, ZipArchive::RDONLY);
+$zip->stream = getEntryStream($zip);
+unset($zip);
+gc_collect_cycles();
+var_dump($resurrected instanceof ResurrectingHolder);
+var_dump(stream_get_contents($resurrected->stream));
+fclose($resurrected->stream);
+unset($resurrected);
+
+// Externally held streams no longer keep the object alive. Closing one stream
+// must not close the archive while another stream still uses it.
 $zip = new Holder;
 $zip->open($filename, ZipArchive::RDONLY);
-$stream = $zip->getStream('entry.txt');
+$stream1 = getEntryStream($zip);
+$stream2 = getEntryStream($zip);
 $weakRef = WeakReference::create($zip);
 unset($zip);
 var_dump($weakRef->get());
-var_dump(stream_get_contents($stream));
-fclose($stream);
+fclose($stream1);
+var_dump(stream_get_contents($stream2));
+fclose($stream2);
 ?>
 --CLEAN--
 <?php
@@ -62,5 +90,7 @@ fclose($stream);
 NULL
 NULL
 NULL
+bool(true)
+string(8) "contents"
 NULL
 string(8) "contents"
