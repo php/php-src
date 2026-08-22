@@ -525,14 +525,21 @@ retry:
 						} else if (st & SNMP_USE_SUFFIX_AS_KEYS && st & SNMP_CMD_WALK) {
 							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 							if (rootlen <= vars->name_length && snmp_oid_compare(root, rootlen, vars->name, rootlen) == 0) {
-								buf2[0] = '\0';
+								size_t pos = 0;
 								count = rootlen;
-								while(count < vars->name_length){
-									snprintf(buf, sizeof(buf), "%lu.", vars->name[count]);
-									strcat(buf2, buf);
+								while (count < vars->name_length) {
+									int written = snprintf(buf2 + pos, sizeof(buf2) - pos, "%lu.", vars->name[count]);
+									if (written < 0 || (size_t)written >= sizeof(buf2) - pos) {
+										break;
+									}
+									pos += (size_t)written;
 									count++;
 								}
-								buf2[strlen(buf2) - 1] = '\0'; /* remove trailing '.' */
+								if (pos > 0) {
+									buf2[pos - 1] = '\0'; /* remove trailing '.' */
+								} else {
+									buf2[0] = '\0';
+								}
 							}
 							add_assoc_zval(return_value, buf2, &snmpval);
 						} else {
