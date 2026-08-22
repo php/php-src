@@ -8,6 +8,8 @@ $uri = Uri\Rfc3986\Uri::parse("https://192.168.0.1");
 var_dump($uri);
 var_dump($uri->toRawString());
 var_dump($uri->toString());
+var_dump($uri->getRawHost());
+var_dump($uri->getHost());
 
 ?>
 --EXPECTF--
@@ -31,3 +33,5 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
 }
 string(19) "https://192.168.0.1"
 string(19) "https://192.168.0.1"
+string(11) "192.168.0.1"
+string(11) "192.168.0.1"

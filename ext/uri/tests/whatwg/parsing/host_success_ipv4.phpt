@@ -6,7 +6,9 @@ Test Uri\WhatWg\Url parsing - host - IPv4
 $url = Uri\WhatWg\Url::parse("https://192.168.0.1");
 
 var_dump($url);
+var_dump($url->toUnicodeString());
 var_dump($url->toAsciiString());
+var_dump($url->getAsciiHost());
 
 ?>
 --EXPECTF--
@@ -29,3 +31,5 @@ object(Uri\WhatWg\Url)#%d (%d) {
   NULL
 }
 string(20) "https://192.168.0.1/"
+string(20) "https://192.168.0.1/"
+string(11) "192.168.0.1"
