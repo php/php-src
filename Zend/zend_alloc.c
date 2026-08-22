@@ -1430,6 +1430,12 @@ static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, void *ptr,
 #endif
 
 	p = (zend_mm_free_slot*)ptr;
+#if ZEND_MM_HEAP_PROTECTION
+	/* Catch the most common double-free pattern for free. */
+	if (UNEXPECTED(p == heap->free_slot[bin_num])) {
+		zend_mm_panic("zend_mm_heap corrupted (double free)");
+	}
+#endif
 	zend_mm_set_next_free_slot(heap, bin_num, p, heap->free_slot[bin_num]);
 	heap->free_slot[bin_num] = p;
 }
