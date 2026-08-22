@@ -1158,8 +1158,11 @@ void php_zip_archive_release(php_zip_archive *archive)
 	efree(archive);
 }
 
-static void php_zip_object_detach_archive(ze_zip_object *ze_obj)
+/* The caller must close or discard released_za before detaching it. */
+static void php_zip_object_detach_archive(ze_zip_object *ze_obj, struct zip *released_za)
 {
+	ZEND_ASSERT(ze_obj->archive != NULL);
+	ZEND_ASSERT(ze_obj->archive->za == released_za);
 	ze_obj->archive->za = NULL;
 	php_zip_archive_release(ze_obj->archive);
 	ze_obj->archive = NULL;
@@ -1579,12 +1582,13 @@ PHP_METHOD(ZipArchive, open)
 
 	if (ze_obj->archive) {
 		/* we already have an opened zip, free it */
-		if (zip_close(ze_obj->archive->za) != 0) {
+		intern = ze_obj->archive->za;
+		if (zip_close(intern) != 0) {
 			php_error_docref(NULL, E_WARNING, "Empty string as source");
 			efree(resolved_path);
 			RETURN_FALSE;
 		}
-		php_zip_object_detach_archive(ze_obj);
+		php_zip_object_detach_archive(ze_obj, intern);
 	}
 	if (ze_obj->filename) {
 		efree(ze_obj->filename);
@@ -1692,7 +1696,7 @@ PHP_METHOD(ZipArchive, close)
 	efree(ze_obj->filename);
 	ze_obj->filename = NULL;
 	ze_obj->filename_len = 0;
-	php_zip_object_detach_archive(ze_obj);
+	php_zip_object_detach_archive(ze_obj, intern);
 
 	if (!err) {
 		RETURN_TRUE;
