@@ -441,8 +441,6 @@ PHP 8.6 UPGRADE NOTES
     any other value throws a ValueError. The operating system may round, cap or
     otherwise adjust the requested size, and may stop sizing that buffer
     automatically, so the size read back can differ from the one requested.
-    Sockets returned by stream_socket_accept() inherit both sizes from the
-    listening socket.
   . Allowed casting filtered streams as file descriptor for select.
   . Added the "write_seek_mode stream" filter parameter for the bz2, iconv,
     zlib, and string stream filters. This parameter must be set via an
