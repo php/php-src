@@ -19,8 +19,8 @@ define("Baz", new stdClass);
 var_dump(Baz);
 try {
     var_dump((string) Baz);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -30,4 +30,4 @@ object(TestClass)#1 (0) {
 string(3) "Foo"
 object(stdClass)#2 (0) {
 }
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string

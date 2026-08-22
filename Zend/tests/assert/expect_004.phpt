@@ -7,9 +7,9 @@ assert.exception=1
 <?php
 try {
     assert(false, "I require this to succeed");
-} catch (AssertionError $ex) {
-    var_dump($ex->getMessage());
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(25) "I require this to succeed"
+AssertionError: I require this to succeed
