@@ -863,6 +863,8 @@ PHP 8.6 UPGRADE NOTES
 
 - DOM:
   . Made splitText() faster and consume less memory.
+  . Improved performance and reduced memory usage when updating Dom\TokenList
+    objects after the associated class attribute changes.
 
 - JSON:
   . Improve performance of encoding arrays and objects.

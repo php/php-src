@@ -205,23 +205,16 @@ static xmlChar *dom_token_list_get_class_value(const xmlAttr *attr, bool *should
 	return NULL;
 }
 
-static void dom_token_list_update_set(dom_token_list_object *intern, HashTable *token_set)
+static void dom_token_list_update_set(dom_token_list_object *intern, HashTable *token_set, const xmlChar *value)
 {
 	/* https://dom.spec.whatwg.org/#ref-for-domtokenlist%E2%91%A0%E2%91%A1 */
-	bool should_free;
-	const xmlAttr *attr = dom_token_list_get_attr(intern);
 	/* 1. If the data is null, the token set remains empty. */
-	xmlChar *value = dom_token_list_get_class_value(attr, &should_free);
 	if (value != NULL) {
 		/* 2. Otherwise, parse the token set. */
 		dom_ordered_set_parser(token_set, (const char *) value, false);
 		intern->cached_string = estrdup((const char *) value);
 	} else {
 		intern->cached_string = NULL;
-	}
-
-	if (should_free) {
-		xmlFree(value);
 	}
 }
 
@@ -238,7 +231,7 @@ static void dom_token_list_ensure_set_up_to_date(dom_token_list_object *intern)
 		HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 		zend_hash_destroy(token_set);
 		zend_hash_init(token_set, 0, NULL, NULL, false);
-		dom_token_list_update_set(intern, token_set);
+		dom_token_list_update_set(intern, token_set, value);
 	}
 
 	if (should_free) {
@@ -259,7 +252,13 @@ void dom_token_list_ctor(dom_token_list_object *intern, dom_object *element_obj)
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 	zend_hash_init(token_set, 0, NULL, NULL, false);
 
-	dom_token_list_update_set(intern, token_set);
+	bool should_free;
+	const xmlAttr *attr = dom_token_list_get_attr(intern);
+	xmlChar *value = dom_token_list_get_class_value(attr, &should_free);
+	dom_token_list_update_set(intern, token_set, value);
+	if (should_free) {
+		xmlFree(value);
+	}
 }
 
 void dom_token_list_free_obj(zend_object *object)
