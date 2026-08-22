@@ -22,8 +22,8 @@ class B extends A {
 
         try {
             call_user_func_array(array($this, 'self::inexistent'), array($str));
-        } catch (\TypeError $e) {
-            echo $e->getMessage() . \PHP_EOL;
+        } catch (\Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
     private function func2($str) {
@@ -52,4 +52,4 @@ Deprecated: Callables of the form ["C", "self::func3"] are deprecated in %s on l
 string(27) "B::func3: This should work!"
 
 Deprecated: Callables of the form ["C", "self::inexistent"] are deprecated in %s on line %d
-call_user_func_array(): Argument #1 ($callback) must be a valid callback, class C does not have a method "inexistent"
+TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class C does not have a method "inexistent"

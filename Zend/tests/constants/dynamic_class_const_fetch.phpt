@@ -11,7 +11,7 @@ function test($code) {
     try {
         var_dump(eval($code));
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -46,19 +46,19 @@ string(3) "bar"
 string(3) "bar"
 
 Warning: Undefined variable $barr in %s : eval()'d code on line %d
-Cannot use value of type null as class constant name
+TypeError: Cannot use value of type null as class constant name
 
 Warning: Undefined variable $barr in %s : eval()'d code on line %d
-Cannot use value of type null as class constant name
+TypeError: Cannot use value of type null as class constant name
 string(3) "bar"
 string(3) "bar"
 string(3) "Foo"
 string(3) "Foo"
-Cannot use value of type int as class constant name
-Cannot use value of type int as class constant name
-Cannot use value of type int as class constant name
-Cannot use value of type int as class constant name
-Cannot use value of type array as class constant name
-Cannot use value of type array as class constant name
-Cannot use value of type array as class constant name
-Cannot use value of type array as class constant name
+TypeError: Cannot use value of type int as class constant name
+TypeError: Cannot use value of type int as class constant name
+TypeError: Cannot use value of type int as class constant name
+TypeError: Cannot use value of type int as class constant name
+TypeError: Cannot use value of type array as class constant name
+TypeError: Cannot use value of type array as class constant name
+TypeError: Cannot use value of type array as class constant name
+TypeError: Cannot use value of type array as class constant name

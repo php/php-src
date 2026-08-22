@@ -11,35 +11,35 @@ set_error_handler(function($code, $msg) {
 
 try {
     zend_test_deprecated(new stdClass);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ret = new stdClass;
 try {
     $ret = zend_test_deprecated(new stdClass());
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $fn = 'zend_test_deprecated';
     $fn(new stdClass);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ret = new stdClass;
 try {
     $fn = 'zend_test_deprecated';
     $ret = $fn(new stdClass);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Function zend_test_deprecated() is deprecated
-Function zend_test_deprecated() is deprecated
-Function zend_test_deprecated() is deprecated
-Function zend_test_deprecated() is deprecated
+Error: Function zend_test_deprecated() is deprecated
+Error: Function zend_test_deprecated() is deprecated
+Error: Function zend_test_deprecated() is deprecated
+Error: Function zend_test_deprecated() is deprecated

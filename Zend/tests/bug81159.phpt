@@ -8,14 +8,14 @@ $o = new stdClass();
 try {
     $s[$o] = 'A';
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($s[$o]);
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot access offset of type stdClass on string
-Cannot access offset of type stdClass on string
+TypeError: Cannot access offset of type stdClass on string
+TypeError: Cannot access offset of type stdClass on string

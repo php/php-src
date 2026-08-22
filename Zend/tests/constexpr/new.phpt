@@ -5,8 +5,8 @@ new in constant expressions
 
 try {
     eval('static $a = new DoesNotExist;');
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 static $b = new stdClass;
@@ -14,8 +14,8 @@ var_dump($b);
 
 try {
     eval('static $c = new stdClass([] + 0);');
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class Test {
@@ -24,8 +24,8 @@ class Test {
 
 try {
     eval('static $d = new Test(new stdClass, [] + 0);');
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 static $e = new Test(new stdClass, 42);
@@ -40,17 +40,17 @@ class Test2 {
 
 try {
     eval('static $f = new Test2();');
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Class "DoesNotExist" not found
+Error: Class "DoesNotExist" not found
 object(stdClass)#2 (0) {
 }
-Unsupported operand types: array + int
-Unsupported operand types: array + int
+TypeError: Unsupported operand types: array + int
+TypeError: Unsupported operand types: array + int
 object(Test)#4 (2) {
   ["a"]=>
   object(stdClass)#1 (0) {
@@ -59,4 +59,4 @@ object(Test)#4 (2) {
   int(42)
 }
 Side-effect
-Failed to construct
+Exception: Failed to construct
