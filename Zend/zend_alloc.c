@@ -883,6 +883,33 @@ static zend_always_inline void zend_mm_chunk_init(zend_mm_heap *heap, zend_mm_ch
 	chunk->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
 }
 
+/* Cached chunks are linked through their headers, which live in memory a heap
+ * overflow can reach. The links are therefore xored with the heap key, and the
+ * decoded value is checked for chunk alignment before being dereferenced. */
+static zend_always_inline zend_mm_chunk *zend_mm_encode_cached_chunk(const zend_mm_heap *heap, const zend_mm_chunk *chunk)
+{
+	return (zend_mm_chunk*)((uintptr_t)chunk ^ heap->shadow_key);
+}
+
+static zend_always_inline zend_mm_chunk *zend_mm_decode_cached_chunk_key(uintptr_t key, const zend_mm_chunk *chunk)
+{
+	zend_mm_chunk *next = (zend_mm_chunk*)((uintptr_t)chunk ^ key);
+
+	/* NULL terminates the list and is chunk aligned, so it needs no special case */
+	ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(next, ZEND_MM_CHUNK_SIZE) == 0, "zend_mm_heap corrupted");
+	return next;
+}
+
+static zend_always_inline void zend_mm_set_next_cached_chunk(zend_mm_heap *heap, zend_mm_chunk *chunk, const zend_mm_chunk *next)
+{
+	chunk->next = zend_mm_encode_cached_chunk(heap, next);
+}
+
+static zend_always_inline zend_mm_chunk *zend_mm_get_next_cached_chunk(const zend_mm_heap *heap, const zend_mm_chunk *chunk)
+{
+	return zend_mm_decode_cached_chunk_key(heap->shadow_key, chunk->next);
+}
+
 /***********************/
 /* Huge Runs (forward) */
 /***********************/
@@ -1031,7 +1058,7 @@ get_chunk:
 			if (heap->cached_chunks) {
 				heap->cached_chunks_count--;
 				chunk = heap->cached_chunks;
-				heap->cached_chunks = chunk->next;
+				heap->cached_chunks = zend_mm_get_next_cached_chunk(heap, chunk);
 			} else {
 #if ZEND_MM_LIMIT
 				if (UNEXPECTED(ZEND_MM_CHUNK_SIZE > heap->limit - heap->real_size)) {
@@ -1150,7 +1177,7 @@ static zend_always_inline void zend_mm_delete_chunk(zend_mm_heap *heap, zend_mm_
 	  && heap->last_chunks_delete_count >= 4)) {
 		/* delay deletion */
 		heap->cached_chunks_count++;
-		chunk->next = heap->cached_chunks;
+		zend_mm_set_next_cached_chunk(heap, chunk, heap->cached_chunks);
 		heap->cached_chunks = chunk;
 	} else {
 #if ZEND_MM_STAT || ZEND_MM_LIMIT
@@ -1168,7 +1195,7 @@ static zend_always_inline void zend_mm_delete_chunk(zend_mm_heap *heap, zend_mm_
 			zend_mm_chunk_free(heap, chunk, ZEND_MM_CHUNK_SIZE);
 		} else {
 //TODO: select the best chunk to delete???
-			chunk->next = heap->cached_chunks->next;
+			zend_mm_set_next_cached_chunk(heap, chunk, zend_mm_get_next_cached_chunk(heap, heap->cached_chunks));
 			zend_mm_chunk_free(heap, heap->cached_chunks, ZEND_MM_CHUNK_SIZE);
 			heap->cached_chunks = chunk;
 		}
@@ -2037,6 +2064,14 @@ ZEND_API void zend_mm_refresh_key_child(zend_mm_heap *heap)
 		}
 	}
 
+	/* Update cached chunk links with the new key */
+	for (zend_mm_chunk *chunk = heap->cached_chunks; chunk != NULL; ) {
+		zend_mm_chunk *next = zend_mm_decode_cached_chunk_key(old_key, chunk->next);
+
+		zend_mm_set_next_cached_chunk(heap, chunk, next);
+		chunk = next;
+	}
+
 #if ZEND_DEBUG
 	heap->pid = getpid();
 #endif
@@ -2489,7 +2524,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 	p = heap->main_chunk->next;
 	while (p != heap->main_chunk) {
 		zend_mm_chunk *q = p->next;
-		p->next = heap->cached_chunks;
+		zend_mm_set_next_cached_chunk(heap, p, heap->cached_chunks);
 		heap->cached_chunks = p;
 		p = q;
 		heap->chunks_count--;
@@ -2500,7 +2535,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		/* free all cached chunks */
 		while (heap->cached_chunks) {
 			p = heap->cached_chunks;
-			heap->cached_chunks = p->next;
+			heap->cached_chunks = zend_mm_get_next_cached_chunk(heap, p);
 			zend_mm_chunk_free(heap, p, ZEND_MM_CHUNK_SIZE);
 		}
 		/* free the first chunk */
@@ -2511,16 +2546,16 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		while ((double)heap->cached_chunks_count + 0.9 > heap->avg_chunks_count &&
 		       heap->cached_chunks) {
 			p = heap->cached_chunks;
-			heap->cached_chunks = p->next;
+			heap->cached_chunks = zend_mm_get_next_cached_chunk(heap, p);
 			zend_mm_chunk_free(heap, p, ZEND_MM_CHUNK_SIZE);
 			heap->cached_chunks_count--;
 		}
 		/* clear cached chunks */
 		p = heap->cached_chunks;
 		while (p != NULL) {
-			zend_mm_chunk *q = p->next;
+			zend_mm_chunk *q = zend_mm_get_next_cached_chunk(heap, p);
 			memset(p, 0, sizeof(zend_mm_chunk));
-			p->next = q;
+			zend_mm_set_next_cached_chunk(heap, p, q);
 			p = q;
 		}
 
@@ -2557,7 +2592,17 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 				&& "heap was re-used without calling zend_mm_refresh_key_child() after a fork");
 #endif
 
+		uintptr_t old_key = heap->shadow_key;
+
 		zend_mm_refresh_key(heap);
+
+		/* Cached chunks outlive the request, so re-encode their links */
+		for (p = heap->cached_chunks; p != NULL; ) {
+			zend_mm_chunk *q = zend_mm_decode_cached_chunk_key(old_key, p->next);
+
+			zend_mm_set_next_cached_chunk(heap, p, q);
+			p = q;
+		}
 	}
 }
 
@@ -2904,7 +2949,7 @@ ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
 			/* free some cached chunks to fit into new memory limit */
 			do {
 				zend_mm_chunk *p = heap->cached_chunks;
-				heap->cached_chunks = p->next;
+				heap->cached_chunks = zend_mm_get_next_cached_chunk(heap, p);
 				zend_mm_chunk_free(heap, p, ZEND_MM_CHUNK_SIZE);
 				heap->cached_chunks_count--;
 				heap->real_size -= ZEND_MM_CHUNK_SIZE;
