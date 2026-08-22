@@ -677,6 +677,45 @@ static inline char *parse_ip_address(php_stream_xport_param *xparam, int *portno
 	return parse_ip_address_ex(xparam->inputs.name, xparam->inputs.namelen, portno, xparam->want_errortext, &xparam->outputs.error_text);
 }
 
+static int php_sockop_parse_buffer_sizes(php_stream *stream, php_sockvals *sockvals)
+{
+	zval *tmpzval;
+
+	if (!PHP_STREAM_CONTEXT(stream)) {
+		return 0;
+	}
+
+#ifdef SO_RCVBUF
+	if ((tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_rcvbuf")) != NULL) {
+		zend_long bufsize = zval_get_long(tmpzval);
+
+		if (bufsize < 1 || bufsize > INT_MAX) {
+			zend_value_error("stream context option 'so_rcvbuf' must be between 1 and %d", INT_MAX);
+			return -1;
+		}
+
+		sockvals->mask |= PHP_SOCKVAL_SO_RCVBUF;
+		sockvals->rcvbuf = (int) bufsize;
+	}
+#endif
+
+#ifdef SO_SNDBUF
+	if ((tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_sndbuf")) != NULL) {
+		zend_long bufsize = zval_get_long(tmpzval);
+
+		if (bufsize < 1 || bufsize > INT_MAX) {
+			zend_value_error("stream context option 'so_sndbuf' must be between 1 and %d", INT_MAX);
+			return -1;
+		}
+
+		sockvals->mask |= PHP_SOCKVAL_SO_SNDBUF;
+		sockvals->sndbuf = (int) bufsize;
+	}
+#endif
+
+	return 0;
+}
+
 static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *sock,
 		php_stream_xport_param *xparam)
 {
@@ -717,6 +756,11 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 	host = parse_ip_address(xparam, &portno);
 
 	if (host == NULL) {
+		return -1;
+	}
+
+	if (php_sockop_parse_buffer_sizes(stream, &sockvals) == -1) {
+		efree(host);
 		return -1;
 	}
 
@@ -865,6 +909,11 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	host = parse_ip_address(xparam, &portno);
 
 	if (host == NULL) {
+		return -1;
+	}
+
+	if (php_sockop_parse_buffer_sizes(stream, &sockvals) == -1) {
+		efree(host);
 		return -1;
 	}
 
