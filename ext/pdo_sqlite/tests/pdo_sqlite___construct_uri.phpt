@@ -41,8 +41,8 @@ var_dump(file_exists($dbFile));
 --EXPECTF--
 bool(false)
 
-Deprecated: Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs in %s on line %d
+Deprecated: PDO::__construct(): Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs in %s on line %d
 bool(true)
 bool(false)
-ErrorException: Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs
+ErrorException: PDO::__construct(): Looking up the DSN from a URI is deprecated due to possible security concerns with DSNs coming from remote URIs
 bool(false)

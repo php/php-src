@@ -75,37 +75,37 @@ int(1)
 
 -- Iteration 3 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1)
 
 -- Iteration 4 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 5 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2)
 
 -- Iteration 6 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2)
 
 -- Iteration 7 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(8)
 
 -- Iteration 8 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1)
 
 -- Iteration 9 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 10 --
@@ -131,17 +131,17 @@ bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 17 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 18 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 19 --
 
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+Deprecated: bindec(): Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 20 --
