@@ -1265,7 +1265,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	struct objid_query objid_query;
 	php_snmp_session *session;
-	int session_less_mode = (getThis() == NULL);
+	bool session_less_mode = (getThis() == NULL);
 	uint32_t timeout_arg_num = 0;
 	uint32_t oid_arg_num = 1, type_arg_num = 0, value_arg_num = 0;
 	php_snmp_object *snmp_object;
@@ -1918,17 +1918,17 @@ static int php_snmp_has_property(zend_object *object, zend_string *name, int has
 {
 	zval rv;
 	php_snmp_prop_handler *hnd;
-	int ret = 0;
+	bool ret = false;
 
 	if ((hnd = zend_hash_find_ptr(&php_snmp_properties, name)) != NULL) {
 		switch (has_set_exists) {
 			case ZEND_PROPERTY_EXISTS:
-				ret = 1;
+				ret = true;
 				break;
 			case ZEND_PROPERTY_ISSET: {
 				zval *value = php_snmp_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
-					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;
+					ret = Z_TYPE_P(value) != IS_NULL;
 					zval_ptr_dtor(value);
 				}
 				break;
@@ -1937,7 +1937,7 @@ static int php_snmp_has_property(zend_object *object, zend_string *name, int has
 				zval *value = php_snmp_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					convert_to_boolean(value);
-					ret = Z_TYPE_P(value) == IS_TRUE? 1:0;
+					ret = Z_TYPE_P(value) == IS_TRUE;
 				}
 				break;
 			}
