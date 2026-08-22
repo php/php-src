@@ -20,6 +20,10 @@ function context(int $rcvbuf, int $sndbuf) {
     ]]);
 }
 
+function port($server): int {
+    return (int)substr(strrchr(stream_socket_get_name($server, false), ':'), 1);
+}
+
 $control = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr,
     STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
 
@@ -36,11 +40,29 @@ if (!$server) {
     die('Unable to create server');
 }
 
-$addr = stream_socket_get_name($server, false);
-$port = (int)substr(strrchr($addr, ':'), 1);
+echo "Listen buffers\n";
+[$listen_rcvbuf, $listen_sndbuf] = buffers($server);
+var_dump($listen_rcvbuf < $rcvbuf);
+var_dump($listen_sndbuf < $sndbuf);
 
-$client = stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 30,
-    STREAM_CLIENT_CONNECT, context($rcvbuf, $sndbuf));
+// A connection is compared against another connection: some systems size the
+// receive buffer of a connected socket on their own.
+$control_client = stream_socket_client("tcp://127.0.0.1:" . port($server), $errno, $errstr, 30);
+
+if (!$control_client) {
+    die('Unable to create client');
+}
+
+$control_accepted = stream_socket_accept($server, 1);
+
+if (!$control_accepted) {
+    die('Unable to accept connection');
+}
+
+[, $client_sndbuf] = buffers($control_client);
+
+$client = stream_socket_client("tcp://127.0.0.1:" . port($server), $errno, $errstr, 30,
+    STREAM_CLIENT_CONNECT, context($client_sndbuf, $client_sndbuf));
 
 if (!$client) {
     die('Unable to create client');
@@ -52,26 +74,14 @@ if (!$accepted) {
     die('Unable to accept connection');
 }
 
-// Verify the listening socket
-[$listen_rcvbuf, $listen_sndbuf] = buffers($server);
-echo "Listen buffers\n";
-var_dump($listen_rcvbuf < $rcvbuf);
-var_dump($listen_sndbuf < $sndbuf);
-
-// Verify server side (accepted connection, inherits from the listening socket)
-[$server_rcvbuf, $server_sndbuf] = buffers($accepted);
-echo "Server buffers\n";
-var_dump($server_rcvbuf < $rcvbuf);
-var_dump($server_sndbuf < $sndbuf);
-
-// Verify client side
-[$client_rcvbuf, $client_sndbuf] = buffers($client);
 echo "Client buffers\n";
-var_dump($client_rcvbuf < $rcvbuf);
-var_dump($client_sndbuf < $sndbuf);
+[, $client_sndbuf2] = buffers($client);
+var_dump($client_sndbuf2 < $client_sndbuf);
 
 fclose($accepted);
+fclose($control_accepted);
 fclose($client);
+fclose($control_client);
 fclose($server);
 fclose($control);
 
@@ -80,9 +90,5 @@ fclose($control);
 Listen buffers
 bool(true)
 bool(true)
-Server buffers
-bool(true)
-bool(true)
 Client buffers
-bool(true)
 bool(true)
