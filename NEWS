@@ -71,6 +71,7 @@ PHP                                                                        NEWS
   . Fixed class constant completion in the interactive shell. (Weilin Du)
 
 - SAPI:
+  . Fixed fuzzer targets failing to build in isolation. (Mrmaxmeier)
   . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
 
 - Session:
