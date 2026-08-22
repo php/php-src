@@ -1872,8 +1872,10 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		int i;
 		zval *zval_file;
 		ze_zip_object *ze_obj;
+		struct zip *za;
 
 		ze_obj = Z_ZIP_P(self);
+		za = php_zip_object_za(ze_obj);
 
 		for (i = 0; i < found; i++) {
 			char *file_stripped, *entry_name;
@@ -1927,19 +1929,19 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					RETURN_FALSE;
 				}
 				if (opts.comp_method >= 0) {
-					if (zip_set_file_compression(intern, ze_obj->last_id, opts.comp_method, opts.comp_flags)) {
+					if (zip_set_file_compression(za, ze_obj->last_id, opts.comp_method, opts.comp_flags)) {
 						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}
 				}
 #ifdef HAVE_ENCRYPTION
 				if (opts.enc_method >= 0) {
-					if (UNEXPECTED(zip_file_set_encryption(intern, ze_obj->last_id, ZIP_EM_NONE, NULL) < 0)) {
+					if (UNEXPECTED(zip_file_set_encryption(za, ze_obj->last_id, ZIP_EM_NONE, NULL) < 0)) {
 						zend_array_destroy(Z_ARR_P(return_value));
 						php_error_docref(NULL, E_WARNING, "password reset failed");
 						RETURN_FALSE;
 					}
-					if (zip_file_set_encryption(intern, ze_obj->last_id, opts.enc_method, opts.enc_password)) {
+					if (zip_file_set_encryption(za, ze_obj->last_id, opts.enc_method, opts.enc_password)) {
 						zend_array_destroy(Z_ARR_P(return_value));
 						RETURN_FALSE;
 					}
