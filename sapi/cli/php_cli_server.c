@@ -175,6 +175,7 @@ typedef struct php_cli_server_client {
 	php_http_parser parser;
 	bool request_read;
 	bool too_large_post;
+	bool expect_continue;
 	zend_string *current_header_name;
 	zend_string *current_header_value;
 	enum { HEADER_NONE=0, HEADER_FIELD, HEADER_VALUE } last_header_element;
@@ -1791,6 +1792,12 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 		return 2;
 	}
 
+	zval *expect_val = zend_hash_str_find(&client->request.headers, "expect", sizeof("expect") - 1);
+	if (expect_val && Z_TYPE_P(expect_val) == IS_STRING
+			&& zend_string_equals_literal_ci(Z_STR_P(expect_val), "100-continue")) {
+		client->expect_continue = true;
+	}
+
 	return 0;
 }
 
@@ -1886,6 +1893,26 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	}
 	client->parser.data = client;
 	nbytes_consumed = php_http_parser_execute(&client->parser, &settings, buf, nbytes_read);
+	if (client->expect_continue && !client->request_read) {
+		/* Parser completed headers with Expect: 100-continue but hasn't
+		 * finished reading the body. Send 100 Continue before the client
+		 * sends the request body. */
+		smart_str buffer = { 0 };
+		bool send_failed = true;
+		append_http_status_line(&buffer, client->parser.http_major * 100 + client->parser.http_minor, 100, 0);
+		smart_str_appendl(&buffer, "\r\n", 2);
+		smart_str_0(&buffer);
+		zend_try {
+			php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+			send_failed = false;
+		} zend_end_try();
+		smart_str_free(&buffer);
+		client->expect_continue = false;
+		if (send_failed) {
+			*errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
+			return -1;
+		}
+	}
 	if (nbytes_consumed != (size_t)nbytes_read && !client->too_large_post) {
 		if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
 			if ((buf[0] & 0x80) /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
@@ -1981,6 +2008,7 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = false;
 	client->too_large_post = false;
+	client->expect_continue = false;
 
 	client->last_header_element = HEADER_NONE;
 	client->current_header_name = NULL;
