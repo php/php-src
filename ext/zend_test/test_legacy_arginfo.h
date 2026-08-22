@@ -1,5 +1,5 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 4d728e740122add9d4c91f5c1abb5f5017690636
+ * Stub hash: 0edc039251d06178acf9ec582a9e11e0c4bf7de3
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, 0)
@@ -196,6 +196,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_test_refcount, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_zval_try_get_double arginfo_zend_test_refcount
 
 #define arginfo_zend_test_zend_ini_parse_quantity arginfo_zend_create_unterminated_string
 
@@ -415,6 +417,7 @@ static ZEND_FUNCTION(zend_object_init_with_constructor);
 static ZEND_FUNCTION(zend_call_method_if_exists);
 static ZEND_FUNCTION(zend_test_call_with_consumed_args);
 static ZEND_FUNCTION(zend_test_refcount);
+static ZEND_FUNCTION(zend_test_zval_try_get_double);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
@@ -563,6 +566,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_call_method_if_exists, arginfo_zend_call_method_if_exists)
 	ZEND_FE(zend_test_call_with_consumed_args, arginfo_zend_test_call_with_consumed_args)
 	ZEND_FE(zend_test_refcount, arginfo_zend_test_refcount)
+	ZEND_FE(zend_test_zval_try_get_double, arginfo_zend_test_zval_try_get_double)
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
