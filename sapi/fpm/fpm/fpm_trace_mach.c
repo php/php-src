@@ -51,6 +51,15 @@ int fpm_trace_signal(pid_t pid) /* {{{ */
 }
 /* }}} */
 
+int fpm_trace_continue(pid_t pid) /* {{{ */
+{
+	if (0 > fpm_pctl_kill(pid, FPM_PCTL_CONT)) {
+		zlog(ZLOG_SYSERROR, "failed to send SIGCONT to %d", pid);
+		return -1;
+	}
+	return 0;
+}
+
 int fpm_trace_ready(pid_t pid) /* {{{ */
 {
 	kern_return_t kr;
