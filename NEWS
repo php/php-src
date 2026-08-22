@@ -127,6 +127,10 @@ PHP                                                                        NEWS
   . Fixed exif_read_data() allocating a HEIF meta box larger than the file
     it came from. (iliaal)
 
+- Core:
+  . Fixed bug GH-17773 (Initializing array elements with references returned by
+    functions was not possible). (Matthias Görgens)
+
 - GMP:
   . Added optional $definitely_prime output parameter to gmp_prevprime().
     (Weilin Du)

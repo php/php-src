@@ -4922,6 +4922,12 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 
 ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, const zend_ssa *ssa, uint32_t t1, uint32_t t2)
 {
+	if (opline->opcode == ZEND_MAKE_REF && opline->extended_value == ZEND_RETURNS_FUNCTION) {
+		/* A by-value function result raises an E_NOTICE, which a userland
+		 * error handler can turn into an exception. */
+		return 1;
+	}
+
 	if (opline->op1_type == IS_CV) {
 		if (t1 & MAY_BE_UNDEF) {
 			switch (opline->opcode) {

@@ -11575,8 +11575,19 @@ static void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		}
 
 		if (by_ref) {
-			zend_ensure_writable_variable(value_ast);
+			zend_assert_not_short_circuited(value_ast);
+			if (is_globals_fetch(value_ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot acquire reference to $GLOBALS");
+			}
 			zend_compile_var(&value_node, value_ast, BP_VAR_W, true);
+			if (value_node.op_type != IS_VAR && zend_is_call(value_ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use result of built-in function in write context");
+			}
+			if (zend_is_call(value_ast)) {
+				opline = zend_emit_op(&value_node, ZEND_MAKE_REF, &value_node, NULL);
+				opline->extended_value = ZEND_RETURNS_FUNCTION;
+			}
 		} else {
 			zend_compile_expr(&value_node, value_ast);
 		}
