@@ -13,6 +13,8 @@ runs:
         apt-get update -y | true
         # TODO: Reenable postgresql + postgresql-contrib packages once they work again.
         apt-get install -y \
+          apache2:i386 \
+          apache2-dev:i386 \
           autoconf \
           bison \
           curl \
