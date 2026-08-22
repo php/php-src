@@ -1,5 +1,5 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: 18e6ffa1acd3c1b6d1c962be97f36e9a46a317a2 */
+ * Stub hash: 7d535318f2334eed04806a7e670ab7c806b286ea */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
