@@ -15,9 +15,18 @@ lexers['php-annotations'] = PhpLexer(startinline=True)
 project = 'php-src docs'
 author = 'The PHP Group'
 extensions = [
+    'myst_parser',
     'sphinx_design',
     'sphinx.ext.autosectionlabel',
 ]
+exclude_patterns = ['**/*TODO.md']
+myst_enable_extensions = [
+    'alert',
+    'gfm_autolink',
+    'strikethrough',
+    'tasklist',
+]
+myst_heading_anchors = 6
 templates_path = ['_templates']
 html_theme = 'sphinxawesome_theme'
 html_static_path = ['_static']
