@@ -47,6 +47,7 @@ PHP                                                                        NEWS
     is freed while the stream is still open). (Eyüp Can Akman)
 
 - SAPI:
+  . Fixed fuzzer targets failing to build in isolation. (Mrmaxmeier)
   . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
 
 27 Aug 2026, PHP 8.5.10
