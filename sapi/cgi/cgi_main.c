@@ -63,6 +63,7 @@
 #include "ext/standard/php_standard.h"
 #include "ext/standard/dl_arginfo.h"
 #include "ext/standard/url.h"
+#include "ext/user_cache/php_user_cache.h"
 
 #ifdef PHP_WIN32
 # include <io.h>
@@ -778,6 +779,104 @@ static void sapi_cgi_log_message(const char *message, int syslog_type_int)
 	}
 }
 
+static const char *cgi_user_cache_getenv(const char *name)
+{
+	const char *value;
+	fcgi_request *request;
+	int name_len;
+
+	if (SG(server_context) != NULL && SG(server_context) != (void *) 1) {
+		request = (fcgi_request*) SG(server_context);
+		if (fcgi_has_env(request)) {
+			name_len = (int) strlen(name);
+			value = fcgi_getenv(request, name, name_len);
+			if (value != NULL) {
+				return value;
+			}
+		}
+	}
+
+	return getenv(name);
+}
+
+static void cgi_user_cache_activate_request_partition(void)
+{
+	const char *document_root = cgi_user_cache_getenv("DOCUMENT_ROOT");
+	const char *server_name = cgi_user_cache_getenv("SERVER_NAME");
+	const char *http_host = cgi_user_cache_getenv("HTTP_HOST");
+	size_t document_root_len, server_name_len, http_host_len, boundary_size;
+	char *boundary;
+	int boundary_len;
+
+	if ((server_name == NULL || server_name[0] == '\0') &&
+		(http_host == NULL || http_host[0] == '\0')
+	) {
+		php_user_cache_activate_boundary_partition_by_id(
+			"cgi-fcgi",
+			NULL,
+			0,
+			PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+		);
+
+		return;
+	}
+
+	if (document_root == NULL) {
+		document_root = "";
+	}
+	if (server_name == NULL) {
+		server_name = "";
+	}
+	if (http_host == NULL) {
+		http_host = "";
+	}
+	document_root_len = strlen(document_root);
+	server_name_len = strlen(server_name);
+	http_host_len = strlen(http_host);
+
+	/* Three decimal digits per size_t byte over-cover each length prefix,
+	 * and the component lengths cannot overflow the sum: each component is
+	 * a live NUL-terminated string in this address space. */
+	boundary_size = sizeof("document-root::;server-name::;http-host::") +
+		3 * (sizeof(size_t) * 3) +
+		document_root_len + server_name_len + http_host_len;
+	boundary = malloc(boundary_size);
+	if (boundary == NULL) {
+		php_user_cache_activate_boundary_partition_by_id(
+			"cgi-fcgi",
+			NULL,
+			0,
+			PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+		);
+
+		return;
+	}
+
+	/* Length-prefix every component so untrusted FastCGI values cannot create
+	 * ambiguous identities.  HTTP_HOST is intentionally included: PHP cannot
+	 * prove that two host aliases belong to the same application, so the safe
+	 * default is to keep them in different cache namespaces. */
+	boundary_len = snprintf(
+		boundary,
+		boundary_size,
+		"document-root:%zu:%s;server-name:%zu:%s;http-host:%zu:%s",
+		document_root_len,
+		document_root,
+		server_name_len,
+		server_name,
+		http_host_len,
+		http_host
+	);
+	ZEND_ASSERT(boundary_len > 0 && (size_t) boundary_len < boundary_size);
+	php_user_cache_activate_boundary_partition_by_id(
+		"cgi-fcgi",
+		boundary,
+		(size_t) boundary_len,
+		PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+	);
+	free(boundary);
+}
+
 /* {{{ php_cgi_ini_activate_user_config */
 static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len)
 {
@@ -860,6 +959,11 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 
 static int sapi_cgi_activate(void)
 {
+	/* Resolve the user-cache partition before any early return below: the
+	 * activate return value is ignored by sapi_activate(), so bailing out
+	 * first would leave the request without a partition. */
+	cgi_user_cache_activate_request_partition();
+
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
 		return FAILURE;
@@ -963,12 +1067,20 @@ static int sapi_cgi_deactivate(void)
 			sapi_cgi_flush(SG(server_context));
 		}
 	}
+	php_user_cache_partition_activate(NULL);
+
 	return SUCCESS;
 }
 
 static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 {
-	return php_module_startup(sapi_module_ptr, &cgi_module_entry);
+	if (php_module_startup(sapi_module_ptr, &cgi_module_entry) == FAILURE) {
+		return FAILURE;
+	}
+
+	php_user_cache_opt_in();
+
+	return SUCCESS;
 }
 
 /* {{{ sapi_module_struct cgi_sapi_module */

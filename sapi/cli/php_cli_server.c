@@ -44,6 +44,8 @@
 
 #include <locale.h>
 
+#include "ext/user_cache/php_user_cache.h"
+
 #ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
@@ -501,7 +503,13 @@ const zend_function_entry server_additional_functions[] = {
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 {
-	return php_module_startup(sapi_module_ptr, &cli_server_module_entry);
+	if (php_module_startup(sapi_module_ptr, &cli_server_module_entry) == FAILURE) {
+		return FAILURE;
+	}
+
+	php_user_cache_opt_in();
+
+	return SUCCESS;
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -2606,6 +2614,10 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 		goto out;
 	}
 	server->server_sock = server_sock;
+
+	if (!php_user_cache_startup_default_context_storage()) {
+		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "UserCache startup failed; UserCache will be unavailable");
+	}
 
 	php_cli_server_startup_workers();
 
