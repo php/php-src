@@ -238,8 +238,8 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 	char sbuf[512];
 	char *buf = &(sbuf[0]);
 	char *dbuf = (char *)NULL;
-	int buflen = sizeof(sbuf) - 1;
-	int val_len = vars->val_len;
+	size_t buflen = sizeof(sbuf) - 1;
+	size_t val_len = vars->val_len;
 
 	/* use emalloc() for large values, use static array otherwise */
 
