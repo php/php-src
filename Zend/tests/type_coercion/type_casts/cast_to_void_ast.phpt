@@ -7,12 +7,12 @@ try {
     assert(false && function () {
         (void) somefunc();
     });
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(false && function () {
+AssertionError: assert(false && function () {
     (void)somefunc();
 })
