@@ -1859,13 +1859,12 @@ zval *php_snmp_read_property(zend_object *object, zend_string *name, int type, v
 	zval *retval;
 	php_snmp_object *obj;
 	php_snmp_prop_handler *hnd;
-	int ret;
 
 	obj = php_snmp_fetch_object(object);
 	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
 	if (hnd && hnd->read_func) {
-		ret = hnd->read_func(obj, rv);
+		zend_result ret = hnd->read_func(obj, rv);
 		if (ret == SUCCESS) {
 			retval = rv;
 		} else {
