@@ -12,10 +12,10 @@ function test(): int
 
 try {
     test();
-} catch (TypeError $exception) {
-    echo $exception->getLine(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': on line ', $e->getLine(), "\n";
 }
 
 ?>
 --EXPECT--
-5
+TypeError: on line 5
