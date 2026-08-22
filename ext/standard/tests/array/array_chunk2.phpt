@@ -6,14 +6,14 @@ $input_array = array('a', 'b', 'c', 'd', 'e');
 
 try {
     var_dump(array_chunk($input_array, 0));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(array_chunk($input_array, 0, true));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(array_chunk($input_array, 1));
@@ -24,8 +24,8 @@ var_dump(array_chunk($input_array, 10));
 var_dump(array_chunk($input_array, 10, true));
 ?>
 --EXPECT--
-array_chunk(): Argument #2 ($length) must be greater than 0
-array_chunk(): Argument #2 ($length) must be greater than 0
+ValueError: array_chunk(): Argument #2 ($length) must be greater than 0
+ValueError: array_chunk(): Argument #2 ($length) must be greater than 0
 array(5) {
   [0]=>
   array(1) {
