@@ -348,6 +348,11 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 		default:
 			RETURN_FALSE;
 	}
+#else
+	/* enchant_broker_set_param() was removed in libenchant 2, so this build has
+	 * no dictionary path support. Report the failure instead of falling off the
+	 * end of the function, which would return null and violate the return type. */
+	RETURN_FALSE;
 #endif
 }
 /* }}} */
@@ -387,6 +392,9 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 	}
 
 	RETURN_STRING(value);
+#else
+	/* See enchant_broker_set_dict_path(). */
+	RETURN_FALSE;
 #endif
 }
 /* }}} */
