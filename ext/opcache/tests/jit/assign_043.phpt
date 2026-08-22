@@ -13,9 +13,9 @@ set_error_handler(function($_, $m) {
 try {
     $a = $b;
     NOT_REACHED;
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Undefined variable $b
+Exception: Undefined variable $b

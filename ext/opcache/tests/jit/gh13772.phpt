@@ -23,4 +23,3 @@ var_dump(Ack(3, 3));
 ?>
 --EXPECT--
 int(61)
-
