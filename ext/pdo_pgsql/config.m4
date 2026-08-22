@@ -25,6 +25,20 @@ if test "$PHP_PDO_PGSQL" != "no"; then
       or later).])],,
     [$PGSQL_LIBS])
 
+  old_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $PGSQL_CFLAGS"
+
+  AC_CHECK_DECL([PGRES_TUPLES_CHUNK],
+    PHP_CHECK_LIBRARY([pq], [PQsetChunkedRowsMode],
+      [AC_DEFINE([HAVE_PG_SET_CHUNKED_ROWS_SIZE], [1],
+        [Define to 1 if libpq has the 'PQsetChunkedRowsMode' function (PostgreSQL
+        17 or later).])],,
+      [$PGSQL_LIBS]),,
+      [#include <libpq-fe.h>]
+  )
+
+  CFLAGS=$old_CFLAGS
+
   PHP_CHECK_PDO_INCLUDES
 
   PHP_NEW_EXTENSION([pdo_pgsql],
