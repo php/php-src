@@ -5687,6 +5687,7 @@ static bool zend_has_finally(void) /* {{{ */
 static void zend_compile_return(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
+	uint32_t return_lineno = CG(zend_lineno);
 	bool is_generator = (CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0;
 	bool by_ref = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
@@ -5707,6 +5708,8 @@ static void zend_compile_return(zend_ast *ast) /* {{{ */
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
 	}
+
+	CG(zend_lineno) = return_lineno;
 
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)
 	 && (expr_node.op_type == IS_CV || (by_ref && expr_node.op_type == IS_VAR))
