@@ -20,10 +20,10 @@ $test->init();
 
 try {
     foreach ($test as &$prop) {}
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot acquire reference to readonly property Test::$prop
+Error: Cannot acquire reference to readonly property Test::$prop
