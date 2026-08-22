@@ -109,7 +109,6 @@ static zend_always_inline struct zip *php_zip_object_za(const ze_zip_object *obj
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 php_stream *php_stream_zip_open(ze_zip_object *obj, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC);
 
-php_zip_archive *php_zip_archive_create(struct zip *za);
 void php_zip_archive_addref(php_zip_archive *archive);
 void php_zip_archive_release(php_zip_archive *archive);
 
