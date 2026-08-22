@@ -13,10 +13,10 @@ $dom = new DOMDocument;
 $xpath = new DOMXPath($dom);
 try {
     clone $xpath;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Trying to clone an uncloneable object of class DOMXPath
+Error: Trying to clone an uncloneable object of class DOMXPath

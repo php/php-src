@@ -12,16 +12,16 @@ $xpath->registerNamespace("php", "http://php.net/xpath");
 $xpath->registerPHPFunctions();
 try {
     $xpath->query("//a[php:function(3)]");
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $xpath->query("//a[php:function()]");
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Handler name must be a string
-Function name must be passed as the first argument
+TypeError: Handler name must be a string
+Error: Function name must be passed as the first argument

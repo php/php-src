@@ -8,13 +8,13 @@ dom
 $doc = new DOMDocument();
 try {
     $doc->appendChild($doc->createAttribute('foo'));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $doc->saveXML();
 
 ?>
 --EXPECT--
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>

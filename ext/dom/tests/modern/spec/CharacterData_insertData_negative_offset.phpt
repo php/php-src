@@ -9,8 +9,8 @@ $dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 try {
     $comment->insertData(-1, "A");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 $comment->insertData(1, "A");
@@ -18,6 +18,6 @@ echo $dom->saveHtml($comment), "\n";
 
 ?>
 --EXPECT--
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->
 <!--fAoobarbaz-->
