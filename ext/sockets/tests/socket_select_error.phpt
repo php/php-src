@@ -7,9 +7,9 @@ sockets
 $r = $w = $e = ['no resource'];
 try {
     socket_select($r, $w, $e, 1);
-} catch (TypeError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-socket_select(): Argument #1 ($read) must only have elements of type Socket, string given
+TypeError: socket_select(): Argument #1 ($read) must only have elements of type Socket, string given
