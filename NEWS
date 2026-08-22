@@ -43,6 +43,8 @@ PHP                                                                        NEWS
     an object converted to an array fails. (David Carlier)
 
 - Zip:
+  . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
+    garbage collected). (Weilin Du, ndossche)
   . Fixed ZipArchive::extractTo() and ZipArchive::getFrom*() reporting success
     on corrupted entries. (David Carlier)
 
