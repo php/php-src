@@ -6104,7 +6104,7 @@ type_check_resource:
 			goto type_check_resource;
 		}
 	} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
+		result = (MAY_BE_NULL & opline->extended_value) != 0;
 		SAVE_OPLINE();
 		ZVAL_UNDEFINED_OP1();
 		if (UNEXPECTED(EG(exception))) {
@@ -18285,7 +18285,7 @@ type_check_resource:
 			goto type_check_resource;
 		}
 	} else if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
+		result = (MAY_BE_NULL & opline->extended_value) != 0;
 		SAVE_OPLINE();
 		ZVAL_UNDEFINED_OP1();
 		if (UNEXPECTED(EG(exception))) {
@@ -40974,7 +40974,7 @@ type_check_resource:
 			goto type_check_resource;
 		}
 	} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
+		result = (MAY_BE_NULL & opline->extended_value) != 0;
 		SAVE_OPLINE();
 		ZVAL_UNDEFINED_OP1();
 		if (UNEXPECTED(EG(exception))) {
@@ -58949,7 +58949,7 @@ type_check_resource:
 			goto type_check_resource;
 		}
 	} else if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
+		result = (MAY_BE_NULL & opline->extended_value) != 0;
 		SAVE_OPLINE();
 		ZVAL_UNDEFINED_OP1();
 		if (UNEXPECTED(EG(exception))) {
@@ -71028,7 +71028,7 @@ type_check_resource:
 			goto type_check_resource;
 		}
 	} else if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
+		result = (MAY_BE_NULL & opline->extended_value) != 0;
 		SAVE_OPLINE();
 		ZVAL_UNDEFINED_OP1();
 		if (UNEXPECTED(EG(exception))) {
@@ -93617,7 +93617,7 @@ type_check_resource:
 			goto type_check_resource;
 		}
 	} else if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
+		result = (MAY_BE_NULL & opline->extended_value) != 0;
 		SAVE_OPLINE();
 		ZVAL_UNDEFINED_OP1();
 		if (UNEXPECTED(EG(exception))) {

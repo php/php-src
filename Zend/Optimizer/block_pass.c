@@ -105,7 +105,7 @@ static void strip_nops(const zend_op_array *op_array, zend_basic_block *b)
 }
 
 static uint32_t get_const_switch_target(const zend_cfg *cfg, const zend_op_array *op_array, const zend_basic_block *block, zend_op *opline, const zval *val) {
-	HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+	const HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 	zval *zv;
 	if ((opline->opcode == ZEND_SWITCH_LONG && Z_TYPE_P(val) != IS_LONG)
 			|| (opline->opcode == ZEND_SWITCH_STRING && Z_TYPE_P(val) != IS_STRING)) {
@@ -471,7 +471,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				break;
 			case ZEND_TYPE_CHECK:
 optimize_type_check:
-				if (opline->extended_value == (1 << IS_TRUE) || opline->extended_value == (1 << IS_FALSE)) {
+				if (opline->extended_value == MAY_BE_TRUE || opline->extended_value == MAY_BE_FALSE) {
 					if (opline->op1_type == IS_TMP_VAR &&
 						!zend_bitset_in(used_ext, VAR_NUM(opline->op1.var))) {
 						src = VAR_SOURCE(opline->op1);
@@ -486,7 +486,7 @@ optimize_type_check:
 									 * T = BOOL_NOT(X) + TYPE_CHECK(T, FALSE) -> BOOL(X), NOP
 									 */
 									src->opcode =
-										((src->opcode == ZEND_BOOL) == (opline->extended_value == (1 << IS_TRUE))) ?
+										((src->opcode == ZEND_BOOL) == (opline->extended_value == MAY_BE_TRUE)) ?
 										ZEND_BOOL : ZEND_BOOL_NOT;
 									COPY_NODE(src->result, opline->result);
 									SET_VAR_SOURCE(src);
