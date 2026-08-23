@@ -1482,10 +1482,10 @@ static zend_result php_session_send_cookie(void)
 	php_session_remove_cookie(); /* remove already sent session ID cookie */
 	/* 'replace' must be 0 here, else a previous Set-Cookie
 	   header, probably sent with setcookie() will be replaced! */
-	sapi_add_header_ex(estrndup(ZSTR_VAL(ncookie.s), ZSTR_LEN(ncookie.s)), ZSTR_LEN(ncookie.s), false, false);
+	zend_result result = sapi_add_header_ex(estrndup(ZSTR_VAL(ncookie.s), ZSTR_LEN(ncookie.s)), ZSTR_LEN(ncookie.s), false, false);
 	smart_str_free(&ncookie);
 
-	return SUCCESS;
+	return result;
 }
 
 PHPAPI const ps_module *_php_find_ps_module(const char *name)
