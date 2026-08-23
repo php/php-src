@@ -2720,6 +2720,10 @@ static void zend_emit_return_type_check(
 		}
 
 		opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
+		if (ZEND_TYPE_IS_COMPLEX(type)) {
+			/* Cache slot for the class-type inline cache. */
+			opline->extended_value = zend_alloc_cache_slot();
+		}
 		if (expr && expr->op_type == IS_CONST) {
 			opline->result_type = expr->op_type = IS_TMP_VAR;
 			opline->result.var = expr->u.op.var = get_temporary_variable();
@@ -8453,6 +8457,10 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		if (opcode == ZEND_RECV) {
 			opline->op2.num = type_ast ?
 				ZEND_TYPE_FULL_MASK(arg_info->type) : MAY_BE_ANY;
+			if (opline->op2.num & _ZEND_TYPE_KIND_MASK) {
+				/* Cache slot for the class-type inline cache. */
+				opline->extended_value = zend_alloc_cache_slot();
+			}
 		}
 
 		if (is_promoted) {

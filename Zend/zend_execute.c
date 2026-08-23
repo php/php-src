@@ -1227,6 +1227,13 @@ static zend_always_inline bool zend_check_type(
 	return zend_check_type_slow(type, arg, ref, current_frame, is_internal);
 }
 
+/* If a type check if fully determined by the CE of the object, rather than the scope, then we may cache it. */
+static zend_always_inline bool zend_type_may_cache_ce(const zend_type *type)
+{
+	return ZEND_TYPE_IS_COMPLEX(*type)
+		&& !(ZEND_TYPE_FULL_MASK(*type) & (MAY_BE_CALLABLE|MAY_BE_STATIC));
+}
+
 /* We can not expose zend_check_type() directly because it's inline and uses static functions */
 ZEND_API bool zend_check_type_ex(
 		const zend_type *type, zval *arg, bool current_frame, bool is_internal)

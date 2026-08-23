@@ -4465,7 +4465,7 @@ ZEND_VM_C_LABEL(fcall_end):
 	ZEND_VM_CONTINUE();
 }
 
-ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
+ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED, CACHE_SLOT)
 {
 	if (OP1_TYPE == IS_UNUSED) {
 		SAVE_OPLINE();
@@ -4492,6 +4492,13 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		}
 
 		if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ref)))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
+		/* Monomorphic inline cache for class types when type declaration contains an object, see ZEND_RECV. */
+		if (EXPECTED(Z_TYPE_P(retval_ref) == IS_OBJECT)
+		 && EXPECTED(ZEND_TYPE_IS_COMPLEX(ret_info->type))
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(retval_ref))) {
 			ZEND_VM_NEXT_OPCODE();
 		}
 
@@ -4529,6 +4536,13 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		if (UNEXPECTED(!zend_check_type_slow(&ret_info->type, retval_ptr, ref, 1, 0))) {
 			zend_verify_return_error(EX(func), retval_ptr);
 			HANDLE_EXCEPTION();
+		}
+		/* SAFETY: See the ZEND_RECV helper for why this is safe and why it fills once. */
+		if (ZEND_TYPE_IS_COMPLEX(ret_info->type)
+		 && CACHED_PTR(opline->extended_value) == NULL
+		 && Z_TYPE_P(retval_ptr) == IS_OBJECT
+		 && zend_type_may_cache_ce(&ret_info->type)) {
+			CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(retval_ptr));
 		}
 		ZEND_VM_NEXT_OPCODE();
 #endif
@@ -5723,6 +5737,15 @@ ZEND_VM_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
 		HANDLE_EXCEPTION();
 	}
 
+	/* Remember the class that satisfied the check, so that the next argument of the same class can take the fast path above.
+	 * Rewriting polymorphic slots is expensive, so fill only once. */
+	if ((opline->op2.num & _ZEND_TYPE_KIND_MASK)
+	 && CACHED_PTR(opline->extended_value) == NULL
+	 && Z_TYPE_P(op_1) == IS_OBJECT
+	 && zend_type_may_cache_ce(&EX(func)->common.arg_info[opline->op1.num - 1].type)) {
+		CACHE_PTR(opline->extended_value, (void*)Z_OBJCE_P(op_1));
+	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -5750,7 +5773,7 @@ ZEND_VM_HANDLER(213, ZEND_SEND_PLACEHOLDER, UNUSED, CONST|UNUSED|NUM)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED)
+ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED, CACHE_SLOT)
 {
 	USE_OPLINE
 	uint32_t arg_num = opline->op1.num;
@@ -5763,6 +5786,13 @@ ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED)
 	param = EX_VAR(opline->result.var);
 
 	if (UNEXPECTED(!(opline->op2.num & (1u << Z_TYPE_P(param))))) {
+		/* Monomorphic cache for CEs.
+		 * The cache slot only exists when the type has a class part. */
+		if (EXPECTED(Z_TYPE_P(param) == IS_OBJECT)
+		 && EXPECTED(opline->op2.num & _ZEND_TYPE_KIND_MASK)
+		 && EXPECTED(CACHED_PTR(opline->extended_value) == (void*)Z_OBJCE_P(param))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
 		ZEND_VM_DISPATCH_TO_HELPER(zend_verify_recv_arg_type_helper, op_1, param);
 	}
 
