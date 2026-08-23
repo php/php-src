@@ -1012,4 +1012,49 @@ function sodium_crypto_kem_enc(string $public_key): array {}
 function sodium_crypto_kem_dec(string $ciphertext, #[\SensitiveParameter] string $secret_key): string {}
 #endif
 
+#ifdef crypto_kem_mlkem768_PUBLICKEYBYTES
+/**
+ * @var int
+ * @cvalue crypto_kem_mlkem768_PUBLICKEYBYTES
+ */
+const SODIUM_CRYPTO_KEM_MLKEM768_PUBLICKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kem_mlkem768_SECRETKEYBYTES
+ */
+const SODIUM_CRYPTO_KEM_MLKEM768_SECRETKEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kem_mlkem768_CIPHERTEXTBYTES
+ */
+const SODIUM_CRYPTO_KEM_MLKEM768_CIPHERTEXTBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kem_mlkem768_SHAREDSECRETBYTES
+ */
+const SODIUM_CRYPTO_KEM_MLKEM768_SHAREDSECRETBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_kem_mlkem768_SEEDBYTES
+ */
+const SODIUM_CRYPTO_KEM_MLKEM768_SEEDBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES()
+ */
+const SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES = UNKNOWN;
+
+function sodium_crypto_kem_mlkem768_keypair(): string {}
+
+function sodium_crypto_kem_mlkem768_seed_keypair(#[\SensitiveParameter] string $seed): string {}
+
+function sodium_crypto_kem_mlkem768_secretkey(#[\SensitiveParameter] string $key_pair): string {}
+
+function sodium_crypto_kem_mlkem768_publickey(#[\SensitiveParameter] string $key_pair): string {}
+
+function sodium_crypto_kem_mlkem768_enc(string $public_key): array {}
+
+function sodium_crypto_kem_mlkem768_dec(string $ciphertext, #[\SensitiveParameter] string $secret_key): string {}
+#endif
+
 class SodiumException extends Exception {}
