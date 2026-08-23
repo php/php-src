@@ -857,6 +857,7 @@ PHP 8.6 UPGRADE NOTES
   . Io\Poll\HandleAlreadyWatchedException
   . Io\Poll\InvalidHandleException
   . StreamPollHandle
+    RFC: https://wiki.php.net/rfc/poll_api
 
 - URI:
   . Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder
@@ -973,6 +974,7 @@ PHP 8.6 UPGRADE NOTES
     the function will be displayed. This uses the same infrastructure as stack
     traces, so i.e. sensitive parameters will not be displayed, and strings
     will be truncated according to zend.exception_string_param_max_len.
+    RFC: https://wiki.php.net/rfc/display_error_function_args
 
 - Mbstring:
   . The mbstring.detect_order INI directive now updates the internal detection
