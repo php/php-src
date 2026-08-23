@@ -1921,11 +1921,11 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 				} else {
 					/* error or timeout */
 					php_handle_aborted_connection();
-					return nbytes_left;
+					return str_len - nbytes_left;
 				}
 			} else {
 				php_handle_aborted_connection();
-				return nbytes_left;
+				return str_len - nbytes_left;
 			}
 		}
 		nbytes_left -= nbytes_sent;
