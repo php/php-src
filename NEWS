@@ -67,6 +67,10 @@ PHP                                                                        NEWS
   . Fixed WSDL cache corruption when a soap:header defines headerfaults.
     (Ilia Alshanetsky)
 
+- Sodium:
+  . Added support for the libsodium 1.0.22 KEM APIs (X-Wing and ML-KEM768).
+    (Zachary DuBois)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
