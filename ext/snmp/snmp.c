@@ -2257,6 +2257,35 @@ static zend_result php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *re
 }
 /* }}} */
 
+/* {{{ */
+static zend_result php_snmp_read_oid_output_format(php_snmp_object *snmp_object, zval *retval)
+{
+	switch(snmp_object->oid_output_format) {
+		case  NETSNMP_OID_OUTPUT_SUFFIX:
+			ZVAL_LONG(retval, ZEND_ENUM_Snmp_OidOutput_Suffix);
+			return SUCCESS;
+		case NETSNMP_OID_OUTPUT_MODULE:
+			ZVAL_LONG(retval, ZEND_ENUM_Snmp_OidOutput_Module);
+			return SUCCESS;
+		case NETSNMP_OID_OUTPUT_FULL:
+			ZVAL_LONG(retval, ZEND_ENUM_Snmp_OidOutput_Full);
+			return SUCCESS;
+		case NETSNMP_OID_OUTPUT_NUMERIC:
+			ZVAL_LONG(retval, ZEND_ENUM_Snmp_OidOutput_Numeric);
+			return SUCCESS;
+		case NETSNMP_OID_OUTPUT_UCD:
+			ZVAL_LONG(retval, ZEND_ENUM_Snmp_OidOutput_Ucd);
+			return SUCCESS;
+		case NETSNMP_OID_OUTPUT_NONE:
+			ZVAL_LONG(retval, ZEND_ENUM_Snmp_OidOutput_None);
+			return SUCCESS;
+		default:
+			ZVAL_NULL(retval);
+			return SUCCESS;
+	}
+}
+/* }}} */
+
 #define PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(name) \
 	static zend_result php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
 	{ \
@@ -2282,7 +2311,6 @@ PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(print_hex_text)
 	}
 
 PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(valueretrieval)
-PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(oid_output_format)
 PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(exceptions_enabled)
 
 /* {{{ */
