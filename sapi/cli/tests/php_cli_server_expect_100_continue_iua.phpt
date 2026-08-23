@@ -8,24 +8,10 @@ if (PHP_OS_FAMILY === "Windows") die("skip SO_LINGER reset behaviour differs on 
 ?>
 --FILE--
 <?php
-$log = tempnam(sys_get_temp_dir(), 'cli_server_log');
-$log_fd = fopen($log, 'ab');
-$server = proc_open(
-    [getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY, '-n', '-d', 'ignore_user_abort=1', '-S', '127.0.0.1:0'],
-    [0 => STDIN, 1 => $log_fd, 2 => $log_fd],
-    $pipes,
-    __DIR__
-);
+include "php_cli_server.inc";
+$server = php_cli_server_start('echo "Hello world";', 'index.php', ['-d', 'ignore_user_abort=1']);
 
-$port = null;
-for ($i = 0; $i < 100 && $port === null; $i++) {
-    usleep(50000);
-    if (preg_match('@://127\.0\.0\.1:(\d+)\) started@', file_get_contents($log), $m)) {
-        $port = $m[1];
-    }
-}
-
-$fp = fsockopen('127.0.0.1', $port);
+$fp = fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT);
 socket_set_option(socket_import_stream($fp), SOL_SOCKET, SO_LINGER, ['l_onoff' => 1, 'l_linger' => 0]);
 fwrite($fp, "POST / HTTP/1.1\r\nExpect: 100-continue\r\nContent-Length: 4\r\n\r\n");
 fclose($fp);
@@ -33,13 +19,14 @@ fclose($fp);
 $output = '';
 for ($i = 0; $i < 100 && !str_contains($output, 'Invalid request'); $i++) {
     usleep(50000);
-    $output = file_get_contents($log);
+    $output = file_get_contents($server->outputFile);
 }
 
 var_dump(str_contains($output, 'Invalid request'), str_contains($output, 'Unexpected EOF'));
-
-proc_terminate($server);
-unlink($log);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . '/php_cli_server_expect_100_continue_iua.log')
 ?>
 --EXPECT--
 bool(true)
