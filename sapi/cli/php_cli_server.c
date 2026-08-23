@@ -578,10 +578,11 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 	}
 	smart_str_appendl(&buffer, "\r\n", 2);
 
-	php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+	size_t buffer_len = ZSTR_LEN(buffer.s);
+	bool sent = php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), buffer_len) == buffer_len;
 
 	smart_str_free(&buffer);
-	return SAPI_HEADER_SENT_SUCCESSFULLY;
+	return sent ? SAPI_HEADER_SENT_SUCCESSFULLY : SAPI_HEADER_SEND_FAILED;
 }
 /* }}} */
 
