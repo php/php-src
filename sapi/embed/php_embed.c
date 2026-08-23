@@ -82,6 +82,7 @@ static size_t php_embed_ub_write(const char *str, size_t str_length)
 		ret = php_embed_single_write(ptr, remaining);
 		if (!ret) {
 			php_handle_aborted_connection();
+			return str_length - remaining;
 		}
 		ptr += ret;
 		remaining -= ret;

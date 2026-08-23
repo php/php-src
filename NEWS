@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.34
 
+- Embed:
+  . Fixed bug GH-23423 (php_embed_ub_write() infinite loop when a write
+    fails and the connection is not aborted). (Lazizbek Ergashev)
 
 30 Jul 2026, PHP 8.2.33
 
