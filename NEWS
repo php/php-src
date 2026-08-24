@@ -46,6 +46,8 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed a leak when a persistent connection failed a liveness check
     with no other live PDO handle. (iliaal)
+  . Fixed a leak of the driver_params argument in bindParam() and
+    bindColumn(). (iliaal)
 
 - Standard:
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
