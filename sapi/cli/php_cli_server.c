@@ -1797,7 +1797,8 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 
 	zval *expect_val = zend_hash_str_find(&client->request.headers, "expect", sizeof("expect") - 1);
 	if (expect_val && Z_TYPE_P(expect_val) == IS_STRING
-			&& zend_string_equals_literal_ci(Z_STR_P(expect_val), "100-continue")) {
+			&& zend_string_equals_literal_ci(Z_STR_P(expect_val), "100-continue")
+			&& parser->http_major == 1 && parser->http_minor == 1) {
 		client->expect_continue = true;
 	}
 
@@ -1911,18 +1912,14 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	if (client->expect_continue && !client->request_read) {
 		/* Parser completed headers with Expect: 100-continue but hasn't
 		 * finished reading the body. Send 100 Continue before the client
-		 * sends the request body. */
-		smart_str buffer = { 0 };
+		 * sends the request body. Only supported in HTTP/1.1. */
+		static const char continue_response[] = "HTTP/1.1 100 Continue\r\n\r\n";
 		bool send_success = false;
-		append_http_status_line(&buffer, client->parser.http_major * 100 + client->parser.http_minor, 100, 0);
-		smart_str_appendl(&buffer, "\r\n", 2);
-		smart_str_0(&buffer);
-		zend_try {
-			size_t sent = php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
-			send_success = sent == ZSTR_LEN(buffer.s);
-		} zend_end_try();
-		smart_str_free(&buffer);
 		client->expect_continue = false;
+		zend_try {
+			size_t sent = php_cli_server_client_send_through(client, continue_response, strlen(continue_response));
+			send_success = sent == strlen(continue_response);
+		} zend_end_try();
 		if (!send_success) {
 			*errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
 			return -1;

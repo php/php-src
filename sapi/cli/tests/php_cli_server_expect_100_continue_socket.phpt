@@ -18,6 +18,15 @@ fwrite($fp, "body");
 echo fgets($fp);
 fclose($fp);
 
+echo "# Send Expect: 100-continue header on HTTP/1.0.\n";
+$fp = php_cli_server_connect();
+fwrite($fp, "POST / HTTP/1.0\r\nExpect: 100-continue\r\nContent-Length: 4\r\nConnection: close\r\n\r\n");
+$read = [$fp];
+var_dump(stream_select($read, $write, $except, 0, 1000));
+fwrite($fp, "body");
+echo fgets($fp);
+fclose($fp);
+
 echo "# Send Expect: 100-continue header and disconnect.\n";
 $fp = php_cli_server_connect();
 if (extension_loaded('sockets')) {
@@ -64,6 +73,9 @@ fclose($fp);
 HTTP/1.1 100 Continue
 
 HTTP/1.1 200 OK
+# Send Expect: 100-continue header on HTTP/1.0.
+int(0)
+HTTP/1.0 200 OK
 # Send Expect: 100-continue header and disconnect.
 HTTP/1.1 200 OK
 # GET with Expect header (no body).
