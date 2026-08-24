@@ -32,6 +32,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-19320 (FPM UID and GID overflow). (Pratik Bhujel)
 
 - Intl:
+  . Fixed grapheme_strpos() and grapheme_strrpos() with an empty needle
+    returning UTF-16 offsets instead of grapheme offsets. (Ilia Alshanetsky)
   . Fixed a memory leak when dumping IntlCalendar instances. (Ilia Alshanetsky)
   . Fixed a memory leak when iterating IntlBreakIterator::getPartsIterator()
     results. (iliaal)

@@ -131,7 +131,11 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			ret_pos = -1;
 			goto finish;
 		}
-		ret_pos = last && offset >= 0 ? uhaystack_len : offset_pos;
+		if (last && offset >= 0) {
+			ret_pos = grapheme_count_graphemes(bi, uhaystack, uhaystack_len);
+		} else {
+			ret_pos = grapheme_count_graphemes(bi, uhaystack, offset_pos);
+		}
 		goto finish;
 	}
 
