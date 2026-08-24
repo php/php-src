@@ -17,8 +17,8 @@ $d = new stdclass;
 
 try {
     var_dump(openssl_pkcs7_decrypt($a, $b, $c, $d));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($c);
 
@@ -30,7 +30,7 @@ var_dump(openssl_pkcs7_decrypt($a, $b, 0, 0));
 echo "Done\n";
 ?>
 --EXPECT--
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 object(stdClass)#1 (0) {
 }
 string(62) "openssl_pkcs7_decrypt(): X.509 Certificate cannot be retrieved"

@@ -9,13 +9,12 @@ var_dump(openssl_cipher_key_length('unknown'));
 
 try {
     var_dump(openssl_cipher_key_length(''));
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-
 Warning: openssl_cipher_key_length(): Unknown cipher algorithm in %s on line %d
 bool(false)
-openssl_cipher_key_length(): Argument #1 ($cipher_algo) must not be empty
+ValueError: openssl_cipher_key_length(): Argument #1 ($cipher_algo) must not be empty

@@ -20,8 +20,8 @@ var_dump($output3);
 try {
     var_dump(openssl_private_decrypt($encrypted, $output4, array($privkey), OPENSSL_PKCS1_OAEP_PADDING));
     var_dump($output4);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(openssl_private_decrypt($encrypted, $output5, array($privkey, ""), OPENSSL_PKCS1_OAEP_PADDING));
@@ -36,6 +36,6 @@ bool(false)
 NULL
 bool(false)
 NULL
-Key array must be of the form array(0 => key, 1 => phrase)
+ValueError: Key array must be of the form array(0 => key, 1 => phrase)
 bool(true)
 string(32) "Testing openssl_public_decrypt()"
