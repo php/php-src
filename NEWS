@@ -39,6 +39,8 @@ PHP                                                                        NEWS
     with no other live PDO handle. (iliaal)
 
 - Standard:
+  . Fixed GH-23338 (fsockopen()/pfsockopen() ValueError reported wrong
+    argument number for $timeout). (lacatoire)
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
 
