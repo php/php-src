@@ -25,6 +25,8 @@ PHP                                                                        NEWS
     wrong argument in error messages. (Weilin Du)
 
 - Intl:
+  . Fixed a memory leak when iterating IntlBreakIterator::getPartsIterator()
+    results. (iliaal)
   . Fixed a double-free when IntlGregorianCalendar construction fails after
     the ICU constructor adopts the TimeZone. (iliaal)
   . Fixed bug GH-23094 (NumberFormatter parsing offsets use UTF-16 positions
