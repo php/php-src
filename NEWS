@@ -48,6 +48,8 @@ PHP                                                                        NEWS
     with no other live PDO handle. (iliaal)
 
 - Standard:
+  . Fixed an out-of-bounds read when following a redirect response with an
+    empty Location header. (iliaal)
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
 
