@@ -79,6 +79,25 @@ PHP                                                                        NEWS
     (lazerg)
   . SessionHandler::validateId() is now implemented, so
     session.use_strict_mode applies to the built-in handler. (Girgias)
+  . It is now deprecated to pass an object that does not implement the
+    create_sid() and validateId() methods. (Girgias)
+  . A deprecation is now emitted when implementing SessionHandlerInterface on a
+    class which doesn't define the create_sid() or validateId() methods, as
+    those will be moved from SessionUpdateTimestampHandlerInterface and
+    SessionIdInterface to SessionHandlerInterface. (Girgias)
+
+- SNMP:
+  . It is now possible to use the AES192, AES192C, AES256, and AES256C as
+    SNMPv3 security protocols if the underlying library supports them.
+    (eskyuu)
+  . It is now possible to reset the MIB tree using the new snmp_read_mib()
+    function. (eskyuu)
+  . Additional MIB parsing and output control functionality has been exposed
+    via the snmp_set_mib_option(), snmp_set_output_option(),
+    snmp_set_string_output_format() functions, the $numeric_index,
+    $numeric_timeticks, $extended_index, $dont_print_units, $escape_quotes,
+    $print_hex_text SNMP properties, and the SNMP::setOidOutputFormat(),
+    SNMP::setStringOutputFormat() methods. (eskyuu)
 
 - Sodium:
   . Fixed incorrect parameter name in sodium_add(), sodium_memcmp(), and

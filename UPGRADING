@@ -415,6 +415,21 @@ PHP 8.6 UPGRADE NOTES
     influences the result of the phar buildFrom family of functions.
     This makes it possible to override the timestamp and names of files.
 
+- SNMP:
+  . It is now possible to use the AES192, AES192C, AES256, and AES256C as
+    SNMPv3 security protocols if the underlying library supports them.
+    RFC: https://wiki.php.net/rfc/snmp_improvements_2026#increase_the_number_of_snmpv3_security_protocols_supported
+  . It is now possible to reset the MIB tree using the new snmp_read_mib()
+    function.
+    RFC: https://wiki.php.net/rfc/snmp_improvements_2026#allow_the_snmp_mib_to_be_reset
+  . Additional MIB parsing and output control functionality has been exposed
+    via the snmp_set_mib_option(), snmp_set_output_option(),
+    snmp_set_string_output_format() functions, the $numeric_index,
+    $numeric_timeticks, $extended_index, $dont_print_units, $escape_quotes,
+    $print_hex_text SNMP properties, and the SNMP::setOidOutputFormat(),
+    SNMP::setStringOutputFormat() methods. (eskyuu)
+    RFC: https://wiki.php.net/rfc/snmp_improvements_2026#implement_more_mib_parsing_and_value_output_controls
+
 - Streams:
   . Added new stream errors API including new classes, enums, functions and
     internal API. It is controlled using error_mode, error_store and
@@ -513,6 +528,16 @@ PHP 8.6 UPGRADE NOTES
   . Calling ReflectionMethod::invoke() or ReflectionMethod::invokeArgs() with
     an object and a static method is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_reflectionmethodinvoke_and_reflectionmethodinvokeargs_with_objects_for_static_methods
+
+- Session:
+  . It is now deprecated to pass an object that does not implement the
+    create_sid() and validateId() methods.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_passing_a_sessionhandler_object_to_session_set_save_handler_which_does_not_contain_the_create_sid_and_validateid
+  . A deprecation is now emitted when implementing SessionHandlerInterface on a
+    class which doesn't define the create_sid() or validateId() methods, as
+    those will be moved from SessionUpdateTimestampHandlerInterface and
+    SessionIdInterface to SessionHandlerInterface.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_passing_a_sessionhandler_object_to_session_set_save_handler_which_does_not_contain_the_create_sid_and_validateid
 
 - SPL:
   . The spl_classes() function is now deprecated, use
@@ -660,6 +685,12 @@ PHP 8.6 UPGRADE NOTES
   . ReflectionAttribute::getNamespaceName()
   . ReflectionAttribute::getShortName()
 
+- SNMP:
+  . snmp_init_mib()
+  . snmp_set_mib_option()
+  . snmp_set_output_option()
+  . snmp_set_string_output_format()
+
 - Standard:
   . clamp() returns the given value if in range, else return the nearest
     bound.
@@ -696,6 +727,12 @@ PHP 8.6 UPGRADE NOTES
   . Openssl\Session
     RFC: https://wiki.php.net/rfc/tls_session_resumption
   . Openssl\Psk
+
+- SNMP:
+  . enum: Snmp\Mib
+  . enum: Snmp\OidOutput
+  . enum: Snmp\Output
+  . enum: Snmp\StringOutput
 
 - Standard:
   . enum SortDirection
