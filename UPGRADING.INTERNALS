@@ -177,6 +177,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     hand if there is one, E_WARNING for the severity, and
     ZEND_ENUM_StreamErrorCode_Generic for the code. terminating should be true
     only if the error aborts the operation.
+  . zend_create_closure(), zend_create_fake_closure() and
+    zend_create_partial_closure() now take the bound $this as a zend_object*
+    instead of a zval*. Accordingly, zend_get_closure_this_ptr() now returns
+    that zend_object*, or NULL when the closure is unbound, instead of a
+    zval* that is IS_UNDEF when the closure is unbound.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
