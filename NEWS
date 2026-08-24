@@ -169,6 +169,7 @@ PHP                                                                        NEWS
     non-string value. (jorgsowa)
   . Fixed AArch64 JIT encoding of invalid logical immediates. (jorgsowa)
   . Fixed unsound shift_left_overflows range when shift wraps. (mkrishna793)
+  . Fix block pass dropping ZEND_FAST_CALL OP2 definition. (Mrmaxmeier)
 
 - OpenSSL:
   . Fixed bug GH-24784 (openssl_pkcs7_read() and openssl_cms_read() overwrite
