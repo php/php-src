@@ -3,6 +3,15 @@ Curl option CURLOPT_MAXFILESIZE_LARGE
 --DESCRIPTION--
 Test CURLOPT_MAXFILESIZE_LARGE with values that exceed, do not exceed, and
 disable the limit, as well as a negative value that triggers an error.
+--SKIPIF--
+<?php
+$curl_version = curl_version();
+if ($curl_version['version_number'] < 0x080400) {
+    // Earlier curl has this option, but it only works
+    // when the response has a Content-Length header.
+    exit("skip: test works only with curl >= 8.4.0");
+}
+?>
 --EXTENSIONS--
 curl
 --FILE--
