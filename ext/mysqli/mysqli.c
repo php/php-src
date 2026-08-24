@@ -256,8 +256,8 @@ zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value,
 		const mysqli_prop_handler *hnd = zend_hash_find_ptr(obj->prop_handler, name);
 		if (hnd) {
 			if (!hnd->write_func) {
-				zend_throw_error(NULL, "Cannot write read-only property %s::$%s",
-					ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Cannot write read-only property %pS::$%pS",
+					object->ce->name, name);
 				return &EG(error_zval);
 			}
 
@@ -402,7 +402,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
 		mysqli_object *intern = Z_MYSQLI_P(zv);
 		if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
 			/* We know that we have a mysqli object, so this failure should be emitted */
-			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(intern->zo.ce->name));
+			zend_throw_error(NULL, "%pS object is already closed", intern->zo.ce->name);
 			return NULL;
 		}
 		mysql = (MY_MYSQL *)(my_res->ptr);
@@ -763,7 +763,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			ce = zend_standard_class_def;
 		}
 		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
-			zend_throw_error(NULL, "Class %s cannot be instantiated", ZSTR_VAL(ce->name));
+			zend_throw_error(NULL, "Class %pS cannot be instantiated", ce->name);
 			RETURN_THROWS();
 		}
 		fetchtype = MYSQLI_ASSOC;
@@ -809,8 +809,8 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
 		} else if (ctor_params && zend_hash_num_elements(ctor_params) > 0) {
 			zend_argument_value_error(ERROR_ARG_POS(3),
-				"must be empty when the specified class (%s) does not have a constructor",
-				ZSTR_VAL(ce->name)
+				"must be empty when the specified class (%pS) does not have a constructor",
+				ce->name
 			);
 		}
 	}
