@@ -175,6 +175,7 @@ typedef struct php_cli_server_client {
 	php_http_parser parser;
 	bool request_read;
 	bool too_large_post;
+	bool headers_written;
 	zend_string *current_header_name;
 	zend_string *current_header_value;
 	enum { HEADER_NONE=0, HEADER_FIELD, HEADER_VALUE } last_header_element;
@@ -544,7 +545,7 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 	sapi_header_struct *h;
 	zend_llist_position pos;
 
-	if (client == NULL || SG(request_info).no_headers) {
+	if (client == NULL || SG(request_info).no_headers || client->headers_written) {
 		return SAPI_HEADER_SENT_SUCCESSFULLY;
 	}
 
@@ -567,10 +568,12 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 	}
 	smart_str_appendl(&buffer, "\r\n", 2);
 
-	php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+	size_t buffer_len = ZSTR_LEN(buffer.s);
+	bool sent = php_cli_server_client_send_through(client, ZSTR_VAL(buffer.s), buffer_len) == buffer_len;
 
+	client->headers_written = true;
 	smart_str_free(&buffer);
-	return SAPI_HEADER_SENT_SUCCESSFULLY;
+	return sent ? SAPI_HEADER_SENT_SUCCESSFULLY : SAPI_HEADER_SEND_FAILED;
 }
 /* }}} */
 
@@ -1927,11 +1930,11 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 				} else {
 					/* error or timeout */
 					php_handle_aborted_connection();
-					return nbytes_left;
+					return str_len - nbytes_left;
 				}
 			} else {
 				php_handle_aborted_connection();
-				return nbytes_left;
+				return str_len - nbytes_left;
 			}
 		}
 		nbytes_left -= nbytes_sent;
@@ -1981,6 +1984,7 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = false;
 	client->too_large_post = false;
+	client->headers_written = false;
 
 	client->last_header_element = HEADER_NONE;
 	client->current_header_name = NULL;
