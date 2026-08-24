@@ -393,8 +393,7 @@ static void dom_check_register_attribute_id(xmlAttrPtr attr, php_libxml_ref_obj 
 {
 	dom_mark_ids_modified(document);
 
-	if (attr->atype != XML_ATTRIBUTE_ID && attr->doc->type == XML_HTML_DOCUMENT_NODE && attr->ns == NULL && xmlStrEqual(attr->name, BAD_CAST "id")) {
-		/* To respect XML's ID behaviour, we only do this registration for HTML documents. */
+	if (attr->atype != XML_ATTRIBUTE_ID && attr->ns == NULL && xmlStrEqual(attr->name, BAD_CAST "id")) {
 		attr->atype = XML_ATTRIBUTE_ID;
 	}
 }
@@ -447,9 +446,10 @@ PHP_METHOD(DOMElement, setAttribute)
 			xmlAddChild((xmlNodePtr) attr, node);
 		} else {
 			attr = xmlSetNsProp(nodep, NULL, name_processed, BAD_CAST value);
-			if (EXPECTED(attr != NULL)) {
-				dom_check_register_attribute_id(attr, intern->document);
-			}
+		}
+
+		if (EXPECTED(attr != NULL)) {
+			dom_check_register_attribute_id(attr, intern->document);
 		}
 
 		if (name_processed != BAD_CAST name) {
