@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- PGSQL:
+  . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.5.11
 
