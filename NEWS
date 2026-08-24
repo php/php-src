@@ -48,6 +48,8 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
     is freed while the stream is still open). (Eyüp Can Akman)
+  . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
+    garbage collected). (Weilin Du, ndossche)
 
 - SAPI:
   . Fixed fuzzer targets failing to build in isolation. (Mrmaxmeier)
