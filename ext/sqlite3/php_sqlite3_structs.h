@@ -50,6 +50,7 @@ typedef struct _php_sqlite3_func {
 	zend_fcall_info_cache func;
 	zend_fcall_info_cache step;
 	zend_fcall_info_cache fini;
+	unsigned int *in_callback_ptr;
 } php_sqlite3_func;
 
 /* Structure for SQLite collation function */
@@ -58,6 +59,7 @@ typedef struct _php_sqlite3_collation {
 
 	const char *collation_name;
 	zend_fcall_info_cache cmp_func;
+	unsigned int *in_callback_ptr;
 } php_sqlite3_collation;
 
 /* Structure for SQLite Database object. */
@@ -69,6 +71,7 @@ typedef struct _php_sqlite3_db_object  {
 	zend_fcall_info_cache authorizer_fcc;
 
 	bool exception;
+	unsigned int in_callback;
 
 	zend_llist free_list;
 	zend_object zo;
