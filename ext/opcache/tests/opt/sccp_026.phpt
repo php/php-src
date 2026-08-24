@@ -27,7 +27,7 @@ $_main:
 0000 RETURN int(1)
 
 test:
-     ; (lines=9, args=1, vars=2, tmps=1)
+     ; (lines=9, args=1, vars=2, tmps=1, vars_to_free=1)
      ; (after optimizer)
      ; %s:2-8
 0000 CV0($var) = RECV 1

@@ -5597,7 +5597,6 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								goto jit_failure;
 							}
 						} else {
-							int j;
 							int may_throw = 0;
 							bool left_frame = 0;
 
@@ -5605,7 +5604,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 									op1_info, OP1_REG_ADDR())) {
 								goto jit_failure;
 							}
-							if (op_array->last_var > 100) {
+							if (op_array->last_var_to_free > 100) {
 								/* To many CVs to unroll */
 								if (!zend_jit_free_cvs(&ctx)) {
 									goto jit_failure;
@@ -5613,7 +5612,7 @@ static zend_vm_opcode_handler_t zend_jit_trace(zend_jit_trace_rec *trace_buffer,
 								left_frame = 1;
 							}
 							if (!left_frame) {
-								for (j = 0 ; j < op_array->last_var; j++) {
+								for (uint32_t j = 0; j < op_array->last_var_to_free; j++) {
 									uint32_t info;
 									uint8_t type;
 
