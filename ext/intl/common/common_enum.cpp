@@ -35,6 +35,8 @@ zend_object_handlers IntlIterator_handlers;
 void zoi_with_current_dtor(zend_object_iterator *iter)
 {
 	zoi_with_current *zoiwc = (zoi_with_current*)iter;
+	iter->funcs->invalidate_current(iter);
+	zoiwc->destroy_it(iter);
 	zval_ptr_dtor(&zoiwc->wrapping_obj);
 	ZVAL_UNDEF(&zoiwc->wrapping_obj);
 }
@@ -147,7 +149,6 @@ static void IntlIterator_objects_dtor(zend_object *object)
 {
 	IntlIterator_object	*ii = php_intl_iterator_fetch_object(object);
 	if (ii->iterator) {
-		((zoi_with_current*)ii->iterator)->destroy_it(ii->iterator);
 		OBJ_RELEASE(&ii->iterator->std);
 		ii->iterator = NULL;
 	}
