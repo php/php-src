@@ -14,31 +14,31 @@ $attr = $dom->createAttribute('Hello');
 
 try {
     $text->appendChild($dom->createElement('br'));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $cdata->appendChild($dom->createElement('br'));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $pi->appendChild($dom->createElement('br'));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $attr->appendChild($dom->createElement('br'));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Hierarchy Request Error
-Hierarchy Request Error
-Hierarchy Request Error
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error

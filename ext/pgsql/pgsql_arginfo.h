@@ -1,5 +1,5 @@
 /* This is a generated file, edit pgsql.stub.php instead.
- * Stub hash: f25b5a574c96d4bc2f08b8cacab16f499a164a6b */
+ * Stub hash: fa7cd778f4e791b15ffc8f1786384332449bda5a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -503,7 +503,7 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_PG_CLOSE_STMT)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_close_stmt, 0, 2, PgSql\\Result, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, connection, Pgsql\\Connection, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif

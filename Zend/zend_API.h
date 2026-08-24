@@ -960,8 +960,6 @@ static zend_always_inline const char *zend_get_object_type_uc(const zend_class_e
 
 ZEND_API bool zend_is_iterable(const zval *iterable);
 
-ZEND_API bool zend_is_countable(const zval *countable);
-
 ZEND_API void zend_convert_internal_arg_info(zend_arg_info *new_arg_info,
 		const zend_internal_arg_info *arg_info, bool is_return_info,
 		bool permanent);
@@ -1571,6 +1569,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_ARRAY_OR_STRING_OR_NULL, "of type array|string|null") \
 	_(Z_EXPECTED_STRING_OR_LONG,	"of type string|int") \
 	_(Z_EXPECTED_STRING_OR_LONG_OR_NULL, "of type string|int|null") \
+	_(Z_EXPECTED_CLASS_NAME,	"a valid class name") \
+	_(Z_EXPECTED_CLASS_NAME_OR_NULL, "a valid class name or null") \
 	_(Z_EXPECTED_OBJECT_OR_CLASS_NAME,	"an object or a valid class name") \
 	_(Z_EXPECTED_OBJECT_OR_CLASS_NAME_OR_NULL, "an object, a valid class name, or null") \
 	_(Z_EXPECTED_OBJECT_OR_STRING,	"of type object|string") \
@@ -1697,10 +1697,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	if (separate) { \
 		SEPARATE_ZVAL_NOREF(_arg); \
 	}
-
-/* get the zval* for a previously parsed argument */
-#define Z_PARAM_GET_PREV_ZVAL(dest) \
-	zend_parse_arg_zval_deref(_arg, &dest, 0);
 
 /* old "|" */
 #define Z_PARAM_OPTIONAL \
@@ -1871,10 +1867,6 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 
 #define Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(dest_fci, dest_fcc) \
 	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 1, 0, false)
-
-#define Z_PARAM_FUNC_OR_NULL_WITH_ZVAL(dest_fci, dest_fcc, dest_zp) \
-	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 1, 0, true) \
-	Z_PARAM_GET_PREV_ZVAL(dest_zp)
 
 /* old "h" */
 #define Z_PARAM_ARRAY_HT_EX2(dest, check_null, deref, separate) \

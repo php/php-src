@@ -12,8 +12,8 @@ $xml->loadXML('<?xml version="1.0"?><html id="test"></html>');
 
 try {
     var_dump($html->documentElement->toggleAttribute("\0"));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- Selected attribute tests (HTML) ---\n";
@@ -88,7 +88,7 @@ var_dump($dom->documentElement->getAttribute('xmlns:anotheron'));
 
 ?>
 --EXPECTF--
-Invalid Character Error
+DOMException: Invalid Character Error
 --- Selected attribute tests (HTML) ---
 bool(false)
 <!DOCTYPE HTML>

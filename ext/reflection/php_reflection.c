@@ -296,12 +296,11 @@ static void _function_string(smart_str *str, const zend_function *fptr, const ze
 static void _property_string(smart_str *str, const zend_property_info *prop, const zend_string *prop_name, const char *indent);
 static void _class_const_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent);
 static void _enum_case_string(smart_str *str, const zend_string *name, zend_class_constant *c, const char *indent);
-static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent);
 static void _extension_string(smart_str *str, const zend_module_entry *module);
 static void _zend_extension_string(smart_str *str, const zend_extension *extension);
 
 /* {{{ _class_string */
-static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const char *indent)
+static void _class_string(smart_str *str, zend_class_entry *ce, zend_object *obj, const char *indent)
 {
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->doc_comment) {
@@ -310,7 +309,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 		smart_str_appendc(str, '\n');
 	}
 
-	if (obj && Z_TYPE_P(obj) == IS_OBJECT) {
+	if (obj) {
 		smart_str_append_printf(str, "%sObject of class [ ", indent);
 	} else {
 		const char *kind = "Class";
@@ -492,8 +491,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 	}
 	smart_str_append_printf(str, "%s  }\n", indent);
 
-	if (obj && Z_TYPE_P(obj) == IS_OBJECT) {
-		HashTable *properties = zend_get_properties_no_lazy_init(Z_OBJ_P(obj));
+	if (obj) {
+		HashTable *properties = zend_get_properties_no_lazy_init(obj);
 		smart_str prop_str = {0};
 
 		count = 0;
@@ -527,7 +526,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, const
 				zend_function *closure;
 				/* see if this is a closure */
 				if (obj && is_closure_invoke(ce, mptr->common.function_name)
-					&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
+					&& (closure = zend_get_closure_invoke_method(obj)) != NULL)
 				{
 					mptr = closure;
 				} else {
@@ -1772,9 +1771,9 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureThis)
 
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
-		zval *closure_this = zend_get_closure_this_ptr(&intern->obj);
-		if (!Z_ISUNDEF_P(closure_this)) {
-			RETURN_OBJ_COPY(Z_OBJ_P(closure_this));
+		zend_object *closure_this = zend_get_closure_this_ptr(&intern->obj);
+		if (closure_this) {
+			RETURN_OBJ_COPY(closure_this);
 		}
 	}
 }
@@ -3334,7 +3333,7 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 	{
 		RETURN_OBJ_COPY(Z_OBJ_P(obj));
 	}
-	zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), obj);
+	zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE_P(obj), Z_OBJ_P(obj));
 }
 /* }}} */
 
@@ -3375,7 +3374,21 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, bool variadic
 	 * Else, we verify that the given object is an instance of the class.
 	 */
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
-		object = NULL;
+		if (object) {
+			zend_string *method_name = get_active_function_or_method_name();
+			zend_error(
+				E_DEPRECATED,
+				"Calling %pS() for static method %pS::%pS() does not need an object parameter",
+				method_name,
+				mptr->common.scope->name,
+				mptr->common.function_name
+			);
+			zend_string_release(method_name);
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+			object = NULL;
+		} 
 		obj_ce = mptr->common.scope;
 	} else {
 		if (!object) {
@@ -4246,7 +4259,7 @@ ZEND_METHOD(ReflectionClass, __toString)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	GET_REFLECTION_OBJECT_PTR(ce);
-	_class_string(&str, ce, &intern->obj, "");
+	_class_string(&str, ce, Z_ISUNDEF(intern->obj) ? NULL : Z_OBJ(intern->obj), "");
 	RETURN_STR(smart_str_extract(&str));
 }
 /* }}} */
@@ -5919,6 +5932,15 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			Z_PARAM_ZVAL(value)
 		ZEND_PARSE_PARAMETERS_END();
 
+		if (!instanceof_function(object->ce, intern->ce)) {
+			zend_string *method_name = get_active_function_or_method_name();
+			zend_error(E_DEPRECATED, "Calling %pS() with a given object that is not an instance of the class this property was declared in is deprecated", method_name);
+			zend_string_release(method_name);
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		const zend_class_entry *old_scope = EG(fake_scope);
 		EG(fake_scope) = intern->ce;
 		object->handlers->write_property(object, ref->unmangled_name, value, ref->cache_slot);
@@ -6045,6 +6067,15 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 		Z_PARAM_OBJECT(object)
 		Z_PARAM_ZVAL(value)
 	} ZEND_PARSE_PARAMETERS_END();
+
+	if (!instanceof_function(Z_OBJCE_P(object), intern->ce)) {
+		zend_string *method_name = get_active_function_or_method_name();
+		zend_error(E_DEPRECATED, "Calling %pS() with a given object that is not an instance of the class this property was declared in is deprecated", method_name);
+		zend_string_release(method_name);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
 
 	zend_reflection_property_set_raw_value(ref->prop, ref->unmangled_name,
 			ref->cache_slot, intern->ce, Z_OBJ_P(object), value);

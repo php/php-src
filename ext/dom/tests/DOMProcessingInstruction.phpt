@@ -15,8 +15,8 @@ echo "--- Test construction ---\n";
 
 try {
     $pi = new DOMProcessingInstruction("\0");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $pi = new DOMProcessingInstruction("test");
@@ -30,7 +30,7 @@ var_dump($pi->data);
 try {
     $pi->data = new FailingStringable;
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($pi->data);
 $pi->data = 12345;
@@ -53,28 +53,28 @@ $instance = $class->newInstanceWithoutConstructor();
 try {
     var_dump($instance->target);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($instance->data);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $instance->data = "hello";
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 --- Test construction ---
-Invalid Character Error
+DOMException: Invalid Character Error
 --- Test fields ---
 string(4) "test"
 string(0) ""
 string(2) "ok"
-failed in __toString
+Exception: failed in __toString
 string(2) "ok"
 string(5) "12345"
 string(10) "my data <>"
@@ -82,6 +82,6 @@ string(10) "my data <>"
 <?xml version="1.0"?>
 <root><?test my data <>?></root>
 --- Test construction with __construct by reflection and fields ---
-Invalid State Error
-Invalid State Error
-Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error

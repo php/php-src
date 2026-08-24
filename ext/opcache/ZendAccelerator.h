@@ -198,6 +198,9 @@ typedef struct _zend_accel_globals {
 	bool               counted;   /* the process uses shared memory */
 	bool               enabled;
 	bool               locked;    /* thread obtained exclusive lock */
+#ifdef ZTS
+	uint32_t           unprotect_depth;
+#endif
 	bool               accelerator_enabled; /* accelerator enabled for current request */
 	bool               pcre_reseted;
 	zend_accel_directives   accel_directives;

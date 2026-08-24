@@ -11,12 +11,12 @@ if (PHP_DEBUG || getenv('SKIP_ASAN')) echo "xleak FFI cleanup after parser error
 try {
 	FFI::cdef('struct tree *get_tree(const oid *, size_t, struct tree *);');
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	FFI::cdef('struct tree *get_tree(oid, size_t, struct tree *);');
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	FFI::cdef('
@@ -25,7 +25,7 @@ typedef struct _simple_struct {
     } simple_struct;
 ');
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 DONE

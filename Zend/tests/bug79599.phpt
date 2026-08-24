@@ -13,15 +13,15 @@ function test2(){
 }
 try{
     test1();
-}catch(\Exception $e){
-    var_dump($e->getMessage());
+}catch(\Throwable $e){
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try{
     test2();
-}catch(\Exception $e){
-    var_dump($e->getMessage());
+}catch(\Throwable $e){
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(21) "Undefined variable $b"
-string(21) "Undefined variable $c"
+Exception: Undefined variable $b
+Exception: Undefined variable $c

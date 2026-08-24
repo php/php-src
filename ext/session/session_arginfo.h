@@ -1,5 +1,5 @@
 /* This is a generated file, edit session.stub.php instead.
- * Stub hash: 6bbbdc8c4a33d1ff9984b3d81e4f5c9b76efcb14 */
+ * Stub hash: 5109ef5c81733a112fe20d2626b8572d0969973c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -135,6 +135,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SessionHandler_create_sid arginfo_class_SessionIdInterface_create_sid
 
+#define arginfo_class_SessionHandler_validateId arginfo_class_SessionHandlerInterface_destroy
+
 ZEND_FUNCTION(session_name);
 ZEND_FUNCTION(session_module_name);
 ZEND_FUNCTION(session_save_path);
@@ -164,6 +166,7 @@ ZEND_METHOD(SessionHandler, write);
 ZEND_METHOD(SessionHandler, destroy);
 ZEND_METHOD(SessionHandler, gc);
 ZEND_METHOD(SessionHandler, create_sid);
+ZEND_METHOD(SessionHandler, validateId);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(session_name, arginfo_session_name)
@@ -221,6 +224,7 @@ static const zend_function_entry class_SessionHandler_methods[] = {
 	ZEND_ME(SessionHandler, destroy, arginfo_class_SessionHandler_destroy, ZEND_ACC_PUBLIC)
 	ZEND_ME(SessionHandler, gc, arginfo_class_SessionHandler_gc, ZEND_ACC_PUBLIC)
 	ZEND_ME(SessionHandler, create_sid, arginfo_class_SessionHandler_create_sid, ZEND_ACC_PUBLIC)
+	ZEND_ME(SessionHandler, validateId, arginfo_class_SessionHandler_validateId, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

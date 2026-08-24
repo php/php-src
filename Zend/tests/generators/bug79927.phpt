@@ -11,8 +11,8 @@ $generator->next();
 $generator->next();
 try {
     $generator->rewind();
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $generator->current(), "\n";
 
@@ -26,6 +26,6 @@ echo $generator2->current(), "\n";
 
 ?>
 --EXPECT--
-Cannot rewind a generator that was already run
+Exception: Cannot rewind a generator that was already run
 3
 4

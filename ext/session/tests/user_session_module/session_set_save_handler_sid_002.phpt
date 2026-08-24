@@ -1,15 +1,11 @@
 --TEST--
-Test session_set_save_handler() function: create_sid
+session_set_save_handler() with create_sid handler not returning string
 --INI--
 session.save_path="{TMP}"
 --EXTENSIONS--
 session
 --FILE--
 <?php
-
-ob_start();
-
-echo "*** Testing session_set_save_handler() function: create_sid ***\n";
 
 class MySession2 implements SessionHandlerInterface, SessionIdInterface {
     public $path;
@@ -27,7 +23,7 @@ class MySession2 implements SessionHandlerInterface, SessionIdInterface {
     }
 
     public function read($id): string|false {
-        return @file_get_contents($this->path . $id);
+        return file_get_contents($this->path . $id);
     }
 
     public function write($id, $data): bool {
@@ -52,29 +48,20 @@ class MySession2 implements SessionHandlerInterface, SessionIdInterface {
     public function create_sid() {
         return false;
     }
+
+	public function validateId(string $id): bool {
+	    return true;
+	}
 }
 
 session_set_save_handler(new MySession2());
-session_start();
 
-$_SESSION['foo'] = "hello";
+try {
+    session_start();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 
-var_dump(session_id(), ini_get('session.save_handler'), $_SESSION);
-
-session_write_close();
-session_unset();
-
-session_start();
-var_dump($_SESSION);
-
-session_write_close();
-session_unset();
 ?>
---EXPECTF--
-*** Testing session_set_save_handler() function: create_sid ***
-
-Fatal error: Uncaught Error: Session id must be a string in %s:%d
-Stack trace:
-#0 %s(%d): session_start()
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+TypeError: Session id must be of type string, bool given

@@ -11,14 +11,14 @@ $wsdl = __DIR__."/ext/soap/tests/bug41004.wsdl";
 try {
     new SoapClient($wsdl, ["classmap" => $classmap]);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     new SoapServer($wsdl, ["classmap" => $classmap]);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-SoapClient::__construct(): Argument #2 ($options) "classmap" option must be an associative array
-SoapServer::__construct(): Argument #2 ($options) "classmap" option must be an associative array
+ValueError: SoapClient::__construct(): Argument #2 ($options) "classmap" option must be an associative array
+ValueError: SoapServer::__construct(): Argument #2 ($options) "classmap" option must be an associative array

@@ -17,14 +17,14 @@ var_dump($uri3->getFragment());
 
 try {
     $uri3->withFragment(" ");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $uri1->withFragment("#fragment2");
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $uri1 = Uri\Rfc3986\Uri::parse("https://example.com?abc=def");
@@ -57,8 +57,8 @@ string(9) "fragment2"
 string(9) "fragment2"
 NULL
 NULL
-The specified fragment is malformed
-The specified fragment is malformed
+Uri\InvalidUriException: The specified fragment is malformed
+Uri\InvalidUriException: The specified fragment is malformed
 NULL
 string(8) "fragment"
 string(9) "fragment1"

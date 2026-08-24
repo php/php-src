@@ -145,7 +145,7 @@ static HashTable dom_xpath_prop_handlers;
 
 static zend_object *dom_objects_namespace_node_new(zend_class_entry *class_type);
 static void dom_object_namespace_node_free_storage(zend_object *object);
-static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, xmlNsPtr original);
+static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, xmlNsPtr original, xmlDocPtr fallback_doc);
 
 typedef zend_result (*dom_read_t)(dom_object *obj, zval *retval);
 typedef zend_result (*dom_write_t)(dom_object *obj, zval *newval);
@@ -725,7 +725,8 @@ static zend_object *dom_object_namespace_node_clone_obj(zend_object *zobject)
 	xmlNodePtr original_node = dom_object_get_node(&intern->dom);
 	if (original_node != NULL) {
 		ZEND_ASSERT(original_node->type == XML_NAMESPACE_DECL);
-		xmlNodePtr cloned_node = php_dom_create_fake_namespace_decl_node_ptr(original_node->parent, original_node->ns);
+		xmlNodePtr parent = intern->parent_intern ? dom_object_get_node(intern->parent_intern) : NULL;
+		xmlNodePtr cloned_node = php_dom_create_fake_namespace_decl_node_ptr(parent, original_node->ns, original_node->doc);
 		dom_update_refcount_after_clone(&intern->dom, original_node, &clone_intern->dom, cloned_node);
 	}
 
@@ -1446,14 +1447,13 @@ void node_list_unlink(xmlNodePtr node)
 	dom_object *wrapper;
 
 	while (node != NULL) {
+		xmlNodePtr next = node->next;
 
 		wrapper = php_dom_object_get_data(node);
 
 		if (wrapper != NULL ) {
 			xmlUnlinkNode(node);
-		} else {
-			if (node->type == XML_ENTITY_REF_NODE)
-				break;
+		} else if (node->type != XML_ENTITY_REF_NODE) {
 			node_list_unlink(node->children);
 
 			switch (node->type) {
@@ -1470,7 +1470,7 @@ void node_list_unlink(xmlNodePtr node)
 
 		}
 
-		node = node->next;
+		node = next;
 	}
 }
 /* }}} end node_list_unlink */
@@ -2262,15 +2262,16 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 }
 /* }}} end dom_get_nsdecl */
 
-static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, xmlNsPtr original)
+static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, xmlNsPtr original, xmlDocPtr fallback_doc)
 {
 	xmlNodePtr attrp;
+	xmlDocPtr doc = nodep ? nodep->doc : fallback_doc;
 	xmlNsPtr curns = xmlNewNs(NULL, original->href, NULL);
 	if (original->prefix) {
 		curns->prefix = xmlStrdup(original->prefix);
-		attrp = xmlNewDocNode(nodep->doc, NULL, BAD_CAST original->prefix, original->href);
+		attrp = xmlNewDocNode(doc, NULL, BAD_CAST original->prefix, original->href);
 	} else {
-		attrp = xmlNewDocNode(nodep->doc, NULL, BAD_CAST "xmlns", original->href);
+		attrp = xmlNewDocNode(doc, NULL, BAD_CAST "xmlns", original->href);
 	}
 	attrp->type = XML_NAMESPACE_DECL;
 	attrp->parent = nodep;
@@ -2281,7 +2282,7 @@ static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, 
 /* Note: Assumes the additional lifetime was already added in the caller. */
 xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern)
 {
-	xmlNodePtr attrp = php_dom_create_fake_namespace_decl_node_ptr(nodep, original);
+	xmlNodePtr attrp = php_dom_create_fake_namespace_decl_node_ptr(nodep, original, NULL);
 	php_dom_create_object(attrp, return_value, parent_intern);
 	/* This object must exist, because we just created an object for it via php_dom_create_object(). */
 	php_dom_namespace_node_obj_from_obj(Z_OBJ_P(return_value))->parent_intern = parent_intern;

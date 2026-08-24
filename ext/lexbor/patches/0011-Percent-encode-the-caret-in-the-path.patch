@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?M=C3=A1t=C3=A9=20Kocsis?= <kocsismate@woohoolabs.com>
 Date: Fri, 10 Jul 2026 22:31:16 +0200
-Subject: [PATCH 11/11] Percent-encode the caret in the path
+Subject: [PATCH 11/13] Percent-encode the caret in the path
 
 The caret (^) is part of the path percent-encode set:
 

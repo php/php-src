@@ -25,7 +25,7 @@ curl_setopt($ch, CURLOPT_WRITEFUNCTION,
 try {
     curl_exec($ch);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(curl_errno($ch) === CURLE_WRITE_ERROR);
@@ -38,7 +38,7 @@ var_dump(curl_errno($ch) === CURLE_OK);
 ?>
 --EXPECTF--
 Test: write function throws exception
-write exception
+Exception: write exception
 bool(true)
 Test: write function is null
 Hello World!

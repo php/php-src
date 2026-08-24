@@ -34,22 +34,22 @@ class Test {
 $test = new Test;
 try {
     $test->prop = "bar";
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($test->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unset($test->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot access private property Test::$prop
-Cannot access private property Test::$prop
-Cannot access private property Test::$prop
+Error: Cannot access private property Test::$prop
+Error: Cannot access private property Test::$prop
+Error: Cannot access private property Test::$prop

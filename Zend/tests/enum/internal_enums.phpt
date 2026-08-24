@@ -33,8 +33,8 @@ var_dump(unserialize($s) === $foo);
 function test_int_enum(int|string $case) {
     try {
         var_dump(ZendTestIntEnum::from($case));
-    } catch (\Error $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(ZendTestIntEnum::tryFrom($case));
 }

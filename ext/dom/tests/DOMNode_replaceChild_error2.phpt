@@ -12,8 +12,8 @@ $a->appendChild($b);
 $b->appendChild($c);
 try {
 	$b->replaceChild($a, $c);
-} catch (DOMException $e) {
-	echo "DOMException: " . $e->getMessage();
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

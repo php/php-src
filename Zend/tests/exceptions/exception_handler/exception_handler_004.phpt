@@ -5,16 +5,16 @@ exception handler tests - 4
 
 try {
     set_exception_handler("fo");
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     set_exception_handler(array("", ""));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-set_exception_handler(): Argument #1 ($callback) must be a valid callback or null, function "fo" not found or invalid function name
-set_exception_handler(): Argument #1 ($callback) must be a valid callback or null, class "" not found
+TypeError: set_exception_handler(): Argument #1 ($callback) must be a valid callback or null, function "fo" not found or invalid function name
+TypeError: set_exception_handler(): Argument #1 ($callback) must be a valid callback or null, class "" not found

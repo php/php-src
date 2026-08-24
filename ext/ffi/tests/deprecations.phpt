@@ -14,8 +14,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 try {
     FFI::new("uint8_t[2]");
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 set_error_handler(null);
 
@@ -28,8 +28,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 try {
     FFI::type("uint16_t[2]");
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 set_error_handler(null);
 
@@ -39,14 +39,14 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 try {
     FFI::cast("uint8_t[2]", $p1);
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 Deprecated: Calling FFI::new() statically is deprecated in %s on line %d
-Calling FFI::new() statically is deprecated
+Exception: Calling FFI::new() statically is deprecated
 object(FFI\CData:uint8_t[2])#1 (2) {
   [0]=>
   int(0)
@@ -55,7 +55,7 @@ object(FFI\CData:uint8_t[2])#1 (2) {
 }
 
 Deprecated: Calling FFI::type() statically is deprecated in %s on line %d
-Calling FFI::type() statically is deprecated
+Exception: Calling FFI::type() statically is deprecated
 
 Deprecated: Calling FFI::cast() statically is deprecated in %s on line %d
-Calling FFI::cast() statically is deprecated
+Exception: Calling FFI::cast() statically is deprecated

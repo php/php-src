@@ -8,24 +8,24 @@ xmlreader
 $reader = new XMLReader();
 try {
     $reader->setSchema('');
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 $reader->close();
 
 $reader = new XMLReader();
 try {
     $reader->setSchema('schema-missing-file.xsd');
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 $reader->close();
 
 $reader = new XMLReader();
 try {
     $reader->setSchema('schema-empty.xsd');
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $reader = new XMLReader();
@@ -37,7 +37,7 @@ var_dump(@$reader->setSchema('schema-bad.xsd'));
 $reader->close();
 ?>
 --EXPECT--
-XMLReader::setSchema(): Argument #1 ($filename) must not be empty
-Schema must be set prior to reading
-Schema must be set prior to reading
+ValueError: XMLReader::setSchema(): Argument #1 ($filename) must not be empty
+Error: Schema must be set prior to reading
+Error: Schema must be set prior to reading
 bool(false)

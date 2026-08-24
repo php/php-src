@@ -908,9 +908,9 @@ U_CFUNC PHP_FUNCTION(grapheme_str_split)
 				add_next_index_stringl(return_value, pstr, pos - current);
 				end = pstr + pos - current;
 				i = 0;
+				pstr += pos - current;
+				current = pos;
 			}
-			pstr += pos - current;
-			current = pos;
 		} else {
 			i += 1;
 		}
@@ -1175,6 +1175,9 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 	current = ZSTR_LEN(string);
 	for (end = pstr; pos != UBRK_DONE; ) {
 		pos = ubrk_previous(bi);
+		if (pos == UBRK_DONE) {
+			break;
+		}
 		end_len = current - pos;
 		for (int32_t j = 0; j < end_len; j++) {
 			*p++ = *(pstr + pos + j);
@@ -1182,6 +1185,7 @@ U_CFUNC PHP_FUNCTION(grapheme_strrev)
 		current = pos;
 	}
 ubrk_end:
+	ZSTR_VAL(ret)[ZSTR_LEN(ret)] = '\0';
 	RETVAL_NEW_STR(ret);
 	ubrk_close(bi);
 close:

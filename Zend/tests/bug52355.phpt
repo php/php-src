@@ -12,8 +12,8 @@ var_dump($foo);
 
 try {
     var_dump(1.0 / -0.0);
-} catch (\DivisionByZeroError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -21,4 +21,4 @@ try {
 float(-0)
 float(-0)
 float(-0)
-Division by zero
+DivisionByZeroError: Division by zero

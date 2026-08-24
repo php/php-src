@@ -29,8 +29,8 @@ var_dump($uri2->getPort());
 
 try {
     $uri1->withPort(1);
-} catch (Uri\InvalidUriException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $url1 = Uri\WhatWg\Url::parse("https://example.com:8080");
@@ -63,7 +63,7 @@ int(8080)
 NULL
 int(80)
 NULL
-Cannot set a port without having a host
+Uri\InvalidUriException: Cannot set a port without having a host
 int(8080)
 int(22)
 NULL

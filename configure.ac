@@ -1224,7 +1224,15 @@ AS_CASE([$host_cpu],
 
 AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
-  [aix*|os400*], [fiber_os="aix"],
+  [aix*|os400*], [
+    fiber_os="aix"
+    dnl AIX triplets start w/ powerpc- even though it may be 64-bit (as AIX
+    dnl has a multiple bitness world). Check if the build is 64-bit, or we
+    dnl end up using the wrong fibre asm (w/o forcing a powerpc64 triplet)
+    AS_IF([test "$ac_cv_sizeof_long" -eq 8], [
+      fiber_cpu="ppc64"
+    ], [])
+  ],
   [freebsd*], [fiber_os="freebsd"],
   [midipix], [fiber_os="midipix"],
   [fiber_os="other"]

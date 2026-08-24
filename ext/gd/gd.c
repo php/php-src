@@ -4152,37 +4152,51 @@ PHP_FUNCTION(imageaffine)
 }
 /* }}} */
 
+#define PHP_GD_Z_PARAM_ARRAY_HT_OR_DOUBLE(dest_ht, dest_double) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (EXPECTED(Z_TYPE_P(_arg) == IS_ARRAY)) { \
+		dest_ht = Z_ARRVAL_P(_arg); \
+	} else { \
+		dest_ht = NULL; \
+		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest_double, NULL, false, _i))) { \
+			zend_argument_type_error(_i, "must be of type array|float, %s given", zend_zval_value_name(_arg)); \
+			_error_code = ZPP_ERROR_FAILURE; \
+			break; \
+		} \
+	}
+
 /* {{{ Return an image containing the affine tramsformed src image, using an optional clipping area */
 PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
+	double dval_option = 0.0;
 	zend_long type;
-	zval *options = NULL;
+	HashTable *options;
 	zval *tmp;
 	int res = GD_FALSE;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(type)
-		Z_PARAM_ZVAL(options)
+		PHP_GD_Z_PARAM_ARRAY_HT_OR_DOUBLE(options, dval_option)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch((gdAffineStandardMatrix)type) {
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
-			if (Z_TYPE_P(options) != IS_ARRAY) {
-				zend_argument_type_error(1, "must be of type array when using translate or scale");
+			if (options == NULL) {
+				zend_argument_type_error(2, "must be of type array when using translate or scale");
 				RETURN_THROWS();
 			}
 
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(options, "x", sizeof("x") - 1)) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
 				zend_argument_value_error(2, "must have an \"x\" key");
 				RETURN_THROWS();
 			}
 
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(options, "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
 				zend_argument_value_error(2, "must have a \"y\" key");
@@ -4202,7 +4216,11 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SHEAR_VERTICAL: {
 			double angle;
 
-			angle = zval_get_double(options);
+			if (options != NULL) {
+				zend_argument_type_error(2, "must be of type float when using rotate or shear");
+				RETURN_THROWS();
+			}
+			angle = dval_option;
 
 			if (type == GD_AFFINE_SHEAR_HORIZONTAL) {
 				res = gdAffineShearHorizontal(affine, angle);
@@ -4253,7 +4271,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(z_m2)) != 6) {
-		zend_argument_value_error(1, "must have 6 elements");
+		zend_argument_value_error(2, "must have 6 elements");
 		RETURN_THROWS();
 	}
 

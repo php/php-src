@@ -1,12 +1,108 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0beta1
+?? ??? ????, PHP 8.6.0beta2
+
+- Core:
+  . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
+    next() call on the inner generator). (iliaal)
+  . Fixed GH-10497 (Allow direct mutation of objects stored in constants or
+    class constants via OBJ->prop = $val). (Khaled Alam)
+  . Reverted GH-22833, which attempted to fix bug GH-18985. (ilutov)
+  . Using the return statement in a finally block is now deprecated.
+    (aldemeery)
+
+- Curl:
+  . Set content length using CURLOPT_POSTFIELDSIZE_LARGE instead of
+    CURLOPT_POSTFIELDSIZE. This makes it possible to post strings larger than
+    2GB on some platforms, e.g. Windows. (Sjoerd Langkemper)
+
+- DOM:
+  . Fixed a typo in the DOMException message for INUSE_ATTRIBUTE_ERR.
+    (Weilin Du)
+  . Fixed bug GH-22624 (use-after-free via DOMNameSpaceNode after
+    DOMDocument::xinclude()). (David Carlier)
+  . Fixed a use-after-free when cloning a DOMNameSpaceNode after
+    DOMDocument::xinclude(). (iliaal)
+  . Fixed a crash in DOMXPath when a php:function callback receives a nodeset
+    and a later callback returns a node from another document. (iliaal)
+  . Fixed bug GH-23331 (UAF when node_list_unlink() skips attribute children
+    that still have a live wrapper). (iliaal)
+  . Fixed a use-after-free when Dom\Element::setAttributeNS() replaces the
+    value of an attribute whose child still has a live wrapper. (iliaal)
+
+- GD:
+  . Fixed imageaffinematrixget() and imageaffinematrixconcat() reporting the
+    wrong argument in error messages. (Weilin Du)
+  . Fixed imageaffinematrixget() to enforce the documented array|float type
+    for the $options parameter. (Weilin Du)
+
+- Intl:
+  . Fixed grapheme_strrev() treating UBRK_DONE as a byte index and leaving
+    the result without a terminating NUL. (iliaal)
+  . Fixed a double-free when IntlGregorianCalendar construction fails after
+    the ICU constructor adopts the TimeZone. (iliaal)
+  . Fixed bug GH-23094 (NumberFormatter parsing offsets use UTF-16 positions
+    for UTF-8 strings). (ColumbusLabs)
+  . Fixed Locale::parseLocale() reading past a trailing '-' or '_'.
+    (iliaal, Xuyang Zhang)
+  . Fixed grapheme_str_split() treating UBRK_DONE as a byte index. (iliaal)
+
+- PDO:
+  . Fixed a leak when a persistent connection failed a liveness check
+    with no other live PDO handle. (iliaal)
+
+- PDO_PGSQL:
+  . Fixed several lazy fetch (PDO::ATTR_PREFETCH => 0) defects: an infinite
+    loop when cleaning up a fetch left in a COPY, a use-after-free when a
+    statement with emulated or disabled prepares is destroyed, a connection
+    left busy for the next fetch, and rows delivered from a result another
+    statement took over. (KentarouTakeda)
+
+- PGSQL:
+  . Fixed the class name casing of pg_close_stmt()'s connection parameter.
+    (lacatoire)
+
+- Phar:
+  . Fixed Phar archives being automatically detected when ".phar" only occurs
+    in a directory name or is not a filename extension in an included file's
+    path. (Weilin Du)
+
+- Readline:
+  . Fixed class constant completion in the interactive shell. (Weilin Du)
+
+- SAPI:
+  . Fixed fuzzer targets failing to build in isolation. (Mrmaxmeier)
+  . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
+
+- Session:
+  . Fixed bug GH-23056 (missing handler name in session write warning).
+    (lazerg)
+  . SessionHandler::validateId() is now implemented, so
+    session.use_strict_mode applies to the built-in handler. (Girgias)
+
+- Sodium:
+  . Fixed incorrect parameter name in sodium_add(), sodium_memcmp(), and
+    sodium_compare() length-mismatch error messages. (lacatoire)
+
+- Standard:
+  . Fixed incorrect parameter name in convert_uudecode() warning. (lacatoire)
+
+- Zip:
+  . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
+    is freed while the stream is still open). (Eyüp Can Akman)
+
+- Zlib:
+  . Fixed bug GH-22142 (Assertion failure in deflate_init() when an option
+    object has uninitialised typed properties). (David Carlier)
+
+13 Aug 2026, PHP 8.6.0beta1
 
 - Core:
   . Deprecated "namespace" as a class constant name. (NickSdot)
   . Changed run-tests.php to run in parallel by default, using up to 10
     automatically detected workers. Pass -j1 for sequential execution.
     (NickSdot)
+  . Allowed readonly properties to declare default values. (NickSdot)
   . Changed run-tests.php to run test subprocesses without a shell where
     possible. (NickSdot)
   . Fixed GH-23083 (SEGV build_trace_args in zend_exceptions.c with
@@ -71,7 +167,9 @@ PHP                                                                        NEWS
   . Passing objects to mb_convert_variables() is now deprecated. (Girgias)
 
 - MySQLi:
-  . The mysqli_get_charset() function is now deprecated. (Kamil Tekiela)
+  . The mysqli_get_charset() function and mysqli::get_charset() method are now deprecated. (Kamil Tekiela)
+  . The mysqli_stmt_init() function and mysqli::stmt_init() method are now deprecated. (Kamil Tekiela)
+  . Instantiation of mysqli_stmt without providing the $query parameter is now deprecated. (Kamil Tekiela)
 
 - PDO:
   . Fixed pdo_raise_impl_error() emitting a warning under ERRMODE_SILENT.

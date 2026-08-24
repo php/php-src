@@ -17,21 +17,21 @@ foreach ($args as [$val, $type]) {
     echo "{$type}:\n";
     try {
         $num->compare($val);
-    } catch (Error $e) {
-        echo $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     echo "\n";
 }
 ?>
 --EXPECTF--
 non number str:
-BcMath\Number::compare(): Argument #1 ($num) is not well-formed
+ValueError: BcMath\Number::compare(): Argument #1 ($num) is not well-formed
 
 array:
-BcMath\Number::compare(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::compare(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
 
 other object:
-BcMath\Number::compare(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::compare(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 
 float:
 

@@ -19,8 +19,8 @@ assert(0 && ($a = function () {
     yield 1 => 2;
     yield from $x;
 }));
-} catch (AssertionError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -68,8 +68,8 @@ assert(0 && ($a = function &(array &$a, ?X $b = null) use ($c,&$d) : ?X {
         }
     }
 }));
-} catch (AssertionError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -104,8 +104,8 @@ L0:
         }
     }
 }));
-} catch (AssertionError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -120,8 +120,8 @@ assert(0 && ($a = function &(?array &$a, X $b = null) use ($c,&$d) : X {
         use T3;
     }
 }));
-} catch (AssertionError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -137,8 +137,8 @@ assert(0 && ($a = function &(array &...$a) {
         echo 3;
     }
 }));
-} catch (AssertionError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -165,13 +165,13 @@ assert(0 && ($a = function (): ?static {
     }
     if ($a); else;
 }));
-} catch (AssertionError $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(0 && ($a = function () {
+AssertionError: assert(0 && ($a = function () {
     global $a;
     global $$b;
     static $c;
@@ -187,7 +187,7 @@ assert(0 && ($a = function () {
     yield 1 => 2;
     yield from $x;
 }))
-assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
+AssertionError: assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
     abstract class A extends B implements C, D {
         public const X = 12;
         public const Y = self::X, Z = 'aaa';
@@ -231,7 +231,7 @@ assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
     }
 
 }))
-assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use($c, &$d): X {
+AssertionError: assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use($c, &$d): X {
     final class A {
         protected final function f2() {
             if (!$x) {
@@ -270,7 +270,7 @@ assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use($c, &$d):
     }
 
 }))
-assert(0 && ($a = function &(?array &$a, X $b = null) use($c, &$d): X {
+AssertionError: assert(0 && ($a = function &(?array &$a, X $b = null) use($c, &$d): X {
     class A {
         use T1, T2 {
             T1::foo insteadof foo;
@@ -282,7 +282,7 @@ assert(0 && ($a = function &(?array &$a, X $b = null) use($c, &$d): X {
     }
 
 }))
-assert(0 && ($a = function &(array &...$a) {
+AssertionError: assert(0 && ($a = function &(array &...$a) {
     declare(A = 1, B = 2);
     try {
         $i++;
@@ -294,7 +294,7 @@ assert(0 && ($a = function &(array &...$a) {
         echo 3;
     }
 }))
-assert(0 && ($a = function (): ?static {
+AssertionError: assert(0 && ($a = function (): ?static {
     declare(C = 1) {
         echo 1;
     }

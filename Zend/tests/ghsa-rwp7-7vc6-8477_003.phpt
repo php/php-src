@@ -13,10 +13,10 @@ function newFoo() {
 
 try {
     newFoo()->prop ??= 'foo';
-} catch (Error $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign string to property Foo::$prop of type int
+TypeError: Cannot assign string to property Foo::$prop of type int

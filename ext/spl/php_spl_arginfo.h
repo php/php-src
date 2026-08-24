@@ -103,14 +103,13 @@ static void register_php_spl_symbols(int module_number)
 	zend_string *attribute_Deprecated_func_spl_classes_0_arg0_str = zend_string_init("use ReflectionExtension::getClassNames() instead", strlen("use ReflectionExtension::getClassNames() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_spl_classes_0->args[0].value, attribute_Deprecated_func_spl_classes_0_arg0_str);
 	attribute_Deprecated_func_spl_classes_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	zend_string *attribute_Deprecated_func_spl_classes_0_arg1_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_spl_classes_0->args[1].value, attribute_Deprecated_func_spl_classes_0_arg1_str);
+	ZVAL_STR(&attribute_Deprecated_func_spl_classes_0->args[1].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_spl_classes_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_spl_object_hash_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "spl_object_hash", sizeof("spl_object_hash") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zend_string *attribute_Deprecated_func_spl_object_hash_0_arg0_str = zend_string_init("consider using spl_object_id() instead", strlen("consider using spl_object_id() instead"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_spl_object_hash_0->args[0].value, attribute_Deprecated_func_spl_object_hash_0_arg0_str);
 	attribute_Deprecated_func_spl_object_hash_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	ZVAL_STR_COPY(&attribute_Deprecated_func_spl_object_hash_0->args[1].value, attribute_Deprecated_func_spl_classes_0_arg1_str);
+	ZVAL_STR(&attribute_Deprecated_func_spl_object_hash_0->args[1].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_spl_object_hash_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 }

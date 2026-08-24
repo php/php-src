@@ -957,6 +957,11 @@ ZEND_FUNCTION(get_class_methods)
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	if (ce == zend_ce_closure) {
+		ZVAL_STR_COPY(&method_name, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
+	}
 }
 /* }}} */
 
@@ -2202,15 +2207,12 @@ ZEND_FUNCTION(debug_backtrace)
 ZEND_FUNCTION(extension_loaded)
 {
 	zend_string *extension_name;
-	zend_string *lcname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	lcname = zend_string_tolower(extension_name);
-	RETVAL_BOOL(zend_hash_exists(&module_registry, lcname));
-	zend_string_release_ex(lcname, 0);
+	RETURN_BOOL(zend_hash_find_ptr_lc(&module_registry, extension_name) != NULL);
 }
 /* }}} */
 

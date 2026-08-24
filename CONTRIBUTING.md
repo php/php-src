@@ -48,6 +48,10 @@ PHP 8.0, which corresponds to the `PHP-8.0` branch in Git. Please also make sure
 you add a link to the PR in the bug on [the bug tracker](https://github.com/php/php-src/issues)
 or [the old bug tracker](https://bugs.php.net/).
 
+If you are new to contributing to PHP, issues tagged
+[`Good first issue`](https://github.com/php/php-src/labels/Good%20first%20issue)
+are suitable for you as a newcomer to file PRs against.
+
 Pull requests implementing RFCs should be submitted against `master`.
 
 Pull requests should *never* be submitted against `PHP-x.y.z` branches, as these

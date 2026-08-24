@@ -11,8 +11,8 @@ echo "document text content: ";
 var_dump($dom->textContent);
 try {
     $dom->textContent = "foo";
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $container = $dom->documentElement;
@@ -39,7 +39,7 @@ echo $dom->saveXml(), "\n";
 ?>
 --EXPECT--
 document text content: NULL
-Cannot modify readonly property Dom\XMLDocument::$textContent
+Error: Cannot modify readonly property Dom\XMLDocument::$textContent
 text node text content: string(4) "text"
 pi node text content: string(5) "value"
 text node text content: string(0) ""

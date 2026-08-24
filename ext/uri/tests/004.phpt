@@ -8,8 +8,8 @@ var_dump(Uri\Rfc3986\Uri::parse(""));
 
 try {
     new Uri\WhatWg\Url("");
-} catch (Uri\WhatWg\InvalidUrlException $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(Uri\WhatWg\Url::parse(""));
@@ -58,7 +58,7 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-The specified URI is malformed (MissingSchemeNonRelativeUrl)
+Uri\WhatWg\InvalidUrlException: The specified URI is malformed (MissingSchemeNonRelativeUrl)
 NULL
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>

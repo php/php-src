@@ -736,12 +736,12 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		RETURN_FALSE;
 	}
 	if (IS_ACCESS_CHECK(type)) {
-		if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
-				&& php_check_open_basedir(local)) {
-			RETURN_FALSE;
-		}
-
+		wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0);
 		if (wrapper == &php_plain_files_wrapper) {
+			if (php_check_open_basedir(local)) {
+				RETURN_FALSE;
+			}
+
 			char realpath[MAXPATHLEN];
 			const char *file_path_to_check;
 			/* if the wrapper is not found, we need to expand path to match open behavior */

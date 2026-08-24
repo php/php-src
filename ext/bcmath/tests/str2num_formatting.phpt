@@ -18,38 +18,38 @@ echo "\n";
 
 try {
     echo bcadd(" 0", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bcadd("1e1", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bcadd("1,1", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bcadd("Hello", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bcadd("1 1", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bcadd("1.a", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -64,32 +64,32 @@ echo "\n";
 
 try {
     echo bccomp(" 0", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bccomp("1e1", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bccomp("1,1", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bccomp("Hello", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo bccomp("1 1", "2");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -100,12 +100,12 @@ try {
 2
 2
 
-bcadd(): Argument #1 ($num1) is not well-formed
-bcadd(): Argument #1 ($num1) is not well-formed
-bcadd(): Argument #1 ($num1) is not well-formed
-bcadd(): Argument #1 ($num1) is not well-formed
-bcadd(): Argument #1 ($num1) is not well-formed
-bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
+ValueError: bcadd(): Argument #1 ($num1) is not well-formed
 
 -1
 -1
@@ -113,8 +113,8 @@ bcadd(): Argument #1 ($num1) is not well-formed
 -1
 -1
 
-bccomp(): Argument #1 ($num1) is not well-formed
-bccomp(): Argument #1 ($num1) is not well-formed
-bccomp(): Argument #1 ($num1) is not well-formed
-bccomp(): Argument #1 ($num1) is not well-formed
-bccomp(): Argument #1 ($num1) is not well-formed
+ValueError: bccomp(): Argument #1 ($num1) is not well-formed
+ValueError: bccomp(): Argument #1 ($num1) is not well-formed
+ValueError: bccomp(): Argument #1 ($num1) is not well-formed
+ValueError: bccomp(): Argument #1 ($num1) is not well-formed
+ValueError: bccomp(): Argument #1 ($num1) is not well-formed

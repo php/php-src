@@ -1,5 +1,5 @@
 /* This is a generated file, edit mysqli.stub.php instead.
- * Stub hash: d31c6ff508415337f4536e8e476168882e769158 */
+ * Stub hash: f5327d48b275a5358b740232281478c83bb8a3db */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -913,7 +913,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_stmt_free_result, arginfo_mysqli_stmt_free_result)
 	ZEND_FE(mysqli_stmt_get_result, arginfo_mysqli_stmt_get_result)
 	ZEND_FE(mysqli_stmt_get_warnings, arginfo_mysqli_stmt_get_warnings)
-	ZEND_FE(mysqli_stmt_init, arginfo_mysqli_stmt_init)
+	ZEND_RAW_FENTRY("mysqli_stmt_init", zif_mysqli_stmt_init, arginfo_mysqli_stmt_init, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mysqli_stmt_insert_id, arginfo_mysqli_stmt_insert_id)
 	ZEND_FE(mysqli_stmt_more_results, arginfo_mysqli_stmt_more_results)
 	ZEND_FE(mysqli_stmt_next_result, arginfo_mysqli_stmt_next_result)
@@ -978,7 +978,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("set_opt", zif_mysqli_options, arginfo_class_mysqli_set_opt, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("ssl_set", zif_mysqli_ssl_set, arginfo_class_mysqli_ssl_set, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("stat", zif_mysqli_stat, arginfo_class_mysqli_stat, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("stmt_init", zif_mysqli_stmt_init, arginfo_class_mysqli_stmt_init, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("stmt_init", zif_mysqli_stmt_init, arginfo_class_mysqli_stmt_init, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("store_result", zif_mysqli_store_result, arginfo_class_mysqli_store_result, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("thread_safe", zif_mysqli_thread_safe, arginfo_class_mysqli_thread_safe, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("use_result", zif_mysqli_use_result, arginfo_class_mysqli_use_result, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1168,8 +1168,7 @@ static void register_mysqli_symbols(int module_number)
 	attribute_Deprecated_func_mysqli_execute_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mysqli_get_charset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_get_charset", sizeof("mysqli_get_charset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_mysqli_get_charset_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[0].value, attribute_Deprecated_func_mysqli_get_charset_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_mysqli_get_charset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_mysqli_get_charset_0_arg1_str = zend_string_init("did you mean mysqli_character_set_name()?", strlen("did you mean mysqli_character_set_name()?"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[1].value, attribute_Deprecated_func_mysqli_get_charset_0_arg1_str);
@@ -1190,6 +1189,13 @@ static void register_mysqli_symbols(int module_number)
 	attribute_Deprecated_func_mysqli_ping_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_real_connect", sizeof("mysqli_real_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_mysqli_stmt_init_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_stmt_init", sizeof("mysqli_stmt_init") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_stmt_init_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_mysqli_stmt_init_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_mysqli_stmt_init_0_arg1_str = zend_string_init("use mysqli_prepare() instead", strlen("use mysqli_prepare() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_stmt_init_0->args[1].value, attribute_Deprecated_func_mysqli_stmt_init_0_arg1_str);
+	attribute_Deprecated_func_mysqli_stmt_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mysqli_refresh_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_refresh", sizeof("mysqli_refresh") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_refresh_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
@@ -1468,8 +1474,7 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_attribute *attribute_Deprecated_func_get_charset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "get_charset", sizeof("get_charset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
-	zend_string *attribute_Deprecated_func_get_charset_0_arg0_str = zend_string_init("8.6", strlen("8.6"), 1);
-	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[0].value, attribute_Deprecated_func_get_charset_0_arg0_str);
+	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
 	attribute_Deprecated_func_get_charset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zend_string *attribute_Deprecated_func_get_charset_0_arg1_str = zend_string_init("did you mean mysqli_character_set_name()?", strlen("did you mean mysqli_character_set_name()?"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[1].value, attribute_Deprecated_func_get_charset_0_arg1_str);
@@ -1504,6 +1509,13 @@ static zend_class_entry *register_class_mysqli(void)
 	attribute_Deprecated_func_ping_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "real_connect", sizeof("real_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_stmt_init_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "stmt_init", sizeof("stmt_init") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_stmt_init_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_stmt_init_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_stmt_init_0_arg1_str = zend_string_init("use mysqli::prepare() instead", strlen("use mysqli::prepare() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_stmt_init_0->args[1].value, attribute_Deprecated_func_stmt_init_0_arg1_str);
+	attribute_Deprecated_func_stmt_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_refresh_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "refresh", sizeof("refresh") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_refresh_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));

@@ -6,15 +6,15 @@ bcmath
 <?php
 try {
     var_dump(bcpowmod('4.1', '4', '3', 3));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(bcpowmod('4', '4', '3.1', 3));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-bcpowmod(): Argument #1 ($num) cannot have a fractional part
-bcpowmod(): Argument #3 ($modulus) cannot have a fractional part
+ValueError: bcpowmod(): Argument #1 ($num) cannot have a fractional part
+ValueError: bcpowmod(): Argument #3 ($modulus) cannot have a fractional part

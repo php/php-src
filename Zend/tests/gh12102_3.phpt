@@ -7,8 +7,8 @@ function test() {
     byVal(C[0]);
     try {
         byRef(C[0]);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -29,4 +29,4 @@ test('y');
 ?>
 --EXPECT--
 string(3) "foo"
-Cannot use temporary expression in write context
+Error: Cannot use temporary expression in write context

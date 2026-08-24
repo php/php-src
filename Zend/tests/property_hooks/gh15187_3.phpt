@@ -17,8 +17,8 @@ foreach ($c as $k => &$v) {
     if ($k === 'c') {
         try {
             $v = 'foo';
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
     if ($k === 'd') {
@@ -31,7 +31,7 @@ var_dump($c);
 ?>
 --EXPECTF--
 int(1)
-Cannot assign string to reference held by property C::$c of type int
+TypeError: Cannot assign string to reference held by property C::$c of type int
 int(2)
 object(C)#%d (2) {
   ["b"]=>

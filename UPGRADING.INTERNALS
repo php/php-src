@@ -136,6 +136,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The zend_save_error_handling() function was removed.
   . The zend_parse_parameter() function has been removed, use one fo the
     zend_parse_arg_TYPE() APIs instead.
+  . The zend_is_countable() function was removed.
 
 - Changed:
   . Internal functions that return by reference are now expected to
@@ -184,6 +185,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added zend_ast_call_get_args() to fetch the argument node from any call
     node.
   . Added Z_PARAM_ENUM().
+  . Added PHP_GD_Z_PARAM_ARRAY_HT_OR_DOUBLE() in ext/gd to parse array|float
+    arguments into either a HashTable pointer or a double.
   . Added zend_enum_fetch_case_id().
   . Added zend_enum_get_case_by_id().
   . Added zend_bin2hex() and zend_bin2hex_str() as helper functions to remove

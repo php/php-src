@@ -89,6 +89,8 @@ typedef struct snmp_session php_snmp_session;
 	} \
 }
 
+static bool mib_needs_reset;
+
 ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
 
@@ -236,8 +238,8 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 	char sbuf[512];
 	char *buf = &(sbuf[0]);
 	char *dbuf = (char *)NULL;
-	int buflen = sizeof(sbuf) - 1;
-	int val_len = vars->val_len;
+	size_t buflen = sizeof(sbuf) - 1;
+	size_t val_len = vars->val_len;
 
 	/* use emalloc() for large values, use static array otherwise */
 
@@ -1061,20 +1063,48 @@ static ZEND_ATTRIBUTE_NONNULL bool snmp_session_set_sec_protocol(struct snmp_ses
 		s->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
 		return true;
 	}
+
+# ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+	if (zend_string_equals_literal_ci(prot, "AES192")) {
+		s->securityPrivProto = usmAES192PrivProtocol;
+		s->securityPrivProtoLen = OID_LENGTH(usmAES192PrivProtocol);
+		return true;
+	}
+
+	if (zend_string_equals_literal_ci(prot, "AES256")) {
+		s->securityPrivProto = usmAES256PrivProtocol;
+		s->securityPrivProtoLen = OID_LENGTH(usmAES256PrivProtocol);
+		return true;
+	}
+
+	if (zend_string_equals_literal_ci(prot, "AES192C")) {
+		s->securityPrivProto = usmAES192CiscoPrivProtocol;
+		s->securityPrivProtoLen = OID_LENGTH(usmAES192CiscoPrivProtocol);
+		return true;
+	}
+
+	if (zend_string_equals_literal_ci(prot, "AES256C")) {
+		s->securityPrivProto = usmAES256CiscoPrivProtocol;
+		s->securityPrivProtoLen = OID_LENGTH(usmAES256CiscoPrivProtocol);
+		return true;
+	}
+# endif
 #endif
 
 #ifdef HAVE_AES
-# ifndef NETSNMP_DISABLE_DES
-	zend_value_error("Security protocol must be one of \"DES\", \"AES128\", or \"AES\"");
-# else
-	zend_value_error("Security protocol must be one of \"AES128\", or \"AES\"");
+zend_value_error("Security protocol must be one of "
+#  ifndef NETSNMP_DISABLE_DES
+    "\"DES\", "
+#  endif
+# ifdef NETSNMP_DRAFT_BLUMENTHAL_AES_04
+ "\"AES256\", \"AES256C\", \"AES192\", \"AES192C\", "
 # endif
-#else
-# ifndef NETSNMP_DISABLE_DES
+ "\"AES128\", or \"AES\""
+);
+#elif !defined(NETSNMP_DISABLE_DES)
 	zend_value_error("Security protocol must be \"DES\"");
-# else
+#else
 	zend_value_error("No security protocol supported");
-# endif
 #endif
 	return false;
 }
@@ -1235,7 +1265,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	struct objid_query objid_query;
 	php_snmp_session *session;
-	int session_less_mode = (getThis() == NULL);
+	bool session_less_mode = (getThis() == NULL);
 	uint32_t timeout_arg_num = 0;
 	uint32_t oid_arg_num = 1, type_arg_num = 0, value_arg_num = 0;
 	php_snmp_object *snmp_object;
@@ -1472,13 +1502,13 @@ PHP_FUNCTION(snmp_get_quick_print)
 /* {{{ Return all objects including their respective object id within the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
-	bool a1;
+	bool quick_print;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &quick_print) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, (int)a1);
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, (int)quick_print);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1486,13 +1516,13 @@ PHP_FUNCTION(snmp_set_quick_print)
 /* {{{ Return all values that are enums with their enum value instead of the raw integer */
 PHP_FUNCTION(snmp_set_enum_print)
 {
-	bool a1;
+	bool enum_print;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &enum_print) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int) a1);
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int)enum_print);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1500,20 +1530,20 @@ PHP_FUNCTION(snmp_set_enum_print)
 /* {{{ Set the OID output format. */
 PHP_FUNCTION(snmp_set_oid_output_format)
 {
-	zend_long a1;
+	zend_long format;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &a1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &format) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	switch (a1) {
+	switch (format) {
 		case NETSNMP_OID_OUTPUT_SUFFIX:
 		case NETSNMP_OID_OUTPUT_MODULE:
 		case NETSNMP_OID_OUTPUT_FULL:
 		case NETSNMP_OID_OUTPUT_NUMERIC:
 		case NETSNMP_OID_OUTPUT_UCD:
 		case NETSNMP_OID_OUTPUT_NONE:
-			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, a1);
+			netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_OID_OUTPUT_FORMAT, format);
 			RETURN_TRUE;
 		default:
 			zend_argument_value_error(1, "must be an SNMP_OID_OUTPUT_* constant");
@@ -1630,6 +1660,7 @@ PHP_FUNCTION(snmp_read_mib)
 		RETURN_THROWS();
 	}
 
+	mib_needs_reset = 1;
 	if (!read_mib(filename)) {
 		char *error = strerror(errno);
 		php_error_docref(NULL, E_WARNING, "Error while reading MIB file '%s': %s", filename, error);
@@ -1639,19 +1670,44 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
+/* {{{ Resets the MIB tree and set the mib directories to the provided mibdirs. */
+PHP_FUNCTION(snmp_init_mib)
+{
+	zend_string *mibdirs = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_PATH_STR_OR_NULL(mibdirs)
+	ZEND_PARSE_PARAMETERS_END();
+
+	// If the mibdirs has been changed, we need to reset the MIB tree at the end of the request
+	if (mibdirs != NULL) {
+		mib_needs_reset = 1;
+	}
+
+	shutdown_mib();
+	netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, ZSTR_VAL(mibdirs));
+#ifdef HAVE_NETSNMP_INIT_MIB
+	netsnmp_init_mib();
+#else
+	init_mib();
+#endif
+}
+/* }}} */
+
 /* {{{ Creates a new SNMP session to specified host. */
 PHP_METHOD(SNMP, __construct)
 {
 	php_snmp_object *snmp_object;
 	zval *object = ZEND_THIS;
-	zend_string *a1, *a2;
+	zend_string *hostname, *community;
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	zend_long version = SNMP_DEFAULT_VERSION;
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lPP|ll", &version, &a1, &a2, &timeout, &retries) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lPP|ll", &version, &hostname, &community, &timeout, &retries) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1670,7 +1726,7 @@ PHP_METHOD(SNMP, __construct)
 		snmp_session_free(&(snmp_object->session));
 	}
 
-	if (!snmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries, 2, 4)) {
+	if (!snmp_session_init(&(snmp_object->session), version, hostname, community, timeout, retries, 2, 4)) {
 		return;
 	}
 	snmp_object->max_oids = 0;
@@ -1807,13 +1863,12 @@ zval *php_snmp_read_property(zend_object *object, zend_string *name, int type, v
 	zval *retval;
 	php_snmp_object *obj;
 	php_snmp_prop_handler *hnd;
-	int ret;
 
 	obj = php_snmp_fetch_object(object);
 	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
 	if (hnd && hnd->read_func) {
-		ret = hnd->read_func(obj, rv);
+		zend_result ret = hnd->read_func(obj, rv);
 		if (ret == SUCCESS) {
 			retval = rv;
 		} else {
@@ -1866,17 +1921,17 @@ static int php_snmp_has_property(zend_object *object, zend_string *name, int has
 {
 	zval rv;
 	php_snmp_prop_handler *hnd;
-	int ret = 0;
+	bool ret = false;
 
 	if ((hnd = zend_hash_find_ptr(&php_snmp_properties, name)) != NULL) {
 		switch (has_set_exists) {
 			case ZEND_PROPERTY_EXISTS:
-				ret = 1;
+				ret = true;
 				break;
 			case ZEND_PROPERTY_ISSET: {
 				zval *value = php_snmp_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
-					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;
+					ret = Z_TYPE_P(value) != IS_NULL;
 					zval_ptr_dtor(value);
 				}
 				break;
@@ -1885,7 +1940,7 @@ static int php_snmp_has_property(zend_object *object, zend_string *name, int has
 				zval *value = php_snmp_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					convert_to_boolean(value);
-					ret = Z_TYPE_P(value) == IS_TRUE? 1:0;
+					ret = Z_TYPE_P(value) == IS_TRUE;
 				}
 				break;
 			}
@@ -1943,7 +1998,7 @@ static zval *php_snmp_get_property_ptr_ptr(zend_object *object, zend_string *nam
 }
 
 /* {{{ */
-static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
+static zend_result php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
 {
 	zval val;
 
@@ -1967,7 +2022,7 @@ static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
 /* }}} */
 
 /* {{{ */
-static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval)
+static zend_result php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval)
 {
 	if (snmp_object->max_oids > 0) {
 		ZVAL_LONG(retval, snmp_object->max_oids);
@@ -1979,7 +2034,7 @@ static int php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *retval)
 /* }}} */
 
 #define PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(name) \
-	static int php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
+	static zend_result php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
 	{ \
 		ZVAL_BOOL(retval, snmp_object->name); \
 		return SUCCESS; \
@@ -1990,7 +2045,7 @@ PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(quick_print)
 PHP_SNMP_BOOL_PROPERTY_READER_FUNCTION(enum_print)
 
 #define PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(name) \
-	static int php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
+	static zend_result php_snmp_read_##name(php_snmp_object *snmp_object, zval *retval) \
 	{ \
 		ZVAL_LONG(retval, snmp_object->name); \
 		return SUCCESS; \
@@ -2001,7 +2056,7 @@ PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(oid_output_format)
 PHP_SNMP_LONG_PROPERTY_READER_FUNCTION(exceptions_enabled)
 
 /* {{{ */
-static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 {
 	zend_long lval;
 
@@ -2023,7 +2078,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 /* }}} */
 
 /* {{{ */
-static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *newval)
 {
 	zend_long lval = zval_get_long(newval);
 
@@ -2039,7 +2094,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 /* }}} */
 
 #define PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(name) \
-static int php_snmp_write_##name(php_snmp_object *snmp_object, zval *newval) \
+static zend_result php_snmp_write_##name(php_snmp_object *snmp_object, zval *newval) \
 { \
 	zval ztmp; \
 	ZVAL_COPY(&ztmp, newval); \
@@ -2056,7 +2111,7 @@ PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(enum_print)
 PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(oid_increasing_check)
 
 /* {{{ */
-static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *newval)
 {
 	zend_long lval = zval_get_long(newval);
 
@@ -2077,13 +2132,11 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 /* }}} */
 
 /* {{{ */
-static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval *newval)
+static zend_result php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval *newval)
 {
-	int ret = SUCCESS;
-
 	snmp_object->exceptions_enabled = zval_get_long(newval);
 
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -2173,6 +2226,23 @@ PHP_MSHUTDOWN_FUNCTION(snmp)
 }
 /* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+static PHP_RSHUTDOWN_FUNCTION(snmp)
+{
+	if (mib_needs_reset) {
+		shutdown_mib();
+		netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, NULL);
+#ifdef HAVE_NETSNMP_INIT_MIB
+		netsnmp_init_mib();
+#else
+		init_mib();
+#endif
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(snmp)
 {
@@ -2200,7 +2270,7 @@ zend_module_entry snmp_module_entry = {
 	PHP_MINIT(snmp),
 	PHP_MSHUTDOWN(snmp),
 	NULL,
-	NULL,
+	PHP_RSHUTDOWN(snmp),
 	PHP_MINFO(snmp),
 	PHP_SNMP_VERSION,
 	PHP_MODULE_GLOBALS(snmp),
