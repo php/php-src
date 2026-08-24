@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed infinite loop in sapi_header_op() for headers of 4 GiB or more.
     (Martin Mirchev)
 
+- Session:
+  . Fixed session save handler wrongly reported as recursive after a fatal
+    error inside a handler callback. (Ilia Alshanetsky)
+
 - SPL:
   . Fixed bug GH-24264 (Unwind/GracefulExit discarded in spl_iterators.c).
     (Lazizbek Ergashev)
