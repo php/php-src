@@ -323,7 +323,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_wrong_class_name_error(uint32_t num, co
 	}
 
 	if (name && Z_TYPE_P(arg) == IS_STRING) {
-		zend_argument_type_error(num, "must be a class name derived from %s, %s given", name, Z_STRVAL_P(arg));
+		zend_argument_type_error(num, "must be a class name derived from %s, \"%s\" given", name, Z_STRVAL_P(arg));
 		return;
 	}
 
@@ -337,7 +337,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_wrong_class_name_or_null_error(uint32_t
 	}
 
 	if (name && Z_TYPE_P(arg) == IS_STRING) {
-		zend_argument_type_error(num, "must be a class name derived from %s, %s given", name, Z_STRVAL_P(arg));
+		zend_argument_type_error(num, "must be a class name derived from %s, \"%s\" given", name, Z_STRVAL_P(arg));
 		return;
 	}
 
