@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23301 (Nested "yield from" yields a value twice when the
     middle generator delegates again). (Lazizbek Ergashev)
 
+- CLI:
+  . Fixed bug GH-23425 (sapi_cli_server_send_headers() does not check the
+    return value of php_cli_server_client_send_through()). (Lazizbek Ergashev)
+
 - DOM:
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
     DOMDocument::xinclude(). (iliaal)
