@@ -61,6 +61,8 @@ PHP                                                                        NEWS
     (Weilin Du)
 
 - Standard:
+  . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
+    before re-attaching the bucket. (iliaal)
   . Fixed an out-of-bounds read when following a redirect response with an
     empty Location header. (iliaal)
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
