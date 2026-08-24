@@ -76,6 +76,10 @@ PHP                                                                        NEWS
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
 
+- Session:
+  . Fixed session data loss in the files save handler when writing the session
+    file fails after it was already truncated. (Ilia Alshanetsky)
+
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
