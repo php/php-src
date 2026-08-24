@@ -2261,7 +2261,7 @@ static zend_result php_snmp_read_max_oids(php_snmp_object *snmp_object, zval *re
 static zend_result php_snmp_read_oid_output_format(php_snmp_object *snmp_object, zval *retval)
 {
 	switch(snmp_object->oid_output_format) {
-		case  NETSNMP_OID_OUTPUT_SUFFIX:
+		case NETSNMP_OID_OUTPUT_SUFFIX:
 			ZVAL_LONG(retval, ZEND_ENUM_Snmp_OidOutput_Suffix);
 			return SUCCESS;
 		case NETSNMP_OID_OUTPUT_MODULE:
