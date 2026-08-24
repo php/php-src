@@ -11,13 +11,13 @@ $reflection = new ReflectionProperty(Foo::class, 'value');
 
 try {
     $reflection->setValue(Foo::Bar, 1);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(Foo::Bar->value);
 
 ?>
 --EXPECT--
-Cannot modify readonly property Foo::$value
+Error: Cannot modify readonly property Foo::$value
 int(0)

@@ -9,23 +9,23 @@ class C {
 
 try {
     new ReflectionProperty();
-} catch (TypeError $re) {
-    echo "Ok - ".$re->getMessage().PHP_EOL;
+} catch (Throwable $re) {
+    echo $re::class, ': ', $re->getMessage(), "\n";
 }
 try {
     new ReflectionProperty('C::p');
-} catch (TypeError $re) {
-    echo "Ok - ".$re->getMessage().PHP_EOL;
+} catch (Throwable $re) {
+    echo $re::class, ': ', $re->getMessage(), "\n";
 }
 
 try {
     new ReflectionProperty('C', 'p', 'x');
-} catch (TypeError $re) {
-    echo "Ok - ".$re->getMessage().PHP_EOL;
+} catch (Throwable $re) {
+    echo $re::class, ': ', $re->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Ok - ReflectionProperty::__construct() expects exactly 2 arguments, 0 given
-Ok - ReflectionProperty::__construct() expects exactly 2 arguments, 1 given
-Ok - ReflectionProperty::__construct() expects exactly 2 arguments, 3 given
+ArgumentCountError: ReflectionProperty::__construct() expects exactly 2 arguments, 0 given
+ArgumentCountError: ReflectionProperty::__construct() expects exactly 2 arguments, 1 given
+ArgumentCountError: ReflectionProperty::__construct() expects exactly 2 arguments, 3 given

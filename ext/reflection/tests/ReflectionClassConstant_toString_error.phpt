@@ -9,10 +9,10 @@ class B {
 
 try {
     echo new ReflectionClassConstant('B', 'X');
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Undefined constant self::UNKNOWN
+Error: Undefined constant self::UNKNOWN

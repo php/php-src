@@ -10,9 +10,9 @@ function test($class)
     {
         $ref = new ReflectionClass($class);
     }
-    catch (ReflectionException $e)
+    catch (Throwable $e)
     {
-        var_dump($e->getMessage());
+        echo $e::class, ': ', $e->getMessage(), "\n";
         return; // only here
     }
 
@@ -21,13 +21,13 @@ function test($class)
     {
         var_dump($ref->newInstance());
     }
-    catch (ReflectionException $e)
+    catch (Throwable $e)
     {
-        var_dump($e->getMessage());
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     catch (Throwable $e)
     {
-        echo "Exception: " . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     echo "====>newInstance(25)\n";
@@ -35,9 +35,9 @@ function test($class)
     {
         var_dump($ref->newInstance(25));
     }
-    catch (ReflectionException $e)
+    catch (Throwable $e)
     {
-        var_dump($e->getMessage());
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     echo "====>newInstance(25, 42)\n";
@@ -45,9 +45,9 @@ function test($class)
     {
         var_dump($ref->newInstance(25, 42));
     }
-    catch (ReflectionException $e)
+    catch (Throwable $e)
     {
-        var_dump($e->getMessage());
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     echo "\n";
@@ -91,15 +91,15 @@ test('WithCtorWithArgs');
 --EXPECTF--
 ====>Class_does_not_exist
 {closure:%s:%d}(Class_does_not_exist)
-string(43) "Class "Class_does_not_exist" does not exist"
+ReflectionException: Class "Class_does_not_exist" does not exist
 ====>NoCtor
 ====>newInstance()
 object(NoCtor)#%d (0) {
 }
 ====>newInstance(25)
-string(86) "Class NoCtor does not have a constructor, so you cannot pass any constructor arguments"
+ReflectionException: Class NoCtor does not have a constructor, so you cannot pass any constructor arguments
 ====>newInstance(25, 42)
-string(86) "Class NoCtor does not have a constructor, so you cannot pass any constructor arguments"
+ReflectionException: Class NoCtor does not have a constructor, so you cannot pass any constructor arguments
 
 ====>WithCtor
 ====>newInstance()
@@ -129,7 +129,7 @@ object(WithCtor)#%d (0) {
 
 ====>WithCtorWithArgs
 ====>newInstance()
-Exception: Too few arguments to function WithCtorWithArgs::__construct(), 0 passed and exactly 1 expected
+ArgumentCountError: Too few arguments to function WithCtorWithArgs::__construct(), 0 passed and exactly 1 expected
 ====>newInstance(25)
 WithCtorWithArgs::__construct(25)
 array(1) {

@@ -18,8 +18,8 @@ try {
     var_dump(property_exists($b, 'a'));
     var_dump($ref->hasProperty('a'));
     var_dump($ref->getProperty('a'));
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class A2 {
@@ -39,5 +39,5 @@ var_dump($prop->getValue(new b2));
 bool(false)
 bool(false)
 bool(false)
-string(29) "Property B::$a does not exist"
+ReflectionException: Property B::$a does not exist
 int(2)
