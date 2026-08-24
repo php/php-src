@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- Intl:
+  . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
+    such as dateType, timeType, calendar and the message pattern. (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.4.26
 
