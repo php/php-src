@@ -8654,7 +8654,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 	}
 
 	zend_partial_create(EX_VAR(opline->result.var),
-		&call->This, call->func,
+		EX(func)->common.scope, &call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
@@ -12027,7 +12027,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_CALLABLE_CONV
 	}
 
 	zend_partial_create(EX_VAR(opline->result.var),
-		&call->This, call->func,
+		EX(func)->common.scope, &call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
@@ -61499,7 +61499,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 	}
 
 	zend_partial_create(EX_VAR(opline->result.var),
-		&call->This, call->func,
+		EX(func)->common.scope, &call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,
@@ -64770,7 +64770,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_CALLABLE_CONVERT_P
 	}
 
 	zend_partial_create(EX_VAR(opline->result.var),
-		&call->This, call->func,
+		EX(func)->common.scope, &call->This, call->func,
 		ZEND_CALL_NUM_ARGS(call), ZEND_CALL_ARG(call, 1),
 		(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) ?
 			call->extra_named_params : NULL,

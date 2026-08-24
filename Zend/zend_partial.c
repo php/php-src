@@ -1126,7 +1126,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 	}
 }
 
-void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
+void zend_partial_create(zval *result, zend_class_entry *scope, zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		zend_string *declaring_filename,
@@ -1162,8 +1162,16 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 		object = NULL;
 	}
 
+
+	/* We conveniently use the function's scope for the scope of the generated closure as this allows const exprs
+	 * referencing self:: or parent:: to behave normally without rewriting them.
+	 * This affects method resolution for magic methods, so use the actual scope for them. */
+	if (!(function->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		scope = function->common.scope;
+	}
+
 	zend_create_partial_closure(result, (zend_function*)op_array,
-			function->common.scope, called_scope, object,
+			scope, called_scope, object,
 			(function->common.fn_flags & ZEND_ACC_CLOSURE) != 0);
 
 	zp_bind(result, function, argc, argv, extra_named_params, const_args);
