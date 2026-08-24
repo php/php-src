@@ -1,36 +1,40 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
+
 namespace
 {
     /**
      * @var int
-     * @cvalue NETSNMP_OID_OUTPUT_SUFFIX
+     * @cvalue ZEND_ENUM_Snmp_OidOutput_Suffix
      */
     const SNMP_OID_OUTPUT_SUFFIX = UNKNOWN;
     /**
      * @var int
-     * @cvalue NETSNMP_OID_OUTPUT_MODULE
+     * @cvalue ZEND_ENUM_Snmp_OidOutput_Module
      */
     const SNMP_OID_OUTPUT_MODULE = UNKNOWN;
     /**
      * @var int
-     * @cvalue NETSNMP_OID_OUTPUT_FULL
+     * @cvalue ZEND_ENUM_Snmp_OidOutput_Full
      */
     const SNMP_OID_OUTPUT_FULL = UNKNOWN;
     /**
      * @var int
-     * @cvalue NETSNMP_OID_OUTPUT_NUMERIC
+     * @cvalue ZEND_ENUM_Snmp_OidOutput_Numeric
      */
     const SNMP_OID_OUTPUT_NUMERIC = UNKNOWN;
     /**
      * @var int
-     * @cvalue NETSNMP_OID_OUTPUT_UCD
+     * @cvalue ZEND_ENUM_Snmp_OidOutput_Ucd
      */
     const SNMP_OID_OUTPUT_UCD = UNKNOWN;
     /**
      * @var int
-     * @cvalue NETSNMP_OID_OUTPUT_NONE
+     * @cvalue ZEND_ENUM_Snmp_OidOutput_None
      */
     const SNMP_OID_OUTPUT_NONE = UNKNOWN;
 
@@ -130,10 +134,16 @@ namespace
 
     function snmp_set_enum_print(bool $enable): true {}
 
-    function snmp_set_oid_output_format(int $format): true {}
+    function snmp_set_mib_option(Snmp\Mib $option, bool $enable): void {}
+
+    function snmp_set_oid_output_format(Snmp\OidOutput|int $format): true {}
+
+    function snmp_set_output_option(Snmp\Output $option, bool $enable): void {}
+
+    function snmp_set_string_output_format(Snmp\StringOutput $format): void {}
 
     /** @alias snmp_set_oid_output_format */
-    function snmp_set_oid_numeric_print(int $format): true {}
+    function snmp_set_oid_numeric_print(Snmp\OidOutput|int $format): true {}
 
     function snmp2_get(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
@@ -216,11 +226,17 @@ namespace
         /** @readonly */
         public array $info;
         public ?int $max_oids;
-        public int $valueretrieval;
+        public bool $oid_increasing_check;
         public bool $quick_print;
         public bool $enum_print;
+        public bool $numeric_index;
+        public bool $numeric_timeticks;
+        public bool $extended_index;
+        public bool $dont_print_units;
+        public bool $escape_quotes;
+        public bool $print_hex_text;
+        public int $valueretrieval;
         public int $oid_output_format;
-        public bool $oid_increasing_check;
         public int $exceptions_enabled;
 
         public function __construct(int $version, string $hostname, string $community, int $timeout = -1, int $retries = -1) {}
@@ -233,6 +249,12 @@ namespace
             string $securityLevel, string $authProtocol = "", string $authPassphrase = "",
             string $privacyProtocol = "", string $privacyPassphrase = "",
             string $contextName = "", string $contextEngineId = ""): bool {}
+
+	    /** @tentative-return-type */
+	    public function setOidOutputFormat (Snmp\OidOutput $format): bool {}
+
+	    /** @tentative-return-type */
+	    public function setStringOutputFormat (Snmp\StringOutput $format): bool {}
 
         /** @tentative-return-type */
         public function get(array|string $objectId, bool $preserveKeys = false): mixed {}
@@ -255,5 +277,43 @@ namespace
 
     class SNMPException extends RuntimeException
     {
+    }
+}
+
+namespace Snmp {
+    enum Mib
+    {
+        case AllowUnderscores;
+        case CommentTerm;
+        case Replace;
+    }
+
+    enum OidOutput
+    {
+        case Suffix;
+        case Module;
+        case Full;
+        case Numeric;
+        case Ucd;
+        case None;
+    }
+
+    enum Output
+    {
+        case NumericIndex;
+        case EnumPrint;
+        case EscapeQuotes;
+        case QuickPrint;
+        case NumericTimeticks;
+        case HexText;
+        case DontPrintUnits;
+        case ExtendedIndex;
+    }
+
+    enum StringOutput
+    {
+        case Guess;
+        case Ascii;
+        case Hex;
     }
 }
