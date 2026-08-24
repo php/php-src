@@ -88,8 +88,8 @@ foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
         var_dump( array_udiff_assoc($value, $array2, $key_comp_func) );
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 };
 
@@ -98,76 +98,76 @@ foreach($inputs as $key =>$value) {
 *** Testing array_udiff_assoc() : usage variation ***
 
 --int 0--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, int given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, int given
 
 --int 1--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, int given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, int given
 
 --int 12345--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, int given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, int given
 
 --int -12345--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, int given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, int given
 
 --float 10.5--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
 
 --float -10.5--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
 
 --float 12.3456789000e10--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
 
 --float -12.3456789000e10--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
 
 --float .5--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, float given
 
 --uppercase NULL--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, null given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, null given
 
 --lowercase null--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, null given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, null given
 
 --lowercase true--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, true given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, true given
 
 --lowercase false--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, false given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, false given
 
 --uppercase TRUE--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, true given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, true given
 
 --uppercase FALSE--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, false given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, false given
 
 --empty string DQ--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
 
 --empty string SQ--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
 
 --string DQ--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
 
 --string SQ--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
 
 --mixed case string--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
 
 --heredoc--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, string given
 
 --instance of classWithToString--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, classWithToString given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, classWithoutToString given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, classWithoutToString given
 
 --undefined var--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, null given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, null given
 
 --unset var--
-array_udiff_assoc(): Argument #1 ($array) must be of type array, null given
+TypeError: array_udiff_assoc(): Argument #1 ($array) must be of type array, null given

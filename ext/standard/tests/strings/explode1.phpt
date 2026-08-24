@@ -29,23 +29,23 @@ foreach($delimiters as $delimiter) {
 
     try {
         var_dump( explode($delimiter, $string, -1) );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( explode($delimiter, $string, 0) );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( explode($delimiter, $string, 1) );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( explode($delimiter, $string, 2) );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $counter++;
 }
@@ -91,15 +91,15 @@ var_dump( explode("b", $obj) );
 --EXPECT--
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
 -- Iteration 2 --
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
 -- Iteration 3 --
 array(1) {
   [0]=>
@@ -201,10 +201,10 @@ array(2) {
   string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 7 --
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
-explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
+ValueError: explode(): Argument #1 ($separator) must not be empty, use str_split() to split a string into characters
 -- Iteration 8 --
 array(2) {
   [0]=>

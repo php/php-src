@@ -24,13 +24,13 @@ var_dump(array_column($a, null, 'a'));
 
 try {
     var_dump(array_column([['a' => new stdClass]], null, 'a'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(array_column([['a' => []]], null, 'a'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -83,5 +83,5 @@ array(8) {
     NULL
   }
 }
-Cannot access offset of type stdClass on array
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type stdClass on array
+TypeError: Cannot access offset of type array on array

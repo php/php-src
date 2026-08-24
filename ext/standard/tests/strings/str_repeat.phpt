@@ -30,8 +30,8 @@ foreach($variations as $input) {
 echo "\n\n*** Testing error conditions ***\n";
 try {
     str_repeat($input[0], -1); // Invalid arg for multiplier
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -100,4 +100,4 @@ try {
 
 
 *** Testing error conditions ***
-str_repeat(): Argument #2 ($times) must be greater than or equal to 0
+ValueError: str_repeat(): Argument #2 ($times) must be greater than or equal to 0

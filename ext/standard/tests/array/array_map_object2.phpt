@@ -23,15 +23,15 @@ class SimpleClass
 echo "-- with non-existent class --\n";
 try {
     var_dump( array_map(array('non-existent', 'square'), array(1, 2)) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- with existent class and non-existent method --\n";
 try {
     var_dump( array_map(array('SimpleClass', 'non-existent'), array(1, 2)) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
@@ -39,7 +39,7 @@ echo "Done";
 --EXPECT--
 *** Testing array_map() :  with non-existent class and method ***
 -- with non-existent class --
-array_map(): Argument #1 ($callback) must be a valid callback or null, class "non-existent" not found
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, class "non-existent" not found
 -- with existent class and non-existent method --
-array_map(): Argument #1 ($callback) must be a valid callback or null, class SimpleClass does not have a method "non-existent"
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, class SimpleClass does not have a method "non-existent"
 Done

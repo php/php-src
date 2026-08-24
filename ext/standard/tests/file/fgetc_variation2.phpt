@@ -21,8 +21,8 @@ fclose($file_handle);
 // read from closed file
 try {
     var_dump( fgetc($file_handle) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
@@ -30,5 +30,5 @@ echo "Done";
 --EXPECT--
 *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with closed handle --
-fgetc(): Argument #1 ($stream) must be an open stream resource
+TypeError: fgetc(): Argument #1 ($stream) must be an open stream resource
 Done
