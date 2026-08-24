@@ -65,8 +65,8 @@ typedef struct _ze_zip_read_rsrc {
 	zend_long zip_rsrc_handle;
 } zip_read_rsrc;
 
-/* Refcounted holder for the native archive handle.
- * Shared between objects and resources. */
+/* Refcounted holder for the native archive state.
+ * Owned by a ZipArchive object and streams opened from it. */
 typedef struct _php_zip_archive {
 	struct zip *za;
 	uint32_t refcount;
