@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   . Fixed Dom\HTMLDocument giving attributes the namespace of their element
     when a fragment is parsed with an xlink, xml or xmlns context element.
     (Ilia Alshanetsky)
+  . getElementById() now finds elements whose id attribute was set with
+    setAttribute()/setAttributeNS() on Dom\XMLDocument. (Ilia Alshanetsky)
 
 - Fileinfo:
   . Upgrade to file 5.48. (Weilin Du)
