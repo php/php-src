@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fixed curl_reset() retaining CURLOPT_PRIVATE after reset. (lacatoire)
+  . Fixed a leaked CurlHandle when a CURLMOPT_PUSHFUNCTION callback denies the
+    push or throws, and a crash using the denied handle if the callback kept
+    it. (Ilia Alshanetsky)
 
 - MBString:
   . Fixed stack overflow in mb_check_encoding() and mb_convert_encoding() with
