@@ -66,6 +66,10 @@ PHP                                                                        NEWS
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
     set to an empty string. (Ilia Alshanetsky)
 
+- Session:
+  . Fixed bug GH-15529 (session save handler wrongly reported as recursive
+    after a fatal error inside a handler callback). (Ilia Alshanetsky)
+
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)
