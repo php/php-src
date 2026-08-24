@@ -528,7 +528,7 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_clas
 	zend_class_redeclaration_error_ex(type, old_ce->name, old_ce);
 }
 
-ZEND_API ZEND_FASTCALL bool zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null)
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null)
 {
 	const zend_class_entry *ce_base = *pce;
 
