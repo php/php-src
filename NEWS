@@ -36,6 +36,8 @@ PHP                                                                        NEWS
   . Fixed a tracing JIT crash when compiling a side trace for a method of a
     class that could not be stored in the inheritance cache. (GH-21710)
     (Arnaud, iliaal)
+  . Fixed a call_stack buffer overflow in zend_analyze_calls() when dead code
+    elimination has removed the DO_FCALL opcodes. (Mrmaxmeier)
 
 - PDO:
   . Fixed a leak when a persistent connection failed a liveness check

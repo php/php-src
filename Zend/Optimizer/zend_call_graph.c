@@ -54,7 +54,10 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 	ALLOCA_FLAG(use_heap);
 	bool is_prototype;
 
-	call_stack = do_alloca((op_array->last / 2) * sizeof(zend_call_info*), use_heap);
+	// Note: Reserve one call stack slot per operation. Each opcode pushes at
+	// most one entry to the call stack, and (with dead code elimination) it's
+	// possible to never pop from the stack.
+	call_stack = do_alloca(op_array->last * sizeof(zend_call_info*), use_heap);
 	call_info = NULL;
 	while (opline != end) {
 		switch (opline->opcode) {
