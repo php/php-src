@@ -75,6 +75,10 @@ PHP                                                                        NEWS
 - Readline:
   . Fixed class constant completion in the interactive shell. (Weilin Du)
 
+- Zip:
+  . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
+    garbage collected). (Weilin Du, ndossche)
+
 - SAPI:
   . Fixed fuzzer targets failing to build in isolation. (Mrmaxmeier)
   . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
