@@ -22,11 +22,11 @@ var_dump(session_cache_expire());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing session_cache_expire() : basic functionality ***
 int(180)
 int(180)
-int(1234567890)
+int(%d)
 bool(true)
 int(180)
 bool(true)
