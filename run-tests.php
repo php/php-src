@@ -3379,6 +3379,7 @@ class JUnit
 
         $time = $time ?? $this->getTimer($file_name);
         $this->record($suite, 'execution_time', $time);
+        $formatted_time = number_format($time, 4, '.', '');
 
         $escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
         $escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function ($c) {
@@ -3387,7 +3388,7 @@ class JUnit
         $escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
         $escaped_test_name = htmlspecialchars($file_name . ' (' . $test_name . ')', ENT_QUOTES);
-        $this->rootSuite['files'][$file_name]['xml'] = "<testcase name='$escaped_test_name' time='$time'>\n";
+        $this->rootSuite['files'][$file_name]['xml'] = "<testcase name='$escaped_test_name' time='$formatted_time'>\n";
 
         if (is_array($type)) {
             $output_type = $type[0] . 'ED';
@@ -3432,7 +3433,7 @@ class JUnit
         }
 
         if (isset($this->rootSuite['files'][$file_name]['total'])) {
-            return number_format($this->rootSuite['files'][$file_name]['total'], 4);
+            return $this->rootSuite['files'][$file_name]['total'];
         }
 
         return 0;
