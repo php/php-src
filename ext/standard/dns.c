@@ -1120,12 +1120,20 @@ PHP_FUNCTION(dns_get_mx)
 			RETURN_FALSE;
 		}
 		cp += i;
+		if (cp + 10 > end) {
+			php_dns_free_handle(handle);
+			RETURN_FALSE;
+		}
 		GETSHORT(type, cp);
 		cp += INT16SZ + INT32SZ;
 		GETSHORT(i, cp);
 		if (type != DNS_T_MX) {
 			cp += i;
 			continue;
+		}
+		if (cp + 2 > end) {
+			php_dns_free_handle(handle);
+			RETURN_FALSE;
 		}
 		GETSHORT(weight, cp);
 		if ((i = dn_expand(answer.qb2, end, cp, buf, sizeof(buf)-1)) < 0) {
