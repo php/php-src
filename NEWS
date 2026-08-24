@@ -57,6 +57,8 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
+  . Fixed PDOStatement::bindColumn() registering a binding for a column name
+    that is not in the result set. (Ilia Alshanetsky)
 
 - Readline:
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
