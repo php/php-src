@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
     such as dateType, timeType, calendar and the message pattern.
     (Ilia Alshanetsky)
+  . Fixed Collator attribute and strength methods not rejecting an
+    unconstructed Collator. (Ilia Alshanetsky)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
