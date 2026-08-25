@@ -1428,6 +1428,7 @@ static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				return false;
 			}
 			H->default_fetching_laziness = !bval;
+			H->default_chunk_size = 0;
 			return true;
 #ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
 		case PDO_PGSQL_ATTR_CHUNK_SIZE: {
