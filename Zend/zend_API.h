@@ -1765,18 +1765,18 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	Z_PARAM_BOOL_EX(dest, is_null, 1, 0)
 
 /* old "C" */
-#define Z_PARAM_CLASS_EX(dest, check_null, deref) \
-		Z_PARAM_PROLOGUE(deref, 0); \
+#define Z_PARAM_CLASS_EX(dest, check_null) \
+		Z_PARAM_PROLOGUE(0, 0); \
 		if (UNEXPECTED(!zend_parse_arg_class(_arg, &dest, _i, check_null))) { \
 			_error_code = ZPP_ERROR_FAILURE; \
 			break; \
 		}
 
 #define Z_PARAM_CLASS(dest) \
-	Z_PARAM_CLASS_EX(dest, 0, 0)
+	Z_PARAM_CLASS_EX(dest, 0)
 
 #define Z_PARAM_CLASS_OR_NULL(dest) \
-	Z_PARAM_CLASS_EX(dest, 1, 0)
+	Z_PARAM_CLASS_EX(dest, 1)
 
 #define Z_PARAM_OBJ_OR_CLASS_NAME_EX(dest, allow_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
