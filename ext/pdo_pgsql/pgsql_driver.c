@@ -297,13 +297,12 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY) == PDO_CURSOR_SCROLL;
 
-	S->is_unbuffered =
-		driver_options
-		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH))
-		&& pdo_get_long_param(&lval, val)
+	bool prefetch_given = driver_options
+		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH));
+
+	S->is_unbuffered = prefetch_given && pdo_get_long_param(&lval, val)
 		? !lval
-		: H->default_fetching_laziness
-	;
+		: H->default_fetching_laziness;
 
 #ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
 	bool chunk_size_given = driver_options
@@ -314,6 +313,9 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 			return false;
 		}
 		S->chunk_size = lval;
+	} else if (prefetch_given) {
+		/* the statement's own prefetch replaces an inherited chunk size */
+		S->chunk_size = 0;
 	} else {
 		S->chunk_size = H->default_chunk_size;
 	}
