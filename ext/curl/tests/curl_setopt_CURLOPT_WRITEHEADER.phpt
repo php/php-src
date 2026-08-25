@@ -1,7 +1,5 @@
 --TEST--
 Curl option CURLOPT_WRITEHEADER
---DESCRIPTION--
-Test writing HTTP response headers to a file using CURLOPT_WRITEHEADER.
 --EXTENSIONS--
 curl
 --FILE--

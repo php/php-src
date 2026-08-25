@@ -1,8 +1,5 @@
 --TEST--
 Curl option CURLOPT_MAXFILESIZE_LARGE
---DESCRIPTION--
-Test CURLOPT_MAXFILESIZE_LARGE with values that exceed, do not exceed, and
-disable the limit, as well as a negative value that triggers an error.
 --SKIPIF--
 <?php
 $curl_version = curl_version();

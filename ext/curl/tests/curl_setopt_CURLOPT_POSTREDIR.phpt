@@ -1,10 +1,5 @@
 --TEST--
 Curl option CURLOPT_POSTREDIR
---DESCRIPTION--
-Verify that CURLOPT_POSTREDIR controls whether POST data is retained on
-301, 302, and 303 redirects.  By default libcurl turns POST into GET on
-301, 302, and 303.  Setting the appropriate bit in CURLOPT_POSTREDIR
-keeps the POST method and body.
 --EXTENSIONS--
 curl
 --FILE--

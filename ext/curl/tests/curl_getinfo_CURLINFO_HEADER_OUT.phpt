@@ -1,8 +1,5 @@
 --TEST--
 curl_getinfo CURLINFO_HEADER_OUT
---DESCRIPTION--
-Verify that CURLINFO_HEADER_OUT returns the request header sent on the
-last request, and that toggling it back to 0 returns FALSE.
 --EXTENSIONS--
 curl
 --FILE--
