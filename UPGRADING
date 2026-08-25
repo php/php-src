@@ -566,6 +566,12 @@ PHP 8.6 UPGRADE NOTES
     * ArrayIterator::unserialize()
     * ArrayIterator::serialize()
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_arrayiterator_methods_that_inherit_arrayobject_implementation
+  . The following SplFileObject methods are now deprecated
+    * SplFileObject::fgetcsv()
+    * SplFileObject::fputcsv()
+    * SplFileObject::setCsvControl()
+    * SplFileObject::getCsvControl()
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_splfileobject_csv_methods
 
 - Standard:
   . metaphone() is deprecated.

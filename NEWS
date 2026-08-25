@@ -112,6 +112,12 @@ PHP                                                                        NEWS
   . Fixed incorrect parameter name in sodium_add(), sodium_memcmp(), and
     sodium_compare() length-mismatch error messages. (lacatoire)
 
+- SPL:
+  . The following SplFileObject methods have been deprecated
+    SplFileObject::fgetcsv(), SplFileObject::fputcsv(),
+    SplFileObject::setCsvControl(), and SplFileObject::getCsvControl().
+    (Girgias)
+
 - Standard:
   . Fixed incorrect parameter name in convert_uudecode() warning. (lacatoire)
   . Added support for the "<" and ">" endianness modifiers in pack() and
