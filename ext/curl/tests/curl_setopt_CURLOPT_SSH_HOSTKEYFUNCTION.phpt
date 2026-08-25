@@ -22,9 +22,9 @@ $ch = curl_init('sftp://php@github.com/file.txt');
 curl_setopt($ch, CURLOPT_SSH_HOSTKEYFUNCTION, 'hostkeyfunction');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 var_dump(curl_exec($ch));
-var_dump(curl_error($ch));
+var_dump(curl_errno($ch) == CURLE_SSL_CACERT);
 
 ?>
 --EXPECT--
 bool(false)
-string(49) "SSL peer certificate or SSH remote key was not OK"
+bool(true)
