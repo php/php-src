@@ -289,6 +289,13 @@ PHP 8.6 UPGRADE NOTES
     - file_exists()
     - lstat()
     - stat()
+  . unpack() now reads a "<" or ">" immediately following a format code as an
+    endianness modifier rather than as the first character of the element name.
+    Formats such as "s<value" now produce the key "value" instead of "<value",
+    and "C>name" raises a ValueError because the C format code accepts no
+    endianness modifier. A name starting with these characters is unaffected
+    when a repeater precedes it, as in "s1<value".
+    RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support
 
 - Sysvshm:
   . shm_attach() now raises a ValueError when the $key argument is outside the
