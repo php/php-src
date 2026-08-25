@@ -1022,10 +1022,10 @@ PHP_METHOD(ArrayObject, setIteratorClass)
 {
 	zval *object = ZEND_THIS;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
-	zend_class_entry *ce_get_iterator = spl_ce_ArrayIterator;
+	zend_class_entry *ce_get_iterator;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_CLASS(ce_get_iterator)
+		Z_PARAM_DERIVED_CLASS_NAME(ce_get_iterator, spl_ce_ArrayIterator)
 	ZEND_PARSE_PARAMETERS_END();
 
 	intern->ce_get_iterator = ce_get_iterator;
