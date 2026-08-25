@@ -488,7 +488,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 		}
 		return ret;
 	} else {
-		return EOF;
+		return 0;
 	}
 }
 /* }}} */
