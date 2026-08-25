@@ -563,7 +563,6 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_bool(return_value, "blocked", 1);
 		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
 	}
-	php_stream_error_operation_end_for_stream(stream);
 
 	if (!Z_ISUNDEF(stream->wrapperdata)) {
 		Z_ADDREF_P(&stream->wrapperdata);
@@ -598,6 +597,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_string(return_value, "uri", stream->orig_path);
 	}
 
+	php_stream_error_operation_end_for_stream(stream);
 }
 /* }}} */
 
