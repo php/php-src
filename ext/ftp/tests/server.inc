@@ -449,6 +449,8 @@ if ($pid) {
 
             if (empty($bug73457)) {
                 $pasvs = stream_socket_accept($soc,10);
+            } else {
+                $pasvs = null;
             }
 
         } elseif (preg_match('/^EPSV/', $buf, $matches)) {
