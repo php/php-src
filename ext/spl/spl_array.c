@@ -995,15 +995,18 @@ PHP_METHOD(ArrayObject, __construct)
 	spl_array_object *intern;
 	zval *array;
 	zend_long ar_flags = 0;
-	zend_class_entry *ce_get_iterator = spl_ce_ArrayIterator;
+	zend_class_entry *ce_get_iterator;
 
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|AlC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_OBJECT(array)
+		Z_PARAM_LONG(ar_flags)
+		Z_PARAM_DERIVED_CLASS_NAME(ce_get_iterator, spl_ce_ArrayIterator)
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_SPLARRAY_P(object);
 
