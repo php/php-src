@@ -1054,6 +1054,10 @@ static zend_expected_type zend_parse_arg_impl(zval *arg, va_list *va, const char
 			{
 				zend_class_entry **pce = va_arg(*va, zend_class_entry **);
 				const zend_class_entry *ce_base = *pce;
+				if (ce_base) {
+					zend_throw_error(NULL, "Cannot use 'C' specifier anymore with a derived class!");
+					return Z_EXPECTED_CLASS_NAME_OR_NULL;
+				}
 
 				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 					*pce = NULL;
