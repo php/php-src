@@ -1,5 +1,5 @@
 --TEST--
-GH-23447 (segfault on soap server handler when it contains undefined constant)
+GH-23447 (Segfault when a class passed to SoapServer::setClass() fails to initialize)
 --EXTENSIONS--
 soap
 --FILE--
