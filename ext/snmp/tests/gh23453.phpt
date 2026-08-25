@@ -1,5 +1,5 @@
 --TEST--
-GH-23453 (ext/snmp: Attempted free on non-malloced address)
+GH-23453 (SNMP::setSecurity() frees a non-malloced address with a context engine ID longer than 32 bytes)
 --EXTENSIONS--
 snmp
 --FILE--
