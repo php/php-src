@@ -530,6 +530,39 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_derived_class(zval *arg, zend_class_entry **ce, const zend_class_entry *base_ce, uint32_t num, bool check_null) {
+	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+		*ce = NULL;
+		return true;
+	}
+
+	/* Only accept string and Stringable(?) as int/foat/bool are not valid class names */
+	if (UNEXPECTED(Z_TYPE_P(arg) != IS_STRING)) {
+		if (Z_TYPE_P(arg) != IS_OBJECT || !zend_parse_arg_str_slow(arg, num)) {
+			*ce = NULL;
+			zend_wrong_parameter_type_error(num, check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME, arg);
+			return false;
+		}
+		/* Object was converted to string */
+		ZEND_ASSERT(Z_TYPE_P(arg) == IS_STRING);
+	}
+	zend_string *class_name = Z_STR_P(arg);
+	zend_class_entry *user_ce = zend_lookup_class(class_name);
+	if (UNEXPECTED(!user_ce)) {
+		*ce = NULL;
+		zend_wrong_parameter_type_error(num, check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME, arg);
+		return false;
+	}
+	if (UNEXPECTED(!instanceof_function(user_ce, base_ce))) {
+		zend_argument_type_error(num, "must be a class name derived from %s%s, \"%s\" given",
+			ZSTR_VAL(base_ce->name), check_null ? " or null" : "", ZSTR_VAL(class_name));
+		*ce = NULL;
+		return false;
+	}
+	*ce = user_ce;
+	return true;
+}
+
 static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32_t arg_num) {
 	const zend_function *func = zend_active_function();
 	ZEND_ASSERT(arg_num > 0);

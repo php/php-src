@@ -1778,6 +1778,19 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_CLASS_OR_NULL(dest) \
 	Z_PARAM_CLASS_EX(dest, 1)
 
+#define Z_PARAM_DERIVED_CLASS_NAME_EX(dest, base_ce, allow_null) \
+		Z_PARAM_PROLOGUE(0, 0); \
+		if (UNEXPECTED(!zend_parse_arg_derived_class(_arg, &dest, base_ce, _i, allow_null))) { \
+			_error_code = ZPP_ERROR_FAILURE; \
+			break; \
+		}
+
+#define Z_PARAM_DERIVED_CLASS_NAME(dest, base_ce) \
+	Z_PARAM_DERIVED_CLASS_NAME_EX(dest, base_ce, false)
+
+#define Z_PARAM_DERIVED_CLASS_NAME_OR_NULL(dest, base_ce) \
+	Z_PARAM_DERIVED_CLASS_NAME_EX(dest, base_ce, true)
+
 #define Z_PARAM_OBJ_OR_CLASS_NAME_EX(dest, allow_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_obj_or_class_name(_arg, &dest, allow_null))) { \
@@ -2217,6 +2230,7 @@ typedef enum zpp_parse_bool_status {
 } zpp_parse_bool_status;
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_derived_class(zval *arg, zend_class_entry **ce, const zend_class_entry *base_ce, uint32_t num, bool check_null);
 ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_parse_arg_bool_slow(const zval *arg, uint32_t arg_num);
 ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_parse_arg_bool_weak(const zval *arg, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num);
