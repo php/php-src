@@ -1382,7 +1382,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 			if (ZSTR_LEN(str_key) >= path_len || strncmp(ZSTR_VAL(str_key), path, ZSTR_LEN(str_key))) {
 				continue;
 			} else {
-				char *test;
+				char *test, *mount_path;
 				size_t test_len;
 				php_stream_statbuf ssb;
 
@@ -1425,22 +1425,25 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 				}
 
 				/* mount the file just in time */
-				if (SUCCESS != phar_mount_entry(phar, test, test_len, path, path_len)) {
-					efree(test);
+				mount_path = estrndup(path, path_len);
+				if (SUCCESS != phar_mount_entry(phar, test, test_len, mount_path, path_len)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: path \"%s\" exists as file \"%s\" and could not be mounted", path, test);
 					}
+					efree(mount_path);
+					efree(test);
 					return NULL;
 				}
-
-				efree(test);
+				efree(mount_path);
 
 				if (NULL == (entry = zend_hash_str_find_ptr(&phar->manifest, path, path_len))) {
 					if (error) {
 						spprintf(error, 4096, "phar error: path \"%s\" exists as file \"%s\" and could not be retrieved after being mounted", path, test);
 					}
+					efree(test);
 					return NULL;
 				}
+				efree(test);
 				return entry;
 			}
 		} ZEND_HASH_FOREACH_END();
