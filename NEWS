@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0beta2
+27 Aug 2026, PHP 8.6.0beta2
 
 - Core:
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
