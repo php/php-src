@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   . Fixed Locale::parseLocale() reading past a trailing '-' or '_'.
     (iliaal, Xuyang Zhang)
   . Fixed grapheme_str_split() treating UBRK_DONE as a byte index. (iliaal)
+  . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
+    read. (iliaal)
 
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
