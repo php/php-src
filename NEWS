@@ -6,6 +6,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-23242 (PHP development server does not support Expect
     100-continue flow control). (Sjoerd Langkemper)
 
+- SPL:
+  . Fixed bug #80056 (DirectoryIterator, FilesystemIterator and
+    RecursiveDirectoryIterator lose directory entries on filesystems that
+    cannot rewind a directory handle after a partial read, e.g. 9p mounts
+    under WSL2 and Docker Desktop). (denkfabrik-li)
+
 
 27 Aug 2026, PHP 8.6.0beta2
 

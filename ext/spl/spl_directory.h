@@ -61,6 +61,11 @@ struct _spl_filesystem_object {
 			php_stream         *dirp;
 			zend_string        *sub_path;
 			zend_long          index;
+			/* Whether the stream is still positioned at its first (non-skipped)
+			 * entry, in which case rewinding is a no-op and is skipped: some
+			 * filesystems (e.g. 9p) cannot seek a directory handle after a
+			 * partial read and would silently lose buffered entries. */
+			bool               at_initial_entry;
 			zend_function      *func_rewind;
 			zend_function      *func_next;
 			zend_function      *func_valid;

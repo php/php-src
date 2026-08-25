@@ -256,6 +256,8 @@ static zend_result spl_filesystem_object_get_file_name(spl_filesystem_object *in
 
 static void spl_filesystem_dir_read(spl_filesystem_object *intern) /* {{{ */
 {
+	intern->u.dir.at_initial_entry = false;
+
 	if (intern->file_name) {
 		/* invalidate */
 		zend_string_release(intern->file_name);
@@ -309,7 +311,36 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_string *
 		do {
 			spl_filesystem_dir_read(intern);
 		} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+		intern->u.dir.at_initial_entry = true;
 	}
+}
+/* }}} */
+
+/* {{{ spl_filesystem_dir_rewind */
+/* rewind a directory resource to its first entry */
+static void spl_filesystem_dir_rewind(spl_filesystem_object *intern)
+{
+	bool skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
+
+	intern->u.dir.index = 0;
+
+	if (intern->u.dir.at_initial_entry) {
+		/* No entry has been consumed since the directory was opened or last
+		 * rewound, so the stream is still positioned at its first entry and
+		 * there is nothing to rewind. Skipping the redundant seek matters on
+		 * filesystems that cannot rewind a directory handle after a partial
+		 * read (e.g. 9p): rewinddir() would silently discard the entries
+		 * already buffered by the C library. */
+		return;
+	}
+
+	if (intern->u.dir.dirp) {
+		php_stream_rewinddir(intern->u.dir.dirp);
+	}
+	do {
+		spl_filesystem_dir_read(intern);
+	} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+	intern->u.dir.at_initial_entry = true;
 }
 /* }}} */
 
@@ -735,9 +766,7 @@ PHP_METHOD(DirectoryIterator, rewind)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	CHECK_DIRECTORY_ITERATOR_IS_INITIALIZED(intern);
-	intern->u.dir.index = 0;
-	php_stream_rewinddir(intern->u.dir.dirp);
-	spl_filesystem_dir_read(intern);
+	spl_filesystem_dir_rewind(intern);
 }
 /* }}} */
 
@@ -1361,17 +1390,10 @@ PHP_METHOD(FilesystemIterator, __construct)
 PHP_METHOD(FilesystemIterator, rewind)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
-	bool skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	intern->u.dir.index = 0;
-	if (intern->u.dir.dirp) {
-		php_stream_rewinddir(intern->u.dir.dirp);
-	}
-	do {
-		spl_filesystem_dir_read(intern);
-	} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+	spl_filesystem_dir_rewind(intern);
 }
 /* }}} */
 
@@ -1638,11 +1660,7 @@ static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter)
 {
 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 
-	object->u.dir.index = 0;
-	if (object->u.dir.dirp) {
-		php_stream_rewinddir(object->u.dir.dirp);
-	}
-	spl_filesystem_dir_read(object);
+	spl_filesystem_dir_rewind(object);
 }
 /* }}} */
 
@@ -1726,15 +1744,8 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
-	bool skip_dots = SPL_HAS_FLAG(object->flags, SPL_FILE_DIR_SKIPDOTS);
 
-	object->u.dir.index = 0;
-	if (object->u.dir.dirp) {
-		php_stream_rewinddir(object->u.dir.dirp);
-	}
-	do {
-		spl_filesystem_dir_read(object);
-	} while (skip_dots && spl_filesystem_is_dot(object->u.dir.entry.d_name));
+	spl_filesystem_dir_rewind(object);
 	if (!Z_ISUNDEF(iterator->current)) {
 		zval_ptr_dtor(&iterator->current);
 		ZVAL_UNDEF(&iterator->current);
