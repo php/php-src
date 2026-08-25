@@ -48,6 +48,10 @@ PHP                                                                        NEWS
   . Fixed a leak when a persistent connection failed a liveness check
     with no other live PDO handle. (iliaal)
 
+- PDO_PGSQL:
+  . Fixed PDO::CURSOR_SCROLL statements failing under lazy fetching
+    (PDO::ATTR_PREFETCH => 0). (KentarouTakeda)
+
 - Phar:
   . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
     (Weilin Du)

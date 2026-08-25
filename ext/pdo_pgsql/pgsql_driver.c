@@ -287,7 +287,16 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY) == PDO_CURSOR_SCROLL;
 
+	S->is_unbuffered =
+		driver_options
+		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH))
+		&& pdo_get_long_param(&lval, val)
+		? !lval
+		: H->default_fetching_laziness
+	;
+
 	if (scrollable) {
+		S->is_unbuffered = false;
 		if (S->cursor_name) {
 			efree(S->cursor_name);
 		}
@@ -311,14 +320,6 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
 		stmt->named_rewrite_template = "$%d";
 	}
-
-	S->is_unbuffered =
-		driver_options
-		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH))
-		&& pdo_get_long_param(&lval, val)
-		? !lval
-		: H->default_fetching_laziness
-	;
 
 	ret = pdo_parse_params(stmt, sql, &nsql);
 
