@@ -266,6 +266,18 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+static bool pdo_pgsql_check_chunk_size(zend_long size)
+{
+	if (size < 0 || ZEND_LONG_EXCEEDS_INT(size)) {
+		zend_value_error("Pdo\\Pgsql::ATTR_CHUNK_SIZE must be between 0 and %d", INT_MAX);
+		return false;
+	}
+
+	return true;
+}
+#endif
+
 static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -285,13 +297,47 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY) == PDO_CURSOR_SCROLL;
 
-	S->is_unbuffered =
-		driver_options
-		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH))
-		&& pdo_get_long_param(&lval, val)
+	bool prefetch_given = driver_options
+		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH));
+
+	S->is_unbuffered = prefetch_given && pdo_get_long_param(&lval, val)
 		? !lval
-		: H->default_fetching_laziness
-	;
+		: H->default_fetching_laziness;
+
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+	bool chunk_size_given = driver_options
+		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_PGSQL_ATTR_CHUNK_SIZE));
+
+	if (chunk_size_given) {
+		if (!pdo_get_long_param(&lval, val)) {
+			return false;
+		}
+		S->chunk_size = lval;
+	} else if (prefetch_given) {
+		/* the statement's own prefetch replaces an inherited chunk size */
+		S->chunk_size = 0;
+	} else {
+		S->chunk_size = H->default_chunk_size;
+	}
+
+	if (!pdo_pgsql_check_chunk_size(S->chunk_size)) {
+		return false;
+	}
+
+	if (S->chunk_size >= 1 && scrollable) {
+		if (chunk_size_given) {
+			zend_value_error("Pdo\\Pgsql::ATTR_CHUNK_SIZE cannot be combined with "
+				"PDO::ATTR_CURSOR set to PDO::CURSOR_SCROLL");
+			return false;
+		}
+
+		S->chunk_size = 0;
+	}
+
+	if (S->chunk_size >= 1) {
+		S->is_unbuffered = true;
+	}
+#endif
 
 	if (scrollable) {
 		S->is_unbuffered = false;
@@ -473,6 +519,12 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
 			ZVAL_BOOL(return_value, H->disable_prepares);
 			break;
+
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		case PDO_PGSQL_ATTR_CHUNK_SIZE:
+			ZVAL_LONG(return_value, H->default_chunk_size);
+			break;
+#endif
 
 		case PDO_ATTR_CLIENT_VERSION: {
 			char buf[16];
@@ -1377,7 +1429,22 @@ static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				return false;
 			}
 			H->default_fetching_laziness = !bval;
+			H->default_chunk_size = 0;
 			return true;
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		case PDO_PGSQL_ATTR_CHUNK_SIZE: {
+			zend_long lval;
+
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			if (!pdo_pgsql_check_chunk_size(lval)) {
+				return false;
+			}
+			H->default_chunk_size = lval;
+			return true;
+		}
+#endif
 		default:
 			return false;
 	}

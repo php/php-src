@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
     read. (iliaal)
 
+- PDO_PGSQL:
+  . Added Pdo\Pgsql::ATTR_CHUNK_SIZE to fetch a result set in chunks of the
+    given number of rows. (KentarouTakeda)
+
 - Phar:
   . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
     (Weilin Du)
