@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed imageaffinematrixget() and imageaffinematrixconcat() reporting the
     wrong argument in error messages. (Weilin Du)
+  . Fixed bug GH-23457 (imagebmp() is extremely slow when writing to a file).
+    (Lazizbek Ergashev)
 
 - Intl:
   . Fixed a double-free when IntlGregorianCalendar construction fails after
