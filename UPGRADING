@@ -664,6 +664,9 @@ PHP 8.6 UPGRADE NOTES
   . header_register_callback() now declares true as its return type. It has not
     been able to return false since PHP 8.0.0, where passing an invalid
     callback started throwing a TypeError instead.
+  . register_tick_function() now declares true as its return type. It has
+    always returned true on success; an invalid callback throws a TypeError
+    via ZPP before the function body is reached.
   . ini_get_all() now includes a "builtin_default_value" element for each
     directive when $details is true. It holds the built-in default value of the
     directive (or null if it has none), independent of values set in php.ini,
