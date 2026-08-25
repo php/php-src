@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Fixed a leak when a persistent connection failed a liveness check
     with no other live PDO handle. (iliaal)
 
+- SOAP:
+  . Fixed bug GH-23447 (Segfault when a class passed to SoapServer::setClass()
+    fails to initialize). (Lazizbek Ergashev)
+
 - Standard:
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
