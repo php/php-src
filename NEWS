@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-23457 (imagebmp() is extremely slow when writing to a file).
     (Lazizbek Ergashev)
 
+- FPM:
+  . Fixed bug GH-19320 (FPM UID and GID overflow). (Pratik Bhujel)
+
 - Intl:
   . Fixed a double-free when IntlGregorianCalendar construction fails after
     the ICU constructor adopts the TimeZone. (iliaal)
@@ -87,9 +90,6 @@ PHP                                                                        NEWS
 
 - LibXML:
   . Fixed bug GH-22752 (Build failure with libxml 2.15). (David Carlier)
-
-- FPM:
-  . Fixed bug GH-19320 (FPM UID and GID overflow). (Pratik Bhujel)
 
 - MBString:
   . Fixed bug GH-22779 (mb_strrpos() returns the wrong position for a negative
