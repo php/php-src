@@ -124,6 +124,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-22480 (Use-after-free when re-watching an already-watched
     variable). (Ilia Alshanetsky)
   . Fixed over-read when watching a packed array element. (Ilia Alshanetsky)
+  . Fixed double free of watch element chains. (Arnaud)
 
 - Readline:
   . Fixed a crash in readline_info() when completion_append_character
