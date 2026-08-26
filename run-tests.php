@@ -2137,23 +2137,23 @@ TEST $file
         $temp_dir = str_replace($temp_source, $temp_target, $temp_dir);
     }
 
-    $main_file_name = basename($file, 'phpt');
+    $main_file_name = basename($file, '.phpt');
 
-    $diff_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'diff';
-    $log_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'log';
-    $exp_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'exp';
-    $stdin_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'stdin';
-    $output_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'out';
-    $memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'mem';
-    $sh_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'sh';
-    $temp_file = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
-    $test_file = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
-    $temp_skipif = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
-    $test_skipif = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
-    $temp_clean = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
-    $test_clean = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
-    $preload_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'preload.php';
-    $tmp_post = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'post';
+    $diff_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.diff';
+    $log_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.log';
+    $exp_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.exp';
+    $stdin_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.stdin';
+    $output_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.out';
+    $memcheck_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.mem';
+    $sh_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.sh';
+    $temp_file = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.php';
+    $test_file = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . '.php';
+    $temp_skipif = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.skip.php';
+    $test_skipif = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . '.skip.php';
+    $temp_clean = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.clean.php';
+    $test_clean = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . '.clean.php';
+    $preload_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.preload.php';
+    $tmp_post = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . '.post';
     $tmp_relative_file = str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $test_file) . 't';
 
     if ($temp_source && $temp_target) {
@@ -2206,6 +2206,7 @@ TEST $file
 
     if ($test->sectionNotEmpty('ENV')) {
         $env_str = str_replace('{PWD}', dirname($file), $test->getSection('ENV'));
+        $env_str = str_replace('{TEST_NAME}', $main_file_name, $env_str);
         foreach (explode("\n", $env_str) as $e) {
             $e = explode('=', trim($e), 2);
 
@@ -2289,6 +2290,7 @@ TEST $file
     // these may overwrite the test defaults...
     if ($test->hasSection('INI')) {
         $ini = str_replace('{PWD}', dirname($file), $test->getSection('INI'));
+        $ini = str_replace('{TEST_NAME}', $main_file_name, $ini);
         $ini = str_replace('{TMP}', sys_get_temp_dir(), $ini);
         $replacement = IS_WINDOWS ? '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"' : 'tee $1 >/dev/null';
         $ini = preg_replace('/{MAIL:(\S+)}/', $replacement, $ini);
