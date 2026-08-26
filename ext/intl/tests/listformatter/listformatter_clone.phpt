@@ -1,11 +1,7 @@
 --TEST--
 Test IntlListFormatter cannot be cloned
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) {
-    die('skip intl extension not available');
-}
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
