@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
     read. (iliaal)
 
+- Phar:
+  . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
+    (Weilin Du)
+
 
 27 Aug 2026, PHP 8.6.0beta2
 
