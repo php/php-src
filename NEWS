@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     100-continue flow control). (Sjoerd Langkemper)
 
 - Intl:
+  . Fixed a memory leak when iterating IntlBreakIterator::getPartsIterator()
+    results. (iliaal)
   . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
     read. (iliaal)
 
