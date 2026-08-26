@@ -4337,21 +4337,39 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 	efree(ctx);
 } /* }}} */
 
+typedef struct {
+	gdIOCtx ctx;
+	size_t buf_len;
+	unsigned char buf[8192];
+} php_gd_stream_ctx;
+
+static void _php_image_stream_flush(php_gd_stream_ctx *stream_ctx) /* {{{ */
+{
+	if (stream_ctx->buf_len) {
+		php_stream_write((php_stream *) stream_ctx->ctx.data, (char *) stream_ctx->buf, stream_ctx->buf_len);
+		stream_ctx->buf_len = 0;
+	}
+} /* }}} */
+
 static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
-	char ch = (char) c;
-	php_stream * stream = (php_stream *)ctx->data;
-	php_stream_write(stream, &ch, 1);
+	php_gd_stream_ctx *stream_ctx = (php_gd_stream_ctx *) ctx;
+	if (stream_ctx->buf_len == sizeof(stream_ctx->buf)) {
+		_php_image_stream_flush(stream_ctx);
+	}
+	stream_ctx->buf[stream_ctx->buf_len++] = (unsigned char) c;
 } /* }}} */
 
 static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
 {
 	php_stream * stream = (php_stream *)ctx->data;
+	_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 	return php_stream_write(stream, (void *)buf, l);
 } /* }}} */
 
 static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
 	if(ctx->data) {
+		_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 		ctx->data = NULL;
 	}
 	efree(ctx);
@@ -4360,6 +4378,7 @@ static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 {
 	if(ctx->data) {
+		_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 		php_stream_close((php_stream *) ctx->data);
 		ctx->data = NULL;
 	}
@@ -4367,7 +4386,8 @@ static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 } /* }}} */
 
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream) {
-	gdIOCtx *ctx = ecalloc(1, sizeof(gdIOCtx));
+	php_gd_stream_ctx *stream_ctx = ecalloc(1, sizeof(php_gd_stream_ctx));
+	gdIOCtx *ctx = &stream_ctx->ctx;
 
 	ctx->putC = _php_image_stream_putc;
 	ctx->putBuf = _php_image_stream_putbuf;
