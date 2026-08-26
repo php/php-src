@@ -52,6 +52,10 @@ PHP                                                                        NEWS
   . Fixed a leak when a persistent connection failed a liveness check
     with no other live PDO handle. (iliaal)
 
+- Phar:
+  . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
+    (Weilin Du)
+
 - Standard:
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
