@@ -13,7 +13,19 @@ try {
 }
 
 try {
+    $poll_ctx->wait(maxEvents: PHP_INT_MIN);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+try {
     $poll_ctx->wait(maxEvents: -1);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+try {
+    $poll_ctx->wait(maxEvents: 0);
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
@@ -21,4 +33,6 @@ try {
 ?>
 --EXPECT--
 ValueError: Io\Poll\Context::wait(): Argument #1 ($timeout) must not be negative
+ValueError: Io\Poll\Context::wait(): Argument #2 ($maxEvents) must be greater than 0
+ValueError: Io\Poll\Context::wait(): Argument #2 ($maxEvents) must be greater than 0
 ValueError: Io\Poll\Context::wait(): Argument #2 ($maxEvents) must be greater than 0

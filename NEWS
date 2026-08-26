@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   . Fixed an out-of-bounds read when following a redirect response with an
     empty Location header. (iliaal)
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
+  . Io\Poll\Context::wait() now rejects a $maxEvents value greater than
+    INT_MAX instead of truncating it. (marc-mabe)
 
 
 27 Aug 2026, PHP 8.6.0beta2
