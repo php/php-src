@@ -60,6 +60,10 @@ PHP                                                                        NEWS
   . Fixed the interactive shell not waiting for the pager process to exit.
     (Weilin Du)
 
+- Standard:
+  . Fixed an out-of-bounds read when following a redirect response with an
+    empty Location header. (iliaal)
+
 - Zip:
   . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
     is freed while the stream is still open). (Eyüp Can Akman)
