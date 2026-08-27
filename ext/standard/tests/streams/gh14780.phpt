@@ -31,8 +31,8 @@ try {
 }
 ?>
 --EXPECTF--
-pfsockopen(): Argument #6 must be -1 or between 0 and %s
-pfsockopen(): Argument #6 must be -1 or between 0 and %s
+pfsockopen(): Argument #5 ($timeout) must be -1 or between 0 and %s
+pfsockopen(): Argument #5 ($timeout) must be -1 or between 0 and %s
 resource(%d) of type (persistent stream)
-pfsockopen(): Argument #6 must be -1 or between 0 and %s
-pfsockopen(): Argument #6 must be -1 or between 0 and %s
+pfsockopen(): Argument #5 ($timeout) must be -1 or between 0 and %s
+pfsockopen(): Argument #5 ($timeout) must be -1 or between 0 and %s
