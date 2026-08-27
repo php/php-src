@@ -55,6 +55,8 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
     (Weilin Du)
+  . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
+    (Weilin Du)
 
 - Readline:
   . Fixed the interactive shell not waiting for the pager process to exit.
