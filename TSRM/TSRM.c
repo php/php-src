@@ -29,6 +29,42 @@ typedef struct _tsrm_tls_entry tsrm_tls_entry;
 /* TSRMLS_CACHE_DEFINE; is already done in Zend, this is being always compiled statically. */
 TSRMLS_CACHE_EXTERN();
 
+#ifdef ZEND_WIN_TSRM_TEB_SLOT
+/* Holds &_tsrm_ls_cache in a TEB TLS slot so EG()/CG() reach it
+ * with a single gs:[] load rather than the 3-load __declspec(thread) lookup. */
+#define ZEND_WIN_TEB_TLS_SLOTS 0x1480
+
+static DWORD zend_win_tsrm_cache_slot = 0;
+unsigned long zend_win_tsrm_cache_offset = 0;
+
+ZEND_API void zend_win_tsrm_cache_init(bool alloc)
+{
+	if (alloc) {
+		zend_win_tsrm_cache_slot = TlsAlloc();
+		if (zend_win_tsrm_cache_slot == TLS_OUT_OF_INDEXES) {
+			fprintf(stderr, "PHP Startup: TlsAlloc() failed, no TLS slot available "
+				"for the ZTS globals cache\n");
+			abort();
+		}
+		if (zend_win_tsrm_cache_slot >= TLS_MINIMUM_AVAILABLE) {
+			fprintf(stderr, "PHP Startup: TlsAlloc() returned slot %lu, but only the "
+				"first %d direct TEB slots are usable for the ZTS globals cache\n",
+				zend_win_tsrm_cache_slot, TLS_MINIMUM_AVAILABLE);
+			abort();
+		}
+		zend_win_tsrm_cache_offset = ZEND_WIN_TEB_TLS_SLOTS
+			+ zend_win_tsrm_cache_slot * (unsigned long) sizeof(void*);
+	}
+	TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
+	/* Verify our layout assumptions work */
+	if (ZEND_TSRM_CACHE_PTR != &_tsrm_ls_cache) {
+		fprintf(stderr, "PHP Startup: the ZTS globals cache is not reachable through "
+			"TEB offset %lu\n", zend_win_tsrm_cache_offset);
+		abort();
+	}
+}
+#endif
+
 struct _tsrm_tls_entry {
 	void **storage;
 	int count;
