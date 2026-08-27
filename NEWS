@@ -63,6 +63,7 @@ PHP                                                                        NEWS
     empty Location header. (iliaal)
   . Fixed a memory leak in array_merge_recursive() when the recursive merge of
     an object converted to an array fails. (David Carlier)
+  . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
 
 - Zip:
   . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
