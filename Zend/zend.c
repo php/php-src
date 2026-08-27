@@ -56,7 +56,11 @@ ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache = {0
 #if defined(_WIN64) && defined(_M_X64) && defined(ZEND_TLS_DIRECT)
 /* Holds &_tsrm_ls_cache in a TEB TLS slot (filled by DllMain) so EG()/CG() reach it
  * with a single gs:[] load rather than the 3-load __declspec(thread) lookup. */
-ZEND_TLS_API unsigned long zend_win_tsrm_cache_slot = 0;
+#define ZEND_WIN_TEB_TLS_SLOTS 0x1480
+
+static DWORD zend_win_tsrm_cache_slot = 0;
+ZEND_TLS_API unsigned long zend_win_tsrm_cache_offset = 0;
+
 ZEND_API void zend_win_tsrm_cache_init(bool alloc)
 {
 	if (alloc) {
@@ -75,8 +79,16 @@ ZEND_API void zend_win_tsrm_cache_init(bool alloc)
 				zend_win_tsrm_cache_slot, TLS_MINIMUM_AVAILABLE);
 			abort();
 		}
+		zend_win_tsrm_cache_offset = ZEND_WIN_TEB_TLS_SLOTS
+			+ zend_win_tsrm_cache_slot * (unsigned long) sizeof(void*);
 	}
 	TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
+	/* Verify our layout assumptions work */
+	if (ZEND_TSRM_CACHE_PTR != &_tsrm_ls_cache) {
+		fprintf(stderr, "PHP Startup: the ZTS globals cache is not reachable through "
+			"TEB offset %lu\n", zend_win_tsrm_cache_offset);
+		abort();
+	}
 }
 #endif
 /* ts_allocate_tls_id takes a callback so each thread resolves its own block.
