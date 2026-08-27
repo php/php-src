@@ -207,8 +207,10 @@ typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
 # define TSRMLS_CACHE_DEFINE()
 extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
 # if defined(_WIN64) && defined(_M_X64)
-/* See zend.c: zend_win_tsrm_cache_init */
+/* See TSRM.c: zend_win_tsrm_cache_init */
+#  define ZEND_WIN_TSRM_TEB_SLOT 1
 extern unsigned long zend_win_tsrm_cache_offset;
+ZEND_API void zend_win_tsrm_cache_init(bool alloc);
 #  define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(zend_win_tsrm_cache_offset))
 # else
 #  define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
