@@ -909,7 +909,7 @@ lxb_url_scheme_copy_special(const lxb_url_scheme_data_t *src,
     return lxb_url_str_copy(&src->name, &dst->name, dst_mraw);
 }
 
-static void
+void
 lxb_url_path_set_null(lxb_url_t *url)
 {
     if (url->path.str.data == NULL) {
@@ -1133,7 +1133,7 @@ lxb_url_host_destroy(lxb_url_host_t *host, lexbor_mraw_t *mraw)
     }
 }
 
-static void
+void
 lxb_url_host_set_empty(lxb_url_host_t *host, lexbor_mraw_t *mraw)
 {
     lxb_url_host_destroy(host, mraw);
