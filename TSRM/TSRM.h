@@ -186,15 +186,36 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #define TSRMG_BULK_STATIC(id, type)	((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])
 #define TSRMG_FAST_STATIC(offset, type, element)	(TSRMG_FAST_BULK_STATIC(offset, type)->element)
 #define TSRMG_FAST_BULK_STATIC(offset, type)	((type) (((char*) TSRMLS_CACHE)+(offset)))
-struct _zend_tsrm_ls_cache;
-#if defined(ZEND_WIN32) && !defined(LIBZEND_EXPORTS)
+
 /* Windows can't dllexport __declspec(thread) symbols, so outside Zend each module
  * keeps a per-module `void *` pointer and reaches EG/CG via the resource-id indirection. */
+#ifdef ZEND_WIN32
+# define ZEND_TLS_API
+# ifdef LIBZEND_EXPORTS
+#  define ZEND_TLS_DIRECT 1
+# endif
+#else
+# define ZEND_TLS_API ZEND_API
+# define ZEND_TLS_DIRECT 1
+#endif
+
+struct _zend_tsrm_ls_cache;
+typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
+
+#ifdef ZEND_TLS_DIRECT
+# define ZEND_TSRMLS_CACHE_T zend_tsrm_ls_cache
+# define TSRMLS_CACHE_DEFINE()
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
+# if defined(_WIN64) && defined(_M_X64)
+/* See zend.c: zend_win_tsrm_cache_init */
+extern unsigned long zend_win_tsrm_cache_offset;
+#  define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(zend_win_tsrm_cache_offset))
+# else
+#  define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
+# endif
+#else
 # define ZEND_TSRMLS_CACHE_T void *
 # define TSRMLS_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache = NULL;
-#else
-# define ZEND_TSRMLS_CACHE_T struct _zend_tsrm_ls_cache
-# define TSRMLS_CACHE_DEFINE()
 #endif
 #ifdef __cplusplus
 #define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR; }

@@ -59,7 +59,7 @@ ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache = {0
 #define ZEND_WIN_TEB_TLS_SLOTS 0x1480
 
 static DWORD zend_win_tsrm_cache_slot = 0;
-ZEND_TLS_API unsigned long zend_win_tsrm_cache_offset = 0;
+unsigned long zend_win_tsrm_cache_offset = 0;
 
 ZEND_API void zend_win_tsrm_cache_init(bool alloc)
 {
