@@ -53,44 +53,6 @@ static bool startup_done = false;
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
 ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache = {0};
-#if defined(_WIN64) && defined(_M_X64) && defined(ZEND_TLS_DIRECT)
-/* Holds &_tsrm_ls_cache in a TEB TLS slot (filled by DllMain) so EG()/CG() reach it
- * with a single gs:[] load rather than the 3-load __declspec(thread) lookup. */
-#define ZEND_WIN_TEB_TLS_SLOTS 0x1480
-
-static DWORD zend_win_tsrm_cache_slot = 0;
-unsigned long zend_win_tsrm_cache_offset = 0;
-
-ZEND_API void zend_win_tsrm_cache_init(bool alloc)
-{
-	if (alloc) {
-		zend_win_tsrm_cache_slot = TlsAlloc();
-		if (zend_win_tsrm_cache_slot == TLS_OUT_OF_INDEXES) {
-			fprintf(stderr, "PHP Startup: TlsAlloc() failed, no TLS slot available "
-				"for the ZTS globals cache\n");
-			abort();
-		}
-		if (zend_win_tsrm_cache_slot >= TLS_MINIMUM_AVAILABLE) {
-			/* Beyond the first TLS_MINIMUM_AVAILABLE slots the loader uses
-			 * TEB->TlsExpansionSlots, which the inline gs:[] read in
-			 * ZEND_TSRM_CACHE_PTR cannot reach. */
-			fprintf(stderr, "PHP Startup: TlsAlloc() returned slot %lu, but only the "
-				"first %d direct TEB slots are usable for the ZTS globals cache\n",
-				zend_win_tsrm_cache_slot, TLS_MINIMUM_AVAILABLE);
-			abort();
-		}
-		zend_win_tsrm_cache_offset = ZEND_WIN_TEB_TLS_SLOTS
-			+ zend_win_tsrm_cache_slot * (unsigned long) sizeof(void*);
-	}
-	TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
-	/* Verify our layout assumptions work */
-	if (ZEND_TSRM_CACHE_PTR != &_tsrm_ls_cache) {
-		fprintf(stderr, "PHP Startup: the ZTS globals cache is not reachable through "
-			"TEB offset %lu\n", zend_win_tsrm_cache_offset);
-		abort();
-	}
-}
-#endif
 /* ts_allocate_tls_id takes a callback so each thread resolves its own block.
  * A plain &..._tls would capture only the registering thread's address. */
 static void *executor_globals_tls_addr(void) { return &_tsrm_ls_cache.eg; }
