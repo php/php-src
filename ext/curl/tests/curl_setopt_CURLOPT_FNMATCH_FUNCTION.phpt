@@ -2,6 +2,10 @@
 Curl option CURLOPT_FNMATCH_FUNCTION
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (!function_exists('pcntl_fork')) die("skip pcntl_fork() not available.");
+?>
 --FILE--
 <?php
 
