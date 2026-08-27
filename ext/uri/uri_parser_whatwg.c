@@ -54,11 +54,6 @@ ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_long_or_null_to_lexbo
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static zend_always_inline zend_string *lexbor_str_to_zend_string(const lexbor_str_t *lexbor_str)
-{
-	return zend_string_init((const char *) lexbor_str->data, lexbor_str->length, false);
-}
-
 ZEND_ATTRIBUTE_NONNULL static bool get_reason_from_error_type(const lxb_url_error_type_t error_type, const char **error_str)
 {
 	switch (error_type) {
@@ -673,7 +668,11 @@ static zend_string *php_uri_parser_whatwg_percent_encode_component(const char *s
 		return NULL;
 	}
 
-	return lexbor_str_to_zend_string(&lexbor_str);
+	zend_string *result = zend_string_init((const char *) lexbor_str.data, lexbor_str.length, false);
+
+	lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+
+	return result;
 }
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_userinfo_component(const char *str, const size_t str_length)
