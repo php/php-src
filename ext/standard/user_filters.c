@@ -419,7 +419,11 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (NULL != (pzdata = zend_read_property(NULL, Z_OBJ_P(zobject), "data", sizeof("data")-1, false, &rv))) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		ZVAL_DEREF(pzdata);
+		ZEND_ASSERT(Z_TYPE_P(pzdata) == IS_STRING);
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}
