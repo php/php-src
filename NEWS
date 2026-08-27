@@ -63,6 +63,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed an out-of-bounds read when following a redirect response with an
     empty Location header. (iliaal)
+  . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
 
 - Zip:
   . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
