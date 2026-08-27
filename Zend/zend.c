@@ -53,7 +53,7 @@ static bool startup_done = false;
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
 ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache = {0};
-#if defined(_WIN64) && defined(ZEND_TLS_DIRECT)
+#if defined(_WIN64) && defined(_M_X64) && defined(ZEND_TLS_DIRECT)
 /* Holds &_tsrm_ls_cache in a TEB TLS slot (filled by DllMain) so EG()/CG() reach it
  * with a single gs:[] load rather than the 3-load __declspec(thread) lookup. */
 ZEND_TLS_API unsigned long zend_win_tsrm_cache_slot = 0;
