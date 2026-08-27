@@ -33,10 +33,17 @@ var_dump(is_string(pg_select($conn, $table_name, ['id' => 1], PGSQL_DML_ASYNC | 
 /* PGSQL_DML_NO_CONV is accepted by pg_delete() and reaches its helper */
 var_dump(is_string(pg_delete($conn, $table_name, ['id' => 1], PGSQL_DML_NO_CONV | PGSQL_DML_STRING)));
 
-pg_query($conn, "DROP TABLE {$table_name}");
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = 'table_pg_dml_option_flags';
+
+$conn = pg_connect($conn_str);
+pg_query($conn, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
-pg_update(): Argument #5 ($flags) must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, and PGSQL_DML_STRING
+pg_update(): Argument #5 ($flags) must be a valid bit mask of PGSQL_CONV_IGNORE_DEFAULT, PGSQL_CONV_FORCE_NULL, PGSQL_CONV_IGNORE_NOT_NULL, PGSQL_DML_NO_CONV, PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, and PGSQL_DML_STRING
 pg_delete(): Argument #4 ($flags) must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, and PGSQL_DML_STRING
 bool(true)
 bool(true)
