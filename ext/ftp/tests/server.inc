@@ -514,7 +514,7 @@ if ($pid) {
                 "drwxr-xr-x 1 owner group        0 Jan 01 00:00 www\r\n" .
                 "drwxr-xr-x 1 owner group        0 Jan 01 00:00 emptydir\r\n" .
                 "-rw-r--r-- 1 owner group       33 Jan 01 00:00 file1\r\n" .
-                "-rw-r--r-- 1 owner group        8 Jan 01 00:00 file\n" .
+                "-rw-r--r-- 1 owner group        8 Jan 01 00:00 file\r\n" .
                 "-rw-r--r-- 1 owner group       35 Jan 01 00:00 a story\r\n" .
                 "-rw-r--r-- 1 owner group       14 Jan 01 00:00 binary data\r\n" .
                 "-rw-r--r-- 1 owner group       13 Jan 01 00:00 fget\r\n" .
