@@ -16,6 +16,15 @@ on:
         options:
           - "0"
           - "1"
+      binary_layout_strategy:
+        description: 'How the binary layout is generated'
+        required: false
+        default: ""
+        type: choice
+        options:
+          - ""
+          - "bolt_align"
+          - "bolt"
       collect_extended_perf_stats:
         description: 'Whether to collect extended perf stats as artifacts'
         required: true
@@ -58,6 +67,7 @@ jobs:
       BASELINE_COMMIT: "d5f6e56610c729710073350af318c4ea1b292cfe"
       ID: "master"
       JIT: "1"
+      BINARY_LAYOUT_STRATEGY: ""
       COLLECT_EXTENDED_PERF_STATS: "0"
       DEBUG_ENVIRONMENT: "0"
       RUN_MICRO_BENCH: "0"
@@ -90,6 +100,7 @@ jobs:
             echo "ID=benchmarked" >> $GITHUB_ENV
 
             echo "JIT=${{ inputs.jit }}" >> $GITHUB_ENV
+            echo "BINARY_LAYOUT_STRATEGY=${{ inputs.binary_layout_strategy }}" >> $GITHUB_ENV
             echo "COLLECT_EXTENDED_PERF_STATS=${{ inputs.collect_extended_perf_stats }}" >> $GITHUB_ENV
             echo "DEBUG_ENVIRONMENT=${{ inputs.debug_environment }}" >> $GITHUB_ENV
             echo "RUN_MICRO_BENCH=${{ inputs.run_micro_bench }}" >> $GITHUB_ENV
@@ -231,6 +242,7 @@ jobs:
           cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           sed -i "s|INFRA_DOCKER_REGISTRY=public.ecr.aws/abcdefgh|INFRA_DOCKER_REGISTRY=${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           sed -i "s|INFRA_WORKSPACE=|INFRA_WORKSPACE=$WORKSPACE|g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          sed -i "s/INFRA_BINARY_LAYOUT_STRATEGY=/INFRA_BINARY_LAYOUT_STRATEGY=${{ env.BINARY_LAYOUT_STRATEGY }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           sed -i "s/INFRA_COLLECT_EXTENDED_PERF_STATS=0/INFRA_COLLECT_EXTENDED_PERF_STATS=${{ env.COLLECT_EXTENDED_PERF_STATS }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
           sed -i "s/INFRA_DEBUG_ENVIRONMENT=0/INFRA_DEBUG_ENVIRONMENT=${{ env.DEBUG_ENVIRONMENT }}/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
 
