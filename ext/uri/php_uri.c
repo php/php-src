@@ -1425,8 +1425,6 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, build)
 
 	lxb_url_t *base_url = NULL;
 	if (base_url_zv != NULL) {
-		zend_argument_error(NULL, 1, "is not supported yet, and therefore, null must be passed");
-		RETURN_THROWS();
 		base_url = Z_URI_OBJECT_P(base_url_zv)->uri;
 	}
 
