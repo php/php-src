@@ -211,7 +211,19 @@ extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cac
 #  define ZEND_WIN_TSRM_TEB_SLOT 1
 extern unsigned long zend_win_tsrm_cache_offset;
 ZEND_API void zend_win_tsrm_cache_init(bool alloc);
-#  define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(zend_win_tsrm_cache_offset))
+#  ifdef __clang__
+static __inline__ __attribute__((const, always_inline)) zend_tsrm_ls_cache *zend_win_tsrm_cache_ptr(void)
+{
+	zend_tsrm_ls_cache *ptr;
+	__asm__ ("movq %%gs:(%1), %0"
+		: "=r" (ptr)
+		: "r" ((uintptr_t) zend_win_tsrm_cache_offset));
+	return ptr;
+}
+#   define ZEND_TSRM_CACHE_PTR zend_win_tsrm_cache_ptr()
+#  else
+#   define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(zend_win_tsrm_cache_offset))
+#  endif
 # else
 #  define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
 # endif
