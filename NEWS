@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
     (Weilin Du)
 
+- Standard:
+  . Fixed an out-of-bounds read when following a redirect response with an
+    empty Location header. (iliaal)
+
 
 27 Aug 2026, PHP 8.6.0beta2
 
