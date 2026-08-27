@@ -42,7 +42,7 @@ static void zend_win_tsrm_cache_publish(void)
 	if (zend_win_tsrm_cache_slot != TLS_OUT_OF_INDEXES) {
 		TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
 		/* Verify our layout assumptions work */
-		if (ZEND_TSRM_CACHE_PTR != &_tsrm_ls_cache) {
+		if ((zend_tsrm_ls_cache *) __readgsqword(zend_win_tsrm_cache_offset) != &_tsrm_ls_cache) {
 			fprintf(stderr, "PHP Startup: the ZTS globals cache is not reachable through "
 				"TEB offset %lu\n", zend_win_tsrm_cache_offset);
 			abort();
