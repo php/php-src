@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed an out-of-bounds read when following a redirect response with an
     empty Location header. (iliaal)
+  . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
 
 
 27 Aug 2026, PHP 8.6.0beta2
