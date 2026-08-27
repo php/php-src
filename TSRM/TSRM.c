@@ -34,8 +34,21 @@ TSRMLS_CACHE_EXTERN();
  * with a single gs:[] load rather than the 3-load __declspec(thread) lookup. */
 #define ZEND_WIN_TEB_TLS_SLOTS 0x1480
 
-static DWORD zend_win_tsrm_cache_slot = 0;
+static DWORD zend_win_tsrm_cache_slot = TLS_OUT_OF_INDEXES;
 unsigned long zend_win_tsrm_cache_offset = 0;
+
+static void zend_win_tsrm_cache_publish(void)
+{
+	if (zend_win_tsrm_cache_slot != TLS_OUT_OF_INDEXES) {
+		TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
+		/* Verify our layout assumptions work */
+		if (ZEND_TSRM_CACHE_PTR != &_tsrm_ls_cache) {
+			fprintf(stderr, "PHP Startup: the ZTS globals cache is not reachable through "
+				"TEB offset %lu\n", zend_win_tsrm_cache_offset);
+			abort();
+		}
+	}
+}
 
 ZEND_API void zend_win_tsrm_cache_init(bool alloc)
 {
@@ -55,14 +68,10 @@ ZEND_API void zend_win_tsrm_cache_init(bool alloc)
 		zend_win_tsrm_cache_offset = ZEND_WIN_TEB_TLS_SLOTS
 			+ zend_win_tsrm_cache_slot * (unsigned long) sizeof(void*);
 	}
-	TlsSetValue(zend_win_tsrm_cache_slot, &_tsrm_ls_cache);
-	/* Verify our layout assumptions work */
-	if (ZEND_TSRM_CACHE_PTR != &_tsrm_ls_cache) {
-		fprintf(stderr, "PHP Startup: the ZTS globals cache is not reachable through "
-			"TEB offset %lu\n", zend_win_tsrm_cache_offset);
-		abort();
-	}
+	zend_win_tsrm_cache_publish();
 }
+#else
+# define zend_win_tsrm_cache_publish() do {} while (0)
 #endif
 
 struct _tsrm_tls_entry {
@@ -454,6 +463,7 @@ static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource
 {
 	tsrm_tls_set(thread_resource);
 	TSRMLS_CACHE = thread_resource;
+	zend_win_tsrm_cache_publish();
 }
 
 /* Must be called with tsmm_mutex held */
