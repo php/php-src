@@ -26,31 +26,7 @@ typedef struct _zend_executor_globals zend_executor_globals;
 typedef struct _zend_php_scanner_globals zend_php_scanner_globals;
 typedef struct _zend_ini_scanner_globals zend_ini_scanner_globals;
 
-#ifdef ZEND_WIN32
-# define ZEND_TLS_API
-# ifdef LIBZEND_EXPORTS
-#  define ZEND_TLS_DIRECT 1
-# endif
-#else
-# define ZEND_TLS_API ZEND_API
-# define ZEND_TLS_DIRECT 1
-#endif
-
 BEGIN_EXTERN_C()
-
-#ifdef ZTS
-typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
-# ifdef ZEND_TLS_DIRECT
-extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
-/* See zend.c: zend_win_tsrm_cache_init */
-#  if defined(_WIN64) && defined(_M_X64)
-extern ZEND_TLS_API unsigned long zend_win_tsrm_cache_offset;
-#   define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(zend_win_tsrm_cache_offset))
-#  else
-#   define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
-#  endif
-# endif
-#endif
 
 /* Compiler */
 #ifdef ZTS
@@ -81,15 +57,15 @@ extern ZEND_API zend_executor_globals executor_globals;
 /* Language Scanner */
 #ifdef ZTS
 extern ZEND_API ts_rsrc_id language_scanner_globals_id;
-# if defined(ZEND_WIN32) && !defined(LIBZEND_EXPORTS)
-# define LANG_SCNG(v) TSRMG(language_scanner_globals_id, zend_php_scanner_globals *, v)
-# else
+# ifdef ZEND_TLS_DIRECT
 #  ifdef ZEND_WIN32
 extern TSRM_TLS zend_php_scanner_globals language_scanner_globals;
 #  else
-extern ZEND_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_php_scanner_globals language_scanner_globals;
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_php_scanner_globals language_scanner_globals;
 #  endif
 #  define LANG_SCNG(v) (language_scanner_globals.v)
+# else
+#  define LANG_SCNG(v) TSRMG(language_scanner_globals_id, zend_php_scanner_globals *, v)
 # endif
 #else
 extern ZEND_API zend_php_scanner_globals language_scanner_globals;
