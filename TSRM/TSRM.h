@@ -213,9 +213,11 @@ extern unsigned long zend_win_tsrm_cache_offset;
 # else
 #  define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
 # endif
+# define ZEND_TSRMG_DIRECT(id, type, member, element) (ZEND_TSRM_CACHE_PTR->member.element)
 #else
 # define ZEND_TSRMLS_CACHE_T void *
 # define TSRMLS_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache = NULL;
+# define ZEND_TSRMG_DIRECT(id, type, member, element) ZEND_TSRMG(id, type, element)
 #endif
 #ifdef __cplusplus
 #define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR; }
