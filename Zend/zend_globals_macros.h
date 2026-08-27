@@ -30,11 +30,7 @@ BEGIN_EXTERN_C()
 
 /* Compiler */
 #ifdef ZTS
-# ifdef ZEND_TLS_DIRECT
-#  define CG(v) (ZEND_TSRM_CACHE_PTR->cg.v)
-# else
-#  define CG(v) ZEND_TSRMG(compiler_globals_id, zend_compiler_globals *, v)
-# endif
+# define CG(v) ZEND_TSRMG_DIRECT(compiler_globals_id, zend_compiler_globals *, cg, v)
 #else
 # define CG(v) (compiler_globals.v)
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
@@ -44,11 +40,7 @@ ZEND_API int zendparse(void);
 
 /* Executor */
 #ifdef ZTS
-# ifdef ZEND_TLS_DIRECT
-#  define EG(v) (ZEND_TSRM_CACHE_PTR->eg.v)
-# else
-#  define EG(v) ZEND_TSRMG(executor_globals_id, zend_executor_globals *, v)
-# endif
+# define EG(v) ZEND_TSRMG_DIRECT(executor_globals_id, zend_executor_globals *, eg, v)
 #else
 # define EG(v) (executor_globals.v)
 extern ZEND_API zend_executor_globals executor_globals;
