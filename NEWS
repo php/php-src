@@ -95,6 +95,8 @@ PHP                                                                        NEWS
     wrong). (Lazizbek Ergashev)
   . Fixed fseek() accepting $whence values that do not fit in an int, which
     were silently truncated onto a valid seek constant. (lacatoire)
+  . Fixed a failed seek discarding the read buffer, which desynchronized the
+    stream from its reported position. (lacatoire)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not

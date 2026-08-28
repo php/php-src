@@ -1367,6 +1367,7 @@ PHPAPI int php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 
 
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+		zend_off_t old_position = stream->position;
 		int ret;
 		switch(whence) {
 			case SEEK_CUR:
@@ -1386,6 +1387,13 @@ PHPAPI int php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		ret = stream->ops->seek(stream, offset, whence, &stream->position);
 
 		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0) {
+			if (ret != 0 && stream->position == old_position) {
+				/* the seek failed without moving the stream, so the buffered
+				 * data and the filter state still describe the current
+				 * position and must be left alone */
+				return ret;
+			}
+
 			if (ret == 0) {
 				stream->eof = 0;
 				stream->fatal_error = 0;
