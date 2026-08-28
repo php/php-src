@@ -42,6 +42,15 @@ ZEND_API zend_tsrm_ls_cache *zend_win_tsrm_cache_fallback(void)
 	return &_tsrm_ls_cache;
 }
 
+ZEND_API void zend_win_tsrm_cache_shutdown(void)
+{
+	zend_win_tsrm_cache_offset = 0;
+	if (zend_win_tsrm_cache_slot != TLS_OUT_OF_INDEXES) {
+		TlsFree(zend_win_tsrm_cache_slot);
+		zend_win_tsrm_cache_slot = TLS_OUT_OF_INDEXES;
+	}
+}
+
 static void zend_win_tsrm_cache_publish(void)
 {
 	if (zend_win_tsrm_cache_slot == TLS_OUT_OF_INDEXES) {
@@ -53,8 +62,7 @@ static void zend_win_tsrm_cache_publish(void)
 		fprintf(stderr, "PHP Startup: the ZTS globals cache is not reachable through "
 			"TEB offset %lu, falling back to __declspec(thread)\n",
 			zend_win_tsrm_cache_offset);
-		zend_win_tsrm_cache_offset = 0;
-		zend_win_tsrm_cache_slot = TLS_OUT_OF_INDEXES;
+		zend_win_tsrm_cache_shutdown();
 	}
 }
 
