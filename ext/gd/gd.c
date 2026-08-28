@@ -1097,6 +1097,51 @@ PHP_FUNCTION(imagecopyresampled)
 /* }}} */
 
 #ifdef PHP_WIN32
+/* The bitmap must not be selected into a device context. */
+static gdImagePtr php_gd_image_from_bitmap(HDC hdc, HBITMAP bitmap, int width, int height)
+{
+	BITMAPINFO bitmap_info = {0};
+	RGBQUAD *pixels;
+	gdImagePtr im;
+	size_t num_pixels;
+	bool overflow;
+	int x, y;
+
+	bitmap_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bitmap_info.bmiHeader.biWidth = width;
+	/* Request a top-down DIB so its row order matches GD's. */
+	bitmap_info.bmiHeader.biHeight = -height;
+	bitmap_info.bmiHeader.biPlanes = 1;
+	bitmap_info.bmiHeader.biBitCount = 32;
+	bitmap_info.bmiHeader.biCompression = BI_RGB;
+
+	num_pixels = zend_safe_address((size_t) width, (size_t) height, 0, &overflow);
+	if (overflow) {
+		return NULL;
+	}
+
+	pixels = safe_emalloc(num_pixels, sizeof(*pixels), 0);
+	if (GetDIBits(hdc, bitmap, 0, (UINT) height, pixels, &bitmap_info, DIB_RGB_COLORS) != height) {
+		efree(pixels);
+		return NULL;
+	}
+
+	im = gdImageCreateTrueColor(width, height);
+	if (im) {
+		for (y = 0; y < height; y++) {
+			const RGBQUAD *src = pixels + (size_t) y * width;
+			int *dst = im->tpixels[y];
+
+			for (x = 0; x < width; x++) {
+				dst[x] = gdTrueColor(src[x].rgbRed, src[x].rgbGreen, src[x].rgbBlue);
+			}
+		}
+	}
+
+	efree(pixels);
+	return im;
+}
+
 /* {{{ Grab a window or its client area using a windows handle (HWND property in COM instance) */
 PHP_FUNCTION(imagegrabwindow)
 {
@@ -1144,18 +1189,8 @@ PHP_FUNCTION(imagegrabwindow)
 
 	PrintWindow(window, memDC, (UINT) client_area);
 
-	im = gdImageCreateTrueColor(Width, Height);
-	if (im) {
-		int x,y;
-		for (y=0; y <= Height; y++) {
-			for (x=0; x <= Width; x++) {
-				int c = GetPixel(memDC, x,y);
-				gdImageSetPixel(im, x, y, gdTrueColor(GetRValue(c), GetGValue(c), GetBValue(c)));
-			}
-		}
-	}
-
 	SelectObject(memDC,hOld);
+	im = php_gd_image_from_bitmap(hdc, memBM, Width, Height);
 	DeleteObject(memBM);
 	DeleteDC(memDC);
 	ReleaseDC( 0, hdc );
@@ -1198,18 +1233,8 @@ PHP_FUNCTION(imagegrabscreen)
 	hOld	= (HBITMAP) SelectObject (memDC, memBM);
 	BitBlt( memDC, 0, 0, Width, Height , hdc, rc.left, rc.top , SRCCOPY );
 
-	im = gdImageCreateTrueColor(Width, Height);
-	if (im) {
-		int x,y;
-		for (y=0; y <= Height; y++) {
-			for (x=0; x <= Width; x++) {
-				int c = GetPixel(memDC, x,y);
-				gdImageSetPixel(im, x, y, gdTrueColor(GetRValue(c), GetGValue(c), GetBValue(c)));
-			}
-		}
-	}
-
 	SelectObject(memDC,hOld);
+	im = php_gd_image_from_bitmap(hdc, memBM, Width, Height);
 	DeleteObject(memBM);
 	DeleteDC(memDC);
 	ReleaseDC( 0, hdc );

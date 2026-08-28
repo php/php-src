@@ -798,6 +798,10 @@ PHP 8.6 UPGRADE NOTES
 - DOM:
   . Made splitText() faster and consume less memory.
 
+- GD:
+  . Improved performance of imagegrabscreen() and imagegrabwindow() on
+    Windows.
+
 - JSON:
   . Improve performance of encoding arrays and objects.
   . Improved performance of indentation generation in json_encode()
