@@ -43,6 +43,12 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 		zend_win_tsrm_cache_init(true);
 	} else if (reason == DLL_THREAD_ATTACH) {
 		zend_win_tsrm_cache_init(false);
+	} else if (reason == DLL_PROCESS_DETACH && dummy == NULL) {
+		/* https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain
+		 * When handling DLL_PROCESS_DETACH, a DLL should free resources
+		 * such as heap memory only if the DLL is being unloaded
+		 * dynamically (the lpvReserved parameter is NULL). */
+		zend_win_tsrm_cache_shutdown();
 	}
 #endif
 
