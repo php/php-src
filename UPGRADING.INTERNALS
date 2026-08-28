@@ -347,9 +347,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 ========================
 
 - SAPIs should explicitly release a thread's resources by calling
-  ts_free_thread() before terminating it. tsrm_shutdown() can only release the
-  resources of the calling thread, for resources allocated with
-  ts_allocate_tls_id().
+  ts_free_thread() before terminating it. Native TLS resource destructors only
+  run on their owning thread; tsrm_shutdown() cannot release them afterwards.
+  All PHP-managed worker threads must be quiescent before tsrm_shutdown().
 
 - AG and SCNG are now allocated with ts_allocate_tls_id() and live in native
   __thread storage on ZTS builds.
