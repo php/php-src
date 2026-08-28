@@ -3,18 +3,22 @@ define set_ts
 end
 
 document set_ts
-	set the ts resource, it is impossible for gdb to
-	call ts_resource_ex while no process is running,
-	but we could get the resource from the argument
-	of frame info.
+	set a legacy TSRM resource cache pointer when it is available
+	from a frame argument. Pass 0 to use the current thread's
+	direct executor and compiler globals.
 end
 
 define ____executor_globals
 	if basic_functions_module.zts
-		set $tsrm_ls = _tsrm_ls_cache
-		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
-		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
-		set $eg_ptr = $eg
+		if !$tsrm_ls
+			set $eg = _tsrm_ls_cache.eg
+			set $cg = _tsrm_ls_cache.cg
+			set $eg_ptr = (zend_executor_globals*) &_tsrm_ls_cache.eg
+		else
+			set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
+			set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
+			set $eg_ptr = $eg
+		end
 	else
 		set $eg = executor_globals
 		set $cg = compiler_globals
