@@ -212,19 +212,31 @@ extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cac
 #  define ZEND_WIN_TSRM_TEB_SLOT 1
 extern unsigned long zend_win_tsrm_cache_offset;
 ZEND_API void zend_win_tsrm_cache_init(bool alloc);
+ZEND_API zend_tsrm_ls_cache *zend_win_tsrm_cache_fallback(void);
 #  ifdef __clang__
 static __inline__ __attribute__((const, always_inline)) zend_tsrm_ls_cache *zend_win_tsrm_cache_ptr(void)
 {
+	uintptr_t offset = zend_win_tsrm_cache_offset;
 	zend_tsrm_ls_cache *ptr;
+	if (__builtin_expect(offset == 0, 0)) {
+		return zend_win_tsrm_cache_fallback();
+	}
 	__asm__ ("movq %%gs:(%1), %0"
 		: "=r" (ptr)
-		: "r" ((uintptr_t) zend_win_tsrm_cache_offset));
+		: "r" (offset));
 	return ptr;
 }
-#   define ZEND_TSRM_CACHE_PTR zend_win_tsrm_cache_ptr()
 #  else
-#   define ZEND_TSRM_CACHE_PTR ((zend_tsrm_ls_cache*)__readgsqword(zend_win_tsrm_cache_offset))
+static __forceinline zend_tsrm_ls_cache *zend_win_tsrm_cache_ptr(void)
+{
+	unsigned long offset = zend_win_tsrm_cache_offset;
+	if (offset == 0) {
+		return zend_win_tsrm_cache_fallback();
+	}
+	return (zend_tsrm_ls_cache *) __readgsqword(offset);
+}
 #  endif
+#  define ZEND_TSRM_CACHE_PTR zend_win_tsrm_cache_ptr()
 # else
 #  define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
 # endif
