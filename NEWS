@@ -204,6 +204,8 @@ PHP                                                                        NEWS
     searching for a string. (Alexander Danilov)
   . Fixed fseek() accepting $whence values that do not fit in an int, which
     were silently truncated onto a valid seek constant. (lacatoire)
+  . Fixed a failed seek discarding the read buffer, which desynchronized the
+    stream from its reported position. (lacatoire)
 
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
