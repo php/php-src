@@ -17,8 +17,14 @@
 
 #include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"
+#include "ext/random/php_random_csprng.h"
 
 #define PHP_USER_CACHE_READER_OWNER_RECLAIMING UINT64_MAX
+
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+# define PHP_USER_CACHE_BOUNDARY_DIR_PREFIX	".ZendUserCacheBnd."
+# define PHP_USER_CACHE_BOUNDARY_SALT_NAME	"salt"
+#endif
 
 typedef enum {
 	PHP_USER_CACHE_ENTRY_LOCK_RELEASE_DROP,
@@ -31,12 +37,14 @@ typedef struct {
 	zend_ulong hash;
 	uint64_t owner_pid;
 	uint64_t owner_start_time;
+	uint64_t owner_token;
 	uint64_t expires_at;
 } php_user_cache_recovered_entry_lock;
 
 typedef struct {
 	php_user_cache_context *context;
 	uint64_t owner_pid;
+	uint64_t owner_token;
 	zend_long lease;
 	bool preserve_lease;
 } php_user_cache_entry_lock;
@@ -63,6 +71,10 @@ struct _php_user_cache_lock_ops {
 };
 
 static bool user_cache_capacity_clamp_warned = false;
+
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+static bool user_cache_boundary_dir_failure_logged = false;
+#endif
 
 static uint64_t user_cache_reader_incarnation = 0;
 
@@ -666,6 +678,10 @@ static void user_cache_shared_boundary_digest(
 	}
 
 	PHP_SHA256Update(&sha_ctx, (const uint8_t *) identity, identity_len);
+
+	ZEND_ASSERT(ctx->storage.boundary_salt_loaded);
+
+	PHP_SHA256Update(&sha_ctx, ctx->storage.boundary_salt, sizeof(ctx->storage.boundary_salt));
 	PHP_SHA256Final(digest, &sha_ctx);
 }
 
@@ -733,14 +749,7 @@ static void user_cache_shared_boundary_lock_name(char *buf, size_t buf_size, siz
 		&identity_low
 	);
 
-	snprintf(
-		buf,
-		buf_size,
-		"%s/.ZendUserCacheBnd.%016" PRIx64 "%08" PRIx32 ".lock",
-		UC_G(lockfile_path),
-		identity_high,
-		identity_low
-	);
+	snprintf(buf, buf_size, "%016" PRIx64 "%08" PRIx32 ".lock", identity_high, identity_low);
 }
 
 static bool user_cache_shared_boundary_fd_is_trusted(int fd, struct stat *st)
@@ -750,6 +759,244 @@ static bool user_cache_shared_boundary_fd_is_trusted(int fd, struct stat *st)
 	}
 
 	return st->st_uid == geteuid() && (st->st_mode & 0077) == 0;
+}
+
+static void user_cache_shared_boundary_log_dir_failure(const char *dir_path, const char *reason)
+{
+	char message[MAXPATHLEN + 192];
+
+	if (user_cache_boundary_dir_failure_logged) {
+		return;
+	}
+
+	user_cache_boundary_dir_failure_logged = true;
+
+	snprintf(
+		message,
+		sizeof(message),
+		"UserCache boundary directory %s is unusable (%s); it must be a directory owned by uid %lu "
+		"with mode 0700 (see user_cache.lockfile_path)",
+		dir_path,
+		reason,
+		(unsigned long) geteuid()
+	);
+
+	php_log_err(message);
+}
+
+static int user_cache_shared_boundary_open_private_dir(char *dir_path, size_t dir_path_size, const char **error_in)
+{
+	struct stat st;
+	int fd, saved_errno, len;
+
+	len = snprintf(
+		dir_path,
+		dir_path_size,
+		"%s/" PHP_USER_CACHE_BOUNDARY_DIR_PREFIX "%lu",
+		UC_G(lockfile_path),
+		(unsigned long) geteuid()
+	);
+	if (len < 0 || (size_t) len >= dir_path_size) {
+		errno = ENAMETOOLONG;
+		*error_in = "lockfile_path";
+
+		return -1;
+	}
+
+	if (mkdir(dir_path, 0700) != 0 && errno != EEXIST) {
+		saved_errno = errno;
+		user_cache_shared_boundary_log_dir_failure(dir_path, strerror(saved_errno));
+		errno = saved_errno;
+
+		*error_in = "mkdir";
+
+		return -1;
+	}
+
+	fd = open(dir_path, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+	if (fd < 0) {
+		saved_errno = errno;
+		user_cache_shared_boundary_log_dir_failure(dir_path, strerror(saved_errno));
+		errno = saved_errno;
+
+		*error_in = "open directory";
+
+		return -1;
+	}
+
+	if (!user_cache_shared_boundary_fd_is_trusted(fd, &st) || !S_ISDIR(st.st_mode)) {
+		close(fd);
+		user_cache_shared_boundary_log_dir_failure(dir_path, "not a private directory owned by this uid");
+		errno = EACCES;
+
+		*error_in = "directory ownership";
+
+		return -1;
+	}
+
+	return fd;
+}
+
+static bool user_cache_shared_boundary_read_salt(
+	int dir_fd,
+	const char *dir_path,
+	uint8_t *salt,
+	bool *missing,
+	const char **error_in
+)
+{
+	struct stat st;
+	size_t got = 0;
+	ssize_t n;
+	int fd;
+
+	*missing = false;
+
+	fd = openat(dir_fd, PHP_USER_CACHE_BOUNDARY_SALT_NAME, O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+	if (fd < 0) {
+		*missing = errno == ENOENT;
+		*error_in = "open salt";
+
+		return false;
+	}
+
+	if (!user_cache_shared_boundary_fd_is_trusted(fd, &st) ||
+		!S_ISREG(st.st_mode) ||
+		st.st_size != PHP_USER_CACHE_BOUNDARY_SALT_SIZE
+	) {
+		close(fd);
+		user_cache_shared_boundary_log_dir_failure(
+			dir_path,
+			"its " PHP_USER_CACHE_BOUNDARY_SALT_NAME " file is not a private regular file of the expected size owned by this uid"
+		);
+		errno = EACCES;
+
+		*error_in = "salt ownership";
+
+		return false;
+	}
+
+	while (got < PHP_USER_CACHE_BOUNDARY_SALT_SIZE) {
+		n = read(fd, salt + got, PHP_USER_CACHE_BOUNDARY_SALT_SIZE - got);
+		if (n < 0 && errno == EINTR) {
+			continue;
+		}
+		if (n <= 0) {
+			close(fd);
+			if (n == 0) {
+				errno = EIO;
+			}
+
+			*error_in = "read salt";
+
+			return false;
+		}
+
+		got += (size_t) n;
+	}
+
+	close(fd);
+
+	return true;
+}
+
+static bool user_cache_shared_boundary_create_salt(int dir_fd, const char **error_in)
+{
+	uint8_t salt[PHP_USER_CACHE_BOUNDARY_SALT_SIZE];
+	size_t written = 0;
+	ssize_t n;
+	char tmp_name[64];
+	int fd, saved_errno;
+
+	snprintf(tmp_name, sizeof(tmp_name), PHP_USER_CACHE_BOUNDARY_SALT_NAME ".%lu", (unsigned long) getpid());
+
+	fd = openat(dir_fd, tmp_name, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+	if (fd < 0 && errno == EEXIST) {
+		unlinkat(dir_fd, tmp_name, 0);
+		fd = openat(dir_fd, tmp_name, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+	}
+	if (fd < 0) {
+		*error_in = "create salt";
+
+		return false;
+	}
+
+	if (php_random_bytes_silent(salt, sizeof(salt)) == FAILURE) {
+		close(fd);
+		unlinkat(dir_fd, tmp_name, 0);
+		errno = EIO;
+
+		*error_in = "php_random_bytes";
+
+		return false;
+	}
+
+	while (written < sizeof(salt)) {
+		n = write(fd, salt + written, sizeof(salt) - written);
+		if (n < 0 && errno == EINTR) {
+			continue;
+		}
+		if (n <= 0) {
+			saved_errno = n == 0 ? EIO : errno;
+			close(fd);
+			unlinkat(dir_fd, tmp_name, 0);
+			errno = saved_errno;
+
+			*error_in = "write salt";
+
+			return false;
+		}
+
+		written += (size_t) n;
+	}
+
+	close(fd);
+
+	if (linkat(dir_fd, tmp_name, dir_fd, PHP_USER_CACHE_BOUNDARY_SALT_NAME, 0) != 0 && errno != EEXIST) {
+		saved_errno = errno;
+		unlinkat(dir_fd, tmp_name, 0);
+		errno = saved_errno;
+
+		*error_in = "linkat";
+
+		return false;
+	}
+
+	unlinkat(dir_fd, tmp_name, 0);
+
+	return true;
+}
+
+static bool user_cache_shared_boundary_load_salt(const char **error_in)
+{
+	php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
+	bool missing, loaded = false;
+	char dir_path[MAXPATHLEN];
+	int dir_fd, saved_errno, attempt;
+
+	if (storage->boundary_salt_loaded) {
+		return true;
+	}
+
+	dir_fd = user_cache_shared_boundary_open_private_dir(dir_path, sizeof(dir_path), error_in);
+	if (dir_fd < 0) {
+		return false;
+	}
+
+	for (attempt = 0; attempt < 2 && !loaded; attempt++) {
+		loaded = user_cache_shared_boundary_read_salt(dir_fd, dir_path, storage->boundary_salt, &missing, error_in);
+		if (loaded || !missing || !user_cache_shared_boundary_create_salt(dir_fd, error_in)) {
+			break;
+		}
+	}
+
+	saved_errno = errno;
+	close(dir_fd);
+	errno = saved_errno;
+
+	storage->boundary_salt_loaded = loaded;
+
+	return loaded;
 }
 
 /* Recreate a zero-length shm object left by a failed creator. */
@@ -845,6 +1092,10 @@ static int user_cache_shared_boundary_create_segments(
 	if (requested_size > (size_t) SSIZE_MAX) {
 		*error_in = "size overflow";
 
+		return PHP_USER_CACHE_ALLOC_FAILURE;
+	}
+
+	if (!user_cache_shared_boundary_load_salt(error_in)) {
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
@@ -1201,8 +1452,6 @@ static bool user_cache_entry_lock_owner_is_dead(uint64_t owner_pid, uint64_t own
 	return UC_G(entry_lock_owner_probe_dead);
 }
 
-/* Key offsets in a segment recovered after owner death are untrusted; bound
- * them before reading. */
 static bool user_cache_recovery_lock_key_is_readable(
 		const php_user_cache_header *header,
 		const php_user_cache_entry_lock_record *record)
@@ -1225,8 +1474,6 @@ static bool user_cache_recovery_lock_key_is_readable(
 	return record->key_len <= data_end - record->key_offset;
 }
 
-/* A lock whose owner has died stays active until its lease expires, then is
- * demoted to ownerless. now_rel is seconds relative to header time_base. */
 static bool user_cache_entry_lock_record_is_active_locked(
 		php_user_cache_entry_lock_record *record,
 		uint64_t now_rel,
@@ -1251,6 +1498,7 @@ static bool user_cache_entry_lock_record_is_active_locked(
 
 		record->owner_pid = 0;
 		record->owner_start_time = 0;
+		record->owner_token = 0;
 
 		return record->expires_at != 0;
 	}
@@ -1258,8 +1506,6 @@ static bool user_cache_entry_lock_record_is_active_locked(
 	return true;
 }
 
-/* Recovery runs before adoption, so the header's lock-region geometry is
- * untrusted and must be validated against the mapping before use. */
 static bool user_cache_entry_lock_layout_sane(
 		const php_user_cache_storage *storage,
 		const php_user_cache_header *header)
@@ -1273,6 +1519,20 @@ static bool user_cache_entry_lock_layout_sane(
 		(size_t) header->entry_lock_offset <= storage->size &&
 		(size_t) lock_capacity * sizeof(php_user_cache_entry_lock_record)
 			<= storage->size - header->entry_lock_offset
+	;
+}
+
+static bool user_cache_data_region_sane(
+		const php_user_cache_storage *storage,
+		const php_user_cache_header *header)
+{
+	uint64_t lock_table_end = (uint64_t) header->entry_lock_offset
+		+ (uint64_t) header->entry_lock_capacity * sizeof(php_user_cache_entry_lock_record)
+	;
+
+	return (uint64_t) header->data_offset >= lock_table_end &&
+		(size_t) header->data_offset <= storage->size &&
+		(size_t) header->data_size <= storage->size - header->data_offset
 	;
 }
 
@@ -1296,6 +1556,7 @@ static php_user_cache_recovered_entry_lock *user_cache_collect_recovery_entry_lo
 	}
 
 	*count_ptr = 0;
+
 	if (count == 0) {
 		return NULL;
 	}
@@ -1325,6 +1586,7 @@ static php_user_cache_recovered_entry_lock *user_cache_collect_recovery_entry_lo
 		locks[*count_ptr].hash = record->hash;
 		locks[*count_ptr].owner_pid = record->owner_pid;
 		locks[*count_ptr].owner_start_time = record->owner_start_time;
+		locks[*count_ptr].owner_token = record->owner_token;
 		locks[*count_ptr].expires_at = record->expires_at;
 
 		(*count_ptr)++;
@@ -1383,6 +1645,7 @@ static void user_cache_restore_recovery_entry_locks(
 			record->hash = locks[i].hash;
 			record->owner_pid = locks[i].owner_pid;
 			record->owner_start_time = locks[i].owner_start_time;
+			record->owner_token = locks[i].owner_token;
 			record->expires_at = (uint32_t) locks[i].expires_at;
 			record->key_offset = key_offset;
 			record->key_len = locks[i].key_len;
@@ -1419,20 +1682,13 @@ static bool user_cache_header_boundary_identity_matches_locked(
 }
 #endif /* PHP_USER_CACHE_HAVE_BOUNDARY_SHM */
 
-/* A segment wipe would invalidate the zero-copy views (verbatim arrays, pinned
- * payloads) that live processes still reference from optimistic reads or graph
- * pins. Recovery defers while any live owner holds one; dead owners do not
- * block, since their state is stale and their memory is unreferenced. During
- * recovery write_seq is odd, so no new optimistic reader can start and this
- * snapshot of the reader/pin state is stable. */
 static bool user_cache_recovery_blocked_by_live_reference(const php_user_cache_header *header)
 {
+	const php_user_cache_reader_slot *reader_slot;
 	/* Not const: zend_atomic_int_load_ex() takes a non-const pointer on
 	 * Windows because the Interlocked API has no read-only form. */
 	php_user_cache_graph_pin_slot *pin_slot;
-	const php_user_cache_reader_slot *reader_slot;
-	uint64_t owner_start_time;
-	uint64_t owner_pid;
+	uint64_t owner_start_time, owner_pid;
 	uint32_t i;
 
 	user_cache_atomic_fence_seq_cst();
@@ -1469,9 +1725,6 @@ static bool user_cache_recovery_blocked_by_live_reference(const php_user_cache_h
 	return false;
 }
 
-/* Recover an interrupted write while holding the exclusive lock. Returns false
- * when recovery must be deferred (see user_cache_recovery_blocked_by_live_reference);
- * the caller then leaves the segment as-is and fails until the reference drains. */
 static bool user_cache_recover_after_owner_death(void)
 {
 	php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
@@ -1479,8 +1732,8 @@ static bool user_cache_recover_after_owner_death(void)
 	php_user_cache_recovered_entry_lock *locks;
 	php_user_cache_reader_slot *slot;
 	uint64_t owner_pid, owner_start_time;
-	size_t table_span;
 	uint32_t lock_count = 0, i;
+	size_t table_span;
 
 	if (header == NULL || !php_user_cache_header_is_initialized_locked()) {
 		return true;
@@ -1494,16 +1747,15 @@ static bool user_cache_recover_after_owner_death(void)
 		return false;
 	}
 
-	locks = user_cache_entry_lock_layout_sane(storage, header)
+	locks = user_cache_entry_lock_layout_sane(storage, header) &&
+		user_cache_data_region_sane(storage, header)
 		? user_cache_collect_recovery_entry_locks(header, &lock_count)
 		: NULL
 	;
 
-	/* The segment is not yet adopted, so header->capacity is untrusted:
-	 * wipe the tables only when they provably fit inside the mapping.
-	 * A mismatched or corrupt layout is reformatted at adoption anyway. */
 	table_span = (size_t) header->capacity
-		* (sizeof(php_user_cache_entry) + sizeof(uint32_t));
+		* (sizeof(php_user_cache_entry) + sizeof(uint32_t))
+	;
 	if (storage->size > sizeof(php_user_cache_header) &&
 		table_span <= storage->size - sizeof(php_user_cache_header)
 	) {
@@ -1514,6 +1766,7 @@ static bool user_cache_recover_after_owner_death(void)
 		);
 		php_user_cache_access_stamps_reset(header);
 	}
+
 	if (user_cache_entry_lock_layout_sane(storage, header)) {
 		memset(
 			php_user_cache_entry_lock_records_ptr(header),
@@ -1521,12 +1774,12 @@ static bool user_cache_recover_after_owner_death(void)
 			(size_t) header->entry_lock_capacity * sizeof(php_user_cache_entry_lock_record)
 		);
 	}
+
 	memset(header->orphaned_graphs, 0, sizeof(header->orphaned_graphs));
 
 	for (i = 0; i < PHP_USER_CACHE_READER_SLOTS; i++) {
 		slot = &header->reader_slots[i];
 
-		/* Reader slots may be claimed lock-free. */
 		owner_pid = php_user_cache_atomic_load_64(&slot->owner_pid);
 		owner_start_time = php_user_cache_atomic_load_64(&slot->owner_start_time);
 
@@ -1537,7 +1790,6 @@ static bool user_cache_recover_after_owner_death(void)
 		if (owner_pid != 0 &&
 			user_cache_entry_lock_owner_is_dead(owner_pid, owner_start_time)
 		) {
-			/* Clear start time before pid so scanners cannot combine owners. */
 			user_cache_atomic_cas_32(&slot->active, 1, 0);
 		}
 	}
@@ -1593,9 +1845,9 @@ static bool user_cache_shared_mutex_lock(php_user_cache_storage *storage)
 
 	result = pthread_mutex_lock(&header->global_shared_mutex.mutex);
 	if (result == EOWNERDEAD) {
-		/* A failed robust-mutex recovery makes the segment unusable. */
 		if (pthread_mutex_consistent(&header->global_shared_mutex.mutex) != 0) {
 			php_error_docref(NULL, E_WARNING, "Cache: unable to make the shared lock consistent after owner death");
+
 			pthread_mutex_unlock(&header->global_shared_mutex.mutex);
 
 			return false;
@@ -1710,10 +1962,10 @@ static bool user_cache_create_lock(void)
 {
 	php_user_cache_context *ctx = php_user_cache_active_context();
 	php_user_cache_storage *storage = &ctx->storage;
-	int val;
 #ifdef PHP_USER_CACHE_USE_SHM_OPEN
 	struct stat lock_st;
 #endif /* PHP_USER_CACHE_USE_SHM_OPEN */
+	int val;
 
 	if (storage->lock_initialized) {
 		return true;
@@ -1727,14 +1979,25 @@ static bool user_cache_create_lock(void)
 
 #ifdef PHP_USER_CACHE_USE_SHM_OPEN
 	if (ctx->boundary_shared) {
+		const char *error_in;
+		char dir_path[MAXPATHLEN];
+		int dir_fd;
+
 		user_cache_shared_boundary_lock_name(
 			storage->lockfile_name,
 			sizeof(storage->lockfile_name),
 			storage->size
 		);
 
-		/* Refuse symlinks in the predictable world-writable lock path. */
-		storage->lock_file = open(storage->lockfile_name, O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600);
+		dir_fd = user_cache_shared_boundary_open_private_dir(dir_path, sizeof(dir_path), &error_in);
+		if (dir_fd < 0) {
+			user_cache_zts_lock_destroy(storage);
+
+			return false;
+		}
+
+		storage->lock_file = openat(dir_fd, storage->lockfile_name, O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600);
+		close(dir_fd);
 		if (storage->lock_file >= 0 &&
 			!user_cache_shared_boundary_fd_is_trusted(storage->lock_file, &lock_st)
 		) {
@@ -1886,7 +2149,6 @@ static bool user_cache_win32_open_lock_file(php_user_cache_context *ctx)
 		}
 	}
 
-	/* Preserve temporary paths outside the ANSI codepage. */
 	tmp_path_w_len = GetTempPathW(MAXPATHLEN, tmp_path_w);
 	if (tmp_path_w_len == 0 || tmp_path_w_len >= MAXPATHLEN) {
 		return false;
@@ -1898,6 +2160,7 @@ static bool user_cache_win32_open_lock_file(php_user_cache_context *ctx)
 	}
 
 	opened = user_cache_win32_open_lock_file_at(storage, tmp_path, base_name);
+
 	free(tmp_path);
 
 	return opened;
@@ -2121,8 +2384,6 @@ static bool user_cache_find_entry_lock_record_slot_locked(
 			continue;
 		}
 
-		/* Avoid a clock read for an empty table; the sentinel re-fetches in
-		 * the segment's first second only. */
 		if (now == 0) {
 			now = php_user_cache_time_rel(header, (uint64_t) time(NULL));
 		}
@@ -2159,7 +2420,8 @@ static bool user_cache_insert_entry_lock_record_locked(
 		uint32_t slot_idx,
 		zend_string *key,
 		zend_ulong hash,
-		zend_long lease)
+		zend_long lease,
+		uint64_t *owner_token)
 {
 	php_user_cache_entry_lock_record *record = &php_user_cache_entry_lock_records_ptr(header)[slot_idx];
 	uint64_t owner_pid;
@@ -2181,10 +2443,13 @@ static bool user_cache_insert_entry_lock_record_locked(
 	record->hash = hash;
 	record->owner_pid = owner_pid;
 	record->owner_start_time = user_cache_cached_self_start_time_token(owner_pid);
+	record->owner_token = ++header->entry_lock_acquire_seq;
 	record->expires_at = lease > 0 ? user_cache_entry_lock_expires_at(header, lease) : 0;
 	record->key_offset = key_offset;
 	record->key_len = (uint32_t) ZSTR_LEN(key);
 	record->state = PHP_USER_CACHE_ENTRY_LOCK_USED;
+
+	*owner_token = record->owner_token;
 
 	return true;
 }
@@ -2192,6 +2457,7 @@ static bool user_cache_insert_entry_lock_record_locked(
 static bool user_cache_update_entry_lock_record_lease_locked(
 		php_user_cache_header *header,
 		zend_string *key,
+		const php_user_cache_entry_lock *lock,
 		zend_long lease)
 {
 	php_user_cache_entry_lock_record *record;
@@ -2209,6 +2475,10 @@ static bool user_cache_update_entry_lock_record_lease_locked(
 	}
 
 	record = &php_user_cache_entry_lock_records_ptr(header)[slot_idx];
+	if (record->owner_pid != lock->owner_pid || record->owner_token != lock->owner_token) {
+		return false;
+	}
+
 	expires_at = user_cache_entry_lock_expires_at(header, lease);
 	if (record->expires_at < expires_at) {
 		record->expires_at = expires_at;
@@ -2227,6 +2497,7 @@ static php_user_cache_entry_lock *user_cache_create_local_entry_lock(
 	lock = emalloc(sizeof(php_user_cache_entry_lock));
 	lock->context = ctx;
 	lock->owner_pid = php_user_cache_cached_pid();
+	lock->owner_token = 0;
 	lock->lease = lease;
 	lock->preserve_lease = preserve_lease;
 
@@ -2268,6 +2539,7 @@ static void user_cache_defer_entry_lock_release(
 	entry->key_len = (uint32_t) ZSTR_LEN(key);
 	entry->owner_pid = lock->owner_pid;
 	entry->owner_start_time = user_cache_cached_self_start_time_token(lock->owner_pid);
+	entry->owner_token = lock->owner_token;
 	entry->lease = lock->lease;
 	entry->preserve_lease = lock->preserve_lease;
 
@@ -2347,11 +2619,13 @@ static void user_cache_drain_deferred_entry_lock_releases(void)
 				record = &php_user_cache_entry_lock_records_ptr(header)[slot_idx];
 
 				if (record->owner_pid == entries[i].owner_pid &&
-					record->owner_start_time == entries[i].owner_start_time
+					record->owner_start_time == entries[i].owner_start_time &&
+					record->owner_token == entries[i].owner_token
 				) {
 					if (entries[i].preserve_lease && entries[i].lease > 0) {
 						record->owner_pid = 0;
 						record->owner_start_time = 0;
+						record->owner_token = 0;
 						record->expires_at = user_cache_entry_lock_expires_at(header, entries[i].lease);
 					} else {
 						user_cache_remove_entry_lock_record_locked(record);
@@ -2405,7 +2679,9 @@ static void user_cache_release_entry_lock_records_locked(
 			continue;
 		}
 
-		if (php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid != lock->owner_pid) {
+		if (php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid != lock->owner_pid ||
+			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_token != lock->owner_token
+		) {
 			continue;
 		}
 
@@ -2415,6 +2691,7 @@ static void user_cache_release_entry_lock_records_locked(
 		) {
 			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid = 0;
 			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_start_time = 0;
+			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_token = 0;
 			php_user_cache_entry_lock_records_ptr(header)[slot_idx].expires_at =
 				user_cache_entry_lock_expires_at(header, lock->lease)
 			;
@@ -2506,6 +2783,7 @@ static void user_cache_release_entry_locks_for_context(
 
 	for (i = 0; i < pair_count; i++) {
 		zend_hash_del(*locks_ptr, pairs[i].key);
+
 		zend_string_release(pairs[i].key);
 	}
 
@@ -2615,7 +2893,7 @@ static bool user_cache_upgrade_held_entry_lock(
 
 		header = php_user_cache_header_ptr();
 		updated = php_user_cache_header_init_locked() &&
-			user_cache_update_entry_lock_record_lease_locked(header, key, lease)
+			user_cache_update_entry_lock_record_lease_locked(header, key, lock, lease)
 		;
 
 		php_user_cache_unlock();
@@ -2637,7 +2915,8 @@ static bool user_cache_remove_owned_entry_lock_record(
 		php_user_cache_context *ctx,
 		zend_string *key,
 		zend_ulong hash,
-		uint64_t owner_pid)
+		uint64_t owner_pid,
+		uint64_t owner_token)
 {
 	php_user_cache_context *prev_ctx;
 	php_user_cache_header *header;
@@ -2662,7 +2941,8 @@ static bool user_cache_remove_owned_entry_lock_record(
 			&found
 		) &&
 		found &&
-		php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid == owner_pid
+		php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid == owner_pid &&
+		php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_token == owner_token
 	) {
 		user_cache_remove_entry_lock_record_locked(
 			&php_user_cache_entry_lock_records_ptr(header)[slot_idx]
@@ -2675,7 +2955,6 @@ static bool user_cache_remove_owned_entry_lock_record(
 	return true;
 }
 
-/* Release all flagged entry locks under one write lock. */
 static void user_cache_release_entry_locks_for_keys(
 		php_user_cache_context *ctx,
 		zend_string **keys,
@@ -2728,7 +3007,8 @@ static void user_cache_release_entry_locks_for_keys(
 			hash = zend_string_hash_val(keys[i]);
 			if (user_cache_find_entry_lock_record_slot_locked(header, keys[i], hash, &slot_idx, &found) &&
 				found &&
-				php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid == lock->owner_pid
+				php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid == lock->owner_pid &&
+				php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_token == lock->owner_token
 			) {
 				user_cache_remove_entry_lock_record_locked(&php_user_cache_entry_lock_records_ptr(header)[slot_idx]);
 			}
@@ -2782,7 +3062,9 @@ static bool user_cache_acquire_entry_lock_record(
 
 		if (!php_user_cache_wlock()) {
 			php_user_cache_restore_context(prev_ctx);
+
 			efree(lock);
+
 			user_cache_destroy_entry_locks_if_empty(locks_ptr);
 
 			return false;
@@ -2793,7 +3075,9 @@ static bool user_cache_acquire_entry_lock_record(
 		if (!php_user_cache_header_init_locked()) {
 			php_user_cache_unlock();
 			php_user_cache_restore_context(prev_ctx);
+
 			efree(lock);
+
 			user_cache_destroy_entry_locks_if_empty(locks_ptr);
 
 			return false;
@@ -2801,7 +3085,14 @@ static bool user_cache_acquire_entry_lock_record(
 
 		if (user_cache_find_entry_lock_record_slot_locked(header, key, hash, &slot_idx, &found)) {
 			if (!found &&
-				!(inserted = user_cache_insert_entry_lock_record_locked(header, slot_idx, key, hash, lease))
+				!(inserted = user_cache_insert_entry_lock_record_locked(
+					header,
+					slot_idx,
+					key,
+					hash,
+					lease,
+					&lock->owner_token
+				))
 			) {
 				insert_failed = true;
 			}
@@ -2815,8 +3106,7 @@ static bool user_cache_acquire_entry_lock_record(
 				return true;
 			}
 
-			/* Roll back a record that cannot be tracked locally. */
-			if (!user_cache_remove_owned_entry_lock_record(ctx, key, hash, lock->owner_pid)) {
+			if (!user_cache_remove_owned_entry_lock_record(ctx, key, hash, lock->owner_pid, lock->owner_token)) {
 				lock->preserve_lease = false;
 				user_cache_defer_entry_lock_release(ctx, key, lock);
 			}
@@ -2847,7 +3137,6 @@ static bool user_cache_acquire_entry_lock_record(
 	}
 }
 
-/* Keys are sorted so concurrent bulk operations acquire locks in one order. */
 static bool user_cache_acquire_entry_lock_records(
 		php_user_cache_context *ctx,
 		zend_string **keys,
@@ -2874,7 +3163,6 @@ static bool user_cache_acquire_entry_lock_records(
 		pending_locks[i] = NULL;
 		collisions[i] = false;
 
-		/* Collapse adjacent duplicates. */
 		if (i > 0 && zend_string_equals(keys[i], keys[i - 1])) {
 			continue;
 		}
@@ -2884,7 +3172,6 @@ static bool user_cache_acquire_entry_lock_records(
 			continue;
 		}
 
-		/* Local tracking will reject a record from another context. */
 		collisions[i] = existing != NULL;
 		pending_locks[i] = user_cache_create_local_entry_lock(ctx, 0, false);
 
@@ -2923,7 +3210,6 @@ static bool user_cache_acquire_entry_lock_records(
 			goto bailout;
 		}
 
-		/* Stop before waiting so the global lock is not held. */
 		for (i = start; i < count; i++) {
 			if (pending_locks[i] == NULL) {
 				continue;
@@ -2939,7 +3225,15 @@ static bool user_cache_acquire_entry_lock_records(
 				break;
 			}
 
-			if (!user_cache_insert_entry_lock_record_locked(header, slot_idx, keys[i], hash, 0)) {
+			if (!user_cache_insert_entry_lock_record_locked(
+					header,
+					slot_idx,
+					keys[i],
+					hash,
+					0,
+					&pending_locks[i]->owner_token
+				)
+			) {
 				insert_failed = true;
 				stop = i;
 				insert_end = i;
@@ -2948,7 +3242,6 @@ static bool user_cache_acquire_entry_lock_records(
 			}
 
 			if (collisions[i]) {
-				/* Do not insert records beyond the known failure. */
 				stop = i;
 				insert_end = i + 1;
 
@@ -2959,7 +3252,6 @@ static bool user_cache_acquire_entry_lock_records(
 		php_user_cache_unlock();
 		php_user_cache_restore_context(prev_ctx);
 
-		/* Roll back records that cannot be tracked locally. */
 		for (i = start; i < insert_end; i++) {
 			if (pending_locks[i] == NULL) {
 				continue;
@@ -2970,13 +3262,16 @@ static bool user_cache_acquire_entry_lock_records(
 						ctx,
 						keys[i],
 						zend_string_hash_val(keys[i]),
-						pending_locks[i]->owner_pid
+						pending_locks[i]->owner_pid,
+						pending_locks[i]->owner_token
 					)
 				) {
 					pending_locks[i]->preserve_lease = false;
 					user_cache_defer_entry_lock_release(ctx, keys[i], pending_locks[i]);
 				}
+
 				efree(pending_locks[i]);
+
 				pending_locks[i] = NULL;
 				add_failed = true;
 
@@ -2999,7 +3294,6 @@ static bool user_cache_acquire_entry_lock_records(
 		}
 
 		if (blocked_idx != stop) {
-			/* Each blocked key gets a fresh wait budget. */
 			blocked_idx = stop;
 			waited_us = 0;
 		}
@@ -3066,8 +3360,6 @@ static uint32_t user_cache_prev_prime(uint32_t candidate)
 	return candidate;
 }
 
-/* Callers hold the global lock: report the clamp through *clamped instead of
- * diagnosing here, so no user code (error handler) can run under the lock. */
 static uint32_t user_cache_calculate_capacity(size_t size, bool *clamped)
 {
 	uint64_t hint, want, max_capacity;
@@ -3085,15 +3377,9 @@ static uint32_t user_cache_calculate_capacity(size_t size, bool *clamped)
 		hint = PHP_USER_CACHE_MIN_CAPACITY;
 	}
 
-	/* Size the table so the declared hint lands at a 0.75 load factor; the
-	 * 7/8 insert cap then leaves ~17% overflow headroom past the hint. */
 	want = hint + (hint + 2) / 3;
 	capacity = user_cache_next_prime((uint32_t) want);
 
-	/* Leave at least half the segment for value data. The per-key lock
-	 * region scales with capacity, so converge on a fixpoint: the clamp
-	 * only shrinks capacity, the lock sizing is monotone in it, and both
-	 * are bounded, so this settles within a few iterations. */
 	reserve = size / 2;
 	lock_capacity = user_cache_calculate_entry_lock_capacity(capacity);
 
@@ -3128,12 +3414,11 @@ static uint32_t user_cache_calculate_capacity(size_t size, bool *clamped)
 	return capacity;
 }
 
-/* Largest power of two at one lock record per 16 entries, clamped so big
- * caches never fall below today's fixed 1024 and small ones keep a floor. */
 static uint32_t user_cache_calculate_entry_lock_capacity(uint32_t capacity)
 {
-	uint32_t want = capacity / 16;
-	uint32_t lock_capacity = PHP_USER_CACHE_ENTRY_LOCK_MAX_CAPACITY;
+	uint32_t want = capacity / 16,
+			lock_capacity = PHP_USER_CACHE_ENTRY_LOCK_MAX_CAPACITY
+	;
 
 	while (lock_capacity > PHP_USER_CACHE_ENTRY_LOCK_MIN_CAPACITY && lock_capacity > want) {
 		lock_capacity >>= 1;
@@ -3147,15 +3432,11 @@ static void user_cache_header_layout_memo(
 		uint32_t *capacity,
 		uint32_t *data_offset)
 {
-	/* Cache the layout for the lifetime of the attachment; both inputs
-	 * (segment size and the PHP_INI_SYSTEM entries hint) are constant for
-	 * the process. */
 	if (!storage->layout_memo_valid) {
 		storage->capacity_memo = user_cache_calculate_capacity(storage->size, &storage->capacity_clamped);
 		storage->entry_lock_capacity_memo =
-			user_cache_calculate_entry_lock_capacity(storage->capacity_memo);
-		/* Entry table, then the advisory access-stamp array, then the
-		 * per-key lock records, then value data. */
+			user_cache_calculate_entry_lock_capacity(storage->capacity_memo)
+		;
 		storage->entry_lock_offset_memo = (uint32_t) PHP_USER_CACHE_ALIGNED_SIZE(
 			sizeof(php_user_cache_header)
 			+ storage->capacity_memo * sizeof(php_user_cache_entry)
@@ -3301,7 +3582,6 @@ static void user_cache_write_section_note_header_initialized(php_user_cache_head
 	UC_G(reader_drain_state) = 0;
 }
 
-/* Publish a fresh segment by storing its magic last. */
 static bool user_cache_header_format_fresh_locked(
 		php_user_cache_header *header,
 		uint32_t capacity,
@@ -3329,7 +3609,6 @@ static bool user_cache_header_format_fresh_locked(
 	if (header->time_base == 0) {
 		header->time_base = 1;
 	}
-	/* Preserve an existing odd sequence until the write section ends. */
 	header->write_seq = UC_G(write_seq_bumped) ? 1u : 2u;
 #ifdef PHP_USER_CACHE_HAVE_SHARED_MUTEX
 	header->lock_model = user_cache_shared_mutex_init(header)
@@ -3475,7 +3754,6 @@ static bool user_cache_try_storage_handler(
 			&error_in
 		) != PHP_USER_CACHE_ALLOC_SUCCESS
 	) {
-		/* Preserve the error across cleanup. */
 		*error_code_ptr = user_cache_platform_ops()->alloc_error_code();
 		*error_in_ptr = error_in;
 
@@ -3494,12 +3772,10 @@ static bool user_cache_try_storage_handler(
 	return true;
 }
 
-/* Boundary contexts must not fall back to process-local storage. */
 static bool user_cache_select_storage_handler(void)
 {
 	const php_user_cache_shm_handler_entry *handler_entry;
-	const char *model = UC_G(memory_model);
-	const char *error_in = NULL;
+	const char *model = UC_G(memory_model), *error_in = NULL;
 	int saved_error = 0;
 
 #ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
@@ -3548,14 +3824,10 @@ static bool user_cache_select_storage_handler(void)
 	return false;
 }
 
-/* Adopt the segment's advertised lock model: re-acquire via the shared mutex
- * if an initialized segment already uses one, otherwise stay on the fcntl
- * lock and recover. Returns false when negotiation fails and the caller must
- * tear down. */
 static bool user_cache_negotiate_lock_model(void)
 {
-	php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
 	const php_user_cache_lock_ops *negotiated_ops;
+	php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
 
 	if (!user_cache_wlock_impl()) {
 		return false;
@@ -3731,7 +4003,6 @@ static void user_cache_resolve_runtime(void)
 
 static bool user_cache_reader_slot_owner_is_dead(const php_user_cache_reader_slot *slot)
 {
-	/* Reader slots are claimed lock-free. */
 	uint64_t owner_pid = php_user_cache_atomic_load_64(&slot->owner_pid),
 		owner_start_time = php_user_cache_atomic_load_64(&slot->owner_start_time)
 	;
@@ -3786,7 +4057,6 @@ static int32_t user_cache_claim_reader_slot(php_user_cache_header *header)
 				continue;
 			}
 
-			/* Clear start time before pid so scanners cannot combine owners. */
 			user_cache_atomic_store_64(&slot->owner_start_time, 0);
 			user_cache_atomic_store_64(&slot->owner_pid, 0);
 		}
@@ -3943,8 +4213,6 @@ static bool user_cache_claim_header_is_attached(const php_user_cache_header *hea
 		return true;
 	}
 
-	/* Threaded SAPI request activation may append boundary partitions
-	 * concurrently; hold their lock while walking the list. */
 	php_user_cache_boundary_partitions_lock();
 
 	for (partition = php_user_cache_partitions; partition != NULL; partition = partition->next) {
@@ -3959,9 +4227,6 @@ static bool user_cache_claim_header_is_attached(const php_user_cache_header *hea
 	return attached;
 }
 
-/* Release this thread's graph pin slot claims: the process outlives the
- * thread, so its live pid would keep the slots unclaimable. Slots with pins
- * outstanding are left for the dead-owner sweep. */
 void php_user_cache_release_thread_graph_pin_claims(php_user_cache_globals *globals)
 {
 	php_user_cache_graph_pin_slot *slot;
@@ -3984,7 +4249,6 @@ void php_user_cache_release_thread_graph_pin_claims(php_user_cache_globals *glob
 			continue;
 		}
 
-		/* Clear start time before pid so scanners cannot combine owners. */
 		php_user_cache_graph_pin_token_store(&slot->owner_start_time, 0);
 		zend_atomic_int_compare_exchange_ex(&slot->owner_pid, &expected, 0);
 	}
@@ -3992,8 +4256,6 @@ void php_user_cache_release_thread_graph_pin_claims(php_user_cache_globals *glob
 	globals->graph_pin_claim_count = 0;
 }
 
-/* Release per-thread reader slots before their live process pid makes them
- * permanently unclaimable. Clear active and start time before owner_pid. */
 void php_user_cache_release_thread_reader_claims(php_user_cache_globals *globals)
 {
 	php_user_cache_reader_slot *slot;
@@ -4022,8 +4284,6 @@ void php_user_cache_release_thread_reader_claims(php_user_cache_globals *globals
 }
 #endif /* ZTS */
 
-/* Shared-graph pin owners reuse the entry-lock liveness probe and its
- * one-second cache. */
 bool php_user_cache_graph_pin_owner_is_dead(uint64_t owner_pid, uint64_t owner_start_time)
 {
 	return user_cache_entry_lock_owner_is_dead(owner_pid, owner_start_time);
@@ -4073,8 +4333,6 @@ bool php_user_cache_header_init_locked(void)
 	user_cache_header_layout_memo(storage, &capacity, &data_offset);
 
 	if (header->magic == PHP_USER_CACHE_MAGIC && header->version == PHP_USER_CACHE_VERSION) {
-		/* Adopt an initialized segment only when its layout matches this
-		 * build; otherwise fall through and reformat it. */
 		if (header->capacity == capacity &&
 			header->data_offset == data_offset &&
 			header->entry_lock_capacity == storage->entry_lock_capacity_memo &&
@@ -4317,9 +4575,6 @@ bool php_user_cache_rlock(void)
 			return true;
 		}
 
-		/* An odd write_seq means a writer died mid-update; take the write
-		 * lock to drive recovery, then retry the read. Bail after a bounded
-		 * number of attempts. */
 		php_user_cache_unlock();
 
 		if (++recovery_attempts > 8) {
@@ -4364,12 +4619,14 @@ bool php_user_cache_wlock_for_ref_release(bool *recovered)
 
 	if (user_cache_recover_after_owner_death()) {
 		*recovered = true;
+
 		user_cache_write_section_enter();
 
 		return true;
 	}
 
 	*recovered = false;
+
 	UC_G(write_seq_bumped) = false;
 
 	return true;
@@ -4405,7 +4662,8 @@ bool php_user_cache_wlock_for_entry_mutation(zend_string *key)
 
 		local_lock = user_cache_find_local_entry_lock(php_user_cache_active_context(), key);
 		if (local_lock != NULL &&
-			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid == local_lock->owner_pid
+			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid == local_lock->owner_pid &&
+			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_token == local_lock->owner_token
 		) {
 			return true;
 		}
@@ -4474,7 +4732,7 @@ bool php_user_cache_release_entry_lock(zend_string *key)
 	}
 
 	hash = zend_string_hash_val(key);
-	if (!user_cache_remove_owned_entry_lock_record(ctx, key, hash, lock->owner_pid)) {
+	if (!user_cache_remove_owned_entry_lock_record(ctx, key, hash, lock->owner_pid, lock->owner_token)) {
 		return false;
 	}
 
@@ -4501,8 +4759,6 @@ void php_user_cache_release_entry_locks(zend_string **keys, const bool *acquired
 	);
 }
 
-/* Read-only probe used by LRU eviction: unlike the acquire paths it never
- * demotes or removes records, so a victim scan cannot mutate lock state. */
 bool php_user_cache_entry_key_lock_active_locked(
 		php_user_cache_header *header,
 		zend_ulong hash,
@@ -4556,8 +4812,6 @@ bool php_user_cache_entry_locks_allow_clear_locked(void)
 
 	user_cache_ensure_entry_lock_owner();
 
-	/* Adoptable, not merely initialized: the record walk below trusts the
-	 * header's lock-region geometry. */
 	if (header == NULL || !php_user_cache_header_adoptable_locked()) {
 		return true;
 	}
