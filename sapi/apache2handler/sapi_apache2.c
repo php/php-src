@@ -70,7 +70,6 @@ typedef struct _php_apache_user_cache_partition_entry {
 	const server_rec *server;
 	const char *server_identity;
 	const char *configured_document_root;
-	const char *configured_hostname;
 	php_user_cache_partition *partition;
 	struct _php_apache_user_cache_partition_entry *next;
 } php_apache_user_cache_partition_entry;
@@ -494,27 +493,6 @@ static const char *php_apache_user_cache_normalize_document_root(apr_pool_t *poo
 	return apr_pstrdup(pool, document_root);
 }
 
-static const char *php_apache_user_cache_normalize_hostname(apr_pool_t *pool, const char *hostname)
-{
-	char *normalized;
-	size_t len;
-
-	if (hostname == NULL || hostname[0] == '\0') {
-		return NULL;
-	}
-
-	normalized = apr_pstrdup(pool, hostname);
-	ap_str_tolower(normalized);
-
-	/* A terminal DNS root label does not identify a different host. */
-	len = strlen(normalized);
-	if (len > 1 && normalized[len - 1] == '.') {
-		normalized[len - 1] = '\0';
-	}
-
-	return normalized;
-}
-
 /* Linear over the vhost list, run once per request. */
 static php_apache_user_cache_partition_entry *php_apache_user_cache_partition_entry_for_server(
 		const server_rec *server)
@@ -532,27 +510,19 @@ static php_apache_user_cache_partition_entry *php_apache_user_cache_partition_en
 
 static void php_apache_user_cache_activate_request_partition(request_rec *r)
 {
+	const char *document_root, *boundary;
 	php_apache_user_cache_partition_entry *entry;
-	const char *document_root, *hostname;
-	const char *boundary;
 
 	entry = php_apache_user_cache_partition_entry_for_server(r->server);
 	document_root = php_apache_user_cache_normalize_document_root(r->pool, ap_context_document_root(r));
 	if (document_root == NULL) {
 		document_root = php_apache_user_cache_normalize_document_root(r->pool, ap_document_root(r));
 	}
-	hostname = php_apache_user_cache_normalize_hostname(r->pool, ap_get_server_name(r));
 
-	/* Preserve the eagerly initialized partition for the configured primary
-	 * host only when Apache resolved the configured document root.  Aliases and
-	 * request-time mappings get deterministic per-host partitions instead. */
 	if (entry != NULL &&
 		entry->partition != NULL &&
-		entry->configured_hostname != NULL &&
 		entry->configured_document_root != NULL &&
-		hostname != NULL &&
 		document_root != NULL &&
-		strcasecmp(hostname, entry->configured_hostname) == 0 &&
 		strcmp(document_root, entry->configured_document_root) == 0
 	) {
 		php_user_cache_partition_activate(entry->partition);
@@ -562,7 +532,6 @@ static void php_apache_user_cache_activate_request_partition(request_rec *r)
 
 	if (entry == NULL ||
 		entry->server_identity == NULL ||
-		hostname == NULL ||
 		document_root == NULL
 	) {
 		php_user_cache_activate_boundary_partition_by_id(
@@ -575,18 +544,13 @@ static void php_apache_user_cache_activate_request_partition(request_rec *r)
 		return;
 	}
 
-	/* This ID is automatic and stable across Apache workers.  Host is included
-	 * even when two aliases resolve to the same directory because PHP cannot
-	 * establish that they belong to one trust domain. */
 	boundary = apr_psprintf(
 		r->pool,
-		"server:%" APR_SIZE_T_FMT ":%s;document-root:%" APR_SIZE_T_FMT ":%s;host:%" APR_SIZE_T_FMT ":%s",
+		"server:%" APR_SIZE_T_FMT ":%s;document-root:%" APR_SIZE_T_FMT ":%s",
 		(apr_size_t) strlen(entry->server_identity),
 		entry->server_identity,
 		(apr_size_t) strlen(document_root),
-		document_root,
-		(apr_size_t) strlen(hostname),
-		hostname
+		document_root
 	);
 	php_user_cache_activate_boundary_partition_by_id(
 		"apache2handler",
@@ -599,8 +563,8 @@ static void php_apache_user_cache_activate_request_partition(request_rec *r)
 static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec *server)
 {
 	const char *hostname, *partition_name;
-	core_server_config *core_config;
 	php_apache_user_cache_partition_entry *entry;
+	core_server_config *core_config;
 	server_rec *cur;
 	unsigned int i;
 
@@ -626,7 +590,6 @@ static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec 
 		entry = apr_pcalloc(pconf, sizeof(*entry));
 		entry->server = cur;
 		entry->server_identity = partition_name;
-		entry->configured_hostname = php_apache_user_cache_normalize_hostname(pconf, cur->server_hostname);
 		core_config = ap_get_core_module_config(cur->module_config);
 		entry->configured_document_root = php_apache_user_cache_normalize_document_root(
 			pconf,

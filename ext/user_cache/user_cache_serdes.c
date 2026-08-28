@@ -1366,7 +1366,7 @@ static bool user_cache_serdes_decode_enum(
 		return false;
 	}
 
-	case_obj = zend_enum_get_case(ce, case_name);
+	case_obj = php_user_cache_enum_case_find(ce, case_name);
 
 	zend_string_release(case_name);
 
