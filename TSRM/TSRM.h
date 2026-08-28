@@ -96,7 +96,8 @@ TSRM_API void tsrm_reserve(size_t size);
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* Resource whose per-thread storage is a native __thread block.
- * Must be called at startup before any other thread exists. */
+ * Must be called at startup before any other thread exists. Its destructor may
+ * only run on the owning thread. */
 TSRM_API ts_rsrc_id ts_allocate_tls_id(ts_rsrc_id *rsrc_id, void *(*tls_addr)(void), size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* fetches the requested resource for the current thread */
