@@ -1,5 +1,5 @@
 --TEST--
-UserCache\Cache: apache2handler partitions cache data by virtual host
+UserCache\Cache: apache2handler partitions cache data by virtual host, not by request Host
 --SKIPIF--
 <?php
 if (!function_exists('proc_open')) die('skip proc_open() not available');
@@ -142,6 +142,7 @@ PHPIniDir "$root"
 
 <VirtualHost 127.0.0.1:$port>
     ServerName alpha.local
+    ServerAlias alpha-alias.local
     DocumentRoot "$alphaRoot"
     <Directory "$alphaRoot">
         Require all granted
@@ -198,6 +199,11 @@ try {
         ['beta.local', '/index.php?action=seed', 'beta.local:beta.local-value:default'],
         ['alpha.local', '/index.php?action=fetch', 'alpha.local:alpha.local-value:default'],
         ['beta.local', '/index.php?action=fetch', 'beta.local:beta.local-value:default'],
+        /* The request Host header does not select a partition: a ServerAlias
+         * host and an unmatched host (served by the default vhost, alpha) both
+         * read the owning vhost's data instead of minting a new partition. */
+        ['alpha-alias.local', '/index.php?action=fetch', 'alpha-alias.local:alpha.local-value:default'],
+        ['gamma.local', '/index.php?action=fetch', 'gamma.local:alpha.local-value:default'],
     ];
 
     foreach ($checks as [$host, $path, $expected]) {

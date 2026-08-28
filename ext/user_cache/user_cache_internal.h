@@ -176,6 +176,7 @@
 /* Boundary partitions require named shared memory. */
 #if !defined(ZEND_WIN32) && defined(PHP_USER_CACHE_USE_SHM_OPEN)
 # define PHP_USER_CACHE_HAVE_BOUNDARY_SHM	1
+# define PHP_USER_CACHE_BOUNDARY_SALT_SIZE	32
 #endif
 
 #if defined(PHP_USER_CACHE_USE_MMAP) && !defined(ZEND_WIN32)
@@ -323,7 +324,6 @@ typedef struct {
 	int segment_count;
 	int lock_file;
 	uint32_t startup_complete;
-	/* Cached for the lifetime of the attached segment. */
 	uint32_t capacity_memo;
 	uint32_t data_offset_memo;
 	uint32_t entry_lock_capacity_memo;
@@ -332,10 +332,12 @@ typedef struct {
 	bool initialized_before_request;
 	bool lock_initialized;
 	bool layout_memo_valid;
-	bool capacity_clamped; /* Deferred to startup so the diagnostic never runs under the lock. */
+	bool capacity_clamped;
 #ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
-	bool boundary_digest_memoized; /* Cached for the lifetime of the partition. */
+	bool boundary_digest_memoized;
 	uint8_t boundary_digest_memo[32];
+	bool boundary_salt_loaded;
+	uint8_t boundary_salt[PHP_USER_CACHE_BOUNDARY_SALT_SIZE];
 #endif
 	char lockfile_name[MAXPATHLEN];
 #ifdef ZTS
@@ -361,18 +363,16 @@ struct _php_user_cache_partition {
 	struct _php_user_cache_partition *next;
 };
 
-/* 40 bytes, hole-free on LP64; probe fields (hash, key, state, lease) fill
- * the first 24 bytes, owner identity trails. */
 typedef struct {
 	zend_ulong hash;
 	uint32_t key_offset;
 	uint32_t key_len;
-	/* Lease deadline in seconds relative to header time_base; 0 = no bound. */
 	uint32_t expires_at;
 	uint8_t state;
 	uint8_t reserved[3];
 	uint64_t owner_pid;
 	uint64_t owner_start_time;
+	uint64_t owner_token;
 } php_user_cache_entry_lock_record;
 
 typedef struct {
@@ -380,6 +380,7 @@ typedef struct {
 	char *key;
 	uint64_t owner_pid;
 	uint64_t owner_start_time;
+	uint64_t owner_token;
 	zend_long lease;
 	uint32_t key_len;
 	bool preserve_lease;
@@ -401,8 +402,6 @@ typedef struct {
  * liveness, which is what makes retired-but-pinned payloads reclaimable. */
 typedef struct {
 	zend_atomic_int owner_pid;
-	/* Live pins held by this owner. Advisory: a crash window can leave it
-	 * higher than the surviving bits, so it only gates liveness probes. */
 	zend_atomic_int pin_count;
 	uint64_t owner_start_time;
 } php_user_cache_graph_pin_slot;
@@ -441,6 +440,9 @@ typedef struct {
 	 * region (header -> entries -> stamps -> lock records -> data). */
 	uint32_t entry_lock_capacity;
 	uint32_t entry_lock_offset;
+	/* Bumped under the write lock for every inserted lock record; the new
+	 * value becomes that record's owner_token. */
+	uint64_t entry_lock_acquire_seq;
 	uint8_t boundary_identity_digest[32];
 	uint32_t orphaned_graphs[PHP_USER_CACHE_ORPHANED_GRAPH_SLOTS];
 	php_user_cache_graph_pin_slot graph_pin_slots[PHP_USER_CACHE_GRAPH_PIN_SLOTS];
@@ -1270,6 +1272,29 @@ static inline bool php_user_cache_class_uses_serdes(zend_class_entry *ce)
 	return ce->serialize != NULL &&
 		ce->unserialize != NULL
 	;
+}
+
+/* Resolves a cached case name without trusting it; mirrors unserialize(). */
+static inline zend_object *php_user_cache_enum_case_find(zend_class_entry *ce, zend_string *name)
+{
+	zend_class_constant *c;
+
+	c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
+	if (c == NULL || !(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
+		return NULL;
+	}
+
+	if (Z_TYPE(c->value) == IS_CONSTANT_AST &&
+		zval_update_constant_ex(&c->value, c->ce) == FAILURE
+	) {
+		return NULL;
+	}
+
+	if (Z_TYPE(c->value) != IS_OBJECT) {
+		return NULL;
+	}
+
+	return Z_OBJ(c->value);
 }
 
 #endif /* PHP_USER_CACHE_INTERNAL_H */

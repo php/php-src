@@ -4920,7 +4920,7 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_enum(
 			return false;
 		}
 
-		case_obj = zend_enum_get_case(ce, case_name);
+		case_obj = php_user_cache_enum_case_find(ce, case_name);
 		if (case_obj == NULL) {
 			return false;
 		}
