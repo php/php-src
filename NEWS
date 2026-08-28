@@ -36,6 +36,8 @@ PHP                                                                        NEWS
     INT_MAX instead of truncating it. (marc-mabe)
   . Fixed fseek() accepting $whence values that do not fit in an int, which
     were silently truncated onto a valid seek constant. (lacatoire)
+  . Fixed a failed seek discarding the read buffer, which desynchronized the
+    stream from its reported position. (lacatoire)
 
 
 27 Aug 2026, PHP 8.6.0beta2
