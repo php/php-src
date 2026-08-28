@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     results. (iliaal)
   . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
     read. (iliaal)
+  . Fixed a use-after-free when IntlRuleBasedBreakIterator is constructed
+    from compiled rules. (iliaal)
 
 - PDO_PGSQL:
   . Added Pdo\Pgsql::ATTR_CHUNK_SIZE to fetch a result set in chunks of the
