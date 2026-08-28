@@ -61,3 +61,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The force_http_10 method has been removed.
   . The get_fd method has been removed.
   . The get_target_uid and get_target_gid methods have been removed.
+
+- SAPIs should explicitly release a thread's resources by calling
+  ts_free_thread() before terminating it. Native TLS resource destructors only
+  run on their owning thread; tsrm_shutdown() cannot release them afterwards.
+  All PHP-managed worker threads must be quiescent before tsrm_shutdown().
