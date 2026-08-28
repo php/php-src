@@ -38,6 +38,8 @@ typedef struct {
 	// current text
 	zval text;
 
+	zend_string *compiled_rules;
+
 	zend_object	zo;
 } BreakIterator_object;
 
