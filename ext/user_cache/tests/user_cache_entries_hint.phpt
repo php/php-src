@@ -24,11 +24,7 @@ echo shell_exec("$php $args -d user_cache.entries_hint=-1 -r " . escapeshellarg(
 $out = shell_exec("$php $args -d user_cache.entries_hint=16777213 -r " . escapeshellarg($code) . " 2>&1");
 echo $out, "\n";
 
-/* The clamped table plus its per-key lock region (1024 records at this
- * scale) must still leave half the segment for value data. Entry records
- * are 48 bytes and lock records 40 on 64-bit layouts, 44 and 36 on 32-bit;
- * each entry also carries a 4-byte access stamp. */
-[$entry_bytes, $lock_bytes] = PHP_INT_SIZE >= 8 ? [48, 40] : [44, 36];
+[$entry_bytes, $lock_bytes] = PHP_INT_SIZE >= 8 ? [48, 48] : [44, 44];
 preg_match('/(\d+)\s*$/', $out, $m);
 $cap = (int) $m[1];
 var_dump($cap >= 100000, $cap * ($entry_bytes + 4) + 1024 * $lock_bytes <= 8 * 1024 * 1024);
