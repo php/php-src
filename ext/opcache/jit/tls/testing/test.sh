@@ -208,7 +208,9 @@ for CC in clang gcc; do
   esac
   for LD in $LDs; do
     for opt in -O0 -O3; do
-      CFLAGS="$MACHINE $MUSL $opt -Werror -I$root/ext/opcache -I$root/Zend -I$root"
+      # def.c stubs tsrm_get_ls_cache_tcb_offset() to 0, which only happens under
+      # global-dynamic, so reference the cache with that model too.
+      CFLAGS="$MACHINE $MUSL $opt -Werror -DTSRM_TLS_MODEL_USE_GLOBAL_DYNAMIC -I$root/ext/opcache -I$root/Zend -I$root"
       LDFLAGS="$MACHINE -fuse-ld=$LD $RPATH"
 
       for pic in "-fPIC" "-fno-PIC $STATIC"; do

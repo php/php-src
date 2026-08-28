@@ -3,8 +3,6 @@
 
 #include "../zend_jit_tls.h"
 
-extern __thread void* _tsrm_ls_cache;
-
 int test(void)
 {
 	size_t tcb_offset = 0;
@@ -12,7 +10,7 @@ int test(void)
 	size_t module_offset = -1;
 
 	/* Ensure the slot is allocated */
-	_tsrm_ls_cache = NULL;
+	void *cache = &_tsrm_ls_cache;
 
 	zend_result result = zend_jit_resolve_tsrm_ls_cache_offsets(
 			&tcb_offset, &module_index, &module_offset);
@@ -24,5 +22,5 @@ int test(void)
 		return 0;
 	}
 
-	return zend_jit_tsrm_ls_cache_address(tcb_offset, module_index, module_offset) == &_tsrm_ls_cache;
+	return zend_jit_tsrm_ls_cache_address(tcb_offset, module_index, module_offset) == cache;
 }
