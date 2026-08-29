@@ -6,7 +6,7 @@ if (PHP_INT_SIZE < 8) die("skip 64-bit only");
 ?>
 --FILE--
 <?php
-$tmp = tempnam(sys_get_temp_dir(), 'fseek');
+$tmp = __DIR__ . '/fseek_whence_overflow.tmp';
 file_put_contents($tmp, "0123456789");
 $bias = 2 ** 32;
 
@@ -33,7 +33,10 @@ var_dump(fseek($h, 3, SEEK_CUR));          // 0
 var_dump(ftell($h));                        // 7
 
 fclose($h);
-unlink($tmp);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . '/fseek_whence_overflow.tmp');
 ?>
 --EXPECT--
 int(-1)
