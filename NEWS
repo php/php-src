@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     return value of php_cli_server_client_send_through()). (Lazizbek Ergashev)
 
 - DOM:
+  . Fixed NamedNodeMap::getNamedItemNS() with an empty URI not matching
+    the null namespace in spec-following mode. (iliaal)
   . Fixed a use-after-free when cloning a DOMNameSpaceNode after
     DOMDocument::xinclude(). (iliaal)
   . Fixed bug GH-23331 (UAF when node_list_unlink() skips attribute children
