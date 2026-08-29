@@ -1104,7 +1104,7 @@ PHPAPI PHP_FUNCTION(fseek)
 		Z_PARAM_LONG(whence)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (whence < INT_MIN || whence > INT_MAX) {
+	if (ZEND_LONG_EXCEEDS_INT(whence)) {
 		RETURN_LONG(-1);
 	}
 
