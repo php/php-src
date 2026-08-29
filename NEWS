@@ -71,6 +71,10 @@ PHP                                                                        NEWS
     an object converted to an array fails. (David Carlier)
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
 
+- Sysvshm:
+  . Fixed out-of-bounds reads and writes when a shared memory segment carries
+    a corrupted header or chunk length. (iliaal)
+
 - Zip:
   . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
     garbage collected). (Weilin Du, ndossche)
