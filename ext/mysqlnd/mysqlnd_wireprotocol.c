@@ -878,7 +878,12 @@ php_mysqlnd_ok_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	/* There is a message */
 	if (packet->header.size > (size_t) (p - buf) && (net_len = php_mysqlnd_net_field_length(&p))) {
-		packet->message_len = MIN(net_len, buf_len - (p - begin));
+		if ((p - buf) > packet->header.size || packet->header.size - (p - buf) < net_len) {
+			DBG_ERR_FMT("OK packet message length is past the packet size");
+			php_error_docref(NULL, E_WARNING, "OK packet message length is past the packet size");
+			DBG_RETURN(FAIL);
+		}
+		packet->message_len = net_len;
 		packet->message = mnd_pestrndup((char *)p, packet->message_len, FALSE);
 	} else {
 		packet->message = NULL;
