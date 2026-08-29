@@ -5236,7 +5236,8 @@ static int zend_jit_math_long_double(zend_jit_ctx   *jit,
                                      zend_jit_addr   op1_addr,
                                      zend_jit_addr   op2_addr,
                                      zend_jit_addr   res_addr,
-                                     uint32_t        res_use_info)
+                                     uint32_t        res_use_info,
+                                     ir_ref         *slow_inputs)
 {
 	ir_op op;
 	ir_ref op1, op2, ref;
@@ -5254,6 +5255,13 @@ static int zend_jit_math_long_double(zend_jit_ctx   *jit,
 	}
 	op1 = jit_Z_LVAL(jit, op1_addr);
 	op2 = jit_Z_DVAL(jit, op2_addr);
+	if (opcode == ZEND_DIV) {
+		ir_ref if_non_zero = ir_IF(ir_NE(op2, ir_CONST_DOUBLE(0.0)));
+
+		ir_IF_FALSE_cold(if_non_zero);
+		ir_END_list((*slow_inputs));
+		ir_IF_TRUE(if_non_zero);
+	}
 	ref = ir_BINARY_OP_D(op, ir_INT2D(op1), op2);
 	jit_set_Z_DVAL(jit, res_addr, ref);
 
@@ -5270,7 +5278,8 @@ static int zend_jit_math_double_long(zend_jit_ctx   *jit,
                                      zend_jit_addr   op1_addr,
                                      zend_jit_addr   op2_addr,
                                      zend_jit_addr   res_addr,
-                                     uint32_t        res_use_info)
+                                     uint32_t        res_use_info,
+                                     ir_ref         *slow_inputs)
 {
 	ir_op op;
 	ir_ref op1, op2, ref;
@@ -5288,6 +5297,13 @@ static int zend_jit_math_double_long(zend_jit_ctx   *jit,
 	}
 	op1 = jit_Z_DVAL(jit, op1_addr);
 	op2 = jit_Z_LVAL(jit, op2_addr);
+	if (opcode == ZEND_DIV) {
+		ir_ref if_non_zero = ir_IF(ir_NE(op2, ir_CONST_LONG(0)));
+
+		ir_IF_FALSE_cold(if_non_zero);
+		ir_END_list((*slow_inputs));
+		ir_IF_TRUE(if_non_zero);
+	}
 	ref = ir_BINARY_OP_D(op, op1, ir_INT2D(op2));
 	jit_set_Z_DVAL(jit, res_addr, ref);
 
@@ -5306,7 +5322,8 @@ static int zend_jit_math_double_double(zend_jit_ctx   *jit,
                                        zend_jit_addr   op1_addr,
                                        zend_jit_addr   op2_addr,
                                        zend_jit_addr   res_addr,
-                                       uint32_t        res_use_info)
+                                       uint32_t        res_use_info,
+                                       ir_ref         *slow_inputs)
 {
 	bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 	ir_op op;
@@ -5325,6 +5342,13 @@ static int zend_jit_math_double_double(zend_jit_ctx   *jit,
 	}
 	op1 = jit_Z_DVAL(jit, op1_addr);
 	op2 = (same_ops) ? op1 : jit_Z_DVAL(jit, op2_addr);
+	if (opcode == ZEND_DIV) {
+		ir_ref if_non_zero = ir_IF(ir_NE(op2, ir_CONST_DOUBLE(0.0)));
+
+		ir_IF_FALSE_cold(if_non_zero);
+		ir_END_list((*slow_inputs));
+		ir_IF_TRUE(if_non_zero);
+	}
 	ref = ir_BINARY_OP_D(op, op1, op2);
 	jit_set_Z_DVAL(jit, res_addr, ref);
 
@@ -5424,7 +5448,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 					ir_END_list(slow_inputs);
 					ir_IF_TRUE(if_op1_long_op2_double);
 				}
-				if (!zend_jit_math_long_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
+				if (!zend_jit_math_long_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info, &slow_inputs)) {
 					return 0;
 				}
 				ir_refs_add(end_inputs, ir_END());
@@ -5454,7 +5478,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 					if_op1_double_op2_double = jit_if_Z_TYPE(jit, op2_addr, IS_DOUBLE);
 					ir_IF_TRUE(if_op1_double_op2_double);
 				}
-				if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
+				if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info, &slow_inputs)) {
 					return 0;
 				}
 				ir_refs_add(end_inputs, ir_END());
@@ -5469,7 +5493,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 					ir_END_list(slow_inputs);
 					ir_IF_TRUE(if_op1_double_op2_long);
 				}
-				if (!zend_jit_math_double_long(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
+				if (!zend_jit_math_double_long(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info, &slow_inputs)) {
 					return 0;
 				}
 				ir_refs_add(end_inputs, ir_END());
@@ -5494,7 +5518,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 				if_op1_double_op2_double = jit_if_Z_TYPE(jit, op2_addr, IS_DOUBLE);
 				ir_IF_TRUE(if_op1_double_op2_double);
 			}
-			if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
+			if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info, &slow_inputs)) {
 				return 0;
 			}
 			ir_refs_add(end_inputs, ir_END());
@@ -5509,7 +5533,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 				ir_END_list(slow_inputs);
 				ir_IF_TRUE(if_op1_double_op2_long);
 			}
-			if (!zend_jit_math_double_long(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
+			if (!zend_jit_math_double_long(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info, &slow_inputs)) {
 				return 0;
 			}
 			ir_refs_add(end_inputs, ir_END());
@@ -5531,7 +5555,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 				if_op1_double_op2_double = jit_if_Z_TYPE(jit, op1_addr, IS_DOUBLE);
 				ir_IF_TRUE(if_op1_double_op2_double);
 			}
-			if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
+			if (!zend_jit_math_double_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info, &slow_inputs)) {
 				return 0;
 			}
 			ir_refs_add(end_inputs, ir_END());
@@ -5546,7 +5570,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 				ir_END_list(slow_inputs);
 				ir_IF_TRUE(if_op1_long_op2_double);
 			}
-			if (!zend_jit_math_long_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info)) {
+			if (!zend_jit_math_long_double(jit, opcode, op1_addr, op2_addr, res_addr, res_use_info, &slow_inputs)) {
 				return 0;
 			}
 			ir_refs_add(end_inputs, ir_END());
@@ -5555,7 +5579,8 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 		}
 	}
 
-	if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
+	if (slow_inputs ||
+		(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
 		(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 		ir_ref func, arg1, arg2, arg3;
 
@@ -5601,7 +5626,7 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 		jit_FREE_OP(jit, op1_type, op1, op1_info, NULL);
 		jit_FREE_OP(jit, op2_type, op2, op2_info, NULL);
 
-		if (may_throw) {
+		if (may_throw || opcode == ZEND_DIV) {
 			if (opline->opcode == ZEND_ASSIGN_DIM_OP && (opline->op2_type & (IS_VAR|IS_TMP_VAR))) {
 				ir_GUARD_NOT(ir_LOAD_A(jit_EG_exception(jit)),
 					jit_STUB_ADDR(jit, jit_stub_exception_handler_free_op2));

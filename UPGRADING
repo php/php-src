@@ -778,6 +778,8 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Floating-point division is now specialized for known float/float,
+    float/int, and int/float operand types by the VM and JIT.
   . printf() using only "%s" and "%d" will be compiled into the equivalent
     string interpolation, avoiding the overhead of a function call and
     repeatedly parsing the format string.

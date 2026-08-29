@@ -1395,9 +1395,17 @@ static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t
 	}
 	switch (op) {
 		case ZEND_POW:
-		case ZEND_DIV:
-			// TODO: check for division by zero ???
 			return false;
+		case ZEND_DIV:
+			/* Long/long division may produce either a long or a double. Start by
+			 * specializing divisions where at least one operand is known to be a
+			 * double, and let the generic handler deal with all other cases. */
+			return (((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE)
+					&& (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))
+					&& !(op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))))
+				|| (((op2_info & MAY_BE_ANY) == MAY_BE_DOUBLE)
+					&& (op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE))
+					&& !(op1_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))));
 		case ZEND_ADD:
 		case ZEND_SUB:
 		case ZEND_MUL:
@@ -1712,7 +1720,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_ADD:
 					case ZEND_SUB:
 					case ZEND_MUL:
-//					case ZEND_DIV: // TODO: check for division by zero ???
+					case ZEND_DIV:
 						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 							break;
 						}
@@ -1727,6 +1735,9 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							/* pass */
 						} else if (!(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) ||
 						    !(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+							break;
+						} else if (opline->opcode == ZEND_DIV
+						 && !zend_jit_supported_binary_op(ZEND_DIV, op1_info, op2_info)) {
 							break;
 						}
 						res_addr = RES_REG_ADDR();
