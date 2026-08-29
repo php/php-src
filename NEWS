@@ -82,6 +82,8 @@ PHP                                                                        NEWS
     on corrupted entries. (David Carlier)
   . Fixed ZipArchive::getNameIndex() truncating the entry index to int.
     (David Carlier)
+  . Fixed fstat() on a zip:// stream reporting success when the archive cannot
+    be opened. (David Carlier)
 
 - SAPI:
   . Fixed fuzzer targets failing to build in isolation. (Mrmaxmeier)
