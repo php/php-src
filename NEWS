@@ -30,6 +30,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-19320 (FPM UID and GID overflow). (Pratik Bhujel)
 
 - Intl:
+  . Fixed a memory leak when dumping IntlCalendar instances. (iliaal)
   . Fixed a memory leak when iterating IntlBreakIterator::getPartsIterator()
     results. (iliaal)
   . Fixed a double-free when IntlGregorianCalendar construction fails after
