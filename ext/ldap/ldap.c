@@ -113,11 +113,6 @@ static zend_object *ldap_link_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *ldap_link_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct LDAP\\Connection, use ldap_connect() instead");
-	return NULL;
-}
-
 static void ldap_link_free(ldap_linkdata *ld)
 {
 	/* We use ldap_destroy rather than ldap_unbind here, because ldap_unbind
@@ -874,7 +869,6 @@ PHP_MINIT_FUNCTION(ldap)
 	memcpy(&ldap_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_link_object_handlers.offset = offsetof(ldap_linkdata, std);
 	ldap_link_object_handlers.free_obj = ldap_link_free_obj;
-	ldap_link_object_handlers.get_constructor = ldap_link_get_constructor;
 	ldap_link_object_handlers.clone_obj = NULL;
 	ldap_link_object_handlers.compare = zend_objects_not_comparable;
 
@@ -951,6 +945,60 @@ PHP_MINFO_FUNCTION(ldap)
 
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
+}
+/* }}} */
+
+/* {{{ Creates new LDAP\Connection object */
+PHP_METHOD(LDAP_Connection, __construct)
+{
+	char *url = NULL;
+	size_t urllen = 0;
+	ldap_linkdata *ld;
+	LDAP *ldap = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &url, &urllen) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
+		zend_throw_error(NULL, "Too many open links (" ZEND_LONG_FMT ")", LDAPG(num_links));
+		RETURN_THROWS();
+	}
+
+	{
+		int rc = LDAP_SUCCESS;
+		if (url && !ldap_is_ldap_url(url)) {
+			zend_argument_value_error(1, "is not a valid LDAP URI");
+			RETURN_THROWS();
+		}
+
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+		if (LDAPG(tls_newctx) && url && !strncmp(url, "ldaps:", 6)) {
+			int val = 0;
+
+			/* ensure all pending TLS options are applied in a new context */
+			if (ldap_set_option(NULL, LDAP_OPT_X_TLS_NEWCTX, &val) != LDAP_OPT_SUCCESS) {
+				zend_throw_error(NULL, "Could not create new security context");
+				RETURN_THROWS();
+			}
+			LDAPG(tls_newctx) = false;
+		}
+#endif
+		ld = Z_LDAP_LINK_P(ZEND_THIS);
+		rc = ldap_initialize(&ldap, url);
+
+		if (rc != LDAP_SUCCESS) {
+			zend_throw_error(NULL, "Could not create session handle: %s", ldap_err2string(rc));
+			RETURN_THROWS();
+		}
+	}
+
+	if (ldap == NULL) {
+		RETURN_THROWS();
+	} else {
+		LDAPG(num_links)++;
+		ld->link = ldap;
+	}
 }
 /* }}} */
 

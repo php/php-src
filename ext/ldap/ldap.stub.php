@@ -835,6 +835,7 @@ namespace LDAP {
      */
     final class Connection
     {
+        public function __construct(?string $uri = null);
     }
 
     /**
