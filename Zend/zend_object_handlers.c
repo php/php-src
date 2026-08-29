@@ -57,6 +57,25 @@ static zend_always_inline bool zend_objects_check_stack_limit(void)
 #endif
 }
 
+static zend_always_inline bool zend_magic_property_handler_is_active(
+		zend_object *zobj, zend_string *name, zend_function *handler)
+{
+	for (zend_execute_data *execute_data = EG(current_execute_data);
+			execute_data; execute_data = execute_data->prev_execute_data) {
+		if (execute_data->func != handler || Z_TYPE(execute_data->This) != IS_OBJECT
+				|| Z_OBJ(execute_data->This) != zobj || ZEND_CALL_NUM_ARGS(execute_data) < 1) {
+			continue;
+		}
+
+		zval *arg = ZEND_CALL_ARG(execute_data, 1);
+		if (Z_TYPE_P(arg) == IS_STRING && zend_string_equals(Z_STR_P(arg), name)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /*
   __X accessors explanation:
 
@@ -923,7 +942,7 @@ try_again:
 		zval tmp_result;
 		guard = zend_get_property_guard(zobj, name);
 
-		if (!((*guard) & IN_ISSET)) {
+		if (!zend_magic_property_handler_is_active(zobj, name, zobj->ce->__isset)) {
 			GC_ADDREF(zobj);
 
 			*guard |= IN_ISSET;
@@ -967,17 +986,17 @@ try_again:
 			}
 			retval = &EG(uninitialized_zval);
 
-			if (zobj->ce->__get && !((*guard) & IN_GET)) {
+			if (zobj->ce->__get && !zend_magic_property_handler_is_active(zobj, name, zobj->ce->__get)) {
 				goto call_getter;
 			}
 			OBJ_RELEASE(zobj);
-		} else if (zobj->ce->__get && !((*guard) & IN_GET)) {
+		} else if (zobj->ce->__get && !zend_magic_property_handler_is_active(zobj, name, zobj->ce->__get)) {
 			goto call_getter_addref;
 		}
 	} else if (zobj->ce->__get) {
 		/* magic get */
 		guard = zend_get_property_guard(zobj, name);
-		if (!((*guard) & IN_GET)) {
+		if (!zend_magic_property_handler_is_active(zobj, name, zobj->ce->__get)) {
 			/* have getter - try with it! */
 call_getter_addref:
 			GC_ADDREF(zobj);
@@ -2501,7 +2520,7 @@ found:
 	if (has_set_exists != ZEND_PROPERTY_EXISTS) {
 		uint32_t *guard = zend_get_property_guard(zobj, name);
 
-		if (!((*guard) & IN_ISSET)) {
+		if (!zend_magic_property_handler_is_active(zobj, name, zobj->ce->__isset)) {
 			zval rv;
 
 			/* have issetter - try with it! */
@@ -2524,7 +2543,8 @@ found:
 				}
 				if (prop) {
 					result = i_zend_is_true(prop);
-				} else if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
+				} else if (EXPECTED(!EG(exception)) && zobj->ce->__get
+						&& !zend_magic_property_handler_is_active(zobj, name, zobj->ce->__get)) {
 					(*guard) |= IN_GET;
 					zend_std_call_getter(zobj, name, &rv);
 					(*guard) &= ~IN_GET;
