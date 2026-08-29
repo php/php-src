@@ -195,6 +195,9 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		ssb->sb.st_blocks = -1;
 #endif
 		ssb->sb.st_ino = -1;
+	} else {
+		zend_string_release_ex(file_basename, 0);
+		return -1;
 	}
 	zend_string_release_ex(file_basename, 0);
 	return 0;
