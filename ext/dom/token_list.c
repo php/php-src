@@ -184,6 +184,7 @@ static void dom_token_list_update(dom_token_list_object *intern)
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 
 	php_libxml_invalidate_cache_tag(&intern->cache_tag);
+	php_libxml_invalidate_node_list_cache(intern->dom.document);
 
 	/* 1. If the associated element does not have an associated attribute and token set is empty, then return. */
 	if (attr == NULL && zend_hash_num_elements(token_set) == 0) {
@@ -432,6 +433,7 @@ zend_result dom_token_list_value_write(dom_object *obj, zval *newval)
 		zend_value_error("Value must not contain any null bytes");
 		return FAILURE;
 	}
+	php_libxml_invalidate_node_list_cache(intern->dom.document);
 	xmlSetNsProp(dom_token_list_get_element(intern), NULL, BAD_CAST "class", BAD_CAST Z_STRVAL_P(newval));
 	/* Note: we don't update the set here, the set is always lazily updated for performance reasons. */
 	return SUCCESS;
