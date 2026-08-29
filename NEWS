@@ -44,6 +44,10 @@ PHP                                                                        NEWS
   . Fixed a use-after-free when IntlRuleBasedBreakIterator is constructed
     from compiled rules. (iliaal)
 
+- MBString:
+  . Fixed mb_ereg_replace() emitting a NUL or out-of-bounds bytes in the
+    replacement when a \\k<name> backref has no closing delimiter. (iliaal)
+
 - Opcache:
   . Fixed opcache.protect_memory race under ZTS. (realFlowControl)
   . Fixed bug GH-23288 (Crash on restart when opcache.interned_strings_buffer
