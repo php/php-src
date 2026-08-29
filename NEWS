@@ -80,6 +80,8 @@ PHP                                                                        NEWS
     garbage collected). (Weilin Du, ndossche)
   . Fixed ZipArchive::extractTo() and ZipArchive::getFrom*() reporting success
     on corrupted entries. (David Carlier)
+  . Fixed ZipArchive::getNameIndex() truncating the entry index to int.
+    (David Carlier)
 
 - SAPI:
   . Fixed fuzzer targets failing to build in isolation. (Mrmaxmeier)
