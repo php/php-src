@@ -270,7 +270,7 @@ PHP 8.6 UPGRADE NOTES
     additional locale arguments when $locales is an array now throws an
     ArgumentCountError.
   . linkinfo() now raises a ValueError when the $path argument is empty.
-  . pathinfo() now raises a ValueError when an invalid $flag argument value is
+  . pathinfo() now raises a ValueError when an invalid $flags argument value is
     passed.
   . scandir() now raises a ValueError when an invalid $sorting_order argument
     value is passed.
