@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     unconstructed Collator. (Ilia Alshanetsky)
 
 - Standard:
+  . Improved performance of array_shift() on packed arrays without holes.
+    (mehmetcansahin)
   . Improved performance of array_splice() when inserting without removing
     elements. (mehmetcansahin)
 
