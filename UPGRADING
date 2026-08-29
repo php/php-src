@@ -977,6 +977,7 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of array_fill_keys().
   . Improved performance of array_intersect().
   . Improved performance of array_map() with multiple arrays passed.
+  . Improved performance of array_shift() on packed arrays without holes.
   . Improved performance of array_sum() and array_product() for
     integer-only arrays.
   . Improved performance of array_unshift().
