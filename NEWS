@@ -71,6 +71,10 @@ PHP                                                                        NEWS
     an object converted to an array fails. (David Carlier)
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
 
+- SimpleXML:
+  . Fixed writing to a dimension of the object returned by attributes() not
+    creating the attribute. (iliaal)
+
 - Zip:
   . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
     garbage collected). (Weilin Du, ndossche)
