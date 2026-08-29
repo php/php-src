@@ -1171,10 +1171,17 @@ void php_mysqlnd_rset_header_free_mem(void * _packet)
 /* }}} */
 
 #define READ_RSET_FIELD(field_name) do { \
+		BAIL_IF_NO_MORE_DATA; \
 		len = php_mysqlnd_net_field_length(&p); \
 		if (UNEXPECTED(len == MYSQLND_NULL_LENGTH)) { \
 			goto faulty_or_fake; \
 		} else if (len != 0) { \
+			BAIL_IF_NO_MORE_DATA; \
+			if (UNEXPECTED((p - begin) > packet->header.size || packet->header.size - (p - begin) < len)) { \
+				DBG_ERR_FMT("Result set field metadata string length is past the packet size"); \
+				php_error_docref(NULL, E_WARNING, "Result set field metadata string length is past the packet size"); \
+				DBG_RETURN(FAIL); \
+			} \
 			meta->field_name = (const char *)p; \
 			meta->field_name ## _length = len; \
 			p += len; \
@@ -1243,7 +1250,7 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	READ_RSET_FIELD(name);
 	READ_RSET_FIELD(org_name);
 
-	/* 1 byte length */
+	BAIL_IF_NO_MORE_DATA;
 	if (UNEXPECTED(12 != *p)) {
 		DBG_ERR_FMT("Protocol error. Server sent false length. Expected 12 got %d", (int) *p);
 		php_error_docref(NULL, E_WARNING, "Protocol error. Server sent false length. Expected 12");
