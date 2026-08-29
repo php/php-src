@@ -940,6 +940,9 @@ PHP 8.6 UPGRADE NOTES
   . Made splitText() faster and consume less memory.
 
 - GD:
+  . imagebmp(), imagewbmp(), imagegd(), and imagegd2() now buffer output when
+    writing to PHP streams, significantly improving performance when writing
+    images to files.
   . Improved performance of imagegrabscreen() and imagegrabwindow() on
     Windows.
 
