@@ -5,11 +5,9 @@ ldap
 --FILE--
 <?php
 
-try {
-    new LDAP\Connection();
-} catch (Error $ex) {
-    echo $ex::class, ': ', $ex->getMessage(), "\n";
-}
+$ldap = new LDAP\Connection();
+var_dump($ldap);
 ?>
---EXPECT--
-Error: Cannot directly construct LDAP\Connection, use ldap_connect() instead
+--EXPECTF--
+object(LDAP\Connection)#%d (0) {
+}
