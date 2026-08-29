@@ -66,6 +66,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-23447 (Segfault when a class passed to SoapServer::setClass()
     fails to initialize). (Lazizbek Ergashev)
+  . Fixed WSDL cache corruption when a soap:header defines headerfaults.
+    (Ilia Alshanetsky)
 
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
