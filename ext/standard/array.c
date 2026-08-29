@@ -1211,7 +1211,7 @@ ZEND_FRAMELESS_FUNCTION(min, 2)
 		zend_long lhs_lval = Z_LVAL_P(lhs);
 
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_LONG)) {
-			RETURN_COPY_VALUE(lhs_lval < Z_LVAL_P(rhs) ? lhs : rhs);
+			RETURN_COPY_VALUE(lhs_lval <= Z_LVAL_P(rhs) ? lhs : rhs);
 		} else if (Z_TYPE_P(rhs) == IS_DOUBLE && (zend_dval_to_lval_silent((double) lhs_lval) == lhs_lval)) {
 			/* if lhs_lval can be exactly represented as a double, go to double dedicated code */
 			lhs_dval = (double) lhs_lval;
@@ -1224,16 +1224,16 @@ ZEND_FRAMELESS_FUNCTION(min, 2)
 
 		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
 double_compare:
-			RETURN_COPY_VALUE(lhs_dval < Z_DVAL_P(rhs) ? lhs : rhs);
+			RETURN_COPY_VALUE(lhs_dval <= Z_DVAL_P(rhs) ? lhs : rhs);
 		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval_silent((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
 			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
-			RETURN_COPY_VALUE(lhs_dval < (double)Z_LVAL_P(rhs) ? lhs : rhs);
+			RETURN_COPY_VALUE(lhs_dval <= (double)Z_LVAL_P(rhs) ? lhs : rhs);
 		} else {
 			goto generic_compare;
 		}
 	} else {
 generic_compare:
-		RETURN_COPY(zend_compare(lhs, rhs) < 0 ? lhs : rhs);
+		RETURN_COPY(zend_compare(lhs, rhs) <= 0 ? lhs : rhs);
 	}
 }
 
