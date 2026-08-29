@@ -32,6 +32,11 @@ PHP 8.7 UPGRADE NOTES
     curl_setopt() return false, instead of being silently interpreted as a
     combination of redirect types.
 
+- FTP:
+  . ftp_connect() and ftp_ssl_connect() now throw a ValueError when $port is
+    outside the 0-65535 range, instead of silently truncating it to its low
+    16 bits (e.g. 65536 previously connected to port 21).
+
 - PDO:
   . PDOStatement::bindColumn() now throws a ValueError when the column name is
     not present in the result set. It previously reported the condition
