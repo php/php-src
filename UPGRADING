@@ -37,6 +37,18 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 
 - Intl:
+  . Added IntlRelativeDateTimeFormatter to format relative date and time offsets
+    using locale-specific text, such as "yesterday" or "in 3 days". Its format()
+    method uses a textual form when available and a numeric form otherwise,
+    while formatNumeric() always uses a numeric form. combineDateAndTime()
+    combines already formatted date and time strings according to the locale.
+    The constructor accepts an optional NumberFormatter to customize numeric
+    output; subsequent configuration changes to that object are reflected in
+    formatting results. Styles, capitalization contexts, and units are selected
+    using the IntlRelativeDateTimeFormatterStyle,
+    IntlRelativeDateTimeFormatterCapitalization, and
+    IntlRelativeDateTimeFormatterUnit enums, respectively.
+    RFC: https://wiki.php.net/rfc/reldateformatter
   . Locale::acceptFromHttp() and locale_accept_from_http() now accept an
     optional $availableLocales array argument. When given, the
     Accept-Language header is matched against these locales instead of all
@@ -67,6 +79,13 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- Intl:
+  . IntlRelativeDateTimeFormatter
+  . enum IntlRelativeDateTimeFormatterStyle
+  . enum IntlRelativeDateTimeFormatterCapitalization
+  . enum IntlRelativeDateTimeFormatterUnit
+    RFC: https://wiki.php.net/rfc/reldateformatter
 
 ========================================
 8. Removed Extensions and SAPIs
