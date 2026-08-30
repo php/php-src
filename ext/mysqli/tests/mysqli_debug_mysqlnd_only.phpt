@@ -65,7 +65,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
         '_mysqlnd_pemalloc',
         '_mysqlnd_perealloc',
     );
-    $trace_file = sprintf('%s%s%s', sys_get_temp_dir(), DIRECTORY_SEPARATOR, 'mysqli_debug_phpt.trace');
+    $trace_file = tempnam(sys_get_temp_dir(), "mysqli_debug_phpt");
 
     $trace = try_control_string($link, 't:m:O,' . $trace_file, $trace_file, 10);
     if (!strstr($trace, 'SELECT * FROM test') && !strstr($trace, 'mysql_real_query'))
