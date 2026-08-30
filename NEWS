@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23242 (PHP development server does not support Expect
     100-continue flow control). (Sjoerd Langkemper)
 
+- DOM:
+  . Fixed stale getElementsByClassName() and other node list caches after
+    className/classList writes and attribute removals. (Ilia Alshanetsky)
+
 - Intl:
   . Fixed a memory leak when dumping IntlCalendar instances. (Ilia Alshanetsky)
   . Fixed Collator::sortWithSortKeys() allocating fixed 2MiB buffers
