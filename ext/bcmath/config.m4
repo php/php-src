@@ -10,7 +10,6 @@ if test "$PHP_BCMATH" != "no"; then
       libbcmath/src/compare.c
       libbcmath/src/convert.c
       libbcmath/src/div.c
-      libbcmath/src/divmod.c
       libbcmath/src/doaddsub.c
       libbcmath/src/floor_or_ceil.c
       libbcmath/src/long2num.c
