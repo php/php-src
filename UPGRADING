@@ -973,6 +973,7 @@ PHP 8.6 UPGRADE NOTES
   . Reduced temporary allocations when iterating Phar directories.
 
 - Standard:
+  . Improved performance of str_ends_with().
   . Improved performance of array_fill_keys().
   . Improved performance of array_intersect().
   . Improved performance of array_map() with multiple arrays passed.
