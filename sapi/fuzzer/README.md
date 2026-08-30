@@ -33,6 +33,7 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-execute`: Fuzzing the executor
 * `php-fuzz-function-jit`: Fuzzing the function JIT (requires --enable-opcache)
 * `php-fuzz-tracing-jit`: Fuzzing the tracing JIT (requires --enable-opcache)
+* `php-fuzz-bcmath`: Fuzzing bcadd, bcsub, bcmul, bcdiv, bcmod and bcpow (requires --enable-bcmath)
 
 Some fuzzers have a seed corpus in `sapi/fuzzer/corpus`. You can use it as follows:
 
