@@ -2,13 +2,15 @@
 GH-23447 (Segfault when a class passed to SoapServer::setClass() fails to initialize)
 --EXTENSIONS--
 soap
+--CREDITS--
+Lu Maltsis (@lmaltsis)
 --FILE--
 <?php
 class foo {
     private $broken = undefinedConstant;
 }
 
-$server = new SoapServer(null, array('uri' => 'http://testuri.org'));
+$server = new SoapServer(null, ['uri' => 'http://testuri.org']);
 $server->setClass('foo');
 
 $server->handle(<<<'XML'
