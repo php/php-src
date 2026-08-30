@@ -1638,6 +1638,12 @@ function array_walk_recursive(array|object &$array, callable $callback, mixed $a
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
 /**
+ * @param array $haystack
+ * @return array
+ */
+function array_str_contains(array $haystack, string $needle): array {}
+
+/**
  * @compile-time-eval
  */
 function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
