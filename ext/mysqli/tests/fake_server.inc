@@ -721,6 +721,19 @@ function my_mysqli_test_auth_response_message_over_read(my_mysqli_fake_server_co
     $conn->read();
 }
 
+function my_mysqli_test_ok_packet_message_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = new my_mysqli_fake_packet();
+    $p->full = "08000001" . "00" . "00" . "00" . "0200" . "0000" . "fa";
+
+    $conn->send_server_greetings();
+    $conn->read_packets(1);
+    $conn->send_server_ok();
+    $conn->read_packets(1);
+    $conn->send($p->to_bytes(), "Malicious OK Packet [message length past the packet size]");
+    $conn->read();
+}
+
 function my_mysqli_test_stmt_response_row_over_read_string(my_mysqli_fake_server_conn $conn): void
 {
     $rh = $conn->packet_generator->server_stmt_execute_items_response();
