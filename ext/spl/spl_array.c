@@ -60,16 +60,28 @@ static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
 
 #define Z_SPLARRAY_P(zv)  spl_array_from_obj(Z_OBJ_P((zv)))
 
+static zend_always_inline void spl_array_separate_properties(zend_object *obj)
+{
+	if (GC_REFCOUNT(obj->properties) > 1) {
+		if (EXPECTED(!(GC_FLAGS(obj->properties) & IS_ARRAY_IMMUTABLE))) {
+			GC_DELREF(obj->properties);
+		}
+		obj->properties = zend_array_dup(obj->properties);
+	}
+}
+
 static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern) { /* {{{ */
 	//??? TODO: Delay duplication for arrays; only duplicate for write operations
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		/* rebuild properties */
 		zend_std_get_properties_ex(&intern->std);
+		spl_array_separate_properties(&intern->std);
 		return &intern->std.properties;
 	} else if (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
 		spl_array_object *other = Z_SPLARRAY_P(&intern->array);
 		return spl_array_get_hash_table_ptr(other);
 	} else if (Z_TYPE(intern->array) == IS_ARRAY) {
+		SEPARATE_ARRAY(&intern->array);
 		return &Z_ARRVAL(intern->array);
 	} else {
 		zend_object *obj = Z_OBJ(intern->array);
@@ -88,12 +100,7 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 		ZEND_ASSERT(!zend_lazy_object_must_init(obj));
 		/* rebuild properties */
 		zend_std_get_properties_ex(obj);
-		if (GC_REFCOUNT(obj->properties) > 1) {
-			if (EXPECTED(!(GC_FLAGS(obj->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_DELREF(obj->properties);
-			}
-			obj->properties = zend_array_dup(obj->properties);
-		}
+		spl_array_separate_properties(obj);
 		return &obj->properties;
 	}
 }
