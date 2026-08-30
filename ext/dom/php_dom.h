@@ -206,7 +206,7 @@ xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep);
 #define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
 	if (UNEXPECTED(__intern->ptr == NULL)) { \
-		zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
+		zend_throw_error(NULL, "Couldn't fetch %pS", __intern->std.ce->name);\
 		RETURN_THROWS();\
   	} \
 }
