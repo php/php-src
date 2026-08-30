@@ -40,6 +40,10 @@ PHP                                                                        NEWS
     which detached the classic BPF filter instead of the reuseport program.
     (David Carlier)
 
+- SOAP:
+  . Fixed WSDL cache corruption when a soap:header defines headerfaults.
+    (Ilia Alshanetsky)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
