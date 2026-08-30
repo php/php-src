@@ -2197,7 +2197,7 @@ PHP_METHOD(ZipArchive, getNameIndex)
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	name = zip_get_name(intern, (int) index, flags);
+	name = zip_get_name(intern, (zip_uint64_t) index, flags);
 
 	if (name) {
 		RETVAL_STRING((char *)name);
