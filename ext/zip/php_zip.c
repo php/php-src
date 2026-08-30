@@ -1011,7 +1011,7 @@ static zval *php_zip_write_property(zend_object *object, zend_string *name, zval
 	}
 
 	if (hnd != NULL) {
-		zend_throw_error(NULL, "Cannot write read-only property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		zend_throw_error(NULL, "Cannot write read-only property %pS::$%pS", object->ce->name, name);
 		return &EG(error_zval);
 	}
 
@@ -1765,8 +1765,8 @@ PHP_METHOD(ZipArchive, __serialize)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_throw_exception_ex(NULL, 0,
-		"Serialization of '%s' is not allowed, override __serialize() and __unserialize() to implement it",
-		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+		"Serialization of '%pS' is not allowed, override __serialize() and __unserialize() to implement it",
+		Z_OBJCE_P(ZEND_THIS)->name);
 }
 
 PHP_METHOD(ZipArchive, __unserialize)
@@ -1780,8 +1780,8 @@ PHP_METHOD(ZipArchive, __unserialize)
 	(void) data;
 
 	zend_throw_exception_ex(NULL, 0,
-		"Unserialization of '%s' is not allowed, override __serialize() and __unserialize() to implement it",
-		ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+		"Unserialization of '%pS' is not allowed, override __serialize() and __unserialize() to implement it",
+		Z_OBJCE_P(ZEND_THIS)->name);
 }
 
 /* {{{ clear the internal status */
