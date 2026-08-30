@@ -108,6 +108,9 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 	objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap != NULL) {
+		if (urilen == 0 && objmap->baseobj != NULL && php_dom_follow_spec_intern(objmap->baseobj)) {
+			uri = NULL;
+		}
 		php_dom_obj_map_get_ns_named_item_into_zval(objmap, named, uri, return_value);
 	}
 }
