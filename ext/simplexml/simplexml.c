@@ -436,8 +436,7 @@ long_dim:
 
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		access_mode = SXE_ACCESS_ATTRIBS;
-		node = php_sxe_get_first_node_non_destructive(sxe, node);
-		attr = (xmlAttrPtr)node;
+		attr = (xmlAttrPtr)php_sxe_get_first_node_non_destructive(sxe, node);
 		test = sxe->iter.name != NULL;
 	} else if (sxe->iter.type != SXE_ITER_CHILD) {
 		mynode = node;

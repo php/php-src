@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Io\Poll\Context::wait() now rejects a $maxEvents value greater than
     INT_MAX instead of truncating it. (marc-mabe)
 
+- SimpleXML:
+  . Fixed writing to a dimension of the object returned by attributes() not
+    creating the attribute. (Ilia Alshanetsky)
+
 
 27 Aug 2026, PHP 8.6.0beta2
 
