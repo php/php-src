@@ -62,6 +62,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
     (Weilin Du)
 
+- SOAP:
+  . Fixed bug GH-23447 (Segfault when a class passed to SoapServer::setClass()
+    fails to initialize). (Lazizbek Ergashev)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
