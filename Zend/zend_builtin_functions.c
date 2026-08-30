@@ -1701,6 +1701,10 @@ ZEND_FUNCTION(get_defined_constants)
 
 static bool backtrace_is_arg_sensitive(const zend_execute_data *call, uint32_t offset)
 {
+	if (call->sensitive_args & (1u << offset)) {
+		return true;
+	}
+
 	const zend_attribute *attribute = zend_get_parameter_attribute_str(
 		call->func->common.attributes,
 		"sensitiveparameter",
