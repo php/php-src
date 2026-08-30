@@ -26,17 +26,17 @@ try
 {
     $r->class = 'bullshit';
 }
-catch(ReflectionException $e)
+catch(Throwable $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try
 {
 $r->name = 'bullshit';
 }
-catch(ReflectionException $e)
+catch(Throwable $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $r->foo = 'bar';
@@ -54,8 +54,8 @@ string(26) "ReflectionFunctionAbstract"
 string(7) "getName"
 string(3) "xyz"
 NULL
-Cannot set read-only property ReflectionMethodEx::$class
-Cannot set read-only property ReflectionMethodEx::$name
+ReflectionException: Cannot set read-only property ReflectionMethodEx::$class
+ReflectionException: Cannot set read-only property ReflectionMethodEx::$name
 string(26) "ReflectionFunctionAbstract"
 string(7) "getName"
 string(3) "bar"

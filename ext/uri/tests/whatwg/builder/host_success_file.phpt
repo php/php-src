@@ -34,4 +34,3 @@ object(Uri\WhatWg\Url)#%d (%d) {
   NULL
 }
 bool(true)
-

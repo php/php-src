@@ -20,15 +20,15 @@ var_dump($output3);
 try {
     var_dump(openssl_public_decrypt($encrypted, $output4, array()));
     var_dump($output4);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(openssl_public_decrypt($encrypted, $output5, array($pubkey)));
     var_dump($output5);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(openssl_public_decrypt($encrypted, $output6, array($pubkey, "")));
 var_dump($output6);
@@ -42,7 +42,7 @@ bool(false)
 NULL
 bool(false)
 NULL
-Key array must be of the form array(0 => key, 1 => phrase)
-Key array must be of the form array(0 => key, 1 => phrase)
+ValueError: Key array must be of the form array(0 => key, 1 => phrase)
+ValueError: Key array must be of the form array(0 => key, 1 => phrase)
 bool(true)
 string(32) "Testing openssl_public_decrypt()"

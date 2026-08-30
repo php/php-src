@@ -30,8 +30,8 @@ $strings          = array( NULL, "abc", 'aaa' );
 echo "\n*** Output for zero argument ***\n";
 try {
     printf();
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /* Number of arguments not matching as specified in format field */
@@ -41,13 +41,13 @@ $nbr = 5;
 $name = "voudras";
 try {
     printf("%d $string %s", $nbr, $name);
-} catch (\ArgumentCountError $e) {
-    print('Error found: '.$e->getMessage());
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
 /* Scalar argument */
-echo "\n*** Output for scalar argument ***\n";
+echo "*** Output for scalar argument ***\n";
 printf(3);
 
 /* Float type variations */
@@ -204,11 +204,11 @@ printf("%.988f",1.23456789e10);
 echo"\n\n*** Output for invalid width(-15) specifier ***\n";
 try {
     printf("%030.-15s", $tempstring);
-} catch (ValueError $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
-echo"\n\n*** Output for '%F' as the format parameter ***\n";
+echo "\n*** Output for '%F' as the format parameter ***\n";
 printf("%F",1.23456789e10);
 
 echo"\n\n*** Output for '%X' as the format parameter ***\n";
@@ -233,10 +233,10 @@ printf("%d", $tempstring);
 ?>
 --EXPECTF--
 *** Output for zero argument ***
-printf() expects at least 1 argument, 0 given
+ArgumentCountError: printf() expects at least 1 argument, 0 given
 
 *** Output for insufficient number of arguments ***
-Error found: 5 arguments are required, 3 given
+ArgumentCountError: 5 arguments are required, 3 given
 *** Output for scalar argument ***
 3
 
@@ -676,7 +676,7 @@ Notice: printf(): Requested precision of 988 digits was truncated to PHP maximum
 12345678900.0000000000%d
 
 *** Output for invalid width(-15) specifier ***
-Unknown format specifier "-"
+ValueError: Unknown format specifier "-"
 
 *** Output for '%F' as the format parameter ***
 12345678900.000000

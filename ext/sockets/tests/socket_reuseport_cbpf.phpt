@@ -20,8 +20,8 @@ var_dump(socket_set_option( $socket, SOL_SOCKET, SO_REUSEADDR, true));
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_REUSEPORT, true));
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, array());
-} catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, SKF_AD_CPU));
 var_dump(socket_bind($socket, '0.0.0.0'));

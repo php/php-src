@@ -18,8 +18,8 @@ function foo2($v1, $v2, $v3) {
 
 try {
     var_dump(array_walk($var,"foo2", "data"));
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -32,5 +32,5 @@ int(2)
 int(1)
 string(4) "data"
 bool(true)
-string(4) "data"
+Exception: data
 Done

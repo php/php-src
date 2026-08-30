@@ -46,4 +46,3 @@ bool(true)
 Now is the winter of our discontent.
 true
 true
-

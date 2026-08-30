@@ -29,8 +29,8 @@ function f() {}
 function test(string $attributeClass, $value) {
     try {
         var_dump((new ReflectionFunction($value))->getAttributes($attributeClass)[0]->newInstance());
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -46,7 +46,7 @@ test(M::class, $m);
 --EXPECT--
 object(F)#4 (0) {
 }
-Attribute "M" cannot target function (allowed targets: method)
-Attribute "F" cannot target method (allowed targets: function)
+Error: Attribute "M" cannot target function (allowed targets: method)
+Error: Attribute "F" cannot target method (allowed targets: function)
 object(M)#4 (0) {
 }

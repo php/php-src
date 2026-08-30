@@ -27,7 +27,7 @@ echo "-- checking binary safe array with two parameter callback function --\n";
 try {
     var_dump( array_map(b"callback2", $arr1) );
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
@@ -46,5 +46,5 @@ array(4) {
   string(5) "22.22"
 }
 -- checking binary safe array with two parameter callback function --
-Exception: Too few arguments to function callback2(), 1 passed and exactly 2 expected
+ArgumentCountError: Too few arguments to function callback2(), 1 passed and exactly 2 expected
 Done

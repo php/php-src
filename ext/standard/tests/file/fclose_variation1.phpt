@@ -9,12 +9,12 @@ separate_zval($s2);
 fclose($s);
 try {
     echo fread($s2, strlen("<?php"));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "\nDone.\n";
 ?>
 --EXPECT--
-fread(): Argument #1 ($stream) must be an open stream resource
+TypeError: fread(): Argument #1 ($stream) must be an open stream resource
 
 Done.

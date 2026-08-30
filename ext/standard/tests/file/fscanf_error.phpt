@@ -15,8 +15,8 @@ fclose($file_handle);
 // invalid file handle
 try {
     fscanf($file_handle, "%s");
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // number of formats in format strings not matching the no of variables
@@ -25,8 +25,8 @@ if ($file_handle == false)
   exit("Error:failed to open file $filename");
 try {
     fscanf($file_handle, "%d%s%f", $int_var, $string_var);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 fclose($file_handle);
 
@@ -41,8 +41,8 @@ foreach($invalid_formats as $format)  {
     exit("Error:failed to open file $filename");
   try {
     var_dump(fscanf($file_handle, $format));
-  } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+  } catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
   fclose($file_handle);
 }
@@ -57,13 +57,13 @@ unlink($filename);
 ?>
 --EXPECT--
 *** Testing fscanf() for error conditions ***
-fscanf(): supplied resource is not a valid File-Handle resource
-Different numbers of variable names and field specifiers
+TypeError: fscanf(): supplied resource is not a valid File-Handle resource
+ValueError: Different numbers of variable names and field specifiers
 array(0) {
 }
-Bad scan conversion character "
-Bad scan conversion character "
-Bad scan conversion character "."
-Bad scan conversion character "m"
+ValueError: Bad scan conversion character "
+ValueError: Bad scan conversion character "
+ValueError: Bad scan conversion character "."
+ValueError: Bad scan conversion character "m"
 
 *** Done ***

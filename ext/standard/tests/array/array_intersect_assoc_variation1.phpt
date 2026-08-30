@@ -92,15 +92,15 @@ foreach($arrays as $unexpected_value) {
     // Calling array_intersect_assoc() with default arguments
     try {
         var_dump( array_intersect_assoc($unexpected_value, $array2) );
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     // Calling array_intersect_assoc() with more arguments
     try {
         var_dump( array_intersect_assoc($unexpected_value, $array2, $arr3) );
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 }
@@ -113,75 +113,75 @@ echo "Done";
 --EXPECT--
 *** Testing array_intersect_assoc() : Passing non-array values to $array1 argument ***
 
--- Iteration 1 --array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
+-- Iteration 1 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
 
--- Iteration 2 --array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
+-- Iteration 2 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
 
--- Iteration 3 --array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
+-- Iteration 3 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
 
--- Iteration 4 --array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
+-- Iteration 4 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, int given
 
--- Iteration 5 --array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+-- Iteration 5 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
 
--- Iteration 6 --array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+-- Iteration 6 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
 
--- Iteration 7 --array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+-- Iteration 7 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
 
--- Iteration 8 --array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+-- Iteration 8 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
 
--- Iteration 9 --array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+-- Iteration 9 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, float given
 
--- Iteration 10 --array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
+-- Iteration 10 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
 
--- Iteration 11 --array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
+-- Iteration 11 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
 
--- Iteration 12 --array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
+-- Iteration 12 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
 
--- Iteration 13 --array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
+-- Iteration 13 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
 
--- Iteration 14 --array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
+-- Iteration 14 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, true given
 
--- Iteration 15 --array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
+-- Iteration 15 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, false given
 
--- Iteration 16 --array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+-- Iteration 16 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
 
--- Iteration 17 --array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+-- Iteration 17 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
 
--- Iteration 18 --array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+-- Iteration 18 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
 
--- Iteration 19 --array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+-- Iteration 19 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
 
--- Iteration 20 --array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+-- Iteration 20 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, string given
 
--- Iteration 21 --array_intersect_assoc(): Argument #1 ($array) must be of type array, classA given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, classA given
+-- Iteration 21 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, classA given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, classA given
 
--- Iteration 22 --array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
+-- Iteration 22 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
 
--- Iteration 23 --array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
+-- Iteration 23 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, null given
 
--- Iteration 24 --array_intersect_assoc(): Argument #1 ($array) must be of type array, resource given
-array_intersect_assoc(): Argument #1 ($array) must be of type array, resource given
+-- Iteration 24 --TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, resource given
+TypeError: array_intersect_assoc(): Argument #1 ($array) must be of type array, resource given
 Done
