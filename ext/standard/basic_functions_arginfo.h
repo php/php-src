@@ -152,6 +152,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_array_walk_recursive arginfo_array_walk
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_str_contains, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, haystack, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_in_array, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_MIXED, 0)
@@ -3543,7 +3547,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sapi_windows_cp_is_utf8, arginfo_sapi_windows_cp_is_utf8)
 	ZEND_FE(sapi_windows_set_ctrl_handler, arginfo_sapi_windows_set_ctrl_handler)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
+
 #endif
+	ZEND_FE(array_str_contains, arginfo_array_str_contains)
 	ZEND_FE_END
 };
 
