@@ -20,6 +20,7 @@
 extern "C" {
 #include <zend.h>
 #include <php.h>
+#include "main/fopen_wrappers.h"
 }
 
 #include <Zend/zend_exceptions.h>
@@ -38,6 +39,16 @@ extern "C" {
 zend_class_entry *ResourceBundle_ce_ptr = NULL;
 
 static zend_object_handlers ResourceBundle_object_handlers;
+
+static zend_result resourcebundle_check_open_basedir(const char *bundlename, size_t bundlename_len)
+{
+	if (bundlename != NULL && bundlename_len != 0 && php_check_open_basedir(bundlename)) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "open_basedir restriction in effect");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
 
 /* {{{ ResourceBundle_object_free */
 static void ResourceBundle_object_free( zend_object *object )
@@ -110,6 +121,10 @@ static zend_result resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (UNEXPECTED(bundlename_len >= MAXPATHLEN)) {
 		zend_argument_value_error(2, "is too long");
+		return FAILURE;
+	}
+
+	if (resourcebundle_check_open_basedir(bundlename, bundlename_len) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -355,6 +370,10 @@ PHP_INTL_FUNCTION_WITH_ERROR_RESET(resourcebundle_locales)
 	if(bundlename_len == 0) {
 		// fetch default locales list
 		bundlename = NULL;
+	}
+
+	if (resourcebundle_check_open_basedir(bundlename, bundlename_len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	icuenum = ures_openAvailableLocales( bundlename, &icuerror );
