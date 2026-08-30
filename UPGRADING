@@ -62,10 +62,17 @@ PHP 8.6 UPGRADE NOTES
     behavior.
 
 - GMP:
-  . GMP power and shift operators now throw a ValueError when GMP right operands
-    are outside the unsigned long range, instead of silently truncating them.
+  . gmp_fact() now throws a ValueError if $num does not fit into an unsigned
+    long.
+  . gmp_pow(), gmp_binomial(), gmp_root() and gmp_rootrem() now throw a
+    ValueError if their second argument does not fit into an unsigned long.
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+    throw a ValueError when GMP right operands are outside the unsigned long range,
+    instead of silently truncating them.
   . GMP integer string parsing now throws a ValueError for strings containing NUL
     bytes, instead of silently truncating them.
+  . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
+    includes the function name and argument index ($modulus).
 
 - Intl:
   . Passing a non-stringable object as a time zone to Intl APIs that accept
@@ -669,16 +676,6 @@ PHP 8.6 UPGRADE NOTES
     array|false. The function always establishes an array before filtering, so
     null was never returned. filter_input_array() is unaffected: it still
     returns null when the requested superglobal does not exist.
-
-- GMP:
-  . gmp_fact() now throws a ValueError if $num does not fit into an unsigned
-    long.
-  . gmp_pow(), gmp_binomial(), gmp_root() and gmp_rootrem() now throw a
-    ValueError if their second argument does not fit into an unsigned long.
-  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
-    throw a ValueError if the right operand does not fit into an unsigned long.
-  . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
-    includes the function name and argument index ($modulus).
 
 - LDAP:
   . ldap_free_result() return type has been narrowed from bool to true. The
