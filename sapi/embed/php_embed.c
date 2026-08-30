@@ -30,7 +30,7 @@ static const char HARDCODED_INI[] =
 	"max_execution_time=0\n"
 	"max_input_time=-1\n\0";
 
-#if defined(PHP_WIN32) && defined(ZTS)
+#if defined(PHP_WIN32) && defined(ZTS) && !defined(PHP_EMBED_STATIC)
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
