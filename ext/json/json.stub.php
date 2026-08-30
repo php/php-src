@@ -92,6 +92,17 @@ const JSON_THROW_ON_ERROR = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue PHP_JSON_DUPLICATE_KEY_MERGE
+ */
+const JSON_DUPLICATE_KEY_MERGE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_JSON_DUPLICATE_KEY_ARRAY
+ */
+const JSON_DUPLICATE_KEY_ARRAY = UNKNOWN;
+
+/**
+ * @var int
  * @cvalue PHP_JSON_ERROR_NONE
  */
 const JSON_ERROR_NONE = UNKNOWN;

@@ -89,6 +89,10 @@ static inline void php_json_error_details_clear(php_json_error_details *out) {
 #define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
 #define PHP_JSON_THROW_ON_ERROR             (1<<22)
 
+/* json_decode() duplicate object key handling (RFC 8259 leaves duplicates undefined) */
+#define PHP_JSON_DUPLICATE_KEY_MERGE        (1<<23)
+#define PHP_JSON_DUPLICATE_KEY_ARRAY        (1<<24)
+
 /* default depth */
 #define PHP_JSON_PARSER_DEFAULT_DEPTH 512
 
