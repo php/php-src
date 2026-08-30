@@ -8963,17 +8963,108 @@ static void zend_compile_implements(zend_ast *ast) /* {{{ */
 	zend_class_name *interface_names;
 	uint32_t i;
 
-	interface_names = emalloc(sizeof(zend_class_name) * list->children);
+	/* Attribute validators run before `implements` parts are compiled, an
+	 * internal attribute from an extension might have added an interface
+	 * already so we cannot assume that the list of interfaces is empty.
+	 * See GH-22354. The attribute validator might have also added an interface
+	 * that the user is trying to manually implement, skip those since otherwise
+	 * there are errors about trying to implement an interface that was already
+	 * implemented. */
+	if (EXPECTED(ce->num_interfaces == 0)) {
+		interface_names = emalloc(sizeof(zend_class_name) * list->children);
+		for (i = 0; i < list->children; ++i) {
+			zend_ast *class_ast = list->child[i];
+			interface_names[i].name =
+				zend_resolve_const_class_name_reference(class_ast, "interface name");
+			interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
+		}
 
-	for (i = 0; i < list->children; ++i) {
-		zend_ast *class_ast = list->child[i];
-		interface_names[i].name =
-			zend_resolve_const_class_name_reference(class_ast, "interface name");
-		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
+		ce->num_interfaces = list->children;
+		ce->interface_names = interface_names;
+		return;
 	}
 
-	ce->num_interfaces = list->children;
+	/* Figure out which interfaces in the list should be skipped; first, resolve
+	 * the names. BUT, only skip the *first* usage of an interface in the
+	 * manual `implements` part, if an interface is added by an attribute but
+	 * also manually declared twice it should still be warned about. */
+	const size_t array_size = zend_safe_address_guarded(list->children, sizeof(zend_string *), 0);
+	ALLOCA_FLAG(use_heap_to_add)
+	ALLOCA_FLAG(use_heap_skipped)
+	zend_string **to_add_names = do_alloca(array_size, use_heap_to_add);
+	zend_string **skipped_names = do_alloca(array_size, use_heap_skipped);
+	uint32_t to_add_count = 0;
+	uint32_t skipped_count = 0;
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *class_ast = list->child[i];
+		zend_string *name = zend_resolve_const_class_name_reference(class_ast, "interface name");
+		bool already_added = false;
+		for (uint32_t idx = 0; idx < ce->num_interfaces; ++idx) {
+			if (zend_string_equals_ci(name, ce->interface_names[idx].name)) {
+				already_added = true;
+				break;
+			}
+		}
+		if (already_added) {
+			// Did we already skip this interface name once?
+			bool already_skipped = false;
+			for (uint32_t idx = 0; idx < skipped_count; ++idx) {
+				if (zend_string_equals_ci(name, skipped_names[idx])) {
+					already_skipped = true;
+					break;
+				}
+			}
+			if (already_skipped) {
+				/* Yes, we want to add the interface even though it was already
+				 * added by an attribute. We get here if 1) an attribute added
+				 * the interface (already_added), 2) the developer declared
+				 * the interface manually (this function), and 3) this is
+				 * *not* the first manual declaration of the interface (i.e.
+				 * a previous manual declaration was already skipped, the
+				 * already_skipped flag). In that case, we add the interface
+				 * again so that the standard warning about implementing the
+				 * same interface multiple times is shown. */
+				to_add_names[i] = name;
+				to_add_count++;
+			} else {
+				to_add_names[i] = NULL;
+				skipped_names[i] = name;
+				skipped_count++;
+			}
+		} else {
+			to_add_names[i] = name;
+			to_add_count++;
+		}
+	}
+	ZEND_ASSERT(skipped_count + to_add_count == list->children);
+
+	// Free the skipped names
+	for (uint32_t idx = 0; idx < skipped_count; ++idx) {
+		zend_string_release(skipped_names[idx]);
+	}
+	free_alloca(skipped_names, use_heap_skipped);
+
+	const uint32_t initial_count = ce->num_interfaces;
+	interface_names = safe_erealloc(ce->interface_names, (initial_count + to_add_count), sizeof(*interface_names), 0);
+
+	uint32_t added_count = 0;
+	for (i = 0; i < list->children; ++i) {
+		zend_string *name = to_add_names[i];
+		if (name == NULL) {
+			// This was one of the names that was already added by a validator
+			continue;
+		}
+		interface_names[initial_count + added_count].name = name;
+		interface_names[initial_count + added_count].lc_name = zend_string_tolower(name);
+		// To make it clear that the to_add_names no longer owns the reference
+		to_add_names[i] = NULL;
+		added_count++;
+	}
+	ZEND_ASSERT(added_count == to_add_count);
+
+	ce->num_interfaces = initial_count + added_count;
 	ce->interface_names = interface_names;
+	free_alloca(to_add_names, use_heap_to_add);
 }
 /* }}} */
 
