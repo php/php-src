@@ -309,6 +309,8 @@ PHP_FUNCTION(shm_get_var)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_data;
 	zend_long shm_varpos;
+	zend_long shm_avail;
+	zend_long shm_len;
 	sysvshm_chunk *shm_var;
 	php_unserialize_data_t var_hash;
 
@@ -331,10 +333,16 @@ PHP_FUNCTION(shm_get_var)
 		RETURN_FALSE;
 	}
 	shm_var = (sysvshm_chunk*) ((char *)shm_list_ptr->ptr + shm_varpos);
+	shm_avail = shm_list_ptr->ptr->end - shm_varpos - (zend_long) sizeof(sysvshm_chunk);
+	if (shm_var->length < 0 || shm_var->length > shm_avail) {
+		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
+		RETURN_FALSE;
+	}
+	shm_len = shm_var->length;
 	shm_data = &shm_var->mem;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	int res = php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash);
+	int res = php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_len, &var_hash);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	if (res != 1) {
 		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
@@ -433,7 +441,7 @@ static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 	pos = ptr->start;
 
 	for (;;) {
-		if (pos >= ptr->end) {
+		if (ptr->end - pos < (zend_long) sizeof(sysvshm_chunk)) {
 			return -1;
 		}
 		shm_var = (sysvshm_chunk*) ((char *) ptr + pos);
