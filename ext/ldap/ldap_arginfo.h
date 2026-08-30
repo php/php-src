@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 8c30aa1dd271f786adec30539ef1ed18f56a68b0 */
+ * Stub hash: 2ba7861657a9a2cfb3c1afbf36617b5d626728b3 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -348,6 +348,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_LDAP_Connection___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_LDAP_Connection_bind, 0, 0, LDAP\\Result, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dn, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
 #endif
@@ -436,6 +442,7 @@ ZEND_FUNCTION(ldap_exop_refresh);
 ZEND_FUNCTION(ldap_parse_exop);
 #endif
 ZEND_METHOD(LDAP_Connection, __construct);
+ZEND_METHOD(LDAP_Connection, bind);
 
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
@@ -533,6 +540,7 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class_LDAP_Connection_methods[] = {
 	ZEND_ME(LDAP_Connection, __construct, arginfo_class_LDAP_Connection___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(LDAP_Connection, bind, arginfo_class_LDAP_Connection_bind, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -784,6 +792,9 @@ static zend_class_entry *register_class_LDAP_Connection(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "LDAP", "Connection", class_LDAP_Connection_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "bind", sizeof("bind") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

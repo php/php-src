@@ -836,6 +836,11 @@ namespace LDAP {
     final class Connection
     {
         public function __construct(?string $uri = null);
+        public function bind(
+            ?string $dn = null,
+            #[\SensitiveParameter] ?string $password = null,
+            ?array $controls = null
+        ): Result;
     }
 
     /**

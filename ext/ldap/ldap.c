@@ -1253,19 +1253,12 @@ PHP_FUNCTION(ldap_bind)
 }
 /* }}} */
 
-/* {{{ Bind to LDAP directory */
-PHP_FUNCTION(ldap_bind_ext)
+
+/* {{{ php_ldap_do_bind_ext */
+static void php_ldap_do_bind_ext(zval *link, char *ldap_bind_dn, size_t ldap_bind_dnlen, char* ldap_bind_pw, size_t ldap_bind_pwlen, HashTable *server_controls_ht, zval *return_value, char **exception_message)
 {
-	zval *link;
-	char *ldap_bind_dn = NULL, *ldap_bind_pw = NULL;
-	size_t ldap_bind_dnlen, ldap_bind_pwlen;
-	HashTable *server_controls_ht = NULL;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!p!h!", &link, ldap_link_ce, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &server_controls_ht) != SUCCESS) {
-		RETURN_THROWS();
-	}
 
 	ld = Z_LDAP_LINK_P(link);
 	VERIFY_LDAP_LINK_CONNECTED(ld);
@@ -1273,7 +1266,7 @@ PHP_FUNCTION(ldap_bind_ext)
 	if (server_controls_ht) {
 		lserverctrls = php_ldap_controls_from_array(ld->link, server_controls_ht, 4);
 		if (lserverctrls == NULL) {
-			RETVAL_FALSE;
+			spprintf(exception_message, 0, "Failed to parse controls");
 			goto cleanup;
 		}
 	}
@@ -1290,16 +1283,14 @@ PHP_FUNCTION(ldap_bind_ext)
 		rc = ldap_sasl_bind(ld->link, ldap_bind_dn, LDAP_SASL_SIMPLE, &cred,
 				lserverctrls, NULL, &msgid);
 		if (rc != LDAP_SUCCESS ) {
-			php_error_docref(NULL, E_WARNING, "Unable to bind to server: %s (%d)", ldap_err2string(rc), rc);
-			RETVAL_FALSE;
+			spprintf(exception_message, 0, "Unable to bind to server: %s (%d)", ldap_err2string(rc), rc);
 			goto cleanup;
 		}
 
 		LDAPMessage *ldap_res;
 		rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 		if (rc == -1) {
-			php_error_docref(NULL, E_WARNING, "Bind operation failed");
-			RETVAL_FALSE;
+			spprintf(exception_message, 0, "Bind operation failed");
 			goto cleanup;
 		}
 
@@ -1315,6 +1306,50 @@ cleanup:
 	}
 
 	return;
+}
+/* }}} */
+
+
+/* {{{ Bind to LDAP directory */
+PHP_METHOD(LDAP_Connection, bind)
+{
+	char *ldap_bind_dn = NULL, *ldap_bind_pw = NULL;
+	size_t ldap_bind_dnlen, ldap_bind_pwlen;
+	HashTable *server_controls_ht = NULL;
+	char *exception_message = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p!p!h!", &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &server_controls_ht) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	php_ldap_do_bind_ext(ZEND_THIS, ldap_bind_dn, ldap_bind_dnlen, ldap_bind_pw, ldap_bind_pwlen, server_controls_ht, return_value, &exception_message);
+	if (exception_message) {
+		zend_throw_error(NULL, "%s", exception_message);
+		efree(exception_message);
+		RETURN_THROWS();
+	}
+}
+/* }}} */
+
+/* {{{ Bind to LDAP directory */
+PHP_FUNCTION(ldap_bind_ext)
+{
+	zval *link;
+	char *ldap_bind_dn = NULL, *ldap_bind_pw = NULL;
+	size_t ldap_bind_dnlen, ldap_bind_pwlen;
+	HashTable *server_controls_ht = NULL;
+	char *exception_message = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!p!h!", &link, ldap_link_ce, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &server_controls_ht) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	php_ldap_do_bind_ext(link, ldap_bind_dn, ldap_bind_dnlen, ldap_bind_pw, ldap_bind_pwlen, server_controls_ht, return_value, &exception_message);
+	if (exception_message) {
+		php_error_docref(NULL, E_WARNING, "%s", exception_message);
+		efree(exception_message);
+		RETVAL_FALSE;
+	}
 }
 /* }}} */
 
