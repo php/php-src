@@ -76,7 +76,7 @@ static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_p
 			if (param->paramno >= 0) {
 				/* TODO Error? */
 				pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO refuses to handle repeating the same :named parameter for multiple positions with this driver, as it might be unsafe to do so.  Consider using a separate name for each parameter instead");
-				return -1;
+				return false;
 			}
 			param->paramno = position;
 			return 1;
