@@ -968,6 +968,9 @@ ZEND_API void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_fl
 		op_array->last,
 		op_array->num_args);
 	fprintf(stderr, ", vars=%d, tmps=%d", op_array->last_var, op_array->T);
+	if (op_array->last_var_to_free != (uint32_t) op_array->last_var) {
+		fprintf(stderr, ", vars_to_free=%d", op_array->last_var_to_free);
+	}
 	if (ssa) {
 		fprintf(stderr, ", ssa_vars=%d", ssa->vars_count);
 	}

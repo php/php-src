@@ -2930,7 +2930,7 @@ done:
 		zend_jit_common_return(jit);
 
 		bool left_frame = false;
-		if (op_array->last_var > 100) {
+		if (op_array->last_var_to_free > 100) {
 			/* To many CVs to unroll */
 			if (!zend_jit_free_cvs(&ctx)) {
 				goto jit_failure;
@@ -2938,9 +2938,7 @@ done:
 			left_frame = true;
 		}
 		if (!left_frame) {
-			int j;
-
-			for (j = 0 ; j < op_array->last_var; j++) {
+			for (uint32_t j = 0; j < op_array->last_var_to_free; j++) {
 				uint32_t info = zend_ssa_cv_info(op_array, ssa, j);
 
 				if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {

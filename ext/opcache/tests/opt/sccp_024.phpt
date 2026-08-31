@@ -30,7 +30,7 @@ $_main:
 0000 RETURN int(1)
 
 A::t:
-     ; (lines=10, args=1, vars=2, tmps=2)
+     ; (lines=10, args=1, vars=2, tmps=2, vars_to_free=1)
      ; (after optimizer)
      ; %ssccp_024.php:3-10
 0000 CV0($obj) = RECV 1
