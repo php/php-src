@@ -715,7 +715,14 @@ static void php_libxml_internal_error_handler_ex(php_libxml_error_level error_ty
 					php_libxml_ctx_error_level(E_NOTICE, ctx, ZSTR_VAL(LIBXML(error_buffer).s), line);
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(LIBXML(error_buffer).s));
+					// Remove the extra NULL at the end - fine to manipulate the error buffer because it
+					// is about to be freed
+					if (ZSTR_LEN(LIBXML(error_buffer).s) > 1
+						&& ZSTR_VAL(LIBXML(error_buffer).s)[ZSTR_LEN(LIBXML(error_buffer).s) - 1] == '\0'
+					) {
+						ZSTR_LEN(LIBXML(error_buffer).s)--;
+					}
+					php_error_docref(NULL, E_WARNING, "%pS", LIBXML(error_buffer).s);
 			}
 		}
 		smart_str_free(&LIBXML(error_buffer));
@@ -780,8 +787,8 @@ static xmlParserInputPtr php_libxml_external_entity_loader(const char *URL,
 
 	if (Z_ISUNDEF(retval)) {
 		php_libxml_ctx_error(context,
-				"Call to user entity loader callback '%s' has failed",
-				ZSTR_VAL(LIBXML(entity_loader_callback).function_handler->common.function_name));
+				"Call to user entity loader callback '%pS' has failed",
+				LIBXML(entity_loader_callback).function_handler->common.function_name);
 	} else {
 		if (Z_TYPE(retval) == IS_STRING) {
 is_string:
@@ -794,8 +801,8 @@ is_string:
 				zend_string *callable_name = zend_get_callable_name(&callable);
 				zend_string *func_name = get_active_function_or_method_name();
 				zend_type_error(
-					"%s(): The user entity loader callback \"%s\" has returned a resource, but it is not a stream",
-					ZSTR_VAL(func_name), ZSTR_VAL(callable_name));
+					"%pS(): The user entity loader callback \"%pS\" has returned a resource, but it is not a stream",
+					func_name, callable_name);
 				zend_string_release(func_name);
 				zend_string_release(callable_name);
 				zval_ptr_dtor(&callable);
