@@ -19,6 +19,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Removed ZEND_STATIC_ASSERT(). Use C11 static_assert() directly instead.
 - The sapi_terminate_process() function was removed.
 - The sapi_force_http_10() function was removed.
+- The sapi_get_fd() function was removed.
 
 ========================
 2. Build system changes
@@ -46,3 +47,4 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The size of the SAPI structure has changed.
   . The terminate_process method has been removed.
   . The force_http_10 method has been removed.
+  . The get_fd method has been removed.
