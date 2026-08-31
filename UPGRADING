@@ -639,6 +639,12 @@ PHP 8.6 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Filter:
+  . filter_var_array() return type has been narrowed from array|false|null to
+    array|false. The function always establishes an array before filtering, so
+    null was never returned. filter_input_array() is unaffected: it still
+    returns null when the requested superglobal does not exist.
+
 - GMP:
   . gmp_fact() now throws a ValueError if $num does not fit into an unsigned
     long.
