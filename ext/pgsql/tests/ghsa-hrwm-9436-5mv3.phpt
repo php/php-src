@@ -42,7 +42,7 @@ bool(false)
 Notice: pg_insert(): String value escaping failed for PostgreSQL 'text' (bar) in %s on line %d
 bool(false)
 
-Notice: pg_insert(): Failed to escape table name 'ABC%s';' in %s on line %d
+Warning: pg_insert(): Failed to escape table name 'ABC%s';': %s in %s on line %d
 bool(false)
 
 Notice: pg_insert(): Failed to escape field 'ABC%s';' in %s on line %d
