@@ -953,7 +953,7 @@ static sapi_module_struct phpdbg_sapi_module = {
 	php_sapi_phpdbg_register_vars,  /* register server variables */
 	php_sapi_phpdbg_log_message,    /* Log message */
 	NULL,                           /* Get request time */
-	NULL,                           /* Child terminate */
+
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
