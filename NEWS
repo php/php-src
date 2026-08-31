@@ -104,6 +104,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23088 (Stack overflow when comparing deeply nested arrays).
     (Lazizbek Ergashev)
 
+- PDO:
+  . Fixed PDOStatement::setFetchMode() not applying changes atomically.
+    (iliaal)
+
 - Date:
   . Fixed leak on double DatePeriod::__construct() call. (ilutov)
 
