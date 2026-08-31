@@ -1487,6 +1487,22 @@ PHP_FUNCTION(ldap_sasl_bind)
 #endif /* HAVE_LDAP_SASL */
 
 /* {{{ Unbind from LDAP directory */
+PHP_METHOD(LDAP_Connection, unbind)
+{
+	ldap_linkdata *ld;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ld = Z_LDAP_LINK_P(ZEND_THIS);
+	VERIFY_LDAP_LINK_CONNECTED(ld);
+
+	ldap_link_free(ld);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ Unbind from LDAP directory */
 PHP_FUNCTION(ldap_unbind)
 {
 	zval *link;

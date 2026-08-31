@@ -841,6 +841,7 @@ namespace LDAP {
             #[\SensitiveParameter] ?string $password = null,
             ?array $controls = null
         ): Result;
+        public function unbind(): bool;
     }
 
     /**
