@@ -71,4 +71,6 @@ ZEND_END_MODULE_GLOBALS(array)
 
 #define ARRAYG(v) ZEND_MODULE_GLOBALS_ACCESSOR(array, v)
 
+PHP_FUNCTION(array_str_contains);
+
 #endif /* PHP_ARRAY_H */
