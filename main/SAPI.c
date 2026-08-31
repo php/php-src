@@ -1045,15 +1045,6 @@ SAPI_API int sapi_get_fd(int *fd)
 	}
 }
 
-SAPI_API int sapi_force_http_10(void)
-{
-	if (sapi_module.force_http_10) {
-		return sapi_module.force_http_10();
-	} else {
-		return FAILURE;
-	}
-}
-
 
 SAPI_API int sapi_get_target_uid(uid_t *obj)
 {

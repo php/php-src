@@ -225,7 +225,6 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len);
 SAPI_API void sapi_activate_headers_only(void);
 
 SAPI_API int sapi_get_fd(int *fd);
-SAPI_API int sapi_force_http_10(void);
 
 SAPI_API int sapi_get_target_uid(uid_t *);
 SAPI_API int sapi_get_target_gid(gid_t *);
@@ -272,8 +271,6 @@ struct _sapi_module_struct {
 	int php_ini_ignore_cwd; /* don't look for php.ini in the current directory */
 
 	int (*get_fd)(int *fd);
-
-	int (*force_http_10)(void);
 
 	int (*get_target_uid)(uid_t *);
 	int (*get_target_gid)(gid_t *);
@@ -330,7 +327,6 @@ END_EXTERN_C()
 	0,    /* php_ini_ignore          */ \
 	0,    /* php_ini_ignore_cwd      */ \
 	NULL, /* get_fd                  */ \
-	NULL, /* force_http_10           */ \
 	NULL, /* get_target_uid          */ \
 	NULL, /* get_target_gid          */ \
 	NULL, /* input_filter            */ \
