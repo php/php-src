@@ -1036,15 +1036,6 @@ SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 	return value;
 }
 
-SAPI_API int sapi_get_fd(int *fd)
-{
-	if (sapi_module.get_fd) {
-		return sapi_module.get_fd(fd);
-	} else {
-		return FAILURE;
-	}
-}
-
 
 SAPI_API int sapi_get_target_uid(uid_t *obj)
 {

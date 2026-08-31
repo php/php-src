@@ -138,6 +138,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zend_parse_arg_TYPE() APIs instead.
   . The zend_is_countable() function was removed.
   . The sapi_force_http_10() function was removed.
+  . The sapi_get_fd() function was removed.
 
 - Changed:
   . Internal functions that return by reference are now expected to
@@ -350,6 +351,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 ========================
 
 - The force_http_10 method has been removed.
+
+- The get_fd method has been removed.
 
 - SAPIs should explicitly release a thread's resources by calling
   ts_free_thread() before terminating it. tsrm_shutdown() can only release the
