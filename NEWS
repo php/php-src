@@ -58,6 +58,8 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed a leak when a persistent connection failed a liveness check
     with no other live PDO handle. (iliaal)
+  . Fixed a leak of the driver_params argument in bindParam() and
+    bindColumn(). (iliaal)
 
 - PDO_ODBC:
   . Fixed bug GH-23444 (ODBC_ATTR_ASSUME_UTF8 corrupts Unicode data outside
