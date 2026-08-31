@@ -366,6 +366,9 @@ PHP                                                                        NEWS
   . Passing an object to the $option argument to deflate_init and inflate_init
     is now deprecated. Use get_object_vars() on the object instead. (Girgias)
 
+- SPL:
+  . Fixed bug GH-11591 (AppendIterator fails with an empty generator).
+    (Matthias Görgens)
 30 Jul 2026, PHP 8.6.0alpha3
 
 - Core:
@@ -855,7 +858,6 @@ PHP                                                                        NEWS
   . pwhash argument-validation errors now throw ValueError instead of
     SodiumException. (iliaal)
 
-- SPL:
   . DirectoryIterator key can now work better with filesystem supporting larger
     directory indexing. (David Carlier)
   . Fixed bug GH-21831 (SplObjectStorage::removeAllExcept() use-after-free with
