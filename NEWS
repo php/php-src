@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
     (Weilin Du)
 
+- SPL:
+  . Fixed SplFileObject::fseek() accepting $whence values that do not fit in an
+    int, which were silently truncated onto a valid seek constant. (lacatoire)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)

@@ -2459,8 +2459,17 @@ PHP_METHOD(SplFileObject, fseek)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	spl_filesystem_file_free_line(intern);
-	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, (int)whence));
+	if (ZEND_LONG_EXCEEDS_INT(whence)) {
+		RETURN_LONG(-1);
+	}
+
+	int ret = php_stream_seek(intern->u.file.stream, pos, (int)whence);
+
+	if (ret == 0) {
+		spl_filesystem_file_free_line(intern);
+	}
+
+	RETURN_LONG(ret);
 } /* }}} */
 
 /* {{{ Get a character from the file */
