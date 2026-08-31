@@ -54,6 +54,10 @@ PHP                                                                        NEWS
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
   . Io\Poll\Context::wait() now rejects a $maxEvents value greater than
     INT_MAX instead of truncating it. (marc-mabe)
+  . Fixed fseek() accepting $whence values that do not fit in an int, which
+    were silently truncated onto a valid seek constant. (lacatoire)
+  . Fixed a failed seek discarding the read buffer, which desynchronized the
+    stream from its reported position. (lacatoire)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
