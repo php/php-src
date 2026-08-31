@@ -137,6 +137,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The zend_parse_parameter() function has been removed, use one fo the
     zend_parse_arg_TYPE() APIs instead.
   . The zend_is_countable() function was removed.
+  . The sapi_terminate_process() function was removed.
 
 - Changed:
   . Internal functions that return by reference are now expected to
@@ -347,6 +348,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+- The terminate_process method has been removed.
 
 - SAPIs should explicitly release a thread's resources by calling
   ts_free_thread() before terminating it. tsrm_shutdown() can only release the
