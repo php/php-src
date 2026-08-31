@@ -1884,7 +1884,7 @@ PHP_FUNCTION(ini_parse_quantity)
 	RETVAL_LONG(zend_ini_parse_quantity(shorthand, &errstr));
 
 	if (errstr) {
-		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(errstr));
 		zend_string_release(errstr);
 	}
 }

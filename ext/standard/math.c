@@ -910,7 +910,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	}
 
 	if (invalidchars > 0) {
-		zend_error(E_DEPRECATED, "Invalid characters passed for attempted conversion, these have been ignored");
+		php_error_docref(NULL, E_DEPRECATED, "Invalid characters passed for attempted conversion, these have been ignored");
 	}
 
 	if (mode == 1) {

@@ -137,7 +137,7 @@ static void file_globals_dtor(php_file_globals *file_globals_p)
 static PHP_INI_MH(OnUpdateAutoDetectLineEndings)
 {
 	if (zend_ini_parse_bool(new_value)) {
-		zend_error(E_DEPRECATED, "auto_detect_line_endings is deprecated");
+		php_error_docref(NULL, E_DEPRECATED, "auto_detect_line_endings is deprecated");
 	}
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
