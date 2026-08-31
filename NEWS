@@ -81,6 +81,10 @@ PHP                                                                        NEWS
   . Added support for the libsodium 1.0.22 KEM APIs (X-Wing and ML-KEM768).
     (Zachary DuBois)
 
+- SPL:
+  . Fixed SplFileObject::fseek() accepting $whence values that do not fit in an
+    int, which were silently truncated onto a valid seek constant. (lacatoire)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
