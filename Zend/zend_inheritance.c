@@ -2377,8 +2377,12 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 			return;
 		}
 
-		/* Abstract method signatures from the trait must be satisfied. */
-		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		/* Abstract method signatures from the trait must be satisfied. An inherited
+		 * private method is not accessible from the using class, so it does not
+		 * satisfy the requirement; only a private method from the class itself does. */
+		if ((fn->common.fn_flags & ZEND_ACC_ABSTRACT)
+				&& (!(existing_fn->common.fn_flags & ZEND_ACC_PRIVATE)
+					|| fixup_trait_scope(existing_fn, ce) == ce)) {
 			/* "abstract private" methods in traits were not available prior to PHP 8.
 			 * As such, "abstract protected" was sometimes used to indicate trait requirements,
 			 * even though the "implementing" method was private. Do not check visibility
