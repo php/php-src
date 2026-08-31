@@ -20,6 +20,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The sapi_terminate_process() function was removed.
 - The sapi_force_http_10() function was removed.
 - The sapi_get_fd() function was removed.
+- The sapi_get_target_uid() and sapi_get_target_gid() functions were removed.
 
 ========================
 2. Build system changes
@@ -48,3 +49,4 @@ PHP 8.7 INTERNALS UPGRADE NOTES
   . The terminate_process method has been removed.
   . The force_http_10 method has been removed.
   . The get_fd method has been removed.
+  . The get_target_uid and get_target_gid methods have been removed.
