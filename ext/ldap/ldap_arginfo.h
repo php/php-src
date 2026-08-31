@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 2ba7861657a9a2cfb3c1afbf36617b5d626728b3 */
+ * Stub hash: 8ee68c1bb5b81d3e63175754910dc89696c718dc */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -354,6 +354,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_LDAP_Connection_bind, 0, 0,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_LDAP_Connection_unbind, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
 #endif
@@ -443,6 +446,7 @@ ZEND_FUNCTION(ldap_parse_exop);
 #endif
 ZEND_METHOD(LDAP_Connection, __construct);
 ZEND_METHOD(LDAP_Connection, bind);
+ZEND_METHOD(LDAP_Connection, unbind);
 
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
@@ -541,6 +545,7 @@ static const zend_function_entry ext_functions[] = {
 static const zend_function_entry class_LDAP_Connection_methods[] = {
 	ZEND_ME(LDAP_Connection, __construct, arginfo_class_LDAP_Connection___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Connection, bind, arginfo_class_LDAP_Connection_bind, ZEND_ACC_PUBLIC)
+	ZEND_ME(LDAP_Connection, unbind, arginfo_class_LDAP_Connection_unbind, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
