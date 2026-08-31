@@ -46,6 +46,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, isSuspicious)
 	ret = intl_icu_compat_uspoof_check_utf8(co->uspoof, ZSTR_VAL(text), ZSTR_LEN(text), co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 
 		if (intl_icu_compat_uspoof_check_result_mismatch(co->uspoofres, ret, &errmask, SPOOFCHECKER_ERROR_CODE_P(co))) {
@@ -83,6 +84,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, areConfusable)
 		ret = uspoof_areConfusableUTF8(co->uspoof, ZSTR_VAL(s1), (int32_t)ZSTR_LEN(s1), ZSTR_VAL(s2), (int32_t)ZSTR_LEN(s2), SPOOFCHECKER_ERROR_CODE_P(co));
 	}
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;
 	}
@@ -109,6 +111,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedLocales)
 	uspoof_setAllowedLocales(co->uspoof, ZSTR_VAL(locales), SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		return;
 	}
@@ -130,6 +133,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setChecks)
 	uspoof_setChecks(co->uspoof, checks, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 	}
 }
@@ -220,6 +224,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, setAllowedChars)
 	efree(upattern);
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 	}
 }
@@ -355,6 +360,7 @@ U_CFUNC PHP_METHOD(Spoofchecker, areBidiConfusable)
 		ret = uspoof_areBidiConfusableUTF8(co->uspoof, (UBiDiDirection)direction, ZSTR_VAL(s1), (int32_t)ZSTR_LEN(s1), ZSTR_VAL(s2), (int32_t)ZSTR_LEN(s2), SPOOFCHECKER_ERROR_CODE_P(co));
 	}
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		intl_error_set_code(NULL, SPOOFCHECKER_ERROR_CODE(co));
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;
 	}
