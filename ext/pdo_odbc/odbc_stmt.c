@@ -35,6 +35,7 @@ enum pdo_odbc_conv_result {
 
 static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SQLSMALLINT sqltype)
 {
+#ifdef PHP_WIN32
 	if (!S->assume_utf8) return 0;
 	switch (sqltype) {
 #ifdef SQL_WCHAR
@@ -52,6 +53,9 @@ static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SQLSMALLINT sqltype)
 		default:
 			return 0;
 	}
+#else
+	return 0;
+#endif
 }
 
 static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
@@ -544,7 +548,15 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 								break;
 						}
 					} else {
-						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
+						zend_ulong ulen;
+						if (pdo_odbc_utf82ucs2(stmt, P->is_unicode,
+									Z_STRVAL_P(parameter),
+									Z_STRLEN_P(parameter),
+									&ulen) == PDO_ODBC_CONV_OK) {
+							P->len = SQL_LEN_DATA_AT_EXEC(ulen);
+						} else {
+							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
+						}
 					}
 				}
 				return 1;
