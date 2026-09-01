@@ -22,8 +22,8 @@ try {
 echo "\n-- Testing hash_file() function with a null byte in the filename --\n";
 try {
     hash_file('md5', $filename . chr(0) . $filename);
-} catch (ValueError $exception) {
-    echo $exception::class, ': ', $exception->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- Testing hash_file() function with a non-existent file --\n";
