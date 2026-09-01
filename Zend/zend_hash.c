@@ -761,7 +761,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, con
 	}
 
 	while (1) {
-		if (p->h == ZSTR_H(key) &&
+		if (EXPECTED(p->h == ZSTR_H(key)) &&
 		    EXPECTED(p->key) &&
 		    zend_string_equal_content(p->key, key)) {
 			return p;
@@ -770,8 +770,11 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, con
 		if (idx == HT_INVALID_IDX) {
 			return NULL;
 		}
+		if (idx != HT_INVALID_IDX) {
+			__builtin_prefetch(HT_HASH_TO_BUCKET_EX(arData, idx), 0, 3);
+		}
 		p = HT_HASH_TO_BUCKET_EX(arData, idx);
-		if (p->key == key) { /* check for the same interned string */
+		if (EXPECTED(p->key == key)) { /* check for the same interned string */
 			return p;
 		}
 	}
@@ -789,12 +792,15 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 	while (idx != HT_INVALID_IDX) {
 		ZEND_ASSERT(idx < HT_IDX_TO_HASH(ht->nTableSize));
 		p = HT_HASH_TO_BUCKET_EX(arData, idx);
-		if ((p->h == h)
+		if (EXPECTED((p->h == h)
 			 && p->key
-			 && zend_string_equals_cstr(p->key, str, len)) {
+			 && zend_string_equals_cstr(p->key, str, len))) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		if (idx != HT_INVALID_IDX) {
+			__builtin_prefetch(HT_HASH_TO_BUCKET_EX(arData, idx), 0, 3);
+		}
 	}
 	return NULL;
 }
@@ -811,10 +817,13 @@ static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *h
 	while (idx != HT_INVALID_IDX) {
 		ZEND_ASSERT(idx < HT_IDX_TO_HASH(ht->nTableSize));
 		p = HT_HASH_TO_BUCKET_EX(arData, idx);
-		if (p->h == h && !p->key) {
+		if (EXPECTED(p->h == h && !p->key)) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		if (idx != HT_INVALID_IDX) {
+			__builtin_prefetch(HT_HASH_TO_BUCKET_EX(arData, idx), 0, 3);
+		}
 	}
 	return NULL;
 }

@@ -29,6 +29,7 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 #include "php.h"
+#include "../Hydra/hydra.h"
 
 #ifndef ZEND_OPTIMIZER_MAX_REGISTERED_PASSES
 # define ZEND_OPTIMIZER_MAX_REGISTERED_PASSES 32
@@ -1607,6 +1608,8 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 	zend_string *name;
 	zend_optimizer_ctx ctx;
 	zval *zv;
+
+	hydra_optimize_script(script, optimization_level, debug_level);
 
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;

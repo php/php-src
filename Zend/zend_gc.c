@@ -2058,6 +2058,7 @@ rerun_gc:
 			idx = GC_FIRST_ROOT;
 			current = GC_IDX2PTR(GC_FIRST_ROOT);
 			while (idx != end) {
+				__builtin_prefetch(current + 1, 0, 3);
 				if (GC_IS_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
 					if (GC_TYPE(p) == IS_OBJECT && !(OBJ_FLAGS(p) & IS_OBJ_DESTRUCTOR_CALLED)) {

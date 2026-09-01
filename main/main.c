@@ -126,7 +126,7 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
 	smart_string version_info = {0};
 	smart_string_append_printf(&version_info,
-		"PHP " PHP_VERSION " (%s) (built: %s) (%s)\n",
+		"HydraPHP v1.0.0 (based on PHP " PHP_VERSION ") (%s) (built: %s) (%s)\n",
 		sapi_module->name, php_build_date,
 #ifdef ZTS
 		"ZTS"
@@ -146,7 +146,7 @@ PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 		" GCOV"
 #endif
 	);
-	smart_string_appends(&version_info, "Copyright © The PHP Group and Contributors\n");
+	smart_string_appends(&version_info, "Copyright © The HydraPHP Project & PHP Group\n");
 
 	const char *build_provider = php_build_provider();
 	if (build_provider) {

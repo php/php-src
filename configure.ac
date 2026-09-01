@@ -1764,6 +1764,12 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     Optimizer/zend_inference.c
     Optimizer/zend_optimizer.c
     Optimizer/zend_ssa.c
+    ../Hydra/hydra.c
+    ../Hydra/ir.c
+    ../Hydra/analysis.c
+    ../Hydra/optimizer.c
+    ../Hydra/profiling.c
+    ../Hydra/jit.c
     zend_alloc.c
     zend_API.c
     zend_ast.c

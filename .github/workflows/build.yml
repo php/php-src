@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential autoconf bison re2c libxml2-dev libsqlite3-dev
+
+      - name: Configure build
+        run: ./buildconf --force && ./configure --disable-all --enable-cli --enable-opcache
+
+      - name: Build Zend + Hydra
+        run: make -j$(nproc)
+
+      - name: Verify executable
+        run: ./sapi/cli/php -v

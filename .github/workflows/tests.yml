@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential autoconf bison re2c libxml2-dev libsqlite3-dev
+
+      - name: Build
+        run: ./buildconf --force && ./configure --disable-all --enable-cli --enable-opcache && make -j$(nproc)
+
+      - name: Run Tests
+        run: make test TESTS="tests/"
+
+      - name: Run .php/.hyd Parity Tests
+        run: |
+          mkdir -p tests
+          echo "<?php echo 'PARITY_OK'; ?>" > tests/parity.php
+          echo "<?hydra echo 'PARITY_OK'; ?>" > tests/parity.hyd
+          
+          OUT_PHP=$(./sapi/cli/php tests/parity.php)
+          OUT_HYD=$(./sapi/cli/php tests/parity.hyd)
+          
+          if [ "$OUT_PHP" = "$OUT_HYD" ]; then
+            echo "Parity check passed: $OUT_PHP == $OUT_HYD"
+          else
+            echo "Parity check failed: PHP ($OUT_PHP) != HYD ($OUT_HYD)"
+            exit 1
+          fi
