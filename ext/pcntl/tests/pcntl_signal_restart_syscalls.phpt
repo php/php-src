@@ -18,8 +18,8 @@ var_dump(pcntl_signal(SIGALRM, SIG_IGN, false));
 
 try {
     pcntl_signal(SIGALRM, SIG_IGN, 1);
-} catch (TypeError $exception) {
-    echo $exception->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(pcntl_signal(SIGALRM, SIG_DFL));
@@ -32,5 +32,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-pcntl_signal(): Argument #3 ($restart_syscalls) must be of type ?bool, int given
+TypeError: pcntl_signal(): Argument #3 ($restart_syscalls) must be of type ?bool, int given
 bool(true)
