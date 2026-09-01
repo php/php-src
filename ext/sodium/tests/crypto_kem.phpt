@@ -58,37 +58,37 @@ var_dump($tampered_shared_secret !== $shared_secret);
 /* Error: truncated public key */
 try {
     sodium_crypto_kem_enc(substr($public_key, 0, -1));
-} catch (SodiumException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 /* Error: truncated ciphertext */
 try {
     sodium_crypto_kem_dec(substr($ciphertext, 0, -1), $secret_key);
-} catch (SodiumException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 /* Error: truncated secret key */
 try {
     sodium_crypto_kem_dec($ciphertext, substr($secret_key, 0, -1));
-} catch (SodiumException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 /* Error: truncated keypair */
 try {
     sodium_crypto_kem_secretkey(substr($keypair, 0, -1));
-} catch (SodiumException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 /* Error: overlong keypair */
 try {
     sodium_crypto_kem_publickey($keypair . 'x');
-} catch (SodiumException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 /* Error: wrong-length seed */
 try {
     sodium_crypto_kem_seed_keypair(random_bytes(SODIUM_CRYPTO_KEM_SEEDBYTES - 1));
-} catch (SodiumException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
