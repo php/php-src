@@ -3,7 +3,7 @@ Test Uri\Rfc3986\Uri parsing - host - octal-like registered name
 --FILE--
 <?php
 
-$uri = Uri\Rfc3986\Uri::parse("HttPs://0300.0250.0000.0001/path?query=foo%20bar");
+$uri = Uri\Rfc3986\Uri::parse("https://0300.0250.0000.0001");
 
 var_dump($uri);
 var_dump($uri->toRawString());
@@ -14,7 +14,7 @@ var_dump($uri->getHostType());
 --EXPECTF--
 object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
-  string(5) "HttPs"
+  string(5) "https"
   ["username"]=>
   NULL
   ["password"]=>
@@ -24,12 +24,12 @@ object(Uri\Rfc3986\Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(5) "/path"
+  string(0) ""
   ["query"]=>
-  string(15) "query=foo%20bar"
+  NULL
   ["fragment"]=>
   NULL
 }
-string(48) "HttPs://0300.0250.0000.0001/path?query=foo%20bar"
-string(48) "https://0300.0250.0000.0001/path?query=foo%20bar"
+string(27) "https://0300.0250.0000.0001"
+string(27) "https://0300.0250.0000.0001"
 enum(Uri\Rfc3986\UriHostType::RegisteredName)

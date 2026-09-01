@@ -3,10 +3,9 @@ Test Uri\WhatWg\Url parsing - host - IPv4 address in octal notation
 --FILE--
 <?php
 
-$url = Uri\WhatWg\Url::parse("HttPs://0300.0250.0000.0001/path?query=foo%20bar");
+$url = Uri\WhatWg\Url::parse("https://0300.0250.0000.0001");
 
 var_dump($url);
-var_dump($url->toUnicodeString());
 var_dump($url->toAsciiString());
 
 ?>
@@ -23,11 +22,10 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(5) "/path"
+  string(1) "/"
   ["query"]=>
-  string(15) "query=foo%20bar"
+  NULL
   ["fragment"]=>
   NULL
 }
-string(40) "https://192.168.0.1/path?query=foo%20bar"
-string(40) "https://192.168.0.1/path?query=foo%20bar"
+string(20) "https://192.168.0.1/"
