@@ -9,7 +9,7 @@ $builder = new Uri\Rfc3986\UriBuilder()
 try {
     $builder->build(new Uri\Rfc3986\Uri("/foo/bar"));
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
