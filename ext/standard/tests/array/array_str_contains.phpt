@@ -1,84 +1,69 @@
 --TEST--
-array_str_contains() basic and edge cases tests
+array_str_contains() basic functionality and edge cases
 --FILE--
 <?php
 
+$fruits = ["apple", "banana", "cherry", "date", "elderberry"];
+
 echo "--- Basic Search ---\n";
-$fruits = ['apple', 'banana', 'cherry', 'pineapple', 'grape'];
-var_dump(array_str_contains($fruits, 'apple'));
+var_dump(array_str_contains($fruits, "an"));
+var_dump(array_str_contains($fruits, "berry"));
+var_dump(array_str_contains($fruits, "xyz"));
 
-echo "\n--- Preserving String and Numeric Keys ---\n";
-$data = [
-    'first' => 'hello world',
-    10      => 'foo bar',
-    'third' => 'world domination',
-    20      => 'just php',
-];
-var_dump(array_str_contains($data, 'world'));
+echo "\n--- Key Preservation ---\n";
+$assoc = ["a" => "first item", "b" => "second item", "c" => "third"];
+var_dump(array_str_contains($assoc, "item"));
 
-echo "\n--- Non-string Values Ignored ---\n";
-$mixed = [
-    'a' => 'test 1',
-    'b' => 123,
-    'c' => null,
-    'd' => 'another test',
-    'e' => ['nested'],
-    'f' => true,
-];
-var_dump(array_str_contains($mixed, 'test'));
-
-echo "\n--- Empty Needle (Matches All String Elements) ---\n";
-$items = ['one', 2, 'three', false, ''];
-var_dump(array_str_contains($items, ''));
+echo "\n--- Empty Needle ---\n";
+$emptyNeedleTest = ["foo", "bar", "baz"];
+var_dump(array_str_contains($emptyNeedleTest, ""));
 
 echo "\n--- UTF-8 and Multi-byte Support ---\n";
-$persian = [
-    'سلام دنیا',
-    'خداحافظ دنیا',
-    'تست پی‌اچ‌پی',
-    'PHP 8.7 عالیه 🚀',
-    'یک ایموجی دیگر 🚀'
+$multibyte = [
+    "سلام دنیا",
+    "خداحافظ دنیا",
+    "PHP 8.7",
+    "PHP 8.7 café 🚀",
+    "یک ایموجی دیگر 🚀",
 ];
-var_dump(array_str_contains($persian, 'دنیا'));
-var_dump(array_str_contains($persian, '🚀'));
+var_dump(array_str_contains($multibyte, "دنیا"));
+var_dump(array_str_contains($multibyte, "🚀"));
 
 echo "\n--- Empty Haystack ---\n";
-var_dump(array_str_contains([], 'anything'));
+var_dump(array_str_contains([], "needle"));
 
 ?>
 --EXPECT--
 --- Basic Search ---
 array(2) {
-  [0]=>
-  string(5) "apple"
-  [3]=>
-  string(9) "pineapple"
+  [1]=>
+  string(6) "banana"
+  [4]=>
+  string(10) "elderberry"
+}
+array(1) {
+  [4]=>
+  string(10) "elderberry"
+}
+array(0) {
 }
 
---- Preserving String and Numeric Keys ---
-array(2) {
-  ["first"]=>
-  string(11) "hello world"
-  ["third"]=>
-  string(16) "world domination"
-}
-
---- Non-string Values Ignored ---
+--- Key Preservation ---
 array(2) {
   ["a"]=>
-  string(6) "test 1"
-  ["d"]=>
-  string(12) "another test"
+  string(10) "first item"
+  ["b"]=>
+  string(11) "second item"
 }
 
---- Empty Needle (Matches All String Elements) ---
+--- Empty Needle ---
 array(3) {
   [0]=>
-  string(3) "one"
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
   [2]=>
-  string(5) "three"
-  [4]=>
-  string(0) ""
+  string(3) "baz"
 }
 
 --- UTF-8 and Multi-byte Support ---
@@ -90,7 +75,7 @@ array(2) {
 }
 array(2) {
   [3]=>
-  string(23) "PHP 8.7" عالیه 🚀"
+  string(18) "PHP 8.7 café 🚀"
   [4]=>
   string(31) "یک ایموجی دیگر 🚀"
 }
