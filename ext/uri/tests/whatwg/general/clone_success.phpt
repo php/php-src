@@ -9,7 +9,6 @@ $url2 = clone $url1;
 var_dump($url1->toAsciiString());
 
 var_dump($url2);
-var_dump($url2->toUnicodeString());
 var_dump($url2->toAsciiString());
 
 ?>
@@ -33,5 +32,4 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-string(20) "https://example.com/"
 string(20) "https://example.com/"

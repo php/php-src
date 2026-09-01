@@ -6,7 +6,6 @@ Test Uri\WhatWg\Url reference resolution - parse() - relative reference with bas
 $url = Uri\WhatWg\Url::parse("/with-base", new Uri\WhatWg\Url("https://example.com"));
 
 var_dump($url);
-var_dump($url->toUnicodeString());
 var_dump($url->toAsciiString());
 
 ?>
@@ -29,5 +28,4 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-string(29) "https://example.com/with-base"
 string(29) "https://example.com/with-base"

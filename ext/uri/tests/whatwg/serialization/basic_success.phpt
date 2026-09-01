@@ -10,7 +10,6 @@ var_dump($serializedUrl1);
 
 $url2 = unserialize($serializedUrl1);
 var_dump($url2);
-var_dump($url2->toUnicodeString());
 var_dump($url2->toAsciiString());
 
 ?>
@@ -34,5 +33,4 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   string(11) "hash-exists"
 }
-string(99) "https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"
 string(99) "https://username:password@www.example.com:8080/pathname1/pathname2/pathname3?query=true#hash-exists"

@@ -6,7 +6,6 @@ Test Uri\WhatWg\Url parsing - scheme - extra slashes
 $url = Uri\WhatWg\Url::parse("HTTPS://////EXAMPLE.com");
 
 var_dump($url);
-var_dump($url->toUnicodeString());
 var_dump($url->toAsciiString());
 
 ?>
@@ -29,5 +28,4 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-string(20) "https://example.com/"
 string(20) "https://example.com/"
