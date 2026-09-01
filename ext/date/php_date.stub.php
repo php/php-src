@@ -649,7 +649,7 @@ class DateInterval
     /**
      * @tentative-return-type
      */
-    public static function createFromDateString(string $datetime): static {}
+    public static function createFromDateString(string $datetime): DateInterval {}
 
     /**
      * @tentative-return-type
