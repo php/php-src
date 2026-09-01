@@ -1,5 +1,5 @@
 --TEST--
-GH-22046: Uri\Rfc3986\Uri cannot be unserialized with the unsupported C format
+Test Uri\Rfc3986\Uri unserialize() - error - unsupported C format
 --FILE--
 <?php
 
