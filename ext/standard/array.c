@@ -7411,7 +7411,7 @@ PHP_FUNCTION(array_str_contains)
 		}
 
 		if (match) {
-			Z_ADDREF_P(val);
+			Z_TRY_ADDREF_P(val);
 			if (key) {
 				zend_hash_add_new(Z_ARRVAL_P(return_value), key, val);
 			} else {
