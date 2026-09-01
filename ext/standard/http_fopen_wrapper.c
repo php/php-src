@@ -1061,7 +1061,7 @@ finish:
 			{
 				char *loc_path = NULL;
 				if (*header_info.location != '/') {
-					if (header_info.location_len > 0 && resource->path) {
+					if (header_info.location_len > 1 && resource->path) {
 						char *s = strrchr(ZSTR_VAL(resource->path), '/');
 						if (!s) {
 							s = ZSTR_VAL(resource->path);
