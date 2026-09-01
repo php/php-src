@@ -104,7 +104,7 @@ static void php_pcre_free_char_table(zval *data)
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 {
-	int preg_code = 0;
+	php_pcre_error_code preg_code = PHP_PCRE_NO_ERROR;
 
 	switch (pcre_code) {
 		case PCRE2_ERROR_MATCHLIMIT:
