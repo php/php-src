@@ -1554,14 +1554,14 @@ static bool preg_get_backref(char **str, int *backref)
 }
 
 /* Return NULL if an exception has occurred */
-static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
+static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, const zend_string *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
 {
 	zend_string *result_str = NULL;
 	zval		 retval;			/* Function return value */
 	zval	     arg;				/* Argument to pass to function */
 
 	array_init_size(&arg, count + (mark ? 1 : 0));
-	populate_subpat_array(Z_ARRVAL(arg), subject, offsets, subpat_names, num_subpats, count, mark, flags);
+	populate_subpat_array(Z_ARRVAL(arg), ZSTR_VAL(subject), offsets, subpat_names, num_subpats, count, mark, flags);
 
 	fci->retval = &retval;
 	fci->param_count = 1;
@@ -1953,7 +1953,7 @@ matched:
 
 			/* Use custom function to get replacement string and its length. */
 			zend_string *eval_result = preg_do_repl_func(
-				fci, fcc, ZSTR_VAL(subject_str), offsets, subpat_names, num_subpats, count,
+				fci, fcc, subject_str, offsets, subpat_names, num_subpats, count,
 				pcre2_get_mark(match_data), flags);
 
 			if (UNEXPECTED(eval_result == NULL)) {
