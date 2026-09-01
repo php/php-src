@@ -6,11 +6,11 @@ Test Lexbor memory management
 $urls = [];
 
 for ($i = 0; $i < 1000; $i++) {
-    $urls[] = Uri\WhatWg\Url::parse("https://example.com/{$i}/");
+    $urls[] = Uri\WhatWg\Url::parse("https://example.com/$i/");
 }
 
 for ($i = 0; $i < 1000; $i++) {
-    if ($urls[$i]->toAsciiString() !== "https://example.com/{$i}/") {
+    if ($urls[$i]->toAsciiString() !== "https://example.com/$i/") {
         die("FAIL");
     }
 }
