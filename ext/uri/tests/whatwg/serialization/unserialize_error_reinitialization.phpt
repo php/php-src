@@ -12,7 +12,6 @@ try {
 }
 
 var_dump($url);
-var_dump($url->toUnicodeString());
 var_dump($url->toAsciiString());
 
 ?>
@@ -36,5 +35,4 @@ object(Uri\WhatWg\Url)#%d (8) {
   ["fragment"]=>
   NULL
 }
-string(20) "https://example.com/"
 string(20) "https://example.com/"
