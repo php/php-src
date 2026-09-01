@@ -2092,7 +2092,6 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 			zend_string *tmp_regex_str;
 			zend_string *regex_str = zval_get_tmp_string(regex_entry, &tmp_regex_str);
 			zend_string *replace_entry_str, *tmp_replace_entry_str;
-			zval *zv;
 
 			/* Get current entry */
 			while (1) {
@@ -2101,7 +2100,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 					tmp_replace_entry_str = NULL;
 					break;
 				}
-				zv = ZEND_HASH_ELEMENT(replace_ht, replace_idx);
+				zval *zv = ZEND_HASH_ELEMENT(replace_ht, replace_idx);
 				replace_idx++;
 				if (Z_TYPE_P(zv) != IS_UNDEF) {
 					replace_entry_str = zval_get_tmp_string(zv, &tmp_replace_entry_str);
@@ -2181,14 +2180,13 @@ static zend_string *php_replace_in_subject_func(zend_string *regex_str, const Ha
 		return result;
 	} else {
 		/* If regex is an array */
-		zval		*regex_entry;
 
 		ZEND_ASSERT(regex_ht != NULL);
 
 		zend_string_addref(subject);
 
 		/* For each entry in the regex array, get the entry */
-		ZEND_HASH_FOREACH_VAL(regex_ht, regex_entry) {
+		ZEND_HASH_FOREACH_VAL(regex_ht, zval *regex_entry) {
 			/* Make sure we're dealing with strings. */
 			zend_string *tmp_regex_entry_str;
 			zend_string *regex_entry_str = zval_try_get_tmp_string(regex_entry, &tmp_regex_entry_str);
@@ -2230,10 +2228,6 @@ static size_t php_preg_replace_func_impl(zval *return_value,
 		}
 	} else {
 		/* if subject is an array */
-		zval		*subject_entry, zv;
-		zend_string	*string_key;
-		zend_ulong	 num_key;
-
 		ZEND_ASSERT(subject_ht != NULL);
 
 		array_init_size(return_value, zend_hash_num_elements(subject_ht));
@@ -2241,7 +2235,7 @@ static size_t php_preg_replace_func_impl(zval *return_value,
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		ZEND_HASH_FOREACH_KEY_VAL(subject_ht, num_key, string_key, subject_entry) {
+		ZEND_HASH_FOREACH_KEY_VAL(subject_ht, zend_ulong num_key, zend_string *string_key, zval *subject_entry) {
 			zend_string *tmp_subject_entry_str;
 			zend_string *subject_entry_str = zval_try_get_tmp_string(subject_entry, &tmp_subject_entry_str);
 			if (UNEXPECTED(subject_entry_str == NULL)) {
@@ -2252,6 +2246,7 @@ static size_t php_preg_replace_func_impl(zval *return_value,
 				regex_str, regex_ht, fci, fcc, subject_entry_str, limit_val, &replace_count, flags);
 			if (result != NULL) {
 				/* Add to return array */
+				zval zv;
 				ZVAL_STR(&zv, result);
 				if (string_key) {
 					zend_hash_add_new(return_value_ht, string_key, &zv);
@@ -2301,10 +2296,6 @@ static void _preg_replace_common(
 		}
 	} else {
 		/* if subject is an array */
-		zval		*subject_entry, zv;
-		zend_string	*string_key;
-		zend_ulong	 num_key;
-
 		ZEND_ASSERT(subject_ht != NULL);
 
 		array_init_size(return_value, zend_hash_num_elements(subject_ht));
@@ -2312,7 +2303,7 @@ static void _preg_replace_common(
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		ZEND_HASH_FOREACH_KEY_VAL(subject_ht, num_key, string_key, subject_entry) {
+		ZEND_HASH_FOREACH_KEY_VAL(subject_ht, zend_ulong num_key, zend_string *string_key, zval *subject_entry) {
 			old_replace_count = replace_count;
 			zend_string *tmp_subject_entry_str;
 			zend_string *subject_entry_str = zval_get_tmp_string(subject_entry, &tmp_subject_entry_str);
@@ -2322,6 +2313,7 @@ static void _preg_replace_common(
 			if (result != NULL) {
 				if (!is_filter || replace_count > old_replace_count) {
 					/* Add to return array */
+					zval zv;
 					ZVAL_STR(&zv, result);
 					if (string_key) {
 						zend_hash_add_new(return_value_ht, string_key, &zv);
@@ -2434,9 +2426,9 @@ PHP_FUNCTION(preg_replace_callback)
 /* {{{ Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback_array)
 {
-	zval *replace, *zcount = NULL;
+	zval *zcount = NULL;
 	HashTable *pattern, *subject_ht;
-	zend_string *subject_str, *str_idx_regex;
+	zend_string *subject_str;
 	zend_long limit = -1, flags = 0;
 	size_t replace_count = 0;
 
@@ -2456,7 +2448,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 		GC_TRY_ADDREF(subject_str);
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(pattern, str_idx_regex, replace) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(pattern, zend_string *str_idx_regex, zval *replace) {
 		if (!str_idx_regex) {
 			zend_argument_type_error(1, "must contain only string patterns as keys");
 			goto error;
@@ -2924,12 +2916,9 @@ PHP_FUNCTION(preg_grep)
 
 PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, zend_long flags) /* {{{ */
 {
-	zval            *entry;             /* An entry in the input array */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	int				 count;				/* Count of matched subpatterns */
 	uint32_t		 options;			/* Execution options */
-	zend_string		*string_key;
-	zend_ulong		 num_key;
 	bool		 invert;			/* Whether to return non-matching
 										   entries */
 	bool old_mdata_used;
@@ -2960,7 +2949,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
 	/* Go through the input array */
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), zend_ulong num_key, zend_string *string_key, zval *entry) {
 		zend_string *tmp_subject_str;
 		zend_string *subject_str = zval_get_tmp_string(entry, &tmp_subject_str);
 
