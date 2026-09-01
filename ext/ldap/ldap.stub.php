@@ -842,6 +842,7 @@ namespace LDAP {
             ?array $controls = null
         ): Result;
         public function unbind(): bool;
+        public function add(string $dn, array $entry, ?array $controls = null): LDAP\Result {}
     }
 
     /**

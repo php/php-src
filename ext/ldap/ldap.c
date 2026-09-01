@@ -2369,8 +2369,15 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 	size_t dn_len;
 	bool is_full_add = false; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oph/|h!", &link, ldap_link_ce, &dn, &dn_len, &attributes_ht, &server_controls_ht) != SUCCESS) {
-		RETURN_THROWS();
+	if (ZEND_IS_METHOD_CALL()) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "ph/|h!", &dn, &dn_len, &attributes_ht, &server_controls_ht) != SUCCESS) {
+			RETURN_THROWS();
+		}
+		link = ZEND_THIS;
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oph/|h!", &link, ldap_link_ce, &dn, &dn_len, &attributes_ht, &server_controls_ht) != SUCCESS) {
+			RETURN_THROWS();
+		}
 	}
 
 	ld = Z_LDAP_LINK_P(link);
@@ -2399,17 +2406,14 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 	ZEND_HASH_FOREACH_STR_KEY_VAL(attributes_ht, attribute, attribute_values) {
 		if (attribute == NULL) {
 			zend_argument_value_error(3, "must be an associative array of attribute => values");
-			RETVAL_FALSE;
 			goto cleanup;
 		}
 		if (ZSTR_LEN(attribute) == 0) {
 			zend_argument_value_error(3, "key must not be empty");
-			RETVAL_FALSE;
 			goto cleanup;
 		}
 		if (zend_str_has_nul_byte(attribute)) {
 			zend_argument_value_error(3, "key must not contain any null bytes");
-			RETVAL_FALSE;
 			goto cleanup;
 		}
 
@@ -2425,7 +2429,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 		if (Z_TYPE_P(attribute_values) != IS_ARRAY) {
 			zend_string *value = php_ldap_try_get_ldap_value_from_zval(attribute_values);
 			if (UNEXPECTED(value == NULL)) {
-				RETVAL_FALSE;
+				zend_argument_value_error(3, "attribute values must be either array or string");
 				goto cleanup;
 			}
 			ldap_mods[attribute_index]->mod_bvalues = safe_emalloc(2, sizeof(struct berval *), 0);
@@ -2440,7 +2444,6 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			if (num_values == 0) {
 				if (UNEXPECTED(oper == LDAP_MOD_ADD)) {
 					zend_argument_value_error(3, "attribute \"%s\" must be a non-empty list of attribute values", ZSTR_VAL(attribute));
-					RETVAL_FALSE;
 					goto cleanup;
 				}
 				/* When we modify, we mean we delete the attribute */
@@ -2449,7 +2452,6 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			}
 			if (!php_ldap_is_numerically_indexed_array(Z_ARRVAL_P(attribute_values))) {
 				zend_argument_value_error(3, "attribute \"%s\" must be an array of attribute values with numeric keys", ZSTR_VAL(attribute));
-				RETVAL_FALSE;
 				goto cleanup;
 			}
 
@@ -2462,7 +2464,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(attribute_values), attribute_value) {
 				zend_string *value = php_ldap_try_get_ldap_value_from_zval(attribute_value);
 				if (UNEXPECTED(value == NULL)) {
-					RETVAL_FALSE;
+					zend_argument_value_error(3, "attribute values must be either array or string");
 					goto cleanup;
 				}
 				ldap_mods[attribute_index]->mod_bvalues[attribute_value_index] = (struct berval *) emalloc (sizeof(struct berval));
@@ -2565,6 +2567,13 @@ PHP_FUNCTION(ldap_add)
 {
 	/* use a newly define parameter into the do_modify so ldap_mod_add can be used the way it is supposed to be used , Gerrit THomson */
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD, false);
+}
+/* }}} */
+
+/* {{{ Add entries to LDAP directory */
+PHP_METHOD(LDAP_Connection, add)
+{
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD, true);
 }
 /* }}} */
 
