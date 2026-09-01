@@ -31,6 +31,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-19320 (FPM UID and GID overflow). (Pratik Bhujel)
 
+- Hash:
+  . Fixed a buffer overflow in hash_pbkdf2() with a large output length.
+    (Lazizbek Ergashev)
+
 - Intl:
   . Fixed grapheme_strpos() and grapheme_strrpos() with an empty needle
     returning UTF-16 offsets instead of grapheme offsets. (Ilia Alshanetsky)
