@@ -482,6 +482,9 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			php_uri_struct_free(resource);
 			return NULL;
 		}
+		if (d < -1) {
+			d = -1;
+		}
 #ifndef PHP_WIN32
 		timeout.tv_sec = (time_t) d;
 		timeout.tv_usec = (size_t) ((d - timeout.tv_sec) * 1000000);
