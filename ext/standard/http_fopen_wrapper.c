@@ -1075,13 +1075,7 @@ finish:
 							}
 						}
 						s[1] = '\0';
-						if (resource->path &&
-							ZSTR_VAL(resource->path)[0] == '/' &&
-							ZSTR_VAL(resource->path)[1] == '\0') {
-							spprintf(&loc_path, 0, "%s%s", ZSTR_VAL(resource->path), header_info.location);
-						} else {
-							spprintf(&loc_path, 0, "%s/%s", ZSTR_VAL(resource->path), header_info.location);
-						}
+						spprintf(&loc_path, 0, "%s%s", ZSTR_VAL(resource->path), header_info.location);
 					} else {
 						spprintf(&loc_path, 0, "/%s", header_info.location);
 					}
