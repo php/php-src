@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_date.stub.php instead.
- * Stub hash: 0e01f68589a71eae2f789ef6de330ac27724ba47 */
+ * Stub hash: f82824bc7dc4c7672f03d3c2698c6a958a730fa8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -459,7 +459,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, duration, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateInterval_createFromDateString, 0, 1, IS_STATIC, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateInterval_createFromDateString, 0, 1, DateInterval, 0)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
