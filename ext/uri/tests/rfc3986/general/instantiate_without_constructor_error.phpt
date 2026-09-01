@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri instantiation without calling the constructor
+Test Uri\Rfc3986\Uri instantiation - error - without calling the constructor
 --EXTENSIONS--
 reflection
 uri

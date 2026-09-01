@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - URL encoded characters
+Test Uri\WhatWg\Url component modification - host - success - percent-encoded characters
 --FILE--
 <?php
 

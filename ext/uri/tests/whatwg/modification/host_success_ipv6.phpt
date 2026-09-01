@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - IPv6 address
+Test Uri\WhatWg\Url component modification - host - success - IPv6 address
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlValidationError constructor reentry
+Test Uri\WhatWg\UrlValidationError::__construct() - error - reentry
 --FILE--
 <?php
 

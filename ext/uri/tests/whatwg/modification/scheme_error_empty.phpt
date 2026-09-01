@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - scheme - empty string
+Test Uri\WhatWg\Url component modification - scheme - error - empty string
 --FILE--
 <?php
 

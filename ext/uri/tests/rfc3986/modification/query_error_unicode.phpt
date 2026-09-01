@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - query - unicode characters
+Test Uri\Rfc3986\Uri component modification - query - error - Unicode characters
 --FILE--
 <?php
 

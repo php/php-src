@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - port - missing host
+Test Uri\Rfc3986\Uri component modification - port - error - missing host
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url serialization and unserialization
+Test Uri\WhatWg\Url serialization and unserialization - success
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - query - unsetting existing
+Test Uri\WhatWg\Url component modification - query - success - unsetting existing
 --FILE--
 <?php
 

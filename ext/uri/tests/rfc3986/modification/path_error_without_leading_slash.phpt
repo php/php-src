@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - path - without leading slash
+Test Uri\Rfc3986\Uri component modification - path - error - without leading slash
 --FILE--
 <?php
 

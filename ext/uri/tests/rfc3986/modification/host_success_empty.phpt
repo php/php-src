@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - empty string
+Test Uri\Rfc3986\Uri component modification - host - success - empty string
 --FILE--
 <?php
 

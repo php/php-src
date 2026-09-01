@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - error - modifying multiple components with warnings before throwing an exception
+Test Uri\WhatWg\Url component modification - multiple components - error - warnings before throwing an exception
 --FILE--
 <?php
 

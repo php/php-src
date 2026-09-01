@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - scheme - invalid characters
+Test Uri\WhatWg\Url component modification - scheme - error - invalid characters
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - port - too small number
+Test Uri\Rfc3986\Uri component modification - port - error - too small number
 --FILE--
 <?php
 

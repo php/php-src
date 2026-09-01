@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - query - null byte
+Test Uri\WhatWg\Url component modification - query - success - null byte
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - scheme - percent encoded character
+Test Uri\WhatWg\Url parsing - scheme - percent-encoded character
 --FILE--
 <?php
 

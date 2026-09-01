@@ -1,5 +1,5 @@
 --TEST--
-Test zend_test_uri_parser() with an invalid Uri\WhatWg\Url
+Test zend_test_uri_parser() - error - invalid Uri\WhatWg\Url
 --EXTENSIONS--
 zend_test
 --FILE--

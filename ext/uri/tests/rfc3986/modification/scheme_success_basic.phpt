@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - scheme - basic case
+Test Uri\Rfc3986\Uri component modification - scheme - success - basic case
 --FILE--
 <?php
 

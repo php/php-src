@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url instantiation without calling the constructor
+Test Uri\WhatWg\Url instantiation - error - without calling the constructor
 --EXTENSIONS--
 reflection
 uri

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri getter - uri type - URI
+Test Uri\Rfc3986\Uri component retrieval - URI type - URI
 --FILE--
 <?php
 

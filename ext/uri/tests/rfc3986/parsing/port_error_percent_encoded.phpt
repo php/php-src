@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri parsing - port - percent encoded character
+Test Uri\Rfc3986\Uri parsing - port - percent-encoded character
 --FILE--
 <?php
 

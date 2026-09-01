@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - scheme - reserved characters
+Test Uri\Rfc3986\Uri component modification - scheme - error - reserved characters
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification when roundtripping is not guaranteed - case 2
+Test Uri\Rfc3986\Uri component modification - round trip not guaranteed - case 2
 --FILE--
 <?php
 

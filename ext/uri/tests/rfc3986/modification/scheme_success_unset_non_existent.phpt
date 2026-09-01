@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - scheme - unsetting non-existent
+Test Uri\Rfc3986\Uri component modification - scheme - success - unsetting non-existent
 --FILE--
 <?php
 

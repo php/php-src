@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - userinfo - URL encoded characters
+Test Uri\Rfc3986\Uri component modification - userinfo - success - percent-encoded characters
 --FILE--
 <?php
 

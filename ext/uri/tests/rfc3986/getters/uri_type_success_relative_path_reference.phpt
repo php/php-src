@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri getter - uri type - Relative path reference
+Test Uri\Rfc3986\Uri component retrieval - URI type - relative-path reference
 --FILE--
 <?php
 

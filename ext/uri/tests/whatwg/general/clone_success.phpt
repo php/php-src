@@ -1,5 +1,5 @@
 --TEST--
-Test cloning Uri\WhatWg\Url
+Test Uri\WhatWg\Url cloning - success
 --FILE--
 <?php
 

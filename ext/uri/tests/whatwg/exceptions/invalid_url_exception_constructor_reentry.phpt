@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\InvalidUrlException constructor reentry
+Test Uri\WhatWg\InvalidUrlException::__construct() - error - reentry
 --FILE--
 <?php
 

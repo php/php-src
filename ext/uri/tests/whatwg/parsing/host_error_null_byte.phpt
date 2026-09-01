@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - basic - URL contains null byte
+Test Uri\WhatWg\Url parsing - host - null byte
 --FILE--
 <?php
 

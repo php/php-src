@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - changing an existing one
+Test Uri\WhatWg\Url component modification - host - success - changing an existing one
 --FILE--
 <?php
 

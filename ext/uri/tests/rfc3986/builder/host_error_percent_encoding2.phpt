@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\UriBuilder::setHost() - error - invalid percent encoded octet in IPv6
+Test Uri\Rfc3986\UriBuilder::setHost() - error - invalid percent-encoded octet in IPv6
 --FILE--
 <?php
 

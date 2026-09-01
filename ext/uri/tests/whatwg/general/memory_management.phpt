@@ -1,5 +1,5 @@
 --TEST--
-Test Lexbor memory management
+Test Uri\WhatWg\Url Lexbor memory management - success
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - IPv4 address
+Test Uri\Rfc3986\Uri component modification - host - success - IPv4 address
 --FILE--
 <?php
 

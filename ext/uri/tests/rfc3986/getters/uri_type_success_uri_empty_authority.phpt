@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri getter - uri type - URI with empty authority
+Test Uri\Rfc3986\Uri component retrieval - URI type - URI with empty authority
 --FILE--
 <?php
 

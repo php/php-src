@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\UriBuilder basic - error - with base URL
+Test Uri\Rfc3986\UriBuilder basic - error - with base URI
 --FILE--
 <?php
 

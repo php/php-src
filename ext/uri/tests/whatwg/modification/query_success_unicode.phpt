@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - query - unicode characters
+Test Uri\WhatWg\Url component modification - query - success - Unicode characters
 --FILE--
 <?php
 

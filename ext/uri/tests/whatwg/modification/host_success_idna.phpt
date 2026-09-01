@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - IDNA characters
+Test Uri\WhatWg\Url component modification - host - success - IDNA characters
 --FILE--
 <?php
 

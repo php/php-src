@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - password - empty string
+Test Uri\WhatWg\Url component modification - password - success - empty string
 --FILE--
 <?php
 

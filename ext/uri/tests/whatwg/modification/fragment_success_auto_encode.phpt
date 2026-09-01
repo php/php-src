@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - fragment - characters from the percent encode set
+Test Uri\WhatWg\Url component modification - fragment - success - characters from the percent-encode set
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test casting Uri\WhatWg\Url to array
+Test Uri\WhatWg\Url array cast - success
 --FILE--
 <?php
 
