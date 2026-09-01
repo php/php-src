@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - path - percent-encoded reserved character
+Test Uri\WhatWg\Url parsing - path - percent-encoded byte
 --FILE--
 <?php
 

@@ -18,7 +18,7 @@ var_dump($uri->toString());
 ?>
 --EXPECTF--
 Exception: Invalid serialization data for Uri\Rfc3986\Uri object
-object(Uri\Rfc3986\Uri)#%d (8) {
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["username"]=>

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component retrieval - percent-encoded components
+Test Uri\Rfc3986\Uri component retrieval - basic - percent-encoded components
 --FILE--
 <?php
 

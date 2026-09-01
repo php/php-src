@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component retrieval - percent-encoded components
+Test Uri\WhatWg\Url component retrieval - basic - percent-encoded components
 --FILE--
 <?php
 
