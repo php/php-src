@@ -517,7 +517,7 @@ static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats)
 }
 
 /* {{{ static make_subpats_table */
-static zend_string **make_subpats_table(uint32_t name_cnt, pcre_cache_entry *pce)
+static zend_string **make_subpats_table(uint32_t name_cnt, const pcre_cache_entry *pce)
 {
 	uint32_t num_subpats = pce->capture_count + 1;
 	uint32_t name_size, ni = 0;
@@ -553,7 +553,7 @@ static zend_string **ensure_subpats_table(uint32_t name_cnt, pcre_cache_entry *p
 
 /* {{{ static calculate_unit_length */
 /* Calculates the byte length of the next character. Assumes valid UTF-8 for PCRE2_UTF. */
-static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, const char *start)
+static zend_always_inline size_t calculate_unit_length(const pcre_cache_entry *pce, const char *start)
 {
 	size_t unit_len;
 
@@ -1127,7 +1127,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, bool global) /* {{{ 
 /* }}} */
 
 static zend_always_inline bool is_known_valid_utf8(
-		zend_string *subject_str, PCRE2_SIZE start_offset) {
+		const zend_string *subject_str, PCRE2_SIZE start_offset) {
 	if (!ZSTR_IS_VALID_UTF8(subject_str)) {
 		/* We don't know whether the string is valid UTF-8 or not. */
 		return false;
@@ -2074,8 +2074,8 @@ static zend_always_inline zend_string *php_pcre_replace_func(zend_string *regex,
 }
 
 /* {{{ php_pcre_replace_array */
-static zend_string *php_pcre_replace_array(HashTable *regex,
-	zend_string *replace_str, HashTable *replace_ht,
+static zend_string *php_pcre_replace_array(const HashTable *regex,
+	zend_string *replace_str, const HashTable *replace_ht,
 	zend_string *subject_str, size_t limit, size_t *replace_count)
 {
 	zval		*regex_entry;
@@ -2100,7 +2100,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 					tmp_replace_entry_str = NULL;
 					break;
 				}
-				zval *zv = ZEND_HASH_ELEMENT(replace_ht, replace_idx);
+				const zval *zv = ZEND_HASH_ELEMENT(replace_ht, replace_idx);
 				replace_idx++;
 				if (Z_TYPE_P(zv) != IS_UNDEF) {
 					replace_entry_str = zval_get_tmp_string(zv, &tmp_replace_entry_str);
@@ -2150,8 +2150,8 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 
 /* {{{ php_replace_in_subject */
 static zend_always_inline zend_string *php_replace_in_subject(
-	zend_string *regex_str, HashTable *regex_ht,
-	zend_string *replace_str, HashTable *replace_ht,
+	zend_string *regex_str, const HashTable *regex_ht,
+	zend_string *replace_str, const HashTable *replace_ht,
 	zend_string *subject, size_t limit, size_t *replace_count)
 {
 	zend_string *result;
@@ -2264,8 +2264,8 @@ static size_t php_preg_replace_func_impl(zval *return_value,
 static void _preg_replace_common(
 	zval *return_value,
 	HashTable *regex_ht, zend_string *regex_str,
-	HashTable *replace_ht, zend_string *replace_str,
-	HashTable *subject_ht, zend_string *subject_str,
+	const HashTable *replace_ht, zend_string *replace_str,
+	const HashTable *subject_ht, zend_string *subject_str,
 	zend_long limit,
 	zval *zcount,
 	bool is_filter
@@ -2553,7 +2553,7 @@ PHP_FUNCTION(preg_split)
 /* }}} */
 
 /* {{{ php_pcre_split */
-PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
+PHPAPI void php_pcre_split_impl(const pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zend_long limit_val, zend_long flags)
 {
 	uint32_t		 options;			/* Execution options */
