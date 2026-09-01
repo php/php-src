@@ -1042,10 +1042,10 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 	digest_length = length;
 	if (!raw_output) {
-		digest_length = (length + 1) / 2;
+		digest_length = length / 2 + (length % 2);
 	}
 
-	loops = (digest_length + ops->digest_size - 1) / ops->digest_size;
+	loops = (digest_length - 1) / ops->digest_size + 1;
 
 	result = safe_emalloc(loops, ops->digest_size, 0);
 
