@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - host - emoji codepoint
+Test Uri\WhatWg\Url parsing - host - emoji code point
 --FILE--
 <?php
 

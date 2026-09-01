@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - scheme - multibyte codepoint
+Test Uri\WhatWg\Url parsing - scheme - multibyte code point
 --FILE--
 <?php
 

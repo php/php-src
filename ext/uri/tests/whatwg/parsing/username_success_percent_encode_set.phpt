@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - username - codepoint in percent-encode set
+Test Uri\WhatWg\Url parsing - username - code point in percent-encode set
 --FILE--
 <?php
 

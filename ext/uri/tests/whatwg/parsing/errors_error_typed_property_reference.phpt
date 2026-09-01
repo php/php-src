@@ -1,10 +1,10 @@
 --TEST--
-Test assigning errors by reference fails
+Test Uri\WhatWg\Url parsing - errors - assignment to a typed property reference
 --FILE--
 <?php
 
 class Foo {
-	public string $x = '';
+    public string $x = '';
 }
 
 $f = new Foo();

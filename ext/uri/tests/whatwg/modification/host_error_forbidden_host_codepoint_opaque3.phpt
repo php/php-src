@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - forbidden host codepoint
+Test Uri\WhatWg\Url component modification - host - forbidden host code point
 --FILE--
 <?php
 

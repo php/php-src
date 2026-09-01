@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setHost() - success - null in case of special URLs
+Test Uri\WhatWg\UrlBuilder::setHost() - error - null in case of special URLs
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test that integer overflows in the port are rejected
+Test Uri\Rfc3986\Uri parsing - port - integer overflow
 --FILE--
 <?php
 
