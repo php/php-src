@@ -1,9 +1,12 @@
 --TEST--
-Test Uri\WhatWg\Url construction - basic - success
+Test Uri\WhatWg\Url parsing - basic - parsing all components with the constructor
 --FILE--
 <?php
 
-var_dump(new Uri\WhatWg\Url("https://username:password@example.com:8080/path?q=r#fragment"));
+$url = new Uri\WhatWg\Url("https://username:password@example.com:8080/path?q=r#fragment");
+
+var_dump($url);
+var_dump($url->toAsciiString());
 
 ?>
 --EXPECTF--
@@ -25,3 +28,4 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   string(8) "fragment"
 }
+string(60) "https://username:password@example.com:8080/path?q=r#fragment"
