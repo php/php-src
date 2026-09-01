@@ -1515,17 +1515,17 @@ PHP_FUNCTION(preg_match_all)
 }
 /* }}} */
 
-/* {{{ preg_get_backref */
-static int preg_get_backref(char **str, int *backref)
+static bool preg_get_backref(char **str, int *backref)
 {
-	char in_brace = 0;
+	bool in_brace = false;
 	char *walk = *str;
 
-	if (walk[1] == 0)
-		return 0;
+	if (walk[1] == 0) {
+		return false;
+	}
 
 	if (*walk == '$' && walk[1] == '{') {
-		in_brace = 1;
+		in_brace = true;
 		walk++;
 	}
 	walk++;
@@ -1533,8 +1533,9 @@ static int preg_get_backref(char **str, int *backref)
 	if (*walk >= '0' && *walk <= '9') {
 		*backref = *walk - '0';
 		walk++;
-	} else
-		return 0;
+	} else {
+		return false;
+	}
 
 	if (*walk && *walk >= '0' && *walk <= '9') {
 		*backref = *backref * 10 + *walk - '0';
@@ -1542,16 +1543,15 @@ static int preg_get_backref(char **str, int *backref)
 	}
 
 	if (in_brace) {
-		if (*walk != '}')
-			return 0;
-		else
-			walk++;
+		if (*walk != '}') {
+			return false;
+		}
+		walk++;
 	}
 
 	*str = walk;
-	return 1;
+	return true;
 }
-/* }}} */
 
 /* Return NULL if an exception has occurred */
 static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, const char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
