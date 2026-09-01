@@ -4888,7 +4888,6 @@ PHP_FUNCTION(sodium_crypto_kem_seed_keypair)
 
 PHP_FUNCTION(sodium_crypto_kem_secretkey)
 {
-	zend_string   *secretkey;
 	unsigned char *keypair;
 	size_t         keypair_len;
 
@@ -4902,16 +4901,11 @@ PHP_FUNCTION(sodium_crypto_kem_secretkey)
 		zend_argument_error(sodium_exception_ce, 1, "must be SODIUM_CRYPTO_KEM_KEYPAIRBYTES bytes long");
 		RETURN_THROWS();
 	}
-	secretkey = zend_string_alloc(crypto_kem_SECRETKEYBYTES, 0);
-	memcpy(ZSTR_VAL(secretkey), keypair, crypto_kem_SECRETKEYBYTES);
-	ZSTR_VAL(secretkey)[crypto_kem_SECRETKEYBYTES] = 0;
-
-	RETURN_STR(secretkey);
+	RETURN_STRINGL((const char *) keypair, crypto_kem_SECRETKEYBYTES);
 }
 
 PHP_FUNCTION(sodium_crypto_kem_publickey)
 {
-	zend_string   *publickey;
 	unsigned char *keypair;
 	size_t         keypair_len;
 
@@ -4925,12 +4919,7 @@ PHP_FUNCTION(sodium_crypto_kem_publickey)
 		zend_argument_error(sodium_exception_ce, 1, "must be SODIUM_CRYPTO_KEM_KEYPAIRBYTES bytes long");
 		RETURN_THROWS();
 	}
-	publickey = zend_string_alloc(crypto_kem_PUBLICKEYBYTES, 0);
-	memcpy(ZSTR_VAL(publickey), keypair + crypto_kem_SECRETKEYBYTES,
-		   crypto_kem_PUBLICKEYBYTES);
-	ZSTR_VAL(publickey)[crypto_kem_PUBLICKEYBYTES] = 0;
-
-	RETURN_STR(publickey);
+	RETURN_STRINGL((const char *) keypair + crypto_kem_SECRETKEYBYTES, crypto_kem_PUBLICKEYBYTES);
 }
 
 PHP_FUNCTION(sodium_crypto_kem_enc)
@@ -5053,7 +5042,6 @@ PHP_FUNCTION(sodium_crypto_kem_mlkem768_seed_keypair)
 
 PHP_FUNCTION(sodium_crypto_kem_mlkem768_secretkey)
 {
-	zend_string   *secretkey;
 	unsigned char *keypair;
 	size_t         keypair_len;
 
@@ -5067,16 +5055,11 @@ PHP_FUNCTION(sodium_crypto_kem_mlkem768_secretkey)
 		zend_argument_error(sodium_exception_ce, 1, "must be SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES bytes long");
 		RETURN_THROWS();
 	}
-	secretkey = zend_string_alloc(crypto_kem_mlkem768_SECRETKEYBYTES, 0);
-	memcpy(ZSTR_VAL(secretkey), keypair, crypto_kem_mlkem768_SECRETKEYBYTES);
-	ZSTR_VAL(secretkey)[crypto_kem_mlkem768_SECRETKEYBYTES] = 0;
-
-	RETURN_STR(secretkey);
+	RETURN_STRINGL((const char *) keypair, crypto_kem_mlkem768_SECRETKEYBYTES);
 }
 
 PHP_FUNCTION(sodium_crypto_kem_mlkem768_publickey)
 {
-	zend_string   *publickey;
 	unsigned char *keypair;
 	size_t         keypair_len;
 
@@ -5090,12 +5073,7 @@ PHP_FUNCTION(sodium_crypto_kem_mlkem768_publickey)
 		zend_argument_error(sodium_exception_ce, 1, "must be SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES bytes long");
 		RETURN_THROWS();
 	}
-	publickey = zend_string_alloc(crypto_kem_mlkem768_PUBLICKEYBYTES, 0);
-	memcpy(ZSTR_VAL(publickey), keypair + crypto_kem_mlkem768_SECRETKEYBYTES,
-		   crypto_kem_mlkem768_PUBLICKEYBYTES);
-	ZSTR_VAL(publickey)[crypto_kem_mlkem768_PUBLICKEYBYTES] = 0;
-
-	RETURN_STR(publickey);
+	RETURN_STRINGL((const char *) keypair + crypto_kem_mlkem768_SECRETKEYBYTES, crypto_kem_mlkem768_PUBLICKEYBYTES);
 }
 
 PHP_FUNCTION(sodium_crypto_kem_mlkem768_enc)
