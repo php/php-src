@@ -60,7 +60,7 @@ array(2) {
   ["first"]=>
   string(11) "hello world"
   ["third"]=>
-  string(18) "world domination"
+  string(16) "world domination"
 }
 
 --- Non-string Values Ignored ---
@@ -90,9 +90,9 @@ array(2) {
 }
 array(2) {
   [3]=>
-  string(18) "PHP 8.7 عالیه 🚀"
+  string(23) "PHP 8.7" عالیه 🚀"
   [4]=>
-  string(30) "یک ایموجی دیگر 🚀"
+  string(31) "یک ایموجی دیگر 🚀"
 }
 
 --- Empty Haystack ---
