@@ -6,7 +6,16 @@ PHP                                                                        NEWS
   . Fixed bug GH-23242 (PHP development server does not support Expect
     100-continue flow control). (Sjoerd Langkemper)
 
+- DOM:
+  . Fixed NamedNodeMap::getNamedItemNS() with an empty URI not matching
+    the null namespace in spec-following mode. (Ilia Alshanetsky)
+  . Fixed stale getElementsByClassName() and other node list caches after
+    className/classList writes and attribute removals. (Ilia Alshanetsky)
+
 - Intl:
+  . Fixed a memory leak when dumping IntlCalendar instances. (Ilia Alshanetsky)
+  . Fixed Collator::sortWithSortKeys() allocating fixed 2MiB buffers
+    regardless of array size. (Ilia Alshanetsky)
   . Fixed a memory leak when iterating IntlBreakIterator::getPartsIterator()
     results. (iliaal)
   . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
@@ -28,6 +37,15 @@ PHP                                                                        NEWS
   . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
     (Weilin Du)
 
+- Sockets:
+  . Fixed socket_set_option() with SO_ATTACH_REUSEPORT_CBPF and a zero value,
+    which detached the classic BPF filter instead of the reuseport program.
+    (David Carlier)
+
+- SOAP:
+  . Fixed WSDL cache corruption when a soap:header defines headerfaults.
+    (Ilia Alshanetsky)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
@@ -36,6 +54,10 @@ PHP                                                                        NEWS
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
   . Io\Poll\Context::wait() now rejects a $maxEvents value greater than
     INT_MAX instead of truncating it. (marc-mabe)
+
+- SimpleXML:
+  . Fixed writing to a dimension of the object returned by attributes() not
+    creating the attribute. (Ilia Alshanetsky)
 
 
 27 Aug 2026, PHP 8.6.0beta2

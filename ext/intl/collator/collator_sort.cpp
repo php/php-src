@@ -44,9 +44,8 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 
 static const size_t DEF_SORT_KEYS_BUF_SIZE = 1048576;
 static const size_t DEF_SORT_KEYS_BUF_INCREMENT = 1048576;
-
-static const size_t DEF_SORT_KEYS_INDX_BUF_SIZE = 1048576;
-static const size_t DEF_SORT_KEYS_INDX_BUF_INCREMENT = 1048576;
+static const size_t MIN_SORT_KEYS_BUF_SIZE = 4096;
+static const size_t SORT_KEY_LENGTH_ESTIMATE = 32;
 
 static const size_t DEF_UTF16_BUF_SIZE = 1024;
 
@@ -427,17 +426,17 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	zval*       hashData             = nullptr;                     /* currently processed item of input hash */
 
 	char*       sortKeyBuf           = nullptr;                     /* buffer to store sort keys */
-	uint32_t    sortKeyBufSize       = DEF_SORT_KEYS_BUF_SIZE;   /* buffer size */
+	uint32_t    sortKeyBufSize       = 0;                        /* buffer size */
 	ptrdiff_t   sortKeyBufOffset     = 0;                        /* pos in buffer to store sort key */
 	uint32_t    sortKeyLen           = 0;                        /* the length of currently processing key */
 	uint32_t    bufLeft              = 0;
 	uint32_t    bufIncrement         = 0;
 
 	collator_sort_key_index_t* sortKeyIndxBuf = nullptr;            /* buffer to store 'indexes' which will be passed to 'qsort' */
-	uint32_t    sortKeyIndxBufSize   = DEF_SORT_KEYS_INDX_BUF_SIZE;
 	uint32_t    sortKeyIndxSize      = sizeof( collator_sort_key_index_t );
 
 	uint32_t    sortKeyCount         = 0;
+	uint32_t    numElements          = 0;
 	uint32_t    j                    = 0;
 
 	UChar*      utf16_buf            = nullptr;                     /* tmp buffer to hold current processing string in utf-16 */
@@ -472,9 +471,20 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( !hash || zend_hash_num_elements( hash ) == 0 )
 		RETURN_TRUE;
 
+	numElements = zend_hash_num_elements( hash );
+
+	if( numElements > DEF_SORT_KEYS_BUF_SIZE / SORT_KEY_LENGTH_ESTIMATE ) {
+		sortKeyBufSize = DEF_SORT_KEYS_BUF_SIZE;
+	} else {
+		sortKeyBufSize = numElements * SORT_KEY_LENGTH_ESTIMATE;
+	}
+	if( sortKeyBufSize < MIN_SORT_KEYS_BUF_SIZE ) {
+		sortKeyBufSize = MIN_SORT_KEYS_BUF_SIZE;
+	}
+
 	/* Create buffers */
-	sortKeyBuf     = reinterpret_cast<char *>(ecalloc( sortKeyBufSize,     sizeof( char    ) ));
-	sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(ecalloc( sortKeyIndxBufSize, sizeof( uint8_t ) ));
+	sortKeyBuf     = reinterpret_cast<char *>(ecalloc( sortKeyBufSize, sizeof( char ) ));
+	sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(ecalloc( numElements, sortKeyIndxSize ));
 	utf16_buf      = eumalloc( utf16_buf_size );
 
 	/* Iterate through input hash and create a sort key for each value. */
@@ -524,7 +534,15 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 		/* check for sortKeyBuf overflow, increasing its size of the buffer if needed */
 		if( sortKeyLen > bufLeft )
 		{
-			bufIncrement = ( sortKeyLen > DEF_SORT_KEYS_BUF_INCREMENT ) ? sortKeyLen : DEF_SORT_KEYS_BUF_INCREMENT;
+			bufIncrement = sortKeyBufSize;
+
+			if( bufIncrement > DEF_SORT_KEYS_BUF_INCREMENT ) {
+				bufIncrement = DEF_SORT_KEYS_BUF_INCREMENT;
+			}
+
+			if( bufIncrement < sortKeyLen ) {
+				bufIncrement = sortKeyLen;
+			}
 
 			sortKeyBufSize += bufIncrement;
 			bufLeft += bufIncrement;
@@ -532,16 +550,6 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 			sortKeyBuf = reinterpret_cast<char *>(erealloc( sortKeyBuf, sortKeyBufSize ));
 
 			sortKeyLen = ucol_getSortKey( co->ucoll, utf16_buf, utf16_len, (uint8_t*)sortKeyBuf + sortKeyBufOffset, bufLeft );
-		}
-
-		/*  check sortKeyIndxBuf overflow, increasing its size of the buffer if needed */
-		if( ( sortKeyCount + 1 ) * sortKeyIndxSize > sortKeyIndxBufSize )
-		{
-			bufIncrement = ( sortKeyIndxSize > DEF_SORT_KEYS_INDX_BUF_INCREMENT ) ? sortKeyIndxSize : DEF_SORT_KEYS_INDX_BUF_INCREMENT;
-
-			sortKeyIndxBufSize += bufIncrement;
-
-			sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(erealloc( sortKeyIndxBuf, sortKeyIndxBufSize ));
 		}
 
 		sortKeyIndxBuf[sortKeyCount].key = (char*)sortKeyBufOffset;    /* remember just offset, cause address */

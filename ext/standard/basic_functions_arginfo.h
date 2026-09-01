@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: a6217cd58a9197deab8c9e18775d10eb0d0aefbf
+ * Stub hash: 70f50354132d58f9c8bee70f9cec9a7dff6dea27
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -2299,6 +2299,12 @@ static const zend_frameless_function_info frameless_function_infos_str_starts_wi
 	{ 0 },
 };
 
+ZEND_FRAMELESS_FUNCTION(str_ends_with, 2);
+static const zend_frameless_function_info frameless_function_infos_str_ends_with[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(str_ends_with, 2), 2 },
+	{ 0 },
+};
+
 ZEND_FRAMELESS_FUNCTION(substr, 2);
 ZEND_FRAMELESS_FUNCTION(substr, 3);
 static const zend_frameless_function_info frameless_function_infos_substr[] = {
@@ -3204,7 +3210,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("strrchr", zif_strrchr, arginfo_strrchr, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("str_contains", zif_str_contains, arginfo_str_contains, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_contains, NULL)
 	ZEND_RAW_FENTRY("str_starts_with", zif_str_starts_with, arginfo_str_starts_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_starts_with, NULL)
-	ZEND_RAW_FENTRY("str_ends_with", zif_str_ends_with, arginfo_str_ends_with, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_ends_with", zif_str_ends_with, arginfo_str_ends_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_ends_with, NULL)
 	ZEND_RAW_FENTRY("chunk_split", zif_chunk_split, arginfo_chunk_split, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("substr", zif_substr, arginfo_substr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_substr, NULL)
 	ZEND_RAW_FENTRY("substr_replace", zif_substr_replace, arginfo_substr_replace, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
