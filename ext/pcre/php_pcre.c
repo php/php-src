@@ -76,7 +76,7 @@ ZEND_TLS pcre2_compile_context *cctx = NULL;
 ZEND_TLS pcre2_match_context   *mctx = NULL;
 ZEND_TLS pcre2_match_data      *mdata = NULL;
 ZEND_TLS bool              mdata_used = 0;
-ZEND_TLS uint8_t pcre2_init_ok = 0;
+ZEND_TLS bool pcre2_init_ok = false;
 #if defined(ZTS) && defined(HAVE_PCRE_JIT_SUPPORT)
 static MUTEX_T pcre_mt = NULL;
 #define php_pcre_mutex_alloc() \
@@ -204,7 +204,7 @@ static void php_pcre_init_pcre2(uint8_t jit)
 	if (!gctx) {
 		gctx = pcre2_general_context_create(php_pcre_malloc, php_pcre_free, NULL);
 		if (!gctx) {
-			pcre2_init_ok = 0;
+			pcre2_init_ok = false;
 			return;
 		}
 	}
@@ -212,7 +212,7 @@ static void php_pcre_init_pcre2(uint8_t jit)
 	if (!cctx) {
 		cctx = pcre2_compile_context_create(gctx);
 		if (!cctx) {
-			pcre2_init_ok = 0;
+			pcre2_init_ok = false;
 			return;
 		}
 	}
@@ -220,7 +220,7 @@ static void php_pcre_init_pcre2(uint8_t jit)
 	if (!mctx) {
 		mctx = pcre2_match_context_create(gctx);
 		if (!mctx) {
-			pcre2_init_ok = 0;
+			pcre2_init_ok = false;
 			return;
 		}
 	}
@@ -229,7 +229,7 @@ static void php_pcre_init_pcre2(uint8_t jit)
 	if (jit && !jit_stack) {
 		jit_stack = pcre2_jit_stack_create(PCRE_JIT_STACK_MIN_SIZE, PCRE_JIT_STACK_MAX_SIZE, gctx);
 		if (!jit_stack) {
-			pcre2_init_ok = 0;
+			pcre2_init_ok = false;
 			return;
 		}
 	}
@@ -238,12 +238,12 @@ static void php_pcre_init_pcre2(uint8_t jit)
 	if (!mdata) {
 		mdata = pcre2_match_data_create(PHP_PCRE_PREALLOC_MDATA_SIZE, gctx);
 		if (!mdata) {
-			pcre2_init_ok = 0;
+			pcre2_init_ok = false;
 			return;
 		}
 	}
 
-	pcre2_init_ok = 1;
+	pcre2_init_ok = true;
 }/*}}}*/
 
 static void php_pcre_shutdown_pcre2(void)
@@ -277,7 +277,7 @@ static void php_pcre_shutdown_pcre2(void)
 		mdata = NULL;
 	}
 
-	pcre2_init_ok = 0;
+	pcre2_init_ok = false;
 }/*}}}*/
 
 static PHP_GINIT_FUNCTION(pcre) /* {{{ */
