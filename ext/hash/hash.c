@@ -17,7 +17,6 @@
 #include <config.h>
 #endif
 
-#include <math.h>
 #include "php_hash.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -1033,10 +1032,10 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 	digest_length = length;
 	if (!raw_output) {
-		digest_length = (zend_long) ceil((float) length / 2.0);
+		digest_length = length / 2 + (length % 2);
 	}
 
-	loops = (zend_long) ceil((float) digest_length / (float) ops->digest_size);
+	loops = (digest_length - 1) / ops->digest_size + 1;
 
 	result = safe_emalloc(loops, ops->digest_size, 0);
 
