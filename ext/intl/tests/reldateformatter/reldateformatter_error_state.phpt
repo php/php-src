@@ -19,7 +19,7 @@ var_dump(intl_get_error_code());
 ini_set('intl.use_exceptions', '1');
 try {
     $formatter->combineDateAndTime('today', "\x80");
-} catch (IntlException $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', str_contains($e->getMessage(), 'Failed to convert time to UTF-16') ? 'conversion failed' : 'unexpected', "\n";
 }
 
