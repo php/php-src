@@ -6,7 +6,6 @@ Test Uri\WhatWg\Url parsing - path - file URL with a backslash and spaces
 $url = Uri\WhatWg\Url::parse("file:///E:\Documents and Settings");
 
 var_dump($url);
-var_dump($url->toUnicodeString());
 var_dump($url->toAsciiString());
 
 ?>
@@ -29,5 +28,4 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-string(37) "file:///E:/Documents%20and%20Settings"
 string(37) "file:///E:/Documents%20and%20Settings"

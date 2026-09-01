@@ -1,5 +1,5 @@
 --TEST--
-Test RFC 3986 percent-encoding normalization
+Test Uri\Rfc3986\Uri normalization - percent-encoding
 --FILE--
 <?php
 

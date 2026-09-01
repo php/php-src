@@ -10,8 +10,8 @@ var_dump($uri->toRawString());
 var_dump($uri->toString());
 
 ?>
---EXPECT--
-object(Uri\Rfc3986\Uri)#1 (8) {
+--EXPECTF--
+object(Uri\Rfc3986\Uri)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["username"]=>

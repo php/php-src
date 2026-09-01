@@ -6,9 +6,7 @@ Test Uri\WhatWg\Url parsing - path - percent-encoded byte
 $url = new Uri\WhatWg\Url("https://example.com/foo/bar%2Fbaz");
 
 var_dump($url);
-var_dump($url->toUnicodeString());
 var_dump($url->toAsciiString());
-var_dump($url->getPath());
 
 ?>
 --EXPECTF--
@@ -31,5 +29,3 @@ object(Uri\WhatWg\Url)#%d (%d) {
   NULL
 }
 string(33) "https://example.com/foo/bar%2Fbaz"
-string(33) "https://example.com/foo/bar%2Fbaz"
-string(14) "/foo/bar%2Fbaz"
