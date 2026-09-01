@@ -27,6 +27,11 @@ PHP                                                                        NEWS
   . Fixed Spoofchecker methods not recording the ICU error code when an ICU
     call fails. (Ilia Alshanetsky)
 
+- MBString:
+  . Fixed mb_ereg_replace() emitting a NUL or out-of-bounds bytes in the
+    replacement when a \k<name> backref has no closing delimiter.
+    (Ilia Alshanetsky)
+
 - PDO_PGSQL:
   . Added Pdo\Pgsql::ATTR_CHUNK_SIZE to fetch a result set in chunks of the
     given number of rows. (KentarouTakeda)
