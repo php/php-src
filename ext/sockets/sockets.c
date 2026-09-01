@@ -948,6 +948,10 @@ PHP_FUNCTION(socket_read)
 		RETURN_FALSE;
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(length, 1, 0))) {
+		RETURN_THROWS();
+	}
+
 	tmpbuf = zend_string_alloc(length, 0);
 
 	if (type == PHP_NORMAL_READ) {
@@ -1434,6 +1438,10 @@ PHP_FUNCTION(socket_recv)
 		RETURN_FALSE;
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(len, 1, 0))) {
+		RETURN_THROWS();
+	}
+
 	recv_buf = zend_string_alloc(len, 0);
 
 	if ((retval = recv(php_sock->bsd_socket, ZSTR_VAL(recv_buf), len, flags)) < 1) {
@@ -1560,6 +1568,10 @@ PHP_FUNCTION(socket_recvfrom)
 
 	if (length <= 0 || length > ZEND_LONG_MAX - 1) {
 		RETURN_FALSE;
+	}
+
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(length, 1, 1))) {
+		RETURN_THROWS();
 	}
 
 	recv_buf = zend_string_alloc(length + 1, 0);

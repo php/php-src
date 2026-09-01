@@ -272,6 +272,9 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	}
 
 	size_t length = (size_t)user_length;
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(length, 1, 0))) {
+		RETURN_THROWS();
+	}
 	retval = zend_string_alloc(length, 0);
 
 	php_random_result result;
@@ -425,6 +428,9 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 	}
 
 	size_t length = (size_t)user_length;
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(length, 1, 0))) {
+		RETURN_THROWS();
+	}
 	retval = zend_string_alloc(length, 0);
 
 	if (max_offset > 0xff) {

@@ -167,6 +167,10 @@ class DivisionByZeroError extends ArithmeticError
 {
 }
 
+class MemoryError extends Error
+{
+}
+
 class UnhandledMatchError extends Error
 {
 }

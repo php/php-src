@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_exceptions.stub.php instead.
- * Stub hash: ba1562ca8fe2fe48c40bc52d10545aa989afd86c */
+ * Stub hash: ccb35f370935ff42169311e1ce0503c1106a07f0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -313,6 +313,16 @@ static zend_class_entry *register_class_DivisionByZeroError(zend_class_entry *cl
 
 	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ArithmeticError, 0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_MemoryError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "MemoryError", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
