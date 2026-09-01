@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     read. (iliaal)
   . Fixed a use-after-free when IntlRuleBasedBreakIterator is constructed
     from compiled rules. (iliaal)
+  . Fixed Spoofchecker methods not recording the ICU error code when an ICU
+    call fails. (Ilia Alshanetsky)
 
 - PDO_PGSQL:
   . Added Pdo\Pgsql::ATTR_CHUNK_SIZE to fetch a result set in chunks of the
