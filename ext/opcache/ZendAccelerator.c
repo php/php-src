@@ -127,7 +127,7 @@ bool fallback_process = false; /* process uses file cache fallback */
 #endif
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
-static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
+static zend_class_entry* (*accelerator_orig_inheritance_cache_get)(zend_class_entry *ce, const zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
 static zend_class_entry* (*accelerator_orig_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);
 static zend_result (*accelerator_orig_zend_stream_open_function)(zend_file_handle *handle );
 static zend_string *(*accelerator_orig_zend_resolve_path)(zend_string *filename);
@@ -2058,7 +2058,7 @@ const zend_op_array *zend_accel_pfa_cache_get(
 		const uint32_t *declaring_lineno_ptr, const zend_function *called_function, bool cacheable_in_shm)
 {
 	zend_string *key = zend_accel_pfa_key(declaring_lineno_ptr, called_function);
-	zend_op_array *op_array = NULL;
+	const zend_op_array *op_array = NULL;
 
 	/* A PFA is SHM-cacheable if the declaring op_array and called_function are
 	 * cached. */
@@ -2273,7 +2273,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 
 		if (!persistent_script) {
 			/* try to find cached script by full real path */
-			zend_accel_hash_entry *bucket;
 
 			/* open file to resolve the path */
 		    if (file_handle->type == ZEND_HANDLE_FILENAME
@@ -2289,7 +2288,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		    }
 
 			if (file_handle->opened_path) {
-				bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path);
+				zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path);
 
 				if (bucket) {
 					persistent_script = (zend_persistent_script *)bucket->data;
@@ -2533,7 +2532,7 @@ static zend_always_inline zend_inheritance_cache_entry* zend_accel_inheritance_c
 	return NULL;
 }
 
-static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
+static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, const zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
 {
 	bool needs_autoload;
 	zend_inheritance_cache_entry *entry = ce->inheritance_cache;

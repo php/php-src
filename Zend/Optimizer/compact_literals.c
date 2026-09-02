@@ -51,10 +51,10 @@ static uint32_t add_static_slot(
 	uint32_t *cache_size
 ) {
 	uint32_t ret;
-	const zval *class_name = &op_array->literals[op1];
-	const zval *prop_name = &op_array->literals[op2];
+	const zend_string *class_name = Z_STR(op_array->literals[op1]);
+	const zend_string *prop_name = Z_STR(op_array->literals[op2]);
 
-	zend_string *key = zend_create_member_string(Z_STR_P(class_name), Z_STR_P(prop_name));
+	zend_string *key = zend_create_member_string(class_name, prop_name);
 	ZSTR_H(key) = zend_string_hash_func(key);
 	ZSTR_H(key) += kind;
 
