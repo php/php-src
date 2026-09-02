@@ -122,7 +122,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_THROWS();
 	}
 	if (UNEXPECTED(ZSTR_LEN(domain) > INT32_MAX - 1)) {
-		zend_argument_value_error(1, "must be less than " PRId32 " bytes", INT32_MAX);
+		zend_argument_value_error(1, "must be less than %" PRId32 " bytes", INT32_MAX);
 		RETURN_THROWS();
 	}
 	if (variant != INTL_IDN_VARIANT_UTS46) {
