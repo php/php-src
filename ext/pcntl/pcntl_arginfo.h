@@ -1,5 +1,5 @@
 /* This is a generated file, edit pcntl.stub.php instead.
- * Stub hash: 04e7b30c6fb23cf6ce6bc26fe094fd5b4dbfe826
+ * Stub hash: ec6306e93fad6d127ff880fc01736ac287619cf7
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
@@ -31,7 +31,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_signal, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
 	ZEND_ARG_INFO(0, handler)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, restart_syscalls, _IS_BOOL, 0, "true")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, restart_syscalls, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal_get_handler, 0, 0, 1)
