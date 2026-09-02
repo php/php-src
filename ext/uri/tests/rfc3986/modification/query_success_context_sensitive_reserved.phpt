@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - query - success - context-sensitive reserved character
+Test Uri\Rfc3986\Uri::withQuery() - success - context-sensitive reserved character
 --FILE--
 <?php
 

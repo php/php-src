@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - path - success - empty string
+Test Uri\Rfc3986\Uri::withPath() - success - empty string
 --FILE--
 <?php
 

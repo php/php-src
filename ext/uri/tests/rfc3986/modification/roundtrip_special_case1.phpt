@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - round trip not guaranteed - case 1
+Test Uri\Rfc3986\Uri::withHost() - success - round trip not guaranteed (case 1)
 --FILE--
 <?php
 

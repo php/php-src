@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - scheme - error - percent-encoded characters
+Test Uri\Rfc3986\Uri::withScheme() - error - percent-encoded characters
 --FILE--
 <?php
 

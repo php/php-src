@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - userinfo - error - reserved characters
+Test Uri\Rfc3986\Uri::withUserInfo() - error - reserved characters
 --FILE--
 <?php
 

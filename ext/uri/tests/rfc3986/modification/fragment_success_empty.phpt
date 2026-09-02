@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - fragment - success - empty string
+Test Uri\Rfc3986\Uri::withFragment() - success - empty string
 --FILE--
 <?php
 

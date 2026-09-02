@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - path - error - Unicode characters
+Test Uri\Rfc3986\Uri::withPath() - error - Unicode characters
 --FILE--
 <?php
 

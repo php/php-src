@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - port - success - unsetting with an empty host
+Test Uri\Rfc3986\Uri::withPort() - success - unsetting with an empty host
 --FILE--
 <?php
 

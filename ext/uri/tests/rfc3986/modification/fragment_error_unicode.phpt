@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - fragment - error - Unicode characters
+Test Uri\Rfc3986\Uri::withFragment() - error - Unicode characters
 --FILE--
 <?php
 

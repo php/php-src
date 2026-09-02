@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - path - error - reserved characters
+Test Uri\Rfc3986\Uri::withPath() - error - reserved characters
 --FILE--
 <?php
 

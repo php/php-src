@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - success - IPv6 address
+Test Uri\Rfc3986\Uri::withHost() - success - IPv6 address
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - path - success - using an email format
+Test Uri\Rfc3986\Uri::withPath() - success - using an email format
 --FILE--
 <?php
 

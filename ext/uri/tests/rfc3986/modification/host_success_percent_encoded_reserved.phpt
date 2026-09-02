@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - success - percent-encoded reserved characters
+Test Uri\Rfc3986\Uri::withHost() - success - percent-encoded reserved characters
 --FILE--
 <?php
 

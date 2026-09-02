@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - fragment - error - reserved characters
+Test Uri\Rfc3986\Uri::withFragment() - error - reserved characters
 --FILE--
 <?php
 

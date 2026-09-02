@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - fragment - success - percent-encoded characters
+Test Uri\Rfc3986\Uri::withFragment() - success - percent-encoded characters
 --FILE--
 <?php
 

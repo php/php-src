@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - error - reserved characters
+Test Uri\Rfc3986\Uri::withHost() - error - reserved characters
 --FILE--
 <?php
 

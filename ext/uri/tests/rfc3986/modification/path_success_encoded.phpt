@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - path - success - percent-encoded characters
+Test Uri\Rfc3986\Uri::withPath() - success - percent-encoded characters
 --FILE--
 <?php
 
