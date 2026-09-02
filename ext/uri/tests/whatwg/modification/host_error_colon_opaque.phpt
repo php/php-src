@@ -1,9 +1,9 @@
 --TEST--
-Test Uri\WhatWg\Url::withHost() - error - forbidden domain code point
+Test Uri\WhatWg\Url::withHost() - error - colon in opaque host input
 --FILE--
 <?php
 
-$url = Uri\WhatWg\Url::parse("https://example.com");
+$url = Uri\WhatWg\Url::parse("foo://example.com");
 
 try {
     $url = $url->withHost("ex:mple.com");
