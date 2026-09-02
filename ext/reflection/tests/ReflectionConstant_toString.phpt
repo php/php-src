@@ -11,5 +11,5 @@ echo new ReflectionConstant('IS_FALSE');
 
 ?>
 --EXPECT--
-Constant [ bool IS_TRUE ] { 1 }
-Constant [ bool IS_FALSE ] {  }
+Constant [ bool IS_TRUE ] { true }
+Constant [ bool IS_FALSE ] { false }
