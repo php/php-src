@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url::withHost() - error - forbidden domain code point
+Test Uri\WhatWg\Url::withHost() - error - at sign in special host input
 --FILE--
 <?php
 

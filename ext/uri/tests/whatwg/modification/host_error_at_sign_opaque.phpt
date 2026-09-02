@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url::withHost() - error - forbidden host code point
+Test Uri\WhatWg\Url::withHost() - error - at sign in opaque host input
 --FILE--
 <?php
 
