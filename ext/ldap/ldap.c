@@ -2672,8 +2672,15 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 	int rc, msgid;
 	size_t dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op|h!", &link, ldap_link_ce, &dn, &dn_len, &server_controls_ht) != SUCCESS) {
-		RETURN_THROWS();
+	if (ZEND_IS_METHOD_CALL()) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|h!", &dn, &dn_len, &server_controls_ht) != SUCCESS) {
+			RETURN_THROWS();
+		}
+		link = ZEND_THIS;
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Op|h!", &link, ldap_link_ce, &dn, &dn_len, &server_controls_ht) != SUCCESS) {
+			RETURN_THROWS();
+		}
 	}
 
 	ld = Z_LDAP_LINK_P(link);
@@ -2693,15 +2700,23 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 		rc = ldap_delete_ext_s(ld->link, dn, lserverctrls, NULL);
 	}
 	if (rc != LDAP_SUCCESS) {
-		php_error_docref(NULL, E_WARNING, "Delete: %s", ldap_err2string(rc));
-		RETVAL_FALSE;
+		if (ZEND_IS_METHOD_CALL()) {
+			zend_throw_exception_ex(ldap_exception_ce, rc, "Delete: %s", ldap_err2string(rc));
+		} else {
+			php_error_docref(NULL, E_WARNING, "Delete: %s", ldap_err2string(rc));
+			RETVAL_FALSE;
+		}
 		goto cleanup;
 	} else if (ext) {
 		LDAPMessage *ldap_res;
 		rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 		if (rc == -1) {
-			php_error_docref(NULL, E_WARNING, "Delete operation failed");
-			RETVAL_FALSE;
+			if (ZEND_IS_METHOD_CALL()) {
+				zend_throw_exception_ex(ldap_exception_ce, 0, "Delete operation failed");
+			} else {
+				php_error_docref(NULL, E_WARNING, "Delete operation failed");
+				RETVAL_FALSE;
+			}
 			goto cleanup;
 		}
 
@@ -2730,6 +2745,11 @@ PHP_FUNCTION(ldap_delete)
 /* }}} */
 
 /* {{{ Delete an entry from a directory */
+PHP_METHOD(LDAP_Connection, delete)
+{
+	php_ldap_do_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
 PHP_FUNCTION(ldap_delete_ext)
 {
 	php_ldap_do_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);

@@ -851,6 +851,7 @@ namespace LDAP {
         public function mod_add(string $dn, array $entry, ?array $controls = null): Result;
         public function mod_del(string $dn, array $entry, ?array $controls = null): Result;
         public function mod_replace(string $dn, array $entry, ?array $controls = null): Result;
+        public function delete(string $dn, ?array $controls = null): Result;
     }
 
     /**
