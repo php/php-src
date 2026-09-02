@@ -27,6 +27,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "Zend/zend_attributes.h"
+#include "Zend/zend_exceptions.h"
 
 #include <stddef.h>
 
@@ -90,7 +91,7 @@ typedef struct {
 ZEND_DECLARE_MODULE_GLOBALS(ldap)
 static PHP_GINIT_FUNCTION(ldap);
 
-static zend_class_entry *ldap_link_ce, *ldap_result_ce, *ldap_result_entry_ce;
+static zend_class_entry *ldap_link_ce, *ldap_exception_ce, *ldap_result_ce, *ldap_result_entry_ce;
 static zend_object_handlers ldap_link_object_handlers, ldap_result_object_handlers, ldap_result_entry_object_handlers;
 
 #ifdef COMPILE_DL_LDAP
@@ -425,6 +426,7 @@ static int php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, const HashT
 
 	control_oid = zval_try_get_tmp_string(val, &control_oid_tmp);
 	if (!control_oid) {
+		zend_value_error("%s(): Control oid must be a string", get_active_function_name());
 		return -1;
 	}
 
@@ -865,6 +867,8 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_link_ce = register_class_LDAP_Connection();
 	ldap_link_ce->create_object = ldap_link_create_object;
 	ldap_link_ce->default_object_handlers = &ldap_link_object_handlers;
+
+	ldap_exception_ce = register_class_LDAP_LdapException(zend_ce_exception);
 
 	memcpy(&ldap_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_link_object_handlers.offset = offsetof(ldap_linkdata, std);
@@ -1324,7 +1328,7 @@ PHP_METHOD(LDAP_Connection, bind)
 
 	php_ldap_do_bind_ext(ZEND_THIS, ldap_bind_dn, ldap_bind_dnlen, ldap_bind_pw, ldap_bind_pwlen, server_controls_ht, return_value, &exception_message);
 	if (exception_message) {
-		zend_throw_error(NULL, "%s", exception_message);
+		zend_throw_exception_ex(ldap_exception_ce, 0, "%s", exception_message);
 		efree(exception_message);
 		RETURN_THROWS();
 	}
@@ -2498,13 +2502,21 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			ldap_status_code = ldap_add_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL);
 		}
 		if (ldap_status_code != LDAP_SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Add: %s", ldap_err2string(ldap_status_code));
-			RETVAL_FALSE;
+			if (ZEND_IS_METHOD_CALL()) {
+				zend_throw_exception_ex(ldap_exception_ce, ldap_status_code, "Add: %s", ldap_err2string(ldap_status_code));
+			} else {
+				php_error_docref(NULL, E_WARNING, "Add: %s", ldap_err2string(ldap_status_code));
+				RETVAL_FALSE;
+			}
 		} else if (ext) {
 			ldap_status_code = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 			if (ldap_status_code == -1) {
-				php_error_docref(NULL, E_WARNING, "Add operation failed");
-				RETVAL_FALSE;
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, 0, "Add operation failed");
+				} else {
+					php_error_docref(NULL, E_WARNING, "Add operation failed");
+					RETVAL_FALSE;
+				}
 				goto cleanup;
 			}
 
@@ -2520,13 +2532,21 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			ldap_status_code = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL);
 		}
 		if (ldap_status_code != LDAP_SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Modify: %s", ldap_err2string(ldap_status_code));
-			RETVAL_FALSE;
+			if (ZEND_IS_METHOD_CALL()) {
+				zend_throw_exception_ex(ldap_exception_ce, ldap_status_code, "Modify: %s", ldap_err2string(ldap_status_code));
+			} else {
+				php_error_docref(NULL, E_WARNING, "Modify: %s", ldap_err2string(ldap_status_code));
+				RETVAL_FALSE;
+			}
 		} else if (ext) {
 			ldap_status_code = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 			if (ldap_status_code == -1) {
-				php_error_docref(NULL, E_WARNING, "Modify operation failed");
-				RETVAL_FALSE;
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, 0, "Modify operation failed");
+				} else {
+					php_error_docref(NULL, E_WARNING, "Modify operation failed");
+					RETVAL_FALSE;
+				}
 				goto cleanup;
 			}
 

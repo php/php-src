@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 3dcda1b3fdd3c07c5958482c602ce3a6db5f0bb7 */
+ * Stub hash: 265b6de0decefe606358c1aec5629d5bef6e8180 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -797,6 +797,16 @@ static void register_ldap_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[1].value, attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0_arg1_str);
 	attribute_Deprecated_const_GSLC_SSL_TWOWAY_AUTH_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
+}
+
+static zend_class_entry *register_class_LDAP_LdapException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "LDAP", "LdapException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_LDAP_Connection(void)

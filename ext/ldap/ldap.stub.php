@@ -829,6 +829,11 @@ namespace {
 }
 
 namespace LDAP {
+    /** @strict-properties */
+    final class LdapException extends \Exception
+    {
+    }
+
     /**
      * @strict-properties
      * @not-serializable
@@ -842,7 +847,7 @@ namespace LDAP {
             ?array $controls = null
         ): Result;
         public function unbind(): bool;
-        public function add(string $dn, array $entry, ?array $controls = null): LDAP\Result {}
+        public function add(string $dn, array $entry, ?array $controls = null): Result {}
     }
 
     /**
