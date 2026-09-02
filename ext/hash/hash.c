@@ -361,7 +361,7 @@ static void php_hash_do_hash(
 	}
 	if (isfilename) {
 		if (zend_char_has_nul_byte(data, data_len)) {
-			zend_argument_value_error(1, "must not contain any null bytes");
+			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
