@@ -61,16 +61,6 @@ try {
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
-/* Error: an ML-KEM768 public key is not a valid X-Wing public key */
-if (defined('SODIUM_CRYPTO_KEM_PUBLICKEYBYTES')) {
-    try {
-        sodium_crypto_kem_enc($public_key);
-    } catch (Throwable $e) {
-        echo $e::class, ': ', $e->getMessage(), "\n";
-    }
-} else {
-    echo "SodiumException: sodium_crypto_kem_enc(): Argument #1 (\$public_key) must be SODIUM_CRYPTO_KEM_PUBLICKEYBYTES bytes long\n";
-}
 /* Error: truncated ciphertext */
 try {
     sodium_crypto_kem_mlkem768_dec(substr($ciphertext, 0, -1), $secret_key);
@@ -101,6 +91,12 @@ try {
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
+/* Error: a public key with an invalid ML-KEM encoding is rejected */
+try {
+    sodium_crypto_kem_mlkem768_enc(str_repeat("\xff", SODIUM_CRYPTO_KEM_MLKEM768_PUBLICKEYBYTES));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
 crypto_kem_mlkem768:
@@ -122,9 +118,9 @@ bool(true)
 bool(true)
 bool(true)
 SodiumException: sodium_crypto_kem_mlkem768_enc(): Argument #1 ($public_key) must be SODIUM_CRYPTO_KEM_MLKEM768_PUBLICKEYBYTES bytes long
-SodiumException: sodium_crypto_kem_enc(): Argument #1 ($public_key) must be SODIUM_CRYPTO_KEM_PUBLICKEYBYTES bytes long
 SodiumException: sodium_crypto_kem_mlkem768_dec(): Argument #1 ($ciphertext) must be SODIUM_CRYPTO_KEM_MLKEM768_CIPHERTEXTBYTES bytes long
 SodiumException: sodium_crypto_kem_mlkem768_dec(): Argument #2 ($secret_key) must be SODIUM_CRYPTO_KEM_MLKEM768_SECRETKEYBYTES bytes long
 SodiumException: sodium_crypto_kem_mlkem768_secretkey(): Argument #1 ($key_pair) must be SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES bytes long
 SodiumException: sodium_crypto_kem_mlkem768_publickey(): Argument #1 ($key_pair) must be SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES bytes long
 SodiumException: sodium_crypto_kem_mlkem768_seed_keypair(): Argument #1 ($seed) must be SODIUM_CRYPTO_KEM_MLKEM768_SEEDBYTES bytes long
+SodiumException: internal error

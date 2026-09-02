@@ -91,6 +91,20 @@ try {
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
+/* Error: a public key with an invalid ML-KEM encoding is rejected */
+try {
+    sodium_crypto_kem_enc(str_repeat("\xff", SODIUM_CRYPTO_KEM_PUBLICKEYBYTES));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+/* Error: a ciphertext whose X25519 component is a small-order point is rejected */
+$small_order_ciphertext = substr($ciphertext, 0, SODIUM_CRYPTO_KEM_CIPHERTEXTBYTES - 32)
+    . str_repeat("\0", 32);
+try {
+    sodium_crypto_kem_dec($small_order_ciphertext, $secret_key);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
 crypto_kem (X-Wing):
@@ -117,3 +131,5 @@ SodiumException: sodium_crypto_kem_dec(): Argument #2 ($secret_key) must be SODI
 SodiumException: sodium_crypto_kem_secretkey(): Argument #1 ($key_pair) must be SODIUM_CRYPTO_KEM_KEYPAIRBYTES bytes long
 SodiumException: sodium_crypto_kem_publickey(): Argument #1 ($key_pair) must be SODIUM_CRYPTO_KEM_KEYPAIRBYTES bytes long
 SodiumException: sodium_crypto_kem_seed_keypair(): Argument #1 ($seed) must be SODIUM_CRYPTO_KEM_SEEDBYTES bytes long
+SodiumException: internal error
+SodiumException: internal error
