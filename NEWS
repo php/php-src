@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed stale getElementsByClassName() and other node list caches after
     className/classList writes and attribute removals. (Ilia Alshanetsky)
 
+- Hash:
+  . Fixed hash_file() reporting argument #1 ($algo) instead of argument #2
+    ($filename) when the filename contains null bytes. (lacatoire)
+
 - Intl:
   . Fixed grapheme_strpos() and grapheme_strrpos() with an empty needle
     returning UTF-16 offsets instead of grapheme offsets. (Ilia Alshanetsky)
@@ -26,11 +30,19 @@ PHP                                                                        NEWS
     from compiled rules. (iliaal)
   . Fixed Spoofchecker methods not recording the ICU error code when an ICU
     call fails. (Ilia Alshanetsky)
+  . Fixed idn_to_ascii() and idn_to_utf8() reporting argument #2 ($flags)
+    instead of argument #3 ($variant) for an invalid IDNA variant, and the
+    domain length error message printing a literal "d" instead of the limit.
+    (lacatoire)
 
 - MBString:
   . Fixed mb_ereg_replace() emitting a NUL or out-of-bounds bytes in the
     replacement when a \k<name> backref has no closing delimiter.
     (Ilia Alshanetsky)
+
+- PCNTL:
+  . Fixed the declared signature of pcntl_signal(), whose $restart_syscalls
+    argument accepts null and defaults to it. (lacatoire)
 
 - PDO_PGSQL:
   . Added Pdo\Pgsql::ATTR_CHUNK_SIZE to fetch a result set in chunks of the
