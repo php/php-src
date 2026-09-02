@@ -1,9 +1,9 @@
 --TEST--
-Test Uri\WhatWg\Url::withHost() - error - forbidden host code point
+Test Uri\WhatWg\Url::withHost() - success - hash mark in opaque host input
 --FILE--
 <?php
 
-$url1 = Uri\WhatWg\Url::parse("https://example.com");
+$url1 = Uri\WhatWg\Url::parse("foo://example.com");
 $url2 = $url1->withHost("ex#mple.com");
 
 var_dump($url1->getAsciiHost());
