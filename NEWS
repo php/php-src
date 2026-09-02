@@ -180,7 +180,7 @@ PHP                                                                        NEWS
   . It is now possible to use the AES192, AES192C, AES256, and AES256C as
     SNMPv3 security protocols if the underlying library supports them.
     (eskyuu)
-  . It is now possible to reset the MIB tree using the new snmp_read_mib()
+  . It is now possible to reset the MIB tree using the new snmp_init_mib()
     function. (eskyuu)
   . Additional MIB parsing and output control functionality has been exposed
     via the snmp_set_mib_option(), snmp_set_output_option(),
