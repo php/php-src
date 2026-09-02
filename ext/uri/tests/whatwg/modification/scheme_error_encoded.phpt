@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - scheme - error - percent-encoded characters
+Test Uri\WhatWg\Url::withScheme() - error - percent-encoded characters
 --FILE--
 <?php
 

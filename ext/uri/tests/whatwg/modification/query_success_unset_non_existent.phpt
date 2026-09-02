@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - query - success - unsetting non-existent
+Test Uri\WhatWg\Url::withQuery() - success - unsetting non-existent
 --FILE--
 <?php
 

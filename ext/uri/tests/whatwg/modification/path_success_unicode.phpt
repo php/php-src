@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - path - success - Unicode characters
+Test Uri\WhatWg\Url::withPath() - success - Unicode characters
 --FILE--
 <?php
 

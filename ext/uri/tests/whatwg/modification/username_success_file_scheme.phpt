@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - username - success - file scheme
+Test Uri\WhatWg\Url::withUsername() - success - file scheme
 --FILE--
 <?php
 

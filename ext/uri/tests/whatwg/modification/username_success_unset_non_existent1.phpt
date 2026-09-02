@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - username - success - unsetting non-existent
+Test Uri\WhatWg\Url::withUsername() - success - unsetting non-existent
 --FILE--
 <?php
 

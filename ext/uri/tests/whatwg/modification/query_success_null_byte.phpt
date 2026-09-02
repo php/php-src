@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - query - success - null byte
+Test Uri\WhatWg\Url::withQuery() - success - null byte
 --FILE--
 <?php
 

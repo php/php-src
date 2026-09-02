@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - password - success - percent-encoded characters
+Test Uri\WhatWg\Url::withPassword() - success - percent-encoded characters
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - username - success - percent-encoded octet byte
+Test Uri\WhatWg\Url::withUsername() - success - percent-encoded octet byte
 --FILE--
 <?php
 

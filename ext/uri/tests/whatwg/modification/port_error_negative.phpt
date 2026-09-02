@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - port - error - negative number
+Test Uri\WhatWg\Url::withPort() - error - negative number
 --FILE--
 <?php
 

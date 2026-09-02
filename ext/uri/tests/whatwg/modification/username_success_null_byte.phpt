@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - username - success - null byte
+Test Uri\WhatWg\Url::withUsername() - success - null byte
 --FILE--
 <?php
 

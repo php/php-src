@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - fragment - success - only a hashmark character
+Test Uri\WhatWg\Url::withFragment() - success - only a hashmark character
 --FILE--
 <?php
 

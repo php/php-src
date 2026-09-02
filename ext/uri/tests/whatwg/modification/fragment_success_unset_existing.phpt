@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - fragment - success - unsetting existing
+Test Uri\WhatWg\Url::withFragment() - success - unsetting existing
 --FILE--
 <?php
 

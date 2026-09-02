@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - port - success - unsetting existing
+Test Uri\WhatWg\Url::withPort() - success - unsetting existing
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - error - unsetting existing
+Test Uri\WhatWg\Url::withHost() - error - unsetting existing
 --FILE--
 <?php
 

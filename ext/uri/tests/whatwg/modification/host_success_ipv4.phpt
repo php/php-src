@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - success - IPv4 address
+Test Uri\WhatWg\Url::withHost() - success - IPv4 address
 --FILE--
 <?php
 

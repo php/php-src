@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - port - success - file scheme
+Test Uri\WhatWg\Url::withPort() - success - file scheme
 --FILE--
 <?php
 

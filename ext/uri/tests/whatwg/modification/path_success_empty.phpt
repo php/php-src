@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - path - success - empty string
+Test Uri\WhatWg\Url::withPath() - success - empty string
 --FILE--
 <?php
 

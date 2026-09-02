@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - fragment - success - empty string
+Test Uri\WhatWg\Url::withFragment() - success - empty string
 --FILE--
 <?php
 
