@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 265b6de0decefe606358c1aec5629d5bef6e8180 */
+ * Stub hash: ca801153dc3517a73509465e58559eff4ad9cbd8 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -357,11 +357,17 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_LDAP_Connection_unbind, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_LDAP_Connection_add, 0, 2, LDAP\\LDAP\\Result, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_LDAP_Connection_add, 0, 2, LDAP\\Result, 0)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, entry, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_LDAP_Connection_mod_add arginfo_class_LDAP_Connection_add
+
+#define arginfo_class_LDAP_Connection_mod_del arginfo_class_LDAP_Connection_add
+
+#define arginfo_class_LDAP_Connection_mod_replace arginfo_class_LDAP_Connection_add
 
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
@@ -454,6 +460,9 @@ ZEND_METHOD(LDAP_Connection, __construct);
 ZEND_METHOD(LDAP_Connection, bind);
 ZEND_METHOD(LDAP_Connection, unbind);
 ZEND_METHOD(LDAP_Connection, add);
+ZEND_METHOD(LDAP_Connection, mod_add);
+ZEND_METHOD(LDAP_Connection, mod_del);
+ZEND_METHOD(LDAP_Connection, mod_replace);
 
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
@@ -554,6 +563,9 @@ static const zend_function_entry class_LDAP_Connection_methods[] = {
 	ZEND_ME(LDAP_Connection, bind, arginfo_class_LDAP_Connection_bind, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Connection, unbind, arginfo_class_LDAP_Connection_unbind, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Connection, add, arginfo_class_LDAP_Connection_add, ZEND_ACC_PUBLIC)
+	ZEND_ME(LDAP_Connection, mod_add, arginfo_class_LDAP_Connection_mod_add, ZEND_ACC_PUBLIC)
+	ZEND_ME(LDAP_Connection, mod_del, arginfo_class_LDAP_Connection_mod_del, ZEND_ACC_PUBLIC)
+	ZEND_ME(LDAP_Connection, mod_replace, arginfo_class_LDAP_Connection_mod_replace, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

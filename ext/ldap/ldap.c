@@ -2595,9 +2595,7 @@ PHP_METHOD(LDAP_Connection, add)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD, true);
 }
-/* }}} */
 
-/* {{{ Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD, true);
@@ -2614,6 +2612,11 @@ PHP_FUNCTION(ldap_mod_replace)
 /* }}} */
 
 /* {{{ Replace attribute values with new ones */
+PHP_METHOD(LDAP_Connection, mod_replace)
+{
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE, true);
+}
+
 PHP_FUNCTION(ldap_mod_replace_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE, true);
@@ -2628,6 +2631,11 @@ PHP_FUNCTION(ldap_mod_add)
 /* }}} */
 
 /* {{{ Add attribute values to current */
+PHP_METHOD(LDAP_Connection, mod_add)
+{
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD, true);
+}
+
 PHP_FUNCTION(ldap_mod_add_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD, true);
@@ -2642,6 +2650,11 @@ PHP_FUNCTION(ldap_mod_del)
 /* }}} */
 
 /* {{{ Delete attribute values */
+PHP_METHOD(LDAP_Connection, mod_del)
+{
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE, true);
+}
+
 PHP_FUNCTION(ldap_mod_del_ext)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE, true);
