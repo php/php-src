@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - path - relative reference
+Test Uri\WhatWg\Url parsing - path - relative-URL
 --FILE--
 <?php
 
