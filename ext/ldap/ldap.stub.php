@@ -844,10 +844,13 @@ namespace LDAP {
         public function bind(
             ?string $dn = null,
             #[\SensitiveParameter] ?string $password = null,
-            ?array $controls = null
+            ?array $controls = null,
         ): Result;
         public function unbind(): bool;
-        public function add(string $dn, array $entry, ?array $controls = null): Result {}
+        public function add(string $dn, array $entry, ?array $controls = null): Result;
+        public function mod_add(string $dn, array $entry, ?array $controls = null): Result;
+        public function mod_del(string $dn, array $entry, ?array $controls = null): Result;
+        public function mod_replace(string $dn, array $entry, ?array $controls = null): Result;
     }
 
     /**
