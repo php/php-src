@@ -864,6 +864,16 @@ static void zend_create_closure_ex(
 				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
 				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
 				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
+			} else if (!ptr
+			 && func->common.scope == scope
+			 && !(func->common.fn_flags & (ZEND_ACC_HEAP_RT_CACHE|ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
+				/* Fake closure over a method that has not run yet: initialize
+				 * the method's own shared runtime cache and use it, instead
+				 * of allocating a cold per-closure heap cache on every
+				 * Closure::fromCallable()/first-class callable creation. */
+				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
+				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
+				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
 			} else {
 				/* Otherwise, we use a non-shared runtime cache */
 				ptr = emalloc(func->op_array.cache_size);
