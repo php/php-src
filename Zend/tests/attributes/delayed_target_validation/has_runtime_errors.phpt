@@ -265,7 +265,7 @@ array(2) {
 }
 Error: Attribute "Attribute" cannot target function (allowed targets: class)
 ********************
-Constant [ bool EXAMPLE ] { 1 }
+Constant [ bool EXAMPLE ] { true }
 
 array(2) {
   [0]=>

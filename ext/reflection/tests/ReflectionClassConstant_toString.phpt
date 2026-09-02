@@ -15,14 +15,14 @@ echo new ReflectionClass(Demo::class);
 
 ?>
 --EXPECTF--
-Constant [ public bool IS_TRUE ] { 1 }
-Constant [ public bool IS_FALSE ] {  }
+Constant [ public bool IS_TRUE ] { true }
+Constant [ public bool IS_FALSE ] { false }
 Class [ <user> class Demo ] {
   @@ %s %d-%d
 
   - Constants [2] {
-    Constant [ public bool IS_TRUE ] { 1 }
-    Constant [ public bool IS_FALSE ] {  }
+    Constant [ public bool IS_TRUE ] { true }
+    Constant [ public bool IS_FALSE ] { false }
   }
 
   - Static properties [0] {
