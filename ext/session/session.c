@@ -2953,13 +2953,13 @@ static bool session_interfaces_include(const zend_class_entry *ce, const zend_cl
 static int session_handler_interface_gets_implemented(zend_class_entry *self, zend_class_entry *class) {
 	if (!zend_hash_str_exists(&class->function_table, ZEND_STRL("create_sid"))
 		&& !session_interfaces_include(class, php_session_id_iface_entry)) {
-		zend_error(E_WARNING,
+		zend_error(E_DEPRECATED,
 			"Class %s implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0",
 			ZSTR_VAL(class->name));
 	}
 	if (!zend_hash_str_exists(&class->function_table, ZEND_STRL("validateid"))
 		&& !session_interfaces_include(class, php_session_update_timestamp_iface_entry)) {
-		zend_error(E_WARNING,
+		zend_error(E_DEPRECATED,
 			"Class %s implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0",
 			ZSTR_VAL(class->name));
 	}
