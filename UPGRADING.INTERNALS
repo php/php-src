@@ -227,6 +227,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added zend_string_ends_with() and related variants.
   . Added trait support for internal classes.
   . Added do_php_cli().
+  . Added do_php_fpm(), the former main() of php-fpm.
 
 ========================
 2. Build system changes
@@ -269,6 +270,12 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 - Embed:
   . The CLI SAPI can not be disabled when building the embed SAPI
     (--enable-embed is incompatible with --disable-cli).
+
+- FPM:
+  . The --enable-fpm option moved to sapi/fpm/config0.m4 so that other SAPIs
+    can test $PHP_FPM. The FPM sources other than the main() entry point are
+    now built into PHP_FPM_SHARED_OBJS. The new --enable-cli-fpm option links
+    them into the CLI binary.
 
 ========================
 3. Module changes

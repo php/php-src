@@ -5,6 +5,22 @@ PHP_ARG_ENABLE([cli],
   [yes],
   [no])
 
+PHP_ARG_ENABLE([cli-fpm],
+  [whether to link FPM into the CLI binary],
+  [AS_HELP_STRING([--enable-cli-fpm],
+    [Link the FPM SAPI into the CLI binary, so that "php --fpm" runs php-fpm
+    (requires --enable-fpm)])],
+  [no],
+  [no])
+
+if test "$PHP_CLI_FPM" != "no"; then
+  if test "$PHP_CLI" = "no" || test "$PHP_FPM" = "no"; then
+    AC_MSG_ERROR([--enable-cli-fpm requires both the CLI and the FPM SAPI])
+  fi
+  AC_DEFINE([PHP_CLI_WITH_FPM], [1],
+    [Define to 1 if the FPM SAPI is linked into the CLI binary.])
+fi
+
 dnl The embed SAPI requires the CLI sources for do_php_cli().
 if test "$PHP_EMBED" != "no" -a "$PHP_CLI" = "no"; then
   AC_MSG_ERROR([--enable-embed requires the CLI SAPI, do not use --disable-cli with --enable-embed])
@@ -47,6 +63,8 @@ if test "$PHP_CLI" != "no"; then
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
     [PHP_CLI_SHARED_OBJS])
   PHP_CLI_OBJS="$PHP_CLI_OBJS $PHP_CLI_SHARED_OBJS"
+  AS_VAR_IF([PHP_CLI_FPM], [no],,
+    [PHP_CLI_OBJS="$PHP_CLI_OBJS \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_SHARED_OBJS)"])
 
   AS_CASE([$host_alias],
     [*aix*], [
