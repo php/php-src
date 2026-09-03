@@ -425,6 +425,16 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 		php_stream_filter_status_t status;
 
 		status = current->fops->filter(stream, current, inp, outp, NULL, flags);
+		if (status == PSFS_FEED_ME || status == PSFS_ERR_FATAL) {
+			while ((bucket = inp->head)) {
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
+			while ((bucket = outp->head)) {
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
+		}
 		if (status == PSFS_FEED_ME) {
 			/* We've flushed the data far enough */
 			return SUCCESS;
