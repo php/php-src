@@ -1685,6 +1685,9 @@ void php_openssl_load_cipher_mode(struct php_openssl_cipher_mode *mode, const EV
 #ifdef EVP_CIPH_SIV_MODE
 		case EVP_CIPH_SIV_MODE:
 #endif
+#ifdef EVP_CIPH_GCM_SIV_MODE
+		case EVP_CIPH_GCM_SIV_MODE:
+#endif
 #ifdef EVP_CIPH_OCB_MODE
 		case EVP_CIPH_OCB_MODE:
 			/* For OCB mode, explicitly set the tag length even when decrypting,
