@@ -819,7 +819,7 @@ PHP 8.6 UPGRADE NOTES
   . StreamPollHandle
 
 - URI:
-  . Uri\Rfc3986\UriBuilder
+  . Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder
     RFC: https://wiki.php.net/rfc/uri_followup#uri_building
 
 ========================================
