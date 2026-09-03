@@ -3005,6 +3005,7 @@ static void zend_hash_sort_internal(HashTable *ht, sort_func_t sort, bucket_comp
 		if (sort == zend_sort && HT_IS_PACKED(ht) && HT_IS_WITHOUT_HOLES(ht)) {
 			/* The single element already has the expected index. */
 			ht->nInternalPointer = 0;
+			ht->nNextFreeElement = 1;
 			return;
 		}
 	}
