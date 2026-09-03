@@ -14,5 +14,5 @@ try {
 }
 
 ?>
---EXPECT--
-TypeError: Cannot assign int to property class@anonymous::$v of type self
+--EXPECTF--
+TypeError: Cannot assign int to property class@anonymous%0%s of type self

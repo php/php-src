@@ -849,7 +849,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 			ZEND_ASSERT(error && "Should have error if not callable");
 			zend_string *callable_name
 				= zend_get_callable_name_ex(&fci->function_name, fci->object);
-			zend_throw_error(NULL, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
+			zend_throw_error(NULL, "Invalid callback %pS, %s", callable_name, error);
 			efree(error);
 			zend_string_release_ex(callable_name, 0);
 			return SUCCESS;
@@ -1721,11 +1721,11 @@ static ZEND_COLD void report_class_fetch_error(const zend_string *class_name, ui
 	}
 
 	if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-		zend_throw_or_error(fetch_type, NULL, "Interface \"%s\" not found", ZSTR_VAL(class_name));
+		zend_throw_or_error(fetch_type, NULL, "Interface \"%pS\" not found", class_name);
 	} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-		zend_throw_or_error(fetch_type, NULL, "Trait \"%s\" not found", ZSTR_VAL(class_name));
+		zend_throw_or_error(fetch_type, NULL, "Trait \"%pS\" not found", class_name);
 	} else {
-		zend_throw_or_error(fetch_type, NULL, "Class \"%s\" not found", ZSTR_VAL(class_name));
+		zend_throw_or_error(fetch_type, NULL, "Class \"%pS\" not found", class_name);
 	}
 }
 

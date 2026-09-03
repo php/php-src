@@ -14349,7 +14349,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 					}
 					if (opline->opcode == ZEND_FETCH_OBJ_W) {
 						ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_invalid_property_write),
-							op1_ref, ir_CONST_ADDR(Z_STRVAL_P(member)));
+							op1_ref, ir_CONST_ADDR(Z_STR_P(member)));
 						jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
 					} else {
 						ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_invalid_property_read),
@@ -14928,7 +14928,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				jit_SET_EX_OPLINE(jit, opline);
 				ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_invalid_property_assign),
 					jit_ZVAL_ADDR(jit, op1_addr),
-					ir_CONST_ADDR(ZSTR_VAL(name)));
+					ir_CONST_ADDR(name));
 
 				if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) != IS_REG) {
 					jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
@@ -15277,7 +15277,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 						ir_CONST_FC_FUNC(zend_jit_invalid_property_assign_op) :
 						ir_CONST_FC_FUNC(zend_jit_invalid_property_assign),
 					jit_ZVAL_ADDR(jit, op1_addr),
-					ir_CONST_ADDR(ZSTR_VAL(name)));
+					ir_CONST_ADDR(name));
 
 				may_throw = true;
 
@@ -15709,7 +15709,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 				jit_SET_EX_OPLINE(jit, opline);
 				ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_invalid_property_incdec),
 					jit_ZVAL_ADDR(jit, op1_addr),
-					ir_CONST_ADDR(ZSTR_VAL(name)));
+					ir_CONST_ADDR(name));
 
 				ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler));
 				ir_IF_TRUE(if_obj);

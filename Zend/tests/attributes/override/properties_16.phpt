@@ -18,4 +18,4 @@ echo "Done";
 
 ?>
 --EXPECTF--
-Fatal error: I@anonymous::$c has #[\Override] attribute, but no matching parent property exists in %s on line %d
+Fatal error: I@anonymous%0%s::$c has #[\Override] attribute, but no matching parent property exists in %s on line %d

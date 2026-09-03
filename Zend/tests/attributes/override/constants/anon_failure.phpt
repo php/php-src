@@ -12,4 +12,4 @@ echo "Done";
 
 ?>
 --EXPECTF--
-Fatal error: class@anonymous::C has #[\Override] attribute, but no matching parent constant exists in %s on line %d
+Fatal error: class@anonymous%0%s::C has #[\Override] attribute, but no matching parent constant exists in %s on line %d

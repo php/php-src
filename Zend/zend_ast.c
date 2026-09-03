@@ -1164,8 +1164,8 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 					if (name) {
 						if (!zend_hash_add(args, name, &arg)) {
 							zend_throw_error(NULL,
-								"Named parameter $%s overwrites previous argument",
-								ZSTR_VAL(name));
+								"Named parameter $%pS overwrites previous argument",
+								name);
 							zend_array_destroy(args);
 							zval_ptr_dtor(result);
 							return FAILURE;
@@ -1252,7 +1252,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 						}
 
 						if (!fptr) {
-							zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function_name));
+							zend_throw_error(NULL, "Call to undefined function %pS()", function_name);
 							return FAILURE;
 						}
 
@@ -1308,9 +1308,9 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 							return FAILURE;
 						} else if (fptr->common.scope->ce_flags & ZEND_ACC_TRAIT) {
 							zend_error(E_DEPRECATED,
-								"Calling static trait method %s::%s is deprecated, "
+								"Calling static trait method %pS::%pS is deprecated, "
 								"it should only be called on a class using the trait",
-								ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name));
+								fptr->common.scope->name, fptr->common.function_name);
 							if (EG(exception)) {
 								return FAILURE;
 							}

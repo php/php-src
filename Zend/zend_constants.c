@@ -351,14 +351,14 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 		c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), constant_name);
 		if (c == NULL) {
 			if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-				zend_throw_error(NULL, "Undefined constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+				zend_throw_error(NULL, "Undefined constant %pS::%pS", class_name, constant_name);
 				goto failure;
 			}
 			ret_constant = NULL;
 		} else {
 			if (!zend_verify_const_access(c, scope)) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_throw_error(NULL, "Cannot access %s constant %s::%s", zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					zend_throw_error(NULL, "Cannot access %s constant %pS::%pS", zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c)), class_name, constant_name);
 				}
 				goto failure;
 			}
@@ -366,7 +366,7 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 			if (UNEXPECTED(ce->ce_flags & ZEND_ACC_TRAIT)) {
 				/** Prevent accessing trait constants directly on cases like \defined() or \constant(), etc. */
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_throw_error(NULL, "Cannot access trait constant %s::%s directly", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					zend_throw_error(NULL, "Cannot access trait constant %pS::%pS directly", class_name, constant_name);
 				}
 				goto failure;
 			}
@@ -394,7 +394,7 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 		zend_result ret;
 
 		if (IS_CONSTANT_VISITED(ret_constant)) {
-			zend_throw_error(NULL, "Cannot declare self-referencing constant %s::%s", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+			zend_throw_error(NULL, "Cannot declare self-referencing constant %pS::%pS", class_name, constant_name);
 			ret_constant = NULL;
 			goto failure;
 		}
@@ -543,7 +543,7 @@ ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
 		|| (ret = zend_hash_add_constant(EG(zend_constants), name, c)) == NULL
 	) {
-		zend_error(E_WARNING, "Constant %s already defined, this will be an error in PHP 9", ZSTR_VAL(name));
+		zend_error(E_WARNING, "Constant %pS already defined, this will be an error in PHP 9", name);
 		zend_string_release(c->name);
 		if (c->filename) {
 			zend_string_release(c->filename);
