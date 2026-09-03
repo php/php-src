@@ -313,7 +313,7 @@ static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucke
  * sorting. */
 static zend_always_inline void zend_array_sort(HashTable *ht, bucket_compare_func_t compare_func, bool renumber) {
 	/* zend_sort() cannot invoke the comparator for at most one element. */
-	if (UNEXPECTED(ht->nNumOfElements <= 1)) {
+	if (ht->nNumOfElements <= 1) {
 		zend_hash_sort_ex(ht, zend_sort, compare_func, renumber);
 	} else {
 		zend_array_sort_ex(ht, zend_sort, compare_func, renumber);
