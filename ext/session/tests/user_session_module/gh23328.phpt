@@ -22,11 +22,11 @@ abstract class MissingCreateSid implements SessionHandlerInterface, SessionUpdat
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Class MissingBoth implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0 in %s on line %d
+Deprecated: Class MissingBoth implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0 in %s on line %d
 
-Warning: Class MissingBoth implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0 in %s on line %d
+Deprecated: Class MissingBoth implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0 in %s on line %d
 
-Warning: Class MissingValidateId implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0 in %s on line %d
+Deprecated: Class MissingValidateId implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0 in %s on line %d
 
-Warning: Class MissingCreateSid implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0 in %s on line %d
+Deprecated: Class MissingCreateSid implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0 in %s on line %d
 Done

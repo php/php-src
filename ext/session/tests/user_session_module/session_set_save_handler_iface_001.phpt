@@ -83,9 +83,9 @@ session_unset();
 --EXPECTF--
 *** Testing session_set_save_handler() function: interface ***
 
-Warning: Class MySession2 implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0 in %s on line %d
+Deprecated: Class MySession2 implementing SessionHandlerInterface is missing the create_sid() method which will be required in PHP 9.0 in %s on line %d
 
-Warning: Class MySession2 implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0 in %s on line %d
+Deprecated: Class MySession2 implementing SessionHandlerInterface is missing the validateId() method which will be required in PHP 9.0 in %s on line %d
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 string(%d) "%s"
