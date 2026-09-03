@@ -148,8 +148,8 @@ phpize_copy_files()
 {
   test -d build || mkdir build
 
-  (cd "$phpdir" && cp $FILES_BUILD "$builddir"/build)
-  (cd "$phpdir" && cp $FILES "$builddir")
+  (cd "$phpdir" && cp -f $FILES_BUILD "$builddir"/build)
+  (cd "$phpdir" && cp -f $FILES "$builddir")
 }
 
 phpize_replace_prefix()
