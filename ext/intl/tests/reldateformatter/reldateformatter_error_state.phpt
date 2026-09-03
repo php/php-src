@@ -20,7 +20,7 @@ ini_set('intl.use_exceptions', '1');
 try {
     $formatter->combineDateAndTime('today', "\x80");
 } catch (Throwable $e) {
-    echo $e::class, ': ', str_contains($e->getMessage(), 'Failed to convert time to UTF-16') ? 'conversion failed' : 'unexpected', "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -32,4 +32,4 @@ bool(true)
 string(8) "tomorrow"
 int(0)
 int(0)
-IntlException: conversion failed
+IntlException: IntlRelativeDateTimeFormatter::combineDateAndTime(): Failed to convert time to UTF-16
