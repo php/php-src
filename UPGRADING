@@ -48,6 +48,12 @@ PHP 8.6 UPGRADE NOTES
     the integer index is greater than INT_MAX instead of overflowing to a
     smaller index.
 
+- FTP:
+  . ftp_nb_fget() and ftp_nb_fput() now throw an Error when the connection is
+    already transferring, instead of emitting a warning and returning false
+    against their declared int return type. ftp_close() already throws on the
+    same condition.
+
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter the types / values of
     their array arguments and raise a TypeError / ValueError accordingly.
