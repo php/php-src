@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     unconstructed Collator. (Ilia Alshanetsky)
 
 - Standard:
+  . Improved performance of array_chunk() when not preserving keys.
+    (mehmetcansahin)
   . Improved performance of array_splice() when inserting without removing
     elements. (mehmetcansahin)
 
