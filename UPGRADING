@@ -319,6 +319,9 @@ PHP 8.6 UPGRADE NOTES
     when the "remove_all_path" option is not of type bool, or when the
     "comp_method", "comp_flags", or "enc_method" options are not of type int
     (numeric strings are coerced), instead of emitting a warning.
+  . Serializing or unserializing a ZipArchive now throws an Exception. A
+    subclass can override __serialize() and __unserialize() to round-trip
+    through ZipArchive::closeString() and ZipArchive::openString().
 
 - Zlib:
   . deflate_init() now raises a TypeError when the value for option "level",
