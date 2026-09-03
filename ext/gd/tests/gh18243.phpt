@@ -37,8 +37,8 @@ try {
 
 try {
 	imagettftext($im, 144115188075855872.0, 0, 15, 60, 0, $font, "");
-} catch (\ValueError $e) {
-	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
