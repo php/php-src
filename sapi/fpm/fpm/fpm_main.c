@@ -131,6 +131,7 @@ static const opt_struct OPTIONS[] = {
 	{'D', 0, "daemonize"},
 	{'F', 0, "nodaemonize"},
 	{'O', 0, "force-stderr"},
+	{20, 0, "fpm"}, /* "php --fpm", see sapi/cli/php_cli_main.c */
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -1494,7 +1495,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
-PHP_FUNCTION(apache_request_headers) /* {{{ */
+PHP_FUNCTION(fpm_apache_request_headers) /* {{{ */
 {
 	fcgi_request *request;
 
@@ -1530,8 +1531,8 @@ static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ main */
-int main(int argc, char *argv[])
+/* {{{ do_php_fpm */
+int do_php_fpm(int argc, char *argv[])
 {
 	int exit_status = FPM_EXIT_OK;
 	int c, use_extended_info = 0;
@@ -1665,6 +1666,9 @@ int main(int argc, char *argv[])
 
 			case 'O': /* force stderr even on non tty */
 				force_stderr = 1;
+				break;
+
+			case 20: /* php --fpm */
 				break;
 
 			default:

@@ -41,6 +41,11 @@ PHP 8.7 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- CLI:
+  . When PHP is configured with --enable-cli-fpm, the php binary also contains
+    the FPM SAPI: "php --fpm [php-fpm options]" behaves like php-fpm. The flag
+    is only recognized as the first argument. The default build is unchanged.
+
 ========================================
 4. Deprecated Functionality
 ========================================

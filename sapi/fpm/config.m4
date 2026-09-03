@@ -1,10 +1,3 @@
-PHP_ARG_ENABLE([fpm],
-  [for FPM build],
-  [AS_HELP_STRING([--enable-fpm],
-    [Enable building of the fpm SAPI executable])],
-  [no],
-  [no])
-
 dnl Configure checks.
 AC_DEFUN([PHP_FPM_CLOCK], [
 AC_CHECK_FUNCS([clock_gettime],, [
@@ -473,8 +466,17 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_SELECT_SAPI([fpm],
     [program],
-    [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
+    [php_fpm_main.c],
     [-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
+  dnl Everything except the main() entry point, so that the CLI binary can link
+  dnl the same objects for do_php_fpm() (--enable-cli-fpm).
+  PHP_ADD_SOURCES_X([sapi/fpm],
+    [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
+    [-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
+    [PHP_FPM_SHARED_OBJS])
+  PHP_FPM_OBJS="$PHP_FPM_OBJS $PHP_FPM_SHARED_OBJS"
+  PHP_SUBST([PHP_FPM_SHARED_OBJS])
 
   AS_CASE([$host_alias],
     [*aix*], [
@@ -489,4 +491,5 @@ if test "$PHP_FPM" != "no"; then
   PHP_SUBST([SAPI_FPM_PATH])
   PHP_SUBST([BUILD_FPM])
   PHP_SUBST([FPM_EXTRA_LIBS])
+  AS_VAR_IF([PHP_CLI_FPM], [no],, [EXTRA_LIBS="$EXTRA_LIBS $FPM_EXTRA_LIBS"])
 fi

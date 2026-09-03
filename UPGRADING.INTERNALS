@@ -45,6 +45,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
   part of handling disabled classes, was removed following the removal of
   the `disable_classes` INI setting in PHP 8.5.
+- Added do_php_fpm(), the former main() of php-fpm.
 
 ========================
 2. Build system changes
@@ -57,6 +58,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
+  . The --enable-fpm option moved to sapi/fpm/config0.m4 so that other SAPIs
+    can test $PHP_FPM. The FPM sources other than the main() entry point are
+    now built into PHP_FPM_SHARED_OBJS. The new --enable-cli-fpm option links
+    them into the CLI binary.
 
 ========================
 3. Module changes

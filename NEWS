@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.7.0alpha1
 
+- CLI:
+  . Added the --enable-cli-fpm configure option, which links the FPM SAPI into
+    the php binary so that "php --fpm" runs php-fpm. (Matthieu Napoli)
+
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
