@@ -658,6 +658,10 @@ PHP 8.6 UPGRADE NOTES
   . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
     includes the function name and argument index ($modulus).
 
+- LDAP:
+  . ldap_free_result() return type has been narrowed from bool to true. The
+    function already always returned true.
+
 - MySQLi:
   . The return structure of mysqli_get_charset() no longer contains the
     undocumented "comment" element. The value of "charsetnr" is now set to a
