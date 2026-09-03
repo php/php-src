@@ -663,6 +663,8 @@ PHP                                                                        NEWS
   . Deprecate returning values from __construct() and __destruct(). (timwolla)
   . base_convert, bindex, hexdec and octdec now raise a notice when they cannot
     precisely convert the given number. (Sjoerd Langkemper)
+  . Added error_include_args INI option to make the display of function
+    arguments consistent in error output. (Calvin Buckley)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)

@@ -913,6 +913,15 @@ PHP 8.6 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- Core:
+  . The error_include_args INI option has been added to make the display of
+    function arguments consistent in errors; it is off by default. Previously,
+    some functions shown a parameter in the error that was up to each call to
+    the internal error function. Now, all parameters as were actually passed to
+    the function will be displayed. This uses the same infrastructure as stack
+    traces, so i.e. sensitive parameters will not be displayed, and strings
+    will be truncated according to zend.exception_string_param_max_len.
+
 - Mbstring:
   . The mbstring.detect_order INI directive now updates the internal detection
     order when changed at runtime via ini_set(). Previously, runtime changes
