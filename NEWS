@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-15375 (Nested "yield from" skips items after a valid() or
     next() call on the inner generator). (iliaal)
+  . Fixed bug GH-23232 (lone namespace separator asks the autoloader for an
+    empty class name). (spawnia)
   . Fixed bug GH-23301 (Nested "yield from" yields a value twice when the
     middle generator delegates again). (Lazizbek Ergashev)
 
