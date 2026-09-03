@@ -15,13 +15,13 @@ $image = imagecreatetruecolor(100, 80);
 foreach ([NAN, INF, PHP_INT_MAX, PHP_INT_MIN] as $size) {
     try {
         imageftbbox($size, 0.0, $font, 'A');
-    } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         imagettfbbox($size, 0.0, $font, 'A');
-    } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -29,34 +29,34 @@ foreach ([NAN, INF, PHP_INT_MAX, PHP_INT_MIN] as $size) {
 foreach ([NAN, INF] as $size) {
     try {
         imagefttext($image, $size, 0.0, 15, 60, 0, $font, 'A');
-    } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         imagettftext($image, $size, 0.0, 15, 60, 0, $font, 'A');
-    } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 /* the type error already agreed with the signature and still does */
 try {
     imageftbbox('x', 0.0, $font, 'A');
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-imageftbbox(): Argument #1 ($size) must be finite
-imagettfbbox(): Argument #1 ($size) must be finite
-imageftbbox(): Argument #1 ($size) must be between %i and %d
-imagettfbbox(): Argument #1 ($size) must be between %i and %d
-imageftbbox(): Argument #1 ($size) must be between %i and %d
-imagettfbbox(): Argument #1 ($size) must be between %i and %d
-imageftbbox(): Argument #1 ($size) must be between %i and %d
-imagettfbbox(): Argument #1 ($size) must be between %i and %d
-imagefttext(): Argument #2 ($size) must be finite
-imagettftext(): Argument #2 ($size) must be finite
-imagefttext(): Argument #2 ($size) must be between %i and %d
-imagettftext(): Argument #2 ($size) must be between %i and %d
-imageftbbox(): Argument #1 ($size) must be of type float, string given
+ValueError: imageftbbox(): Argument #1 ($size) must be finite
+ValueError: imagettfbbox(): Argument #1 ($size) must be finite
+ValueError: imageftbbox(): Argument #1 ($size) must be between %i and %d
+ValueError: imagettfbbox(): Argument #1 ($size) must be between %i and %d
+ValueError: imageftbbox(): Argument #1 ($size) must be between %i and %d
+ValueError: imagettfbbox(): Argument #1 ($size) must be between %i and %d
+ValueError: imageftbbox(): Argument #1 ($size) must be between %i and %d
+ValueError: imagettfbbox(): Argument #1 ($size) must be between %i and %d
+ValueError: imagefttext(): Argument #2 ($size) must be finite
+ValueError: imagettftext(): Argument #2 ($size) must be finite
+ValueError: imagefttext(): Argument #2 ($size) must be between %i and %d
+ValueError: imagettftext(): Argument #2 ($size) must be between %i and %d
+TypeError: imageftbbox(): Argument #1 ($size) must be of type float, string given
