@@ -114,6 +114,8 @@ PHP                                                                        NEWS
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
   . Fixed bug GH-23780 (unserialize('') fails silently). (timwolla)
+  . Improved performance of array_chunk() when not preserving keys.
+    (mehmetcansahin)
   . Improved performance of array_splice() when inserting without removing
     elements. (mehmetcansahin)
   . Enforce max_filter_count: limit the number of filters that can be chained
