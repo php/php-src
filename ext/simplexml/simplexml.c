@@ -2187,13 +2187,18 @@ PHP_FUNCTION(simplexml_load_file)
 	xmlDocPtr       docp;
 	zend_string      *ns = zend_empty_string;
 	zend_long            options = 0;
-	zend_class_entry *ce= ce_SimpleXMLElement;
+	zend_class_entry *ce = NULL;
 	zend_function    *fptr_count;
 	bool       isprefix = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|C!lSb", &filename, &filename_len, &ce, &options, &ns, &isprefix) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 5)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_DERIVED_CLASS_NAME_OR_NULL(ce, ce_SimpleXMLElement)
+		Z_PARAM_LONG(options)
+		Z_PARAM_STR(ns)
+		Z_PARAM_BOOL(isprefix)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
 		zend_argument_value_error(3, "is too large");
@@ -2233,13 +2238,18 @@ PHP_FUNCTION(simplexml_load_string)
 	xmlDocPtr       docp;
 	zend_string      *ns = zend_empty_string;
 	zend_long            options = 0;
-	zend_class_entry *ce= ce_SimpleXMLElement;
+	zend_class_entry *ce = NULL;
 	zend_function    *fptr_count;
 	bool       isprefix = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|C!lSb", &data, &data_len, &ce, &options, &ns, &isprefix) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 5)
+		Z_PARAM_STRING(data, data_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_DERIVED_CLASS_NAME_OR_NULL(ce, ce_SimpleXMLElement)
+		Z_PARAM_LONG(options)
+		Z_PARAM_STR(ns)
+		Z_PARAM_BOOL(isprefix)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
 		zend_argument_value_error(1, "is too long");

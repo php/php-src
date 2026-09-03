@@ -22,4 +22,4 @@ try {
 Bad iterator type:
 TypeError: ArrayObject::__construct(): Argument #3 ($iteratorClass) must be a class name derived from ArrayIterator, "Exception" given
 Non-existent class:
-TypeError: ArrayObject::__construct(): Argument #3 ($iteratorClass) must be a class name derived from ArrayIterator, "nonExistentClassName" given
+TypeError: ArrayObject::__construct(): Argument #3 ($iteratorClass) must be a valid class name, "nonExistentClassName" given
