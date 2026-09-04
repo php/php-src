@@ -20,6 +20,8 @@
 
 #include "zend_portability.h"
 
+#include <math.h>
+
 BEGIN_EXTERN_C()
 
 /*
@@ -412,5 +414,22 @@ END_EXTERN_C()
 # define XPFPA_RETURN_DOUBLE_EXTENDED(val)  return (val)
 
 #endif /* FPU CONTROL */
+
+/* zend_init_fpu() clamps the x87 FPU to double precision (53-bit mantissa) for
+ * the whole request. libm's expm1() computes on the x87 unit and relies on the
+ * extended range to round correctly to double, so while that clamp is in place
+ * its result is off by one or more ULP. Restore extended precision for the call
+ * and truncate the result back to double. Compiles down to a plain expm1()
+ * everywhere XPFPA_HAVE_CW is 0, which includes x86-64 and arm64. */
+static zend_always_inline double zend_expm1(double num)
+{
+#if XPFPA_HAVE_CW
+	XPFPA_DECLARE
+	XPFPA_SWITCH_DOUBLE_EXTENDED();
+	XPFPA_RETURN_DOUBLE(expm1(num));
+#else
+	return expm1(num);
+#endif
+}
 
 #endif
