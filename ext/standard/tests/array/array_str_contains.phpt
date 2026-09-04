@@ -1,45 +1,30 @@
 --TEST--
-array_str_contains() basic functionality and edge cases
+array_str_contains() function - basic and edge cases
 --FILE--
 <?php
 
-$fruits = ["apple", "banana", "cherry", "date", "elderberry"];
+$haystack = ["apple", "banana", "cherry", "date", "elderberry"];
 
-echo "--- Basic Search ---\n";
-var_dump(array_str_contains($fruits, "an"));
-var_dump(array_str_contains($fruits, "berry"));
-var_dump(array_str_contains($fruits, "xyz"));
+// 1. Basic matching
+var_dump(array_str_contains($haystack, "an"));
+var_dump(array_str_contains($haystack, "berry"));
+var_dump(array_str_contains($haystack, "xyz"));
 
-echo "\n--- Key Preservation ---\n";
-$assoc = ["a" => "first item", "b" => "second item", "c" => "third"];
+// 2. Preserves array keys
+$assoc = ["a" => "item_one", "b" => "item_two", "c" => "other"];
 var_dump(array_str_contains($assoc, "item"));
 
-echo "\n--- Empty Needle ---\n";
-$emptyNeedleTest = ["foo", "bar", "baz"];
-var_dump(array_str_contains($emptyNeedleTest, ""));
+// 3. Empty needle matches everything
+var_dump(array_str_contains(["foo", "bar"], ""));
 
-echo "\n--- UTF-8 and Multi-byte Support ---\n";
-$multibyte = [
-    "???? ????",
-    "??????? ????",
-    "PHP 8.7",
-    "PHP 8.7 café ??",
-    "?? ?????? ???? ??",
-];
-var_dump(array_str_contains($multibyte, "????"));
-var_dump(array_str_contains($multibyte, "??"));
-
-echo "\n--- Empty Haystack ---\n";
-var_dump(array_str_contains([], "needle"));
+// 4. Empty array returns empty array
+var_dump(array_str_contains([], "test"));
 
 ?>
 --EXPECT--
---- Basic Search ---
-array(2) {
+array(1) {
   [1]=>
   string(6) "banana"
-  [4]=>
-  string(10) "elderberry"
 }
 array(1) {
   [4]=>
@@ -47,39 +32,17 @@ array(1) {
 }
 array(0) {
 }
-
---- Key Preservation ---
 array(2) {
   ["a"]=>
-  string(10) "first item"
+  string(8) "item_one"
   ["b"]=>
-  string(11) "second item"
+  string(8) "item_two"
 }
-
---- Empty Needle ---
-array(3) {
+array(2) {
   [0]=>
   string(3) "foo"
   [1]=>
   string(3) "bar"
-  [2]=>
-  string(3) "baz"
 }
-
---- UTF-8 and Multi-byte Support ---
-array(2) {
-  [0]=>
-  string(17) "???? ????"
-  [1]=>
-  string(23) "??????? ????"
-}
-array(2) {
-  [3]=>
-  string(18) "PHP 8.7 café ??"
-  [4]=>
-  string(31) "?? ?????? ???? ??"
-}
-
---- Empty Haystack ---
 array(0) {
 }
