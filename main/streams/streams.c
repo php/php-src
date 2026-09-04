@@ -1306,6 +1306,11 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 				php_stream_bucket_unlink(bucket);
 				php_stream_bucket_delref(bucket);
 			}
+			while (brig_outp->head) {
+				bucket = brig_outp->head;
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
 			break;
 	}
 
