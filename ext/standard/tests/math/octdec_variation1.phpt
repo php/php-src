@@ -57,10 +57,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(octdec($input));
-    } catch (TypeError $e) {
-        echo 'TypeError: ', $e->getMessage(), "\n";
-    } catch (ValueError $e) {
-        echo 'ValueError: ', $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
     }
     $iterator++;
 };
@@ -80,28 +78,28 @@ int(1)
 int(5349)
 
 -- Iteration 4 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 5 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 6 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 7 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 8 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 9 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 10 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 11 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 12 --
 int(1)
@@ -125,13 +123,13 @@ int(0)
 TypeError: octdec(): Argument #1 ($octal_string) must be of type string, array given
 
 -- Iteration 19 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 20 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 21 --
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 22 --
 TypeError: octdec(): Argument #1 ($octal_string) must be of type string, resource given

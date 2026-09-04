@@ -31,8 +31,8 @@ foreach($values as $value) {
     echo "\n-- hexdec $value --\n";
     try {
         var_dump(hexdec($value));
-    } catch (ValueError $e) {
-        echo 'ValueError: ', $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
     }
 };
 
@@ -65,7 +65,7 @@ int(2147483647)
 int(2147483648)
 
 -- hexdec 0x123XYZABC --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- hexdec 311015 --
 int(3215381)
@@ -74,7 +74,7 @@ int(3215381)
 int(3215381)
 
 -- hexdec 31101.3 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- hexdec 3110130 --
 int(51446064)

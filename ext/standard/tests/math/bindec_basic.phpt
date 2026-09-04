@@ -32,27 +32,27 @@ for ($i = 0; $i < count($values); $i++) {
     try {
         $res = bindec($values[$i]);
         var_dump($res);
-    } catch (ValueError $e) {
-        echo 'ValueError: ', $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
     }
 }
 ?>
 --EXPECT--
 int(455)
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(455)
 int(224)
 int(2147483647)
 float(2147483648)
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(1)
 int(0)

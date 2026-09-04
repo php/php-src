@@ -10,20 +10,20 @@ var_dump(hexdec("12345"));
 
 try {
     var_dump(hexdec("q12345"));
-} catch (ValueError $e) {
-    echo 'ValueError: ', $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 try {
     var_dump(hexdec("12345+?!"));
-} catch (ValueError $e) {
-    echo 'ValueError: ', $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 try {
     var_dump(hexdec("12345q"));
-} catch (ValueError $e) {
-    echo 'ValueError: ', $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage() . "\n";
 }
 
 var_dump((float)hexdec("1234500001"));
@@ -33,8 +33,8 @@ var_dump((float)hexdec("17fffffff"));
 --EXPECT--
 int(74565)
 int(74565)
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 float(78187069441)
 float(6442450943)

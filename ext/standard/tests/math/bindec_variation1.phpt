@@ -57,10 +57,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(bindec($input));
-    } catch (TypeError $e) {
-        echo 'TypeError: ', $e->getMessage(), "\n";
-    } catch (ValueError $e) {
-        echo 'ValueError: ', $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
     }
     $iterator++;
 };
@@ -76,25 +74,25 @@ int(0)
 int(1)
 
 -- Iteration 3 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 4 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 5 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 6 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 7 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 8 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 9 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 10 --
 int(1)
@@ -118,13 +116,13 @@ int(0)
 TypeError: bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 17 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 18 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 19 --
-ValueError: bindec(): Argument #1 ($binary_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 20 --
 TypeError: bindec(): Argument #1 ($binary_string) must be of type string, resource given

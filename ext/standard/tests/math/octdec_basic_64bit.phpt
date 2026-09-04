@@ -31,26 +31,26 @@ for ($i = 0; $i < count($values); $i++) {
     try {
         $res = octdec($values[$i]);
         var_dump($res);
-    } catch (ValueError $e) {
-        echo 'ValueError: ', $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
     }
 }
 ?>
 --EXPECT--
 *** Testing octdec() : basic functionality ***
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(253)
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(5349)
 int(342391)
 int(375)
 int(2147483647)
 int(2147483648)
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(5349)
-ValueError: octdec(): Argument #1 ($octal_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(823384)
 int(1)
 int(0)

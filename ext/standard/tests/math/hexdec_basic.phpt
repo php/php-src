@@ -28,8 +28,8 @@ for ($i = 0; $i < count($values); $i++) {
     try {
         $res = hexdec($values[$i]);
         var_dump($res);
-    } catch (ValueError $e) {
-        echo 'ValueError: ', $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
     }
 }
 ?>
@@ -42,10 +42,10 @@ int(1194684)
 int(7904751)
 int(2147483647)
 float(2147483648)
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(3215381)
 int(3215381)
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 int(51446064)
 int(18279)
 int(70199)

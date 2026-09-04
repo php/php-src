@@ -17,38 +17,38 @@ echo "=======================================\n";
 // These should fail
 try {
     echo base_convert('fg', 16, 10);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Exception $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo base_convert('f 0xff ', 16, 10);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Exception $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo base_convert('1xff ', 16, 10);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Exception $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo base_convert(chr(0), 16, 10);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Exception $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo base_convert("0o7" , 9, 10);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Exception $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     echo base_convert("0 0" , 9, 10) . "\n";
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Exception $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -62,9 +62,9 @@ try {
 7
 10
 =======================================
-base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
-base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
-base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
-base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
-base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
-base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion
+Exception: Invalid characters passed for attempted conversion

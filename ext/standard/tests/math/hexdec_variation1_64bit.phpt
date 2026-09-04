@@ -61,10 +61,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(hexdec($input));
-    } catch (TypeError $e) {
-        echo 'TypeError: ', $e->getMessage(), "\n";
-    } catch (ValueError $e) {
-        echo 'ValueError: ', $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
     }
     $iterator++;
 };
@@ -83,7 +81,7 @@ int(1)
 int(74565)
 
 -- Iteration 4 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 5 --
 int(285960729237)
@@ -92,19 +90,19 @@ int(285960729237)
 int(285960729238)
 
 -- Iteration 7 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 8 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 9 --
 int(20015998341120)
 
 -- Iteration 10 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 11 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 12 --
 int(1)
@@ -128,13 +126,13 @@ int(0)
 TypeError: hexdec(): Argument #1 ($hex_string) must be of type string, array given
 
 -- Iteration 19 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 20 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 21 --
-ValueError: hexdec(): Argument #1 ($hex_string) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 22 --
 TypeError: hexdec(): Argument #1 ($hex_string) must be of type string, resource given

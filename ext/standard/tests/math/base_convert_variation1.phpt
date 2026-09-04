@@ -54,10 +54,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(base_convert($input, 10, 8));
-    } catch (TypeError $exception) {
-        echo 'TypeError: ', $exception->getMessage() . "\n";
-    } catch (ValueError $exception) {
-        echo 'ValueError: ', $exception->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage() . "\n";
     }
     $iterator++;
 }
@@ -76,25 +74,25 @@ string(1) "1"
 string(2) "14"
 
 -- Iteration 4 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 5 --
 string(11) "17777777777"
 
 -- Iteration 6 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 7 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 8 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 9 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 10 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 11 --
 string(1) "1"
@@ -118,13 +116,13 @@ string(1) "0"
 TypeError: base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 18 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 19 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 20 --
-ValueError: base_convert(): Argument #1 ($num) has invalid characters for attempted conversion
+Exception: Invalid characters passed for attempted conversion
 
 -- Iteration 21 --
 TypeError: base_convert(): Argument #1 ($num) must be of type string, resource given
