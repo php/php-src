@@ -74,6 +74,21 @@ static void php_pack(const zval *val, size_t size, php_pack_endianness endiannes
 }
 /* }}} */
 
+static bool php_pack_try_get_double(const zval *value, uint32_t arg_num, double *result)
+{
+	bool failed;
+
+	*result = zval_try_get_double(value, &failed);
+	if (UNEXPECTED(failed)) {
+		if (!EG(exception)) {
+			zend_argument_type_error(arg_num, "must be of type float, %s given", zend_zval_value_name(value));
+		}
+		return false;
+	}
+
+	return true;
+}
+
 ZEND_ATTRIBUTE_CONST static inline uint16_t php_pack_reverse_int16(uint16_t arg)
 {
 	return ((arg & 0xFF) << 8) | ((arg >> 8) & 0xFF);
@@ -702,7 +717,17 @@ too_few_args:
 			case 'g':
 			case 'G': {
 				while (arg-- > 0) {
-					float v = (float) zval_get_double(&argv[currentarg++]);
+					double d;
+					float v;
+					if (!php_pack_try_get_double(&argv[currentarg], currentarg + 2, &d)) {
+						zend_string_release(output);
+						efree(formatcodes);
+						efree(formatargs);
+						efree(formatendian);
+						RETURN_THROWS();
+					}
+					currentarg++;
+					v = (float) d;
 					if (code == 'g' || formatendian[i] == PHP_LITTLE_ENDIAN) {
 						php_pack_copy_float(1, &ZSTR_VAL(output)[outputpos], v);
 					} else if (code == 'G' || formatendian[i] == PHP_BIG_ENDIAN) {
@@ -719,7 +744,15 @@ too_few_args:
 			case 'e':
 			case 'E': {
 				while (arg-- > 0) {
-					double v = zval_get_double(&argv[currentarg++]);
+					double v;
+					if (!php_pack_try_get_double(&argv[currentarg], currentarg + 2, &v)) {
+						zend_string_release(output);
+						efree(formatcodes);
+						efree(formatargs);
+						efree(formatendian);
+						RETURN_THROWS();
+					}
+					currentarg++;
 					if (code == 'e' || formatendian[i] == PHP_LITTLE_ENDIAN) {
 						php_pack_copy_double(1, &ZSTR_VAL(output)[outputpos], v);
 					} else if (code == 'E' || formatendian[i] == PHP_BIG_ENDIAN) {
