@@ -335,6 +335,21 @@ PHP 8.6 UPGRADE NOTES
 - Date:
   . Added a new Time\Duration class.
     RFC: https://wiki.php.net/rfc/duration_class
+  . The following DateTime, DateTimeImmutable, DateTimeZone, DateInterval, and DatePeriod methods now have tentative static return types:
+    DateTime::createFromInterface()
+    DateTimeImmutable::__set_state()
+    DateTimeImmutable::modify()
+    DateTimeImmutable::add()
+    DateTimeImmutable::sub()
+    DateTimeImmutable::setTimezone()
+    DateTimeImmutable::setTime()
+    DateTimeImmutable::setDate()
+    DateTimeImmutable::setISODate()
+    DateTimeImmutable::setTimestamp()
+    DateTimeImmutable::createFromInterface()
+    DateTimeZone::__set_state()
+    DateInterval::__set_state()
+    DatePeriod::__set_state()
 
 - Fileinfo:
   . finfo_file() now works with remote streams.
