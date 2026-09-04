@@ -49,19 +49,45 @@ foreach ($formats as $format) {
 echo "references: ";
 var_dump($passed);
 
+$precisionLossValues = [
+    'float' => [42.5, 'Implicit conversion from float 42.5 to int loses precision'],
+    'float string' => ['42.5', 'Implicit conversion from float-string "42.5" to int loses precision'],
+];
+
 $passed = true;
 foreach ($formats as $format) {
-    $warning = null;
-    set_error_handler(static function (int $errno, string $errstr) use (&$warning): bool {
-        $warning = $errstr;
+    foreach ($precisionLossValues as $name => [$value, $message]) {
+        $diagnostic = null;
+        set_error_handler(static function (int $errno, string $errstr) use (&$diagnostic): bool {
+            $diagnostic = [$errno, $errstr];
+            return true;
+        });
+        $actual = unpack($format, pack($format, $value))[1];
+        restore_error_handler();
+
+        if ($actual !== 42 || $diagnostic !== [E_DEPRECATED, $message]) {
+            echo "Unexpected precision-loss result for $format/$name: ";
+            var_dump($actual, $diagnostic);
+            $passed = false;
+        }
+    }
+}
+echo "precision loss: ";
+var_dump($passed);
+
+$passed = true;
+foreach ($formats as $format) {
+    $diagnostic = null;
+    set_error_handler(static function (int $errno, string $errstr) use (&$diagnostic): bool {
+        $diagnostic = [$errno, $errstr];
         return true;
     });
     $actual = unpack($format, pack($format, '42 with trailing data'))[1];
     restore_error_handler();
 
-    if ($actual !== 42 || $warning !== 'A non-numeric value encountered') {
+    if ($actual !== 42 || $diagnostic !== [E_WARNING, 'A non-numeric value encountered']) {
         echo "Unexpected trailing-data result for $format: ";
-        var_dump($actual, $warning);
+        var_dump($actual, $diagnostic);
         $passed = false;
     }
 }
@@ -72,4 +98,5 @@ var_dump($passed);
 --EXPECT--
 valid conversions: bool(true)
 references: bool(true)
+precision loss: bool(true)
 trailing data: bool(true)

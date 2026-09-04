@@ -96,18 +96,25 @@ echo "argument numbers: ";
 var_dump($passed);
 
 $passed = true;
+$diagnosticValues = [
+    'float' => [42.5, E_DEPRECATED, 'Implicit conversion from float 42.5 to int loses precision'],
+    'float string' => ['42.5', E_DEPRECATED, 'Implicit conversion from float-string "42.5" to int loses precision'],
+    'leading-numeric string' => ['42 with trailing data', E_WARNING, 'A non-numeric value encountered'],
+];
 set_error_handler(static function (int $errno, string $errstr): never {
-    throw new Exception($errstr);
+    throw new Exception($errstr, $errno);
 });
 foreach ($formats as $format) {
-    try {
-        pack($format, '42 with trailing data');
-        echo "Unexpectedly accepted trailing data for $format\n";
-        $passed = false;
-    } catch (Throwable $e) {
-        if (!$e instanceof Exception || $e->getMessage() !== 'A non-numeric value encountered') {
-            echo "Unexpected exception for $format: ", $e::class, ': ', $e->getMessage(), "\n";
+    foreach ($diagnosticValues as $name => [$value, $severity, $message]) {
+        try {
+            pack($format, $value);
+            echo "Unexpectedly accepted $name for $format\n";
             $passed = false;
+        } catch (Throwable $e) {
+            if (!$e instanceof Exception || $e->getCode() !== $severity || $e->getMessage() !== $message) {
+                echo "Unexpected exception for $format/$name: ", $e::class, ': ', $e->getMessage(), "\n";
+                $passed = false;
+            }
         }
     }
 }
