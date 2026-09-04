@@ -20,14 +20,14 @@ var_dump(array_str_contains($emptyNeedleTest, ""));
 
 echo "\n--- UTF-8 and Multi-byte Support ---\n";
 $multibyte = [
-    "سلام دنیا",
-    "خداحافظ دنیا",
+    "???? ????",
+    "??????? ????",
     "PHP 8.7",
-    "PHP 8.7 café 🚀",
-    "یک ایموجی دیگر 🚀",
+    "PHP 8.7 caf� ??",
+    "?? ?????? ???? ??",
 ];
-var_dump(array_str_contains($multibyte, "دنیا"));
-var_dump(array_str_contains($multibyte, "🚀"));
+var_dump(array_str_contains($multibyte, "????"));
+var_dump(array_str_contains($multibyte, "??"));
 
 echo "\n--- Empty Haystack ---\n";
 var_dump(array_str_contains([], "needle"));
@@ -69,15 +69,15 @@ array(3) {
 --- UTF-8 and Multi-byte Support ---
 array(2) {
   [0]=>
-  string(17) "سلام دنیا"
+  string(17) "???? ????"
   [1]=>
-  string(23) "خداحافظ دنیا"
+  string(23) "??????? ????"
 }
 array(2) {
   [3]=>
-  string(18) "PHP 8.7 café 🚀"
+  string(18) "PHP 8.7 caf� ??"
   [4]=>
-  string(31) "یک ایموجی دیگر 🚀"
+  string(31) "?? ?????? ???? ??"
 }
 
 --- Empty Haystack ---
