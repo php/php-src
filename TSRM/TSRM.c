@@ -92,6 +92,9 @@ struct _tsrm_tls_entry {
 	int count;
 	THREAD_T thread_id;
 	tsrm_tls_entry *next;
+#ifdef TSRM_WIN32
+	void *thread_exit_data;
+#endif
 };
 
 typedef struct {
@@ -162,18 +165,127 @@ static FILE *tsrm_error_file;
 	}
 #endif
 
+static bool tsrm_thread_exit_armed = false;
+
 #ifdef TSRM_WIN32
 static DWORD tls_key = TLS_OUT_OF_INDEXES;
+static DWORD tsrm_exit_key = FLS_OUT_OF_INDEXES;
+static BOOLEAN (NTAPI *tsrm_dll_shutdown_in_progress)(void);
+
+typedef struct {
+	tsrm_tls_entry *thread_resources;
+} tsrm_thread_exit_data;
+
+# define TSRM_THREAD_EXIT_CC	WINAPI
 # define tsrm_tls_set(what)		TlsSetValue(tls_key, (void*)(what))
 # define tsrm_tls_get()			TlsGetValue(tls_key)
+
+static void tsrm_exit_key_set(tsrm_tls_entry *thread_resources)
+{
+	tsrm_thread_exit_data *data;
+
+	if (!tsrm_thread_exit_armed) {
+		return;
+	}
+
+	data = FlsGetValue(tsrm_exit_key);
+	if (!thread_resources) {
+		if (data && FlsSetValue(tsrm_exit_key, NULL)) {
+			free(data);
+		}
+		return;
+	}
+
+	if (!data) {
+		data = malloc(sizeof(tsrm_thread_exit_data));
+		if (!data) {
+			return;
+		}
+		data->thread_resources = thread_resources;
+		if (!FlsSetValue(tsrm_exit_key, data)) {
+			free(data);
+			return;
+		}
+		thread_resources->thread_exit_data = data;
+		return;
+	}
+	data->thread_resources = thread_resources;
+	thread_resources->thread_exit_data = data;
+}
 #else
 static pthread_key_t tls_key;
+static pthread_key_t tsrm_exit_key;
+# define TSRM_THREAD_EXIT_CC
 # define tsrm_tls_set(what)		pthread_setspecific(tls_key, (void*)(what))
 # define tsrm_tls_get()			pthread_getspecific(tls_key)
+# define tsrm_exit_key_set(what)	do { if (tsrm_thread_exit_armed) { pthread_setspecific(tsrm_exit_key, (void*)(what)); } } while (0)
 #endif
 
 TSRM_TLS bool in_main_thread = false;
 TSRM_TLS bool is_thread_shutdown = false;
+
+static void TSRM_THREAD_EXIT_CC tsrm_thread_exit_handler(void *arg)
+{
+#ifdef TSRM_WIN32
+	tsrm_thread_exit_data *data = arg;
+	tsrm_tls_entry *thread_resources;
+
+	if (tsrm_dll_shutdown_in_progress()) {
+		return;
+	}
+	/* FLS callbacks also run when another fiber is deleted. TSRM storage is
+	 * thread-wide, so only tear it down for the exiting execution context. */
+	if (!tsrm_thread_exit_armed) {
+		free(data);
+		return;
+	}
+	if (FlsGetValue(tsrm_exit_key) != data) {
+		free(data);
+		return;
+	}
+	FlsSetValue(tsrm_exit_key, NULL);
+	thread_resources = data->thread_resources;
+	if (thread_resources != TSRMLS_CACHE || thread_resources->thread_exit_data != data
+			|| in_main_thread || !tsrm_tls_table) {
+		free(data);
+		return;
+	}
+#else
+	tsrm_tls_entry *thread_resources = (tsrm_tls_entry *) arg;
+
+	if (!tsrm_thread_exit_armed || arg != TSRMLS_CACHE || in_main_thread || !tsrm_tls_table) {
+		return;
+	}
+#endif
+
+	tsrm_tls_set(thread_resources);
+	ts_free_thread();
+#ifdef TSRM_WIN32
+	free(data);
+#endif
+}
+
+TSRM_API void tsrm_thread_exit_disarm(void)
+{
+	if (!tsrm_thread_exit_armed) {
+		return;
+	}
+	tsrm_thread_exit_armed = false;
+#ifdef TSRM_WIN32
+	DWORD key = tsrm_exit_key;
+	tsrm_exit_key = FLS_OUT_OF_INDEXES;
+	FlsFree(key);
+#else
+	pthread_key_delete(tsrm_exit_key);
+#endif
+}
+
+#if !defined(TSRM_WIN32) && defined(__GNUC__)
+static void __attribute__((destructor)) tsrm_thread_exit_unload(void)
+{
+	tsrm_thread_exit_disarm();
+}
+#endif
 
 /* Startup TSRM (call once for the entire process) */
 TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int debug_level, const char *debug_filename)
@@ -217,6 +329,14 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 	tsrm_reserved_size = 0;
 
 	tsrm_env_mutex = tsrm_mutex_alloc();
+
+#ifdef TSRM_WIN32
+	tsrm_dll_shutdown_in_progress = (BOOLEAN (NTAPI *)(void)) (void *) GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlDllShutdownInProgress");
+	tsrm_exit_key = tsrm_dll_shutdown_in_progress ? FlsAlloc(tsrm_thread_exit_handler) : FLS_OUT_OF_INDEXES;
+	tsrm_thread_exit_armed = tsrm_exit_key != FLS_OUT_OF_INDEXES;
+#else
+	tsrm_thread_exit_armed = pthread_key_create(&tsrm_exit_key, tsrm_thread_exit_handler) == 0;
+#endif
 
 	return 1;
 }/*}}}*/
@@ -262,6 +382,8 @@ TSRM_API void tsrm_shutdown(void)
 		/* only the main thread may shutdown tsrm */
 		return;
 	}
+
+	tsrm_thread_exit_disarm();
 
 	for (int i=0; i<tsrm_tls_table_size; i++) {
 		tsrm_tls_entry *p = tsrm_tls_table[i], *next_p;
@@ -499,6 +621,9 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	(*thread_resources_ptr)->count = id_count;
 	(*thread_resources_ptr)->thread_id = thread_id;
 	(*thread_resources_ptr)->next = NULL;
+#ifdef TSRM_WIN32
+	(*thread_resources_ptr)->thread_exit_data = NULL;
+#endif
 
 	/* Set thread local storage to this new thread resources structure */
 	set_thread_local_storage_resource_to(*thread_resources_ptr);
@@ -526,6 +651,11 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	if (tsrm_new_thread_end_handler) {
 		tsrm_new_thread_end_handler(thread_id);
 	}
+
+	/* A thread exiting from a resource constructor cannot safely clean up an
+	 * entry that is still being built while tsmm_mutex is held. */
+	tsrm_exit_key_set(*thread_resources_ptr);
+	is_thread_shutdown = false;
 }/*}}}*/
 
 /* fetches the requested resource for the current thread */
@@ -605,7 +735,6 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		allocate_new_resource(last_thread_resources, thread_id);
 		thread_resources = *last_thread_resources;
 		thread_resources->next = next;
-		is_thread_shutdown = false;
 		/* We don't have to tail-call ts_resource_ex, we can take the fast path to the return
 		 * because we already have the correct pointer. */
 	}
@@ -633,6 +762,7 @@ void ts_free_thread(void)
 		return;
 	}
 
+	is_thread_shutdown = true;
 	/* Release resources that depend on TSRM before taking its lock. */
 	if (tsrm_thread_free_handler) {
 		tsrm_thread_free_handler();
@@ -651,6 +781,7 @@ void ts_free_thread(void)
 				tsrm_tls_table[hash_value] = p->next;
 			}
 			tsrm_tls_set(0);
+			tsrm_exit_key_set(0);
 			TSRMLS_CACHE = NULL;
 			free(thread_resources);
 			tsrm_mutex_unlock(tsmm_mutex);
@@ -660,6 +791,7 @@ void ts_free_thread(void)
 		p = p->next;
 	}
 	tsrm_tls_set(0);
+	tsrm_exit_key_set(0);
 	TSRMLS_CACHE = NULL;
 	tsrm_mutex_unlock(tsmm_mutex);
 }/*}}}*/

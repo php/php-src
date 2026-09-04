@@ -346,13 +346,16 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 5. SAPI changes
 ========================
 
-- SAPIs should explicitly release a thread's resources by calling
-  ts_free_thread() before terminating it. Native TLS resource destructors only
-  run on their owning thread; tsrm_shutdown() cannot release them afterwards.
-  All PHP-managed worker threads must be quiescent before tsrm_shutdown().
+- Per-thread TSRM resources are now released best-effort at normal thread exit,
+  because native TLS resource destructors can only run on their owning thread and
+  tsrm_shutdown() cannot release them afterwards. Prefer explicitly calling ts_free_thread().
 
-- AG and SCNG are now allocated with ts_allocate_tls_id() and live in native
-  __thread storage on ZTS builds.
+- tsrm_shutdown() and the bundled library-unload hooks automatically disarm
+  thread-exit cleanup. Embedders must stop and join all PHP worker threads
+  before calling tsrm_shutdown() or unloading PHP.
+
+- EG, CG, AG and SCNG are now allocated with ts_allocate_tls_id() and live in native
+  __thread storage in ZTS builds.
 
 - php-cli functionality is now available in embed builds via the do_php_cli()
   function.
