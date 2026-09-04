@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-20890 (Segfault in zval_undefined_cv with non-simple property
     hook with minimal tracing JIT). (ndossche)
+  . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
+    root trace at the opcache.jit_max_root_traces limit, causing spurious
+    "Too few arguments" errors and crashes). (RV7PR)
 
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
