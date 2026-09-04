@@ -1058,7 +1058,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API double ZEND_FASTCALL zval_try_get_double_func(const zval *op, bool *failed) /* {{{ */
+ZEND_API double ZEND_FASTCALL zval_try_get_double_func(const zval *op, bool *failed)
 {
 	*failed = false;
 try_again:
@@ -1116,7 +1116,6 @@ try_again:
 		default: ZEND_UNREACHABLE();
 	}
 }
-/* }}} */
 
 static zend_always_inline zend_string* __zval_get_string_func(const zval *op, bool try) /* {{{ */
 {
