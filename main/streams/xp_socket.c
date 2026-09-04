@@ -677,7 +677,8 @@ static inline char *parse_ip_address(php_stream_xport_param *xparam, int *portno
 	return parse_ip_address_ex(xparam->inputs.name, xparam->inputs.namelen, portno, xparam->want_errortext, &xparam->outputs.error_text);
 }
 
-static int php_sockop_parse_buffer_sizes(php_stream *stream, php_sockvals *sockvals)
+static int php_sockop_parse_buffer_sizes(php_stream *stream, php_stream_xport_param *xparam,
+		php_sockvals *sockvals)
 {
 	zval *tmpzval;
 
@@ -690,7 +691,9 @@ static int php_sockop_parse_buffer_sizes(php_stream *stream, php_sockvals *sockv
 		zend_long bufsize = zval_get_long(tmpzval);
 
 		if (bufsize < 1 || bufsize > INT_MAX) {
-			zend_value_error("stream context option 'so_rcvbuf' must be between 1 and %d", INT_MAX);
+			if (xparam->want_errortext) {
+				xparam->outputs.error_text = strpprintf(0, "so_rcvbuf context option must be between 1 and %d", INT_MAX);
+			}
 			return -1;
 		}
 
@@ -704,7 +707,9 @@ static int php_sockop_parse_buffer_sizes(php_stream *stream, php_sockvals *sockv
 		zend_long bufsize = zval_get_long(tmpzval);
 
 		if (bufsize < 1 || bufsize > INT_MAX) {
-			zend_value_error("stream context option 'so_sndbuf' must be between 1 and %d", INT_MAX);
+			if (xparam->want_errortext) {
+				xparam->outputs.error_text = strpprintf(0, "so_sndbuf context option must be between 1 and %d", INT_MAX);
+			}
 			return -1;
 		}
 
@@ -759,7 +764,7 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 		return -1;
 	}
 
-	if (php_sockop_parse_buffer_sizes(stream, &sockvals) == -1) {
+	if (php_sockop_parse_buffer_sizes(stream, xparam, &sockvals) == -1) {
 		efree(host);
 		return -1;
 	}
@@ -912,7 +917,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		return -1;
 	}
 
-	if (php_sockop_parse_buffer_sizes(stream, &sockvals) == -1) {
+	if (php_sockop_parse_buffer_sizes(stream, xparam, &sockvals) == -1) {
 		efree(host);
 		return -1;
 	}
