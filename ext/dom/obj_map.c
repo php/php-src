@@ -476,9 +476,9 @@ void php_dom_obj_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long i
 	}
 }
 
-void php_dom_obj_map_get_ns_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, const char *ns, zval *return_value)
+void php_dom_obj_map_get_ns_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, const char *ns, bool use_ns, zval *return_value)
 {
-	xmlNodePtr itemnode = objmap->handler->get_ns_named_item(objmap, named, ns);
+	xmlNodePtr itemnode = objmap->handler->get_ns_named_item(objmap, named, ns, use_ns);
 	if (itemnode) {
 		DOM_RET_OBJ(itemnode, objmap->baseobj);
 	} else {
@@ -490,17 +490,17 @@ void php_dom_obj_map_get_ns_named_item_into_zval(dom_nnodemap_object *objmap, co
  * === Named item === *
  **********************/
 
-static xmlNodePtr dom_map_get_ns_named_item_entity(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static xmlNodePtr dom_map_get_ns_named_item_entity(dom_nnodemap_object *map, const zend_string *named, const char *ns, bool use_ns)
 {
 	return xmlHashLookup(map->ht, BAD_CAST ZSTR_VAL(named));
 }
 
-static bool dom_map_has_ns_named_item_xmlht(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static bool dom_map_has_ns_named_item_xmlht(dom_nnodemap_object *map, const zend_string *named, const char *ns, bool use_ns)
 {
-	return dom_map_get_ns_named_item_entity(map, named, ns) != NULL;
+	return dom_map_get_ns_named_item_entity(map, named, ns, use_ns) != NULL;
 }
 
-static xmlNodePtr dom_map_get_ns_named_item_notation(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static xmlNodePtr dom_map_get_ns_named_item_notation(dom_nnodemap_object *map, const zend_string *named, const char *ns, bool use_ns)
 {
 	xmlNotationPtr notation = xmlHashLookup(map->ht, BAD_CAST ZSTR_VAL(named));
 	if (notation) {
@@ -509,38 +509,37 @@ static xmlNodePtr dom_map_get_ns_named_item_notation(dom_nnodemap_object *map, c
 	return NULL;
 }
 
-static xmlNodePtr dom_map_get_ns_named_item_prop(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static xmlNodePtr dom_map_get_ns_named_item_prop(dom_nnodemap_object *map, const zend_string *named, const char *ns, bool use_ns)
 {
 	xmlNodePtr nodep = dom_object_get_node(map->baseobj);
 	if (nodep) {
-		if (ns) {
-			xmlNodePtr itemnode = (xmlNodePtr) xmlHasNsProp(nodep, BAD_CAST ZSTR_VAL(named), BAD_CAST ns);
-			if (itemnode != NULL && itemnode->type == XML_ATTRIBUTE_DECL) {
-				return NULL;
-			}
-			return itemnode;
+		xmlNodePtr itemnode;
+		if (use_ns) {
+			itemnode = (xmlNodePtr) xmlHasNsProp(nodep, BAD_CAST ZSTR_VAL(named), BAD_CAST ns);
+		} else if (php_dom_follow_spec_intern(map->baseobj)) {
+			itemnode = (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST ZSTR_VAL(named), ZSTR_LEN(named));
 		} else {
-			if (php_dom_follow_spec_intern(map->baseobj)) {
-				return (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST ZSTR_VAL(named), ZSTR_LEN(named));
-			} else {
-				return (xmlNodePtr) xmlHasProp(nodep, BAD_CAST ZSTR_VAL(named));
-			}
+			itemnode = (xmlNodePtr) xmlHasProp(nodep, BAD_CAST ZSTR_VAL(named));
 		}
+		if (itemnode != NULL && itemnode->type == XML_ATTRIBUTE_DECL) {
+			return NULL;
+		}
+		return itemnode;
 	}
 	return NULL;
 }
 
-static bool dom_map_has_ns_named_item_prop(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static bool dom_map_has_ns_named_item_prop(dom_nnodemap_object *map, const zend_string *named, const char *ns, bool use_ns)
 {
-	return dom_map_get_ns_named_item_prop(map, named, ns) != NULL;
+	return dom_map_get_ns_named_item_prop(map, named, ns, use_ns) != NULL;
 }
 
-static xmlNodePtr dom_map_get_ns_named_item_null(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static xmlNodePtr dom_map_get_ns_named_item_null(dom_nnodemap_object *map, const zend_string *named, const char *ns, bool use_ns)
 {
 	return NULL;
 }
 
-static bool dom_map_has_ns_named_item_null(dom_nnodemap_object *map, const zend_string *named, const char *ns)
+static bool dom_map_has_ns_named_item_null(dom_nnodemap_object *map, const zend_string *named, const char *ns, bool use_ns)
 {
 	return false;
 }
