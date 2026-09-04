@@ -48,6 +48,11 @@ PHP 8.6 UPGRADE NOTES
     the integer index is greater than INT_MAX instead of overflowing to a
     smaller index.
 
+- FTP:
+  . ftp_connect() and ftp_ssl_connect() now throw a ValueError when $port is
+    outside the 0-65535 range, instead of silently truncating it to its low
+    16 bits (e.g. 65536 previously connected to port 21).
+
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter the types / values of
     their array arguments and raise a TypeError / ValueError accordingly.
