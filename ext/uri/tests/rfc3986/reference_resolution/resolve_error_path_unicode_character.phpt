@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri reference resolution - resolve() - Unicode
+Test Uri\Rfc3986\Uri::resolve() - error - Unicode character in path
 --FILE--
 <?php
 

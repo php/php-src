@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri reference resolution - resolve() - null byte
+Test Uri\Rfc3986\Uri::resolve() - error - null byte in path
 --FILE--
 <?php
 

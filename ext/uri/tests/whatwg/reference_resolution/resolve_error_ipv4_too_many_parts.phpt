@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url reference resolution - resolve() - IPv4 with too many parts
+Test Uri\WhatWg\Url::resolve() - error - IPv4 with too many parts
 --FILE--
 <?php
 

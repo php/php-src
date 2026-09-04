@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url reference resolution - resolve() - null byte
+Test Uri\WhatWg\Url::resolve() - error - null byte in host
 --FILE--
 <?php
 

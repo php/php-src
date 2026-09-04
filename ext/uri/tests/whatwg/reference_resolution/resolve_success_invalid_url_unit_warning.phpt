@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url reference resolution - resolve() - invalid URL unit warning
+Test Uri\WhatWg\Url::resolve() - success - invalid URL unit warning
 --FILE--
 <?php
 

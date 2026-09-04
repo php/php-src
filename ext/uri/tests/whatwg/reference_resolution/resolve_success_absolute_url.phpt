@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url reference resolution - resolve() - absolute URL
+Test Uri\WhatWg\Url::resolve() - success - absolute URL
 --FILE--
 <?php
 

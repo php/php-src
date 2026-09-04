@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url reference resolution - parse() - absolute URL with base URL
+Test Uri\WhatWg\Url::parse() - success - absolute URL with base URL
 --FILE--
 <?php
 
