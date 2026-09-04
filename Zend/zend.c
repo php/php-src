@@ -62,7 +62,6 @@ static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
-static HashTable *global_persistent_list = NULL;
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
 # define GLOBAL_CONSTANTS_TABLE		global_constants_table
@@ -855,13 +854,17 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 }
 /* }}} */
 
-static void executor_globals_persistent_list_dtor(void *storage)
+static void zend_thread_free_handler(void)
 {
-	zend_executor_globals *executor_globals = storage;
+	volatile bool completed = false;
 
-	if (&executor_globals->persistent_list != global_persistent_list) {
-		zend_destroy_rsrc_list(&executor_globals->persistent_list);
-	}
+	do {
+		zend_try {
+			zend_destroy_rsrc_list(&EG(persistent_list));
+			completed = true;
+		} zend_end_try();
+	} while (!completed);
+	zend_init_rsrc_plist();
 }
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
@@ -1081,6 +1084,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+	tsrm_set_thread_free_handler(zend_thread_free_handler);
 	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
 
@@ -1151,7 +1155,6 @@ zend_result zend_post_startup(void) /* {{{ */
 	EG(zend_constants) = NULL;
 
 	executor_globals_ctor(executor_globals);
-	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
 	global_map_ptr_last = CG(map_ptr_last);
@@ -1168,12 +1171,12 @@ zend_result zend_post_startup(void) /* {{{ */
 
 void zend_shutdown(void) /* {{{ */
 {
+#ifdef ZTS
+	tsrm_set_thread_free_handler(NULL);
+#endif
 	zend_vm_dtor();
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
-#ifdef ZTS
-	ts_apply_for_id(executor_globals_id, executor_globals_persistent_list_dtor);
-#endif
 	zend_destroy_modules();
 
 	virtual_cwd_deactivate();

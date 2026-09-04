@@ -125,6 +125,7 @@ static MUTEX_T tsrm_env_mutex; /* tsrm environ mutex */
 static tsrm_thread_begin_func_t tsrm_new_thread_begin_handler = NULL;
 static tsrm_thread_end_func_t tsrm_new_thread_end_handler = NULL;
 static tsrm_shutdown_func_t tsrm_shutdown_handler = NULL;
+static tsrm_shutdown_func_t tsrm_thread_free_handler = NULL;
 
 /* Debug support */
 int tsrm_error(int level, const char *format, ...);
@@ -301,6 +302,7 @@ TSRM_API void tsrm_shutdown(void)
 	tsrm_new_thread_begin_handler = NULL;
 	tsrm_new_thread_end_handler = NULL;
 	tsrm_shutdown_handler = NULL;
+	tsrm_thread_free_handler = NULL;
 
 	tsrm_reserved_pos  = 0;
 	tsrm_reserved_size = 0;
@@ -631,6 +633,11 @@ void ts_free_thread(void)
 		return;
 	}
 
+	/* Release resources that depend on TSRM before taking its lock. */
+	if (tsrm_thread_free_handler) {
+		tsrm_thread_free_handler();
+	}
+
 	tsrm_mutex_lock(tsmm_mutex);
 	hash_value = THREAD_HASH_OF(thread_resources->thread_id, tsrm_tls_table_size);
 	p = tsrm_tls_table[hash_value];
@@ -843,6 +850,12 @@ TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler)
 	tsrm_shutdown_handler = shutdown_handler;
 	return retval;
 }/*}}}*/
+
+
+void tsrm_set_thread_free_handler(tsrm_shutdown_func_t thread_free_handler)
+{
+	tsrm_thread_free_handler = thread_free_handler;
+}
 
 
 /*

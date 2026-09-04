@@ -140,6 +140,8 @@ TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
 TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler);
+/* Internal Zend hook, run before any of the thread's resources are destroyed. */
+void tsrm_set_thread_free_handler(tsrm_shutdown_func_t thread_free_handler);
 
 TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
