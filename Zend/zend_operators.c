@@ -1058,7 +1058,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_never_inline double ZEND_FASTCALL zval_try_get_double_func(const zval *op, bool *failed) /* {{{ */
+ZEND_API double ZEND_FASTCALL zval_try_get_double_func(const zval *op, bool *failed) /* {{{ */
 {
 	*failed = false;
 try_again:
