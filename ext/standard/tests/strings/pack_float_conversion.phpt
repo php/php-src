@@ -3,111 +3,131 @@ pack() float and double value conversions
 --FILE--
 <?php
 
+$formats = ['f', 'g', 'G', 'd', 'e', 'E'];
 $values = [
-    'null' => null,
-    'false' => false,
-    'true' => true,
-    'int' => 42,
-    'float' => 42.5,
-    'numeric integer string' => '42',
-    'numeric float string' => '42.5',
-    'numeric scientific string' => '1e3',
+    'null' => [null, 0.0],
+    'false' => [false, 0.0],
+    'true' => [true, 1.0],
+    'int' => [42, 42.0],
+    'float' => [42.5, 42.5],
+    'numeric integer string' => ['42', 42.0],
+    'numeric float string' => ['42.5', 42.5],
+    'numeric scientific string' => ['1e3', 1000.0],
+    'leading whitespace' => [' 42.5', 42.5],
+    'trailing whitespace' => ["42.5 \t", 42.5],
 ];
 
-foreach ($values as $name => $value) {
-    echo "$name: ";
-    var_dump(unpack('d', pack('d', $value))[1]);
+foreach ($formats as $format) {
+    echo "$format:\n";
+    foreach ($values as $name => [$value, $expected]) {
+        $actual = unpack($format, pack($format, $value))[1];
+        echo "$name: ";
+        var_dump($actual === $expected);
+    }
 }
 
-echo "reference: ";
+echo "references:\n";
 $value = 1.5;
 $reference =& $value;
-var_dump(unpack('d', pack('d', $reference))[1]);
+foreach ($formats as $format) {
+    $actual = unpack($format, pack($format, $reference))[1];
+    echo "$format: ";
+    var_dump($actual === 1.5);
+}
 
 echo "trailing data:\n";
-var_dump(unpack('d', pack('d', '42 with trailing data'))[1]);
+foreach ($formats as $format) {
+    $warning = null;
+    set_error_handler(static function (int $errno, string $errstr) use (&$warning): bool {
+        $warning = $errstr;
+        return true;
+    });
+    $actual = unpack($format, pack($format, '42 with trailing data'))[1];
+    restore_error_handler();
 
-$invalidValues = [
-    'empty string' => '',
-    'whitespace string' => ' ',
-    'non-numeric string' => 'not numeric',
-    'array' => [],
-    'object' => new stdClass(),
-    'resource' => fopen(__FILE__, 'r'),
-];
-
-foreach ($invalidValues as $name => $value) {
-    echo "$name:\n";
-    try {
-        pack('d', $value);
-    } catch (Throwable $e) {
-        echo $e::class, ': ', $e->getMessage(), "\n";
-    }
+    echo "$format: $warning; ";
+    var_dump($actual === 42.0);
 }
-
-echo "all format codes:\n";
-foreach (['f', 'g', 'G', 'd', 'e', 'E'] as $format) {
-    try {
-        pack($format, []);
-    } catch (Throwable $e) {
-        echo "$format: ", $e->getMessage(), "\n";
-    }
-}
-
-echo "later argument:\n";
-try {
-    pack('d2', 1.0, []);
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
-
-echo "warning converted to exception:\n";
-set_error_handler(static function (int $errno, string $errstr): never {
-    throw new Exception($errstr);
-});
-try {
-    pack('d', '42 with trailing data');
-} catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-}
-restore_error_handler();
-fclose($invalidValues['resource']);
 
 ?>
---EXPECTF--
-null: float(0)
-false: float(0)
-true: float(1)
-int: float(42)
-float: float(42.5)
-numeric integer string: float(42)
-numeric float string: float(42.5)
-numeric scientific string: float(1000)
-reference: float(1.5)
+--EXPECT--
+f:
+null: bool(true)
+false: bool(true)
+true: bool(true)
+int: bool(true)
+float: bool(true)
+numeric integer string: bool(true)
+numeric float string: bool(true)
+numeric scientific string: bool(true)
+leading whitespace: bool(true)
+trailing whitespace: bool(true)
+g:
+null: bool(true)
+false: bool(true)
+true: bool(true)
+int: bool(true)
+float: bool(true)
+numeric integer string: bool(true)
+numeric float string: bool(true)
+numeric scientific string: bool(true)
+leading whitespace: bool(true)
+trailing whitespace: bool(true)
+G:
+null: bool(true)
+false: bool(true)
+true: bool(true)
+int: bool(true)
+float: bool(true)
+numeric integer string: bool(true)
+numeric float string: bool(true)
+numeric scientific string: bool(true)
+leading whitespace: bool(true)
+trailing whitespace: bool(true)
+d:
+null: bool(true)
+false: bool(true)
+true: bool(true)
+int: bool(true)
+float: bool(true)
+numeric integer string: bool(true)
+numeric float string: bool(true)
+numeric scientific string: bool(true)
+leading whitespace: bool(true)
+trailing whitespace: bool(true)
+e:
+null: bool(true)
+false: bool(true)
+true: bool(true)
+int: bool(true)
+float: bool(true)
+numeric integer string: bool(true)
+numeric float string: bool(true)
+numeric scientific string: bool(true)
+leading whitespace: bool(true)
+trailing whitespace: bool(true)
+E:
+null: bool(true)
+false: bool(true)
+true: bool(true)
+int: bool(true)
+float: bool(true)
+numeric integer string: bool(true)
+numeric float string: bool(true)
+numeric scientific string: bool(true)
+leading whitespace: bool(true)
+trailing whitespace: bool(true)
+references:
+f: bool(true)
+g: bool(true)
+G: bool(true)
+d: bool(true)
+e: bool(true)
+E: bool(true)
 trailing data:
-
-Warning: A non-numeric value encountered in %s on line %d
-float(42)
-empty string:
-TypeError: pack(): Argument #2 must be of type float, string given
-whitespace string:
-TypeError: pack(): Argument #2 must be of type float, string given
-non-numeric string:
-TypeError: pack(): Argument #2 must be of type float, string given
-array:
-TypeError: pack(): Argument #2 must be of type float, array given
-object:
-TypeError: pack(): Argument #2 must be of type float, stdClass given
-resource:
-TypeError: pack(): Argument #2 must be of type float, resource given
-all format codes:
-f: pack(): Argument #2 must be of type float, array given
-g: pack(): Argument #2 must be of type float, array given
-G: pack(): Argument #2 must be of type float, array given
-d: pack(): Argument #2 must be of type float, array given
-e: pack(): Argument #2 must be of type float, array given
-E: pack(): Argument #2 must be of type float, array given
-later argument:
-TypeError: pack(): Argument #3 must be of type float, array given
-warning converted to exception:
-Exception: A non-numeric value encountered
+f: A non-numeric value encountered; bool(true)
+g: A non-numeric value encountered; bool(true)
+G: A non-numeric value encountered; bool(true)
+d: A non-numeric value encountered; bool(true)
+e: A non-numeric value encountered; bool(true)
+E: A non-numeric value encountered; bool(true)
