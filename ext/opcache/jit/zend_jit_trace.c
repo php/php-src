@@ -8780,7 +8780,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				SHM_UNPROTECT();
 				zend_jit_unprotect();
 
-				((zend_op*)opline)->handler =
+				((zend_op*)(t->opline))->handler =
 					ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->orig_handler;
 
 				ZEND_OP_TRACE_INFO(t->opline, jit_extension->offset)->trace_flags &= ~ZEND_JIT_TRACE_JITED;
