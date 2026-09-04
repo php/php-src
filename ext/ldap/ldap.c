@@ -28,6 +28,7 @@
 #include "php_ini.h"
 #include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_interfaces.h"
 
 #include <stddef.h>
 
@@ -77,7 +78,9 @@ typedef struct {
 } ldap_linkdata;
 
 typedef struct {
+	zval ld;
 	LDAPMessage *result;
+	LDAPMessage *current;
 	zend_object std;
 } ldap_resultdata;
 
@@ -876,7 +879,7 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_link_object_handlers.clone_obj = NULL;
 	ldap_link_object_handlers.compare = zend_objects_not_comparable;
 
-	ldap_result_ce = register_class_LDAP_Result();
+	ldap_result_ce = register_class_LDAP_Result(zend_ce_iterator);
 	ldap_result_ce->create_object = ldap_result_create_object;
 	ldap_result_ce->default_object_handlers = &ldap_result_object_handlers;
 
@@ -1868,6 +1871,8 @@ cleanup_parallel:
 			object_init_ex(return_value, ldap_result_ce);
 			result = Z_LDAP_RESULT_P(return_value);
 			result->result = ldap_res;
+			// result->ld = ld;
+			ZVAL_COPY(&result->ld, link);
 		}
 	} else {
 		zend_argument_type_error(1, "must be of type LDAP\\Connection|array, %s given", zend_zval_value_name(link));
@@ -1948,6 +1953,93 @@ PHP_FUNCTION(ldap_count_entries)
 	VERIFY_LDAP_RESULT_OPEN(ldap_result);
 
 	RETURN_LONG(ldap_count_entries(ld->link, ldap_result->result));
+}
+/* }}} */
+
+/* {{{ Iterator methods */
+PHP_METHOD(LDAP_Result, current)
+{
+	ldap_resultdata *ldap_result;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ldap_result = Z_LDAP_RESULT_P(ZEND_THIS);
+
+	if (ldap_result->current == NULL) {
+		RETVAL_FALSE;
+	} else {
+		object_init_ex(return_value, ldap_result_entry_ce);
+		ldap_result_entry *resultentry = Z_LDAP_RESULT_ENTRY_P(return_value);
+		ZVAL_COPY(&resultentry->res, ZEND_THIS);
+		resultentry->data = ldap_result->current;
+		resultentry->ber = NULL;
+	}
+}
+PHP_METHOD(LDAP_Result, key)
+{
+	ldap_resultdata *ldap_result;
+	ldap_linkdata *ld;
+	char* dn;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ldap_result = Z_LDAP_RESULT_P(ZEND_THIS);
+	ld = Z_LDAP_LINK_P(&ldap_result->ld);
+	VERIFY_LDAP_LINK_CONNECTED(ld);
+	VERIFY_LDAP_RESULT_OPEN(ldap_result);
+
+	dn = ldap_get_dn(ld->link, ldap_result->current);
+	if (dn != NULL) {
+		RETVAL_STRING(dn);
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+		ldap_memfree(dn);
+#else
+		free(dn);
+#endif
+	} else {
+		RETURN_FALSE;
+	}
+}
+PHP_METHOD(LDAP_Result, next)
+{
+	ldap_resultdata *ldap_result;
+	ldap_linkdata *ld;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ldap_result = Z_LDAP_RESULT_P(ZEND_THIS);
+	ld = Z_LDAP_LINK_P(&ldap_result->ld);
+	VERIFY_LDAP_LINK_CONNECTED(ld);
+	VERIFY_LDAP_RESULT_OPEN(ldap_result);
+
+	ldap_result->current = ldap_next_entry(ld->link, ldap_result->current);
+}
+PHP_METHOD(LDAP_Result, rewind)
+{
+	ldap_linkdata *ld;
+	ldap_resultdata *ldap_result;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ldap_result = Z_LDAP_RESULT_P(ZEND_THIS);
+	ld = Z_LDAP_LINK_P(&ldap_result->ld);
+	VERIFY_LDAP_LINK_CONNECTED(ld);
+	VERIFY_LDAP_RESULT_OPEN(ldap_result);
+
+	ldap_result->current = ldap_first_entry(ld->link, ldap_result->result);
+}
+PHP_METHOD(LDAP_Result, valid)
+{
+	ldap_resultdata *ldap_result;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ldap_result = Z_LDAP_RESULT_P(ZEND_THIS);
+	if (ldap_result->current != NULL) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
+	}
 }
 /* }}} */
 

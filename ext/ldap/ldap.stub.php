@@ -859,8 +859,13 @@ namespace LDAP {
      * @strict-properties
      * @not-serializable
      */
-    final class Result
+    final class Result implements \Iterator
     {
+        public function current(): ResultEntry;
+        public function key(): string;
+        public function next(): void;
+        public function rewind(): void;
+        public function valid(): bool;
     }
 
     /**
