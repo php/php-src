@@ -55,9 +55,17 @@ typedef ZEND_SET_ALIGNED(1, unsigned int unaligned_uint);
 typedef ZEND_SET_ALIGNED(1, int unaligned_int);
 
 /* {{{ php_pack */
-static void php_pack(const zval *val, size_t size, php_pack_endianness endianness, char *output)
+static bool php_pack(
+	const zval *val, uint32_t arg_num, size_t size, php_pack_endianness endianness, char *output
+)
 {
-	zend_ulong zl = zval_get_long(val);
+	bool failed;
+	zend_ulong zl = zval_try_get_long(val, &failed);
+
+	if (UNEXPECTED(failed)) {
+		zend_argument_type_error(arg_num, "must be of type int, %s given", zend_zval_value_name(val));
+		return false;
+	}
 
 	if ((endianness == PHP_LITTLE_ENDIAN) != MACHINE_LITTLE_ENDIAN) {
 		zl = PHP_LONG_BSWAP(zl);
@@ -71,6 +79,7 @@ static void php_pack(const zval *val, size_t size, php_pack_endianness endiannes
 	}
 
 	memcpy(output, (const char *) &zl, size);
+	return true;
 }
 /* }}} */
 
@@ -80,9 +89,7 @@ static bool php_pack_try_get_double(const zval *value, uint32_t arg_num, double 
 
 	*result = zval_try_get_double(value, &failed);
 	if (UNEXPECTED(failed)) {
-		if (!EG(exception)) {
-			zend_argument_type_error(arg_num, "must be of type float, %s given", zend_zval_value_name(value));
-		}
+		zend_argument_type_error(arg_num, "must be of type float, %s given", zend_zval_value_name(value));
 		return false;
 	}
 
@@ -629,7 +636,12 @@ too_few_args:
 			case 'c':
 			case 'C':
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 1, PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]);
+					if (!php_pack(
+						&argv[currentarg], currentarg + 2, 1, PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]
+					)) {
+						goto conversion_failed;
+					}
+					currentarg++;
 					outputpos++;
 				}
 				break;
@@ -651,7 +663,12 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 2, endianness, &ZSTR_VAL(output)[outputpos]);
+					if (!php_pack(
+						&argv[currentarg], currentarg + 2, 2, endianness, &ZSTR_VAL(output)[outputpos]
+					)) {
+						goto conversion_failed;
+					}
+					currentarg++;
 					outputpos += 2;
 				}
 				break;
@@ -660,7 +677,12 @@ too_few_args:
 			case 'i':
 			case 'I':
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], sizeof(int), PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]);
+					if (!php_pack(
+						&argv[currentarg], currentarg + 2, sizeof(int), PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]
+					)) {
+						goto conversion_failed;
+					}
+					currentarg++;
 					outputpos += sizeof(int);
 				}
 				break;
@@ -682,7 +704,12 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 4, endianness, &ZSTR_VAL(output)[outputpos]);
+					if (!php_pack(
+						&argv[currentarg], currentarg + 2, 4, endianness, &ZSTR_VAL(output)[outputpos]
+					)) {
+						goto conversion_failed;
+					}
+					currentarg++;
 					outputpos += 4;
 				}
 				break;
@@ -706,7 +733,12 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 8, endianness, &ZSTR_VAL(output)[outputpos]);
+					if (!php_pack(
+						&argv[currentarg], currentarg + 2, 8, endianness, &ZSTR_VAL(output)[outputpos]
+					)) {
+						goto conversion_failed;
+					}
+					currentarg++;
 					outputpos += 8;
 				}
 				break;
@@ -720,11 +752,7 @@ too_few_args:
 					double d;
 					float v;
 					if (!php_pack_try_get_double(&argv[currentarg], currentarg + 2, &d)) {
-						zend_string_release(output);
-						efree(formatcodes);
-						efree(formatargs);
-						efree(formatendian);
-						RETURN_THROWS();
+						goto conversion_failed;
 					}
 					currentarg++;
 					v = (float) d;
@@ -746,11 +774,7 @@ too_few_args:
 				while (arg-- > 0) {
 					double v;
 					if (!php_pack_try_get_double(&argv[currentarg], currentarg + 2, &v)) {
-						zend_string_release(output);
-						efree(formatcodes);
-						efree(formatargs);
-						efree(formatendian);
-						RETURN_THROWS();
+						goto conversion_failed;
 					}
 					currentarg++;
 					if (code == 'e' || formatendian[i] == PHP_LITTLE_ENDIAN) {
@@ -793,6 +817,13 @@ too_few_args:
 	ZSTR_VAL(output)[outputpos] = '\0';
 	ZSTR_LEN(output) = outputpos;
 	RETURN_NEW_STR(output);
+
+conversion_failed:
+	zend_string_release(output);
+	efree(formatcodes);
+	efree(formatargs);
+	efree(formatendian);
+	RETURN_THROWS();
 }
 /* }}} */
 

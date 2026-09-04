@@ -1,21 +1,42 @@
 --TEST--
-pack() accepts GMP values for float and double format codes
+pack() accepts GMP values for numeric format codes
 --EXTENSIONS--
 gmp
 --FILE--
 <?php
 
-$value = gmp_init(42);
-foreach (['f', 'g', 'G', 'd', 'e', 'E'] as $format) {
-    echo "$format: ";
-    var_dump(unpack($format, pack($format, $value))[1]);
+$integerFormats = ['c', 'C', 's', 'S', 'n', 'v', 'i', 'I', 'l', 'L', 'N', 'V'];
+if (PHP_INT_SIZE >= 8) {
+    array_push($integerFormats, 'q', 'Q', 'J', 'P');
 }
+$floatFormats = ['f', 'g', 'G', 'd', 'e', 'E'];
+$value = gmp_init(42);
+
+$passed = true;
+foreach ($integerFormats as $format) {
+    $actual = unpack($format, pack($format, $value))[1];
+    if ($actual !== 42) {
+        echo "Unexpected result for $format: ";
+        var_dump($actual);
+        $passed = false;
+    }
+}
+echo "integer formats: ";
+var_dump($passed);
+
+$passed = true;
+foreach ($floatFormats as $format) {
+    $actual = unpack($format, pack($format, $value))[1];
+    if ($actual !== 42.0) {
+        echo "Unexpected result for $format: ";
+        var_dump($actual);
+        $passed = false;
+    }
+}
+echo "floating-point formats: ";
+var_dump($passed);
 
 ?>
 --EXPECT--
-f: float(42)
-g: float(42)
-G: float(42)
-d: float(42)
-e: float(42)
-E: float(42)
+integer formats: bool(true)
+floating-point formats: bool(true)

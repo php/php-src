@@ -1,0 +1,125 @@
+--TEST--
+pack() integer value conversion errors
+--FILE--
+<?php
+
+$formats = ['c', 'C', 's', 'S', 'n', 'v', 'i', 'I', 'l', 'L', 'N', 'V'];
+if (PHP_INT_SIZE >= 8) {
+    array_push($formats, 'q', 'Q', 'J', 'P');
+}
+
+$passed = true;
+foreach ($formats as $format) {
+    try {
+        pack($format, []);
+        echo "Unexpectedly accepted an array for $format\n";
+        $passed = false;
+    } catch (Throwable $e) {
+        $expected = 'pack(): Argument #2 must be of type int, array given';
+        if (!$e instanceof TypeError || $e->getMessage() !== $expected) {
+            echo "Unexpected exception for $format: ", $e::class, ': ', $e->getMessage(), "\n";
+            $passed = false;
+        }
+    }
+}
+echo "all formats: ";
+var_dump($passed);
+
+$resource = fopen(__FILE__, 'r');
+$invalidValues = [
+    'empty string' => ['', 'string'],
+    'whitespace string' => [' ', 'string'],
+    'non-numeric string' => ['not numeric', 'string'],
+    'empty array' => [[], 'array'],
+    'non-empty array' => [[1], 'array'],
+    'object' => [new stdClass(), 'stdClass'],
+    'resource' => [$resource, 'resource'],
+];
+
+$passed = true;
+foreach ($invalidValues as $name => [$value, $type]) {
+    try {
+        pack('i', $value);
+        echo "Unexpectedly accepted $name\n";
+        $passed = false;
+    } catch (Throwable $e) {
+        $expected = "pack(): Argument #2 must be of type int, $type given";
+        if (!$e instanceof TypeError || $e->getMessage() !== $expected) {
+            echo "Unexpected exception for $name: ", $e::class, ': ', $e->getMessage(), "\n";
+            $passed = false;
+        }
+    }
+}
+echo "invalid values: ";
+var_dump($passed);
+
+$passed = true;
+$value = [];
+$reference =& $value;
+foreach ($formats as $format) {
+    try {
+        pack($format, $reference);
+        echo "Unexpectedly accepted an invalid reference for $format\n";
+        $passed = false;
+    } catch (Throwable $e) {
+        $expected = 'pack(): Argument #2 must be of type int, array given';
+        if (!$e instanceof TypeError || $e->getMessage() !== $expected) {
+            echo "Unexpected exception for $format/reference: ", $e::class, ': ', $e->getMessage(), "\n";
+            $passed = false;
+        }
+    }
+}
+echo "invalid references: ";
+var_dump($passed);
+
+$passed = true;
+$cases = [
+    ['i2', [1, []], 3],
+    ['i*', [1, []], 3],
+    ['C2i', [1, 2, []], 4],
+    ['i2l2', [1, 2, 3, []], 5],
+];
+foreach ($cases as [$format, $arguments, $argumentNumber]) {
+    try {
+        pack($format, ...$arguments);
+        echo "Unexpectedly accepted an invalid argument for $format\n";
+        $passed = false;
+    } catch (Throwable $e) {
+        $expected = "pack(): Argument #$argumentNumber must be of type int, array given";
+        if (!$e instanceof TypeError || $e->getMessage() !== $expected) {
+            echo "Unexpected exception for $format: ", $e::class, ': ', $e->getMessage(), "\n";
+            $passed = false;
+        }
+    }
+}
+echo "argument numbers: ";
+var_dump($passed);
+
+$passed = true;
+set_error_handler(static function (int $errno, string $errstr): never {
+    throw new Exception($errstr);
+});
+foreach ($formats as $format) {
+    try {
+        pack($format, '42 with trailing data');
+        echo "Unexpectedly accepted trailing data for $format\n";
+        $passed = false;
+    } catch (Throwable $e) {
+        if (!$e instanceof Exception || $e->getMessage() !== 'A non-numeric value encountered') {
+            echo "Unexpected exception for $format: ", $e::class, ': ', $e->getMessage(), "\n";
+            $passed = false;
+        }
+    }
+}
+restore_error_handler();
+fclose($resource);
+echo "exception propagation: ";
+var_dump($passed);
+
+?>
+--EXPECT--
+all formats: bool(true)
+invalid values: bool(true)
+invalid references: bool(true)
+argument numbers: bool(true)
+exception propagation: bool(true)
