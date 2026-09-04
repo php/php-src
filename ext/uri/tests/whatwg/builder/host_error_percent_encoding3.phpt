@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setHost() - error - invalid percent encoded octet in IPv4
+Test Uri\WhatWg\UrlBuilder::setHost() - error - invalid percent-encoded octet in IPv4
 --FILE--
 <?php
 

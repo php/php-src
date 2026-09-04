@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - scheme - invalid characters
+Test Uri\WhatWg\Url::withScheme() - error - invalid characters
 --FILE--
 <?php
 
@@ -8,7 +8,7 @@ $url = Uri\WhatWg\Url::parse("https://example.com");
 try {
     $url->withScheme("http?");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - forbidden host code point
+Test Uri\WhatWg\Url::withHost() - success - hash mark in opaque host input
 --FILE--
 <?php
 

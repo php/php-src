@@ -1,5 +1,5 @@
 --TEST--
-Test cloning Uri\Rfc3986\Uri
+Test Uri\Rfc3986\Uri cloning - success
 --FILE--
 <?php
 

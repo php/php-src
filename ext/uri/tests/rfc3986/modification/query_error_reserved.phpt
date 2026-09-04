@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - query - reserved characters
+Test Uri\Rfc3986\Uri::withQuery() - error - reserved characters
 --FILE--
 <?php
 
@@ -8,7 +8,7 @@ $uri = Uri\Rfc3986\Uri::parse("https://example.com");
 try {
     $uri->withQuery("#foo");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

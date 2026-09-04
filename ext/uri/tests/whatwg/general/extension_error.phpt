@@ -1,5 +1,5 @@
 --TEST--
-Test extension of Uri\WhatWg\Url
+Test Uri\WhatWg\Url extension - error
 --FILE--
 <?php
 

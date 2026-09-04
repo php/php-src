@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - forbidden domain code point
+Test Uri\WhatWg\Url::withHost() - error - at sign in special host input
 --FILE--
 <?php
 
@@ -8,7 +8,7 @@ $url = Uri\WhatWg\Url::parse("https://example.com");
 try {
     $url = $url->withHost("ex@mple.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

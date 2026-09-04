@@ -1,5 +1,5 @@
 --TEST--
-Test extension of Uri\Rfc3986\Uri
+Test Uri\Rfc3986\Uri extension - error
 --FILE--
 <?php
 

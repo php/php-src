@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri reference resolution - resolve() - relative reference
+Test Uri\Rfc3986\Uri::resolve() - success - relative reference
 --FILE--
 <?php
 

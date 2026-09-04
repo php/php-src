@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url reference resolution - resolve() - relative reference
+Test Uri\WhatWg\Url::resolve() - success - relative-URL
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url equivalence - returns true - identical URIs
+Test Uri\WhatWg\Url equivalence - returns true - identical URLs
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - basic - parse() returns null for an emoji relative reference
+Test Uri\WhatWg\Url parsing - basic - parse() returns null for an emoji relative-URL
 --FILE--
 <?php
 

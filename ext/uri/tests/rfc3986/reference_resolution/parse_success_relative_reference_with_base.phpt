@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri reference resolution - parse() - relative reference with base URI
+Test Uri\Rfc3986\Uri::parse() - success - relative reference with base URI
 --FILE--
 <?php
 

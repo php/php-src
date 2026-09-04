@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - path - without leading slash
+Test Uri\WhatWg\Url::withPath() - success - without leading slash
 --FILE--
 <?php
 

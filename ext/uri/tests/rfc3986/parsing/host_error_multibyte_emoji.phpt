@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri parsing - host - emoji code point
+Test Uri\Rfc3986\Uri parsing - host - emoji character
 --FILE--
 <?php
 

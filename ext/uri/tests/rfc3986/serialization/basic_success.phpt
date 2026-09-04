@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri serialization and unserialization
+Test Uri\Rfc3986\Uri serialization and unserialization - success
 --FILE--
 <?php
 

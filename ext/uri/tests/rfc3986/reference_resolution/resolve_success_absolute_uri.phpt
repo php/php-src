@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri reference resolution - resolve() - absolute URI
+Test Uri\Rfc3986\Uri::resolve() - success - absolute URI
 --FILE--
 <?php
 

@@ -1,12 +1,12 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - path - relative reference
+Test Uri\WhatWg\Url parsing - path - relative-URL
 --FILE--
 <?php
 
 try {
     new Uri\WhatWg\Url("/foo");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-Test casting Uri\Rfc3986\Uri to array
+Test Uri\Rfc3986\Uri array cast - success
 --FILE--
 <?php
 

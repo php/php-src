@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - unsetting with userinfo
+Test Uri\Rfc3986\Uri::withHost() - error - unsetting with userinfo
 --FILE--
 <?php
 

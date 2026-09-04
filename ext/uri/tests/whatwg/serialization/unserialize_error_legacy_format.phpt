@@ -1,5 +1,5 @@
 --TEST--
-GH-22046: Uri\WhatWg\Url cannot be unserialized with the unsupported C format
+Test Uri\WhatWg\Url unserialize() - error - unsupported C format
 --FILE--
 <?php
 

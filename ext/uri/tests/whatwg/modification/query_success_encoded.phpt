@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - query - URL encoded characters
+Test Uri\WhatWg\Url::withQuery() - success - percent-encoded characters
 --FILE--
 <?php
 

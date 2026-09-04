@@ -1,5 +1,5 @@
 --TEST--
-Test the handling of large ports for the uri struct
+Test zend_test_uri_parser() - success - large RFC 3986 port
 --EXTENSIONS--
 zend_test
 --FILE--
