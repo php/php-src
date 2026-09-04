@@ -119,7 +119,6 @@ static sapi_module_struct fuzzer_module = {
 	register_variables,  /* register server variables */
 	log_message,         /* Log message */
 	NULL,                          /* Get request time */
-	NULL,                          /* Child terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
