@@ -9,6 +9,8 @@ $invalidValues = [
     'empty string' => ['', 'string'],
     'whitespace string' => [' ', 'string'],
     'non-numeric string' => ['not numeric', 'string'],
+    'INF string' => ['INF', 'string'],
+    'NAN string' => ['NAN', 'string'],
     'empty array' => [[], 'array'],
     'non-empty array' => [[1], 'array'],
     'object' => [new stdClass(), 'stdClass'],
@@ -23,7 +25,7 @@ foreach ($formats as $format) {
             pack($format, $value);
             echo "accepted\n";
         } catch (Throwable $e) {
-            $expected = "pack(): Argument #2 must be of type float, $type given";
+            $expected = "pack(): Argument #2 must be of type float for format code '$format', $type given";
             var_dump($e instanceof TypeError && $e->getMessage() === $expected);
         }
     }
@@ -38,25 +40,26 @@ foreach ($formats as $format) {
         pack($format, $reference);
         echo "accepted\n";
     } catch (Throwable $e) {
-        $expected = 'pack(): Argument #2 must be of type float, array given';
+        $expected = "pack(): Argument #2 must be of type float for format code '$format', array given";
         var_dump($e instanceof TypeError && $e->getMessage() === $expected);
     }
 }
 
 echo "argument numbers:\n";
 $cases = [
-    ['f2', [1.0, []], 3],
-    ['d*', [1.0, []], 3],
-    ['C2g', [1, 2, []], 4],
-    ['f2d2', [1.0, 2.0, 3.0, []], 5],
+    ['f2', [1.0, []], 3, 'f'],
+    ['d*', [1.0, []], 3, 'd'],
+    ['C2g', [1, 2, []], 4, 'g'],
+    ['f2d2', [1.0, 2.0, 3.0, []], 5, 'd'],
 ];
-foreach ($cases as [$format, $arguments, $argumentNumber]) {
+foreach ($cases as [$format, $arguments, $argumentNumber, $valueFormat]) {
     echo "$format: ";
     try {
         pack($format, ...$arguments);
         echo "accepted\n";
     } catch (Throwable $e) {
-        $expected = "pack(): Argument #$argumentNumber must be of type float, array given";
+        $expected = "pack(): Argument #$argumentNumber must be of type float "
+            . "for format code '$valueFormat', array given";
         var_dump($e instanceof TypeError && $e->getMessage() === $expected);
     }
 }
@@ -82,6 +85,8 @@ f:
 empty string: bool(true)
 whitespace string: bool(true)
 non-numeric string: bool(true)
+INF string: bool(true)
+NAN string: bool(true)
 empty array: bool(true)
 non-empty array: bool(true)
 object: bool(true)
@@ -90,6 +95,8 @@ g:
 empty string: bool(true)
 whitespace string: bool(true)
 non-numeric string: bool(true)
+INF string: bool(true)
+NAN string: bool(true)
 empty array: bool(true)
 non-empty array: bool(true)
 object: bool(true)
@@ -98,6 +105,8 @@ G:
 empty string: bool(true)
 whitespace string: bool(true)
 non-numeric string: bool(true)
+INF string: bool(true)
+NAN string: bool(true)
 empty array: bool(true)
 non-empty array: bool(true)
 object: bool(true)
@@ -106,6 +115,8 @@ d:
 empty string: bool(true)
 whitespace string: bool(true)
 non-numeric string: bool(true)
+INF string: bool(true)
+NAN string: bool(true)
 empty array: bool(true)
 non-empty array: bool(true)
 object: bool(true)
@@ -114,6 +125,8 @@ e:
 empty string: bool(true)
 whitespace string: bool(true)
 non-numeric string: bool(true)
+INF string: bool(true)
+NAN string: bool(true)
 empty array: bool(true)
 non-empty array: bool(true)
 object: bool(true)
@@ -122,6 +135,8 @@ E:
 empty string: bool(true)
 whitespace string: bool(true)
 non-numeric string: bool(true)
+INF string: bool(true)
+NAN string: bool(true)
 empty array: bool(true)
 non-empty array: bool(true)
 object: bool(true)

@@ -1058,6 +1058,11 @@ try_again:
 }
 /* }}} */
 
+/*
+ * Strings use zval_try_get_long() numeric-string semantics. If *failed is true,
+ * the return value must not be used and an exception may be pending. The input
+ * must not be IS_UNDEF.
+ */
 ZEND_API double ZEND_FASTCALL zval_try_get_double_func(const zval *op, bool *failed)
 {
 	*failed = false;
@@ -1079,7 +1084,6 @@ try_again:
 				double dval;
 				bool trailing_data = false;
 
-				/* For BC reasons we allow errors so that we can warn on leading numeric string */
 				type = is_numeric_string_ex(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval,
 					/* allow errors */ true, NULL, &trailing_data);
 				if (type == 0) {

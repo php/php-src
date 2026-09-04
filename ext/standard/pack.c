@@ -56,14 +56,18 @@ typedef ZEND_SET_ALIGNED(1, int unaligned_int);
 
 /* {{{ php_pack */
 static bool php_pack(
-	const zval *val, uint32_t arg_num, size_t size, php_pack_endianness endianness, char *output
+	const zval *val, uint32_t arg_num, char format_code, size_t size,
+	php_pack_endianness endianness, char *output
 )
 {
 	bool failed;
 	zend_ulong zl = zval_try_get_long(val, &failed);
 
 	if (UNEXPECTED(failed)) {
-		zend_argument_type_error(arg_num, "must be of type int, %s given", zend_zval_value_name(val));
+		zend_argument_type_error(
+			arg_num, "must be of type int for format code '%c', %s given",
+			format_code, zend_zval_value_name(val)
+		);
 		return false;
 	}
 
@@ -83,13 +87,18 @@ static bool php_pack(
 }
 /* }}} */
 
-static bool php_pack_try_get_double(const zval *value, uint32_t arg_num, double *result)
+static bool php_pack_try_get_double(
+	const zval *value, uint32_t arg_num, char format_code, double *result
+)
 {
 	bool failed;
 
 	*result = zval_try_get_double(value, &failed);
 	if (UNEXPECTED(failed)) {
-		zend_argument_type_error(arg_num, "must be of type float, %s given", zend_zval_value_name(value));
+		zend_argument_type_error(
+			arg_num, "must be of type float for format code '%c', %s given",
+			format_code, zend_zval_value_name(value)
+		);
 		return false;
 	}
 
@@ -233,6 +242,7 @@ PHP_FUNCTION(pack)
 	size_t formatcount = 0;
 	int outputpos = 0, outputsize = 0;
 	zend_string *output;
+	bool conversion_failed = false;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_STRING(format, formatlen)
@@ -636,10 +646,12 @@ too_few_args:
 			case 'c':
 			case 'C':
 				while (arg-- > 0) {
+					uint32_t arg_num = currentarg + 2;
 					if (!php_pack(
-						&argv[currentarg], currentarg + 2, 1, PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]
+						&argv[currentarg], arg_num, code, 1, PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]
 					)) {
-						goto conversion_failed;
+						conversion_failed = true;
+						goto cleanup;
 					}
 					currentarg++;
 					outputpos++;
@@ -663,10 +675,12 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
+					uint32_t arg_num = currentarg + 2;
 					if (!php_pack(
-						&argv[currentarg], currentarg + 2, 2, endianness, &ZSTR_VAL(output)[outputpos]
+						&argv[currentarg], arg_num, code, 2, endianness, &ZSTR_VAL(output)[outputpos]
 					)) {
-						goto conversion_failed;
+						conversion_failed = true;
+						goto cleanup;
 					}
 					currentarg++;
 					outputpos += 2;
@@ -677,10 +691,13 @@ too_few_args:
 			case 'i':
 			case 'I':
 				while (arg-- > 0) {
+					uint32_t arg_num = currentarg + 2;
 					if (!php_pack(
-						&argv[currentarg], currentarg + 2, sizeof(int), PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]
+						&argv[currentarg], arg_num, code, sizeof(int), PHP_MACHINE_ENDIAN,
+						&ZSTR_VAL(output)[outputpos]
 					)) {
-						goto conversion_failed;
+						conversion_failed = true;
+						goto cleanup;
 					}
 					currentarg++;
 					outputpos += sizeof(int);
@@ -704,10 +721,12 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
+					uint32_t arg_num = currentarg + 2;
 					if (!php_pack(
-						&argv[currentarg], currentarg + 2, 4, endianness, &ZSTR_VAL(output)[outputpos]
+						&argv[currentarg], arg_num, code, 4, endianness, &ZSTR_VAL(output)[outputpos]
 					)) {
-						goto conversion_failed;
+						conversion_failed = true;
+						goto cleanup;
 					}
 					currentarg++;
 					outputpos += 4;
@@ -733,10 +752,12 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
+					uint32_t arg_num = currentarg + 2;
 					if (!php_pack(
-						&argv[currentarg], currentarg + 2, 8, endianness, &ZSTR_VAL(output)[outputpos]
+						&argv[currentarg], arg_num, code, 8, endianness, &ZSTR_VAL(output)[outputpos]
 					)) {
-						goto conversion_failed;
+						conversion_failed = true;
+						goto cleanup;
 					}
 					currentarg++;
 					outputpos += 8;
@@ -751,8 +772,10 @@ too_few_args:
 				while (arg-- > 0) {
 					double d;
 					float v;
-					if (!php_pack_try_get_double(&argv[currentarg], currentarg + 2, &d)) {
-						goto conversion_failed;
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack_try_get_double(&argv[currentarg], arg_num, code, &d)) {
+						conversion_failed = true;
+						goto cleanup;
 					}
 					currentarg++;
 					v = (float) d;
@@ -773,8 +796,10 @@ too_few_args:
 			case 'E': {
 				while (arg-- > 0) {
 					double v;
-					if (!php_pack_try_get_double(&argv[currentarg], currentarg + 2, &v)) {
-						goto conversion_failed;
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack_try_get_double(&argv[currentarg], arg_num, code, &v)) {
+						conversion_failed = true;
+						goto cleanup;
 					}
 					currentarg++;
 					if (code == 'e' || formatendian[i] == PHP_LITTLE_ENDIAN) {
@@ -811,19 +836,18 @@ too_few_args:
 		}
 	}
 
-	efree(formatcodes);
-	efree(formatargs);
-	efree(formatendian);
 	ZSTR_VAL(output)[outputpos] = '\0';
 	ZSTR_LEN(output) = outputpos;
-	RETURN_NEW_STR(output);
 
-conversion_failed:
-	zend_string_release(output);
+cleanup:
 	efree(formatcodes);
 	efree(formatargs);
 	efree(formatendian);
-	RETURN_THROWS();
+	if (UNEXPECTED(conversion_failed)) {
+		zend_string_release(output);
+		RETURN_THROWS();
+	}
+	RETURN_NEW_STR(output);
 }
 /* }}} */
 

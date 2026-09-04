@@ -15,7 +15,7 @@ foreach ($formats as $format) {
         echo "Unexpectedly accepted an array for $format\n";
         $passed = false;
     } catch (Throwable $e) {
-        $expected = 'pack(): Argument #2 must be of type int, array given';
+        $expected = "pack(): Argument #2 must be of type int for format code '$format', array given";
         if (!$e instanceof TypeError || $e->getMessage() !== $expected) {
             echo "Unexpected exception for $format: ", $e::class, ': ', $e->getMessage(), "\n";
             $passed = false;
@@ -43,7 +43,7 @@ foreach ($invalidValues as $name => [$value, $type]) {
         echo "Unexpectedly accepted $name\n";
         $passed = false;
     } catch (Throwable $e) {
-        $expected = "pack(): Argument #2 must be of type int, $type given";
+        $expected = "pack(): Argument #2 must be of type int for format code 'i', $type given";
         if (!$e instanceof TypeError || $e->getMessage() !== $expected) {
             echo "Unexpected exception for $name: ", $e::class, ': ', $e->getMessage(), "\n";
             $passed = false;
@@ -62,7 +62,7 @@ foreach ($formats as $format) {
         echo "Unexpectedly accepted an invalid reference for $format\n";
         $passed = false;
     } catch (Throwable $e) {
-        $expected = 'pack(): Argument #2 must be of type int, array given';
+        $expected = "pack(): Argument #2 must be of type int for format code '$format', array given";
         if (!$e instanceof TypeError || $e->getMessage() !== $expected) {
             echo "Unexpected exception for $format/reference: ", $e::class, ': ', $e->getMessage(), "\n";
             $passed = false;
@@ -74,18 +74,18 @@ var_dump($passed);
 
 $passed = true;
 $cases = [
-    ['i2', [1, []], 3],
-    ['i*', [1, []], 3],
-    ['C2i', [1, 2, []], 4],
-    ['i2l2', [1, 2, 3, []], 5],
+    ['i2', [1, []], 3, 'i'],
+    ['i*', [1, []], 3, 'i'],
+    ['C2i', [1, 2, []], 4, 'i'],
+    ['i2l2', [1, 2, 3, []], 5, 'l'],
 ];
-foreach ($cases as [$format, $arguments, $argumentNumber]) {
+foreach ($cases as [$format, $arguments, $argumentNumber, $valueFormat]) {
     try {
         pack($format, ...$arguments);
         echo "Unexpectedly accepted an invalid argument for $format\n";
         $passed = false;
     } catch (Throwable $e) {
-        $expected = "pack(): Argument #$argumentNumber must be of type int, array given";
+        $expected = "pack(): Argument #$argumentNumber must be of type int for format code '$valueFormat', array given";
         if (!$e instanceof TypeError || $e->getMessage() !== $expected) {
             echo "Unexpected exception for $format: ", $e::class, ': ', $e->getMessage(), "\n";
             $passed = false;

@@ -35,18 +35,26 @@ foreach ($formats as $format) {
     var_dump($actual === 1.5);
 }
 
-echo "trailing data:\n";
+echo "special float values:\n";
 foreach ($formats as $format) {
-    $warning = null;
-    set_error_handler(static function (int $errno, string $errstr) use (&$warning): bool {
-        $warning = $errstr;
+    $infinity = unpack($format, pack($format, INF))[1];
+    $nan = unpack($format, pack($format, NAN))[1];
+    echo "$format: ";
+    var_dump($infinity === INF && is_nan($nan));
+}
+
+echo "leading-numeric strings:\n";
+foreach ($formats as $format) {
+    $diagnostic = null;
+    set_error_handler(static function (int $errno, string $errstr) use (&$diagnostic): bool {
+        $diagnostic = [$errno, $errstr];
         return true;
     });
     $actual = unpack($format, pack($format, '42 with trailing data'))[1];
     restore_error_handler();
 
-    echo "$format: $warning; ";
-    var_dump($actual === 42.0);
+    echo "$format: ";
+    var_dump($diagnostic === [E_WARNING, 'A non-numeric value encountered'] && $actual === 42.0);
 }
 
 ?>
@@ -124,10 +132,17 @@ G: bool(true)
 d: bool(true)
 e: bool(true)
 E: bool(true)
-trailing data:
-f: A non-numeric value encountered; bool(true)
-g: A non-numeric value encountered; bool(true)
-G: A non-numeric value encountered; bool(true)
-d: A non-numeric value encountered; bool(true)
-e: A non-numeric value encountered; bool(true)
-E: A non-numeric value encountered; bool(true)
+special float values:
+f: bool(true)
+g: bool(true)
+G: bool(true)
+d: bool(true)
+e: bool(true)
+E: bool(true)
+leading-numeric strings:
+f: bool(true)
+g: bool(true)
+G: bool(true)
+d: bool(true)
+e: bool(true)
+E: bool(true)
