@@ -14,8 +14,8 @@ $file = __DIR__ . '/imagejpeg_quality_range.jpeg';
 foreach ([-2, -1, 0, 100, 101] as $quality) {
     try {
         var_dump(imagejpeg($image, $file, $quality));
-    } catch (ValueError $e) {
-        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
