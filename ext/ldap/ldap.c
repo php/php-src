@@ -3787,8 +3787,15 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 	bool deleteoldrdn;
 	HashTable *server_controls_ht = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opppb|h!", &link, ldap_link_ce, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &server_controls_ht) != SUCCESS) {
-		RETURN_THROWS();
+	if (ZEND_IS_METHOD_CALL()) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "pppb|h!", &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &server_controls_ht) != SUCCESS) {
+			RETURN_THROWS();
+		}
+		link = ZEND_THIS;
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Opppb|h!", &link, ldap_link_ce, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &server_controls_ht) != SUCCESS) {
+			RETURN_THROWS();
+		}
 	}
 
 	ld = Z_LDAP_LINK_P(link);
@@ -3830,12 +3837,20 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 #endif
 
 	if (rc != LDAP_SUCCESS) {
-		RETVAL_FALSE;
+		if (ZEND_IS_METHOD_CALL()) {
+			zend_throw_exception_ex(ldap_exception_ce, rc, "Rename: %s", ldap_err2string(rc));
+		} else {
+			RETVAL_FALSE;
+		}
 	} else if (ext) {
 		rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 		if (rc == -1) {
-			php_error_docref(NULL, E_WARNING, "Rename operation failed");
-			RETVAL_FALSE;
+			if (ZEND_IS_METHOD_CALL()) {
+				zend_throw_exception_ex(ldap_exception_ce, rc, "Rename operation failed");
+			} else {
+				php_error_docref(NULL, E_WARNING, "Rename operation failed");
+				RETVAL_FALSE;
+			}
 			goto cleanup;
 		}
 
@@ -3864,6 +3879,11 @@ PHP_FUNCTION(ldap_rename)
 /* }}} */
 
 /* {{{ Modify the name of an entry */
+PHP_METHOD(LDAP_Connection, rename)
+{
+	php_ldap_do_rename(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
 PHP_FUNCTION(ldap_rename_ext)
 {
 	php_ldap_do_rename(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
