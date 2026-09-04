@@ -154,6 +154,7 @@ static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *n
 
 	/* Typed property, so it is a string already */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+	php_libxml_invalidate_node_list_cache(obj->document);
 	return xmlSetNsProp(nodep, NULL, (const xmlChar *) name, (const xmlChar *) Z_STRVAL_P(newval));
 }
 
@@ -542,7 +543,7 @@ out:
 	efree(worklist);
 }
 
-static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
+static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp, php_libxml_ref_obj *document)
 {
 	ZEND_ASSERT(thisp != NULL);
 	ZEND_ASSERT(attrp != NULL);
@@ -597,6 +598,7 @@ static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
 			return false;
 		default: ZEND_UNREACHABLE();
 	}
+	php_libxml_invalidate_node_list_cache(document);
 	return true;
 }
 
@@ -622,7 +624,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(dom_remove_attribute(nodep, attrp));
+	RETURN_BOOL(dom_remove_attribute(nodep, attrp, intern->document));
 }
 
 PHP_METHOD(Dom_Element, removeAttribute)
@@ -640,7 +642,7 @@ PHP_METHOD(Dom_Element, removeAttribute)
 
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp != NULL) {
-		dom_remove_attribute(nodep, attrp);
+		dom_remove_attribute(nodep, attrp, intern->document);
 	}
 }
 /* }}} end dom_element_remove_attribute */
@@ -798,6 +800,7 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 		RETURN_FALSE;
 	}
 
+	php_libxml_invalidate_node_list_cache(intern->document);
 	xmlUnlinkNode((xmlNodePtr) attrp);
 
 	DOM_RET_OBJ((xmlNodePtr) attrp, intern);
@@ -1198,6 +1201,7 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 		if (nsptr != NULL) {
 			if (xmlStrEqual(BAD_CAST uri, nsptr->href)) {
 				dom_eliminate_ns(nodep, nsptr);
+				php_libxml_invalidate_node_list_cache(intern->document);
 			} else {
 				return;
 			}
@@ -1212,6 +1216,7 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 		} else {
 			xmlUnlinkNode((xmlNodePtr) attrp);
 		}
+		php_libxml_invalidate_node_list_cache(intern->document);
 	}
 }
 /* }}} end dom_element_remove_attribute_ns */
@@ -1947,7 +1952,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 
 	/* Step 5 */
 	if (force_is_null || !force) {
-		retval = !dom_remove_attribute(thisp, attribute);
+		retval = !dom_remove_attribute(thisp, attribute, intern->document);
 		goto out;
 	}
 

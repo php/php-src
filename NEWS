@@ -6,13 +6,43 @@ PHP                                                                        NEWS
   . Fixed bug GH-23242 (PHP development server does not support Expect
     100-continue flow control). (Sjoerd Langkemper)
 
+- DOM:
+  . Fixed NamedNodeMap::getNamedItemNS() with an empty URI not matching
+    the null namespace in spec-following mode. (Ilia Alshanetsky)
+  . Fixed stale getElementsByClassName() and other node list caches after
+    className/classList writes and attribute removals. (Ilia Alshanetsky)
+
+- Hash:
+  . Fixed hash_file() reporting argument #1 ($algo) instead of argument #2
+    ($filename) when the filename contains null bytes. (lacatoire)
+
 - Intl:
+  . Fixed grapheme_strpos() and grapheme_strrpos() with an empty needle
+    returning UTF-16 offsets instead of grapheme offsets. (Ilia Alshanetsky)
+  . Fixed a memory leak when dumping IntlCalendar instances. (Ilia Alshanetsky)
+  . Fixed Collator::sortWithSortKeys() allocating fixed 2MiB buffers
+    regardless of array size. (Ilia Alshanetsky)
   . Fixed a memory leak when iterating IntlBreakIterator::getPartsIterator()
     results. (iliaal)
   . Fixed a leak in Locale::getKeywords() when a keyword value cannot be
     read. (iliaal)
   . Fixed a use-after-free when IntlRuleBasedBreakIterator is constructed
     from compiled rules. (iliaal)
+  . Fixed Spoofchecker methods not recording the ICU error code when an ICU
+    call fails. (Ilia Alshanetsky)
+  . Fixed idn_to_ascii() and idn_to_utf8() reporting argument #2 ($flags)
+    instead of argument #3 ($variant) for an invalid IDNA variant, and the
+    domain length error message printing a literal "d" instead of the limit.
+    (lacatoire)
+
+- MBString:
+  . Fixed mb_ereg_replace() emitting a NUL or out-of-bounds bytes in the
+    replacement when a \k<name> backref has no closing delimiter.
+    (Ilia Alshanetsky)
+
+- PCNTL:
+  . Fixed the declared signature of pcntl_signal(), whose $restart_syscalls
+    argument accepts null and defaults to it. (lacatoire)
 
 - PDO_PGSQL:
   . Added Pdo\Pgsql::ATTR_CHUNK_SIZE to fetch a result set in chunks of the
@@ -28,6 +58,15 @@ PHP                                                                        NEWS
   . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
     (Weilin Du)
 
+- Sockets:
+  . Fixed socket_set_option() with SO_ATTACH_REUSEPORT_CBPF and a zero value,
+    which detached the classic BPF filter instead of the reuseport program.
+    (David Carlier)
+
+- SOAP:
+  . Fixed WSDL cache corruption when a soap:header defines headerfaults.
+    (Ilia Alshanetsky)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
@@ -38,6 +77,10 @@ PHP                                                                        NEWS
     INT_MAX instead of truncating it. (marc-mabe)
   . Improved performance of array_chunk() when not preserving keys.
     (mehmetcansahin)
+
+- SimpleXML:
+  . Fixed writing to a dimension of the object returned by attributes() not
+    creating the attribute. (Ilia Alshanetsky)
 
 
 27 Aug 2026, PHP 8.6.0beta2
@@ -139,7 +182,7 @@ PHP                                                                        NEWS
   . It is now possible to use the AES192, AES192C, AES256, and AES256C as
     SNMPv3 security protocols if the underlying library supports them.
     (eskyuu)
-  . It is now possible to reset the MIB tree using the new snmp_read_mib()
+  . It is now possible to reset the MIB tree using the new snmp_init_mib()
     function. (eskyuu)
   . Additional MIB parsing and output control functionality has been exposed
     via the snmp_set_mib_option(), snmp_set_output_option(),
@@ -622,6 +665,8 @@ PHP                                                                        NEWS
   . Deprecate returning values from __construct() and __destruct(). (timwolla)
   . base_convert, bindex, hexdec and octdec now raise a notice when they cannot
     precisely convert the given number. (Sjoerd Langkemper)
+  . Added error_include_args INI option to make the display of function
+    arguments consistent in error output. (Calvin Buckley)
 
 - BCMath:
   . Added NUL-byte validation to BCMath functions. (jorgsowa)

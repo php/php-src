@@ -1841,6 +1841,20 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 /* Huge Runs (again) */
 /*********************/
 
+/* Huge block metadata is allocated from the very heap it describes, so a heap
+ * overflow can reach it. size ends up as a munmap() length, where a corrupted
+ * value would unmap unrelated mappings, so bound it before use: a live block is
+ * page aligned and is still accounted for in real_size. */
+static zend_always_inline void zend_mm_check_huge_block_size(const zend_mm_heap *heap, size_t size)
+{
+	ZEND_MM_CHECK(size != 0 && ZEND_MM_ALIGNED_OFFSET(size, REAL_PAGE_SIZE) == 0, "zend_mm_heap corrupted");
+#if ZEND_MM_STAT || ZEND_MM_LIMIT
+	ZEND_MM_CHECK(size <= heap->real_size, "zend_mm_heap corrupted");
+#else
+	(void)heap;
+#endif
+}
+
 #if ZEND_DEBUG
 static void zend_mm_add_huge_block(zend_mm_heap *heap, void *ptr, size_t size, size_t dbg_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #else
@@ -1890,6 +1904,7 @@ static size_t zend_mm_get_huge_block_size(zend_mm_heap *heap, void *ptr ZEND_FIL
 	zend_mm_huge_list *list = heap->huge_list;
 	while (list != NULL) {
 		if (list->ptr == ptr) {
+			zend_mm_check_huge_block_size(heap, list->size);
 			return list->size;
 		}
 		list = list->next;
@@ -2000,6 +2015,7 @@ static void zend_mm_free_huge(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZE
 
 	ZEND_MM_CHECK(ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE) == 0, "zend_mm_heap corrupted");
 	size = zend_mm_del_huge_block(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	zend_mm_check_huge_block_size(heap, size);
 	zend_mm_chunk_free(heap, ptr, size);
 #if ZEND_MM_STAT || ZEND_MM_LIMIT
 	heap->real_size -= size;
@@ -2492,6 +2508,7 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 	while (list) {
 		zend_mm_huge_list *q = list;
 		list = list->next;
+		zend_mm_check_huge_block_size(heap, q->size);
 		zend_mm_chunk_free(heap, q->ptr, q->size);
 	}
 

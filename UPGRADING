@@ -133,7 +133,7 @@ PHP 8.6 UPGRADE NOTES
     unchanged. Previously, NUL bytes were silently accepted: for cookie_path
     and cookie_domain this caused the SAPI to drop the Set-Cookie header; for
     cache_limiter the value was silently truncated at the NUL byte.
-  . A ValueError is not thrown if $name is a string containing NUL bytes in
+  . A ValueError is thrown if $name is a string containing NUL bytes in
     session_module_name().
   . session_encode() now returns an empty string instead of false for empty
     sessions. It only returns false now when the session data could not be
@@ -198,6 +198,16 @@ PHP 8.6 UPGRADE NOTES
     the error message instead of the generic "Encoding: Violation of encoding
     rules" message. Code that compares the exact message may need to be
     updated.
+
+- Sockets:
+  . socket_set_option() with SO_ATTACH_REUSEPORT_CBPF now requires an int
+    $value and a $level of SOL_SOCKET. Any other value type throws a TypeError
+    instead of being coerced, and any other level raises a warning and returns
+    false.
+  . socket_set_option() with SO_ATTACH_REUSEPORT_CBPF and a $value of 0 now
+    detaches the reuseport filter through SO_DETACH_REUSEPORT_BPF. It
+    previously used SO_DETACH_BPF, an alias of SO_DETACH_FILTER, which left the
+    reuseport program attached.
 
 - Sodium:
   . The password-hashing functions sodium_crypto_pwhash(),
@@ -309,6 +319,9 @@ PHP 8.6 UPGRADE NOTES
     when the "remove_all_path" option is not of type bool, or when the
     "comp_method", "comp_flags", or "enc_method" options are not of type int
     (numeric strings are coerced), instead of emitting a warning.
+  . Serializing or unserializing a ZipArchive now throws an Exception. A
+    subclass can override __serialize() and __unserialize() to round-trip
+    through ZipArchive::closeString() and ZipArchive::openString().
 
 - Zlib:
   . deflate_init() now raises a TypeError when the value for option "level",
@@ -484,10 +497,10 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
   . Added Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType().
     RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
-  . Added Uri\Rfc3986\UriBuilder.
+  . Added Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder.
     RFC: https://wiki.php.net/rfc/uri_followup#uri_building
-  . Added Uri\WhatWg\UrlBuilder.
-    RFC: https://wiki.php.net/rfc/uri_followup#uri_building
+  . Added Uri\url_percent_encode().
+    RFC: https://wiki.php.net/rfc/uri_followup#percent-encoding_support
 
 ========================================
 3. Changes in SAPI modules
@@ -629,6 +642,12 @@ PHP 8.6 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Filter:
+  . filter_var_array() return type has been narrowed from array|false|null to
+    array|false. The function always establishes an array before filtering, so
+    null was never returned. filter_input_array() is unaffected: it still
+    returns null when the requested superglobal does not exist.
+
 - GMP:
   . gmp_fact() now throws a ValueError if $num does not fit into an unsigned
     long.
@@ -638,6 +657,10 @@ PHP 8.6 UPGRADE NOTES
     throw a ValueError if the right operand does not fit into an unsigned long.
   . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
     includes the function name and argument index ($modulus).
+
+- LDAP:
+  . ldap_free_result() return type has been narrowed from bool to true. The
+    function already always returned true.
 
 - MySQLi:
   . The return structure of mysqli_get_charset() no longer contains the
@@ -800,7 +823,7 @@ PHP 8.6 UPGRADE NOTES
   . StreamPollHandle
 
 - URI:
-  . Uri\Rfc3986\UriBuilder
+  . Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder
     RFC: https://wiki.php.net/rfc/uri_followup#uri_building
 
 ========================================
@@ -860,6 +883,29 @@ PHP 8.6 UPGRADE NOTES
   . EAI_ALLDONE.
   . EAI_INTR.
   . EAI_IDN_ENCODE.
+  . SO_DETACH_REUSEPORT_BPF (Linux only).
+
+- Sodium:
+  . SODIUM_CRYPTO_IPCRYPT_BYTES.
+  . SODIUM_CRYPTO_IPCRYPT_KEYBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_ND_KEYBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_ND_TWEAKBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_ND_INPUTBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_ND_OUTPUTBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_NDX_KEYBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_NDX_TWEAKBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_NDX_INPUTBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_NDX_OUTPUTBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_PFX_KEYBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_PFX_BYTES.
+  . SODIUM_CRYPTO_XOF_SHAKE128_BLOCKBYTES.
+  . SODIUM_CRYPTO_XOF_SHAKE128_STATEBYTES.
+  . SODIUM_CRYPTO_XOF_SHAKE256_BLOCKBYTES.
+  . SODIUM_CRYPTO_XOF_SHAKE256_STATEBYTES.
+  . SODIUM_CRYPTO_XOF_TURBOSHAKE128_BLOCKBYTES.
+  . SODIUM_CRYPTO_XOF_TURBOSHAKE128_STATEBYTES.
+  . SODIUM_CRYPTO_XOF_TURBOSHAKE256_BLOCKBYTES.
+  . SODIUM_CRYPTO_XOF_TURBOSHAKE256_STATEBYTES.
 
 - Standard:
   . ARRAY_FILTER_USE_VALUE.
@@ -870,6 +916,15 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- Core:
+  . The error_include_args INI option has been added to make the display of
+    function arguments consistent in errors; it is off by default. Previously,
+    some functions shown a parameter in the error that was up to each call to
+    the internal error function. Now, all parameters as were actually passed to
+    the function will be displayed. This uses the same infrastructure as stack
+    traces, so i.e. sensitive parameters will not be displayed, and strings
+    will be truncated according to zend.exception_string_param_max_len.
 
 - Mbstring:
   . The mbstring.detect_order INI directive now updates the internal detection
@@ -940,6 +995,9 @@ PHP 8.6 UPGRADE NOTES
   . Made splitText() faster and consume less memory.
 
 - GD:
+  . imagebmp(), imagewbmp(), imagegd(), and imagegd2() now buffer output when
+    writing to PHP streams, significantly improving performance when writing
+    images to files.
   . Improved performance of imagegrabscreen() and imagegrabwindow() on
     Windows.
 
@@ -960,6 +1018,7 @@ PHP 8.6 UPGRADE NOTES
 
 - Standard:
   . Improved performance of array_chunk() when not preserving keys.
+  . Improved performance of sorting single-element arrays.
   . Improved performance of array_fill_keys().
   . Improved performance of array_intersect().
   . Improved performance of array_map() with multiple arrays passed.
