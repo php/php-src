@@ -1485,7 +1485,7 @@ PHP_FUNCTION(fpow)
 		Z_PARAM_DOUBLE(exponent)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(pow(base, exponent));
+	RETURN_DOUBLE(zend_pow(base, exponent));
 }
 /* }}} */
 

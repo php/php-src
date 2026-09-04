@@ -1347,7 +1347,7 @@ static double safe_pow(double base, double exponent)
 		zend_power_base_0_exponent_lt_0_error();
 	}
 
-	return pow(base, exponent);
+	return zend_pow(base, exponent);
 }
 
 static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
