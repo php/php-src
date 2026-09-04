@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 3082471b9217bbd18bdc8e3012ca0bd77ab2707e */
+ * Stub hash: ce8f92f3daaee6dd6069c0a2663fca8e36d56106 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -374,6 +374,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_LDAP_Connection_delete, 0, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_LDAP_Connection_rename, 0, 4, LDAP\\Result, 0)
+	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, new_rdn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, new_parent, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, delete_old_rdn, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
 #endif
@@ -469,6 +477,7 @@ ZEND_METHOD(LDAP_Connection, mod_add);
 ZEND_METHOD(LDAP_Connection, mod_del);
 ZEND_METHOD(LDAP_Connection, mod_replace);
 ZEND_METHOD(LDAP_Connection, delete);
+ZEND_METHOD(LDAP_Connection, rename);
 
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
@@ -573,6 +582,7 @@ static const zend_function_entry class_LDAP_Connection_methods[] = {
 	ZEND_ME(LDAP_Connection, mod_del, arginfo_class_LDAP_Connection_mod_del, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Connection, mod_replace, arginfo_class_LDAP_Connection_mod_replace, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Connection, delete, arginfo_class_LDAP_Connection_delete, ZEND_ACC_PUBLIC)
+	ZEND_ME(LDAP_Connection, rename, arginfo_class_LDAP_Connection_rename, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
