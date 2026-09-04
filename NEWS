@@ -112,6 +112,8 @@ PHP                                                                        NEWS
 - SAPI:
   . Fixed fuzzer targets failing to build in isolation. (Mrmaxmeier)
   . Fixed returns uninitialized value on LiteSpeed lsapi SAPI (Go Kudo)
+  . Fixed bug GH-23424 (sapi_lsapi_ub_write() returns str_length - ret
+    instead of ret when LSAPI_Write() short-writes). (Lazizbek Ergashev)
 
 27 Aug 2026, PHP 8.4.25
 
