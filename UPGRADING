@@ -429,6 +429,10 @@ PHP 8.6 UPGRADE NOTES
     max_early_data and receive it through the early_data_cb callback. The
     outcome is reported as 'accepted', 'rejected' or 'not_sent' in the
     early_data key of the crypto stream_get_meta_data() array.
+  . Added the $data_is_digest parameter to openssl_sign() and
+    openssl_verify(). When set to true, $data is treated as an
+    already-computed digest and is signed/verified directly instead of being
+    hashed again first.
 
 - PDO_PGSQL:
   . Added Pdo\Pgsql::ATTR_CHUNK_SIZE, the number of rows a statement fetches

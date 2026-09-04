@@ -4539,16 +4539,16 @@ PHP_FUNCTION(openssl_sign)
 	zend_string *sigbuf = NULL;
 	char * data;
 	size_t data_len;
-	EVP_MD_CTX *md_ctx;
 	zend_string *method_str = NULL;
 	zend_long method_long = OPENSSL_ALGO_SHA1;
 	const EVP_MD *mdtype;
 	zend_long padding = 0;
 	zend_long salt_length = RSA_PSS_SALTLEN_AUTO;
+	bool data_is_digest = 0;
 	EVP_PKEY_CTX *pctx;
 	bool can_default_digest = ZEND_THREEWAY_COMPARE(PHP_OPENSSL_API_VERSION, 0x30000) >= 0;
 
-	ZEND_PARSE_PARAMETERS_START(3, 6)
+	ZEND_PARSE_PARAMETERS_START(3, 7)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_ZVAL(signature)
 		Z_PARAM_ZVAL(key)
@@ -4556,6 +4556,7 @@ PHP_FUNCTION(openssl_sign)
 		Z_PARAM_STR_OR_LONG(method_str, method_long)
 		Z_PARAM_LONG(padding)
 		Z_PARAM_LONG(salt_length)
+		Z_PARAM_BOOL(data_is_digest)
 	ZEND_PARSE_PARAMETERS_END();
 
 	pkey = php_openssl_pkey_from_zval(key, 0, "", 0, 3);
@@ -4578,25 +4579,49 @@ PHP_FUNCTION(openssl_sign)
 	}
 	PHP_OPENSSL_CHECK_LONG_TO_INT(salt_length, salt_length, 6);
 
-	md_ctx = EVP_MD_CTX_create();
 	size_t siglen;
-	if (md_ctx != NULL &&
-			EVP_DigestSignInit(md_ctx, &pctx, mdtype, NULL, pkey) &&
-			php_openssl_setup_rsa_padding(pctx, pkey, padding) == SUCCESS &&
-			php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == SUCCESS &&
-			EVP_DigestSign(md_ctx, NULL, &siglen, (unsigned char*)data, data_len) &&
-			(sigbuf = zend_string_alloc(siglen, 0)) != NULL &&
-			EVP_DigestSign(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, (unsigned char*)data, data_len)) {
-		ZSTR_VAL(sigbuf)[siglen] = '\0';
-		ZSTR_LEN(sigbuf) = siglen;
-		ZEND_TRY_ASSIGN_REF_NEW_STR(signature, sigbuf);
-		RETVAL_TRUE;
+	if (data_is_digest) {
+		/* $data is already a digest: sign it directly with the low-level
+		 * EVP_PKEY_sign() API instead of hashing it again via EVP_DigestSign(). */
+		pctx = EVP_PKEY_CTX_new(pkey, NULL);
+		if (pctx != NULL &&
+				EVP_PKEY_sign_init(pctx) > 0 &&
+				(mdtype == NULL || EVP_PKEY_CTX_set_signature_md(pctx, mdtype) > 0) &&
+				php_openssl_setup_rsa_padding(pctx, pkey, padding) == SUCCESS &&
+				php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == SUCCESS &&
+				EVP_PKEY_sign(pctx, NULL, &siglen, (unsigned char *) data, data_len) > 0 &&
+				(sigbuf = zend_string_alloc(siglen, 0)) != NULL &&
+				EVP_PKEY_sign(pctx, (unsigned char *) ZSTR_VAL(sigbuf), &siglen, (unsigned char *) data, data_len) > 0) {
+			ZSTR_VAL(sigbuf)[siglen] = '\0';
+			ZSTR_LEN(sigbuf) = siglen;
+			ZEND_TRY_ASSIGN_REF_NEW_STR(signature, sigbuf);
+			RETVAL_TRUE;
+		} else {
+			php_openssl_store_errors();
+			efree(sigbuf);
+			RETVAL_FALSE;
+		}
+		EVP_PKEY_CTX_free(pctx);
 	} else {
-		php_openssl_store_errors();
-		efree(sigbuf);
-		RETVAL_FALSE;
+		EVP_MD_CTX *md_ctx = EVP_MD_CTX_create();
+		if (md_ctx != NULL &&
+				EVP_DigestSignInit(md_ctx, &pctx, mdtype, NULL, pkey) &&
+				php_openssl_setup_rsa_padding(pctx, pkey, padding) == SUCCESS &&
+				php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == SUCCESS &&
+				EVP_DigestSign(md_ctx, NULL, &siglen, (unsigned char*)data, data_len) &&
+				(sigbuf = zend_string_alloc(siglen, 0)) != NULL &&
+				EVP_DigestSign(md_ctx, (unsigned char*)ZSTR_VAL(sigbuf), &siglen, (unsigned char*)data, data_len)) {
+			ZSTR_VAL(sigbuf)[siglen] = '\0';
+			ZSTR_LEN(sigbuf) = siglen;
+			ZEND_TRY_ASSIGN_REF_NEW_STR(signature, sigbuf);
+			RETVAL_TRUE;
+		} else {
+			php_openssl_store_errors();
+			efree(sigbuf);
+			RETVAL_FALSE;
+		}
+		EVP_MD_CTX_destroy(md_ctx);
 	}
-	EVP_MD_CTX_destroy(md_ctx);
 	php_openssl_release_evp_md(mdtype);
 	EVP_PKEY_free(pkey);
 }
@@ -4608,7 +4633,6 @@ PHP_FUNCTION(openssl_verify)
 	zval *key;
 	EVP_PKEY *pkey;
 	int err = 0;
-	EVP_MD_CTX *md_ctx;
 	const EVP_MD *mdtype;
 	char * data;
 	size_t data_len;
@@ -4618,10 +4642,11 @@ PHP_FUNCTION(openssl_verify)
 	zend_long method_long = OPENSSL_ALGO_SHA1;
 	zend_long padding = 0;
 	zend_long salt_length = RSA_PSS_SALTLEN_AUTO;
+	bool data_is_digest = 0;
 	EVP_PKEY_CTX *pctx;
 	bool can_default_digest = ZEND_THREEWAY_COMPARE(PHP_OPENSSL_API_VERSION, 0x30000) >= 0;
 
-	ZEND_PARSE_PARAMETERS_START(3, 6)
+	ZEND_PARSE_PARAMETERS_START(3, 7)
 		Z_PARAM_STRING(data, data_len)
 		Z_PARAM_STRING(signature, signature_len)
 		Z_PARAM_ZVAL(key)
@@ -4629,6 +4654,7 @@ PHP_FUNCTION(openssl_verify)
 		Z_PARAM_STR_OR_LONG(method_str, method_long)
 		Z_PARAM_LONG(padding)
 		Z_PARAM_LONG(salt_length)
+		Z_PARAM_BOOL(data_is_digest)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_OPENSSL_CHECK_SIZE_T_TO_UINT(signature_len, signature, 2);
@@ -4653,28 +4679,42 @@ PHP_FUNCTION(openssl_verify)
 		RETURN_FALSE;
 	}
 
-	md_ctx = EVP_MD_CTX_create();
-	if (md_ctx == NULL) {
-		php_openssl_store_errors();
-		err = -1;
-		goto cleanup;
+	if (data_is_digest) {
+		/* $data is already a digest: verify it directly with the low-level
+		 * EVP_PKEY_verify() API instead of hashing it again via EVP_DigestVerify(). */
+		pctx = EVP_PKEY_CTX_new(pkey, NULL);
+		if (pctx == NULL ||
+				EVP_PKEY_verify_init(pctx) <= 0 ||
+				(mdtype != NULL && EVP_PKEY_CTX_set_signature_md(pctx, mdtype) <= 0) ||
+				php_openssl_setup_rsa_padding(pctx, pkey, padding) == FAILURE ||
+				php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == FAILURE) {
+			php_openssl_store_errors();
+			err = -1;
+		} else {
+			err = EVP_PKEY_verify(pctx, (unsigned char *) signature, signature_len, (unsigned char *) data, data_len);
+			if (err < 0) {
+				php_openssl_store_errors();
+			}
+		}
+		EVP_PKEY_CTX_free(pctx);
+	} else {
+		EVP_MD_CTX *md_ctx = EVP_MD_CTX_create();
+		if (md_ctx == NULL) {
+			php_openssl_store_errors();
+			err = -1;
+		} else if (!EVP_DigestVerifyInit(md_ctx, &pctx, mdtype, NULL, pkey) ||
+				php_openssl_setup_rsa_padding(pctx, pkey, padding) == FAILURE ||
+				php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == FAILURE) {
+			php_openssl_store_errors();
+			err = -1;
+		} else {
+			err = EVP_DigestVerify(md_ctx, (unsigned char *)signature, signature_len, (unsigned char*)data, data_len);
+			if (err < 0) {
+				php_openssl_store_errors();
+			}
+		}
+		EVP_MD_CTX_destroy(md_ctx);
 	}
-
-	if (!EVP_DigestVerifyInit(md_ctx, &pctx, mdtype, NULL, pkey) ||
-			php_openssl_setup_rsa_padding(pctx, pkey, padding) == FAILURE ||
-			php_openssl_setup_rsa_pss_salt_length(pctx, pkey, padding, salt_length) == FAILURE) {
-		php_openssl_store_errors();
-		err = -1;
-		goto cleanup;
-	}
-
-	err = EVP_DigestVerify(md_ctx, (unsigned char *)signature, signature_len, (unsigned char*)data, data_len);
-	if (err < 0) {
-		php_openssl_store_errors();
-	}
-
-cleanup:
-	EVP_MD_CTX_destroy(md_ctx);
 	php_openssl_release_evp_md(mdtype);
 	EVP_PKEY_free(pkey);
 	RETURN_LONG(err);
