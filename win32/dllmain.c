@@ -31,6 +31,11 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
 {
 	BOOL ret = TRUE;
 
+#ifdef ZTS
+	if (reason == DLL_PROCESS_DETACH && reserved == NULL) {
+		tsrm_thread_exit_disarm();
+	}
+#endif
 #ifdef ZEND_WIN_TSRM_TEB_SLOT
 	if (reason == DLL_PROCESS_ATTACH) {
 		zend_win_tsrm_cache_init(true);
