@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_date.stub.php instead.
- * Stub hash: 8556e1b5f05ae9f78200f05f01d9f8e815cba49d */
+ * Stub hash: f82824bc7dc4c7672f03d3c2698c6a958a730fa8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -272,7 +272,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_createF
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeImmutable, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_createFromInterface, 0, 1, DateTime, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_createFromInterface, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
@@ -350,7 +350,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable___wakeup arginfo_class_DateTimeInterface___wakeup
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable___set_state, 0, 1, DateTimeImmutable, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable___set_state, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
@@ -376,40 +376,40 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_diff arginfo_class_DateTimeInterface_diff
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_modify, 0, 1, DateTimeImmutable, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_modify, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, modifier, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_add, 0, 1, DateTimeImmutable, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_add, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_OBJ_INFO(0, interval, DateInterval, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_sub arginfo_class_DateTimeImmutable_add
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_setTimezone, 0, 1, DateTimeImmutable, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setTimezone, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_setTime, 0, 2, DateTimeImmutable, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setTime, 0, 2, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, minute, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, second, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microsecond, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_setDate, 0, 3, DateTimeImmutable, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setDate, 0, 3, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, day, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_setISODate, 0, 2, DateTimeImmutable, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setISODate, 0, 2, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, week, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dayOfWeek, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_setTimestamp, 0, 1, DateTimeImmutable, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_setTimestamp, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -419,9 +419,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutabl
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_createFromInterface, 0, 1, DateTimeImmutable, 0)
-	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DateTimeImmutable_createFromInterface arginfo_class_DateTime_createFromInterface
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeZone___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, timezone, IS_STRING, 0)
@@ -455,9 +453,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeZone___wakeup arginfo_class_DateTimeInterface___wakeup
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeZone___set_state, 0, 1, DateTimeZone, 0)
-	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DateTimeZone___set_state arginfo_class_DateTimeImmutable___set_state
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, duration, IS_STRING, 0)
@@ -475,9 +471,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateInterval___wakeup arginfo_class_DateTimeInterface___wakeup
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateInterval___set_state, 0, 1, DateInterval, 0)
-	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DateInterval___set_state arginfo_class_DateTimeImmutable___set_state
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DatePeriod_createFromISO8601String, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, specification, IS_STRING, 0)
@@ -509,9 +503,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DatePeriod___wakeup arginfo_class_DateTimeInterface___wakeup
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DatePeriod___set_state, 0, 1, DatePeriod, 0)
-	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DatePeriod___set_state arginfo_class_DateTimeImmutable___set_state
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DatePeriod_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()

@@ -719,6 +719,23 @@ PHP 8.6 UPGRADE NOTES
     directive when $details is true. It holds the built-in default value of the
     directive (or null if it has none), independent of values set in php.ini,
     on the command line, or at runtime.
+    
+- Date:
+  . The following DateTime, DateTimeImmutable, DateTimeZone, DateInterval, and DatePeriod methods now have tentative static return types:
+    DateTime::createFromInterface()
+    DateTimeImmutable::__set_state()
+    DateTimeImmutable::modify()
+    DateTimeImmutable::add()
+    DateTimeImmutable::sub()
+    DateTimeImmutable::setTimezone()
+    DateTimeImmutable::setTime()
+    DateTimeImmutable::setDate()
+    DateTimeImmutable::setISODate()
+    DateTimeImmutable::setTimestamp()
+    DateTimeImmutable::createFromInterface()
+    DateTimeZone::__set_state()
+    DateInterval::__set_state()
+    DatePeriod::__set_state()
 
 - Zip:
   . zip_entry_close() return type has been narrowed from bool to true. The
