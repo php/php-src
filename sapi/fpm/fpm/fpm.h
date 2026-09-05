@@ -41,6 +41,8 @@ enum fpm_init_return_status {
 };
 
 int fpm_run(int *max_requests);
+/* this performs full fpm-SAPI boot: the former main() of php-fpm. */
+int do_php_fpm(int argc, char *argv[]);
 enum fpm_init_return_status fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr);
 
 struct fpm_globals_s {

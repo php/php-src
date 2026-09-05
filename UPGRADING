@@ -516,6 +516,9 @@ PHP 8.6 UPGRADE NOTES
 - CLI:
   . The built-in development server now accepts requests using the HTTP QUERY
     method instead of returning 501 Not Implemented.
+  . When PHP is configured with --enable-cli-fpm, the php binary also contains
+    the FPM SAPI: "php --fpm [php-fpm options]" behaves like php-fpm. The flag
+    is only recognized as the first argument. The default build is unchanged.
 
 ========================================
 4. Deprecated Functionality

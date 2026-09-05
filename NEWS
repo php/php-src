@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     when $allow_string is false is now deprecated. (Daniel Scherzer)
 
 - CLI:
+  . Added the --enable-cli-fpm configure option, which links the FPM SAPI into
+    the php binary so that "php --fpm" runs php-fpm. (Matthieu Napoli)
   . Fixed bug GH-23242 (PHP development server does not support Expect
     100-continue flow control). (Sjoerd Langkemper)
 
