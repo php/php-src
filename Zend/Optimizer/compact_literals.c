@@ -767,6 +767,21 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					opline->extended_value = cache_size | (opline->extended_value & ZEND_PARTIAL_FLAGS);
 					cache_size += 2 * sizeof(void *);
 					break;
+				case ZEND_RECV:
+					/* class-type inline cache */
+					if (opline->op2.num & _ZEND_TYPE_KIND_MASK) {
+						opline->extended_value = cache_size;
+						cache_size += sizeof(void *);
+					}
+					break;
+				case ZEND_VERIFY_RETURN_TYPE:
+					/* class-type inline cache */
+					if ((op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
+					 && ZEND_TYPE_IS_COMPLEX((op_array->arg_info - 1)->type)) {
+						opline->extended_value = cache_size;
+						cache_size += sizeof(void *);
+					}
+					break;
 			}
 			opline++;
 		}
