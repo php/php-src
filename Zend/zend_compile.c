@@ -2433,6 +2433,20 @@ static inline uint32_t zend_emit_cond_jump(uint8_t opcode, znode *cond, uint32_t
 }
 /* }}} */
 
+/* Compile `!` in a condition as an inverted jump instead of a BOOL_NOT
+ * opcode followed by a jump. Both evaluate the operand with the same
+ * boolean semantics, and removing the intermediate temporary also lets
+ * comparisons fuse with the jump (smart branch). */
+static zend_ast *zend_unwrap_bool_not(zend_ast *cond_ast, uint8_t *jump_opcode) /* {{{ */
+{
+	while (cond_ast->kind == ZEND_AST_UNARY_OP && cond_ast->attr == ZEND_BOOL_NOT) {
+		*jump_opcode = (*jump_opcode == ZEND_JMPZ) ? ZEND_JMPNZ : ZEND_JMPZ;
+		cond_ast = cond_ast->child[0];
+	}
+	return cond_ast;
+}
+/* }}} */
+
 static inline void zend_update_jump_target(uint32_t opnum_jump, uint32_t opnum_target) /* {{{ */
 {
 	zend_op *opline = &CG(active_op_array)->opcodes[opnum_jump];
@@ -6453,9 +6467,11 @@ static void zend_compile_while(const zend_ast *ast) /* {{{ */
 
 	opnum_cond = get_next_op_number();
 	zend_update_jump_target(opnum_jmp, opnum_cond);
+	uint8_t jump_opcode = ZEND_JMPNZ;
+	cond_ast = zend_unwrap_bool_not(cond_ast, &jump_opcode);
 	zend_compile_expr(&cond_node, cond_ast);
 
-	zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, opnum_start);
+	zend_emit_cond_jump(jump_opcode, &cond_node, opnum_start);
 
 	zend_end_loop(opnum_cond, NULL);
 }
@@ -6475,9 +6491,11 @@ static void zend_compile_do_while(const zend_ast *ast) /* {{{ */
 	zend_compile_stmt(stmt_ast);
 
 	opnum_cond = get_next_op_number();
+	uint8_t jump_opcode = ZEND_JMPNZ;
+	cond_ast = zend_unwrap_bool_not(cond_ast, &jump_opcode);
 	zend_compile_expr(&cond_node, cond_ast);
 
-	zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, opnum_start);
+	zend_emit_cond_jump(jump_opcode, &cond_node, opnum_start);
 
 	zend_end_loop(opnum_cond, NULL);
 }
@@ -6666,8 +6684,10 @@ static void zend_compile_if(zend_ast *ast) /* {{{ */
 				zend_do_extended_stmt(NULL);
 			}
 
+			uint8_t jump_opcode = ZEND_JMPZ;
+			cond_ast = zend_unwrap_bool_not(cond_ast, &jump_opcode);
 			zend_compile_expr(&cond_node, cond_ast);
-			opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
+			opnum_jmpz = zend_emit_cond_jump(jump_opcode, &cond_node, 0);
 
 			zend_compile_stmt(stmt_ast);
 
@@ -11136,9 +11156,11 @@ static void zend_compile_conditional(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
+	uint8_t jump_opcode = ZEND_JMPZ;
+	cond_ast = zend_unwrap_bool_not(cond_ast, &jump_opcode);
 	zend_compile_expr(&cond_node, cond_ast);
 
-	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
+	opnum_jmpz = zend_emit_cond_jump(jump_opcode, &cond_node, 0);
 
 	zend_compile_expr(&true_node, true_ast);
 
