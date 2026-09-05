@@ -19,6 +19,7 @@
 #include "fpm_scoreboard.h"
 #include "fpm_stdio.h"
 #include "fpm_log.h"
+#include "fpm_user_cache.h"
 #include "zlog.h"
 
 struct fpm_globals_s fpm_globals = {
@@ -64,6 +65,7 @@ enum fpm_init_return_status fpm_init(int argc, char **argv, char *config, char *
 	    0 > fpm_children_init_main()      ||
 	    0 > fpm_sockets_init_main()       ||
 	    0 > fpm_worker_pool_init_main()   ||
+	    0 > fpm_user_cache_init_main()    ||
 	    0 > fpm_event_init_main()) {
 
 		if (fpm_globals.test_successful) {
