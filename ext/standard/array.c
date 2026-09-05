@@ -7371,3 +7371,53 @@ PHP_FUNCTION(array_combine)
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
+/* {{{ Filters array elements that contain a specific substring, preserving keys */
+PHP_FUNCTION(array_str_contains)
+{
+	HashTable *haystack;
+	zend_string *needle;
+	zval *val;
+	zend_string *key;
+	zend_ulong num_key;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY_HT(haystack)
+		Z_PARAM_STR(needle)
+	ZEND_PARSE_PARAMETERS_END();
+
+	array_init(return_value);
+
+	if (zend_hash_num_elements(haystack) == 0) {
+		return;
+	}
+
+	/* Empty needle matches every string element */
+	bool needle_is_empty = (ZSTR_LEN(needle) == 0);
+
+	ZEND_HASH_FOREACH_KEY_VAL(haystack, num_key, key, val) {
+		ZVAL_DEREF(val);
+
+		if (Z_TYPE_P(val) != IS_STRING) {
+			continue;
+		}
+
+		bool match = false;
+		if (needle_is_empty) {
+			match = true;
+		} else if (Z_STRLEN_P(val) >= ZSTR_LEN(needle)) {
+			if (php_memnstr(Z_STRVAL_P(val), ZSTR_VAL(needle), ZSTR_LEN(needle), Z_STRVAL_P(val) + Z_STRLEN_P(val))) {
+				match = true;
+			}
+		}
+
+		if (match) {
+			Z_TRY_ADDREF_P(val);
+			if (key) {
+				zend_hash_add_new(Z_ARRVAL_P(return_value), key, val);
+			} else {
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, val);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
