@@ -550,6 +550,10 @@ PHP_FUNCTION(frenchtojd)
 		RETURN_THROWS();
 	}
 
+	if (year < 1 || year > 14 || month < 1 || month > 13 || day < 1 || day > 30) {
+		RETURN_LONG(0);
+	}
+
 	RETURN_LONG(FrenchToSdn(year, month, day));
 }
 /* }}} */
