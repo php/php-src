@@ -900,6 +900,12 @@ lxb_url_path_set_null(lxb_url_t *url);
 LXB_API void
 lxb_url_host_set_empty(lxb_url_host_t *host, lexbor_mraw_t *mraw);
 
+LXB_API void
+lxb_url_query_set_null(lxb_url_t *url);
+
+LXB_API void
+lxb_url_fragment_set_null(lxb_url_t *url);
+
 /*
  * Inline functions.
  */
