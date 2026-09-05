@@ -628,7 +628,7 @@ static uint8_t zend_jit_trace_bad_stop_event(const zend_op *opline, int count)
 
 static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int idx, uint32_t is_megamorphic, uint32_t init_level)
 {
-	zend_jit_trace_stop stop ZEND_ATTRIBUTE_UNUSED = ZEND_JIT_TRACE_STOP_ERROR;
+	zend_jit_trace_stop stop = ZEND_JIT_TRACE_STOP_ERROR;
 
 	do {
 		zend_function *func;
@@ -671,15 +671,21 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_MEGAMORPHIC);
 		}
 		TRACE_RECORD(ZEND_JIT_TRACE_INIT_CALL, ZEND_JIT_TRACE_FAKE_INFO(init_level), func);
+
+		return idx;
 	} while (0);
-	return idx;
+
+	/* TRACE_RECORD() may jump here */
+	return -(int)stop;
 }
 
+/* Returns the new trace buffer index, or -(int)zend_jit_trace_stop on failure */
 static int zend_jit_trace_record_fake_init_call(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int idx, uint32_t is_megamorphic)
 {
 	return zend_jit_trace_record_fake_init_call_ex(call, trace_buffer, idx, is_megamorphic, 0);
 }
 
+/* Returns the new trace buffer index, or -(int)zend_jit_trace_stop on failure */
 static int zend_jit_trace_subtrace(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int start, int end, uint8_t event, const zend_op_array *op_array, const zend_op *opline)
 {
 	int idx;
@@ -692,7 +698,7 @@ static int zend_jit_trace_subtrace(zend_execute_data *call, zend_jit_trace_rec *
 		}
 	}
 	if (idx + (end - start) >= JIT_G(max_trace_length) - 2) {
-		return -1;
+		return -(int)ZEND_JIT_TRACE_STOP_TOO_LONG;
 	}
 	memmove(trace_buffer + idx, trace_buffer + start, (end - start) * sizeof(zend_jit_trace_rec));
 	return idx + (end - start);
@@ -810,12 +816,15 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 	if (prev_call) {
 		int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, is_megamorphic);
 		if (ret < 0) {
-			TRACE_END(ZEND_JIT_TRACE_END, ZEND_JIT_TRACE_STOP_BAD_FUNC, opline);
+			/* The recorded prefix is incomplete (some pending calls are
+			 * missing), so it must not be compiled. */
+			stop = (zend_jit_trace_stop)-ret;
+			TRACE_END(ZEND_JIT_TRACE_END, stop, opline);
 #ifdef HAVE_GCC_GLOBAL_REGS
 			execute_data = save_execute_data;
 			opline = save_opline;
 #endif
-			return ZEND_JIT_TRACE_STOP_BAD_FUNC;
+			return stop;
 		}
 		idx = ret;
 	}
@@ -1199,7 +1208,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 						if (prev_call) {
 							int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, 0);
 							if (ret < 0) {
-								stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
+								stop = (zend_jit_trace_stop)-ret;
 								break;
 							}
 							idx = ret;
@@ -1227,7 +1236,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 						if (prev_call) {
 							int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, 0);
 							if (ret < 0) {
-								stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
+								stop = (zend_jit_trace_stop)-ret;
 								break;
 							}
 							idx = ret;
@@ -1364,7 +1373,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 					int ret = zend_jit_trace_subtrace(EX(call), trace_buffer,
 						last_loop, idx, ZEND_JIT_TRACE_START_LOOP, op_array, opline);
 					if (ret < 0) {
-						stop = ZEND_JIT_TRACE_STOP_TOO_LONG;
+						stop = (zend_jit_trace_stop)-ret;
 						break;
 					}
 					idx = ret;
