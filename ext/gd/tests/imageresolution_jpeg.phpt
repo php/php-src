@@ -43,7 +43,7 @@ array(2) {
   [1]=>
   int(299)
 }
-ValueError: imagejpeg(): Argument #3 ($quality) must be at between -1 and 100
+ValueError: imagejpeg(): Argument #3 ($quality) must be between -1 and 100
 --CLEAN--
 <?php
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'imageresolution_jpeg.jpeg');
