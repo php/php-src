@@ -75,7 +75,6 @@
 
 #include "php_ini.h"
 
-#include "zend_attributes.h"
 
 #include "php_intl_arginfo.h"
 

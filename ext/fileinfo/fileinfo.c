@@ -29,7 +29,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h" /* needed for context stuff */
-#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
 #include "php_fileinfo.h"
 #include "fileinfo_arginfo.h"
