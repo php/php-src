@@ -51,6 +51,7 @@ foreach ($pipes as $pipe) {
 }
 
 printf("STDOUT << %s\n", read_pipe($pipes[1]));
+write_pipe($pipes[0], "continue\n");
 printf("STDOUT << %s\n", read_pipe($pipes[1]));
 
 write_pipe($pipes[0], 'done');

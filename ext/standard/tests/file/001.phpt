@@ -24,7 +24,7 @@ if (file_exists('test.file')) {
 } else {
     echo "test.file does not exist\n";
 }
-sleep (2);
+touch('test.file', 946684800);
 symlink('test.file','test.link');
 if (file_exists('test.link')) {
     echo "test.link exists\n";

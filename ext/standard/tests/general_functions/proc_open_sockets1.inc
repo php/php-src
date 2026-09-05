@@ -1,7 +1,8 @@
 <?php
 
 echo "hello";
-sleep(1);
+fgets(STDIN);
 fwrite(STDERR, "SOME ERROR");
-sleep(1);
+fgets(STDIN);
 echo "world";
+fgets(STDIN);

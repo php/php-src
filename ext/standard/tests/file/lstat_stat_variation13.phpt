@@ -17,10 +17,10 @@ $filename = "$file_path/lstat_stat_variation13.tmp";
 echo "*** Checking stat() on a file opened using read/write mode ***\n";
 $file_handle = fopen($filename, "w");  // create file
 fclose($file_handle);
+touch($filename, 946684800);
 $old_stat = stat($filename);
 // clear the stat
 clearstatcache();
-sleep(1);
 // opening file again in read mode
 $file_handle = fopen($filename, "r");  // read file
 fclose($file_handle);

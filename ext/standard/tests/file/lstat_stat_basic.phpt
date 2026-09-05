@@ -31,7 +31,6 @@ $file_handle = fopen($filename, "w");
 fclose($file_handle);
 // stat of the file created
 $file_stat = stat($filename);
-sleep(2);
 
 // now new stat of the dir after file is created
 $new_dir_stat = stat($dirname);
@@ -42,7 +41,6 @@ $sym_linkname = "$file_path/lstat_stat_basic_link.tmp";
 symlink($filename, $sym_linkname);
 // stat of the link created
 $link_stat = lstat($sym_linkname);
-sleep(2);
 // new stat of the file, after a softlink to this file is created
 $new_file_stat = stat($filename);
 clearstatcache();
