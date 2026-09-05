@@ -92,6 +92,10 @@ PHP                                                                        NEWS
   . Fixed WSDL cache corruption when a soap:header defines headerfaults.
     (Ilia Alshanetsky)
 
+- PDO:
+  . Fixed persistent connections with a colon in the username or password
+    reusing another connection's handle. (iliaal)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
