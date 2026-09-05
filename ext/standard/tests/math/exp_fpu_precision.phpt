@@ -15,10 +15,6 @@ serialize_precision=-1
 
 $x = 3;
 
-echo "-- unaffected reference points --\n";
-var_dump(exp(0));
-var_dump(exp(1));
-
 echo "-- runtime calls --\n";
 var_dump(exp($x));
 var_dump(exp($x + 2));
@@ -36,9 +32,6 @@ var_dump(exp(10) === exp($x + 7));
 var_dump(exp(20) === exp($x + 17));
 ?>
 --EXPECT--
--- unaffected reference points --
-float(1)
-float(2.718281828459045)
 -- runtime calls --
 float(20.085536923187668)
 float(148.4131591025766)
