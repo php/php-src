@@ -203,8 +203,13 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 
 			efree(q);
 #else
-			PQclear(PQclosePortal(H->server, S->cursor_name));
-			S->is_cursor_declared = false;
+			PGresult *res = PQclosePortal(H->server, S->cursor_name);
+
+			if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+				S->is_cursor_declared = false;
+			}
+
+			PQclear(res);
 #endif
 		}
 
