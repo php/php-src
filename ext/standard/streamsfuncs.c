@@ -425,15 +425,18 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		ZEND_TRY_ASSIGN_REF_NULL(zremote);
 	}
 
-	if (to_read <= 0) {
+	if (UNEXPECTED(to_read <= 0)) {
 		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(to_read)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
 		RETURN_THROWS();
 	}
 
-	read_buf = zend_string_alloc(to_read, 0);
+	read_buf = zend_string_alloc((size_t) to_read, 0);
 
 	php_stream_error_operation_begin();
-	recvd = php_stream_xport_recvfrom(stream, ZSTR_VAL(read_buf), to_read, (int)flags, NULL, NULL,
+	recvd = php_stream_xport_recvfrom(stream, ZSTR_VAL(read_buf), (size_t) to_read, (int)flags, NULL, NULL,
 			zremote ? &remote_addr : NULL);
 	php_stream_error_operation_end_for_stream(stream);
 
@@ -455,22 +458,28 @@ PHP_FUNCTION(stream_socket_recvfrom)
 PHP_FUNCTION(stream_get_contents)
 {
 	php_stream *stream;
-	zend_long maxlen, desiredpos = -1L;
+	zend_long maxlen_zl, desiredpos = -1L;
+	size_t maxlen;
 	bool maxlen_is_null = 1;
 	zend_string *contents;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		PHP_Z_PARAM_STREAM(stream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
+		Z_PARAM_LONG_OR_NULL(maxlen_zl, maxlen_is_null)
 		Z_PARAM_LONG(desiredpos)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (maxlen_is_null) {
-		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
-	} else if (maxlen < 0 && maxlen != (ssize_t)PHP_STREAM_COPY_ALL) {
+	if (maxlen_is_null || maxlen_zl == -1) {
+		maxlen = PHP_STREAM_COPY_ALL;
+	} else if (UNEXPECTED(maxlen_zl < 0)) {
 		zend_argument_value_error(2, "must be greater than or equal to -1");
 		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(maxlen_zl)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
+	} else {
+		maxlen = (size_t) maxlen_zl;
 	}
 
 	php_stream_error_operation_begin();
@@ -496,7 +505,7 @@ PHP_FUNCTION(stream_get_contents)
 		}
 	}
 
-	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0))) {
+	if ((contents = php_stream_copy_to_mem(stream, (size_t) maxlen, 0))) {
 		RETVAL_STR(contents);
 	} else {
 		RETVAL_EMPTY_STRING();
@@ -509,7 +518,8 @@ PHP_FUNCTION(stream_get_contents)
 PHP_FUNCTION(stream_copy_to_stream)
 {
 	php_stream *src, *dest;
-	zend_long maxlen, pos = 0;
+	zend_long maxlen_zl, pos = 0;
+	size_t maxlen;
 	bool maxlen_is_null = 1;
 	size_t len;
 	zval *zcontext = NULL;
@@ -519,13 +529,21 @@ PHP_FUNCTION(stream_copy_to_stream)
 		PHP_Z_PARAM_STREAM(src)
 		PHP_Z_PARAM_STREAM(dest)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
+		Z_PARAM_LONG_OR_NULL(maxlen_zl, maxlen_is_null)
 		Z_PARAM_LONG(pos)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (maxlen_is_null) {
+	if (maxlen_is_null || maxlen_zl == -1) {
 		maxlen = PHP_STREAM_COPY_ALL;
+	} else if (UNEXPECTED(maxlen_zl < 0)) {
+		zend_argument_value_error(3, "must be greater than or equal to -1");
+		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(maxlen_zl)) {
+		zend_argument_value_error(3, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
+	} else {
+		maxlen = (size_t) maxlen_zl;
 	}
 
 	php_stream_error_operation_begin();
@@ -1420,16 +1438,20 @@ PHP_FUNCTION(stream_get_line)
 		Z_PARAM_STRING(str, str_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (max_length < 0) {
+	if (UNEXPECTED(max_length < 0)) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(max_length)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
 	}
+
 	if (!max_length) {
 		max_length = PHP_SOCK_CHUNK_SIZE;
 	}
 
 	php_stream_error_operation_begin();
-	if ((buf = php_stream_get_record(stream, max_length, str, str_len))) {
+	if ((buf = php_stream_get_record(stream, (size_t) max_length, str, str_len))) {
 		RETVAL_STR(buf);
 	} else {
 		RETVAL_FALSE;
@@ -1513,7 +1535,15 @@ PHP_FUNCTION(stream_set_write_buffer)
 		Z_PARAM_LONG(arg2)
 	ZEND_PARSE_PARAMETERS_END();
 
-	buff = arg2;
+	if (UNEXPECTED(arg2 < 0)) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(arg2)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
+	}
+
+	buff = (size_t) arg2;
 
 	php_stream_error_operation_begin();
 	/* if buff is 0 then set to non-buffered */
@@ -1574,7 +1604,15 @@ PHP_FUNCTION(stream_set_read_buffer)
 		Z_PARAM_LONG(arg2)
 	ZEND_PARSE_PARAMETERS_END();
 
-	buff = arg2;
+	if (UNEXPECTED(arg2 < 0)) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(arg2)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
+	}
+
+	buff = (size_t) arg2;
 
 	php_stream_error_operation_begin();
 	/* if buff is 0 then set to non-buffered */

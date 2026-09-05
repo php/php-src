@@ -10,7 +10,7 @@ $string = chr(0).chr(255).chr(128).chr(234).chr(143);
 
 /* different pad_lengths */
 $pad_lengths = [
-    -PHP_INT_MAX,  // huge negative value
+    (-2 ** (PHP_SYS_SIZE * 8 - 2)) << 1, // huge negative value
     -1,  // negative value
     0,  // pad_length < sizeof(input_string)
     9,  // pad_length <= sizeof(input_string)

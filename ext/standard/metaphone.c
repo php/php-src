@@ -33,8 +33,11 @@ PHP_FUNCTION(metaphone)
 		Z_PARAM_LONG(phones)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (phones < 0) {
+	if (UNEXPECTED(phones < 0)) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(phones)) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", SIZE_MAX);
 		RETURN_THROWS();
 	}
 
