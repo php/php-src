@@ -1400,11 +1400,43 @@ AC_DEFUN([PHP_POLL_MECHANISMS],
     AC_DEFINE([HAVE_EPOLL], [1], [Define if epoll is available])
     poll_mechanisms="$poll_mechanisms epoll"
 
-    AC_CHECK_FUNCS([epoll_pwait2], [],
-      [AC_CHECK_DECL([epoll_pwait2],
-        [AC_DEFINE([HAVE_EPOLL_PWAIT2], [1])],
-        [],
-        [#include <sys/epoll.h>])])
+    AC_CACHE_CHECK([whether epoll_pwait2 works], [php_cv_have_working_epoll_pwait2],
+      [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+        #include <errno.h>
+        #include <sys/epoll.h>
+
+        int main(void)
+        {
+          int epfd = epoll_create1(EPOLL_CLOEXEC);
+          struct epoll_event ev;
+          struct timespec timeout = {0, 0};
+
+          if (epfd < 0) {
+            return 1;
+          }
+
+          if (epoll_pwait2(epfd, &ev, 1, &timeout, (void*)0) < 0) {
+        #ifdef ENOSYS
+            if (errno == ENOSYS) {
+              return 1;
+            }
+        #endif
+        #ifdef ENOTSUP
+            if (errno == ENOTSUP) {
+              return 1;
+            }
+        #endif
+          }
+
+          return 0;
+        }
+      ]])],
+      [php_cv_have_working_epoll_pwait2=yes],
+      [php_cv_have_working_epoll_pwait2=no],
+      [php_cv_have_working_epoll_pwait2=no])])
+    AS_VAR_IF([php_cv_have_working_epoll_pwait2], [yes],
+      [AC_DEFINE([HAVE_EPOLL_PWAIT2], [1],
+        [Define if epoll_pwait2 is available])])
   ])
 
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
