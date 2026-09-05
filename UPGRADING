@@ -1028,6 +1028,7 @@ PHP 8.6 UPGRADE NOTES
   . Reduced temporary allocations when iterating Phar directories.
 
 - Standard:
+  . Improved performance of array_chunk() when not preserving keys.
   . Improved performance of sorting single-element arrays.
   . Improved performance of array_fill_keys().
   . Improved performance of array_intersect().
