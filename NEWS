@@ -92,6 +92,8 @@ PHP                                                                        NEWS
   . Fixed an out-of-bounds read when following a redirect response with an
     empty Location header. (iliaal)
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
+  . Fixed bug GH-22410 (Incorrect float behavior with large numbers).
+    (arshidkv12)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
