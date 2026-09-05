@@ -752,6 +752,20 @@ PHP 8.6 UPGRADE NOTES
   . snmp_set_output_option()
   . snmp_set_string_output_format()
 
+- Sodium:
+  . sodium_crypto_kem_keypair(), sodium_crypto_kem_seed_keypair(),
+    sodium_crypto_kem_secretkey(), sodium_crypto_kem_publickey(),
+    sodium_crypto_kem_enc() and sodium_crypto_kem_dec() expose the X-Wing
+    KEM (hybrid ML-KEM768+X25519, libsodium's recommended KEM).
+    Available when PHP is built against libsodium >= 1.0.22.
+  . sodium_crypto_kem_mlkem768_keypair(),
+    sodium_crypto_kem_mlkem768_seed_keypair(),
+    sodium_crypto_kem_mlkem768_secretkey(),
+    sodium_crypto_kem_mlkem768_publickey(),
+    sodium_crypto_kem_mlkem768_enc() and sodium_crypto_kem_mlkem768_dec()
+    expose the ML-KEM768 (FIPS 203) KEM.
+    Available when PHP is built against libsodium >= 1.0.22.
+
 - Standard:
   . clamp() returns the given value if in range, else returns the nearest
     bound.
@@ -906,6 +920,18 @@ PHP 8.6 UPGRADE NOTES
   . SODIUM_CRYPTO_XOF_TURBOSHAKE128_STATEBYTES.
   . SODIUM_CRYPTO_XOF_TURBOSHAKE256_BLOCKBYTES.
   . SODIUM_CRYPTO_XOF_TURBOSHAKE256_STATEBYTES.
+  . SODIUM_CRYPTO_KEM_PUBLICKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SECRETKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_CIPHERTEXTBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SHAREDSECRETBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SEEDBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_KEYPAIRBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_PUBLICKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SECRETKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_CIPHERTEXTBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SHAREDSECRETBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SEEDBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES (libsodium >= 1.0.22).
 
 - Standard:
   . ARRAY_FILTER_USE_VALUE.
