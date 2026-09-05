@@ -132,6 +132,7 @@ config.h.in
 /sapi/fpm/php-fpm
 /sapi/phpdbg/phpdbg
 /sapi/fuzzer/php-fuzz-*
+/sapi/litespeed/lsphp
 /scripts/php-config
 /scripts/phpize
 php
