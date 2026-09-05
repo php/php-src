@@ -4097,6 +4097,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 						GC_TRY_UNPROTECT_RECURSION(thash);
 					}
 					if (!ret) {
+						zval_ptr_dtor(&tmp);
 						return 0;
 					}
 				} else {
@@ -4105,6 +4106,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 					if (EXPECTED(!zv)) {
 						Z_TRY_DELREF_P(src_zval);
 						zend_cannot_add_element();
+						zval_ptr_dtor(&tmp);
 						return 0;
 					}
 				}
