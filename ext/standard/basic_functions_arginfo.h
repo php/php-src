@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: 31018a787ba261316941b0d88f090b9cf271aa0e
+ * Stub hash: 4feeab72edf6b7440af99a60e1401492828f141e
  * Has decl header: yes */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
@@ -2238,6 +2238,22 @@ static const zend_frameless_function_info frameless_function_infos_trim[] = {
 	{ 0 },
 };
 
+ZEND_FRAMELESS_FUNCTION(rtrim, 1);
+ZEND_FRAMELESS_FUNCTION(rtrim, 2);
+static const zend_frameless_function_info frameless_function_infos_rtrim[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(rtrim, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(rtrim, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 1);
+ZEND_FRAMELESS_FUNCTION(ltrim, 2);
+static const zend_frameless_function_info frameless_function_infos_ltrim[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(ltrim, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(ltrim, 2), 2 },
+	{ 0 },
+};
+
 ZEND_FRAMELESS_FUNCTION(implode, 1);
 ZEND_FRAMELESS_FUNCTION(implode, 2);
 static const zend_frameless_function_info frameless_function_infos_implode[] = {
@@ -3178,9 +3194,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_RAW_FENTRY("strcoll", zif_strcoll, arginfo_strcoll, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("trim", zif_trim, arginfo_trim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_trim, NULL)
-	ZEND_RAW_FENTRY("rtrim", zif_rtrim, arginfo_rtrim, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("rtrim", zif_rtrim, arginfo_rtrim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_rtrim, NULL)
 	ZEND_RAW_FENTRY("chop", zif_rtrim, arginfo_chop, 0, NULL, NULL)
-	ZEND_RAW_FENTRY("ltrim", zif_ltrim, arginfo_ltrim, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("ltrim", zif_ltrim, arginfo_ltrim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_ltrim, NULL)
 	ZEND_RAW_FENTRY("wordwrap", zif_wordwrap, arginfo_wordwrap, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("explode", zif_explode, arginfo_explode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("implode", zif_implode, arginfo_implode, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_implode, NULL)
