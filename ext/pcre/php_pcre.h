@@ -53,7 +53,7 @@ PHPAPI void  php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str
 PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, const char *subject, size_t subject_len, zend_string *replace_str,
 	size_t limit, size_t *replace_count);
 
-PHPAPI void  php_pcre_split_impl(  pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
+PHPAPI void  php_pcre_split_impl(const pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zend_long limit_val, zend_long flags);
 
 PHPAPI void  php_pcre_grep_impl(   pcre_cache_entry *pce, zval *input, zval *return_value,
