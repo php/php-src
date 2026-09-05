@@ -700,6 +700,13 @@ PHP 8.6 UPGRADE NOTES
     landed, which is a tautology; an invalid callback throws a TypeError via
     ZPP before the function body is reached.
 
+- Reflection:
+  . The outputs of ReflectionClassConstant::__toString() and
+    ReflectionConstant::__toString() for constants with boolean values have been
+    changed to use `true` and `false` rather than `1` and an empty string. This
+    also affects other ways of printing class constants, e.g.
+    `ReflectionClass::__toString()`.
+
 - Sockets:
   . socket_addrinfo_lookup() now has an additional optional argument $error_code
     that, when not null, receives the error code on failure (one of the EAI_*
