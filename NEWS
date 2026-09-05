@@ -80,6 +80,10 @@ PHP                                                                        NEWS
   . Fixed writing to a dimension of the object returned by attributes() not
     creating the attribute. (Ilia Alshanetsky)
 
+- Streams:
+  . Added so_rcvbuf and so_sndbuf stream socket context options, setting the
+    socket receive and send buffer sizes in bytes. (David Carlier)
+
 
 27 Aug 2026, PHP 8.6.0beta2
 

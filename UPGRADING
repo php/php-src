@@ -486,6 +486,13 @@ PHP 8.6 UPGRADE NOTES
     sockets. A positive value enables lingering for that many seconds, zero
     or a negative value disables it. Values above 65535 are clamped as the
     linger time is limited to an unsigned short on some platforms.
+  . Added stream socket context options so_rcvbuf and so_sndbuf that set the
+    socket receive and send buffer sizes in bytes (SO_RCVBUF and SO_SNDBUF) on
+    TCP and UDP sockets. The value must be an integer between 1 and 2147483647,
+    any other value makes the stream creation fail. The operating system may
+    round, cap or otherwise adjust the requested size, and may stop sizing that
+    buffer automatically, so the size read back can differ from the one
+    requested.
   . Allowed casting filtered streams as file descriptors for select.
   . Added the "write_seek_mode" filter parameter for the bz2, iconv,
     zlib, and string stream filters. This parameter must be set via an
