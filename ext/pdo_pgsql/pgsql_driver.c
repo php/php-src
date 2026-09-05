@@ -242,10 +242,59 @@ void pdo_pgsql_close_lob_streams(pdo_dbh_t *dbh)
 	}
 }
 
+void pdo_pgsql_defer_close(pdo_pgsql_db_handle *H, const char *cmd, size_t cmd_len, bool is_deallocate)
+{
+	pdo_pgsql_pending_close *pc;
+
+	if (is_deallocate && H->deallocate_unsupported) {
+		return;
+	}
+
+	pc = pemalloc(sizeof(*pc) + cmd_len, H->is_persistent);
+	memcpy(pc->cmd, cmd, cmd_len + 1);
+	pc->is_deallocate = is_deallocate;
+	pc->next = H->pending_closes;
+	H->pending_closes = pc;
+}
+
+void pdo_pgsql_discard_pending_closes(pdo_pgsql_db_handle *H)
+{
+	while (H->pending_closes) {
+		pdo_pgsql_pending_close *pc = H->pending_closes;
+
+		H->pending_closes = pc->next;
+		pefree(pc, H->is_persistent);
+	}
+}
+
+void pdo_pgsql_run_pending_closes(pdo_pgsql_db_handle *H)
+{
+	if (!H->pending_closes || !H->server
+			|| PQtransactionStatus(H->server) != PQTRANS_IDLE) {
+		return;
+	}
+
+	do {
+		pdo_pgsql_pending_close *pc = H->pending_closes;
+		PGresult *res = PQexec(H->server, pc->cmd);
+
+		if (res) {
+			if (pc->is_deallocate && pdo_pgsql_sqlstate_is(res, "0A000")) {
+				H->deallocate_unsupported = true;
+			}
+			PQclear(res);
+		}
+
+		H->pending_closes = pc->next;
+		pefree(pc, H->is_persistent);
+	} while (H->pending_closes);
+}
+
 static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (H) {
+		pdo_pgsql_discard_pending_closes(H);
 		if (H->lob_streams) {
 			pdo_pgsql_close_lob_streams(dbh);
 			zend_hash_destroy(H->lob_streams);
@@ -560,6 +609,7 @@ static zend_result pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (!PQconsumeInput(H->server) || PQstatus(H->server) == CONNECTION_BAD) {
 		PQreset(H->server);
+		pdo_pgsql_discard_pending_closes(H);
 	}
 	return (PQstatus(H->server) == CONNECTION_OK) ? SUCCESS : FAILURE;
 }
@@ -605,17 +655,22 @@ static bool pgsql_handle_commit(pdo_dbh_t *dbh)
 	} else {
 		dbh->in_txn = pgsql_handle_in_transaction(dbh);
 	}
+	pdo_pgsql_run_pending_closes((pdo_pgsql_db_handle *)dbh->driver_data);
 
 	return ret;
 }
 
 static bool pgsql_handle_rollback(pdo_dbh_t *dbh)
 {
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	int ret = pdo_pgsql_transaction_cmd("ROLLBACK", dbh);
 
 	if (ret) {
 		pdo_pgsql_close_lob_streams(dbh);
 	}
+	/* cursors declared in the transaction are gone with it */
+	H->rollback_counter++;
+	pdo_pgsql_run_pending_closes(H);
 
 	return ret;
 }
@@ -1391,6 +1446,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	smart_str_0(&conn_str);
 
 	H->server = PQconnectdb(ZSTR_VAL(conn_str.s));
+	H->is_persistent = dbh->is_persistent;
 	H->lob_streams = (HashTable *) pemalloc(sizeof(HashTable), dbh->is_persistent);
 	zend_hash_init(H->lob_streams, 0, NULL, NULL, 1);
 
