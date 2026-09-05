@@ -3576,6 +3576,8 @@ PHP_FUNCTION(array_shift)
 	/* re-index like it did before */
 	if (HT_IS_PACKED(Z_ARRVAL_P(stack))) {
 		uint32_t k = 0;
+		/* Must be read before the deletion below opens a hole. */
+		bool without_holes = HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(stack));
 
 		/* Get the first value and copy it into the return value */
 		idx = 0;
@@ -3596,15 +3598,32 @@ PHP_FUNCTION(array_shift)
 		zend_hash_packed_del_val(Z_ARRVAL_P(stack), val);
 
 		if (EXPECTED(!HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
-			for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
-				val = Z_ARRVAL_P(stack)->arPacked + idx;
-				if (Z_TYPE_P(val) == IS_UNDEF) continue;
-				if (idx != k) {
-					zval *q = Z_ARRVAL_P(stack)->arPacked + k;
-					ZVAL_COPY_VALUE(q, val);
-					ZVAL_UNDEF(val);
+			if (without_holes) {
+				/* The slot just vacated is the only hole, so the rest moves down by one
+				 * without having to test every slot. */
+				HashTable *ht = Z_ARRVAL_P(stack);
+
+				if (ht->nNumUsed > 0) {
+					k = ht->nNumUsed - 1;
+					if (k == 1) {
+						/* Avoid the memmove() call overhead for the common tiny-array case. */
+						ZVAL_COPY_VALUE(ht->arPacked, ht->arPacked + 1);
+					} else {
+						memmove(ht->arPacked, ht->arPacked + 1, sizeof(zval) * k);
+					}
+					ZVAL_UNDEF(ht->arPacked + k);
 				}
-				k++;
+			} else {
+				for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
+					val = Z_ARRVAL_P(stack)->arPacked + idx;
+					if (Z_TYPE_P(val) == IS_UNDEF) continue;
+					if (idx != k) {
+						zval *q = Z_ARRVAL_P(stack)->arPacked + k;
+						ZVAL_COPY_VALUE(q, val);
+						ZVAL_UNDEF(val);
+					}
+					k++;
+				}
 			}
 		} else {
 			uint32_t iter_pos = zend_hash_iterators_lower_pos(Z_ARRVAL_P(stack), 0);
