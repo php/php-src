@@ -5097,7 +5097,7 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	int (*orig_header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers) = sapi_module.header_handler;
 	int (*orig_send_headers)(sapi_headers_struct *sapi_headers) = sapi_module.send_headers;
 	void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context)= sapi_module.send_header;
-	char *(*orig_getenv)(const char *name, size_t name_len) = sapi_module.getenv;
+	zend_string *(*orig_getenv)(const char *name, size_t name_len) = sapi_module.getenv;
 	size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
 	void (*orig_flush)(void *server_context) = sapi_module.flush;
 #ifdef ZEND_SIGNALS
