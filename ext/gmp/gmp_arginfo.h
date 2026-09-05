@@ -1,6 +1,8 @@
 /* This is a generated file, edit gmp.stub.php instead.
  * Stub hash: 743a4be1078abfa29294336564126ace8c194cbe */
 
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "0")

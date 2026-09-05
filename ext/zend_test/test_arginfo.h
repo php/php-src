@@ -2,6 +2,12 @@
  * Stub hash: 4d728e740122add9d4c91f5c1abb5f5017690636
  * Has decl header: yes */
 
+#include "zend_attributes.h"
+#include "zend_constants.h"
+#if (PHP_VERSION_ID >= 80100)
+#include "zend_enum.h"
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_trigger_bailout, 0, 0, IS_NEVER, 0)
 ZEND_END_ARG_INFO()
 

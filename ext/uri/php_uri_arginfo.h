@@ -2,6 +2,9 @@
  * Stub hash: 9e087e3aefdab5662892e7fad9de87857aa63057
  * Has decl header: yes */
 
+#include "zend_attributes.h"
+#include "zend_enum.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Uri_WhatWg_url_percent_encode, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, mode, Uri\\WhatWg\\\125rlPercentEncodingMode, 0)

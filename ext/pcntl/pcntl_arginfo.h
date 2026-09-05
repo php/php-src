@@ -2,6 +2,9 @@
  * Stub hash: ec6306e93fad6d127ff880fc01736ac287619cf7
  * Has decl header: yes */
 
+#include "zend_constants.h"
+#include "zend_enum.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

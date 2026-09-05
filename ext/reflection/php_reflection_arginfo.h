@@ -2,6 +2,9 @@
  * Stub hash: c4dcc2653f826c2c437065faec4bf77772ef88b1
  * Has decl header: yes */
 
+#include "zend_attributes.h"
+#include "zend_enum.h"
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
 ZEND_END_ARG_INFO()
