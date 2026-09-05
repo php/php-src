@@ -1,4 +1,4 @@
 Sphinx
+myst-parser>=5.1
 sphinx-design
 sphinxawesome-theme
-rstfmt
