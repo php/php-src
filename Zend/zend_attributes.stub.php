@@ -21,7 +21,7 @@ final class Attribute
     const int TARGET_CONSTANT = UNKNOWN;
     /** @cvalue ZEND_ATTRIBUTE_TARGET_ALL */
     const int TARGET_ALL = UNKNOWN;
-    /**  @cvalue ZEND_ATTRIBUTE_IS_REPEATABLE */
+    /** @cvalue ZEND_ATTRIBUTE_IS_REPEATABLE */
     const int IS_REPEATABLE = UNKNOWN;
 
     public int $flags;
