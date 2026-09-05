@@ -1038,6 +1038,8 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
   . Improved performance of str_split().
+  . Improved performance and reduced memory usage of sort() and rsort()
+    when using SORT_REGULAR on large packed arrays containing only integers.
 
 - URI:
   . Improved performance of Uri\WhatWg\Url::parse() when collecting

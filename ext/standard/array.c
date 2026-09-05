@@ -695,6 +695,43 @@ PHP_FUNCTION(natcasesort)
 
 typedef bucket_compare_func_t(*get_compare_function)(zend_long);
 
+static int php_array_packed_long_compare(const void *a, const void *b)
+{
+	const zval *lhs = a, *rhs = b;
+	if (Z_LVAL_P(lhs) != Z_LVAL_P(rhs)) {
+		return Z_LVAL_P(lhs) > Z_LVAL_P(rhs) ? 1 : -1;
+	}
+	return (Z_EXTRA_P(lhs) > Z_EXTRA_P(rhs)) - (Z_EXTRA_P(lhs) < Z_EXTRA_P(rhs));
+}
+
+static int php_array_packed_long_reverse_compare(const void *a, const void *b)
+{
+	const zval *lhs = a, *rhs = b;
+	if (Z_LVAL_P(lhs) != Z_LVAL_P(rhs)) {
+		return Z_LVAL_P(lhs) < Z_LVAL_P(rhs) ? 1 : -1;
+	}
+	return (Z_EXTRA_P(lhs) > Z_EXTRA_P(rhs)) - (Z_EXTRA_P(lhs) < Z_EXTRA_P(rhs));
+}
+
+static bool php_array_try_packed_long_sort(HashTable *array, compare_func_t cmp)
+{
+	if (!HT_IS_PACKED(array)
+	 || !HT_IS_WITHOUT_HOLES(array) || HT_HAS_ITERATORS(array)) {
+		return false;
+	}
+
+	/* Reject references and other types before changing any element. Integer
+	 * comparisons cannot invoke user code, so the array stays exclusively owned. */
+	for (uint32_t i = 0; i < array->nNumUsed; i++) {
+		if (Z_TYPE(array->arPacked[i]) != IS_LONG) {
+			return false;
+		}
+	}
+
+	zend_hash_sort_packed(array, cmp);
+	return true;
+}
+
 static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compare_function get_cmp, bool renumber) {
 	HashTable *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
@@ -707,6 +744,14 @@ static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compar
 	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = get_cmp(sort_type);
+
+	/* Keep small sorts out of the speculative type scan and helper call. */
+	if (renumber && sort_type == PHP_SORT_REGULAR && array->nNumOfElements >= 64
+	 && php_array_try_packed_long_sort(array,
+		get_cmp == php_get_data_compare_func
+			? php_array_packed_long_compare : php_array_packed_long_reverse_compare)) {
+		RETURN_TRUE;
+	}
 
 	zend_array_sort(array, cmp, renumber);
 
