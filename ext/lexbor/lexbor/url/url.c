@@ -1183,7 +1183,15 @@ lxb_url_port_set(lxb_url_t *url, uint16_t port)
     url->has_port = true;
 }
 
-static void
+void
+lxb_url_query_set_null(lxb_url_t *url)
+{
+    if (url->query.data != NULL) {
+        (void) lexbor_str_destroy(&url->query, url->mraw, false);
+    }
+}
+
+void
 lxb_url_fragment_set_null(lxb_url_t *url)
 {
     if (url->fragment.data != NULL) {
