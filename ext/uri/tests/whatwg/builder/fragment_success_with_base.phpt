@@ -1,13 +1,11 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder basic - success - with scheme relative URL
+Test Uri\WhatWg\UrlBuilder::setFragment() - success - with base URL
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setHost("example.net");
-$builder->setPath("/foo/bar/baz");
-$builder->setPort(124);
-$url = $builder->build(new Uri\WhatWg\Url("https://user:pass@example.com:123/foo/bar?query#hash"));
+$builder->setFragment("foo");
+$url = $builder->build(new Uri\WhatWg\Url("https://example.com/#bar"));
 
 var_dump($url->toAsciiString());
 var_dump($url);
@@ -15,7 +13,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(35) "https://example.net:124/foo/bar/baz"
+string(24) "https://example.com/#foo"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -24,14 +22,15 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["password"]=>
   NULL
   ["host"]=>
-  string(11) "example.net"
+  string(11) "example.com"
   ["port"]=>
-  int(124)
+  NULL
   ["path"]=>
-  string(12) "/foo/bar/baz"
+  string(1) "/"
   ["query"]=>
   NULL
   ["fragment"]=>
-  NULL
+  string(3) "foo"
 }
 bool(true)
+

@@ -1001,6 +1001,14 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		if (status != LXB_STATUS_OK) {
 			goto failure;
 		}
+	} else if (lexbor_base_url->username.data != NULL) {
+		zval zv;
+		ZVAL_NULL(&zv);
+		const zend_result result = php_uri_parser_whatwg_username_write(lexbor_url, &zv, NULL);
+		php_uri_parser_whatwg_build_errors(&errors);
+		if (result == FAILURE) {
+			goto failure;
+		}
 	}
 
 	if (Z_TYPE_P(password) == IS_STRING) {
@@ -1010,6 +1018,14 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		);
 		php_uri_parser_whatwg_build_errors_and_throw(status, "password", &errors);
 		if (status != LXB_STATUS_OK) {
+			goto failure;
+		}
+	} else if (lexbor_base_url->password.data != NULL) {
+		zval zv;
+		ZVAL_NULL(&zv);
+		const zend_result result = php_uri_parser_whatwg_password_write(lexbor_url, &zv, NULL);
+		php_uri_parser_whatwg_build_errors(&errors);
+		if (result == FAILURE) {
 			goto failure;
 		}
 	}
@@ -1037,6 +1053,14 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		if (status != LXB_STATUS_OK) {
 			goto failure;
 		}
+	}  else if (lexbor_base_url->has_port) {
+		zval zv;
+		ZVAL_NULL(&zv);
+		const zend_result result = php_uri_parser_whatwg_port_write(lexbor_url, &zv, NULL);
+		php_uri_parser_whatwg_build_errors(&errors);
+		if (result == FAILURE) {
+			goto failure;
+		}
 	}
 
 	if (Z_TYPE_P(path) == IS_STRING && Z_STRLEN_P(path) > 0) {
@@ -1060,6 +1084,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	}
 
 	if (Z_TYPE_P(query) == IS_STRING) {
+		lxb_url_query_set_null(lexbor_url);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(lxb_char_t *) Z_STRVAL_P(query), Z_STRLEN_P(query),
 			LXB_URL_STATE_QUERY_STATE, LXB_ENCODING_AUTO
@@ -1079,6 +1104,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	}
 
 	if (Z_TYPE_P(fragment) == IS_STRING) {
+		lxb_url_fragment_set_null(lexbor_url);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(lxb_char_t *) Z_STRVAL_P(fragment), Z_STRLEN_P(fragment),
 			LXB_URL_STATE_FRAGMENT_STATE, LXB_ENCODING_AUTO
@@ -1116,12 +1142,6 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 ) {
 	lxb_url_parser_clean(&lexbor_parser);
 
-	if (lexbor_base_url != NULL && Z_TYPE_P(scheme) == IS_STRING && Z_STRLEN_P(scheme) == 0) {
-		return php_uri_parser_whatwg_resolve_reference_from_zval(
-			lexbor_base_url, scheme, username, password, host, port, path, query, fragment, errors_zv
-		);
-	}
-
 	if (Z_TYPE_P(host) == IS_NULL ||
 		Z_STRLEN_P(host) == 0 ||
 		php_uri_parser_whatwg_get_special_scheme(Z_STR_P(scheme)) == LXB_URL_SCHEMEL_TYPE_FILE
@@ -1140,6 +1160,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have port");
 			return NULL;
 		}
+	}
+
+	if (lexbor_base_url != NULL && Z_TYPE_P(scheme) == IS_STRING && Z_STRLEN_P(scheme) == 0) {
+		return php_uri_parser_whatwg_resolve_reference_from_zval(
+			lexbor_base_url, scheme, username, password, host, port, path, query, fragment, errors_zv
+		);
 	}
 
 	lxb_url_t *lexbor_url = lexbor_mraw_calloc(lexbor_parser.mraw, sizeof(*lexbor_url));
