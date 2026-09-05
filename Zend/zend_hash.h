@@ -304,6 +304,10 @@ ZEND_API int   zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_f
 ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 ZEND_API void  ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 
+/* Sort and renumber a packed array without holes. The comparator must not
+ * execute user code or modify the array. */
+ZEND_API void ZEND_FASTCALL zend_hash_sort_packed(HashTable *ht, compare_func_t compare_func);
+
 static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucket_compare_func_t compare_func, bool renumber) {
 	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber);
 }

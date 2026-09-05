@@ -187,6 +187,12 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
     added, given the primary flags were running out of bits.
   . Added zend_hash_str_lookup().
+  . Added zend_hash_sort_packed() to sort and renumber packed arrays in place
+    without converting them to mixed storage. The array must have a reference
+    count of 1, contain no holes, and have no active iterators. The comparator
+    receives pointers to zval elements rather than Bucket entries and must
+    not execute user code or modify the array. Original positions are stored
+    in Z_EXTRA_P() so the comparator can use them for stable tie-breaking.
   . Added zend_ast_call_get_args() to fetch the argument node from any call
     node.
   . Added Z_PARAM_ENUM().
