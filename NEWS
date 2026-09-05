@@ -68,6 +68,10 @@ PHP                                                                        NEWS
   . Fixed PDO::CURSOR_SCROLL statements failing under lazy fetching
     (PDO::ATTR_PREFETCH => 0). (KentarouTakeda)
 
+- PDO Sqlite:
+  . Fixed bug GH-20214 (PDO::FETCH_DEFAULT unexpected behavior with
+    PDOStatement::setFetchMode). (SakiTakamachi)
+
 - Phar:
   . Fixed bug GH-23418 (Use-after-free when looking up mounted directories).
     (Weilin Du)
