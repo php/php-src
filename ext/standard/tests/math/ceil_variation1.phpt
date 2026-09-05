@@ -64,8 +64,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(ceil($input));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 };
@@ -97,25 +97,25 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-ceil(): Argument #1 ($num) must be of type int|float, string given
+TypeError: ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 8 --
-ceil(): Argument #1 ($num) must be of type int|float, string given
+TypeError: ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 9 --
-ceil(): Argument #1 ($num) must be of type int|float, array given
+TypeError: ceil(): Argument #1 ($num) must be of type int|float, array given
 
 -- Iteration 10 --
-ceil(): Argument #1 ($num) must be of type int|float, string given
+TypeError: ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 11 --
-ceil(): Argument #1 ($num) must be of type int|float, string given
+TypeError: ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 12 --
-ceil(): Argument #1 ($num) must be of type int|float, string given
+TypeError: ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 13 --
-ceil(): Argument #1 ($num) must be of type int|float, classA given
+TypeError: ceil(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 14 --
 
@@ -128,4 +128,4 @@ Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is dep
 float(0)
 
 -- Iteration 16 --
-ceil(): Argument #1 ($num) must be of type int|float, resource given
+TypeError: ceil(): Argument #1 ($num) must be of type int|float, resource given

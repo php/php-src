@@ -71,8 +71,8 @@ class P extends O {
         $this->call(array($this, 'O::who'));
         try {
             $this->call(array($this, 'B::who'));
-        } catch (TypeError $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -120,4 +120,4 @@ $this|O::who
 Deprecated: Callables of the form ["P", "O::who"] are deprecated in %s on line %d
 O
 $this|B::who
-call_user_func(): Argument #1 ($callback) must be a valid callback, class P is not a subclass of B
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class P is not a subclass of B

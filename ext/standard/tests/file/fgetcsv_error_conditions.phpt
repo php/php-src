@@ -13,49 +13,49 @@ $enclosure = '"';
 echo 'fgetcsv() with negative length' . \PHP_EOL;
 try {
     var_dump( fgetcsv($file_handle, -10, escape: "\\") );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( fgetcsv($file_handle, -10, $delimiter, escape: "\\") );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( fgetcsv($file_handle, -10, $delimiter, $enclosure, escape: "\\") );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo 'fgetcsv() with delimiter as empty string' . \PHP_EOL;
 try {
     var_dump( fgetcsv($file_handle, $length, '', $enclosure, escape: "\\") );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo 'fgetcsv() with enclosure as empty string' . \PHP_EOL;
 try {
     var_dump( fgetcsv($file_handle, $length, $delimiter, '', escape: "\\") );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo 'fgetcsv() with delimiter & enclosure as empty string' . \PHP_EOL;
 try {
     var_dump( fgetcsv($file_handle, $length, '', '', escape: "\\") );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 fgetcsv() with negative length
-fgetcsv(): Argument #2 ($length) must be between 0 and %d
-fgetcsv(): Argument #2 ($length) must be between 0 and %d
-fgetcsv(): Argument #2 ($length) must be between 0 and %d
+ValueError: fgetcsv(): Argument #2 ($length) must be between 0 and %d
+ValueError: fgetcsv(): Argument #2 ($length) must be between 0 and %d
+ValueError: fgetcsv(): Argument #2 ($length) must be between 0 and %d
 fgetcsv() with delimiter as empty string
-fgetcsv(): Argument #3 ($separator) must be a single character
+ValueError: fgetcsv(): Argument #3 ($separator) must be a single character
 fgetcsv() with enclosure as empty string
-fgetcsv(): Argument #4 ($enclosure) must be a single character
+ValueError: fgetcsv(): Argument #4 ($enclosure) must be a single character
 fgetcsv() with delimiter & enclosure as empty string
-fgetcsv(): Argument #3 ($separator) must be a single character
+ValueError: fgetcsv(): Argument #3 ($separator) must be a single character

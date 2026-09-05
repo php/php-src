@@ -26,8 +26,8 @@ array_walk($var, "walk");
 $var = "";
 try {
     array_walk($var, "walk");
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -46,5 +46,5 @@ string(10) "%r\0%r*%r\0%rvar_pro"
 string(14) "test_protected"
 string(7) "var_pub"
 string(11) "test_public"
-array_walk(): Argument #1 ($array) must be of type array, string given
+TypeError: array_walk(): Argument #1 ($array) must be of type array, string given
 Done

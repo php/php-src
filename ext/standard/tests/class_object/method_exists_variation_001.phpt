@@ -74,8 +74,8 @@ foreach($values as $value) {
       echo "\nArg value $value \n";
       try {
         var_dump( method_exists($value, $method) );
-      } catch (TypeError $e) {
-        echo $e->getMessage(), PHP_EOL;
+      } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
       }
 };
 
@@ -87,69 +87,69 @@ Error: 2 - Undefined variable $undefined_var
 Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 1 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 12345 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value -2345 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 10.5 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value -10.5 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 101234567000 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 1.07654321E-9 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 0.5 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 Arg value  
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value  
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value 1 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, true given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, true given
 
 Arg value  
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, false given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, false given
 
 Arg value 1 
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, true given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, true given
 
 Arg value  
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, false given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, false given
 
 Arg value  
 bool(false)
@@ -166,8 +166,8 @@ In autoload(String)
 bool(false)
 
 Arg value  
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value  
-method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
+TypeError: method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 Done

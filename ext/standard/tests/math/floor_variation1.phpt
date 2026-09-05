@@ -64,8 +64,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(floor($input));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 };
@@ -97,25 +97,25 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-floor(): Argument #1 ($num) must be of type int|float, string given
+TypeError: floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 8 --
-floor(): Argument #1 ($num) must be of type int|float, string given
+TypeError: floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 9 --
-floor(): Argument #1 ($num) must be of type int|float, array given
+TypeError: floor(): Argument #1 ($num) must be of type int|float, array given
 
 -- Iteration 10 --
-floor(): Argument #1 ($num) must be of type int|float, string given
+TypeError: floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 11 --
-floor(): Argument #1 ($num) must be of type int|float, string given
+TypeError: floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 12 --
-floor(): Argument #1 ($num) must be of type int|float, string given
+TypeError: floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 13 --
-floor(): Argument #1 ($num) must be of type int|float, classA given
+TypeError: floor(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 14 --
 
@@ -128,4 +128,4 @@ Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is de
 float(0)
 
 -- Iteration 16 --
-floor(): Argument #1 ($num) must be of type int|float, resource given
+TypeError: floor(): Argument #1 ($num) must be of type int|float, resource given

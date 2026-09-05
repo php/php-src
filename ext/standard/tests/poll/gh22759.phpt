@@ -25,8 +25,8 @@ var_dump($second->isActive());
 
 try {
     $second->remove();
-} catch (Io\Poll\InactiveWatcherException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "done\n";
@@ -34,5 +34,5 @@ echo "done\n";
 --EXPECT--
 NULL
 bool(false)
-Cannot remove inactive watcher
+Io\Poll\InactiveWatcherException: Cannot remove inactive watcher
 done

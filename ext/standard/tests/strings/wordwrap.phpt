@@ -29,8 +29,8 @@ var_dump("123|==1234567890|==123" === wordwrap("123 1234567890 123", 10, "|==", 
 
 try {
     wordwrap(chr(0), 0, "");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -53,4 +53,4 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-wordwrap(): Argument #3 ($break) must not be empty
+ValueError: wordwrap(): Argument #3 ($break) must not be empty

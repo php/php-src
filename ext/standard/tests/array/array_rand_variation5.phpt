@@ -28,29 +28,29 @@ var_dump( array_rand($input, 1) );  // with valid $num_req value
 echo"\n-- With num_req = 0 --\n";
 try {
     var_dump( array_rand($input, 0) );  // with $num_req=0
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo"\n-- With num_req = -1 --\n";
 try {
     var_dump( array_rand($input, -1) );  // with $num_req=-1
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo"\n-- With num_req = -2 --\n";
 try {
     var_dump( array_rand($input, -2) );  // with $num_req=-2
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo"\n-- With num_req more than number of members in 'input' array --\n";
 try {
     var_dump( array_rand($input, 13) );  // with $num_req=13
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -64,13 +64,13 @@ int(%d)
 int(%d)
 
 -- With num_req = 0 --
-array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
+ValueError: array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
 
 -- With num_req = -1 --
-array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
+ValueError: array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
 
 -- With num_req = -2 --
-array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
+ValueError: array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
 
 -- With num_req more than number of members in 'input' array --
-array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)
+ValueError: array_rand(): Argument #2 ($num) must be between 1 and the number of elements in argument #1 ($array)

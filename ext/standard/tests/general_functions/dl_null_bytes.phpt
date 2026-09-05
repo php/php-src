@@ -5,10 +5,10 @@ dl() rejects null bytes in extension filename
 
 try {
     dl("foo\0bar");
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-dl(): Argument #1 ($extension_filename) must not contain any null bytes
+ValueError: dl(): Argument #1 ($extension_filename) must not contain any null bytes

@@ -9,9 +9,9 @@ $resourceFileTemp = fopen('php://temp', 'r+');
 stream_context_set_params($resourceFileTemp, array());
 try {
     preg_replace('', function() {}, $resourceFileTemp);
-} catch (\TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-preg_replace(): Argument #2 ($replacement) must be of type array|string, Closure given
+TypeError: preg_replace(): Argument #2 ($replacement) must be of type array|string, Closure given

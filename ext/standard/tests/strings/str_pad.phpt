@@ -66,16 +66,16 @@ echo "\n--- empty padding string ---\n";
 
 try {
     str_pad($input_string, 12, "");
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /* bad pad_type - passing an undefined one */
 
 try {
     str_pad($input_string, $pad_length, "+", 15);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -302,5 +302,5 @@ string(16) "\t\variation\t\t"
 #### error conditions ####
 
 --- empty padding string ---
-str_pad(): Argument #3 ($pad_string) must not be empty
-str_pad(): Argument #4 ($pad_type) must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH
+ValueError: str_pad(): Argument #3 ($pad_string) must not be empty
+ValueError: str_pad(): Argument #4 ($pad_type) must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH

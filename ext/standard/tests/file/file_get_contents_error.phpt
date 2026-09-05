@@ -19,8 +19,8 @@ $file_handle = fopen($file_path."/file_put_contents_error.tmp", "w");
 echo "\n-- Testing for invalid negative maxlen values --\n";
 try {
     file_get_contents($file_path."/file_get_contents_error1.tmp", FALSE, $file_handle, 0, -5);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 delete_files($file_path, 1, "file_get_contents_error", 1);
@@ -48,6 +48,6 @@ Warning: file_get_contents(): Failed to open stream: No such file or directory i
 bool(false)
 
 -- Testing for invalid negative maxlen values --
-file_get_contents(): Argument #5 ($length) must be greater than or equal to 0
+ValueError: file_get_contents(): Argument #5 ($length) must be greater than or equal to 0
 
 *** Done ***

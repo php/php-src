@@ -11,18 +11,18 @@ class Foo {
 	) {
 		try {
 			assert(($this->f)('abc') !== 'cba');
-		} catch (Error $e) {
-			echo $e->getMessage(), PHP_EOL;
+		} catch (Throwable $e) {
+			echo $e::class, ': ', $e->getMessage(), "\n";
 		}
 		try {
 			assert(($this?->f)('abc') !== 'cba');
-		} catch (Error $e) {
-			echo $e->getMessage(), PHP_EOL;
+		} catch (Throwable $e) {
+			echo $e::class, ': ', $e->getMessage(), "\n";
 		}
 		try {
 			assert((self::$sf)('abc') !== 'cba');
-		} catch (Error $e) {
-			echo $e->getMessage(), PHP_EOL;
+		} catch (Throwable $e) {
+			echo $e::class, ': ', $e->getMessage(), "\n";
 		}
 	}
 }
@@ -31,6 +31,6 @@ new Foo();
 
 ?>
 --EXPECT--
-assert(($this->f)('abc') !== 'cba')
-assert(($this?->f)('abc') !== 'cba')
-assert((self::$sf)('abc') !== 'cba')
+AssertionError: assert(($this->f)('abc') !== 'cba')
+AssertionError: assert(($this?->f)('abc') !== 'cba')
+AssertionError: assert((self::$sf)('abc') !== 'cba')

@@ -92,15 +92,15 @@ foreach($arrays as $unexpected_value) {
     // Calling array_intersect() with default arguments
     try {
         var_dump( array_intersect($unexpected_value,$array2) );
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     // Calling array_intersect() with more arguments
     try {
         var_dump( array_intersect($unexpected_value, $array2, $arr3) );
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 }
@@ -113,75 +113,75 @@ echo "Done";
 --EXPECT--
 *** Testing array_intersect() : Passing non-array values to $array1 argument ***
 
--- Iterator 1 --array_intersect(): Argument #1 ($array) must be of type array, int given
-array_intersect(): Argument #1 ($array) must be of type array, int given
+-- Iterator 1 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, int given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, int given
 
--- Iterator 2 --array_intersect(): Argument #1 ($array) must be of type array, int given
-array_intersect(): Argument #1 ($array) must be of type array, int given
+-- Iterator 2 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, int given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, int given
 
--- Iterator 3 --array_intersect(): Argument #1 ($array) must be of type array, int given
-array_intersect(): Argument #1 ($array) must be of type array, int given
+-- Iterator 3 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, int given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, int given
 
--- Iterator 4 --array_intersect(): Argument #1 ($array) must be of type array, int given
-array_intersect(): Argument #1 ($array) must be of type array, int given
+-- Iterator 4 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, int given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, int given
 
--- Iterator 5 --array_intersect(): Argument #1 ($array) must be of type array, float given
-array_intersect(): Argument #1 ($array) must be of type array, float given
+-- Iterator 5 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 6 --array_intersect(): Argument #1 ($array) must be of type array, float given
-array_intersect(): Argument #1 ($array) must be of type array, float given
+-- Iterator 6 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 7 --array_intersect(): Argument #1 ($array) must be of type array, float given
-array_intersect(): Argument #1 ($array) must be of type array, float given
+-- Iterator 7 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 8 --array_intersect(): Argument #1 ($array) must be of type array, float given
-array_intersect(): Argument #1 ($array) must be of type array, float given
+-- Iterator 8 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 9 --array_intersect(): Argument #1 ($array) must be of type array, float given
-array_intersect(): Argument #1 ($array) must be of type array, float given
+-- Iterator 9 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 10 --array_intersect(): Argument #1 ($array) must be of type array, null given
-array_intersect(): Argument #1 ($array) must be of type array, null given
+-- Iterator 10 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, null given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, null given
 
--- Iterator 11 --array_intersect(): Argument #1 ($array) must be of type array, null given
-array_intersect(): Argument #1 ($array) must be of type array, null given
+-- Iterator 11 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, null given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, null given
 
--- Iterator 12 --array_intersect(): Argument #1 ($array) must be of type array, true given
-array_intersect(): Argument #1 ($array) must be of type array, true given
+-- Iterator 12 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, true given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, true given
 
--- Iterator 13 --array_intersect(): Argument #1 ($array) must be of type array, false given
-array_intersect(): Argument #1 ($array) must be of type array, false given
+-- Iterator 13 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, false given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, false given
 
--- Iterator 14 --array_intersect(): Argument #1 ($array) must be of type array, true given
-array_intersect(): Argument #1 ($array) must be of type array, true given
+-- Iterator 14 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, true given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, true given
 
--- Iterator 15 --array_intersect(): Argument #1 ($array) must be of type array, false given
-array_intersect(): Argument #1 ($array) must be of type array, false given
+-- Iterator 15 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, false given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, false given
 
--- Iterator 16 --array_intersect(): Argument #1 ($array) must be of type array, string given
-array_intersect(): Argument #1 ($array) must be of type array, string given
+-- Iterator 16 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 17 --array_intersect(): Argument #1 ($array) must be of type array, string given
-array_intersect(): Argument #1 ($array) must be of type array, string given
+-- Iterator 17 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 18 --array_intersect(): Argument #1 ($array) must be of type array, string given
-array_intersect(): Argument #1 ($array) must be of type array, string given
+-- Iterator 18 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 19 --array_intersect(): Argument #1 ($array) must be of type array, string given
-array_intersect(): Argument #1 ($array) must be of type array, string given
+-- Iterator 19 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 20 --array_intersect(): Argument #1 ($array) must be of type array, string given
-array_intersect(): Argument #1 ($array) must be of type array, string given
+-- Iterator 20 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 21 --array_intersect(): Argument #1 ($array) must be of type array, classA given
-array_intersect(): Argument #1 ($array) must be of type array, classA given
+-- Iterator 21 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, classA given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, classA given
 
--- Iterator 22 --array_intersect(): Argument #1 ($array) must be of type array, null given
-array_intersect(): Argument #1 ($array) must be of type array, null given
+-- Iterator 22 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, null given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, null given
 
--- Iterator 23 --array_intersect(): Argument #1 ($array) must be of type array, null given
-array_intersect(): Argument #1 ($array) must be of type array, null given
+-- Iterator 23 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, null given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, null given
 
--- Iterator 24 --array_intersect(): Argument #1 ($array) must be of type array, resource given
-array_intersect(): Argument #1 ($array) must be of type array, resource given
+-- Iterator 24 --TypeError: array_intersect(): Argument #1 ($array) must be of type array, resource given
+TypeError: array_intersect(): Argument #1 ($array) must be of type array, resource given
 Done

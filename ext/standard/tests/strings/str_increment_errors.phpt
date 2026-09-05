@@ -30,24 +30,24 @@ $strings = [
 foreach ($strings as $s) {
     try {
         var_dump(str_increment($s));
-    } catch (ValueError $e) {
-        echo $e->getMessage(), PHP_EOL;
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
-str_increment(): Argument #1 ($string) must not be empty
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
-str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must not be empty
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters
+ValueError: str_increment(): Argument #1 ($string) must be composed only of alphanumeric ASCII characters

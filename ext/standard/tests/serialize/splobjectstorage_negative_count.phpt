@@ -8,10 +8,10 @@ OSS-Fuzz: Unserializing SplObjectStorage with negative number of elements
 $str = 'C:16:"SplObjectStorage":25:{x:i:-9223372036854775808;}';
 try {
     var_dump(unserialize($str));
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Error at offset 24 of 25 bytes
+UnexpectedValueException: Error at offset 24 of 25 bytes

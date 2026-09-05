@@ -48,8 +48,8 @@ var_dump( array_map(array('ChildClass', 'staticParent1'), $arr1) );
 echo "-- accessing child method from parent class --\n";
 try {
     var_dump( array_map(array('ParentClass', 'staticChild'), $arr1) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- accessing parent method using child class object --\n";
@@ -58,8 +58,8 @@ var_dump( array_map(array($childobj, 'staticParent1'), $arr1) );
 echo "-- accessing child method using parent class object --\n";
 try {
     var_dump( array_map(array($parentobj, 'staticChild'), $arr1) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
@@ -76,7 +76,7 @@ array(3) {
   int(7)
 }
 -- accessing child method from parent class --
-array_map(): Argument #1 ($callback) must be a valid callback or null, class ParentClass does not have a method "staticChild"
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, class ParentClass does not have a method "staticChild"
 -- accessing parent method using child class object --
 array(3) {
   [0]=>
@@ -87,5 +87,5 @@ array(3) {
   int(7)
 }
 -- accessing child method using parent class object --
-array_map(): Argument #1 ($callback) must be a valid callback or null, class ParentClass does not have a method "staticChild"
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, class ParentClass does not have a method "staticChild"
 Done

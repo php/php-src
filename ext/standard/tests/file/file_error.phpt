@@ -9,13 +9,13 @@ $file_handle = fopen($file_path."/file.tmp", "w");
 $filename = $file_path."/file.tmp";
 try {
     var_dump( file($filename, 10, NULL) );  //  Incorrect flag
-} catch(ValueError $e) {
-    echo "ValueError: " . $e->getMessage() . "\n";
+} catch(Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( file($filename, FILE_APPEND) );  //  Incorrect flag
-} catch(ValueError $e) {
-    echo "ValueError: " . $e->getMessage() . "\n";
+} catch(Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump( file("temp.tmp") );  // non existing filename
 fclose($file_handle);

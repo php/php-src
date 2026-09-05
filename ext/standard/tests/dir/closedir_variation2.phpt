@@ -22,8 +22,8 @@ var_dump($dh);
 echo "\n-- Close directory handle second time: --\n";
 try {
     var_dump(closedir($dh));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "Directory Handle: ";
 var_dump($dh);
@@ -41,5 +41,5 @@ NULL
 Directory Handle: resource(%d) of type (Unknown)
 
 -- Close directory handle second time: --
-closedir(): Argument #1 ($dir_handle) must be an open stream resource
+TypeError: closedir(): Argument #1 ($dir_handle) must be an open stream resource
 Directory Handle: resource(%d) of type (Unknown)

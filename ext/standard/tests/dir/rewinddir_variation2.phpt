@@ -19,8 +19,8 @@ closedir($dir_handle);
 echo "\n-- Call to rewinddir() --\n";
 try {
     var_dump(rewinddir($dir_handle));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -36,4 +36,4 @@ resource(%d) of type (stream)
 string(%d) "%s"
 
 -- Call to rewinddir() --
-rewinddir(): Argument #1 ($dir_handle) must be an open stream resource
+TypeError: rewinddir(): Argument #1 ($dir_handle) must be an open stream resource

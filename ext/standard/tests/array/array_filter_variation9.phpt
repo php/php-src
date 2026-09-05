@@ -19,15 +19,15 @@ var_dump( array_filter($input, 'chr') );
 // using language construct 'echo' as 'callback'
 try {
     var_dump( array_filter($input, 'echo') );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // using language construct 'isset' as 'callback'
 try {
     var_dump( array_filter($input, 'isset') );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done"
@@ -54,6 +54,6 @@ array(4) {
   [3]=>
   int(100)
 }
-array_filter(): Argument #2 ($callback) must be a valid callback or null, function "echo" not found or invalid function name
-array_filter(): Argument #2 ($callback) must be a valid callback or null, function "isset" not found or invalid function name
+TypeError: array_filter(): Argument #2 ($callback) must be a valid callback or null, function "echo" not found or invalid function name
+TypeError: array_filter(): Argument #2 ($callback) must be a valid callback or null, function "isset" not found or invalid function name
 Done

@@ -39,8 +39,8 @@ foreach ($inputs as $i => $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(decoct($input));
-    } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -61,10 +61,10 @@ string(5) "30071"
 string(22) "1777777777777777773327"
 
 -- Iteration 5 --
-decoct(): Argument #1 ($num) must be of type int, float given
+TypeError: decoct(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 6 --
-decoct(): Argument #1 ($num) must be of type int, float given
+TypeError: decoct(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
 string(13) "1627646215010"
@@ -82,7 +82,7 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 12 --
-decoct(): Argument #1 ($num) must be of type int, string given
+TypeError: decoct(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 13 --
-decoct(): Argument #1 ($num) must be of type int, string given
+TypeError: decoct(): Argument #1 ($num) must be of type int, string given

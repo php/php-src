@@ -27,8 +27,8 @@ var_dump( get_class_methods("D") );
 echo "Argument is non existent class:\n";
 try {
     var_dump( get_class_methods("NonExistent") );
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done";
@@ -57,5 +57,5 @@ Argument is name of class which has no methods:
 array(0) {
 }
 Argument is non existent class:
-get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, "NonExistent" given
+TypeError: get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, "NonExistent" given
 Done

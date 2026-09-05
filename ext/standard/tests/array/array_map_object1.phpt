@@ -25,8 +25,8 @@ function test($cb, $args) {
   echo join('::', $cb) . "\n";
   try {
     var_dump(array_map($cb, $args));
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
 }
 test(array('SimpleClass', 'square'), array(1, 2));
@@ -132,15 +132,15 @@ array(2) {
 
 -- simple class with private variable and method --
 SimpleClassPri::add
-array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access private method SimpleClassPri::add()
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access private method SimpleClassPri::add()
 
 -- simple class with protected variable and method --
 SimpleClassPro::mul
-array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method SimpleClassPro::mul()
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method SimpleClassPro::mul()
 
 -- class without members --
 EmptyClass
-array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
 
 -- abstract class --
 ChildClass::emptyFunction
@@ -173,9 +173,9 @@ array(2) {
   int(4)
 }
 StaticClass::cube
-array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access private method StaticClass::cube()
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access private method StaticClass::cube()
 StaticClass::retVal
-array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method StaticClass::retVal()
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method StaticClass::retVal()
 -- class implementing an interface --
 InterClass::square
 array(2) {

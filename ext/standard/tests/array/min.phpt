@@ -7,20 +7,20 @@ precision=14
 
 try {
     var_dump(min(1));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(min(array()));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(min(new stdclass));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(min(2,1,2));
@@ -33,9 +33,9 @@ var_dump(min(0, true, false, true));
 
 ?>
 --EXPECT--
-min(): Argument #1 ($value) must be of type array, int given
-min(): Argument #1 ($value) must contain at least one element
-min(): Argument #1 ($value) must be of type array, stdClass given
+TypeError: min(): Argument #1 ($value) must be of type array, int given
+ValueError: min(): Argument #1 ($value) must contain at least one element
+TypeError: min(): Argument #1 ($value) must be of type array, stdClass given
 int(1)
 float(2.09)
 string(0) ""

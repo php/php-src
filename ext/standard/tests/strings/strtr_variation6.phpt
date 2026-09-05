@@ -66,8 +66,8 @@ for($index = 0; $index < count($from_arr); $index++) {
   $from = $from_arr[$index];
   try {
     var_dump(strtr($str, $from, $to));
-  } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+  } catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
   $count++;
 }
@@ -89,11 +89,11 @@ string(6) "m1tatm"
 -- Iteration 6 --
 string(6) "tm0atm"
 -- Iteration 7 --
-strtr(): Argument #2 ($from) must be of type string, array given
+TypeError: strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 8 --
-strtr(): Argument #2 ($from) must be of type string, array given
+TypeError: strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 9 --
-strtr(): Argument #2 ($from) must be of type string, array given
+TypeError: strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 10 --
 string(6) "0a2atm"
 -- Iteration 11 --
@@ -113,4 +113,4 @@ string(6) "012atm"
 -- Iteration 16 --
 string(6) "012ttm"
 -- Iteration 17 --
-strtr(): Argument #2 ($from) must be of type string, resource given
+TypeError: strtr(): Argument #2 ($from) must be of type string, resource given

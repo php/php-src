@@ -11,12 +11,12 @@ var_dump(intdiv(PHP_INT_MIN, PHP_INT_MIN));
 try {
   var_dump(intdiv(PHP_INT_MIN, -1));
 } catch (Throwable $e) {
-  echo "Exception: " . $e->getMessage() . "\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
   var_dump(intdiv(1, 0));
 } catch (Throwable $e) {
-  echo "Exception: " . $e->getMessage() . "\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -27,5 +27,5 @@ int(-1)
 int(1)
 int(1)
 int(1)
-Exception: Division of PHP_INT_MIN by -1 is not an integer
-Exception: Division by zero
+ArithmeticError: Division of PHP_INT_MIN by -1 is not an integer
+DivisionByZeroError: Division by zero

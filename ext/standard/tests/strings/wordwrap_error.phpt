@@ -24,8 +24,8 @@ $cut = true;
 
 try {
     wordwrap($str, $width, $break, $cut);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- width = -10 & cut = false --\n";
@@ -47,7 +47,7 @@ var_dump( wordwrap($str, $width, $break, $cut) );
 -- width = 0 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = 0 & cut = true --
-wordwrap(): Argument #4 ($cut_long_words) cannot be true when argument #2 ($width) is 0
+ValueError: wordwrap(): Argument #4 ($cut_long_words) cannot be true when argument #2 ($width) is 0
 -- width = -10 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = -10 & cut = true --

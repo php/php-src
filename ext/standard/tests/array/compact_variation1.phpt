@@ -18,14 +18,14 @@ $arr3 = array(&$string);
 
 try {
     var_dump(compact($arr1));
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(compact($arr2));
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(compact($arr3));
@@ -33,8 +33,8 @@ var_dump(compact($arr3));
 ?>
 --EXPECT--
 *** Testing compact() : usage variations  - arrays containing references ***
-Recursion detected
-Recursion detected
+Error: Recursion detected
+Error: Recursion detected
 array(1) {
   ["c"]=>
   int(3)

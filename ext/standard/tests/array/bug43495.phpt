@@ -11,8 +11,8 @@ $b["key1"]["key2"]["key3"]=&$b;
 
 try {
     array_merge_recursive($a,$b);
-} catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 /* Break recursion */
@@ -21,4 +21,4 @@ $b["key1"]["key2"]["key3"] = null;
 
 ?>
 --EXPECT--
-Recursion detected
+Error: Recursion detected

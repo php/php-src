@@ -88,8 +88,8 @@ foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
         var_dump( array_uintersect($array1, $value, $data_compare_function) );
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 };
 
@@ -98,76 +98,76 @@ foreach($inputs as $key =>$value) {
 *** Testing array_uintersect() : usage variation ***
 
 --int 0--
-array_uintersect(): Argument #2 must be of type array, int given
+TypeError: array_uintersect(): Argument #2 must be of type array, int given
 
 --int 1--
-array_uintersect(): Argument #2 must be of type array, int given
+TypeError: array_uintersect(): Argument #2 must be of type array, int given
 
 --int 12345--
-array_uintersect(): Argument #2 must be of type array, int given
+TypeError: array_uintersect(): Argument #2 must be of type array, int given
 
 --int -12345--
-array_uintersect(): Argument #2 must be of type array, int given
+TypeError: array_uintersect(): Argument #2 must be of type array, int given
 
 --float 10.5--
-array_uintersect(): Argument #2 must be of type array, float given
+TypeError: array_uintersect(): Argument #2 must be of type array, float given
 
 --float -10.5--
-array_uintersect(): Argument #2 must be of type array, float given
+TypeError: array_uintersect(): Argument #2 must be of type array, float given
 
 --float 12.3456789000e10--
-array_uintersect(): Argument #2 must be of type array, float given
+TypeError: array_uintersect(): Argument #2 must be of type array, float given
 
 --float -12.3456789000e10--
-array_uintersect(): Argument #2 must be of type array, float given
+TypeError: array_uintersect(): Argument #2 must be of type array, float given
 
 --float .5--
-array_uintersect(): Argument #2 must be of type array, float given
+TypeError: array_uintersect(): Argument #2 must be of type array, float given
 
 --uppercase NULL--
-array_uintersect(): Argument #2 must be of type array, null given
+TypeError: array_uintersect(): Argument #2 must be of type array, null given
 
 --lowercase null--
-array_uintersect(): Argument #2 must be of type array, null given
+TypeError: array_uintersect(): Argument #2 must be of type array, null given
 
 --lowercase true--
-array_uintersect(): Argument #2 must be of type array, true given
+TypeError: array_uintersect(): Argument #2 must be of type array, true given
 
 --lowercase false--
-array_uintersect(): Argument #2 must be of type array, false given
+TypeError: array_uintersect(): Argument #2 must be of type array, false given
 
 --uppercase TRUE--
-array_uintersect(): Argument #2 must be of type array, true given
+TypeError: array_uintersect(): Argument #2 must be of type array, true given
 
 --uppercase FALSE--
-array_uintersect(): Argument #2 must be of type array, false given
+TypeError: array_uintersect(): Argument #2 must be of type array, false given
 
 --empty string DQ--
-array_uintersect(): Argument #2 must be of type array, string given
+TypeError: array_uintersect(): Argument #2 must be of type array, string given
 
 --empty string SQ--
-array_uintersect(): Argument #2 must be of type array, string given
+TypeError: array_uintersect(): Argument #2 must be of type array, string given
 
 --string DQ--
-array_uintersect(): Argument #2 must be of type array, string given
+TypeError: array_uintersect(): Argument #2 must be of type array, string given
 
 --string SQ--
-array_uintersect(): Argument #2 must be of type array, string given
+TypeError: array_uintersect(): Argument #2 must be of type array, string given
 
 --mixed case string--
-array_uintersect(): Argument #2 must be of type array, string given
+TypeError: array_uintersect(): Argument #2 must be of type array, string given
 
 --heredoc--
-array_uintersect(): Argument #2 must be of type array, string given
+TypeError: array_uintersect(): Argument #2 must be of type array, string given
 
 --instance of classWithToString--
-array_uintersect(): Argument #2 must be of type array, classWithToString given
+TypeError: array_uintersect(): Argument #2 must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-array_uintersect(): Argument #2 must be of type array, classWithoutToString given
+TypeError: array_uintersect(): Argument #2 must be of type array, classWithoutToString given
 
 --undefined var--
-array_uintersect(): Argument #2 must be of type array, null given
+TypeError: array_uintersect(): Argument #2 must be of type array, null given
 
 --unset var--
-array_uintersect(): Argument #2 must be of type array, null given
+TypeError: array_uintersect(): Argument #2 must be of type array, null given

@@ -276,4 +276,3 @@ Base = -9223372036854775808
 ..... Exponent = -500 Result = 0
 ..... Exponent = 2147483647 Result = -INF
 ..... Exponent = -2147483648 Result = 0
-

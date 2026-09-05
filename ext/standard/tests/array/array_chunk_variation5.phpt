@@ -23,18 +23,18 @@ foreach ($sizes as $size){
     echo "\n-- Testing array_chunk() when size = $size --\n";
     try {
         var_dump( array_chunk($input_array, $size) );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, true) );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, false) );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
@@ -42,9 +42,9 @@ foreach ($sizes as $size){
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() when size = -1 --
-array_chunk(): Argument #2 ($length) must be greater than 0
-array_chunk(): Argument #2 ($length) must be greater than 0
-array_chunk(): Argument #2 ($length) must be greater than 0
+ValueError: array_chunk(): Argument #2 ($length) must be greater than 0
+ValueError: array_chunk(): Argument #2 ($length) must be greater than 0
+ValueError: array_chunk(): Argument #2 ($length) must be greater than 0
 
 -- Testing array_chunk() when size = 4 --
 array(1) {
@@ -82,9 +82,9 @@ array(1) {
 }
 
 -- Testing array_chunk() when size = 0 --
-array_chunk(): Argument #2 ($length) must be greater than 0
-array_chunk(): Argument #2 ($length) must be greater than 0
-array_chunk(): Argument #2 ($length) must be greater than 0
+ValueError: array_chunk(): Argument #2 ($length) must be greater than 0
+ValueError: array_chunk(): Argument #2 ($length) must be greater than 0
+ValueError: array_chunk(): Argument #2 ($length) must be greater than 0
 
 -- Testing array_chunk() when size = 1 --
 array(3) {

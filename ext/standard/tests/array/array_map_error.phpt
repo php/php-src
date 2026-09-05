@@ -12,7 +12,7 @@ function callback1() {
 try {
     var_dump( array_map('callback1') );
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- Testing array_map() function with less no. of arrays than callback function arguments --\n";
@@ -23,7 +23,7 @@ function callback2($p, $q) {
 try {
     var_dump( array_map('callback2', $arr1) );
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- Testing array_map() function with more no. of arrays than callback function arguments --\n";
@@ -37,10 +37,10 @@ echo "Done";
 *** Testing array_map() : error conditions ***
 
 -- Testing array_map() function with one less than expected no. of arguments --
-Exception: array_map() expects at least 2 arguments, 1 given
+ArgumentCountError: array_map() expects at least 2 arguments, 1 given
 
 -- Testing array_map() function with less no. of arrays than callback function arguments --
-Exception: Too few arguments to function callback2(), 1 passed and exactly 2 expected
+ArgumentCountError: Too few arguments to function callback2(), 1 passed and exactly 2 expected
 
 -- Testing array_map() function with more no. of arrays than callback function arguments --
 array(2) {

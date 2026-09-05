@@ -96,8 +96,8 @@ foreach ($types as $type) {
 
         // check the new type
         var_dump( gettype($var) );
-     } catch (ValueError $exception) {
-         echo $exception->getMessage() . "\n";
+     } catch (Throwable $exception) {
+         echo $exception::class, ': ', $exception->getMessage(), "\n";
      }
   }
 }
@@ -537,33 +537,33 @@ string(7) "boolean"
 
 -- Setting type of data to resource --
 -- Iteration 1 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 2 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 3 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 4 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 5 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 6 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 7 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 8 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 9 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 10 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 11 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 12 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 13 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 -- Iteration 14 --
-Cannot convert to resource type
+ValueError: Cannot convert to resource type
 
 -- Setting type of data to array --
 -- Iteration 1 --
