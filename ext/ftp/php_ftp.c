@@ -656,8 +656,8 @@ PHP_FUNCTION(ftp_nb_fget)
 
 	/* configuration */
 	if (ftp->in_use) {
-		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot start a transfer while another transfer is in progress");
+		RETURN_THROWS();
 	}
 
 	ftp->direction = 0;   /* recv */
@@ -961,8 +961,8 @@ PHP_FUNCTION(ftp_nb_fput)
 
 	/* configuration */
 	if (ftp->in_use) {
-		php_error_docref(NULL, E_WARNING, "FTP\\Connection is already in use");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cannot start a transfer while another transfer is in progress");
+		RETURN_THROWS();
 	}
 
 	ftp->direction = true;   /* send */
