@@ -24,6 +24,7 @@
 #include "zend_API.h"
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
+#include "zend_async_API.h"
 #include "zend_ini.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
@@ -831,6 +832,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->current_fiber_context = NULL;
 	executor_globals->main_fiber_context = NULL;
 	executor_globals->active_fiber = NULL;
+	memset(&executor_globals->shutdown_context, 0, sizeof(executor_globals->shutdown_context));
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
@@ -1979,8 +1981,13 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 				zend_user_exception_handler();
 			}
+
 			if (EG(exception)) {
-				ret = zend_exception_error(EG(exception), E_ERROR);
+				if (ZEND_ASYNC_CURRENT_COROUTINE == NULL) {
+					ret = zend_exception_error(EG(exception), E_ERROR);
+				} else {
+					ret = FAILURE;
+				}
 			}
 		}
 		zend_destroy_static_vars(op_array);
