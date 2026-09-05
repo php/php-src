@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     next() call on the inner generator). (iliaal)
   . Fixed bug GH-23301 (Nested "yield from" yields a value twice when the
     middle generator delegates again). (Lazizbek Ergashev)
+  . Fixed the IS_IDENTICAL_EMPTY_ARRAY specialization being selected for an
+    IS_CONST op1. (Mrmaxmeier)
 
 - DOM:
   . Fixed NamedNodeMap::getNamedItemNS() with an empty URI not matching
