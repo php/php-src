@@ -19,7 +19,6 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_libsodium.h"
-#include "zend_attributes.h"
 #include "zend_exceptions.h"
 
 #include <sodium.h>

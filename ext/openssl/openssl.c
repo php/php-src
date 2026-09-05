@@ -26,7 +26,6 @@
 #include "php_ini.h"
 #include "php_openssl.h"
 #include "php_openssl_backend.h"
-#include "zend_attributes.h"
 #include "zend_exceptions.h"
 
 /* PHP Includes */

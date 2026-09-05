@@ -31,8 +31,6 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
-#include "zend_attributes.h"
-#include "zend_enum.h"
 #include "zend_ini.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"

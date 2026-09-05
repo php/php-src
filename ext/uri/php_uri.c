@@ -19,8 +19,6 @@
 #include "php.h"
 #include "Zend/zend_interfaces.h"
 #include "Zend/zend_exceptions.h"
-#include "Zend/zend_attributes.h"
-#include "Zend/zend_enum.h"
 #include "ext/standard/info.h"
 
 #include "php_uri.h"

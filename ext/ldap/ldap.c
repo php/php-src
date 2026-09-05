@@ -26,7 +26,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "Zend/zend_attributes.h"
 
 #include <stddef.h>
 

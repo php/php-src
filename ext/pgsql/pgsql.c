@@ -35,7 +35,6 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
-#include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "php_network.h"
 

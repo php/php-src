@@ -22,7 +22,6 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "zend_attributes.h"
 
 #include "ext/standard/info.h"
 #include "Zend/zend_interfaces.h"
