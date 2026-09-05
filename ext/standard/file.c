@@ -92,7 +92,6 @@ php_file_globals file_globals;
 # include <fnmatch.h>
 #endif
 
-#include "zend_attributes.h"
 #include "file_arginfo.h"
 
 /* }}} */

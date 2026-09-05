@@ -1,6 +1,8 @@
 /* This is a generated file, edit zend_builtin_functions.stub.php instead.
  * Stub hash: 5d7145b7bc305bb50b45e75c02740206148223b1 */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clone, 0, 1, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, withProperties, IS_ARRAY, 0, "[]")

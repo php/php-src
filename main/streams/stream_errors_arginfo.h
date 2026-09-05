@@ -2,6 +2,8 @@
  * Stub hash: d3087b608996f81bf0dd19c25792feec9744e768
  * Has decl header: yes */
 
+#include "zend_enum.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_StreamException_getErrors, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 

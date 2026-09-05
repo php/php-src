@@ -1,6 +1,8 @@
 /* This is a generated file, edit readline.stub.php instead.
  * Stub hash: 848e798481f62ee09cfd8cc3dfa6b0814cfdd979 */
 
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_readline, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prompt, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()

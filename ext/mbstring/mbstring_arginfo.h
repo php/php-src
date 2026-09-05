@@ -1,6 +1,11 @@
 /* This is a generated file, edit mbstring.stub.php instead.
  * Stub hash: f02c317efd6814f902ea75c9d222893713546845 */
 
+#if defined(HAVE_MBREGEX)
+#include "zend_attributes.h"
+#endif
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
