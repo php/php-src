@@ -1097,7 +1097,13 @@ try_again:
 						return 0.0;
 					}
 				}
-				return type == IS_LONG ? (double) lval : dval;
+				if (type == IS_DOUBLE) {
+					return dval;
+				}
+				if (UNEXPECTED(lval == 0)) {
+					return zend_strtod(Z_STRVAL_P(op), NULL);
+				}
+				return (double) lval;
 			}
 		case IS_OBJECT:
 			{

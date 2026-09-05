@@ -43,6 +43,13 @@ foreach ($formats as $format) {
     var_dump($infinity === INF && is_nan($nan));
 }
 
+echo "signed zero integer strings:\n";
+foreach ($formats as $format) {
+    $actual = unpack($format, pack($format, '-0'))[1];
+    echo "$format: ";
+    var_dump($actual === 0.0 && fdiv(1.0, $actual) === -INF);
+}
+
 echo "leading-numeric strings:\n";
 foreach ($formats as $format) {
     $diagnostic = null;
@@ -133,6 +140,13 @@ d: bool(true)
 e: bool(true)
 E: bool(true)
 special float values:
+f: bool(true)
+g: bool(true)
+G: bool(true)
+d: bool(true)
+e: bool(true)
+E: bool(true)
+signed zero integer strings:
 f: bool(true)
 g: bool(true)
 G: bool(true)
