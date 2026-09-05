@@ -49,5 +49,23 @@ foreach ($cases as $label => $array) {
 }
 ?>
 --EXPECTF--
-=== BENCHMARK RESULTS (%s iterations) ===
-%a
+=== BENCHMARK RESULTS (%d iterations) ===
+\[Match at start\]
+  C (array_str_contains) : %f ms
+  Userland (foreach)     : %f ms
+  Speedup                : %f x faster
+
+\[Match in middle\]
+  C (array_str_contains) : %f ms
+  Userland (foreach)     : %f ms
+  Speedup                : %f x faster
+
+\[Match at end\]
+  C (array_str_contains) : %f ms
+  Userland (foreach)     : %f ms
+  Speedup                : %f x faster
+
+\[No match (all)\]
+  C (array_str_contains) : %f ms
+  Userland (foreach)     : %f ms
+  Speedup                : %f x faster
