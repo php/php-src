@@ -42,4 +42,3 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
 bool(false)
-

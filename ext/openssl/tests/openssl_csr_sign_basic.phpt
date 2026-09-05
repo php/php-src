@@ -44,20 +44,20 @@ var_dump(openssl_csr_sign($wrong, null, $privkey, 365));
 
 try {
     openssl_csr_sign(array(), null, $privkey, 365);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     var_dump(openssl_csr_sign($csr, array(), $privkey, 365));
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     var_dump(openssl_csr_sign($csr, null, array(), 365));
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 var_dump(openssl_csr_sign($csr, null, $privkey, 365, $config_arg));
 ?>
@@ -79,8 +79,8 @@ bool(false)
 
 Warning: openssl_csr_sign(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
 bool(false)
-openssl_csr_sign(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, array given
-openssl_csr_sign(): Argument #2 ($ca_certificate) must be of type OpenSSLCertificate|string|null, array given
-Key array must be of the form array(0 => key, 1 => phrase)
+TypeError: openssl_csr_sign(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, array given
+TypeError: openssl_csr_sign(): Argument #2 ($ca_certificate) must be of type OpenSSLCertificate|string|null, array given
+ValueError: Key array must be of the form array(0 => key, 1 => phrase)
 object(OpenSSLCertificate)#%d (0) {
 }

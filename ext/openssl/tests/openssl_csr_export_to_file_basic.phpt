@@ -45,8 +45,8 @@ var_dump(openssl_csr_export_to_file($wrong, $csrfile));
 
 try {
     openssl_csr_export_to_file($dh, $csrfile);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(openssl_csr_export_to_file($csr, $csrfile, false));
 ?>
@@ -81,5 +81,5 @@ f1JMPX0/eHrKvG9wBZu28FdS54xoWGeD1NGraW24
 
 Warning: openssl_csr_export_to_file(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
 bool(false)
-openssl_csr_export_to_file(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
+TypeError: openssl_csr_export_to_file(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
 bool(true)

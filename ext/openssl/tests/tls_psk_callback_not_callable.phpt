@@ -43,4 +43,3 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 caught: psk_client_cb must be a valid callback, %s
-
