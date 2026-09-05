@@ -18,7 +18,7 @@ var_dump(MY_CONSTANT);
 --EXPECTF--
 Deprecated: define(): Argument #3 ($case_insensitive) is ignored and treated as false since declaration of case-insensitive constants is no longer supported, passing the argument explicitly is unnecessary in %s on line %d
 
-Warning: define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported, this will be an error in PHP 9.0 in %s on line %d
+Deprecated: define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported, this will be an error in PHP 9.0 in %s on line %d
 Error: Undefined constant "MY_CONSTANT"
 
 Deprecated: define(): Argument #3 ($case_insensitive) is ignored and treated as false since declaration of case-insensitive constants is no longer supported, passing the argument explicitly is unnecessary in %s on line %d

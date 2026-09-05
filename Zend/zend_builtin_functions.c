@@ -583,7 +583,7 @@ ZEND_FUNCTION(define)
 	}
 
 	if (non_cs) {
-		zend_error(E_WARNING, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported, this will be an error in PHP 9.0");
+		zend_error(E_DEPRECATED, "define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported, this will be an error in PHP 9.0");
 		if (UNEXPECTED(EG(exception))) {
 			RETURN_THROWS();
 		}
