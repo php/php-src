@@ -95,13 +95,9 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 TSRM_API void tsrm_reserve(size_t size);
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
-/* Fast resources at caller-chosen, compile-time-constant offsets. The fixed
- * front region must be reserved after tsrm_reserve() and before any fast id. */
-TSRM_API void tsrm_reserve_fast_front(size_t size);
-TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, ptrdiff_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
-
 /* Resource whose per-thread storage is a native __thread block.
- * Must be called at startup before any other thread exists. */
+ * Must be called at startup before any other thread exists. Its destructor may
+ * only run on the owning thread. */
 TSRM_API ts_rsrc_id ts_allocate_tls_id(ts_rsrc_id *rsrc_id, void *(*tls_addr)(void), size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* fetches the requested resource for the current thread */
@@ -110,6 +106,9 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
 
 /* frees all resources allocated for the current thread */
 TSRM_API void ts_free_thread(void);
+
+/* Disable process-wide automatic thread-exit cleanup. */
+TSRM_API void tsrm_thread_exit_disarm(void);
 
 /* deallocates all occurrences of a given id */
 TSRM_API void ts_free_id(ts_rsrc_id id);
@@ -144,6 +143,8 @@ TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
 TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler);
+/* Internal Zend hook, run before any of the thread's resources are destroyed. */
+void tsrm_set_thread_free_handler(tsrm_shutdown_func_t thread_free_handler);
 
 TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
@@ -166,9 +167,14 @@ TSRM_API bool tsrm_is_managed_thread(void);
 	|| defined(__MUSL__) || defined(__HAIKU__) || defined(_AIX)
 # define TSRM_TLS_MODEL_ATTR
 # define TSRM_TLS_MODEL_DEFAULT
-#elif defined(__PIC__) && !defined(__PIE__)
-# define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
-# define TSRM_TLS_MODEL_INITIAL_EXEC
+#elif (defined(__PIC__) && !defined(__PIE__)) || !defined(ZEND_ENABLE_STATIC_TSRMLS_CACHE)
+# if defined(TSRM_TLS_MODEL_USE_GLOBAL_DYNAMIC)
+#  define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("global-dynamic")))
+#  define TSRM_TLS_MODEL_GLOBAL_DYNAMIC
+# else
+#  define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
+#  define TSRM_TLS_MODEL_INITIAL_EXEC
+# endif
 #else
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("local-exec")))
 # define TSRM_TLS_MODEL_LOCAL_EXEC
@@ -186,17 +192,75 @@ TSRM_API bool tsrm_is_managed_thread(void);
 #define TSRMG_BULK_STATIC(id, type)	((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])
 #define TSRMG_FAST_STATIC(offset, type, element)	(TSRMG_FAST_BULK_STATIC(offset, type)->element)
 #define TSRMG_FAST_BULK_STATIC(offset, type)	((type) (((char*) TSRMLS_CACHE)+(offset)))
-#ifdef __cplusplus
-#define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR; }
-#define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS void *TSRMLS_CACHE; }
+
+/* Windows can't dllexport __declspec(thread) symbols, so outside Zend each module
+ * keeps a per-module `void *` pointer and reaches EG/CG via the resource-id indirection. */
+#ifdef ZEND_WIN32
+# define ZEND_TLS_API
+# ifdef LIBZEND_EXPORTS
+#  define ZEND_TLS_DIRECT 1
+# endif
 #else
-#define TSRMLS_MAIN_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR;
-#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE;
+# define ZEND_TLS_API ZEND_API
+# define ZEND_TLS_DIRECT 1
 #endif
-#define TSRMLS_MAIN_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;
-#define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL;
+
+struct _zend_tsrm_ls_cache;
+typedef struct _zend_tsrm_ls_cache zend_tsrm_ls_cache;
+
+#ifdef ZEND_TLS_DIRECT
+# define ZEND_TSRMLS_CACHE_T zend_tsrm_ls_cache
+# define TSRMLS_CACHE_DEFINE()
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache;
+# if defined(_WIN64) && defined(_M_X64)
+/* See TSRM.c: zend_win_tsrm_cache_init */
+#  define ZEND_WIN_TSRM_TEB_SLOT 1
+extern unsigned long zend_win_tsrm_cache_offset;
+ZEND_API void zend_win_tsrm_cache_init(bool alloc);
+ZEND_API void zend_win_tsrm_cache_shutdown(void);
+ZEND_API zend_tsrm_ls_cache *zend_win_tsrm_cache_fallback(void);
+#  ifdef __clang__
+static __inline__ __attribute__((const, always_inline)) zend_tsrm_ls_cache *zend_win_tsrm_cache_ptr(void)
+{
+	uintptr_t offset = zend_win_tsrm_cache_offset;
+	zend_tsrm_ls_cache *ptr;
+	if (__builtin_expect(offset == 0, 0)) {
+		return zend_win_tsrm_cache_fallback();
+	}
+	__asm__ ("movq %%gs:(%1), %0"
+		: "=r" (ptr)
+		: "r" (offset));
+	return ptr;
+}
+#  else
+static __forceinline zend_tsrm_ls_cache *zend_win_tsrm_cache_ptr(void)
+{
+	unsigned long offset = zend_win_tsrm_cache_offset;
+	if (offset == 0) {
+		return zend_win_tsrm_cache_fallback();
+	}
+	return (zend_tsrm_ls_cache *) __readgsqword(offset);
+}
+#  endif
+#  define ZEND_TSRM_CACHE_PTR zend_win_tsrm_cache_ptr()
+# else
+#  define ZEND_TSRM_CACHE_PTR (&_tsrm_ls_cache)
+# endif
+# define ZEND_TSRMG_DIRECT(id, type, member, element) (ZEND_TSRM_CACHE_PTR->member.element)
+#else
+# define ZEND_TSRMLS_CACHE_T void *
+# define TSRMLS_CACHE_DEFINE() TSRM_TLS void *_tsrm_ls_cache = NULL;
+# define ZEND_TSRMG_DIRECT(id, type, member, element) ZEND_TSRMG(id, type, element)
+#endif
+#ifdef __cplusplus
+#define TSRMLS_MAIN_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR; }
+#define TSRMLS_CACHE_EXTERN() extern "C" { extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache; }
+#else
+#define TSRMLS_MAIN_CACHE_EXTERN() extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache TSRM_TLS_MODEL_ATTR;
+#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS ZEND_TSRMLS_CACHE_T _tsrm_ls_cache;
+#endif
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
-#define TSRMLS_CACHE _tsrm_ls_cache
+#define TSRMLS_CACHE (*(void **) &_tsrm_ls_cache)
 
 #ifdef __cplusplus
 }
@@ -209,7 +273,6 @@ TSRM_API bool tsrm_is_managed_thread(void);
 
 #define TSRMG_STATIC(id, type, element)
 #define TSRMLS_MAIN_CACHE_EXTERN()
-#define TSRMLS_MAIN_CACHE_DEFINE()
 #define TSRMLS_CACHE_EXTERN()
 #define TSRMLS_CACHE_DEFINE()
 #define TSRMLS_CACHE_UPDATE()

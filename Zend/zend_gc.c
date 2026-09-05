@@ -306,12 +306,12 @@ typedef struct _zend_gc_globals {
 
 #ifdef ZTS
 static int gc_globals_id;
-static size_t gc_globals_offset;
-#define GC_G(v) ZEND_TSRMG_FAST(gc_globals_offset, zend_gc_globals *, v)
+static TSRM_TLS TSRM_TLS_MODEL_ATTR zend_gc_globals gc_globals;
+static void *gc_globals_tls_addr(void) { return &gc_globals; }
 #else
-#define GC_G(v) (gc_globals.v)
 static zend_gc_globals gc_globals;
 #endif
+#define GC_G(v) (gc_globals.v)
 
 #if GC_BENCH
 # define GC_BENCH_INC(counter) GC_G(counter)++
@@ -549,7 +549,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 void gc_globals_ctor(void)
 {
 #ifdef ZTS
-	ts_allocate_fast_id(&gc_globals_id, &gc_globals_offset, sizeof(zend_gc_globals), (ts_allocate_ctor) gc_globals_ctor_ex, (ts_allocate_dtor) root_buffer_dtor);
+	ts_allocate_tls_id(&gc_globals_id, gc_globals_tls_addr, sizeof(zend_gc_globals), (ts_allocate_ctor) gc_globals_ctor_ex, (ts_allocate_dtor) root_buffer_dtor);
 #else
 	gc_globals_ctor_ex(&gc_globals);
 #endif
@@ -2307,13 +2307,6 @@ void gc_bench_print(void)
 	fprintf(stderr, "        Root    Buffered     buffer     grey\n");
 	fprintf(stderr, "      --------  --------  -----------  ------\n");
 	fprintf(stderr, "ZVAL  %8d  %8d  %9d  %8d\n", GC_G(zval_possible_root), GC_G(zval_buffered), GC_G(zval_remove_from_buffer), GC_G(zval_marked_grey));
-}
-#endif
-
-#ifdef ZTS
-size_t zend_gc_globals_size(void)
-{
-	return sizeof(zend_gc_globals);
 }
 #endif
 

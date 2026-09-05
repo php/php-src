@@ -5851,7 +5851,7 @@ static void ir_emit_tls(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 ||#else
 ||	code = 0xd53bd040 | reg; // TODO: hard-coded: mrs reg, tpidr_el0
 |	.long code
-||# ifdef __FreeBSD__
+||# ifndef __MUSL__
 ||	if (insn->op3 == IR_NULL) {
 |		ldr Rx(reg), [Rx(reg), #insn->op2]
 ||	} else {
@@ -5859,7 +5859,7 @@ static void ir_emit_tls(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |		ldr Rx(reg), [Rx(reg), #insn->op2]
 |		ldr Rx(reg), [Rx(reg), #insn->op3]
 ||	}
-||# elif defined(__MUSL__)
+||# else
 ||	if (insn->op3 == IR_NULL) {
 |		ldr Rx(reg), [Rx(reg), #insn->op2]
 ||	} else {
@@ -5867,9 +5867,6 @@ static void ir_emit_tls(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |		ldr Rx(reg), [Rx(reg), #insn->op2]
 |		ldr Rx(reg), [Rx(reg), #insn->op3]
 ||	}
-||# else
-||//???	IR_ASSERT(insn->op2 <= LDR_STR_PIMM64);
-|	ldr Rx(reg), [Rx(reg), #insn->op2]
 ||# endif
 ||#endif
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {

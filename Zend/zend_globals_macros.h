@@ -30,7 +30,7 @@ BEGIN_EXTERN_C()
 
 /* Compiler */
 #ifdef ZTS
-# define CG(v) ZEND_TSRMG_FAST(ZEND_CG_OFFSET, zend_compiler_globals *, v)
+# define CG(v) ZEND_TSRMG_DIRECT(compiler_globals_id, zend_compiler_globals *, cg, v)
 #else
 # define CG(v) (compiler_globals.v)
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
@@ -40,7 +40,7 @@ ZEND_API int zendparse(void);
 
 /* Executor */
 #ifdef ZTS
-# define EG(v) ZEND_TSRMG_FAST(ZEND_EG_OFFSET, zend_executor_globals *, v)
+# define EG(v) ZEND_TSRMG_DIRECT(executor_globals_id, zend_executor_globals *, eg, v)
 #else
 # define EG(v) (executor_globals.v)
 extern ZEND_API zend_executor_globals executor_globals;
@@ -49,15 +49,15 @@ extern ZEND_API zend_executor_globals executor_globals;
 /* Language Scanner */
 #ifdef ZTS
 extern ZEND_API ts_rsrc_id language_scanner_globals_id;
-# if defined(ZEND_WIN32) && !defined(LIBZEND_EXPORTS)
-# define LANG_SCNG(v) TSRMG(language_scanner_globals_id, zend_php_scanner_globals *, v)
-# else
+# ifdef ZEND_TLS_DIRECT
 #  ifdef ZEND_WIN32
 extern TSRM_TLS zend_php_scanner_globals language_scanner_globals;
 #  else
-extern ZEND_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_php_scanner_globals language_scanner_globals;
+extern ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_php_scanner_globals language_scanner_globals;
 #  endif
 #  define LANG_SCNG(v) (language_scanner_globals.v)
+# else
+#  define LANG_SCNG(v) TSRMG(language_scanner_globals_id, zend_php_scanner_globals *, v)
 # endif
 #else
 extern ZEND_API zend_php_scanner_globals language_scanner_globals;
