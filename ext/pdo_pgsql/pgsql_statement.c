@@ -79,18 +79,20 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 			// TODO (??) libpq does not support close statement protocol < postgres 17
 			// check if we can circumvent this.
 			char *q = NULL;
-			PGTransactionStatusType tstatus = PQtransactionStatus(H->server);
+			size_t q_len = spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
 
-			if (tstatus == PQTRANS_IDLE) {
-				spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
-				res = PQexec(H->server, q);
-				efree(q);
+			if (PQtransactionStatus(H->server) == PQTRANS_IDLE) {
+				res = H->deallocate_unsupported ? NULL : PQexec(H->server, q);
+				if (res && pdo_pgsql_sqlstate_is(res, "0A000")) {
+					H->deallocate_unsupported = true;
+				}
 			} else {
-				/* Outside PQTRANS_IDLE, skip DEALLOCATE: on libpq < 17 some servers
-				 * (e.g. Aurora DSQL) reject it and poison the tx (GH-21869). The
-				 * statement is session-scoped, so it's freed on disconnect. */
+				/* a rejected DEALLOCATE would abort the caller's transaction,
+				 * so hold it back until the connection is idle again */
+				pdo_pgsql_defer_close(H, q, q_len, true);
 				res = NULL;
 			}
+			efree(q);
 #else
 			res = PQclosePrepared(H->server, S->stmt_name);
 #endif
@@ -123,18 +125,27 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	}
 
 	if (S->cursor_name) {
-		if (server_obj_usable) {
+		if (server_obj_usable && S->is_prepared) {
 			pdo_pgsql_db_handle *H = S->H;
 			char *q = NULL;
-			PGresult *res;
+			size_t q_len = spprintf(&q, 0, "CLOSE %s", S->cursor_name);
 
-			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			res = PQexec(H->server, q);
+			if (S->declared_at_rollback == H->rollback_counter
+					|| PQtransactionStatus(H->server) == PQTRANS_IDLE) {
+				PQclear(PQexec(H->server, q));
+			} else {
+				/* the rollback may have dropped the cursor, and the failing
+				 * CLOSE would abort the caller's transaction */
+				pdo_pgsql_defer_close(H, q, q_len, false);
+			}
 			efree(q);
-			if (res) PQclear(res);
 		}
 		efree(S->cursor_name);
 		S->cursor_name = NULL;
+	}
+
+	if (server_obj_usable) {
+		pdo_pgsql_run_pending_closes(S->H);
 	}
 
 	if(S->cols) {
@@ -151,6 +162,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	pdo_pgsql_db_handle *H = S->H;
 	ExecStatusType status;
+	bool prepare_retried = false;
 
 	bool in_trans = stmt->dbh->methods->in_transaction(stmt->dbh);
 
@@ -185,6 +197,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 
 		/* the cursor was declared correctly */
 		S->is_prepared = 1;
+		S->declared_at_rollback = H->rollback_counter;
 
 		/* fetch to be able to get the number of tuples later, but don't advance the cursor pointer */
 		spprintf(&q, 0, "FETCH FORWARD 0 FROM %s", S->cursor_name);
@@ -216,7 +229,7 @@ stmt_retry:
 					 * chance to DEALLOCATE the prepared statements it has created. so, if we hit a 42P05 we
 					 * deallocate it and retry ONCE (thies 2005.12.15)
 					 */
-					if (sqlstate && !strcmp(sqlstate, "42P05")) {
+					if (!prepare_retried && sqlstate && !strcmp(sqlstate, "42P05")) {
 						PGresult *res;
 #ifndef HAVE_PQCLOSEPREPARED
 						char buf[100]; /* stmt_name == "pdo_crsr_%08x" */
@@ -228,6 +241,9 @@ stmt_retry:
 						if (res) {
 							PQclear(res);
 						}
+						PQclear(S->result);
+						S->result = NULL;
+						prepare_retried = true;
 						goto stmt_retry;
 					} else {
 						pdo_pgsql_error_stmt(stmt, status, sqlstate);

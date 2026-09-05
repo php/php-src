@@ -34,6 +34,13 @@ typedef struct {
 	char *errmsg;
 } pdo_pgsql_error_info;
 
+/* a DEALLOCATE or CLOSE held back until the connection leaves its transaction */
+typedef struct pdo_pgsql_pending_close {
+	struct pdo_pgsql_pending_close *next;
+	bool is_deallocate;
+	char cmd[1];
+} pdo_pgsql_pending_close;
+
 /* stuff we use in a pgsql database handle */
 typedef struct {
 	PGconn		*server;
@@ -49,6 +56,10 @@ typedef struct {
 	bool		disable_prepares;
 	HashTable       *lob_streams;
 	zend_fcall_info_cache *notice_callback;
+	pdo_pgsql_pending_close *pending_closes;
+	unsigned int	rollback_counter;
+	bool		is_persistent;
+	bool		deallocate_unsupported;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -67,6 +78,7 @@ typedef struct {
 	int *param_formats;
 	Oid *param_types;
 	int                     current_row;
+	unsigned int            declared_at_rollback;
 	bool is_prepared;
 } pdo_pgsql_stmt;
 
@@ -88,6 +100,13 @@ extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const
 extern const struct pdo_stmt_methods pgsql_stmt_methods;
 
 #define pdo_pgsql_sqlstate(r) PQresultErrorField(r, PG_DIAG_SQLSTATE)
+
+static zend_always_inline bool pdo_pgsql_sqlstate_is(PGresult *res, const char *sqlstate)
+{
+	const char *result_state = pdo_pgsql_sqlstate(res);
+
+	return result_state && !strcmp(result_state, sqlstate);
+}
 
 enum {
 	PDO_PGSQL_ATTR_DISABLE_PREPARES = PDO_ATTR_DRIVER_SPECIFIC,
@@ -116,6 +135,9 @@ void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H);
 
 void pdo_libpq_version(char *buf, size_t len);
 void pdo_pgsql_close_lob_streams(pdo_dbh_t *dbh);
+void pdo_pgsql_defer_close(pdo_pgsql_db_handle *H, const char *cmd, size_t cmd_len, bool is_deallocate);
+void pdo_pgsql_run_pending_closes(pdo_pgsql_db_handle *H);
+void pdo_pgsql_discard_pending_closes(pdo_pgsql_db_handle *H);
 
 void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS);
 void pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAMETERS);
