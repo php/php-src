@@ -55,9 +55,21 @@ typedef ZEND_SET_ALIGNED(1, unsigned int unaligned_uint);
 typedef ZEND_SET_ALIGNED(1, int unaligned_int);
 
 /* {{{ php_pack */
-static void php_pack(const zval *val, size_t size, php_pack_endianness endianness, char *output)
+static bool php_pack(
+	const zval *val, uint32_t arg_num, char format_code, size_t size,
+	php_pack_endianness endianness, char *output
+)
 {
-	zend_ulong zl = zval_get_long(val);
+	bool failed;
+	zend_ulong zl = zval_try_get_long(val, &failed);
+
+	if (UNEXPECTED(failed)) {
+		zend_argument_type_error(
+			arg_num, "must be of type int for format code '%c', %s given",
+			format_code, zend_zval_value_name(val)
+		);
+		return false;
+	}
 
 	if ((endianness == PHP_LITTLE_ENDIAN) != MACHINE_LITTLE_ENDIAN) {
 		zl = PHP_LONG_BSWAP(zl);
@@ -71,8 +83,27 @@ static void php_pack(const zval *val, size_t size, php_pack_endianness endiannes
 	}
 
 	memcpy(output, (const char *) &zl, size);
+	return true;
 }
 /* }}} */
+
+static bool php_pack_try_get_double(
+	const zval *value, uint32_t arg_num, char format_code, double *result
+)
+{
+	bool failed;
+
+	*result = zval_try_get_double(value, &failed);
+	if (UNEXPECTED(failed)) {
+		zend_argument_type_error(
+			arg_num, "must be of type float for format code '%c', %s given",
+			format_code, zend_zval_value_name(value)
+		);
+		return false;
+	}
+
+	return true;
+}
 
 ZEND_ATTRIBUTE_CONST static inline uint16_t php_pack_reverse_int16(uint16_t arg)
 {
@@ -211,6 +242,7 @@ PHP_FUNCTION(pack)
 	size_t formatcount = 0;
 	int outputpos = 0, outputsize = 0;
 	zend_string *output;
+	bool conversion_failed = false;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_STRING(format, formatlen)
@@ -614,7 +646,14 @@ too_few_args:
 			case 'c':
 			case 'C':
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 1, PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]);
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack(
+						&argv[currentarg], arg_num, code, 1, PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]
+					)) {
+						conversion_failed = true;
+						goto cleanup;
+					}
+					currentarg++;
 					outputpos++;
 				}
 				break;
@@ -636,7 +675,14 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 2, endianness, &ZSTR_VAL(output)[outputpos]);
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack(
+						&argv[currentarg], arg_num, code, 2, endianness, &ZSTR_VAL(output)[outputpos]
+					)) {
+						conversion_failed = true;
+						goto cleanup;
+					}
+					currentarg++;
 					outputpos += 2;
 				}
 				break;
@@ -645,7 +691,15 @@ too_few_args:
 			case 'i':
 			case 'I':
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], sizeof(int), PHP_MACHINE_ENDIAN, &ZSTR_VAL(output)[outputpos]);
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack(
+						&argv[currentarg], arg_num, code, sizeof(int), PHP_MACHINE_ENDIAN,
+						&ZSTR_VAL(output)[outputpos]
+					)) {
+						conversion_failed = true;
+						goto cleanup;
+					}
+					currentarg++;
 					outputpos += sizeof(int);
 				}
 				break;
@@ -667,7 +721,14 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 4, endianness, &ZSTR_VAL(output)[outputpos]);
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack(
+						&argv[currentarg], arg_num, code, 4, endianness, &ZSTR_VAL(output)[outputpos]
+					)) {
+						conversion_failed = true;
+						goto cleanup;
+					}
+					currentarg++;
 					outputpos += 4;
 				}
 				break;
@@ -691,7 +752,14 @@ too_few_args:
 				}
 
 				while (arg-- > 0) {
-					php_pack(&argv[currentarg++], 8, endianness, &ZSTR_VAL(output)[outputpos]);
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack(
+						&argv[currentarg], arg_num, code, 8, endianness, &ZSTR_VAL(output)[outputpos]
+					)) {
+						conversion_failed = true;
+						goto cleanup;
+					}
+					currentarg++;
 					outputpos += 8;
 				}
 				break;
@@ -702,7 +770,15 @@ too_few_args:
 			case 'g':
 			case 'G': {
 				while (arg-- > 0) {
-					float v = (float) zval_get_double(&argv[currentarg++]);
+					double d;
+					float v;
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack_try_get_double(&argv[currentarg], arg_num, code, &d)) {
+						conversion_failed = true;
+						goto cleanup;
+					}
+					currentarg++;
+					v = (float) d;
 					if (code == 'g' || formatendian[i] == PHP_LITTLE_ENDIAN) {
 						php_pack_copy_float(1, &ZSTR_VAL(output)[outputpos], v);
 					} else if (code == 'G' || formatendian[i] == PHP_BIG_ENDIAN) {
@@ -719,7 +795,13 @@ too_few_args:
 			case 'e':
 			case 'E': {
 				while (arg-- > 0) {
-					double v = zval_get_double(&argv[currentarg++]);
+					double v;
+					uint32_t arg_num = currentarg + 2;
+					if (!php_pack_try_get_double(&argv[currentarg], arg_num, code, &v)) {
+						conversion_failed = true;
+						goto cleanup;
+					}
+					currentarg++;
 					if (code == 'e' || formatendian[i] == PHP_LITTLE_ENDIAN) {
 						php_pack_copy_double(1, &ZSTR_VAL(output)[outputpos], v);
 					} else if (code == 'E' || formatendian[i] == PHP_BIG_ENDIAN) {
@@ -754,11 +836,17 @@ too_few_args:
 		}
 	}
 
+	ZSTR_VAL(output)[outputpos] = '\0';
+	ZSTR_LEN(output) = outputpos;
+
+cleanup:
 	efree(formatcodes);
 	efree(formatargs);
 	efree(formatendian);
-	ZSTR_VAL(output)[outputpos] = '\0';
-	ZSTR_LEN(output) = outputpos;
+	if (UNEXPECTED(conversion_failed)) {
+		zend_string_release(output);
+		RETURN_THROWS();
+	}
 	RETURN_NEW_STR(output);
 }
 /* }}} */

@@ -234,6 +234,15 @@ PHP 8.6 UPGRADE NOTES
     and DirectoryIterator::current() returns string|SplFileInfo|static.
 
 - Standard:
+  . pack() now throws a TypeError when a value for an integer or floating-point
+    format code cannot be converted to int or float, instead of silently
+    coercing it. Floating-point format codes use PHP numeric-string syntax, so
+    "INF" and "NAN" strings are no longer accepted; the corresponding float
+    values remain accepted. Integer format codes now emit E_DEPRECATED when
+    converting a float or float-string to int loses precision. Integer and
+    floating-point format codes emit E_WARNING for leading-numeric strings.
+    These diagnostics are propagated if an error handler converts them to
+    exceptions.
   . array_intersect() with at least two arrays now converts values to strings
     while scanning its inputs instead of during sort comparisons. This can
     change the number and order of conversion warnings and __toString() calls,

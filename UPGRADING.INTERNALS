@@ -227,6 +227,13 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added zend_string_ends_with() and related variants.
   . Added trait support for internal classes.
   . Added do_php_cli().
+  . Added zval_try_get_double(), which converts a defined zval to a double and
+    reports conversion failures through a bool pointer. String conversion uses
+    the numeric-string semantics of zval_try_get_long(), rather than the
+    zend_strtod() semantics of zval_get_double(); non-numeric strings such as
+    "INF" and "NAN" fail, while leading-numeric strings emit E_WARNING. When
+    *failed is true, the returned value must not be used and an exception may
+    already be pending. Passing an IS_UNDEF zval is a caller error.
 
 ========================
 2. Build system changes

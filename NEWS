@@ -70,6 +70,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
+  . Fixed pack() accepting values that cannot be converted to int or float for
+    integer and floating-point format codes. (Weilin Du)
   . Fixed an out-of-bounds read when following a redirect response with an
     empty Location header. (iliaal)
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
