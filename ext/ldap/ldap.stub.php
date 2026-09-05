@@ -829,11 +829,8 @@ namespace {
 }
 
 namespace LDAP {
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Connection
+    /** @strict-properties */
+    final class LdapException extends \Exception
     {
     }
 
@@ -841,8 +838,34 @@ namespace LDAP {
      * @strict-properties
      * @not-serializable
      */
-    final class Result
+    final class Connection
     {
+        public function __construct(?string $uri = null);
+        public function bind(
+            ?string $dn = null,
+            #[\SensitiveParameter] ?string $password = null,
+            ?array $controls = null,
+        ): Result;
+        public function unbind(): bool;
+        public function add(string $dn, array $entry, ?array $controls = null): Result;
+        public function mod_add(string $dn, array $entry, ?array $controls = null): Result;
+        public function mod_del(string $dn, array $entry, ?array $controls = null): Result;
+        public function mod_replace(string $dn, array $entry, ?array $controls = null): Result;
+        public function delete(string $dn, ?array $controls = null): Result;
+        public function rename(string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null): Result;
+    }
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Result implements \Iterator
+    {
+        public function current(): ResultEntry;
+        public function key(): string;
+        public function next(): void;
+        public function rewind(): void;
+        public function valid(): bool;
     }
 
     /**
