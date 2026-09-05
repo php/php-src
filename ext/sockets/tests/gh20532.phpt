@@ -13,4 +13,3 @@ var_dump(socket_addrinfo_lookup("example.com", "http", ['ai_socktype' => SOCK_RA
 bool(true)
 bool(true)
 bool(true)
-
