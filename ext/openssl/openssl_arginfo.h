@@ -1,6 +1,9 @@
 /* This is a generated file, edit openssl.stub.php instead.
  * Stub hash: 7cad995b734d69f98d489edb97a7878a4ea8f47e */
 
+#include "zend_attributes.h"
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, output_filename, IS_STRING, 0)

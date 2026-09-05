@@ -1,6 +1,9 @@
 /* This is a generated file, edit filter.stub.php instead.
  * Stub hash: bd421586fdc068c456415b597d718787eb140517 */
 
+#include "zend_attributes.h"
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_filter_has_var, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, input_type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, var_name, IS_STRING, 0)

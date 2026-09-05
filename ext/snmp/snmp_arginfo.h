@@ -2,6 +2,9 @@
  * Stub hash: 9916f5e1d4db267e7f5d6709adf90decc9dc7f0a
  * Has decl header: yes */
 
+#include "zend_constants.h"
+#include "zend_enum.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, community, IS_STRING, 0)

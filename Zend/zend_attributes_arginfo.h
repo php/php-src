@@ -1,6 +1,8 @@
 /* This is a generated file, edit zend_attributes.stub.php instead.
  * Stub hash: dc2b1de9f4d91162f0e9ab236272f79019c5b5ab */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
 ZEND_END_ARG_INFO()
