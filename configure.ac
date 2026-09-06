@@ -695,7 +695,7 @@ AS_VAR_IF([php_cv_func_getaddrinfo], [yes],
 dnl on FreeBSD, copy_file_range() works only with the undocumented flag 0x01000000;
 dnl until the problem is fixed properly, copy_file_range() is used only on Linux
 AC_CACHE_CHECK([for copy_file_range], [php_cv_func_copy_file_range],
-[AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+[AC_LINK_IFELSE([AC_LANG_SOURCE([
 #ifndef __linux__
 # error "unsupported platform"
 #endif
