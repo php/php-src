@@ -114,6 +114,9 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
     creating the attribute. (Ilia Alshanetsky)
+  . Fixed child elements of the element returned by
+    SimpleXMLElement::addChild() not being accessible by property name when
+    namespaces are involved. (Ilia Alshanetsky)
 
 - Zip:
   . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
