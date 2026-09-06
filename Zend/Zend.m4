@@ -346,7 +346,7 @@ AS_VAR_IF([ZEND_GCC_GLOBAL_REGS], [yes], [
       [aarch64*|arm64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-x27 -ffixed-x28"])],
       [ppc64*|powerpc64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-r14 -ffixed-r15"])],
       [riscv64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-x18 -ffixed-x19"])],
-      [AC_MSG_ERROR([Cannot reserve VM registers for LTO, disable lto or use --disable-gcc-global-regs])])
+      [AC_MSG_ERROR([Cannot reserve VM registers for LTO, disable LTO or use --disable-gcc-global-regs])])
   ])
 ])
 ])
