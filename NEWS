@@ -66,6 +66,11 @@ PHP                                                                        NEWS
     replacement when a \k<name> backref has no closing delimiter.
     (Ilia Alshanetsky)
 
+- ODBC:
+  . Fixed odbc_field_len(), odbc_field_scale() and odbc_field_type()
+    returning uninitialized memory when SQLColAttribute fails.
+    (Ilia Alshanetsky)
+
 - Opcache:
   . Fixed a crash when the huge page SHM remap discarded mappings outside the
     reserved address range. (Piotr Hałas)
