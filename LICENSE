@@ -1,27 +1,22 @@
-Copyright © 1999–2026, The PHP Group and Contributors.
-Copyright © 1999–2026, Zend Technologies Ltd., a subsidiary company of Perforce Software, Inc.
+# MARCO DE LICENCIAMIENTO — EUNIPRINCEZ DIGITAL v2026.1-MRP.pk
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+Copyright (c) 2026 Juan Valentín García Espinoza
+ID de Desarrollador / Registro Legal: GAEJ940310HSPRSN02
+Clave de Control Vital: GAESJN94031024H400
+Paquete Core: com.euniprincez_blindado
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
+---
 
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+## 1. TÉRMINOS DE USO DE CÓDIGO Y MÓDULOS (MIT CON RESTRICCIÓN DE METADATOS)
+Se concede permiso para utilizar, copiar y modificar los módulos fuente del Software, siempre que:
+1. Se mantenga el aviso de copyright original en cada copia.
+2. No se alteren los metadatos de autoría ni se remueva el ID legal (GAEJ940310HSPRSN02).
+3. Todo despliegue en contenedores (Docker/OCI) o ejecuciones en servidores valide satisfactoriamente la Clave de Control Vital (GAESJN94031024H400).
 
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
+## 2. RESTRICCIONES DE EJECUTABLES Y BINARIOS (LICENCIA PROPIETARIA)
+Los archivos binarios, paquetes compilados (.apk), instaladores y scripts de despliegue directo quedan clasificados como PROPIETARIOS Y CONFIDENCIALES. Se prohíbe explícitamente:
+- La ingeniería inversa, descompilación o desensamblado.
+- La redistribución o sublicenciamiento sin autorización previa por escrito del titular.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+## 3. EXCLUSIÓN DE GARANTÍA
+EL SOFTWARE SE ENTREGA "TAL CUAL", SIN GARANTÍAS DE NINGÚN TIPO, EXPRESAS O IMPLÍCITAS. EN NINGÚN CASO EL AUTOR SERÁ RESPONSABLE DE RECLAMACIONES O DAÑOS DERIVADOS DEL USO DEL SOFTWARE.
