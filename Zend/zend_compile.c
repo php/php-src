@@ -6131,6 +6131,104 @@ static bool zend_has_finally(void) /* {{{ */
 }
 /* }}} */
 
+/* Returns true if the return type check for `return <expr_ast>;` can be
+ * proven to always pass at compile time, so ZEND_VERIFY_RETURN_TYPE need
+ * not be emitted. Two classes of proof:
+ * - the expression's opcode always produces a specific scalar type
+ *   (comparisons, instanceof, isset, boolean ops -> bool; concatenation
+ *   and string interpolation -> string) that the return type accepts;
+ * - `return $this->prop;` where the property is declared in the class
+ *   being compiled with a type every value of which satisfies the return
+ *   type: property types are invariant under inheritance, typed property
+ *   slots always hold conforming values (uninitialized reads throw before
+ *   the return check, __get results and get hook results are verified
+ *   against the property type), so the fetched value always conforms.
+ * Closures are excluded (Closure::bind can rebind them to unrelated
+ * scopes), as are by-ref returns and context-dependent return types. */
+static bool zend_return_type_check_provably_passes(const zend_ast *expr_ast, const zend_arg_info *return_info) /* {{{ */
+{
+	zend_type type = return_info->type;
+	uint32_t ret_mask;
+
+	if (CG(active_op_array)->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_RETURN_REFERENCE|ZEND_ACC_GENERATOR)) {
+		return false;
+	}
+	ret_mask = ZEND_TYPE_PURE_MASK(type);
+	if (ret_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC|MAY_BE_NEVER|MAY_BE_VOID)) {
+		return false;
+	}
+
+	switch (expr_ast->kind) {
+		case ZEND_AST_BINARY_OP:
+			switch (expr_ast->attr) {
+				case ZEND_IS_IDENTICAL:
+				case ZEND_IS_NOT_IDENTICAL:
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_SMALLER:
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					return (ret_mask & MAY_BE_BOOL) == MAY_BE_BOOL;
+				case ZEND_CONCAT:
+				case ZEND_FAST_CONCAT:
+					return (ret_mask & MAY_BE_STRING) != 0;
+			}
+			return false;
+		case ZEND_AST_GREATER:
+		case ZEND_AST_GREATER_EQUAL:
+		case ZEND_AST_AND:
+		case ZEND_AST_OR:
+		case ZEND_AST_INSTANCEOF:
+		case ZEND_AST_ISSET:
+		case ZEND_AST_EMPTY:
+			return (ret_mask & MAY_BE_BOOL) == MAY_BE_BOOL;
+		case ZEND_AST_UNARY_OP:
+			return expr_ast->attr == ZEND_BOOL_NOT
+				&& (ret_mask & MAY_BE_BOOL) == MAY_BE_BOOL;
+		case ZEND_AST_PROP: {
+			zend_class_entry *ce = CG(active_class_entry);
+			zend_ast *obj_ast = expr_ast->child[0];
+			zend_ast *name_ast = expr_ast->child[1];
+			const zend_property_info *prop_info;
+			zend_type prop_type;
+			uint32_t prop_mask;
+
+			if (!ce || !is_this_fetch(obj_ast)) {
+				return false;
+			}
+			if (name_ast->kind != ZEND_AST_ZVAL
+			 || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
+				return false;
+			}
+			/* Only properties declared earlier in the class being
+			 * compiled are visible here; inherited properties are not
+			 * (linking happens later), which is what makes this sound. */
+			prop_info = zend_hash_find_ptr(&ce->properties_info,
+				zend_ast_get_str(name_ast));
+			if (!prop_info
+			 || (prop_info->flags & (ZEND_ACC_STATIC|ZEND_ACC_VIRTUAL))
+			 || prop_info->hooks
+			 || !ZEND_TYPE_IS_SET(prop_info->type)) {
+				return false;
+			}
+			prop_type = prop_info->type;
+			if (ZEND_TYPE_HAS_LIST(prop_type) || ZEND_TYPE_HAS_LIST(type)) {
+				return false;
+			}
+			if (ZEND_TYPE_HAS_NAME(prop_type) != ZEND_TYPE_HAS_NAME(type)) {
+				return false;
+			}
+			if (ZEND_TYPE_HAS_NAME(prop_type)
+			 && !zend_string_equals_ci(ZEND_TYPE_NAME(prop_type), ZEND_TYPE_NAME(type))) {
+				return false;
+			}
+			prop_mask = ZEND_TYPE_PURE_MASK(prop_type);
+			return (prop_mask & ~ret_mask) == 0;
+		}
+	}
+	return false;
+}
+/* }}} */
+
 static void zend_compile_return(const zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -6182,8 +6280,11 @@ static void zend_compile_return(const zend_ast *ast) /* {{{ */
 
 	/* Generator return types are handled separately */
 	if (!is_generator && (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-		zend_emit_return_type_check(
-			expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, false);
+		if (!expr_ast || by_ref
+		 || !zend_return_type_check_provably_passes(expr_ast, CG(active_op_array)->arg_info - 1)) {
+			zend_emit_return_type_check(
+				expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1, false);
+		}
 	}
 
 	uint32_t opnum_before_finally = get_next_op_number();
