@@ -10,8 +10,8 @@ var_dump(fstat($fp));
 fclose($fp);
 try {
     var_dump(fstat($fp));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 @unlink($filename);
@@ -72,5 +72,5 @@ array(26) {
   ["blocks"]=>
   int(%i)
 }
-fstat(): Argument #1 ($stream) must be an open stream resource
+TypeError: fstat(): Argument #1 ($stream) must be an open stream resource
 Done

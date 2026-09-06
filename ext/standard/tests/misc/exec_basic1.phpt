@@ -10,21 +10,21 @@ exec, system, passthru  — Basic command execution functions
 $cmd = "echo abc\n\0command";
 try {
     var_dump(exec($cmd, $output));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(system($cmd, $output));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(passthru($cmd, $output));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-exec(): Argument #1 ($command) must not contain any null bytes
-system(): Argument #1 ($command) must not contain any null bytes
-passthru(): Argument #1 ($command) must not contain any null bytes
+ValueError: exec(): Argument #1 ($command) must not contain any null bytes
+ValueError: system(): Argument #1 ($command) must not contain any null bytes
+ValueError: passthru(): Argument #1 ($command) must not contain any null bytes

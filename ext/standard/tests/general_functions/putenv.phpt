@@ -17,14 +17,14 @@ var_dump(getenv($var_name));
 
 try {
     putenv("=123");
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     putenv("");
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -37,6 +37,6 @@ bool(true)
 string(0) ""
 bool(true)
 bool(false)
-putenv(): Argument #1 ($assignment) must have a valid syntax
-putenv(): Argument #1 ($assignment) must have a valid syntax
+ValueError: putenv(): Argument #1 ($assignment) must have a valid syntax
+ValueError: putenv(): Argument #1 ($assignment) must have a valid syntax
 Done

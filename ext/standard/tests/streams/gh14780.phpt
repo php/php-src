@@ -10,29 +10,29 @@ $code = null;
 $err = null;
 try {
 	pfsockopen('udp://127.0.0.1', '63844', $code, $err, (PHP_INT_MAX/100000)+1);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pfsockopen('udp://127.0.0.1', '63844', $code, $err, (PHP_INT_MIN/100000)-1);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(pfsockopen('udp://127.0.0.1', '63844', $code, $err, -1));
 try {
 	pfsockopen('udp://127.0.0.1', '63844', $code, $err, NAN);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pfsockopen('udp://127.0.0.1', '63844', $code, $err, INF);
-} catch (\ValueError $e) {
-	echo $e->getMessage();
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-pfsockopen(): Argument #6 must be -1 or between 0 and %s
-pfsockopen(): Argument #6 must be -1 or between 0 and %s
+ValueError: pfsockopen(): Argument #6 must be -1 or between 0 and %s
+ValueError: pfsockopen(): Argument #6 must be -1 or between 0 and %s
 resource(%d) of type (persistent stream)
-pfsockopen(): Argument #6 must be -1 or between 0 and %s
-pfsockopen(): Argument #6 must be -1 or between 0 and %s
+ValueError: pfsockopen(): Argument #6 must be -1 or between 0 and %s
+ValueError: pfsockopen(): Argument #6 must be -1 or between 0 and %s

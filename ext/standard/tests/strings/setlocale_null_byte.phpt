@@ -10,38 +10,38 @@ class NullByteStringable {
 
 try {
     var_dump(setlocale(LC_ALL, "C\0locale"));
-} catch (ValueError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(setlocale(LC_ALL, ["locale\0name", "C"]));
-} catch (ValueError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(@setlocale(LC_ALL, [str_repeat("x", 255), "C\0locale"]));
-} catch (ValueError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(setlocale(LC_ALL, "zz_ZZ.nope", ["C\0locale"]));
-} catch (TypeError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(setlocale(LC_ALL, "zz_ZZ.nope", new NullByteStringable()));
-} catch (ValueError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(setlocale(LC_ALL, [], new NullByteStringable()));
-} catch (ArgumentCountError $e) {
-    echo $e::class, ": ", $e->getMessage(), \PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

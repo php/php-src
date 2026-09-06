@@ -17,13 +17,13 @@ try {
         $iter = new DirectoryIterator($dir);
         print get_class($iter) . "\n";
         print "after\n";
-} catch (Exception $e) {
-        print "in catch: ".$e->getMessage()."\n";
+} catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 ==DONE==
 <?php exit(0); ?>
 --EXPECT--
 before
-in catch: DirectoryIterator::__construct(): Failed to open directory: No such file or directory
+UnexpectedValueException: DirectoryIterator::__construct(): Failed to open directory: No such file or directory
 ==DONE==

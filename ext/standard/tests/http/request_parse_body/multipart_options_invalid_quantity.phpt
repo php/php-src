@@ -8,7 +8,7 @@ try {
         'upload_max_filesize' => '1GB',
     ]);
 } catch (Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

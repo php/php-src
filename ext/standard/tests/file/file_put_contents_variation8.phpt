@@ -44,8 +44,8 @@ for( $i=0; $i<count($names_arr); $i++ ) {
         } else {
             echo "Failed to write data to: '$names_arr[$i]'\n";
         }
-    } catch (\TypeError|\ValueError $e) {
-        echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

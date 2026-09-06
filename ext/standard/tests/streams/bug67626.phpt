@@ -32,16 +32,16 @@ $fp = fopen('my://foobar', 'r+');
 
 try {
     fread($fp, 42);
-} catch (Exception $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
-echo "\n";
+
 try {
     fwrite($fp, 'foobar');
-} catch (Exception $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-stream_read_exception
-stream_write_exception
+Exception: stream_read_exception
+Exception: stream_write_exception

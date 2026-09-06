@@ -10,25 +10,25 @@ $s = serialize($z);
 
 try {
     unserialize($s, ["allowed_classes" => null]);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     unserialize($s, ["allowed_classes" => 0]);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 
 try {
     unserialize($s, ["allowed_classes" => 1]);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-unserialize(): Option "allowed_classes" must be of type array|bool, null given
-unserialize(): Option "allowed_classes" must be of type array|bool, int given
-unserialize(): Option "allowed_classes" must be of type array|bool, int given
+TypeError: unserialize(): Option "allowed_classes" must be of type array|bool, null given
+TypeError: unserialize(): Option "allowed_classes" must be of type array|bool, int given
+TypeError: unserialize(): Option "allowed_classes" must be of type array|bool, int given

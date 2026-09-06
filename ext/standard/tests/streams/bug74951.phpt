@@ -10,7 +10,7 @@ trait Stream00ploiter{
 try {
 	stream_wrapper_register('e0ploit','Stream00ploiter');
 } catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

@@ -22,8 +22,8 @@ echo "\n-- Testing stream_set_timeout() function with a closed socket --\n";
 fclose($client);
 try {
     var_dump( stream_set_timeout($client, $seconds) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- Testing stream_set_timeout() function with a stream that does not support timeouts --\n";
@@ -39,7 +39,7 @@ echo "Done";
 *** Testing stream_set_timeout() : error conditions ***
 
 -- Testing stream_set_timeout() function with a closed socket --
-stream_set_timeout(): Argument #1 ($stream) must be an open stream resource
+TypeError: stream_set_timeout(): Argument #1 ($stream) must be an open stream resource
 
 -- Testing stream_set_timeout() function with a stream that does not support timeouts --
 bool(false)

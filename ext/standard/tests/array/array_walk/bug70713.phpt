@@ -22,10 +22,10 @@ $arr = array('string' => new obj);
 
 try {
     array_walk_recursive($arr, 'settype');
-} catch (\TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Iterated value is no longer an array or object
+TypeError: Iterated value is no longer an array or object

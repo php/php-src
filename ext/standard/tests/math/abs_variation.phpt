@@ -70,8 +70,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(abs($input));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 };
@@ -104,25 +104,25 @@ int(1)
 int(0)
 
 -- Iteration 7 --
-abs(): Argument #1 ($num) must be of type int|float, string given
+TypeError: abs(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 8 --
-abs(): Argument #1 ($num) must be of type int|float, string given
+TypeError: abs(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 9 --
-abs(): Argument #1 ($num) must be of type int|float, array given
+TypeError: abs(): Argument #1 ($num) must be of type int|float, array given
 
 -- Iteration 10 --
-abs(): Argument #1 ($num) must be of type int|float, string given
+TypeError: abs(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 11 --
-abs(): Argument #1 ($num) must be of type int|float, string given
+TypeError: abs(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 12 --
-abs(): Argument #1 ($num) must be of type int|float, string given
+TypeError: abs(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 13 --
-abs(): Argument #1 ($num) must be of type int|float, classA given
+TypeError: abs(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 14 --
 
@@ -135,4 +135,4 @@ Deprecated: abs(): Passing null to parameter #1 ($num) of type int|float is depr
 int(0)
 
 -- Iteration 16 --
-abs(): Argument #1 ($num) must be of type int|float, resource given
+TypeError: abs(): Argument #1 ($num) must be of type int|float, resource given

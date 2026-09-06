@@ -10,4 +10,3 @@ fclose($fp);
 --EXPECT--
 int(-1)
 int(-1)
-

@@ -48,8 +48,8 @@ foreach($file_content_types as $file_content_type) {
         var_dump( ftell($file_handle) );
         try {
             var_dump( ftruncate($file_handle, $new_size) ); // truncate it
-        } catch (\ValueError $e) {
-            echo $e->getMessage() . \PHP_EOL;
+        } catch (\Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         var_dump( ftell($file_handle) );
         var_dump( feof($file_handle) );
@@ -72,7 +72,7 @@ echo "Done\n";
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -80,7 +80,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -88,7 +88,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -96,7 +96,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -104,7 +104,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -112,7 +112,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -120,7 +120,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -128,7 +128,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -136,7 +136,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -144,7 +144,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -152,7 +152,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -160,7 +160,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -168,7 +168,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -176,7 +176,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -184,7 +184,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -192,7 +192,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -200,7 +200,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -208,7 +208,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -216,7 +216,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -224,7 +224,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -232,7 +232,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -240,7 +240,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -248,7 +248,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -256,7 +256,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -266,7 +266,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -274,7 +274,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -282,7 +282,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -290,7 +290,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -298,7 +298,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -306,7 +306,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -314,7 +314,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -322,7 +322,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -330,7 +330,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -338,7 +338,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -346,7 +346,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -354,7 +354,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -362,7 +362,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -370,7 +370,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -378,7 +378,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -386,7 +386,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -394,7 +394,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -402,7 +402,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -410,7 +410,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -418,7 +418,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -426,7 +426,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -434,7 +434,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -442,7 +442,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)
@@ -450,7 +450,7 @@ bool(true)
 -- Testing ftruncate(): try truncating file to a negative size --
 bool(true)
 int(0)
-ftruncate(): Argument #2 ($size) must be greater than or equal to 0
+ValueError: ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)
 bool(false)
 bool(true)

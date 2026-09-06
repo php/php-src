@@ -15,8 +15,8 @@ $result1 = fread($fp, 5);
 
 try {
     var_dump(rewinddir($fp));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $result2 = fread($fp, 5);
 
@@ -32,7 +32,7 @@ if ($result1 === $result2) {
 
 -- Open a file using fopen --
 resource(%d) of type (stream)
-rewinddir(): Argument #1 ($dir_handle) must be a valid Directory resource
+TypeError: rewinddir(): Argument #1 ($dir_handle) must be a valid Directory resource
 
 -- Check if rewinddir() has repositioned the file pointer --
 rewinddir() does not work on file pointers

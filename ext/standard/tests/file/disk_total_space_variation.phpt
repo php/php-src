@@ -46,8 +46,8 @@ foreach($dirs_arr as $dir1) {
   echo "\n-- Iteration $count --\n";
   try {
     var_dump( disk_total_space( $dir1 ) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   $count++;
 }
@@ -95,16 +95,16 @@ float(%f)
 float(%f)
 
 -- Iteration 9 --
-disk_total_space(): Argument #1 ($directory) must not contain any null bytes
+ValueError: disk_total_space(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 10 --
-disk_total_space(): Argument #1 ($directory) must not contain any null bytes
+ValueError: disk_total_space(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 11 --
-disk_total_space(): Argument #1 ($directory) must not contain any null bytes
+ValueError: disk_total_space(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 12 --
-disk_total_space(): Argument #1 ($directory) must not contain any null bytes
+ValueError: disk_total_space(): Argument #1 ($directory) must not contain any null bytes
 *** Testing with Binary Input ***
 float(%s)
 

@@ -64,8 +64,8 @@ foreach($values as $value) {
     echo @"\nArg value: $value (type: " . gettype($value) . ")\n";
     try {
         var_dump( get_class($value) );
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 };
 
@@ -79,80 +79,80 @@ Warning: Undefined variable $undefined_var in %s on line %d
 Warning: Undefined variable $unset_var in %s on line %d
 
 Arg value: 0 (type: integer)
-get_class(): Argument #1 ($object) must be of type object, int given
+TypeError: get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 1 (type: integer)
-get_class(): Argument #1 ($object) must be of type object, int given
+TypeError: get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 12345 (type: integer)
-get_class(): Argument #1 ($object) must be of type object, int given
+TypeError: get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: -2345 (type: integer)
-get_class(): Argument #1 ($object) must be of type object, int given
+TypeError: get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 10.5 (type: double)
-get_class(): Argument #1 ($object) must be of type object, float given
+TypeError: get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: -10.5 (type: double)
-get_class(): Argument #1 ($object) must be of type object, float given
+TypeError: get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 101234567000 (type: double)
-get_class(): Argument #1 ($object) must be of type object, float given
+TypeError: get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 1.07654321E-9 (type: double)
-get_class(): Argument #1 ($object) must be of type object, float given
+TypeError: get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 0.5 (type: double)
-get_class(): Argument #1 ($object) must be of type object, float given
+TypeError: get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: Array (type: array)
-get_class(): Argument #1 ($object) must be of type object, array given
+TypeError: get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-get_class(): Argument #1 ($object) must be of type object, array given
+TypeError: get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-get_class(): Argument #1 ($object) must be of type object, array given
+TypeError: get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-get_class(): Argument #1 ($object) must be of type object, array given
+TypeError: get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-get_class(): Argument #1 ($object) must be of type object, array given
+TypeError: get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value:  (type: NULL)
-get_class(): Argument #1 ($object) must be of type object, null given
+TypeError: get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value:  (type: NULL)
-get_class(): Argument #1 ($object) must be of type object, null given
+TypeError: get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value: 1 (type: boolean)
-get_class(): Argument #1 ($object) must be of type object, true given
+TypeError: get_class(): Argument #1 ($object) must be of type object, true given
 
 Arg value:  (type: boolean)
-get_class(): Argument #1 ($object) must be of type object, false given
+TypeError: get_class(): Argument #1 ($object) must be of type object, false given
 
 Arg value: 1 (type: boolean)
-get_class(): Argument #1 ($object) must be of type object, true given
+TypeError: get_class(): Argument #1 ($object) must be of type object, true given
 
 Arg value:  (type: boolean)
-get_class(): Argument #1 ($object) must be of type object, false given
+TypeError: get_class(): Argument #1 ($object) must be of type object, false given
 
 Arg value:  (type: string)
-get_class(): Argument #1 ($object) must be of type object, string given
+TypeError: get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value:  (type: string)
-get_class(): Argument #1 ($object) must be of type object, string given
+TypeError: get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value: string (type: string)
-get_class(): Argument #1 ($object) must be of type object, string given
+TypeError: get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value: string (type: string)
-get_class(): Argument #1 ($object) must be of type object, string given
+TypeError: get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value:  (type: NULL)
-get_class(): Argument #1 ($object) must be of type object, null given
+TypeError: get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value:  (type: NULL)
-get_class(): Argument #1 ($object) must be of type object, null given
+TypeError: get_class(): Argument #1 ($object) must be of type object, null given
 Done

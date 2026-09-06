@@ -15,8 +15,8 @@ var_dump(join("TEST", $sub_array));
 // glue as array & pieces as array containing sub array
 try {
     var_dump(join(array(1, 2, 3, 4), $sub_array));
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 // numeric value as glue, pieces as array containing sub array
@@ -35,7 +35,7 @@ Warning: Array to string conversion in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
 string(27) "ArrayTESTArrayTESTPHPTEST50"
-join(): Argument #1 ($separator) must be of type string, array given
+TypeError: join(): Argument #1 ($separator) must be of type string, array given
 
 Warning: Array to string conversion in %s on line %d
 

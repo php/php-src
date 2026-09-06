@@ -73,8 +73,8 @@ for($index = 0; $index < count($values); $index ++) {
 
   try {
     var_dump(join($glue, $pieces));
-  } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+  } catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
 
   $counter++;
@@ -105,15 +105,15 @@ string(29) "element11.07654321E-9element2"
 -- Iteration 9 --
 string(19) "element10.5element2"
 -- Iteration 10 --
-join(): Argument #1 ($separator) must be of type string, array given
+TypeError: join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 11 --
-join(): Argument #1 ($separator) must be of type string, array given
+TypeError: join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 12 --
-join(): Argument #1 ($separator) must be of type string, array given
+TypeError: join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 13 --
-join(): Argument #1 ($separator) must be of type string, array given
+TypeError: join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 14 --
-join(): Argument #1 ($separator) must be of type string, array given
+TypeError: join(): Argument #1 ($separator) must be of type string, array given
 -- Iteration 15 --
 string(17) "element11element2"
 -- Iteration 16 --
@@ -129,5 +129,5 @@ string(16) "element1element2"
 -- Iteration 21 --
 string(16) "element1element2"
 -- Iteration 22 --
-join(): Argument #1 ($separator) must be of type array|string, resource given
+TypeError: join(): Argument #1 ($separator) must be of type array|string, resource given
 Done

@@ -17,8 +17,8 @@ echo "*** Testing stream_filter_remove() : error conditions ***\n";
 echo "\n-- Testing stream_filter_remove() function with bad resource --\n";
 try {
     stream_filter_remove($fp);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\n-- Testing stream_filter_remove() function with an already removed filter --\n";
@@ -26,8 +26,8 @@ echo "\n-- Testing stream_filter_remove() function with an already removed filte
 var_dump(stream_filter_remove( $filter ));
 try {
     stream_filter_remove($filter);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 fclose( $fp );
@@ -42,8 +42,8 @@ $file = __DIR__ . DIRECTORY_SEPARATOR . 'streamfilterTestErrors.txt';
 *** Testing stream_filter_remove() : error conditions ***
 
 -- Testing stream_filter_remove() function with bad resource --
-stream_filter_remove(): supplied resource is not a valid stream filter resource
+TypeError: stream_filter_remove(): supplied resource is not a valid stream filter resource
 
 -- Testing stream_filter_remove() function with an already removed filter --
 bool(true)
-stream_filter_remove(): supplied resource is not a valid stream filter resource
+TypeError: stream_filter_remove(): supplied resource is not a valid stream filter resource

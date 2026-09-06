@@ -9,10 +9,10 @@ try {
             'error_mode' => StreamErrorMode::Exception,
         ]
     ]);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Stream error handling options cannot be set on the default context
+ValueError: Stream error handling options cannot be set on the default context

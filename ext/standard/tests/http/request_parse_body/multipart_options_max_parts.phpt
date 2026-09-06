@@ -24,7 +24,7 @@ try {
         'max_multipart_body_parts' => 1,
     ]);
 } catch (Throwable $e) {
-    echo get_class($e), ': ', $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($_POST, $_FILES);

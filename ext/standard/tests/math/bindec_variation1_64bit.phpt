@@ -57,8 +57,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(bindec($input));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 };
@@ -127,7 +127,7 @@ int(0)
 int(0)
 
 -- Iteration 16 --
-bindec(): Argument #1 ($binary_string) must be of type string, array given
+TypeError: bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 17 --
 
@@ -145,4 +145,4 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 int(0)
 
 -- Iteration 20 --
-bindec(): Argument #1 ($binary_string) must be of type string, resource given
+TypeError: bindec(): Argument #1 ($binary_string) must be of type string, resource given

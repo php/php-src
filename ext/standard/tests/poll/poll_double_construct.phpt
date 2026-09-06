@@ -9,20 +9,20 @@ list($r, $w) = pt_new_socket_pair();
 $handle = new StreamPollHandle($r);
 try {
     $handle->__construct($r);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ctx = pt_new_stream_poll();
 try {
     $ctx->__construct();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "done\n";
 ?>
 --EXPECT--
-StreamPollHandle object is already constructed
-Io\Poll\Context object is already constructed
+Error: StreamPollHandle object is already constructed
+Error: Io\Poll\Context object is already constructed
 done

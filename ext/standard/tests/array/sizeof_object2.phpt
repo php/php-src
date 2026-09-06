@@ -76,22 +76,22 @@ for($i = 0; $i < count($objects); $i++)
   echo "Default Mode: ";
   try {
     var_dump( sizeof($var) );
-  } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+  } catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
 
   echo "COUNT_NORMAL Mode: ";
   try {
     var_dump( sizeof($var, COUNT_NORMAL) );
-  } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+  } catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
 
   echo "COUNT_RECURSIVE Mode: ";
   try {
     var_dump( sizeof($var, COUNT_RECURSIVE) );
-  } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+  } catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
 
   $counter++;
@@ -103,23 +103,23 @@ echo "Done";
 *** Testing sizeof() : object functionality ***
 --- Testing sizeof() with objects which doesn't implement Countable interface ---
 -- Iteration 1 --
-Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
-COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
-COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
+Default Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
+COUNT_NORMAL Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
+COUNT_RECURSIVE Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test given
 -- Iteration 2 --
-Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
-COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
-COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
+Default Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
+COUNT_NORMAL Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
+COUNT_RECURSIVE Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test1 given
 -- Iteration 3 --
-Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
-COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
-COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
+Default Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
+COUNT_NORMAL Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
+COUNT_RECURSIVE Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, test2 given
 -- Iteration 4 --
-Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
-COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
-COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
+Default Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
+COUNT_NORMAL Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
+COUNT_RECURSIVE Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, child_test2 given
 -- Iteration 5 --
-Default Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
-COUNT_NORMAL Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
-COUNT_RECURSIVE Mode: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
+Default Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
+COUNT_NORMAL Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
+COUNT_RECURSIVE Mode: TypeError: sizeof(): Argument #1 ($value) must be of type Countable|array, concrete_class given
 Done

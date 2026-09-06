@@ -49,8 +49,8 @@ foreach ($types as $type) {
     foreach ($array as $var) {
         try {
             var_dump(settype($var, $type));
-        } catch (Error $e) {
-            echo "Error: ", $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         var_dump($var);
     }
@@ -160,7 +160,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 array(3) {
   [0]=>
   int(1)
@@ -169,9 +169,9 @@ array(3) {
   [2]=>
   int(3)
 }
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 string(14) "another string"
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 array(3) {
   [0]=>
   int(2)
@@ -180,21 +180,21 @@ array(3) {
   [2]=>
   int(4)
 }
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 int(1)
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 float(2)
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 NULL
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 bool(false)
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 string(11) "some string"
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 resource(%d) of type (Unknown)
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 resource(%d) of type (stream)
-Error: Cannot convert to resource type
+ValueError: Cannot convert to resource type
 object(stdClass)#%d (0) {
 }
 bool(true)

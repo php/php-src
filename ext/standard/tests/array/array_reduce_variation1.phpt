@@ -22,7 +22,7 @@ echo "\n--- Testing with a callback with too many parameters ---\n";
 try {
     var_dump(array_reduce($array, "threeArgs", 2));
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -33,4 +33,4 @@ try {
 int(2)
 
 --- Testing with a callback with too many parameters ---
-Exception: Too few arguments to function threeArgs(), 2 passed and exactly 3 expected
+ArgumentCountError: Too few arguments to function threeArgs(), 2 passed and exactly 3 expected

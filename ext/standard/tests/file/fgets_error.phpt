@@ -11,15 +11,15 @@ echo "-- Testing fgets() with invalid length arguments --\n";
 $len = 0;
 try {
     var_dump( fgets($fp, $len) );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $len = -10;
 try {
     var_dump( fgets($fp, $len) );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $len = 1;
 var_dump( fgets($fp, $len) ); // return length - 1 always, expect false
@@ -28,6 +28,6 @@ var_dump( fgets($fp, $len) ); // return length - 1 always, expect false
 --EXPECT--
 *** Testing error conditions ***
 -- Testing fgets() with invalid length arguments --
-fgets(): Argument #2 ($length) must be greater than 0
-fgets(): Argument #2 ($length) must be greater than 0
+ValueError: fgets(): Argument #2 ($length) must be greater than 0
+ValueError: fgets(): Argument #2 ($length) must be greater than 0
 bool(false)

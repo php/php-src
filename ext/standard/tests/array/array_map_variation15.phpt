@@ -15,13 +15,13 @@ $arr3 = array(1.1, 2.2);
 
 try {
     var_dump( array_map('non_existent', $arr1, $arr2, $arr3) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done";
 ?>
 --EXPECT--
 *** Testing array_map() : non existent 'callback' function ***
-array_map(): Argument #1 ($callback) must be a valid callback or null, function "non_existent" not found or invalid function name
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, function "non_existent" not found or invalid function name
 Done

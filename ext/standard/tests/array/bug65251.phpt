@@ -6,8 +6,8 @@ Bug #65251: array_merge_recursive() recursion detection broken
 /* This no longer involves any recursion. */
 try {
     array_merge_recursive($GLOBALS, $GLOBALS);
-} catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

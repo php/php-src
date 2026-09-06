@@ -11,20 +11,20 @@ echo "-- Testing fread() with invalid length arguments --\n";
 $len = 0;
 try {
     var_dump( fread($file_handle, $len) );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $len = -10;
 try {
     var_dump( fread($file_handle, $len) );
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 *** Testing error conditions ***
 -- Testing fread() with invalid length arguments --
-fread(): Argument #2 ($length) must be greater than 0
-fread(): Argument #2 ($length) must be greater than 0
+ValueError: fread(): Argument #2 ($length) must be greater than 0
+ValueError: fread(): Argument #2 ($length) must be greater than 0

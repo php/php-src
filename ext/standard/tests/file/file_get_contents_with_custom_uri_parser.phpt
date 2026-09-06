@@ -10,8 +10,8 @@ try {
         ],
     ]);
     var_dump(file_get_contents("http://example.com", context: $context));
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $context = stream_context_create([
@@ -37,7 +37,7 @@ var_dump(file_get_contents("http://exa%23mple.org", context: $context)); // inva
 
 ?>
 --EXPECTF--
-file_get_contents(): Provided stream context has invalid value for the "uri_parser_class" option
+ValueError: file_get_contents(): Provided stream context has invalid value for the "uri_parser_class" option
 
 Warning: file_get_contents(): Failed to open stream: operation failed in %s on line %d
 bool(false)

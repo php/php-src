@@ -63,8 +63,8 @@ for($index = 0; $index < count($replace_pairs_arr); $index++) {
     $replace_pairs = $replace_pairs_arr[$index];
     try {
         var_dump(strtr($str, $replace_pairs));
-    } catch (TypeError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     $count ++;
@@ -78,22 +78,22 @@ echo "*** Done ***";
 *** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***
 
 -- Iteration 1 --
-strtr(): Argument #2 ($from) must be of type array, int given
+TypeError: strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 2 --
-strtr(): Argument #2 ($from) must be of type array, int given
+TypeError: strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 3 --
-strtr(): Argument #2 ($from) must be of type array, int given
+TypeError: strtr(): Argument #2 ($from) must be of type array, int given
 
 -- Iteration 4 --
-strtr(): Argument #2 ($from) must be of type array, float given
+TypeError: strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 5 --
-strtr(): Argument #2 ($from) must be of type array, float given
+TypeError: strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 6 --
-strtr(): Argument #2 ($from) must be of type array, float given
+TypeError: strtr(): Argument #2 ($from) must be of type array, float given
 
 -- Iteration 7 --
 string(6) "012atm"
@@ -105,26 +105,26 @@ string(6) "012atm"
 string(6) "122atm"
 
 -- Iteration 10 --
-strtr(): Argument #2 ($from) must be of type array, true given
+TypeError: strtr(): Argument #2 ($from) must be of type array, true given
 
 -- Iteration 11 --
-strtr(): Argument #2 ($from) must be of type array, false given
+TypeError: strtr(): Argument #2 ($from) must be of type array, false given
 
 -- Iteration 12 --
-strtr(): Argument #2 ($from) must be of type array, true given
+TypeError: strtr(): Argument #2 ($from) must be of type array, true given
 
 -- Iteration 13 --
-strtr(): Argument #2 ($from) must be of type array, false given
+TypeError: strtr(): Argument #2 ($from) must be of type array, false given
 
 -- Iteration 14 --
-strtr(): Argument #2 ($from) must be of type array, null given
+TypeError: strtr(): Argument #2 ($from) must be of type array, null given
 
 -- Iteration 15 --
-strtr(): Argument #2 ($from) must be of type array, null given
+TypeError: strtr(): Argument #2 ($from) must be of type array, null given
 
 -- Iteration 16 --
-strtr(): Argument #2 ($from) must be of type array, sample given
+TypeError: strtr(): Argument #2 ($from) must be of type array, sample given
 
 -- Iteration 17 --
-strtr(): Argument #2 ($from) must be of type array, resource given
+TypeError: strtr(): Argument #2 ($from) must be of type array, resource given
 *** Done ***

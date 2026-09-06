@@ -58,8 +58,8 @@ $inputs = [
 foreach ($inputs as $input) {
     try {
         var_dump(pow($input, 3));
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 fclose($fp);
@@ -78,11 +78,11 @@ float(0.125)
 int(0)
 int(1)
 int(0)
-Unsupported operand types: string ** int
-Unsupported operand types: array ** int
-Unsupported operand types: string ** int
+TypeError: Unsupported operand types: string ** int
+TypeError: Unsupported operand types: array ** int
+TypeError: Unsupported operand types: string ** int
 float(1157.625)
 int(8)
 float(0.000250047)
-Unsupported operand types: classA ** int
-Unsupported operand types: resource ** int
+TypeError: Unsupported operand types: classA ** int
+TypeError: Unsupported operand types: resource ** int

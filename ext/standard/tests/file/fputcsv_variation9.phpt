@@ -52,8 +52,8 @@ foreach ($csv_lists as $csv_list) {
     // write to a file in csv format
     try {
       var_dump( fputcsv($file_handle, $csv_field, '++', '%%') );
-    } catch (ValueError $e) {
-      echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+      echo $e::class, ': ', $e->getMessage(), "\n";
     }
     // check the file pointer position and eof
     var_dump( ftell($file_handle) );
@@ -75,649 +75,649 @@ echo "Done\n";
 *** Testing fputcsv() : with two chars as enclosure & delimiter ***
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-fputcsv(): Argument #3 ($separator) must be a single character
+ValueError: fputcsv(): Argument #3 ($separator) must be a single character
 int(0)
 bool(false)
 string(0) ""

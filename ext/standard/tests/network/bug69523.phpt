@@ -4,9 +4,9 @@ setcookie() allows empty cookie name
 <?php
 try {
     setcookie('', 'foo');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-setcookie(): Argument #1 ($name) must not be empty
+ValueError: setcookie(): Argument #1 ($name) must not be empty

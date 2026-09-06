@@ -10,8 +10,8 @@ class MySplFileInfo extends SplFileInfo {
 
 try {
     serialize(new MySplFileInfo(__FILE__));
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $anon = new class () {
@@ -21,33 +21,33 @@ $anon = new class () {
 
 try {
     serialize($anon);
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     unserialize("O:13:\"MySplFileInfo\":0:{}");
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unserialize("C:13:\"MySplFileInfo\":0:{}");
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $name = $anon::class;
 try {
     unserialize("O:" . strlen($name) . ":\"" . $name . "\":0:{}");
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-Serialization of 'MySplFileInfo' is not allowed
-Serialization of 'class@anonymous' is not allowed
-Unserialization of 'MySplFileInfo' is not allowed
-Unserialization of 'MySplFileInfo' is not allowed
+Exception: Serialization of 'MySplFileInfo' is not allowed
+Exception: Serialization of 'class@anonymous' is not allowed
+Exception: Unserialization of 'MySplFileInfo' is not allowed
+Exception: Unserialization of 'MySplFileInfo' is not allowed
 
 Warning: unserialize(): Error at offset 0 of %d bytes in %s on line %d

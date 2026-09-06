@@ -31,8 +31,8 @@ foreach($operations as $operation) {
     echo "--- Iteration $i ---" . \PHP_EOL;
     try {
         var_dump(flock($fp, $operation));
-    } catch (\TypeError|\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $i++;
 }
@@ -43,8 +43,8 @@ $fp = fopen($file, "w");
 fclose($fp);
 try {
     var_dump(flock($fp, LOCK_SH|LOCK_NB));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -55,19 +55,19 @@ unlink($file);
 --EXPECT--
 *** Testing error conditions ***
 --- Iteration 0 ---
-flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
+ValueError: flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
 --- Iteration 1 ---
-flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
+ValueError: flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
 --- Iteration 2 ---
-flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
+ValueError: flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
 --- Iteration 3 ---
-flock(): Argument #2 ($operation) must be of type int, array given
+TypeError: flock(): Argument #2 ($operation) must be of type int, array given
 --- Iteration 4 ---
-flock(): Argument #2 ($operation) must be of type int, array given
+TypeError: flock(): Argument #2 ($operation) must be of type int, array given
 --- Iteration 5 ---
-flock(): Argument #2 ($operation) must be of type int, string given
+TypeError: flock(): Argument #2 ($operation) must be of type int, string given
 --- Iteration 6 ---
-flock(): Argument #2 ($operation) must be of type int, string given
+TypeError: flock(): Argument #2 ($operation) must be of type int, string given
 --- Iteration 7 ---
-flock(): Argument #2 ($operation) must be of type int, string given
-flock(): Argument #1 ($stream) must be an open stream resource
+TypeError: flock(): Argument #2 ($operation) must be of type int, string given
+TypeError: flock(): Argument #1 ($stream) must be an open stream resource

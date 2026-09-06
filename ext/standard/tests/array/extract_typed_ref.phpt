@@ -13,11 +13,11 @@ $i =& $test->i;
 $s =& $test->s;
 try {
     extract(['i' => 'foo', 's' => 42]);
-} catch (TypeError $e) { echo $e->getMessage(), "\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($test->i, $test->s);
 
 ?>
 --EXPECT--
-Cannot assign string to reference held by property Test::$i of type int
+TypeError: Cannot assign string to reference held by property Test::$i of type int
 int(0)
 string(0) ""

@@ -72,22 +72,22 @@ foreach($values as $value) {
   // with default argument
   try {
     var_dump(sprintf($value));
-  } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+  } catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
 
   // with two arguments
   try {
     var_dump(sprintf($value, $arg1));
-  } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+  } catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
 
   // with three arguments
   try {
     var_dump(sprintf($value, $arg1, $arg2));
-  } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+  } catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
   }
 
   $count++;
@@ -147,29 +147,29 @@ string(3) "0.5"
 string(3) "0.5"
 
 -- Iteration 10 --
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 11 --
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 12 --
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 13 --
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 14 --
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
-sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 15 --
 string(1) "1"
@@ -207,7 +207,7 @@ string(6) "Object"
 string(6) "Object"
 
 -- Iteration 22 --
-sprintf(): Argument #1 ($format) must be of type string, resource given
-sprintf(): Argument #1 ($format) must be of type string, resource given
-sprintf(): Argument #1 ($format) must be of type string, resource given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, resource given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, resource given
+TypeError: sprintf(): Argument #1 ($format) must be of type string, resource given
 Done

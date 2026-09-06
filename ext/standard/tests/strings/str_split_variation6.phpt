@@ -27,15 +27,15 @@ for($count = 0; $count < count($values); $count++) {
 
     try {
         var_dump( str_split($str, $values[$count]) );
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
 *** Testing str_split() : different integer values for 'split_length' ***
 -- Iteration 1 --
-str_split(): Argument #2 ($length) must be greater than 0
+ValueError: str_split(): Argument #2 ($length) must be greater than 0
 -- Iteration 2 --
 array(42) {
   [0]=>
@@ -124,7 +124,7 @@ array(42) {
   string(1) "t"
 }
 -- Iteration 3 --
-str_split(): Argument #2 ($length) must be greater than 0
+ValueError: str_split(): Argument #2 ($length) must be greater than 0
 -- Iteration 4 --
 array(1) {
   [0]=>
@@ -143,4 +143,4 @@ array(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 7 --
-str_split(): Argument #2 ($length) must be greater than 0
+ValueError: str_split(): Argument #2 ($length) must be greater than 0
