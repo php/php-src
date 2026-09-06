@@ -1058,6 +1058,77 @@ try_again:
 }
 /* }}} */
 
+/*
+ * Strings use zval_try_get_long() numeric-string semantics. If *failed is true,
+ * the return value must not be used and an exception may be pending. The input
+ * must not be IS_UNDEF.
+ */
+ZEND_API double ZEND_FASTCALL zval_try_get_double_func(const zval *op, bool *failed)
+{
+	*failed = false;
+try_again:
+	switch (Z_TYPE_P(op)) {
+		case IS_NULL:
+		case IS_FALSE:
+			return 0.0;
+		case IS_TRUE:
+			return 1.0;
+		case IS_LONG:
+			return (double) Z_LVAL_P(op);
+		case IS_DOUBLE:
+			return Z_DVAL_P(op);
+		case IS_STRING:
+			{
+				uint8_t type;
+				zend_long lval;
+				double dval;
+				double result;
+				bool trailing_data = false;
+
+				type = is_numeric_string_ex(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval,
+					/* allow errors */ true, NULL, &trailing_data);
+				if (type == 0) {
+					*failed = true;
+					return 0.0;
+				}
+				if (type == IS_DOUBLE) {
+					result = dval;
+				} else if (UNEXPECTED(lval == 0)) {
+					result = zend_strtod(Z_STRVAL_P(op), NULL);
+				} else {
+					result = (double) lval;
+				}
+				if (UNEXPECTED(trailing_data)) {
+					zend_error(E_WARNING, "A non-numeric value encountered");
+					if (UNEXPECTED(EG(exception))) {
+						*failed = true;
+						return 0.0;
+					}
+				}
+				return result;
+			}
+		case IS_OBJECT:
+			{
+				zval dst;
+				if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), &dst, IS_DOUBLE) == FAILURE
+						|| EG(exception)) {
+					*failed = true;
+					return 0.0;
+				}
+				ZEND_ASSERT(Z_TYPE(dst) == IS_DOUBLE);
+				return Z_DVAL(dst);
+			}
+		case IS_RESOURCE:
+		case IS_ARRAY:
+			*failed = true;
+			return 0.0;
+		case IS_REFERENCE:
+			op = Z_REFVAL_P(op);
+			goto try_again;
+		default: ZEND_UNREACHABLE();
+	}
+}
+
 static zend_always_inline zend_string* __zval_get_string_func(const zval *op, bool try) /* {{{ */
 {
 try_again:
