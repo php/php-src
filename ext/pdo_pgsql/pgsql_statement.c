@@ -57,7 +57,7 @@
 #define FLOAT8OID 701
 
 #ifndef HAVE_PQCLOSEPORTAL
-static bool pdo_pgsql_try_cmd(const char *cmd, pdo_pgsql_db_handle *H)
+static bool pdo_pgsql_try_cmd(const char *cmd, const char *ok_sqlstate, pdo_pgsql_db_handle *H)
 {
 	bool result = false;
 	char *q = NULL;
@@ -85,6 +85,10 @@ static bool pdo_pgsql_try_cmd(const char *cmd, pdo_pgsql_db_handle *H)
 
 	if (PQresultStatus(res) == PGRES_COMMAND_OK) {
 		result = true;
+	} else if (res) {
+		const char *sqlstate = pdo_pgsql_sqlstate(res);
+
+		result = sqlstate && !strcmp(sqlstate, ok_sqlstate);
 	}
 
 	if (q) efree(q);
@@ -155,7 +159,7 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 #ifndef HAVE_PQCLOSEPORTAL
 			char *q;
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			pdo_pgsql_try_cmd(q, H);
+			pdo_pgsql_try_cmd(q, "34000", H); /* 34000: invalid_cursor_name */
 			efree(q);
 #else
 			PQclear(PQclosePortal(H->server, S->cursor_name));
@@ -197,7 +201,8 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 #ifndef HAVE_PQCLOSEPORTAL
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
 
-			if (pdo_pgsql_try_cmd(q, H)) {
+			/* 34000: invalid_cursor_name */
+			if (pdo_pgsql_try_cmd(q, "34000", H)) {
 				S->is_cursor_declared = false;
 			}
 
