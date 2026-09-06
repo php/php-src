@@ -27,6 +27,8 @@ PHP                                                                        NEWS
     that still have a live wrapper). (iliaal)
   . Fixed a use-after-free when Dom\Element::setAttributeNS() replaces the
     value of an attribute whose child still has a live wrapper. (iliaal)
+  . Fixed Dom\HTMLDocument::getElementById() not finding ids of SVG and
+    MathML elements. (Ilia Alshanetsky)
 
 - GD:
   . Fixed imageaffinematrixget() and imageaffinematrixconcat() reporting the
