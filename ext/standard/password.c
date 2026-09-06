@@ -184,6 +184,10 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
+	if (ZSTR_LEN(password) > 72) {
+		zend_error(E_NOTICE, "Passwords longer than 72 characters are truncated by bcrypt");
+	}
+
 	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 		cost = zval_get_long(zcost);
 	}
