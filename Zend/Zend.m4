@@ -341,9 +341,11 @@ AS_VAR_IF([ZEND_GCC_GLOBAL_REGS], [yes], [
   done
   AS_VAR_IF([zend_lto], [yes], [
     AS_CASE([$host_cpu],
-      [i386], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-esi -ffixed-edi"])],
-      [x86_64], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-r14 -ffixed-r15"])],
-      [aarch64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-x27 -ffixed-x28"])],
+      [x86_64*|amd64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-r14 -ffixed-r15"])],
+      [x86*|amd*|i?86*|pentium], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-esi -ffixed-edi"])],
+      [aarch64*|arm64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-x27 -ffixed-x28"])],
+      [ppc64*|powerpc64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-r14 -ffixed-r15"])],
+      [riscv64*], [AS_VAR_APPEND([LDFLAGS], [" -ffixed-x18 -ffixed-x19"])],
       [AC_MSG_ERROR([Cannot reserve VM registers for LTO, disable lto or use --disable-gcc-global-regs])])
   ])
 ])
