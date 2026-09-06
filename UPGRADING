@@ -52,6 +52,15 @@ PHP 8.7 UPGRADE NOTES
     application terminate one attribute and append further ones.
 
 - Standard:
+  . pack() now throws a TypeError when a value for an integer or floating-point
+    format code cannot be converted to int or float, instead of silently
+    coercing it. Floating-point format codes use PHP numeric-string syntax, so
+    "INF" and "NAN" strings are no longer accepted; the corresponding float
+    values remain accepted. Integer format codes now emit E_DEPRECATED when
+    converting a float or float-string to int loses precision. Integer and
+    floating-point format codes emit E_WARNING for leading-numeric strings.
+    These diagnostics are propagated if an error handler converts them to
+    exceptions.
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change
     this.
