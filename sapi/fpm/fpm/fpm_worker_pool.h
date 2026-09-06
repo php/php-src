@@ -3,6 +3,8 @@
 #ifndef FPM_WORKER_POOL_H
 #define FPM_WORKER_POOL_H 1
 
+#include <sys/types.h>
+
 #include "fpm_conf.h"
 #include "fpm_shm.h"
 
@@ -23,9 +25,12 @@ struct fpm_worker_pool_s {
 	char *user, *home;									/* for setting env USER and HOME */
 	enum fpm_address_domain listen_address_domain;
 	int listening_socket;
-	int set_uid, set_gid;								/* config uid and gid */
+	uid_t set_uid;
+	gid_t set_gid;										/* config uid and gid */
 	char *set_user;										/* config user name */
-	int socket_uid, socket_gid, socket_mode;
+	uid_t socket_uid;
+	gid_t socket_gid;
+	int socket_mode;
 
 	/* runtime */
 	struct fpm_child_s *children;

@@ -1180,6 +1180,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		}
 
 		if (ZSTR_VAL(name)[0] == '\\') {
+			if (ZSTR_LEN(name) == 1) {
+				/* A lone namespace separator names no class, e.g. is_callable('\::method'). */
+				return NULL;
+			}
 			lc_name = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
 			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
 		} else {

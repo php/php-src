@@ -65,23 +65,33 @@ typedef struct _ze_zip_read_rsrc {
 	zend_long zip_rsrc_handle;
 } zip_read_rsrc;
 
-/* Extends zend object */
-typedef struct _ze_zip_object {
+/* Refcounted holder for the native archive state.
+ * Owned by a ZipArchive object and streams opened from it. */
+typedef struct _php_zip_archive {
 	struct zip *za;
+	uint32_t refcount;
+	/* libzip reads buffers until the archive is closed, can outlive the object. */
 	char **buffers;
-	HashTable *prop_handler;
-	char *filename;
-	int filename_len;
 	int buffers_cnt;
-	zip_int64_t last_id;
-	int err_zip;
-	int err_sys;
 #ifdef HAVE_PROGRESS_CALLBACK
 	zval progress_callback;
 #endif
 #ifdef HAVE_CANCEL_CALLBACK
 	zval cancel_callback;
 #endif
+} php_zip_archive;
+
+/* Extends zend object */
+typedef struct _ze_zip_object {
+	/* NULL when there is no open archive, non-NULL otherwise.
+	 * Owns one ref to the struct. */
+	php_zip_archive *archive;
+	HashTable *prop_handler;
+	char *filename;
+	int filename_len;
+	zip_int64_t last_id;
+	int err_zip;
+	int err_sys;
 	zend_object zo;
 } ze_zip_object;
 
@@ -89,10 +99,18 @@ static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
 	return (ze_zip_object *)((char*)(obj) - XtOffsetOf(ze_zip_object, zo));
 }
 
+/* The archive an object currently has open, or NULL. */
+static zend_always_inline struct zip *php_zip_object_za(const ze_zip_object *obj) {
+	return obj->archive ? obj->archive->za : NULL;
+}
+
 #define Z_ZIP_P(zv) php_zip_fetch_object(Z_OBJ_P((zv)))
 
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 php_stream *php_stream_zip_open(ze_zip_object *obj, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC);
+
+void php_zip_archive_addref(php_zip_archive *archive);
+void php_zip_archive_release(php_zip_archive *archive);
 
 extern const php_stream_wrapper php_stream_zip_wrapper;
 

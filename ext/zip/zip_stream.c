@@ -34,7 +34,7 @@ struct php_zip_stream_data_t {
 	struct zip_file *zf;
 	size_t cursor;
 	php_stream *stream;
-	ze_zip_object *owner;
+	php_zip_archive *archive;
 };
 
 #define STREAM_DATA_FROM_STREAM() \
@@ -103,10 +103,10 @@ static int php_zip_ops_close(php_stream *stream, int close_handle)
 		}
 	}
 
-	/* the pinned object ref is tied to self, so release it regardless of close_handle */
-	if (self->owner) {
-		OBJ_RELEASE(&self->owner->zo);
-		self->owner = NULL;
+	/* the archive ref is tied to self, so release it regardless of close_handle */
+	if (self->archive) {
+		php_zip_archive_release(self->archive);
+		self->archive = NULL;
 	}
 	efree(self);
 	stream->abstract = NULL;
@@ -195,6 +195,9 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		ssb->sb.st_blocks = -1;
 #endif
 		ssb->sb.st_ino = -1;
+	} else {
+		zend_string_release_ex(file_basename, 0);
+		return -1;
 	}
 	zend_string_release_ex(file_basename, 0);
 	return 0;
@@ -243,7 +246,7 @@ const php_stream_ops php_stream_zipio_ops = {
 /* {{{ php_stream_zip_open */
 php_stream *php_stream_zip_open(ze_zip_object *obj, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC)
 {
-	struct zip *arch = obj->za;
+	struct zip *arch = php_zip_object_za(obj);
 	struct zip_file *zf = NULL;
 
 	php_stream *stream = NULL;
@@ -262,9 +265,9 @@ php_stream *php_stream_zip_open(ze_zip_object *obj, struct zip_stat *sb, const c
 			self->zf = zf;
 			self->stream = NULL;
 			self->cursor = 0;
-			/* keep the archive object alive while the stream borrows its zip_t */
-			self->owner = obj;
-			GC_ADDREF(&obj->zo);
+			/* keep the zip_t alive while the stream borrows it */
+			self->archive = obj->archive;
+			php_zip_archive_addref(self->archive);
 #if LIBZIP_ATLEAST(1,9,1)
 			if (zip_file_is_seekable(zf) > 0) {
 				stream = php_stream_alloc(&php_stream_zipio_seek_ops, self, NULL, mode);
@@ -350,7 +353,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 			self->zf = zf;
 			self->stream = NULL;
 			self->cursor = 0;
-			self->owner = NULL;
+			self->archive = NULL;
 #if LIBZIP_ATLEAST(1,9,1)
 			if (zip_file_is_seekable(zf) > 0) {
 				stream = php_stream_alloc(&php_stream_zipio_seek_ops, self, NULL, mode);

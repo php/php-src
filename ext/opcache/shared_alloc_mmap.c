@@ -245,9 +245,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		/* to got HUGE PAGES in low 32-bit address we have to reserve address
 		   space and then remap it using MAP_HUGETLB */
 
-		p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
+		p = mmap(NULL, requested_size + huge_page_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 		if (p != MAP_FAILED) {
-			munmap(p, requested_size);
+			munmap(p, requested_size + huge_page_size);
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
 			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {

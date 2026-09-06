@@ -1234,7 +1234,10 @@ static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname
 		} else {
 			str = zend_string_init(entry.filename, entry.filename_len, 0);
 		}
-		zend_hash_add_mem(&mydata->manifest, str, (void*)&entry, sizeof(phar_entry_info));
+		if (!zend_hash_add_mem(&mydata->manifest, str, (void*)&entry, sizeof(phar_entry_info))) {
+			phar_metadata_tracker_free(&entry.metadata_tracker, entry.is_persistent);
+			pefree(entry.filename, entry.is_persistent);
+		}
 		zend_string_release(str);
 	}
 
