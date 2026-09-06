@@ -53,9 +53,10 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_ctor(php_dom_xpath_callbacks *regist
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_node_list(php_dom_xpath_callbacks *registry)
 {
 	if (registry->node_list) {
-		zend_hash_destroy(registry->node_list);
-		FREE_HASHTABLE(registry->node_list);
+		HashTable *node_list = registry->node_list;
 		registry->node_list = NULL;
+		zend_hash_destroy(node_list);
+		FREE_HASHTABLE(node_list);
 	}
 }
 
@@ -100,6 +101,12 @@ static void php_dom_xpath_callback_ns_get_gc(php_dom_xpath_callback_ns *ns, zend
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_get_gc(php_dom_xpath_callbacks *registry, zend_get_gc_buffer *gc_buffer)
 {
+	if (registry->node_list) {
+		zval *entry;
+		ZEND_HASH_FOREACH_VAL(registry->node_list, entry) {
+			zend_get_gc_buffer_add_zval(gc_buffer, entry);
+		} ZEND_HASH_FOREACH_END();
+	}
 	if (registry->php_ns) {
 		php_dom_xpath_callback_ns_get_gc(registry->php_ns, gc_buffer);
 	}
@@ -113,7 +120,7 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_get_gc(php_dom_xpath_callbacks *regi
 
 PHP_DOM_EXPORT HashTable *php_dom_xpath_callbacks_get_gc_for_whole_object(php_dom_xpath_callbacks *registry, zend_object *object, zval **table, int *n)
 {
-	if (registry->php_ns || registry->namespaces) {
+	if (registry->php_ns || registry->namespaces || registry->node_list) {
 		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 		php_dom_xpath_callbacks_get_gc(registry, gc_buffer);
 		zend_get_gc_buffer_use(gc_buffer, table, n);
