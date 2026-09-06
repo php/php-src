@@ -8,6 +8,11 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed bug GH-23365 (DOMNode::insertBefore($n, $n) drops the node and
     leaves a self-referencing sibling list). (David Carlier)
+  . Fixed Dom\HTMLDocument::getElementById() not finding ids of SVG and
+    MathML elements. (Ilia Alshanetsky)
+  . Fixed Dom\HTMLDocument giving attributes the namespace of their element
+    when a fragment is parsed with an xlink, xml or xmlns context element.
+    (Ilia Alshanetsky)
 
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
