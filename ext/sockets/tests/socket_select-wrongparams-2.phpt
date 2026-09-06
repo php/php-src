@@ -11,12 +11,12 @@ $time    = 0;
 
 try {
     socket_select($sockets, $write, $except, $time);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-socket_select(): At least one array argument must be passed
+ValueError: socket_select(): At least one array argument must be passed
 --CREDITS--
 Till Klampaeckel, till@php.net
 Berlin TestFest 2009

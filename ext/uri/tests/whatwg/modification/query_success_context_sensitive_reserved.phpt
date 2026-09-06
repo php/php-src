@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - query - context-sensitive reserved character
+Test Uri\WhatWg\Url::withQuery() - success - context-sensitive reserved character
 --FILE--
 <?php
 

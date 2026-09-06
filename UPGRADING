@@ -486,6 +486,13 @@ PHP 8.6 UPGRADE NOTES
     sockets. A positive value enables lingering for that many seconds, zero
     or a negative value disables it. Values above 65535 are clamped as the
     linger time is limited to an unsigned short on some platforms.
+  . Added stream socket context options so_rcvbuf and so_sndbuf that set the
+    socket receive and send buffer sizes in bytes (SO_RCVBUF and SO_SNDBUF) on
+    TCP and UDP sockets. The value must be an integer between 1 and 2147483647,
+    any other value makes the stream creation fail. The operating system may
+    round, cap or otherwise adjust the requested size, and may stop sizing that
+    buffer automatically, so the size read back can differ from the one
+    requested.
   . Allowed casting filtered streams as file descriptors for select.
   . Added the "write_seek_mode" filter parameter for the bz2, iconv,
     zlib, and string stream filters. This parameter must be set via an
@@ -529,6 +536,10 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_the_possibility_to_name_a_function_readonly
   . Passing a 3rd argument to define() is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_define_with_case_insensitive_being_specified
+  . Calling is_a() or is_subclass_of() with a string as the first argument
+    when $allow_string is false is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_a_with_string_when_allow_string_is_false
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_subclass_of_with_string_when_allow_string_is_false
 
 - BZ2:
   . Passing an object for the Bzip2 {de}compression stream filter is now
@@ -613,6 +624,11 @@ PHP 8.6 UPGRADE NOTES
   . Passing an object to array_walk{_recursive} is now deprecated. Use
     get_object_vars() on the object instead.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_array_parameter_of_array_walk_and_array_walk_recursive
+  . Passing an object as the $data argument to http_build_query() is now
+    deprecated. The interpretation of object values within $data as arrays
+    is also deprecated. Convert objects to arrays with get_object_vars()
+    before calling the function.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_data_parameter_of_http_build_query
   . The is_double() function is now deprecated. Use is_float() instead.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_double
   . The is_long() and is_integer() functions are now deprecated. Use is_int()
@@ -751,6 +767,20 @@ PHP 8.6 UPGRADE NOTES
   . snmp_set_mib_option()
   . snmp_set_output_option()
   . snmp_set_string_output_format()
+
+- Sodium:
+  . sodium_crypto_kem_keypair(), sodium_crypto_kem_seed_keypair(),
+    sodium_crypto_kem_secretkey(), sodium_crypto_kem_publickey(),
+    sodium_crypto_kem_enc() and sodium_crypto_kem_dec() expose the X-Wing
+    KEM (hybrid ML-KEM768+X25519, libsodium's recommended KEM).
+    Available when PHP is built against libsodium >= 1.0.22.
+  . sodium_crypto_kem_mlkem768_keypair(),
+    sodium_crypto_kem_mlkem768_seed_keypair(),
+    sodium_crypto_kem_mlkem768_secretkey(),
+    sodium_crypto_kem_mlkem768_publickey(),
+    sodium_crypto_kem_mlkem768_enc() and sodium_crypto_kem_mlkem768_dec()
+    expose the ML-KEM768 (FIPS 203) KEM.
+    Available when PHP is built against libsodium >= 1.0.22.
 
 - Standard:
   . clamp() returns the given value if in range, else returns the nearest
@@ -906,6 +936,18 @@ PHP 8.6 UPGRADE NOTES
   . SODIUM_CRYPTO_XOF_TURBOSHAKE128_STATEBYTES.
   . SODIUM_CRYPTO_XOF_TURBOSHAKE256_BLOCKBYTES.
   . SODIUM_CRYPTO_XOF_TURBOSHAKE256_STATEBYTES.
+  . SODIUM_CRYPTO_KEM_PUBLICKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SECRETKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_CIPHERTEXTBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SHAREDSECRETBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SEEDBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_KEYPAIRBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_PUBLICKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SECRETKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_CIPHERTEXTBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SHAREDSECRETBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SEEDBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES (libsodium >= 1.0.22).
 
 - Standard:
   . ARRAY_FILTER_USE_VALUE.

@@ -2,6 +2,16 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0beta3
 
+- BCMath:
+  . Fixed out-of-bounds read in bc_is_zero_for_scale() when scale exceeds
+    n_scale. (Ilia Alshanetsky)
+
+- Core:
+  . Calling is_a() or is_subclass_of() with a string as the first argument
+    when $allow_string is false is now deprecated. (Daniel Scherzer)
+  . Fixed bug GH-23232 (lone namespace separator asks the autoloader for an
+    empty class name). (spawnia)
+
 - CLI:
   . Fixed bug GH-23242 (PHP development server does not support Expect
     100-continue flow control). (Sjoerd Langkemper)
@@ -67,6 +77,10 @@ PHP                                                                        NEWS
   . Fixed WSDL cache corruption when a soap:header defines headerfaults.
     (Ilia Alshanetsky)
 
+- Sodium:
+  . Added support for the libsodium 1.0.22 KEM APIs (X-Wing and ML-KEM768).
+    (Zachary DuBois)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
@@ -77,10 +91,16 @@ PHP                                                                        NEWS
     INT_MAX instead of truncating it. (marc-mabe)
   . Improved performance of array_chunk() when not preserving keys.
     (mehmetcansahin)
+  . Fixed GH-23338 (fsockopen()/pfsockopen() ValueError reported wrong
+    argument number for $timeout). (lacatoire)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
     creating the attribute. (Ilia Alshanetsky)
+
+- Streams:
+  . Added so_rcvbuf and so_sndbuf stream socket context options, setting the
+    socket receive and send buffer sizes in bytes. (David Carlier)
 
 
 27 Aug 2026, PHP 8.6.0beta2
@@ -340,6 +360,10 @@ PHP                                                                        NEWS
     (Girgias)
 
 - Standard:
+  . Passing an object as the $data argument to http_build_query() is now
+    deprecated. The interpretation of object values within $data as arrays
+    is also deprecated. Convert objects to arrays with get_object_vars()
+    before calling the function. (Girgias)
   . Added the "filter.max_filter_count" stream context option for php://filter
     URLs. Using more than 16 filters without configuring this option is now
     deprecated. (Sjoerd Langkemper)

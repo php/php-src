@@ -651,12 +651,68 @@ PHP_FUNCTION(rtrim)
 }
 /* }}} */
 
+ZEND_FRAMELESS_FUNCTION(rtrim, 1)
+{
+	zval str_tmp;
+	zend_string *str;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, /* what */ NULL, /* what_len */ 0, /* mode */ 2));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+}
+
+ZEND_FRAMELESS_FUNCTION(rtrim, 2)
+{
+	zval str_tmp, what_tmp;
+	zend_string *str, *what;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR(2, what, what_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 2));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_STR(2, what_tmp);
+}
+
 /* {{{ Strips whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
 	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 1)
+{
+	zval str_tmp;
+	zend_string *str;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, /* what */ NULL, /* what_len */ 0, /* mode */ 1));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+}
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 2)
+{
+	zval str_tmp, what_tmp;
+	zend_string *str, *what;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR(2, what, what_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 1));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_STR(2, what_tmp);
+}
 
 /* {{{ Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)

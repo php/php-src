@@ -22,9 +22,9 @@ try {
         "group"	=> '127.0.0.1',
         "interface" => "lo",
     ));
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-IP address used in the context of an unexpected type of socket
+ValueError: IP address used in the context of an unexpected type of socket

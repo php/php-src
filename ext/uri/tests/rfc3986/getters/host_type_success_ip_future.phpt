@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component retrieval - host type - IP future
+Test Uri\Rfc3986\Uri component retrieval - host type - IPvFuture
 --FILE--
 <?php
 
