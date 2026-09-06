@@ -11,18 +11,9 @@
 */
 
 #include "php.h"
-#include "cli.h"
-#ifdef PHP_CLI_WITH_FPM
-#include "sapi/fpm/fpm/fpm.h"
-#endif
+#include "fpm/fpm.h"
 
 int main(int argc, char *argv[])
 {
-#ifdef PHP_CLI_WITH_FPM
-	/* "php --fpm [args]" runs the FPM SAPI, which ignores the "--fpm" option. */
-	if (argc > 1 && strcmp(argv[1], "--fpm") == 0) {
-		return do_php_fpm(argc, argv);
-	}
-#endif
-	return do_php_cli(argc, argv);
+	return do_php_fpm(argc, argv);
 }

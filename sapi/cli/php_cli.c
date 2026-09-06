@@ -482,6 +482,9 @@ static void php_cli_usage(char *argv0)
 				"\n"
 				"  --ini            Show configuration file names\n"
 				"  --ini=diff       Show INI entries that differ from the built-in default\n"
+#ifdef PHP_CLI_WITH_FPM
+				"  --fpm            Run as php-fpm, passing the remaining arguments to it\n"
+#endif
 				"\n"
 				"  --rf <name>      Show information about function <name>.\n"
 				"  --rc <name>      Show information about class <name>.\n"

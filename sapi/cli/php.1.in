@@ -365,6 +365,12 @@ Shows configuration for extension
 .TP
 .B \-\-ini
 Show configuration file names
+.TP
+.B \-\-fpm
+Run as
+.BR php\-fpm (8),
+passing the remaining arguments to it. Only available when PHP was configured
+with \-\-enable\-cli\-fpm, and only recognized as the first argument.
 .SH FILES
 .TP 15
 .B php\-cli.ini
