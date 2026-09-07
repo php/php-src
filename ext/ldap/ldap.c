@@ -2612,6 +2612,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 		if (ldap_status_code != LDAP_SUCCESS) {
 			if (ZEND_IS_METHOD_CALL()) {
 				zend_throw_exception_ex(ldap_exception_ce, ldap_status_code, "Add: %s", ldap_err2string(ldap_status_code));
+				RETURN_THROWS();
 			} else {
 				php_error_docref(NULL, E_WARNING, "Add: %s", ldap_err2string(ldap_status_code));
 				RETVAL_FALSE;
@@ -2621,6 +2622,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			if (ldap_status_code == -1) {
 				if (ZEND_IS_METHOD_CALL()) {
 					zend_throw_exception_ex(ldap_exception_ce, 0, "Add operation failed");
+					RETURN_THROWS();
 				} else {
 					php_error_docref(NULL, E_WARNING, "Add operation failed");
 					RETVAL_FALSE;
@@ -2642,6 +2644,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 		if (ldap_status_code != LDAP_SUCCESS) {
 			if (ZEND_IS_METHOD_CALL()) {
 				zend_throw_exception_ex(ldap_exception_ce, ldap_status_code, "Modify: %s", ldap_err2string(ldap_status_code));
+				RETURN_THROWS();
 			} else {
 				php_error_docref(NULL, E_WARNING, "Modify: %s", ldap_err2string(ldap_status_code));
 				RETVAL_FALSE;
@@ -2651,6 +2654,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, bool ext)
 			if (ldap_status_code == -1) {
 				if (ZEND_IS_METHOD_CALL()) {
 					zend_throw_exception_ex(ldap_exception_ce, 0, "Modify operation failed");
+					RETURN_THROWS();
 				} else {
 					php_error_docref(NULL, E_WARNING, "Modify operation failed");
 					RETVAL_FALSE;
@@ -2810,6 +2814,7 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 	if (rc != LDAP_SUCCESS) {
 		if (ZEND_IS_METHOD_CALL()) {
 			zend_throw_exception_ex(ldap_exception_ce, rc, "Delete: %s", ldap_err2string(rc));
+			RETURN_THROWS();
 		} else {
 			php_error_docref(NULL, E_WARNING, "Delete: %s", ldap_err2string(rc));
 			RETVAL_FALSE;
@@ -2821,6 +2826,7 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 		if (rc == -1) {
 			if (ZEND_IS_METHOD_CALL()) {
 				zend_throw_exception_ex(ldap_exception_ce, 0, "Delete operation failed");
+				RETURN_THROWS();
 			} else {
 				php_error_docref(NULL, E_WARNING, "Delete operation failed");
 				RETVAL_FALSE;
@@ -3251,15 +3257,22 @@ cleanup:
 
 #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 /* {{{ Get the current value of various session-wide parameters */
-PHP_FUNCTION(ldap_get_option)
+static void php_ldap_do_get_option(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *link = NULL, *retval;
 	ldap_linkdata *ld;
 	zend_long option;
 	LDAP *ldap;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!lz", &link, ldap_link_ce, &option, &retval) != SUCCESS) {
-		RETURN_THROWS();
+	if (ZEND_IS_METHOD_CALL()) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &option) != SUCCESS) {
+			RETURN_THROWS();
+		}
+		link = ZEND_THIS;
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!lz", &link, ldap_link_ce, &option, &retval) != SUCCESS) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (!link) {
@@ -3304,26 +3317,50 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			int val;
 
-			if (ldap_get_option(ldap, option, &val)) {
-				RETURN_FALSE;
+			int rc = ldap_get_option(ldap, option, &val);
+			if (rc != LDAP_OPT_SUCCESS) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Get option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
-			ZEND_TRY_ASSIGN_REF_LONG(retval, val);
+			if (ZEND_IS_METHOD_CALL()) {
+				RETVAL_LONG(val);
+			} else {
+				ZEND_TRY_ASSIGN_REF_LONG(retval, val);
+			}
 		} break;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
 	case LDAP_OPT_NETWORK_TIMEOUT:
 		{
 			struct timeval *timeout = NULL;
 
-			if (ldap_get_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
+			int rc = ldap_get_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout);
+			if (rc != LDAP_OPT_SUCCESS) {
 				if (timeout) {
 					ldap_memfree(timeout);
 				}
-				RETURN_FALSE;
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Get option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
+			} else if (!timeout) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, 0, "Get option: failed to get timeout");
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
-			if (!timeout) {
-				RETURN_FALSE;
+			if (ZEND_IS_METHOD_CALL()) {
+				RETVAL_LONG(timeout->tv_sec);
+			} else {
+				ZEND_TRY_ASSIGN_REF_LONG(retval, timeout->tv_sec);
 			}
-			ZEND_TRY_ASSIGN_REF_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
 		} break;
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
@@ -3331,10 +3368,20 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			int timeout;
 
-			if (ldap_get_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
-				RETURN_FALSE;
+			int rc = ldap_get_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout);
+			if (rc != LDAP_OPT_SUCCESS) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Get option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
-			ZEND_TRY_ASSIGN_REF_LONG(retval, (timeout / 1000));
+			if (ZEND_IS_METHOD_CALL()) {
+				RETVAL_LONG((timeout / 1000));
+			} else {
+				ZEND_TRY_ASSIGN_REF_LONG(retval, (timeout / 1000));
+			}
 		} break;
 #endif
 #ifdef LDAP_OPT_TIMEOUT
@@ -3342,16 +3389,30 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			struct timeval *timeout = NULL;
 
-			if (ldap_get_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
+			int rc = ldap_get_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout);
+			if (rc != LDAP_OPT_SUCCESS) {
 				if (timeout) {
 					ldap_memfree(timeout);
 				}
-				RETURN_FALSE;
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Get option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
+			} else if (!timeout) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, 0, "Get option: failed to get timeout");
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
-			if (!timeout) {
-				RETURN_FALSE;
+			if (ZEND_IS_METHOD_CALL()) {
+				RETVAL_LONG(timeout->tv_sec);
+			} else {
+				ZEND_TRY_ASSIGN_REF_LONG(retval, timeout->tv_sec);
 			}
-			ZEND_TRY_ASSIGN_REF_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
 		} break;
 #endif
@@ -3392,13 +3453,33 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			char *val = NULL;
 
-			if (ldap_get_option(ldap, option, &val) || val == NULL || *val == '\0') {
+			int rc = ldap_get_option(ldap, option, &val);
+			if (rc != LDAP_OPT_SUCCESS) {
 				if (val) {
 					ldap_memfree(val);
 				}
-				RETURN_FALSE;
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Get option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
+			} else if (val == NULL || *val == '\0') {
+				if (val) {
+					ldap_memfree(val);
+				}
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, 0, "Get option: failed to get option");
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
-			ZEND_TRY_ASSIGN_REF_STRING(retval, val);
+			if (ZEND_IS_METHOD_CALL()) {
+				RETVAL_STRING(val);
+			} else {
+				ZEND_TRY_ASSIGN_REF_STRING(retval, val);
+			}
 			ldap_memfree(val);
 		} break;
 	case LDAP_OPT_SERVER_CONTROLS:
@@ -3406,13 +3487,29 @@ PHP_FUNCTION(ldap_get_option)
 		{
 			LDAPControl **ctrls = NULL;
 
-			if (ldap_get_option(ldap, option, &ctrls) || ctrls == NULL) {
+			int rc = ldap_get_option(ldap, option, &ctrls);
+			if (rc != LDAP_OPT_SUCCESS) {
 				if (ctrls) {
 					ldap_memfree(ctrls);
 				}
-				RETURN_FALSE;
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Get option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
+			} else if (ctrls == NULL) {
+				if (ZEND_IS_METHOD_CALL()) {
+					RETVAL_EMPTY_ARRAY();
+				} else {
+					RETURN_FALSE;
+				}
 			}
-			_php_ldap_controls_to_array(ldap, ctrls, retval, true);
+			if (ZEND_IS_METHOD_CALL()) {
+				_php_ldap_controls_to_array(ldap, ctrls, return_value, true);
+			} else {
+				_php_ldap_controls_to_array(ldap, ctrls, retval, true);
+			}
 		} break;
 /* options not implemented
 	case LDAP_OPT_API_INFO:
@@ -3422,11 +3519,27 @@ PHP_FUNCTION(ldap_get_option)
 		zend_argument_value_error(2, "must be a valid LDAP option");
 		RETURN_THROWS();
 	}
-	RETURN_TRUE;
+	if (!ZEND_IS_METHOD_CALL()) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(LDAP_Connection, getOption)
+{
+	php_ldap_do_get_option(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_FUNCTION(ldap_get_option)
+{
+	php_ldap_do_get_option(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Set the value of various session-wide parameters */
+PHP_METHOD(LDAP_Connection, setOption)
+{
+	php_ldap_do_get_option(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 PHP_FUNCTION(ldap_set_option)
 {
 	zval *link = NULL, *newval;
@@ -3948,6 +4061,7 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 	if (rc != LDAP_SUCCESS) {
 		if (ZEND_IS_METHOD_CALL()) {
 			zend_throw_exception_ex(ldap_exception_ce, rc, "Rename: %s", ldap_err2string(rc));
+			RETURN_THROWS();
 		} else {
 			RETVAL_FALSE;
 		}
@@ -3956,6 +4070,7 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, bool ext)
 		if (rc == -1) {
 			if (ZEND_IS_METHOD_CALL()) {
 				zend_throw_exception_ex(ldap_exception_ce, rc, "Rename operation failed");
+				RETURN_THROWS();
 			} else {
 				php_error_docref(NULL, E_WARNING, "Rename operation failed");
 				RETVAL_FALSE;

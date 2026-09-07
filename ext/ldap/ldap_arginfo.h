@@ -1,5 +1,5 @@
 /* This is a generated file, edit ldap.stub.php instead.
- * Stub hash: 5da6c12018690489890d26ef40340861ac976e24 */
+ * Stub hash: 224d66c6466af9b094d5c4c77a9e85e051843ff9 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -382,6 +382,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_LDAP_Connection_rename, 0, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_LDAP_Connection_getOption, 0, 1, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_LONG)
+	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_LDAP_Connection_setOption, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL, NULL)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_LDAP_Result_current, 0, 0, LDAP\\ResultEntry, 0)
 ZEND_END_ARG_INFO()
 
@@ -494,6 +503,8 @@ ZEND_METHOD(LDAP_Connection, mod_del);
 ZEND_METHOD(LDAP_Connection, mod_replace);
 ZEND_METHOD(LDAP_Connection, delete);
 ZEND_METHOD(LDAP_Connection, rename);
+ZEND_METHOD(LDAP_Connection, getOption);
+ZEND_METHOD(LDAP_Connection, setOption);
 ZEND_METHOD(LDAP_Result, current);
 ZEND_METHOD(LDAP_Result, key);
 ZEND_METHOD(LDAP_Result, next);
@@ -605,6 +616,8 @@ static const zend_function_entry class_LDAP_Connection_methods[] = {
 	ZEND_ME(LDAP_Connection, mod_replace, arginfo_class_LDAP_Connection_mod_replace, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Connection, delete, arginfo_class_LDAP_Connection_delete, ZEND_ACC_PUBLIC)
 	ZEND_ME(LDAP_Connection, rename, arginfo_class_LDAP_Connection_rename, ZEND_ACC_PUBLIC)
+	ZEND_ME(LDAP_Connection, getOption, arginfo_class_LDAP_Connection_getOption, ZEND_ACC_PUBLIC)
+	ZEND_ME(LDAP_Connection, setOption, arginfo_class_LDAP_Connection_setOption, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
