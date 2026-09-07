@@ -1073,14 +1073,6 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		if (status != LXB_STATUS_OK) {
 			goto failure;
 		}
-	} else if (lexbor_base_url->path.str.data != NULL) {
-		zval zv;
-		ZVAL_NULL(&zv);
-		const zend_result result = php_uri_parser_whatwg_query_write(lexbor_url, &zv, NULL);
-		php_uri_parser_whatwg_build_errors(&errors);
-		if (result == FAILURE) {
-			goto failure;
-		}
 	}
 
 	if (Z_TYPE_P(query) == IS_STRING) {
@@ -1093,14 +1085,6 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		if (status != LXB_STATUS_OK) {
 			goto failure;
 		}
-	}  else if (lexbor_base_url->query.data != NULL) {
-		zval zv;
-		ZVAL_NULL(&zv);
-		const zend_result result = php_uri_parser_whatwg_query_write(lexbor_url, &zv, NULL);
-		php_uri_parser_whatwg_build_errors(&errors);
-		if (result == FAILURE) {
-			goto failure;
-		}
 	}
 
 	if (Z_TYPE_P(fragment) == IS_STRING) {
@@ -1111,14 +1095,6 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		);
 		php_uri_parser_whatwg_build_errors_and_throw(status, "fragment", &errors);
 		if (status != LXB_STATUS_OK) {
-			goto failure;
-		}
-	} else if (lexbor_base_url->fragment.data != NULL) {
-		zval zv;
-		ZVAL_NULL(&zv);
-		const zend_result result = php_uri_parser_whatwg_fragment_write(lexbor_url, &zv, NULL);
-		php_uri_parser_whatwg_build_errors(&errors);
-		if (result == FAILURE) {
 			goto failure;
 		}
 	}
