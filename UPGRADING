@@ -49,10 +49,10 @@ PHP 8.6 UPGRADE NOTES
     smaller index.
 
 - FTP:
-  . ftp_nb_fget() and ftp_nb_fput() now throw an Error when the connection is
-    already transferring, instead of emitting a warning and returning false
-    against their declared int return type. ftp_close() already throws on the
-    same condition.
+  . ftp_nb_fget(), ftp_nb_fput(), ftp_nb_get() and ftp_nb_put() now throw an
+    Error when the connection is already transferring, instead of emitting a
+    warning and returning false. ftp_close() already throws on the same
+    condition.
 
 - GD:
   . imagesetstyle(), imagefilter() and imagecrop() filter the types / values of
