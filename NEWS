@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     when $allow_string is false is now deprecated. (Daniel Scherzer)
   . Fixed bug GH-23232 (lone namespace separator asks the autoloader for an
     empty class name). (spawnia)
+  . Enabled the TAILCALL VM (--disable-gcc-global-regs) when building with GCC >= 16.
+    (henderkes)
 
 - CLI:
   . Fixed bug GH-23242 (PHP development server does not support Expect
