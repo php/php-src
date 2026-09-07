@@ -3536,19 +3536,22 @@ PHP_FUNCTION(ldap_get_option)
 /* }}} */
 
 /* {{{ Set the value of various session-wide parameters */
-PHP_METHOD(LDAP_Connection, setOption)
-{
-	php_ldap_do_get_option(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-PHP_FUNCTION(ldap_set_option)
+static void php_ldap_do_set_option(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *link = NULL, *newval;
 	ldap_linkdata *ld;
 	LDAP *ldap;
 	zend_long option;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!lz", &link, ldap_link_ce, &option, &newval) != SUCCESS) {
-		RETURN_THROWS();
+	if (ZEND_IS_METHOD_CALL()) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz", &option, &newval) != SUCCESS) {
+			RETURN_THROWS();
+		}
+		link = ZEND_THIS;
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!lz", &link, ldap_link_ce, &option, &newval) != SUCCESS) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (!link) {
@@ -3603,8 +3606,14 @@ PHP_FUNCTION(ldap_set_option)
 				RETURN_THROWS();
 			}
 			int val = (int)lval;
-			if (ldap_set_option(ldap, option, &val)) {
-				RETURN_FALSE;
+			int rc = ldap_set_option(ldap, option, &val);
+			if (rc != LDAP_OPT_SUCCESS) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Get option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
 		} break;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
@@ -3619,8 +3628,14 @@ PHP_FUNCTION(ldap_set_option)
 			}
 			timeout.tv_sec = lval;
 			timeout.tv_usec = 0;
-			if (ldap_set_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
-				RETURN_FALSE;
+			int rc = ldap_set_option(ldap, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout);
+			if (rc != LDAP_OPT_SUCCESS) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Set option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
 		} break;
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
@@ -3634,8 +3649,14 @@ PHP_FUNCTION(ldap_set_option)
 				RETURN_THROWS();
 			}
 			timeout = 1000 * lval; /* Convert to milliseconds */
-			if (ldap_set_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
-				RETURN_FALSE;
+			int rc = ldap_set_option(ldap, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout);
+			if (rc != LDAP_OPT_SUCCESS) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Set option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
 		} break;
 #endif
@@ -3652,8 +3673,14 @@ PHP_FUNCTION(ldap_set_option)
 			}
 			timeout.tv_sec = lval;
 			timeout.tv_usec = 0;
-			if (ldap_set_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout)) {
-				RETURN_FALSE;
+			int rc = ldap_set_option(ldap, LDAP_OPT_TIMEOUT, (void *) &timeout);
+			if (rc != LDAP_OPT_SUCCESS) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Set option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
 		} break;
 #endif
@@ -3694,9 +3721,15 @@ PHP_FUNCTION(ldap_set_option)
 			if (val == NULL) {
 				RETURN_THROWS();
 			}
-			if (ldap_set_option(ldap, option, ZSTR_VAL(val))) {
+			int rc = ldap_set_option(ldap, option, ZSTR_VAL(val));
+			if (rc != LDAP_OPT_SUCCESS) {
 				zend_string_release(val);
-				RETURN_FALSE;
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Set option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
 			zend_string_release(val);
 		} break;
@@ -3710,8 +3743,14 @@ PHP_FUNCTION(ldap_set_option)
 #endif
 		{
 			void *val = zend_is_true(newval) ? LDAP_OPT_ON : LDAP_OPT_OFF;
-			if (ldap_set_option(ldap, option, val)) {
-				RETURN_FALSE;
+			int rc = ldap_set_option(ldap, option, val);
+			if (rc != LDAP_OPT_SUCCESS) {
+				if (ZEND_IS_METHOD_CALL()) {
+					zend_throw_exception_ex(ldap_exception_ce, rc, "Set option: %s", ldap_err2string(rc));
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
 		} break;
 		/* options with control list value */
@@ -3728,12 +3767,21 @@ PHP_FUNCTION(ldap_set_option)
 			ctrls = php_ldap_controls_from_array(ldap, Z_ARRVAL_P(newval), 3);
 
 			if (ctrls == NULL) {
-				RETURN_FALSE;
+				if (ZEND_IS_METHOD_CALL()) {
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			} else {
 				int rc = ldap_set_option(ldap, option, ctrls);
 				_php_ldap_controls_free(&ctrls);
-				if (rc != LDAP_SUCCESS) {
-					RETURN_FALSE;
+				if (rc != LDAP_OPT_SUCCESS) {
+					if (ZEND_IS_METHOD_CALL()) {
+						zend_throw_exception_ex(ldap_exception_ce, rc, "Set option: %s", ldap_err2string(rc));
+						RETURN_THROWS();
+					} else {
+						RETURN_FALSE;
+					}
 				}
 			}
 		} break;
@@ -3741,7 +3789,17 @@ PHP_FUNCTION(ldap_set_option)
 		zend_argument_value_error(2, "must be a valid LDAP option");
 		RETURN_THROWS();
 	}
-	RETURN_TRUE;
+	if (!ZEND_IS_METHOD_CALL()) {
+		RETURN_TRUE;
+	}
+}
+PHP_METHOD(LDAP_Connection, setOption)
+{
+	php_ldap_do_set_option(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+PHP_FUNCTION(ldap_set_option)
+{
+	php_ldap_do_set_option(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
