@@ -2521,6 +2521,135 @@ AS_VAR_IF([php_cv_have_avx512vbmi], [yes],
 ])
 
 dnl
+dnl PHP_CHECK_SSE2
+dnl
+dnl Build for SSE2 on x86 targets that support it but do not enable it already.
+dnl SSE2 is part of the x86-64 baseline, but optional on 32-bit x86, where the
+dnl i686 baseline GCC targets by default predates it.
+dnl
+dnl -msse2 lets the compiler emit SSE2 instructions and defines __SSE2__. It is
+dnl not added when the compiler does not honour it, including when CFLAGS turn
+dnl SSE2 off again with -mno-sse2, or when a probe running SSE2 code fails.
+dnl
+dnl With SSE2 enabled, -mfpmath=sse is added as well, so that double arithmetic
+dnl also uses SSE2 rather than the x87 unit. Clang does that by itself as soon
+dnl as SSE2 is enabled; GCC needs the flag, and ignores it with only a warning
+dnl when SSE2 is not enabled. x87 registers hold a 64-bit mantissa and a 15-bit
+dnl exponent. zend_init_fpu() clamps the mantissa to 53 bits, which makes
+dnl normal-range arithmetic behave like IEEE-754 binary64, but the exponent
+dnl range cannot be clamped: a result that lands in the subnormal range is
+dnl rounded once into the wide register and a second time when it is stored, and
+dnl that double rounding can leave it one ULP away from the correctly rounded
+dnl value.
+dnl
+dnl Neither flag is added when it is already in effect.
+dnl
+dnl On x86 the resulting build requires an SSE2 capable CPU. Pass
+dnl CFLAGS=-mno-sse2 to build without SSE2.
+dnl
+AC_DEFUN([PHP_CHECK_SSE2], [dnl
+php_sse2_flags=
+
+AC_CACHE_CHECK([whether the target is x86], [php_cv_target_x86],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
+#if !defined(__i386__) && !defined(__x86_64__)
+#error not x86
+#endif
+  ]])],
+  [php_cv_target_x86=yes],
+  [php_cv_target_x86=no])])
+
+AS_VAR_IF([php_cv_target_x86], [yes], [dnl
+  php_sse2_save_CFLAGS=$CFLAGS
+
+  AC_CACHE_CHECK([whether SSE2 is enabled by default], [php_cv_sse2_default],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
+#ifndef __SSE2__
+#error SSE2 not enabled
+#endif
+    ]])],
+    [php_cv_sse2_default=yes],
+    [php_cv_sse2_default=no])])
+
+  AS_VAR_IF([php_cv_sse2_default], [no], [dnl
+    CFLAGS="-msse2 $php_sse2_save_CFLAGS"
+
+    AC_CACHE_CHECK([whether -msse2 takes effect], [php_cv_cc_msse2],
+      [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <emmintrin.h>]], [[
+#ifndef __SSE2__
+#error SSE2 not enabled
+#endif
+__m128d x = _mm_set_sd(1.0);
+(void) x;
+      ]])],
+      [php_cv_cc_msse2=yes],
+      [php_cv_cc_msse2=no])])
+
+    AS_VAR_IF([php_cv_cc_msse2], [yes], [dnl
+      AC_CACHE_CHECK([whether this machine can run SSE2 code],
+        [php_cv_sse2_runs],
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <emmintrin.h>
+int main(void)
+{
+  volatile double a = 3.0, b = 7.0;
+  double c = _mm_cvtsd_f64(_mm_div_sd(_mm_set_sd(a), _mm_set_sd(b)));
+  return (c > 0.4 && c < 0.5) ? 0 : 1;
+}
+        ]])],
+        [php_cv_sse2_runs=yes],
+        [php_cv_sse2_runs=no],
+        [php_cv_sse2_runs=cross])])
+
+      AS_CASE([$php_cv_sse2_runs],
+        [yes], [php_sse2_flags=-msse2],
+        [no], [AC_MSG_WARN(
+          [this machine cannot run SSE2 code; building without SSE2])],
+        [cross], [php_sse2_flags=-msse2])
+    ])
+  ])
+
+  CFLAGS="$php_sse2_flags $php_sse2_save_CFLAGS"
+
+  AC_CACHE_CHECK([whether double arithmetic uses SSE2 by default],
+    [php_cv_sse2_math_default],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
+#ifndef __SSE2_MATH__
+#error x87 math
+#endif
+    ]])],
+    [php_cv_sse2_math_default=yes],
+    [php_cv_sse2_math_default=no])])
+
+  AS_IF([test "$php_cv_sse2_math_default" = no &&
+    { test "$php_cv_sse2_default" = yes || test -n "$php_sse2_flags"; }], [dnl
+    CFLAGS="$php_sse2_flags -mfpmath=sse $php_sse2_save_CFLAGS"
+
+    AC_CACHE_CHECK([whether -mfpmath=sse takes effect], [php_cv_cc_mfpmath_sse],
+      [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
+#ifndef __SSE2_MATH__
+#error x87 math
+#endif
+      ]])],
+      [php_cv_cc_mfpmath_sse=yes],
+      [php_cv_cc_mfpmath_sse=no])])
+
+    AS_VAR_IF([php_cv_cc_mfpmath_sse], [yes],
+      [php_sse2_flags="${php_sse2_flags:+$php_sse2_flags }-mfpmath=sse"])
+  ])
+
+  CFLAGS=$php_sse2_save_CFLAGS
+])
+
+AC_MSG_CHECKING([for SSE2 compiler flags to add])
+AS_IF([test -n "$php_sse2_flags"], [dnl
+  CFLAGS="$php_sse2_flags $CFLAGS"
+  CXXFLAGS="$php_sse2_flags $CXXFLAGS"
+  AC_MSG_RESULT([$php_sse2_flags])
+], [AC_MSG_RESULT([none])])
+])
+
+dnl
 dnl PHP_CHECK_VARIABLE_ATTRIBUTE(attribute)
 dnl
 dnl Check whether the compiler supports the GNU C variable attribute.

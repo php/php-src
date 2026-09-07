@@ -66,6 +66,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
+  . On x86, configure now builds with SSE2 and -mfpmath=sse. 32-bit x86
+    builds therefore require an SSE2 capable CPU. Pass CFLAGS=-mno-sse2 to
+    build without SSE2. The new Autoconf macro PHP_CHECK_SSE2 implements
+    this, and extensions can use it in phpize/config.m4.
 
 ========================
 3. Module changes

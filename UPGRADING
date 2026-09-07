@@ -180,6 +180,12 @@ PHP 8.7 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- Core:
+  . 32-bit x86 builds now use SSE2 for floating point arithmetic by default,
+    so results match 64-bit builds; previously, subnormal results could be
+    one ULP off. Such builds require an SSE2 capable CPU; build with
+    CFLAGS=-mno-sse2 to keep the previous behaviour.
+
 ========================================
 14. Performance Improvements
 ========================================
