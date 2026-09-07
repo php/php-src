@@ -98,6 +98,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
     (Weilin Du)
 
+- SNMP:
+  . Fixed bug GH-23453 (SNMP::setSecurity() frees a non-malloced address with a
+    context engine ID longer than 32 bytes). (Lazizbek Ergashev)
+
 - SOAP:
   . Fixed bug GH-23447 (Segfault when a class passed to SoapServer::setClass()
     fails to initialize). (Lazizbek Ergashev)
