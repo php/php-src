@@ -673,6 +673,7 @@ void odbc_bindcols(odbc_result *result)
 		result->values[i].value_max_len = 0;
 		colfieldid = SQL_COLUMN_DISPLAY_SIZE;
 
+		result->values[i].name[0] = '\0';
 		rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)(i+1), SQL_DESC_NAME,
 				result->values[i].name, sizeof(result->values[i].name), &colnamelen, 0);
 		result->values[i].coltype = 0;
@@ -782,10 +783,30 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 /* }}} */
 
+static void odbc_colattribute_failed(odbc_result *result, zend_long pv_num)
+{
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+	SQLINTEGER diag_error;
+	SQLCHAR diag_state[6];
+	SQLCHAR diag_text[128];
+
+	memset(diag_state, '\0', sizeof(diag_state));
+	memset(diag_text, '\0', sizeof(diag_text));
+	if (SQL_SUCCESS == SQLGetDiagRec(SQL_HANDLE_STMT, result->stmt, 1, diag_state, &diag_error, diag_text, sizeof(diag_text), NULL)) {
+		diag_state[sizeof(diag_state) - 1] = '\0';
+		diag_text[sizeof(diag_text) - 1] = '\0';
+		php_error_docref(NULL, E_WARNING, "SQLColAttribute failed for field #%d: [%s] %s", (int)pv_num, diag_state, diag_text);
+		return;
+	}
+#endif
+	php_error_docref(NULL, E_WARNING, "SQLColAttribute failed for field #%d", (int)pv_num);
+}
+
 /* {{{ odbc_column_lengths */
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
+	RETCODE rc;
 	SQLLEN len;
 	zval *pv_res;
 	zend_long pv_num;
@@ -812,7 +833,11 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
-	SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT) (type?SQL_COLUMN_SCALE:SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+	rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT)(type ? SQL_COLUMN_SCALE : SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		odbc_colattribute_failed(result, pv_num);
+		len = 0;
+	}
 
 	RETURN_LONG(len);
 }
@@ -2450,6 +2475,7 @@ PHP_FUNCTION(odbc_field_type)
 	odbc_result	*result;
 	char    	tmp[32];
 	SQLSMALLINT	tmplen;
+	RETCODE		rc;
 	zval		*pv_res;
 	zend_long		pv_num;
 
@@ -2475,7 +2501,13 @@ PHP_FUNCTION(odbc_field_type)
 		RETURN_FALSE;
 	}
 
-	SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
+	tmp[0] = '\0';
+	rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, sizeof(tmp) - 1, &tmplen, NULL);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		odbc_colattribute_failed(result, pv_num);
+		RETURN_FALSE;
+	}
+
 	RETURN_STRING(tmp);
 }
 /* }}} */
