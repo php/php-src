@@ -47,6 +47,17 @@ var_dump(
     ldap_get_option($link, LDAP_OPT_CLIENT_CONTROLS, $option),
     $option
 );
+var_dump(
+    $link->getOption(LDAP_OPT_DEREF),
+    $link->getOption(LDAP_OPT_SIZELIMIT),
+    $link->getOption(LDAP_OPT_TIMELIMIT),
+    $link->getOption(LDAP_OPT_NETWORK_TIMEOUT),
+    $link->getOption(LDAP_OPT_TIMEOUT),
+    $link->getOption(LDAP_OPT_REFERRALS),
+    $link->getOption(LDAP_OPT_RESTART),
+    $link->getOption(LDAP_OPT_SERVER_CONTROLS),
+    $link->getOption(LDAP_OPT_CLIENT_CONTROLS),
+);
 ?>
 --EXPECT--
 bool(true)
@@ -85,6 +96,53 @@ array(2) {
   }
 }
 bool(true)
+array(2) {
+  ["1.2.752.58.10.1"]=>
+  array(3) {
+    ["oid"]=>
+    string(15) "1.2.752.58.10.1"
+    ["iscritical"]=>
+    bool(true)
+    ["value"]=>
+    NULL
+  }
+  ["1.2.752.58.1.10"]=>
+  array(3) {
+    ["oid"]=>
+    string(15) "1.2.752.58.1.10"
+    ["iscritical"]=>
+    bool(false)
+    ["value"]=>
+    string(5) "magic"
+  }
+}
+int(0)
+int(123)
+int(33)
+int(44)
+int(55)
+int(0)
+int(0)
+array(2) {
+  ["1.2.752.58.10.1"]=>
+  array(3) {
+    ["oid"]=>
+    string(15) "1.2.752.58.10.1"
+    ["iscritical"]=>
+    bool(true)
+    ["value"]=>
+    NULL
+  }
+  ["1.2.752.58.1.10"]=>
+  array(3) {
+    ["oid"]=>
+    string(15) "1.2.752.58.1.10"
+    ["iscritical"]=>
+    bool(false)
+    ["value"]=>
+    string(5) "magic"
+  }
+}
 array(2) {
   ["1.2.752.58.10.1"]=>
   array(3) {

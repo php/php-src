@@ -853,6 +853,8 @@ namespace LDAP {
         public function mod_replace(string $dn, array $entry, ?array $controls = null): Result;
         public function delete(string $dn, ?array $controls = null): Result;
         public function rename(string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null): Result;
+        public function getOption(int $option): array|string|int;
+        public function setOption(int $option, array|string|int|bool $value): void;
     }
 
     /**
