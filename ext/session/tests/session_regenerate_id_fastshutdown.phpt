@@ -3,7 +3,7 @@ Test session_regenerate_id() function : basic functionality
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 opcache.fast_shutdown=1
 --FILE--

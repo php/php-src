@@ -19,7 +19,7 @@ session.save_handler=files
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --COOKIE--
 PHPSESSID=rfc1867-inter
 --GET--

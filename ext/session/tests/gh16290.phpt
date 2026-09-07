@@ -3,7 +3,7 @@ GH-16290 (overflow on session cookie_lifetime ini)
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 ob_start();
