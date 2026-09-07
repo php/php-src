@@ -81,6 +81,10 @@ PHP                                                                        NEWS
   . Added support for the libsodium 1.0.22 KEM APIs (X-Wing and ML-KEM768).
     (Zachary DuBois)
 
+- SPL:
+  . Fixed SplFileObject::fseek() accepting $whence values that do not fit in an
+    int, which were silently truncated onto a valid seek constant. (lacatoire)
+
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
@@ -93,6 +97,10 @@ PHP                                                                        NEWS
     argument number for $timeout). (lacatoire)
   . Fixed bug GH-23576 (Next index for array returned from array_keys() is
     wrong). (Lazizbek Ergashev)
+  . Fixed fseek() accepting $whence values that do not fit in an int, which
+    were silently truncated onto a valid seek constant. (lacatoire)
+  . Fixed a failed seek discarding the read buffer, which desynchronized the
+    stream from its reported position. (lacatoire)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
