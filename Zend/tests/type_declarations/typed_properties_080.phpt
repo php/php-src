@@ -11,18 +11,18 @@ class Test {
     static function run() {
         try {
             self::$a;
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         try {
             self::$b;
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         try {
             self::$c;
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -31,6 +31,6 @@ Test::run();
 
 ?>
 --EXPECT--
-Typed static property Test::$a must not be accessed before initialization
-Typed static property Test::$b must not be accessed before initialization
-Typed static property Test::$c must not be accessed before initialization
+Error: Typed static property Test::$a must not be accessed before initialization
+Error: Typed static property Test::$b must not be accessed before initialization
+Error: Typed static property Test::$c must not be accessed before initialization

@@ -16,8 +16,8 @@ $b = new B();
 try {
     var_dump($b->f());
 } catch (Throwable $e) {
-    echo "Exception: ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Exception: Call to protected method B::f() from global scope
+Error: Call to protected method B::f() from global scope

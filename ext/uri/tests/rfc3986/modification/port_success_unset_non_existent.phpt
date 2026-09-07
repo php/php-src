@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - port - unsetting non-existent
+Test Uri\Rfc3986\Uri::withPort() - success - unsetting non-existent
 --FILE--
 <?php
 

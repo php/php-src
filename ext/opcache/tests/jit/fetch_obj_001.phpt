@@ -50,24 +50,24 @@ function bar() {
     $d = array();
     try {
         foo($d->{"ab" ."c"});
-    } catch (Error $err) {
-        echo $err->getMessage(), "\n";
+    } catch (Throwable $err) {
+        echo $err::class, ': ', $err->getMessage(), "\n";
     }
     var_dump($d);
 
     $e = NULL;
     try {
         foo($e->{"ab" ."c"});
-    } catch (Error $err) {
-        echo $err->getMessage(), "\n";
+    } catch (Throwable $err) {
+        echo $err::class, ': ', $err->getMessage(), "\n";
     }
     var_dump($e);
 
     $f = "";
     try {
         foo($f->{"ab" ."c"});
-    } catch (Error $err) {
-        echo $err->getMessage(), "\n";
+    } catch (Throwable $err) {
+        echo $err::class, ': ', $err->getMessage(), "\n";
     }
     var_dump($f);
 }
@@ -127,10 +127,10 @@ object(stdClass)#%d (2) {
   array(0) {
   }
 }
-Attempt to modify property "abc" on array
+Error: Attempt to modify property "abc" on array
 array(0) {
 }
-Attempt to modify property "abc" on null
+Error: Attempt to modify property "abc" on null
 NULL
-Attempt to modify property "abc" on string
+Error: Attempt to modify property "abc" on string
 string(0) ""

@@ -170,6 +170,10 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		return value;
 	}
 
+	if (places == 0 && value == trunc(value)) {
+        return value;
+    }
+
 	places = places < INT_MIN+1 ? INT_MIN+1 : places;
 
 	exponent = php_intpow10(abs(places));

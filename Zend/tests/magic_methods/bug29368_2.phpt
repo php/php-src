@@ -12,10 +12,10 @@ class Bomb {
 try {
     $x = new ReflectionMethod(new Bomb(), "foo");
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "ok\n";
 ?>
 --EXPECT--
-bomb!
+Exception: bomb!
 ok

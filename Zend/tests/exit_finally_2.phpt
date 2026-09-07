@@ -14,8 +14,8 @@ try {
         throw new Exception("Finally exception");
     }
     echo "Not executed\n";
-} catch (Exception $e) {
-    echo "Caught {$e->getMessage()}\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

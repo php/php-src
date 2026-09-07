@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\UriBuilder::setHost() - success - Registered name
+Test Uri\Rfc3986\UriBuilder::setHost() - success - registered name
 --FILE--
 <?php
 

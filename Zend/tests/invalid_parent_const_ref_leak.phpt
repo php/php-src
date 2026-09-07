@@ -9,10 +9,10 @@ class A {
 
 try {
     A::B;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot access "parent" when current class scope has no parent
+Error: Cannot access "parent" when current class scope has no parent

@@ -46,11 +46,18 @@ typedef struct _php_snmp_object {
 	struct snmp_session *session;
 	int max_oids;
 	int valueretrieval;
-	int quick_print;
-	int enum_print;
+	bool quick_print;
+	bool enum_print;
+	bool numeric_index;
+	bool numeric_timeticks;
+	bool extended_index;
+	bool dont_print_units;
+	bool escape_quotes;
+	bool print_hex_text;
+	int string_output_format;
 	int oid_output_format;
 	int snmp_errno;
-	int oid_increasing_check;
+	bool oid_increasing_check;
 	int exceptions_enabled;
 	char snmp_errstr[256];
 	zend_object zo;
@@ -60,8 +67,8 @@ typedef struct _php_snmp_object {
 
 #define Z_SNMP_P(zv) php_snmp_fetch_object(Z_OBJ_P((zv)))
 
-typedef int (*php_snmp_read_t)(php_snmp_object *snmp_object, zval *retval);
-typedef int (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval);
+typedef zend_result (*php_snmp_read_t)(php_snmp_object *snmp_object, zval *retval);
+typedef zend_result (*php_snmp_write_t)(php_snmp_object *snmp_object, zval *newval);
 
 typedef struct _ptp_snmp_prop_handler {
 	const char *name;

@@ -20,7 +20,7 @@ $d = new D();
 try {
     $d->prop = $c;
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($d);
 
@@ -29,18 +29,18 @@ $d->prop = 'foo';
 try {
     $d->prop = $c;
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($d);
 
 ?>
 --EXPECTF--
-C::__toString
+Exception: C::__toString
 object(D)#%d (0) {
   ["prop"]=>
   uninitialized(string)
 }
-C::__toString
+Exception: C::__toString
 object(D)#2 (1) {
   ["prop"]=>
   string(3) "foo"

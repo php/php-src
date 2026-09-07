@@ -145,6 +145,11 @@ static uint32_t _zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_
 	}
 	if (JIT_G(current_frame)) {
 		op_array = &JIT_G(current_frame)->func->op_array;
+		if (!(op_array->fn_flags & ZEND_ACC_IMMUTABLE)) {
+			zend_jit_op_array_trace_extension *jit_extension =
+				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+			op_array = jit_extension->op_array;
+		}
 		stack_size = op_array->last_var + op_array->T;
 		if (stack_size) {
 			stack = JIT_G(current_frame)->stack;
@@ -1162,6 +1167,9 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 		const zend_op *opline = NULL;
 		int call_level = 0;
 
+		/* Scan trace buffer forward to find the first recorded opline after
+		 * the sequence of ZEND_JIT_TRACE_INIT_CALL, and keep track of the
+		 * call level. */
 		p++;
 		while (1) {
 			if (p->op == ZEND_JIT_TRACE_VM) {
@@ -1173,8 +1181,9 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 			} else {
 				return NULL;
 			}
-			p--;
+			p++;
 		}
+		/* Scan oplines backward to find the init fcall op */
 		if (opline) {
 			while (opline > op_array->opcodes) {
 				opline--;

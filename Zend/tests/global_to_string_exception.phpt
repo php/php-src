@@ -5,10 +5,10 @@ To string conversion failure in global
 
 try {
     global ${new stdClass};
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string

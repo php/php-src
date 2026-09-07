@@ -651,12 +651,68 @@ PHP_FUNCTION(rtrim)
 }
 /* }}} */
 
+ZEND_FRAMELESS_FUNCTION(rtrim, 1)
+{
+	zval str_tmp;
+	zend_string *str;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, /* what */ NULL, /* what_len */ 0, /* mode */ 2));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+}
+
+ZEND_FRAMELESS_FUNCTION(rtrim, 2)
+{
+	zval str_tmp, what_tmp;
+	zend_string *str, *what;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR(2, what, what_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 2));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_STR(2, what_tmp);
+}
+
 /* {{{ Strips whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
 	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 1)
+{
+	zval str_tmp;
+	zend_string *str;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, /* what */ NULL, /* what_len */ 0, /* mode */ 1));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+}
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 2)
+{
+	zval str_tmp, what_tmp;
+	zend_string *str, *what;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR(2, what, what_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 1));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_STR(2, what_tmp);
+}
 
 /* {{{ Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
@@ -1192,6 +1248,19 @@ PHP_FUNCTION(strtoupper)
 }
 /* }}} */
 
+ZEND_FRAMELESS_FUNCTION(strtoupper, 1)
+{
+	zval str_tmp;
+	zend_string *str;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+
+	RETVAL_STR(zend_string_toupper(str));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+}
+
 /* {{{ Makes a string lowercase */
 PHP_FUNCTION(strtolower)
 {
@@ -1204,6 +1273,19 @@ PHP_FUNCTION(strtolower)
 	RETURN_STR(zend_string_tolower(str));
 }
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(strtolower, 1)
+{
+	zval str_tmp;
+	zend_string *str;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+
+	RETVAL_STR(zend_string_tolower(str));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+}
 
 PHP_FUNCTION(str_increment)
 {
@@ -1868,6 +1950,21 @@ PHP_FUNCTION(str_ends_with)
 	RETURN_BOOL(zend_string_ends_with(haystack, needle));
 }
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(str_ends_with, 2)
+{
+	zval haystack_tmp, needle_tmp;
+	zend_string *haystack, *needle;
+
+	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
+	Z_FLF_PARAM_STR(2, needle, needle_tmp);
+
+	RETVAL_BOOL(zend_string_ends_with(haystack, needle));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, haystack_tmp);
+	Z_FLF_PARAM_FREE_STR(2, needle_tmp);
+}
 
 static zend_always_inline void _zend_strpos(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
 {

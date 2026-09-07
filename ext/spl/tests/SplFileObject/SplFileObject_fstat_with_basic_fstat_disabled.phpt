@@ -4,7 +4,7 @@ SplFileObject::fstat when fstat() has been disabled.
 disable_functions="fstat"
 --FILE--
 <?php
-$obj = New SplFileObject(__DIR__.'/SplFileObject_testinput.csv');
+$obj = New SplFileObject(__DIR__.'/SplFileObject_testinput.txt');
 var_dump($obj->fstat());
 ?>
 --EXPECTF--

@@ -8,9 +8,9 @@ bcmath
 <?php
 try {
     var_dump(bcpowmod('1', '-1', '2'));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-bcpowmod(): Argument #2 ($exponent) must be greater than or equal to 0
+ValueError: bcpowmod(): Argument #2 ($exponent) must be greater than or equal to 0

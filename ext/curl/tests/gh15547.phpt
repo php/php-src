@@ -10,20 +10,20 @@ $mh = curl_multi_init();
 try {
 	curl_multi_select($mh, -2500000);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 curl_multi_close($mh);
 $mh = curl_multi_init();
 try {
 	curl_multi_select($mh, 2500000);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 curl_multi_close($mh);
 $mh = curl_multi_init();
 var_dump(curl_multi_select($mh, 1000000));
 ?>
 --EXPECTF--
-curl_multi_select(): Argument #2 ($timeout) must be between %d and %f
-curl_multi_select(): Argument #2 ($timeout) must be between %d and %f
+ValueError: curl_multi_select(): Argument #2 ($timeout) must be between %d and %f
+ValueError: curl_multi_select(): Argument #2 ($timeout) must be between %d and %f
 int(0)

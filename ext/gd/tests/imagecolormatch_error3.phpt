@@ -15,9 +15,9 @@ $background_color = imagecolorallocate($imb, 0, 0, 100);
 try {
     imagecolormatch($ima, $imb);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-imagecolormatch(): Argument #2 ($image2) must be Palette
+ValueError: imagecolormatch(): Argument #2 ($image2) must be Palette

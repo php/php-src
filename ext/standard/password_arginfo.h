@@ -1,6 +1,8 @@
 /* This is a generated file, edit password.stub.php instead.
  * Stub hash: f61df8d477588718e0eb1b055e5a3e138e6bcad3 */
 
+#include "zend_constants.h"
+
 static void register_password_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("PASSWORD_DEFAULT", "2y", CONST_PERSISTENT);

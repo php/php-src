@@ -1,6 +1,8 @@
 /* This is a generated file, edit tidy.stub.php instead.
  * Stub hash: 7a1ba6bc8ec95e846ec89060b30f54d2c32486ef */
 
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, config, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")

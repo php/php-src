@@ -20,12 +20,12 @@ unset($x->foo);
 try {
     var_dump($x->foo);
 } catch (Throwable $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $x->foo = "ops";
 } catch (Throwable $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -36,5 +36,5 @@ object(Foo)#1 (1) {
 NULL
 int(5)
 NULL
-Typed property Foo::$foo must not be accessed before initialization
-Cannot assign string to property Foo::$foo of type ?int
+Error: Typed property Foo::$foo must not be accessed before initialization
+TypeError: Cannot assign string to property Foo::$foo of type ?int

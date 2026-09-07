@@ -11,7 +11,7 @@ if ($outfile === false) {
 
 $contentfile = $outfile . ".out";
 
-$pkcsfile = __DIR__ . "/openssl_cms_verify__pkcsfile.tmp";
+$pkcsfile = __DIR__ . "/openssl_cms_verify_basic__pkcsfile.tmp";
 $eml = __DIR__ . "/signed.eml";
 $wrong = "wrong";
 $empty = "";
@@ -38,7 +38,10 @@ if (file_exists($contentfile)) {
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . DIRECTORY_SEPARATOR . '/openssl_cms_verify__pkcsfile.tmp');
+$pkcsfile = __DIR__ . DIRECTORY_SEPARATOR . '/openssl_cms_verify_basic__pkcsfile.tmp';
+if (file_exists($pkcsfile)) {
+    unlink($pkcsfile);
+}
 ?>
 --EXPECT--
 bool(false)

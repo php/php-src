@@ -14,10 +14,10 @@ $doc->load(__DIR__."/book.xml");
 
 try {
     $doc->schemaValidateSource('');
-} catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-DOMDocument::schemaValidateSource(): Argument #1 ($source) must not be empty
+ValueError: DOMDocument::schemaValidateSource(): Argument #1 ($source) must not be empty

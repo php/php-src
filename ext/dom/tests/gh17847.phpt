@@ -37,16 +37,16 @@ foreach ($xpath->query('//p') as $entry) {
 foreach ($garbage as $node) {
     try {
         var_dump($node->localName);
-    } catch (DOMException $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
-Invalid State Error
-Invalid State Error
-Invalid State Error
-Invalid State Error
-Invalid State Error
-Invalid State Error
-Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error
+DOMException: Invalid State Error

@@ -17,14 +17,14 @@ $obj = new A;
 try {
     foreach ($obj as $k => &$v) {}
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($obj);
 ?>
 --EXPECTF--
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
-Cannot acquire reference to readonly property A::$foo
+Error: Cannot acquire reference to readonly property A::$foo
 object(A)#1 (1) {
   ["foo"]=>
   string(3) "bar"

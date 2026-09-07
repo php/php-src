@@ -956,7 +956,7 @@ namespace {
     function pg_set_chunked_rows_size(PgSql\Connection $connection, int $size): bool {}
 #endif
 #ifdef HAVE_PG_CLOSE_STMT
-    function pg_close_stmt(Pgsql\Connection $connection, string $statement_name): PgSql\Result|false {}
+    function pg_close_stmt(PgSql\Connection $connection, string $statement_name): PgSql\Result|false {}
 #endif
 }
 

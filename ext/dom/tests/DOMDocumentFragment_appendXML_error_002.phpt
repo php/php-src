@@ -10,9 +10,9 @@ dom
 $fragment = new DOMDocumentFragment();
 try {
     $fragment->appendXML('<bait>crankbait</bait>');
-} catch (DOMException $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-No Modification Allowed Error
+DOMException: No Modification Allowed Error

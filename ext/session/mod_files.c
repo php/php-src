@@ -101,13 +101,13 @@ const ps_module ps_mod_files = {
 	PS_MOD_UPDATE_TIMESTAMP(files)
 };
 
-static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const zend_string *key)
+ZEND_ATTRIBUTE_NONNULL static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const zend_string *key)
 {
 	const char *p;
 	int i;
 	size_t n;
 
-	if (!data || ZSTR_LEN(key) <= data->dirdepth ||
+	if (ZSTR_LEN(key) <= data->dirdepth ||
 		buflen < (ZSTR_LEN(data->basedir) + 2 * data->dirdepth + ZSTR_LEN(key) + 5 + sizeof(FILE_PREFIX))) {
 		return NULL;
 	}
@@ -351,12 +351,12 @@ static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetim
 	return nrdels;
 }
 
-static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
+ZEND_ATTRIBUTE_NONNULL static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
 {
 	char buf[MAXPATHLEN];
 	zend_stat_t sbuf = {0};
 
-	if (!key || !ps_files_path_create(buf, sizeof(buf), data, key)) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
 	}
 	if (VCWD_STAT(buf, &sbuf)) {
@@ -678,8 +678,7 @@ PS_CREATE_SID_FUNC(files)
 			}
 		}
 		/* Check collision */
-		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
-		if (data && ps_files_key_exists(data, sid) == SUCCESS) {
+		if (ps_files_key_exists(data, sid) == SUCCESS) {
 			zend_string_release_ex(sid, false);
 			sid = NULL;
 			if (--maxfail < 0) {

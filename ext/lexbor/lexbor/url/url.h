@@ -81,6 +81,20 @@ typedef enum {
 }
 lxb_url_state_t;
 
+typedef enum {
+    LXB_URL_MAP_UNDEF         = 0x00,
+    LXB_URL_MAP_C0            = 0x01,
+    LXB_URL_MAP_FRAGMENT      = 0x02,
+    LXB_URL_MAP_QUERY         = 0x04,
+    LXB_URL_MAP_SPECIAL_QUERY = 0x08,
+    LXB_URL_MAP_PATH          = 0x10,
+    LXB_URL_MAP_USERINFO      = 0x20,
+    LXB_URL_MAP_COMPONENT     = 0x40,
+    LXB_URL_MAP_X_WWW_FORM    = 0x80,
+    LXB_URL_MAP_ALL           = 0xff
+}
+lxb_url_map_type_t;
+
 /*
  * New values can only be added downwards.
  * Before LXB_URL_SCHEMEL_TYPE__LAST_ENTRY.
@@ -320,6 +334,114 @@ lxb_url_parse_basic(lxb_url_parser_t *parser, lxb_url_t *url,
                     const lxb_url_t *base_url,
                     const lxb_char_t *data, size_t length,
                     lxb_url_state_t override_state, lxb_encoding_t encoding);
+
+/*
+ * IPv6 parser.
+ *
+ * This function is an implementation of IPv6 parsing according to the WHATWG
+ * specification.
+ * https://url.spec.whatwg.org/#concept-ipv6-parser
+ *
+ * The address can be passed both with and without the surrounding square
+ * brackets: "::1" and "[::1]" give the same result. If the opening bracket is
+ * present, the closing one is required.
+ *
+ * The output buffer is zeroed by the function, there is no need to prepare it.
+ * Use the lxb_url_serialize_host_ipv6() function to serialize the result.
+ *
+ * @param[in] lxb_url_parser_t *. Can be NULL.
+ * @param[in] Pointer to the beginning of the data. Not NULL.
+ * @param[in] Length of the data. Can be 0.
+ * @param[out] Buffer for eight (uint16_t[8]) IPv6 pieces. Not NULL. The value
+ * is meaningful only if LXB_STATUS_OK is returned.
+ *
+ * @return LXB_STATUS_OK if successful, otherwise an error status value.
+ */
+LXB_API lxb_status_t
+lxb_url_parse_host_ipv6(lxb_url_parser_t *parser, const lxb_char_t *data,
+                        size_t length, uint16_t *ipv6);
+
+/*
+ * UTF-8 percent-encoder.
+ *
+ * Percent-encodes bytes from data according to url_map and appends the result
+ * to str. A byte is encoded as "%HH" when the result of
+ * (url_map[byte] & enmap) is non-zero. Uppercase hexadecimal digits are used.
+ * If space_as_plus is true, U+0020 SPACE is encoded as '+' before the map is
+ * checked.
+ *
+ * The input is expected to be valid UTF-8; the function does not validate it.
+ *
+ * @param[in] Pointer to UTF-8 data. Not NULL.
+ * @param[in] Length of data. Can be 0.
+ * @param[in, out] Output string. Can be uninitialized (data = NULL). Encoded
+ * data is appended to any existing content. Not NULL.
+ * @param[in] Memory object used to allocate or resize the output string. Not
+ * NULL.
+ * @param[in] Table of 256 entries indexed by input byte, each entry is a bit
+ * mask of lxb_url_map_type_t values. Not NULL.
+ * @param[in] Mask selecting the bytes to percent-encode.
+ * @param[in] Replace U+0020 SPACE with '+' if true.
+ *
+ * @return LXB_STATUS_OK if successful, otherwise an error status value.
+ */
+LXB_API lxb_status_t
+lxb_url_percent_encode_utf_8(const lxb_char_t *data, size_t length,
+                             lexbor_str_t *str, lexbor_mraw_t *mraw,
+                             const uint8_t *url_map, lxb_url_map_type_t enmap,
+                             bool space_as_plus);
+
+/*
+ * Percent-encode after encoding.
+ *
+ * Converts valid UTF-8 data to the specified encoding and appends the
+ * percent-encoded result to str. Each encoded byte for which
+ * (url_map[byte] & enmap) is non-zero is written as "%HH" using uppercase
+ * hexadecimal digits. If a code point cannot be represented in the target
+ * encoding, its percent-encoded numeric character reference is appended.
+ *
+ * If encoding is UTF-8, no conversion is performed. If space_as_plus is true,
+ * an encoded U+0020 SPACE is replaced with '+' before the map is checked.
+ * The input is expected to be valid UTF-8; the function does not validate it.
+ *
+ * @param[in] Pointer to UTF-8 data. Not NULL.
+ * @param[in] Length of data. Can be 0.
+ * @param[in, out] Output string. Can be uninitialized (data = NULL). Encoded
+ * data is appended to any existing content. Not NULL.
+ * @param[in] Memory object used to allocate or resize the output string. Not
+ * NULL.
+ * @param[in] Table of 256 entries indexed by encoded byte, each entry is a bit
+ * mask of lxb_url_map_type_t values. Not NULL.
+ * @param[in] Target encoding. Not NULL.
+ * @param[in] Mask selecting the bytes to percent-encode.
+ * @param[in] Replace an encoded U+0020 SPACE with '+' if true.
+ *
+ * @return LXB_STATUS_OK if successful, otherwise an error status value.
+ */
+LXB_API lxb_status_t
+lxb_url_percent_encode_encoding(const lxb_char_t *data, size_t length,
+                                lexbor_str_t *str, lexbor_mraw_t *mraw,
+                                const uint8_t *url_map,
+                                const lxb_encoding_data_t *encoding,
+                                lxb_url_map_type_t enmap,
+                                bool space_as_plus);
+
+/*
+ * Get the URL percent-encoding map.
+ *
+ * Returns the built-in lookup table for the percent-encode sets defined by the
+ * URL specification. The table contains 256 entries indexed by byte value.
+ * Each entry is a bit mask of the lxb_url_map_type_t sets in which the byte
+ * must be percent-encoded.
+ *
+ * The returned map can be passed to lxb_url_percent_encode_utf_8() or
+ * lxb_url_percent_encode_encoding(). It has static storage duration and must
+ * not be modified or freed.
+ *
+ * @return Pointer to a read-only table of 256 entries. Never NULL.
+ */
+LXB_API const uint8_t *
+lxb_url_get_percent_encoding_map(void);
 
 /*
  * Erase URL.

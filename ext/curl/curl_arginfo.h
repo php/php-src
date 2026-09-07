@@ -1,6 +1,9 @@
 /* This is a generated file, edit curl.stub.php instead.
  * Stub hash: 5da31d6790f9db408cac4aed3f81f7affb2849a6 */
 
+#include "zend_attributes.h"
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
 ZEND_END_ARG_INFO()

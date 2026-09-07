@@ -9,11 +9,11 @@ if (PHP_INT_SIZE != 8) die("skip: 64-bit only"); ?>
 <?php
 try {
     $var48 = bcscale(634314234334311);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $var67 = bcsqrt(0);
 $var414 = bcadd(0,-1,10);
 ?>
 --EXPECT--
-bcscale(): Argument #1 ($scale) must be between 0 and 2147483647
+ValueError: bcscale(): Argument #1 ($scale) must be between 0 and 2147483647

@@ -7,17 +7,17 @@ bcmath
 
 try {
     bcpow('a', '1');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     bcpow('1', 'a');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-bcpow(): Argument #1 ($num) is not well-formed
-bcpow(): Argument #2 ($exponent) is not well-formed
+ValueError: bcpow(): Argument #1 ($num) is not well-formed
+ValueError: bcpow(): Argument #2 ($exponent) is not well-formed

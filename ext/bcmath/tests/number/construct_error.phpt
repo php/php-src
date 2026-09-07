@@ -7,17 +7,17 @@ bcmath
 try {
     $num = new BcMath\Number('1');
     $num->__construct(5);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $num = new BcMath\Number('a');
     var_dump($num);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot modify readonly property BcMath\Number::$value
-BcMath\Number::__construct(): Argument #1 ($num) is not well-formed
+Error: Cannot modify readonly property BcMath\Number::$value
+ValueError: BcMath\Number::__construct(): Argument #1 ($num) is not well-formed

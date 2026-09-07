@@ -1505,7 +1505,7 @@ function set_time_limit(int $seconds): bool {}
 
 /* main/SAPI.c */
 
-function header_register_callback(callable $callback): bool {}
+function header_register_callback(callable $callback): true {}
 
 /* main/output.c */
 
@@ -2063,7 +2063,7 @@ function getprotobyname(string $protocol): int|false {}
 function getprotobynumber(int $protocol): string|false {}
 #endif
 
-function register_tick_function(callable $callback, mixed ...$args): bool {}
+function register_tick_function(callable $callback, mixed ...$args): true {}
 
 function unregister_tick_function(callable $callback): void {}
 
@@ -2331,13 +2331,21 @@ function strcoll(string $string1, string $string2): int {}
  */
 function trim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function rtrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @alias rtrim */
 function chop(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function ltrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /**
@@ -2368,10 +2376,16 @@ function join(string|array $separator, ?array $array = null): string {}
  */
 function strtok(string $string, ?string $token = null): string|false {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ */
 function strtoupper(string $string): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ */
 function strtolower(string $string): string {}
 
 function str_increment(string $string): string {}
@@ -2445,7 +2459,10 @@ function str_contains(string $haystack, string $needle): bool {}
  */
 function str_starts_with(string $haystack, string $needle): bool {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function str_ends_with(string $haystack, string $needle): bool {}
 
 /**

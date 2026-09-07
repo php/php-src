@@ -472,7 +472,9 @@ static zend_ast *zp_attribute_to_ast(zend_attribute *attribute)
 	if (attribute->argc) {
 		args_ast = zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST);
 		for (uint32_t i = 0; i < attribute->argc; i++) {
-			zend_ast *arg_ast = zend_ast_create_zval(&attribute->args[i].value);
+			zval *zv = &attribute->args[i].value;
+			Z_TRY_ADDREF_P(zv);
+			zend_ast *arg_ast = zend_ast_create_zval(zv);
 			if (attribute->args[i].name) {
 				arg_ast = zend_ast_create(ZEND_AST_NAMED_ARG,
 						zend_ast_create_zval_from_str(
@@ -561,6 +563,31 @@ static zend_ast *zp_compile_forwarding_call(
 			args_ast = zend_ast_list_add(args_ast, default_value_ast);
 		} else if (zp_is_const_arg(const_args, offset)) {
 			ZEND_ASSERT(Z_TYPE(argv[offset]) < IS_OBJECT);
+			ZEND_ASSERT(!Z_REFCOUNTED(argv[offset]));
+
+			/* This argument never changes, so we can burn it into the op_array
+			 * and check its type ahead of time. */
+
+			zend_arg_info *arg_info;
+			if (offset < function->common.num_args) {
+				arg_info = &function->common.arg_info[offset];
+			} else if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
+				arg_info = &function->common.arg_info[function->common.num_args];
+			} else {
+				arg_info = NULL;
+			}
+			if (arg_info && ZEND_TYPE_IS_SET(arg_info->type)
+					&& UNEXPECTED(!zend_check_type_ex(&arg_info->type, &argv[offset],
+						/* current_frame */ true, /* is_internal */ false))) {
+				zend_string *need_msg = zend_type_to_string_resolved(arg_info->type,
+						function->common.scope);
+				zend_argument_type_error_ex(function, offset + 1,
+						"must be of type %s, %s given",
+						ZSTR_VAL(need_msg), zend_zval_value_name(&argv[offset]));
+				zend_string_release(need_msg);
+				goto error;
+			}
+
 			args_ast = zend_ast_list_add(args_ast, zend_ast_create_zval(&argv[offset]));
 		} else {
 			args_ast = zend_ast_list_add(args_ast, zend_ast_create(ZEND_AST_VAR,
@@ -677,8 +704,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	zend_op_array *op_array = NULL;
 
 	if (UNEXPECTED(function->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
-		const char *format = "Cannot call %S() dynamically";
-		zend_throw_error(NULL, format, function->common.function_name);
+		zend_throw_error(NULL, "Cannot call %pS() dynamically", function->common.function_name);
 		return NULL;
 	}
 
@@ -1103,7 +1129,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 	}
 }
 
-void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
+void zend_partial_create(zval *result, zend_class_entry *scope, zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		zend_string *declaring_filename,
@@ -1125,7 +1151,7 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 	}
 
 	zend_class_entry *called_scope;
-	zval object;
+	zend_object *object;
 
 	if (Z_TYPE_P(this_ptr) == IS_OBJECT) {
 		called_scope = Z_OBJCE_P(this_ptr);
@@ -1134,13 +1160,21 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 	}
 
 	if (Z_TYPE_P(this_ptr) == IS_OBJECT && !zp_is_static_closure(function)) {
-		ZVAL_COPY_VALUE(&object, this_ptr);
+		object = Z_OBJ_P(this_ptr);
 	} else {
-		ZVAL_UNDEF(&object);
+		object = NULL;
+	}
+
+
+	/* We conveniently use the function's scope for the scope of the generated closure as this allows const exprs
+	 * referencing self:: or parent:: to behave normally without rewriting them.
+	 * This affects method resolution for magic methods, so use the actual scope for them. */
+	if (!(function->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		scope = function->common.scope;
 	}
 
 	zend_create_partial_closure(result, (zend_function*)op_array,
-			function->common.scope, called_scope, &object,
+			scope, called_scope, object,
 			(function->common.fn_flags & ZEND_ACC_CLOSURE) != 0);
 
 	zp_bind(result, function, argc, argv, extra_named_params, const_args);

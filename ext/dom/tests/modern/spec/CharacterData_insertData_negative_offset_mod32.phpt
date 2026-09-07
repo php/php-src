@@ -15,8 +15,8 @@ $dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 try {
     $comment->insertData(-1, "A");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 $comment->insertData(-(2**32 - 1), "A");
@@ -28,25 +28,25 @@ $dom = new DOMDocument;
 $comment = $dom->createComment("foobarbaz");
 try {
     $comment->insertData(-1, "A");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 try {
     $comment->insertData(-(2**32 - 1), "A");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 
 ?>
 --EXPECT--
 --- Modern behaviour ---
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->
 <!--fAoobarbaz-->
 --- Legacy behaviour ---
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - userinfo - adding a new one
+Test Uri\Rfc3986\Uri::withUserInfo() - success - adding a new one
 --FILE--
 <?php
 

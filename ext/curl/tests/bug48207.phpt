@@ -45,7 +45,7 @@ foreach ([
     try {
         curl_setopt($ch, $option, $fp);
     } catch (ValueError $exception) {
-        echo $exception->getMessage(), "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -54,8 +54,8 @@ is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>
 --EXPECT--
-curl_setopt(): The file handle provided for CURLOPT_FILE must be writable
-curl_setopt(): The file handle provided for CURLOPT_WRITEHEADER must be writable
-curl_setopt(): The file handle provided for CURLOPT_STDERR must be writable
+ValueError: curl_setopt(): The file handle provided for CURLOPT_FILE must be writable
+ValueError: curl_setopt(): The file handle provided for CURLOPT_WRITEHEADER must be writable
+ValueError: curl_setopt(): The file handle provided for CURLOPT_STDERR must be writable
 Hello World!
 Hello World!

@@ -12,8 +12,8 @@ $image = imagecreate(1,1);// 1px image
 try {
     imagebmp($image, "./foo\0bar");
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-imagebmp(): Argument #2 ($file) must not contain null bytes
+TypeError: imagebmp(): Argument #2 ($file) must not contain null bytes

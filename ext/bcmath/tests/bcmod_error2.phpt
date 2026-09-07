@@ -8,21 +8,21 @@ bcmath.scale=0
 <?php
 try {
     bcmod("10", "0");
-} catch (DivisionByZeroError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 try {
     bcmod("10", "0.000");
-} catch (DivisionByZeroError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 try {
     bcmod("10", "-0.0");
-} catch (DivisionByZeroError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Modulo by zero
-Modulo by zero
-Modulo by zero
+DivisionByZeroError: Modulo by zero
+DivisionByZeroError: Modulo by zero
+DivisionByZeroError: Modulo by zero

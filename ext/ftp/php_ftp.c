@@ -27,7 +27,6 @@
 
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
-#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
 
 #include "php_ftp.h"

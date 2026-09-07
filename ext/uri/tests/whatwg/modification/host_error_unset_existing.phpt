@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - unsetting existing
+Test Uri\WhatWg\Url::withHost() - error - unsetting existing
 --FILE--
 <?php
 
@@ -8,7 +8,7 @@ $url = Uri\WhatWg\Url::parse("https://example.com");
 try {
     $url = $url->withHost(null);
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

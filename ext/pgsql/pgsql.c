@@ -35,7 +35,6 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
-#include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "php_network.h"
 
@@ -3427,13 +3426,13 @@ static zend_result pgsql_copy_from_query(PGconn *pgsql, PGresult *pgsql_result, 
 	}
 
 	int result;
-	if (ZSTR_LEN(tmp) > 0 && ZSTR_VAL(tmp)[ZSTR_LEN(tmp) - 1] != '\n') {
+	if (ZSTR_LEN(tmp) == 0 || zend_string_ends_with_literal(tmp, "\n")) {
+		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+	} else {
 		char *zquery = zend_cstr_append_char(
 			ZSTR_VAL(tmp), ZSTR_LEN(tmp), '\n');
 		result = PQputCopyData(pgsql, zquery, ZSTR_LEN(tmp) + 1);
 		efree(zquery);
-	} else {
-		result = PQputCopyData(pgsql, ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 	}
 
 	zend_tmp_string_release(tmp_tmp);
@@ -5740,8 +5739,9 @@ PHP_FUNCTION(pg_insert)
 	}
 
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
-		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_IGNORE_DEFAULT, PGSQL_CONV_FORCE_NULL, "
+			"PGSQL_CONV_IGNORE_NOT_NULL, PGSQL_DML_NO_CONV, PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, "
+			"and PGSQL_DML_STRING");
 		RETURN_THROWS();
 	}
 
@@ -5972,8 +5972,9 @@ PHP_FUNCTION(pg_update)
 	}
 
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
-		zend_argument_value_error(5, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+		zend_argument_value_error(5, "must be a valid bit mask of PGSQL_CONV_IGNORE_DEFAULT, PGSQL_CONV_FORCE_NULL, "
+			"PGSQL_CONV_IGNORE_NOT_NULL, PGSQL_DML_NO_CONV, PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, "
+			"and PGSQL_DML_STRING");
 		RETURN_THROWS();
 	}
 
@@ -6004,7 +6005,7 @@ PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const zend_string *t
 	ZEND_ASSERT(pg_link != NULL);
 	ZEND_ASSERT(table != NULL);
 	ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
-	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
+	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
 		return FAILURE;
@@ -6074,7 +6075,7 @@ PHP_FUNCTION(pg_delete)
 
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		zend_argument_value_error(4, "must be a valid bit mask of PGSQL_CONV_FORCE_NULL, PGSQL_DML_NO_CONV, "
-			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, PGSQL_DML_ASYNC, and PGSQL_DML_STRING");
+			"PGSQL_DML_ESCAPE, PGSQL_DML_EXEC, and PGSQL_DML_STRING");
 		RETURN_THROWS();
 	}
 

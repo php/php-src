@@ -8,8 +8,8 @@ var_dump("foo$bar"[0]);
 var_dump("foo$bar"->prop);
 try {
     var_dump("foo$bar"->method());
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class FooBar { public static $prop = 42; }
@@ -24,6 +24,6 @@ string(1) "f"
 
 Warning: Attempt to read property "prop" on string in %s on line %d
 NULL
-Call to a member function method() on string
+Error: Call to a member function method() on string
 int(42)
 int(42)

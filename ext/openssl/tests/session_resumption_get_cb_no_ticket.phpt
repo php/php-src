@@ -76,4 +76,3 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
 SERVER_EXCEPTION: Session tickets cannot be enabled when session_get_cb is setConnection failed as expected
-

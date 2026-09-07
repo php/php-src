@@ -71,11 +71,10 @@ static zend_always_inline void union_find_unite(int *parent, int *size, int i, i
 }
 /* }}} */
 
-static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+static zend_result zend_build_equi_escape_sets(int *parent, const zend_op_array *op_array, const zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
-	zend_ssa_phi *p;
 	int i;
 	int *size;
 	ALLOCA_FLAG(use_heap)
@@ -88,7 +87,7 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 
 	for (i = 0; i < ssa_vars_count; i++) {
 		if (ssa_vars[i].definition_phi) {
-			p = ssa_vars[i].definition_phi;
+			const zend_ssa_phi *p = ssa_vars[i].definition_phi;
 			if (p->pi >= 0) {
 				union_find_unite(parent, size, i, p->sources[0]);
 			} else {
@@ -98,8 +97,8 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 			}
 		} else if (ssa_vars[i].definition >= 0) {
 			int def = ssa_vars[i].definition;
-			zend_ssa_op *op = ssa->ops + def;
-			zend_op *opline =  op_array->opcodes + def;
+			const zend_ssa_op *op = ssa->ops + def;
+			const zend_op *opline =  op_array->opcodes + def;
 
 			if (op->op1_def >= 0) {
 				if (op->op1_use >= 0) {
@@ -145,9 +144,9 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 }
 /* }}} */
 
-static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
+static bool is_allocation_def(const zend_op_array *op_array, const zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
 {
-	zend_ssa_op *ssa_op = ssa->ops + def;
+	const zend_ssa_op *ssa_op = ssa->ops + def;
 	zend_op *opline = op_array->opcodes + def;
 
 	if (ssa_op->result_def == var) {
@@ -156,7 +155,7 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 				return true;
 			case ZEND_NEW: {
 			    /* objects with destructors should escape */
-				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
+				const zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 					script, op_array, opline);
 				uint32_t forbidden_flags =
 					/* These flags will always cause an exception */
@@ -216,10 +215,10 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 }
 /* }}} */
 
-static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
+static bool is_local_def(const zend_op_array *op_array, const zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
 {
-	zend_ssa_op *op = ssa->ops + def;
-	zend_op *opline = op_array->opcodes + def;
+	const zend_ssa_op *op = ssa->ops + def;
+	const zend_op *opline = op_array->opcodes + def;
 
 	if (op->result_def == var) {
 		switch (opline->opcode) {
@@ -230,7 +229,7 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 				return true;
 			case ZEND_NEW: {
 				/* objects with destructors should escape */
-				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
+				const zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 					script, op_array, opline);
 				if (ce
 				 && !ce->create_object
@@ -266,10 +265,10 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 }
 /* }}} */
 
-static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int var) /* {{{ */
+static bool is_escape_use(const zend_op_array *op_array, const zend_ssa *ssa, int use, int var) /* {{{ */
 {
-	zend_ssa_op *ssa_op = ssa->ops + use;
-	zend_op *opline = op_array->opcodes + use;
+	const zend_ssa_op *ssa_op = ssa->ops + use;
+	const zend_op *opline = op_array->opcodes + use;
 
 	if (ssa_op->op1_use == var) {
 		switch (opline->opcode) {
@@ -377,7 +376,7 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 }
 /* }}} */
 
-zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+zend_result zend_ssa_escape_analysis(const zend_script *script, const zend_op_array *op_array, const zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
@@ -474,8 +473,8 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 					root = ees[i];
 					if (ssa_vars[root].escape_state == ESCAPE_STATE_NO_ESCAPE) {
 						FOREACH_USE(ssa_vars + i, use) {
-							zend_ssa_op *op = ssa->ops + use;
-							zend_op *opline = op_array->opcodes + use;
+							const zend_ssa_op *op = ssa->ops + use;
+							const zend_op *opline = op_array->opcodes + use;
 							int enclosing_root;
 
 							if (opline->opcode == ZEND_OP_DATA &&

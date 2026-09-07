@@ -81,109 +81,173 @@ $t->test();
 
 
 ?>
---EXPECT--
+--EXPECTF--
 >>> With Defined class
 is_a( OBJECT:base, base) =                                  yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:base, base) =                                  no
 is_a( STRING:base, base, true) =                            yes
 is_subclass_of( OBJECT:base, base) =                        no
 is_subclass_of( STRING:base, base) =                        no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:base, base,false) =                  no
 >>> With Undefined
 is_a( STRING:undefB, base,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, base) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, base,false) =                no
 is_subclass_of( STRING:undefB, base) =                      no
 
 >>> With Defined class
 is_a( OBJECT:base, derived_a) =                             no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:base, derived_a) =                             no
 is_a( STRING:base, derived_a, true) =                       no
 is_subclass_of( OBJECT:base, derived_a) =                   no
 is_subclass_of( STRING:base, derived_a) =                   no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:base, derived_a,false) =             no
 >>> With Undefined
 is_a( STRING:undefB, derived_a,true) =                      no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, derived_a) =                           no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, derived_a,false) =           no
 is_subclass_of( STRING:undefB, derived_a) =                 no
 
 >>> With Defined class
 is_a( OBJECT:base, if_a) =                                  no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:base, if_a) =                                  no
 is_a( STRING:base, if_a, true) =                            no
 is_subclass_of( OBJECT:base, if_a) =                        no
 is_subclass_of( STRING:base, if_a) =                        no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:base, if_a,false) =                  no
 >>> With Undefined
 is_a( STRING:undefB, if_a,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, if_a) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, if_a,false) =                no
 is_subclass_of( STRING:undefB, if_a) =                      no
 
 >>> With Defined class
 is_a( OBJECT:base, undefA) =                                no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:base, undefA) =                                no
 is_a( STRING:base, undefA, true) =                          no
 is_subclass_of( OBJECT:base, undefA) =                      no
 is_subclass_of( STRING:base, undefA) =                      no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:base, undefA,false) =                no
 >>> With Undefined
 is_a( STRING:undefB, undefA,true) =                         no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, undefA) =                              no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, undefA,false) =              no
 is_subclass_of( STRING:undefB, undefA) =                    no
 
 
 >>> With Defined class
 is_a( OBJECT:derived_a, base) =                             yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_a, base) =                             no
 is_a( STRING:derived_a, base, true) =                       yes
 is_subclass_of( OBJECT:derived_a, base) =                   yes
 is_subclass_of( STRING:derived_a, base) =                   yes
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_a, base,false) =             no
 >>> With Undefined
 is_a( STRING:undefB, base,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, base) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, base,false) =                no
 is_subclass_of( STRING:undefB, base) =                      no
 
 >>> With Defined class
 is_a( OBJECT:derived_a, derived_a) =                        yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_a, derived_a) =                        no
 is_a( STRING:derived_a, derived_a, true) =                  yes
 is_subclass_of( OBJECT:derived_a, derived_a) =              no
 is_subclass_of( STRING:derived_a, derived_a) =              no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_a, derived_a,false) =        no
 >>> With Undefined
 is_a( STRING:undefB, derived_a,true) =                      no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, derived_a) =                           no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, derived_a,false) =           no
 is_subclass_of( STRING:undefB, derived_a) =                 no
 
 >>> With Defined class
 is_a( OBJECT:derived_a, if_a) =                             yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_a, if_a) =                             no
 is_a( STRING:derived_a, if_a, true) =                       yes
 is_subclass_of( OBJECT:derived_a, if_a) =                   yes
 is_subclass_of( STRING:derived_a, if_a) =                   yes
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_a, if_a,false) =             no
 >>> With Undefined
 is_a( STRING:undefB, if_a,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, if_a) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, if_a,false) =                no
 is_subclass_of( STRING:undefB, if_a) =                      no
 
 >>> With Defined class
 is_a( OBJECT:derived_a, undefA) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_a, undefA) =                           no
 is_a( STRING:derived_a, undefA, true) =                     no
 is_subclass_of( OBJECT:derived_a, undefA) =                 no
 is_subclass_of( STRING:derived_a, undefA) =                 no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_a, undefA,false) =           no
 >>> With Undefined
 is_a( STRING:undefB, undefA,true) =                         no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, undefA) =                              no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, undefA,false) =              no
 is_subclass_of( STRING:undefB, undefA) =                    no
 
@@ -192,60 +256,92 @@ NOW WITH AUTOLOAD
 
 >>> With Defined class
 is_a( OBJECT:base, base) =                                  yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:base, base) =                                  no
 is_a( STRING:base, base, true) =                            yes
 is_subclass_of( OBJECT:base, base) =                        no
 is_subclass_of( STRING:base, base) =                        no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:base, base,false) =                  no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, base,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, base) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, base,false) =                no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, base) =                      no
 
 >>> With Defined class
 is_a( OBJECT:base, derived_a) =                             no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:base, derived_a) =                             no
 is_a( STRING:base, derived_a, true) =                       no
 is_subclass_of( OBJECT:base, derived_a) =                   no
 is_subclass_of( STRING:base, derived_a) =                   no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:base, derived_a,false) =             no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, derived_a,true) =                      no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, derived_a) =                           no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, derived_a,false) =           no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, derived_a) =                 no
 
 >>> With Defined class
 is_a( OBJECT:base, if_a) =                                  no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:base, if_a) =                                  no
 is_a( STRING:base, if_a, true) =                            no
 is_subclass_of( OBJECT:base, if_a) =                        no
 is_subclass_of( STRING:base, if_a) =                        no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:base, if_a,false) =                  no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, if_a,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, if_a) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, if_a,false) =                no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, if_a) =                      no
 
 >>> With Defined class
 is_a( OBJECT:base, undefA) =                                no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:base, undefA) =                                no
 is_a( STRING:base, undefA, true) =                          no
 is_subclass_of( OBJECT:base, undefA) =                      no
 is_subclass_of( STRING:base, undefA) =                      no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:base, undefA,false) =                no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, undefA,true) =                         no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, undefA) =                              no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, undefA,false) =              no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, undefA) =                    no
@@ -253,60 +349,92 @@ is_subclass_of( STRING:undefB, undefA) =                    no
 
 >>> With Defined class
 is_a( OBJECT:derived_a, base) =                             yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_a, base) =                             no
 is_a( STRING:derived_a, base, true) =                       yes
 is_subclass_of( OBJECT:derived_a, base) =                   yes
 is_subclass_of( STRING:derived_a, base) =                   yes
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_a, base,false) =             no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, base,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, base) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, base,false) =                no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, base) =                      no
 
 >>> With Defined class
 is_a( OBJECT:derived_a, derived_a) =                        yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_a, derived_a) =                        no
 is_a( STRING:derived_a, derived_a, true) =                  yes
 is_subclass_of( OBJECT:derived_a, derived_a) =              no
 is_subclass_of( STRING:derived_a, derived_a) =              no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_a, derived_a,false) =        no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, derived_a,true) =                      no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, derived_a) =                           no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, derived_a,false) =           no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, derived_a) =                 no
 
 >>> With Defined class
 is_a( OBJECT:derived_a, if_a) =                             yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_a, if_a) =                             no
 is_a( STRING:derived_a, if_a, true) =                       yes
 is_subclass_of( OBJECT:derived_a, if_a) =                   yes
 is_subclass_of( STRING:derived_a, if_a) =                   yes
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_a, if_a,false) =             no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, if_a,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, if_a) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, if_a,false) =                no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, if_a) =                      no
 
 >>> With Defined class
 is_a( OBJECT:derived_a, undefA) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_a, undefA) =                           no
 is_a( STRING:derived_a, undefA, true) =                     no
 is_subclass_of( OBJECT:derived_a, undefA) =                 no
 is_subclass_of( STRING:derived_a, undefA) =                 no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_a, undefA,false) =           no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, undefA,true) =                         no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, undefA) =                              no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, undefA,false) =              no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, undefA) =                    no
@@ -314,60 +442,92 @@ is_subclass_of( STRING:undefB, undefA) =                    no
 
 >>> With Defined class
 is_a( OBJECT:derived_b, base) =                             yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_b, base) =                             no
 is_a( STRING:derived_b, base, true) =                       yes
 is_subclass_of( OBJECT:derived_b, base) =                   yes
 is_subclass_of( STRING:derived_b, base) =                   yes
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_b, base,false) =             no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, base,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, base) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, base,false) =                no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, base) =                      no
 
 >>> With Defined class
 is_a( OBJECT:derived_b, derived_a) =                        no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_b, derived_a) =                        no
 is_a( STRING:derived_b, derived_a, true) =                  no
 is_subclass_of( OBJECT:derived_b, derived_a) =              no
 is_subclass_of( STRING:derived_b, derived_a) =              no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_b, derived_a,false) =        no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, derived_a,true) =                      no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, derived_a) =                           no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, derived_a,false) =           no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, derived_a) =                 no
 
 >>> With Defined class
 is_a( OBJECT:derived_b, if_a) =                             yes
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_b, if_a) =                             no
 is_a( STRING:derived_b, if_a, true) =                       yes
 is_subclass_of( OBJECT:derived_b, if_a) =                   yes
 is_subclass_of( STRING:derived_b, if_a) =                   yes
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_b, if_a,false) =             no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, if_a,true) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, if_a) =                                no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, if_a,false) =                no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, if_a) =                      no
 
 >>> With Defined class
 is_a( OBJECT:derived_b, undefA) =                           no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:derived_b, undefA) =                           no
 is_a( STRING:derived_b, undefA, true) =                     no
 is_subclass_of( OBJECT:derived_b, undefA) =                 no
 is_subclass_of( STRING:derived_b, undefA) =                 no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:derived_b, undefA,false) =           no
 >>> With Undefined
 >>>> In autoload: string(6) "undefB"
 is_a( STRING:undefB, undefA,true) =                         no
+
+Deprecated: Calling is_a() with a string when $allow_string is false in %s on line %d
 is_a( STRING:undefB, undefA) =                              no
+
+Deprecated: Calling is_subclass_of() with a string when $allow_string is false in %s on line %d
 is_subclass_of( STRING:undefB, undefA,false) =              no
 >>>> In autoload: string(6) "undefB"
 is_subclass_of( STRING:undefB, undefA) =                    no

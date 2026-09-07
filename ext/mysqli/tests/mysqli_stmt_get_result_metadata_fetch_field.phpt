@@ -15,9 +15,10 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_set_charset($link, 'utf8'))
         printf("[%d] %s\n", mysqli_errno($link), mysqli_errno($link));
 
-    if (!($stmt = mysqli_stmt_init($link)) ||
-        !mysqli_stmt_prepare($stmt, "SELECT id, label, id + 1 as _id,  concat(label, '_') ___label FROM test ORDER BY id ASC LIMIT 3") ||
-        !mysqli_stmt_execute($stmt))
+    if (!$stmt = mysqli_prepare($link, "SELECT id, label, id + 1 as _id,  concat(label, '_') ___label FROM test ORDER BY id ASC LIMIT 3"))
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+    if(!mysqli_stmt_execute($stmt))
         printf("[001] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (!is_object($res = mysqli_stmt_get_result($stmt)) || 'mysqli_result' != get_class($res)) {

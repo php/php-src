@@ -18,8 +18,8 @@ var_dump($c);
 
 try {
     eval('static $d = new Vec(x: 0.0, x: 1.0);');
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -48,4 +48,4 @@ object(Vec)#3 (3) {
   ["z"]=>
   float(1)
 }
-Named parameter $x overwrites previous argument
+Error: Named parameter $x overwrites previous argument

@@ -1489,13 +1489,14 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		info->lineno = error_lineno;
 		info->filename = zend_string_copy(error_filename);
 		info->message = zend_string_copy(message);
-		EG(errors).size++;
-		if (EG(errors).size > EG(errors).capacity) {
+		uint32_t new_size = EG(errors).size + 1;
+		if (new_size > EG(errors).capacity) {
 			uint32_t capacity = EG(errors).capacity ? EG(errors).capacity + (EG(errors).capacity >> 1) : 2;
 			EG(errors).errors = erealloc(EG(errors).errors, sizeof(zend_error_info *) * capacity);
 			EG(errors).capacity = capacity;
 		}
-		EG(errors).errors[EG(errors).size - 1] = info;
+		EG(errors).errors[EG(errors).size] = info;
+		EG(errors).size = new_size;
 
 		/* Do not process non-fatal recorded error */
 		if (!(type & E_FATAL_ERRORS) || (type & E_DONT_BAIL)) {
@@ -1832,11 +1833,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 
 	//TODO: we can't convert compile-time errors to exceptions yet???
 	if (EG(current_execute_data) && !CG(in_compilation)) {
-		// %S is used for zend_string pointers by smart str printing, but normally
-		// is for wide character strings and so compilers complain if this is inline
-		// Use "%S" so that the message can contain null bytes.
-		const char *format = "%S";
-		zend_throw_exception_ex(exception_ce, 0, format, message);
+		zend_throw_exception_ex(exception_ce, 0, "%pS", message);
 	} else {
 		zend_error_noreturn(E_ERROR, "%s", ZSTR_VAL(message));
 	}

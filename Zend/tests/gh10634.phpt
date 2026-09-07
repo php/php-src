@@ -6,7 +6,7 @@ function test_input($input) {
     try {
         eval($input);
     } catch(Throwable $e) {
-        var_dump($e->getMessage());
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -17,8 +17,8 @@ test_input("y&#  ");
 test_input("y&//");
 ?>
 --EXPECT--
-string(36) "Unterminated comment starting line 1"
-string(36) "Unterminated comment starting line 1"
-string(36) "syntax error, unexpected end of file"
-string(36) "syntax error, unexpected end of file"
-string(36) "syntax error, unexpected end of file"
+ParseError: Unterminated comment starting line 1
+ParseError: Unterminated comment starting line 1
+ParseError: syntax error, unexpected end of file
+ParseError: syntax error, unexpected end of file
+ParseError: syntax error, unexpected end of file

@@ -45,7 +45,7 @@ var_dump($foo->self(null?->bar())->null());
 try {
     var_dump($foo?->self()[null?->bar()]);
 } catch (Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -103,4 +103,4 @@ string(11) "Foo::self()"
 string(11) "Foo::null()"
 NULL
 string(11) "Foo::self()"
-string(38) "Cannot use object of type Foo as array"
+Error: Cannot use object of type Foo as array

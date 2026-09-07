@@ -24,11 +24,11 @@ function test($object) {
 
 try {
     test(new ByVal);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 int(42)
-Cannot create reference to property ByVal::$byVal
+Error: Cannot create reference to property ByVal::$byVal

@@ -7,9 +7,9 @@ zend.assertions=1
 
 try {
     assert(false && ($a **= 2));
-} catch (AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-assert(): assert(false && ($a **= 2)) failed
+AssertionError: assert(false && ($a **= 2))

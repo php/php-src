@@ -11,9 +11,9 @@ $dom->loadXML('<test />');
 
 try {
     $dom->documentElement->append(array());
-} catch(TypeError $e) {
-    echo "OK! {$e->getMessage()}";
+} catch(Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-OK! DOMElement::append(): Argument #1 must be of type DOMNode|string, array given
+TypeError: DOMElement::append(): Argument #1 must be of type DOMNode|string, array given

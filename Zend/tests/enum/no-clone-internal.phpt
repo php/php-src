@@ -7,10 +7,10 @@ zend_test
 
 try {
     var_dump(clone ZendTestIntEnum::Foo);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Trying to clone an uncloneable object of class ZendTestIntEnum
+Error: Trying to clone an uncloneable object of class ZendTestIntEnum

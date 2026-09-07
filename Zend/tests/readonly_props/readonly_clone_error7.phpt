@@ -18,16 +18,16 @@ $foo = new Foo([]);
 // First call fills the cache slot
 try {
     var_dump(clone $foo);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(clone $foo);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot indirectly modify readonly property Foo::$bar
-Cannot indirectly modify readonly property Foo::$bar
+Error: Cannot indirectly modify readonly property Foo::$bar
+Error: Cannot indirectly modify readonly property Foo::$bar

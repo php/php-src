@@ -1,6 +1,8 @@
 /* This is a generated file, edit spl_array.stub.php instead.
  * Stub hash: c50ad88a1603d7805b7b77b60bd9c9bf0aa0a008 */
 
+#include "zend_attributes.h"
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")

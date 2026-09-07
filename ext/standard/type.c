@@ -13,6 +13,7 @@
 */
 
 #include "php.h"
+#include "zend_interfaces.h"
 
 /* {{{ Returns the type of the variable */
 PHP_FUNCTION(gettype)
@@ -458,6 +459,18 @@ PHP_FUNCTION(is_countable)
 		Z_PARAM_ZVAL(var)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(zend_is_countable(var));
+
+	switch (Z_TYPE_P(var)) {
+		case IS_ARRAY:
+			RETURN_TRUE;
+		case IS_OBJECT:
+			if (Z_OBJ_HT_P(var)->count_elements) {
+				RETURN_TRUE;
+			}
+
+			RETURN_BOOL(zend_class_implements_interface(Z_OBJCE_P(var), zend_ce_countable));
+		default:
+			RETURN_FALSE;
+	}
 }
 /* }}} */

@@ -29,8 +29,8 @@ function xxx() {
 try {
 	@xxx();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Exception: Attempt to assign property "next" on null
+Error: Attempt to assign property "next" on null

@@ -28,8 +28,8 @@ foreach ($methods as $method) {
         echo "{$type}:\n";
         try {
             $num->$method($val);
-        } catch (Error $e) {
-            echo $e->getMessage() . "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
     echo "\n";
@@ -38,11 +38,11 @@ foreach ($methods as $method) {
 --EXPECTF--
 ========== add ==========
 non number str:
-BcMath\Number::add(): Argument #1 ($num) is not well-formed
+ValueError: BcMath\Number::add(): Argument #1 ($num) is not well-formed
 array:
-BcMath\Number::add(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::add(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
 other object:
-BcMath\Number::add(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::add(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
 Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
@@ -52,11 +52,11 @@ Deprecated: BcMath\Number::add(): Passing null to parameter #1 ($num) of type Bc
 
 ========== sub ==========
 non number str:
-BcMath\Number::sub(): Argument #1 ($num) is not well-formed
+ValueError: BcMath\Number::sub(): Argument #1 ($num) is not well-formed
 array:
-BcMath\Number::sub(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::sub(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
 other object:
-BcMath\Number::sub(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::sub(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
 Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
@@ -66,11 +66,11 @@ Deprecated: BcMath\Number::sub(): Passing null to parameter #1 ($num) of type Bc
 
 ========== mul ==========
 non number str:
-BcMath\Number::mul(): Argument #1 ($num) is not well-formed
+ValueError: BcMath\Number::mul(): Argument #1 ($num) is not well-formed
 array:
-BcMath\Number::mul(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::mul(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
 other object:
-BcMath\Number::mul(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::mul(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
 Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
@@ -80,43 +80,43 @@ Deprecated: BcMath\Number::mul(): Passing null to parameter #1 ($num) of type Bc
 
 ========== div ==========
 non number str:
-BcMath\Number::div(): Argument #1 ($num) is not well-formed
+ValueError: BcMath\Number::div(): Argument #1 ($num) is not well-formed
 array:
-BcMath\Number::div(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::div(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
 other object:
-BcMath\Number::div(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::div(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
 Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
-Division by zero
+DivisionByZeroError: Division by zero
 null:
 
 Deprecated: BcMath\Number::div(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s
-Division by zero
+DivisionByZeroError: Division by zero
 
 ========== mod ==========
 non number str:
-BcMath\Number::mod(): Argument #1 ($num) is not well-formed
+ValueError: BcMath\Number::mod(): Argument #1 ($num) is not well-formed
 array:
-BcMath\Number::mod(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::mod(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
 other object:
-BcMath\Number::mod(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::mod(): Argument #1 ($num) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
 Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
-Modulo by zero
+DivisionByZeroError: Modulo by zero
 null:
 
 Deprecated: BcMath\Number::mod(): Passing null to parameter #1 ($num) of type BcMath\Number|string|int is deprecated in %s
-Modulo by zero
+DivisionByZeroError: Modulo by zero
 
 ========== pow ==========
 non number str:
-BcMath\Number::pow(): Argument #1 ($exponent) is not well-formed
+ValueError: BcMath\Number::pow(): Argument #1 ($exponent) is not well-formed
 array:
-BcMath\Number::pow(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, array given
+TypeError: BcMath\Number::pow(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, array given
 other object:
-BcMath\Number::pow(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, stdClass given
+TypeError: BcMath\Number::pow(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
 Deprecated: Implicit conversion from float 0.1 to int loses precision in %s

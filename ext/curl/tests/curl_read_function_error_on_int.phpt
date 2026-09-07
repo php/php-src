@@ -21,10 +21,10 @@ curl_setopt($ch, CURLOPT_READFUNCTION, "custom_readfunction" );
 try {
     curl_exec($ch);
 } catch (ValueError $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(curl_error($ch));
 ?>
 --EXPECT--
-The CURLOPT_READFUNCTION callback must return a string or CURL_READFUNC_ABORT or CURL_READFUNC_PAUSE
+ValueError: The CURLOPT_READFUNCTION callback must return a string or CURL_READFUNC_ABORT or CURL_READFUNC_PAUSE
 string(29) "operation aborted by callback"

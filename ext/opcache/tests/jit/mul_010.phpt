@@ -25,8 +25,8 @@ function test() {
 try {
     @test();
 } catch (Throwable $ex) {
-	echo $ex->getMessage() . "\n";
+	echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unsupported operand types: string * float
+TypeError: Unsupported operand types: string * float

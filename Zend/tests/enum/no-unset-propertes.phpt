@@ -14,24 +14,24 @@ enum IntFoo: int {
 $foo = Foo::Bar;
 try {
     unset($foo->name);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $intFoo = IntFoo::Bar;
 try {
     unset($intFoo->name);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unset($intFoo->value);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot unset readonly property Foo::$name
-Cannot unset readonly property IntFoo::$name
-Cannot unset readonly property IntFoo::$value
+Error: Cannot unset readonly property Foo::$name
+Error: Cannot unset readonly property IntFoo::$name
+Error: Cannot unset readonly property IntFoo::$value

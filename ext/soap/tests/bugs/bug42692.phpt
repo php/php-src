@@ -33,7 +33,7 @@ try {
     $result = $client->checkAuth(1,"two");
     echo "Auth for 1 is $result\n";
 } catch (Exception $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--

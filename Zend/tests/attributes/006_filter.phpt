@@ -56,16 +56,16 @@ $ref = new \ReflectionFunction(function () { });
 
 try {
     $ref->getAttributes(A1::class, 3);
-} catch (\Error $e) {
-    var_dump('ERROR 1', $e->getMessage());
+} catch (\Throwable $e) {
+    echo 'ERROR 1: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $ref = new \ReflectionFunction(function () { });
 
 try {
     $ref->getAttributes(SomeMissingClass::class, \ReflectionAttribute::IS_INSTANCEOF);
-} catch (\Error $e) {
-    var_dump('ERROR 2', $e->getMessage());
+} catch (\Throwable $e) {
+    echo 'ERROR 2: ', $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -106,7 +106,5 @@ Array
     [2] => A3
 )
 
-string(7) "ERROR 1"
-string(103) "ReflectionFunctionAbstract::getAttributes(): Argument #2 ($flags) must be a valid attribute filter flag"
-string(7) "ERROR 2"
-string(34) "Class "SomeMissingClass" not found"
+ERROR 1: ValueError: ReflectionFunctionAbstract::getAttributes(): Argument #2 ($flags) must be a valid attribute filter flag
+ERROR 2: Error: Class "SomeMissingClass" not found

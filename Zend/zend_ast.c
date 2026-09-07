@@ -1349,7 +1349,7 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 			if (uses_variadic_placeholder) {
 				flags |= ZEND_PARTIAL_USES_VARIADIC_PLACEHOLDER;
 			}
-			zend_partial_create(result, &frame->This, fptr,
+			zend_partial_create(result, scope, &frame->This, fptr,
 					ZEND_CALL_NUM_ARGS(frame), ZEND_CALL_ARG(frame, 1),
 					extra_named_params, named_positions,
 					fcc_ast->filename, &ast->lineno,

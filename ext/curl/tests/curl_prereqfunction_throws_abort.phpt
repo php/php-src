@@ -24,12 +24,12 @@ curl_setopt($ch, CURLOPT_PREREQFUNCTION,
 try {
     curl_exec($ch);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(curl_errno($ch) === CURLE_ABORTED_BY_CALLBACK);
 
 ?>
 --EXPECTF--
-prereq exception
+Exception: prereq exception
 bool(true)

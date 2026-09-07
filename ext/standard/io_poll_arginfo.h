@@ -2,6 +2,8 @@
  * Stub hash: 2f52b00fd6dfc62291e0dd288ffd68547b29bdaa
  * Has decl header: yes */
 
+#include "zend_enum.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Poll_Backend_getAvailableBackends, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 

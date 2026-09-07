@@ -13,13 +13,13 @@ try {
             public protected(set) string $baz;
         }
     } && false);
-} catch (Error $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(function () {
+AssertionError: assert(function () {
     class Foo {
         public private(set) string $bar;
         public protected(set) string $baz;

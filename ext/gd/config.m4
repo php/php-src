@@ -394,13 +394,31 @@ if test "$PHP_GD" != "no"; then
     AC_DEFINE([HAVE_GD_PNG_GET_VERSION_STRING], [1],
       [Define to 1 if GD library has the 'gdPngGetVersionString' function.])
 
-    dnl Some systems (e.g. Solaris) declare iconv_t in <iconv.h> as something
-    dnl other than 'void *'. The bundled libgd/gdkanji.c only falls back to its
-    dnl own 'typedef void *iconv_t' when HAVE_ICONV_T_DEF is undefined, so detect
-    dnl the system definition to avoid a conflicting typedef.
-    AC_EGREP_HEADER([typedef.*iconv_t], [iconv.h],
-      [AC_DEFINE([HAVE_ICONV_T_DEF], [1],
-        [Define to 1 if <iconv.h> defines iconv_t.])])
+    dnl The bundled libgd/gdkanji.c includes <iconv.h> only when HAVE_ICONV_H or
+    dnl HAVE_ICONV is defined, and skips its own 'typedef void *iconv_t' when
+    dnl HAVE_ICONV_T_DEF is defined. HAVE_ICONV comes from the iconv extension,
+    dnl which needn't be part of this build, so detect iconv here and define the
+    dnl typedef macro only along with the header one.
+    AC_CACHE_CHECK([for iconv usable by the gd extension], [php_cv_lib_gd_iconv],
+      [php_cv_lib_gd_iconv=no
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>]],
+        [[iconv_t cd = iconv_open("", ""); (void)iconv_close(cd);]])],
+        [php_cv_lib_gd_iconv=yes],
+        [LIBS_SAVED=$LIBS
+        LIBS="-liconv $LIBS"
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>]],
+          [[iconv_t cd = iconv_open("", ""); (void)iconv_close(cd);]])],
+          [php_cv_lib_gd_iconv=-liconv])
+        LIBS=$LIBS_SAVED])])
+    AS_VAR_IF([php_cv_lib_gd_iconv], [no],, [
+      AS_VAR_IF([php_cv_lib_gd_iconv], [-liconv],
+        [PHP_ADD_LIBRARY([iconv], [1], [GD_SHARED_LIBADD])])
+      AC_DEFINE([HAVE_ICONV_H], [1],
+        [Define to 1 if you have the <iconv.h> header file.])
+      AC_EGREP_HEADER([typedef.*iconv_t], [iconv.h],
+        [AC_DEFINE([HAVE_ICONV_T_DEF], [1],
+          [Define to 1 if <iconv.h> defines iconv_t.])])
+    ])
 
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])

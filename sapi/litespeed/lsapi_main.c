@@ -1443,7 +1443,7 @@ void setArgv0( int argc, char * argv[] )
 #include <fcntl.h>
 int main( int argc, char * argv[] )
 {
-    int ret;
+    int ret = 0;
     int bindFd;
 
     char * php_ini_path = NULL;

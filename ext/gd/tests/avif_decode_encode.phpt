@@ -39,7 +39,7 @@ gd
     try {
     	imageavif($img, $outfile, 1234);
     } catch (\ValueError $e) {
-        echo $e->getMessage() . PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     echo 'Encoding AVIF with illegal speed: ';
@@ -47,7 +47,7 @@ gd
     try {
     	imageavif($img, $outfile, 70, 1234);
     } catch (\ValueError $e) {
-        echo $e->getMessage() . PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 
     echo 'Encoding AVIF losslessly... ';
@@ -75,8 +75,8 @@ Default AVIF encoding: ok
 Encoding AVIF at quality 70: ok
 Encoding AVIF at quality 70 with speed 5: ok
 Encoding AVIF with default quality: ok
-Encoding AVIF with illegal quality: imageavif(): Argument #3 ($quality) must be between -1 and 100
-Encoding AVIF with illegal speed: imageavif(): Argument #4 ($speed) must be between -1 and 10
+Encoding AVIF with illegal quality: ValueError: imageavif(): Argument #3 ($quality) must be between -1 and 100
+Encoding AVIF with illegal speed: ValueError: imageavif(): Argument #4 ($speed) must be between -1 and 10
 Encoding AVIF losslessly... ok
 Decoding the AVIF we just wrote...
 What is the mean squared error of the two images? 0

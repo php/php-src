@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - error - modifying multiple components with warnings before throwing an exception
+Test Uri\WhatWg\Url component modification - error - earlier warnings not in exception
 --FILE--
 <?php
 
@@ -12,7 +12,7 @@ $url = new Uri\WhatWg\Url("https://example.com")
 try {
     $url->withScheme("0");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump($e->errors);
 }
 

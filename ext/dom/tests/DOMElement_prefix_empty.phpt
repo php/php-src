@@ -29,8 +29,8 @@ echo "--- Changing the prefix to that of a conflicting namespace (\"conflict\") 
 
 try {
     $container->prefix = "conflict";
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveXML();
 
@@ -46,6 +46,6 @@ echo $dom->saveXML();
 <?xml version="1.0"?>
 <hello:container xmlns:conflict="urn:foo" xmlns:hello="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"/>
 --- Changing the prefix to that of a conflicting namespace ("conflict") ---
-Namespace Error
+DOMException: Namespace Error
 <?xml version="1.0"?>
 <hello:container xmlns:conflict="urn:foo" xmlns:hello="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"/>

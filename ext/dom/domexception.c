@@ -73,7 +73,7 @@ void php_dom_throw_error(dom_exception_code error_code, bool strict_error)
 			error_message = "Not Supported Error";
 			break;
 		case INUSE_ATTRIBUTE_ERR:
-			error_message = "Inuse Attribute Error";
+			error_message = "In Use Attribute Error";
 			break;
 		case INVALID_STATE_ERR:
 			error_message = "Invalid State Error";

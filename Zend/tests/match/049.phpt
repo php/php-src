@@ -10,8 +10,8 @@ class Beep {}
 function test(mixed $var) {
     try {
         match($var) {};
-    } catch (UnhandledMatchError $e) {
-        print $e->getMessage() . PHP_EOL;
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -29,14 +29,14 @@ test(str_repeat('e', 100));
 test(str_repeat("e\n", 100));
 ?>
 --EXPECT--
-Unhandled match case of type null
-Unhandled match case of type int
-Unhandled match case of type float
-Unhandled match case of type float
-Unhandled match case of type string
-Unhandled match case of type bool
-Unhandled match case of type bool
-Unhandled match case of type array
-Unhandled match case of type Beep
-Unhandled match case of type string
-Unhandled match case of type string
+UnhandledMatchError: Unhandled match case of type null
+UnhandledMatchError: Unhandled match case of type int
+UnhandledMatchError: Unhandled match case of type float
+UnhandledMatchError: Unhandled match case of type float
+UnhandledMatchError: Unhandled match case of type string
+UnhandledMatchError: Unhandled match case of type bool
+UnhandledMatchError: Unhandled match case of type bool
+UnhandledMatchError: Unhandled match case of type array
+UnhandledMatchError: Unhandled match case of type Beep
+UnhandledMatchError: Unhandled match case of type string
+UnhandledMatchError: Unhandled match case of type string

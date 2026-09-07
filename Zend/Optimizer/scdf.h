@@ -39,8 +39,8 @@ typedef struct _scdf_ctx {
 		void (*visit_phi)(
 			struct _scdf_ctx *scdf, const zend_ssa_phi *phi);
 		void (*mark_feasible_successors)(
-			struct _scdf_ctx *scdf, int block_num, zend_basic_block *block,
-			zend_op *opline, zend_ssa_op *ssa_op);
+			struct _scdf_ctx *scdf, int block_num, const zend_basic_block *block,
+			zend_op *opline, const zend_ssa_op *ssa_op);
 	} handlers;
 } scdf_ctx;
 

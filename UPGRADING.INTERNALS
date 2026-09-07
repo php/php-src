@@ -136,6 +136,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . The zend_save_error_handling() function was removed.
   . The zend_parse_parameter() function has been removed, use one fo the
     zend_parse_arg_TYPE() APIs instead.
+  . The zend_is_countable() function was removed.
 
 - Changed:
   . Internal functions that return by reference are now expected to
@@ -176,6 +177,11 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     hand if there is one, E_WARNING for the severity, and
     ZEND_ENUM_StreamErrorCode_Generic for the code. terminating should be true
     only if the error aborts the operation.
+  . zend_create_closure(), zend_create_fake_closure() and
+    zend_create_partial_closure() now take the bound $this as a zend_object*
+    instead of a zval*. Accordingly, zend_get_closure_this_ptr() now returns
+    that zend_object*, or NULL when the closure is unbound, instead of a
+    zval* that is IS_UNDEF when the closure is unbound.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
@@ -184,6 +190,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added zend_ast_call_get_args() to fetch the argument node from any call
     node.
   . Added Z_PARAM_ENUM().
+  . Added PHP_GD_Z_PARAM_ARRAY_HT_OR_DOUBLE() in ext/gd to parse array|float
+    arguments into either a HashTable pointer or a double.
   . Added zend_enum_fetch_case_id().
   . Added zend_enum_get_case_by_id().
   . Added zend_bin2hex() and zend_bin2hex_str() as helper functions to remove
@@ -221,6 +229,13 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . Added do_php_cli().
   . The ZTS symbols compiler_globals_offset and executor_globals_offset have
     been removed: CG()/EG() now reach the globals through a __thread struct.
+  . Added zval_try_get_double(), which converts a defined zval to a double and
+    reports conversion failures through a bool pointer. String conversion uses
+    the numeric-string semantics of zval_try_get_long(), rather than the
+    zend_strtod() semantics of zval_get_double(); non-numeric strings such as
+    "INF" and "NAN" fail, while leading-numeric strings emit E_WARNING. When
+    *failed is true, the returned value must not be used and an exception may
+    already be pending. Passing an IS_UNDEF zval is a caller error.
 
 ========================
 2. Build system changes

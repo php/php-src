@@ -18,6 +18,14 @@ class MySessionHandler implements SessionHandlerInterface {
     public function write($id, $session_data): bool { return false; }
     public function destroy($id): bool { return false; }
     public function gc($maxlifetime): int { return 1; }
+
+    private int $id = 0;
+	public function create_sid(): string {
+	    return ++$this->id;
+	}
+	public function validateId(string $id): bool {
+	    return $id > 0 && $id <= $this->id;
+	}
 }
 
 var_dump(session_module_name("files"));

@@ -87,6 +87,9 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	}
 
 	breakiterator_object_create(object, rbbi, false);
+	if (compiled) {
+		Z_INTL_BREAKITERATOR_P(object)->compiled_rules = zend_string_copy(rules);
+	}
 }
 
 U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRules)

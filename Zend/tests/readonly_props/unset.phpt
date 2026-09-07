@@ -14,8 +14,8 @@ class Test {
 $test = new Test(1);
 try {
     unset($test->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class Test2 {
@@ -39,8 +39,8 @@ var_dump($test->prop); // Call __get.
 var_dump($test->prop); // Don't call __get.
 try {
     unset($test->prop); // Unset initialized, illegal.
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class Test3 {
@@ -50,8 +50,8 @@ class Test3 {
 $test = new Test3;
 try {
     unset($test->prop);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 class Test4 {
@@ -60,8 +60,8 @@ class Test4 {
     public function __construct() {
         try {
             unset($this->prop);
-        } catch (Error $e) {
-            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 
@@ -74,19 +74,19 @@ $test = new Test4;
 var_dump($test->prop); // Don't call __get.
 try {
     unset($test->prop);
-} catch (Error $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->prop); // Still don't call __get.
 
 ?>
 --EXPECT--
-Cannot unset readonly property Test::$prop
+Error: Cannot unset readonly property Test::$prop
 Test2::__get
 int(1)
 int(1)
-Cannot unset readonly property Test2::$prop
-Cannot unset protected(set) readonly property Test3::$prop from global scope
+Error: Cannot unset readonly property Test2::$prop
+Error: Cannot unset protected(set) readonly property Test3::$prop from global scope
 Error: Cannot unset readonly property Test4::$prop
 int(1)
 Error: Cannot unset readonly property Test4::$prop

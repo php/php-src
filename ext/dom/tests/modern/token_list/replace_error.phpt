@@ -11,24 +11,24 @@ $list = $element->classList;
 
 try {
     $list->replace("\0", "X");
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $list->replace("X", "\0");
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $list->replace("a b", "X");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Dom\TokenList::replace(): Argument #1 ($token) must not contain any null bytes
-Dom\TokenList::replace(): Argument #2 ($newToken) must not contain any null bytes
-The token must not contain any ASCII whitespace
+ValueError: Dom\TokenList::replace(): Argument #1 ($token) must not contain any null bytes
+ValueError: Dom\TokenList::replace(): Argument #2 ($newToken) must not contain any null bytes
+DOMException: The token must not contain any ASCII whitespace

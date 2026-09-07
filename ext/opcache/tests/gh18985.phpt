@@ -2,6 +2,8 @@
 GH-18985: Wrong lineno for multiline expressions
 --EXTENSIONS--
 opcache
+--XFAIL--
+GH-22833 was reverted, so this will need a different fix.
 --INI--
 opcache.enable_cli=1
 opcache.opt_debug_level=0x40010000

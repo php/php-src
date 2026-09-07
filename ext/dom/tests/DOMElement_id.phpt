@@ -29,7 +29,7 @@ var_dump($div->id);
 try {
     $div->id = new MyStringable();
 } catch (Throwable $e) {
-    echo "Error: ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($div->id);
 echo $dom->saveXML();
@@ -44,7 +44,7 @@ string(0) ""
 string(2) "é"
 string(0) ""
 string(5) "12345"
-Error: foo
+Exception: foo
 string(5) "12345"
 <?xml version="1.0"?>
 <html><div id="12345"/></html>

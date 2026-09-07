@@ -1,6 +1,8 @@
 /* This is a generated file, edit user_filters.stub.php instead.
  * Stub hash: 01be6d52377ecd1940c14e3d508df28a70456c58 */
 
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_filter, 0, 4, IS_LONG, 0)
 	ZEND_ARG_INFO(0, in)
 	ZEND_ARG_INFO(0, out)

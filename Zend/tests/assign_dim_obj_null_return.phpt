@@ -9,61 +9,61 @@ function test() {
 
     try {
         var_dump($array[] = 123);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         var_dump($array[[]] = 123);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         var_dump($array[new stdClass] = 123);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         var_dump($true[123] = 456);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         var_dump($array[] += 123);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         var_dump($array[[]] += 123);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         var_dump($array[new stdClass] += 123);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         var_dump($true[123] += 456);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
         var_dump($true->foo = 123);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump($true->foo += 123);
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -71,13 +71,13 @@ test();
 
 ?>
 --EXPECT--
-Cannot add element to the array as the next element is already occupied
-Cannot access offset of type array on array
-Cannot access offset of type stdClass on array
-Cannot use a scalar value as an array
-Cannot add element to the array as the next element is already occupied
-Cannot access offset of type array on array
-Cannot access offset of type stdClass on array
-Cannot use a scalar value as an array
-Attempt to assign property "foo" on true
-Attempt to assign property "foo" on true
+Error: Cannot add element to the array as the next element is already occupied
+TypeError: Cannot access offset of type array on array
+TypeError: Cannot access offset of type stdClass on array
+Error: Cannot use a scalar value as an array
+Error: Cannot add element to the array as the next element is already occupied
+TypeError: Cannot access offset of type array on array
+TypeError: Cannot access offset of type stdClass on array
+Error: Cannot use a scalar value as an array
+Error: Attempt to assign property "foo" on true
+Error: Attempt to assign property "foo" on true

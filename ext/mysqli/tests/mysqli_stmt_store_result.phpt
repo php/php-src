@@ -34,11 +34,10 @@ require_once 'skipifconnectfailure.inc';
     if (!$link_buf = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[009] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-    if (!$stmt_buf = mysqli_stmt_init($link_buf))
+    if (!$stmt_buf = mysqli_prepare($link_buf, "SELECT id, label FROM test ORDER BY id"))
         printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!mysqli_stmt_prepare($stmt_buf, "SELECT id, label FROM test ORDER BY id") ||
-        !mysqli_stmt_execute($stmt_buf))
+    if (!mysqli_stmt_execute($stmt_buf))
         printf("[011] [%d] %s\n", mysqli_stmt_errno($stmt_buf), mysqli_stmt_error($stmt_buf));
 
     $id = $label = $id_buf = $label_buf = null;
@@ -78,7 +77,8 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'clean_table.inc';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli_stmt object is not fully initialized
 mysqli_stmt object is already closed
 done!

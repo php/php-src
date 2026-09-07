@@ -16,12 +16,12 @@ var_dump(libxml_set_external_entity_loader(function($a, $b, $c, $d) {}));
 try {
     var_dump($dd->validate());
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done.\n";
 ?>
 --EXPECTF--
 bool(true)
-Exception: Too few arguments to function {closure:%s:%d}(), 3 passed and exactly 4 expected
+ArgumentCountError: Too few arguments to function {closure:%s:%d}(), 3 passed and exactly 4 expected
 Done.

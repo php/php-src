@@ -11,10 +11,10 @@ $foo = new Foo();
 
 try {
     $foo->bar = 1;
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot create dynamic property Foo::$bar
+Error: Cannot create dynamic property Foo::$bar

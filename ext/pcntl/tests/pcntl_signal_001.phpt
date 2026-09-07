@@ -9,8 +9,8 @@ try {
         echo "signaled\n";
     });    
 } catch (Error $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-pcntl_signal(): Argument #1 ($signal) must be less than %d
+ValueError: pcntl_signal(): Argument #1 ($signal) must be less than %d

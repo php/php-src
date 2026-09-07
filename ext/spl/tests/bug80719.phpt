@@ -15,5 +15,5 @@ foreach ($array as $v) {
 
 ?>
 --EXPECT--
-TypeError: ArrayObject::setIteratorClass(): Argument #1 ($iteratorClass) must be a class name derived from ArrayIterator, FilterIterator given
+TypeError: ArrayObject::setIteratorClass(): Argument #1 ($iteratorClass) must be a class name derived from ArrayIterator, "FilterIterator" given
 int(42)

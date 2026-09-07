@@ -31,7 +31,7 @@ echo (string) new ReflectionFunction($bar);
 $bar(100);
 ?>
 --EXPECTF--
-Closure [ <user> static public method {closure:%s:%d} ] {
+Closure [ <user> static function {closure:%s:%d} ] {
   @@ %s 10 - 10
 
   - Parameters [1] {
@@ -42,7 +42,7 @@ Foo::method
 int(1)
 Foo::method
 int(1)
-Closure [ <user> static public method {closure:%s:%d} ] {
+Closure [ <user> static function {closure:%s:%d} ] {
   @@ %s 17 - 17
 
   - Parameters [2] {
@@ -55,7 +55,7 @@ int(10)
 Foo::method
 int(10)
 int(20)
-Closure [ <user> static public method {closure:%s:%d} ] {
+Closure [ <user> static function {closure:%s:%d} ] {
   @@ %s 24 - 24
 
   - Bound Variables [1] {

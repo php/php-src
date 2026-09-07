@@ -14,8 +14,8 @@ function test(
 try {
     test('foo', 'bar', 'baz');
     echo 'Not reached';
-} catch (Exception $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
     $testFrame = $e->getTrace()[0];
     var_dump($testFrame['function']);
     var_dump(count($testFrame['args']));
@@ -36,8 +36,8 @@ function test2(
 try {
     test2('foo', 'variadic1', 'variadic2', 'variadic3');
     echo 'Not reached';
-} catch (Exception $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
     $testFrame = $e->getTrace()[0];
     var_dump($testFrame['function']);
     var_dump(count($testFrame['args']));
@@ -53,14 +53,14 @@ try {
 
 ?>
 --EXPECTF--
-Error
+Exception: Error
 string(4) "test"
 int(3)
 string(3) "foo"
 string(3) "bar"
 string(3) "baz"
 Success
-Error 2
+Exception: Error 2
 string(5) "test2"
 int(4)
 string(3) "foo"

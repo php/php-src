@@ -1,5 +1,7 @@
 --TEST--
 GHSA-x692-q9x7-8c3f: bccomp() out-of-bounds write
+--EXTENSIONS--
+bcmath
 --CREDITS--
 Recep Asan (recepasan)
 --FILE--

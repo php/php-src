@@ -11,10 +11,10 @@ class Bar { }
 
 try {
     var_dump((new ReflectionClass(Bar::class))->getAttributes()[0]->newInstance());
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Class "Foo" not found
+Error: Class "Foo" not found

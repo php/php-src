@@ -14,11 +14,11 @@ var_dump($test->prop);
 
 try {
     $test->prop = 0;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 int(42)
-Cannot write to get-only virtual property Test::$prop
+Error: Cannot write to get-only virtual property Test::$prop

@@ -16,6 +16,8 @@
 #include "php_session.h"
 #include "mod_user.h"
 
+#include "zend_exceptions.h"
+
 const ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
 };
@@ -222,27 +224,23 @@ PS_CREATE_SID_FUNC(user)
 {
 	/* maintain backwards compatibility */
 	if (!Z_ISUNDEF(PSF(create_sid))) {
-		zend_string *id = NULL;
 		zval retval;
 
 		ps_call_handler(&PSF(create_sid), 0, NULL, &retval);
+		/* Exception was thrown */
+		if (Z_ISUNDEF(retval)) {
+			return NULL;
+		}
 
-		if (!Z_ISUNDEF(retval)) {
-			if (Z_TYPE(retval) == IS_STRING) {
-				id = zend_string_copy(Z_STR(retval));
-			}
+		if (UNEXPECTED(Z_TYPE(retval) != IS_STRING)) {
+			/* Will no longer be needed in PHP 9 as the interface return type will be in effect */
+			zend_throw_error(zend_ce_type_error, "Session id must be of type string, %s given", zend_zval_type_name(&retval));
 			zval_ptr_dtor(&retval);
-		} else {
-			zend_throw_error(NULL, "No session id returned by function");
 			return NULL;
 		}
+		ZEND_ASSERT(Z_TYPE(retval) == IS_STRING);
 
-		if (!id) {
-			zend_throw_error(NULL, "Session id must be a string");
-			return NULL;
-		}
-
-		return id;
+		return Z_STR(retval);
 	}
 
 	/* function as defined by PS_MOD */

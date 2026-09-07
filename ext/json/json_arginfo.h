@@ -1,6 +1,8 @@
 /* This is a generated file, edit json.stub.php instead.
  * Stub hash: 0ceb50047401c4b9e878c09cc518eacc274f7fff */
 
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_json_encode, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
