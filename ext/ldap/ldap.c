@@ -165,6 +165,8 @@ static void ldap_result_free(ldap_resultdata *result)
 {
 	ldap_msgfree(result->result);
 	result->result = NULL;
+	result->current = NULL;
+	zval_ptr_dtor(&result->ld);
 }
 
 static void ldap_result_free_obj(zend_object *obj)
