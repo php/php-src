@@ -7,8 +7,8 @@ ftp
 foreach ([-1, 65536, 65536 + 2121, PHP_INT_MIN, PHP_INT_MAX] as $port) {
     try {
         ftp_connect('127.0.0.1', $port);
-    } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -22,10 +22,10 @@ $result = @ftp_connect('127.0.0.1', 65535);
 var_dump($result === false || is_object($result)); // true either way
 ?>
 --EXPECT--
-ftp_connect(): Argument #2 ($port) must be between 0 and 65535
-ftp_connect(): Argument #2 ($port) must be between 0 and 65535
-ftp_connect(): Argument #2 ($port) must be between 0 and 65535
-ftp_connect(): Argument #2 ($port) must be between 0 and 65535
-ftp_connect(): Argument #2 ($port) must be between 0 and 65535
+ValueError: ftp_connect(): Argument #2 ($port) must be between 0 and 65535
+ValueError: ftp_connect(): Argument #2 ($port) must be between 0 and 65535
+ValueError: ftp_connect(): Argument #2 ($port) must be between 0 and 65535
+ValueError: ftp_connect(): Argument #2 ($port) must be between 0 and 65535
+ValueError: ftp_connect(): Argument #2 ($port) must be between 0 and 65535
 bool(true)
 bool(true)
