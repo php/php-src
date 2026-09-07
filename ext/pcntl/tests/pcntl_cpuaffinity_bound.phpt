@@ -18,7 +18,8 @@ $prefix = 'pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cpu id must be between
 try {
     pcntl_setcpuaffinity($pid, [PHP_INT_MAX]);
     exit("PHP_INT_MAX was accepted as a cpu id" . PHP_EOL);
-} catch (ValueError $e) {
+} catch (Throwable $e) {
+    echo $e::class, "\n";
     if (!preg_match('/must be between 0 and (\d+) \(/', $e->getMessage(), $m)) {
         exit("unexpected message: " . $e->getMessage() . PHP_EOL);
     }
@@ -30,17 +31,22 @@ $bound = (int) $m[1];
    without ever changing the process affinity. */
 try {
     pcntl_setcpuaffinity($pid, [$bound, PHP_INT_MAX]);
-} catch (ValueError $e) {
+} catch (Throwable $e) {
+    echo $e::class, "\n";
     var_dump($e->getMessage() === $prefix . $bound . ' (' . PHP_INT_MAX . ')');
 }
 
 /* and the first id past the bound is rejected, naming itself */
 try {
     pcntl_setcpuaffinity($pid, [$bound + 1]);
-} catch (ValueError $e) {
+} catch (Throwable $e) {
+    echo $e::class, "\n";
     var_dump($e->getMessage() === $prefix . $bound . ' (' . ($bound + 1) . ')');
 }
 ?>
 --EXPECT--
+ValueError
+ValueError
 bool(true)
+ValueError
 bool(true)
