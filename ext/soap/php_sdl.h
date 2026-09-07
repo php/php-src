@@ -73,6 +73,7 @@ typedef struct sdlCtx {
 
 	HashTable *attributes;       /* array of sdlAttributePtr */
 	HashTable *attributeGroups;  /* array of sdlTypesPtr */
+	HashTable fixupInProgress;
 	php_stream_context *context;
 	zval               old_header;
 } sdlCtx;

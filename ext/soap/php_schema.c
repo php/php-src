@@ -2173,6 +2173,10 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 		if (ctx->attributeGroups != NULL) {
 			tmp = (sdlTypePtr)schema_find_by_ref(ctx->attributeGroups, attr->ref);
 			if (tmp) {
+				if (zend_hash_index_find_ptr(&ctx->fixupInProgress, (zend_ulong)tmp) != NULL) {
+					soap_error1(E_ERROR, "Parsing Schema: recursive attributeGroup 'ref' attribute '%s'", attr->ref);
+				}
+				zend_hash_index_add_ptr(&ctx->fixupInProgress, (zend_ulong)tmp, tmp);
 				if (tmp->attributes) {
 					zend_hash_internal_pointer_reset(tmp->attributes);
 					while ((tmp_attr = zend_hash_get_current_data_ptr(tmp->attributes)) != NULL) {
@@ -2208,6 +2212,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 						}
 					}
 				}
+				zend_hash_index_del(&ctx->fixupInProgress, (zend_ulong)tmp);
 			}
 		}
 		efree(attr->ref);
@@ -2222,6 +2227,9 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 			sdlTypePtr tmp;
 
 			if (ctx->sdl->groups && (tmp = zend_hash_str_find_ptr(ctx->sdl->groups, model->u.group_ref, strlen(model->u.group_ref))) != NULL) {
+				if (zend_hash_index_find_ptr(&ctx->fixupInProgress, (zend_ulong)tmp) != NULL) {
+					soap_error1(E_ERROR, "Parsing Schema: recursive group 'ref' attribute '%s'", model->u.group_ref);
+				}
 				schema_type_fixup(ctx, tmp);
 				efree(model->u.group_ref);
 				model->kind = XSD_CONTENT_GROUP;
@@ -2264,6 +2272,8 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 {
 	sdlTypePtr tmp;
 	sdlAttributePtr attr;
+
+	zend_hash_index_add_ptr(&ctx->fixupInProgress, (zend_ulong)type, type);
 
 	if (type->ref != NULL) {
 		if (ctx->sdl->elements != NULL) {
@@ -2317,6 +2327,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 			}
 		}
 	}
+	zend_hash_index_del(&ctx->fixupInProgress, (zend_ulong)type);
 }
 
 void schema_pass2(sdlCtx *ctx)
@@ -2324,6 +2335,8 @@ void schema_pass2(sdlCtx *ctx)
 	sdlPtr sdl = ctx->sdl;
 	sdlAttributePtr attr;
 	sdlTypePtr type;
+
+	zend_hash_init(&ctx->fixupInProgress, 0, NULL, NULL, 0);
 
 	if (ctx->attributes) {
 		ZEND_HASH_FOREACH_PTR(ctx->attributes, attr) {
@@ -2358,6 +2371,8 @@ void schema_pass2(sdlCtx *ctx)
 		zend_hash_destroy(ctx->attributeGroups);
 		efree(ctx->attributeGroups);
 	}
+
+	zend_hash_destroy(&ctx->fixupInProgress);
 }
 
 void delete_model(zval *zv)
