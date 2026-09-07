@@ -28,12 +28,12 @@ var_dump($i, Foo::$i);
 
 try {
     $i = null;
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($i, Foo::$i);
 
 try {
     Foo::$i = null;
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($i, Foo::$i);
 
 Foo::$s = &ref(5);
@@ -44,17 +44,17 @@ var_dump(Foo::$i, ref());
 
 try {
     Foo::$i = &ref("x");
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump(Foo::$i, ref());
 
 try {
     Foo::$i = &Foo::$s;
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump(Foo::$i, Foo::$s);
 
 try {
     Foo::$s = &Foo::$i;
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump(Foo::$i, Foo::$s);
 
 ?>
@@ -66,22 +66,22 @@ int(3)
 int(3)
 int(4)
 int(4)
-Cannot assign null to reference held by property Foo::$i of type int
+TypeError: Cannot assign null to reference held by property Foo::$i of type int
 int(4)
 int(4)
-Cannot assign null to property Foo::$i of type int
+TypeError: Cannot assign null to property Foo::$i of type int
 int(4)
 int(4)
 string(1) "5"
 string(1) "5"
 int(0)
 int(0)
-Cannot assign string to property Foo::$i of type int
+TypeError: Cannot assign string to property Foo::$i of type int
 int(0)
 string(1) "x"
-Reference with value of type string held by property Foo::$s of type string is not compatible with property Foo::$i of type int
+TypeError: Reference with value of type string held by property Foo::$s of type string is not compatible with property Foo::$i of type int
 int(0)
 string(1) "5"
-Reference with value of type int held by property Foo::$i of type int is not compatible with property Foo::$s of type string
+TypeError: Reference with value of type int held by property Foo::$i of type int is not compatible with property Foo::$s of type string
 int(0)
 string(1) "5"

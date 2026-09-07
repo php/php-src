@@ -9,12 +9,12 @@ function node_alike_test($test) {
         var_dump($test->parentNode);
         var_dump($test->nodeValue);
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump($test->appendChild($test));
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -23,12 +23,12 @@ $test = new DOMCharacterData("test");
 try {
     var_dump($test->textContent);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($test->appendData('test'));
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Test DOMCdataSection --\n";
@@ -42,12 +42,12 @@ try {
     var_dump($test->wholeText);
     var_dump($test->parentNode);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($test->isWhitespaceInElementContent());
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Test DOMComment --\n";
@@ -63,7 +63,7 @@ var_dump($test->parentNode);
 try {
     var_dump($test->appendChild($test));
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Test DOMNode --\n";
@@ -81,12 +81,12 @@ try {
     var_dump($test->nodeValue);
     var_dump($test->parentNode);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($test->appendChild($test));
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "-- Test DOMAttr --\n";
@@ -96,13 +96,13 @@ var_dump($test->parentNode);
 try {
     var_dump($test->appendChild($test));
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 -- Test DOMCharacterData --
-Invalid State Error
-Couldn't fetch DOMCharacterData
+DOMException: Invalid State Error
+Error: Couldn't fetch DOMCharacterData
 -- Test DOMCdataSection --
 string(4) "test"
 bool(true)
@@ -117,21 +117,21 @@ int(0)
 -- Test DOMElement --
 string(4) "test"
 NULL
-No Modification Allowed Error
+DOMException: No Modification Allowed Error
 -- Test DOMNode --
-Invalid State Error
-Couldn't fetch DOMNode
+DOMException: Invalid State Error
+Error: Couldn't fetch DOMNode
 -- Test DOMNotation --
-Invalid State Error
-Couldn't fetch DOMNotation
+DOMException: Invalid State Error
+Error: Couldn't fetch DOMNotation
 -- Test DOMProcessingInstruction --
 NULL
 string(5) "value"
 bool(false)
 -- Test DOMEntity --
-Invalid State Error
-Couldn't fetch DOMEntity
+DOMException: Invalid State Error
+Error: Couldn't fetch DOMEntity
 -- Test DOMAttr --
 string(5) "value"
 NULL
-No Modification Allowed Error
+DOMException: No Modification Allowed Error

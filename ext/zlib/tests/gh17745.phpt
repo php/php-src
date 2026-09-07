@@ -13,8 +13,11 @@ class Options {
 }
 var_dump(deflate_init(ZLIB_ENCODING_RAW, new Options));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: deflate_init(): Passing an object for argument #2 $option to deflate_init() is deprecated, call get_object_vars() first instead in %s on line %d
 object(DeflateContext)#2 (0) {
 }
+
+Deprecated: deflate_init(): Passing an object for argument #2 $option to deflate_init() is deprecated, call get_object_vars() first instead in %s on line %d
 object(DeflateContext)#3 (0) {
 }

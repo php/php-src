@@ -10,7 +10,7 @@ $ao->uasort(function($a, $b) use ($ao, &$i) {
         try {
             $ao->exchangeArray([4, 5, 6]);
         } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         var_dump($ao);
     }
@@ -19,7 +19,7 @@ $ao->uasort(function($a, $b) use ($ao, &$i) {
 
 ?>
 --EXPECT--
-Modification of ArrayObject during sorting is prohibited
+Error: Modification of ArrayObject during sorting is prohibited
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {

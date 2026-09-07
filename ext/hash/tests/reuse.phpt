@@ -9,9 +9,9 @@ try {
     hash_update($h, 'foo');
 }
 catch (\Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-hash_update(): Argument #1 ($context) must be a valid, non-finalized HashContext
+TypeError: hash_update(): Argument #1 ($context) must be a valid, non-finalized HashContext

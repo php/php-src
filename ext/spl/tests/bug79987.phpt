@@ -13,26 +13,26 @@ set_error_handler(function ($type, $msg, $file, $line, $context = []) {
 try {
     var_dump($x->getLinkTarget());
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($x->getFilename());
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($x->getExtension());
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($x->getBasename());
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Object not initialized
-Object not initialized
-Object not initialized
-Object not initialized
+Error: Object not initialized
+Error: Object not initialized
+Error: Object not initialized
+Error: Object not initialized

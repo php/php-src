@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
@@ -61,7 +59,7 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv_prefix_map);
 	} else {
 		/* cast to Bucket* only works if this holds, I would prefer a static assert but we're stuck at C99. */
-		ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0);
+		ZEND_ASSERT(offsetof(Bucket, val) == 0);
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
 		Bucket *bucket = (Bucket *) zv;
 		/* Make sure we take the value from the key string that lives long enough. */
@@ -242,32 +240,34 @@ PHP_DOM_EXPORT void php_dom_ns_compat_mark_attribute_list(php_dom_libxml_ns_mapp
 
 	/* We want to prepend at the front, but in order of the namespace definitions.
 	 * So temporarily unlink the existing properties and add them again at the end. */
-	xmlAttrPtr attr = node->properties;
-	node->properties = NULL;
+	xmlAttrPtr first_original = node->properties;
+	xmlAttrPtr first_ns_attr = NULL, last_ns_attr = NULL;
 
 	xmlNsPtr ns = node->nsDef;
-	xmlAttrPtr last_added = NULL;
 	do {
-		last_added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
-		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		xmlNsPtr next = ns->next;
+		node->nsDef = next;
 		ns->next = NULL;
 		php_libxml_set_old_ns(node->doc, ns);
+		xmlAttrPtr added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
+		if (added != NULL) {
+			if (first_ns_attr == NULL) {
+				first_ns_attr = added;
+			}
+			last_ns_attr = added;
+		}
+		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		ns = next;
 	} while (ns != NULL);
 
-	if (last_added != NULL) {
-		/* node->properties now points to the first namespace declaration attribute. */
-		if (attr != NULL) {
-			last_added->next = attr;
-			attr->prev = last_added;
-		}
-	} else {
-		/* Nothing added, so nothing changed. Only really possible on OOM. */
-		node->properties = attr;
+	if (first_ns_attr != NULL && first_original != NULL) {
+		xmlAttrPtr last_original = first_ns_attr->prev;
+		last_original->next = NULL;
+		first_ns_attr->prev = NULL;
+		last_ns_attr->next = first_original;
+		first_original->prev = last_ns_attr;
+		node->properties = first_ns_attr;
 	}
-
-	node->nsDef = NULL;
 }
 
 PHP_DOM_EXPORT bool php_dom_ns_is_fast_ex(xmlNsPtr ns, const php_dom_ns_magic_token *magic_token)

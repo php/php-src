@@ -10,5 +10,6 @@ $x = FFI::cdef()->new('int');
 array_walk($x, function($x) { echo "test\n"; });
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: array_walk(): Passing an object for argument #1 $array to array_walk() is deprecated, call get_object_vars() first instead in %s on line %d
 DONE

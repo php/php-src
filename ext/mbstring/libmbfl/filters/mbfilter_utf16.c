@@ -173,7 +173,6 @@ static void mb_wchar_to_utf16le_default(uint32_t *in, size_t len, mb_convert_buf
 
 #endif
 
-static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter);
 static size_t mb_utf16_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static zend_string* mb_cut_utf16(unsigned char *str, size_t from, size_t len, unsigned char *end);
 static zend_string* mb_cut_utf16be(unsigned char *str, size_t from, size_t len, unsigned char *end);
@@ -188,8 +187,8 @@ const mbfl_encoding mbfl_encoding_utf16 = {
 	mbfl_encoding_utf16_aliases,
 	NULL,
 	0,
-	&vtbl_utf16_wchar,
-	&vtbl_wchar_utf16,
+	NULL,
+	NULL,
 	mb_utf16_to_wchar,
 	mb_wchar_to_utf16be,
 	NULL,
@@ -203,8 +202,8 @@ const mbfl_encoding mbfl_encoding_utf16be = {
 	NULL,
 	NULL,
 	0,
-	&vtbl_utf16be_wchar,
-	&vtbl_wchar_utf16be,
+	NULL,
+	NULL,
 	mb_utf16be_to_wchar,
 	mb_wchar_to_utf16be,
 	NULL,
@@ -218,269 +217,13 @@ const mbfl_encoding mbfl_encoding_utf16le = {
 	NULL,
 	NULL,
 	0,
-	&vtbl_utf16le_wchar,
-	&vtbl_wchar_utf16le,
+	NULL,
+	NULL,
 	mb_utf16le_to_wchar,
 	mb_wchar_to_utf16le,
 	NULL,
 	mb_cut_utf16le
 };
-
-const struct mbfl_convert_vtbl vtbl_utf16_wchar = {
-	mbfl_no_encoding_utf16,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_utf16_wchar,
-	mbfl_filt_conv_utf16_wchar_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_utf16 = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_utf16,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_utf16be,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_utf16be_wchar = {
-	mbfl_no_encoding_utf16be,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_utf16be_wchar,
-	mbfl_filt_conv_utf16_wchar_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_utf16be = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_utf16be,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_utf16be,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_utf16le_wchar = {
-	mbfl_no_encoding_utf16le,
-	mbfl_no_encoding_wchar,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_utf16le_wchar,
-	mbfl_filt_conv_utf16_wchar_flush,
-	NULL,
-};
-
-const struct mbfl_convert_vtbl vtbl_wchar_utf16le = {
-	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_utf16le,
-	mbfl_filt_conv_common_ctor,
-	NULL,
-	mbfl_filt_conv_wchar_utf16le,
-	mbfl_filt_conv_common_flush,
-	NULL,
-};
-
-#define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
-
-int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
-{
-	/* Start with the assumption that the string is big-endian;
-	 * If we find a little-endian BOM, then we will change that assumption */
-	if (filter->status == 0) {
-		filter->cache = c & 0xFF;
-		filter->status = 1;
-	} else {
-		int n = (filter->cache << 8) | (c & 0xFF);
-		filter->cache = filter->status = 0;
-		if (n == 0xFFFE) {
-			/* Switch to little-endian mode */
-			filter->filter_function = mbfl_filt_conv_utf16le_wchar;
-		} else {
-			filter->filter_function = mbfl_filt_conv_utf16be_wchar;
-			if (n >= 0xD800 && n <= 0xDBFF) {
-				filter->cache = n & 0x3FF; /* Pick out 10 data bits */
-				filter->status = 2;
-				return 0;
-			} else if (n >= 0xDC00 && n <= 0xDFFF) {
-				/* This is wrong; second part of surrogate pair has come first */
-				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			} else if (n != 0xFEFF) {
-				CK((*filter->output_function)(n, filter->data));
-			}
-		}
-	}
-
-	return 0;
-}
-
-int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
-{
-	int n;
-
-	switch (filter->status) {
-	case 0: /* First byte */
-		filter->cache = c & 0xFF;
-		filter->status = 1;
-		break;
-
-	case 1: /* Second byte */
-		n = (filter->cache << 8) | (c & 0xFF);
-		if (n >= 0xD800 && n <= 0xDBFF) {
-			filter->cache = n & 0x3FF; /* Pick out 10 data bits */
-			filter->status = 2;
-		} else if (n >= 0xDC00 && n <= 0xDFFF) {
-			/* This is wrong; second part of surrogate pair has come first */
-			filter->status = 0;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		} else {
-			filter->status = 0;
-			CK((*filter->output_function)(n, filter->data));
-		}
-		break;
-
-	case 2: /* Second part of surrogate, first byte */
-		filter->cache = (filter->cache << 8) | (c & 0xFF);
-		filter->status = 3;
-		break;
-
-	case 3: /* Second part of surrogate, second byte */
-		n = ((filter->cache & 0xFF) << 8) | (c & 0xFF);
-		if (n >= 0xD800 && n <= 0xDBFF) {
-			/* Wrong; that's the first half of a surrogate pair, not the second */
-			filter->cache = n & 0x3FF;
-			filter->status = 2;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		} else if (n >= 0xDC00 && n <= 0xDFFF) {
-			filter->status = 0;
-			n = ((filter->cache & 0x3FF00) << 2) + (n & 0x3FF) + 0x10000;
-			CK((*filter->output_function)(n, filter->data));
-		} else {
-			filter->status = 0;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			CK((*filter->output_function)(n, filter->data));
-		}
-	}
-
-	return 0;
-}
-
-int mbfl_filt_conv_wchar_utf16be(int c, mbfl_convert_filter *filter)
-{
-	int n;
-
-	if (c >= 0 && c < MBFL_WCSPLANE_UCS2MAX) {
-		CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)(c & 0xff, filter->data));
-	} else if (c >= MBFL_WCSPLANE_SUPMIN && c < MBFL_WCSPLANE_SUPMAX) {
-		n = ((c >> 10) - 0x40) | 0xd800;
-		CK((*filter->output_function)((n >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)(n & 0xff, filter->data));
-		n = (c & 0x3ff) | 0xdc00;
-		CK((*filter->output_function)((n >> 8) & 0xff, filter->data));
-		CK((*filter->output_function)(n & 0xff, filter->data));
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
-
-int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
-{
-	int n;
-
-	switch (filter->status) {
-	case 0:
-		filter->cache = c & 0xff;
-		filter->status = 1;
-		break;
-
-	case 1:
-		if ((c & 0xfc) == 0xd8) {
-			/* Looks like we have a surrogate pair here */
-			filter->cache += ((c & 0x3) << 8);
-			filter->status = 2;
-		} else if ((c & 0xfc) == 0xdc) {
-			/* This is wrong; the second part of the surrogate pair has come first */
-			filter->status = 0;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		} else {
-			filter->status = 0;
-			CK((*filter->output_function)(filter->cache + ((c & 0xff) << 8), filter->data));
-		}
-		break;
-
-	case 2:
-		filter->cache = (filter->cache << 10) + (c & 0xff);
-		filter->status = 3;
-		break;
-
-	case 3:
-		n = (filter->cache & 0xFF) | ((c & 0xFF) << 8);
-		if (n >= 0xD800 && n <= 0xDBFF) {
-			/* We previously saw the first part of a surrogate pair and were
-			 * expecting the second part; this is another first part */
-			filter->cache = n & 0x3FF;
-			filter->status = 2;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-		} else if (n >= 0xDC00 && n <= 0xDFFF) {
-			n = filter->cache + ((c & 0x3) << 8) + 0x10000;
-			filter->status = 0;
-			CK((*filter->output_function)(n, filter->data));
-		} else {
-			/* The first part of a surrogate pair was followed by some other codepoint
-			 * which is not part of a surrogate pair at all */
-			filter->status = 0;
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			CK((*filter->output_function)(n, filter->data));
-		}
-		break;
-	}
-
-	return 0;
-}
-
-int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter)
-{
-	int n;
-
-	if (c >= 0 && c < MBFL_WCSPLANE_UCS2MAX) {
-		CK((*filter->output_function)(c & 0xff, filter->data));
-		CK((*filter->output_function)((c >> 8) & 0xff, filter->data));
-	} else if (c >= MBFL_WCSPLANE_SUPMIN && c < MBFL_WCSPLANE_SUPMAX) {
-		n = ((c >> 10) - 0x40) | 0xd800;
-		CK((*filter->output_function)(n & 0xff, filter->data));
-		CK((*filter->output_function)((n >> 8) & 0xff, filter->data));
-		n = (c & 0x3ff) | 0xdc00;
-		CK((*filter->output_function)(n & 0xff, filter->data));
-		CK((*filter->output_function)((n >> 8) & 0xff, filter->data));
-	} else {
-		CK(mbfl_filt_conv_illegal_output(c, filter));
-	}
-
-	return 0;
-}
-
-static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
-{
-	if (filter->status) {
-		/* Input string was truncated */
-		filter->status = 0;
-		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-	}
-
-	if (filter->flush_function) {
-		(*filter->flush_function)(filter->data);
-	}
-
-	return 0;
-}
 
 #define DETECTED_BE 1
 #define DETECTED_LE 2

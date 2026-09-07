@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Jason Greene <jason@inetgurus.net>                           |
    +----------------------------------------------------------------------+
@@ -154,6 +152,7 @@ typedef psetid_t cpu_set_t;
 #include "Zend/zend_max_execution_timer.h"
 
 #include "pcntl_arginfo.h"
+#include "pcntl_decl.h"
 static zend_class_entry *QosClass_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
@@ -185,12 +184,8 @@ ZEND_GET_MODULE(pcntl)
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 static void pcntl_signal_handler(int, siginfo_t*, void*);
 static void pcntl_siginfo_to_zval(int, siginfo_t*, zval*);
-#else
-static void pcntl_signal_handler(int);
-#endif
 static void pcntl_signal_dispatch(void);
 static void pcntl_signal_dispatch_tick_function(int dummy_int, void *dummy_pointer);
 static void pcntl_interrupt_function(zend_execute_data *execute_data);
@@ -212,7 +207,7 @@ PHP_RINIT_FUNCTION(pcntl)
 	PCNTL_G(last_error) = 0;
 	PCNTL_G(num_signals) = NSIG;
 #ifdef SIGRTMAX
-	/* At least FreeBSD reports an incorrecrt NSIG that does not include realtime signals.
+	/* At least FreeBSD reports an incorrect NSIG that does not include realtime signals.
 	 * As SIGRTMAX may be a dynamic value, adjust the value in INIT. */
 	if (NSIG < SIGRTMAX + 1) {
 		PCNTL_G(num_signals) = SIGRTMAX + 1;
@@ -240,7 +235,7 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 	/* Reset all signals to their default disposition */
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
 		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
-			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, 0);
+			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, false);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -313,6 +308,11 @@ PHP_FUNCTION(pcntl_alarm)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(seconds);
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (seconds < 0 || seconds > UINT_MAX) {
+		zend_argument_value_error(1, "must be between 0 and %u", UINT_MAX);
+		RETURN_THROWS();
+	}
 
 	RETURN_LONG((zend_long) alarm(seconds));
 }
@@ -676,7 +676,11 @@ PHP_FUNCTION(pcntl_exec)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (args != NULL) {
-		// TODO Check array is a list?
+		if (!zend_array_is_list(Z_ARRVAL_P(args))) {
+			zend_argument_value_error(2, "must be a list array");
+			RETURN_THROWS();
+		}
+
 		/* Build argument list */
 		SEPARATE_ARRAY(args);
 		const HashTable *args_ht = Z_ARRVAL_P(args);
@@ -742,13 +746,10 @@ PHP_FUNCTION(pcntl_exec)
 				zend_string_addref(key);
 			}
 
-			/* Length of element + equal sign + length of key + null */
-			*pair = safe_emalloc(ZSTR_LEN(element_str) + 1, sizeof(char), ZSTR_LEN(key) + 1);
-			/* Copy key=element + final null byte into buffer */
-			memcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key));
-			(*pair)[ZSTR_LEN(key)] = '=';
-			/* Copy null byte */
-			memcpy(*pair + ZSTR_LEN(key) + 1, ZSTR_VAL(element_str), ZSTR_LEN(element_str) + 1);
+			*pair = zend_cstr_concat3(
+				ZSTR_VAL(key), ZSTR_LEN(key),
+				"=", 1,
+				ZSTR_VAL(element_str), ZSTR_LEN(element_str));
 
 			/* Cleanup */
 			zend_string_release_ex(key, false);
@@ -830,7 +831,7 @@ PHP_FUNCTION(pcntl_signal)
 			zend_argument_value_error(2, "must be either SIG_DFL or SIG_IGN when an integer value is given");
 			RETURN_THROWS();
 		}
-		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
+		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), restart_syscalls) == (void *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
@@ -870,17 +871,8 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 		Z_PARAM_LONG(signo)
 	ZEND_PARSE_PARAMETERS_END();
 
-	// note: max signal on mac is SIGUSR2 (31), no real time signals.
-	int sigmax = NSIG - 1;
-#if defined(SIGRTMAX)
-	// oddily enough, NSIG on freebsd reports only 32 whereas SIGRTMIN starts at 65.
-	if (sigmax < SIGRTMAX) {
-		sigmax = SIGRTMAX;
-	}
-#endif
-
-	if (signo < 1 || signo > sigmax) {
-		zend_argument_value_error(1, "must be between 1 and %d", sigmax);
+	if (signo < 1 || signo >= PCNTL_G(num_signals)) {
+		zend_argument_value_error(1, "must be between 1 and %d", PCNTL_G(num_signals) - 1);
 		RETURN_THROWS();
 	}
 
@@ -1011,8 +1003,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 /* }}} */
 #endif
 
-#ifdef HAVE_STRUCT_SIGINFO_T
-# ifdef HAVE_SIGWAITINFO
+#ifdef HAVE_SIGWAITINFO
 
 /* {{{ Synchronously wait for queued signals */
 PHP_FUNCTION(pcntl_sigwaitinfo)
@@ -1054,8 +1045,9 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	RETURN_LONG(signal_no);
 }
 /* }}} */
-# endif
-# ifdef HAVE_SIGTIMEDWAIT
+#endif
+
+#ifdef HAVE_SIGTIMEDWAIT
 /* {{{ Wait for queued signals */
 PHP_FUNCTION(pcntl_sigtimedwait)
 {
@@ -1117,7 +1109,7 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	RETURN_LONG(signal_no);
 }
 /* }}} */
-# endif
+#endif
 
 static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_siginfo) /* {{{ */
 {
@@ -1153,7 +1145,7 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 			case SIGFPE:
 			case SIGSEGV:
 			case SIGBUS:
-				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
+				add_assoc_long_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
 				break;
 #if defined(SIGPOLL) && !defined(__CYGWIN__)
 			case SIGPOLL:
@@ -1187,7 +1179,6 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 	}
 }
 /* }}} */
-#endif
 
 #ifdef HAVE_GETPRIORITY
 /* {{{ Get the priority of any process */
@@ -1329,11 +1320,7 @@ PHP_FUNCTION(pcntl_strerror)
 /* }}} */
 
 /* Our custom signal handler that calls the appropriate php_function */
-#ifdef HAVE_STRUCT_SIGINFO_T
 static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
-#else
-static void pcntl_signal_handler(int signo)
-#endif
 {
 	struct php_pcntl_pending_signal *psig = PCNTL_G(spares);
 	if (!psig) {
@@ -1345,9 +1332,7 @@ static void pcntl_signal_handler(int signo)
 	psig->signo = signo;
 	psig->next = NULL;
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 	psig->siginfo = *siginfo;
-#endif
 
 	/* the head check is important, as the tick handler cannot atomically clear both
 	 * the head and tail */
@@ -1399,19 +1384,14 @@ void pcntl_signal_dispatch(void)
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
 				ZVAL_LONG(&params[0], queue->signo);
-#ifdef HAVE_STRUCT_SIGINFO_T
 				array_init(&params[1]);
 				pcntl_siginfo_to_zval(queue->signo, &queue->siginfo, &params[1]);
-#else
-				ZVAL_NULL(&params[1]);
-#endif
 
 				/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
 				call_user_function(NULL, NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
-#ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
-#endif
+
 				if (EG(exception)) {
 					break;
 				}
@@ -1485,7 +1465,6 @@ PHP_FUNCTION(pcntl_unshare)
 			case EINVAL:
 				zend_argument_value_error(1, "must be a combination of CLONE_* flags, or at least one flag is unsupported by the kernel");
 				RETURN_THROWS();
-				break;
 #endif
 #ifdef ENOMEM
 			case ENOMEM:
@@ -1838,48 +1817,48 @@ PHP_FUNCTION(pcntl_getcpu)
 #endif
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-static qos_class_t qos_zval_to_lval(const zval *qos_obj)
+static qos_class_t qos_enum_to_pthread(zend_enum_Pcntl_QosClass entry)
 {
-	qos_class_t qos_class = QOS_CLASS_DEFAULT;
-	zend_string *entry = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(qos_obj)));
-
-	if (zend_string_equals_literal(entry, "UserInteractive")) {
-		qos_class = QOS_CLASS_USER_INTERACTIVE;
-	} else if (zend_string_equals_literal(entry, "UserInitiated")) {
-		qos_class = QOS_CLASS_USER_INITIATED;
-	} else if (zend_string_equals_literal(entry, "Utility")) {
-		qos_class = QOS_CLASS_UTILITY;
-	} else if (zend_string_equals_literal(entry, "Background")) {
-		qos_class = QOS_CLASS_BACKGROUND;
+	switch (entry) {
+	case ZEND_ENUM_Pcntl_QosClass_UserInteractive:
+		return QOS_CLASS_USER_INTERACTIVE;
+	case ZEND_ENUM_Pcntl_QosClass_UserInitiated:
+		return QOS_CLASS_USER_INITIATED;
+	case ZEND_ENUM_Pcntl_QosClass_Utility:
+		return QOS_CLASS_UTILITY;
+	case ZEND_ENUM_Pcntl_QosClass_Background:
+		return QOS_CLASS_BACKGROUND;
+	case ZEND_ENUM_Pcntl_QosClass_Default:
+		return QOS_CLASS_DEFAULT;
 	}
 
-	return qos_class;
+	ZEND_UNREACHABLE();
 }
 
 static zend_object *qos_lval_to_zval(qos_class_t qos_class)
 {
-	const char *entryname;
+	int entry_id;
 	switch (qos_class)
 	{
 	case QOS_CLASS_USER_INTERACTIVE:
-		entryname = "UserInteractive";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_UserInteractive;
 		break;
 	case QOS_CLASS_USER_INITIATED:
-		entryname = "UserInitiated";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_UserInitiated;
 		break;
 	case QOS_CLASS_UTILITY:
-		entryname = "Utility";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_Utility;
 		break;
 	case QOS_CLASS_BACKGROUND:
-		entryname = "Background";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_Background;
 		break;
 	case QOS_CLASS_DEFAULT:
 	default:
-		entryname = "Default";
+		entry_id = ZEND_ENUM_Pcntl_QosClass_Default;
 		break;
 	}
 
-	return zend_enum_get_case_cstr(QosClass_ce, entryname);
+	return zend_enum_get_case_by_id(QosClass_ce, entry_id);
 }
 
 PHP_FUNCTION(pcntl_getqos_class)
@@ -1901,13 +1880,13 @@ PHP_FUNCTION(pcntl_getqos_class)
 
 PHP_FUNCTION(pcntl_setqos_class)
 {
-	zval *qos_obj;
+	zend_enum_Pcntl_QosClass qos;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(qos_obj, QosClass_ce)
+		Z_PARAM_ENUM(qos, QosClass_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	qos_class_t qos_class = qos_zval_to_lval(qos_obj);
+	qos_class_t qos_class = qos_enum_to_pthread(qos);
 
 	if (UNEXPECTED(pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0))
 	{

@@ -11,10 +11,10 @@ $child = $comment->nextSibling;
 
 try {
     $comment->removeChild($child);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Not Found Error
+DOMException: Not Found Error

@@ -1,16 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
-  +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
 */
 
@@ -37,10 +33,13 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
 #include "test_arginfo.h"
+#include "tmp_methods_arginfo.h"
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
 #include "zend_mm_custom_handlers.h"
 #include "ext/uri/php_uri.h"
+#include "zend_observer.h"
+#include "test_decl.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
@@ -55,6 +54,9 @@ static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_gen_stub_flag_compatibility_test;
 static zend_class_entry *zend_attribute_test_class;
 static zend_class_entry *zend_test_trait;
+static zend_class_entry *zend_test_trait_for_internal_class;
+static zend_class_entry *zend_test_trait_for_internal_class2;
+static zend_class_entry *zend_test_class_with_traits;
 static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_repeatable_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
@@ -223,6 +225,557 @@ static ZEND_FUNCTION(zend_delref)
 	RETURN_NULL();
 }
 
+/* BEGIN ZPP test functions */
+static ZEND_FUNCTION(zend_bool)
+{
+	bool v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_BOOL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(v);
+}
+
+static ZEND_FUNCTION(zend_bool_or_null)
+{
+	bool v;
+	bool is_null;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_BOOL_OR_NULL(v, is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	RETURN_BOOL(v);
+}
+
+static ZEND_FUNCTION(zend_bool_slow_zpp)
+{
+	bool v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(v);
+}
+
+static ZEND_FUNCTION(zend_bool_or_null_slow_zpp)
+{
+	bool v;
+	bool is_null;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b!", &v, &is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	RETURN_BOOL(v);
+}
+
+static ZEND_FUNCTION(zend_int)
+{
+	zend_long v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(v);
+}
+
+static ZEND_FUNCTION(zend_int_or_null)
+{
+	zend_long v;
+	bool is_null;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG_OR_NULL(v, is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	RETURN_LONG(v);
+}
+
+static ZEND_FUNCTION(zend_int_slow_zpp)
+{
+	zend_long v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(v);
+}
+
+static ZEND_FUNCTION(zend_int_or_null_slow_zpp)
+{
+	zend_long v;
+	bool is_null;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l!", &v, &is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	RETURN_LONG(v);
+}
+
+static ZEND_FUNCTION(zend_float)
+{
+	double v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_DOUBLE(v);
+}
+
+static ZEND_FUNCTION(zend_float_or_null)
+{
+	double v;
+	bool is_null;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE_OR_NULL(v, is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	RETURN_DOUBLE(v);
+}
+
+static ZEND_FUNCTION(zend_float_slow_zpp)
+{
+	double v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_DOUBLE(v);
+}
+
+static ZEND_FUNCTION(zend_float_or_null_slow_zpp)
+{
+	double v;
+	bool is_null;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "d!", &v, &is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	RETURN_DOUBLE(v);
+}
+
+static ZEND_FUNCTION(zend_number)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_number_or_null)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_number_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "n", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_number_or_null_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "n!", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_object)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_object_or_null)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_object_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_object_or_null_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_obj)
+{
+	zend_object *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_OBJ_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_obj_or_null)
+{
+	zend_object *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_OBJ_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_obj_or_class_name)
+{
+	zend_class_entry *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_CLASS_NAME(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR_COPY(v->name);
+}
+
+static ZEND_FUNCTION(zend_obj_or_class_name_or_null)
+{
+	zend_class_entry *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OR_CLASS_NAME_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_STR_COPY(v->name);
+}
+
+static ZEND_FUNCTION(zend_class_name)
+{
+	zend_class_entry *v = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_CLASS(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR_COPY(v->name);
+}
+
+static ZEND_FUNCTION(zend_class_name_or_null)
+{
+	zend_class_entry *v = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_CLASS_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_STR_COPY(v->name);
+}
+
+static ZEND_FUNCTION(zend_class_name_slow_zpp)
+{
+	zend_class_entry *v = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "C", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_STR_COPY(v->name);
+}
+
+static ZEND_FUNCTION(zend_class_name_or_null_slow_zpp)
+{
+	zend_class_entry *v = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "C!", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_STR_COPY(v->name);
+}
+
+static ZEND_FUNCTION(zend_object_sdtClass)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(v, zend_standard_class_def)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_object_sdtClass_or_null)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(v, zend_standard_class_def)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_object_sdtClass_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &v, zend_standard_class_def) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_object_sdtClass_or_null_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!", &v, zend_standard_class_def) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_obj_sdtClass)
+{
+	zend_object *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS(v, zend_standard_class_def)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_OBJ_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_obj_sdtClass_or_null)
+{
+	zend_object *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_NULL(v, zend_standard_class_def)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_OBJ_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_obj_stdclass_or_string)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(object, zend_standard_class_def, str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else {
+		RETURN_OBJ_COPY(object);
+	}
+}
+
+static ZEND_FUNCTION(zend_obj_stdclass_or_string_or_null)
+{
+	zend_string *str;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(object, zend_standard_class_def, str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	} else if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_NULL();
+	}
+}
+
+static ZEND_FUNCTION(zend_obj_stdclass_or_int)
+{
+	zend_long l;
+	zend_object *object;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG(object, zend_standard_class_def, l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_LONG(l);
+	}
+}
+
+static ZEND_FUNCTION(zend_obj_stdclass_or_int_or_null)
+{
+	zend_long l;
+	zend_object *object;
+	bool is_null;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(object, zend_standard_class_def, l, is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_null) {
+		RETURN_NULL();
+	} else if (object) {
+		RETURN_OBJ_COPY(object);
+	} else {
+		RETURN_LONG(l);
+	}
+}
+
+static ZEND_FUNCTION(zend_resource)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_resource_or_null)
+{
+	zval *v;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE_OR_NULL(v)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_resource_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(v);
+}
+
+static ZEND_FUNCTION(zend_resource_or_null_slow_zpp)
+{
+	zval *v;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r!", &v) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (v == NULL) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(v);
+}
+
 /* Tests Z_PARAM_OBJ_OR_STR */
 static ZEND_FUNCTION(zend_string_or_object)
 {
@@ -259,22 +812,85 @@ static ZEND_FUNCTION(zend_string_or_object_or_null)
 	}
 }
 
-/* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR */
-static ZEND_FUNCTION(zend_string_or_stdclass)
+/* Tests Z_PARAM_NUMBER_OR_STR */
+static ZEND_FUNCTION(zend_number_or_string)
 {
-	zend_string *str;
-	zend_object *object;
+	zval *input;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS_OR_STR(object, zend_standard_class_def, str)
+		Z_PARAM_NUMBER_OR_STR(input)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (str) {
-		RETURN_STR_COPY(str);
-	} else {
-		RETURN_OBJ_COPY(object);
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		case IS_STRING:
+			RETURN_STR_COPY(Z_STR_P(input));
+		default: ZEND_UNREACHABLE();
 	}
 }
+
+/* Tests Z_PARAM_NUMBER_OR_STR_OR_NULL */
+static ZEND_FUNCTION(zend_number_or_string_or_null)
+{
+	zval *input;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER_OR_STR_OR_NULL(input)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!input) {
+		RETURN_NULL();
+	}
+
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		case IS_STRING:
+			RETURN_STR_COPY(Z_STR_P(input));
+		default: ZEND_UNREACHABLE();
+	}
+}
+
+/* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
+static ZEND_FUNCTION(zend_iterable)
+{
+	zval *arg1, *arg2;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ITERABLE(arg1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ITERABLE_OR_NULL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+}
+
+static ZEND_FUNCTION(zend_iterable_legacy)
+{
+	zval *arg1, *arg2;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ITERABLE(arg1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ITERABLE_OR_NULL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(arg1);
+}
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable_legacy, 0, 1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, arg1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry ext_function_legacy[] = {
+	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
+	ZEND_FE_END
+};
+/* END ZPP test functions */
 
 static ZEND_FUNCTION(zend_test_compile_string)
 {
@@ -309,69 +925,6 @@ static ZEND_FUNCTION(zend_test_compile_string)
 	}
 
 	return;
-}
-
-/* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
-static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
-{
-	zend_string *str;
-	zend_object *object;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(object, zend_standard_class_def, str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (str) {
-		RETURN_STR_COPY(str);
-	} else if (object) {
-		RETURN_OBJ_COPY(object);
-	} else {
-		RETURN_NULL();
-	}
-}
-
-/* Tests Z_PARAM_NUMBER_OR_STR */
-static ZEND_FUNCTION(zend_number_or_string)
-{
-	zval *input;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER_OR_STR(input)
-	ZEND_PARSE_PARAMETERS_END();
-
-	switch (Z_TYPE_P(input)) {
-		case IS_LONG:
-			RETURN_LONG(Z_LVAL_P(input));
-		case IS_DOUBLE:
-			RETURN_DOUBLE(Z_DVAL_P(input));
-		case IS_STRING:
-			RETURN_STR_COPY(Z_STR_P(input));
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-}
-
-/* Tests Z_PARAM_NUMBER_OR_STR_OR_NULL */
-static ZEND_FUNCTION(zend_number_or_string_or_null)
-{
-	zval *input;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER_OR_STR_OR_NULL(input)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (!input) {
-		RETURN_NULL();
-	}
-
-	switch (Z_TYPE_P(input)) {
-		case IS_LONG:
-			RETURN_LONG(Z_LVAL_P(input));
-		case IS_DOUBLE:
-			RETURN_DOUBLE(Z_DVAL_P(input));
-		case IS_STRING:
-			RETURN_STR_COPY(Z_STR_P(input));
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
 }
 
 static ZEND_FUNCTION(zend_weakmap_attach)
@@ -433,41 +986,6 @@ static ZEND_FUNCTION(zend_test_override_libxml_global_state)
 }
 #endif
 
-/* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
-static ZEND_FUNCTION(zend_iterable)
-{
-	zval *arg1, *arg2;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ITERABLE(arg1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ITERABLE_OR_NULL(arg2)
-	ZEND_PARSE_PARAMETERS_END();
-}
-
-static ZEND_FUNCTION(zend_iterable_legacy)
-{
-	zval *arg1, *arg2;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ITERABLE(arg1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ITERABLE_OR_NULL(arg2)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RETURN_COPY(arg1);
-}
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable_legacy, 0, 1, IS_ITERABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, arg1, IS_ITERABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry ext_function_legacy[] = {
-	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
-	ZEND_FE_END
-};
-
 /* Call a method on a class or object using zend_call_method() */
 static ZEND_FUNCTION(zend_call_method)
 {
@@ -492,7 +1010,6 @@ static ZEND_FUNCTION(zend_call_method)
 		ce = zend_lookup_class(Z_STR_P(class_or_object));
 		if (!ce) {
 			zend_error_noreturn(E_ERROR, "Unknown class '%s'", Z_STRVAL_P(class_or_object));
-			return;
 		}
 	} else {
 		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(class_or_object));
@@ -546,13 +1063,86 @@ static ZEND_FUNCTION(zend_call_method_if_exists)
 		}
 		RETURN_NULL();
 	}
+	if (Z_TYPE_P(return_value) == IS_REFERENCE) {
+		zend_unwrap_reference(return_value);
+	}
+}
+
+static ZEND_FUNCTION(zend_test_call_with_consumed_args)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	zval *args;
+	zend_long consumed_args;
+	zval retval;
+	uint32_t actual_consumed_args = 0;
+	uint32_t i;
+	zend_result call_result;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_ARRAY(args)
+		Z_PARAM_LONG(consumed_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(consumed_args < 0 || consumed_args > UINT32_MAX)) {
+		zend_argument_value_error(3, "must be between 0 and 4294967295");
+		RETURN_THROWS();
+	}
+
+	zend_fcall_info_args(&fci, args);
+
+	ZVAL_UNDEF(&retval);
+	fci.retval = &retval;
+	fci.consumed_args = (uint32_t) consumed_args;
+
+	call_result = zend_call_function(&fci, &fcc);
+
+	for (i = 0; i < fci.param_count && i < 32; i++) {
+		if (Z_ISUNDEF(fci.params[i])) {
+			actual_consumed_args |= (1u << i);
+		}
+	}
+
+	zend_fcall_info_args_clear(&fci, true);
+
+	if (call_result == FAILURE || EG(exception)) {
+		if (!Z_ISUNDEF(retval)) {
+			zval_ptr_dtor(&retval);
+		}
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+	add_assoc_long(return_value, "consumed_args", actual_consumed_args);
+
+	if (Z_ISUNDEF(retval)) {
+		add_assoc_null(return_value, "retval");
+	} else {
+		add_assoc_zval(return_value, "retval", &retval);
+	}
+}
+
+static ZEND_FUNCTION(zend_test_refcount)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!Z_REFCOUNTED_P(value)) {
+		RETURN_LONG(-1);
+	}
+
+	RETURN_LONG(Z_REFCOUNT_P(value));
 }
 
 static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_OBJ_COPY(zend_enum_get_case_cstr(zend_test_unit_enum, "Foo"));
+	RETURN_OBJ_COPY(zend_enum_get_case_by_id(zend_test_unit_enum, ZEND_ENUM_ZendTestUnitEnum_Foo));
 }
 
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity)
@@ -594,6 +1184,13 @@ static ZEND_FUNCTION(zend_test_zend_ini_str)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STR(ZT_G(str_test));
+}
+
+static ZEND_FUNCTION(zend_test_zstr_init_literal)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_STR(ZSTR_INIT_LITERAL("foo\0bar", false));
 }
 
 static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8)
@@ -1025,16 +1622,38 @@ static ZEND_FUNCTION(zend_test_log_err_debug)
 	php_log_err_with_severity(ZSTR_VAL(str), LOG_DEBUG);
 }
 
+typedef struct _zend_test_object {
+	zend_internal_function *tmp_method;
+	zend_object std;
+} zend_test_object;
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
-	zend_object *obj = zend_objects_new(class_type);
-	object_properties_init(obj, class_type);
-	obj->handlers = &zend_test_class_handlers;
-	return obj;
+	zend_test_object *intern = zend_object_alloc(sizeof(zend_test_object), class_type);
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+	return &intern->std;
+}
+
+static void zend_test_class_free_obj(zend_object *object)
+{
+	zend_test_object *intern = ZEND_CONTAINER_OF(object, zend_test_object, std);
+
+	if (intern->tmp_method) {
+		zend_internal_function *func = intern->tmp_method;
+		intern->tmp_method = NULL;
+		zend_string_release_ex(func->function_name, 0);
+		zend_free_internal_arg_info(func, false);
+		efree(func);
+	}
+
+	zend_object_std_dtor(object);
 }
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key)
 {
+	zend_test_object *intern = ZEND_CONTAINER_OF(*object, zend_test_object, std);
+
 	if (zend_string_equals_literal_ci(name, "test")) {
 		zend_internal_function *fptr;
 
@@ -1048,9 +1667,45 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 		fptr->num_args = 0;
 		fptr->scope = (*object)->ce;
 		fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
+		fptr->fn_flags2 = 0;
 		fptr->function_name = zend_string_copy(name);
 		fptr->handler = ZEND_FN(zend_test_func);
 		fptr->doc_comment = NULL;
+
+		return (zend_function*)fptr;
+	} else if (zend_string_equals_literal_ci(name, "testTmpMethodWithArgInfo")) {
+		if (intern->tmp_method) {
+			return (zend_function*)intern->tmp_method;
+		}
+
+		const zend_function_entry *entry = &class_ZendTestTmpMethods_methods[0];
+		zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
+		memset(fptr, 0, sizeof(zend_internal_function));
+		fptr->type = ZEND_INTERNAL_FUNCTION;
+		fptr->handler = entry->handler;
+		fptr->function_name = zend_string_init(entry->fname, strlen(entry->fname), false);
+		fptr->scope = intern->std.ce;
+		fptr->prototype = NULL;
+		fptr->T = ZEND_OBSERVER_ENABLED;
+		fptr->fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_NEVER_CACHE;
+
+		zend_internal_function_info *info = (zend_internal_function_info*)entry->arg_info;
+
+		uint32_t num_arg_info = 1 + entry->num_args;
+		zend_arg_info *arg_info = safe_emalloc(num_arg_info, sizeof(zend_arg_info), 0);
+		for (uint32_t i = 0; i < num_arg_info; i++) {
+			zend_convert_internal_arg_info(&arg_info[i], &entry->arg_info[i], i == 0, false);
+		}
+
+		fptr->arg_info = arg_info + 1;
+		fptr->num_args = entry->num_args;
+		if (info->required_num_args == (uint32_t)-1) {
+			fptr->required_num_args = entry->num_args;
+		} else {
+			fptr->required_num_args = info->required_num_args;
+		}
+
+		intern->tmp_method = fptr;
 
 		return (zend_function*)fptr;
 	}
@@ -1072,6 +1727,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 		fptr->num_args = 0;
 		fptr->scope = ce;
 		fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
+		fptr->fn_flags2 = 0;
 		fptr->function_name = zend_string_copy(name);
 		fptr->handler = ZEND_FN(zend_test_func);
 		fptr->doc_comment = NULL;
@@ -1138,6 +1794,18 @@ static ZEND_METHOD(_ZendTestClass, variadicTest) {
 	object_init_ex(return_value, zend_get_called_scope(execute_data));
 }
 
+ZEND_METHOD(ZendTestTmpMethods, testTmpMethodWithArgInfo)
+{
+	zend_object *obj;
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2);
+		Z_PARAM_OPTIONAL;
+		Z_PARAM_OBJ_OR_NULL(obj);
+		Z_PARAM_STR(str);
+	ZEND_PARSE_PARAMETERS_END();
+}
+
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1154,6 +1822,18 @@ static ZEND_METHOD(_ZendTestTrait, testMethod)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_TRUE;
+}
+
+static ZEND_METHOD(_ZendTestTraitForInternalClass, traitMethod)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG(789);
+}
+
+static ZEND_METHOD(_ZendTestTraitForInternalClass2, traitMethod2)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_LONG(101);
 }
 
 static ZEND_METHOD(ZendTestNS_Foo, method)
@@ -1443,17 +2123,24 @@ PHP_MINIT_FUNCTION(zend_test)
 	register_ZendTestClass_dnf_property(zend_test_class);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
+	zend_test_class->default_object_handlers = &zend_test_class_handlers;
 
 	zend_test_child_class = register_class__ZendTestChildClass(zend_test_class);
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
+	zend_test_class_handlers.clone_obj = NULL;
+	zend_test_class_handlers.free_obj = zend_test_class_free_obj;
+	zend_test_class_handlers.offset = offsetof(zend_test_object, std);
 
 	zend_test_gen_stub_flag_compatibility_test = register_class_ZendTestGenStubFlagCompatibilityTest();
 
 	zend_attribute_test_class = register_class_ZendAttributeTest();
 
 	zend_test_trait = register_class__ZendTestTrait();
+	zend_test_trait_for_internal_class = register_class__ZendTestTraitForInternalClass();
+	zend_test_trait_for_internal_class2 = register_class__ZendTestTraitForInternalClass2();
+	zend_test_class_with_traits = register_class__ZendTestClassWithTraits(zend_test_trait_for_internal_class, zend_test_trait_for_internal_class2);
 
 	register_test_symbols(module_number);
 
@@ -1739,7 +2426,7 @@ typedef off_t off64_t;
 PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out, off64_t *off_out, size_t len, unsigned int flags)
 {
 	ssize_t (*original_copy_file_range)(int, off64_t *, int, off64_t *, size_t, unsigned int) = dlsym(RTLD_NEXT, "copy_file_range");
-	if (ZT_G(limit_copy_file_range) >= Z_L(0)) {
+	if (ZT_G(limit_copy_file_range) >= Z_L(0) && ZT_G(limit_copy_file_range) < len) {
 		len = ZT_G(limit_copy_file_range);
 	}
 	return original_copy_file_range(fd_in, off_in, fd_out, off_out, len, flags);

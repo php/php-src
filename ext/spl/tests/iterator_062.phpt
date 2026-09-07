@@ -11,8 +11,8 @@ class myRecursiveIteratorIterator extends RecursiveIteratorIterator {
 try {
     $it = new myRecursiveIteratorIterator();
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-RecursiveIteratorIterator::__construct() expects at least 1 argument, 0 given
+ArgumentCountError: RecursiveIteratorIterator::__construct() expects at least 1 argument, 0 given

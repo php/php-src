@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -34,11 +32,7 @@ static inline void phpdbg_append_individual_arg(smart_str *s, uint32_t i, zend_f
 	}
 	if (i < func->common.num_args) {
 		if (arginfo) {
-			if (func->type == ZEND_INTERNAL_FUNCTION) {
-				arg_name = (char *) ((zend_internal_arg_info *) &arginfo[i])->name;
-			} else {
-				arg_name = ZSTR_VAL(arginfo[i].name);
-			}
+			arg_name = ZSTR_VAL(arginfo[i].name);
 		}
 		smart_str_appends(s, arg_name ? arg_name : "?");
 		smart_str_appendc(s, '=');
@@ -213,11 +207,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 				char *arg_name = NULL;
 
 				if (arginfo) {
-					if (func->type == ZEND_INTERNAL_FUNCTION) {
-						arg_name = (char *)((zend_internal_arg_info *)&arginfo[j])->name;
-					} else {
-						arg_name = ZSTR_VAL(arginfo[j].name);
-					}
+					arg_name = ZSTR_VAL(arginfo[j].name);
 				}
 
 				if (!is_variadic) {

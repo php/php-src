@@ -12,10 +12,10 @@ enum E2 {
 
 try {
     var_dump(E1::C);
-} catch (TypeError $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign E2 to class constant E1::C of type static
+TypeError: Cannot assign E2 to class constant E1::C of type static

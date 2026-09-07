@@ -12,16 +12,16 @@ try {
     /* Read-only property */
     $driver->client_info = 42;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $driver->report_mode = "1";
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot write read-only property mysqli_driver::$client_info
-Cannot assign string to property mysqli_driver::$report_mode of type int
+Error: Cannot write read-only property mysqli_driver::$client_info
+TypeError: Cannot assign string to property mysqli_driver::$report_mode of type int

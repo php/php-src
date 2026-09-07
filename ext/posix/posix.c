@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Kristian Koehntopp <kris@koehntopp.de>                       |
    +----------------------------------------------------------------------+
@@ -746,6 +744,15 @@ PHP_FUNCTION(posix_access)
 		efree(path);
 		POSIX_G(last_error) = EPERM;
 		RETURN_FALSE;
+	}
+
+	if (mode < 0 || (mode & ~(F_OK | R_OK | W_OK | X_OK))) {
+		zend_argument_value_error(
+			2,
+			"must be a bitmask of POSIX_F_OK, POSIX_R_OK, POSIX_W_OK, and POSIX_X_OK"
+		);
+		efree(path);
+		RETURN_THROWS();
 	}
 
 	ret = access(path, mode);

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Edin Kadribasic <edink@emini.dk>                            |
   |          Ilia Alshanestsky <ilia@prohost.org>                        |
@@ -268,6 +266,18 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+static bool pdo_pgsql_check_chunk_size(zend_long size)
+{
+	if (size < 0 || ZEND_LONG_EXCEEDS_INT(size)) {
+		zend_value_error("Pdo\\Pgsql::ATTR_CHUNK_SIZE must be between 0 and %d", INT_MAX);
+		return false;
+	}
+
+	return true;
+}
+#endif
+
 static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -287,13 +297,47 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY) == PDO_CURSOR_SCROLL;
 
-	S->is_unbuffered =
-		driver_options
-		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH))
-		&& pdo_get_long_param(&lval, val)
+	bool prefetch_given = driver_options
+		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH));
+
+	S->is_unbuffered = prefetch_given && pdo_get_long_param(&lval, val)
 		? !lval
-		: H->default_fetching_laziness
-	;
+		: H->default_fetching_laziness;
+
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+	bool chunk_size_given = driver_options
+		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_PGSQL_ATTR_CHUNK_SIZE));
+
+	if (chunk_size_given) {
+		if (!pdo_get_long_param(&lval, val)) {
+			return false;
+		}
+		S->chunk_size = lval;
+	} else if (prefetch_given) {
+		/* the statement's own prefetch replaces an inherited chunk size */
+		S->chunk_size = 0;
+	} else {
+		S->chunk_size = H->default_chunk_size;
+	}
+
+	if (!pdo_pgsql_check_chunk_size(S->chunk_size)) {
+		return false;
+	}
+
+	if (S->chunk_size >= 1 && scrollable) {
+		if (chunk_size_given) {
+			zend_value_error("Pdo\\Pgsql::ATTR_CHUNK_SIZE cannot be combined with "
+				"PDO::ATTR_CURSOR set to PDO::CURSOR_SCROLL");
+			return false;
+		}
+
+		S->chunk_size = 0;
+	}
+
+	if (S->chunk_size >= 1) {
+		S->is_unbuffered = true;
+	}
+#endif
 
 	if (scrollable) {
 		S->is_unbuffered = false;
@@ -395,11 +439,10 @@ static zend_string* pgsql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 				return NULL;
 			}
 			quotedlen = tmp_len + 1;
-			quoted = emalloc(quotedlen + 1);
-			memcpy(quoted+1, escaped, quotedlen-2);
-			quoted[0] = '\'';
-			quoted[quotedlen-1] = '\'';
-			quoted[quotedlen] = '\0';
+			quoted = zend_cstr_concat3(
+				"'", 1,
+				(const char *) escaped, quotedlen - 2,
+				"'", 1);
 			PQfreemem(escaped);
 			break;
 		default:
@@ -477,6 +520,12 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			ZVAL_BOOL(return_value, H->disable_prepares);
 			break;
 
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		case PDO_PGSQL_ATTR_CHUNK_SIZE:
+			ZVAL_LONG(return_value, H->default_chunk_size);
+			break;
+#endif
+
 		case PDO_ATTR_CLIENT_VERSION: {
 			char buf[16];
 			pdo_libpq_version(buf, sizeof(buf));
@@ -506,20 +555,16 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 				case CONNECTION_AUTH_OK:
 					ZVAL_STRINGL(return_value, "Received authentication; waiting for backend start-up to finish.", strlen("Received authentication; waiting for backend start-up to finish."));
 					break;
-#ifdef CONNECTION_SSL_STARTUP
 				case CONNECTION_SSL_STARTUP:
 					ZVAL_STRINGL(return_value, "Negotiating SSL encryption.", strlen("Negotiating SSL encryption."));
 					break;
-#endif
 				case CONNECTION_SETENV:
 					ZVAL_STRINGL(return_value, "Negotiating environment-driven parameter settings.", strlen("Negotiating environment-driven parameter settings."));
 					break;
 
-#ifdef CONNECTION_CONSUME
 				case CONNECTION_CONSUME:
 					ZVAL_STRINGL(return_value, "Flushing send queue/consuming extra data.", strlen("Flushing send queue/consuming extra data."));
 					break;
-#endif
 #ifdef CONNECTION_GSS_STARTUP
 				case CONNECTION_GSS_STARTUP:
 					ZVAL_STRINGL(return_value, "Negotiating GSSAPI.", strlen("Negotiating GSSAPI."));
@@ -1347,6 +1392,20 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 	}
 }
 
+static void pdo_pgsql_request_shutdown(pdo_dbh_t *dbh)
+{
+	PGresult *res;
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	if(H->server) {
+		res = PQexec(H->server, "DISCARD ALL");
+
+		if(res) {
+			PQclear(res);
+		}
+	}
+}
+
 static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	bool bval;
@@ -1370,7 +1429,22 @@ static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				return false;
 			}
 			H->default_fetching_laziness = !bval;
+			H->default_chunk_size = 0;
 			return true;
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+		case PDO_PGSQL_ATTR_CHUNK_SIZE: {
+			zend_long lval;
+
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+			if (!pdo_pgsql_check_chunk_size(lval)) {
+				return false;
+			}
+			H->default_chunk_size = lval;
+			return true;
+		}
+#endif
 		default:
 			return false;
 	}
@@ -1390,7 +1464,7 @@ static const struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_get_attribute,
 	pdo_pgsql_check_liveness,	/* check_liveness */
 	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
-	NULL,
+	pdo_pgsql_request_shutdown,
 	pgsql_handle_in_transaction,
 	NULL, /* get_gc */
 	pdo_pgsql_scanner

@@ -22,8 +22,8 @@ foreach ($values as $value) {
 --EXPECTF--
 Warning: posix_ttyname(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
-string(19) "Bad file descriptor"
+string(%d) "Bad file %r(descriptor|number)%r"
 
 Warning: posix_ttyname(): Argument #1 ($file_descriptor) must be between 0 and %d in %s on line %d
 bool(false)
-string(19) "Bad file descriptor"
+string(%d) "Bad file %r(descriptor|number)%r"

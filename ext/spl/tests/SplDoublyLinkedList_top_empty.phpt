@@ -7,8 +7,8 @@ Gabriel Caruso (carusogabriel34@gmail.com)
 try {
     (new SplDoublyLinkedList)->top();
 } catch (RuntimeException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Can't peek at an empty datastructure
+RuntimeException: Can't peek at an empty datastructure

@@ -1,5 +1,9 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5e4b066d70fa264c7de3ba4b2113369c34c33e43 */
+/* This is a generated file, edit pcntl.stub.php instead.
+ * Stub hash: ec6306e93fad6d127ff880fc01736ac287619cf7
+ * Has decl header: yes */
+
+#include "zend_constants.h"
+#include "zend_enum.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -30,7 +34,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_signal, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
 	ZEND_ARG_INFO(0, handler)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, restart_syscalls, _IS_BOOL, 0, "true")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, restart_syscalls, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal_get_handler, 0, 0, 1)
@@ -48,7 +52,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_sigprocmask, 0, 2, _IS_BOO
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigwaitinfo, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
@@ -184,7 +188,7 @@ ZEND_FUNCTION(pcntl_signal_dispatch);
 #if defined(HAVE_SIGPROCMASK)
 ZEND_FUNCTION(pcntl_sigprocmask);
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_FUNCTION(pcntl_sigwaitinfo);
 ZEND_FUNCTION(pcntl_sigtimedwait);
 #endif
@@ -245,7 +249,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_SIGPROCMASK)
 	ZEND_FE(pcntl_sigprocmask, arginfo_pcntl_sigprocmask)
 #endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
+#if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	ZEND_FE(pcntl_sigwaitinfo, arginfo_pcntl_sigwaitinfo)
 	ZEND_FE(pcntl_sigtimedwait, arginfo_pcntl_sigtimedwait)
 #endif

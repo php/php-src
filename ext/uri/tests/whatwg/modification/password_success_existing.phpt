@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - password - changing an existing one
---EXTENSIONS--
-uri
+Test Uri\WhatWg\Url::withPassword() - success - changing an existing one
 --FILE--
 <?php
 

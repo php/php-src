@@ -9,6 +9,7 @@ iconv
 if (substr(PHP_OS, 0, 3) == 'WIN' ) {die('skip not for windows');}
 if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
 if (setlocale(LC_ALL, "en_US.utf8") === false) { die('skip en_US.utf8 locales not available'); }
+if (PHP_OS_FAMILY === 'Solaris') { die("skip Solaris native iconv lacks GNU transliteration"); }
 ?>
 --FILE--
 <?php

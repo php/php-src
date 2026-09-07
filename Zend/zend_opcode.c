@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -45,7 +44,7 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
+void init_op_array(zend_op_array *op_array, zend_function_type type, int initial_ops_size)
 {
 	op_array->type = type;
 	op_array->arg_flags[0] = 0;
@@ -84,6 +83,7 @@ void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
 	op_array->last_try_catch = 0;
 
 	op_array->fn_flags = 0;
+	op_array->fn_flags2 = 0;
 
 	op_array->last_literal = 0;
 	op_array->literals = NULL;
@@ -123,21 +123,32 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	}
 }
 
-void zend_free_internal_arg_info(zend_internal_function *function) {
-	if ((function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
-		function->arg_info) {
+ZEND_API void zend_free_internal_arg_info(zend_internal_function *function,
+		bool persistent) {
+	if (function->arg_info) {
+		ZEND_ASSERT((persistent || (function->fn_flags & ZEND_ACC_NEVER_CACHE))
+				&& "Functions with non-persistent arg_info must be flagged ZEND_ACC_NEVER_CACHE");
 
 		uint32_t i;
 		uint32_t num_args = function->num_args + 1;
-		zend_internal_arg_info *arg_info = function->arg_info - 1;
+		zend_arg_info *arg_info = function->arg_info - 1;
 
 		if (function->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
 		for (i = 0 ; i < num_args; i++) {
-			zend_type_release(arg_info[i].type, /* persistent */ 1);
+			bool is_return_info = i == 0;
+			if (!is_return_info) {
+				zend_string_release_ex(arg_info[i].name, persistent);
+				if (arg_info[i].default_value) {
+					zend_string_release_ex(arg_info[i].default_value,
+							persistent);
+				}
+			}
+			zend_type_release(arg_info[i].type, persistent);
 		}
-		free(arg_info);
+
+		pefree(arg_info, persistent);
 	}
 }
 
@@ -156,7 +167,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 		/* For methods this will be called explicitly. */
 		if (!function->common.scope) {
-			zend_free_internal_arg_info(&function->internal_function);
+			zend_free_internal_arg_info(&function->internal_function, true);
 
 			if (function->common.attributes) {
 				zend_hash_release(function->common.attributes);
@@ -396,7 +407,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 					if (prop_info->attributes) {
 						zend_hash_release(prop_info->attributes);
 					}
-					zend_type_release(prop_info->type, /* persistent */ 0);
+					zend_type_release(prop_info->type, /* persistent */ false);
 					if (prop_info->hooks) {
 						for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
 							if (prop_info->hooks[i]) {
@@ -463,7 +474,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
-					zend_type_release(prop_info->type, /* persistent */ 1);
+					zend_type_release(prop_info->type, /* persistent */ true);
 					if (prop_info->attributes) {
 						zend_hash_release(prop_info->attributes);
 					}
@@ -473,12 +484,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release_ex(ce->name, 1);
 
-			/* TODO: eliminate this loop for classes without functions with arg_info / attributes */
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
-				if (fn->common.scope == ce) {
-					if (fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) {
-						zend_free_internal_arg_info(&fn->internal_function);
-					}
+				if (fn->common.scope == ce && !(fn->common.fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+					zend_free_internal_arg_info(&fn->internal_function, true);
 
 					if (fn->common.attributes) {
 						zend_hash_release(fn->common.attributes);
@@ -526,6 +534,13 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->attributes) {
 				zend_hash_release(ce->attributes);
+			}
+			if (ce->num_traits > 0) {
+				for (uint32_t i = 0; i < ce->num_traits; i++) {
+					zend_string_release(ce->trait_names[i].name);
+					zend_string_release(ce->trait_names[i].lc_name);
+				}
+				free(ce->trait_names);
 			}
 			free(ce);
 			break;
@@ -639,7 +654,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release_ex(arg_info[i].name, 0);
 			}
-			zend_type_release(arg_info[i].type, /* persistent */ 0);
+			if (arg_info[i].doc_comment) {
+				zend_string_release_ex(arg_info[i].doc_comment, 0);
+			}
+			zend_type_release(arg_info[i].type, /* persistent */ false);
 		}
 		efree(arg_info);
 	}
@@ -686,9 +704,7 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 
 static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num, uint32_t dst_num)
 {
-	int i;
-
-	for (i = 0; i < op_array->last_try_catch; i++) {
+	for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
 		if (!op_array->try_catch_array[i].finally_op) {
 			continue;
 		}
@@ -909,14 +925,14 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_FETCH_LIST_W
 	 || opline->opcode == ZEND_COPY_TMP
 	 || opline->opcode == ZEND_EXT_STMT) {
-		return 1;
+		return true;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R
 		&& opline->opcode != ZEND_FE_FETCH_RW
 		&& opline->opcode != ZEND_VERIFY_RETURN_TYPE
 		&& opline->opcode != ZEND_BIND_LEXICAL
 		&& opline->opcode != ZEND_ROPE_ADD);
-	return 0;
+	return false;
 }
 
 /* Live ranges must be sorted by increasing start opline */

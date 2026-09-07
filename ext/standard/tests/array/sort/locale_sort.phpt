@@ -29,7 +29,8 @@ $table = array("AB" => "Alberta",
 asort($table, SORT_LOCALE_STRING);
 var_dump($table);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant SORT_LOCALE_STRING is deprecated since 8.6, use one of the Collator::*sort*() methods instead in %s on line %d
 array(13) {
   ["AB"]=>
   string(7) "Alberta"

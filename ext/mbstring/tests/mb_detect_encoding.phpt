@@ -134,7 +134,7 @@ print("EUC-JP: " . mb_detect_encoding('', 'EUC-JP') . "\n");  // SJIS
 try {
     var_dump(mb_detect_encoding($euc_jp, 'BAD'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "== BOM TEST ==\n";
@@ -450,7 +450,7 @@ UTF-8
 == INVALID PARAMETER ==
 INT: EUC-JP
 EUC-JP: EUC-JP
-mb_detect_encoding(): Argument #2 ($encodings) contains invalid encoding "BAD"
+ValueError: mb_detect_encoding(): Argument #2 ($encodings) contains invalid encoding "BAD"
 == BOM TEST ==
 string(5) "UTF-8"
 string(8) "UTF-16BE"

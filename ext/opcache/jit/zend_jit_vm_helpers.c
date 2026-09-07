@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend JIT                                                             |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
@@ -255,9 +253,9 @@ bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 		}
 
 		zend_vm_stack_free_call_frame(call);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
@@ -283,9 +281,9 @@ bool ZEND_FASTCALL zend_jit_nodiscard_helper(OPLINE_D)
 		}
 
 		zend_vm_stack_free_call_frame(call);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 
 bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D)
@@ -295,17 +293,17 @@ bool ZEND_FASTCALL zend_jit_deprecated_nodiscard_helper(OPLINE_D)
 
 	if (fbc->common.fn_flags & ZEND_ACC_DEPRECATED) {
 		if (zend_jit_deprecated_helper(OPLINE_C) == 0) {
-			return 0;
+			return false;
 		}
 	}
 
 	if (fbc->common.fn_flags & ZEND_ACC_NODISCARD) {
 		if (zend_jit_nodiscard_helper(OPLINE_C) == 0) {
-			return 0;
+			return false;
 		}
 	}
 
-	return 1;
+	return true;
 }
 
 void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D)
@@ -682,11 +680,20 @@ static int zend_jit_trace_record_fake_init_call(zend_execute_data *call, zend_ji
 	return zend_jit_trace_record_fake_init_call_ex(call, trace_buffer, idx, is_megamorphic, 0);
 }
 
-static int zend_jit_trace_subtrace(zend_jit_trace_rec *trace_buffer, int start, int end, uint8_t event, const zend_op_array *op_array, const zend_op *opline)
+static int zend_jit_trace_subtrace(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int start, int end, uint8_t event, const zend_op_array *op_array, const zend_op *opline)
 {
 	int idx;
 
 	TRACE_START(ZEND_JIT_TRACE_START, event, op_array, opline);
+	if (call) {
+		idx = zend_jit_trace_record_fake_init_call(call, trace_buffer, idx, 0);
+		if (idx < 0) {
+			return idx;
+		}
+	}
+	if (idx + (end - start) >= JIT_G(max_trace_length) - 2) {
+		return -1;
+	}
 	memmove(trace_buffer + idx, trace_buffer + start, (end - start) * sizeof(zend_jit_trace_rec));
 	return idx + (end - start);
 }
@@ -980,6 +987,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 					}
 				}
 				break;
+			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_OBJ_R: {
 				if (opline->op2_type == IS_CONST) {
 					/* Remove the SIMPLE_GET flag to avoid inlining hooks. */
@@ -994,7 +1002,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 			case ZEND_FETCH_OBJ_W:
 			case ZEND_FETCH_OBJ_RW:
 			case ZEND_FETCH_OBJ_IS:
-			case ZEND_FETCH_OBJ_FUNC_ARG:
 			case ZEND_FETCH_OBJ_UNSET:
 			case ZEND_ASSIGN_OBJ:
 			case ZEND_ASSIGN_OBJ_OP:
@@ -1059,7 +1066,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, 0, func);
 			}
 		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL
-				|| opline->opcode == ZEND_CALLABLE_CONVERT) {
+				|| opline->opcode == ZEND_CALLABLE_CONVERT
+				|| opline->opcode == ZEND_CALLABLE_CONVERT_PARTIAL) {
 			/* TODO: Support tracing JIT for ZEND_CALLABLE_CONVERT. */
 			stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 			break;
@@ -1353,8 +1361,13 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 
 				if (opline == last_loop_opline
 				 && level == last_loop_level) {
-					idx = zend_jit_trace_subtrace(trace_buffer,
+					int ret = zend_jit_trace_subtrace(EX(call), trace_buffer,
 						last_loop, idx, ZEND_JIT_TRACE_START_LOOP, op_array, opline);
+					if (ret < 0) {
+						stop = ZEND_JIT_TRACE_STOP_TOO_LONG;
+						break;
+					}
+					idx = ret;
 					start = ZEND_JIT_TRACE_START_LOOP;
 					stop = ZEND_JIT_TRACE_STOP_LOOP;
 					ret_level = 0;

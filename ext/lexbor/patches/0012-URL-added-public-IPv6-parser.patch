@@ -1,0 +1,320 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Borisov <lex.borisov@gmail.com>
+Date: Wed, 12 Aug 2026 23:29:20 +0300
+Subject: [PATCH 12/13] URL: added public IPv6 parser.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Added lxb_url_parse_host_ipv6() — a public entry point to the IPv6
+parser from the WHATWG specification:
+https://url.spec.whatwg.org/#concept-ipv6-parser
+
+The address is accepted both with and without the surrounding square
+brackets: "::1" and "[::1]" give the same result.
+
+https://github.com/lexbor/lexbor/pull/402
+
+The API was requested in #402 for use by php/php-src#22268.
+
+Suggested-by: Máté Kocsis (@kocsismate)
+---
+ source/lexbor/url/url.c           |  42 +++++++
+ source/lexbor/url/url.h           |  26 ++++
+ test/lexbor/url/parse_host_ipv6.c | 190 ++++++++++++++++++++++++++++++
+ 3 files changed, 258 insertions(+)
+ create mode 100644 test/lexbor/url/parse_host_ipv6.c
+
+diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
+index 8099c12..7487762 100644
+--- a/source/lexbor/url/url.c
++++ b/source/lexbor/url/url.c
+@@ -3752,6 +3752,46 @@ lxb_url_is_ipv4(lxb_url_parser_t *parser, const lxb_char_t *data,
+     return status != LXB_STATUS_ERROR;
+ }
+ 
++lxb_status_t
++lxb_url_parse_host_ipv6(lxb_url_parser_t *parser, const lxb_char_t *data,
++                        size_t length, uint16_t *ipv6)
++{
++    lxb_status_t status;
++    lxb_url_parser_t self_parser;
++
++    if (parser == NULL) {
++        parser = &self_parser;
++
++        parser->log = NULL;
++        parser->idna = NULL;
++        parser->buffer = NULL;
++    }
++
++    if (data < data + length && *data == '[') {
++        if (data[length - 1] != ']') {
++            (void) lxb_url_log_append(parser, &data[length - 1],
++                                      LXB_URL_ERROR_TYPE_IPV6_UNCLOSED);
++
++            status = LXB_STATUS_ERROR_UNEXPECTED_DATA;
++
++            goto done;
++        }
++
++        data += 1;
++        length -= 2;
++    }
++
++    status = lxb_url_ipv6_parse(parser, data, data + length, ipv6);
++
++done:
++
++    if (parser == &self_parser) {
++        lxb_url_parser_destroy(parser, false);
++    }
++
++    return status;
++}
++
+ static lxb_status_t
+ lxb_url_ipv6_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
+                    const lxb_char_t *end, uint16_t *ipv6)
+@@ -3763,6 +3803,8 @@ lxb_url_ipv6_parse(lxb_url_parser_t *parser, const lxb_char_t *data,
+     const lxb_char_t *p;
+     lxb_url_error_type_t err_type;
+ 
++    memset(ipv6, 0x00, sizeof(uint16_t) * 8);
++
+     piece = ipv6;
+     compress = NULL;
+     p = data;
+diff --git a/source/lexbor/url/url.h b/source/lexbor/url/url.h
+index 6cc6f10..aa50485 100644
+--- a/source/lexbor/url/url.h
++++ b/source/lexbor/url/url.h
+@@ -321,6 +321,32 @@ lxb_url_parse_basic(lxb_url_parser_t *parser, lxb_url_t *url,
+                     const lxb_char_t *data, size_t length,
+                     lxb_url_state_t override_state, lxb_encoding_t encoding);
+ 
++/*
++ * IPv6 parser.
++ *
++ * This function is an implementation of IPv6 parsing according to the WHATWG
++ * specification.
++ * https://url.spec.whatwg.org/#concept-ipv6-parser
++ *
++ * The address can be passed both with and without the surrounding square
++ * brackets: "::1" and "[::1]" give the same result. If the opening bracket is
++ * present, the closing one is required.
++ *
++ * The output buffer is zeroed by the function, there is no need to prepare it.
++ * Use the lxb_url_serialize_host_ipv6() function to serialize the result.
++ *
++ * @param[in] lxb_url_parser_t *. Can be NULL.
++ * @param[in] Pointer to the beginning of the data. Not NULL.
++ * @param[in] Length of the data. Can be 0.
++ * @param[out] Buffer for eight (uint16_t[8]) IPv6 pieces. Not NULL. The value
++ * is meaningful only if LXB_STATUS_OK is returned.
++ *
++ * @return LXB_STATUS_OK if successful, otherwise an error status value.
++ */
++LXB_API lxb_status_t
++lxb_url_parse_host_ipv6(lxb_url_parser_t *parser, const lxb_char_t *data,
++                        size_t length, uint16_t *ipv6);
++
+ /*
+  * Erase URL.
+  *
+diff --git a/test/lexbor/url/parse_host_ipv6.c b/test/lexbor/url/parse_host_ipv6.c
+new file mode 100644
+index 0000000..bbf5293
+--- /dev/null
++++ b/test/lexbor/url/parse_host_ipv6.c
+@@ -0,0 +1,190 @@
++/*
++ * Copyright (C) 2026 Alexander Borisov
++ *
++ * Author: Alexander Borisov <borisov@lexbor.com>
++ */
++
++#include <unit/test.h>
++#include <lexbor/url/url.h>
++
++
++typedef struct {
++    const lxb_char_t *input;
++    size_t           length;
++    uint16_t         ipv6[8];
++}
++ipv6_success_t;
++
++typedef struct {
++    const lxb_char_t     *input;
++    lxb_url_error_type_t error;
++}
++ipv6_failure_t;
++
++
++static const ipv6_success_t success_entries[] = {
++    {
++        (const lxb_char_t *) "::",
++        sizeof("::") - 1,
++        {0, 0, 0, 0, 0, 0, 0, 0}
++    },
++    {
++        (const lxb_char_t *) "::1",
++        sizeof("::1") - 1,
++        {0, 0, 0, 0, 0, 0, 0, 1}
++    },
++    {
++        (const lxb_char_t *) "[::1]",
++        sizeof("[::1]") - 1,
++        {0, 0, 0, 0, 0, 0, 0, 1}
++    },
++    {
++        (const lxb_char_t *) "1:2:3:4:5:6:7:8",
++        sizeof("1:2:3:4:5:6:7:8") - 1,
++        {1, 2, 3, 4, 5, 6, 7, 8}
++    },
++    {
++        (const lxb_char_t *) "2001:db8::ff00:42:8329",
++        sizeof("2001:db8::ff00:42:8329") - 1,
++        {0x2001, 0x0db8, 0, 0, 0, 0xff00, 0x0042, 0x8329}
++    },
++    {
++        (const lxb_char_t *) "::ffff:192.0.2.1",
++        sizeof("::ffff:192.0.2.1") - 1,
++        {0, 0, 0, 0, 0, 0xffff, 0xc000, 0x0201}
++    },
++    {
++        (const lxb_char_t *) "[::1]ignored",
++        5,
++        {0, 0, 0, 0, 0, 0, 0, 1}
++    }
++};
++
++static const ipv6_failure_t failure_entries[] = {
++    {
++        (const lxb_char_t *) "",
++        LXB_URL_ERROR_TYPE_IPV6_TOO_FEW_PIECES
++    },
++    {
++        (const lxb_char_t *) "[::1",
++        LXB_URL_ERROR_TYPE_IPV6_UNCLOSED
++    },
++    {
++        (const lxb_char_t *) ":",
++        LXB_URL_ERROR_TYPE_IPV6_INVALID_COMPRESSION
++    },
++    {
++        (const lxb_char_t *) "1::2::3",
++        LXB_URL_ERROR_TYPE_IPV6_MULTIPLE_COMPRESSION
++    },
++    {
++        (const lxb_char_t *) "1:2:3:4:5:6:7:8:9",
++        LXB_URL_ERROR_TYPE_IPV6_TOO_MANY_PIECES
++    },
++    {
++        (const lxb_char_t *) "1:2:3:4:5:6:7",
++        LXB_URL_ERROR_TYPE_IPV6_TOO_FEW_PIECES
++    },
++    {
++        (const lxb_char_t *) "1:2:3:4:5:6:7:g",
++        LXB_URL_ERROR_TYPE_IPV6_INVALID_CODE_POINT
++    },
++    {
++        (const lxb_char_t *) "1:2:3:4:5:6:7:1.2.3.4",
++        LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_MANY_PIECES
++    },
++    {
++        (const lxb_char_t *) "::ffff:.1.2.3",
++        LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_INVALID_CODE_POINT
++    },
++    {
++        (const lxb_char_t *) "::ffff:192.0.2.256",
++        LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_OUT_OF_RANGE_PART
++    },
++    {
++        (const lxb_char_t *) "::ffff:192.0.2",
++        LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_FEW_PARTS
++    }
++};
++
++
++TEST_BEGIN(parse_success)
++{
++    size_t length;
++    lxb_status_t status;
++    uint16_t ipv6[8];
++
++    length = sizeof(success_entries) / sizeof(ipv6_success_t);
++
++    for (size_t i = 0; i < length; i++) {
++        memset(ipv6, 0xff, sizeof(ipv6));
++
++        status = lxb_url_parse_host_ipv6(NULL, success_entries[i].input,
++                                         success_entries[i].length, ipv6);
++        test_eq(status, LXB_STATUS_OK);
++
++        for (size_t j = 0; j < 8; j++) {
++            test_eq_u_short(ipv6[j], success_entries[i].ipv6[j]);
++        }
++    }
++}
++TEST_END
++
++TEST_BEGIN(parse_failure)
++{
++    size_t length;
++    lxb_status_t status;
++    lxb_url_parser_t parser;
++    lexbor_plog_entry_t *error;
++
++    status = lxb_url_parser_init(&parser, NULL);
++    test_eq(status, LXB_STATUS_OK);
++
++    length = sizeof(failure_entries) / sizeof(ipv6_failure_t);
++
++    for (size_t i = 0; i < length; i++) {
++        status = lxb_url_parse_host_ipv6(
++            &parser, failure_entries[i].input,
++            strlen((const char *) failure_entries[i].input),
++            (uint16_t[8]) {0});
++
++        test_eq(status, LXB_STATUS_ERROR_UNEXPECTED_DATA);
++        test_ne(parser.log, NULL);
++        test_eq_size(lexbor_plog_length(parser.log), 1UL);
++
++        error = lexbor_array_obj_get(&parser.log->list, 0);
++        test_ne(error, NULL);
++        test_eq(error->id, failure_entries[i].error);
++
++        lxb_url_parser_clean(&parser);
++    }
++
++    lxb_url_parser_memory_destroy(&parser);
++    lxb_url_parser_destroy(&parser, false);
++}
++TEST_END
++
++TEST_BEGIN(parse_failure_without_parser)
++{
++    lxb_status_t status;
++    uint16_t ipv6[8];
++
++    static const lexbor_str_t input = lexbor_str("::ffff:192.0.2.256");
++
++    status = lxb_url_parse_host_ipv6(NULL, input.data, input.length, ipv6);
++    test_eq(status, LXB_STATUS_ERROR_UNEXPECTED_DATA);
++}
++TEST_END
++
++int
++main(int argc, const char *argv[])
++{
++    TEST_INIT();
++
++    TEST_ADD(parse_success);
++    TEST_ADD(parse_failure);
++    TEST_ADD(parse_failure_without_parser);
++
++    TEST_RUN("lexbor/url/parse_host_ipv6");
++    TEST_RELEASE();
++}

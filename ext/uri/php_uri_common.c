@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Máté Kocsis <kocsismate@php.net>                            |
    +----------------------------------------------------------------------+
@@ -38,8 +36,33 @@ static zend_string *get_known_string_by_property_name(php_uri_property_name prop
 			return ZSTR_KNOWN(ZEND_STR_QUERY);
 		case PHP_URI_PROPERTY_NAME_FRAGMENT:
 			return ZSTR_KNOWN(ZEND_STR_FRAGMENT);
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
+}
+
+zend_result php_uri_pass_errors_by_ref_and_free(zval *errors_zv, zval *errors)
+{
+	ZEND_ASSERT(Z_TYPE_P(errors) == IS_UNDEF || Z_TYPE_P(errors) == IS_ARRAY);
+
+	/* There was no error during parsing */
+	if (Z_ISUNDEF_P(errors)) {
+		return SUCCESS;
+	}
+
+	/* The errors parameter is an array, but the pass-by ref argument stored by
+	 * errors_zv was not passed - the URI implementation either doesn't support
+	 * returning additional error information, or the caller is not interested in it */
+	if (errors_zv == NULL) {
+		zval_ptr_dtor(errors);
+		return SUCCESS;
+	}
+
+	ZEND_TRY_ASSIGN_REF_TMP(errors_zv, errors);
+	if (EG(exception)) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
 }
 
 void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode)
@@ -57,7 +80,7 @@ void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property
 	}
 }
 
-static void php_uri_property_write_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, zval *property_zv)
+static void php_uri_property_write_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, const zval *property_zv)
 {
 	php_uri_object *old_uri_object = Z_URI_OBJECT_P(ZEND_THIS);
 	ZEND_ASSERT(old_uri_object->uri != NULL);

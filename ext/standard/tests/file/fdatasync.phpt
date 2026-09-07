@@ -34,7 +34,12 @@ fclose($file_handle);
 
 echo "\n*** Testing fdatasync(): attempting to sync stdin ***\n";
 $file_handle = fopen("php://stdin", "w");
-var_dump(fdatasync($file_handle));
+// On Solaris, fdatasync() on stdin returns true
+if (PHP_OS_FAMILY === 'Solaris') {
+  var_dump(!fdatasync($file_handle));
+} else {
+  var_dump(fdatasync($file_handle));
+}
 fclose($file_handle);
 
 echo "\n*** Testing fdatasync(): for non-file stream ***\n";

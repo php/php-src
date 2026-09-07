@@ -14,42 +14,42 @@ XML);
 
 try {
     $doc->documentElement->firstElementChild->prepend($doc->documentElement->attributes[0]);
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $doc->documentElement->firstElementChild->append($doc->documentElement->attributes[0]);
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $doc->documentElement->firstElementChild->before($doc->documentElement->attributes[0]);
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $doc->documentElement->firstElementChild->after($doc->documentElement->attributes[0]);
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $doc->documentElement->firstElementChild->replaceWith($doc->documentElement->attributes[0]);
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $doc->saveXML();
 ?>
 --EXPECT--
-Hierarchy Request Error
-Hierarchy Request Error
-Hierarchy Request Error
-Hierarchy Request Error
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
+DOMException: Hierarchy Request Error
 <?xml version="1.0"?>
 <container x="foo">
     <test/>

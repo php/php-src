@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
    +----------------------------------------------------------------------+
@@ -102,6 +101,32 @@ static inline size_t zend_call_stack_default_size(void)
 #ifdef __sun
 	return 8 * 4096;
 #endif
+#ifdef _AIX
+	/*
+	 * default pthread stack limit is 96 KB on 32-bit, 192 KB on 64-bit
+	 * https://www.ibm.com/docs/en/aix/7.1.0?topic=programming-threads-library-options
+	 */
+#ifdef HAVE_PTHREAD_GETTHRDS_NP /* if we have pthread linked (not in libc) */
+	if (pthread_self() != 1) {
+#ifdef __64BIT__
+		return 192 * 1024;
+#else
+		return 96 * 1024;
+#endif
+	}
+#endif
+	/*
+	 * default AIX ulimit -s value is allegedly 32 MB, default values per:
+	 * https://www.ibm.com/docs/en/aix/7.1.0?topic=u-ulimit-command
+	 * N.B.: the the file uses 512b blocks, but the command uses kilobytes
+	 * https://www.ibm.com/support/pages/ibm-aix-security-ulimit-and-ulimit-d-output-differs-value-etcsecuritylimits
+	 *
+	 * note PASE uses an unlimited stack size by default, which is capped
+	 * at the PowerPC segment size (256 MB)
+	 */
+	return 32 * 1024 * 1024;
+#endif
+
 
 	return 2 * 1024 * 1024;
 }

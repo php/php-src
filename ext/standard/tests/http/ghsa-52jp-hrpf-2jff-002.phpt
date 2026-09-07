@@ -45,7 +45,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 Found the mime-type: text/html;
 
-Warning: file_get_contents(http://127.0.0.1:%d): Failed to open stream: HTTP Location header size is over the limit of 8182 bytes in %s
+Warning: file_get_contents(): Failed to open stream: HTTP Location header size is over the limit of 8182 bytes in %s
 string(0) ""
 array(2) {
   [0]=>

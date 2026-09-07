@@ -23,7 +23,6 @@
 #ifdef PHP_WIN32
 # include <string.h>
 #else
-# include <sys/param.h>
 # include <sys/types.h>
 # include <string.h>
 #endif
@@ -338,7 +337,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	char *s_bytes;
 	/* Default number of rounds.  */
 	size_t rounds = ROUNDS_DEFAULT;
-	bool rounds_custom = 0;
+	bool rounds_custom = false;
 
 	/* Find beginning of salt string.  The prefix should normally always
 	be present.  Just in case it is not.  */
@@ -358,7 +357,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 			}
 
 			rounds = srounds;
-			rounds_custom = 1;
+			rounds_custom = true;
 		}
 	}
 

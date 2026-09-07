@@ -18,7 +18,8 @@ try {
 var_dump($test);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: array_walk(): Passing an object for argument #1 $array to array_walk() is deprecated, call get_object_vars() first instead in %s on line %d
 Cannot assign array to reference held by property Test::$prop of type int
 object(Test)#1 (1) {
   ["prop"]=>

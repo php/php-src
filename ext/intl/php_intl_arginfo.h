@@ -1,5 +1,8 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d9e331c3a1ae46f8eae07ef0d39cb9990e74a0d1 */
+/* This is a generated file, edit php_intl.stub.php instead.
+ * Stub hash: f94e7c9cc372878f1f8bd0e948092ea72076e687 */
+
+#include "zend_attributes.h"
+#include "zend_constants.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, timezone, IntlTimeZone|DateTimeZone, MAY_BE_STRING|MAY_BE_NULL, "null")
@@ -501,6 +504,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_levenshtein, 0, 2, MAY_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_strrev, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -548,6 +555,17 @@ ZEND_END_ARG_INFO()
 #define arginfo_locale_get_display_language arginfo_locale_get_display_script
 
 #define arginfo_locale_get_display_variant arginfo_locale_get_display_script
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_get_display_keyword, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_get_display_keyword_value, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_compose, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, subtags, IS_ARRAY, 0)
@@ -922,6 +940,7 @@ ZEND_FUNCTION(grapheme_strstr);
 ZEND_FUNCTION(grapheme_stristr);
 ZEND_FUNCTION(grapheme_str_split);
 ZEND_FUNCTION(grapheme_levenshtein);
+ZEND_FUNCTION(grapheme_strrev);
 ZEND_FUNCTION(grapheme_extract);
 ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
@@ -936,6 +955,8 @@ ZEND_FUNCTION(locale_get_display_region);
 ZEND_FUNCTION(locale_get_display_name);
 ZEND_FUNCTION(locale_get_display_language);
 ZEND_FUNCTION(locale_get_display_variant);
+ZEND_FUNCTION(locale_get_display_keyword);
+ZEND_FUNCTION(locale_get_display_keyword_value);
 ZEND_FUNCTION(locale_compose);
 ZEND_FUNCTION(locale_parse);
 ZEND_FUNCTION(locale_get_all_variants);
@@ -1113,6 +1134,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(grapheme_stristr, arginfo_grapheme_stristr)
 	ZEND_FE(grapheme_str_split, arginfo_grapheme_str_split)
 	ZEND_FE(grapheme_levenshtein, arginfo_grapheme_levenshtein)
+	ZEND_FE(grapheme_strrev, arginfo_grapheme_strrev)
 	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
 	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
@@ -1127,6 +1149,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(locale_get_display_name, arginfo_locale_get_display_name)
 	ZEND_FE(locale_get_display_language, arginfo_locale_get_display_language)
 	ZEND_FE(locale_get_display_variant, arginfo_locale_get_display_variant)
+	ZEND_FE(locale_get_display_keyword, arginfo_locale_get_display_keyword)
+	ZEND_FE(locale_get_display_keyword_value, arginfo_locale_get_display_keyword_value)
 	ZEND_FE(locale_compose, arginfo_locale_compose)
 	ZEND_FE(locale_parse, arginfo_locale_parse)
 	ZEND_FE(locale_get_all_variants, arginfo_locale_get_all_variants)

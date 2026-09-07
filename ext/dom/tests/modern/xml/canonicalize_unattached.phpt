@@ -11,10 +11,10 @@ $child->remove();
 
 try {
     $child->C14N();
-} catch (Dom\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Canonicalization can only happen on nodes attached to a document.
+DOMException: Canonicalization can only happen on nodes attached to a document.

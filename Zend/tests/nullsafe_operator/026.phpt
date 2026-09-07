@@ -10,17 +10,17 @@ $null = null;
 
 try {
     Test::${$null?->foo}->bar;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     Test::{$null?->foo}()->bar;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Access to undeclared static property Test::$
-Method name must be a string
+Error: Access to undeclared static property Test::$
+Error: Method name must be a string

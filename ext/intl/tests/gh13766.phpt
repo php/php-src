@@ -17,19 +17,19 @@ $offset3 = "offset";
 try {
 	$oIntlDateFormatter->parseToCalendar('America/Los_Angeles', $offset3);
 } catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $offset3 = PHP_INT_MAX * 16;
 try {
 	$oIntlDateFormatter->parseToCalendar('America/Los_Angeles', $offset3);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 --EXPECTF--
 int(%d)
 string(13) "Europe/Berlin"
 int(%d)
 string(19) "America/Los_Angeles"
-IntlDateFormatter::parseToCalendar(): Argument #2 ($offset) must be of type int, string given
+TypeError: IntlDateFormatter::parseToCalendar(): Argument #2 ($offset) must be of type int, string given
 
 Warning: The float %r(1\.4757395258967641E\+20|34359738352)%r is not representable as an int, cast occurred in %s on line %d

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Jim Winstead <jimw@php.net>                                 |
@@ -44,7 +42,6 @@
 #include <pwd.h>
 #endif
 
-#include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -73,7 +70,7 @@ Allows any change to open_basedir setting in during Startup and Shutdown events,
 or a tightening during activation/runtime/deactivation */
 PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 {
-	char **p = (char **) ZEND_INI_GET_ADDR();
+	char **p = ZEND_INI_GET_ADDR();
 	char *pathbuf, *ptr, *end;
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
@@ -362,7 +359,6 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	char *path_info;
 	zend_string *filename = NULL;
 	zend_string *resolved_path = NULL;
-	size_t length;
 	bool orig_display_errors;
 
 	memset(file_handle, 0, sizeof(zend_file_handle));
@@ -375,7 +371,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		if (s) {			/* if there is no path name after the file, do not bother */
 			char user[32];			/* to try open the directory */
 
-			length = s - (path_info + 2);
+			size_t length = s - (path_info + 2);
 			if (length > sizeof(user) - 1) {
 				length = sizeof(user) - 1;
 			}
@@ -424,19 +420,37 @@ try_again:
 		}
 	} else
 #endif
-	if (PG(doc_root) && path_info && (length = strlen(PG(doc_root))) &&
-		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
-		size_t path_len = strlen(path_info);
-		filename = zend_string_alloc(length + path_len + 2, 0);
-		memcpy(ZSTR_VAL(filename), PG(doc_root), length);
-		if (!IS_SLASH(ZSTR_VAL(filename)[length - 1])) {	/* length is never 0 */
-			ZSTR_VAL(filename)[length++] = PHP_DIR_SEPARATOR;
+	if (PG(doc_root) && path_info && IS_ABSOLUTE_PATH(ZSTR_VAL(PG(doc_root)), ZSTR_LEN(PG(doc_root)))) {
+		const size_t path_len = strlen(path_info);
+
+		/* We need to concatenate two paths together, there are 3 situations:
+		 * - No trailing slash AND no leading slash
+		 * - Trailing slash AND leading slash
+		 * - Either a trailing slash OR a leading slash
+		 * In the first case we need to add a slash, in the second one we need to skip the leading slash,
+		 * and in the third we can just concatenate them together */
+		const unsigned int nb_slashes = IS_SLASH(ZSTR_VAL(PG(doc_root))[ZSTR_LEN(PG(doc_root)) - 1]) + IS_SLASH(path_info[0]);
+		switch (nb_slashes) {
+			case 0:
+				filename = zend_string_concat3(
+					ZSTR_VAL(PG(doc_root)), ZSTR_LEN(PG(doc_root)),
+					ZEND_STRL("/"),
+					path_info, path_len
+				);
+				break;
+			case 1:
+				filename = zend_string_concat2(
+					ZSTR_VAL(PG(doc_root)), ZSTR_LEN(PG(doc_root)),
+					path_info, path_len
+				);
+				break;
+			case 2:
+				filename = zend_string_concat2(
+					ZSTR_VAL(PG(doc_root)), ZSTR_LEN(PG(doc_root)),
+					path_info + 1, path_len -1
+				);
+				break;
 		}
-		if (IS_SLASH(path_info[0])) {
-			length--;
-		}
-		strncpy(ZSTR_VAL(filename) + length, path_info, path_len + 1);
-		ZSTR_LEN(filename) = length + path_len;
 	} else if (SG(request_info).path_translated) {
 		filename = zend_string_init(SG(request_info).path_translated,
 			strlen(SG(request_info).path_translated), 0);
@@ -506,7 +520,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 	php_stream_wrapper *wrapper;
 	zend_string *exec_filename;
 
-	if (!filename || CHECK_NULL_PATH(filename, filename_length)) {
+	if (!filename || zend_char_has_nul_byte(filename, filename_length)) {
 		return NULL;
 	}
 

@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - port - changing an existing one
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withPort() - success - changing an existing one
 --FILE--
 <?php
 

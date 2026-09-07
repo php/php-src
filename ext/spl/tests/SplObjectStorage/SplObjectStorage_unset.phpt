@@ -16,14 +16,14 @@ $s[$o] = new HasDestructor();
 try {
     unset($s[$o]);
 } catch (Exception $e) {
-    echo "Caught: {$e->getMessage()}\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($s);
 $s[$o] = new HasDestructor();
 try {
     $s->offsetUnset($o);
 } catch (Exception $e) {
-    echo "Caught: {$e->getMessage()}\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($s);
@@ -35,7 +35,7 @@ object(SplObjectStorage)#2 (1) {
   array(0) {
   }
 }
-Caught: thrown from destructor
+RuntimeException: thrown from destructor
 object(SplObjectStorage)#2 (1) {
   ["storage":"SplObjectStorage":private]=>
   array(0) {
@@ -47,7 +47,7 @@ object(SplObjectStorage)#2 (1) {
   array(0) {
   }
 }
-Caught: thrown from destructor
+RuntimeException: thrown from destructor
 object(SplObjectStorage)#2 (1) {
   ["storage":"SplObjectStorage":private]=>
   array(0) {

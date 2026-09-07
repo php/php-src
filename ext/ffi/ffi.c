@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Dmitry Stogov <dmitry@zend.com>                              |
    +----------------------------------------------------------------------+
@@ -36,11 +34,9 @@
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
-#include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()  php_win_err()
 #else
-#include <sys/param.h>
 #define GET_DL_ERROR()  DL_ERROR()
 #endif
 #endif
@@ -950,6 +946,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	fci.object = NULL;
 	fci.param_count = callback_data->arg_count;
 	fci.named_params = NULL;
+	fci.consumed_args = 0;
 
 	if (callback_data->type->func.args) {
 		int n = 0;
@@ -957,7 +954,8 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 
 		ZEND_HASH_PACKED_FOREACH_PTR(callback_data->type->func.args, arg_type) {
 			arg_type = ZEND_FFI_TYPE(arg_type);
-			zend_ffi_cdata_to_zval(NULL, args[n], arg_type, BP_VAR_R, &fci.params[n], (zend_ffi_flags)(arg_type->attr & ZEND_FFI_ATTR_CONST), 0, 0);
+			zend_ffi_cdata_to_zval(NULL, args[n], arg_type, BP_VAR_R, &fci.params[n], (zend_ffi_flags)(arg_type->attr & ZEND_FFI_ATTR_CONST),
+					       false, false);
 			n++;
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1133,7 +1131,7 @@ static zval *zend_ffi_cdata_get(zend_object *obj, zend_string *member, int read_
 		return &EG(uninitialized_zval);
 	}
 
-	zend_ffi_cdata_to_zval(cdata, cdata->ptr, type, BP_VAR_R, rv, 0, 0, 0);
+	zend_ffi_cdata_to_zval(cdata, cdata->ptr, type, BP_VAR_R, rv, 0, false, false);
 	return rv;
 }
 /* }}} */
@@ -1300,7 +1298,8 @@ static zval *zend_ffi_cdata_read_field(zend_object *obj, zend_string *field_name
 			}
 		}
 		ptr = (void*)(((char*)ptr) + field->offset);
-		zend_ffi_cdata_to_zval(NULL, ptr, field_type, read_type, rv, (cdata->flags & ZEND_FFI_FLAG_CONST) | (zend_ffi_flags)field->is_const, 0, 0);
+		zend_ffi_cdata_to_zval(NULL, ptr, field_type, read_type, rv, (cdata->flags & ZEND_FFI_FLAG_CONST) | (zend_ffi_flags)field->is_const,
+				       false, false);
 	} else {
 		zend_ffi_bit_field_to_zval(ptr, field, rv);
 	}
@@ -1434,7 +1433,7 @@ static zval *zend_ffi_cdata_read_dim(zend_object *obj, zval *offset, int read_ty
 		return &EG(uninitialized_zval);
 	}
 
-	zend_ffi_cdata_to_zval(NULL, ptr, dim_type, read_type, rv, is_const, 0, 0);
+	zend_ffi_cdata_to_zval(NULL, ptr, dim_type, read_type, rv, is_const, false, false);
 	return rv;
 }
 /* }}} */
@@ -1523,7 +1522,7 @@ static bool zend_ffi_ctype_name_append(zend_ffi_ctype_name_buf *buf, const char 
 static bool zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_type *type) /* {{{ */
 {
 	const char *name = NULL;
-	bool is_ptr = 0;
+	bool is_ptr = false;
 
 	while (1) {
 		switch (type->kind) {
@@ -1583,12 +1582,12 @@ static bool zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_typ
 				if (!zend_ffi_ctype_name_prepend(buf, "*", 1)) {
 					return 0;
 				}
-				is_ptr = 1;
+				is_ptr = true;
 				type = ZEND_FFI_TYPE(type->pointer.type);
 				break;
 			case ZEND_FFI_TYPE_FUNC:
 				if (is_ptr) {
-					is_ptr = 0;
+					is_ptr = false;
 					if (!zend_ffi_ctype_name_prepend(buf, "(", 1)
 					 || !zend_ffi_ctype_name_append(buf, ")", 1)) {
 						return 0;
@@ -1602,7 +1601,7 @@ static bool zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_typ
 				break;
 			case ZEND_FFI_TYPE_ARRAY:
 				if (is_ptr) {
-					is_ptr = 0;
+					is_ptr = false;
 					if (!zend_ffi_ctype_name_prepend(buf, "(", 1)
 					 || !zend_ffi_ctype_name_append(buf, ")", 1)) {
 						return 0;
@@ -1980,7 +1979,8 @@ static zval *zend_ffi_cdata_it_get_current_data(zend_object_iterator *it) /* {{{
 	ptr = (void*)((char*)cdata->ptr + dim_type->size * iter->it.index);
 
 	zval_ptr_dtor(&iter->value);
-	zend_ffi_cdata_to_zval(NULL, ptr, dim_type, iter->by_ref ? BP_VAR_RW : BP_VAR_R, &iter->value, (cdata->flags & ZEND_FFI_FLAG_CONST) | (zend_ffi_flags)(type->attr & ZEND_FFI_ATTR_CONST), 0, 0);
+	zend_ffi_cdata_to_zval(NULL, ptr, dim_type, iter->by_ref ? BP_VAR_RW : BP_VAR_R, &iter->value, (cdata->flags & ZEND_FFI_FLAG_CONST) | (zend_ffi_flags)(type->attr & ZEND_FFI_ATTR_CONST),
+			       false, false);
 	return &iter->value;
 }
 /* }}} */
@@ -2078,12 +2078,11 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 		case ZEND_FFI_TYPE_SINT32:
 		case ZEND_FFI_TYPE_UINT64:
 		case ZEND_FFI_TYPE_SINT64:
-			zend_ffi_cdata_to_zval(cdata, ptr, type, BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
+			zend_ffi_cdata_to_zval(cdata, ptr, type, BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, false, false);
 			ht = zend_new_array(1);
 			zend_hash_str_add(ht, "cdata", sizeof("cdata")-1, &tmp);
 			*is_temp = 1;
 			return ht;
-			break;
 		case ZEND_FFI_TYPE_POINTER:
 			if (*(void**)ptr == NULL) {
 				ZVAL_NULL(&tmp);
@@ -2098,7 +2097,8 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 				*is_temp = 1;
 				return ht;
 			} else {
-				zend_ffi_cdata_to_zval(NULL, *(void**)ptr, ZEND_FFI_TYPE(type->pointer.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
+				zend_ffi_cdata_to_zval(NULL, *(void**)ptr, ZEND_FFI_TYPE(type->pointer.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST,
+						       false, false);
 				ht = zend_new_array(1);
 				zend_hash_index_add_new(ht, 0, &tmp);
 				*is_temp = 1;
@@ -2111,7 +2111,8 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 				if (key) {
 					if (!f->bits) {
 						void *f_ptr = (void*)(((char*)ptr) + f->offset);
-						zend_ffi_cdata_to_zval(NULL, f_ptr, ZEND_FFI_TYPE(f->type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, type->attr & ZEND_FFI_ATTR_UNION);
+						zend_ffi_cdata_to_zval(NULL, f_ptr, ZEND_FFI_TYPE(f->type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST,
+								       false, type->attr & ZEND_FFI_ATTR_UNION);
 						zend_hash_add(ht, key, &tmp);
 					} else {
 						zend_ffi_bit_field_to_zval(ptr, f, &tmp);
@@ -2124,7 +2125,8 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 		case ZEND_FFI_TYPE_ARRAY:
 			ht = zend_new_array(type->array.length);
 			for (n = 0; n < type->array.length; n++) {
-				zend_ffi_cdata_to_zval(NULL, ptr, ZEND_FFI_TYPE(type->array.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
+				zend_ffi_cdata_to_zval(NULL, ptr, ZEND_FFI_TYPE(type->array.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST,
+						       false, false);
 				zend_hash_index_add(ht, n, &tmp);
 				ptr = (void*)(((char*)ptr) + ZEND_FFI_TYPE(type->array.type)->size);
 			}
@@ -2135,7 +2137,6 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 			// TODO: function name ???
 			*is_temp = 1;
 			return ht;
-			break;
 		default:
 			ZEND_UNREACHABLE();
 			break;
@@ -2180,6 +2181,7 @@ static zend_result zend_ffi_cdata_get_closure(zend_object *obj, zend_class_entry
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
+	func->common.fn_flags2 = 0;
 	func->common.function_name = ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE);
 	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
 	func->common.num_args = 0;
@@ -2303,7 +2305,7 @@ static zend_object *zend_ffi_new(zend_class_entry *class_type) /* {{{ */
 	ffi->lib = NULL;
 	ffi->symbols = NULL;
 	ffi->tags = NULL;
-	ffi->persistent = 0;
+	ffi->persistent = false;
 
 	return &ffi->std;
 }
@@ -2505,7 +2507,8 @@ static zval *zend_ffi_read_var(zend_object *obj, zend_string *var_name, int read
 	}
 
 	if (sym->kind == ZEND_FFI_SYM_VAR) {
-		zend_ffi_cdata_to_zval(NULL, sym->addr, ZEND_FFI_TYPE(sym->type), read_type, rv, (zend_ffi_flags)sym->is_const, 0, 0);
+		zend_ffi_cdata_to_zval(NULL, sym->addr, ZEND_FFI_TYPE(sym->type), read_type, rv, (zend_ffi_flags)sym->is_const,
+				       false, false);
 	} else if (sym->kind == ZEND_FFI_SYM_FUNC) {
 		zend_ffi_cdata *cdata;
 		zend_ffi_type *new_type = emalloc(sizeof(zend_ffi_type));
@@ -2958,6 +2961,7 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
+	func->common.fn_flags2 = 0;
 	func->common.function_name = zend_string_copy(name);
 	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
 	func->common.num_args = 0;
@@ -3583,7 +3587,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 		}
 		ffi->symbols = scope->symbols;
 		ffi->tags = scope->tags;
-		ffi->persistent = 1;
+		ffi->persistent = true;
 	} else {
 		ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
 		ffi->lib = handle;
@@ -3766,14 +3770,14 @@ static zend_result zend_ffi_validate_var_type(const zend_ffi_type *type, bool al
 		zend_ffi_throw_parser_error("function type is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
-	return zend_ffi_validate_type(type, 0, allow_incomplete_array);
+	return zend_ffi_validate_type(type, false, allow_incomplete_array);
 }
 /* }}} */
 
 void zend_ffi_validate_type_name(zend_ffi_dcl *dcl) /* {{{ */
 {
 	zend_ffi_finalize_type(dcl);
-	if (zend_ffi_validate_var_type(ZEND_FFI_TYPE(dcl->type), 0) == FAILURE) {
+	if (zend_ffi_validate_var_type(ZEND_FFI_TYPE(dcl->type), false) == FAILURE) {
 		zend_ffi_cleanup_dcl(dcl);
 		LONGJMP(FFI_G(bailout), FAILURE);
 	}
@@ -4710,9 +4714,8 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 ZEND_METHOD(FFI_CType, getName) /* {{{ */
 {
 	zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_ffi_ctype_name_buf buf;
 
@@ -4732,9 +4735,7 @@ ZEND_METHOD(FFI_CType, getKind) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	RETURN_LONG(type->kind);
@@ -4746,9 +4747,7 @@ ZEND_METHOD(FFI_CType, getSize) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	RETURN_LONG(type->size);
@@ -4760,9 +4759,7 @@ ZEND_METHOD(FFI_CType, getAlignment) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	RETURN_LONG(type->align);
@@ -4774,9 +4771,7 @@ ZEND_METHOD(FFI_CType, getAttributes) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	RETURN_LONG(type->attr);
@@ -4788,9 +4783,7 @@ ZEND_METHOD(FFI_CType, getEnumKind) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_ENUM) {
@@ -4807,9 +4800,7 @@ ZEND_METHOD(FFI_CType, getArrayElementType) /* {{{ */
 	zend_ffi_type *type;
 	zend_ffi_ctype *ret;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_ARRAY) {
@@ -4828,9 +4819,7 @@ ZEND_METHOD(FFI_CType, getArrayLength) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_ARRAY) {
@@ -4847,9 +4836,7 @@ ZEND_METHOD(FFI_CType, getPointerType) /* {{{ */
 	zend_ffi_ctype *ret;
 	zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_POINTER) {
@@ -4871,9 +4858,7 @@ ZEND_METHOD(FFI_CType, getStructFieldNames) /* {{{ */
 	zend_string* name;
 	zval zv;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_STRUCT) {
@@ -4951,9 +4936,7 @@ ZEND_METHOD(FFI_CType, getFuncABI) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_FUNC) {
@@ -4970,9 +4953,7 @@ ZEND_METHOD(FFI_CType, getFuncReturnType) /* {{{ */
 	zend_ffi_ctype *ret;
 	zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_FUNC) {
@@ -4991,9 +4972,7 @@ ZEND_METHOD(FFI_CType, getFuncParameterCount) /* {{{ */
 	const zend_ffi_ctype *ctype = (zend_ffi_ctype*)(Z_OBJ_P(ZEND_THIS));
 	const zend_ffi_type *type;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	type = ZEND_FFI_TYPE(ctype->type);
 	if (type->kind != ZEND_FFI_TYPE_FUNC) {
@@ -5371,7 +5350,7 @@ static zend_result zend_ffi_preload_glob(const char *filename) /* {{{ */
 		/* pass */
 	} else {
 		for(i=0 ; i<globbuf.gl_pathc; i++) {
-			zend_ffi *ffi = zend_ffi_load(globbuf.gl_pathv[i], 1);
+			zend_ffi *ffi = zend_ffi_load(globbuf.gl_pathv[i], true);
 			if (!ffi) {
 				php_globfree(&globbuf);
 				return FAILURE;
@@ -5389,7 +5368,7 @@ static zend_result zend_ffi_preload(char *preload) /* {{{ */
 {
 	zend_ffi *ffi;
 	char *s = NULL, *e, *filename;
-	bool is_glob = 0;
+	bool is_glob = false;
 
 	e = preload;
 	while (*e) {
@@ -5399,7 +5378,7 @@ static zend_result zend_ffi_preload(char *preload) /* {{{ */
 					filename = estrndup(s, e-s);
 					s = NULL;
 					if (!is_glob) {
-						ffi = zend_ffi_load(filename, 1);
+						ffi = zend_ffi_load(filename, true);
 						efree(filename);
 						if (!ffi) {
 							return FAILURE;
@@ -5412,14 +5391,14 @@ static zend_result zend_ffi_preload(char *preload) /* {{{ */
 						if (ret == FAILURE) {
 							return FAILURE;
 						}
-						is_glob = 0;
+						is_glob = false;
 					}
 				}
 				break;
 			case '*':
 			case '?':
 			case '[':
-				is_glob = 1;
+				is_glob = true;
 				break;
 			default:
 				if (!s) {
@@ -5432,7 +5411,7 @@ static zend_result zend_ffi_preload(char *preload) /* {{{ */
 	if (s) {
 		filename = estrndup(s, e-s);
 		if (!is_glob) {
-			ffi = zend_ffi_load(filename, 1);
+			ffi = zend_ffi_load(filename, true);
 			efree(filename);
 			if (!ffi) {
 				return FAILURE;
@@ -6000,7 +5979,7 @@ void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name
 	const zend_ffi_type *sym_type;
 	int64_t value;
 	zend_ffi_type *enum_type = ZEND_FFI_TYPE(enum_dcl->type);
-	bool overflow = 0;
+	bool overflow = false;
 	bool is_signed =
 		(enum_type->enumeration.kind == ZEND_FFI_TYPE_SINT8 ||
 		 enum_type->enumeration.kind == ZEND_FFI_TYPE_SINT16 ||
@@ -6011,36 +5990,36 @@ void zend_ffi_add_enum_val(zend_ffi_dcl *enum_dcl, const char *name, size_t name
 	if (val->kind == ZEND_FFI_VAL_EMPTY) {
 		if (is_signed) {
 			if (*last == 0x7FFFFFFFFFFFFFFFLL) {
-				overflow = 1;
+				overflow = true;
 			}
 		} else {
 			if ((*min != 0 || *max != 0)
 			 && (uint64_t)*last == 0xFFFFFFFFFFFFFFFFULL) {
-				overflow = 1;
+				overflow = true;
 			}
 		}
 		value = *last + 1;
 	} else if (val->kind == ZEND_FFI_VAL_CHAR) {
 		if (!is_signed && val->ch < 0) {
 			if ((uint64_t)*max > 0x7FFFFFFFFFFFFFFFULL) {
-				overflow = 1;
+				overflow = true;
 			} else {
-				is_signed = 1;
+				is_signed = true;
 			}
 		}
 		value = val->ch;
 	} else if (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_INT64) {
 		if (!is_signed && val->i64 < 0) {
 			if ((uint64_t)*max > 0x7FFFFFFFFFFFFFFFULL) {
-				overflow = 1;
+				overflow = true;
 			} else {
-				is_signed = 1;
+				is_signed = true;
 			}
 		}
 		value = val->i64;
 	} else if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 		if (is_signed && val->u64 > 0x7FFFFFFFFFFFFFFFULL) {
-			overflow = 1;
+			overflow = true;
 		}
 		value = val->u64;
 	} else {
@@ -6144,7 +6123,7 @@ static zend_result zend_ffi_validate_field_type(const zend_ffi_type *type, zend_
 	if (type == struct_type) {
 		zend_ffi_throw_parser_error("Struct/union can't contain an instance of itself at line %d", FFI_G(line));
 		return FAILURE;
-	} else if (zend_ffi_validate_var_type(type, 1) == FAILURE) {
+	} else if (zend_ffi_validate_var_type(type, true) == FAILURE) {
 		return FAILURE;
 	} else if (struct_type->attr & ZEND_FFI_ATTR_UNION) {
 		if (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY) {
@@ -6187,7 +6166,7 @@ void zend_ffi_add_field(zend_ffi_dcl *struct_dcl, const char *name, size_t name_
 	}
 	field->type = field_dcl->type;
 	field->is_const = (bool)(field_dcl->attr & ZEND_FFI_ATTR_CONST);
-	field->is_nested = 0;
+	field->is_nested = false;
 	field->first_bit = 0;
 	field->bits = 0;
 	field_dcl->type = field_type; /* reset "owned" flag */
@@ -6240,7 +6219,7 @@ void zend_ffi_add_anonymous_field(zend_ffi_dcl *struct_dcl, zend_ffi_dcl *field_
 		}
 		new_field->type = field->type;
 		new_field->is_const = field->is_const;
-		new_field->is_nested = 1;
+		new_field->is_nested = true;
 		new_field->first_bit = field->first_bit;
 		new_field->bits = field->bits;
 		field->type = ZEND_FFI_TYPE(field->type); /* reset "owned" flag */
@@ -6355,7 +6334,7 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 	}
 	field->type = field_dcl->type;
 	field->is_const = (bool)(field_dcl->attr & ZEND_FFI_ATTR_CONST);
-	field->is_nested = 0;
+	field->is_nested = false;
 	field_dcl->type = field_type; /* reset "owned" flag */
 
 	if (name) {
@@ -6414,7 +6393,7 @@ static zend_result zend_ffi_validate_array_element_type(const zend_ffi_type *typ
 		zend_ffi_throw_parser_error("Only the leftmost array can be undimensioned at line %d", FFI_G(line));
 		return FAILURE;
 	}
-	return zend_ffi_validate_type(type, 0, 1);
+	return zend_ffi_validate_type(type, false, true);
 }
 /* }}} */
 
@@ -6474,7 +6453,7 @@ static zend_result zend_ffi_validate_func_ret_type(const zend_ffi_type *type) /*
 		zend_ffi_throw_parser_error("Function returning array is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
-	return zend_ffi_validate_incomplete_type(type, 1, 0);
+	return zend_ffi_validate_incomplete_type(type, true, false);
 }
 /* }}} */
 
@@ -6648,7 +6627,7 @@ void zend_ffi_add_arg(HashTable **args, const char *name, size_t name_len, zend_
 		new_type->pointer.type = arg_dcl->type;
 		arg_dcl->type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
 	}
-	if (zend_ffi_validate_incomplete_type(type, 1, 1) == FAILURE) {
+	if (zend_ffi_validate_incomplete_type(type, true, true) == FAILURE) {
 		zend_ffi_cleanup_dcl(arg_dcl);
 		zend_hash_destroy(*args);
 		pefree(*args, FFI_G(persistent));
@@ -6727,7 +6706,7 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 			zend_ffi_type *type;
 
 			type = ZEND_FFI_TYPE(dcl->type);
-			if (zend_ffi_validate_type(type, (dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_EXTERN, 1) == FAILURE) {
+			if (zend_ffi_validate_type(type, (dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_EXTERN, true) == FAILURE) {
 				zend_ffi_cleanup_dcl(dcl);
 				LONGJMP(FFI_G(bailout), FAILURE);
 			}
@@ -7102,7 +7081,6 @@ static zend_result zend_ffi_nested_type(zend_ffi_type *type, zend_ffi_type *nest
 			nested_type->size = nested_type->array.length * ZEND_FFI_TYPE(nested_type->array.type)->size;
 			nested_type->align = ZEND_FFI_TYPE(nested_type->array.type)->align;
 			return SUCCESS;
-			break;
 		case ZEND_FFI_TYPE_FUNC:
 			/* "char" is used as a terminator of nested declaration */
 			if (nested_type->func.ret_type == &zend_ffi_type_char) {

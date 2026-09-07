@@ -8,8 +8,8 @@ intl
 try {
     new NumberFormatter('xx', NumberFormatter::DECIMAL);
 } catch (ValueError $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-NumberFormatter::__construct(): Argument #1 ($locale) "%s" is invalid
+ValueError: NumberFormatter::__construct(): Argument #1 ($locale) "%s" is invalid

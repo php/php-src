@@ -8,9 +8,9 @@ session
 try {
     (new SessionHandler)->create_sid();
 } catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Session is not active
+Error: Session is not active

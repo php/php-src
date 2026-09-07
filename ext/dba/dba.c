@@ -1,14 +1,12 @@
 /*
-+----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sascha Schumann <sascha@schumann.cx>                        |
    |          Marcus Boerger <helly@php.net>                              |
@@ -337,10 +335,7 @@ static zend_result dba_connection_cast_object(zend_object *obj, zval *result, in
 	return zend_std_cast_object_tostring(obj, result, type);
 }
 
-static inline dba_connection *dba_connection_from_obj(zend_object *obj)
-{
-	return (dba_connection *)((char *)(obj) - XtOffsetOf(dba_connection, std));
-}
+#define dba_connection_from_obj(obj) ZEND_CONTAINER_OF(obj, dba_connection, std)
 
 #define Z_DBA_CONNECTION_P(zv) dba_connection_from_obj(Z_OBJ_P(zv))
 #define Z_DBA_INFO_P(zv) Z_DBA_CONNECTION_P(zv)->info
@@ -411,7 +406,7 @@ PHP_MINIT_FUNCTION(dba)
 	dba_connection_ce->default_object_handlers = &dba_connection_object_handlers;
 
 	memcpy(&dba_connection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	dba_connection_object_handlers.offset = XtOffsetOf(dba_connection, std);
+	dba_connection_object_handlers.offset = offsetof(dba_connection, std);
 	dba_connection_object_handlers.free_obj = dba_connection_free_obj;
 	dba_connection_object_handlers.get_constructor = dba_connection_get_constructor;
 	dba_connection_object_handlers.clone_obj = NULL;
@@ -539,8 +534,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
 	char *lock_name;
 #ifdef PHP_WIN32
-	bool restarted = 0;
-	bool need_creation = 0;
+	bool restarted = false;
+	bool need_creation = false;
 #endif
 
 	zend_string *path;
@@ -923,7 +918,7 @@ restart:
 
 				lock_file_mode = "r+b";
 
-				restarted = 1;
+				restarted = true;
 				goto restart;
 #endif
 			}
@@ -969,14 +964,14 @@ fail:
 /* {{{ Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
-	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
-	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
 
@@ -1277,7 +1272,7 @@ PHP_FUNCTION(dba_sync)
 /* {{{ List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
-	bool full_info = 0;
+	bool full_info = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
 		RETURN_THROWS();
@@ -1287,10 +1282,8 @@ PHP_FUNCTION(dba_handlers)
 
 	for (const dba_handler *hptr = handler; hptr->name; hptr++) {
 		if (full_info) {
-			// TODO: avoid reallocation ???
-			char *str = hptr->info(hptr, NULL);
+			const char *str = hptr->info(hptr, NULL);
 			add_assoc_string(return_value, hptr->name, str);
-			efree(str);
 		} else {
 			add_next_index_string(return_value, hptr->name);
 		}
@@ -1301,9 +1294,7 @@ PHP_FUNCTION(dba_handlers)
 /* {{{ List opened databases */
 PHP_FUNCTION(dba_list)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 

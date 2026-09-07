@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -98,7 +96,8 @@ static void dom_xpath_proxy_factory(xmlNodePtr node, zval *child, dom_object *in
 
 	ZEND_ASSERT(node->type != XML_NAMESPACE_DECL);
 
-	php_dom_create_object(node, child, intern);
+	dom_xpath_object *xobj = php_xpath_obj_from_obj(&intern->std);
+	php_dom_create_object(node, child, dom_xpath_intern_for_doc(xobj, node->doc));
 }
 
 static dom_xpath_object *dom_xpath_ext_fetch_intern(xmlXPathParserContextPtr ctxt)
@@ -228,7 +227,7 @@ zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 
 /* {{{ registerNodeNamespaces bool*/
 static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
-	return (dom_xpath_object*)((char*)(obj) - XtOffsetOf(dom_xpath_object, dom));
+	return ZEND_CONTAINER_OF(obj, dom_xpath_object, dom);
 }
 
 zend_result dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
@@ -264,10 +263,7 @@ PHP_METHOD(DOMXPath, registerNamespace)
 		RETURN_THROWS();
 	}
 
-	if (xmlXPathRegisterNs(ctxp, prefix, ns_uri) != 0) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	RETURN_BOOL(xmlXPathRegisterNs(ctxp, prefix, ns_uri) == 0);
 }
 /* }}} */
 

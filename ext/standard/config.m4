@@ -328,7 +328,7 @@ dnl
 
 PHP_CHECK_FUNC(res_search, resolv, socket)
 
-AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np elf_aux_info])
+AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir posix_spawn_file_actions_addchdir_np elf_aux_info])
 
 dnl
 dnl Obsolete check for strptime() declaration. The strptime, where available,
@@ -418,6 +418,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     image.c
     incomplete_class.c
     info.c
+    io_poll.c
     iptc.c
     levenshtein.c
     libavifinfo/avifinfo.c
@@ -452,8 +453,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     versioning.c
     $php_ext_standard_sources
   ]),
-  [no],,
-  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  [no])
 
 PHP_ADD_BUILD_DIR([$ext_builddir/libavifinfo])
 

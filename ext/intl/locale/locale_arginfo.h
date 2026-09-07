@@ -1,5 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ff1f75bd34a52f57210734e2f5e29efb87566137 */
+/* This is a generated file, edit locale.stub.php instead.
+ * Stub hash: 43dbc3aa294044e9cef923a5f39249dae86b67f0 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -32,6 +32,17 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Locale_getDisplayLanguage arginfo_class_Locale_getDisplayScript
 
 #define arginfo_class_Locale_getDisplayVariant arginfo_class_Locale_getDisplayScript
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Locale_getDisplayKeyword, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Locale_getDisplayKeywordValue, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, keyword, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, displayLocale, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_composeLocale, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, subtags, IS_ARRAY, 0)
@@ -83,6 +94,8 @@ ZEND_FUNCTION(locale_get_display_region);
 ZEND_FUNCTION(locale_get_display_name);
 ZEND_FUNCTION(locale_get_display_language);
 ZEND_FUNCTION(locale_get_display_variant);
+ZEND_FUNCTION(locale_get_display_keyword);
+ZEND_FUNCTION(locale_get_display_keyword_value);
 ZEND_FUNCTION(locale_compose);
 ZEND_FUNCTION(locale_parse);
 ZEND_FUNCTION(locale_get_all_variants);
@@ -106,6 +119,8 @@ static const zend_function_entry class_Locale_methods[] = {
 	ZEND_RAW_FENTRY("getDisplayName", zif_locale_get_display_name, arginfo_class_Locale_getDisplayName, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getDisplayLanguage", zif_locale_get_display_language, arginfo_class_Locale_getDisplayLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getDisplayVariant", zif_locale_get_display_variant, arginfo_class_Locale_getDisplayVariant, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayKeyword", zif_locale_get_display_keyword, arginfo_class_Locale_getDisplayKeyword, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayKeywordValue", zif_locale_get_display_keyword_value, arginfo_class_Locale_getDisplayKeywordValue, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("composeLocale", zif_locale_compose, arginfo_class_Locale_composeLocale, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("parseLocale", zif_locale_parse, arginfo_class_Locale_parseLocale, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getAllVariants", zif_locale_get_all_variants, arginfo_class_Locale_getAllVariants, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
@@ -128,70 +143,70 @@ static zend_class_entry *register_class_Locale(void)
 
 	zval const_ACTUAL_LOCALE_value;
 	ZVAL_LONG(&const_ACTUAL_LOCALE_value, ULOC_ACTUAL_LOCALE);
-	zend_string *const_ACTUAL_LOCALE_name = zend_string_init_interned("ACTUAL_LOCALE", sizeof("ACTUAL_LOCALE") - 1, 1);
+	zend_string *const_ACTUAL_LOCALE_name = zend_string_init_interned("ACTUAL_LOCALE", sizeof("ACTUAL_LOCALE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_ACTUAL_LOCALE_name, &const_ACTUAL_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ACTUAL_LOCALE_name);
+	zend_string_release_ex(const_ACTUAL_LOCALE_name, true);
 
 	zval const_VALID_LOCALE_value;
 	ZVAL_LONG(&const_VALID_LOCALE_value, ULOC_VALID_LOCALE);
-	zend_string *const_VALID_LOCALE_name = zend_string_init_interned("VALID_LOCALE", sizeof("VALID_LOCALE") - 1, 1);
+	zend_string *const_VALID_LOCALE_name = zend_string_init_interned("VALID_LOCALE", sizeof("VALID_LOCALE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_VALID_LOCALE_name, &const_VALID_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_VALID_LOCALE_name);
+	zend_string_release_ex(const_VALID_LOCALE_name, true);
 
 	zval const_DEFAULT_LOCALE_value;
 	ZVAL_NULL(&const_DEFAULT_LOCALE_value);
-	zend_string *const_DEFAULT_LOCALE_name = zend_string_init_interned("DEFAULT_LOCALE", sizeof("DEFAULT_LOCALE") - 1, 1);
+	zend_string *const_DEFAULT_LOCALE_name = zend_string_init_interned("DEFAULT_LOCALE", sizeof("DEFAULT_LOCALE") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_DEFAULT_LOCALE_name, &const_DEFAULT_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_NULL));
-	zend_string_release(const_DEFAULT_LOCALE_name);
+	zend_string_release_ex(const_DEFAULT_LOCALE_name, true);
 
 	zval const_LANG_TAG_value;
 	zend_string *const_LANG_TAG_value_str = zend_string_init(LOC_LANG_TAG, strlen(LOC_LANG_TAG), 1);
 	ZVAL_STR(&const_LANG_TAG_value, const_LANG_TAG_value_str);
-	zend_string *const_LANG_TAG_name = zend_string_init_interned("LANG_TAG", sizeof("LANG_TAG") - 1, 1);
+	zend_string *const_LANG_TAG_name = zend_string_init_interned("LANG_TAG", sizeof("LANG_TAG") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_LANG_TAG_name, &const_LANG_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_LANG_TAG_name);
+	zend_string_release_ex(const_LANG_TAG_name, true);
 
 	zval const_EXTLANG_TAG_value;
 	zend_string *const_EXTLANG_TAG_value_str = zend_string_init(LOC_EXTLANG_TAG, strlen(LOC_EXTLANG_TAG), 1);
 	ZVAL_STR(&const_EXTLANG_TAG_value, const_EXTLANG_TAG_value_str);
-	zend_string *const_EXTLANG_TAG_name = zend_string_init_interned("EXTLANG_TAG", sizeof("EXTLANG_TAG") - 1, 1);
+	zend_string *const_EXTLANG_TAG_name = zend_string_init_interned("EXTLANG_TAG", sizeof("EXTLANG_TAG") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_EXTLANG_TAG_name, &const_EXTLANG_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_EXTLANG_TAG_name);
+	zend_string_release_ex(const_EXTLANG_TAG_name, true);
 
 	zval const_SCRIPT_TAG_value;
 	zend_string *const_SCRIPT_TAG_value_str = zend_string_init(LOC_SCRIPT_TAG, strlen(LOC_SCRIPT_TAG), 1);
 	ZVAL_STR(&const_SCRIPT_TAG_value, const_SCRIPT_TAG_value_str);
-	zend_string *const_SCRIPT_TAG_name = zend_string_init_interned("SCRIPT_TAG", sizeof("SCRIPT_TAG") - 1, 1);
+	zend_string *const_SCRIPT_TAG_name = zend_string_init_interned("SCRIPT_TAG", sizeof("SCRIPT_TAG") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_SCRIPT_TAG_name, &const_SCRIPT_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_SCRIPT_TAG_name);
+	zend_string_release_ex(const_SCRIPT_TAG_name, true);
 
 	zval const_REGION_TAG_value;
 	zend_string *const_REGION_TAG_value_str = zend_string_init(LOC_REGION_TAG, strlen(LOC_REGION_TAG), 1);
 	ZVAL_STR(&const_REGION_TAG_value, const_REGION_TAG_value_str);
-	zend_string *const_REGION_TAG_name = zend_string_init_interned("REGION_TAG", sizeof("REGION_TAG") - 1, 1);
+	zend_string *const_REGION_TAG_name = zend_string_init_interned("REGION_TAG", sizeof("REGION_TAG") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_REGION_TAG_name, &const_REGION_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_REGION_TAG_name);
+	zend_string_release_ex(const_REGION_TAG_name, true);
 
 	zval const_VARIANT_TAG_value;
 	zend_string *const_VARIANT_TAG_value_str = zend_string_init(LOC_VARIANT_TAG, strlen(LOC_VARIANT_TAG), 1);
 	ZVAL_STR(&const_VARIANT_TAG_value, const_VARIANT_TAG_value_str);
-	zend_string *const_VARIANT_TAG_name = zend_string_init_interned("VARIANT_TAG", sizeof("VARIANT_TAG") - 1, 1);
+	zend_string *const_VARIANT_TAG_name = zend_string_init_interned("VARIANT_TAG", sizeof("VARIANT_TAG") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_VARIANT_TAG_name, &const_VARIANT_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_VARIANT_TAG_name);
+	zend_string_release_ex(const_VARIANT_TAG_name, true);
 
 	zval const_GRANDFATHERED_LANG_TAG_value;
 	zend_string *const_GRANDFATHERED_LANG_TAG_value_str = zend_string_init(LOC_GRANDFATHERED_LANG_TAG, strlen(LOC_GRANDFATHERED_LANG_TAG), 1);
 	ZVAL_STR(&const_GRANDFATHERED_LANG_TAG_value, const_GRANDFATHERED_LANG_TAG_value_str);
-	zend_string *const_GRANDFATHERED_LANG_TAG_name = zend_string_init_interned("GRANDFATHERED_LANG_TAG", sizeof("GRANDFATHERED_LANG_TAG") - 1, 1);
+	zend_string *const_GRANDFATHERED_LANG_TAG_name = zend_string_init_interned("GRANDFATHERED_LANG_TAG", sizeof("GRANDFATHERED_LANG_TAG") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_GRANDFATHERED_LANG_TAG_name, &const_GRANDFATHERED_LANG_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_GRANDFATHERED_LANG_TAG_name);
+	zend_string_release_ex(const_GRANDFATHERED_LANG_TAG_name, true);
 
 	zval const_PRIVATE_TAG_value;
 	zend_string *const_PRIVATE_TAG_value_str = zend_string_init(LOC_PRIVATE_TAG, strlen(LOC_PRIVATE_TAG), 1);
 	ZVAL_STR(&const_PRIVATE_TAG_value, const_PRIVATE_TAG_value_str);
-	zend_string *const_PRIVATE_TAG_name = zend_string_init_interned("PRIVATE_TAG", sizeof("PRIVATE_TAG") - 1, 1);
+	zend_string *const_PRIVATE_TAG_name = zend_string_init_interned("PRIVATE_TAG", sizeof("PRIVATE_TAG") - 1, true);
 	zend_declare_typed_class_constant(class_entry, const_PRIVATE_TAG_name, &const_PRIVATE_TAG_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(const_PRIVATE_TAG_name);
+	zend_string_release_ex(const_PRIVATE_TAG_name, true);
 
 	return class_entry;
 }

@@ -12,7 +12,7 @@ var_dump(isset($string[0][0]));
 try {
     var_dump($string["foo"]);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(isset($string["foo"]["bar"]));
 
@@ -23,5 +23,5 @@ string(1) "f"
 string(1) "o"
 bool(true)
 bool(true)
-Cannot access offset of type string on string
+TypeError: Cannot access offset of type string on string
 bool(false)

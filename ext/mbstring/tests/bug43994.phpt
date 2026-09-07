@@ -19,21 +19,25 @@ echo "Without \$regs arg:\n";
 try {
     var_dump( mb_ereg($input, 'hello, world') );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "With \$regs arg:\n";
 try {
     var_dump(mb_ereg($input, 'hello, world', $mb_regs));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump($mb_regs);
 ?>
---EXPECT--
+--EXPECTF--
 Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+ValueError: mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+ValueError: mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL

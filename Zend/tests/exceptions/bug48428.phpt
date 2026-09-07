@@ -5,9 +5,9 @@ Bug #48428 (crash when exception is thrown while passing function arguments)
 try {
         function x() { throw new Exception("ERROR"); }
                 x(x());
-} catch(Exception $e) {
-        echo($e -> getMessage());
+} catch(Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-ERROR
+Exception: ERROR

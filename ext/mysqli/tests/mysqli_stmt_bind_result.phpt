@@ -10,9 +10,11 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require 'table.inc';
 
-    $stmt = mysqli_stmt_init($link);
-    if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
-        printf("[002a] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    if (!($stmt = mysqli_prepare($link, "SELECT id, label FROM test ORDER BY id LIMIT 1")))
+        printf("[002a] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+    if (!mysqli_stmt_bind_result($stmt, $id, $label))
+        printf("[002b] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     mysqli_stmt_close($stmt);
     $stmt = mysqli_stmt_init($link);
@@ -67,13 +69,8 @@ require_once 'skipifconnectfailure.inc';
             return false;
         }
 
-        if (!$stmt = mysqli_stmt_init($link)) {
+        if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (?, ?)")) {
             printf("[%04d] [%d] %s\n", $offset + 1, mysqli_errno($link), mysqli_error($link));
-            return false;
-        }
-
-        if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)")) {
-            printf("[%04d] [%d] %s\n", $offset + 2, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
             return false;
         }
 
@@ -91,10 +88,8 @@ require_once 'skipifconnectfailure.inc';
         }
         mysqli_stmt_close($stmt);
 
-        $stmt = mysqli_stmt_init($link);
-
-        if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test")) {
-            printf("[%04d] [%d] %s\n", $offset + 7, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        if (!($stmt = mysqli_prepare($link, "SELECT id, label FROM test"))) {
+            printf("[%04d] [%d] %s\n", $offset + 7, mysqli_errno($link), mysqli_error($link));
             return false;
         }
 
@@ -267,9 +262,8 @@ require_once 'skipifconnectfailure.inc';
     if (mysqli_get_server_version($link) >= 50600)
         func_mysqli_stmt_bind_result($link, $engine, "s", "TIME(6)", "13:31:34.123456", 1770);
 
-    $stmt = mysqli_stmt_init($link);
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1000, 'z')"))
-        printf("[3001] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    if (!($stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (1000, 'z')")))
+        printf("[3001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     $id = null;
     try {
@@ -288,6 +282,7 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli_stmt object is not fully initialized
 Number of bind variables doesn't match number of fields in prepared statement
 Number of bind variables doesn't match number of fields in prepared statement

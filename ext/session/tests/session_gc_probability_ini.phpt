@@ -36,7 +36,7 @@ try {
     session_start($gc_setting);
     session_write_close();
     } catch (Throwable $e) {
-        echo $e::class, ': '. $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ob_end_flush();

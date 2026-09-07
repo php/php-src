@@ -7,6 +7,9 @@ sockets
 if (!defined('TCP_CONGESTION')) {
     die('skip TCP_CONGESTION test');
 }
+if (PHP_OS_FAMILY === 'Solaris' ) {
+    die("skip Solaris does not allow setting TCP_CONGESTION");
+}
 ?>
 --FILE--
 <?php

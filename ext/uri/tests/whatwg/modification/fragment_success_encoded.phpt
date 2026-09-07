@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - fragment - URL encoded characters
---EXTENSIONS--
-uri
+Test Uri\WhatWg\Url::withFragment() - success - percent-encoded characters
 --FILE--
 <?php
 

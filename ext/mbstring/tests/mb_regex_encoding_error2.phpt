@@ -17,10 +17,12 @@ echo "*** Testing mb_regex_encoding() : error conditions ***\n";
 try {
     var_dump(mb_regex_encoding('unknown'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_regex_encoding() : error conditions ***
-mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "unknown" given
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line 9
+ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "unknown" given

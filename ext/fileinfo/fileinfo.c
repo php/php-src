@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Ilia Alshanetsky <ilia@php.net>                              |
   +----------------------------------------------------------------------+
@@ -31,7 +29,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h" /* needed for context stuff */
-#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
 #include "php_fileinfo.h"
 #include "fileinfo_arginfo.h"
@@ -45,9 +42,7 @@ typedef struct _finfo_object {
 	zend_object zo;
 } finfo_object;
 
-static inline finfo_object *php_finfo_fetch_object(zend_object *obj) {
-	return (finfo_object *)((char*)(obj) - XtOffsetOf(finfo_object, zo));
-}
+#define php_finfo_fetch_object(obj) ZEND_CONTAINER_OF(obj, finfo_object, zo)
 
 #define Z_FINFO_P(zv) php_finfo_fetch_object(Z_OBJ_P((zv)))
 
@@ -84,7 +79,7 @@ PHP_MINIT_FUNCTION(finfo)
 
 	/* copy the standard object handlers to you handler table */
 	memcpy(&finfo_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	finfo_object_handlers.offset = XtOffsetOf(finfo_object, zo);
+	finfo_object_handlers.offset = offsetof(finfo_object, zo);
 	finfo_object_handlers.free_obj = finfo_objects_free;
 	finfo_object_handlers.clone_obj = NULL;
 
@@ -268,11 +263,12 @@ static const char* php_fileinfo_from_path(struct magic_set *magic, const zend_st
 	if (php_stream_stat(stream, &ssb) == SUCCESS) {
 		if (ssb.sb.st_mode & S_IFDIR) {
 			ret_val = "directory";
-		} else {
-			ret_val = magic_stream(magic, stream);
-			if (UNEXPECTED(ret_val == NULL)) {
-				php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
-			}
+		}
+	}
+	if (!ret_val) {
+		ret_val = magic_stream(magic, stream);
+		if (UNEXPECTED(ret_val == NULL)) {
+			php_error_docref(NULL, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
 		}
 	}
 

@@ -37,7 +37,7 @@ function ut_main()
 	try {
         	ut_datefmt_set_timezone_id( $fmt , $timezone_id_entry );
 	} catch (IntlException $e) {
-		echo $e->getMessage() . PHP_EOL;
+		echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 	}
         $timezone_id = ut_datefmt_get_timezone_id( $fmt );
         $res_str .= "\nAfter call to set_timezone_id :  timezone_id= $timezone_id";

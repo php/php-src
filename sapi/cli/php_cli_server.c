@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Moriyoshi Koizumi <moriyoshi@php.net>                        |
    |         Xinchen Hui       <laruence@php.net>                         |
@@ -44,7 +42,6 @@
 #include <unistd.h>
 #endif
 
-#include <signal.h>
 #include <locale.h>
 
 #ifdef HAVE_DLFCN_H
@@ -177,7 +174,9 @@ typedef struct php_cli_server_client {
 	zend_string *addr_str;
 	php_http_parser parser;
 	bool request_read;
+	bool too_large_post;
 	bool headers_written;
+	bool expect_continue;
 	zend_string *current_header_name;
 	zend_string *current_header_value;
 	enum { HEADER_NONE=0, HEADER_FIELD, HEADER_VALUE } last_header_element;
@@ -213,6 +212,7 @@ static const php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 405, "<h1>%s</h1><p>Requested method not allowed.</p>" },
+	{ 413, "<h1>%s</h1><p>The request body exceeds the configured <code>post_max_size</code> of " ZEND_LONG_FMT " bytes.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
@@ -396,22 +396,14 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 
 static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
 {
-	char *ret;
-	ALLOCA_FLAG(use_heap)
-	char *ext_lower = do_alloca(ext_len + 1, use_heap);
-	zend_str_tolower_copy(ext_lower, ext, ext_len);
-	ret = zend_hash_str_find_ptr(&server->extension_mime_types, ext_lower, ext_len);
-	free_alloca(ext_lower, use_heap);
-	return (const char*)ret;
+	return zend_hash_str_find_ptr_lc(&server->extension_mime_types, ext, ext_len);
 } /* }}} */
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	php_cli_server_client *client;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	client = SG(server_context);
 
@@ -450,9 +442,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
@@ -540,7 +530,7 @@ static void sapi_cli_server_flush(void *server_context) /* {{{ */
 
 	if (!SG(headers_sent)) {
 		sapi_send_headers();
-		SG(headers_sent) = 1;
+		SG(headers_sent) = true;
 	}
 } /* }}} */
 
@@ -1235,7 +1225,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 
 	/* error */
 	if (append_error_message) {
-		spprintf(&error_buf, 0, " - %s in %s on line %d",
+		spprintf(&error_buf, 0, " - %s in %s on line %" PRIu32,
 			ZSTR_VAL(PG(last_error_message)), ZSTR_VAL(PG(last_error_file)), PG(last_error_lineno));
 		if (!error_buf) {
 			efree(basic_buf);
@@ -1795,17 +1785,42 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 		break;
 	}
 	client->last_header_element = HEADER_NONE;
+
+	if (parser->content_length > 0
+			&& SG(post_max_size) > 0
+			&& (zend_long) parser->content_length > SG(post_max_size)) {
+		client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
+		client->too_large_post = true;
+		client->request_read = true;
+		return 2;
+	}
+
+	zval *expect_val = zend_hash_str_find(&client->request.headers, "expect", sizeof("expect") - 1);
+	if (expect_val && Z_TYPE_P(expect_val) == IS_STRING
+			&& zend_string_equals_literal_ci(Z_STR_P(expect_val), "100-continue")
+			&& parser->http_major == 1 && parser->http_minor == 1) {
+		client->expect_continue = true;
+	}
+
 	return 0;
 }
 
 static int php_cli_server_client_read_request_on_body(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	if (!client->request.content) {
-		client->request.content = pemalloc(parser->content_length, 1);
-		client->request.content_len = 0;
+
+	/* length is bounded by the read buffer in php_cli_server_client_read_request()
+	 * and content_len by post_max_size, so the sum below cannot overflow. */
+	ZEND_ASSERT(length <= SIZE_MAX - client->request.content_len);
+
+	if (SG(post_max_size) > 0 && client->request.content_len + length > (size_t) SG(post_max_size)) {
+		client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
+		client->too_large_post = true;
+		client->request_read = true;
+		return 1;
 	}
-	client->request.content = perealloc(client->request.content, client->request.content_len + length, 1);
+
+	client->request.content = safe_perealloc(client->request.content, 1, client->request.content_len, length, 1);
 	memmove(client->request.content + client->request.content_len, at, length);
 	client->request.content_len += length;
 	return 0;
@@ -1882,7 +1897,7 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	}
 	client->parser.data = client;
 	nbytes_consumed = php_http_parser_execute(&client->parser, &settings, buf, nbytes_read);
-	if (nbytes_consumed != (size_t)nbytes_read) {
+	if (nbytes_consumed != (size_t)nbytes_read && !client->too_large_post) {
 		if (php_cli_server_log_level >= PHP_CLI_SERVER_LOG_ERROR) {
 			if ((buf[0] & 0x80) /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
 				*errstr = estrdup("Unsupported SSL request");
@@ -1892,6 +1907,23 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 		}
 
 		return -1;
+	}
+
+	if (client->expect_continue && !client->request_read) {
+		/* Parser completed headers with Expect: 100-continue but hasn't
+		 * finished reading the body. Send 100 Continue before the client
+		 * sends the request body. Only supported in HTTP/1.1. */
+		static const char continue_response[] = "HTTP/1.1 100 Continue\r\n\r\n";
+		bool send_success = false;
+		client->expect_continue = false;
+		zend_try {
+			size_t sent = php_cli_server_client_send_through(client, continue_response, strlen(continue_response));
+			send_success = sent == strlen(continue_response);
+		} zend_end_try();
+		if (!send_success) {
+			*errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
+			return -1;
+		}
 	}
 
 	return client->request_read ? 1: 0;
@@ -1976,7 +2008,9 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = false;
+	client->too_large_post = false;
 	client->headers_written = false;
+	client->expect_continue = false;
 
 	client->last_header_element = HEADER_NONE;
 	client->current_header_name = NULL;
@@ -2000,10 +2034,16 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 	pefree(client->addr, 1);
 	zend_string_release_ex(client->addr_str, /* persistent */ true);
 
+	if (client->current_header_name) {
+		zend_string_release_ex(client->current_header_name, /* persistent */ true);
+		client->current_header_name = NULL;
+	}
+	if (client->current_header_value) {
+		zend_string_release_ex(client->current_header_value, /* persistent */ true);
+		client->current_header_value = NULL;
+	}
+
 	if (client->content_sender_initialized) {
-		/* Headers must be set if we reached the content initialisation */
-		assert(client->current_header_name == NULL);
-		assert(client->current_header_value == NULL);
 		php_cli_server_content_sender_dtor(&client->content_sender);
 	}
 } /* }}} */
@@ -2055,11 +2095,20 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
 		{
-			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
-			if (!chunk) {
-				goto fail;
+			php_cli_server_chunk *chunk;
+			if (status == 413) {
+				chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + strlen(status_string) + MAX_LENGTH_OF_LONG + 1);
+				if (!chunk) {
+					goto fail;
+				}
+				snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, SG(post_max_size));
+			} else {
+				chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
+				if (!chunk) {
+					goto fail;
+				}
+				snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
 			}
-			snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
 			chunk->data.heap.len = strlen(chunk->data.heap.p);
 			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
@@ -2658,12 +2707,15 @@ static zend_result php_cli_server_recv_event_read_request(php_cli_server *server
 			if (client->request.request_method == PHP_HTTP_NOT_IMPLEMENTED) {
 				return php_cli_server_send_error_page(server, client, 501);
 			}
+			if (client->too_large_post) {
+				return php_cli_server_send_error_page(server, client, 413);
+			}
 			php_cli_server_poller_remove(&server->poller, POLLIN, client->sock);
 			return php_cli_server_dispatch(server, client);
 		case 0:
 			php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
 			return SUCCESS;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 	/* Under ASAN the compiler somehow doesn't realise that the switch block always returns */
 	return FAILURE;

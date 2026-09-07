@@ -11,9 +11,9 @@ $utf16le_char_bad = pack("H*", "00dc00dc");
 
 try {
 	bindtextdomain($utf16le_char_bad,$utf16_first_le);
-} catch (\ValueError $e) {
-	echo $e->getMessage();
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-bindtextdomain(): Argument #1 ($domain) must not contain any null bytes
+ValueError: bindtextdomain(): Argument #1 ($domain) must not contain any null bytes

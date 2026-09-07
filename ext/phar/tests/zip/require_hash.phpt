@@ -25,7 +25,7 @@ try {
 	$phar = new Phar($fname);
 	var_dump($phar->getStub());
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ini_set('phar.require_hash', 0);
 try {
@@ -35,7 +35,7 @@ try {
 	$phar->setSignatureAlgorithm(Phar::MD5);
 	var_dump($phar->getSignature());
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -46,7 +46,7 @@ try {
 @unlink(__DIR__ . '/require_hash.zip');
 ?>
 --EXPECTF--
-phar error: signature is missing in zip-based phar "%srequire_hash.phar.zip"
+UnexpectedValueException: phar error: signature is missing in zip-based phar "%srequire_hash.phar.zip"
 bool(false)
 array(2) {
   ["hash"]=>

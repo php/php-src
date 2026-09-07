@@ -104,6 +104,8 @@ NULL
 Static method:
 ReflectionMethod::invoke() expects at least 1 argument, 0 given
 ReflectionMethod::invoke(): Argument #1 ($object) must be of type ?object, true given
+
+Deprecated: Calling ReflectionMethod::invoke() for static method TestClass::staticMethod() does not need an object parameter in %s on line %d
 Called staticMethod()
 Exception: Using $this when not in object context
 NULL

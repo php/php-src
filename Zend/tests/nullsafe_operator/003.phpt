@@ -25,7 +25,7 @@ var_dump($foo?->qux());
 try {
     var_dump($foo?->quux());
 } catch (Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump((new Foo)?->bar);
@@ -34,7 +34,7 @@ var_dump((new Foo)?->qux());
 try {
     var_dump((new Foo)?->quux());
 } catch (Throwable $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -48,10 +48,10 @@ string(3) "bar"
 Warning: Undefined property: Foo::$baz in %s.php on line 20
 NULL
 string(3) "qux"
-string(36) "Call to undefined method Foo::quux()"
+Error: Call to undefined method Foo::quux()
 string(3) "bar"
 
 Warning: Undefined property: Foo::$baz in %s.php on line 29
 NULL
 string(3) "qux"
-string(36) "Call to undefined method Foo::quux()"
+Error: Call to undefined method Foo::quux()

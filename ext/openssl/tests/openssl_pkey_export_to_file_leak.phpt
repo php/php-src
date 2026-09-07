@@ -11,5 +11,5 @@ var_dump(openssl_pkey_export_to_file($key, str_repeat("a", 10000), passphrase: "
 
 ?>
 --EXPECTF--
-Warning: openssl_pkey_export_to_file(output_filename): must be a valid file path %s
+Warning: openssl_pkey_export_to_file(): must be a valid file path %s
 bool(false)

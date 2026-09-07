@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Andi Gutmans <andi@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -25,6 +23,7 @@
 #include "php_ini.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_enum.h"
 #include "bcmath_arginfo.h"
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
@@ -73,7 +72,7 @@ ZEND_GET_MODULE(bcmath)
 
 ZEND_INI_MH(OnUpdateScale)
 {
-	int *p;
+	int *p = ZEND_INI_GET_ADDR();
 	zend_long tmp;
 
 	tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
@@ -81,7 +80,6 @@ ZEND_INI_MH(OnUpdateScale)
 		return FAILURE;
 	}
 
-	p = (int *) ZEND_INI_GET_ADDR();
 	*p = (int) tmp;
 
 	return SUCCESS;
@@ -205,7 +203,7 @@ static void bc_pow_err(bc_raise_status status, uint32_t arg_num)
 				zend_argument_value_error(arg_num, "exponent is too large, the number of digits overflowed");
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -583,7 +581,7 @@ PHP_FUNCTION(bcpowmod)
 		case OK:
 			RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	cleanup: {
@@ -797,34 +795,29 @@ PHP_FUNCTION(bcround)
 {
 	zend_string *numstr;
 	zend_long precision = 0;
-	zend_long mode = PHP_ROUND_HALF_UP;
-	zend_object *mode_object = NULL;
+	zend_enum_RoundingMode rounding_mode = ZEND_ENUM_RoundingMode_HalfAwayFromZero;
 	bc_num num = NULL, result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(numstr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
-		Z_PARAM_OBJ_OF_CLASS(mode_object, rounding_mode_ce)
+		Z_PARAM_ENUM(rounding_mode, rounding_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (bcmath_check_precision(precision, 2) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (mode_object != NULL) {
-		mode = php_math_round_mode_from_enum(mode_object);
-	}
-
-	switch (mode) {
-		case PHP_ROUND_HALF_UP:
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_HALF_EVEN:
-		case PHP_ROUND_HALF_ODD:
-		case PHP_ROUND_CEILING:
-		case PHP_ROUND_FLOOR:
-		case PHP_ROUND_TOWARD_ZERO:
-		case PHP_ROUND_AWAY_FROM_ZERO:
+	switch (rounding_mode) {
+		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
+		case ZEND_ENUM_RoundingMode_HalfEven:
+		case ZEND_ENUM_RoundingMode_HalfOdd:
+		case ZEND_ENUM_RoundingMode_TowardsZero:
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			break;
 		default:
 			/* This is currently unreachable, but might become reachable when new modes are added. */
@@ -841,7 +834,7 @@ PHP_FUNCTION(bcround)
 		goto cleanup;
 	}
 
-	size_t scale = bc_round(num, precision, mode, &result);
+	size_t scale = bc_round(num, precision, rounding_mode, &result);
 	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
@@ -896,10 +889,7 @@ static int bcmath_number_compare(zval *op1, zval *op2);
 #endif
 #define CHECK_SCALE_OVERFLOW(scale) (scale > INT_MAX)
 
-static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_obj(const zend_object *obj)
-{
-	return (bcmath_number_obj_t*)((char*)(obj) - XtOffsetOf(bcmath_number_obj_t, std));
-}
+#define get_bcmath_number_from_obj(obj) ZEND_CONTAINER_OF(obj, bcmath_number_obj_t, std)
 
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_zval(const zval *zv)
 {
@@ -1045,7 +1035,7 @@ static void bcmath_number_register_class(void)
 	bcmath_number_ce->default_object_handlers = &bcmath_number_obj_handlers;
 
 	memcpy(&bcmath_number_obj_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	bcmath_number_obj_handlers.offset = XtOffsetOf(bcmath_number_obj_t, std);
+	bcmath_number_obj_handlers.offset = offsetof(bcmath_number_obj_t, std);
 	bcmath_number_obj_handlers.free_obj = bcmath_number_free;
 	bcmath_number_obj_handlers.clone_obj = bcmath_number_clone;
 	bcmath_number_obj_handlers.do_operation = bcmath_number_do_operation;
@@ -1235,7 +1225,7 @@ static zend_result bc_num_from_obj_or_str_or_long(
 	bc_num *num, size_t *full_scale, const zend_object *obj, const zend_string *str, zend_long lval)
 {
 	if (obj) {
-		bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
+		const bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
 		*num = intern->num;
 		if (full_scale) {
 			*full_scale = intern->scale;
@@ -1325,7 +1315,7 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 				goto fail;
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (Z_TYPE_P(op1) != IS_OBJECT) {
@@ -1511,7 +1501,7 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 				goto fail;
 			}
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	if (num_obj == NULL) {
@@ -1671,7 +1661,7 @@ PHP_METHOD(BcMath_Number, powmod)
 			goto cleanup;
 		case OK:
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 
 	bc_rm_trailing_zeros(ret);
@@ -1810,34 +1800,30 @@ PHP_METHOD(BcMath_Number, ceil)
 PHP_METHOD(BcMath_Number, round)
 {
 	zend_long precision = 0;
-	zend_long rounding_mode = PHP_ROUND_HALF_UP;
-	zend_object *mode_object = NULL;
+	zend_enum_RoundingMode rounding_mode = ZEND_ENUM_RoundingMode_HalfAwayFromZero;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision);
-		Z_PARAM_OBJ_OF_CLASS(mode_object, rounding_mode_ce);
+		Z_PARAM_ENUM(rounding_mode, rounding_mode_ce);
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (bcmath_check_precision(precision, 1) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (mode_object != NULL) {
-		rounding_mode = php_math_round_mode_from_enum(mode_object);
-	}
-
 	switch (rounding_mode) {
-		case PHP_ROUND_HALF_UP:
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_HALF_EVEN:
-		case PHP_ROUND_HALF_ODD:
-		case PHP_ROUND_CEILING:
-		case PHP_ROUND_FLOOR:
-		case PHP_ROUND_TOWARD_ZERO:
-		case PHP_ROUND_AWAY_FROM_ZERO:
+		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
+		case ZEND_ENUM_RoundingMode_HalfEven:
+		case ZEND_ENUM_RoundingMode_HalfOdd:
+		case ZEND_ENUM_RoundingMode_TowardsZero:
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			break;
 		default:
+			/* This is currently unreachable, but might become reachable when new modes are added. */
 			zend_argument_value_error(2, "is an unsupported rounding mode");
 			RETURN_THROWS();
 	}

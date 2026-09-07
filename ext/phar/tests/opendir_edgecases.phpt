@@ -15,7 +15,7 @@ $pname = 'phar://' . $fname;
 try {
     opendir(array());
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 mkdir(__DIR__ . '/opendir_edgecases');
@@ -55,9 +55,9 @@ include $pname . '/foo';
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(__DIR__ . '/opendir_edgecases');
 --EXPECTF--
-opendir(): Argument #1 ($directory) must be of type string, array given
+TypeError: opendir(): Argument #1 ($directory) must be of type string, array given
 .
 ..
 foo
 
-Warning: opendir(phar://%sopendir_edgecases.phar.php/oops): Failed to open directory: %s in phar://%sopendir_edgecases.phar.php/foo on line %d
+Warning: opendir(): Failed to open directory: %s in phar://%sopendir_edgecases.phar.php/foo on line %d

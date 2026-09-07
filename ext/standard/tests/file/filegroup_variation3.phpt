@@ -26,10 +26,6 @@ $files_arr = array(
   "//filegroup_variation3//filegroup_variation3.tmp",
   "/filegroup_variation3/*.tmp",
   "filegroup_variation3/filegroup*.tmp",
-
-  /* Testing Binary safe */
-  "/filegroup_variation3/filegroup_variation3.tmp".chr(0),
-  "/filegroup_variation3/filegroup_variation3.tmp\0"
 );
 
 $count = 1;
@@ -73,14 +69,6 @@ bool(false)
 - Iteration 6 -
 
 Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
-bool(false)
-- Iteration 7 -
-
-Warning: filegroup(): Filename contains null byte in %s on line %d
-bool(false)
-- Iteration 8 -
-
-Warning: filegroup(): Filename contains null byte in %s on line %d
 bool(false)
 
 *** Done ***

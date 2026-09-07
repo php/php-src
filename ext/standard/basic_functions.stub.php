@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 /* array.c */
 
@@ -75,6 +78,7 @@ const SORT_STRING = UNKNOWN;
  * @var int
  * @cvalue PHP_SORT_LOCALE_STRING
  */
+#[\Deprecated(message: "use one of the Collator::*sort*() methods instead", since: "8.6")]
 const SORT_LOCALE_STRING = UNKNOWN;
 /**
  * @var int
@@ -86,6 +90,11 @@ const SORT_NATURAL = UNKNOWN;
  * @cvalue PHP_SORT_FLAG_CASE
  */
 const SORT_FLAG_CASE = UNKNOWN;
+
+enum SortDirection {
+    case Ascending;
+    case Descending;
+}
 
 /**
  * @var int
@@ -109,6 +118,11 @@ const COUNT_NORMAL = UNKNOWN;
  */
 const COUNT_RECURSIVE = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_VALUE
+ */
+const ARRAY_FILTER_USE_VALUE = UNKNOWN;
 /**
  * @var int
  * @cvalue ARRAY_FILTER_USE_BOTH
@@ -1491,7 +1505,7 @@ function set_time_limit(int $seconds): bool {}
 
 /* main/SAPI.c */
 
-function header_register_callback(callable $callback): bool {}
+function header_register_callback(callable $callback): true {}
 
 /* main/output.c */
 
@@ -1606,6 +1620,12 @@ function min(mixed $value, mixed ...$values): mixed {}
  */
 function max(mixed $value, mixed ...$values): mixed {}
 
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 3}
+ */
+function clamp(mixed $value, mixed $min, mixed $max): mixed {}
+
 function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
 
 function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
@@ -1622,7 +1642,10 @@ function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
  */
 function array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false {}
 
-/** @prefer-ref $array */
+/**
+ * @prefer-ref $array
+ * @forbid-dynamic-calls
+ */
 function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""): int {}
 
 /**
@@ -1630,6 +1653,7 @@ function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""
  * @param array|string $var_names
  * @return array<string, mixed|ref>
  * @refcount 1
+ * @forbid-dynamic-calls
  */
 function compact($var_name, ...$var_names): array {}
 
@@ -1860,7 +1884,7 @@ function array_product(array $array): int|float {}
 
 function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
 
-function array_filter(array $array, ?callable $callback = null, int $mode = 0): array {}
+function array_filter(array $array, ?callable $callback = null, int $mode = ARRAY_FILTER_USE_VALUE): array {}
 
 function array_find(array $array, callable $callback): mixed {}
 
@@ -1953,7 +1977,6 @@ function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
 function time_sleep_until(float $timestamp): bool {}
 #endif
 
-/** @refcount 1 */
 function get_current_user(): string {}
 
 /** @return string|array<int|string, string|array>|false */
@@ -2040,7 +2063,7 @@ function getprotobyname(string $protocol): int|false {}
 function getprotobynumber(int $protocol): string|false {}
 #endif
 
-function register_tick_function(callable $callback, mixed ...$args): bool {}
+function register_tick_function(callable $callback, mixed ...$args): true {}
 
 function unregister_tick_function(callable $callback): void {}
 
@@ -2216,6 +2239,7 @@ function inet_pton(string $ip): string|false {}
 /* metaphone.c */
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'use a userland phonetic matching library instead')]
 function metaphone(string $string, int $max_phonemes = 0): string {}
 
 /* {{{ head.c */
@@ -2297,6 +2321,7 @@ function strcspn(string $string, string $characters, int $offset = 0, ?int $leng
 function nl_langinfo(int $item): string|false {}
 #endif
 
+#[\Deprecated(message: "use Collator::compare() instead", since: "8.6")]
 function strcoll(string $string1, string $string2): int {}
 
 /**
@@ -2304,16 +2329,24 @@ function strcoll(string $string1, string $string2): int {}
  * @frameless-function {"arity": 1}
  * @frameless-function {"arity": 2}
  */
-function trim(string $string, string $characters = " \n\r\t\v\0"): string {}
+function trim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
-/** @compile-time-eval */
-function rtrim(string $string, string $characters = " \n\r\t\v\0"): string {}
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
+function rtrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /** @alias rtrim */
-function chop(string $string, string $characters = " \n\r\t\v\0"): string {}
+function chop(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
-/** @compile-time-eval */
-function ltrim(string $string, string $characters = " \n\r\t\v\0"): string {}
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
+function ltrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /**
  * @compile-time-eval
@@ -2343,10 +2376,16 @@ function join(string|array $separator, ?array $array = null): string {}
  */
 function strtok(string $string, ?string $token = null): string|false {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ */
 function strtoupper(string $string): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ */
 function strtolower(string $string): string {}
 
 function str_increment(string $string): string {}
@@ -2420,7 +2459,10 @@ function str_contains(string $haystack, string $needle): bool {}
  */
 function str_starts_with(string $haystack, string $needle): bool {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function str_ends_with(string $haystack, string $needle): bool {}
 
 /**
@@ -3362,7 +3404,10 @@ function soundex(string $string): string {}
 
 /* streamsfuncs.c */
 
-function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
+/**
+ * @param resource|null $context
+ */
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null, $context = null): int|false {}
 
 /**
  * @return resource
@@ -3458,6 +3503,11 @@ function stream_socket_sendto($socket, string $data, int $flags = 0, string $add
  */
 function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_method = null, $session_stream = null): int|bool {}
 
+/**
+ * @param resource $stream
+ */
+function stream_socket_get_crypto_status($stream): int {}
+
 #ifdef HAVE_SHUTDOWN
 /** @param resource $stream */
 function stream_socket_shutdown($stream, int $mode): bool {}
@@ -3465,17 +3515,19 @@ function stream_socket_shutdown($stream, int $mode): bool {}
 
 #ifdef HAVE_SOCKETPAIR
 /**
+ * @param resource|null $context
  * @return array<int, resource>|false
  * @refcount 1
  */
-function stream_socket_pair(int $domain, int $type, int $protocol): array|false {}
+function stream_socket_pair(int $domain, int $type, int $protocol, $context = null): array|false {}
 #endif
 
 /**
  * @param resource $from
  * @param resource $to
+ * @param resource|null $context
  */
-function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0): int|false {}
+function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0, $context = null): int|false {}
 
 /**
  * @param resource $stream
@@ -3536,13 +3588,23 @@ function stream_resolve_include_path(string $filename): string|false {}
 function stream_get_wrappers(): array {}
 
 /**
+ * @return array<int, StreamError>
+ */
+function stream_last_errors(): array {}
+
+function stream_clear_errors(): void {}
+
+/**
  * @return array<int, string>
  * @refcount 1
  */
 function stream_get_transports(): array {}
 
-/** @param resource|string $stream */
-function stream_is_local($stream): bool {}
+/**
+ * @param resource|string $stream
+ * @param resource|null $context
+ */
+function stream_is_local($stream, $context = null): bool {}
 
 /** @param resource $stream */
 function stream_isatty($stream): bool {}
@@ -3592,6 +3654,7 @@ function intval(mixed $value, int $base = 10): int {}
 function floatval(mixed $value): float {}
 
 /** @alias floatval */
+#[\Deprecated(message: "use floatval() instead", since: "8.6")]
 function doubleval(mixed $value): float {}
 
 /**
@@ -3625,9 +3688,11 @@ function is_bool(mixed $value): bool {}
 function is_int(mixed $value): bool {}
 
 /** @alias is_int */
+#[\Deprecated(message: "use is_int() instead", since: "8.6")]
 function is_integer(mixed $value): bool {}
 
 /** @alias is_int */
+#[\Deprecated(message: "use is_int() instead", since: "8.6")]
 function is_long(mixed $value): bool {}
 
 /**
@@ -3636,6 +3701,7 @@ function is_long(mixed $value): bool {}
 function is_float(mixed $value): bool {}
 
 /** @alias is_float */
+#[\Deprecated(message: "use is_float() instead", since: "8.6")]
 function is_double(mixed $value): bool {}
 
 /**

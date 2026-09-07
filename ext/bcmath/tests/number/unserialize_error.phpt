@@ -7,8 +7,8 @@ bcmath
 try {
     $num = new BcMath\Number(1);
     $num->__unserialize(['value' => '5']);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -22,15 +22,15 @@ $cases = [
 foreach ($cases as $case) {
     try {
         unserialize($case);
-    } catch (Exception $e) {
-        echo $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
-Cannot modify readonly property BcMath\Number::$value
+Error: Cannot modify readonly property BcMath\Number::$value
 
-Invalid serialization data for BcMath\Number object
-Invalid serialization data for BcMath\Number object
-Invalid serialization data for BcMath\Number object
-Invalid serialization data for BcMath\Number object
+Exception: Invalid serialization data for BcMath\Number object
+Exception: Invalid serialization data for BcMath\Number object
+Exception: Invalid serialization data for BcMath\Number object
+Exception: Invalid serialization data for BcMath\Number object

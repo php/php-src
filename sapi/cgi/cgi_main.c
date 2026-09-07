@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Stig Bakken <ssb@php.net>                                   |
@@ -59,7 +57,6 @@
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "http_status_codes.h"
@@ -97,6 +94,8 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #  include "valgrind/cachegrind.h"
 # endif
 #endif
+
+#include "zend_perf_stat.h"
 
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
@@ -1222,7 +1221,7 @@ static void init_request_info(fcgi_request *request)
 			size_t script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
-				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", PG(doc_root));
+				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", ZSTR_VAL(PG(doc_root)));
 				/* fix docroot */
 				TRANSLATE_SLASHES(env_document_root);
 			}
@@ -1688,9 +1687,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
@@ -1738,6 +1735,7 @@ int main(int argc, char *argv[])
 	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
+	bool perf_enabled = false;
 #ifdef HAVE_GETTIMEOFDAY
 	struct timeval start, end;
 #else
@@ -2265,7 +2263,7 @@ parent_loop_end:
 					}
 					fcgi_shutdown();
 					no_headers = 1;
-					SG(headers_sent) = 1;
+					SG(headers_sent) = true;
 					php_cgi_usage(argv[0]);
 					php_output_end_all();
 					exit_status = 0;
@@ -2327,7 +2325,7 @@ parent_loop_end:
 								return FAILURE;
 							}
 							if (no_headers) {
-								SG(headers_sent) = 1;
+								SG(headers_sent) = true;
 								SG(request_info).no_headers = 1;
 							}
 							php_print_info(0xFFFFFFFF);
@@ -2345,7 +2343,7 @@ parent_loop_end:
 							if (script_file) {
 								efree(script_file);
 							}
-							SG(headers_sent) = 1;
+							SG(headers_sent) = true;
 							php_printf("[PHP Modules]\n");
 							print_modules();
 							php_printf("\n[Zend Modules]\n");
@@ -2371,7 +2369,7 @@ parent_loop_end:
 								free(bindpath);
 								return FAILURE;
 							}
-							SG(headers_sent) = 1;
+							SG(headers_sent) = true;
 							SG(request_info).no_headers = 1;
 							php_print_version(&cgi_sapi_module);
 							php_request_shutdown((void *) 0);
@@ -2408,7 +2406,7 @@ do_repeat:
 				}
 
 				if (no_headers) {
-					SG(headers_sent) = 1;
+					SG(headers_sent) = true;
 					SG(request_info).no_headers = 1;
 				}
 
@@ -2446,14 +2444,16 @@ do_repeat:
 				}
 			} /* end !cgi && !fastcgi */
 
-#ifdef HAVE_VALGRIND
 			if (warmup_repeats == 0) {
+				zend_perf_stat_enable();
+				perf_enabled = true;
+#ifdef HAVE_VALGRIND
 				CALLGRIND_START_INSTRUMENTATION;
 # ifdef HAVE_VALGRIND_CACHEGRIND_H
 				CACHEGRIND_START_INSTRUMENTATION;
 # endif
-			}
 #endif
+			}
 
 			/* request startup only after we've done all we can to
 			 * get path_translated */
@@ -2466,7 +2466,7 @@ do_repeat:
 				return FAILURE;
 			}
 			if (no_headers) {
-				SG(headers_sent) = 1;
+				SG(headers_sent) = true;
 				SG(request_info).no_headers = 1;
 			}
 
@@ -2573,6 +2573,10 @@ fastcgi_request_done:
 				SG(request_info).query_string = NULL;
 			}
 
+			if (perf_enabled) {
+				zend_perf_stat_disable();
+				perf_enabled = false;
+			}
 #ifdef HAVE_VALGRIND
 			/* We're not interested in measuring shutdown */
 			CALLGRIND_STOP_INSTRUMENTATION;

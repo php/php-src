@@ -92,13 +92,13 @@ Size of destination file => int(1500)
 
 -- Iteration 3 --
 Copy operation => 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 Existence of destination file => bool(false)
 
 -- Iteration 4 --
 Copy operation => 
-Warning: copy(%s): %s
+Warning: copy(): %s
 bool(false)
 Existence of destination file => bool(false)
 *** Done ***

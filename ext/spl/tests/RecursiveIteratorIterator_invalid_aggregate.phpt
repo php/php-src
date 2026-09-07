@@ -13,9 +13,9 @@ class MyIteratorAggregate implements IteratorAggregate {
 try {
     new RecursiveIteratorIterator(new MyIteratorAggregate);
 } catch (LogicException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-MyIteratorAggregate::getIterator() must return an object that implements Traversable
+LogicException: MyIteratorAggregate::getIterator() must return an object that implements Traversable

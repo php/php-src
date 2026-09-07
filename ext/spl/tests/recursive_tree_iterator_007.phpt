@@ -24,7 +24,7 @@ try {
         echo "[$k] => $v\n";
     }
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -34,4 +34,4 @@ try {
 [1] => \-Array
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string

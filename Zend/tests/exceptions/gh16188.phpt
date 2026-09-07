@@ -16,6 +16,7 @@ printf("__toString:\n%s\n\n", $re);
 ?>
 ==DONE==
 --EXPECTF--
+Deprecated: array_walk(): Passing an object for argument #1 $array to array_walk() is deprecated, call get_object_vars() first instead in %s on line %d
 getTraceAsString:
 #0 {main}
 

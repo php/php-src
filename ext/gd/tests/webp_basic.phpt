@@ -40,7 +40,7 @@ var_dump(mse($im1, $im_lossless) == 0);
 try {
 	imagewebp($im1, $filename, -10);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -51,4 +51,4 @@ try {
 --EXPECT--
 Is lossy conversion close enough? bool(true)
 Does lossless conversion work? bool(true)
-imagewebp(): Argument #3 ($quality) must be greater than or equal to -1
+ValueError: imagewebp(): Argument #3 ($quality) must be greater than or equal to -1

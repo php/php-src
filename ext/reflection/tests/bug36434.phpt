@@ -26,6 +26,9 @@ foreach ($r->GetProperties() as $p)
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
+
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
 bar foo
 ancestor ancestor

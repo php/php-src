@@ -10,12 +10,12 @@ var_dump(test1(...));
 var_dump(test2(...));
 
 ?>
---EXPECT--
-object(Closure)#1 (1) {
+--EXPECTF--
+object(Closure)#%d (1) {
   ["function"]=>
   string(5) "test1"
 }
-object(Closure)#1 (1) {
+object(Closure)#%d (1) {
   ["function"]=>
   string(5) "test2"
 }

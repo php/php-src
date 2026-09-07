@@ -19,9 +19,9 @@ var_dump($o->a);
 try {
     $o->a = new C;
 } catch (Throwable $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 string(4) "okok"
-Cannot assign C to property A::$a of type string
+TypeError: Cannot assign C to property A::$a of type string

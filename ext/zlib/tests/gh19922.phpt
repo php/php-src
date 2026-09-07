@@ -7,6 +7,5 @@ zlib
 var_dump(gzopen("php://output", 14));
 ?>
 --EXPECTF--
-
-Warning: gzopen(php://output): could not make seekable - php://output in %s on line %d
+Warning: gzopen(): could not make seekable - php://output in %s on line %d
 bool(false)

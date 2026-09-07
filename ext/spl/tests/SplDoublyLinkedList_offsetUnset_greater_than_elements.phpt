@@ -17,9 +17,9 @@ $ll->offsetUnset($ll->count() + 1);
 var_dump($ll);
 
 } catch(Exception $e) {
-echo $e->getMessage();
+echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-SplDoublyLinkedList::offsetUnset(): Argument #1 ($index) is out of range
+OutOfRangeException: SplDoublyLinkedList::offsetUnset(): Argument #1 ($index) is out of range

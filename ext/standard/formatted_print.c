@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Author: Stig S�ther Bakken <ssb@php.net>                             |
+   | Author: Stig Sæther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -103,7 +101,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 	if (req_size > ZSTR_LEN(*buffer)) {
 		size_t size = ZSTR_LEN(*buffer);
 		while (req_size > size) {
-			if (size > ZEND_SIZE_MAX/2) {
+			if (size > SIZE_MAX/2) {
 				zend_error_noreturn(E_ERROR, "Field width %zd is too long", req_size);
 			}
 			size <<= 1;
@@ -298,9 +296,9 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 			char exp_char = fmt == 'G' || fmt == 'H' ? 'E' : 'e';
 			/* We use &num_buf[ 1 ], so that we have room for the sign. */
 			s = zend_gcvt(number, precision, decimal_point, exp_char, &num_buf[1]);
-			is_negative = 0;
+			is_negative = false;
 			if (*s == '-') {
-				is_negative = 1;
+				is_negative = true;
 				s = &num_buf[1];
 			} else if (always_sign) {
 				num_buf[0] = '+';

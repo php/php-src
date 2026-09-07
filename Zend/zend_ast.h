@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Bob Weinand <bwoebi@php.net>                                |
    |          Dmitry Stogov <dmitry@php.net>                              |
@@ -76,6 +75,7 @@ enum _zend_ast_kind {
 	ZEND_AST_TYPE,
 	ZEND_AST_CONSTANT_CLASS,
 	ZEND_AST_CALLABLE_CONVERT,
+	ZEND_AST_PLACEHOLDER_ARG,
 
 	/* 1 child node */
 	ZEND_AST_VAR = 1 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -143,7 +143,7 @@ enum _zend_ast_kind {
 	ZEND_AST_DECLARE,
 	ZEND_AST_USE_TRAIT,
 	ZEND_AST_TRAIT_PRECEDENCE,
-	ZEND_AST_METHOD_REFERENCE,
+	ZEND_AST_TRAIT_METHOD_REFERENCE,
 	ZEND_AST_NAMESPACE,
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
@@ -152,7 +152,6 @@ enum _zend_ast_kind {
 	ZEND_AST_MATCH,
 	ZEND_AST_MATCH_ARM,
 	ZEND_AST_NAMED_ARG,
-	ZEND_AST_PARENT_PROPERTY_HOOK_CALL,
 	ZEND_AST_PIPE,
 
 	/* 3 child nodes */
@@ -167,14 +166,14 @@ enum _zend_ast_kind {
 	ZEND_AST_CONST_ELEM,
 	ZEND_AST_CLASS_CONST_GROUP,
 
-	// Pseudo node for initializing enums
-	ZEND_AST_CONST_ENUM_INIT,
-
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
 	ZEND_AST_ENUM_CASE,
 	ZEND_AST_PROP_ELEM,
+
+	// Pseudo node for initializing enums
+	ZEND_AST_CONST_ENUM_INIT,
 
 	/* 5 child nodes */
 
@@ -229,10 +228,14 @@ typedef struct _zend_ast_decl {
 	zend_ast *child[5];
 } zend_ast_decl;
 
+// TODO: rename
 typedef struct _zend_ast_fcc {
 	zend_ast_kind kind; /* Type of the node (ZEND_AST_* enum constant) */
 	zend_ast_attr attr; /* Additional attribute, use depending on node type */
 	uint32_t lineno;    /* Line number */
+	zend_string *filename;
+	zend_string *name;
+	zend_ast *args;
 	ZEND_MAP_PTR_DEF(zend_function *, fptr);
 } zend_ast_fcc;
 
@@ -307,27 +310,39 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_0(zend_ast_kind kind);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_1(zend_ast_kind kind, zend_ast *child);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2);
 
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_arg_list_0(zend_ast_kind kind);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_arg_list_1(zend_ast_kind kind, zend_ast *child);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_arg_list_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2);
+
 # define zend_ast_create(...) \
 	ZEND_AST_SPEC_CALL(zend_ast_create, __VA_ARGS__)
 # define zend_ast_create_ex(...) \
 	ZEND_AST_SPEC_CALL_EX(zend_ast_create_ex, __VA_ARGS__)
 # define zend_ast_create_list(init_children, ...) \
 	ZEND_AST_SPEC_CALL(zend_ast_create_list, __VA_ARGS__)
+# define zend_ast_create_arg_list(init_children, ...) \
+	ZEND_AST_SPEC_CALL(zend_ast_create_arg_list, __VA_ARGS__)
 
 #else
 ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...);
 ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...);
 ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...);
+ZEND_API zend_ast *zend_ast_create_arg_list(uint32_t init_children, zend_ast_kind kind, ...);
 #endif
 
 ZEND_ATTRIBUTE_NODISCARD ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *list, zend_ast *op);
+
+/* Like zend_ast_list_add(), but wraps the list into a ZEND_AST_CALLABLE_CONVERT
+ * if any arg is a ZEND_AST_PLACEHOLDER_ARG. list can be a zend_ast_list, or a
+ * zend_ast_fcc. */
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_arg_list_add(zend_ast *list, zend_ast *arg);
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4
 );
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(void);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_fcc(zend_ast *args);
 
 typedef struct {
 	bool had_side_effects;
@@ -337,7 +352,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *ast, zend_class_entry *scope, bool *short_circuited_ptr, zend_ast_evaluate_ctx *ctx);
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
+/* Copies 'ast' to the heap, returns a refcounted AST reference */
 ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);
+/* Duplicates 'ast' on the arena */
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_dup(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
@@ -345,7 +363,7 @@ typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr, void *context);
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *context);
 
 static zend_always_inline size_t zend_ast_size(uint32_t children) {
-	return XtOffsetOf(zend_ast, child) + (sizeof(zend_ast *) * children);
+	return offsetof(zend_ast, child) + (sizeof(zend_ast *) * children);
 }
 
 static zend_always_inline bool zend_ast_is_special(const zend_ast *ast) {
@@ -424,5 +442,10 @@ static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 }
 
 zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr);
+
+zend_ast * ZEND_FASTCALL zend_ast_call_get_args(zend_ast *ast);
+
+/* Recognize parent::$prop::get() pattern. */
+bool zend_ast_is_parent_hook_call(const zend_ast *ast);
 
 #endif

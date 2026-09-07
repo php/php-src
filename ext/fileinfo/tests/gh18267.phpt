@@ -8,7 +8,7 @@ $cls = new finfo();
 try {
     $cls->file("test",FILEINFO_NONE, STDERR);
 } catch (\TypeError $e) {
-    echo $e->getMessage(); 
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL; 
 }
 --EXPECT--
-finfo::file(): supplied resource is not a valid Stream-Context resource
+TypeError: finfo::file(): supplied resource is not a valid Stream-Context resource

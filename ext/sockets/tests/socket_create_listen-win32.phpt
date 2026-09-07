@@ -15,7 +15,7 @@ socket_getsockname($sock, $addr, $port);
 var_dump($addr, $port);
 ?>
 --EXPECT--
-string(9) "127.0.0.1"
+string(7) "0.0.0.0"
 int(31338)
 --CREDITS--
 Till Klampaeckel, till@php.net

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
@@ -685,7 +683,8 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	}
 	colsize = displaysize;
 
-	col->maxlen = S->cols[colno].datalen = colsize;
+	S->cols[colno].datalen = colsize;
+	col->maxlen = displaysize;
 	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
 	S->cols[colno].is_unicode = pdo_odbc_sqltype_is_unicode(S, S->cols[colno].coltype);
 
@@ -889,7 +888,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val)
 			return 0;
 
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
-			S->assume_utf8 = zval_is_true(val);
+			S->assume_utf8 = zend_is_true(val);
 			return 0;
 		default:
 			strcpy(S->einfo.last_err_msg, "Unknown Attribute");

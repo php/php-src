@@ -139,60 +139,70 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
      * @tentative-return-type
      * @implementation-alias ArrayObject::getFlags
      */
+	#[\Deprecated(since: "8.6")]
     public function getFlags(): int {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::setFlags
      */
+	#[\Deprecated(since: "8.6")]
     public function setFlags(int $flags): void {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::asort
      */
+	#[\Deprecated(since: "8.6")]
     public function asort(int $flags = SORT_REGULAR): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::ksort
      */
+	#[\Deprecated(since: "8.6")]
     public function ksort(int $flags = SORT_REGULAR): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::uasort
      */
+	#[\Deprecated(since: "8.6")]
     public function uasort(callable $callback): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::uksort
      */
+	#[\Deprecated(since: "8.6")]
     public function uksort(callable $callback): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::natsort
      */
+	#[\Deprecated(since: "8.6")]
     public function natsort(): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::natcasesort
      */
+	#[\Deprecated(since: "8.6")]
     public function natcasesort(): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::unserialize
      */
+	#[\Deprecated(since: "8.6")]
     public function unserialize(string $data): void {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::serialize
      */
+	#[\Deprecated(since: "8.6")]
     public function serialize(): string {}
 
     /**

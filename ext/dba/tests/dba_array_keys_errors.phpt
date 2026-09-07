@@ -17,12 +17,12 @@ $db = get_any_db($name);
 try {
     dba_insert([], "Content String 1", $db);
 } catch (\Error $e) {
-    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     dba_insert(["a", "b", "c"], "Content String 2", $db);
 } catch (\Error $e) {
-    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 /* Use an object */
@@ -30,12 +30,12 @@ $o = new stdClass();
 try {
     var_dump(dba_insert([$o, 'obj'], 'Test', $db));
 } catch (\Error $e) {
-    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(dba_insert(['group', $o], 'Test', $db));
 } catch (\Error $e) {
-    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 dba_close($db);

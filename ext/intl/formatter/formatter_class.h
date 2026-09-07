@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stanislav Malyshev <stas@zend.com>                          |
    +----------------------------------------------------------------------+
@@ -15,25 +15,34 @@
 #ifndef FORMATTER_CLASS_H
 #define FORMATTER_CLASS_H
 
-#include <php.h>
+#include "formatter_data.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "intl_common.h"
 #include "intl_error.h"
 #include "intl_data.h"
-#include "formatter_data.h"
+#ifdef __cplusplus
+}
+#endif
 
 typedef struct {
 	formatter_data  nf_data;
 	zend_object     zo;
 } NumberFormatter_object;
 
-static inline NumberFormatter_object *php_intl_number_format_fetch_object(zend_object *obj) {
-	return (NumberFormatter_object *)((char*)(obj) - XtOffsetOf(NumberFormatter_object, zo));
-}
+#define php_intl_number_format_fetch_object(obj) ZEND_CONTAINER_OF(obj, NumberFormatter_object, zo)
 #define Z_INTL_NUMBERFORMATTER_P(zv) php_intl_number_format_fetch_object(Z_OBJ_P(zv))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void formatter_register_class( void );
 extern zend_class_entry *NumberFormatter_ce_ptr;
+#ifdef __cplusplus
+}
+#endif
 
 /* Auxiliary macros */
 

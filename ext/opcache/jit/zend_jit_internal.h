@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend JIT                                                             |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
@@ -119,13 +117,13 @@ typedef uintptr_t zend_jit_addr;
 static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_addr addr2)
 {
 	if (addr1 == addr2) {
-		return 1;
+		return true;
 	} else if (Z_MODE(addr1) == IS_REG && Z_MODE(addr2) == IS_REG) {
 		return Z_SSA_VAR(addr1) == Z_SSA_VAR(addr2);
 	} else if (Z_MODE(addr1) == IS_REF_ZVAL && Z_MODE(addr2) == IS_REF_ZVAL) {
 		return Z_IR_REF(addr1) == Z_IR_REF(addr2);
 	}
-	return 0;
+	return false;
 }
 
 typedef struct _zend_jit_op_array_extension {
@@ -457,6 +455,10 @@ typedef struct _zend_jit_trace_exit_info {
 	uint32_t                stack_offset;
 	zend_jit_ref_snapshot   poly_func;
 	zend_jit_ref_snapshot   poly_this;
+#if ZEND_DEBUG
+	const char             *filename;
+	int                     lineno;
+#endif
 } zend_jit_trace_exit_info;
 
 typedef struct _zend_jit_trace_stack {
@@ -703,7 +705,7 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	} else  {
 		ZEND_UNREACHABLE();
 	}
-	*exit_if_true = 0;
+	*exit_if_true = false;
 	return NULL;
 }
 

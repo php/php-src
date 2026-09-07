@@ -3,7 +3,7 @@ GH-10403: Fix incorrect bitshifting and masking in ffi bitfield
 --EXTENSIONS--
 ffi
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) echo "skip this test is for 64-bit only"; ?>
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only"); ?>
 --FILE--
 <?php
 $ffi = FFI::cdef(<<<EOF

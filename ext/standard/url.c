@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -93,7 +91,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char const *s, *e, *p, *pp, *ue;
 
-	*has_port = 0;
+	*has_port = false;
 	s = str;
 	ue = s + length;
 
@@ -183,7 +181,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			port_buf[pp - p] = '\0';
 			port = ZEND_STRTOL(port_buf, &end, 10);
 			if (port >= 0 && port <= 65535 && end != port_buf) {
-				*has_port = 1;
+				*has_port = true;
 				ret->port = (unsigned short) port;
 				if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 				    s += 2;
@@ -249,7 +247,7 @@ parse_host:
 				port_buf[e - p] = '\0';
 				port = ZEND_STRTOL(port_buf, &end, 10);
 				if (port >= 0 && port <= 65535 && end != port_buf) {
-					*has_port = 1;
+					*has_port = true;
 					ret->port = (unsigned short)port;
 				} else {
 					php_url_free(ret);

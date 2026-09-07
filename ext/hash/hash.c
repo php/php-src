@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sara Golemon <pollita@php.net>                               |
   |         Scott MacVicar <scottmac@php.net>                            |
@@ -103,9 +101,7 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo) /* {{{ */
 {
-	zend_string *lower = zend_string_tolower(algo);
-	const php_hash_ops *ops = zend_hash_find_ptr(&php_hash_hashtable, lower);
-	zend_string_release(lower);
+	const php_hash_ops *ops = zend_hash_find_ptr_lc(&php_hash_hashtable, algo);
 
 	return ops;
 }
@@ -364,8 +360,8 @@ static void php_hash_do_hash(
 		RETURN_THROWS();
 	}
 	if (isfilename) {
-		if (CHECK_NULL_PATH(data, data_len)) {
-			zend_argument_value_error(1, "must not contain any null bytes");
+		if (zend_char_has_nul_byte(data, data_len)) {
+			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
@@ -404,7 +400,7 @@ static void php_hash_do_hash(
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
-		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+		zend_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
 		zend_string_efree(digest);
 		RETURN_NEW_STR(hex_digest);
@@ -507,7 +503,7 @@ static void php_hash_do_hash_hmac(
 	}
 
 	if (isfilename) {
-		if (CHECK_NULL_PATH(data, data_len)) {
+		if (zend_char_has_nul_byte(data, data_len)) {
 			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
@@ -561,7 +557,7 @@ static void php_hash_do_hash_hmac(
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(ops->digest_size, 2, 0, 0);
 
-		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
+		zend_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
 		zend_string_efree(digest);
 		RETURN_NEW_STR(hex_digest);
@@ -576,13 +572,13 @@ PHP_FUNCTION(hash_hmac)
 	zend_string *algo;
 	char *data, *key;
 	size_t data_len, key_len;
-	bool raw_output = 0;
+	bool raw_output = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 0);
+	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, false);
 }
 /* }}} */
 
@@ -593,13 +589,13 @@ PHP_FUNCTION(hash_hmac_file)
 	zend_string *algo;
 	char *data, *key;
 	size_t data_len, key_len;
-	bool raw_output = 0;
+	bool raw_output = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sss|b", &algo, &data, &data_len, &key, &key_len, &raw_output) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, 1);
+	php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, raw_output, true);
 }
 /* }}} */
 
@@ -777,7 +773,7 @@ PHP_FUNCTION(hash_final)
 {
 	zval *zhash;
 	php_hashcontext_object *hash;
-	bool raw_output = 0;
+	bool raw_output = false;
 	zend_string *digest;
 	size_t digest_len;
 
@@ -822,7 +818,7 @@ PHP_FUNCTION(hash_final)
 	} else {
 		zend_string *hex_digest = zend_string_safe_alloc(digest_len, 2, 0, 0);
 
-		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), digest_len);
+		zend_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), digest_len);
 		ZSTR_VAL(hex_digest)[2 * digest_len] = 0;
 		zend_string_efree(digest);
 		RETURN_NEW_STR(hex_digest);
@@ -857,9 +853,7 @@ PHP_FUNCTION(hash_algos)
 {
 	zend_string *str;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_STR_KEY(&php_hash_hashtable, str) {
@@ -874,9 +868,7 @@ PHP_FUNCTION(hash_hmac_algos)
 	zend_string *str;
 	const php_hash_ops *ops;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&php_hash_hashtable, str, ops) {
@@ -988,7 +980,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
 	zend_long loops, i, j, iterations, digest_length = 0, length = 0;
 	size_t pass_len, salt_len = 0;
-	bool raw_output = 0;
+	bool raw_output = false;
 	const php_hash_ops *ops;
 	void *context;
 	HashTable *args = NULL;
@@ -1096,7 +1088,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	if (raw_output) {
 		memcpy(ZSTR_VAL(returnval), result, length);
 	} else {
-		php_hash_bin2hex(ZSTR_VAL(returnval), result, digest_length);
+		zend_bin2hex(ZSTR_VAL(returnval), result, digest_length);
 	}
 	ZSTR_VAL(returnval)[length] = 0;
 	efree(result);
@@ -1117,12 +1109,12 @@ PHP_FUNCTION(hash_equals)
 
 	/* We only allow comparing string to prevent unexpected results. */
 	if (Z_TYPE_P(known_zval) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type string, %s given", zend_zval_value_name(known_zval));
+		zend_wrong_parameter_type_error(1, Z_EXPECTED_STRING, known_zval);
 		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(user_zval) != IS_STRING) {
-		zend_argument_type_error(2, "must be of type string, %s given", zend_zval_value_name(user_zval));
+		zend_wrong_parameter_type_error(2, Z_EXPECTED_STRING, user_zval);
 		RETURN_THROWS();
 	}
 
@@ -1226,9 +1218,9 @@ PHP_FUNCTION(mhash)
 	}
 
 	if (key) {
-		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, 1, 0);
+		php_hash_do_hash_hmac(return_value, algo, data, data_len, key, key_len, true, false);
 	} else {
-		php_hash_do_hash(return_value, algo, data, data_len, 1, 0, NULL);
+		php_hash_do_hash(return_value, algo, data, data_len, true, false, NULL);
 	}
 
 	if (algo) {
@@ -1259,9 +1251,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 /* {{{ Gets the number of available hashes */
 PHP_FUNCTION(mhash_count)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_LONG(MHASH_NUM_ALGOS - 1);
 }
 /* }}} */
@@ -1404,7 +1394,7 @@ static void php_hashcontext_free(zend_object *obj) {
 
 /* {{{ php_hashcontext_clone */
 static zend_object *php_hashcontext_clone(zend_object *zobj) {
-	php_hashcontext_object *oldobj = php_hashcontext_from_object(zobj);
+	const php_hashcontext_object *oldobj = php_hashcontext_from_object(zobj);
 	zend_object *znew = php_hashcontext_create(zobj->ce);
 	php_hashcontext_object *newobj = php_hashcontext_from_object(znew);
 
@@ -1462,9 +1452,7 @@ PHP_METHOD(HashContext, __serialize)
 	zend_long magic = 0;
 	zval tmp;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1661,7 +1649,7 @@ PHP_MINIT_FUNCTION(hash)
 
 	memcpy(&php_hashcontext_handlers, &std_object_handlers,
 	       sizeof(zend_object_handlers));
-	php_hashcontext_handlers.offset = XtOffsetOf(php_hashcontext_object, std);
+	php_hashcontext_handlers.offset = offsetof(php_hashcontext_object, std);
 	php_hashcontext_handlers.free_obj = php_hashcontext_free;
 	php_hashcontext_handlers.clone_obj = php_hashcontext_clone;
 

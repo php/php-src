@@ -11,9 +11,9 @@ sqlite3
 try {
   $db = new SQLite3();
 } catch (TypeError $e) {
-  var_dump($e->getMessage());
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-string(59) "SQLite3::__construct() expects at least 1 argument, 0 given"
+ArgumentCountError: SQLite3::__construct() expects at least 1 argument, 0 given

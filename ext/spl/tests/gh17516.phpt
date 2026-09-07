@@ -11,7 +11,7 @@ var_dump($cls->getPathInfo('SplFileInfoChild'));
 try {
 	$cls->getPathInfo('BadSplFileInfo');
 } catch (\TypeError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
@@ -21,4 +21,4 @@ object(SplFileInfoChild)#2 (2) {
   ["fileName":"SplFileInfo":private]=>
   string(4) "php:"
 }
-SplFileInfo::getPathInfo(): Argument #1 ($class) must be a class name derived from SplFileInfo or null, BadSplFileInfo given
+TypeError: SplFileInfo::getPathInfo(): Argument #1 ($class) must be a class name derived from SplFileInfo or null, BadSplFileInfo given

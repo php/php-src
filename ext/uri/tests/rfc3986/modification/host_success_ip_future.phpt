@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - IP future address
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withHost() - success - IPvFuture address
 --FILE--
 <?php
 

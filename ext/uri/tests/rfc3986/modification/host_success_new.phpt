@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - adding a new one
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withHost() - success - adding a new one
 --FILE--
 <?php
 

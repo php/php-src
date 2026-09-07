@@ -9,8 +9,8 @@ $s1 = "some string";
 
 try {
     var_dump($a + $s1);
-} catch (Error $e) {
-    echo "\nException: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $c = $a + $s1;
@@ -19,7 +19,7 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Exception: Unsupported operand types: array + string
+TypeError: Unsupported operand types: array + string
 
 Fatal error: Uncaught TypeError: Unsupported operand types: array + string in %s:%d
 Stack trace:

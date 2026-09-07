@@ -30,7 +30,7 @@ ini_set("session.cookie_secure", TRUE);
 var_dump(session_get_cookie_params());
 ini_set("session.cookie_httponly", TRUE);
 var_dump(session_get_cookie_params());
-ini_set("session.cookie_samesite", "foo");
+ini_set("session.cookie_samesite", "Lax");
 var_dump(session_get_cookie_params());
 ini_set("session.cookie_partitioned", TRUE);
 var_dump(session_get_cookie_params());
@@ -150,7 +150,7 @@ array(7) {
   ["httponly"]=>
   bool(true)
   ["samesite"]=>
-  string(3) "foo"
+  string(3) "Lax"
 }
 array(7) {
   ["lifetime"]=>
@@ -166,6 +166,6 @@ array(7) {
   ["httponly"]=>
   bool(true)
   ["samesite"]=>
-  string(3) "foo"
+  string(3) "Lax"
 }
 Done

@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -194,23 +193,37 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 	return object;
 }
 
-ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
+ZEND_API void ZEND_FASTCALL zend_object_set_properties_reinitable(zend_object *object, bool reinitable)
+{
+	if (!ZEND_CLASS_HAS_READONLY_PROPS(object->ce)) {
+		return;
+	}
+
+	for (uint32_t i = 0; i < object->ce->default_properties_count; i++) {
+		zval *prop = OBJ_PROP_NUM(object, i);
+		if (reinitable) {
+			if (!Z_ISUNDEF_P(prop)) {
+				Z_PROP_FLAG_P(prop) |= IS_PROP_REINITABLE;
+			}
+		} else {
+			Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
+		}
+	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, const zend_object *old_object)
 {
 	bool has_clone_method = old_object->ce->clone != NULL;
 
 	if (old_object->ce->default_properties_count) {
-		zval *src = old_object->properties_table;
+		const zval *src = old_object->properties_table;
 		zval *dst = new_object->properties_table;
-		zval *end = src + old_object->ce->default_properties_count;
+		const zval *end = src + old_object->ce->default_properties_count;
 
 		do {
 			i_zval_ptr_dtor(dst);
 			ZVAL_COPY_VALUE_PROP(dst, src);
 			zval_add_ref(dst);
-			if (has_clone_method) {
-				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
-				Z_PROP_FLAG_P(dst) |= IS_PROP_REINITABLE;
-			}
 
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(dst)))) {
@@ -256,10 +269,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				ZVAL_COPY_VALUE(&new_prop, prop);
 				zval_add_ref(&new_prop);
 			}
-			if (has_clone_method) {
-				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
-				Z_PROP_FLAG_P(&new_prop) |= IS_PROP_REINITABLE;
-			}
+
 			if (EXPECTED(key)) {
 				_zend_hash_append(new_object->properties, key, &new_prop);
 			} else {
@@ -269,15 +279,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 	}
 
 	if (has_clone_method) {
+		zend_object_set_properties_reinitable(new_object, /* reinitable */ true);
 		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
-
-		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
-			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
-				zval* prop = OBJ_PROP_NUM(new_object, i);
-				/* Unconditionally remove the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
-				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
-			}
-		}
+		zend_object_set_properties_reinitable(new_object, /* reinitable */ false);
 	}
 }
 
@@ -286,13 +290,8 @@ ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const
 	zend_object *new_object = old_object->handlers->clone_obj(old_object);
 
 	if (EXPECTED(!EG(exception))) {
-		/* Unlock readonly properties once more. */
-		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
-			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
-				zval* prop = OBJ_PROP_NUM(new_object, i);
-				Z_PROP_FLAG_P(prop) |= IS_PROP_REINITABLE;
-			}
-		}
+
+		zend_object_set_properties_reinitable(new_object, /* reinitable */ true);
 
 		const zend_class_entry *old_scope = EG(fake_scope);
 
@@ -323,13 +322,7 @@ ZEND_API zend_object *zend_objects_clone_obj_with(zend_object *old_object, const
 
 		EG(fake_scope) = old_scope;
 
-		/* Lock readonly properties once more. */
-		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
-			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
-				zval* prop = OBJ_PROP_NUM(new_object, i);
-				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
-			}
-		}
+		zend_object_set_properties_reinitable(new_object, /* reinitable */ false);
 	}
 
 	return new_object;

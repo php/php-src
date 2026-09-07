@@ -10,10 +10,10 @@ enum Foo: int {
 
 try {
     var_dump(Foo::from(2));
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-2 is not a valid backing value for enum Foo
+ValueError: 2 is not a valid backing value for enum Foo

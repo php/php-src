@@ -16,15 +16,15 @@ $a = new class {
 try {
     $a->testParam(null);
 } catch (\Throwable $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $a->test();
 } catch (\Throwable $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-class@anonymous(): Argument #1 ($a) must be of type class@anonymous|string, null given, called in %s on line %d
-class@anonymous::test(): Return value must be of type class@anonymous|string, stdClass returned
+TypeError: class@anonymous(): Argument #1 ($a) must be of type class@anonymous|string, null given, called in %s on line %d
+TypeError: class@anonymous::test(): Return value must be of type class@anonymous|string, stdClass returned

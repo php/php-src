@@ -102,7 +102,7 @@ echo"Done\n";
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -110,7 +110,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -119,7 +119,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -127,7 +127,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -136,7 +136,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -144,7 +144,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -153,7 +153,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -161,7 +161,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -170,7 +170,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -178,7 +178,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -187,7 +187,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -195,7 +195,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -204,7 +204,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -212,7 +212,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -221,7 +221,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -229,7 +229,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -238,7 +238,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -246,7 +246,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -257,7 +257,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -265,7 +265,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -274,7 +274,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -282,7 +282,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -291,7 +291,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -299,7 +299,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -308,7 +308,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -316,7 +316,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -325,7 +325,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -333,7 +333,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -342,7 +342,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -350,7 +350,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -359,7 +359,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -367,7 +367,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -376,7 +376,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -384,7 +384,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -393,7 +393,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -401,7 +401,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -412,7 +412,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -420,7 +420,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -429,7 +429,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -437,7 +437,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -446,7 +446,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -454,7 +454,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -463,7 +463,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -471,7 +471,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -480,7 +480,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -488,7 +488,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -497,7 +497,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -505,7 +505,7 @@ bool(false)
 int(%r1024|1137%r)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(%r1024|1137%r)
 bool(false)
@@ -514,7 +514,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -522,7 +522,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -531,7 +531,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -539,7 +539,7 @@ bool(false)
 int(1024)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(1024)
 bool(false)
@@ -548,7 +548,7 @@ bool(false)
 int(0)
 bool(false)
 Reading 1030 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(0)
 bool(false)
@@ -556,7 +556,7 @@ bool(false)
 int(%r1024|1137%r)
 bool(false)
 Reading 10 bytes from file, expecting 0 bytes ... 
-Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fread(): Read of 8192 bytes failed with errno=9 Bad file %r(descriptor|number)%r in %s on line %d
 OK
 int(%r1024|1137%r)
 bool(false)

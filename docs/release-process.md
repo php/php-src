@@ -6,6 +6,8 @@ repository available according to the release schedule.
 The release schedule for each version is published on the
 [PHP wiki](https://wiki.php.net):
 
+- [PHP 8.6](https://wiki.php.net/todo/php86)
+- [PHP 8.5](https://wiki.php.net/todo/php85)
 - [PHP 8.4](https://wiki.php.net/todo/php84)
 - [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
@@ -103,6 +105,7 @@ releases.
     * php-8.4.0 (initial GA)
     * php-8.4.9 (periodic bugfix or security release)
 
+12. Ensure you are familiar with our procedure for [merging upwards][].
 
 ## Packaging a non-stable release (alpha/beta/RC)
 
@@ -137,13 +140,22 @@ slightly different steps. We'll call attention where the steps differ.
    > During the first RC release, you will create (and push!) the version
    > branch for the pre-GA release, e.g., `PHP-8.2`. See
    > "[Forking a new version branch](#forking-a-new-version-branch)" below.
-   > From this point forward, all pre-GA release branches will be created from
+   > For the last RC release, and the subsequent GA release, follow the post-GA
+   > procedure, but until that point, pre-GA release branches will be created from
    > this version branch. Again, these release branches are local-only. Do not
    > push them!
    >
    > ```shell
-   > git checkout -b php-X.Y.0beta2-local-release-branch upstream/PHP-X.Y
+   > git checkout -b php-X.Y.0RC3-local-release-branch upstream/PHP-X.Y
    > ```
+
+   > 💬 **Hint** \
+   > The *patch-level version branch* for GA (PHP X.Y.0) is created as part of the
+   > last *planned* RC release (currently PHP X.Y.0RC4). After the last RC is released,
+   > additional bug fixes in the PHP X.Y branch will not be a part of PHP X.Y.0. If a regression
+   > is found that warrants including a fix in PHP X.Y.0, use the same process as
+   > for other patch releases - merge the patch as normal to PHP X.Y, and then cherry-pick
+   > the patch to the patch-level PHP X.Y.0 branch.
 
    > 🔷 **Non-stable version branches: post-GA** \
    > After GA, you will create (and push) a new *patch-level version branch*
@@ -169,10 +181,10 @@ slightly different steps. We'll call attention where the steps differ.
 4. Using your local-only release branch, bump the version numbers in
    `main/php_version.h`, `Zend/zend.h`, `configure.ac`, and possibly
    `NEWS`.
-  
+
    The date for NEWS should be the date of the announcement (Thursday),
    *not* the date of the tagging (Tuesday).
-  
+
    For examples, see [Update versions for PHP 8.1.0beta3][] (for a pre-GA
    example) or [Update versions for PHP 8.1.6RC1][] along with
    [Update NEWS for PHP 8.1.6RC1][] (for a post-GA example).
@@ -263,7 +275,7 @@ slightly different steps. We'll call attention where the steps differ.
    The NEWS is updated at the *start* of the cycle for the next tag, e.g.
    [Update NEWS for PHP 8.2.0 alpha2][] was sent as part of tagging 8.2.0 alpha **1**.
 
-   🔷 **For post-GA releases only,** switch back to the *version branch* for
+   🔷 **For post-GA releases, and the final pre-GA RC** switch back to the *version branch* for
    your release (e.g., `PHP-8.2`) and bump the version numbers in
    `main/php_version.h`, `Zend/zend.h`, `configure.ac` and `NEWS`. This prepares
    the version branch for the next version.
@@ -291,11 +303,34 @@ slightly different steps. We'll call attention where the steps differ.
    > Only release tags should have version numbers in these files that do not
    > end in `-dev` (e.g., `8.1.7`, `8.1.7RC1`, `8.2.0alpha1`, etc.).
 
-10. Push the changes to the `php-src`.
+    Do not forget to merge up PHP-X.Y all the way to master.
+
+    ```shell
+    git switch PHP-X.Y+1 # starting from your release branch
+    git merge PHP-X.Y
+    # repeat             # Merge up all the way
+    git switch master
+    git merge PHP-X.Y+n  # latest release branch
+    ```
+
+    When resolving the conflicts, ignore the changes from PHP-X.Y in higher
+    branches when on PHP.X.Y+1 or master after the merge resulting in the
+    conflicts.
+
+    ```shell
+    git checkout --ours main/php_version.h Zend/zend.h configure.ac
+    git add main/php_version.h Zend/zend.h configure.ac
+    git merge --continue
+    ```
+
+    Be sure to set up a merge driver for the `NEWS` file as described in
+    the [Git FAQ page on the PHP wiki][gitfaq-mandatory].
+
+11. Push the changes to the `php-src`.
 
     ```shell
     git push upstream php-X.Y.ZRCn # tag name
-    git push upstream PHP-X.Y.Z    # patch-level version branch (post-GA only)
+    git push upstream PHP-X.Y.Z    # patch-level version branch (beginning with the last RC before GA)
     git push upstream PHP-X.Y      # version branch (post-branch creation only)
     git push upstream master       # version branch (pre-branch creation only)
     ```
@@ -306,12 +341,7 @@ slightly different steps. We'll call attention where the steps differ.
     >
     > Local-only release branches should not be pushed!
 
-    Do not forget to merge up PHP-X.Y all the way to master. When resolving
-    the conflicts, ignore the changes from PHP-X.Y in higher branches. It
-    means using something like `git checkout --ours .` when on PHP.X.Y+1 or
-    master after the merge resulting in the conflicts.
-
-11. Run the following using the release tag to export the tree, create the
+12. Run the following using the release tag to export the tree, create the
     `configure` script, and build and compress three tarballs (`.tar.gz`,
     `.tar.bz2` and `.tar.xz`).
 
@@ -319,7 +349,7 @@ slightly different steps. We'll call attention where the steps differ.
     ./scripts/dev/makedist php-X.Y.ZRCn
     ```
 
-12. Run the following using the release tag and your GPG key ID to sign the
+13. Run the following using the release tag and your GPG key ID to sign the
     tarballs and save the signatures to `php-X.Y.ZRCn.manifest`, which you can
     upload to GitHub and include in the announcement emails.
 
@@ -327,7 +357,7 @@ slightly different steps. We'll call attention where the steps differ.
     ./scripts/dev/gen_verify_stub X.Y.ZRCn YOURKEYID > php-X.Y.ZRCn.manifest
     ```
 
-13. If you have the [GitHub command line tool][] installed, run the following to
+14. If you have the [GitHub command line tool][] installed, run the following to
     create a public Gist for the manifest file:
 
     ```shell
@@ -336,7 +366,7 @@ slightly different steps. We'll call attention where the steps differ.
 
     Or you may go to https://gist.github.com to create it manually.
 
-14. Copy the tarballs (using scp, rsync, etc.) to your `public_html/` folder on
+15. Copy the tarballs (using scp, rsync, etc.) to your `public_html/` folder on
     downloads.php.net.
 
     ```shell
@@ -347,10 +377,10 @@ slightly different steps. We'll call attention where the steps differ.
     > If you do not have a `public_html` directory, create it and set its
     > permissions to `0755`.
 
-15. Now the tarballs and signatures may be found at
+16. Now the tarballs and signatures may be found at
     `https://downloads.php.net/~yourname/`, e.g. https://downloads.php.net/~derick/.
 
-16. Once the release is tagged, contact the release-managers@php.net distribution
+17. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -506,33 +536,46 @@ slightly different steps. We'll call attention where the steps differ.
    You can send a PR to [toot-together](https://github.com/derickr/toot-together/)
    with highlights from the NEWS file yourself, if you want.
 
-   * [Annonce 8.5.0alpha1](https://github.com/derickr/toot-together/pull/42)
-   * [Annonce 8.5.0alpha2](https://github.com/derickr/toot-together/pull/47)
+   * [Announce 8.5.0alpha1](https://github.com/derickr/toot-together/pull/42)
+   * [Announce 8.5.0alpha2](https://github.com/derickr/toot-together/pull/47)
 
    We post to [@php@fosstodon.org](https://fosstodon.org/@php).
 
 
 ## Packaging a stable release
 
-1. Check out the *patch-level version branch* for the release
-   (e.g., `PHP-8.1.7`).
+1. Check out the *patch-level version branch* for the release.
+
+   ```
+   git switch PHP-X.Y.Z
+   ```
 
    > 💬 **Hint** \
    > You should have created this branch when packaging the non-stable release
-   > candidate for this version. If it is for a PHP-X.Y.0 version, then just
-   > create and push this branch.
+   > candidate for this version. If it is for a PHP-X.Y.0 version, then the branch
+   > was created as part of the final planned release candidate, PHP-X.Y.0RC4.
 
-2. If a CVE commit needs to be merged to the release, have it committed to
-   the base branches and [merged upwards as usual][] (e.g. commit the CVE fix
-   to 7.2, merge to 7.3, 7.4, etc.). Then, you can cherry-pick it into the
-   patch-level version branch for this release.
+2. If the upcoming release is a security release, you will have been informed
+   about it by the security release manager (SRM) by Tuesday noon (UTC).
 
-   Commit these changes and push the patch-level version branch. Ensure
-   that CI is still passing (see above).
+   > 💬 **Hint** \
+   > If you haven't set up a git remote for the security repo yet, do so:
+   > ```bash
+   > git remote add security git@github.com:php/php-src-security.git
+   > ```
 
-   > 💡 **Tip** \
-   > Don't forget to update `NEWS` manually in an extra commit to the
-   > patch-level version branch.
+   The SRM will provide you with a branch to merge in your
+   *patch-level version branch*.
+
+   ```bash
+   git fetch security
+   git merge security/PHP-X.Y.Z-security
+   git push upstream PHP-X.Y.Z
+   ```
+
+   > 💬 **Hint** \
+   > You do not need to merge this back into PHP-X.Y; the SRM will take care
+   > of it.
 
 3. Run the `./scripts/dev/credits` script in the patch-level version branch,
    and commit the changes in the credits files in `ext/standard`.
@@ -649,31 +692,7 @@ slightly different steps. We'll call attention where the steps differ.
     git push upstream master
     ```
 
-14. Switch to your local clone of the `web-php` repository and update the
-    `web-php-distributions` submodule.
-
-    ```shell
-    cd /path/to/repos/php/web-php
-    git pull --rebase upstream master
-    git submodule init
-    git submodule update
-    cd distributions
-    git fetch --all
-    git pull --rebase upstream master
-    cd ..
-    git commit distributions -m "X.Y.Z tarballs"
-    git push upstream master
-    ```
-
-    > 💬 **Hint** \
-    > This fetches the last commit ID from `web-php-distributions` and pins the
-    > "distributions" submodule in `web-php` to this commit ID.
-    >
-    > When the website syncs, which should happen within an hour, the tarballs
-    > will be available from `https://www.php.net/distributions/php-X.Y.Z.tar.gz`,
-    > etc.
-
-15. Once the release is tagged, contact the release-managers@php.net distribution
+14. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -938,13 +957,20 @@ feature development that cannot go into the new version.
    See [Prepare for PHP 8.2][] and [Prepare for PHP 8.2 (bis)][] for an example
    of what this commit should include.
 
-4. Push the new version branch and the changes to the `master` branch, with an
+   > 💬 **Hint** \
+   > The API version numbers in `Zend/zend_extensions.h`, `Zend/zend_modules.h`, and
+   > `main/php.h` in `master` need to be **greater** than the ones in the new `PHP-X.Y`
+   > branch. Generally, use the `YYYYMMDD` date for the *Thursday* as the value for the
+   > `PHP-X.Y` API numbers, and for the *Friday* as the value for the `master` API
+   > numbers. This ensures that `master` is always considered newer than the version branch.
+
+5. Push the new version branch and the changes to the `master` branch, with an
    appropriate commit message (e.g., "master is now for PHP 8.3.0-dev").
 
-5. Immediately notify internals@ of the new branch and advise on the new merging
+6. Immediately notify internals@ of the new branch and advise on the new merging
    order. For example: https://news-web.php.net/php.internals/99903
 
-6. Update `web-php:git.php` and https://wiki.php.net/vcs/gitworkflow to reflect
+7. Update `web-php:git.php` and https://wiki.php.net/vcs/gitworkflow to reflect
    the new branch.
 
    For example:
@@ -959,6 +985,29 @@ feature development that cannot go into the new version.
 > minor improvements and bug fixes. All major improvements and new features must
 > wait.
 
+8. Most CI configuration is maintained on the lowest supported branch; update the
+   applicable files there to reflect the branch cut, and then upmerge that commit
+   5 times to get it to `master`. The following files need to be updated:
+
+   * `.github/matrix.php` (add new branch, update version for `master`)
+   [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/197921a8aa7b2f9af103b439bf913e23d6ed1b98)
+
+   * `.github/scripts/windows/find-target-branch.bat` (update version for `master`)
+   [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/107075605db6f1b15ce275e345d1c6de04a464b0)
+
+9. Update the `.github/workflows/push.yml` file with the new branch. This file
+   does not need to be updated on the lowest supported branch; just update the
+   newly cut branch to add the new branch to the branches that the workflow
+   runs on (and then upmerge once to `master`). For example:
+
+   * [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/77af4780ccbbc96a2f85a3102d45a15f5e26f9c9)
+
+10. Update the version of `php/php-sdk-binary-tools` used for the `master` branch for the `nightly`
+    and `push` jobs to account for the new version; this can be done before the branch cut if
+    the new version is ready. If the new version is not ready when the branch is cut, file an
+    issue reporting the problem. For example:
+
+    * [Updating after 8.5 branch cut](https://github.com/php/php-src/commit/f7e39a91d5a9de53fc4e184f6fce6116ca3388a1)
 
 ## Preparing for the initial stable version (PHP X.Y.0)
 
@@ -1044,26 +1093,19 @@ volunteers to begin the selection process for the next release managers.
    * php-general@lists.php.net (email php-general+subscribe@lists.php.net)
    * php-qa@lists.php.net (email php-qa+subscribe@lists.php.net)
 
-4. Email systems@php.net to get setup for access to downloads.php.net, to be
-   added to the release-managers@php.net distribution list, and to be added to
-   the moderators for php-announce@lists.php.net so you are able to moderate
-   your release announcements.
+4. File a [ticket in the infrastructure](https://github.com/php/infrastructure/issues/new?template=request-release-manager-access.yml)
+   project and provide an SSH key, your @php.net email address, your GitHub
+   account name, and your preferred system account name. Preferrably they're
+   all the same!
 
-   Provide the following information in a single email:
+5. Read [Logging into Servers](https://github.com/php/infrastructure/blob/main/docs/ServerAccess.rst#logging-into-servers) to set up
+   access to downloads.php.net through jump hosts with 2FA.
 
-   - An SSH public key, preferably a new unique one for PHP systems and
-     projects.
-   - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
-     up access to downloads.php.net through jump hosts, and provide a
-     `.google_authenticator` file for 2FA.
-   - Your @php.net email address to use for the release-managers@php.net
-     distribution list and php-announce@lists.php.net moderator address. This
-     should preferably not forward to a Gmail address.
-   - Your GitHub account name, so that your membership to the release managers
-     group may be approved.
-
-   A system admin will then contact you to go through with steps 5 through 8 of
-   [2FA setup instructions](https://wiki.php.net/systems#fa_setup_instructions).
+   Then [create a Google Authenticator file](https://github.com/php/infrastructure/blob/main/docs/ServerAccess.rst#creating-google-authenticator-files),
+   and provide the `.google_authenticator` file that this created, as
+   attachment to an email to systems@php.net. In this email you should also
+   provide a link to the ticket in the infrastructure project that you have
+   created in the previous step
 
    > 💬 **Hint** \
    > To send email from your @php.net address, you will need to use a custom
@@ -1071,7 +1113,7 @@ volunteers to begin the selection process for the next release managers.
    > "[Send emails from a different address or alias][]."
 
 
-5. Create a [GPG key][] for your @php.net address.
+6. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -1136,7 +1178,7 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-6. Make sure you have the following repositories cloned locally:
+7. Make sure you have the following repositories cloned locally:
 
    * https://github.com/php/php-src
    * https://github.com/php/web-php
@@ -1154,7 +1196,7 @@ volunteers to begin the selection process for the next release managers.
 [Update NEWS for PHP 8.2.0RC6]: https://github.com/php/php-src/commit/4ccc414961a70200d638ca281a35f893226d74e2
 [PHP 8.3 is now for PHP 8.3.21-dev]: https://github.com/php/php-src/commit/b57f425cfe20a11003253427424cc0517483550b
 [GitHub command line tool]: https://cli.github.com
-[merged upwards as usual]: https://wiki.php.net/vcs/gitworkflow
+[merging upwards]: https://wiki.php.net/vcs/gitworkflow
 [Update versions for PHP 8.1.7]: https://github.com/php/php-src/commit/d35e577a1bd0b35b9386cea97cddc73fd98eed6d
 [Update NEWS for PHP 8.1.7]: https://github.com/php/php-src/commit/b241f07f52ca9f87bf52be81817f475e6e727439
 [Announce PHP 8.1.6]: https://github.com/php/web-php/commit/9f796a96c65f07e45845ec248933bfb0010b94a9
@@ -1167,5 +1209,6 @@ volunteers to begin the selection process for the next release managers.
 [GPG key]: https://en.wikipedia.org/wiki/GNU_Privacy_Guard
 [Generating a new GPG key]: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 [sign your GPG key]: https://carouth.com/articles/signing-pgp-keys/
+[gitfaq-mandatory]: https://wiki.php.net/vcs/gitfaq#mandatory_git_settings
 [Send emails from a different address or alias]: https://support.google.com/mail/answer/22370?hl=en
 [security-txt]: https://github.com/php/policies/blob/main/security-policies.rst#making-changes-to-securitytxt

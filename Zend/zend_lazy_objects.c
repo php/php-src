@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
    +----------------------------------------------------------------------+
@@ -479,6 +478,24 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	/* prevent reentrant initialization */
 	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY);
 
+	zval *properties_table_snapshot = NULL;
+
+	/* Snapshot dynamic properties */
+	HashTable *properties_snapshot = obj->properties;
+	if (properties_snapshot) {
+		GC_TRY_ADDREF(properties_snapshot);
+	}
+
+	/* Snapshot declared properties */
+	if (obj->ce->default_properties_count) {
+		zval *properties_table = obj->properties_table;
+		properties_table_snapshot = emalloc(sizeof(*properties_table_snapshot) * obj->ce->default_properties_count);
+
+		for (int i = 0; i < obj->ce->default_properties_count; i++) {
+			ZVAL_COPY_PROP(&properties_table_snapshot[i], &properties_table[i]);
+		}
+	}
+
 	/* Call factory */
 	zval retval;
 	int argc = 1;
@@ -492,33 +509,29 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	zend_call_known_fcc(initializer, &retval, argc, &zobj, named_params);
 
 	if (UNEXPECTED(EG(exception))) {
-		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
-		goto exit;
+		goto fail;
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT)) {
-		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		zend_type_error("Lazy proxy factory must return an instance of a class compatible with %s, %s returned",
 				ZSTR_VAL(obj->ce->name),
 				zend_zval_value_name(&retval));
 		zval_ptr_dtor(&retval);
-		goto exit;
+		goto fail;
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT || !zend_lazy_object_compatible(Z_OBJ(retval), obj))) {
-		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		zend_type_error("The real instance class %s is not compatible with the proxy class %s. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.",
 				zend_zval_value_name(&retval),
 				ZSTR_VAL(obj->ce->name));
 		zval_ptr_dtor(&retval);
-		goto exit;
+		goto fail;
 	}
 
 	if (UNEXPECTED(Z_OBJ(retval) == obj || zend_object_is_lazy(Z_OBJ(retval)))) {
-		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		zend_throw_error(NULL, "Lazy proxy factory must return a non-lazy object");
 		zval_ptr_dtor(&retval);
-		goto exit;
+		goto fail;
 	}
 
 	zend_fcc_dtor(&info->u.initializer.fcc);
@@ -542,6 +555,21 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 		}
 	}
 
+	if (properties_table_snapshot) {
+		for (int i = 0; i < obj->ce->default_properties_count; i++) {
+			zval *p = &properties_table_snapshot[i];
+			/* Use zval_ptr_dtor directly here (not zend_object_dtor_property),
+			 * as any reference type_source will have already been deleted in
+			 * case the prop is not bound to this value anymore. */
+			i_zval_ptr_dtor(p);
+		}
+		efree(properties_table_snapshot);
+	}
+
+	if (properties_snapshot) {
+		zend_release_properties(properties_snapshot);
+	}
+
 	instance = Z_OBJ(retval);
 
 exit:
@@ -554,6 +582,11 @@ exit:
 	}
 
 	return instance;
+
+fail:
+	OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
+	zend_lazy_object_revert_init(obj, properties_table_snapshot, properties_snapshot);
+	goto exit;
 }
 
 /* Initialize a lazy object. */

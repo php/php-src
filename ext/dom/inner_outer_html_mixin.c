@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
@@ -183,7 +181,7 @@ static lxb_dom_document_cmode_t dom_translate_quirks_mode(php_libxml_quirks_mode
 		case PHP_LIBXML_NO_QUIRKS: return LXB_DOM_DOCUMENT_CMODE_NO_QUIRKS;
 		case PHP_LIBXML_LIMITED_QUIRKS: return LXB_DOM_DOCUMENT_CMODE_LIMITED_QUIRKS;
 		case PHP_LIBXML_QUIRKS: return LXB_DOM_DOCUMENT_CMODE_QUIRKS;
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -293,8 +291,12 @@ static xmlNodePtr dom_xml_fragment_parsing_algorithm(dom_object *obj, const xmlN
 	}
 	parser->dict = context_node->doc->dict;
 
+#if LIBXML_VERSION >= 21300
+	xmlCtxtSetOptions(parser, XML_PARSE_IGNORE_ENC | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NO_XXE);
+#else
 	php_libxml_sanitize_parse_ctxt_options(parser);
 	xmlCtxtUseOptions(parser, XML_PARSE_IGNORE_ENC | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
+#endif
 
 	xmlCharEncodingHandlerPtr encoding = xmlFindCharEncodingHandler("UTF-8");
 	(void) xmlSwitchToEncoding(parser, encoding);

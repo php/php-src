@@ -42,8 +42,4 @@ int mbfilter_sjis_emoji_docomo2unicode(int s, int *snd);
 int mbfilter_sjis_emoji_kddi2unicode(int s, int *snd);
 int mbfilter_sjis_emoji_sb2unicode(int s, int *snd);
 
-int mbfilter_unicode2sjis_emoji_docomo(int c, int *s1, mbfl_convert_filter *filter);
-int mbfilter_unicode2sjis_emoji_kddi_sjis(int c, int *s1, mbfl_convert_filter *filter);
-int mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter);
-
 #endif /* MBFL_MBFILTER_CJK_H */

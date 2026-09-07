@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - IPv6 address
---EXTENSIONS--
-uri
+Test Uri\WhatWg\Url::withHost() - success - IPv6 address
 --FILE--
 <?php
 

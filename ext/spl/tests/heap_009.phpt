@@ -13,7 +13,7 @@ function testForException( $heap )
     }
     catch( \Error $e )
     {
-        echo $e->getMessage(),"\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -46,9 +46,9 @@ testForException( $heap );
 
 ?>
 --EXPECT--
-An iterator cannot be used with foreach by reference
-An iterator cannot be used with foreach by reference
-An iterator cannot be used with foreach by reference
-An iterator cannot be used with foreach by reference
-An iterator cannot be used with foreach by reference
-An iterator cannot be used with foreach by reference
+Error: An iterator cannot be used with foreach by reference
+Error: An iterator cannot be used with foreach by reference
+Error: An iterator cannot be used with foreach by reference
+Error: An iterator cannot be used with foreach by reference
+Error: An iterator cannot be used with foreach by reference
+Error: An iterator cannot be used with foreach by reference

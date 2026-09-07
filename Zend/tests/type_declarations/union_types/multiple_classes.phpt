@@ -27,14 +27,14 @@ var_dump($test->method("42"));
 
 try {
     $test->prop = new stdClass;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $test->method(new stdClass);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 if (true) {
@@ -67,8 +67,8 @@ int(42)
 int(42)
 int(42)
 int(42)
-Cannot assign stdClass to property Test::$prop of type X|Y|Z|int
-Test::method(): Argument #1 ($arg) must be of type X|Y|Z|int, stdClass given, called in %s on line %d
+TypeError: Cannot assign stdClass to property Test::$prop of type X|Y|Z|int
+TypeError: Test::method(): Argument #1 ($arg) must be of type X|Y|Z|int, stdClass given, called in %s on line %d
 object(X)#4 (0) {
 }
 object(X)#6 (0) {

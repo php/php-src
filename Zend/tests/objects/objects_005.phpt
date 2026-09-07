@@ -19,4 +19,4 @@ class test3 extends test {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of test3::foo() must be compatible with & test::foo() in %s on line %d
+Fatal error: Declaration of test3::foo() must be compatible with &test::foo() in %s on line %d

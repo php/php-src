@@ -41,7 +41,7 @@ var_dump($b->isCompressed() == Phar::BZ2);
 try {
 $b->isFileFormat(25);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -54,4 +54,4 @@ string(9) "it worked"
 string(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
-Unknown file format specified
+PharException: Unknown file format specified

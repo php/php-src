@@ -101,7 +101,7 @@ function tryBadFlags($flags) {
     mb_convert_kana('abc', $flags, 'UTF-8');
     echo "BAD! mb_convert_kana should have thrown an exception for flags: $flags\n";
   } catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
 }
 function tryIncompatibleFlags($flag1, $flag2) {
@@ -129,7 +129,7 @@ tryIncompatibleFlags('k', 'c');
 try {
   mb_convert_kana($zenKakuA, 'Z', 'UTF-8');
 } catch (ValueError $e) {
-  echo $e->getMessage() . "\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Regression test: Two codepoints collapsed into one, just one position
@@ -220,37 +220,37 @@ Convert full-width katakana to full-width hiragana:
 
 0000
 
-mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'a' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'a' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'r' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'r' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'n' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'n' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'R' and 'a' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'R' and 'a' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'N' and 'a' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'N' and 'a' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'R' and 'r' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'R' and 'r' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'N' and 'n' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'N' and 'n' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'S' and 's' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'S' and 's' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'H' and 'K' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'H' and 'K' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'C' and 'c' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'C' and 'c' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'M' and 'm' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'M' and 'm' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'C' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'C' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'c' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'c' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'k' and 'C' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'k' and 'C' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'k' and 'c' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'k' and 'c' flags
-mb_convert_kana(): Argument #2 ($mode) contains invalid flag: 'Z'
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'a' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'a' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'r' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'r' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'n' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'A' and 'n' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'R' and 'a' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'R' and 'a' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'N' and 'a' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'N' and 'a' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'R' and 'r' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'R' and 'r' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'N' and 'n' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'N' and 'n' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'S' and 's' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'S' and 's' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'H' and 'K' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'H' and 'K' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'C' and 'c' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'C' and 'c' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'M' and 'm' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'M' and 'm' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'C' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'C' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'c' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'c' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'k' and 'C' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'k' and 'C' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'k' and 'c' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) must not combine 'k' and 'c' flags
+ValueError: mb_convert_kana(): Argument #2 ($mode) contains invalid flag: 'Z'
 --CREDITS--
 Jason Easter <easter@phpug-wuerzburg.de>
 PHPUG Würzburg <phpug-wuerzburg.de>

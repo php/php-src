@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-$filename_txt = __DIR__."/010.test.txt";
+$filename_txt = __DIR__."/010-R.test.txt";
 $filename_txt_escaped = escapeshellarg($filename_txt);
 
 $txt = '

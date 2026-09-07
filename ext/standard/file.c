@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Stig Bakken <ssb@php.net>                                   |
@@ -63,11 +61,7 @@
 #include "file.h"
 
 #ifdef HAVE_PWD_H
-# ifdef PHP_WIN32
-#  include "win32/pwd.h"
-# else
-#  include <pwd.h>
-# endif
+# include <pwd.h>
 #endif
 
 #include "fsock.h"
@@ -98,7 +92,6 @@ php_file_globals file_globals;
 # include <fnmatch.h>
 #endif
 
-#include "zend_attributes.h"
 #include "file_arginfo.h"
 
 /* }}} */
@@ -149,8 +142,8 @@ static PHP_INI_MH(OnUpdateAutoDetectLineEndings)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateString, user_agent, php_file_globals, file_globals)
-	STD_PHP_INI_ENTRY("from", NULL, PHP_INI_ALL, OnUpdateString, from_address, php_file_globals, file_globals)
+	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateStr, user_agent, php_file_globals, file_globals)
+	STD_PHP_INI_ENTRY("from", NULL, PHP_INI_ALL, OnUpdateStr, from_address, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("default_socket_timeout", "60", PHP_INI_ALL, OnUpdateLong, default_socket_timeout, php_file_globals, file_globals)
 	STD_PHP_INI_BOOLEAN("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateAutoDetectLineEndings, auto_detect_line_endings, php_file_globals, file_globals)
 PHP_INI_END()
@@ -223,7 +216,9 @@ PHP_FUNCTION(flock)
 		Z_PARAM_ZVAL(wouldblock)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	php_flock_common(stream, operation, 2, wouldblock, return_value);
+	php_stream_error_operation_end_for_stream(stream);
 }
 /* }}} */
 
@@ -258,6 +253,8 @@ PHP_FUNCTION(get_meta_tags)
 	if (!md.stream)	{
 		RETURN_FALSE;
 	}
+
+	php_stream_error_operation_begin();
 
 	array_init(return_value);
 
@@ -370,6 +367,8 @@ PHP_FUNCTION(get_meta_tags)
 	if (value) efree(value);
 	if (name) efree(name);
 	php_stream_close(md.stream);
+
+	php_stream_error_operation_end_for_stream(md.stream);
 }
 /* }}} */
 
@@ -404,12 +403,13 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_THROWS();
 	}
 
+	php_stream_error_operation_begin();
 	context = php_stream_context_from_zval(zcontext, 0);
-
 	stream = php_stream_open_wrapper_ex(filename, "rb",
 				(use_include_path ? USE_PATH : 0) | REPORT_ERRORS,
 				NULL, context);
 	if (!stream) {
+		php_stream_error_operation_end(context);
 		RETURN_FALSE;
 	}
 
@@ -420,8 +420,9 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if (offset != 0 && php_stream_seek(stream, offset, ((offset > 0) ? SEEK_SET : SEEK_END)) < 0) {
-		php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 		php_stream_close(stream);
+		php_stream_error_operation_end(context);
+		php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 		RETURN_FALSE;
 	}
 
@@ -432,6 +433,7 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	php_stream_close(stream);
+	php_stream_error_operation_end(context);
 }
 /* }}} */
 
@@ -461,6 +463,7 @@ PHP_FUNCTION(file_put_contents)
 		php_stream_from_zval(srcstream, data);
 	}
 
+	php_stream_error_operation_begin();
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (flags & PHP_FILE_APPEND) {
@@ -470,6 +473,7 @@ PHP_FUNCTION(file_put_contents)
 		if (php_memnstr(filename, "://", sizeof("://") - 1, filename + filename_len)) {
 			if (strncasecmp(filename, "file://", sizeof("file://") - 1)) {
 				php_error_docref(NULL, E_WARNING, "Exclusive locks may only be set for regular files");
+				php_stream_error_operation_end(context);
 				RETURN_FALSE;
 			}
 		}
@@ -479,11 +483,13 @@ PHP_FUNCTION(file_put_contents)
 
 	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {
+		php_stream_error_operation_end(context);
 		RETURN_FALSE;
 	}
 
 	if ((flags & LOCK_EX) && (!php_stream_supports_lock(stream) || php_stream_lock(stream, LOCK_EX))) {
 		php_stream_close(stream);
+		php_stream_error_operation_end(context);
 		php_error_docref(NULL, E_WARNING, "Exclusive locks are not supported for this stream");
 		RETURN_FALSE;
 	}
@@ -566,6 +572,7 @@ PHP_FUNCTION(file_put_contents)
 			break;
 	}
 	php_stream_close(stream);
+	php_stream_error_operation_end(context);
 
 	if (numbytes < 0) {
 		RETURN_FALSE;
@@ -611,10 +618,12 @@ PHP_FUNCTION(file)
 	include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
 
+	php_stream_error_operation_begin();
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (!stream) {
+		php_stream_error_operation_end(context);
 		RETURN_FALSE;
 	}
 
@@ -663,12 +672,12 @@ parse_eol:
 			p = e;
 			goto parse_eol;
 		}
+
+		zend_string_efree(target_buf);
 	}
 
-	if (target_buf) {
-		zend_string_free(target_buf);
-	}
 	php_stream_close(stream);
+	php_stream_error_operation_end(context);
 }
 /* }}} */
 
@@ -708,7 +717,9 @@ PHP_FUNCTION(tmpfile)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
+	php_stream_error_operation_begin();
 	stream = php_stream_fopen_tmpfile();
+	php_stream_error_operation_end_for_stream(stream);
 
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
@@ -736,9 +747,11 @@ PHP_FUNCTION(fopen)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	php_stream_error_operation_end(context);
 
 	if (stream == NULL) {
 		RETURN_FALSE;
@@ -762,9 +775,11 @@ PHPAPI PHP_FUNCTION(fclose)
 		RETURN_FALSE;
 	}
 
+	php_stream_error_operation_begin();
 	php_stream_free(stream,
 		PHP_STREAM_FREE_KEEP_RSRC |
 		(stream->is_persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE));
+	php_stream_error_operation_end_for_stream(stream);
 
 	RETURN_TRUE;
 }
@@ -807,19 +822,21 @@ PHP_FUNCTION(popen)
 
 	fp = VCWD_POPEN(command, posix_mode);
 	if (!fp) {
-		php_error_docref2(NULL, command, posix_mode, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		efree(posix_mode);
 		RETURN_FALSE;
 	}
 
+	php_stream_error_operation_begin();
 	stream = php_stream_fopen_from_pipe(fp, mode);
 
 	if (stream == NULL)	{
-		php_error_docref2(NULL, command, mode, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETVAL_FALSE;
 	} else {
 		php_stream_to_zval(stream, return_value);
 	}
+	php_stream_error_operation_end_for_stream(stream);
 
 	efree(posix_mode);
 }
@@ -834,9 +851,11 @@ PHP_FUNCTION(pclose)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	FG(pclose_wait) = 1;
 	zend_list_close(stream->res);
 	FG(pclose_wait) = 0;
+	php_stream_error_operation_end_for_stream(stream);
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
@@ -850,11 +869,13 @@ PHPAPI PHP_FUNCTION(feof)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	if (php_stream_eof(stream)) {
-		RETURN_TRUE;
+		RETVAL_TRUE;
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	php_stream_error_operation_end_for_stream(stream);
 }
 /* }}} */
 
@@ -874,9 +895,11 @@ PHPAPI PHP_FUNCTION(fgets)
 		Z_PARAM_LONG_OR_NULL(len, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	if (len_is_null) {
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
+		php_stream_error_operation_end_for_stream(stream);
 		if (buf == NULL) {
 			RETURN_FALSE;
 		}
@@ -890,7 +913,9 @@ PHPAPI PHP_FUNCTION(fgets)
 		}
 
 		str = zend_string_alloc(len, 0);
-		if (php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len) == NULL) {
+		buf = php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len);
+		php_stream_error_operation_end_for_stream(stream);
+		if (buf == NULL) {
 			zend_string_efree(str);
 			RETURN_FALSE;
 		}
@@ -915,7 +940,9 @@ PHPAPI PHP_FUNCTION(fgetc)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	int result = php_stream_getc(stream);
+	php_stream_error_operation_end_for_stream(stream);
 
 	if (result == EOF) {
 		RETVAL_FALSE;
@@ -934,7 +961,6 @@ PHP_FUNCTION(fscanf)
 	zval *file_handle;
 	char *buf, *format;
 	size_t len;
-	void *what;
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_RESOURCE(file_handle)
@@ -942,16 +968,18 @@ PHP_FUNCTION(fscanf)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	what = zend_fetch_resource2(Z_RES_P(file_handle), "File-Handle", php_file_le_stream(), php_file_le_pstream());
+	php_stream *stream = zend_fetch_resource2(Z_RES_P(file_handle), "File-Handle", php_file_le_stream(), php_file_le_pstream());
 
-	/* we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
+	/* we can't do a ZEND_VERIFY_RESOURCE(stream), otherwise we end up
 	 * with a leak if we have an invalid filehandle. This needs changing
 	 * if the code behind ZEND_VERIFY_RESOURCE changed. - cc */
-	if (!what) {
+	if (!stream) {
 		RETURN_THROWS();
 	}
 
-	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);
+	php_stream_error_operation_begin();
+	buf = php_stream_get_line(stream, NULL, 0, &len);
+	php_stream_error_operation_end_for_stream(stream);
 	if (buf == NULL) {
 		RETURN_FALSE;
 	}
@@ -961,7 +989,8 @@ PHP_FUNCTION(fscanf)
 	efree(buf);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
-		WRONG_PARAM_COUNT;
+		zend_wrong_param_count();
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -996,7 +1025,9 @@ PHPAPI PHP_FUNCTION(fwrite)
 		RETURN_LONG(0);
 	}
 
+	php_stream_error_operation_begin();
 	ret = php_stream_write(stream, input, num_bytes);
+	php_stream_error_operation_end_for_stream(stream);
 	if (ret < 0) {
 		RETURN_FALSE;
 	}
@@ -1015,27 +1046,27 @@ PHPAPI PHP_FUNCTION(fflush)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	ret = php_stream_flush(stream);
-	if (ret) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	php_stream_error_operation_end_for_stream(stream);
+	RETURN_BOOL(!ret);
 }
 /* }}} */
 
 /* {{{ Rewind the position of a file pointer */
 PHPAPI PHP_FUNCTION(rewind)
 {
+	int ret;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (-1 == php_stream_rewind(stream)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	php_stream_error_operation_begin();
+	ret = php_stream_rewind(stream);
+	php_stream_error_operation_end_for_stream(stream);
+	RETURN_BOOL(-1 != ret);
 }
 /* }}} */
 
@@ -1049,7 +1080,9 @@ PHPAPI PHP_FUNCTION(ftell)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	ret = php_stream_tell(stream);
+	php_stream_error_operation_end_for_stream(stream);
 	if (ret == -1)	{
 		RETURN_FALSE;
 	}
@@ -1070,7 +1103,9 @@ PHPAPI PHP_FUNCTION(fseek)
 		Z_PARAM_LONG(whence)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG(php_stream_seek(stream, offset, (int) whence));
+	php_stream_error_operation_begin();
+	RETVAL_LONG(php_stream_seek(stream, offset, (int) whence));
+	php_stream_error_operation_end_for_stream(stream);
 }
 /* }}} */
 
@@ -1094,7 +1129,9 @@ PHP_FUNCTION(mkdir)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	RETURN_BOOL(php_stream_mkdir(dir, (int)mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
+	php_stream_error_operation_begin();
+	RETVAL_BOOL(php_stream_mkdir(dir, (int)mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
+	php_stream_error_operation_end(context);
 }
 /* }}} */
 
@@ -1114,7 +1151,9 @@ PHP_FUNCTION(rmdir)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	RETURN_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
+	php_stream_error_operation_begin();
+	RETVAL_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
+	php_stream_error_operation_end(context);
 }
 /* }}} */
 
@@ -1138,14 +1177,17 @@ PHP_FUNCTION(readfile)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
+	php_stream_error_operation_begin();
 	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
-		RETURN_LONG(size);
+		RETVAL_LONG(size);
+	} else {
+		RETVAL_FALSE;
 	}
+	php_stream_error_operation_end(context);
 
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1187,7 +1229,9 @@ PHPAPI PHP_FUNCTION(fpassthru)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	size = php_stream_passthru(stream);
+	php_stream_error_operation_end_for_stream(stream);
 	RETURN_LONG(size);
 }
 /* }}} */
@@ -1208,26 +1252,31 @@ PHP_FUNCTION(rename)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
+	context = php_stream_context_from_zval(zcontext, 0);
+
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
+		php_stream_error_operation_end(context);
 		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
 		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->rename) {
+		php_stream_error_operation_end(context);
 		php_error_docref(NULL, E_WARNING, "%s wrapper does not support renaming", wrapper->wops->label ? wrapper->wops->label : "Source");
 		RETURN_FALSE;
 	}
 
 	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0)) {
+		php_stream_error_operation_end(context);
 		php_error_docref(NULL, E_WARNING, "Cannot rename a file across wrapper types");
 		RETURN_FALSE;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
-
-	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context));
+	RETVAL_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, REPORT_ERRORS, context));
+	php_stream_error_operation_end(context);
 }
 /* }}} */
 
@@ -1246,20 +1295,24 @@ PHP_FUNCTION(unlink)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
+		php_stream_error_operation_end(context);
 		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
 		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->unlink) {
+		php_stream_error_operation_end(context);
 		php_error_docref(NULL, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
 		RETURN_FALSE;
 	}
-	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context));
+	RETVAL_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context));
+	php_stream_error_operation_end(context);
 }
 /* }}} */
 
@@ -1271,12 +1324,15 @@ PHP_FUNCTION(fsync)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	if (!php_stream_sync_supported(stream)) {
+		php_stream_error_operation_end_for_stream(stream);
 		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(php_stream_sync(stream, /* data_only */ 0) == 0);
+	RETVAL_BOOL(php_stream_sync(stream, /* data_only */ 0) == 0);
+	php_stream_error_operation_end_for_stream(stream);
 }
 
 PHP_FUNCTION(fdatasync)
@@ -1287,12 +1343,15 @@ PHP_FUNCTION(fdatasync)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	if (!php_stream_sync_supported(stream)) {
+		php_stream_error_operation_end_for_stream(stream);
 		php_error_docref(NULL, E_WARNING, "Can't fsync this stream!");
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(php_stream_sync(stream, /* data_only */ 1) == 0);
+	RETVAL_BOOL(php_stream_sync(stream, /* data_only */ 1) == 0);
+	php_stream_error_operation_end_for_stream(stream);
 }
 
 /* {{{ Truncate file to 'size' length */
@@ -1311,12 +1370,16 @@ PHP_FUNCTION(ftruncate)
 		RETURN_THROWS();
 	}
 
+	php_stream_error_operation_begin();
+
 	if (!php_stream_truncate_supported(stream)) {
+		php_stream_error_operation_end_for_stream(stream);
 		php_error_docref(NULL, E_WARNING, "Can't truncate this stream!");
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, size));
+	RETVAL_BOOL(0 == php_stream_truncate_set_size(stream, size));
+	php_stream_error_operation_end_for_stream(stream);
 }
 /* }}} */
 PHPAPI void php_fstat(php_stream *stream, zval *return_value)
@@ -1400,7 +1463,9 @@ PHP_FUNCTION(fstat)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
 	php_fstat(stream, return_value);
+	php_stream_error_operation_end_for_stream(stream);
 }
 /* }}} */
 
@@ -1419,13 +1484,16 @@ PHP_FUNCTION(copy)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_error_operation_begin();
+	context = php_stream_context_from_zval(zcontext, 0);
+
 	if (php_stream_locate_url_wrapper(source, NULL, 0) == &php_plain_files_wrapper && php_check_open_basedir(source)) {
+		php_stream_error_operation_end(context);
 		RETURN_FALSE;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
-
-	RETURN_BOOL(php_copy_file_ctx(source, target, 0, context) == SUCCESS);
+	RETVAL_BOOL(php_copy_file_ctx(source, target, 0, context) == SUCCESS);
+	php_stream_error_operation_end(context);
 }
 /* }}} */
 
@@ -1455,7 +1523,6 @@ PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
-			break;
 		case 0:
 			break;
 		default: /* failed to stat file, does not exist? */
@@ -1470,7 +1537,6 @@ PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
-			break;
 		case 0:
 			break;
 		default: /* failed to stat file, does not exist? */
@@ -1552,9 +1618,10 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_THROWS();
 	}
 
+	php_stream_error_operation_begin();
 	str = php_stream_read_to_str(stream, len);
+	php_stream_error_operation_end_for_stream(stream);
 	if (!str) {
-		zval_ptr_dtor_str(return_value);
 		RETURN_FALSE;
 	}
 
@@ -1672,7 +1739,9 @@ PHP_FUNCTION(fputcsv)
 		RETURN_THROWS();
 	}
 
+	php_stream_error_operation_begin();
 	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char, eol_str);
+	php_stream_error_operation_end_for_stream(stream);
 	if (ret < 0) {
 		RETURN_FALSE;
 	}
@@ -1805,19 +1874,23 @@ PHP_FUNCTION(fgetcsv)
 		RETURN_THROWS();
 	}
 
+	php_stream_error_operation_begin();
 	if (len < 0) {
 		if ((buf = php_stream_get_line(stream, NULL, 0, &buf_len)) == NULL) {
+			php_stream_error_operation_end_for_stream(stream);
 			RETURN_FALSE;
 		}
 	} else {
 		buf = emalloc(len + 1);
 		if (php_stream_get_line(stream, buf, len + 1, &buf_len) == NULL) {
 			efree(buf);
+			php_stream_error_operation_end_for_stream(stream);
 			RETURN_FALSE;
 		}
 	}
 
 	HashTable *values = php_fgetcsv(stream, delimiter, enclosure, escape_char, buf_len, buf);
+	php_stream_error_operation_end_for_stream(stream);
 	if (values == NULL) {
 		values = php_bc_fgetcsv_empty_line();
 	}
@@ -2154,18 +2227,14 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 		switch (ch) {
 			case '<':
 				return TOK_OPENTAG;
-				break;
 
 			case '>':
 				return TOK_CLOSETAG;
-				break;
 
 			case '=':
 				return TOK_EQUAL;
-				break;
 			case '/':
 				return TOK_SLASH;
-				break;
 
 			case '\'':
 			case '"':
@@ -2192,7 +2261,6 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 				}
 
 				return TOK_STRING;
-				break;
 
 			case '\n':
 			case '\r':
@@ -2201,7 +2269,6 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 
 			case ' ':
 				return TOK_SPACE;
-				break;
 
 			default:
 				if (isalnum(ch)) {

@@ -10,8 +10,8 @@ $img = imagecreatetruecolor ( 256, 1);
 try {
 	imagescale($img, -1, -1, 0);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Argument #2 ($width) and argument #3 ($height) cannot be both negative
+ValueError: Argument #2 ($width) and argument #3 ($height) cannot be both negative

@@ -16,27 +16,27 @@ $recursiveArrayIterator = new RecursiveArrayIterator($obj);
 try {
     var_dump($recursiveArrayIterator->current());
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($recursiveArrayIterator->current());
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $recursiveArrayIterator->next();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($recursiveArrayIterator->current());
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
-nope 0
-nope 1
-nope 2
-nope 3
+Error: nope 0
+Error: nope 1
+Error: nope 2
+Error: nope 3

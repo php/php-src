@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - fragment - unsetting not-existent
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withFragment() - success - unsetting non-existent
 --FILE--
 <?php
 

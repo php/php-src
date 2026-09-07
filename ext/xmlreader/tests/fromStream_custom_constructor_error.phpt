@@ -17,10 +17,10 @@ fseek($h, 0);
 try {
     CustomXMLReader::fromStream($h, encoding: "UTF-8");
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 fclose($h);
 ?>
 --EXPECT--
-nope
+Error: nope

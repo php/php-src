@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Benjamin Eberlei <kontakt@beberlei.de>                      |
    |          Martin Schröder <m.schroeder2007@gmail.com>                 |
@@ -77,17 +76,17 @@ typedef struct _zend_internal_attribute {
 	zend_string* (*validator)(zend_attribute *attr, uint32_t target, zend_class_entry *scope);
 } zend_internal_attribute;
 
-ZEND_API zend_attribute *zend_get_attribute(HashTable *attributes, zend_string *lcname);
-ZEND_API zend_attribute *zend_get_attribute_str(HashTable *attributes, const char *str, size_t len);
+ZEND_API zend_attribute *zend_get_attribute(const HashTable *attributes, const zend_string *lcname);
+ZEND_API zend_attribute *zend_get_attribute_str(const HashTable *attributes, const char *str, size_t len);
 
-ZEND_API zend_attribute *zend_get_parameter_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset);
-ZEND_API zend_attribute *zend_get_parameter_attribute_str(HashTable *attributes, const char *str, size_t len, uint32_t offset);
+ZEND_API zend_attribute *zend_get_parameter_attribute(const HashTable *attributes, const zend_string *lcname, uint32_t offset);
+ZEND_API zend_attribute *zend_get_parameter_attribute_str(const HashTable *attributes, const char *str, size_t len, uint32_t offset);
 
-ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, uint32_t i, zend_class_entry *scope);
+ZEND_API zend_result zend_get_attribute_value(zval *ret, const zend_attribute *attr, uint32_t i, zend_class_entry *scope);
 ZEND_API zend_result zend_get_attribute_object(zval *out, zend_class_entry *attribute_ce, zend_attribute *attribute_data, zend_class_entry *scope, zend_string *filename);
 
 ZEND_API zend_string *zend_get_attribute_target_names(uint32_t targets);
-ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr);
+ZEND_API bool zend_is_attribute_repeated(const HashTable *attributes, const zend_attribute *attr);
 
 ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry *ce);
 ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags);
@@ -97,7 +96,7 @@ ZEND_API zend_attribute *zend_add_attribute(
 		HashTable **attributes, zend_string *name, uint32_t argc,
 		uint32_t flags, uint32_t offset, uint32_t lineno);
 
-uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope);
+uint32_t zend_attribute_attribute_get_flags(const zend_attribute *attr, zend_class_entry *scope);
 
 END_EXTERN_C()
 
@@ -119,13 +118,13 @@ static zend_always_inline zend_attribute *zend_add_parameter_attribute(zend_func
 	return zend_add_attribute(&func->common.attributes, name, argc, flags, offset + 1, 0);
 }
 
-static zend_always_inline zend_attribute *zend_add_property_attribute(zend_class_entry *ce, zend_property_info *info, zend_string *name, uint32_t argc)
+static zend_always_inline zend_attribute *zend_add_property_attribute(const zend_class_entry *ce, zend_property_info *info, zend_string *name, uint32_t argc)
 {
 	uint32_t flags = ce->type != ZEND_USER_CLASS ? ZEND_ATTRIBUTE_PERSISTENT : 0;
 	return zend_add_attribute(&info->attributes, name, argc, flags, 0, 0);
 }
 
-static zend_always_inline zend_attribute *zend_add_class_constant_attribute(zend_class_entry *ce, zend_class_constant *c, zend_string *name, uint32_t argc)
+static zend_always_inline zend_attribute *zend_add_class_constant_attribute(const zend_class_entry *ce, zend_class_constant *c, zend_string *name, uint32_t argc)
 {
 	uint32_t flags = ce->type != ZEND_USER_CLASS ? ZEND_ATTRIBUTE_PERSISTENT : 0;
 	return zend_add_attribute(&c->attributes, name, argc, flags, 0, 0);

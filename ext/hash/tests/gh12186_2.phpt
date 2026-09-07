@@ -9,9 +9,9 @@ hash_final($c);
 try {
     clone $c;
 } catch (Throwable $ex) {
-    echo $ex->getMessage() . "\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-Cannot clone a finalized HashContext
+ValueError: Cannot clone a finalized HashContext

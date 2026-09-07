@@ -37,7 +37,7 @@ foreach ($invalid_cases as $i => $case) {
         $heap->__unserialize($case);
         echo "Case $i: UNEXPECTED SUCCESS\n";
     } catch (Exception $e) {
-        echo "Case $i: " . $e->getMessage() . "\n";
+        echo "Case $i: ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -60,25 +60,25 @@ foreach ($pq_invalid_cases as $i => $case) {
         $pq->__unserialize($case);
         echo "PQ Case $i: UNEXPECTED SUCCESS\n";
     } catch (Exception $e) {
-        echo "PQ Case $i: " . $e->getMessage() . "\n";
+        echo "PQ Case $i: ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECT--
-Case 0: Invalid serialization data for SplMaxHeap object
-Case 1: Invalid serialization data for SplMaxHeap object
-Case 2: Invalid serialization data for SplMaxHeap object
-Case 3: Invalid serialization data for SplMaxHeap object
-Case 4: Invalid serialization data for SplMaxHeap object
-Case 5: Invalid serialization data for SplMaxHeap object
-Case 6: Invalid serialization data for SplMaxHeap object
-Case 7: Invalid serialization data for SplMaxHeap object
-Case 8: Invalid serialization data for SplMaxHeap object
-Case 9: Invalid serialization data for SplMaxHeap object
-Case 10: Invalid serialization data for SplMaxHeap object
-PQ Case 0: Invalid serialization data for SplPriorityQueue object
-PQ Case 1: Invalid serialization data for SplPriorityQueue object
-PQ Case 2: Invalid serialization data for SplPriorityQueue object
-PQ Case 3: Invalid serialization data for SplPriorityQueue object
-PQ Case 4: Invalid serialization data for SplPriorityQueue object
+Case 0: Exception: Invalid serialization data for SplMaxHeap object
+Case 1: Exception: Invalid serialization data for SplMaxHeap object
+Case 2: Exception: Invalid serialization data for SplMaxHeap object
+Case 3: Exception: Invalid serialization data for SplMaxHeap object
+Case 4: Exception: Invalid serialization data for SplMaxHeap object
+Case 5: Exception: Invalid serialization data for SplMaxHeap object
+Case 6: Exception: Invalid serialization data for SplMaxHeap object
+Case 7: Exception: Invalid serialization data for SplMaxHeap object
+Case 8: Exception: Invalid serialization data for SplMaxHeap object
+Case 9: Exception: Invalid serialization data for SplMaxHeap object
+Case 10: Exception: Invalid serialization data for SplMaxHeap object
+PQ Case 0: Exception: Invalid serialization data for SplPriorityQueue object
+PQ Case 1: Exception: Invalid serialization data for SplPriorityQueue object
+PQ Case 2: Exception: Invalid serialization data for SplPriorityQueue object
+PQ Case 3: Exception: Invalid serialization data for SplPriorityQueue object
+PQ Case 4: Exception: Invalid serialization data for SplPriorityQueue object

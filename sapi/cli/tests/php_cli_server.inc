@@ -5,6 +5,7 @@ class CliServerInfo {
     public function __construct(
         public string $docRoot,
         public $processHandle,
+        public $outputFile,
     ) {}
 }
 
@@ -16,15 +17,16 @@ function php_cli_server_start(
     $php_executable = getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY;
     $error = null;
 
-    // Create dedicated doc root to avoid index.php clashes between tests.
-    $doc_root = __DIR__ . DIRECTORY_SEPARATOR . basename($_SERVER['PHP_SELF'], '.php');
+    // Create dedicated doc root to avoid index.php clashes between processes.
+    $doc_root = __DIR__ . DIRECTORY_SEPARATOR . basename($_SERVER['PHP_SELF'], '.php') . '-' . getmypid();
     @mkdir($doc_root);
 
     if ($code) {
         file_put_contents($doc_root . '/' . ($router ?: 'index.php'), '<?php ' . $code . ' ?>');
     }
 
-    $cmd = [$php_executable, '-t', $doc_root, '-n', ...$cmd_args, '-S', 'localhost:0'];
+    // XXX: This should ideally use the same INI overrides as run-tests
+    $cmd = [$php_executable, '-d', 'error_include_args=0', '-t', $doc_root, '-n', ...$cmd_args, '-S', 'localhost:0'];
     if (!is_null($router)) {
         $cmd[] = $router;
     }
@@ -117,7 +119,7 @@ function php_cli_server_start(
     define("PHP_CLI_SERVER_PORT", $port);
     define("PHP_CLI_SERVER_ADDRESS", PHP_CLI_SERVER_HOSTNAME.":".PHP_CLI_SERVER_PORT);
 
-    return new CliServerInfo($doc_root, $handle);
+    return new CliServerInfo($doc_root, $handle, $output_file);
 }
 
 function php_cli_server_connect() {

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Jakub Zelenka <bukka@php.net>                                |
   +----------------------------------------------------------------------+
@@ -52,6 +50,7 @@
 
 #define PHP_JSON_INT_MAX_LENGTH (MAX_LENGTH_OF_LONG - 1)
 
+#define PHP_JSON_TOKEN_LENGTH() ((size_t) (s->cursor - s->token))
 
 static void php_json_scanner_copy_string(php_json_scanner *s, size_t esc_size)
 {
@@ -96,6 +95,8 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;
 	s->options = options;
+	s->line = 1;
+	s->line_start = (php_json_ctype *) str;
 	PHP_JSON_CONDITION_SET(JS);
 }
 
@@ -169,7 +170,8 @@ std:
 	}
 	<JS>INT                  {
 		bool bigint = 0, negative = s->token[0] == '-';
-		size_t digits = (size_t) (s->cursor - s->token - negative);
+		size_t digits = PHP_JSON_TOKEN_LENGTH();
+		digits -= negative;
 		if (digits >= PHP_JSON_INT_MAX_LENGTH) {
 			if (digits == PHP_JSON_INT_MAX_LENGTH) {
 				int cmp = strncmp((char *) (s->token + negative), LONG_MIN_DIGITS, PHP_JSON_INT_MAX_LENGTH);
@@ -195,7 +197,12 @@ std:
 		ZVAL_DOUBLE(&s->value, zend_strtod((char *) s->token, NULL));
 		return PHP_JSON_T_DOUBLE;
 	}
-	<JS>NL|WS                { goto std; }
+	<JS>NL                   {
+		s->line++;
+		s->line_start = s->cursor;
+		goto std;
+	}
+	<JS>WS                   { goto std; }
 	<JS>EOI                  {
 		if (s->limit < s->cursor) {
 			return PHP_JSON_T_EOI;
@@ -223,7 +230,14 @@ std:
 		s->errcode = PHP_JSON_ERROR_UTF8;
 		return PHP_JSON_T_ERROR;
 	}
-
+	<STR_P1>EOI             {
+		if (s->limit < s->cursor) {
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+		} else {
+			s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
+		}
+		return PHP_JSON_T_ERROR;
+	}
 	<STR_P1>CTRL             {
 		s->errcode = PHP_JSON_ERROR_CTRL_CHAR;
 		return PHP_JSON_T_ERROR;
@@ -295,7 +309,6 @@ std:
 		s->errcode = PHP_JSON_ERROR_UTF8;
 		return PHP_JSON_T_ERROR;
 	}
-
 	<STR_P2_UTF,STR_P2_BIN>UTF16_1             {
 		int utf16 = php_json_ucs2_to_int(s, 2);
 		PHP_JSON_SCANNER_COPY_UTF();

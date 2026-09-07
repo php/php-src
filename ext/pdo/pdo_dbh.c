@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@php.net>                                    |
   |         Marcus Boerger <helly@php.net>                               |
@@ -75,20 +73,15 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 	pdo_error_type *pdo_err = &dbh->error_code;
 	const char *msg;
 
-	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
-#if 0
-		/* BUG: if user is running in silent mode and hits an error at the driver level
-		 * when they use the PDO methods to call up the error information, they may
-		 * get bogus information */
-		return;
-#endif
-	}
-
 	if (stmt) {
 		pdo_err = &stmt->error_code;
 	}
 
 	memcpy(*pdo_err, sqlstate, sizeof(pdo_error_type));
+
+	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
+		return;
+	}
 
 	/* hash sqlstate to error messages */
 	msg = pdo_sqlstate_state_to_description(*pdo_err);
@@ -808,7 +801,7 @@ PDO_API bool pdo_get_bool_param(bool *bval, const zval *value)
 			*bval = false;
 			return true;
 		case IS_LONG:
-			*bval = zval_is_true(value);
+			*bval = zend_is_true(value);
 			return true;
 		case IS_STRING: /* TODO Should string be allowed? */
 		default:
@@ -1193,7 +1186,7 @@ PHP_METHOD(PDO, query)
 	pdo_stmt_t *stmt;
 	zend_string *statement;
 	zend_long fetch_mode;
-	bool fetch_mode_is_null = 1;
+	bool fetch_mode_is_null = true;
 	zval *args = NULL;
 	uint32_t num_args = 0;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
@@ -1324,6 +1317,7 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 	if (func->common.attributes) {
 		zend_hash_release(func->common.attributes);
 	}
+	zend_free_internal_arg_info(&func->internal_function, false);
 	efree(func);
 }
 /* }}} */
@@ -1339,6 +1333,7 @@ static void cls_method_pdtor(zval *el) /* {{{ */ {
 	if (func->common.attributes) {
 		zend_hash_release(func->common.attributes);
 	}
+	zend_free_internal_arg_info(&func->internal_function, true);
 	pefree(func, 1);
 }
 /* }}} */
@@ -1411,7 +1406,19 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
 
-			func.arg_info = (zend_internal_arg_info*)funcs->arg_info + 1;
+			uint32_t num_arg_info = 1 + funcs->num_args;
+			if (func.fn_flags & ZEND_ACC_VARIADIC) {
+				num_arg_info++;
+			}
+
+			zend_arg_info *arg_info = safe_pemalloc(num_arg_info,
+					sizeof(zend_arg_info), 0, dbh->is_persistent);
+			for (uint32_t i = 0; i < num_arg_info; i++) {
+				zend_convert_internal_arg_info(&arg_info[i],
+						&funcs->arg_info[i], i == 0, dbh->is_persistent);
+			}
+
+			func.arg_info = arg_info + 1;
 			func.num_args = funcs->num_args;
 			if (info->required_num_args == (uint32_t)-1) {
 				func.required_num_args = funcs->num_args;
@@ -1475,7 +1482,6 @@ static zend_function *dbh_method_get(zend_object **object, zend_string *method_n
 {
 	zend_function *fbc = NULL;
 	pdo_dbh_object_t *dbh_obj = php_pdo_dbh_fetch_object(*object);
-	zend_string *lc_method_name;
 
 	if ((fbc = zend_std_get_method(object, method_name, key)) == NULL) {
 		/* not a pre-defined method, nor a user-defined method; check
@@ -1488,9 +1494,7 @@ static zend_function *dbh_method_get(zend_object **object, zend_string *method_n
 			}
 		}
 
-		lc_method_name = zend_string_tolower(method_name);
-		fbc = zend_hash_find_ptr(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], lc_method_name);
-		zend_string_release_ex(lc_method_name, 0);
+		fbc = zend_hash_find_ptr_lc(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], method_name);
 	}
 
 out:
@@ -1520,7 +1524,7 @@ void pdo_dbh_init(int module_number)
 	pdo_dbh_ce->default_object_handlers = &pdo_dbh_object_handlers;
 
 	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
+	pdo_dbh_object_handlers.offset = offsetof(pdo_dbh_object_t, std);
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
 	pdo_dbh_object_handlers.clone_obj = NULL;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
@@ -1597,7 +1601,7 @@ static void pdo_dbh_free_storage(zend_object *std)
 		dbh->methods->persistent_shutdown(dbh);
 	}
 	zend_object_std_dtor(std);
-	dbh_free(dbh, 0);
+	dbh_free(dbh, false);
 }
 
 zend_object *pdo_dbh_new(zend_class_entry *ce)
@@ -1621,7 +1625,7 @@ ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
 {
 	if (res->ptr) {
 		pdo_dbh_t *dbh = (pdo_dbh_t*)res->ptr;
-		dbh_free(dbh, 1);
+		dbh_free(dbh, true);
 		res->ptr = NULL;
 	}
 }

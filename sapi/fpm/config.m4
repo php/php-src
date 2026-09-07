@@ -262,100 +262,16 @@ AS_VAR_IF([php_cv_have_SO_LISTENQLEN], [yes],
     [Define to 1 if you have 'SO_LISTENQ*'.])])
 ])
 
-AC_DEFUN([PHP_FPM_KQUEUE],
-[AC_CACHE_CHECK([for kqueue],
-  [php_cv_have_kqueue],
-  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([dnl
-    #include <sys/types.h>
-    #include <sys/event.h>
-    #include <sys/time.h>
-  ], [dnl
-    int kfd;
-    struct kevent k;
-    kfd = kqueue();
-    /* 0 -> STDIN_FILENO */
-    EV_SET(&k, 0, EVFILT_READ , EV_ADD | EV_CLEAR, 0, 0, NULL);
-    (void)kfd;
-  ])],
-  [php_cv_have_kqueue=yes],
-  [php_cv_have_kqueue=no])])
-AS_VAR_IF([php_cv_have_kqueue], [yes],
-  [AC_DEFINE([HAVE_KQUEUE], [1],
-    [Define to 1 if system has a working 'kqueue' function.])])
-])
-
-AC_DEFUN([PHP_FPM_EPOLL],
-[AC_CACHE_CHECK([for epoll],
-  [php_cv_have_epoll],
-  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [dnl
-    int epollfd;
-    struct epoll_event e;
-
-    epollfd = epoll_create(1);
-    if (epollfd < 0) {
-      return 1;
-    }
-
-    e.events = EPOLLIN | EPOLLET;
-    e.data.fd = 0;
-
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &e) == -1) {
-      return 1;
-    }
-
-    e.events = 0;
-    if (epoll_wait(epollfd, &e, 1, 1) < 0) {
-      return 1;
-    }
-  ])],
-  [php_cv_have_epoll=yes],
-  [php_cv_have_epoll=no])])
-AS_VAR_IF([php_cv_have_epoll], [yes],
-  [AC_DEFINE([HAVE_EPOLL], [1], [Define to 1 if system has a working epoll.])])
-])
-
-AC_DEFUN([PHP_FPM_SELECT],
-[AC_CACHE_CHECK([for select],
-  [php_cv_have_select],
-  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([dnl
-    /* According to POSIX.1-2001 */
-    #include <sys/select.h>
-
-    /* According to earlier standards */
-    #include <sys/time.h>
-    #include <sys/types.h>
-    #include <unistd.h>
-  ], [dnl
-    fd_set fds;
-    struct timeval t;
-    t.tv_sec = 0;
-    t.tv_usec = 42;
-    FD_ZERO(&fds);
-    /* 0 -> STDIN_FILENO */
-    FD_SET(0, &fds);
-    select(FD_SETSIZE, &fds, NULL, NULL, &t);
-  ])],
-  [php_cv_have_select=yes],
-  [php_cv_have_select=no])])
-AS_VAR_IF([php_cv_have_select], [yes],
-  [AC_DEFINE([HAVE_SELECT], [1],
-    [Define to 1 if system has a working 'select' function.])])
-])
-
 if test "$PHP_FPM" != "no"; then
   PHP_FPM_CLOCK
   PHP_FPM_TRACE
   PHP_FPM_BUILTIN_ATOMIC
   PHP_FPM_LQ
-  PHP_FPM_KQUEUE
-  PHP_FPM_EPOLL
-  PHP_FPM_SELECT
 
   AC_CHECK_FUNCS([clearenv setproctitle setproctitle_fast])
 
   AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
   AC_CHECK_HEADER([sys/times.h], [AC_CHECK_FUNCS([times])])
-  AC_CHECK_HEADER([port.h], [AC_CHECK_FUNCS([port_create])])
 
   PHP_ARG_WITH([fpm-user],,
     [AS_HELP_STRING([[--with-fpm-user[=USER]]],

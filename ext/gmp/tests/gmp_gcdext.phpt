@@ -31,12 +31,12 @@ foreach ($a as $val) {
 try {
     var_dump(gmp_gcdext($val[0], array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_gcdext(array(), array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -62,6 +62,6 @@ string(1) "1"
 string(1) "1"
 string(3) "195"
 string(3) "195"
-gmp_gcdext(): Argument #2 ($num2) must be of type GMP|string|int, array given
-gmp_gcdext(): Argument #1 ($num1) must be of type GMP|string|int, array given
+TypeError: gmp_gcdext(): Argument #2 ($num2) must be of type GMP|string|int, array given
+TypeError: gmp_gcdext(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

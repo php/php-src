@@ -9,7 +9,7 @@ function trycatch_dump(...$tests) {
             var_dump($test());
         }
         catch (\Error $e) {
-            echo '[' . get_class($e) . '] ' . $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -39,9 +39,9 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, int given
-[TypeError] hash_equals(): Argument #2 ($user_string) must be of type string, int given
-[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, int given
-[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, null given
-[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, null given
-[TypeError] hash_equals(): Argument #1 ($known_string) must be of type string, null given
+TypeError: hash_equals(): Argument #1 ($known_string) must be of type string, int given
+TypeError: hash_equals(): Argument #2 ($user_string) must be of type string, int given
+TypeError: hash_equals(): Argument #1 ($known_string) must be of type string, int given
+TypeError: hash_equals(): Argument #1 ($known_string) must be of type string, null given
+TypeError: hash_equals(): Argument #1 ($known_string) must be of type string, null given
+TypeError: hash_equals(): Argument #1 ($known_string) must be of type string, null given

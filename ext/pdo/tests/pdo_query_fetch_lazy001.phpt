@@ -29,8 +29,8 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_query_fetch_lazy_001");
 ?>
---EXPECT--
-object(PDOStatement)#2 (1) {
+--EXPECTF--
+object(PDOStatement)#%d (1) {
   ["queryString"]=>
   string(38) "SELECT * FROM pdo_query_fetch_lazy_001"
 }

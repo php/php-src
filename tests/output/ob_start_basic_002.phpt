@@ -50,4 +50,3 @@ I stole your output.
 
 --> Use callback 'return_zero':
 0
-

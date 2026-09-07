@@ -9,4 +9,4 @@ if (substr(PHP_OS, 0, 3) != "WIN") { print "skip - Windows only"; }
 file_get_contents(__DIR__);
 ?>
 --EXPECTF--
-Warning: file_get_contents(%s): Failed to open stream: Permission denied in %s on line %d
+Warning: file_get_contents(): Failed to open stream: Permission denied in %s on line %d

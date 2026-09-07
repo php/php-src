@@ -23,10 +23,10 @@ var_dump(gmp_binomial(-2, 6)); // == (2 + 6 - 1 over 6)
 try {
     var_dump(gmp_binomial(5, -2));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
---EXPECT--
+--EXPECTF--
 object(GMP)#1 (1) {
   ["num"]=>
   string(3) "252"
@@ -67,4 +67,4 @@ object(GMP)#2 (1) {
   ["num"]=>
   string(1) "7"
 }
-gmp_binomial(): Argument #2 ($k) must be greater than or equal to 0
+ValueError: gmp_binomial(): Argument #2 ($k) must be between 0 and %d

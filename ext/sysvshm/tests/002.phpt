@@ -15,31 +15,31 @@ $key = ftok(__FILE__, 't');
 try {
     shm_attach(-1, 0);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     shm_attach(0, -1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     shm_attach(123, -1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     shm_attach($key, -1);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     shm_attach($key, 0);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump($s = shm_attach($key, 1024));
@@ -57,11 +57,11 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-shm_attach(): Argument #2 ($size) must be greater than 0
-shm_attach(): Argument #2 ($size) must be greater than 0
-shm_attach(): Argument #2 ($size) must be greater than 0
-shm_attach(): Argument #2 ($size) must be greater than 0
-shm_attach(): Argument #2 ($size) must be greater than 0
+ValueError: shm_attach(): Argument #2 ($size) must be greater than 0
+ValueError: shm_attach(): Argument #2 ($size) must be greater than 0
+ValueError: shm_attach(): Argument #2 ($size) must be greater than 0
+ValueError: shm_attach(): Argument #2 ($size) must be greater than 0
+ValueError: shm_attach(): Argument #2 ($size) must be greater than 0
 object(SysvSharedMemory)#%d (0) {
 }
 object(SysvSharedMemory)#%d (0) {

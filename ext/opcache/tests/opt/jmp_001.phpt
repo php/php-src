@@ -28,6 +28,6 @@ test:
      ; (after optimizer)
      ; %s:2-6
 0000 INIT_FCALL_BY_NAME 0 string("test2")
-0001 V1 = DO_FCALL_BY_NAME
-0002 CV0($var) = QM_ASSIGN V1
+0001 T1 = DO_FCALL_BY_NAME
+0002 CV0($var) = QM_ASSIGN T1
 0003 RETURN CV0($var)

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -43,7 +41,6 @@ mysqlnd_run_authentication(
 			const MYSQLND_STRING auth_plugin_data,
 			const char * const auth_protocol,
 			const unsigned int charset_no,
-			const MYSQLND_SESSION_OPTIONS * const session_options,
 			const zend_ulong mysql_flags,
 			const bool silent,
 			const bool is_change_user
@@ -110,7 +107,7 @@ mysqlnd_run_authentication(
 				scrambled_data = auth_plugin->methods.get_auth_data(
 					NULL, &scrambled_data_len, conn, user, passwd,
 					passwd_len, plugin_data, plugin_data_len,
-					session_options, conn->protocol_frame_codec->data,
+					conn->protocol_frame_codec->data,
 					mysql_flags);
 			}
 
@@ -118,7 +115,7 @@ mysqlnd_run_authentication(
 				goto end;
 			}
 			if (FALSE == is_change_user) {
-				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, session_options, mysql_flags,
+				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, mysql_flags,
 											charset_no,
 											first_call,
 											requested_protocol,
@@ -177,14 +174,13 @@ static enum_func_status
 mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * const conn,
 								unsigned int charset_no,
 								const size_t server_capabilities,
-								const MYSQLND_SESSION_OPTIONS * const session_options,
 								const zend_ulong mysql_flags)
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * charset;
 	DBG_ENTER("mysqlnd_switch_to_ssl_if_needed");
 
-	if (session_options->charset_name && (charset = mysqlnd_find_charset_name(session_options->charset_name))) {
+	if (conn->options->charset_name && (charset = mysqlnd_find_charset_name(conn->options->charset_name))) {
 		charset_no = charset->nr;
 	}
 
@@ -210,18 +206,17 @@ mysqlnd_connect_run_authentication(
 			const char * const authentication_protocol,
 			const unsigned int charset_no,
 			const size_t server_capabilities,
-			const MYSQLND_SESSION_OPTIONS * const session_options,
 			const zend_ulong mysql_flags
 			)
 {
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_connect_run_authentication");
 
-	ret = mysqlnd_switch_to_ssl_if_needed(conn, charset_no, server_capabilities, session_options, mysql_flags);
+	ret = mysqlnd_switch_to_ssl_if_needed(conn, charset_no, server_capabilities, mysql_flags);
 	if (PASS == ret) {
 		ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, db_len,
 										 authentication_plugin_data, authentication_protocol,
-										 charset_no, session_options, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/);
+										 charset_no, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/);
 	}
 	DBG_RETURN(ret);
 }
@@ -236,7 +231,6 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const size_t passwd_len,
 							  const char * const db,
 							  const size_t db_len,
-							  const MYSQLND_SESSION_OPTIONS * const session_options,
 							  const zend_ulong mysql_flags,
 							  const unsigned int server_charset_no,
 							  const bool use_full_blown_auth_packet,
@@ -281,8 +275,8 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		conn->payload_decoder_factory->m.init_auth_packet(&auth_packet);
 
 		auth_packet.client_flags = mysql_flags;
-		auth_packet.max_packet_size = session_options->max_allowed_packet;
-		if (session_options->charset_name && (charset = mysqlnd_find_charset_name(session_options->charset_name))) {
+		auth_packet.max_packet_size = conn->options->max_allowed_packet;
+		if (conn->options->charset_name && (charset = mysqlnd_find_charset_name(conn->options->charset_name))) {
 			auth_packet.charset_no	= charset->nr;
 		} else {
 			auth_packet.charset_no	= server_charset_no;
@@ -556,7 +550,6 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  size_t * auth_data_len,
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
-								  const MYSQLND_SESSION_OPTIONS * const session_options,
 								  const MYSQLND_PFC_DATA * const pfc_data,
 								  const zend_ulong mysql_flags
 								 )
@@ -592,7 +585,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_native_auth_plugin =
 		"auth_plugin_mysql_native_password",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
@@ -617,7 +610,6 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   size_t * auth_data_len,
 							   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
-							   const MYSQLND_SESSION_OPTIONS * const session_options,
 							   const MYSQLND_PFC_DATA * const pfc_data,
 							   const zend_ulong mysql_flags
 							  )
@@ -646,7 +638,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin
 		"auth_plugin_mysql_clear_password",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
@@ -820,7 +812,6 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 /* {{{ mysqlnd_sha256_get_rsa_key */
 static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
-						   const MYSQLND_SESSION_OPTIONS * const session_options,
 						   const MYSQLND_PFC_DATA * const pfc_data
 						  )
 {
@@ -894,7 +885,6 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  size_t * auth_data_len,
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
-								  const MYSQLND_SESSION_OPTIONS * const session_options,
 								  const MYSQLND_PFC_DATA * const pfc_data,
 								  const zend_ulong mysql_flags
 								 )
@@ -916,7 +906,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 		ret[passwd_len] = '\0';
 	} else {
 		*auth_data_len = 0;
-		server_public_key = mysqlnd_sha256_get_rsa_key(conn, session_options, pfc_data);
+		server_public_key = mysqlnd_sha256_get_rsa_key(conn, pfc_data);
 
 		if (server_public_key) {
 			ALLOCA_FLAG(use_heap);
@@ -944,7 +934,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plu
 		"auth_plugin_sha256_password",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uwendel@mysql.com>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
@@ -1095,7 +1085,6 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 								   size_t * auth_data_len,
 							 	   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								   const size_t passwd_len, zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
-								   const MYSQLND_SESSION_OPTIONS * const session_options,
 								   const MYSQLND_PFC_DATA * const pfc_data,
 								   const zend_ulong mysql_flags
 								  )
@@ -1306,7 +1295,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_caching_sha2_auth_plugin 
 		"auth_plugin_caching_sha2_password",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Johannes Schlüter <johannes.schlueter@php.net>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */

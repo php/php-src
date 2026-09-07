@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
@@ -79,12 +77,15 @@ static xmlDocPtr soap_xmlParse_ex(xmlParserCtxtPtr ctxt)
 {
 	xmlDocPtr ret;
 	if (ctxt) {
+#if LIBXML_VERSION >= 21300
+		xmlCtxtSetOptions(ctxt, XML_PARSE_HUGE | XML_PARSE_NO_XXE | XML_PARSE_NONET | XML_PARSE_NOBLANKS);
+#else
 		php_libxml_sanitize_parse_ctxt_options(ctxt);
-		/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
 		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 		ctxt->keepBlanks = 0;
 		ctxt->options |= XML_PARSE_HUGE;
 		ZEND_DIAGNOSTIC_IGNORED_END
+#endif
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;
@@ -147,7 +148,7 @@ xmlNsPtr node_find_ns(xmlNodePtr node)
 	}
 }
 
-int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
+bool attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
 {
 	if (node->name && strcmp((const char *) node->name, name) == 0) {
 		xmlNsPtr nsPtr = node->ns;
@@ -155,17 +156,17 @@ int attr_is_equal_ex(xmlAttrPtr node, const char *name, const char *ns)
 			if (nsPtr) {
 				return (strcmp((const char *) nsPtr->href, ns) == 0);
 			} else {
-				return FALSE;
+				return false;
 			}
 		} else if (nsPtr) {
-			return FALSE;
+			return false;
 		}
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
+bool node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
 {
 	if (name == NULL || ((node->name) && strcmp((char*)node->name, name) == 0)) {
 		if (ns) {
@@ -173,29 +174,29 @@ int node_is_equal_ex(xmlNodePtr node, const char *name, const char *ns)
 			if (nsPtr) {
 				return strcmp((const char *) nsPtr->href, ns) == 0;
 			} else {
-				return FALSE;
+				return false;
 			}
 		}
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-int node_is_equal_ex_one_of(xmlNodePtr node, const char *name, const char *const *namespaces)
+bool node_is_equal_ex_one_of(xmlNodePtr node, const char *name, const char *const *namespaces)
 {
 	if ((node->name) && strcmp((char*)node->name, name) == 0) {
 		xmlNsPtr nsPtr = node_find_ns(node);
 		if (nsPtr) {
 			do {
 				if (strcmp((const char *) nsPtr->href, *namespaces) == 0) {
-					return TRUE;
+					return true;
 				}
 				namespaces++;
 			} while (*namespaces != NULL);
 		}
-		return FALSE;
+		return false;
 	}
-	return FALSE;
+	return false;
 }
 
 xmlAttrPtr get_attribute_any_ns(xmlAttrPtr node, const char *name)

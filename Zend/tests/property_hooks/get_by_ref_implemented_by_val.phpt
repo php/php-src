@@ -15,4 +15,4 @@ class A implements I {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of A::$prop::get() must be compatible with & I::$prop::get() in %s on line %d
+Fatal error: Declaration of A::$prop::get() must be compatible with &I::$prop::get() in %s on line %d

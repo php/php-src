@@ -14,20 +14,20 @@ socket_getsockname($s_c, $addr, $port);
 // wrong parameter count
 try {
     socket_connect($s_c);
-} catch (\ArgumentCountError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     socket_connect($s_c, '0.0.0.0');
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $s_w = socket_connect($s_c, '0.0.0.0', $port);
 
 socket_close($s_c);
 ?>
 --EXPECTF--
-socket_connect() expects at least 2 arguments, 1 given
-socket_connect(): Argument #3 ($port) cannot be null when the socket type is AF_INET
+ArgumentCountError: socket_connect() expects at least 2 arguments, 1 given
+ValueError: socket_connect(): Argument #3 ($port) cannot be null when the socket type is AF_INET
 
 Warning: socket_connect(): unable to connect [%i]: %a in %s on line %d

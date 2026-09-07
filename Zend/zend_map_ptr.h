@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -27,6 +26,8 @@ typedef struct _zend_string zend_string;
 #define ZEND_MAP_PTR_KIND_PTR_OR_OFFSET 1
 
 #define ZEND_MAP_PTR_KIND ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
+#define ZEND_MAP_PTR_CHUNK_SIZE 4096
+#define ZEND_MAP_PTR_CHUNK_MASK (ZEND_MAP_PTR_CHUNK_SIZE - 1)
 
 #define ZEND_MAP_PTR(ptr) \
 	ptr ## __ptr
@@ -72,7 +73,9 @@ typedef struct _zend_string zend_string;
 	((void*)(((uintptr_t)(real_base)) + zend_map_ptr_static_size * sizeof(void *) - 1))
 /* Note: chunked like: [8192..12287][4096..8191][0..4095] */
 #define ZEND_MAP_PTR_STATIC_NUM_TO_PTR(num) \
-	((void **)CG(map_ptr_real_base) + zend_map_ptr_static_size - ZEND_MM_ALIGNED_SIZE_EX((num) + 1, 4096) + ((num) & 4095))
+	((void **)CG(map_ptr_real_base) + zend_map_ptr_static_size \
+		- ZEND_MM_ALIGNED_SIZE_EX((num) + 1, ZEND_MAP_PTR_CHUNK_SIZE) \
+		+ ((num) & ZEND_MAP_PTR_CHUNK_MASK))
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif

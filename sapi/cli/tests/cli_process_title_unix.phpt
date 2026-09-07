@@ -13,6 +13,9 @@ exec("ps -p 1", $output, $exit_code);
 if ($exit_code !== 0) {
     die("skip ps -p is not available");
 }
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip process titles not supported on Solaris");
+}
 ?>
 --FILE--
 <?php

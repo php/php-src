@@ -7,17 +7,17 @@ zend.assertions=1
 
 try {
     assert((fn() => false)());
-} catch (AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     assert((fn&(int... $args): ?bool => $args[0])(false));
-} catch (AssertionError $e) {
-    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-assert(): assert((fn() => false)()) failed
-assert(): assert((fn&(int ...$args): ?bool => $args[0])(false)) failed
+AssertionError: assert((fn() => false)())
+AssertionError: assert((fn&(int ...$args): ?bool => $args[0])(false))

@@ -36,13 +36,13 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "test027");
 ?>
---EXPECT--
-object(PDOStatement)#2 (1) {
+--EXPECTF--
+object(PDOStatement)#%d (1) {
   ["queryString"]=>
   string(21) "SELECT * FROM test027"
 }
 bool(false)
-object(PDORow)#4 (3) {
+object(PDORow)#%d (3) {
   ["queryString"]=>
   string(21) "SELECT * FROM test027"
   ["id"]=>
@@ -52,7 +52,7 @@ object(PDORow)#4 (3) {
 }
 lazy: 1test1
 bool(true)
-object(PDORow)#4 (3) {
+object(PDORow)#%d (3) {
   ["queryString"]=>
   string(21) "SELECT * FROM test027"
   ["id"]=>

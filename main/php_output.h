@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Michael Wallner <mike@php.net>                               |
    +----------------------------------------------------------------------+
@@ -114,12 +112,6 @@ typedef zend_result (*php_output_handler_conflict_check_t)(const char *handler_n
 /* ctor for aliases */
 typedef struct _php_output_handler *(*php_output_handler_alias_ctor_t)(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
 
-typedef struct _php_output_handler_user_func_t {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zval zoh;
-} php_output_handler_user_func_t;
-
 typedef struct _php_output_handler {
 	zend_string *name;
 	int flags;
@@ -131,7 +123,7 @@ typedef struct _php_output_handler {
 	void (*dtor)(void *opaq);
 
 	union {
-		php_output_handler_user_func_t *user;
+		zend_fcall_info_cache *user_fcc;
 		php_output_handler_context_func_t internal;
 	} func;
 } php_output_handler;

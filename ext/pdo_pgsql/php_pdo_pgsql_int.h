@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Edin Kadribasic <edink@emini.dk>                            |
   |          Ilia Alshanestsky <ilia@prohost.org>                        |
@@ -49,6 +47,7 @@ typedef struct {
 	HashTable       *lob_streams;
 	zend_fcall_info_cache *notice_callback;
 	bool		default_fetching_laziness;
+	zend_long	default_chunk_size;
 	pdo_pgsql_stmt  *running_stmt;
 } pdo_pgsql_db_handle;
 
@@ -68,7 +67,9 @@ struct pdo_pgsql_stmt {
 	int *param_formats;
 	Oid *param_types;
 	int                     current_row;
+	zend_long chunk_size;
 	bool is_prepared;
+	bool is_cursor_declared;
 	bool is_unbuffered;
 	bool is_running_unbuffered;
 };
@@ -95,6 +96,7 @@ extern const struct pdo_stmt_methods pgsql_stmt_methods;
 enum {
 	PDO_PGSQL_ATTR_DISABLE_PREPARES = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE,
+	PDO_PGSQL_ATTR_CHUNK_SIZE,
 };
 
 struct pdo_pgsql_lob_self {

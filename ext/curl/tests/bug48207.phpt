@@ -36,10 +36,17 @@ $tempfile	= tempnam(sys_get_temp_dir(), 'CURL_FILE_HANDLE');
 $fp = fopen($tempfile, "r"); // Opening 'fubar' with the incorrect readonly flag
 
 $ch = curl_init($url);
-try {
-    curl_setopt($ch, CURLOPT_FILE, $fp);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+
+foreach ([
+    CURLOPT_FILE,
+    CURLOPT_WRITEHEADER,
+    CURLOPT_STDERR,
+] as $option) {
+    try {
+        curl_setopt($ch, $option, $fp);
+    } catch (ValueError $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
+    }
 }
 
 curl_exec($ch);
@@ -47,6 +54,8 @@ is_file($tempfile) and @unlink($tempfile);
 isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>
 --EXPECT--
-curl_setopt(): The provided file handle must be writable
+ValueError: curl_setopt(): The file handle provided for CURLOPT_FILE must be writable
+ValueError: curl_setopt(): The file handle provided for CURLOPT_WRITEHEADER must be writable
+ValueError: curl_setopt(): The file handle provided for CURLOPT_STDERR must be writable
 Hello World!
 Hello World!

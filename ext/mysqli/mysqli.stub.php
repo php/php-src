@@ -58,6 +58,11 @@ const MYSQLI_OPT_INT_AND_FLOAT_NATIVE = UNKNOWN;
  * @cvalue MYSQL_OPT_SSL_VERIFY_SERVER_CERT
  */
 const MYSQLI_OPT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_COMPRESS
+ */
+const MYSQLI_OPT_COMPRESS = UNKNOWN;
 
 /**
  * @var int
@@ -792,6 +797,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_get_charset
      */
+    #[\Deprecated(since: '8.6', message: 'did you mean mysqli_character_set_name()?')]
     public function get_charset(): ?object {}
 
     /**
@@ -902,6 +908,11 @@ class mysqli
     public function real_escape_string(string $string): string {}
 
     /**
+     * @alias mysqli_quote_string
+     */
+    public function quote_string(string $string): string {}
+
+    /**
      * @tentative-return-type
      * @alias mysqli_reap_async_query
      */
@@ -985,6 +996,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_stmt_init
      */
+    #[\Deprecated(since: '8.6', message: 'use mysqli::prepare() instead')]
     public function stmt_init(): mysqli_stmt|false {}
 
     /**
@@ -1453,6 +1465,7 @@ function mysqli_get_connection_stats(mysqli $mysql): array {}
 function mysqli_get_client_stats(): array {}
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'did you mean mysqli_character_set_name()?')]
 function mysqli_get_charset(mysqli $mysql): ?object {}
 
 /** @refcount 1 */
@@ -1542,6 +1555,8 @@ function mysqli_real_escape_string(mysqli $mysql, string $string): string {}
 /** @alias mysqli_real_escape_string */
 function mysqli_escape_string(mysqli $mysql, string $string): string {}
 
+function mysqli_quote_string(mysqli $mysql, string $string): string {}
+
 function mysqli_real_query(mysqli $mysql, string $query): bool {}
 
 /** @refcount 1 */
@@ -1596,6 +1611,7 @@ function mysqli_stmt_get_result(mysqli_stmt $statement): mysqli_result|false {}
 function mysqli_stmt_get_warnings(mysqli_stmt $statement): mysqli_warning|false {}
 
 /** @refcount 1 */
+#[\Deprecated(since: '8.6', message: 'use mysqli_prepare() instead')]
 function mysqli_stmt_init(mysqli $mysql): mysqli_stmt|false {}
 
 /** @refcount 1 */

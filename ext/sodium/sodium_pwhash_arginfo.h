@@ -1,5 +1,9 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit sodium_pwhash.stub.php instead.
  * Stub hash: d1e804ceea5e18fc5a4eca50b318d98387b2a470 */
+
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+#include "zend_constants.h"
+#endif
 
 static void register_sodium_pwhash_symbols(int module_number)
 {

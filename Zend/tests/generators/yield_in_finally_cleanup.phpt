@@ -47,5 +47,6 @@ gen4()->rewind();
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 ===DONE===

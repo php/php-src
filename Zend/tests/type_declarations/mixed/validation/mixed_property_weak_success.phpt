@@ -26,10 +26,10 @@ $foo = new Foo();
 
 try {
     $foo->property1;
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Typed property Foo::$property1 must not be accessed before initialization
+Error: Typed property Foo::$property1 must not be accessed before initialization

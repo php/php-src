@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - host - IPv4 address
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withHost() - success - IPv4 address
 --FILE--
 <?php
 

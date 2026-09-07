@@ -329,7 +329,7 @@ if ($pid) {
             }
         }elseif (preg_match('/^RETR ([\/]*[\w\h]+)/', $buf, $matches)) {
             if(!empty($pasv)){
-                ;
+                $fs = $pasvs;
             }
             else if (!$fs = stream_socket_client("tcp://$host:$port")) {
                 fputs($s, "425 Can't open data connection\r\n");
@@ -398,6 +398,20 @@ if ($pid) {
                     fputs($fs, str_repeat("A", 4095) . "\r\n" . str_repeat("B", 10));
                     fputs($s, "226 Closing data Connection.\r\n");
                     break;
+                case "bare_cr":
+                    // A bare CR (not part of CRLF) mid-stream, plus a bare CR on
+                    // the final byte of the first FTP_BUFSIZE (4096) read followed
+                    // by a non-LF byte in the next read.
+                    fputs($s, "150 File status okay; about to open data connection.\r\n");
+                    fputs($fs, "line1\r\nba\rre\r\nend" . str_repeat("X", 4078) . "\r" . str_repeat("Y", 10));
+                    fputs($s, "226 Closing data Connection.\r\n");
+                    break;
+                case "trailing_cr":
+                    // The whole transfer ends on a bare CR.
+                    fputs($s, "150 File status okay; about to open data connection.\r\n");
+                    fputs($fs, "trail\r");
+                    fputs($s, "226 Closing data Connection.\r\n");
+                    break;
 
                 default:
                     fputs($s, "550 {$matches[1]}: No such file or directory \r\n");
@@ -435,6 +449,8 @@ if ($pid) {
 
             if (empty($bug73457)) {
                 $pasvs = stream_socket_accept($soc,10);
+            } else {
+                $pasvs = null;
             }
 
         } elseif (preg_match('/^EPSV/', $buf, $matches)) {
@@ -481,7 +497,40 @@ if ($pid) {
             fputs($s, "226 Transfer complete\r\n");
         }elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
             fputs($s, "425 Error establishing connection\r\n");
-
+        }elseif (preg_match('/^LIST\s*$/', $buf, $matches)) {
+            if (empty($pasv)) {
+                fputs($s, "150 File status okay; about to open data connection\r\n");
+                if (!$fs = stream_socket_client("tcp://$host:$port")) {
+                    fputs($s, "425 Can't open data connection\r\n");
+                    continue;
+                }
+            } else {
+                fputs($s, "125 Data connection already open; transfer starting.\r\n");
+                $fs = $pasvs;
+            }
+            fputs($fs,
+                "drwxr-xr-x 1 owner group        0 Jan 01 00:00 .\r\n" .
+                "drwxr-xr-x 1 owner group        0 Jan 01 00:00 ..\r\n" .
+                "drwxr-xr-x 1 owner group        0 Jan 01 00:00 www\r\n" .
+                "drwxr-xr-x 1 owner group        0 Jan 01 00:00 emptydir\r\n" .
+                "-rw-r--r-- 1 owner group       33 Jan 01 00:00 file1\r\n" .
+                "-rw-r--r-- 1 owner group        8 Jan 01 00:00 file\r\n" .
+                "-rw-r--r-- 1 owner group       35 Jan 01 00:00 a story\r\n" .
+                "-rw-r--r-- 1 owner group       14 Jan 01 00:00 binary data\r\n" .
+                "-rw-r--r-- 1 owner group       13 Jan 01 00:00 fget\r\n" .
+                "-rw-r--r-- 1 owner group        5 Jan 01 00:00 fgetresume\r\n" .
+                "-rw-r--r-- 1 owner group 5368709120 Jan 01 00:00 largefile\r\n" .
+                "-rw-r--r-- 1 owner group     5100 Jan 01 00:00 mediumfile\r\n" .
+                "-rw-r--r-- 1 owner group        1 Jan 01 00:00 fget_large\r\n" .
+                "-rw-r--r-- 1 owner group     4107 Jan 01 00:00 crlf_boundary\r\n" .
+                "-rw-r--r-- 1 owner group     4096 Jan 01 00:00 bare_cr\r\n" .
+                "-rw-r--r-- 1 owner group        6 Jan 01 00:00 trailing_cr\r\n" .
+                "-rw-r--r-- 1 owner group       10 Jan 01 00:00 gh10521\r\n" .
+                "-rw-r--r-- 1 owner group       10 Jan 01 00:00 pasv\r\n" .
+                "-rw-r--r-- 1 owner group       10 Jan 01 00:00 bug73457\r\n"
+            );
+            fclose($fs);
+            fputs($s, "226 Closing data Connection.\r\n");
         }elseif (preg_match('/^REST (\d+)/', $buf, $matches)) {
             $GLOBALS['rest_pos'] = $matches[1];
             fputs($s, "350 OK\r\n");

@@ -2,6 +2,12 @@
 iconv_substr() with out of bounds offset
 --EXTENSIONS--
 iconv
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris iconv behaves differently");
+}
+?>
 --FILE--
 <?php
 

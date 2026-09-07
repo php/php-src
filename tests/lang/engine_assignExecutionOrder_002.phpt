@@ -13,7 +13,7 @@ echo "A=$a B=$b\n";
 try {
     $c[$c=1] = 1;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // i++ evaluated first, so $d[0] is 10
@@ -94,7 +94,7 @@ print_r($ee);
 ?>
 --EXPECTF--
 A=hello B=bye
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 array(2) {
   [0]=>
   int(10)

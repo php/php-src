@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Rob Richards <rrichards@php.net>                             |
   |         Pierre-A. Joye <pajoye@php.net>                              |
@@ -432,7 +430,7 @@ PHP_FUNCTION(xmlwriter_write_element)
 }
 /* }}} */
 
-/* {{{ Write full namesapced element tag - returns FALSE on error */
+/* {{{ Write full namespaced element tag - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_write_element_ns)
 {
 	xmlTextWriterPtr ptr;
@@ -765,7 +763,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	int retval;
 	/* Optional parameters */
 	char *pubid = NULL, *sysid = NULL, *ndataid = NULL;
-	bool pe = 0;
+	bool pe = false;
 	size_t pubid_len, sysid_len, ndataid_len;
 	zval *self;
 
@@ -907,9 +905,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 	zval *self = getThis();
 	ze_xmlwriter_object *ze_obj = NULL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (self) {
 		/* We do not use XMLWRITER_FROM_OBJECT, xmlwriter init function here */
@@ -1006,7 +1002,7 @@ PHP_METHOD(XMLWriter, toStream)
 /* {{{ php_xmlwriter_flush */
 static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) {
 	xmlTextWriterPtr ptr;
-	bool empty = 1;
+	bool empty = true;
 	int output_bytes;
 	zval *self;
 
@@ -1052,7 +1048,7 @@ PHP_FUNCTION(xmlwriter_flush)
 static PHP_MINIT_FUNCTION(xmlwriter)
 {
 	memcpy(&xmlwriter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	xmlwriter_object_handlers.offset = XtOffsetOf(ze_xmlwriter_object, std);
+	xmlwriter_object_handlers.offset = offsetof(ze_xmlwriter_object, std);
 	xmlwriter_object_handlers.dtor_obj = xmlwriter_object_dtor;
 	xmlwriter_object_handlers.clone_obj = NULL;
 	xmlwriter_class_entry_ce = register_class_XMLWriter();

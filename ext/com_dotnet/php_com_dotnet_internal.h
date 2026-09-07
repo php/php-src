@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
@@ -46,9 +44,9 @@ typedef struct _php_com_dotnet_object {
 	HashTable *id_of_name_cache;
 } php_com_dotnet_object;
 
-static inline bool php_com_is_valid_object(zval *zv)
+static inline bool php_com_is_valid_object(zend_object *obj)
 {
-	zend_class_entry *ce = Z_OBJCE_P(zv);
+	const zend_class_entry *ce = obj->ce;
 	return zend_string_equals_literal(ce->name, "com") ||
 		zend_string_equals_literal(ce->name, "dotnet") ||
 		zend_string_equals_literal(ce->name, "variant");
@@ -56,7 +54,7 @@ static inline bool php_com_is_valid_object(zval *zv)
 
 #define CDNO_FETCH(zv)			(php_com_dotnet_object*)Z_OBJ_P(zv)
 #define CDNO_FETCH_VERIFY(obj, zv)	do { \
-	if (!php_com_is_valid_object(zv)) { \
+	if (!php_com_is_valid_object(Z_OBJ_P(zv))) { \
 		php_com_throw_exception(E_UNEXPECTED, "expected a variant object"); \
 		return; \
 	} \
@@ -68,7 +66,6 @@ extern zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_e
 
 /* com_handlers.c */
 zend_object* php_com_object_new(zend_class_entry *ce);
-zend_object* php_com_object_clone(zend_object *object);
 void php_com_object_free_storage(zend_object *object);
 extern zend_object_handlers php_com_object_handlers;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable);
@@ -102,8 +99,8 @@ zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_fu
 		WORD flags,	VARIANT *v, int nargs, zval *args);
 
 /* com_wrapper.c */
-PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name);
-PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val);
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zend_object *val, GUID *sinkid, HashTable *id_to_name);
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zend_object *val);
 
 /* com_persist.c */
 void php_com_persist_minit(INIT_FUNC_ARGS);
@@ -117,9 +114,11 @@ PHP_COM_DOTNET_API zend_result php_com_zval_from_variant(zval *z, VARIANT *v, in
 PHP_COM_DOTNET_API zend_result php_com_copy_variant(VARIANT *dst, VARIANT *src);
 
 /* com_dotnet.c */
+#ifdef HAVE_MSCOREE_H
 PHP_METHOD(dotnet, __construct);
 void php_com_dotnet_rshutdown(void);
 void php_com_dotnet_mshutdown(void);
+#endif
 
 /* com_misc.c */
 void php_com_throw_exception(HRESULT code, char *message);

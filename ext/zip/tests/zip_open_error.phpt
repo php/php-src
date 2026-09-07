@@ -11,7 +11,7 @@ echo "Test case 1:";
 try {
     $zip = zip_open("");
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Test case 2:\n";
@@ -21,7 +21,7 @@ echo is_resource($zip) ? "OK" : "Failure";
 --EXPECTF--
 Test case 1:
 Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
-zip_open(): Argument #1 ($filename) must not be empty
+ValueError: zip_open(): Argument #1 ($filename) must not be empty
 Test case 2:
 
 Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d

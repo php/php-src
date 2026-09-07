@@ -14,9 +14,9 @@ $client = new SoapClient(__DIR__."/../interop/Round2/GroupB/round2_groupB.wsdl",
 try {
     $client->echo2DStringArray($fusion);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 string(10) "xxxxxxxxxx"
-Cannot traverse an already closed generator
+Exception: Cannot traverse an already closed generator

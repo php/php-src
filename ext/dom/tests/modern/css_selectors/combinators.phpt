@@ -56,8 +56,8 @@ test_helper($dom, 'article[title].bar p');
 
 try {
     test_helper($dom, 'col.selected||td');
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -110,4 +110,4 @@ try {
 --- Selector: article[title].bar p ---
 <p xmlns="http://www.w3.org/1999/xhtml" class="bar">Fifth p</p>
 --- Selector: col.selected||td ---
-Dom\Document::querySelectorAll(): Argument #1 ($selectors) contains an unsupported selector
+ValueError: Dom\Document::querySelectorAll(): Argument #1 ($selectors) contains an unsupported selector

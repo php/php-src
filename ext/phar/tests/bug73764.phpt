@@ -9,8 +9,8 @@ try {
 $p = Phar::LoadPhar('bug73764.phar', 'alias.phar');
 echo "OK\n";
 } catch(PharException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-internal corruption of phar "%sbug73764.phar" (truncated manifest entry)
+PharException: internal corruption of phar "%sbug73764.phar" (truncated manifest entry)

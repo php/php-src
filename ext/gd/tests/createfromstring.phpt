@@ -55,7 +55,7 @@ unlink($dir . '/p.png');
 try {
     imagecreatefromstring('');
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 //random string > 12
 $im = imagecreatefromstring(' asdf jklp foo');

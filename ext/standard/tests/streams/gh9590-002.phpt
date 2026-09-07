@@ -7,6 +7,8 @@ posix
 if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, -1)) {
     die('skip Failed to set POSIX_RLIMIT_NOFILE');
 }
+if (PHP_OS_FAMILY === 'Solaris' && PHP_INT_SIZE === 8)
+    die('skip Solaris LP64 FD_SETSIZE=65536 not practically exceedable here');
 ?>
 --FILE--
 <?php

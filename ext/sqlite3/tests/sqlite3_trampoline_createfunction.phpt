@@ -16,8 +16,8 @@ class TrampolineTest {
 $o = new TrampolineTest();
 $callback = [$o, 'strtoupper'];
 var_dump($db->createfunction('strtoupper', $callback));
-var_dump($db->querySingle('SELECT strtoupper("test")'));
-var_dump($db->querySingle('SELECT strtoupper("test")'));
+var_dump($db->querySingle("SELECT strtoupper('test')"));
+var_dump($db->querySingle("SELECT strtoupper('test')"));
 
 ?>
 --EXPECT--

@@ -21,5 +21,8 @@ stream_filter_append($fp, 'bzip2.decompress', STREAM_FILTER_WRITE, new ParamsDec
 fwrite($fp, "Hello world, hopefully not broken\n");
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: stream_filter_append(): Passing an object for filter parameters for bzip2.compress is deprecated, call get_object_vars() first instead in %s on line %d
+
+Deprecated: stream_filter_append(): Passing an object for filter parameters for bzip2.decompress is deprecated, call get_object_vars() first instead in %s on line %d
 Hello world, hopefully not broken

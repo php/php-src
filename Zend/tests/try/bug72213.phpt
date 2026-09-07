@@ -15,11 +15,11 @@ function test() {
 
 try {
     test();
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump($e->getPrevious()->getMessage());
 }
 ?>
 --EXPECT--
-string(1) "b"
+Exception: b
 string(1) "a"

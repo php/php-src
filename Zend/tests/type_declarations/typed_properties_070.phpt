@@ -29,12 +29,12 @@ var_dump(Foo::$i);
 
 try {
     Foo::$i += PHP_INT_MAX;
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump(Foo::$i);
 
 try {
     Foo::$i .= PHP_INT_MAX;
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump(Foo::$i);
 
 ?>
@@ -43,7 +43,7 @@ string(2) "11"
 string(2) "13"
 string(2) "12"
 int(1)
-Cannot assign float to property Foo::$i of type int
+TypeError: Cannot assign float to property Foo::$i of type int
 int(1)
-Cannot assign string to property Foo::$i of type int
+TypeError: Cannot assign string to property Foo::$i of type int
 int(1)

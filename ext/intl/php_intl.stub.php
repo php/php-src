@@ -445,6 +445,8 @@ function grapheme_str_split(string $string, int $length = 1): array|false {}
 
 function grapheme_levenshtein(string $string1, string $string2, int $insertion_cost = 1, int $replacement_cost = 1, int $deletion_cost = 1, string $locale = ""): int|false {}
 
+function grapheme_strrev(string $string): string|false {}
+
 /** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR_COUNT, int $offset = 0, &$next = null): string|false {}
 
@@ -484,6 +486,10 @@ function locale_get_display_name(string $locale, ?string $displayLocale = null):
 function locale_get_display_language(string $locale, ?string $displayLocale = null): string|false {}
 
 function locale_get_display_variant(string $locale, ?string $displayLocale = null): string|false {}
+
+function locale_get_display_keyword(string $keyword, ?string $displayLocale = null): string|false {}
+
+function locale_get_display_keyword_value(string $locale, string $keyword, ?string $displayLocale = null): string|false {}
 
 function locale_compose(array $subtags): string|false {}
 

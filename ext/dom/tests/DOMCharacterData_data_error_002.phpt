@@ -10,9 +10,9 @@ dom
 $character_data = new DOMCharacterData();
 try {
     print $character_data->data;
-} catch (DOMException $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Invalid State Error
+DOMException: Invalid State Error

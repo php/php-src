@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Andrei Zmievski <andrei@php.net>                             |
    +----------------------------------------------------------------------+
@@ -752,21 +750,23 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	}
 
 	if (key != regex) {
-		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(ctype_string));
-		if (!tables) {
-			zend_string *_k;
+		zv = zend_hash_str_lookup(&char_tables, ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)));
+		if (Z_ISNULL_P(zv)) {
 			tables = pcre2_maketables(gctx);
 			if (UNEXPECTED(!tables)) {
+				/* Remove the placeholder entry created by zend_hash_str_lookup(),
+				 * set ptr to NULL first so the destructor (pefree) is safe. */
+				ZVAL_PTR(zv, NULL);
+				zend_hash_str_del(&char_tables, ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)));
 				php_error_docref(NULL,E_WARNING, "Failed to generate locale character tables");
 				pcre_handle_exec_error(PCRE2_ERROR_NOMEMORY);
 				zend_string_release_ex(key, 0);
 				efree(pattern);
 				return NULL;
 			}
-			_k = zend_string_init(ZSTR_VAL(BG(ctype_string)), ZSTR_LEN(BG(ctype_string)), 1);
-			GC_MAKE_PERSISTENT_LOCAL(_k);
-			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
-			zend_string_release(_k);
+			ZVAL_PTR(zv, (void *)tables);
+		} else {
+			tables = Z_PTR_P(zv);
 		}
 	}
 	pcre2_set_character_tables(cctx, tables);
@@ -833,19 +833,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	new_entry.refcount = 0;
 	new_entry.subpats_table = NULL;
 
-	rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count);
-	if (rc < 0) {
-		if (key != regex) {
-			zend_string_release_ex(key, 0);
-		}
-		pcre2_code_free(new_entry.re);
-		php_error_docref(NULL, E_WARNING, "Internal pcre2_pattern_info() error %d", rc);
-		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
-		return NULL;
-	}
-
-	rc = pcre2_pattern_info(re, PCRE2_INFO_NAMECOUNT, &new_entry.name_count);
-	if (rc < 0) {
+	if ((rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count)) < 0 ||
+	    (rc = pcre2_pattern_info(re, PCRE2_INFO_NAMECOUNT, &new_entry.name_count)) < 0) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
@@ -1097,7 +1086,7 @@ static void populate_subpat_array(
 	/* Add MARK, if available */
 	if (mark) {
 		ZVAL_STRING(&val, (char *)mark);
-		zend_hash_str_add_new(subpats_ht, ZEND_STRL("MARK"), &val);
+		zend_hash_str_update(subpats_ht, ZEND_STRL("MARK"), &val);
 	}
 }
 
@@ -1141,12 +1130,12 @@ static zend_always_inline bool is_known_valid_utf8(
 		zend_string *subject_str, PCRE2_SIZE start_offset) {
 	if (!ZSTR_IS_VALID_UTF8(subject_str)) {
 		/* We don't know whether the string is valid UTF-8 or not. */
-		return 0;
+		return false;
 	}
 
 	if (start_offset == ZSTR_LEN(subject_str)) {
 		/* Degenerate case: Offset points to end of string. */
-		return 1;
+		return true;
 	}
 
 	/* Check that the offset does not point to an UTF-8 continuation byte. */
@@ -1577,6 +1566,7 @@ static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cach
 	fci->retval = &retval;
 	fci->param_count = 1;
 	fci->params = &arg;
+	fci->consumed_args = zend_fci_consumed_arg(0);
 	zend_call_function(fci, fcc);
 	zval_ptr_dtor(&arg);
 	if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
@@ -1715,10 +1705,10 @@ matched:
 			walk = ZSTR_VAL(replace_str);
 			replace_end = walk + ZSTR_LEN(replace_str);
 			walk_last = 0;
-			simple_string = 1;
+			simple_string = true;
 			while (walk < replace_end) {
 				if ('\\' == *walk || '$' == *walk) {
-					simple_string = 0;
+					simple_string = false;
 					if (walk_last == '\\') {
 						walk++;
 						walk_last = 0;
@@ -2502,7 +2492,7 @@ PHP_FUNCTION(preg_replace_callback_array)
 			case IS_NULL:
 				RETVAL_NULL();
 				goto error;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 
 		if (EG(exception)) {
@@ -3022,7 +3012,13 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	if (match_data != mdata) {
 		pcre2_match_data_free(match_data);
 	}
+
 	mdata_used = old_mdata_used;
+
+	if (PCRE_G(error_code) != PHP_PCRE_NO_ERROR) {
+		zend_array_destroy(Z_ARR_P(return_value));
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 

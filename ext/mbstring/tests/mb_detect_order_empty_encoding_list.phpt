@@ -8,15 +8,15 @@ mbstring
 try {
     var_dump( mb_detect_order(''));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump( mb_detect_order([]));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-mb_detect_order(): Argument #1 ($encoding) must specify at least one encoding
-mb_detect_order(): Argument #1 ($encoding) must specify at least one encoding
+ValueError: mb_detect_order(): Argument #1 ($encoding) must specify at least one encoding
+ValueError: mb_detect_order(): Argument #1 ($encoding) must specify at least one encoding

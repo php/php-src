@@ -39,7 +39,7 @@ What do you write phpt tests on?
    If you want more guidance than that you can always ask the PHP Quality Assurance Team on their
    mailing list (php-qa@lists.php.net) where they would like you to direct your attentions.
 
-How is a phpt test is used?
+How is a phpt test used?
 
    When a test is called by the ``run-tests.php`` script it takes various parts of the phpt file to
    name and create a .php file. That .php file is then executed. The output of the .php file is then
@@ -132,7 +132,7 @@ below illustrates a minimal test.
    string(32) "# hello All, I sAid hi planet! #"
 
 As you can see the file is divided into several sections. The TEST section holds a one line title of
-the phpt test, this should be a simple description and shouldn't ever excede one line, if you need
+the phpt test, this should be a simple description and shouldn't ever exceed one line, if you need
 to write more explanation add comments in the body of the test case. The phpt files name is used
 when generating a .php file. The FILE section is used as the body of the .php file, so don't forget
 to open and close your php tags. The EXPECT section is the part used as a comparison to see if the
@@ -192,6 +192,11 @@ When you are testing your test case it's really important to make sure that you 
 temporary resources (eg files) that you used in the test. There is a special ``--CLEAN--`` section
 to help you do this — see `here <#clean>`_.
 
+Tests run in parallel by default. Mutable resources such as files, directories, ports, database
+objects, and IPC identifiers must therefore be unique to each test. Read-only fixtures may be
+shared. If a resource cannot be isolated, declare the narrowest applicable conflict using
+``--CONFLICTS--`` or a ``CONFLICTS`` file.
+
 Another good check is to look at what lines of code in the PHP source your test case covers. This is
 easy to do, there are some instructions on the `PHP Wiki
 <https://wiki.php.net/doc/articles/writing-tests>`_.
@@ -235,10 +240,10 @@ and not in the INI section. This is because of the order in which settings are c
 
    date_default_timezone_set() -> TZ environmental -> INI setting -> System Setting
 
-If a TZ environmental varaibale is found the INI setting will be ignored.
+If a TZ environmental variable is found the INI setting will be ignored.
 
-Tests that run, or only have have matching EXPECT output, on 32bit platforms can use a SKIPIF
-section like:
+Tests that run, or only have matching EXPECT output, on 32bit platforms can use a SKIPIF section
+like:
 
 .. code:: php
 
@@ -580,7 +585,7 @@ Example 1 (snippet):
 .. code:: text
 
    --DESCRIPTION--
-   This test covers both valid and invalid usages of filter_input() with INPUT_GET and INPUT_POST data and several differnet filter sanitizers.
+   This test covers both valid and invalid usages of filter_input() with INPUT_GET and INPUT_POST data and several different filter sanitizers.
 
 Example 1 (full): :ref:`sample001.phpt`
 
@@ -591,9 +596,10 @@ Example 1 (full): :ref:`sample001.phpt`
 on the first line. If the test was part of a TestFest event, then # followed by the name of the
 event and the date (YYYY-MM-DD) on the second line.
 
-**Required:** No. For newly created tests this section should no longer be included, as test
-authorship is already accurately tracked by Git. If multiple authors should be credited, the
-`Co-authored-by` tag in the commit message may be used.
+**Required:** No. For newly created tests the section should no longer be used for simple authorship
+claims or listing all contributors who edited the test; as it is already accurately tracked by Git.
+It may be used if more specific attribution is useful, for example to credit the original reporter
+of a bug or a contributor who is not credited via `Co-authored-by` tag.
 
 **Format:** Name Email [Event]
 
@@ -1310,7 +1316,7 @@ Example 1 (full): :ref:`sample017.phpt`
 ``--FLAKY--``
 -------------
 
-**Description:** This section identifies this test as one that occassionally fails. If the test
+**Description:** This section identifies this test as one that occasionally fails. If the test
 actually fails, it will be retried one more time, and that result will be reported. The section
 should include a brief description of why the test is flaky. Reasons for this include tests that
 rely on relatively precise timing, or temporary disc states. Available as of PHP 8.1.22 and 8.2.9,
@@ -1389,7 +1395,7 @@ Example 1 (full): :ref:`sample002.phpt`
 ``--EXPECT_EXTERNAL--``
 -----------------------
 
-**Description:** Similar to to ``--EXPECT--`` section, but just stating a filename where to load the
+**Description:** Similar to ``--EXPECT--`` section, but just stating a filename where to load the
 expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.
@@ -1526,7 +1532,7 @@ Example 2 (full): :ref:`sample020.phpt`
 ``--EXPECTF_EXTERNAL--``
 ------------------------
 
-**Description:** Similar to to ``--EXPECTF--`` section, but like the ``--EXPECT_EXTERNAL--`` section
+**Description:** Similar to ``--EXPECTF--`` section, but like the ``--EXPECT_EXTERNAL--`` section
 just stating a filename where to load the expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.
@@ -1607,7 +1613,7 @@ Example 3 (snippet):
 ``--EXPECTREGEX_EXTERNAL--``
 ----------------------------
 
-**Description:** Similar to to ``--EXPECTREGEX--`` section, but like the ``--EXPECT_EXTERNAL--``
+**Description:** Similar to ``--EXPECTREGEX--`` section, but like the ``--EXPECT_EXTERNAL--``
 section just stating a filename where to load the expected output from.
 
 **Required:** One of the ``EXPECT`` type sections is required.
@@ -1884,7 +1890,7 @@ sample001.phpt
    --DESCRIPTION--
    This test covers both valid and invalid usages of
    filter_input() with INPUT_GET and INPUT_POST data
-   and several differnt filter sanitizers.
+   and several different filter sanitizers.
    --CREDITS--
    Felipe Pena <felipe@php.net>
    --INI--

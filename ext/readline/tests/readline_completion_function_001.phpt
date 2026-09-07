@@ -18,7 +18,7 @@ foreach ($data as $callback) {
     try {
         var_dump(readline_completion_function($callback));
     } catch (\TypeError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -26,5 +26,5 @@ foreach ($data as $callback) {
 --EXPECT--
 bool(true)
 bool(true)
-readline_completion_function(): Argument #1 ($callback) must be a valid callback, no array or string given
-readline_completion_function(): Argument #1 ($callback) must be a valid callback, no array or string given
+TypeError: readline_completion_function(): Argument #1 ($callback) must be a valid callback, no array or string given
+TypeError: readline_completion_function(): Argument #1 ($callback) must be a valid callback, no array or string given

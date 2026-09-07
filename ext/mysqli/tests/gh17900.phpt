@@ -9,8 +9,8 @@ $mysqli = new mysqli();
 try {
     $mysqli->__construct('doesnotexist');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot call constructor twice
+Error: Cannot call constructor twice

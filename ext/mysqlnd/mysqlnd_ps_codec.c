@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -317,7 +315,7 @@ ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 		const zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_DATE;
-		t.neg = 0;
+		t.neg = false;
 
 		t.second_part = t.hour = t.minute = t.second = 0;
 
@@ -354,7 +352,7 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 		const zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
-		t.neg = 0;
+		t.neg = false;
 
 		t.year	 = (unsigned int) sint2korr(to);
 		t.month = (unsigned int) to[2];

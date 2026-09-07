@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Saki Takamachi <saki@php.net>                               |
    +----------------------------------------------------------------------+
@@ -19,7 +17,7 @@
 #include <stddef.h>
 
 /* Returns the scale of the value after rounding. */
-size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
+size_t bc_round(bc_num num, zend_long precision, zend_enum_RoundingMode mode, bc_num *result)
 {
 	/* clear result */
 	bc_free_num(result);
@@ -38,32 +36,30 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	/* e.g. value is 0.1 and precision is -3, ret is 0 or 1000  */
 	if (precision < 0 && num->n_len < (size_t) (-(precision + Z_L(1))) + 1) {
 		switch (mode) {
-			case PHP_ROUND_HALF_UP:
-			case PHP_ROUND_HALF_DOWN:
-			case PHP_ROUND_HALF_EVEN:
-			case PHP_ROUND_HALF_ODD:
-			case PHP_ROUND_TOWARD_ZERO:
+			case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
+			case ZEND_ENUM_RoundingMode_HalfTowardsZero:
+			case ZEND_ENUM_RoundingMode_HalfEven:
+			case ZEND_ENUM_RoundingMode_HalfOdd:
+			case ZEND_ENUM_RoundingMode_TowardsZero:
 				*result = bc_copy_num(BCG(_zero_));
 				return 0;
 
-			case PHP_ROUND_CEILING:
+			case ZEND_ENUM_RoundingMode_PositiveInfinity:
 				if (num->n_sign == MINUS) {
 					*result = bc_copy_num(BCG(_zero_));
 					return 0;
 				}
 				break;
 
-			case PHP_ROUND_FLOOR:
+			case ZEND_ENUM_RoundingMode_NegativeInfinity:
 				if (num->n_sign == PLUS) {
 					*result = bc_copy_num(BCG(_zero_));
 					return 0;
 				}
 				break;
 
-			case PHP_ROUND_AWAY_FROM_ZERO:
+			case ZEND_ENUM_RoundingMode_AwayFromZero:
 				break;
-
-			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 
 		if (bc_is_zero(num)) {
@@ -115,7 +111,7 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 
 	/* Check cases that can be determined without looping. */
 	switch (mode) {
-		case PHP_ROUND_HALF_UP:
+		case ZEND_ENUM_RoundingMode_HalfAwayFromZero:
 			if (*nptr >= 5) {
 				goto up;
 			} else if (*nptr < 5) {
@@ -123,9 +119,9 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			}
 			break;
 
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_HALF_EVEN:
-		case PHP_ROUND_HALF_ODD:
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
+		case ZEND_ENUM_RoundingMode_HalfEven:
+		case ZEND_ENUM_RoundingMode_HalfOdd:
 			if (*nptr > 5) {
 				goto up;
 			} else if (*nptr < 5) {
@@ -134,7 +130,7 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			/* if *nptr == 5, we need to look-up further digits before making a decision. */
 			break;
 
-		case PHP_ROUND_CEILING:
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
 			if (num->n_sign != PLUS) {
 				goto check_zero;
 			} else if (*nptr > 0) {
@@ -143,7 +139,7 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			/* if *nptr == 0, a loop is required for judgment. */
 			break;
 
-		case PHP_ROUND_FLOOR:
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
 			if (num->n_sign != MINUS) {
 				goto check_zero;
 			} else if (*nptr > 0) {
@@ -152,17 +148,15 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			/* if *nptr == 0, a loop is required for judgment. */
 			break;
 
-		case PHP_ROUND_TOWARD_ZERO:
+		case ZEND_ENUM_RoundingMode_TowardsZero:
 			goto check_zero;
 
-		case PHP_ROUND_AWAY_FROM_ZERO:
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
 			if (*nptr > 0) {
 				goto up;
 			}
 			/* if *nptr == 0, a loop is required for judgment. */
 			break;
-
-		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	/* Loop through the remaining digits. */
@@ -178,25 +172,25 @@ size_t bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	}
 
 	switch (mode) {
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_CEILING:
-		case PHP_ROUND_FLOOR:
-		case PHP_ROUND_AWAY_FROM_ZERO:
+		case ZEND_ENUM_RoundingMode_HalfTowardsZero:
+		case ZEND_ENUM_RoundingMode_PositiveInfinity:
+		case ZEND_ENUM_RoundingMode_NegativeInfinity:
+		case ZEND_ENUM_RoundingMode_AwayFromZero:
 			goto check_zero;
 
-		case PHP_ROUND_HALF_EVEN:
+		case ZEND_ENUM_RoundingMode_HalfEven:
 			if (rounded_len == 0 || num->n_value[rounded_len - 1] % 2 == 0) {
 				goto check_zero;
 			}
 			break;
 
-		case PHP_ROUND_HALF_ODD:
+		case ZEND_ENUM_RoundingMode_HalfOdd:
 			if (rounded_len != 0 && num->n_value[rounded_len - 1] % 2 == 1) {
 				goto check_zero;
 			}
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 up:

@@ -78,7 +78,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "pdo_attr_statement_class_basic");
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
   string(12) "PDOStatement"
@@ -89,7 +89,7 @@ StatementWithPublicDestructor::__destruct
 Class derived from PDOStatement, with private constructor:
 bool(true)
 StatementWithPrivateConstructor::__construct
-object(StatementWithPrivateConstructor)#2 (1) {
+object(StatementWithPrivateConstructor)#%d (1) {
   ["queryString"]=>
   string(68) "SELECT id, label FROM pdo_attr_statement_class_basic ORDER BY id ASC"
 }
@@ -97,7 +97,7 @@ string(6) "param1"
 Class derived from a child of PDOStatement:
 bool(true)
 StatementWithPrivateConstructor::__construct
-object(StatementDerivedFromChild)#2 (1) {
+object(StatementDerivedFromChild)#%d (1) {
   ["queryString"]=>
   string(68) "SELECT id, label FROM pdo_attr_statement_class_basic ORDER BY id ASC"
 }

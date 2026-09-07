@@ -59,7 +59,7 @@ try
 }
 catch(Exception $e)
 {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try
@@ -68,7 +68,7 @@ try
 }
 catch(Exception $e)
 {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $it = new MyCachingIterator(new ArrayIterator(array(0, 1, 2, 3)), CachingIterator::FULL_CACHE);
@@ -89,8 +89,8 @@ $it->show();
 
 ?>
 --EXPECT--
-Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
-Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
+BadMethodCallException: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
+BadMethodCallException: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 MyCachingIterator::testSet()
 set(0,25)
 set(1,42)

@@ -20,11 +20,11 @@ try {
         ],
     ]);
 } catch (\ValueError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "ok\n";
 ?>
 --EXPECT--
-ldap_search(): Sort key list must have an "attr" key
+ValueError: ldap_search(): Sort key list must have an "attr" key
 ok

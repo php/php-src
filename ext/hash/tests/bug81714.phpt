@@ -7,8 +7,8 @@ hash_final($h);
 try {
     serialize($h);
 } catch (Exception $ex) {
-    var_dump($ex->getMessage());
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-string(52) "HashContext for algorithm "md5" cannot be serialized"
+Exception: HashContext for algorithm "md5" cannot be serialized

@@ -7,4 +7,4 @@ exif
 exif_read_data(__DIR__."/input");
 ?>
 --EXPECTF--
-Warning: exif_read_data(%s): Invalid HEIF file in %s on line %d
+Warning: exif_read_data(): Invalid HEIF file in %s on line %d

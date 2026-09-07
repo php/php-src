@@ -16,15 +16,6 @@ LCOV_EXCLUDES = \
 	'$(top_srcdir)/parse_date.re' \
 	'$(top_srcdir)/parse_iso_intervals.re'
 
-GCOVR_EXCLUDES = \
-	'ext/bcmath/libbcmath/.*' \
-	'ext/date/lib/.*' \
-	'ext/fileinfo/libmagic/.*' \
-	'ext/gd/libgd/.*' \
-	'ext/hash/sha3/.*' \
-	'ext/mbstring/libmbfl/.*' \
-	'ext/pcre/pcre2lib/.*'
-
 lcov: lcov-html
 
 php_lcov.info:
@@ -48,15 +39,11 @@ gcovr-html:
 	@echo "Generating gcovr HTML"
 	@rm -rf gcovr_html/
 	@mkdir gcovr_html
-	gcovr -sr . -o gcovr_html/index.html --html --html-details \
-		--exclude-directories 'ext/date/lib$$' \
-		$(foreach lib, $(GCOVR_EXCLUDES), -e $(lib))
+	gcovr -r . -o gcovr_html/index.html --html --html-details
 
 gcovr-xml:
 	@echo "Generating gcovr XML"
 	@rm -f gcovr.xml
-	gcovr -sr . -o gcovr.xml --xml \
-		--exclude-directories 'ext/date/lib$$' \
-		$(foreach lib, $(GCOVR_EXCLUDES), -e $(lib))
+	gcovr -r . -o gcovr.xml --xml
 
 .PHONY: gcovr-html lcov-html php_lcov.info

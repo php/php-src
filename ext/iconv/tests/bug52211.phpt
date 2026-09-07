@@ -2,6 +2,12 @@
 Bug #52211 (iconv() returns part of string on error)
 --EXTENSIONS--
 iconv
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris iconv behaves differently");
+}
+?>
 --FILE--
 <?php
 

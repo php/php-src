@@ -47,9 +47,6 @@ if (mysqli_get_server_version($link) < 50003) {
             !mysqli_query($link, $sql = sprintf('CREATE TABLE test(id BIGINT UNSIGNED, bit_value BIT(%d) NOT NULL, bit_null BIT(%d) DEFAULT NULL) ENGINE="%s"', $bits, $bits, $engine)))
             printf("[002 - %d] [%d] %s\n",$bits, mysqli_errno($link), mysqli_error($link));
 
-        if (!$stmt = mysqli_stmt_init($link))
-            printf("[003 - %d] [%d] %s\n", $bits, mysqli_errno($link), mysqli_error($link));
-
         $tests = 0;
         $rand_max = mt_getrandmax();
         while ($tests < 10) {
@@ -77,13 +74,17 @@ if (mysqli_get_server_version($link) < 50003) {
                 ;
             $bin2 = substr($bin, $i, strlen($bin));
 
-            if (!mysqli_stmt_prepare($stmt, $sql) ||
-                    !mysqli_stmt_execute($stmt))
+            if (!$stmt = mysqli_prepare($link, $sql))
+                printf("[003 - %d] [%d] %s\n", $bits, mysqli_errno($link), mysqli_error($link));
+
+            if(!mysqli_stmt_execute($stmt))
                 printf("[004 - %d] [%d] %s\n", $bits, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
             $sql = sprintf("SELECT bin(bit_value) AS _bin, id, bit_value, bit_null FROM test WHERE id = %s", $value);
-            if (!mysqli_stmt_prepare($stmt, $sql) ||
-                    !mysqli_stmt_execute($stmt))
+            if (!$stmt = mysqli_prepare($link, $sql))
+                printf("[005 - %d] [%d] %s\n", $bits, mysqli_errno($link), mysqli_error($link));
+
+            if(!mysqli_stmt_execute($stmt))
                 printf("[005 - %d] [%d] %s\n", $bits, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
             if (!$res = mysqli_stmt_get_result($stmt))

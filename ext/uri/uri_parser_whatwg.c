@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Máté Kocsis <kocsismate@php.net>                            |
    +----------------------------------------------------------------------+
@@ -27,10 +25,11 @@
 ZEND_TLS lexbor_mraw_t lexbor_mraw = {0};
 ZEND_TLS lxb_url_parser_t lexbor_parser = {0};
 ZEND_TLS lxb_unicode_idna_t lexbor_idna = {0};
+ZEND_TLS uint8_t lexbor_custom_url_map[256] = {0};
 
 static const size_t lexbor_mraw_byte_size = 8192;
 
-static zend_always_inline void zval_string_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
+ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_string_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
 {
 	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) {
 		lexbor_str->data = (lxb_char_t *) Z_STRVAL_P(value);
@@ -42,16 +41,110 @@ static zend_always_inline void zval_string_or_null_to_lexbor_str(zval *value, le
 	}
 }
 
-static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexbor_str_t *lexbor_str)
+ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_long_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
 {
 	if (Z_TYPE_P(value) == IS_LONG) {
-		ZVAL_STR(value, zend_long_to_str(Z_LVAL_P(value)));
-		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value));
-		zval_ptr_dtor_str(value);
+		char buf[MAX_LENGTH_OF_LONG + 1];
+		const char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, Z_LVAL_P(value));
+		lexbor_str_init_append(lexbor_str, lexbor_parser.mraw, (const lxb_char_t *) res, strlen(res));
 	} else {
 		ZEND_ASSERT(Z_ISNULL_P(value));
 		lexbor_str->data = (lxb_char_t *) "";
 		lexbor_str->length = 0;
+	}
+}
+
+ZEND_ATTRIBUTE_NONNULL static bool get_reason_from_error_type(const lxb_url_error_type_t error_type, const char **error_str)
+{
+	switch (error_type) {
+		case LXB_URL_ERROR_TYPE_DOMAIN_TO_ASCII:
+			*error_str = "DomainToAscii";
+			return true;
+		case LXB_URL_ERROR_TYPE_DOMAIN_TO_UNICODE:
+			*error_str = "DomainToUnicode";
+			return false;
+		case LXB_URL_ERROR_TYPE_DOMAIN_INVALID_CODE_POINT:
+			*error_str = "DomainInvalidCodePoint";
+			return true;
+		case LXB_URL_ERROR_TYPE_HOST_INVALID_CODE_POINT:
+			*error_str = "HostInvalidCodePoint";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_EMPTY_PART:
+			*error_str = "Ipv4EmptyPart";
+			return false;
+		case LXB_URL_ERROR_TYPE_IPV4_TOO_MANY_PARTS:
+			*error_str = "Ipv4TooManyParts";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_NON_NUMERIC_PART:
+			*error_str = "Ipv4NonNumericPart";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_NON_DECIMAL_PART:
+			*error_str = "Ipv4NonDecimalPart";
+			return false;
+		case LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART:
+			*error_str = "Ipv4OutOfRangePart";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_UNCLOSED:
+			*error_str = "Ipv6Unclosed";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_INVALID_COMPRESSION:
+			*error_str = "Ipv6InvalidCompression";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_TOO_MANY_PIECES:
+			*error_str = "Ipv6TooManyPieces";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_MULTIPLE_COMPRESSION:
+			*error_str = "Ipv6MultipleCompression";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_INVALID_CODE_POINT:
+			*error_str = "Ipv6InvalidCodePoint";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV6_TOO_FEW_PIECES:
+			*error_str = "Ipv6TooFewPieces";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_MANY_PIECES:
+			*error_str = "Ipv4InIpv6TooManyPieces";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_INVALID_CODE_POINT:
+			*error_str = "Ipv4InIpv6InvalidCodePoint";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_OUT_OF_RANGE_PART:
+			*error_str = "Ipv4InIpv6OutOfRangePart";
+			return true;
+		case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_FEW_PARTS:
+			*error_str = "Ipv4InIpv6TooFewParts";
+			return true;
+		case LXB_URL_ERROR_TYPE_INVALID_URL_UNIT:
+			*error_str = "InvalidUrlUnit";
+			return false;
+		case LXB_URL_ERROR_TYPE_SPECIAL_SCHEME_MISSING_FOLLOWING_SOLIDUS:
+			*error_str = "SpecialSchemeMissingFollowingSolidus";
+			return false;
+		case LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL:
+			*error_str = "MissingSchemeNonRelativeUrl";
+			return true;
+		case LXB_URL_ERROR_TYPE_INVALID_REVERSE_SOLIDUS:
+			*error_str = "InvalidReverseSoldius";
+			return false;
+		case LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS:
+			*error_str = "InvalidCredentials";
+			return false;
+		case LXB_URL_ERROR_TYPE_HOST_MISSING:
+			*error_str = "HostMissing";
+			return true;
+		case LXB_URL_ERROR_TYPE_PORT_OUT_OF_RANGE:
+			*error_str = "PortOutOfRange";
+			return true;
+		case LXB_URL_ERROR_TYPE_PORT_INVALID:
+			*error_str = "PortInvalid";
+			return true;
+		case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER:
+			*error_str = "FileInvalidWindowsDriveLetter";
+			return false;
+		case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST:
+			*error_str = "FileInvalidWindowsDriveLetterHost";
+			return false;
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -60,14 +153,8 @@ static zend_always_inline void zval_long_or_null_to_lexbor_str(zval *value, lexb
  * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum.
  * The result is passed by reference to the errors parameter.
  */
-static const char *fill_errors(zval *errors)
+ZEND_ATTRIBUTE_NONNULL static const char *fill_errors_inner(HashTable *errors)
 {
-	if (lexbor_parser.log == NULL || lexbor_plog_length(lexbor_parser.log) == 0) {
-		ZVAL_EMPTY_ARRAY(errors);
-		return NULL;
-	}
-
-	array_init(errors);
 	const char *result = NULL;
 
 	lexbor_plog_entry_t *lxb_error;
@@ -78,125 +165,8 @@ static const char *fill_errors(zval *errors)
 
 		const char *error_str;
 		zval failure;
-		switch (lxb_error->id) {
-			case LXB_URL_ERROR_TYPE_DOMAIN_TO_ASCII:
-				error_str = "DomainToAscii";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_DOMAIN_TO_UNICODE:
-				error_str = "DomainToUnicode";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_DOMAIN_INVALID_CODE_POINT:
-				error_str = "DomainInvalidCodePoint";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_HOST_INVALID_CODE_POINT:
-				error_str = "HostInvalidCodePoint";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_EMPTY_PART:
-				error_str = "Ipv4EmptyPart";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_TOO_MANY_PARTS:
-				error_str = "Ipv4TooManyParts";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_NON_NUMERIC_PART:
-				error_str = "Ipv4NonNumericPart";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_NON_DECIMAL_PART:
-				error_str = "Ipv4NonDecimalPart";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_OUT_OF_RANGE_PART:
-				error_str = "Ipv4OutOfRangePart";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_UNCLOSED:
-				error_str = "Ipv6Unclosed";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_INVALID_COMPRESSION:
-				error_str = "Ipv6InvalidCompression";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_TOO_MANY_PIECES:
-				error_str = "Ipv6TooManyPieces";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_MULTIPLE_COMPRESSION:
-				error_str = "Ipv6MultipleCompression";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_INVALID_CODE_POINT:
-				error_str = "Ipv6InvalidCodePoint";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV6_TOO_FEW_PIECES:
-				error_str = "Ipv6TooFewPieces";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_MANY_PIECES:
-				error_str = "Ipv4InIpv6TooManyPieces";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_INVALID_CODE_POINT:
-				error_str = "Ipv4InIpv6InvalidCodePoint";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_OUT_OF_RANGE_PART:
-				error_str = "Ipv4InIpv6OutOfRangePart";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_IPV4_IN_IPV6_TOO_FEW_PARTS:
-				error_str = "Ipv4InIpv6TooFewParts";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_INVALID_URL_UNIT:
-				error_str = "InvalidUrlUnit";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_SPECIAL_SCHEME_MISSING_FOLLOWING_SOLIDUS:
-				error_str = "SpecialSchemeMissingFollowingSolidus";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL:
-				error_str = "MissingSchemeNonRelativeUrl";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_INVALID_REVERSE_SOLIDUS:
-				error_str = "InvalidReverseSoldius";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_INVALID_CREDENTIALS:
-				error_str = "InvalidCredentials";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_HOST_MISSING:
-				error_str = "HostMissing";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_PORT_OUT_OF_RANGE:
-				error_str = "PortOutOfRange";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_PORT_INVALID:
-				error_str = "PortInvalid";
-				ZVAL_TRUE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER:
-				error_str = "FileInvalidWindowsDriveLetter";
-				ZVAL_FALSE(&failure);
-				break;
-			case LXB_URL_ERROR_TYPE_FILE_INVALID_WINDOWS_DRIVE_LETTER_HOST:
-				error_str = "FileInvalidWindowsDriveLetterHost";
-				ZVAL_FALSE(&failure);
-				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
-		}
+
+		ZVAL_BOOL(&failure, get_reason_from_error_type(lxb_error->id, &error_str));
 
 		zval error_type;
 		ZVAL_OBJ(&error_type, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_validation_error_type, error_str));
@@ -208,10 +178,28 @@ static const char *fill_errors(zval *errors)
 			result = error_str;
 		}
 
-		add_next_index_zval(errors, &error);
+		zend_hash_next_index_insert(errors, &error);
 	}
 
 	return result;
+}
+
+/**
+ * Creates a Uri\WhatWg\UrlValidationError class by mapping error codes listed in
+ * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum.
+ * The result is passed by reference to the errors parameter.
+ */
+ZEND_ATTRIBUTE_NONNULL static const char *fill_errors(zval *errors)
+{
+	size_t log_len;
+	if (lexbor_parser.log == NULL || (log_len = lexbor_plog_length(lexbor_parser.log)) == 0) {
+		ZVAL_EMPTY_ARRAY(errors);
+		return NULL;
+	}
+
+	array_init_size(errors, log_len);
+
+	return fill_errors_inner(Z_ARRVAL_P(errors));
 }
 
 static void throw_invalid_url_exception_during_write(zval *errors, const char *component)
@@ -236,7 +224,7 @@ static void throw_invalid_url_exception_during_write(zval *errors, const char *c
 	}
 }
 
-static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, size_t length, void *ctx)
+static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, const size_t length, void *ctx)
 {
 	smart_str *uri_str = ctx;
 
@@ -247,7 +235,7 @@ static lxb_status_t serialize_to_smart_str_callback(const lxb_char_t *data, size
 	return LXB_STATUS_OK;
 }
 
-static zend_result php_uri_parser_whatwg_scheme_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_scheme_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -258,7 +246,7 @@ static zend_result php_uri_parser_whatwg_scheme_read(void *uri, php_uri_componen
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_scheme_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_scheme_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -274,6 +262,11 @@ static zend_result php_uri_parser_whatwg_scheme_write(void *uri, zval *value, zv
 	}
 
 	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL bool php_uri_parser_whatwg_is_special(const lxb_url_t *lexbor_uri)
+{
+	return lxb_url_is_special(lexbor_uri);
 }
 
 /* 4.2. URL miscellaneous: A URL includes credentials if its username or password is not the empty string. */
@@ -295,7 +288,7 @@ static zend_result php_uri_parser_whatwg_username_read(void *uri, php_uri_compon
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_username_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_username_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -326,7 +319,7 @@ static zend_result php_uri_parser_whatwg_password_read(void *uri, php_uri_compon
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_password_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_password_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -344,7 +337,7 @@ static zend_result php_uri_parser_whatwg_password_write(void *uri, zval *value, 
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_host_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -379,7 +372,7 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 			case PHP_URI_COMPONENT_READ_MODE_RAW:
 				ZVAL_STRINGL(retval, (const char *) lexbor_uri->host.u.domain.data, lexbor_uri->host.u.domain.length);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
+			default: ZEND_UNREACHABLE();
 		}
 	} else {
 		ZVAL_NULL(retval);
@@ -388,7 +381,32 @@ static zend_result php_uri_parser_whatwg_host_read(void *uri, php_uri_component_
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_host_write(void *uri, zval *value, zval *errors)
+ZEND_ATTRIBUTE_NONNULL void php_uri_parser_whatwg_host_type_read(const lxb_url_t *lexbor_uri, zval *retval)
+{
+	switch (lexbor_uri->host.type) {
+		case LXB_URL_HOST_TYPE_IPV4:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "IPv4"));
+			return;
+		case LXB_URL_HOST_TYPE_IPV6:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "IPv6"));
+			return;
+		case LXB_URL_HOST_TYPE_DOMAIN:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "Domain"));
+			return;
+		case LXB_URL_HOST_TYPE_EMPTY:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "Empty"));
+			return;
+		case LXB_URL_HOST_TYPE_OPAQUE:
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "Opaque"));
+			return;
+		case LXB_URL_HOST_TYPE__UNDEF:
+			ZVAL_NULL(retval);
+			return;
+		default: ZEND_UNREACHABLE();
+	}
+}
+
+static zend_result php_uri_parser_whatwg_host_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -406,7 +424,7 @@ static zend_result php_uri_parser_whatwg_host_write(void *uri, zval *value, zval
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_port_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_port_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -419,7 +437,7 @@ static zend_result php_uri_parser_whatwg_port_read(void *uri, php_uri_component_
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_port_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_port_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -437,7 +455,7 @@ static zend_result php_uri_parser_whatwg_port_write(void *uri, zval *value, zval
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_path_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_path_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -450,7 +468,7 @@ static zend_result php_uri_parser_whatwg_path_read(void *uri, php_uri_component_
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_path_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_path_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -468,7 +486,7 @@ static zend_result php_uri_parser_whatwg_path_write(void *uri, zval *value, zval
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_query_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_query_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -481,7 +499,7 @@ static zend_result php_uri_parser_whatwg_query_read(void *uri, php_uri_component
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_query_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_query_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -499,7 +517,7 @@ static zend_result php_uri_parser_whatwg_query_write(void *uri, zval *value, zva
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_fragment_read(void *uri, php_uri_component_read_mode read_mode, zval *retval)
+static zend_result php_uri_parser_whatwg_fragment_read(void *uri, const php_uri_component_read_mode read_mode, zval *retval)
 {
 	const lxb_url_t *lexbor_uri = uri;
 
@@ -512,7 +530,7 @@ static zend_result php_uri_parser_whatwg_fragment_read(void *uri, php_uri_compon
 	return SUCCESS;
 }
 
-static zend_result php_uri_parser_whatwg_fragment_write(void *uri, zval *value, zval *errors)
+static zend_result php_uri_parser_whatwg_fragment_write(void *uri, const zval *value, zval *errors)
 {
 	lxb_url_t *lexbor_uri = uri;
 	lexbor_str_t str = {0};
@@ -532,9 +550,7 @@ static zend_result php_uri_parser_whatwg_fragment_write(void *uri, zval *value, 
 
 PHP_RINIT_FUNCTION(uri_parser_whatwg)
 {
-	lxb_status_t status;
-	
-	status = lexbor_mraw_init(&lexbor_mraw, lexbor_mraw_byte_size);
+	lxb_status_t status = lexbor_mraw_init(&lexbor_mraw, lexbor_mraw_byte_size);
 	if (status != LXB_STATUS_OK) {
 		goto fail;
 	}
@@ -548,6 +564,9 @@ PHP_RINIT_FUNCTION(uri_parser_whatwg)
 	if (status != LXB_STATUS_OK) {
 		goto fail;
 	}
+
+	memcpy(lexbor_custom_url_map, lxb_url_get_percent_encoding_map(), sizeof(lexbor_custom_url_map));
+	lexbor_custom_url_map['%'] = -1; /* % is percent-encoded */
 
 	return SUCCESS;
 
@@ -577,7 +596,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(uri_parser_whatwg)
 	return SUCCESS;
 }
 
-lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, bool silent)
+lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, const size_t uri_str_len, const lxb_url_t *lexbor_base_url, zval *errors, const bool silent)
 {
 	lxb_url_parser_clean(&lexbor_parser);
 
@@ -601,7 +620,7 @@ lxb_url_t *php_uri_parser_whatwg_parse_ex(const char *uri_str, size_t uri_str_le
 	return url;
 }
 
-static void *php_uri_parser_whatwg_parse(const char *uri_str, size_t uri_str_len, const void *base_url, zval *errors, bool silent)
+static void *php_uri_parser_whatwg_parse(const char *uri_str, const size_t uri_str_len, const void *base_url, zval *errors, const bool silent)
 {
 	return php_uri_parser_whatwg_parse_ex(uri_str, uri_str_len, base_url, errors, silent);
 }
@@ -613,7 +632,7 @@ static void *php_uri_parser_whatwg_clone(void *uri)
 	return lxb_url_clone(lexbor_parser.mraw, lexbor_uri);
 }
 
-static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposition_mode recomposition_mode, bool exclude_fragment)
+static zend_string *php_uri_parser_whatwg_to_string(void *uri, const php_uri_recomposition_mode recomposition_mode, const bool exclude_fragment)
 {
 	const lxb_url_t *lexbor_uri = uri;
 	smart_str uri_str = {0};
@@ -630,10 +649,83 @@ static zend_string *php_uri_parser_whatwg_to_string(void *uri, php_uri_recomposi
 		case PHP_URI_RECOMPOSITION_MODE_NORMALIZED_ASCII:
 			lxb_url_serialize(lexbor_uri, serialize_to_smart_str_callback, &uri_str, exclude_fragment);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return smart_str_extract(&uri_str);
+}
+
+static zend_string *php_uri_parser_whatwg_percent_encode_component(const char *str, const size_t str_length, const lxb_url_map_type_t map, const bool space_as_plus)
+{
+	lexbor_str_t lexbor_str = {0};
+
+	const lexbor_status_t status = lxb_url_percent_encode_utf_8(
+		(lxb_char_t *) str, str_length, &lexbor_str, lexbor_parser.mraw, lexbor_custom_url_map, map, space_as_plus
+	);
+
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+		return NULL;
+	}
+
+	zend_string *result = zend_string_init((const char *) lexbor_str.data, lexbor_str.length, false);
+
+	lexbor_str_destroy(&lexbor_str, lexbor_parser.mraw, false);
+
+	return result;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_userinfo_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_USERINFO, false);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_opaque_host_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_C0, false);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_path_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_PATH, false);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_opaque_path_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_C0, false);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_path_segment_component(const char *str, const size_t str_length)
+{
+	ZEND_ASSERT((lexbor_custom_url_map['/'] & LXB_URL_MAP_PATH) == 0);
+
+	lexbor_custom_url_map['/'] |= LXB_URL_MAP_PATH;
+
+	zend_string *result = php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_PATH, false);
+
+	lexbor_custom_url_map['/'] &= ~LXB_URL_MAP_PATH;
+
+	return result;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_query_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_QUERY, false);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_special_query_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_SPECIAL_QUERY, false);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_form_query_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_X_WWW_FORM, true);
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_percent_encode_fragment_component(const char *str, const size_t str_length)
+{
+	return php_uri_parser_whatwg_percent_encode_component(str, str_length, LXB_URL_MAP_FRAGMENT, false);
 }
 
 static void php_uri_parser_whatwg_destroy(void *uri)
@@ -641,6 +733,348 @@ static void php_uri_parser_whatwg_destroy(void *uri)
 	lxb_url_t *lexbor_uri = uri;
 
 	lxb_url_destroy(lexbor_uri);
+}
+
+ZEND_ATTRIBUTE_NONNULL static zend_always_inline zend_result php_uri_parser_whatwg_component_error(
+	const char *component_name, const lxb_url_error_type_t error_type
+) {
+	const char *reason = "";
+	if (error_type != LXB_URL_ERROR_TYPE__LAST_ENTRY) {
+		get_reason_from_error_type(error_type, &reason);
+	}
+
+	zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception,
+		0,
+		"The specified %s is malformed%s%s%s",
+		component_name,
+		reason ? " (" : "",
+		reason ? reason : "",
+		reason ? ")" : ""
+	);
+
+	return FAILURE;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_none(const zend_string *component)
+{
+	return SUCCESS;
+}
+
+static zend_always_inline bool php_uri_whatwg_is_ascii_tab_or_newline(const unsigned char c)
+{
+	return c == '\t' || c == '\n' || c == '\r';
+}
+
+static zend_always_inline bool php_uri_parser_whatwg_is_alpha(const unsigned char c)
+{
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+static zend_always_inline bool php_uri_parser_whatwg_is_digit(const unsigned char c)
+{
+	return c >= '0' && c <= '9';
+}
+
+static zend_always_inline unsigned char php_uri_ascii_to_lowercase(const unsigned char c)
+{
+	return c >= 'A' && c <= 'Z' ? (unsigned char) (c + ('a' - 'A')) : c;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_scheme(const zend_string *scheme)
+{
+	const char *p = ZSTR_VAL(scheme);
+	const char *end = p + ZSTR_LEN(scheme);
+	bool seen_first = false;
+
+	for (const char *c = p; c < end; c++) {
+		const unsigned char uc = (unsigned char) *c;
+
+		if (php_uri_whatwg_is_ascii_tab_or_newline(uc)) {
+			continue;
+		}
+
+		if (!seen_first) {
+			if (!php_uri_parser_whatwg_is_alpha(uc)) {
+				return php_uri_parser_whatwg_component_error("scheme", LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
+			}
+			seen_first = true;
+		} else {
+			if (!php_uri_parser_whatwg_is_alpha(uc) && !php_uri_parser_whatwg_is_digit(uc) && uc != '+' && uc != '-' && uc != '.') {
+				return php_uri_parser_whatwg_component_error("scheme", LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
+			}
+		}
+	}
+
+	if (!seen_first) {
+		return php_uri_parser_whatwg_component_error("scheme", LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
+	}
+
+	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_host(const zend_string *host)
+{
+	if (ZSTR_LEN(host) == 0) {
+		/* Skip validation - an empty string may or may not be a valid host depending on whether the URL is special */
+		return SUCCESS;
+	}
+
+	const char *first = ZSTR_VAL(host);
+	const char *last = ZSTR_VAL(host) + ZSTR_LEN(host);
+
+	while (first < last && php_uri_whatwg_is_ascii_tab_or_newline((unsigned char) *first)) {
+		first++;
+	}
+
+	if (*first != '[') {
+		/* Skip validation - The host is not an IPv6 address */
+		return SUCCESS;
+	}
+
+	while (first < last && php_uri_whatwg_is_ascii_tab_or_newline((unsigned char) *last)) {
+		last--;
+	}
+
+	lxb_char_t *stripped_host = emalloc(last - first + 1);
+	size_t stripped_host_len = 0;
+
+	for (const char *i = first; i < last; i++) {
+		const unsigned char uc = (unsigned char) *i;
+
+		if (!php_uri_whatwg_is_ascii_tab_or_newline(uc)) {
+			stripped_host[stripped_host_len++] = (lxb_char_t) uc;
+		}
+	}
+	stripped_host[stripped_host_len] = '\0';
+
+	uint16_t ipv6[8];
+	const lxb_status_t result = lxb_url_parse_host_ipv6(
+		&lexbor_parser,
+		stripped_host,
+		stripped_host_len,
+		ipv6
+	);
+
+	efree(stripped_host);
+
+	if (result != LXB_STATUS_OK) {
+		lexbor_plog_entry_t *lxb_error;
+
+		if (lexbor_parser.log != NULL && (lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
+			return php_uri_parser_whatwg_component_error("host", lxb_error->id);
+		} else {
+			return php_uri_parser_whatwg_component_error("host", LXB_URL_ERROR_TYPE__LAST_ENTRY);
+		}
+	}
+
+	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_validate_port(const zend_long port)
+{
+	if (port  < 0) {
+		return php_uri_parser_whatwg_component_error("port", LXB_URL_ERROR_TYPE_PORT_INVALID);
+	}
+
+	if (port > 65535) {
+		return php_uri_parser_whatwg_component_error("port", LXB_URL_ERROR_TYPE_PORT_OUT_OF_RANGE);
+	}
+
+	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL static lxb_url_scheme_type_t php_uri_parser_whatwg_get_special_scheme(const zend_string *scheme)
+{
+    const char *p = ZSTR_VAL(scheme);
+    const char *end = p + ZSTR_LEN(scheme);
+
+    /*
+     * Create a normalized buffer from the scheme by leaving out tab and newline characters.
+     * The longest special scheme "https" is 5 characters, therefore 6 bytes is enough to store.
+     */
+    char buf[6];
+    size_t buf_len = 0;
+
+    for (const char *c = p; c < end; c++) {
+        const unsigned char uc = (unsigned char) *c;
+
+        if (php_uri_whatwg_is_ascii_tab_or_newline(uc)) {
+            continue;
+        }
+
+        if (buf_len == sizeof(buf) - 1) {
+        	/* Longer than any special scheme */
+            return false;
+        }
+
+        buf[buf_len++] = (char) php_uri_ascii_to_lowercase(uc);
+    }
+
+    switch (buf_len) {
+    	case 2:
+    		if (memcmp(buf, "ws", 2) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_WS;
+    		}
+
+    		break;
+        case 3:
+    		if (memcmp(buf, "ftp", 3) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_FTP;
+    		}
+
+    		if (memcmp(buf, "wss", 3) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_WSS;
+    		}
+
+    		break;
+    	case 4:
+    		if (memcmp(buf, "http", 4) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_HTTP;
+    		}
+
+    		if (memcmp(buf, "file", 4) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_FILE;
+    		}
+
+            break;
+        case 5:
+    		if (memcmp(buf, "https", 5) == 0) {
+    			return LXB_URL_SCHEMEL_TYPE_HTTPS;
+    		}
+
+    		break;
+	}
+
+	return LXB_URL_SCHEMEL_TYPE__UNDEF;
+}
+
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors(zval *errors)
+{
+	size_t log_len;
+
+	if (lexbor_parser.log == NULL || (log_len = lexbor_plog_length(lexbor_parser.log)) == 0) {
+		return;
+	}
+
+	if (Z_TYPE_P(errors) != IS_ARRAY) {
+		zval_ptr_dtor(errors);
+		array_init_size(errors, log_len);
+	}
+
+	fill_errors_inner(Z_ARRVAL_P(errors));
+}
+
+ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_build_from_zval(
+	lxb_url_t *lexbor_base_url, const zval *scheme, const zval *username, const zval *password,
+	const zval *host, const zval *port, const zval *path, const zval *query, const zval *fragment,
+	zval *errors_zv
+) {
+	if (Z_TYPE_P(host) == IS_NULL ||
+		Z_STRLEN_P(host) == 0 ||
+		php_uri_parser_whatwg_get_special_scheme(Z_STR_P(scheme)) == LXB_URL_SCHEMEL_TYPE_FILE
+	) {
+		if (Z_TYPE_P(username) != IS_NULL) {
+			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have username");
+			return NULL;
+		}
+
+		if (Z_TYPE_P(password) != IS_NULL) {
+			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have password");
+			return NULL;
+		}
+
+		if (Z_TYPE_P(port) != IS_NULL) {
+			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have port");
+			return NULL;
+		}
+	}
+
+	lxb_url_parser_clean(&lexbor_parser);
+
+	lxb_url_t *lexbor_url = lexbor_mraw_calloc(lexbor_parser.mraw, sizeof(*lexbor_url));
+	if (lexbor_url == NULL) {
+		zend_throw_exception(php_uri_ce_whatwg_invalid_url_exception, "Memory allocation error", 0);
+		return NULL;
+	}
+
+	lexbor_url->mraw = lexbor_parser.mraw;
+
+	/*
+	 * The URL is initialized as LXB_URL_SCHEMEL_TYPE__UNDEF but this would prevent the scheme to be updated
+	 * in case of non-special schemes due to https://github.com/php/php-src/blob/27d7b799c0a13578ee0506b428b8ddc209ffb010/ext/lexbor/lexbor/url/url.c#L1402
+	 */
+	if (php_uri_parser_whatwg_get_special_scheme(Z_STR_P(scheme)) == LXB_URL_SCHEMEL_TYPE__UNDEF) {
+		lexbor_url->scheme.type = LXB_URL_SCHEMEL_TYPE__UNKNOWN;
+	}
+
+	zval errors;
+	ZVAL_UNDEF(&errors);
+
+	zend_result result = php_uri_parser_whatwg_scheme_write(lexbor_url, scheme, NULL);
+	php_uri_parser_whatwg_build_errors(&errors);
+	if (result == FAILURE) {
+		goto failure;
+	}
+
+	result = php_uri_parser_whatwg_host_write(lexbor_url, host, NULL);
+	php_uri_parser_whatwg_build_errors(&errors);
+	if (result == FAILURE) {
+		goto failure;
+	}
+
+	/* Intentionally writing username after host to avoid error when the username is set but the host is missing */
+	result = php_uri_parser_whatwg_username_write(lexbor_url, username, NULL);
+	php_uri_parser_whatwg_build_errors(&errors);
+	if (result == FAILURE) {
+		goto failure;
+	}
+
+	/* Intentionally writing password after host to avoid error when the password is set but the password is missing */
+	result = php_uri_parser_whatwg_password_write(lexbor_url, password, NULL);
+	php_uri_parser_whatwg_build_errors(&errors);
+	if (result == FAILURE) {
+		goto failure;
+	}
+
+	/* Intentionally writing port after host to avoid error when the port is set but the host is missing */
+	result = php_uri_parser_whatwg_port_write(lexbor_url, port, NULL);
+	php_uri_parser_whatwg_build_errors(&errors);
+	if (result == FAILURE) {
+		goto failure;
+	}
+
+	result = php_uri_parser_whatwg_path_write(lexbor_url, path, NULL);
+	php_uri_parser_whatwg_build_errors(&errors);
+	if (result == FAILURE) {
+		goto failure;
+	}
+
+	result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
+	php_uri_parser_whatwg_build_errors(&errors);
+	if (result == FAILURE) {
+		goto failure;
+	}
+
+	result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
+	php_uri_parser_whatwg_build_errors(&errors);
+	if (result == FAILURE) {
+		goto failure;
+	}
+
+	if (lexbor_base_url != NULL) {
+		/* TODO */
+	}
+
+	if (php_uri_pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE) {
+		goto failure;
+	}
+
+	return lexbor_url;
+
+failure:
+	zval_ptr_dtor(&errors);
+	lxb_url_destroy(lexbor_url);
+	return NULL;
 }
 
 PHPAPI const php_uri_parser php_uri_parser_whatwg = {

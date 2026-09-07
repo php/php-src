@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Thies C. Arntzen <thies@thieso.net>                          |
    +----------------------------------------------------------------------+
@@ -332,7 +330,6 @@ PHP_FUNCTION(iptcparse)
 	unsigned char *buffer, recnum, dataset;
 	char *str, key[16];
 	size_t str_len;
-	zval values, *element;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(str, str_len)
@@ -381,10 +378,9 @@ PHP_FUNCTION(iptcparse)
 			array_init(return_value);
 		}
 
-		if ((element = zend_hash_str_find(Z_ARRVAL_P(return_value), key, strlen(key))) == NULL) {
-			array_init(&values);
-
-			element = zend_hash_str_update(Z_ARRVAL_P(return_value), key, strlen(key), &values);
+		zval *element = zend_hash_str_lookup(Z_ARRVAL_P(return_value), key, strlen(key));
+		if (Z_ISNULL_P(element)) {
+			array_init(element);
 		}
 
 		add_next_index_stringl(element, (char *) buffer+inx, len);

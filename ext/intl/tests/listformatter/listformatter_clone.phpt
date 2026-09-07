@@ -1,11 +1,7 @@
 --TEST--
 Test IntlListFormatter cannot be cloned
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) {
-    die('skip intl extension not available');
-}
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -14,8 +10,8 @@ $formatter = new IntlListFormatter('en_US', IntlListFormatter::TYPE_AND, IntlLis
 try {
     $clonedFormatter = clone $formatter;
 } catch(Error $error) {
-    echo $error->getMessage();
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Trying to clone an uncloneable object of class IntlListFormatter
+Error: Trying to clone an uncloneable object of class IntlListFormatter

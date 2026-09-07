@@ -12,7 +12,7 @@ if(!defined("GLOB_BRACE")) die ('skip requires GLOB_BRACE');
 $dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 
-$dirname = __DIR__ . '/__tmp_oo_addglob2/';
+$dirname = __DIR__ . '/__tmp_oo_addglob_leak/';
 $file = $dirname . 'test.zip';
 
 @mkdir($dirname);
@@ -38,7 +38,7 @@ var_dump($zip->addGlob($dirname . 'bar.*', GLOB_BRACE, $options));
 <?php
 $dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
-rmdir_rf(__DIR__ . '/__tmp_oo_addglob2/');
+rmdir_rf(__DIR__ . '/__tmp_oo_addglob_leak/');
 ?>
 --EXPECTF--
 array(1) {

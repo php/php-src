@@ -1,5 +1,8 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fecde55745fb219cb15fd35a54a71371ef2b8b7d */
+/* This is a generated file, edit mysqli.stub.php instead.
+ * Stub hash: f5327d48b275a5358b740232281478c83bb8a3db */
+
+#include "zend_attributes.h"
+#include "zend_constants.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -251,6 +254,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_real_escape_string, 0, 2,
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_escape_string arginfo_mysqli_real_escape_string
+
+#define arginfo_mysqli_quote_string arginfo_mysqli_real_escape_string
 
 #define arginfo_mysqli_real_query arginfo_mysqli_multi_query
 
@@ -527,6 +532,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_real_esca
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_quote_string, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_mysqli_reap_async_query, 0, 0, mysqli_result, MAY_BE_BOOL)
 ZEND_END_ARG_INFO()
 
@@ -767,6 +776,7 @@ ZEND_FUNCTION(mysqli_report);
 ZEND_FUNCTION(mysqli_query);
 ZEND_FUNCTION(mysqli_real_connect);
 ZEND_FUNCTION(mysqli_real_escape_string);
+ZEND_FUNCTION(mysqli_quote_string);
 ZEND_FUNCTION(mysqli_real_query);
 ZEND_FUNCTION(mysqli_reap_async_query);
 ZEND_FUNCTION(mysqli_release_savepoint);
@@ -855,7 +865,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_free_result, arginfo_mysqli_free_result)
 	ZEND_FE(mysqli_get_connection_stats, arginfo_mysqli_get_connection_stats)
 	ZEND_FE(mysqli_get_client_stats, arginfo_mysqli_get_client_stats)
-	ZEND_FE(mysqli_get_charset, arginfo_mysqli_get_charset)
+	ZEND_RAW_FENTRY("mysqli_get_charset", zif_mysqli_get_charset, arginfo_mysqli_get_charset, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mysqli_get_client_info, arginfo_mysqli_get_client_info)
 	ZEND_FE(mysqli_get_client_version, arginfo_mysqli_get_client_version)
 	ZEND_FE(mysqli_get_links_stats, arginfo_mysqli_get_links_stats)
@@ -883,6 +893,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_real_connect, arginfo_mysqli_real_connect)
 	ZEND_FE(mysqli_real_escape_string, arginfo_mysqli_real_escape_string)
 	ZEND_RAW_FENTRY("mysqli_escape_string", zif_mysqli_real_escape_string, arginfo_mysqli_escape_string, 0, NULL, NULL)
+	ZEND_FE(mysqli_quote_string, arginfo_mysqli_quote_string)
 	ZEND_FE(mysqli_real_query, arginfo_mysqli_real_query)
 	ZEND_FE(mysqli_reap_async_query, arginfo_mysqli_reap_async_query)
 	ZEND_FE(mysqli_release_savepoint, arginfo_mysqli_release_savepoint)
@@ -905,7 +916,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_stmt_free_result, arginfo_mysqli_stmt_free_result)
 	ZEND_FE(mysqli_stmt_get_result, arginfo_mysqli_stmt_get_result)
 	ZEND_FE(mysqli_stmt_get_warnings, arginfo_mysqli_stmt_get_warnings)
-	ZEND_FE(mysqli_stmt_init, arginfo_mysqli_stmt_init)
+	ZEND_RAW_FENTRY("mysqli_stmt_init", zif_mysqli_stmt_init, arginfo_mysqli_stmt_init, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mysqli_stmt_insert_id, arginfo_mysqli_stmt_insert_id)
 	ZEND_FE(mysqli_stmt_more_results, arginfo_mysqli_stmt_more_results)
 	ZEND_FE(mysqli_stmt_next_result, arginfo_mysqli_stmt_next_result)
@@ -940,7 +951,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("connect", zif_mysqli_connect, arginfo_class_mysqli_connect, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("dump_debug_info", zif_mysqli_dump_debug_info, arginfo_class_mysqli_dump_debug_info, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("debug", zif_mysqli_debug, arginfo_class_mysqli_debug, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("get_charset", zif_mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("get_charset", zif_mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("execute_query", zif_mysqli_execute_query, arginfo_class_mysqli_execute_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("get_client_info", zif_mysqli_get_client_info, arginfo_class_mysqli_get_client_info, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("get_connection_stats", zif_mysqli_get_connection_stats, arginfo_class_mysqli_get_connection_stats, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -957,6 +968,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("query", zif_mysqli_query, arginfo_class_mysqli_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("real_connect", zif_mysqli_real_connect, arginfo_class_mysqli_real_connect, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("real_escape_string", zif_mysqli_real_escape_string, arginfo_class_mysqli_real_escape_string, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("quote_string", zif_mysqli_quote_string, arginfo_class_mysqli_quote_string, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("reap_async_query", zif_mysqli_reap_async_query, arginfo_class_mysqli_reap_async_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("escape_string", zif_mysqli_real_escape_string, arginfo_class_mysqli_escape_string, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("real_query", zif_mysqli_real_query, arginfo_class_mysqli_real_query, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -969,7 +981,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("set_opt", zif_mysqli_options, arginfo_class_mysqli_set_opt, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("ssl_set", zif_mysqli_ssl_set, arginfo_class_mysqli_ssl_set, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("stat", zif_mysqli_stat, arginfo_class_mysqli_stat, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("stmt_init", zif_mysqli_stmt_init, arginfo_class_mysqli_stmt_init, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("stmt_init", zif_mysqli_stmt_init, arginfo_class_mysqli_stmt_init, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("store_result", zif_mysqli_store_result, arginfo_class_mysqli_store_result, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("thread_safe", zif_mysqli_thread_safe, arginfo_class_mysqli_thread_safe, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("use_result", zif_mysqli_use_result, arginfo_class_mysqli_use_result, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1045,6 +1057,7 @@ static void register_mysqli_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_INT_AND_FLOAT_NATIVE", MYSQLND_OPT_INT_AND_FLOAT_NATIVE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_SSL_VERIFY_SERVER_CERT", MYSQL_OPT_SSL_VERIFY_SERVER_CERT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_OPT_COMPRESS", MYSQL_OPT_COMPRESS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_PUBLIC_KEY", MYSQL_SERVER_PUBLIC_KEY, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL", CLIENT_SSL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_COMPRESS", CLIENT_COMPRESS, CONST_PERSISTENT);
@@ -1157,6 +1170,13 @@ static void register_mysqli_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_execute_0->args[1].value, attribute_Deprecated_func_mysqli_execute_0_arg1_str);
 	attribute_Deprecated_func_mysqli_execute_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
+	zend_attribute *attribute_Deprecated_func_mysqli_get_charset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_get_charset", sizeof("mysqli_get_charset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_mysqli_get_charset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_mysqli_get_charset_0_arg1_str = zend_string_init("did you mean mysqli_character_set_name()?", strlen("did you mean mysqli_character_set_name()?"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_get_charset_0->args[1].value, attribute_Deprecated_func_mysqli_get_charset_0_arg1_str);
+	attribute_Deprecated_func_mysqli_get_charset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_attribute *attribute_Deprecated_func_mysqli_kill_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_kill", sizeof("mysqli_kill") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_kill_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_func_mysqli_kill_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
@@ -1172,6 +1192,13 @@ static void register_mysqli_symbols(int module_number)
 	attribute_Deprecated_func_mysqli_ping_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_real_connect", sizeof("mysqli_real_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_mysqli_stmt_init_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_stmt_init", sizeof("mysqli_stmt_init") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_stmt_init_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_mysqli_stmt_init_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_mysqli_stmt_init_0_arg1_str = zend_string_init("use mysqli_prepare() instead", strlen("use mysqli_prepare() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_stmt_init_0->args[1].value, attribute_Deprecated_func_mysqli_stmt_init_0_arg1_str);
+	attribute_Deprecated_func_mysqli_stmt_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_mysqli_refresh_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_refresh", sizeof("mysqli_refresh") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_mysqli_refresh_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
@@ -1302,27 +1329,27 @@ static zend_class_entry *register_class_mysqli_driver(void)
 
 	zval property_client_info_default_value;
 	ZVAL_UNDEF(&property_client_info_default_value);
-	zend_string *property_client_info_name = zend_string_init("client_info", sizeof("client_info") - 1, 1);
+	zend_string *property_client_info_name = zend_string_init("client_info", sizeof("client_info") - 1, true);
 	zend_declare_typed_property(class_entry, property_client_info_name, &property_client_info_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_client_info_name);
+	zend_string_release_ex(property_client_info_name, true);
 
 	zval property_client_version_default_value;
 	ZVAL_UNDEF(&property_client_version_default_value);
-	zend_string *property_client_version_name = zend_string_init("client_version", sizeof("client_version") - 1, 1);
+	zend_string *property_client_version_name = zend_string_init("client_version", sizeof("client_version") - 1, true);
 	zend_declare_typed_property(class_entry, property_client_version_name, &property_client_version_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_client_version_name);
+	zend_string_release_ex(property_client_version_name, true);
 
 	zval property_driver_version_default_value;
 	ZVAL_UNDEF(&property_driver_version_default_value);
-	zend_string *property_driver_version_name = zend_string_init("driver_version", sizeof("driver_version") - 1, 1);
+	zend_string *property_driver_version_name = zend_string_init("driver_version", sizeof("driver_version") - 1, true);
 	zend_declare_typed_property(class_entry, property_driver_version_name, &property_driver_version_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_driver_version_name);
+	zend_string_release_ex(property_driver_version_name, true);
 
 	zval property_report_mode_default_value;
 	ZVAL_LONG(&property_report_mode_default_value, 0);
-	zend_string *property_report_mode_name = zend_string_init("report_mode", sizeof("report_mode") - 1, 1);
+	zend_string *property_report_mode_name = zend_string_init("report_mode", sizeof("report_mode") - 1, true);
 	zend_declare_typed_property(class_entry, property_report_mode_name, &property_report_mode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_report_mode_name);
+	zend_string_release_ex(property_report_mode_name, true);
 
 	return class_entry;
 }
@@ -1336,111 +1363,111 @@ static zend_class_entry *register_class_mysqli(void)
 
 	zval property_affected_rows_default_value;
 	ZVAL_UNDEF(&property_affected_rows_default_value);
-	zend_string *property_affected_rows_name = zend_string_init("affected_rows", sizeof("affected_rows") - 1, 1);
+	zend_string *property_affected_rows_name = zend_string_init("affected_rows", sizeof("affected_rows") - 1, true);
 	zend_declare_typed_property(class_entry, property_affected_rows_name, &property_affected_rows_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
-	zend_string_release(property_affected_rows_name);
+	zend_string_release_ex(property_affected_rows_name, true);
 
 	zval property_client_info_default_value;
 	ZVAL_UNDEF(&property_client_info_default_value);
-	zend_string *property_client_info_name = zend_string_init("client_info", sizeof("client_info") - 1, 1);
+	zend_string *property_client_info_name = zend_string_init("client_info", sizeof("client_info") - 1, true);
 	zend_declare_typed_property(class_entry, property_client_info_name, &property_client_info_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_client_info_name);
+	zend_string_release_ex(property_client_info_name, true);
 
 	zval property_client_version_default_value;
 	ZVAL_UNDEF(&property_client_version_default_value);
-	zend_string *property_client_version_name = zend_string_init("client_version", sizeof("client_version") - 1, 1);
+	zend_string *property_client_version_name = zend_string_init("client_version", sizeof("client_version") - 1, true);
 	zend_declare_typed_property(class_entry, property_client_version_name, &property_client_version_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_client_version_name);
+	zend_string_release_ex(property_client_version_name, true);
 
 	zval property_connect_errno_default_value;
 	ZVAL_UNDEF(&property_connect_errno_default_value);
-	zend_string *property_connect_errno_name = zend_string_init("connect_errno", sizeof("connect_errno") - 1, 1);
+	zend_string *property_connect_errno_name = zend_string_init("connect_errno", sizeof("connect_errno") - 1, true);
 	zend_declare_typed_property(class_entry, property_connect_errno_name, &property_connect_errno_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_connect_errno_name);
+	zend_string_release_ex(property_connect_errno_name, true);
 
 	zval property_connect_error_default_value;
 	ZVAL_UNDEF(&property_connect_error_default_value);
-	zend_string *property_connect_error_name = zend_string_init("connect_error", sizeof("connect_error") - 1, 1);
+	zend_string *property_connect_error_name = zend_string_init("connect_error", sizeof("connect_error") - 1, true);
 	zend_declare_typed_property(class_entry, property_connect_error_name, &property_connect_error_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_connect_error_name);
+	zend_string_release_ex(property_connect_error_name, true);
 
 	zval property_errno_default_value;
 	ZVAL_UNDEF(&property_errno_default_value);
-	zend_string *property_errno_name = zend_string_init("errno", sizeof("errno") - 1, 1);
+	zend_string *property_errno_name = zend_string_init("errno", sizeof("errno") - 1, true);
 	zend_declare_typed_property(class_entry, property_errno_name, &property_errno_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_errno_name);
+	zend_string_release_ex(property_errno_name, true);
 
 	zval property_error_default_value;
 	ZVAL_UNDEF(&property_error_default_value);
-	zend_string *property_error_name = zend_string_init("error", sizeof("error") - 1, 1);
+	zend_string *property_error_name = zend_string_init("error", sizeof("error") - 1, true);
 	zend_declare_typed_property(class_entry, property_error_name, &property_error_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_error_name);
+	zend_string_release_ex(property_error_name, true);
 
 	zval property_error_list_default_value;
 	ZVAL_UNDEF(&property_error_list_default_value);
-	zend_string *property_error_list_name = zend_string_init("error_list", sizeof("error_list") - 1, 1);
+	zend_string *property_error_list_name = zend_string_init("error_list", sizeof("error_list") - 1, true);
 	zend_declare_typed_property(class_entry, property_error_list_name, &property_error_list_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-	zend_string_release(property_error_list_name);
+	zend_string_release_ex(property_error_list_name, true);
 
 	zval property_field_count_default_value;
 	ZVAL_UNDEF(&property_field_count_default_value);
-	zend_string *property_field_count_name = zend_string_init("field_count", sizeof("field_count") - 1, 1);
+	zend_string *property_field_count_name = zend_string_init("field_count", sizeof("field_count") - 1, true);
 	zend_declare_typed_property(class_entry, property_field_count_name, &property_field_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_field_count_name);
+	zend_string_release_ex(property_field_count_name, true);
 
 	zval property_host_info_default_value;
 	ZVAL_UNDEF(&property_host_info_default_value);
-	zend_string *property_host_info_name = zend_string_init("host_info", sizeof("host_info") - 1, 1);
+	zend_string *property_host_info_name = zend_string_init("host_info", sizeof("host_info") - 1, true);
 	zend_declare_typed_property(class_entry, property_host_info_name, &property_host_info_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_host_info_name);
+	zend_string_release_ex(property_host_info_name, true);
 
 	zval property_info_default_value;
 	ZVAL_UNDEF(&property_info_default_value);
-	zend_string *property_info_name = zend_string_init("info", sizeof("info") - 1, 1);
+	zend_string *property_info_name = zend_string_init("info", sizeof("info") - 1, true);
 	zend_declare_typed_property(class_entry, property_info_name, &property_info_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
-	zend_string_release(property_info_name);
+	zend_string_release_ex(property_info_name, true);
 
 	zval property_insert_id_default_value;
 	ZVAL_UNDEF(&property_insert_id_default_value);
-	zend_string *property_insert_id_name = zend_string_init("insert_id", sizeof("insert_id") - 1, 1);
+	zend_string *property_insert_id_name = zend_string_init("insert_id", sizeof("insert_id") - 1, true);
 	zend_declare_typed_property(class_entry, property_insert_id_name, &property_insert_id_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
-	zend_string_release(property_insert_id_name);
+	zend_string_release_ex(property_insert_id_name, true);
 
 	zval property_server_info_default_value;
 	ZVAL_UNDEF(&property_server_info_default_value);
-	zend_string *property_server_info_name = zend_string_init("server_info", sizeof("server_info") - 1, 1);
+	zend_string *property_server_info_name = zend_string_init("server_info", sizeof("server_info") - 1, true);
 	zend_declare_typed_property(class_entry, property_server_info_name, &property_server_info_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_server_info_name);
+	zend_string_release_ex(property_server_info_name, true);
 
 	zval property_server_version_default_value;
 	ZVAL_UNDEF(&property_server_version_default_value);
-	zend_string *property_server_version_name = zend_string_init("server_version", sizeof("server_version") - 1, 1);
+	zend_string *property_server_version_name = zend_string_init("server_version", sizeof("server_version") - 1, true);
 	zend_declare_typed_property(class_entry, property_server_version_name, &property_server_version_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_server_version_name);
+	zend_string_release_ex(property_server_version_name, true);
 
 	zval property_sqlstate_default_value;
 	ZVAL_UNDEF(&property_sqlstate_default_value);
-	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, 1);
+	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, true);
 	zend_declare_typed_property(class_entry, property_sqlstate_name, &property_sqlstate_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_sqlstate_name);
+	zend_string_release_ex(property_sqlstate_name, true);
 
 	zval property_protocol_version_default_value;
 	ZVAL_UNDEF(&property_protocol_version_default_value);
-	zend_string *property_protocol_version_name = zend_string_init("protocol_version", sizeof("protocol_version") - 1, 1);
+	zend_string *property_protocol_version_name = zend_string_init("protocol_version", sizeof("protocol_version") - 1, true);
 	zend_declare_typed_property(class_entry, property_protocol_version_name, &property_protocol_version_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_protocol_version_name);
+	zend_string_release_ex(property_protocol_version_name, true);
 
 	zval property_thread_id_default_value;
 	ZVAL_UNDEF(&property_thread_id_default_value);
-	zend_string *property_thread_id_name = zend_string_init("thread_id", sizeof("thread_id") - 1, 1);
+	zend_string *property_thread_id_name = zend_string_init("thread_id", sizeof("thread_id") - 1, true);
 	zend_declare_typed_property(class_entry, property_thread_id_name, &property_thread_id_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_thread_id_name);
+	zend_string_release_ex(property_thread_id_name, true);
 
 	zval property_warning_count_default_value;
 	ZVAL_UNDEF(&property_warning_count_default_value);
-	zend_string *property_warning_count_name = zend_string_init("warning_count", sizeof("warning_count") - 1, 1);
+	zend_string *property_warning_count_name = zend_string_init("warning_count", sizeof("warning_count") - 1, true);
 	zend_declare_typed_property(class_entry, property_warning_count_name, &property_warning_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_warning_count_name);
+	zend_string_release_ex(property_warning_count_name, true);
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
@@ -1448,6 +1475,13 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "change_user", sizeof("change_user") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_get_charset_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "get_charset", sizeof("get_charset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_get_charset_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_get_charset_0_arg1_str = zend_string_init("did you mean mysqli_character_set_name()?", strlen("did you mean mysqli_character_set_name()?"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_get_charset_0->args[1].value, attribute_Deprecated_func_get_charset_0_arg1_str);
+	attribute_Deprecated_func_get_charset_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_get_client_info_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "get_client_info", sizeof("get_client_info") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_get_client_info_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_1));
@@ -1479,6 +1513,13 @@ static zend_class_entry *register_class_mysqli(void)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "real_connect", sizeof("real_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
+	zend_attribute *attribute_Deprecated_func_stmt_init_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "stmt_init", sizeof("stmt_init") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_stmt_init_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_stmt_init_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_stmt_init_0_arg1_str = zend_string_init("use mysqli::prepare() instead", strlen("use mysqli::prepare() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_stmt_init_0->args[1].value, attribute_Deprecated_func_stmt_init_0_arg1_str);
+	attribute_Deprecated_func_stmt_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_attribute *attribute_Deprecated_func_refresh_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "refresh", sizeof("refresh") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_refresh_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_4));
 	attribute_Deprecated_func_refresh_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
@@ -1499,27 +1540,27 @@ static zend_class_entry *register_class_mysqli_result(zend_class_entry *class_en
 
 	zval property_current_field_default_value;
 	ZVAL_UNDEF(&property_current_field_default_value);
-	zend_string *property_current_field_name = zend_string_init("current_field", sizeof("current_field") - 1, 1);
+	zend_string *property_current_field_name = zend_string_init("current_field", sizeof("current_field") - 1, true);
 	zend_declare_typed_property(class_entry, property_current_field_name, &property_current_field_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_current_field_name);
+	zend_string_release_ex(property_current_field_name, true);
 
 	zval property_field_count_default_value;
 	ZVAL_UNDEF(&property_field_count_default_value);
-	zend_string *property_field_count_name = zend_string_init("field_count", sizeof("field_count") - 1, 1);
+	zend_string *property_field_count_name = zend_string_init("field_count", sizeof("field_count") - 1, true);
 	zend_declare_typed_property(class_entry, property_field_count_name, &property_field_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_field_count_name);
+	zend_string_release_ex(property_field_count_name, true);
 
 	zval property_lengths_default_value;
 	ZVAL_UNDEF(&property_lengths_default_value);
-	zend_string *property_lengths_name = zend_string_init("lengths", sizeof("lengths") - 1, 1);
+	zend_string *property_lengths_name = zend_string_init("lengths", sizeof("lengths") - 1, true);
 	zend_declare_typed_property(class_entry, property_lengths_name, &property_lengths_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
-	zend_string_release(property_lengths_name);
+	zend_string_release_ex(property_lengths_name, true);
 
 	zval property_num_rows_default_value;
 	ZVAL_UNDEF(&property_num_rows_default_value);
-	zend_string *property_num_rows_name = zend_string_init("num_rows", sizeof("num_rows") - 1, 1);
+	zend_string *property_num_rows_name = zend_string_init("num_rows", sizeof("num_rows") - 1, true);
 	zend_declare_typed_property(class_entry, property_num_rows_name, &property_num_rows_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
-	zend_string_release(property_num_rows_name);
+	zend_string_release_ex(property_num_rows_name, true);
 
 	zval property_type_default_value;
 	ZVAL_UNDEF(&property_type_default_value);
@@ -1537,63 +1578,63 @@ static zend_class_entry *register_class_mysqli_stmt(void)
 
 	zval property_affected_rows_default_value;
 	ZVAL_UNDEF(&property_affected_rows_default_value);
-	zend_string *property_affected_rows_name = zend_string_init("affected_rows", sizeof("affected_rows") - 1, 1);
+	zend_string *property_affected_rows_name = zend_string_init("affected_rows", sizeof("affected_rows") - 1, true);
 	zend_declare_typed_property(class_entry, property_affected_rows_name, &property_affected_rows_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
-	zend_string_release(property_affected_rows_name);
+	zend_string_release_ex(property_affected_rows_name, true);
 
 	zval property_insert_id_default_value;
 	ZVAL_UNDEF(&property_insert_id_default_value);
-	zend_string *property_insert_id_name = zend_string_init("insert_id", sizeof("insert_id") - 1, 1);
+	zend_string *property_insert_id_name = zend_string_init("insert_id", sizeof("insert_id") - 1, true);
 	zend_declare_typed_property(class_entry, property_insert_id_name, &property_insert_id_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
-	zend_string_release(property_insert_id_name);
+	zend_string_release_ex(property_insert_id_name, true);
 
 	zval property_num_rows_default_value;
 	ZVAL_UNDEF(&property_num_rows_default_value);
-	zend_string *property_num_rows_name = zend_string_init("num_rows", sizeof("num_rows") - 1, 1);
+	zend_string *property_num_rows_name = zend_string_init("num_rows", sizeof("num_rows") - 1, true);
 	zend_declare_typed_property(class_entry, property_num_rows_name, &property_num_rows_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_STRING));
-	zend_string_release(property_num_rows_name);
+	zend_string_release_ex(property_num_rows_name, true);
 
 	zval property_param_count_default_value;
 	ZVAL_UNDEF(&property_param_count_default_value);
-	zend_string *property_param_count_name = zend_string_init("param_count", sizeof("param_count") - 1, 1);
+	zend_string *property_param_count_name = zend_string_init("param_count", sizeof("param_count") - 1, true);
 	zend_declare_typed_property(class_entry, property_param_count_name, &property_param_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_param_count_name);
+	zend_string_release_ex(property_param_count_name, true);
 
 	zval property_field_count_default_value;
 	ZVAL_UNDEF(&property_field_count_default_value);
-	zend_string *property_field_count_name = zend_string_init("field_count", sizeof("field_count") - 1, 1);
+	zend_string *property_field_count_name = zend_string_init("field_count", sizeof("field_count") - 1, true);
 	zend_declare_typed_property(class_entry, property_field_count_name, &property_field_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_field_count_name);
+	zend_string_release_ex(property_field_count_name, true);
 
 	zval property_errno_default_value;
 	ZVAL_UNDEF(&property_errno_default_value);
-	zend_string *property_errno_name = zend_string_init("errno", sizeof("errno") - 1, 1);
+	zend_string *property_errno_name = zend_string_init("errno", sizeof("errno") - 1, true);
 	zend_declare_typed_property(class_entry, property_errno_name, &property_errno_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_errno_name);
+	zend_string_release_ex(property_errno_name, true);
 
 	zval property_error_default_value;
 	ZVAL_UNDEF(&property_error_default_value);
-	zend_string *property_error_name = zend_string_init("error", sizeof("error") - 1, 1);
+	zend_string *property_error_name = zend_string_init("error", sizeof("error") - 1, true);
 	zend_declare_typed_property(class_entry, property_error_name, &property_error_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_error_name);
+	zend_string_release_ex(property_error_name, true);
 
 	zval property_error_list_default_value;
 	ZVAL_UNDEF(&property_error_list_default_value);
-	zend_string *property_error_list_name = zend_string_init("error_list", sizeof("error_list") - 1, 1);
+	zend_string *property_error_list_name = zend_string_init("error_list", sizeof("error_list") - 1, true);
 	zend_declare_typed_property(class_entry, property_error_list_name, &property_error_list_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
-	zend_string_release(property_error_list_name);
+	zend_string_release_ex(property_error_list_name, true);
 
 	zval property_sqlstate_default_value;
 	ZVAL_UNDEF(&property_sqlstate_default_value);
-	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, 1);
+	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, true);
 	zend_declare_typed_property(class_entry, property_sqlstate_name, &property_sqlstate_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_sqlstate_name);
+	zend_string_release_ex(property_sqlstate_name, true);
 
 	zval property_id_default_value;
 	ZVAL_UNDEF(&property_id_default_value);
-	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, true);
 	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_id_name);
+	zend_string_release_ex(property_id_name, true);
 
 	return class_entry;
 }
@@ -1611,15 +1652,15 @@ static zend_class_entry *register_class_mysqli_warning(void)
 
 	zval property_sqlstate_default_value;
 	ZVAL_UNDEF(&property_sqlstate_default_value);
-	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, 1);
+	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, true);
 	zend_declare_typed_property(class_entry, property_sqlstate_name, &property_sqlstate_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_sqlstate_name);
+	zend_string_release_ex(property_sqlstate_name, true);
 
 	zval property_errno_default_value;
 	ZVAL_UNDEF(&property_errno_default_value);
-	zend_string *property_errno_name = zend_string_init("errno", sizeof("errno") - 1, 1);
+	zend_string *property_errno_name = zend_string_init("errno", sizeof("errno") - 1, true);
 	zend_declare_typed_property(class_entry, property_errno_name, &property_errno_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(property_errno_name);
+	zend_string_release_ex(property_errno_name, true);
 
 	return class_entry;
 }
@@ -1634,9 +1675,9 @@ static zend_class_entry *register_class_mysqli_sql_exception(zend_class_entry *c
 	zval property_sqlstate_default_value;
 	zend_string *property_sqlstate_default_value_str = zend_string_init("00000", strlen("00000"), 1);
 	ZVAL_STR(&property_sqlstate_default_value, property_sqlstate_default_value_str);
-	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, 1);
+	zend_string *property_sqlstate_name = zend_string_init("sqlstate", sizeof("sqlstate") - 1, true);
 	zend_declare_typed_property(class_entry, property_sqlstate_name, &property_sqlstate_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_sqlstate_name);
+	zend_string_release_ex(property_sqlstate_name, true);
 
 	return class_entry;
 }

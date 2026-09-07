@@ -10,15 +10,15 @@ require "connect.inc";
 try {
 	ldap_connect("nope://$host", 65536);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
 	ldap_connect("nope://$host", 0);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-ldap_connect(): Argument #2 ($port) must be between 1 and 65535
-ldap_connect(): Argument #2 ($port) must be between 1 and 65535
+ValueError: ldap_connect(): Argument #2 ($port) must be between 1 and 65535
+ValueError: ldap_connect(): Argument #2 ($port) must be between 1 and 65535

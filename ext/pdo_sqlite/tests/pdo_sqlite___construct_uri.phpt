@@ -26,7 +26,7 @@ var_dump(file_exists($dbFile));
 try {
     new PDO("uri:{$dsnFile}");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 clearstatcache();

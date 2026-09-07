@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Paul Panotzki - Bunyip Information Systems                  |
    |          Jim Winstead <jimw@php.net>                                 |
@@ -31,17 +29,10 @@ static size_t php_fsockopen_format_host_port(char **message, const char *prefix,
     int portlen = snprintf(portbuf, sizeof(portbuf), ":" ZEND_LONG_FMT, port);
     size_t total_len = prefix_len + host_len + portlen;
 
-    char *result = emalloc(total_len + 1); 
-
-	if (prefix_len > 0) {
-    	memcpy(result, prefix, prefix_len);
-	}
-    memcpy(result + prefix_len, host, host_len);
-    memcpy(result + prefix_len + host_len, portbuf, portlen);
-
-    result[total_len] = '\0';
-
-    *message = result;
+    *message = zend_cstr_concat3(
+        prefix, prefix_len,
+        host, host_len,
+        portbuf, portlen);
 
 	return total_len;
 }

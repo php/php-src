@@ -11,7 +11,7 @@ calendar
   try {
       cal_info(99999);
   } catch (ValueError $ex) {
-      echo "{$ex->getMessage()}\n";
+      echo $ex::class, ': ', $ex->getMessage(), "\n";
   }
 ?>
 --EXPECT--
@@ -216,4 +216,4 @@ Array
     [calname] => Julian
     [calsymbol] => CAL_JULIAN
 )
-cal_info(): Argument #1 ($calendar) must be a valid calendar ID
+ValueError: cal_info(): Argument #1 ($calendar) must be a valid calendar ID

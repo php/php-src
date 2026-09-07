@@ -541,7 +541,6 @@ namespace {
         private bool $trace = false;
         private ?int $compression = null;
         private ?Soap\Sdl $sdl = null;
-        private ?array $typemap = null;
         /** @var resource|null */
         private $httpsocket = null;
         private ?Soap\Url $httpurl = null;

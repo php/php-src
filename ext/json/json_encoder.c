@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Omar Kilani <omar@php.net>                                   |
   |         Jakub Zelenka <bukka@php.net>                                |
@@ -54,6 +52,7 @@ static inline void php_json_pretty_print_char(smart_str *buf, int options, char 
 static inline void php_json_pretty_print_indent(smart_str *buf, int options, const php_json_encoder *encoder) /* {{{ */
 {
 	if (options & PHP_JSON_PRETTY_PRINT) {
+		smart_str_alloc(buf, encoder->depth * 4, 0);
 		for (int i = 0; i < encoder->depth; ++i) {
 			smart_str_appendl(buf, "    ", 4);
 		}
@@ -109,7 +108,6 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 static zend_result php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
 	bool encode_as_object = options & PHP_JSON_FORCE_OBJECT;
-	bool need_comma = false;
 	HashTable *myht, *prop_ht;
 	zend_refcounted *recursion_rc;
 
@@ -161,12 +159,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				continue;
 			}
 
-			if (need_comma) {
-				smart_str_appendc(buf, ',');
-			} else {
-				need_comma = 1;
-			}
-
 			php_json_pretty_print_char(buf, options, '\n');
 			php_json_pretty_print_indent(buf, options, encoder);
 
@@ -186,6 +178,14 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
 				return FAILURE;
 			}
+
+			smart_str_appendc(buf, ',');
+		}
+
+		bool empty = ZSTR_VAL(buf->s)[ZSTR_LEN(buf->s) - 1] != ',';
+		if (!empty) {
+			/* Drop the trailing comma. */
+			ZSTR_LEN(buf->s)--;
 		}
 
 		PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
@@ -197,7 +197,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 		}
 		--encoder->depth;
 
-		if (need_comma) {
+		if (!empty) {
 			php_json_pretty_print_char(buf, options, '\n');
 			php_json_pretty_print_indent(buf, options, encoder);
 		}
@@ -235,23 +235,19 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 	uint32_t i = myht ? zend_hash_num_elements(myht) : 0;
 
+	bool empty = true;
 	if (i > 0) {
 		zend_string *key;
 		zval *data;
 		zend_ulong index;
 
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
+			bool need_dtor = false;
 			zval tmp;
 			ZVAL_UNDEF(&tmp);
 
 			if (!encode_as_object) {
 				ZEND_ASSERT(Z_TYPE_P(data) != IS_PTR);
-
-				if (need_comma) {
-					smart_str_appendc(buf, ',');
-				} else {
-					need_comma = 1;
-				}
 
 				php_json_pretty_print_char(buf, options, '\n');
 				php_json_pretty_print_indent(buf, options, encoder);
@@ -268,6 +264,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						if ((prop_info->flags & ZEND_ACC_VIRTUAL) && !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
 							continue;
 						}
+						need_dtor = true;
 						data = zend_read_property_ex(prop_info->ce, Z_OBJ_P(val), prop_info->name, /* silent */ true, &tmp);
 						if (EG(exception)) {
 							PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
@@ -277,11 +274,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						}
 					}
 
-					if (need_comma) {
-						smart_str_appendc(buf, ',');
-					} else {
-						need_comma = 1;
-					}
 
 					php_json_pretty_print_char(buf, options, '\n');
 					php_json_pretty_print_indent(buf, options, encoder);
@@ -294,12 +286,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 						smart_str_appendl(buf, "\"\"", 2);
 					}
 				} else {
-					if (need_comma) {
-						smart_str_appendc(buf, ',');
-					} else {
-						need_comma = 1;
-					}
-
 					php_json_pretty_print_char(buf, options, '\n');
 					php_json_pretty_print_indent(buf, options, encoder);
 
@@ -319,8 +305,18 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 				zval_ptr_dtor(&tmp);
 				return FAILURE;
 			}
-			zval_ptr_dtor(&tmp);
+			if (UNEXPECTED(need_dtor)) {
+				zval_ptr_dtor(&tmp);
+			}
+
+			smart_str_appendc(buf, ',');
 		} ZEND_HASH_FOREACH_END();
+
+		empty = ZSTR_VAL(buf->s)[ZSTR_LEN(buf->s) - 1] != ',';
+		if (!empty) {
+			/* Drop the trailing comma. */
+			ZSTR_LEN(buf->s)--;
+		}
 	}
 
 	PHP_JSON_HASH_UNPROTECT_RECURSION(recursion_rc);
@@ -335,7 +331,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 	--encoder->depth;
 
 	/* Only keep closing bracket on same line for empty arrays/objects */
-	if (need_comma) {
+	if (!empty) {
 		php_json_pretty_print_char(buf, options, '\n');
 		php_json_pretty_print_indent(buf, options, encoder);
 	}
@@ -582,6 +578,11 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 
 	ZEND_GUARD_PROTECT_RECURSION(guard, JSON);
 
+	/* jsonSerialize() may drop the last reference to the object, e.g. by
+	 * nulling a reference that aliases the encoded array slot; keep it alive
+	 * so the recursion guard and the identity check below stay valid. */
+	GC_ADDREF(obj);
+
 	zend_function *json_serialize_method = zend_hash_str_find_ptr(&ce->function_table, ZEND_STRL("jsonserialize"));
 	ZEND_ASSERT(json_serialize_method != NULL && "This should be guaranteed prior to calling this function");
 	zend_call_known_function(json_serialize_method, obj, ce, &retval, 0, NULL, NULL);
@@ -591,6 +592,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 			smart_str_appendl(buf, "null", 4);
 		}
 		ZEND_GUARD_UNPROTECT_RECURSION(guard, JSON);
+		OBJ_RELEASE(obj);
 		return FAILURE;
 	}
 
@@ -605,6 +607,7 @@ static zend_result php_json_encode_serializable_object(smart_str *buf, zend_obje
 	}
 
 	zval_ptr_dtor(&retval);
+	OBJ_RELEASE(obj);
 
 	return return_code;
 }

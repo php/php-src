@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Jakub Zelenka <bukka@php.net>                               |
    +----------------------------------------------------------------------+
@@ -88,23 +86,23 @@ static bool php_openssl_pkey_init_rsa_data(RSA *rsa, zval *data)
 	OPENSSL_PKEY_SET_BN(data, e);
 	OPENSSL_PKEY_SET_BN(data, d);
 	if (!n || !d || !RSA_set0_key(rsa, n, e, d)) {
-		return 0;
+		return false;
 	}
 
 	OPENSSL_PKEY_SET_BN(data, p);
 	OPENSSL_PKEY_SET_BN(data, q);
 	if ((p || q) && !RSA_set0_factors(rsa, p, q)) {
-		return 0;
+		return false;
 	}
 
 	OPENSSL_PKEY_SET_BN(data, dmp1);
 	OPENSSL_PKEY_SET_BN(data, dmq1);
 	OPENSSL_PKEY_SET_BN(data, iqmp);
 	if ((dmp1 || dmq1 || iqmp) && !RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp)) {
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 EVP_PKEY *php_openssl_pkey_init_rsa(zval *data)
@@ -144,11 +142,11 @@ static bool php_openssl_pkey_init_dsa_data(DSA *dsa, zval *data, bool *is_privat
 		BN_free(p);
 		BN_free(q);
 		BN_free(g);
-		return 0;
+		return false;
 	}
 
 	if (!DSA_set0_pqg(dsa, p, q, g)) {
-		return 0;
+		return false;
 	}
 
 	OPENSSL_PKEY_SET_BN(data, pub_key);
@@ -161,18 +159,18 @@ static bool php_openssl_pkey_init_dsa_data(DSA *dsa, zval *data, bool *is_privat
 	/* generate key */
 	if (!DSA_generate_key(dsa)) {
 		php_openssl_store_errors();
-		return 0;
+		return false;
 	}
 
 	/* if BN_mod_exp return -1, then DSA_generate_key succeed for failed key
 	 * so we need to double check that public key is created */
 	DSA_get0_key(dsa, &pub_key_const, &priv_key_const);
 	if (!pub_key_const || BN_is_zero(pub_key_const)) {
-		return 0;
+		return false;
 	}
 	/* all good */
 	*is_private = true;
-	return 1;
+	return true;
 }
 
 EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
@@ -210,11 +208,11 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 	OPENSSL_PKEY_SET_BN(data, g);
 	if (!p || !q) {
 		BN_free(p);
-		return 0;
+		return false;
 	}
 
 	if (!DH_set0_pqg(dh, p, q, g)) {
-		return 0;
+		return false;
 	}
 
 	OPENSSL_PKEY_SET_BN(data, priv_key);
@@ -230,7 +228,7 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 			BN_free(q);
 			BN_free(g);
 			BN_free(priv_key);
-			return 0;
+			return false;
 		}
 		return DH_set0_key(dh, pub_key, priv_key);
 	}
@@ -238,11 +236,11 @@ static bool php_openssl_pkey_init_dh_data(DH *dh, zval *data, bool *is_private)
 	/* generate key */
 	if (!DH_generate_key(dh)) {
 		php_openssl_store_errors();
-		return 0;
+		return false;
 	}
 	/* all good */
 	*is_private = true;
-	return 1;
+	return true;
 }
 
 EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private)
@@ -591,6 +589,11 @@ zend_string *php_openssl_dh_compute_key(EVP_PKEY *pkey, char *pub_str, size_t pu
 	}
 
 	BIGNUM *pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
+	if (pub == NULL) {
+		php_openssl_store_errors();
+		return NULL;
+	}
+
 	zend_string *data = zend_string_alloc(DH_size(dh), 0);
 	int len = DH_compute_key((unsigned char*)ZSTR_VAL(data), pub, dh);
 	BN_free(pub);
@@ -651,7 +654,6 @@ const EVP_MD *php_openssl_get_evp_md_from_algo(zend_long algo)
 #endif
 		default:
 			return NULL;
-			break;
 	}
 	return mdtype;
 }
@@ -672,40 +674,31 @@ const EVP_CIPHER *php_openssl_get_evp_cipher_from_algo(zend_long algo)
 #ifndef OPENSSL_NO_RC2
 		case PHP_OPENSSL_CIPHER_RC2_40:
 			return EVP_rc2_40_cbc();
-			break;
 		case PHP_OPENSSL_CIPHER_RC2_64:
 			return EVP_rc2_64_cbc();
-			break;
 		case PHP_OPENSSL_CIPHER_RC2_128:
 			return EVP_rc2_cbc();
-			break;
 #endif
 
 #ifndef OPENSSL_NO_DES
 		case PHP_OPENSSL_CIPHER_DES:
 			return EVP_des_cbc();
-			break;
 		case PHP_OPENSSL_CIPHER_3DES:
 			return EVP_des_ede3_cbc();
-			break;
 #endif
 
 #ifndef OPENSSL_NO_AES
 		case PHP_OPENSSL_CIPHER_AES_128_CBC:
 			return EVP_aes_128_cbc();
-			break;
 		case PHP_OPENSSL_CIPHER_AES_192_CBC:
 			return EVP_aes_192_cbc();
-			break;
 		case PHP_OPENSSL_CIPHER_AES_256_CBC:
 			return EVP_aes_256_cbc();
-			break;
 #endif
 
 
 		default:
 			return NULL;
-			break;
 	}
 }
 

@@ -18,8 +18,8 @@ $dom = new DOMDocument;
 $comment = $dom->createComment("foobarbaz");
 try {
     $comment->deleteData(3, -1);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo $dom->saveHtml($comment), "\n";
 
@@ -28,5 +28,5 @@ echo $dom->saveHtml($comment), "\n";
 --- Modern behaviour ---
 <!--foo-->
 --- Legacy behaviour ---
-Index Size Error
+DOMException: Index Size Error
 <!--foobarbaz-->

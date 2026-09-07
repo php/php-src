@@ -1,11 +1,16 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f6bf6cdd07080c01d3a0cb08d71409d05b1084f9 */
+/* This is a generated file, edit basic_functions.stub.php instead.
+ * Stub hash: 4feeab72edf6b7440af99a60e1401492828f141e
+ * Has decl header: yes */
+
+#include "zend_attributes.h"
+#include "zend_constants.h"
+#include "zend_enum.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_header_register_callback, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_header_register_callback, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
@@ -137,6 +142,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_min, 0, 1, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_max arginfo_min
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clamp, 0, 3, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, min, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, max, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_MASK(1, array, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
@@ -339,7 +350,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "ARRAY_FILTER_USE_VALUE")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_find, 0, 2, IS_MIXED, 0)
@@ -567,7 +578,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getprotobynumber, 0, 1, MAY_BE_S
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_tick_function, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_tick_function, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -832,7 +843,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trim, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 0, "\" \\n\\r\\t\\v\\x00\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 0, "\" \\f\\n\\r\\t\\v\\x00\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_rtrim arginfo_trim
@@ -1816,6 +1827,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG
 	ZEND_ARG_TYPE_INFO(1, except, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microseconds, IS_LONG, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
@@ -1918,6 +1930,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_enable_crypto, 0, 
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, session_stream, "null")
 ZEND_END_ARG_INFO()
 
+#define arginfo_stream_socket_get_crypto_status arginfo_fpassthru
+
 #if defined(HAVE_SHUTDOWN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_socket_shutdown, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
@@ -1930,6 +1944,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_pair, 0, 3, MAY_BE
 	ZEND_ARG_TYPE_INFO(0, domain, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_LONG, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -1938,6 +1953,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_copy_to_stream, 0, 2, MAY
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_get_contents, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -1980,9 +1996,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_stream_get_wrappers arginfo_ob_list_handlers
 
+#define arginfo_stream_last_errors arginfo_ob_list_handlers
+
+#define arginfo_stream_clear_errors arginfo_flush
+
 #define arginfo_stream_get_transports arginfo_ob_list_handlers
 
-#define arginfo_stream_is_local arginfo_rewind
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_is_local, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_stream_isatty arginfo_rewind
 
@@ -2197,6 +2220,12 @@ static const zend_frameless_function_info frameless_function_infos_max[] = {
 	{ 0 },
 };
 
+ZEND_FRAMELESS_FUNCTION(clamp, 3);
+static const zend_frameless_function_info frameless_function_infos_clamp[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(clamp, 3), 3 },
+	{ 0 },
+};
+
 ZEND_FRAMELESS_FUNCTION(in_array, 2);
 ZEND_FRAMELESS_FUNCTION(in_array, 3);
 static const zend_frameless_function_info frameless_function_infos_in_array[] = {
@@ -2213,11 +2242,39 @@ static const zend_frameless_function_info frameless_function_infos_trim[] = {
 	{ 0 },
 };
 
+ZEND_FRAMELESS_FUNCTION(rtrim, 1);
+ZEND_FRAMELESS_FUNCTION(rtrim, 2);
+static const zend_frameless_function_info frameless_function_infos_rtrim[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(rtrim, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(rtrim, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 1);
+ZEND_FRAMELESS_FUNCTION(ltrim, 2);
+static const zend_frameless_function_info frameless_function_infos_ltrim[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(ltrim, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(ltrim, 2), 2 },
+	{ 0 },
+};
+
 ZEND_FRAMELESS_FUNCTION(implode, 1);
 ZEND_FRAMELESS_FUNCTION(implode, 2);
 static const zend_frameless_function_info frameless_function_infos_implode[] = {
 	{ ZEND_FRAMELESS_FUNCTION_NAME(implode, 1), 1 },
 	{ ZEND_FRAMELESS_FUNCTION_NAME(implode, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(strtoupper, 1);
+static const zend_frameless_function_info frameless_function_infos_strtoupper[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strtoupper, 1), 1 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(strtolower, 1);
+static const zend_frameless_function_info frameless_function_infos_strtolower[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strtolower, 1), 1 },
 	{ 0 },
 };
 
@@ -2254,6 +2311,12 @@ static const zend_frameless_function_info frameless_function_infos_str_contains[
 ZEND_FRAMELESS_FUNCTION(str_starts_with, 2);
 static const zend_frameless_function_info frameless_function_infos_str_starts_with[] = {
 	{ ZEND_FRAMELESS_FUNCTION_NAME(str_starts_with, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(str_ends_with, 2);
+static const zend_frameless_function_info frameless_function_infos_str_ends_with[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(str_ends_with, 2), 2 },
 	{ 0 },
 };
 
@@ -2332,6 +2395,7 @@ ZEND_FUNCTION(current);
 ZEND_FUNCTION(key);
 ZEND_FUNCTION(min);
 ZEND_FUNCTION(max);
+ZEND_FUNCTION(clamp);
 ZEND_FUNCTION(array_walk);
 ZEND_FUNCTION(array_walk_recursive);
 ZEND_FUNCTION(in_array);
@@ -2799,6 +2863,7 @@ ZEND_FUNCTION(stream_socket_get_name);
 ZEND_FUNCTION(stream_socket_recvfrom);
 ZEND_FUNCTION(stream_socket_sendto);
 ZEND_FUNCTION(stream_socket_enable_crypto);
+ZEND_FUNCTION(stream_socket_get_crypto_status);
 #if defined(HAVE_SHUTDOWN)
 ZEND_FUNCTION(stream_socket_shutdown);
 #endif
@@ -2815,6 +2880,8 @@ ZEND_FUNCTION(stream_get_meta_data);
 ZEND_FUNCTION(stream_get_line);
 ZEND_FUNCTION(stream_resolve_include_path);
 ZEND_FUNCTION(stream_get_wrappers);
+ZEND_FUNCTION(stream_last_errors);
+ZEND_FUNCTION(stream_clear_errors);
 ZEND_FUNCTION(stream_get_transports);
 ZEND_FUNCTION(stream_is_local);
 ZEND_FUNCTION(stream_isatty);
@@ -2925,12 +2992,21 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(key, arginfo_key)
 	ZEND_RAW_FENTRY("min", zif_min, arginfo_min, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_min, NULL)
 	ZEND_RAW_FENTRY("max", zif_max, arginfo_max, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_max, NULL)
+	ZEND_RAW_FENTRY("clamp", zif_clamp, arginfo_clamp, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_clamp, NULL)
 	ZEND_FE(array_walk, arginfo_array_walk)
 	ZEND_FE(array_walk_recursive, arginfo_array_walk_recursive)
 	ZEND_RAW_FENTRY("in_array", zif_in_array, arginfo_in_array, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_in_array, NULL)
 	ZEND_RAW_FENTRY("array_search", zif_array_search, arginfo_array_search, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_FE(extract, arginfo_extract)
-	ZEND_FE(compact, arginfo_compact)
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("extract", zif_extract, arginfo_extract, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("extract", zif_extract, arginfo_extract, 0, NULL, NULL)
+#endif
+#if (PHP_VERSION_ID >= 80600)
+	ZEND_RAW_FENTRY("compact", zif_compact, arginfo_compact, ZEND_FENTRY_FLAGS(0, ZEND_ACC2_FORBID_DYN_CALLS), NULL, NULL)
+#elif (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("compact", zif_compact, arginfo_compact, 0, NULL, NULL)
+#endif
 	ZEND_FE(array_fill, arginfo_array_fill)
 	ZEND_FE(array_fill_keys, arginfo_array_fill_keys)
 	ZEND_FE(range, arginfo_range)
@@ -3098,7 +3174,7 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE(inet_ntop, arginfo_inet_ntop)
 	ZEND_FE(inet_pton, arginfo_inet_pton)
-	ZEND_FE(metaphone, arginfo_metaphone)
+	ZEND_RAW_FENTRY("metaphone", zif_metaphone, arginfo_metaphone, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(header, arginfo_header)
 	ZEND_FE(header_remove, arginfo_header_remove)
 	ZEND_FE(setrawcookie, arginfo_setrawcookie)
@@ -3120,18 +3196,18 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_NL_LANGINFO)
 	ZEND_FE(nl_langinfo, arginfo_nl_langinfo)
 #endif
-	ZEND_FE(strcoll, arginfo_strcoll)
+	ZEND_RAW_FENTRY("strcoll", zif_strcoll, arginfo_strcoll, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("trim", zif_trim, arginfo_trim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_trim, NULL)
-	ZEND_RAW_FENTRY("rtrim", zif_rtrim, arginfo_rtrim, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("rtrim", zif_rtrim, arginfo_rtrim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_rtrim, NULL)
 	ZEND_RAW_FENTRY("chop", zif_rtrim, arginfo_chop, 0, NULL, NULL)
-	ZEND_RAW_FENTRY("ltrim", zif_ltrim, arginfo_ltrim, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("ltrim", zif_ltrim, arginfo_ltrim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_ltrim, NULL)
 	ZEND_RAW_FENTRY("wordwrap", zif_wordwrap, arginfo_wordwrap, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("explode", zif_explode, arginfo_explode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("implode", zif_implode, arginfo_implode, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_implode, NULL)
 	ZEND_RAW_FENTRY("join", zif_implode, arginfo_join, 0, NULL, NULL)
 	ZEND_FE(strtok, arginfo_strtok)
-	ZEND_RAW_FENTRY("strtoupper", zif_strtoupper, arginfo_strtoupper, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("strtolower", zif_strtolower, arginfo_strtolower, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("strtoupper", zif_strtoupper, arginfo_strtoupper, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtoupper, NULL)
+	ZEND_RAW_FENTRY("strtolower", zif_strtolower, arginfo_strtolower, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtolower, NULL)
 	ZEND_FE(str_increment, arginfo_str_increment)
 	ZEND_FE(str_decrement, arginfo_str_decrement)
 	ZEND_FE(basename, arginfo_basename)
@@ -3147,7 +3223,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("strrchr", zif_strrchr, arginfo_strrchr, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("str_contains", zif_str_contains, arginfo_str_contains, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_contains, NULL)
 	ZEND_RAW_FENTRY("str_starts_with", zif_str_starts_with, arginfo_str_starts_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_starts_with, NULL)
-	ZEND_RAW_FENTRY("str_ends_with", zif_str_ends_with, arginfo_str_ends_with, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_ends_with", zif_str_ends_with, arginfo_str_ends_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_ends_with, NULL)
 	ZEND_RAW_FENTRY("chunk_split", zif_chunk_split, arginfo_chunk_split, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("substr", zif_substr, arginfo_substr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_substr, NULL)
 	ZEND_RAW_FENTRY("substr_replace", zif_substr_replace, arginfo_substr_replace, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
@@ -3403,6 +3479,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_socket_recvfrom, arginfo_stream_socket_recvfrom)
 	ZEND_FE(stream_socket_sendto, arginfo_stream_socket_sendto)
 	ZEND_FE(stream_socket_enable_crypto, arginfo_stream_socket_enable_crypto)
+	ZEND_FE(stream_socket_get_crypto_status, arginfo_stream_socket_get_crypto_status)
 #if defined(HAVE_SHUTDOWN)
 	ZEND_FE(stream_socket_shutdown, arginfo_stream_socket_shutdown)
 #endif
@@ -3422,6 +3499,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_get_line, arginfo_stream_get_line)
 	ZEND_FE(stream_resolve_include_path, arginfo_stream_resolve_include_path)
 	ZEND_FE(stream_get_wrappers, arginfo_stream_get_wrappers)
+	ZEND_FE(stream_last_errors, arginfo_stream_last_errors)
+	ZEND_FE(stream_clear_errors, arginfo_stream_clear_errors)
 	ZEND_FE(stream_get_transports, arginfo_stream_get_transports)
 	ZEND_FE(stream_is_local, arginfo_stream_is_local)
 	ZEND_FE(stream_isatty, arginfo_stream_isatty)
@@ -3438,17 +3517,17 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(settype, arginfo_settype)
 	ZEND_RAW_FENTRY("intval", zif_intval, arginfo_intval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("floatval", zif_floatval, arginfo_floatval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("doubleval", zif_floatval, arginfo_doubleval, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("doubleval", zif_floatval, arginfo_doubleval, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("boolval", zif_boolval, arginfo_boolval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("strval", zif_strval, arginfo_strval, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_null", zif_is_null, arginfo_is_null, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_resource", zif_is_resource, arginfo_is_resource, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_bool", zif_is_bool, arginfo_is_bool, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_int", zif_is_int, arginfo_is_int, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("is_integer", zif_is_int, arginfo_is_integer, 0, NULL, NULL)
-	ZEND_RAW_FENTRY("is_long", zif_is_int, arginfo_is_long, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("is_integer", zif_is_int, arginfo_is_integer, ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("is_long", zif_is_int, arginfo_is_long, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("is_float", zif_is_float, arginfo_is_float, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
-	ZEND_RAW_FENTRY("is_double", zif_is_float, arginfo_is_double, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("is_double", zif_is_float, arginfo_is_double, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("is_numeric", zif_is_numeric, arginfo_is_numeric, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_is_numeric, NULL)
 	ZEND_RAW_FENTRY("is_string", zif_is_string, arginfo_is_string, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_array", zif_is_array, arginfo_is_array, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
@@ -3509,13 +3588,14 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SORT_REGULAR", PHP_SORT_REGULAR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NUMERIC", PHP_SORT_NUMERIC, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_STRING", PHP_SORT_STRING, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_PERSISTENT);
+	zend_constant *const_SORT_LOCALE_STRING = REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_LOWER", PHP_CASE_LOWER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_UPPER", PHP_CASE_UPPER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_NORMAL", PHP_COUNT_NORMAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", PHP_COUNT_RECURSIVE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_VALUE", ARRAY_FILTER_USE_VALUE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_PERSISTENT);
 	zend_constant *const_ASSERT_ACTIVE = REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", PHP_ASSERT_ACTIVE, CONST_PERSISTENT | CONST_DEPRECATED);
@@ -3902,9 +3982,23 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_func_strptime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
 
+	zend_attribute *attribute_Deprecated_func_metaphone_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "metaphone", sizeof("metaphone") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR(&attribute_Deprecated_func_metaphone_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_metaphone_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zend_string *attribute_Deprecated_func_metaphone_0_arg1_str = zend_string_init("use a userland phonetic matching library instead", strlen("use a userland phonetic matching library instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_metaphone_0->args[1].value, attribute_Deprecated_func_metaphone_0_arg1_str);
+	attribute_Deprecated_func_metaphone_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_attribute *attribute_Deprecated_func_assert_options_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "assert_options", sizeof("assert_options") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	ZVAL_STR(&attribute_Deprecated_func_assert_options_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
 	attribute_Deprecated_func_assert_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_strcoll_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strcoll", sizeof("strcoll") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_func_strcoll_0_arg0_str = zend_string_init("use Collator::compare() instead", strlen("use Collator::compare() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_strcoll_0->args[0].value, attribute_Deprecated_func_strcoll_0_arg0_str);
+	attribute_Deprecated_func_strcoll_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR(&attribute_Deprecated_func_strcoll_0->args[1].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_strcoll_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_func_utf8_encode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_encode", sizeof("utf8_encode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_2));
@@ -3931,6 +4025,41 @@ static void register_basic_functions_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_socket_set_timeout_0->args[1].value, attribute_Deprecated_func_socket_set_timeout_0_arg1_str);
 	attribute_Deprecated_func_socket_set_timeout_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 #endif
+
+	zend_attribute *attribute_Deprecated_func_doubleval_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "doubleval", sizeof("doubleval") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_func_doubleval_0_arg0_str = zend_string_init("use floatval() instead", strlen("use floatval() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_doubleval_0->args[0].value, attribute_Deprecated_func_doubleval_0_arg0_str);
+	attribute_Deprecated_func_doubleval_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR(&attribute_Deprecated_func_doubleval_0->args[1].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_doubleval_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_is_integer_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_integer", sizeof("is_integer") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_func_is_integer_0_arg0_str = zend_string_init("use is_int() instead", strlen("use is_int() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_is_integer_0->args[0].value, attribute_Deprecated_func_is_integer_0_arg0_str);
+	attribute_Deprecated_func_is_integer_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR(&attribute_Deprecated_func_is_integer_0->args[1].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_is_integer_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_is_long_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_long", sizeof("is_long") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	ZVAL_STR_COPY(&attribute_Deprecated_func_is_long_0->args[0].value, attribute_Deprecated_func_is_integer_0_arg0_str);
+	attribute_Deprecated_func_is_long_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR(&attribute_Deprecated_func_is_long_0->args[1].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_is_long_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_is_double_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "is_double", sizeof("is_double") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_func_is_double_0_arg0_str = zend_string_init("use is_float() instead", strlen("use is_float() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_is_double_0->args[0].value, attribute_Deprecated_func_is_double_0_arg0_str);
+	attribute_Deprecated_func_is_double_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	ZVAL_STR(&attribute_Deprecated_func_is_double_0->args[1].value, ZSTR_KNOWN(ZEND_STR_8_DOT_6));
+	attribute_Deprecated_func_is_double_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_const_SORT_LOCALE_STRING_0 = zend_add_global_constant_attribute(const_SORT_LOCALE_STRING, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
+	zend_string *attribute_Deprecated_const_SORT_LOCALE_STRING_0_arg0_str = zend_string_init("use one of the Collator::*sort*() methods instead", strlen("use one of the Collator::*sort*() methods instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SORT_LOCALE_STRING_0->args[0].value, attribute_Deprecated_const_SORT_LOCALE_STRING_0_arg0_str);
+	attribute_Deprecated_const_SORT_LOCALE_STRING_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+	zend_string *attribute_Deprecated_const_SORT_LOCALE_STRING_0_arg1_str = zend_string_init("8.6", strlen("8.6"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_SORT_LOCALE_STRING_0->args[1].value, attribute_Deprecated_const_SORT_LOCALE_STRING_0_arg1_str);
+	attribute_Deprecated_const_SORT_LOCALE_STRING_0->args[1].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_attribute *attribute_Deprecated_const_ASSERT_ACTIVE_0 = zend_add_global_constant_attribute(const_ASSERT_ACTIVE, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	ZVAL_STR(&attribute_Deprecated_const_ASSERT_ACTIVE_0->args[0].value, ZSTR_KNOWN(ZEND_STR_8_DOT_3));
@@ -3964,6 +4093,17 @@ static void register_basic_functions_symbols(int module_number)
 	attribute_Deprecated_const_ASSERT_EXCEPTION_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
+static zend_class_entry *register_class_SortDirection(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("SortDirection", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Ascending", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Descending", NULL);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -3971,9 +4111,9 @@ static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 	INIT_CLASS_ENTRY(ce, "__PHP_Incomplete_Class", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES);
 
-	zend_string *attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_string *attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, true);
 	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0);
+	zend_string_release_ex(attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0, true);
 
 	return class_entry;
 }

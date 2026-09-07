@@ -1,12 +1,12 @@
 --TEST--
-Test Uri\WhatWg\Url parsing - scheme - multibyte codepoint
+Test Uri\WhatWg\Url parsing - scheme - multibyte code point
 --FILE--
 <?php
 
 try {
     new Uri\WhatWg\Url("ƕŢŢƤƨ://example.com");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

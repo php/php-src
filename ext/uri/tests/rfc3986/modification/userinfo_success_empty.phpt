@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - userinfo - empty string
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withUserInfo() - success - empty string
 --FILE--
 <?php
 

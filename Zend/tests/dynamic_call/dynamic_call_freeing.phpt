@@ -6,23 +6,23 @@ Freeing of function "name" when dynamic call fails
 try {
     $bar = "bar";
     ("foo" . $bar)();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $bar = ["bar"];
     (["foo"] + $bar)();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     (new stdClass)();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Call to undefined function foobar()
-Array callback must have exactly two elements
-Object of type stdClass is not callable
+Error: Call to undefined function foobar()
+Error: Array callback must have exactly two elements
+Error: Object of type stdClass is not callable

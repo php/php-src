@@ -10,9 +10,9 @@ $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 try {
     var_dump($c->roll(-1, 2));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-IntlCalendar::roll(): Argument #1 ($field) must be a valid field
+ValueError: IntlCalendar::roll(): Argument #1 ($field) must be a valid field

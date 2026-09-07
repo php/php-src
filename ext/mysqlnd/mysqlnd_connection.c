@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -1386,7 +1384,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */
 	ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, strlen(db),
 									 conn->authentication_plugin_data, conn->options->auth_protocol,
-									0 /*charset not used*/, conn->options, conn->server_capabilities, silent, TRUE/*is_change*/);
+									0 /*charset not used*/, conn->server_capabilities, silent, TRUE/*is_change*/);
 
 	/*
 	  Here we should close all statements. Unbuffered queries should not be a

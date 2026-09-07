@@ -36,14 +36,14 @@ function valid(Test $test, string $prop1, string $prop2, $value) {
     try {
         $test->$prop2 = $value;
         $test->$prop1 =& $test->$prop2;
-    } catch (TypeError $e) {
-        echo "Valid assignment $prop1 =& $prop2 threw {$e->getMessage()}\n";
+    } catch (Throwable $e) {
+        echo "Valid assignment $prop1 =& $prop2 ", $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         $test->$prop1 = $value;
         $test->$prop2 =& $test->$prop1;
-    } catch (TypeError $e) {
-        echo "Valid assignment $prop2 =& $prop1 threw {$e->getMessage()}\n";
+    } catch (Throwable $e) {
+        echo "Valid assignment $prop2 =& $prop1 ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

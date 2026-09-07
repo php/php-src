@@ -25,7 +25,7 @@ bool(true)
 string(1) "0"
 string(1) "0"
 
-Warning: session_set_cookie_params(): CookieLifetime cannot be negative in %s on line %d
+Warning: session_set_cookie_params(): session.cookie_lifetime must be between 0 and %d in %s on line %d
 bool(false)
 string(1) "0"
 Done

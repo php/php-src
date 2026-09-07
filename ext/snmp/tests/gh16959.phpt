@@ -66,5 +66,5 @@ array(4) {
 }
 Object of class stdClass could not be converted to string
 Object of class stdClass could not be converted to string
-Type must be a single character
-Type must be a single character
+snmp2_set(): Argument #4 ($type) must be a single character
+snmp2_set(): Argument #4 ($type) must be a single character

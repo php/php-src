@@ -4535,10 +4535,10 @@ ZEND_API char *zend_gcvt(double value, int ndigit, char dec_point, char exponent
 	if ((decpt >= 0 && decpt > ndigit) || decpt < -3) { /* use E-style */
 		/* exponential format (e.g. 1.2345e+13) */
 		if (--decpt < 0) {
-			sign = 1;
+			sign = true;
 			decpt = -decpt;
 		} else {
-			sign = 0;
+			sign = false;
 		}
 		src = digits;
 		*dst++ = *src++;

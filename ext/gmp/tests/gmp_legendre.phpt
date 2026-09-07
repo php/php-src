@@ -23,17 +23,17 @@ var_dump(gmp_strval(gmp_legendre(3, $n1)));
 try {
     var_dump(gmp_legendre(3, array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_legendre(array(), 3));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_legendre(array(), array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -56,7 +56,7 @@ string(1) "0"
 string(2) "-1"
 string(1) "0"
 string(2) "-1"
-gmp_legendre(): Argument #2 ($num2) must be of type GMP|string|int, array given
-gmp_legendre(): Argument #1 ($num1) must be of type GMP|string|int, array given
-gmp_legendre(): Argument #1 ($num1) must be of type GMP|string|int, array given
+TypeError: gmp_legendre(): Argument #2 ($num2) must be of type GMP|string|int, array given
+TypeError: gmp_legendre(): Argument #1 ($num1) must be of type GMP|string|int, array given
+TypeError: gmp_legendre(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

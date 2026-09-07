@@ -48,21 +48,9 @@ require_once 'skipifconnectfailure.inc';
             // don't bail - column type might not be supported by the server, ignore this
             continue;
         }
-        if (!$stmt_ins = mysqli_stmt_init($link_ins)) {
+        if (!$stmt_ins = mysqli_prepare($link_ins, "INSERT INTO test(id, bit_value) VALUES (?, ?)")) {
             printf("[004 - %d] [%d] %s\n", $bits, mysqli_errno($link_ins), mysqli_error($link_ins));
             continue;
-        }
-
-        if (!mysqli_stmt_prepare($stmt_ins, "INSERT INTO test(id, bit_value) VALUES (?, ?)")) {
-            printf("[005 - %d] [%d] %s\n", $bits, mysqli_stmt_errno($stmt_ins), mysqli_stmt_error($stmt_ins));
-            mysqli_stmt_close($stmt_ins);
-            continue;
-        }
-
-        if (!($stmt_sel = mysqli_stmt_init($link_sel))) {
-            printf("[006 - %d] [%d] %s\n", $bits, mysqli_errno($link_sel), mysqli_error($link_sel));
-            mysqli_stmt_close($stmt_ins);
-                continue;
         }
 
         $tests = 0;
@@ -101,8 +89,12 @@ require_once 'skipifconnectfailure.inc';
                 break;
             }
             $sql = sprintf("SELECT id, BIN(bit_value) AS _bin, bit_value, bit_value + 0 AS _bit_value0, bit_null FROM test WHERE id = %s", $value);
-            if ((!mysqli_stmt_prepare($stmt_sel, $sql)) ||
-                (!mysqli_stmt_execute($stmt_sel))) {
+            unset($stmt_sel); // Unset the variable first, otherwise we would get Out of sync error
+            if (!($stmt_sel = mysqli_prepare($link_sel, $sql))) {
+                printf("[009 - %d] [%d] %s\n", $bits, mysqli_errno($link_sel), mysqli_error($link_sel));
+                break;
+            }
+            if (!mysqli_stmt_execute($stmt_sel)) {
                 printf("[009 - %d] [%d] %s\n", $bits, mysqli_stmt_errno($stmt_sel), mysqli_stmt_error($stmt_sel));
                 break;
             }

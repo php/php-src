@@ -17,8 +17,8 @@ try {
     $a = 5;
     $res1 = $a |> _modify(...);
     var_dump($res1);
-} catch (\Error $e) {
-  echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Complex variables.
@@ -26,12 +26,12 @@ try {
     $a = ['foo' => 'beep'];
     $res2 = $a |> _append(...);
     var_dump($res2);
-} catch (\Error $e) {
-  echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
 ?>
 --EXPECTF--
-_modify(): Argument #1 ($a) could not be passed by reference
-_append(): Argument #1 ($a) could not be passed by reference
+Error: _modify(): Argument #1 ($a) could not be passed by reference
+Error: _append(): Argument #1 ($a) could not be passed by reference

@@ -11,8 +11,8 @@ $checker = new Spoofchecker();
 try {
     $checker->__construct();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Spoofchecker object is already constructed
+Error: Spoofchecker object is already constructed

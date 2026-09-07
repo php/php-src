@@ -11,8 +11,7 @@ require_once 'skipifconnectfailure.inc';
 require_once 'connect.inc';
 
 $db = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
-$qry=$db->stmt_init();
-$qry->prepare("SELECT REPEAT('a',100000)");
+$qry=$db->prepare("SELECT REPEAT('a',100000)");
 $qry->execute();
 $qry->bind_result($text);
 $qry->fetch();

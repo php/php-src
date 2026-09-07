@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - query - empty string
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withQuery() - success - empty string
 --FILE--
 <?php
 

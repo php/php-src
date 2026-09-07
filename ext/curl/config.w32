@@ -5,7 +5,7 @@ ARG_WITH("curl", "cURL support", "no");
 if (PHP_CURL != "no") {
 	var curl_location;
 	if ((curl_location = CHECK_LIB("libcurl_a.lib;libcurl.lib", "curl", PHP_CURL)) &&
-		CHECK_HEADER_ADD_INCLUDE("curl/easy.h", "CFLAGS_CURL") &&
+		CHECK_HEADER("curl/easy.h", "CFLAGS_CURL") &&
 		SETUP_OPENSSL("curl", PHP_CURL) >= 2 &&
 		CHECK_LIB("winmm.lib", "curl", PHP_CURL) &&
 		CHECK_LIB("wldap32.lib", "curl", PHP_CURL) &&
@@ -14,7 +14,7 @@ if (PHP_CURL != "no") {
 		 CHECK_LIB("libssh2.lib", "curl", PHP_CURL) &&
 		 CHECK_LIB("nghttp2.lib", "curl", PHP_CURL))
 		) {
-		if (!(CHECK_HEADER_ADD_INCLUDE("brotli/decode.h", "CFLAGS_CURL") &&
+		if (!(CHECK_HEADER("brotli/decode.h", "CFLAGS_CURL") &&
 			CHECK_LIB("brotlidec.lib;brotlidec-static.lib", "curl", PHP_CURL) &&
 			CHECK_LIB("brotlicommon.lib;brotlicommon-static.lib", "curl", PHP_CURL)
 		)) {

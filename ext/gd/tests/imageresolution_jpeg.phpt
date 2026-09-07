@@ -27,7 +27,7 @@ imageresolution($exp, 71, 299);
 try {
 	imagejpeg($exp, $filename, 101);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
@@ -43,7 +43,7 @@ array(2) {
   [1]=>
   int(299)
 }
-imagejpeg(): Argument #3 ($quality) must be at between -1 and 100
+ValueError: imagejpeg(): Argument #3 ($quality) must be at between -1 and 100
 --CLEAN--
 <?php
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'imageresolution_jpeg.jpeg');

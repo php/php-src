@@ -36,7 +36,7 @@ echo "--- Dump ---\n";
 var_dump($proc);
 
 ?>
---EXPECT--
+--EXPECTF--
 --- Set to 1 ---
 --- Set to -1 ---
 XSLTProcessor::$maxTemplateVars must be greater than or equal to 0
@@ -51,7 +51,7 @@ object(XSLTProcessor)#1 (4) {
   ["cloneDocument"]=>
   bool(false)
   ["maxTemplateDepth"]=>
-  int(3000)
+  int(%d)
   ["maxTemplateVars"]=>
   int(1)
 }

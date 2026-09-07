@@ -9,9 +9,9 @@ dom
 <?php
 try {
     DOMDocument::saveHTML(true);
-} catch (Error $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Non-static method DOMDocument::saveHTML() cannot be called statically
+Error: Non-static method DOMDocument::saveHTML() cannot be called statically

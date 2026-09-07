@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
@@ -134,7 +132,8 @@ ZEND_ATTRIBUTE_UNUSED static void create_file(void) {
 
 ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
 	steps_left = MAX_STEPS;
-	zend_exception_save();
+	zend_object *exception = EG(exception);
+	EG(exception) = NULL;
 	zval retval, args[2];
 	zend_function *fn = zend_hash_str_find_ptr(CG(function_table), ZEND_STRL("opcache_invalidate"));
 	ZEND_ASSERT(fn != NULL);
@@ -145,5 +144,5 @@ ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
 	ZEND_ASSERT(Z_TYPE(retval) == IS_TRUE);
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&retval);
-	zend_exception_restore();
+	EG(exception) = exception;
 }

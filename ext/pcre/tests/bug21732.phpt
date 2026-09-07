@@ -12,12 +12,12 @@ class foo {
 try {
     var_dump(preg_replace('', array(), ''));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(preg_replace_callback("/(ab)(cd)(e)/", array(new foo(), "cb"), 'abcde'));
 ?>
 --EXPECT--
-preg_replace(): Argument #1 ($pattern) must be of type array when argument #2 ($replacement) is an array, string given
+TypeError: preg_replace(): Argument #1 ($pattern) must be of type array when argument #2 ($replacement) is an array, string given
 array(4) {
   [0]=>
   string(5) "abcde"

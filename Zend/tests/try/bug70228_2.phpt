@@ -16,5 +16,6 @@ function test() {
 
 var_dump(test());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 int(42)

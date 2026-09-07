@@ -13,7 +13,7 @@ var_dump($db->inTransaction());
 try {
     $db->beginTransaction();
 } catch (PDOException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $db->commit();
@@ -25,6 +25,6 @@ var_dump($db->inTransaction());
 --EXPECT--
 bool(false)
 bool(true)
-There is already an active transaction
+PDOException: There is already an active transaction
 bool(false)
 bool(true)

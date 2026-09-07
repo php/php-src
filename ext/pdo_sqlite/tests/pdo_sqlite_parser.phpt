@@ -31,9 +31,8 @@ foreach ($queries as $k => $query) {
 // One parameter
 $queries = [
     "SELECT * FROM {$table} WHERE '1' = ?",
-    "SELECT * FROM {$table} WHERE \"?\" IN (?, \"?\")",
+    "SELECT * FROM {$table} WHERE '?' IN (?, '?')",
     "SELECT * FROM {$table} WHERE `a``?` = ?",
-    "SELECT * FROM {$table} WHERE \"a`?\" = ?",
     "SELECT * FROM {$table} WHERE [a`?] = ?",
 ];
 
@@ -41,6 +40,22 @@ foreach ($queries as $k => $query) {
     $stmt = $db->prepare($query);
     $stmt->execute([1]);
     var_dump($stmt->fetch(PDO::FETCH_NUM) === [0 => 1]);
+}
+
+// Check if DQS are enabled.
+$dqs = true;
+try {
+    $db->exec('SELECT "test"');
+} catch (\PDOException) {
+    $dqs = false;
+}
+
+if ($dqs) {
+    $stmt = $db->prepare("SELECT * FROM {$table} WHERE \"a`?\" = ?");
+    $stmt->execute([1]);
+    var_dump($stmt->fetch(PDO::FETCH_NUM) === [0 => 1]);
+} else {
+    var_dump(true);
 }
 
 ?>

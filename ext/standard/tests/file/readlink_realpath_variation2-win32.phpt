@@ -80,7 +80,7 @@ Warning: readlink(): readlink failed to read the symbolic link (%s), error %d in
 bool(false)
 bool(false)
 
-Warning: unlink(%s/./readlink_realpath_variation2/home/../home//tests//..//..//..//home//readlink_realpath_variation2_link.tmp/): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory in %s on line %d
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an array --
 bool(true)
@@ -94,5 +94,5 @@ Warning: readlink(): readlink failed to read the symbolic link (%s), error %d in
 bool(false)
 bool(false)
 
-Warning: unlink(%s/./readlink_realpath_variation2/home/../home//tests//..//..//..//home//readlink_realpath_variation2_link.tmp/): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory in %s on line %d
 Done

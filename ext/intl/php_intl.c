@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Vadim Savchuk <vsavchuk@productengine.com>                  |
    |          Dmitry Lakhtyuk <dlakhtyuk@productengine.com>               |
@@ -42,6 +42,7 @@
 #include "locale/locale_class.h"
 
 #include "listformatter/listformatter_class.h"
+#include "rangeformatter/rangeformatter_class.h"
 
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
@@ -74,7 +75,6 @@
 
 #include "php_ini.h"
 
-#include "zend_attributes.h"
 
 #include "php_intl_arginfo.h"
 
@@ -105,7 +105,7 @@ char* canonicalize_locale_string(const char* locale) {
 
 	canonicalized_len = uloc_canonicalize(locale, canonicalized, sizeof(canonicalized), &status);
 
-	if (U_FAILURE(status) || canonicalized_len <= 0) {
+	if (UNEXPECTED(U_FAILURE(status) || canonicalized_len <= 0)) {
 		return NULL;
 	}
 
@@ -114,7 +114,7 @@ char* canonicalize_locale_string(const char* locale) {
 
 static PHP_INI_MH(OnUpdateErrorLevel)
 {
-	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_long *p = ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (*p) {
 		php_error_docref("session.configuration", E_DEPRECATED,
@@ -189,6 +189,10 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'ListFormatter' PHP class */
 	listformatter_register_class(  );
 
+#if U_ICU_VERSION_MAJOR_NUM >= 63
+	/* Register 'NumberRangeFormatter' PHP class */
+	rangeformatter_register_class( );
+#endif
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
 
@@ -273,6 +277,7 @@ PHP_RINIT_FUNCTION( intl )
 PHP_RSHUTDOWN_FUNCTION( intl )
 {
 	INTL_G(current_collator) = NULL;
+	INTL_G(current_collator_error) = NULL;
 	if (INTL_G(grapheme_iterator)) {
 		grapheme_close_global_iterator(  );
 		INTL_G(grapheme_iterator) = NULL;

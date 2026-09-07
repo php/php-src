@@ -23,5 +23,9 @@ $a->__construct();
 echo "DONE";
 ?>
 --EXPECTF--
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
+
+Deprecated: Returning a value from a constructor is deprecated in %s on line %d
+
 Warning: Undefined property: Z::$x in %s on line %d
 DONE

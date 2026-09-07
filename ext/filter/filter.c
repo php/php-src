@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
   |          Derick Rethans <derick@php.net>                             |
@@ -27,7 +25,6 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
-#include "zend_attributes.h"
 #include "filter_private.h"
 #include "filter_arginfo.h"
 #include "zend_exceptions.h"
@@ -482,11 +479,7 @@ PHP_FUNCTION(filter_has_var)
 		RETURN_THROWS();
 	}
 
-	if (array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var)) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(array_ptr && zend_hash_exists(Z_ARRVAL_P(array_ptr), var));
 }
 /* }}} */
 
@@ -832,9 +825,7 @@ PHP_FUNCTION(filter_list)
 {
 	int size = sizeof(filter_list) / sizeof(filter_list_entry);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	for (int i = 0; i < size; ++i) {

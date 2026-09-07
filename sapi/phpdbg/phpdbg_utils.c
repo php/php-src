@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -603,7 +601,7 @@ int phpdbg_is_auto_global(char *name, int len) {
 PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_object *exception) {
 	const zend_op *op;
 	zend_op *cur;
-	uint32_t op_num, i;
+	uint32_t op_num;
 	zend_op_array *op_array = &execute_data->func->op_array;
 
 	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3 && EG(opline_before_exception)) {
@@ -614,7 +612,7 @@ PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_obj
 
 	op_num = op - op_array->opcodes;
 
-	for (i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op <= op_num; i++) {
+	for (uint32_t i = 0; i < op_array->last_try_catch && op_array->try_catch_array[i].try_op <= op_num; i++) {
 		uint32_t catch = op_array->try_catch_array[i].catch_op, finally = op_array->try_catch_array[i].finally_op;
 		if (op_num <= catch || op_num <= finally) {
 			if (finally) {
@@ -674,11 +672,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			/* Make sure it looks like a float */
 			if (zend_finite(Z_DVAL_P(zv)) && !strchr(decode, '.')) {
 				size_t len = strlen(decode);
-				char *decode2 = emalloc(len + strlen(".0") + 1);
-				memcpy(decode2, decode, len);
-				decode2[len] = '.';
-				decode2[len+1] = '0';
-				decode2[len+2] = '\0';
+				char *decode2 = zend_cstr_concat(decode, len, ".0", strlen(".0"));
 				efree(decode);
 				decode = decode2;
 			}

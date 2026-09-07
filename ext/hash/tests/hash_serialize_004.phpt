@@ -8,7 +8,7 @@ $ctx = hash_init("sha256");
 try {
     $ctx->__unserialize($ctx->__serialize());
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // bad formats
@@ -26,20 +26,20 @@ foreach ([
         $ctx = unserialize(base64_decode($serial));
         echo "Unexpected success\n";
     } catch (Exception $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 echo "Done\n";
 ?>
 --EXPECT--
-HashContext::__unserialize called on initialized object
-Incomplete or ill-formed serialization data
-Incomplete or ill-formed serialization data
-Incomplete or ill-formed serialization data
-HashContext with HASH_HMAC option cannot be serialized
-Incomplete or ill-formed serialization data ("sha1" code -1)
-Incomplete or ill-formed serialization data ("sha1" code -1024)
-Incomplete or ill-formed serialization data ("sha1" code -1)
-Unknown hash algorithm
+Exception: HashContext::__unserialize called on initialized object
+Exception: Incomplete or ill-formed serialization data
+Exception: Incomplete or ill-formed serialization data
+Exception: Incomplete or ill-formed serialization data
+Exception: HashContext with HASH_HMAC option cannot be serialized
+Exception: Incomplete or ill-formed serialization data ("sha1" code -1)
+Exception: Incomplete or ill-formed serialization data ("sha1" code -1024)
+Exception: Incomplete or ill-formed serialization data ("sha1" code -1)
+Exception: Unknown hash algorithm
 Done

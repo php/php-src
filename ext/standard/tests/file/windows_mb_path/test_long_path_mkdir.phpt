@@ -2,12 +2,10 @@
 Mkdir with path length < 260 and > 248 has be a long path
 --SKIPIF--
 <?php
-include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
-
-skip_if_not_win();
+if (PHP_OS_FAMILY !== 'Windows') die('skip windows only test');
 
 $start = realpath(__DIR__);
-if (strlen($start) > 260 || strlen($start) > 248) {
+if (strlen($start) > 260 || strlen($start) < 248) {
     die("skip the starting path length is unsuitable for this test");
 }
 

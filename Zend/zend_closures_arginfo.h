@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit zend_closures.stub.php instead.
  * Stub hash: e0626e52adb2d38dad1140c1a28cc7774cc84500 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)

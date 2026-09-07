@@ -4,6 +4,9 @@ Stack limit 010 - Check stack size detection against known defaults
 zend_test
 --SKIPIF--
 <?php
+if (PHP_OS_FAMILY == "AIX") {
+    die("skip AIX adjusts top of stack (used for size) in unpredictable way");
+}
 if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
 if (!getenv('STACK_LIMIT_DEFAULTS_CHECK')) { die('skip STACK_LIMIT_DEFAULTS_CHECK not set'); }
 ?>
@@ -27,7 +30,9 @@ $expectedMaxSize = match(php_uname('s')) {
         'true' => 16*1024*1024, // https://github.com/actions/runner-images/pull/3328
         default => 8*1024*1024,
     },
-    'SunOS' => 10 * 1024 * 1024,
+    'SunOS' => preg_match('/(omnios|illumos|smartos|oi-|openindiana|joyent)/i', php_uname('v'))
+        ? 10 * 1024 * 1024
+        : 8 * 1024 * 1024,
     'Windows NT' => 67108864 - 4*4096, // Set by sapi/cli/config.w32
 };
 

@@ -33,8 +33,8 @@ call_user_func(array('BAR','x'));
 call_user_func('BAR::www');
 try {
     call_user_func('self::y');
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -58,4 +58,4 @@ string(1) "y"
 ok
 __callstatic:
 string(3) "www"
-call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access "self" when no class scope is active
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access "self" when no class scope is active

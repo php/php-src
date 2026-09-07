@@ -1,15 +1,13 @@
 // Utils for configure script
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
   +----------------------------------------------------------------------+
@@ -95,10 +93,10 @@ if (typeof(CWD) == "undefined") {
 if (!MODE_PHPIZE) {
 	/* defaults; we pick up the precise versions from configure.ac */
 	var PHP_VERSION = 8;
-	var PHP_MINOR_VERSION = 5;
+	var PHP_MINOR_VERSION = 6;
 	var PHP_RELEASE_VERSION = 0;
 	var PHP_EXTRA_VERSION = "";
-	var PHP_VERSION_STRING = "8.5.0";
+	var PHP_VERSION_STRING = "8.6.0";
 }
 
 /* Get version numbers and DEFINE as a string */
@@ -929,6 +927,11 @@ function OLD_CHECK_LIB(libnames, target, path_to_check)
 
 }
 
+/**
+ * Checks whether function exists in the given header. Same as GREP_HEADER() but
+ * it also defines the 'HAVE_<FUNC_NAME>' preprocessor macro to 1 or 0. In new
+ * code rather use GREP_HEADER() and define the macro explicitly when needed.
+ */
 function CHECK_FUNC_IN_HEADER(header_name, func_name, path_to_check, add_to_flag)
 {
 	var c = false;
@@ -955,6 +958,9 @@ function CHECK_FUNC_IN_HEADER(header_name, func_name, path_to_check, add_to_flag
 	return false;
 }
 
+/**
+ * Checks whether specified regular expression is found in the given header.
+ */
 function GREP_HEADER(header_name, regex, path_to_check)
 {
 	var c = false;
@@ -996,6 +1002,55 @@ function GREP_HEADER(header_name, regex, path_to_check)
 	return false;
 }
 
+/**
+ * Checks if specified header exists and adds its include path to C flags.
+ */
+function CHECK_HEADER(header_name, flag_name, path_to_check, use_env, add_dir_part)
+{
+	var dir_part_to_add = "";
+
+	if (use_env == null) {
+		use_env = true;
+	}
+
+	// if true, add the dir part of the header_name to the include path
+	if (add_dir_part == null) {
+		add_dir_part = false;
+	} else if (add_dir_part) {
+		var basename = FSO.GetFileName(header_name);
+		dir_part_to_add = "\\" + header_name.substr(0, header_name.length - basename.length - 1);
+	}
+
+	if (path_to_check == null) {
+		path_to_check = php_usual_include_suspects;
+	} else {
+		path_to_check += ";" + php_usual_include_suspects;
+	}
+
+	var p = search_paths(header_name, path_to_check, use_env ? "INCLUDE" : null);
+
+	if (typeof(p) == "string") {
+		ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
+	} else if (p == false) {
+		/* Not found in the defaults or the explicit paths,
+		 * so check the general extra includes; if we find
+		 * it here, no need to add another /I for it as we
+		 * already have it covered, unless we are adding
+		 * the dir part.... */
+		p = search_paths(header_name, PHP_EXTRA_INCLUDES, null);
+		if (typeof(p) == "string" && add_dir_part) {
+			ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
+		}
+	}
+
+	return p;
+}
+
+/**
+ * Obsolete. Checks if specified header exists, adds its include path to C flags
+ * and defines the 'HAVE_<HEADER_NAME_H>' C preprocessor macro. In new code, use
+ * CHECK_HEADER() instead, and define the 'HAVE_' macro manually as needed.
+ */
 function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env, add_dir_part, add_to_flag_only)
 {
 	var dir_part_to_add = "";
@@ -1439,6 +1494,9 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		ADD_FLAG("CFLAGS_PHP", "/D COMPILE_DL_" + EXT);
 	} else {
 		STDOUT.WriteLine("Enabling extension " + extname_for_printing);
+		/* Statically linked extensions share the engine's _tsrm_ls_cache symbol,
+		 * so in ZTS builds they can read the TSRMLS cache directly. */
+		cflags = "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 " + cflags;
 	}
 
 	MFO.WriteBlankLines(1);
@@ -3018,7 +3076,7 @@ function toolset_setup_project_tools()
 	}
 
 	var RE2C = PATH_PROG('re2c');
-	DEFINE('RE2C_FLAGS', '--no-generation-date');
+	DEFINE('RE2C_FLAGS', '--no-generation-date -W');
 	if (RE2C) {
 		var RE2CVERS = probe_binary(RE2C, "version");
 		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
@@ -3306,7 +3364,7 @@ function toolset_setup_common_cflags()
 
 		ADD_FLAG("CFLAGS", "/Zc:wchar_t");
 	} else if (CLANG_TOOLSET) {
-		ADD_FLAG("CFLAGS", "-Wno-deprecated-declarations");
+		ADD_FLAG("CFLAGS", "-Wno-deprecated-declarations -Wno-microsoft-enum-forward-reference");
 		if (TARGET_ARCH == 'x86') {
 			ADD_FLAG('CFLAGS', '-m32');
 		} else {
@@ -3319,6 +3377,10 @@ function toolset_setup_common_cflags()
 
 		var vc_ver = probe_binary(PATH_PROG('cl', null));
 		ADD_FLAG("CFLAGS"," -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions");
+
+        if (CLANGVERS >= 1900 && TARGET_ARCH === 'x64') {
+            AC_DEFINE('HAVE_PRESERVE_NONE', 1, 'Whether the compiler supports __attribute__((preserve_none))');
+        }
 	}
 
 	if (!CLANG_TOOLSET) {
@@ -3340,24 +3402,25 @@ function toolset_setup_intrinsic_cflags()
 	/* From oldest to newest. */
 	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2", "avx512");
 
-	if (VS_TOOLSET) {
-		if ("disabled" == PHP_NATIVE_INTRINSICS) {
-			ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
-		}
+	if ("disabled" == PHP_NATIVE_INTRINSICS) {
+        ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
+	}
 
-		if (TARGET_ARCH == 'arm64') {
-			/* arm64 supports neon */
-			configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
-			/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
-			AC_DEFINE('HAVE_ARCH64_CRC32', 1);
-			return;
-		}
+	if (TARGET_ARCH == 'arm64') {
+		/* arm64 supports neon */
+		configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
+		/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
+		AC_DEFINE('HAVE_ARCH64_CRC32', 1);
+		return;
+	}
 
-		if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
-			PHP_NATIVE_INTRINSICS = default_enabled;
-		}
+    // if --enable-native-intrisics is not specified, it's "no" - enable default
+	if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
+		PHP_NATIVE_INTRINSICS = default_enabled;
+	}
 
-		if ("all" == PHP_NATIVE_INTRINSICS) {
+	if ("all" == PHP_NATIVE_INTRINSICS) {
+		if (VS_TOOLSET) {
 			var list = (new VBArray(avail.Keys())).toArray();
 
 			for (var i in list) {
@@ -3366,45 +3429,60 @@ function toolset_setup_intrinsic_cflags()
 
 			/* All means all. __AVX__, __AVX2__, and __AVX512*__ are defined by compiler. */
 			ADD_FLAG("CFLAGS","/arch:AVX512");
-			configure_subst.Add("PHP_SIMD_SCALE", "AVX512");
-		} else {
-			var list = PHP_NATIVE_INTRINSICS.split(",");
-			var j = 0;
-			for (var k = 0; k < scale.length; k++) {
-				for (var i = 0; i < list.length; i++) {
-					var it = list[i].toLowerCase();
-					if (scale[k] == it) {
-						j = k > j ? k : j;
-					} else if (!avail.Exists(it) && "avx512" != it && "avx2" != it && "avx" != it) {
-						WARNING("Unknown intrinsic name '" + it + "' ignored");
-					}
+		} else if (CLANG_TOOLSET) {
+			ADD_FLAG("CFLAGS","-mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl");
+		}
+		configure_subst.Add("PHP_SIMD_SCALE", "AVX512");
+	} else {
+		var list = PHP_NATIVE_INTRINSICS.split(",");
+		var j = 0;
+		for (var k = 0; k < scale.length; k++) {
+			for (var i = 0; i < list.length; i++) {
+				var it = list[i].toLowerCase();
+				if (scale[k] == it) {
+					j = k > j ? k : j;
+				} else if (!avail.Exists(it) && "avx512" != it && "avx2" != it && "avx" != it) {
+					WARNING("Unknown intrinsic name '" + it + "' ignored");
 				}
 			}
-			if (TARGET_ARCH == 'x86') {
-				/* SSE2 is currently the default on 32-bit. It could change later,
-					for now no need to pass it. But, if SSE only was chosen,
-					/arch:SSE is required. */
-				if ("sse" == scale[j]) {
-					ADD_FLAG("CFLAGS","/arch:SSE");
-				}
+		}
+		if (TARGET_ARCH == 'x86') {
+			/* SSE2 is currently the default on 32-bit. It could change later,
+				for now no need to pass it. But, if SSE only was chosen,
+				/arch:SSE is required. */
+			if ("sse" == scale[j]) {
+				ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:SSE" : "-msse");
 			}
-			configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
-			/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
-				The declared macros therefore won't affect the code generation,
-				but will enable the guarded code parts. */
-			if ("avx512" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX512");
-				j -= 3;
-			} else if ("avx2" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX2");
-				j -= 2;
-			} else if ("avx" == scale[j]) {
-				ADD_FLAG("CFLAGS","/arch:AVX");
-				j -= 1;
-			}
+		}
+		configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
+		if ("avx512" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX512" : "-mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl");
+			j -= 3;
+		} else if ("avx2" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX2" : "-mavx2");
+			j -= 2;
+		} else if ("avx" == scale[j]) {
+			ADD_FLAG("CFLAGS", VS_TOOLSET ? "/arch:AVX" : "-mavx");
+			j -= 1;
+		}
+		if (VS_TOOLSET) {
+			/* MSVC has no explicit way to enable intrinsics between SSE3 and SSE4.2.
+			   The declared macros won't affect code generation, but will enable
+			   the guarded code parts. */
 			for (var i = 0; i <= j; i++) {
 				var it = scale[i];
 				AC_DEFINE(avail.Item(it), 1);
+			}
+		} else if (CLANG_TOOLSET) {
+			/* clang supports -m flags for each SSE level and auto-defines
+			   the corresponding __SSE*__ macros. Pass the highest requested
+			   level; clang implicitly enables all lower levels. */
+			var clang_flag_map = {
+				"sse": "-msse", "sse2": "-msse2", "sse3": "-msse3",
+				"ssse3": "-mssse3", "sse4.1": "-msse4.1", "sse4.2": "-msse4.2"
+			};
+			if (clang_flag_map[scale[j]]) {
+				ADD_FLAG("CFLAGS", clang_flag_map[scale[j]]);
 			}
 		}
 	}
@@ -3445,7 +3523,7 @@ function toolset_setup_common_ldflags()
 function toolset_setup_common_libs()
 {
 	// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
-	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib Pathcch.lib");
+	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib psapi.lib bcrypt.lib Pathcch.lib Mswsock.lib");
 }
 
 function toolset_setup_build_mode()
@@ -3657,7 +3735,7 @@ function SETUP_ZLIB_LIB(target, path_to_check)
 	return (PHP_ZLIB != "no" && !PHP_ZLIB_SHARED) || CHECK_LIB("zlib_a.lib;zlib.lib", target, path_to_check);
 }
 
-function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part, add_to_flag_only)
+function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part)
 {
 	var ret = 0;
 	var cflags_var = "CFLAGS_" + target.toUpperCase();
@@ -3665,7 +3743,7 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 	if (CHECK_LIB("libcrypto.lib", target, path_to_check) &&
 			CHECK_LIB("libssl.lib", target, path_to_check) &&
 			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
-			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
+			CHECK_HEADER("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part)) {
 		/* Openssl 1.1.x or later */
 		return 2;
 	}
@@ -3678,8 +3756,8 @@ function SETUP_SQLITE3(target, path_to_check, shared) {
 	var libs = (shared ? "libsqlite3.lib;libsqlite3_a.lib" : "libsqlite3_a.lib;libsqlite3.lib");
 
 	return CHECK_LIB(libs, target, path_to_check) &&
-		CHECK_HEADER_ADD_INCLUDE("sqlite3.h", cflags_var) &&
-		CHECK_HEADER_ADD_INCLUDE("sqlite3ext.h", cflags_var);
+		CHECK_HEADER("sqlite3.h", cflags_var) &&
+		CHECK_HEADER("sqlite3ext.h", cflags_var);
 }
 
 function check_binary_tools_sdk()

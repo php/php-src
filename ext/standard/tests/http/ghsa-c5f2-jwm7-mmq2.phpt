@@ -19,10 +19,4 @@ $context = stream_context_create(['http' => ['proxy' => 'tcp://' . $host, 'reque
 echo file_get_contents("http://$host/$userinput", false, $context);
 ?>
 --EXPECTF--
-Warning: file_get_contents(http://localhost:%d/index.php HTTP/1.1
-Host: localhost:%d
-
-GET /index2.php HTTP/1.1
-Host: localhost:%d
-
-GET /index.php): Failed to open stream: HTTP wrapper full URI path does not allow CR or LF characters in %s on line %d
+Warning: file_get_contents(): Failed to open stream: HTTP wrapper full URI path does not allow CR or LF characters in %s on line %d

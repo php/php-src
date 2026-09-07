@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit pdo_stmt.stub.php instead.
  * Stub hash: 6a5b332ba4bfeceaca6aad734d38dabb66d82c97 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 2, _IS_BOOL, 0)
@@ -142,9 +142,9 @@ static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_ent
 
 	zval property_queryString_default_value;
 	ZVAL_UNDEF(&property_queryString_default_value);
-	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, 1);
+	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, true);
 	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_queryString_name);
+	zend_string_release_ex(property_queryString_name, true);
 
 	return class_entry;
 }
@@ -158,9 +158,9 @@ static zend_class_entry *register_class_PDORow(void)
 
 	zval property_queryString_default_value;
 	ZVAL_UNDEF(&property_queryString_default_value);
-	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, 1);
+	zend_string *property_queryString_name = zend_string_init("queryString", sizeof("queryString") - 1, true);
 	zend_declare_typed_property(class_entry, property_queryString_name, &property_queryString_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_queryString_name);
+	zend_string_release_ex(property_queryString_name, true);
 
 	return class_entry;
 }

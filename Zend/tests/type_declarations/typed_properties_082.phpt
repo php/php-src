@@ -14,7 +14,7 @@ class Test2 extends Test {
 $x =& Test::$x;
 try {
     $x = "foo";
-} catch (TypeError $e) { echo $e->getMessage(), "\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 var_dump($x, Test::$x);
 
 Test::$x =& Test2::$y; // remove the typed ref from $x
@@ -23,7 +23,7 @@ var_dump($x, Test::$x);
 
 ?>
 --EXPECT--
-Cannot assign string to reference held by property Test::$x of type int
+TypeError: Cannot assign string to reference held by property Test::$x of type int
 int(0)
 int(0)
 string(3) "foo"

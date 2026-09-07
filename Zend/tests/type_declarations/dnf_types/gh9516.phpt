@@ -25,28 +25,28 @@ try {
     $t->method1(new A_);
     echo 'Fail', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method1(new B_);
     echo 'Fail', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method1(new AB_);
     echo 'Pass', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method1(new D_);
     echo 'Pass', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 // Lets try in reverse?
@@ -54,28 +54,28 @@ try {
     $t->method2(new A_);
     echo 'Fail', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method2(new B_);
     echo 'Fail', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method2(new AB_);
     echo 'Pass', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method2(new D_);
     echo 'Pass', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 /* Single before intersection */
@@ -83,28 +83,28 @@ try {
     $t->method3(new A_);
     echo 'Fail', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method3(new B_);
     echo 'Fail', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method3(new AB_);
     echo 'Pass', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method3(new D_);
     echo 'Pass', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 // Lets try in reverse?
@@ -112,46 +112,46 @@ try {
     $t->method4(new A_);
     echo 'Fail', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method4(new B_);
     echo 'Fail', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method4(new AB_);
     echo 'Pass', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 try {
     $t->method4(new D_);
     echo 'Pass', \PHP_EOL;
 } catch (\Throwable $throwable) {
-    echo $throwable->getMessage(), \PHP_EOL;
+    echo $throwable::class, ': ', $throwable->getMessage(), "\n";
 }
 
 
 ?>
 --EXPECTF--
-T::method1(): Argument #1 ($arg) must be of type (A&B)|D, A_ given, called in %s on line %d
-T::method1(): Argument #1 ($arg) must be of type (A&B)|D, B_ given, called in %s on line %d
+TypeError: T::method1(): Argument #1 ($arg) must be of type (A&B)|D, A_ given, called in %s on line %d
+TypeError: T::method1(): Argument #1 ($arg) must be of type (A&B)|D, B_ given, called in %s on line %d
 Pass
 Pass
-T::method2(): Argument #1 ($arg) must be of type (B&A)|D, A_ given, called in %s on line %d
-T::method2(): Argument #1 ($arg) must be of type (B&A)|D, B_ given, called in %s on line %d
+TypeError: T::method2(): Argument #1 ($arg) must be of type (B&A)|D, A_ given, called in %s on line %d
+TypeError: T::method2(): Argument #1 ($arg) must be of type (B&A)|D, B_ given, called in %s on line %d
 Pass
 Pass
-T::method3(): Argument #1 ($arg) must be of type D|(A&B), A_ given, called in %s on line %d
-T::method3(): Argument #1 ($arg) must be of type D|(A&B), B_ given, called in %s on line %d
+TypeError: T::method3(): Argument #1 ($arg) must be of type D|(A&B), A_ given, called in %s on line %d
+TypeError: T::method3(): Argument #1 ($arg) must be of type D|(A&B), B_ given, called in %s on line %d
 Pass
 Pass
-T::method4(): Argument #1 ($arg) must be of type D|(B&A), A_ given, called in %s on line %d
-T::method4(): Argument #1 ($arg) must be of type D|(B&A), B_ given, called in %s on line %d
+TypeError: T::method4(): Argument #1 ($arg) must be of type D|(B&A), A_ given, called in %s on line %d
+TypeError: T::method4(): Argument #1 ($arg) must be of type D|(B&A), B_ given, called in %s on line %d
 Pass
 Pass

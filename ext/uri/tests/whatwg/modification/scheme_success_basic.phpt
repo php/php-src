@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - scheme - basic case
---EXTENSIONS--
-uri
+Test Uri\WhatWg\Url::withScheme() - success - basic case
 --FILE--
 <?php
 

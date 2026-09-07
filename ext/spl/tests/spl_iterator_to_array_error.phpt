@@ -15,19 +15,19 @@ try {
     // get keys
     $ar = iterator_to_array($it);
 } catch (Exception $e) {
-    echo $e->getMessage() . PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     // get values
     $ar = iterator_to_array($it, false);
 } catch (Exception $e) {
-    echo $e->getMessage() . PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 
 <?php exit(0); ?>
 --EXPECT--
-Make the iterator break
-Make the iterator break
+Exception: Make the iterator break
+Exception: Make the iterator break

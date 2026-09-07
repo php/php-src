@@ -16,7 +16,7 @@ $part = true;
 try {
     var_dump( mb_strrichr($haystack, $needle, $part, $encoding) );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -24,4 +24,4 @@ try {
 *** Testing mb_strrichr() : error conditions ***
 
 -- Testing mb_strrichr() with unknown encoding --
-mb_strrichr(): Argument #4 ($encoding) must be a valid encoding, "unknown-encoding" given
+ValueError: mb_strrichr(): Argument #4 ($encoding) must be a valid encoding, "unknown-encoding" given

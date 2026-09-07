@@ -9,26 +9,26 @@ posix
 try {
 	posix_setpgid(PHP_INT_MAX, 1);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	posix_setpgid(-2, 1);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	posix_setpgid(1, PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	posix_setpgid(1, -2);
 } catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-posix_setpgid(): Argument #1 ($process_id) must be between 0 and %d
-posix_setpgid(): Argument #1 ($process_id) must be between 0 and %d
-posix_setpgid(): Argument #2 ($process_group_id) must be between 0 and %d
-posix_setpgid(): Argument #2 ($process_group_id) must be between 0 and %d
+ValueError: posix_setpgid(): Argument #1 ($process_id) must be between 0 and %d
+ValueError: posix_setpgid(): Argument #1 ($process_id) must be between 0 and %d
+ValueError: posix_setpgid(): Argument #2 ($process_group_id) must be between 0 and %d
+ValueError: posix_setpgid(): Argument #2 ($process_group_id) must be between 0 and %d

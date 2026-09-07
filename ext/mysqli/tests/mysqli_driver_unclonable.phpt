@@ -9,7 +9,7 @@ try {
     $driver = new mysqli_driver;
     $driver_clone = clone $driver;
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

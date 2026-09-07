@@ -10,7 +10,7 @@ function test($f) {
         $f();
         echo "No error?\n";
     } catch (TypeError|ValueError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 test(fn($WRONG_SCOPE_1 = 0, $WRONG_SCOPE_2 = 0) => gmp_init(1) < "x");
@@ -20,7 +20,7 @@ test(fn($WRONG_SCOPE_1 = 0, $WRONG_SCOPE_2 = 0) => gmp_init(1) + []);
 
 ?>
 --EXPECT--
-Number is not an integer string
-Number must be of type GMP|string|int, array given
-Number is not an integer string
-Number must be of type GMP|string|int, array given
+ValueError: Number is not an integer string
+TypeError: Number must be of type GMP|string|int, array given
+ValueError: Number is not an integer string
+TypeError: Number must be of type GMP|string|int, array given

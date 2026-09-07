@@ -15,14 +15,14 @@ try {
   $so->unserialize($blob);
   var_dump($so);
 } catch(UnexpectedValueException $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 }
 echo "DONE\n";
 ?>
 --EXPECT--
-Error at offset 6 of 34 bytes
-Error at offset 46 of 89 bytes
+UnexpectedValueException: Error at offset 6 of 34 bytes
+UnexpectedValueException: Error at offset 46 of 89 bytes
 object(SplObjectStorage)#2 (1) {
   ["storage":"SplObjectStorage":private]=>
   array(2) {
@@ -45,5 +45,5 @@ object(SplObjectStorage)#2 (1) {
     }
   }
 }
-Error at offset 78 of 78 bytes
+UnexpectedValueException: Error at offset 78 of 78 bytes
 DONE

@@ -10,16 +10,16 @@ $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 try {
     var_dump($c->setMinimalDaysInFirstWeek(0));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 try {
     var_dump(intlcal_set_minimal_days_in_first_week($c, 0));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-IntlCalendar::setMinimalDaysInFirstWeek(): Argument #1 ($days) must be between 1 and 7
-intlcal_set_minimal_days_in_first_week(): Argument #2 ($days) must be between 1 and 7
+ValueError: IntlCalendar::setMinimalDaysInFirstWeek(): Argument #1 ($days) must be between 1 and 7
+ValueError: intlcal_set_minimal_days_in_first_week(): Argument #2 ($days) must be between 1 and 7

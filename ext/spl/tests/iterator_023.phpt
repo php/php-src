@@ -121,7 +121,7 @@ try
 }
 catch(UnexpectedValueException $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

@@ -7,15 +7,14 @@ Bug #28800 (Incorrect string to number conversion for strings starting with 'inf
         try {
             echo ($v+0)."\n";
         } catch (\TypeError $e) {
-            echo $e->getMessage() . \PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
     }
 ?>
 --EXPECT--
-Unsupported operand types: string + int
-Unsupported operand types: string + int
-Unsupported operand types: string + int
-Unsupported operand types: string + int
-Unsupported operand types: string + int
-Unsupported operand types: string + int
-
+TypeError: Unsupported operand types: string + int
+TypeError: Unsupported operand types: string + int
+TypeError: Unsupported operand types: string + int
+TypeError: Unsupported operand types: string + int
+TypeError: Unsupported operand types: string + int
+TypeError: Unsupported operand types: string + int

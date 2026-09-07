@@ -1,6 +1,9 @@
 <?php
 
-/** @generate-class-entries */
+/**
+ * @generate-class-entries
+ * @generate-c-enums
+ */
 
 /* Wait Constants */
 
@@ -1020,7 +1023,7 @@ const PCNTL_ECAPMODE = UNKNOWN;
     function pcntl_wait(&$status, int $flags = 0, &$resource_usage = []): int {}
 
     /** @param callable|int $handler */
-    function pcntl_signal(int $signal, $handler, bool $restart_syscalls = true): bool {}
+    function pcntl_signal(int $signal, $handler, ?bool $restart_syscalls = null): bool {}
 
     /** @return callable|int */
     function pcntl_signal_get_handler(int $signal) {}
@@ -1032,14 +1035,12 @@ const PCNTL_ECAPMODE = UNKNOWN;
     function pcntl_sigprocmask(int $mode, array $signals, &$old_signals = null): bool {}
 #endif
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
     /** @param array $info */
     function pcntl_sigwaitinfo(array $signals, &$info = []): int|false {}
 
     /** @param array $info */
     function pcntl_sigtimedwait(array $signals, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}
-#endif
 #endif
 
     function pcntl_wifexited(int $status): bool {}

@@ -12,15 +12,15 @@ $src = socket_create(AF_UNIX, SOCK_DGRAM, 0);
 
 try {
 	socket_setopt($src, SOL_UDP, UDP_SEGMENT, -1);
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	socket_setopt($src, SOL_UDP, UDP_SEGMENT, 65536);
-} catch (\ValueError $e) {
-	echo $e->getMessage(), PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-socket_setopt(): Argument #4 ($value) must be between 0 and 65535
-socket_setopt(): Argument #4 ($value) must be between 0 and 65535
+ValueError: socket_setopt(): Argument #4 ($value) must be between 0 and 65535
+ValueError: socket_setopt(): Argument #4 ($value) must be between 0 and 65535

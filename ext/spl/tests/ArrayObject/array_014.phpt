@@ -16,7 +16,7 @@ try
 }
 catch(Exception $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try
@@ -26,7 +26,7 @@ try
 }
 catch(Exception $e)
 {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $pos = 0;
@@ -41,8 +41,8 @@ foreach($it as $v)
 int(11)
 int(5)
 int(4)
-Seek position -1 is out of range
-Seek position 12 is out of range
+OutOfBoundsException: Seek position -1 is out of range
+OutOfBoundsException: Seek position 12 is out of range
 int(0)
 int(1)
 int(2)

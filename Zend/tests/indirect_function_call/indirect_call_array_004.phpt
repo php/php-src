@@ -23,8 +23,8 @@ $arr = array('foo', 'abc');
 try {
     $arr();
 }
-catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $arr = array('foo', '123');
@@ -32,8 +32,8 @@ $arr = array('foo', '123');
 try {
     $arr();
 }
-catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
@@ -45,8 +45,8 @@ $arr = array($foo, 'abc');
 try {
     $arr();
 }
-catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
@@ -56,16 +56,16 @@ $arr = array($foo, '123');
 try {
     $arr();
 }
-catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-foo
+Exception: foo
 From foo::__callStatic:
-123
+Exception: 123
 ------
-foo
+Exception: foo
 From foo::__call:
-123
+Exception: 123

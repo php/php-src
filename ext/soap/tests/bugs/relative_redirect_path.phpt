@@ -42,7 +42,7 @@ try {
     $client->__soapCall("foo", []);
     echo "redirect followed\n";
 } catch (SoapFault $e) {
-    echo "SoapFault: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

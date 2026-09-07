@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Mel Dafert (mel@dafert.at)                                  |
    +----------------------------------------------------------------------+
@@ -36,7 +36,7 @@ zend_object_handlers IntlDatePatternGenerator_handlers;
 
 static zend_object *IntlDatePatternGenerator_object_clone(zend_object *object)
 {
-	IntlDatePatternGenerator_object *dtpgo_orig = php_intl_datepatterngenerator_fetch_object(object);
+	const IntlDatePatternGenerator_object *dtpgo_orig = php_intl_datepatterngenerator_fetch_object(object);
 	zend_object                        *ret_val = IntlDatePatternGenerator_ce_ptr->create_object(object->ce);
 	IntlDatePatternGenerator_object  *dtpgo_new = php_intl_datepatterngenerator_fetch_object(ret_val);
 
@@ -106,7 +106,7 @@ void dateformat_register_IntlDatePatternGenerator_class( void )
 
 	memcpy(&IntlDatePatternGenerator_handlers, &std_object_handlers,
 		sizeof IntlDatePatternGenerator_handlers);
-	IntlDatePatternGenerator_handlers.offset = XtOffsetOf(IntlDatePatternGenerator_object, zo);
+	IntlDatePatternGenerator_handlers.offset = offsetof(IntlDatePatternGenerator_object, zo);
 	IntlDatePatternGenerator_handlers.clone_obj = IntlDatePatternGenerator_object_clone;
 	IntlDatePatternGenerator_handlers.free_obj = IntlDatePatternGenerator_object_free;
 }

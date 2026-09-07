@@ -13,7 +13,7 @@ function section($func, $haystack, $needle)
         try {
             var_dump($func($haystack, $needle, $offset));
         } catch (\ValueError $e) {
-            echo $e->getMessage() . \PHP_EOL;
+            echo $e::class, ': ', $e->getMessage(), PHP_EOL;
         }
     }
 }
@@ -44,7 +44,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -52,7 +52,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- mb_strpos -----------
 
@@ -67,7 +67,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -75,7 +75,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- stripos -----------
 
@@ -90,7 +90,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -98,7 +98,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- mb_stripos -----------
 
@@ -113,7 +113,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -121,7 +121,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- strrpos -----------
 
@@ -136,7 +136,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 int(8)
 > Offset: -3
@@ -144,7 +144,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- mb_strrpos -----------
 
@@ -159,7 +159,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 int(8)
 > Offset: -3
@@ -167,7 +167,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- strripos -----------
 
@@ -182,7 +182,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 int(8)
 > Offset: -3
@@ -190,7 +190,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- mb_strripos -----------
 
@@ -205,7 +205,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 int(8)
 > Offset: -3
@@ -213,4 +213,4 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

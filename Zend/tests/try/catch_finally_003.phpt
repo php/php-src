@@ -32,7 +32,10 @@ function &bar($a) {
 var_dump(foo("para"));
 var_dump(bar("para"));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
+
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 string(3) "try"
 string(7) "finally"
 string(7) "finally"

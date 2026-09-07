@@ -99,4 +99,3 @@ array(1) {
   [0]=>
   string(28) "This is a file in script dir"
 }
-

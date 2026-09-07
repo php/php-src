@@ -40,7 +40,7 @@ foreach($tests as $data)
     }
     catch(Exception $e)
     {
-        echo 'Exception: ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

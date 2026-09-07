@@ -10,8 +10,8 @@ $foo = function() {
 };
 try {
     var_dump($foo->a);
-} catch (Error $ex) {
-    echo "Error: {$ex->getMessage()}\n";
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--

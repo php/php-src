@@ -12,6 +12,8 @@ class Base {
 		set => $value;
 	}
 
+	public const CLASS_CONST = '';
+
 	public function printVal() {
 		echo __METHOD__ . "\n";
 	}
@@ -34,7 +36,7 @@ class DemoClass extends Base {
 	}
 
 	#[DelayedTargetValidation]
-	#[Override] // Does nothing here
+	#[Override] // Does something here
 	public const CLASS_CONST = 'FOO';
 
 	public function __construct(

@@ -6,7 +6,13 @@ dnl ----------------------------------------------------------------------------
 m4_include([build/ax_check_compile_flag.m4])
 m4_include([build/ax_func_which_gethostbyname_r.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
+
 m4_include([build/libtool.m4])
+m4_include([build/ltoptions.m4])
+m4_include([build/ltsugar.m4])
+m4_include([build/ltversion.m4])
+m4_include([build/lt~obsolete.m4])
+
 m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
@@ -17,8 +23,9 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.5.11-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
+AC_INIT([PHP],[8.6.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
+AC_CONFIG_MACRO_DIR([build])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
@@ -159,9 +166,9 @@ PHP_RUNPATH_SWITCH
 
 dnl Checks for some support/generator progs.
 PHP_PROG_BISON([3.0.0])
-PHP_PROG_RE2C([1.0.3], [--no-generation-date])
-dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 7.4.
-PHP_PROG_PHP([7.4])
+PHP_PROG_RE2C([1.0.3], [--no-generation-date -W])
+dnl Find installed PHP. Minimum supported version for gen_stub.php is PHP 8.1.
+PHP_PROG_PHP([8.1])
 
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto extension with re2c],
@@ -238,8 +245,8 @@ dnl the performance hit from the lost register.
 AC_MSG_CHECKING([whether to force non-PIC code in shared modules])
 case $host_alias in
   i?86-*-linux*|i?86-*-freebsd*)
-    if test "${with_pic+set}" != "set" || test "$with_pic" = "no"; then
-      with_pic=no
+    if test "${enable_pic+set}" != "set" || test "$enable_pic" = "no"; then
+      enable_pic=no
       AC_MSG_RESULT([yes])
     else
       AC_MSG_RESULT([no])
@@ -362,6 +369,9 @@ AC_SEARCH_LIBS([Pgrab], [proc])
 dnl Haiku does not have network api in libc.
 AC_SEARCH_LIBS([setsockopt], [network])
 
+dnl Solaris/illumos provide sendfile() in libsendfile; libc on Linux/FreeBSD.
+AC_SEARCH_LIBS([sendfile], [sendfile])
+
 dnl Check for openpty. It may require linking against libutil or libbsd.
 AC_CHECK_FUNCS([openpty],,
   [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
@@ -437,6 +447,7 @@ AC_CHECK_HEADERS(m4_normalize([
 ])
 
 PHP_FOPENCOOKIE
+PHP_POLL_MECHANISMS
 PHP_BROKEN_GETCWD
 AS_VAR_IF([GCC], [yes], [PHP_BROKEN_GCC_STRLEN_OPT])
 
@@ -504,11 +515,11 @@ AS_VAR_IF([php_cv_have_alignof], [yes],
 
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
-AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
-dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exist.
-if test "$(uname -s 2>/dev/null)" != "QNX"; then
-  AC_STRUCT_ST_BLOCKS
-fi
+AC_CHECK_MEMBERS(m4_normalize([
+  struct stat.st_blksize,
+  struct stat.st_blocks,
+  struct stat.st_rdev
+]))
 
 dnl Checks for types.
 AC_TYPE_UID_T
@@ -580,10 +591,12 @@ AC_CHECK_FUNCS(m4_normalize([
   putenv
   reallocarray
   scandir
+  sendfile
   setenv
   setitimer
   shutdown
   sigprocmask
+  splice
   statfs
   statvfs
   std_syslog
@@ -1121,7 +1134,7 @@ case $php_sapi_module in
     if test "$PHP_CGI" = "no" && test "$PHP_CLI" = "no" && test "$PHP_FPM" = "no" && test "$PHP_LITESPEED" = "no" && test "$PHP_PHPDBG" = "no"; then
       enable_static=no
     fi
-    case $with_pic in
+    case $enable_pic in
       yes)
         standard_libtool_flag='-prefer-pic'
         ;;
@@ -1211,7 +1224,15 @@ AS_CASE([$host_cpu],
 
 AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
-  [aix*|os400*], [fiber_os="aix"],
+  [aix*|os400*], [
+    fiber_os="aix"
+    dnl AIX triplets start w/ powerpc- even though it may be 64-bit (as AIX
+    dnl has a multiple bitness world). Check if the build is 64-bit, or we
+    dnl end up using the wrong fibre asm (w/o forcing a powerpc64 triplet)
+    AS_IF([test "$ac_cv_sizeof_long" -eq 8], [
+      fiber_cpu="ppc64"
+    ], [])
+  ],
   [freebsd*], [fiber_os="freebsd"],
   [midipix], [fiber_os="midipix"],
   [fiber_os="other"]
@@ -1531,8 +1552,10 @@ AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
   ]))])
 
   AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
-    CFLAGS="$CFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
-    CXXFLAGS="$CXXFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
+    CFLAGS="$CFLAGS -fsanitize=address"
+    CXXFLAGS="$CXXFLAGS -fsanitize=address"
+    AC_DEFINE([ZEND_TRACK_ARENA_ALLOC], [1],
+      [Whether to track arena allocations individually for AddressSanitizer.])
   ], [AC_MSG_ERROR([AddressSanitizer is not available])])
 ])
 
@@ -1586,20 +1609,7 @@ dnl
 PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART([Configuring libtool])
 
-dnl Silence warning: "ar: 'u' modifier ignored since 'D' is the default".
-dnl See https://github.com/php/php-src/pull/3017
-AC_SUBST([AR_FLAGS], [cr])
-
-dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
-dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
-dnl compiler.
-AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
-  undefine([AC_PROG_CXX])
-  AC_DEFUN([AC_PROG_CXX], [])
-  undefine([AC_PROG_CXXCPP])
-  AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
-])
-AC_PROG_LIBTOOL
+LT_INIT
 
 PHP_SET_LIBTOOL_VARIABLE([--silent])
 
@@ -1688,6 +1698,26 @@ PHP_ADD_SOURCES_X([main],
   [PHP_FASTCGI_OBJS],
   [no])
 
+PHP_ADD_SOURCES([main/io], m4_normalize([
+    php_io.c
+    php_io_copy_linux.c
+    php_io_copy_freebsd.c
+    php_io_copy_solaris.c
+    php_io_copy_macos.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
+PHP_ADD_SOURCES([main/poll], m4_normalize([
+    poll_backend_epoll.c
+    poll_backend_eventport.c
+    poll_backend_kqueue.c
+    poll_backend_poll.c
+    poll_core.c
+    poll_fd_table.c
+    poll_handle.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
 PHP_ADD_SOURCES([main/streams], m4_normalize([
     cast.c
     filter.c
@@ -1695,6 +1725,7 @@ PHP_ADD_SOURCES([main/streams], m4_normalize([
     memory.c
     mmap.c
     plain_wrapper.c
+    stream_errors.c
     streams.c
     transports.c
     userspace.c
@@ -1738,6 +1769,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_ast.c
     zend_atomic.c
     zend_attributes.c
+    zend_autoload.c
     zend_builtin_functions.c
     zend_call_stack.c
     zend_closures.c
@@ -1779,6 +1811,7 @@ PHP_ADD_SOURCES([Zend], m4_normalize([
     zend_observer.c
     zend_opcode.c
     zend_operators.c
+    zend_partial.c
     zend_property_hooks.c
     zend_ptr_stack.c
     zend_signal.c
@@ -1809,6 +1842,8 @@ AC_DEFINE([HAVE_BUILD_DEFS_H], [1],
 
 PHP_ADD_BUILD_DIR([
   main
+  main/io
+  main/poll
   main/streams
   scripts
   scripts/man1
@@ -1851,11 +1886,11 @@ cat <<X
 
 +--------------------------------------------------------------------+
 | License:                                                           |
-| This software is subject to the PHP License, available in this     |
-| distribution in the file LICENSE. By continuing this installation  |
-| process, you are bound by the terms of this license agreement.     |
-| If you do not agree with the terms of this license, you must abort |
-| the installation process at this point.                            |
+| This software is subject to the Modified BSD License, available in |
+| this distribution in the file LICENSE. By continuing this          |
+| installation process, you are bound by the terms of this license   |
+| agreement. If you do not agree with the terms of this license, you |
+| must abort the installation process at this point.                 |
 +--------------------------------------------------------------------+
 
 Thank you for using PHP.

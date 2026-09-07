@@ -33,10 +33,13 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: array_walk_recursive(): Passing an object for argument #1 $array to array_walk_recursive() is deprecated, call get_object_vars() first instead in %s on line %d
 string(3) "foo"
 string(3) "foo"
 string(3) "bar"
 string(3) "bar"
+
+Deprecated: array_walk_recursive(): Passing an object for argument #1 $array to array_walk_recursive() is deprecated, call get_object_vars() first instead in %s on line %d
 string(13) "%0test%0var_pri"
 string(12) "test_private"
 string(10) "%0*%0var_pro"

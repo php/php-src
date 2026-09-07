@@ -1,5 +1,8 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 89cbb449ee6146dc8d50ba4bb1e76f83444a2db2 */
+/* This is a generated file, edit libsodium.stub.php instead.
+ * Stub hash: 82dc3f80ea85b0c71ed9db9b111097f3eb49d71d */
+
+#include "zend_attributes.h"
+#include "zend_constants.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -483,6 +486,143 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_scalarmult_base arginfo_sodium_crypto_box_publickey_from_secretkey
 
+#if defined(crypto_ipcrypt_KEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_ipcrypt_keygen, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_ipcrypt_encrypt, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_ipcrypt_decrypt, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, encrypted_ip, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_sodium_crypto_ipcrypt_nd_keygen arginfo_sodium_crypto_ipcrypt_keygen
+
+#define arginfo_sodium_crypto_ipcrypt_nd_encrypt arginfo_sodium_crypto_ipcrypt_encrypt
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_ipcrypt_nd_decrypt, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext_hex, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_sodium_crypto_ipcrypt_ndx_keygen arginfo_sodium_crypto_ipcrypt_keygen
+
+#define arginfo_sodium_crypto_ipcrypt_ndx_encrypt arginfo_sodium_crypto_ipcrypt_encrypt
+
+#define arginfo_sodium_crypto_ipcrypt_ndx_decrypt arginfo_sodium_crypto_ipcrypt_nd_decrypt
+
+#define arginfo_sodium_crypto_ipcrypt_pfx_keygen arginfo_sodium_crypto_ipcrypt_keygen
+
+#define arginfo_sodium_crypto_ipcrypt_pfx_encrypt arginfo_sodium_crypto_ipcrypt_encrypt
+
+#define arginfo_sodium_crypto_ipcrypt_pfx_decrypt arginfo_sodium_crypto_ipcrypt_decrypt
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_bin2ip, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, bin, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_ip2bin, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(crypto_xof_shake128_STATEBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128_init, 0, 0, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, domain, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128_update, 0, 2, IS_TRUE, 0)
+	ZEND_ARG_TYPE_INFO(1, state, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_xof_shake128_squeeze, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(1, state, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_sodium_crypto_xof_shake256 arginfo_sodium_crypto_xof_shake128
+
+#define arginfo_sodium_crypto_xof_shake256_init arginfo_sodium_crypto_xof_shake128_init
+
+#define arginfo_sodium_crypto_xof_shake256_update arginfo_sodium_crypto_xof_shake128_update
+
+#define arginfo_sodium_crypto_xof_shake256_squeeze arginfo_sodium_crypto_xof_shake128_squeeze
+
+#define arginfo_sodium_crypto_xof_turboshake128 arginfo_sodium_crypto_xof_shake128
+
+#define arginfo_sodium_crypto_xof_turboshake128_init arginfo_sodium_crypto_xof_shake128_init
+
+#define arginfo_sodium_crypto_xof_turboshake128_update arginfo_sodium_crypto_xof_shake128_update
+
+#define arginfo_sodium_crypto_xof_turboshake128_squeeze arginfo_sodium_crypto_xof_shake128_squeeze
+
+#define arginfo_sodium_crypto_xof_turboshake256 arginfo_sodium_crypto_xof_shake128
+
+#define arginfo_sodium_crypto_xof_turboshake256_init arginfo_sodium_crypto_xof_shake128_init
+
+#define arginfo_sodium_crypto_xof_turboshake256_update arginfo_sodium_crypto_xof_shake128_update
+
+#define arginfo_sodium_crypto_xof_turboshake256_squeeze arginfo_sodium_crypto_xof_shake128_squeeze
+#endif
+
+#if defined(crypto_kem_PUBLICKEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_keypair, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_seed_keypair, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, seed, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_secretkey, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key_pair, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_sodium_crypto_kem_publickey arginfo_sodium_crypto_kem_secretkey
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_enc, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, public_key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_dec, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, secret_key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(crypto_kem_mlkem768_PUBLICKEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_mlkem768_keypair, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_mlkem768_seed_keypair, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, seed, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_mlkem768_secretkey, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key_pair, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_sodium_crypto_kem_mlkem768_publickey arginfo_sodium_crypto_kem_mlkem768_secretkey
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_mlkem768_enc, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, public_key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_kem_mlkem768_dec, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, secret_key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(sodium_crypto_aead_aes256gcm_is_available);
 #if defined(HAVE_AESGCM)
 ZEND_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt);
@@ -615,6 +755,56 @@ ZEND_FUNCTION(sodium_hex2bin);
 #if defined(sodium_base64_VARIANT_ORIGINAL)
 ZEND_FUNCTION(sodium_bin2base64);
 ZEND_FUNCTION(sodium_base642bin);
+#endif
+#if defined(crypto_ipcrypt_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_ipcrypt_keygen);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_encrypt);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_decrypt);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_nd_keygen);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_nd_encrypt);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_nd_decrypt);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_ndx_keygen);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_ndx_encrypt);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_ndx_decrypt);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_pfx_keygen);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_pfx_encrypt);
+ZEND_FUNCTION(sodium_crypto_ipcrypt_pfx_decrypt);
+ZEND_FUNCTION(sodium_bin2ip);
+ZEND_FUNCTION(sodium_ip2bin);
+#endif
+#if defined(crypto_xof_shake128_STATEBYTES)
+ZEND_FUNCTION(sodium_crypto_xof_shake128);
+ZEND_FUNCTION(sodium_crypto_xof_shake128_init);
+ZEND_FUNCTION(sodium_crypto_xof_shake128_update);
+ZEND_FUNCTION(sodium_crypto_xof_shake128_squeeze);
+ZEND_FUNCTION(sodium_crypto_xof_shake256);
+ZEND_FUNCTION(sodium_crypto_xof_shake256_init);
+ZEND_FUNCTION(sodium_crypto_xof_shake256_update);
+ZEND_FUNCTION(sodium_crypto_xof_shake256_squeeze);
+ZEND_FUNCTION(sodium_crypto_xof_turboshake128);
+ZEND_FUNCTION(sodium_crypto_xof_turboshake128_init);
+ZEND_FUNCTION(sodium_crypto_xof_turboshake128_update);
+ZEND_FUNCTION(sodium_crypto_xof_turboshake128_squeeze);
+ZEND_FUNCTION(sodium_crypto_xof_turboshake256);
+ZEND_FUNCTION(sodium_crypto_xof_turboshake256_init);
+ZEND_FUNCTION(sodium_crypto_xof_turboshake256_update);
+ZEND_FUNCTION(sodium_crypto_xof_turboshake256_squeeze);
+#endif
+#if defined(crypto_kem_PUBLICKEYBYTES)
+ZEND_FUNCTION(sodium_crypto_kem_keypair);
+ZEND_FUNCTION(sodium_crypto_kem_seed_keypair);
+ZEND_FUNCTION(sodium_crypto_kem_secretkey);
+ZEND_FUNCTION(sodium_crypto_kem_publickey);
+ZEND_FUNCTION(sodium_crypto_kem_enc);
+ZEND_FUNCTION(sodium_crypto_kem_dec);
+#endif
+#if defined(crypto_kem_mlkem768_PUBLICKEYBYTES)
+ZEND_FUNCTION(sodium_crypto_kem_mlkem768_keypair);
+ZEND_FUNCTION(sodium_crypto_kem_mlkem768_seed_keypair);
+ZEND_FUNCTION(sodium_crypto_kem_mlkem768_secretkey);
+ZEND_FUNCTION(sodium_crypto_kem_mlkem768_publickey);
+ZEND_FUNCTION(sodium_crypto_kem_mlkem768_enc);
+ZEND_FUNCTION(sodium_crypto_kem_mlkem768_dec);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -752,6 +942,56 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sodium_base642bin, arginfo_sodium_base642bin)
 #endif
 	ZEND_RAW_FENTRY("sodium_crypto_scalarmult_base", zif_sodium_crypto_box_publickey_from_secretkey, arginfo_sodium_crypto_scalarmult_base, 0, NULL, NULL)
+#if defined(crypto_ipcrypt_KEYBYTES)
+	ZEND_FE(sodium_crypto_ipcrypt_keygen, arginfo_sodium_crypto_ipcrypt_keygen)
+	ZEND_FE(sodium_crypto_ipcrypt_encrypt, arginfo_sodium_crypto_ipcrypt_encrypt)
+	ZEND_FE(sodium_crypto_ipcrypt_decrypt, arginfo_sodium_crypto_ipcrypt_decrypt)
+	ZEND_FE(sodium_crypto_ipcrypt_nd_keygen, arginfo_sodium_crypto_ipcrypt_nd_keygen)
+	ZEND_FE(sodium_crypto_ipcrypt_nd_encrypt, arginfo_sodium_crypto_ipcrypt_nd_encrypt)
+	ZEND_FE(sodium_crypto_ipcrypt_nd_decrypt, arginfo_sodium_crypto_ipcrypt_nd_decrypt)
+	ZEND_FE(sodium_crypto_ipcrypt_ndx_keygen, arginfo_sodium_crypto_ipcrypt_ndx_keygen)
+	ZEND_FE(sodium_crypto_ipcrypt_ndx_encrypt, arginfo_sodium_crypto_ipcrypt_ndx_encrypt)
+	ZEND_FE(sodium_crypto_ipcrypt_ndx_decrypt, arginfo_sodium_crypto_ipcrypt_ndx_decrypt)
+	ZEND_FE(sodium_crypto_ipcrypt_pfx_keygen, arginfo_sodium_crypto_ipcrypt_pfx_keygen)
+	ZEND_FE(sodium_crypto_ipcrypt_pfx_encrypt, arginfo_sodium_crypto_ipcrypt_pfx_encrypt)
+	ZEND_FE(sodium_crypto_ipcrypt_pfx_decrypt, arginfo_sodium_crypto_ipcrypt_pfx_decrypt)
+	ZEND_FE(sodium_bin2ip, arginfo_sodium_bin2ip)
+	ZEND_FE(sodium_ip2bin, arginfo_sodium_ip2bin)
+#endif
+#if defined(crypto_xof_shake128_STATEBYTES)
+	ZEND_FE(sodium_crypto_xof_shake128, arginfo_sodium_crypto_xof_shake128)
+	ZEND_FE(sodium_crypto_xof_shake128_init, arginfo_sodium_crypto_xof_shake128_init)
+	ZEND_FE(sodium_crypto_xof_shake128_update, arginfo_sodium_crypto_xof_shake128_update)
+	ZEND_FE(sodium_crypto_xof_shake128_squeeze, arginfo_sodium_crypto_xof_shake128_squeeze)
+	ZEND_FE(sodium_crypto_xof_shake256, arginfo_sodium_crypto_xof_shake256)
+	ZEND_FE(sodium_crypto_xof_shake256_init, arginfo_sodium_crypto_xof_shake256_init)
+	ZEND_FE(sodium_crypto_xof_shake256_update, arginfo_sodium_crypto_xof_shake256_update)
+	ZEND_FE(sodium_crypto_xof_shake256_squeeze, arginfo_sodium_crypto_xof_shake256_squeeze)
+	ZEND_FE(sodium_crypto_xof_turboshake128, arginfo_sodium_crypto_xof_turboshake128)
+	ZEND_FE(sodium_crypto_xof_turboshake128_init, arginfo_sodium_crypto_xof_turboshake128_init)
+	ZEND_FE(sodium_crypto_xof_turboshake128_update, arginfo_sodium_crypto_xof_turboshake128_update)
+	ZEND_FE(sodium_crypto_xof_turboshake128_squeeze, arginfo_sodium_crypto_xof_turboshake128_squeeze)
+	ZEND_FE(sodium_crypto_xof_turboshake256, arginfo_sodium_crypto_xof_turboshake256)
+	ZEND_FE(sodium_crypto_xof_turboshake256_init, arginfo_sodium_crypto_xof_turboshake256_init)
+	ZEND_FE(sodium_crypto_xof_turboshake256_update, arginfo_sodium_crypto_xof_turboshake256_update)
+	ZEND_FE(sodium_crypto_xof_turboshake256_squeeze, arginfo_sodium_crypto_xof_turboshake256_squeeze)
+#endif
+#if defined(crypto_kem_PUBLICKEYBYTES)
+	ZEND_FE(sodium_crypto_kem_keypair, arginfo_sodium_crypto_kem_keypair)
+	ZEND_FE(sodium_crypto_kem_seed_keypair, arginfo_sodium_crypto_kem_seed_keypair)
+	ZEND_FE(sodium_crypto_kem_secretkey, arginfo_sodium_crypto_kem_secretkey)
+	ZEND_FE(sodium_crypto_kem_publickey, arginfo_sodium_crypto_kem_publickey)
+	ZEND_FE(sodium_crypto_kem_enc, arginfo_sodium_crypto_kem_enc)
+	ZEND_FE(sodium_crypto_kem_dec, arginfo_sodium_crypto_kem_dec)
+#endif
+#if defined(crypto_kem_mlkem768_PUBLICKEYBYTES)
+	ZEND_FE(sodium_crypto_kem_mlkem768_keypair, arginfo_sodium_crypto_kem_mlkem768_keypair)
+	ZEND_FE(sodium_crypto_kem_mlkem768_seed_keypair, arginfo_sodium_crypto_kem_mlkem768_seed_keypair)
+	ZEND_FE(sodium_crypto_kem_mlkem768_secretkey, arginfo_sodium_crypto_kem_mlkem768_secretkey)
+	ZEND_FE(sodium_crypto_kem_mlkem768_publickey, arginfo_sodium_crypto_kem_mlkem768_publickey)
+	ZEND_FE(sodium_crypto_kem_mlkem768_enc, arginfo_sodium_crypto_kem_mlkem768_enc)
+	ZEND_FE(sodium_crypto_kem_mlkem768_dec, arginfo_sodium_crypto_kem_mlkem768_dec)
+#endif
 	ZEND_FE_END
 };
 
@@ -882,6 +1122,46 @@ static void register_libsodium_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES", crypto_core_ristretto255_HASHBYTES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES", crypto_core_ristretto255_SCALARBYTES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES", crypto_core_ristretto255_NONREDUCEDSCALARBYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_ipcrypt_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_BYTES", crypto_ipcrypt_BYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_KEYBYTES", crypto_ipcrypt_KEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_ND_KEYBYTES", crypto_ipcrypt_ND_KEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_ND_TWEAKBYTES", crypto_ipcrypt_ND_TWEAKBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_ND_INPUTBYTES", crypto_ipcrypt_ND_INPUTBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_ND_OUTPUTBYTES", crypto_ipcrypt_ND_OUTPUTBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_NDX_KEYBYTES", crypto_ipcrypt_NDX_KEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_NDX_TWEAKBYTES", crypto_ipcrypt_NDX_TWEAKBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_NDX_INPUTBYTES", crypto_ipcrypt_NDX_INPUTBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_NDX_OUTPUTBYTES", crypto_ipcrypt_NDX_OUTPUTBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_PFX_KEYBYTES", crypto_ipcrypt_PFX_KEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_IPCRYPT_PFX_BYTES", crypto_ipcrypt_PFX_BYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_xof_shake128_STATEBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_XOF_SHAKE128_BLOCKBYTES", crypto_xof_shake128_BLOCKBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_XOF_SHAKE128_STATEBYTES", crypto_xof_shake128_STATEBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_XOF_SHAKE256_BLOCKBYTES", crypto_xof_shake256_BLOCKBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_XOF_SHAKE256_STATEBYTES", crypto_xof_shake256_STATEBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_XOF_TURBOSHAKE128_BLOCKBYTES", crypto_xof_turboshake128_BLOCKBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_XOF_TURBOSHAKE128_STATEBYTES", crypto_xof_turboshake128_STATEBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_XOF_TURBOSHAKE256_BLOCKBYTES", crypto_xof_turboshake256_BLOCKBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_XOF_TURBOSHAKE256_STATEBYTES", crypto_xof_turboshake256_STATEBYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_kem_PUBLICKEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_PUBLICKEYBYTES", crypto_kem_PUBLICKEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_SECRETKEYBYTES", crypto_kem_SECRETKEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_CIPHERTEXTBYTES", crypto_kem_CIPHERTEXTBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_SHAREDSECRETBYTES", crypto_kem_SHAREDSECRETBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_SEEDBYTES", crypto_kem_SEEDBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_KEYPAIRBYTES", SODIUM_CRYPTO_KEM_KEYPAIRBYTES(), CONST_PERSISTENT);
+#endif
+#if defined(crypto_kem_mlkem768_PUBLICKEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_MLKEM768_PUBLICKEYBYTES", crypto_kem_mlkem768_PUBLICKEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_MLKEM768_SECRETKEYBYTES", crypto_kem_mlkem768_SECRETKEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_MLKEM768_CIPHERTEXTBYTES", crypto_kem_mlkem768_CIPHERTEXTBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_MLKEM768_SHAREDSECRETBYTES", crypto_kem_mlkem768_SHAREDSECRETBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_MLKEM768_SEEDBYTES", crypto_kem_mlkem768_SEEDBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES", SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES(), CONST_PERSISTENT);
 #endif
 
 #if defined(HAVE_AESGCM)
@@ -1060,6 +1340,44 @@ static void register_libsodium_symbols(int module_number)
 #endif
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_scalarmult_base", sizeof("sodium_crypto_scalarmult_base") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(crypto_ipcrypt_KEYBYTES)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_ipcrypt_encrypt", sizeof("sodium_crypto_ipcrypt_encrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_ipcrypt_decrypt", sizeof("sodium_crypto_ipcrypt_decrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_ipcrypt_nd_encrypt", sizeof("sodium_crypto_ipcrypt_nd_encrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_ipcrypt_nd_decrypt", sizeof("sodium_crypto_ipcrypt_nd_decrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_ipcrypt_ndx_encrypt", sizeof("sodium_crypto_ipcrypt_ndx_encrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_ipcrypt_ndx_decrypt", sizeof("sodium_crypto_ipcrypt_ndx_decrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_ipcrypt_pfx_encrypt", sizeof("sodium_crypto_ipcrypt_pfx_encrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_ipcrypt_pfx_decrypt", sizeof("sodium_crypto_ipcrypt_pfx_decrypt") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(crypto_kem_PUBLICKEYBYTES)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_seed_keypair", sizeof("sodium_crypto_kem_seed_keypair") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_secretkey", sizeof("sodium_crypto_kem_secretkey") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_publickey", sizeof("sodium_crypto_kem_publickey") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_dec", sizeof("sodium_crypto_kem_dec") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(crypto_kem_mlkem768_PUBLICKEYBYTES)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_mlkem768_seed_keypair", sizeof("sodium_crypto_kem_mlkem768_seed_keypair") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_mlkem768_secretkey", sizeof("sodium_crypto_kem_mlkem768_secretkey") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_mlkem768_publickey", sizeof("sodium_crypto_kem_mlkem768_publickey") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_kem_mlkem768_dec", sizeof("sodium_crypto_kem_mlkem768_dec") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
 }
 
 static zend_class_entry *register_class_SodiumException(zend_class_entry *class_entry_Exception)

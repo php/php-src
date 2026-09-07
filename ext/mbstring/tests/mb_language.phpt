@@ -23,7 +23,7 @@ echo "Try changing to a non-existent language:\n";
 try {
     var_dump(mb_language('Pig Latin'));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(mb_language());
 ?>
@@ -37,5 +37,5 @@ bool(true)
 Confirm language was changed:
 string(7) "English"
 Try changing to a non-existent language:
-mb_language(): Argument #1 ($language) must be a valid language, "Pig Latin" given
+ValueError: mb_language(): Argument #1 ($language) must be a valid language, "Pig Latin" given
 string(7) "neutral"

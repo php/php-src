@@ -95,4 +95,4 @@ directory unlinked
 
 --- try to unlink a directory ---
 
-Warning: unlink(unlinkVar10.tmp/linkme.tmp): %s in %s on line %d
+Warning: unlink(): %s in %s on line %d

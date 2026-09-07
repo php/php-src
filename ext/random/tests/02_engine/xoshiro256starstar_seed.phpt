@@ -17,7 +17,7 @@ echo "Invalid data type", PHP_EOL;
 try {
     $engine = new Xoshiro256StarStar(1.0);
 } catch (Throwable $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo PHP_EOL, PHP_EOL;
 
@@ -25,7 +25,7 @@ echo "Invalid string seed length", PHP_EOL;
 try {
     $engine = new Xoshiro256StarStar('foobar');
 } catch (Throwable $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo PHP_EOL, PHP_EOL;
 
@@ -33,7 +33,7 @@ echo "Null seed", PHP_EOL;
 try {
     $engine = new Xoshiro256StarStar(str_repeat("\x00", 32));
 } catch (Throwable $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo PHP_EOL, PHP_EOL;
 
@@ -57,15 +57,15 @@ Random string seed
 
 
 Invalid data type
-Random\Engine\Xoshiro256StarStar::__construct(): Argument #1 ($seed) must be of type string|int|null, float given
+TypeError: Random\Engine\Xoshiro256StarStar::__construct(): Argument #1 ($seed) must be of type string|int|null, float given
 
 
 Invalid string seed length
-Random\Engine\Xoshiro256StarStar::__construct(): Argument #1 ($seed) must be a 32 byte (256 bit) string
+ValueError: Random\Engine\Xoshiro256StarStar::__construct(): Argument #1 ($seed) must be a 32 byte (256 bit) string
 
 
 Null seed
-Random\Engine\Xoshiro256StarStar::__construct(): Argument #1 ($seed) must not consist entirely of NUL bytes
+ValueError: Random\Engine\Xoshiro256StarStar::__construct(): Argument #1 ($seed) must not consist entirely of NUL bytes
 
 
 Valid string seed

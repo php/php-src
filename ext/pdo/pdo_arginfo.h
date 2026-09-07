@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit pdo.stub.php instead.
  * Stub hash: dc41dddeea1ae117c6f2f3447afb29bf6623b757 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pdo_drivers, 0, 0, IS_ARRAY, 0)
@@ -24,9 +24,9 @@ static zend_class_entry *register_class_PDOException(zend_class_entry *class_ent
 
 	zval property_errorInfo_default_value;
 	ZVAL_NULL(&property_errorInfo_default_value);
-	zend_string *property_errorInfo_name = zend_string_init("errorInfo", sizeof("errorInfo") - 1, 1);
+	zend_string *property_errorInfo_name = zend_string_init("errorInfo", sizeof("errorInfo") - 1, true);
 	zend_declare_typed_property(class_entry, property_errorInfo_name, &property_errorInfo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
-	zend_string_release(property_errorInfo_name);
+	zend_string_release_ex(property_errorInfo_name, true);
 
 	return class_entry;
 }

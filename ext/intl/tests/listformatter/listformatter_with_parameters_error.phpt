@@ -10,17 +10,17 @@ intl
 try {
     $formatter = new IntlListFormatter('ro', 23232323);
 } catch(ValueError $exception) {
-    echo $exception->getMessage();
+    echo $exception::class, ': ', $exception->getMessage(), PHP_EOL;
 }
 
-echo PHP_EOL;
+
 
 try {
     $formatter = new IntlListFormatter('ro', IntlListFormatter::TYPE_AND, 2323232);
 } catch(ValueError $exception) {
-    echo $exception->getMessage();
+    echo $exception::class, ': ', $exception->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-IntlListFormatter::__construct(): Argument #2 ($type) must be one of IntlListFormatter::TYPE_AND, IntlListFormatter::TYPE_OR, or IntlListFormatter::TYPE_UNITS
-IntlListFormatter::__construct(): Argument #3 ($width) must be one of IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT, or IntlListFormatter::WIDTH_NARROW
+ValueError: IntlListFormatter::__construct(): Argument #2 ($type) must be one of IntlListFormatter::TYPE_AND, IntlListFormatter::TYPE_OR, or IntlListFormatter::TYPE_UNITS
+ValueError: IntlListFormatter::__construct(): Argument #3 ($width) must be one of IntlListFormatter::WIDTH_WIDE, IntlListFormatter::WIDTH_SHORT, or IntlListFormatter::WIDTH_NARROW

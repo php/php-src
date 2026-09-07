@@ -16,7 +16,7 @@ var_dump(gzclose($h));
 try {
     gzread($h, 20);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $h = gzopen($f, 'r');
@@ -27,13 +27,13 @@ var_dump(fclose($h));
 try {
     gzread($h, 20);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
 ?>
 --EXPECT--
 bool(true)
-gzread(): Argument #1 ($stream) must be an open stream resource
+TypeError: gzread(): Argument #1 ($stream) must be an open stream resource
 bool(true)
-gzread(): Argument #1 ($stream) must be an open stream resource
+TypeError: gzread(): Argument #1 ($stream) must be an open stream resource

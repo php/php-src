@@ -30,7 +30,6 @@ $precisions = array(
     -17,
     -19,
     -20,
-    PHP_INT_MIN,
 );
 
 foreach ($numbers as $number) {
@@ -54,7 +53,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(25) "9,200,000,000,000,000,000"
 ... with precision -19: string(26) "10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(-9223372036854775808)
 ... with precision 5: string(32) "-9,223,372,036,854,775,808.00000"
 ... with precision 0: string(26) "-9,223,372,036,854,775,808"
@@ -65,7 +63,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(26) "-9,200,000,000,000,000,000"
 ... with precision -19: string(27) "-10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(2147483647)
 ... with precision 5: string(19) "2,147,483,647.00000"
 ... with precision 0: string(13) "2,147,483,647"
@@ -76,7 +73,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(1) "0"
 ... with precision -19: string(1) "0"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(-2147483648)
 ... with precision 5: string(20) "-2,147,483,648.00000"
 ... with precision 0: string(14) "-2,147,483,648"
@@ -87,7 +83,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(1) "0"
 ... with precision -19: string(1) "0"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(9223372034707292160)
 ... with precision 5: string(31) "9,223,372,034,707,292,160.00000"
 ... with precision 0: string(25) "9,223,372,034,707,292,160"
@@ -98,7 +93,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(25) "9,200,000,000,000,000,000"
 ... with precision -19: string(26) "10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(-9223372034707292160)
 ... with precision 5: string(32) "-9,223,372,034,707,292,160.00000"
 ... with precision 0: string(26) "-9,223,372,034,707,292,160"
@@ -109,7 +103,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(26) "-9,200,000,000,000,000,000"
 ... with precision -19: string(27) "-10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(2147483648)
 ... with precision 5: string(19) "2,147,483,648.00000"
 ... with precision 0: string(13) "2,147,483,648"
@@ -120,7 +113,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(1) "0"
 ... with precision -19: string(1) "0"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(-2147483649)
 ... with precision 5: string(20) "-2,147,483,649.00000"
 ... with precision 0: string(14) "-2,147,483,649"
@@ -131,7 +123,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(1) "0"
 ... with precision -19: string(1) "0"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(4294967294)
 ... with precision 5: string(19) "4,294,967,294.00000"
 ... with precision 0: string(13) "4,294,967,294"
@@ -142,7 +133,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(1) "0"
 ... with precision -19: string(1) "0"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(4294967295)
 ... with precision 5: string(19) "4,294,967,295.00000"
 ... with precision 0: string(13) "4,294,967,295"
@@ -153,7 +143,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(1) "0"
 ... with precision -19: string(1) "0"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(4294967293)
 ... with precision 5: string(19) "4,294,967,293.00000"
 ... with precision 0: string(13) "4,294,967,293"
@@ -164,7 +153,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(1) "0"
 ... with precision -19: string(1) "0"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(9223372036854775806)
 ... with precision 5: string(31) "9,223,372,036,854,775,806.00000"
 ... with precision 0: string(25) "9,223,372,036,854,775,806"
@@ -175,7 +163,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(25) "9,200,000,000,000,000,000"
 ... with precision -19: string(26) "10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: float(9.223372036854776E+18)
 ... with precision 5: string(31) "9,223,372,036,854,775,808.00000"
 ... with precision 0: string(25) "9,223,372,036,854,775,808"
@@ -186,7 +173,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(25) "9,200,000,000,000,000,000"
 ... with precision -19: string(26) "10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: int(-9223372036854775807)
 ... with precision 5: string(32) "-9,223,372,036,854,775,807.00000"
 ... with precision 0: string(26) "-9,223,372,036,854,775,807"
@@ -197,7 +183,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(26) "-9,200,000,000,000,000,000"
 ... with precision -19: string(27) "-10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: float(-9.223372036854776E+18)
 ... with precision 5: string(32) "-9,223,372,036,854,775,808.00000"
 ... with precision 0: string(26) "-9,223,372,036,854,775,808"
@@ -208,7 +193,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(26) "-9,200,000,000,000,000,000"
 ... with precision -19: string(27) "-10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: float(9.223372036854775E+18)
 ... with precision 5: string(31) "9,223,372,036,854,774,784.00000"
 ... with precision 0: string(25) "9,223,372,036,854,774,784"
@@ -219,7 +203,6 @@ foreach ($numbers as $number) {
 ... with precision -17: string(25) "9,200,000,000,000,000,000"
 ... with precision -19: string(26) "10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"
 --- testing: float(-9.223372036854775E+18)
 ... with precision 5: string(32) "-9,223,372,036,854,774,784.00000"
 ... with precision 0: string(26) "-9,223,372,036,854,774,784"
@@ -230,4 +213,3 @@ foreach ($numbers as $number) {
 ... with precision -17: string(26) "-9,200,000,000,000,000,000"
 ... with precision -19: string(27) "-10,000,000,000,000,000,000"
 ... with precision -20: string(1) "0"
-... with precision -9223372036854775808: string(1) "0"

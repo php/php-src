@@ -10,7 +10,7 @@ var_dump(gmp_strval(gmp_com("0")));
 try {
     var_dump(gmp_strval(gmp_com("test")));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump(gmp_strval(gmp_com("2394876545678")));
 var_dump(gmp_strval(gmp_com("-111")));
@@ -25,7 +25,7 @@ var_dump(gmp_strval(gmp_com($n)));
 try {
     var_dump(gmp_strval(gmp_com(array())));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -33,12 +33,12 @@ echo "Done\n";
 --EXPECT--
 string(2) "-1"
 string(2) "-1"
-gmp_com(): Argument #1 ($num) is not an integer string
+ValueError: gmp_com(): Argument #1 ($num) is not an integer string
 string(14) "-2394876545679"
 string(3) "110"
 string(7) "-874654"
 string(4) "9875"
 string(9) "-98765468"
 string(12) "-98765463338"
-gmp_com(): Argument #1 ($num) must be of type GMP|string|int, array given
+TypeError: gmp_com(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

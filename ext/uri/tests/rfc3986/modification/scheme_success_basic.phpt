@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\Rfc3986\Uri component modification - scheme - basic case
---EXTENSIONS--
-uri
+Test Uri\Rfc3986\Uri::withScheme() - success - basic case
 --FILE--
 <?php
 

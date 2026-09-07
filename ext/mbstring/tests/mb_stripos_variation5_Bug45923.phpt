@@ -31,13 +31,13 @@ for ($i = -30; $i <= 60; $i += 10) {
     try {
         var_dump(mb_stripos($string_ascii, $needle_ascii, $i));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     echo "--Multibyte String --\n";
     try {
         var_dump(mb_stripos($string_mb, $needle_mb, $i, 'UTF-8'));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -47,9 +47,9 @@ for ($i = -30; $i <= 60; $i += 10) {
 
 **-- Offset is: -30 --**
 -- ASCII String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: -20 --**
 -- ASCII String --
@@ -83,24 +83,24 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 40 --**
 -- ASCII String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 50 --**
 -- ASCII String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 60 --**
 -- ASCII String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

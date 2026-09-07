@@ -9,7 +9,7 @@ try {
     $r = gmp_sqrtrem(-1);
     var_dump($r);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $r = gmp_sqrtrem("0");
@@ -49,7 +49,7 @@ try {
     $r = gmp_sqrtrem($n);
     var_dump($r);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $n = gmp_init(1000001);
@@ -60,13 +60,13 @@ var_dump(gmp_strval($r[1]));
 try {
     var_dump(gmp_sqrtrem(array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
 ?>
 --EXPECT--
-gmp_sqrtrem(): Argument #1 ($num) must be greater than or equal to 0
+ValueError: gmp_sqrtrem(): Argument #1 ($num) must be greater than or equal to 0
 string(1) "0"
 string(1) "0"
 string(1) "1"
@@ -83,8 +83,8 @@ string(4) "1000"
 string(1) "0"
 string(4) "1000"
 string(1) "1"
-gmp_sqrtrem(): Argument #1 ($num) must be greater than or equal to 0
+ValueError: gmp_sqrtrem(): Argument #1 ($num) must be greater than or equal to 0
 string(4) "1000"
 string(1) "1"
-gmp_sqrtrem(): Argument #1 ($num) must be of type GMP|string|int, array given
+TypeError: gmp_sqrtrem(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

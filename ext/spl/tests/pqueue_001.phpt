@@ -8,7 +8,7 @@ $pq = new SplPriorityQueue();
 try {
     $pq->extract();
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $pq->insert("a", 1);
@@ -60,7 +60,7 @@ foreach ($pq3 as $k=>$v) {
 
 ?>
 --EXPECT--
-Exception: Can't extract from an empty heap
+RuntimeException: Can't extract from an empty heap
 2=>b
 1=>a
 0=>c

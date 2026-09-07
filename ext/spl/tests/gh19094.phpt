@@ -35,22 +35,22 @@ $canary = new stdClass;
 try {
     $cls[$canary] = 1;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $cls[new MyAggregate] = 1;
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $cls[new MyIterator] = 1;
 try {
     $cls->key();
 } catch (RuntimeException $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Can only attach objects that implement the Iterator interface
-Can only attach objects that implement the Iterator interface
-Called key() with non valid sub iterator
+TypeError: Can only attach objects that implement the Iterator interface
+TypeError: Can only attach objects that implement the Iterator interface
+RuntimeException: Called key() with non valid sub iterator

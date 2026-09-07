@@ -32,8 +32,8 @@ var_dump(openssl_pkcs12_export($invalid, $output, $invalid, $pass));
 var_dump(openssl_pkcs12_export($invalid_path, $output, $invalid_path, $pass));
 try {
     var_dump(openssl_pkcs12_export($priv_res, $output, $cert_res, $pass));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 //var_dump(openssl_pkcs12_export($cert, $output, $priv, $pass, array("foo")));
 ?>
@@ -53,4 +53,4 @@ bool(false)
 
 Warning: openssl_pkcs12_export(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
-openssl_pkcs12_export(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, OpenSSLAsymmetricKey given
+TypeError: openssl_pkcs12_export(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, OpenSSLAsymmetricKey given

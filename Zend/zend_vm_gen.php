@@ -4,15 +4,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -23,15 +22,14 @@ const HEADER_TEXT = <<< DATA
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -1583,7 +1581,6 @@ function gen_null_handler($f, $kind) {
     out($f,"\n");
     out($f,"\tSAVE_OPLINE();\n");
     out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
-    out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
     out($f,"}\n\n");
 }
 
@@ -1829,12 +1826,10 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
         case ZEND_VM_KIND_SWITCH:
             out($f,"default: ZEND_NULL_LABEL:\n");
             out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
-            out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
             break;
         case ZEND_VM_KIND_GOTO:
             out($f,"ZEND_NULL_LABEL:\n");
             out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
-            out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
             break;
         case ZEND_VM_KIND_HYBRID:
             out($f,"\t\t\tHYBRID_CASE(HYBRID_HALT):\n");
@@ -2149,6 +2144,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# undef ZEND_VM_RETURN\n");
                         out($f,"# undef ZEND_VM_DISPATCH_TO_HELPER\n");
                         out($f,"# undef ZEND_VM_INTERRUPT\n");
+                        out($f,"# undef ZEND_VM_ENTER_EX\n");
+                        out($f,"# undef ZEND_VM_LEAVE\n");
                         out($f,"\n");
                         out($f,"# define ZEND_VM_TAIL_CALL(call)               ZEND_MUSTTAIL return call\n");
                         out($f,"# define ZEND_VM_CONTINUE()                    ZEND_VM_TAIL_CALL(opline->handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))\n");
@@ -2160,6 +2157,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"    } while (0)\n");
                         out($f,"# define ZEND_VM_DISPATCH_TO_LEAVE_HELPER(helper) opline = &call_leave_op; SAVE_OPLINE(); ZEND_VM_CONTINUE()\n");
                         out($f,"# define ZEND_VM_INTERRUPT()        ZEND_VM_TAIL_CALL(zend_interrupt_TAILCALL(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))\n");
+                        out($f,"# define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
+                        out($f,"# define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
                         out($f,"\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV zend_interrupt_helper".($spec?"_SPEC":"")."_TAILCALL(ZEND_OPCODE_HANDLER_ARGS);\n");
                         out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV zend_interrupt(ZEND_OPCODE_HANDLER_ARGS);\n");

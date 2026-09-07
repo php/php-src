@@ -14,14 +14,14 @@ $tidy = new tidy();
 try {
 	$tidy->parseString($buffer, $config);
 } catch (\ValueError $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $config = ['neither'];
 try {
 	$tidy->parseString($buffer, $config);
 } catch (\TypeError $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $config = ['doctype-mode' => 'customtag'];
@@ -29,7 +29,7 @@ $config = ['doctype-mode' => 'customtag'];
 try {
 	var_dump($tidy->parseString($buffer, $config));
 } catch (\ValueError $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $config = ['doctype' => 'php'];
@@ -37,7 +37,7 @@ $config = ['doctype' => 'php'];
 try {
 	var_dump($tidy->parseString($buffer, $config));
 } catch (\TypeError $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $config = ['doctype' => 'auto', 0 => 'value2'];
@@ -45,7 +45,7 @@ $config = ['doctype' => 'auto', 0 => 'value2'];
 try {
 	var_dump($tidy->parseString($buffer, $config));
 } catch (\TypeError $e) {
-	echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

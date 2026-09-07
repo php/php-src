@@ -16,7 +16,7 @@ echo "\n-- Testing mb_substr_count() function with an unknown encoding --\n";
 try {
     var_dump(mb_substr_count($haystack, $needle, $encoding));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -24,4 +24,4 @@ try {
 *** Testing mb_substr_count() : error conditions ***
 
 -- Testing mb_substr_count() function with an unknown encoding --
-mb_substr_count(): Argument #3 ($encoding) must be a valid encoding, "unknown-encoding" given
+ValueError: mb_substr_count(): Argument #3 ($encoding) must be a valid encoding, "unknown-encoding" given

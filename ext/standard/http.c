@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
@@ -79,7 +77,7 @@ try_again:
 			scalar = zend_enum_fetch_case_value(Z_OBJ_P(scalar));
 			goto try_again;
 		/* All possible types are either handled here or previously */
-		EMPTY_SWITCH_DEFAULT_CASE();
+		default: ZEND_UNREACHABLE();
 	}
 }
 
@@ -124,14 +122,14 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
-		bool is_dynamic = 1;
+		bool is_dynamic = true;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
 			if (Z_ISUNDEF_P(zdata)) {
 				continue;
 			}
 
-			is_dynamic = 0;
+			is_dynamic = false;
 		}
 
 		/* handling for private & protected object properties */
@@ -160,6 +158,11 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		if (Z_TYPE_P(zdata) == IS_ARRAY
 		 || (Z_TYPE_P(zdata) == IS_OBJECT
 		  && !(Z_OBJCE_P(zdata)->ce_flags & ZEND_ACC_ENUM))) {
+			if (Z_TYPE_P(zdata) == IS_OBJECT) {
+				php_error_docref(NULL, E_DEPRECATED,
+					"object values within argument #1 $data to http_build_query() being interpreted as arrays is deprecated,"
+					" instead the $data argument should be preprocessed with get_object_vars()");
+			}
 			zend_string *new_prefix;
 			if (key) {
 				zend_string *encoded_key;
@@ -238,9 +241,13 @@ PHP_FUNCTION(http_build_query)
 		Z_PARAM_LONG(enc_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(Z_TYPE_P(formdata) == IS_OBJECT && (Z_OBJCE_P(formdata)->ce_flags & ZEND_ACC_ENUM))) {
-		zend_argument_type_error(1, "must not be an enum, %s given", zend_zval_value_name(formdata));
-		RETURN_THROWS();
+	if (UNEXPECTED(Z_TYPE_P(formdata) == IS_OBJECT)) {
+		if (Z_OBJCE_P(formdata)->ce_flags & ZEND_ACC_ENUM) {
+			zend_argument_type_error(1, "must not be an enum, %s given", zend_zval_value_name(formdata));
+			RETURN_THROWS();
+		}
+		php_error_docref(NULL, E_DEPRECATED,
+			"Passing an object for argument #1 $data to http_build_query() is deprecated, call get_object_vars() first instead");
 	}
 
 	php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, /* key_prefix */ NULL, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type);
@@ -319,7 +326,7 @@ static zend_result cache_request_parse_body_options(HashTable *options)
 		return FAILURE;
 	} ZEND_HASH_FOREACH_END();
 
-#undef CACHE_OPTION
+#undef CHECK_OPTION
 
 	return SUCCESS;
 }
@@ -374,9 +381,7 @@ exit:
 
 PHP_FUNCTION(http_get_last_response_headers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!Z_ISUNDEF(BG(last_http_headers))) {
 		RETURN_COPY(&BG(last_http_headers));
@@ -387,9 +392,7 @@ PHP_FUNCTION(http_get_last_response_headers)
 
 PHP_FUNCTION(http_clear_last_response_headers)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zval_ptr_dtor(&BG(last_http_headers));
 	ZVAL_UNDEF(&BG(last_http_headers));

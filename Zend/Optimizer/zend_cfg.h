@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, CFG - Control Flow Graph                                |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -44,14 +42,14 @@ typedef struct _zend_basic_block {
 	uint32_t          flags;
 	uint32_t          start;              /* first opcode number         */
 	uint32_t          len;                /* number of opcodes           */
-	int               successors_count;   /* number of successors        */
-	int               predecessors_count; /* number of predecessors      */
-	int               predecessor_offset; /* offset of 1-st predecessor  */
-	int               idom;               /* immediate dominator block   */
+	uint32_t          successors_count;   /* number of successors        */
+	uint32_t          predecessors_count; /* number of predecessors      */
+	int               predecessor_offset; /* offset of 1-st predecessor, or -1 */
+	int               idom;               /* immediate dominator block, or -1  */
 	int               loop_header;        /* closest loop header, or -1  */
-	int               level;              /* steps away from the entry in the dom. tree */
-	int               children;           /* list of dominated blocks    */
-	int               next_child;         /* next dominated block        */
+	int               level;              /* steps away from the entry in the dom. tree, or -1 */
+	int               children;           /* list of dominated blocks, or -1 */
+	int               next_child;         /* next dominated block, or -1 */
 	int               successors_storage[2]; /* up to 2 successor blocks */
 } zend_basic_block;
 
@@ -82,8 +80,8 @@ typedef struct _zend_basic_block {
 */
 
 typedef struct _zend_cfg {
-	int               blocks_count;       /* number of basic blocks      */
-	int               edges_count;        /* number of edges             */
+	uint32_t          blocks_count;       /* number of basic blocks      */
+	uint32_t          edges_count;        /* number of edges             */
 	zend_basic_block *blocks;             /* array of basic blocks       */
 	int              *predecessors;
 	uint32_t         *map;

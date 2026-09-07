@@ -5,6 +5,9 @@ Test setlocale() function : usage variations - Setting all available locales in 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Some locales on Solaris (e.g. iso_8859_1) are incomplete, cannot test LC_ALL");
+}
 exec("locale -a", $output, $exit_code);
 if ($exit_code !== 0) {
     die("skip locale -a not available");

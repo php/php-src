@@ -5,4 +5,3 @@ Calling debug_print_backtrace() from main script
 debug_print_backtrace();
 ?>
 --EXPECT--
-

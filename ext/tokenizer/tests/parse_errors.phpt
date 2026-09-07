@@ -9,7 +9,7 @@ function test_parse_error($code) {
     try {
         var_dump(token_get_all($code, TOKEN_PARSE));
     } catch (ParseError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     foreach (token_get_all($code) as $token) {
@@ -29,7 +29,7 @@ test_parse_error('<?php var_dump(078 + 078);');
 
 ?>
 --EXPECT--
-Invalid numeric literal
+ParseError: Invalid numeric literal
 T_OPEN_TAG (<?php )
 T_STRING (var_dump)
 (
@@ -37,7 +37,7 @@ T_LNUMBER (078)
 )
 ;
 
-Invalid UTF-8 codepoint escape sequence
+ParseError: Invalid UTF-8 codepoint escape sequence
 T_OPEN_TAG (<?php )
 T_STRING (var_dump)
 (
@@ -45,7 +45,7 @@ T_CONSTANT_ENCAPSED_STRING ("\u{xyz}")
 )
 ;
 
-Invalid UTF-8 codepoint escape sequence: Codepoint too large
+ParseError: Invalid UTF-8 codepoint escape sequence: Codepoint too large
 T_OPEN_TAG (<?php )
 T_STRING (var_dump)
 (
@@ -53,7 +53,7 @@ T_CONSTANT_ENCAPSED_STRING ("\u{ffffff}")
 )
 ;
 
-Invalid numeric literal
+ParseError: Invalid numeric literal
 T_OPEN_TAG (<?php )
 T_STRING (var_dump)
 (

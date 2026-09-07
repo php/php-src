@@ -10,7 +10,7 @@ $n = gmp_init(0);
 try {
     var_dump(gmp_testbit($n, -10));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 var_dump(gmp_testbit($n, 0));
@@ -22,7 +22,7 @@ var_dump(gmp_testbit($n, 1));
 try {
     var_dump(gmp_testbit($n, -1));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $n = gmp_init("1000000");
@@ -48,12 +48,12 @@ var_dump(gmp_strval($n));
 echo "Done\n";
 ?>
 --EXPECTF--
-gmp_testbit(): Argument #2 ($index) must be between 0 and %d * %d
+ValueError: gmp_testbit(): Argument #2 ($index) must be between 0 and %d * %d
 bool(false)
 bool(false)
 bool(false)
 bool(true)
-gmp_testbit(): Argument #2 ($index) must be between 0 and %d * %d
+ValueError: gmp_testbit(): Argument #2 ($index) must be between 0 and %d * %d
 bool(false)
 bool(true)
 string(7) "1000002"

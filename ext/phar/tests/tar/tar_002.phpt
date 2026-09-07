@@ -19,7 +19,7 @@ try {
     $phar = new Phar(__DIR__ . '/tar_002.phar.tar');
     echo "should not execute\n";
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -27,5 +27,5 @@ try {
 @unlink(__DIR__ . '/tar_002.phar.tar');
 ?>
 --EXPECTF--
-Warning: fopen(phar://%star_002.phar.tar/tar_002.phpt): Failed to open stream: phar error: "%star_002.phar.tar" is a corrupted tar file (truncated) in %star_002.php on line 9
-phar error: "%star_002.phar.tar" is a corrupted tar file (truncated)
+Warning: fopen(): Failed to open stream: phar error: "%star_002.phar.tar" is a corrupted tar file (truncated) in %star_002.php on line 9
+UnexpectedValueException: phar error: "%star_002.phar.tar" is a corrupted tar file (truncated)

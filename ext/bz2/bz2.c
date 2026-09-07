@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Sterling Hughes <sterling@php.net>                           |
   +----------------------------------------------------------------------+
@@ -352,7 +350,7 @@ PHP_FUNCTION(bzopen)
 			RETURN_THROWS();
 		}
 
-		if (CHECK_ZVAL_NULL_PATH(file)) {
+		if (zend_str_has_nul_byte(Z_STR_P(file))) {
 			zend_argument_type_error(1, "must not contain null bytes");
 			RETURN_THROWS();
 		}
@@ -402,7 +400,7 @@ unsupported_mode:
 					RETURN_FALSE;
 				}
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+			default: ZEND_UNREACHABLE();
 		}
 
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void *) &fd, REPORT_ERRORS)) {
@@ -521,11 +519,15 @@ PHP_FUNCTION(bzdecompress)
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
 
+	if (source_len > UINT_MAX) {
+		zend_argument_value_error(1, "must have a length less than or equal to %u", UINT_MAX);
+		RETURN_THROWS();
+	}
+
 	if (BZ2_bzDecompressInit(&bzs, 0, (int)small) != BZ_OK) {
 		RETURN_FALSE;
 	}
 
-	// TODO Check source string length fits in unsigned int
 	bzs.next_in = source;
 	bzs.avail_in = source_len;
 
@@ -538,18 +540,18 @@ PHP_FUNCTION(bzdecompress)
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
 		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
-		if (size > SIZE_MAX) {
+		if (UNEXPECTED(size > SIZE_MAX)) {
 			/* no reason to continue if we're going to drop it anyway */
 			break;
 		}
-		dest = zend_string_safe_realloc(dest, 1, bzs.avail_out+1, (size_t) size, 0);
+		dest = zend_string_safe_realloc(dest, 1, (size_t) bzs.avail_out + 1, (size_t) size, 0);
 		bzs.next_out = ZSTR_VAL(dest) + size;
 	}
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
 		size = (((uint64_t) bzs.total_out_hi32) << 32U) + bzs.total_out_lo32;
 		if (UNEXPECTED(size > SIZE_MAX)) {
-			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
+			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zu", SIZE_MAX);
 			zend_string_efree(dest);
 			RETVAL_LONG(BZ_MEM_ERROR);
 		} else {
@@ -594,10 +596,8 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	switch (opt) {
 		case PHP_BZ_ERRNO:
 			RETURN_LONG(errnum);
-			break;
 		case PHP_BZ_ERRSTR:
 			RETURN_STRING((char*)errstr);
-			break;
 		case PHP_BZ_ERRBOTH:
 			array_init(return_value);
 

@@ -17,7 +17,7 @@ echo "Invalid data type", PHP_EOL;
 try {
     $engine = new PcgOneseq128XslRr64(1.0);
 } catch (TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo PHP_EOL, PHP_EOL;
 
@@ -25,7 +25,7 @@ echo "Invalid string seed length", PHP_EOL;
 try {
     $engine = new PcgOneseq128XslRr64('foobar');
 } catch (ValueError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 echo PHP_EOL, PHP_EOL;
 
@@ -49,11 +49,11 @@ Random string seed
 
 
 Invalid data type
-Random\Engine\PcgOneseq128XslRr64::__construct(): Argument #1 ($seed) must be of type string|int|null, float given
+TypeError: Random\Engine\PcgOneseq128XslRr64::__construct(): Argument #1 ($seed) must be of type string|int|null, float given
 
 
 Invalid string seed length
-Random\Engine\PcgOneseq128XslRr64::__construct(): Argument #1 ($seed) must be a 16 byte (128 bit) string
+ValueError: Random\Engine\PcgOneseq128XslRr64::__construct(): Argument #1 ($seed) must be a 16 byte (128 bit) string
 
 
 Valid string seed

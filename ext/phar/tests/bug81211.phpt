@@ -24,12 +24,12 @@ $archive = new PharData(__DIR__ . '/bug81211/archive.tar');
 try {
     $archive->buildFromDirectory(__DIR__ . '/bug81211/foo');
 } catch (UnexpectedValueException $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 try {
     $archive->buildFromIterator(new RecursiveDirectoryIterator(__DIR__ . '/bug81211/foo', FilesystemIterator::SKIP_DOTS), __DIR__ . '/bug81211/foo');
 } catch (UnexpectedValueException $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --CLEAN--
@@ -42,5 +42,5 @@ try {
 @rmdir(__DIR__ . '/bug81211');
 ?>
 --EXPECTF--
-Iterator RecursiveIteratorIterator returned a path "%s%ebug81211%efoobar%efile" that is not in the base directory "%s%ebug81211%efoo"
-Iterator RecursiveDirectoryIterator returned a path "%s%ebug81211%efoobar%efile" that is not in the base directory "%s%ebug81211%efoo"
+UnexpectedValueException: Iterator RecursiveIteratorIterator returned a path "%s%ebug81211%efoobar%efile" that is not in the base directory "%s%ebug81211%efoo"
+UnexpectedValueException: Iterator RecursiveDirectoryIterator returned a path "%s%ebug81211%efoobar%efile" that is not in the base directory "%s%ebug81211%efoo"

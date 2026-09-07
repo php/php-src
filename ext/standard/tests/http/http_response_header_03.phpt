@@ -30,7 +30,7 @@ http_server_kill($pid);
 Deprecated: The predefined locally scoped $http_response_header variable is deprecated, call http_get_last_response_headers() instead in %s on line 16
 NULL
 
-Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%a
+Warning: file_get_contents(): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%a
 bool(false)
 array(5) {
   [0]=>

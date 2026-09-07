@@ -10,12 +10,8 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require 'table.inc';
 
-    $stmt = mysqli_stmt_init($link);
-    if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
-        printf("[001] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-
-    if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
-        printf("[001] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
+        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 
     print "plain vanilla...\n";

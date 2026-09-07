@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - host - null byte
---EXTENSIONS--
-uri
+Test Uri\WhatWg\Url::withHost() - error - null byte
 --FILE--
 <?php
 
@@ -10,7 +8,7 @@ $url = Uri\WhatWg\Url::parse("https://example.com");
 try {
     $url->withHost("h\0st");
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

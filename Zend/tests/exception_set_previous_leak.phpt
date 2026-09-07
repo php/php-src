@@ -11,10 +11,10 @@ try {
     } finally {
         throw $e;
     }
-} catch (Exception $e2) {
-    echo $e2->getMessage(), "\n";
+} catch (Throwable $e2) {
+    echo $e2::class, ': ', $e2->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Test
+Exception: Test

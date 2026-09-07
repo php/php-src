@@ -7,11 +7,12 @@ phar
 try {
 $p = new PharData(__DIR__."/bug71498.zip");
 } catch(UnexpectedValueException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 
 DONE
 --EXPECTF--
-phar error: end of central directory not found in zip-based phar "%s%ebug71498.zip"
+UnexpectedValueException: phar error: end of central directory not found in zip-based phar "%s%ebug71498.zip"
+
 DONE

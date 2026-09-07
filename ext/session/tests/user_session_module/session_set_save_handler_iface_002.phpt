@@ -73,7 +73,7 @@ var_dump($ret);
 try {
     $ret = session_set_save_handler($handler);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 session_start();
@@ -83,7 +83,7 @@ session_start();
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 bool(true)
-session_set_save_handler(): Argument #1 ($open) must be of type SessionHandlerInterface, MySession2 given
+TypeError: session_set_save_handler(): Argument #1 ($open) must be of type SessionHandlerInterface, MySession2 given
 good handler writing
 
 Deprecated: PHP Request Shutdown: Session callback must have a return value of type bool, int returned in Unknown on line 0

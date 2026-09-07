@@ -8,10 +8,10 @@ pgsql
 try {
     pg_dbname();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 Deprecated: pg_dbname(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
-No PostgreSQL connection opened yet
+Error: No PostgreSQL connection opened yet

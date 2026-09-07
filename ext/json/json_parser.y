@@ -2,15 +2,13 @@
 %code top {
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Jakub Zelenka <bukka@php.net>                                |
   +----------------------------------------------------------------------+
@@ -48,7 +46,6 @@ int json_yydebug = 1;
 %union {
 	zval value;
 }
-
 
 %token <value> PHP_JSON_T_NUL
 %token <value> PHP_JSON_T_TRUE
@@ -306,6 +303,30 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser)
 {
 	return parser->scanner.errcode;
+}
+
+static uint64_t php_json_compute_error_column(const php_json_scanner *s)
+{
+	const php_json_ctype *p = s->line_start;
+	const php_json_ctype *end = s->token;
+	/* Count characters from the start of the line to the failing token,
+	 * folding UTF-8 continuation bytes into their leading byte. */
+	uint64_t column = 1;
+
+	while (p < end) {
+		if ((*p & 0b11000000) != 0b10000000) {
+			column++;
+		}
+		p++;
+	}
+	return column;
+}
+
+PHP_JSON_API void php_json_parser_error_details(const php_json_parser *parser, php_json_error_details *out)
+{
+	out->code = parser->scanner.errcode;
+	out->line = parser->scanner.line;
+	out->column = php_json_compute_error_column(&parser->scanner);
 }
 
 static const php_json_parser_methods default_parser_methods =

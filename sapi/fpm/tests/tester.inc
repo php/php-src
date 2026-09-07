@@ -225,7 +225,7 @@ class Tester
      */
     static public function findExecutable(): bool|string
     {
-        $phpPath = getenv("TEST_PHP_EXECUTABLE");
+        $phpPath = getenv("TEST_PHP_FPM_EXECUTABLE") ?: getenv("TEST_PHP_EXECUTABLE");
         for ($i = 0; $i < 2; $i++) {
             $slashPosition = strrpos($phpPath, "/");
             if ($slashPosition) {

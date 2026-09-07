@@ -46,6 +46,7 @@
 .text
 .align	8
 .global	make_fcontext
+.hidden make_fcontext
 .type	make_fcontext, @function
 
 #define ARG_OFFSET         0

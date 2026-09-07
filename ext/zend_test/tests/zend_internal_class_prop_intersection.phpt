@@ -28,12 +28,12 @@ try {
 try {
     $o->classIntersectionProp = new EmptyIterator();
 } catch (TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $o->classIntersectionProp = new C();
 } catch (TypeError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 $o->classIntersectionProp = new I();
 
@@ -41,6 +41,6 @@ $o->classIntersectionProp = new I();
 ==DONE==
 --EXPECT--
 Error: Typed property _ZendTestClass::$classIntersectionProp must not be accessed before initialization
-Cannot assign EmptyIterator to property _ZendTestClass::$classIntersectionProp of type Traversable&Countable
-Cannot assign C to property _ZendTestClass::$classIntersectionProp of type Traversable&Countable
+TypeError: Cannot assign EmptyIterator to property _ZendTestClass::$classIntersectionProp of type Traversable&Countable
+TypeError: Cannot assign C to property _ZendTestClass::$classIntersectionProp of type Traversable&Countable
 ==DONE==

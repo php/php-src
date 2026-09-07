@@ -15,28 +15,28 @@ try {
     $ret = session_set_save_handler($exceptionCallback, $validCallback, $validCallback, $validCallback, $validCallback, $validCallback);
     session_start();
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     $ret = session_set_save_handler($deprecatedCallback, $validCallback, $validCallback, $validCallback, $validCallback, $validCallback);
     session_start();
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     $ret = session_set_save_handler($validCallback, $exceptionCallback, $validCallback, $validCallback, $validCallback, $validCallback);
     session_start();
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     $ret = session_set_save_handler($validCallback, $deprecatedCallback, $exceptionCallback, $validCallback, $validCallback, $validCallback);
     session_start();
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ob_end_flush();
@@ -44,7 +44,7 @@ ob_end_flush();
 ?>
 --EXPECTF--
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
-Session callback must have a return value of type bool, array returned
+TypeError: Session callback must have a return value of type bool, array returned
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 
@@ -53,7 +53,7 @@ Deprecated: session_start(): Session callback must have a return value of type b
 Warning: session_start(): Failed to read session data: user (%s) in %s on line %d
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
-Session callback must have a return value of type bool, array returned
+TypeError: Session callback must have a return value of type bool, array returned
 
 Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 

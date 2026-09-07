@@ -1,7 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - fragment - with leading hashmark
---EXTENSIONS--
-uri
+Test Uri\WhatWg\Url::withFragment() - success - with leading hashmark
 --FILE--
 <?php
 

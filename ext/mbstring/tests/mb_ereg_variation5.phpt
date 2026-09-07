@@ -57,19 +57,29 @@ function base64_encode_var_dump($regs) {
     }
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_ereg() : usage variations ***
 
-ASCII String without $regs arg:		bool(true)
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+ASCII String without $regs arg:		
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+bool(true)
 ASCII String with $regs arg:
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 array(1) {
   [0]=>
   string(52) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4OS4="
 }
 
-Multibyte String without $regs arg:	bool(true)
+Multibyte String without $regs arg:	
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+bool(true)
 Multubyte String with $regs arg:
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 bool(true)
 array(1) {
   [0]=>

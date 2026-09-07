@@ -11,8 +11,8 @@ $session->close();
 try {
 	$session->setSecurity('authPriv', 'MD5', '', 'AES', '');
 } catch(Error $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Invalid or uninitialized SNMP object
+Error: Invalid or uninitialized SNMP object

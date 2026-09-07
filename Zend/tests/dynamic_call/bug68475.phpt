@@ -36,16 +36,16 @@ $callback(...$args);
 $callback = 'TestClass::undefinedMethod';
 try {
     $callback();
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Reference undefined class.
 $callback = 'UndefinedClass::testMethod';
 try {
     $callback();
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -53,5 +53,5 @@ Static method called!
 Static method called!
 Static method called with args: arg1, arg2, arg3
 Static method called with args: arg1, arg2, arg3
-Call to undefined method TestClass::undefinedMethod()
-Class "UndefinedClass" not found
+Error: Call to undefined method TestClass::undefinedMethod()
+Error: Class "UndefinedClass" not found

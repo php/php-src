@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -167,8 +165,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	xsltStylesheetPtr sheetp;
 	bool clone_docu = false;
 	xmlNode *nodep = NULL;
-	zval *cloneDocu, rv, clone_zv, owner_zv;
-	zend_string *member;
+	zval *cloneDocu, clone_zv, owner_zv;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &docp) == FAILURE) {
@@ -216,15 +213,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	ZVAL_OBJ(&clone_zv, clone);
 	nodep = php_libxml_import_node(&clone_zv);
 
-	if (nodep) {
-		newdoc = nodep->doc;
-	}
-	if (newdoc == NULL) {
-		OBJ_RELEASE(clone);
-		zend_argument_type_error(1, "must be a valid XML node");
-		RETURN_THROWS();
-	}
-
+	newdoc = nodep->doc;
 	php_libxml_node_object *clone_lxml_obj = Z_LIBXML_NODE_P(&clone_zv);
 
 	if (GC_REFCOUNT(clone) > 1 || clone_lxml_obj->document->refcount > 1) {
@@ -265,10 +254,8 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	intern->sheet_ref_obj->refcount++;
 	OBJ_RELEASE(clone);
 
-	member = ZSTR_INIT_LITERAL("cloneDocument", 0);
-	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
+	cloneDocu = xsl_prop_clone_document(Z_OBJ_P(id));
 	clone_docu = zend_is_true(cloneDocu);
-	zend_string_release_ex(member, 0);
 	if (!clone_docu) {
 		/* Check if the stylesheet is using xsl:key, if yes, we have to clone the document _always_ before a transformation.
 		 * xsl:key elements may only occur at the top level. Furthermore, all elements at the top level must be in a
@@ -308,8 +295,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	xmlNodePtr node = NULL;
 	xsltTransformContextPtr ctxt;
 	php_libxml_node_object *object;
-	zval *doXInclude, rv;
-	zend_string *member;
+	zval *doXInclude;
 	FILE *f;
 	int secPrefsError = 0;
 	xsltSecurityPrefsPtr secPrefs = NULL;
@@ -365,10 +351,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		}
 	}
 
-	member = ZSTR_INIT_LITERAL("doXInclude", 0);
-	doXInclude = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
+	doXInclude = xsl_prop_do_xinclude(Z_OBJ_P(id));
 	ctxt->xinclude = zend_is_true(doXInclude);
-	zend_string_release_ex(member, 0);
 
 	zval *max_template_depth = xsl_prop_max_template_depth(Z_OBJ_P(id));
 	ZEND_ASSERT(Z_TYPE_P(max_template_depth) == IS_LONG);
@@ -466,20 +450,18 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 
 	if (newdocp) {
 		if (ret_class) {
-			zend_string *curclass_name;
-			zend_class_entry *curce;
 			php_libxml_node_object *interndoc;
 
-			curce = Z_OBJCE_P(docp);
-			curclass_name = curce->name;
-			while (curce->parent != NULL) {
-				curce = curce->parent;
+			const zend_class_entry *current_ce = Z_OBJCE_P(docp);
+			const zend_string *current_class_name = current_ce->name;
+			while (current_ce->parent != NULL) {
+				current_ce = current_ce->parent;
 			}
 
-			if (!instanceof_function(ret_class, curce)) {
+			if (!instanceof_function(ret_class, current_ce)) {
 				xmlFreeDoc(newdocp);
 				zend_argument_type_error(2, "must be a class name compatible with %s, %s given",
-					ZSTR_VAL(curclass_name), ZSTR_VAL(ret_class->name)
+					ZSTR_VAL(current_class_name), ZSTR_VAL(ret_class->name)
 				);
 				RETURN_THROWS();
 			}
@@ -720,11 +702,7 @@ PHP_METHOD(XSLTProcessor, removeParameter)
 		RETURN_THROWS();
 	}
 	intern = Z_XSL_P(id);
-	if (zend_hash_del(intern->parameter, key) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(zend_hash_del(intern->parameter, key) == SUCCESS);
 	zend_string_release_ex(key, false);
 }
 /* }}} end XSLTProcessor::removeParameter */
@@ -835,9 +813,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 	zval *id = ZEND_THIS;
 	xsl_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_XSL_P(id);
 
@@ -848,9 +824,7 @@ PHP_METHOD(XSLTProcessor, getSecurityPrefs)
 /* {{{ */
 PHP_METHOD(XSLTProcessor, hasExsltSupport)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #ifdef HAVE_XSL_EXSLT
 	RETURN_TRUE;

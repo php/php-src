@@ -33,13 +33,13 @@ $csr = openssl_csr_new($dn, $privkey, $args);
 var_dump(openssl_csr_export($csr, $output));
 try {
     var_dump(openssl_csr_export($wrong, $output));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(openssl_csr_export($privkey, $output));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(openssl_csr_export($csr, $output, false));
 ?>
@@ -48,5 +48,5 @@ bool(true)
 
 Warning: openssl_csr_export(): X.509 Certificate Signing Request cannot be retrieved in %s on line %d
 bool(false)
-openssl_csr_export(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
+TypeError: openssl_csr_export(): Argument #1 ($csr) must be of type OpenSSLCertificateSigningRequest|string, OpenSSLAsymmetricKey given
 bool(true)

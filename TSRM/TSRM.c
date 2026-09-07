@@ -36,12 +36,13 @@ struct _tsrm_tls_entry {
 	tsrm_tls_entry *next;
 };
 
-
 typedef struct {
 	size_t size;
 	ts_allocate_ctor ctor;
 	ts_allocate_dtor dtor;
-	size_t fast_offset;
+	ptrdiff_t fast_offset;
+	/* When set, storage comes from __thread memory instead of being allocated by TSRM. */
+	void *(*tls_addr)(void);
 	int done;
 } tsrm_resource_type;
 
@@ -58,6 +59,7 @@ static int					resource_types_table_size;
 /* Reserved space for fast globals access */
 static size_t tsrm_reserved_pos  = 0;
 static size_t tsrm_reserved_size = 0;
+static size_t tsrm_reserved_front = 0;
 
 static MUTEX_T tsmm_mutex;	  /* thread-safe memory manager mutex */
 static MUTEX_T tsrm_env_mutex; /* tsrm environ mutex */
@@ -155,6 +157,7 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 
 	tsrm_reserved_pos  = 0;
 	tsrm_reserved_size = 0;
+	tsrm_reserved_front = 0;
 
 	tsrm_env_mutex = tsrm_mutex_alloc();
 
@@ -163,14 +166,20 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 
 static void ts_free_resources(tsrm_tls_entry *thread_resources)
 {
+	bool own_thread = thread_resources->thread_id == tsrm_thread_id();
+
 	/* Need to destroy in reverse order to respect dependencies. */
 	for (int i = thread_resources->count - 1; i >= 0; i--) {
 		if (!resource_types_table[i].done) {
+			/* A __thread block of a foreign thread is inaccessible. */
+			if (resource_types_table[i].tls_addr && !own_thread) {
+				continue;
+			}
 			if (resource_types_table[i].dtor) {
 				resource_types_table[i].dtor(thread_resources->storage[i]);
 			}
 
-			if (!resource_types_table[i].fast_offset) {
+			if (!resource_types_table[i].fast_offset && !resource_types_table[i].tls_addr) {
 				free(thread_resources->storage[i]);
 			}
 		}
@@ -179,7 +188,9 @@ static void ts_free_resources(tsrm_tls_entry *thread_resources)
 	free(thread_resources->storage);
 }
 
-/* Shutdown TSRM (call once for the entire process) */
+/* Shutdown TSRM (call once for the entire process). Tears down every thread left
+ * in the table. For resources allocated with ts_allocate_tls_id(), only the dtor
+ * of the calling thread is invoked. */
 TSRM_API void tsrm_shutdown(void)
 {/*{{{*/
 	if (is_thread_shutdown) {
@@ -205,7 +216,7 @@ TSRM_API void tsrm_shutdown(void)
 			} else {
 				free(p->storage);
 			}
-			free(p);
+			free((char *) p - tsrm_reserved_front);
 			p = next_p;
 		}
 	}
@@ -232,6 +243,7 @@ TSRM_API void tsrm_shutdown(void)
 
 	tsrm_reserved_pos  = 0;
 	tsrm_reserved_size = 0;
+	tsrm_reserved_front = 0;
 }/*}}}*/
 
 /* {{{ */
@@ -256,7 +268,10 @@ static void tsrm_update_active_threads(void)
 
 				p->storage = (void *) realloc(p->storage, sizeof(void *)*id_count);
 				for (j=p->count; j<id_count; j++) {
-					if (resource_types_table[j].fast_offset) {
+					if (resource_types_table[j].tls_addr) {
+						TSRM_ASSERT(p->thread_id == tsrm_thread_id());
+						p->storage[j] = resource_types_table[j].tls_addr();
+					} else if (resource_types_table[j].fast_offset) {
 						p->storage[j] = (void *) (((char*)p) + resource_types_table[j].fast_offset);
 					} else {
 						p->storage[j] = (void *) malloc(resource_types_table[j].size);
@@ -301,6 +316,7 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].fast_offset = 0;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].tls_addr = NULL;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
 
 	tsrm_update_active_threads();
@@ -319,9 +335,38 @@ TSRM_API void tsrm_reserve(size_t size)
 }/*}}}*/
 
 
+/* Carve a fixed-offset front region out of the reserved space. It is placed
+ * before the TLS entry, so the hot globals get compile-time-constant negative
+ * offsets from the cache pointer. */
+TSRM_API void tsrm_reserve_fast_front(size_t size)
+{
+	tsrm_reserved_front = TSRM_ALIGNED_SIZE(size);
+	tsrm_reserved_size -= tsrm_reserved_front;
+}
+
+
 /* allocates a new fast thread-safe-resource id */
 TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {/*{{{*/
+	tsrm_mutex_lock(tsmm_mutex);
+	size = TSRM_ALIGNED_SIZE(size);
+	if (tsrm_reserved_size - tsrm_reserved_pos < size) {
+		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fast resource"));
+		*rsrc_id = 0;
+		*offset = 0;
+		tsrm_mutex_unlock(tsmm_mutex);
+		return 0;
+	}
+	ptrdiff_t fixed_offset = TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_pos;
+	tsrm_reserved_pos += size;
+	tsrm_mutex_unlock(tsmm_mutex);
+
+	return ts_allocate_fast_id_at(rsrc_id, offset, fixed_offset, size, ctor, dtor);
+}/*}}}*/
+
+
+TSRM_API ts_rsrc_id ts_allocate_fast_id_at(ts_rsrc_id *rsrc_id, size_t *offset, ptrdiff_t fixed_offset, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
+{
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new fast resource id, %d bytes", size));
 
 	tsrm_mutex_lock(tsmm_mutex);
@@ -331,16 +376,7 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtained resource id %d", *rsrc_id));
 
 	size = TSRM_ALIGNED_SIZE(size);
-	if (tsrm_reserved_size - tsrm_reserved_pos < size) {
-		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fast resource"));
-		*rsrc_id = 0;
-		*offset = 0;
-		tsrm_mutex_unlock(tsmm_mutex);
-		return 0;
-	}
-
-	*offset = TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_pos;
-	tsrm_reserved_pos += size;
+	*offset = (size_t) fixed_offset;
 
 	/* store the new resource type in the resource sizes table */
 	if (resource_types_table_size < id_count) {
@@ -359,6 +395,7 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].fast_offset = *offset;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].tls_addr = NULL;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
 
 	tsrm_update_active_threads();
@@ -366,7 +403,42 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", *rsrc_id));
 	return *rsrc_id;
-}/*}}}*/
+}
+
+/* allocates a resource id whose per-thread storage is a native __thread block */
+TSRM_API ts_rsrc_id ts_allocate_tls_id(ts_rsrc_id *rsrc_id, void *(*tls_addr)(void), size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
+{
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new TLS resource id, %d bytes", size));
+
+	tsrm_mutex_lock(tsmm_mutex);
+
+	*rsrc_id = TSRM_SHUFFLE_RSRC_ID(id_count++);
+
+	if (resource_types_table_size < id_count) {
+		tsrm_resource_type *_tmp;
+		_tmp = (tsrm_resource_type *) realloc(resource_types_table, sizeof(tsrm_resource_type)*id_count);
+		if (!_tmp) {
+			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate storage for resource"));
+			*rsrc_id = 0;
+			tsrm_mutex_unlock(tsmm_mutex);
+			return 0;
+		}
+		resource_types_table = _tmp;
+		resource_types_table_size = id_count;
+	}
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].fast_offset = 0;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].tls_addr = tls_addr;
+	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
+
+	tsrm_update_active_threads();
+	tsrm_mutex_unlock(tsmm_mutex);
+
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new TLS resource id %d", *rsrc_id));
+	return *rsrc_id;
+}
 
 static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource)
 {
@@ -378,7 +450,10 @@ static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource
 static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_T thread_id)
 {/*{{{*/
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id));
-	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_size);
+	/* The entry follows the fixed-offset front region.
+	 * hot globals live at negative offsets from the TLS cache pointer. */
+	char *block = (char *) malloc(tsrm_reserved_front + TSRM_ALIGNED_SIZE(sizeof(tsrm_tls_entry)) + tsrm_reserved_size);
+	(*thread_resources_ptr) = (tsrm_tls_entry *) (block + tsrm_reserved_front);
 	(*thread_resources_ptr)->storage = NULL;
 	if (id_count > 0) {
 		(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
@@ -397,7 +472,9 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		if (resource_types_table[i].done) {
 			(*thread_resources_ptr)->storage[i] = NULL;
 		} else {
-			if (resource_types_table[i].fast_offset) {
+			if (resource_types_table[i].tls_addr) {
+				(*thread_resources_ptr)->storage[i] = resource_types_table[i].tls_addr();
+			} else if (resource_types_table[i].fast_offset) {
 				(*thread_resources_ptr)->storage[i] = (void *) (((char*)(*thread_resources_ptr)) + resource_types_table[i].fast_offset);
 			} else {
 				(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
@@ -485,9 +562,11 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		/* In case that extensions don't use the pointer passed from the dtor, but incorrectly
 		 * use the global pointer, we need to setup the global pointer temporarily here. */
 		set_thread_local_storage_resource_to(thread_resources);
-		/* Free up the old resource from the old thread instance */
+		/* Dead thread with a recycled id: its __thread blocks are gone, and this
+		 * thread's blocks were never constructed, so keep tls dtors from running. */
+		thread_resources->thread_id = 0;
 		ts_free_resources(thread_resources);
-		free(thread_resources);
+		free((char *) thread_resources - tsrm_reserved_front);
 		/* Allocate a new resource at the same point in the linked list, and relink the next pointer */
 		allocate_new_resource(last_thread_resources, thread_id);
 		thread_resources = *last_thread_resources;
@@ -529,7 +608,7 @@ void ts_free_thread(void)
 				tsrm_tls_table[hash_value] = thread_resources->next;
 			}
 			tsrm_tls_set(0);
-			free(thread_resources);
+			free((char *) thread_resources - tsrm_reserved_front);
 			break;
 		}
 		if (thread_resources->next) {
@@ -559,7 +638,7 @@ void ts_free_id(ts_rsrc_id id)
 						if (resource_types_table[rsrc_id].dtor) {
 							resource_types_table[rsrc_id].dtor(p->storage[rsrc_id]);
 						}
-						if (!resource_types_table[rsrc_id].fast_offset) {
+						if (!resource_types_table[rsrc_id].fast_offset && !resource_types_table[rsrc_id].tls_addr) {
 							free(p->storage[rsrc_id]);
 						}
 					}

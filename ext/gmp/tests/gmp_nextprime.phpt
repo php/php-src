@@ -19,19 +19,19 @@ try {
     $n = gmp_nextprime(array());
     var_dump(gmp_strval($n));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $n = gmp_nextprime("");
     var_dump(gmp_strval($n));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $n = gmp_nextprime(new stdclass());
     var_dump(gmp_strval($n));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -42,7 +42,7 @@ string(1) "2"
 string(1) "2"
 string(4) "1009"
 string(6) "100003"
-gmp_nextprime(): Argument #1 ($num) must be of type GMP|string|int, array given
-gmp_nextprime(): Argument #1 ($num) is not an integer string
-gmp_nextprime(): Argument #1 ($num) must be of type GMP|string|int, stdClass given
+TypeError: gmp_nextprime(): Argument #1 ($num) must be of type GMP|string|int, array given
+ValueError: gmp_nextprime(): Argument #1 ($num) is not an integer string
+TypeError: gmp_nextprime(): Argument #1 ($num) must be of type GMP|string|int, stdClass given
 Done

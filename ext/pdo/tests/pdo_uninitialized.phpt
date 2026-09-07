@@ -16,24 +16,24 @@ $pdo = new MyPDO;
 try {
     $pdo->query("foo");
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $stmt = new MyPDOStatement;
 try {
     $stmt->fetch();
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $stmt = new MyPDOStatement;
 try {
     foreach ($stmt as $row) {}
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-MyPDO object is uninitialized
-MyPDOStatement object is uninitialized
-MyPDOStatement object is uninitialized
+Error: MyPDO object is uninitialized
+Error: MyPDOStatement object is uninitialized
+Error: MyPDOStatement object is uninitialized
