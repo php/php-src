@@ -101,7 +101,11 @@ int phpdbg_process_print(int fd, int type, const char *msg, int msglen) {
 			if (msg) {
 				struct timeval tp;
 				if (gettimeofday(&tp, NULL) == SUCCESS) {
+#ifdef HAVE_VASPRINTF
 					msgoutlen = phpdbg_asprintf(&msgout, "[%ld %.8F]: %.*s\n", tp.tv_sec, tp.tv_usec / 1000000., msglen, msg);
+#else
+					msgoutlen = phpdbg_asprintf(&msgout, "[%ld 0.%06ld00]: %.*s\n", tp.tv_sec, (long) tp.tv_usec, msglen, msg);
+#endif
 				} else {
 					msgoutlen = FAILURE;
 				}
