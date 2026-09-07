@@ -9216,6 +9216,12 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 	zend_function *func = NULL;
 	ir_ref func_ref, func_ref2, scope_ref, scope_ref2, if_cached, cold_path, ref;
 	ir_ref if_static = IR_UNUSED;
+	bool is_megamorphic_call_from_trait =
+		(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
+		&& opline->op1_type != IS_CONST
+		&& trace
+		&& trace->op == ZEND_JIT_TRACE_INIT_CALL
+		&& trace->func;
 
 	if (info) {
 		call_info = info->callee_info;
@@ -9228,6 +9234,9 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 	}
 
 	ce = zend_get_known_class(op_array, opline, opline->op1_type, opline->op1);
+	if (is_megamorphic_call_from_trait) {
+		ce = NULL;
+	}
 	if (!func && ce && (opline->op1_type == IS_CONST || !(ce->ce_flags & ZEND_ACC_TRAIT))) {
 		zval *zv = RT_CONSTANT(opline, opline->op2);
 		zend_string *method_name;
@@ -9281,14 +9290,15 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 	func_ref = ir_PHI_2(IR_ADDR, func_ref2, func_ref);
 	scope_ref = ir_PHI_2(IR_ADDR, scope_ref2, scope_ref);
 
-	if ((!func || zend_jit_may_be_modified(func, op_array))
+	if ((is_megamorphic_call_from_trait || !func || zend_jit_may_be_modified(func, op_array))
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL
 	 && trace->func) {
 		int32_t exit_point;
 		const void *exit_addr;
 
-		exit_point = zend_jit_trace_get_exit_point(opline, func ? ZEND_JIT_EXIT_INVALIDATE : 0);
+		exit_point = zend_jit_trace_get_exit_point(opline,
+			func && !is_megamorphic_call_from_trait ? ZEND_JIT_EXIT_INVALIDATE : 0);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;
