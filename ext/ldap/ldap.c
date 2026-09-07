@@ -879,7 +879,7 @@ PHP_MINIT_FUNCTION(ldap)
 	ldap_link_object_handlers.clone_obj = NULL;
 	ldap_link_object_handlers.compare = zend_objects_not_comparable;
 
-	ldap_result_ce = register_class_LDAP_Result(zend_ce_iterator);
+	ldap_result_ce = register_class_LDAP_Result(zend_ce_iterator, zend_ce_countable);
 	ldap_result_ce->create_object = ldap_result_create_object;
 	ldap_result_ce->default_object_handlers = &ldap_result_object_handlers;
 
@@ -1936,6 +1936,20 @@ PHP_FUNCTION(ldap_free_result)
 /* }}} */
 
 /* {{{ Count the number of entries in a search result */
+PHP_METHOD(LDAP_Result, count)
+{
+	ldap_linkdata *ld;
+	ldap_resultdata *ldap_result;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ldap_result = Z_LDAP_RESULT_P(ZEND_THIS);
+	ld = Z_LDAP_LINK_P(&ldap_result->ld);
+	VERIFY_LDAP_LINK_CONNECTED(ld);
+	VERIFY_LDAP_RESULT_OPEN(ldap_result);
+
+	RETURN_LONG(ldap_count_entries(ld->link, ldap_result->result));
+}
 PHP_FUNCTION(ldap_count_entries)
 {
 	zval *link, *result;
