@@ -4406,7 +4406,7 @@ PHP_FUNCTION(array_keys)
 
 	/* Base case: empty input */
 	if (!elem_count) {
-		RETURN_COPY(input);
+		RETURN_EMPTY_ARRAY();
 	}
 
 	/* Initialize return array */

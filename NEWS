@@ -91,6 +91,8 @@ PHP                                                                        NEWS
     INT_MAX instead of truncating it. (marc-mabe)
   . Fixed GH-23338 (fsockopen()/pfsockopen() ValueError reported wrong
     argument number for $timeout). (lacatoire)
+  . Fixed bug GH-23576 (Next index for array returned from array_keys() is
+    wrong). (Lazizbek Ergashev)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
