@@ -2428,7 +2428,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 							do {
 								zend_hash_iterators_update(target, iter_pos, target_idx);
 								iter_pos = zend_hash_iterators_lower_pos(target, iter_pos + 1);
-							} while (iter_pos < idx);
+							} while (iter_pos <= idx);
 						}
 						target_idx++; q++;
 					}
