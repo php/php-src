@@ -17,7 +17,7 @@ class TransferDuringNbWrite {
     public function stream_write($data) {
         try {
             (self::$call)(self::$ftp);
-        } catch (\Error $e) {
+        } catch (Throwable $e) {
             echo $e::class, ': ', $e->getMessage(), "\n";
         }
         return strlen($data);
