@@ -145,9 +145,7 @@ odbc_connection *odbc_get_conn(HashTable *list, int count);
 void odbc_del_conn(HashTable *list, int ind);
 void odbc_bindcols(odbc_result *result);
 
-#define ODBC_SQL_ERROR_PARAMS odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, char *func
-
-void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
+void odbc_sql_error(odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, const char *func, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
 
 #define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR || x == SQL_WLONGVARCHAR)
 
