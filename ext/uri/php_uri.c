@@ -1088,31 +1088,31 @@ PHP_FUNCTION(Uri_WhatWg_url_percent_encode)
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Username:
 			ZEND_FALLTHROUGH;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Password:
-			str = php_uri_parser_whatwg_percent_encode_userinfo_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_userinfo_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_OpaqueHost:
-			str = php_uri_parser_whatwg_percent_encode_opaque_host_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_opaque_host_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Path:
-			str = php_uri_parser_whatwg_percent_encode_path_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_path_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_OpaquePath:
-			str = php_uri_parser_whatwg_percent_encode_opaque_path_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_opaque_path_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_PathSegment:
-			str = php_uri_parser_whatwg_percent_encode_path_segment_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_path_segment_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Query:
-			str = php_uri_parser_whatwg_percent_encode_query_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_query_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_SpecialQuery:
-			str = php_uri_parser_whatwg_percent_encode_special_query_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_special_query_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_FormQuery:
-			str = php_uri_parser_whatwg_percent_encode_form_query_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_form_query_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		case ZEND_ENUM_Uri_WhatWg_UrlPercentEncodingMode_Fragment:
-			str = php_uri_parser_whatwg_percent_encode_fragment_component(ZSTR_VAL(input), ZSTR_LEN(input));
+			str = php_uri_parser_whatwg_fragment_percent_encode(ZSTR_VAL(input), ZSTR_LEN(input));
 			break;
 		default: ZEND_UNREACHABLE();
 	}
@@ -1216,7 +1216,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, setScheme)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("scheme"),
-		php_uri_parser_rfc3986_validate_scheme
+		php_uri_parser_rfc3986_scheme_validate
 	);
 }
 
@@ -1225,7 +1225,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, setUserInfo)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("userinfo"),
-		php_uri_parser_rfc3986_validate_userinfo
+		php_uri_parser_rfc3986_userinfo_validate
 	);
 }
 
@@ -1234,7 +1234,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, setHost)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("host"),
-		php_uri_parser_rfc3986_validate_host
+		php_uri_parser_rfc3986_host_validate
 	);
 }
 
@@ -1243,7 +1243,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, setPort)
 	php_uri_builder_set_component_long_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("port"),
-		php_uri_parser_rfc3986_validate_port
+		php_uri_parser_rfc3986_port_validate
 	);
 }
 
@@ -1252,7 +1252,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, setPath)
 	php_uri_builder_set_component_string(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("path"),
-		php_uri_parser_rfc3986_validate_path
+		php_uri_parser_rfc3986_path_validate
 	);
 }
 
@@ -1261,7 +1261,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, setQuery)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("query"),
-		php_uri_parser_rfc3986_validate_query
+		php_uri_parser_rfc3986_query_validate
 	);
 }
 
@@ -1270,7 +1270,7 @@ PHP_METHOD(Uri_Rfc3986_UriBuilder, setFragment)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("fragment"),
-		php_uri_parser_rfc3986_validate_fragment
+		php_uri_parser_rfc3986_fragment_validate
 	);
 }
 
@@ -1334,7 +1334,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setScheme)
 	php_uri_builder_set_component_string(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("scheme"),
-		php_uri_parser_whatwg_validate_scheme
+		php_uri_parser_whatwg_scheme_validate
 	);
 }
 
@@ -1343,7 +1343,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setUsername)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("username"),
-		php_uri_parser_whatwg_validate_none
+		php_uri_parser_whatwg_none_validate
 	);
 }
 
@@ -1352,7 +1352,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setPassword)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("password"),
-		php_uri_parser_whatwg_validate_none
+		php_uri_parser_whatwg_none_validate
 	);
 }
 
@@ -1361,7 +1361,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setHost)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("host"),
-		php_uri_parser_whatwg_validate_host
+		php_uri_parser_whatwg_host_validate
 	);
 }
 
@@ -1370,7 +1370,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setPort)
 	php_uri_builder_set_component_long_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("port"),
-		php_uri_parser_whatwg_validate_port
+		php_uri_parser_whatwg_port_validate
 	);
 }
 
@@ -1379,7 +1379,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setPath)
 	php_uri_builder_set_component_string(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("path"),
-		php_uri_parser_whatwg_validate_none
+		php_uri_parser_whatwg_none_validate
 	);
 }
 
@@ -1388,7 +1388,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setQuery)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("query"),
-		php_uri_parser_whatwg_validate_none
+		php_uri_parser_whatwg_none_validate
 	);
 }
 
@@ -1397,7 +1397,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setFragment)
 	php_uri_builder_set_component_string_or_null(
 		INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ZEND_STRL("fragment"),
-		php_uri_parser_whatwg_validate_none
+		php_uri_parser_whatwg_none_validate
 	);
 }
 
