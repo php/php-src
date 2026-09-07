@@ -482,6 +482,7 @@ void shutdown_executor(void) /* {{{ */
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
 	} else {
 		zend_vm_stack_destroy();
+		zend_vm_stack_destroy_caches();
 
 		if (EG(full_tables_cleanup)) {
 			zend_hash_reverse_apply(EG(function_table), clean_non_persistent_function_full);
