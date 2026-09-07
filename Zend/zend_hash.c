@@ -1412,7 +1412,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 								do {
 									zend_hash_iterators_update(ht, iter_pos, j);
 									iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
-								} while (iter_pos < i);
+								} while (iter_pos <= i);
 							}
 							q++;
 							j++;
