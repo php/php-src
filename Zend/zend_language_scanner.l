@@ -327,14 +327,13 @@ ZEND_API zend_result zend_lex_tstring(zval *zv, unsigned char *ident)
 static const zend_encoding *zend_multibyte_detect_utf_encoding(const unsigned char *script, size_t script_size)
 {
 	const unsigned char *p;
+	size_t offset = 0;
 	int wchar_size = 2;
 	int le = 0;
 
 	/* utf-16 or utf-32? */
-	p = script;
-	assert(p >= script);
-	while ((size_t)(p-script) < script_size) {
-		p = memchr(p, 0, script_size-(p-script)-2);
+	while (offset < script_size && script_size - offset > 2) {
+		p = memchr(script + offset, 0, script_size - offset - 2);
 		if (!p) {
 			break;
 		}
@@ -344,13 +343,13 @@ static const zend_encoding *zend_multibyte_detect_utf_encoding(const unsigned ch
 		}
 
 		/* searching for UTF-32 specific byte orders, so this will do */
-		p += 4;
+		offset = p - script + 4;
 	}
 
 	/* BE or LE? */
-	p = script;
-	assert(p >= script);
-	while ((size_t)(p-script) < script_size) {
+	offset = 0;
+	while (script_size - offset >= (size_t) wchar_size) {
+		p = script + offset;
 		if (*p == '\0' && *(p+wchar_size-1) != '\0') {
 			/* BE */
 			le = 0;
@@ -360,7 +359,7 @@ static const zend_encoding *zend_multibyte_detect_utf_encoding(const unsigned ch
 			le = 1;
 			break;
 		}
-		p += wchar_size;
+		offset += wchar_size;
 	}
 
 	if (wchar_size == 2) {
