@@ -78,6 +78,8 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed WSDL cache corruption when a soap:header defines headerfaults.
     (Ilia Alshanetsky)
+  . Fixed stack overflow when parsing a WSDL with self-referential schema
+    groups or attributeGroups. (Ilia Alshanetsky)
 
 - Sodium:
   . Added support for the libsodium 1.0.22 KEM APIs (X-Wing and ML-KEM768).
