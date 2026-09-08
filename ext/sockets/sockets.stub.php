@@ -40,6 +40,38 @@ const AF_DIVERT = UNKNOWN;
  */
 const AF_PACKET = UNKNOWN;
 #endif
+#ifdef AF_VSOCK
+/**
+ * @var int
+ * @cvalue AF_VSOCK
+ */
+const AF_VSOCK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue VMADDR_CID_ANY
+ */
+const VMADDR_CID_ANY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue VMADDR_CID_HYPERVISOR
+ */
+const VMADDR_CID_HYPERVISOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue VMADDR_CID_LOCAL
+ */
+const VMADDR_CID_LOCAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue VMADDR_CID_HOST
+ */
+const VMADDR_CID_HOST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue VMADDR_PORT_ANY
+ */
+const VMADDR_PORT_ANY = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SOCK_STREAM
