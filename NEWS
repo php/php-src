@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.27
 
+- Tokenizer:
+  . Fixed GH-23552 (token_get_all() does not retag a reserved keyword used as a
+    class constant name when the same keyword appears in the initializer).
+    (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.4.26
 
