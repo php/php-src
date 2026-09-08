@@ -410,7 +410,6 @@ PHP                                                                        NEWS
     (Girgias)
   . The SORT_LOCALE_STRING constant for the family of sort functions is now
     deprecated, use one of the following functions instead:
-    * Collator::sort()
     * Collator::asort()
     * Collator::sort()
     * Collator::sortWithSortKeys()
