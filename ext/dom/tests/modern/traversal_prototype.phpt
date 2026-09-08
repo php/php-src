@@ -82,4 +82,4 @@ s3
 s1
 s2
 s3
-DOM\Element::up(): Argument #2 ($index) must be greater than or equal to 0
+Dom\Element::up(): Argument #2 ($index) must be greater than or equal to 0
