@@ -119,7 +119,11 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
 #endif
 
 #ifdef AF_VSOCK
-#define PHP_VSOCK_ID_MAX ((int64_t) UINT32_MAX)
+#if SIZEOF_ZEND_LONG > 4
+# define PHP_VSOCK_ID_OUT_OF_RANGE(v) ((v) < INT32_MIN || (v) > (zend_long) UINT32_MAX)
+#else
+# define PHP_VSOCK_ID_OUT_OF_RANGE(v) 0
+#endif
 
 static bool php_set_vsock_addr(struct sockaddr_vm *svm, zend_string *addr, zend_long port,
 		uint32_t addr_arg_num, uint32_t port_arg_num)
@@ -128,13 +132,13 @@ static bool php_set_vsock_addr(struct sockaddr_vm *svm, zend_string *addr, zend_
 	double dval;
 
 	if (is_numeric_string(ZSTR_VAL(addr), ZSTR_LEN(addr), &cid, &dval, 0) != IS_LONG
-			|| (int64_t) cid < INT32_MIN || (int64_t) cid > PHP_VSOCK_ID_MAX) {
+			|| PHP_VSOCK_ID_OUT_OF_RANGE(cid)) {
 		zend_argument_value_error(addr_arg_num, "must be a numeric context ID between 0 and " ZEND_ULONG_FMT,
 			(zend_ulong) UINT32_MAX);
 		return false;
 	}
 
-	if ((int64_t) port < INT32_MIN || (int64_t) port > PHP_VSOCK_ID_MAX) {
+	if (PHP_VSOCK_ID_OUT_OF_RANGE(port)) {
 		zend_argument_value_error(port_arg_num, "must be between 0 and " ZEND_ULONG_FMT, (zend_ulong) UINT32_MAX);
 		return false;
 	}
