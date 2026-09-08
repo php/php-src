@@ -13,6 +13,6 @@ namespace {
 
 ?>
 --EXPECTF--
-Deprecated: Using "_" as a constant name is deprecated in %s on line %d
+Deprecated: Using "_" as a constant name is deprecated since 8.6 in %s on line %d
 
-Deprecated: Using "_" as a constant name is deprecated in %s on line %d
+Deprecated: Using "_" as a constant name is deprecated since 8.6 in %s on line %d

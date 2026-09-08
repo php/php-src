@@ -10219,7 +10219,7 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 				zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated");
 				break;
 			case ZEND_SYMBOL_CONST:
-				zend_error(E_DEPRECATED, "Using \"_\" as a constant name is deprecated");
+				zend_error(E_DEPRECATED, "Using \"_\" as a constant name is deprecated since 8.6");
 				break;
 			case ZEND_SYMBOL_FUNCTION:
 				break;
