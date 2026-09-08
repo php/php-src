@@ -1404,12 +1404,12 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, setFragment)
 PHP_METHOD(Uri_WhatWg_UrlBuilder, build)
 {
 	zval *base_url_zv = NULL;
-	zval *errors = NULL;
+	zval *soft_errors = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(base_url_zv, php_uri_ce_whatwg_url)
-		Z_PARAM_ZVAL(errors)
+		Z_PARAM_ZVAL(soft_errors)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const zval *scheme = Z_WHATWG_URL_PROP_SCHEME_DEREF_P(ZEND_THIS);
@@ -1430,7 +1430,7 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, build)
 
 	lxb_url_t *lexbor_url = php_uri_parser_whatwg_build_from_zval(
 		base_url, scheme, username, password, host, port, path, query, fragment,
-		errors
+		soft_errors
 	);
 	if (lexbor_url == NULL) {
 		RETURN_THROWS();

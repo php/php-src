@@ -7,12 +7,12 @@ $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("foo");
 $builder->setHost("example.com");
 $builder->setFragment("\tfo\no");
-$errors = [];
-$url = $builder->build(errors: $errors);
+$softErrors = [];
+$url = $builder->build(softErrors: $softErrors);
 
 var_dump($url->toAsciiString());
 var_dump($url);
-var_dump($errors);
+var_dump($softErrors);
 var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
