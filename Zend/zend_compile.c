@@ -4925,15 +4925,14 @@ static zend_result zend_compile_func_array_slice(znode *result, const zend_ast_l
 
 static uint32_t find_frameless_function_offset(uint32_t arity, const void *handler)
 {
-	void **handlers = zend_flf_handlers;
-	void **current = handlers;
-	while (current) {
-		if (*current == handler) {
-			return current - handlers;
+	for (size_t i = 0; i < zend_flf_count; i++) {
+		if (zend_flf_handlers[i] == handler) {
+			return (uint32_t)i;
 		}
-		current++;
 	}
 
+	/* Unreachable in practice: zend_register_functions() records the handler
+	 * of every frameless_function_infos entry at registration time. */
 	return (uint32_t)-1;
 }
 
@@ -4963,10 +4962,9 @@ static const zend_frameless_function_info *find_frameless_function_info(const ze
 		  || frameless_function_info->num_args == args->children)) {
 			uint32_t num_args = frameless_function_info->num_args;
 			uint32_t offset = find_frameless_function_offset(num_args, frameless_function_info->handler);
-			if (offset == (uint32_t)-1) {
-				continue;
+			if (offset != (uint32_t)-1) {
+				return frameless_function_info;
 			}
-			return frameless_function_info;
 		}
 		frameless_function_info++;
 	}
