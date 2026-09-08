@@ -8919,7 +8919,7 @@ ZEND_VM_C_LABEL(type_check_resource):
 			ZEND_VM_C_GOTO(type_check_resource);
 		}
 	} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
+		result = (MAY_BE_NULL & opline->extended_value) != 0;
 		SAVE_OPLINE();
 		ZVAL_UNDEFINED_OP1();
 		if (UNEXPECTED(EG(exception))) {

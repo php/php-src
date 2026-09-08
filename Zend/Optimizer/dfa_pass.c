@@ -36,7 +36,7 @@
 # include "ssa_integrity.c"
 #endif
 
-zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
+zend_result zend_dfa_analyze_op_array(const zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
 	uint32_t build_flags;
 
@@ -111,7 +111,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 static void zend_ssa_remove_nops(zend_op_array *op_array, const zend_ssa *ssa, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
-	zend_basic_block *blocks_end = blocks + ssa->cfg.blocks_count;
+	const zend_basic_block *blocks_end = blocks + ssa->cfg.blocks_count;
 	zend_basic_block *b;
 	zend_func_info *func_info;
 	int j;
@@ -475,9 +475,9 @@ static uint32_t zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 				 * instances of a PFA. */
 				uint32_t const_args = 0;
 				for (uint32_t i = 0, l = MIN(sizeof(const_args)*CHAR_BIT, call_info->num_args); i < l; i++) {
-					zend_op *send_opline = call_info->arg_info[i].opline;
+					const zend_op *send_opline = call_info->arg_info[i].opline;
 					if (send_opline->op1_type == IS_CONST) {
-						zval *value = CT_CONSTANT_EX(op_array, send_opline->op1.constant);
+						const zval *value = CT_CONSTANT_EX(op_array, send_opline->op1.constant);
 						if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 							/* Const exprs can evaluate to non-const zvals (e.g. objects), and are not idempotent */
 							continue;
@@ -536,10 +536,10 @@ static zend_always_inline void take_successor_ex(zend_ssa *ssa, uint32_t block_n
 	block->successors_count = 1;
 }
 
-static void compress_block(zend_op_array *op_array, zend_basic_block *block)
+static void compress_block(const zend_op_array *op_array, zend_basic_block *block)
 {
 	while (block->len > 0) {
-		zend_op *opline = &op_array->opcodes[block->start + block->len - 1];
+		const zend_op *opline = &op_array->opcodes[block->start + block->len - 1];
 
 		if (opline->opcode == ZEND_NOP) {
 			block->len--;
@@ -552,7 +552,6 @@ static void compress_block(zend_op_array *op_array, zend_basic_block *block)
 static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int new_pred) {
 	zend_basic_block *block = &ssa->cfg.blocks[block_id];
 	int *predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
-	zend_ssa_phi *phi;
 
 	int old_pred_idx = -1;
 	int new_pred_idx = -1;
@@ -579,7 +578,7 @@ static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int n
 		);
 
 		/* Also remove the corresponding phi node entries */
-		for (phi = ssa->blocks[block_id].phis; phi; phi = phi->next) {
+		for (zend_ssa_phi *phi = ssa->blocks[block_id].phis; phi; phi = phi->next) {
 			if (phi->pi >= 0) {
 				if (phi->pi == old_pred || phi->pi == new_pred) {
 					zend_ssa_rename_var_uses(
@@ -604,7 +603,6 @@ static void zend_ssa_replace_control_link(const zend_op_array *op_array, zend_ss
 	const zend_basic_block *src = &ssa->cfg.blocks[from];
 	const zend_basic_block *old = &ssa->cfg.blocks[to];
 	const zend_basic_block *dst = &ssa->cfg.blocks[new_to];
-	zend_op *opline;
 
 	for (uint32_t i = 0; i < src->successors_count; i++) {
 		if (src->successors[i] == to) {
@@ -613,7 +611,7 @@ static void zend_ssa_replace_control_link(const zend_op_array *op_array, zend_ss
 	}
 
 	if (src->len > 0) {
-		opline = op_array->opcodes + src->start + src->len - 1;
+		zend_op *opline = op_array->opcodes + src->start + src->len - 1;
 		switch (opline->opcode) {
 			case ZEND_JMP:
 			case ZEND_FAST_CALL:
@@ -653,7 +651,7 @@ static void zend_ssa_replace_control_link(const zend_op_array *op_array, zend_ss
 			case ZEND_SWITCH_STRING:
 			case ZEND_MATCH:
 				{
-					HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+					const HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 					zval *zv;
 					ZEND_HASH_FOREACH_VAL(jumptable, zv) {
 						if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)) == old->start) {
@@ -675,12 +673,12 @@ static void zend_ssa_unlink_block(const zend_op_array *op_array, zend_ssa *ssa, 
 {
 	if (block->predecessors_count == 1 && ssa->blocks[block_num].phis == NULL) {
 		int *predecessors;
-		zend_basic_block *fe_fetch_block = NULL;
+		const zend_basic_block *fe_fetch_block = NULL;
 
 		ZEND_ASSERT(block->successors_count == 1);
 		predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
 		if (block->predecessors_count == 1 && (block->flags & ZEND_BB_FOLLOW)) {
-			zend_basic_block *pred_block = &ssa->cfg.blocks[predecessors[0]];
+			const zend_basic_block *pred_block = &ssa->cfg.blocks[predecessors[0]];
 
 			if (pred_block->len > 0 && (pred_block->flags & ZEND_BB_REACHABLE)) {
 				if ((op_array->opcodes[pred_block->start + pred_block->len - 1].opcode == ZEND_FE_FETCH_R
@@ -704,7 +702,7 @@ static void zend_ssa_unlink_block(const zend_op_array *op_array, zend_ssa *ssa, 
 	}
 }
 
-static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
+static int zend_dfa_optimize_jmps(const zend_op_array *op_array, zend_ssa *ssa)
 {
 	int removed_ops = 0;
 	uint32_t block_num = 0;
@@ -911,7 +909,7 @@ optimize_jmpnz:
 				case ZEND_SWITCH_STRING:
 				case ZEND_MATCH:
 					if (opline->op1_type == IS_CONST) {
-						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+						const zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
 						uint8_t type = Z_TYPE_P(zv);
 						bool correct_type =
 							(opline->opcode == ZEND_SWITCH_LONG && type == IS_LONG)
@@ -1136,7 +1134,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 // op_1: ASSIGN ? -> #v [use_as_double], long(?) => ASSIGN ? -> #v, double(?)
 
-					zval *zv = CT_CONSTANT_EX(op_array, opline->op2.constant);
+					const zval *zv = CT_CONSTANT_EX(op_array, opline->op2.constant);
 					ZEND_ASSERT(Z_TYPE_INFO_P(zv) == IS_LONG);
 					ZVAL_DOUBLE(&tmp, zval_get_double(zv));
 					opline->op2.constant = zend_optimizer_add_literal(op_array, &tmp);
@@ -1147,7 +1145,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 // op_1: QM_ASSIGN #v [use_as_double], long(?) => QM_ASSIGN #v, double(?)
 
-					zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+					const zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
 					ZEND_ASSERT(Z_TYPE_INFO_P(zv) == IS_LONG);
 					ZVAL_DOUBLE(&tmp, zval_get_double(zv));
 					opline->op1.constant = zend_optimizer_add_literal(op_array, &tmp);
@@ -1164,7 +1162,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				) {
 
 					if (opline->op1_type == IS_CONST && opline->op2_type != IS_CONST) {
-						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+						const zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
 
 						if ((OP2_INFO() & MAY_BE_ANY) == MAY_BE_DOUBLE
 						 && Z_TYPE_INFO_P(zv) == IS_LONG) {
@@ -1217,7 +1215,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 							}
 						}
 					} else if (opline->op1_type != IS_CONST && opline->op2_type == IS_CONST) {
-						zval *zv = CT_CONSTANT_EX(op_array, opline->op2.constant);
+						const zval *zv = CT_CONSTANT_EX(op_array, opline->op2.constant);
 
 						if ((OP1_INFO() & MAY_BE_ANY) == MAY_BE_DOUBLE
 						 && Z_TYPE_INFO_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == IS_LONG) {

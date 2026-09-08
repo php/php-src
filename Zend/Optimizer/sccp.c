@@ -387,7 +387,7 @@ static inline zend_result fetch_array_elem(zval **result, const zval *op1, const
 	}
 }
 
-static inline zend_result ct_eval_fetch_dim(zval *result, const zval *op1, const zval *op2, int support_strings) {
+static inline zend_result ct_eval_fetch_dim(zval *result, const zval *op1, const zval *op2, bool support_strings) {
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
 		zval *value;
 		if (fetch_array_elem(&value, op1, op2) == SUCCESS && value && !IS_BOT(value)) {
@@ -587,20 +587,19 @@ static inline zend_result ct_eval_assign_dim(zval *result, zval *value, const zv
 	}
 }
 
-static inline zend_result fetch_obj_prop(zval **result, const zval *op1, const zval *op2) {
+static inline zval* fetch_obj_prop(const zval *op1, const zval *op2) {
 	switch (Z_TYPE_P(op2)) {
 		case IS_STRING:
-			*result = zend_symtable_find(Z_ARR_P(op1), Z_STR_P(op2));
-			return SUCCESS;
+			return zend_symtable_find(Z_ARR_P(op1), Z_STR_P(op2));
 		default:
-			return FAILURE;
+			return NULL;
 	}
 }
 
 static inline zend_result ct_eval_fetch_obj(zval *result, const zval *op1, const zval *op2) {
 	if (IS_PARTIAL_OBJECT(op1)) {
-		zval *value;
-		if (fetch_obj_prop(&value, op1, op2) == SUCCESS && value && !IS_BOT(value)) {
+		const zval *value = fetch_obj_prop(op1, op2);
+		if (value && !IS_BOT(value)) {
 			ZVAL_COPY(result, value);
 			return SUCCESS;
 		}
@@ -610,10 +609,7 @@ static inline zend_result ct_eval_fetch_obj(zval *result, const zval *op1, const
 
 static inline zend_result ct_eval_isset_obj(zval *result, uint32_t extended_value, const zval *op1, const zval *op2) {
 	if (IS_PARTIAL_OBJECT(op1)) {
-		zval *value;
-		if (fetch_obj_prop(&value, op1, op2) == FAILURE) {
-			return FAILURE;
-		}
+		zval *value = fetch_obj_prop(op1, op2);
 		if (!value || IS_BOT(value)) {
 			return FAILURE;
 		}
@@ -1301,7 +1297,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 					SKIP_IF_TOP(data);
 
-					if (ct_eval_fetch_dim(&tmp, op1, op2, 0) == SUCCESS) {
+					if (ct_eval_fetch_dim(&tmp, op1, op2, false) == SUCCESS) {
 						if (IS_BOT(data)) {
 							dup_partial_array(&zv, op1);
 							ct_eval_del_array_elem(&zv, op2);

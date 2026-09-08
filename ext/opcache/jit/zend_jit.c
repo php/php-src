@@ -565,9 +565,9 @@ static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
 	return c && (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 }
 
-static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, const zend_op *opline, uint8_t op_type, znode_op op)
+static const zend_class_entry* zend_get_known_class(const zend_op_array *op_array, const zend_op *opline, uint8_t op_type, znode_op op)
 {
-	zend_class_entry *ce = NULL;
+	const zend_class_entry *ce = NULL;
 
 	if (op_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(opline, op);
@@ -602,7 +602,7 @@ static zend_class_entry* zend_get_known_class(const zend_op_array *op_array, con
 	return ce;
 }
 
-static zend_property_info* zend_get_known_property_info(const zend_op_array *op_array, zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
+static zend_property_info* zend_get_known_property_info(const zend_op_array *op_array, const zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
 {
 	zend_property_info *info = NULL;
 
@@ -621,7 +621,7 @@ static zend_property_info* zend_get_known_property_info(const zend_op_array *op_
 		}
 
 		if (ce->parent) {
-			zend_class_entry *parent = ce->parent;
+			const zend_class_entry *parent = ce->parent;
 
 			do {
 				if (parent->type == ZEND_INTERNAL_CLASS) {

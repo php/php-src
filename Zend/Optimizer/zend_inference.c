@@ -1829,7 +1829,7 @@ static void zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {
 	int *scc_var;
 	zend_ssa_phi *p;
 	zend_ssa_range tmp;
-	int scc, j;
+	int j;
 	ALLOCA_FLAG(use_heap);
 
 	worklist = do_alloca(
@@ -1850,7 +1850,7 @@ static void zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {
 		}
 	}
 
-	for (scc = 0; scc < ssa->sccs; scc++) {
+	for (int scc = 0; scc < ssa->sccs; scc++) {
 		j = scc_var[scc];
 		if (next_scc_var[j] < 0) {
 			/* SCC with a single element */
@@ -2037,10 +2037,9 @@ static void add_usages(const zend_op_array *op_array, const zend_ssa *ssa, zend_
 	}
 	if (ssa->vars[var].use_chain >= 0) {
 		int use = ssa->vars[var].use_chain;
-		const zend_ssa_op *op;
 
 		do {
-			op = ssa->ops + use;
+			const zend_ssa_op *op = ssa->ops + use;
 			if (op->result_def >= 0) {
 				zend_bitset_incl(worklist, op->result_def);
 			}

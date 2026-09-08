@@ -4375,7 +4375,7 @@ static zend_result zend_compile_func_typecheck(znode *result, const zend_ast_lis
 	if (type != _IS_BOOL) {
 		opline->extended_value = (1 << type);
 	} else {
-		opline->extended_value = (1 << IS_FALSE) | (1 << IS_TRUE);
+		opline->extended_value = MAY_BE_BOOL;
 	}
 	return SUCCESS;
 }
@@ -4392,7 +4392,7 @@ static zend_result zend_compile_func_is_scalar(znode *result, const zend_ast_lis
 
 	zend_compile_expr(&arg_node, args->child[0]);
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
-	opline->extended_value = (1 << IS_FALSE | 1 << IS_TRUE | 1 << IS_DOUBLE | 1 << IS_LONG | 1 << IS_STRING);
+	opline->extended_value = (MAY_BE_BOOL | MAY_BE_DOUBLE | MAY_BE_LONG | MAY_BE_STRING);
 	return SUCCESS;
 }
 

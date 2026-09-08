@@ -9233,7 +9233,6 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_call_info *call_info = NULL;
-	zend_class_entry *ce;
 	zend_function *func = NULL;
 	ir_ref func_ref, func_ref2, scope_ref, scope_ref2, if_cached, cold_path, ref;
 	ir_ref if_static = IR_UNUSED;
@@ -9248,7 +9247,7 @@ static int zend_jit_init_static_method_call(zend_jit_ctx         *jit,
 		}
 	}
 
-	ce = zend_get_known_class(op_array, opline, opline->op1_type, opline->op1);
+	const zend_class_entry *ce = zend_get_known_class(op_array, opline, opline->op1_type, opline->op1);
 	if (!func && ce && (opline->op1_type == IS_CONST || !(ce->ce_flags & ZEND_ACC_TRAIT))) {
 		zval *zv = RT_CONSTANT(opline, opline->op2);
 		zend_string *method_name;
@@ -16127,9 +16126,7 @@ static int zend_jit_fetch_static_prop(zend_jit_ctx *jit, const zend_op *opline, 
 	ir_ref ref, ref2, if_cached, fast_path, cold_path, prop_info_ref, if_typed, if_def;
 	int fetch_type;
 	zend_property_info *known_prop_info = NULL;
-	zend_class_entry *ce;
-
-	ce = zend_get_known_class(op_array, opline, opline->op2_type, opline->op2);
+	const zend_class_entry *ce = zend_get_known_class(op_array, opline, opline->op2_type, opline->op2);
 	if (ce && (opline->op2_type == IS_CONST || !(ce->ce_flags & ZEND_ACC_TRAIT))) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zend_string *prop_name;
