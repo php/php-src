@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0beta3
+10 Sep 2026, PHP 8.6.0beta3
 
 - BCMath:
   . Fixed out-of-bounds read in bc_is_zero_for_scale() when scale exceeds
