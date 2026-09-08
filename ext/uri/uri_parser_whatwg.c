@@ -148,6 +148,23 @@ ZEND_ATTRIBUTE_NONNULL static bool get_reason_from_error_type(const lxb_url_erro
 	}
 }
 
+ZEND_ATTRIBUTE_NONNULL static bool append_validation_error(
+	HashTable *errors, lxb_url_error_type_t error_type, const char *context, const char **reason
+) {
+	zval error;
+	object_init_ex(&error, php_uri_ce_whatwg_url_validation_error);
+	zend_update_property_string(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("context"), context);
+
+	bool failure = get_reason_from_error_type(error_type, reason);
+	zval type;
+	ZVAL_OBJ(&type, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_validation_error_type, *reason));
+	zend_update_property_ex(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZSTR_KNOWN(ZEND_STR_TYPE), &type);
+	zend_update_property_bool(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("failure"), failure);
+	zend_hash_next_index_insert(errors, &error);
+
+	return failure;
+}
+
 /**
  * Creates a Uri\WhatWg\UrlValidationError class by mapping error codes listed in
  * https://url.spec.whatwg.org/#writing to a Uri\WhatWg\UrlValidationErrorType enum.
@@ -159,26 +176,10 @@ ZEND_ATTRIBUTE_NONNULL static const char *fill_errors_inner(HashTable *errors)
 
 	lexbor_plog_entry_t *lxb_error;
 	while ((lxb_error = lexbor_array_obj_pop(&lexbor_parser.log->list)) != NULL) {
-		zval error;
-		object_init_ex(&error, php_uri_ce_whatwg_url_validation_error);
-		zend_update_property_string(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("context"), (const char *) lxb_error->data);
-
-		const char *error_str;
-		zval failure;
-
-		ZVAL_BOOL(&failure, get_reason_from_error_type(lxb_error->id, &error_str));
-
-		zval error_type;
-		ZVAL_OBJ(&error_type, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_validation_error_type, error_str));
-		zend_update_property_ex(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZSTR_KNOWN(ZEND_STR_TYPE), &error_type);
-
-		zend_update_property(php_uri_ce_whatwg_url_validation_error, Z_OBJ(error), ZEND_STRL("failure"), &failure);
-
-		if (Z_TYPE(failure) == IS_TRUE) {
-			result = error_str;
+		const char *reason;
+		if (append_validation_error(errors, lxb_error->id, (const char *) lxb_error->data, &reason)) {
+			result = reason;
 		}
-
-		zend_hash_next_index_insert(errors, &error);
 	}
 
 	return result;
@@ -735,22 +736,31 @@ static void php_uri_parser_whatwg_destroy(void *uri)
 	lxb_url_destroy(lexbor_uri);
 }
 
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_throw_exception(const char *message)
+{
+	zend_object *exception = zend_throw_exception(php_uri_ce_whatwg_invalid_url_exception, message, 0);
+	zval errors;
+	ZVAL_EMPTY_ARRAY(&errors);
+	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &errors);
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_always_inline zend_result php_uri_parser_whatwg_component_error(
 	const char *component_name, const lxb_url_error_type_t error_type
 ) {
-	const char *reason = "";
+	zval errors;
+	array_init(&errors);
+
+	const char *reason = NULL;
 	if (error_type != LXB_URL_ERROR_TYPE__LAST_ENTRY) {
-		get_reason_from_error_type(error_type, &reason);
+		append_validation_error(Z_ARRVAL(errors), error_type, "", &reason);
 	}
 
-	zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception,
-		0,
-		"The specified %s is malformed%s%s%s",
-		component_name,
-		reason ? " (" : "",
-		reason ? reason : "",
-		reason ? ")" : ""
-	);
+	zend_object *exception = zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception,
+		0, "The specified %s is malformed%s%s%s", component_name,
+		reason ? " (" : "", reason ? reason : "", reason ? ")" : "");
+
+	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &errors);
+	zval_ptr_dtor(&errors);
 
 	return FAILURE;
 }
@@ -984,17 +994,17 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		php_uri_parser_whatwg_get_special_scheme(Z_STR_P(scheme)) == LXB_URL_SCHEMEL_TYPE_FILE
 	) {
 		if (Z_TYPE_P(username) != IS_NULL) {
-			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have username");
+			php_uri_parser_whatwg_throw_exception("The specified URL cannot have username");
 			return NULL;
 		}
 
 		if (Z_TYPE_P(password) != IS_NULL) {
-			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have password");
+			php_uri_parser_whatwg_throw_exception("The specified URL cannot have password");
 			return NULL;
 		}
 
 		if (Z_TYPE_P(port) != IS_NULL) {
-			zend_throw_exception_ex(php_uri_ce_whatwg_invalid_url_exception, 0, "The specified URL cannot have port");
+			php_uri_parser_whatwg_throw_exception("The specified URL cannot have port");
 			return NULL;
 		}
 	}
@@ -1003,7 +1013,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 
 	lxb_url_t *lexbor_url = lexbor_mraw_calloc(lexbor_parser.mraw, sizeof(*lexbor_url));
 	if (lexbor_url == NULL) {
-		zend_throw_exception(php_uri_ce_whatwg_invalid_url_exception, "Memory allocation error", 0);
+		php_uri_parser_whatwg_throw_exception("Memory allocation error");
 		return NULL;
 	}
 
