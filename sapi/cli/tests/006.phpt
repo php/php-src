@@ -63,7 +63,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Constant [ <persistent> string PCRE_VERSION ] { %s }
     Constant [ <persistent> int PCRE_VERSION_MAJOR ] { %d }
     Constant [ <persistent> int PCRE_VERSION_MINOR ] { %d }
-    Constant [ <persistent> bool PCRE_JIT_SUPPORT ] { %d }
+    Constant [ <persistent> bool PCRE_JIT_SUPPORT ] { true }
   }
 
   - Functions {
