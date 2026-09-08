@@ -576,11 +576,31 @@ PHP_MINFO_FUNCTION(odbc)
 }
 /* }}} */
 
+static SQLRETURN odbc_diag_rec(ODBC_SQL_ENV_T henv, ODBC_SQL_CONN_T conn, ODBC_SQL_STMT_T stmt,
+		char *state, char *errormsg, SQLSMALLINT errormsg_size)
+{
+	SQLINTEGER native_error;
+	SQLSMALLINT handle_type;
+	SQLHANDLE handle;
+
+	if (stmt != SQL_NULL_HSTMT) {
+		handle_type = SQL_HANDLE_STMT;
+		handle = (SQLHANDLE) stmt;
+	} else if (conn != SQL_NULL_HDBC) {
+		handle_type = SQL_HANDLE_DBC;
+		handle = (SQLHANDLE) conn;
+	} else {
+		handle_type = SQL_HANDLE_ENV;
+		handle = (SQLHANDLE) henv;
+	}
+
+	return SQLGetDiagRec(handle_type, handle, 1, (SQLCHAR *) state, &native_error,
+			(SQLCHAR *) errormsg, errormsg_size, NULL);
+}
+
 /* {{{ odbc_sql_error */
 void odbc_sql_error(odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, const char *func, ...)
 {
-	SQLINTEGER	error;        /* Not used */
-	SQLSMALLINT	errormsgsize; /* Not used */
 	RETCODE rc;
 	ODBC_SQL_ENV_T henv;
 	ODBC_SQL_CONN_T conn;
@@ -593,12 +613,7 @@ void odbc_sql_error(odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, const 
 		conn = SQL_NULL_HDBC;
 	}
 
-	/* This leads to an endless loop in many drivers!
-	 *
-	   while(henv != SQL_NULL_HENV){
-		do {
-	 */
-	rc = SQLError(henv, conn, stmt, (SQLCHAR *) ODBCG(laststate), &error, (SQLCHAR *) ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg))-1, &errormsgsize);
+	rc = odbc_diag_rec(henv, conn, stmt, ODBCG(laststate), ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg))-1);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		snprintf(ODBCG(laststate), sizeof(ODBCG(laststate)), "HY000");
 		snprintf(ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)), "Failed to fetch error message");
@@ -619,10 +634,6 @@ void odbc_sql_error(odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, const 
 	} else {
 		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s", ODBCG(lasterrormsg), ODBCG(laststate));
 	}
-	/*
-		} while (SQL_SUCCEEDED(rc));
-	}
-	*/
 }
 /* }}} */
 
@@ -1161,14 +1172,16 @@ PHP_FUNCTION(odbc_cursor)
 		cursorname = emalloc(max_len + 1);
 		rc = SQLGetCursorName(result->stmt, (SQLCHAR *) cursorname, (SQLSMALLINT)max_len, &len);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-			char        state[6];     /* Not used */
-	 		SQLINTEGER  error;        /* Not used */
+			char        state[6];
 			char        errormsg[SQL_MAX_MESSAGE_LENGTH];
-			SQLSMALLINT errormsgsize; /* Not used */
+			SQLRETURN   diag_rc;
 
-			SQLError( result->conn_ptr->henv, result->conn_ptr->hdbc,
-						result->stmt, (SQLCHAR *) state, &error, (SQLCHAR *) errormsg,
-						sizeof(errormsg)-1, &errormsgsize);
+			diag_rc = odbc_diag_rec(result->conn_ptr->henv, result->conn_ptr->hdbc, result->stmt,
+					state, errormsg, sizeof(errormsg)-1);
+			if (diag_rc != SQL_SUCCESS && diag_rc != SQL_SUCCESS_WITH_INFO) {
+				snprintf(state, sizeof(state), "HY000");
+				snprintf(errormsg, sizeof(errormsg), "Failed to fetch error message");
+			}
 			if (!strncmp(state,"S1015",5)) {
 				snprintf(cursorname, max_len+1, "php_curs_" ZEND_ULONG_FMT, (zend_ulong)result->stmt);
 				if (SQLSetCursorName(result->stmt, (SQLCHAR *) cursorname, SQL_NTS) != SQL_SUCCESS) {
