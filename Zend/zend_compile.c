@@ -252,7 +252,7 @@ void zend_assert_valid_class_name(const zend_string *name, const char *type) /* 
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot use \"%s\" as %s as it is reserved", ZSTR_VAL(name), type);
 	}
-	if (zend_string_equals_literal(name, "_")) {
+	if (zend_string_equals_literal(name, "_") || zend_string_ends_with_literal(name, "\\_")) {
 		zend_error(E_DEPRECATED, "Using \"_\" as %s is deprecated since 8.4", type);
 	}
 }
@@ -10215,15 +10215,15 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 
 		if (zend_string_equals(new_name, ZSTR_CHAR('_'))) {
 			switch (type) {
-			case ZEND_SYMBOL_CLASS:
-				zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated");
-				break;
-			case ZEND_SYMBOL_CONST:
-				zend_error(E_DEPRECATED, "Using \"_\" as a constant name is deprecated since 8.6");
-				break;
-			case ZEND_SYMBOL_FUNCTION:
-				break;
-			default: ZEND_UNREACHABLE();
+				case ZEND_SYMBOL_CLASS:
+					zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated");
+					break;
+				case ZEND_SYMBOL_CONST:
+					zend_error(E_DEPRECATED, "Using \"_\" as a constant name is deprecated since 8.6");
+					break;
+				case ZEND_SYMBOL_FUNCTION:
+					break;
+				default: ZEND_UNREACHABLE();
 			}
 		}
 
