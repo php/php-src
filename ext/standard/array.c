@@ -775,10 +775,11 @@ static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS,
 		if (php_array_data_compare_type(sort_type) != PHP_ARRAY_CMP_REGULAR) {
 			long_cmp = NULL;
 		}
-		if (!php_array_try_packed_scalar_sort(array, packed_cmp, long_cmp)) {
-			zend_array_sort_packed(array, packed_cmp);
+		if (php_array_try_packed_scalar_sort(array, packed_cmp, long_cmp)) {
+			RETURN_TRUE;
 		}
-		RETURN_TRUE;
+		/* Preserve the cleared hash index that implicit comparison callbacks can
+		 * observe when reading the array being sorted. */
 	}
 
 	cmp = get_cmp(sort_type);
