@@ -54,6 +54,14 @@ struct php_unserialize_data {
 	zend_long         cur_depth;
 	zend_long         max_depth;
 	var_entries       entries;
+	/* O(1) random-access jump table for var_access(): holds pointers to the
+	 * overflow chunks beyond `entries` (chunk 0), in allocation order.
+	 * chunk_list[0] corresponds to ids [VAR_ENTRIES_MAX, 2*VAR_ENTRIES_MAX).
+	 * Lazily allocated: stays NULL/0 for payloads that never exceed
+	 * VAR_ENTRIES_MAX back-referenceable values (the common case). */
+	var_entries     **chunk_list;
+	zend_long         num_chunks;
+	zend_long         chunk_list_capacity;
 };
 
 PHPAPI php_unserialize_data_t php_var_unserialize_init(void) {
@@ -69,6 +77,9 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init(void) {
 		d->max_depth = BG(unserialize_max_depth);
 		d->entries.used_slots = 0;
 		d->entries.next = NULL;
+		d->chunk_list = NULL;
+		d->num_chunks = 0;
+		d->chunk_list_capacity = 0;
 		if (!BG(serialize_lock)) {
 			BG(unserialize).data = d;
 			BG(unserialize).level = 1;
@@ -126,6 +137,18 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 
 		(*var_hashx)->last->next = var_hash;
 		(*var_hashx)->last = var_hash;
+
+		/* Record the new overflow chunk in the O(1) jump table used by
+		 * var_access(). This runs exactly once per VAR_ENTRIES_MAX (1018)
+		 * pushes, so the amortized cost is negligible. */
+		if ((*var_hashx)->num_chunks == (*var_hashx)->chunk_list_capacity) {
+			zend_long new_capacity = (*var_hashx)->chunk_list_capacity
+				? (*var_hashx)->chunk_list_capacity * 2 : 4;
+			(*var_hashx)->chunk_list = erealloc(
+				(*var_hashx)->chunk_list, new_capacity * sizeof(var_entries *));
+			(*var_hashx)->chunk_list_capacity = new_capacity;
+		}
+		(*var_hashx)->chunk_list[(*var_hashx)->num_chunks++] = var_hash;
 	}
 
 	var_hash->data[var_hash->used_slots++] = rval;
@@ -220,21 +243,39 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nz
 
 static zval *var_access(php_unserialize_data_t *var_hashx, zend_long id)
 {
-	var_entries *var_hash = &(*var_hashx)->entries;
+	php_unserialize_data_t d = *var_hashx;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_access(" ZEND_LONG_FMT "): " ZEND_LONG_FMT "\n", var_hash?var_hash->used_slots:-1L, id);
+	fprintf(stderr, "var_access: " ZEND_LONG_FMT "\n", id);
 #endif
 
-	while (id >= VAR_ENTRIES_MAX && var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
-		var_hash = var_hash->next;
-		id -= VAR_ENTRIES_MAX;
+	if (id < 0) {
+		return NULL;
 	}
 
-	if (!var_hash) return NULL;
+	if (id < VAR_ENTRIES_MAX) {
+		if (id >= d->entries.used_slots) return NULL;
+		return d->entries.data[id];
+	}
 
-	if (id < 0 || id >= var_hash->used_slots) return NULL;
+	{
+		/* id is provably >= VAR_ENTRIES_MAX here, so rem/chunk_index/slot
+		 * are all provably non-negative. Every chunk but possibly the last
+		 * is exactly full (var_push() only allocates a new chunk once the
+		 * tail is completely full), so chunk_index deterministically
+		 * identifies the right chunk -- no need to walk the chain. */
+		zend_long rem = id - VAR_ENTRIES_MAX;
+		zend_long chunk_index = rem / VAR_ENTRIES_MAX;
+		zend_long slot = rem % VAR_ENTRIES_MAX;
+		var_entries *var_hash;
 
-	return var_hash->data[id];
+		if (chunk_index >= d->num_chunks) {
+			return NULL;
+		}
+
+		var_hash = d->chunk_list[chunk_index];
+		if (slot >= var_hash->used_slots) return NULL;
+		return var_hash->data[slot];
+	}
 }
 
 PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
@@ -253,6 +294,12 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		next = var_hash->next;
 		efree_size(var_hash, sizeof(var_entries));
 		var_hash = next;
+	}
+
+	/* Free the jump-table bookkeeping array itself. The chunks it points to
+	 * were already freed by the loop above (chunk_list never owns them). */
+	if ((*var_hashx)->chunk_list) {
+		efree((*var_hashx)->chunk_list);
 	}
 
 	while (var_dtor_hash) {
