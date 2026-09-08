@@ -18,6 +18,6 @@ jobs:
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.WINDOWS_BUILDS_TOKEN }}
+          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          TAG="${{ inputs.tag || github.ref_name }}"
           gh workflow run php.yml -R php/php-windows-builder -f php-version="${TAG#php-}"
