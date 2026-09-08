@@ -1,5 +1,5 @@
 /* This is a generated file, edit zend_closures.stub.php instead.
- * Stub hash: e0626e52adb2d38dad1140c1a28cc7774cc84500 */
+ * Stub hash: 213756ada15a12d8eb91f4f64f40184530bffc20 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Closure___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -27,12 +27,17 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_getCurrent, 0, 0, Closure, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Closure___invoke, 0, 0, IS_MIXED, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Closure, __construct);
 ZEND_METHOD(Closure, bind);
 ZEND_METHOD(Closure, bindTo);
 ZEND_METHOD(Closure, call);
 ZEND_METHOD(Closure, fromCallable);
 ZEND_METHOD(Closure, getCurrent);
+ZEND_METHOD(Closure, __invoke);
 
 static const zend_function_entry class_Closure_methods[] = {
 	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)
@@ -41,6 +46,7 @@ static const zend_function_entry class_Closure_methods[] = {
 	ZEND_ME(Closure, call, arginfo_class_Closure_call, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, fromCallable, arginfo_class_Closure_fromCallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Closure, getCurrent, arginfo_class_Closure_getCurrent, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Closure, __invoke, arginfo_class_Closure___invoke, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
