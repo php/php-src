@@ -51,6 +51,14 @@ static void reldateformatter_free_object(zend_object *object)
 		ureldatefmt_close(RELDATEFORMATTER_OBJECT(obj));
 		RELDATEFORMATTER_OBJECT(obj) = nullptr;
 	}
+	if (obj->number_formatter != nullptr) {
+		OBJ_RELEASE(obj->number_formatter);
+		obj->number_formatter = nullptr;
+	}
+	if (obj->locale != nullptr) {
+		zend_string_release(obj->locale);
+		obj->locale = nullptr;
+	}
 	intl_error_reset(RELDATEFORMATTER_ERROR_P(obj));
 
 	zend_object_std_dtor(&obj->zo);
@@ -63,12 +71,33 @@ static zend_object *reldateformatter_create_object(zend_class_entry *class_type)
 
 	intl_error_init(RELDATEFORMATTER_ERROR_P(obj));
 	RELDATEFORMATTER_OBJECT(obj) = nullptr;
+	obj->number_formatter = nullptr;
+	obj->number_formatter_version = 0;
+	obj->locale = nullptr;
+	obj->style = UDAT_STYLE_LONG;
+	obj->capitalization_context = UDISPCTX_CAPITALIZATION_NONE;
 
 	zend_object_std_init(&obj->zo, class_type);
 	object_properties_init(&obj->zo, class_type);
 	obj->zo.handlers = &reldateformatter_handlers;
 
 	return &obj->zo;
+}
+
+static HashTable *reldateformatter_get_gc(zend_object *object, zval **table, int *n)
+{
+	IntlRelativeDateTimeFormatter_object *obj = php_intl_reldateformatter_fetch_object(object);
+
+	if (obj->number_formatter != nullptr) {
+		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+		zend_get_gc_buffer_add_obj(gc_buffer, obj->number_formatter);
+		zend_get_gc_buffer_use(gc_buffer, table, n);
+	} else {
+		*table = nullptr;
+		*n = 0;
+	}
+
+	return nullptr;
 }
 
 static bool reldateformatter_valid_style(zend_long style)
@@ -105,6 +134,65 @@ static void reldateformatter_throw_constructor_failure(
 
 	INTL_G(use_exceptions) = old_use_exceptions;
 	INTL_G(error_level) = old_error_level;
+}
+
+static URelativeDateTimeFormatter *reldateformatter_open(
+	const char *locale,
+	zend_long style,
+	zend_long capitalization_context,
+	const NumberFormatter_object *number_formatter,
+	UErrorCode *status
+)
+{
+	UNumberFormat *number_formatter_clone = nullptr;
+	if (number_formatter != nullptr) {
+		number_formatter_clone = unum_clone(
+			reinterpret_cast<const UNumberFormat *>(FORMATTER_OBJECT(number_formatter)),
+			status);
+		if (U_FAILURE(*status)) {
+			return nullptr;
+		}
+	}
+
+	return ureldatefmt_open(
+		locale,
+		number_formatter_clone,
+		static_cast<UDateRelativeDateTimeFormatterStyle>(style),
+		static_cast<UDisplayContext>(capitalization_context),
+		status);
+}
+
+static bool reldateformatter_refresh_number_formatter(IntlRelativeDateTimeFormatter_object *obj)
+{
+	if (obj->number_formatter == nullptr) {
+		return true;
+	}
+
+	NumberFormatter_object *number_formatter = php_intl_number_format_fetch_object(obj->number_formatter);
+	if (obj->number_formatter_version == number_formatter->configuration_version) {
+		return true;
+	}
+
+	UErrorCode status = U_ZERO_ERROR;
+	URelativeDateTimeFormatter *formatter = reldateformatter_open(
+		ZSTR_VAL(obj->locale),
+		obj->style,
+		obj->capitalization_context,
+		number_formatter,
+		&status);
+	if (U_FAILURE(status) || formatter == nullptr) {
+		if (U_SUCCESS(status)) {
+			status = U_MEMORY_ALLOCATION_ERROR;
+		}
+		intl_errors_set(RELDATEFORMATTER_ERROR_P(obj), status,
+			"Failed to update IntlRelativeDateTimeFormatter from NumberFormatter");
+		return false;
+	}
+
+	ureldatefmt_close(RELDATEFORMATTER_OBJECT(obj));
+	RELDATEFORMATTER_OBJECT(obj) = formatter;
+	obj->number_formatter_version = number_formatter->configuration_version;
+	return true;
 }
 
 PHP_METHOD(IntlRelativeDateTimeFormatter, __construct)
@@ -159,29 +247,21 @@ PHP_METHOD(IntlRelativeDateTimeFormatter, __construct)
 		RETURN_THROWS();
 	}
 
-	UErrorCode status = U_ZERO_ERROR;
-	UNumberFormat *number_formatter_clone = nullptr;
+	NumberFormatter_object *number_formatter_obj = nullptr;
 	if (number_formatter != nullptr) {
-		NumberFormatter_object *number_formatter_obj = Z_INTL_NUMBERFORMATTER_P(number_formatter);
+		number_formatter_obj = Z_INTL_NUMBERFORMATTER_P(number_formatter);
 		if (FORMATTER_OBJECT(number_formatter_obj) == nullptr) {
 			zend_throw_error(NULL, "Found unconstructed NumberFormatter");
 			RETURN_THROWS();
 		}
-
-		number_formatter_clone = unum_clone(
-			reinterpret_cast<const UNumberFormat *>(FORMATTER_OBJECT(number_formatter_obj)),
-			&status);
-		if (U_FAILURE(status)) {
-			reldateformatter_throw_constructor_failure(obj, status, "Failed to clone NumberFormatter");
-			RETURN_THROWS();
-		}
 	}
 
-	RELDATEFORMATTER_OBJECT(obj) = ureldatefmt_open(
+	UErrorCode status = U_ZERO_ERROR;
+	RELDATEFORMATTER_OBJECT(obj) = reldateformatter_open(
 		locale,
-		number_formatter_clone,
-		static_cast<UDateRelativeDateTimeFormatterStyle>(style),
-		static_cast<UDisplayContext>(capitalization_context),
+		style,
+		capitalization_context,
+		number_formatter_obj,
 		&status);
 
 	if (U_FAILURE(status) || RELDATEFORMATTER_OBJECT(obj) == nullptr) {
@@ -191,6 +271,15 @@ PHP_METHOD(IntlRelativeDateTimeFormatter, __construct)
 		reldateformatter_throw_constructor_failure(
 			obj, status, "Failed to create IntlRelativeDateTimeFormatter");
 		RETURN_THROWS();
+	}
+
+	obj->locale = zend_string_init(locale, strlen(locale), false);
+	obj->style = style;
+	obj->capitalization_context = capitalization_context;
+	if (number_formatter != nullptr) {
+		obj->number_formatter = Z_OBJ_P(number_formatter);
+		GC_ADDREF(obj->number_formatter);
+		obj->number_formatter_version = number_formatter_obj->configuration_version;
 	}
 }
 
@@ -253,6 +342,10 @@ static void reldateformatter_format(INTERNAL_FUNCTION_PARAMETERS, bool numeric)
 		zend_argument_value_error(2,
 			"must be one of the IntlRelativeDateTimeFormatter::UNIT_* constants");
 		RETURN_THROWS();
+	}
+
+	if (!reldateformatter_refresh_number_formatter(obj)) {
+		RETURN_FALSE;
 	}
 
 	const double numeric_offset = zval_get_double(offset);
@@ -369,4 +462,5 @@ void reldateformatter_register_class(void)
 	reldateformatter_handlers.offset = offsetof(IntlRelativeDateTimeFormatter_object, zo);
 	reldateformatter_handlers.free_obj = reldateformatter_free_object;
 	reldateformatter_handlers.clone_obj = nullptr;
+	reldateformatter_handlers.get_gc = reldateformatter_get_gc;
 }

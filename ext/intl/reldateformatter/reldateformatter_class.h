@@ -23,6 +23,11 @@
 typedef struct {
 	intl_error error;
 	URelativeDateTimeFormatter *formatter;
+	zend_object *number_formatter;
+	uint64_t number_formatter_version;
+	zend_string *locale;
+	zend_long style;
+	zend_long capitalization_context;
 	zend_object zo;
 } IntlRelativeDateTimeFormatter_object;
 
