@@ -240,6 +240,13 @@ PHP 8.6 UPGRADE NOTES
     and DirectoryIterator::current() returns string|SplFileInfo|static.
 
 - Standard:
+  . During sort() and rsort() on packed arrays, implicit comparison callbacks
+    (such as __toString() and error handlers) can now read numeric indices of
+    the array and observe its partially sorted contents. Previously, these
+    reads reported an undefined array key warning and returned null because
+    the hash index was cleared during sorting. This applies to all array sizes
+    and comparison flags that invoke such callbacks. Arrays stored in mixed
+    form continue to use the previous sorting path.
   . array_intersect() with at least two arrays now converts values to strings
     while scanning its inputs instead of during sort comparisons. This can
     change the number and order of conversion warnings and __toString() calls,
@@ -1075,6 +1082,8 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
   . Improved performance of str_split().
+  . sort(), rsort(), and usort() now avoid converting packed arrays to mixed
+    storage while sorting. usort() continues to sort a copy of the input array.
 
 - URI:
   . Improved performance of Uri\WhatWg\Url::parse() when collecting

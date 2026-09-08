@@ -282,17 +282,17 @@ static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Buc
 }
 /* }}} */
 
-static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_zval_unstable_i(zval *f, zval *s) /* {{{ */
 {
-	int result = zend_compare(&f->val, &s->val);
+	int result = zend_compare(f, s);
 	/* Special enums handling for array_unique. We don't want to add this logic to zend_compare as
 	 * that would be observable via comparison operators. */
-	zval *rhs = &s->val;
+	zval *rhs = s;
 	ZVAL_DEREF(rhs);
 	if (UNEXPECTED(Z_TYPE_P(rhs) == IS_OBJECT)
 	 && result == ZEND_UNCOMPARABLE
 	 && (Z_OBJCE_P(rhs)->ce_flags & ZEND_ACC_ENUM)) {
-		zval *lhs = &f->val;
+		zval *lhs = f;
 		ZVAL_DEREF(lhs);
 		if (Z_TYPE_P(lhs) == IS_OBJECT && (Z_OBJCE_P(lhs)->ce_flags & ZEND_ACC_ENUM)) {
 			// Order doesn't matter, we just need to group the same enum values
@@ -308,29 +308,29 @@ static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucke
 }
 /* }}} */
 
-static zend_always_inline int php_array_data_compare_numeric_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_numeric_zval_unstable_i(zval *f, zval *s) /* {{{ */
 {
-	return numeric_compare_function(&f->val, &s->val);
+	return numeric_compare_function(f, s);
 }
 /* }}} */
 
-static zend_always_inline int php_array_data_compare_string_case_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_string_case_zval_unstable_i(zval *f, zval *s) /* {{{ */
 {
-	return string_case_compare_function(&f->val, &s->val);
+	return string_case_compare_function(f, s);
 }
 /* }}} */
 
-static zend_always_inline int php_array_data_compare_string_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_string_zval_unstable_i(zval *f, zval *s) /* {{{ */
 {
-	return string_compare_function(&f->val, &s->val);
+	return string_compare_function(f, s);
 }
 /* }}} */
 
-static int php_array_natural_general_compare(Bucket *f, Bucket *s, bool fold_case) /* {{{ */
+static int php_array_natural_general_compare(zval *f, zval *s, bool fold_case) /* {{{ */
 {
 	zend_string *tmp_str1, *tmp_str2;
-	zend_string *str1 = zval_get_tmp_string(&f->val, &tmp_str1);
-	zend_string *str2 = zval_get_tmp_string(&s->val, &tmp_str2);
+	zend_string *str1 = zval_get_tmp_string(f, &tmp_str1);
+	zend_string *str2 = zval_get_tmp_string(s, &tmp_str2);
 
 	int result = strnatcmp_ex(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2), fold_case);
 
@@ -340,36 +340,62 @@ static int php_array_natural_general_compare(Bucket *f, Bucket *s, bool fold_cas
 }
 /* }}} */
 
-static zend_always_inline int php_array_natural_compare_unstable_i(Bucket *a, Bucket *b) /* {{{ */
+static zend_always_inline int php_array_natural_compare_zval_unstable_i(zval *a, zval *b) /* {{{ */
 {
 	return php_array_natural_general_compare(a, b, false);
 }
 /* }}} */
 
-static zend_always_inline int php_array_natural_case_compare_unstable_i(Bucket *a, Bucket *b) /* {{{ */
+static zend_always_inline int php_array_natural_case_compare_zval_unstable_i(zval *a, zval *b) /* {{{ */
 {
 	return php_array_natural_general_compare(a, b, true);
 }
 /* }}} */
 
-static int php_array_data_compare_string_locale_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_string_locale_zval_unstable_i(zval *f, zval *s) /* {{{ */
 {
-	return string_locale_compare_function(&f->val, &s->val);
+	return string_locale_compare_function(f, s);
 }
 /* }}} */
+
+static zend_never_inline ZEND_COLD int stable_zval_sort_fallback(const zval *a, const zval *b)
+{
+	return ZEND_THREEWAY_COMPARE(Z_EXTRA_P(a), Z_EXTRA_P(b));
+}
+
+/* Share value comparisons between Bucket sorting and packed zval sorting. */
+#define DEFINE_DATA_SORT_VARIANTS(name) \
+	static zend_always_inline int php_array_##name##_unstable_i(Bucket *a, Bucket *b) { \
+		return php_array_##name##_zval_unstable_i(&a->val, &b->val); \
+	} \
+	DEFINE_SORT_VARIANTS(name) \
+	static zend_never_inline int php_array_packed_##name(const void *a, const void *b) { \
+		int result = php_array_##name##_zval_unstable_i((zval *) a, (zval *) b); \
+		if (EXPECTED(result)) { \
+			return result; \
+		} \
+		return stable_zval_sort_fallback(a, b); \
+	} \
+	static zend_never_inline int php_array_packed_reverse_##name(const void *a, const void *b) { \
+		int result = php_array_##name##_zval_unstable_i((zval *) a, (zval *) b) * -1; \
+		if (EXPECTED(result)) { \
+			return result; \
+		} \
+		return stable_zval_sort_fallback(a, b); \
+	}
 
 DEFINE_SORT_VARIANTS(key_compare);
 DEFINE_SORT_VARIANTS(key_compare_numeric);
 DEFINE_SORT_VARIANTS(key_compare_string_case);
 DEFINE_SORT_VARIANTS(key_compare_string);
 DEFINE_SORT_VARIANTS(key_compare_string_locale);
-DEFINE_SORT_VARIANTS(data_compare);
-DEFINE_SORT_VARIANTS(data_compare_numeric);
-DEFINE_SORT_VARIANTS(data_compare_string_case);
-DEFINE_SORT_VARIANTS(data_compare_string);
-DEFINE_SORT_VARIANTS(data_compare_string_locale);
-DEFINE_SORT_VARIANTS(natural_compare);
-DEFINE_SORT_VARIANTS(natural_case_compare);
+DEFINE_DATA_SORT_VARIANTS(data_compare);
+DEFINE_DATA_SORT_VARIANTS(data_compare_numeric);
+DEFINE_DATA_SORT_VARIANTS(data_compare_string_case);
+DEFINE_DATA_SORT_VARIANTS(data_compare_string);
+DEFINE_DATA_SORT_VARIANTS(data_compare_string_locale);
+DEFINE_DATA_SORT_VARIANTS(natural_compare);
+DEFINE_DATA_SORT_VARIANTS(natural_case_compare);
 
 static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type)
 {
@@ -431,129 +457,84 @@ static bucket_compare_func_t php_get_key_reverse_compare_func(zend_long sort_typ
 	return NULL;
 }
 
-static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type) /* {{{ */
+typedef enum {
+	PHP_ARRAY_CMP_REGULAR,
+	PHP_ARRAY_CMP_NUMERIC,
+	PHP_ARRAY_CMP_STRING,
+	PHP_ARRAY_CMP_STRING_CASE,
+	PHP_ARRAY_CMP_NATURAL,
+	PHP_ARRAY_CMP_NATURAL_CASE,
+	PHP_ARRAY_CMP_LOCALE,
+} php_array_compare_type;
+
+static zend_always_inline php_array_compare_type php_array_data_compare_type(zend_long sort_type)
 {
 	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
-			return php_array_data_compare_numeric;
-
+			return PHP_ARRAY_CMP_NUMERIC;
 		case PHP_SORT_STRING:
-			if (sort_type & PHP_SORT_FLAG_CASE) {
-				return php_array_data_compare_string_case;
-			} else {
-				return php_array_data_compare_string;
-			}
-
+			return sort_type & PHP_SORT_FLAG_CASE ? PHP_ARRAY_CMP_STRING_CASE : PHP_ARRAY_CMP_STRING;
 		case PHP_SORT_NATURAL:
-			if (sort_type & PHP_SORT_FLAG_CASE) {
-				return php_array_natural_case_compare;
-			} else {
-				return php_array_natural_compare;
-			}
-
+			return sort_type & PHP_SORT_FLAG_CASE ? PHP_ARRAY_CMP_NATURAL_CASE : PHP_ARRAY_CMP_NATURAL;
 		case PHP_SORT_LOCALE_STRING:
-			return php_array_data_compare_string_locale;
-
+			return PHP_ARRAY_CMP_LOCALE;
 		case PHP_SORT_REGULAR:
 		default:
-			return php_array_data_compare;
+			return PHP_ARRAY_CMP_REGULAR;
 	}
-	return NULL;
 }
 
-static bucket_compare_func_t php_get_data_reverse_compare_func(zend_long sort_type) /* {{{ */
+#define PHP_ARRAY_DATA_COMPARATORS(name) { \
+	{php_array_##name, php_array_reverse_##name}, \
+	{php_array_##name##_unstable, php_array_reverse_##name##_unstable}, \
+	{php_array_packed_##name, php_array_packed_reverse_##name} \
+}
+
+/* Indexed by comparison type, then by reverse order. */
+static const struct {
+	bucket_compare_func_t stable[2];
+	bucket_compare_func_t unstable[2];
+	compare_func_t packed[2];
+} php_array_data_comparators[] = {
+	PHP_ARRAY_DATA_COMPARATORS(data_compare),
+	PHP_ARRAY_DATA_COMPARATORS(data_compare_numeric),
+	PHP_ARRAY_DATA_COMPARATORS(data_compare_string),
+	PHP_ARRAY_DATA_COMPARATORS(data_compare_string_case),
+	PHP_ARRAY_DATA_COMPARATORS(natural_compare),
+	PHP_ARRAY_DATA_COMPARATORS(natural_case_compare),
+	PHP_ARRAY_DATA_COMPARATORS(data_compare_string_locale),
+};
+#undef PHP_ARRAY_DATA_COMPARATORS
+
+ZEND_STATIC_ASSERT(
+	sizeof(php_array_data_comparators) / sizeof(php_array_data_comparators[0])
+		== PHP_ARRAY_CMP_LOCALE + 1,
+	"Every array comparison type must have a comparator table entry");
+
+static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type)
 {
-	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
-		case PHP_SORT_NUMERIC:
-			return php_array_reverse_data_compare_numeric;
-
-		case PHP_SORT_STRING:
-			if (sort_type & PHP_SORT_FLAG_CASE) {
-				return php_array_reverse_data_compare_string_case;
-			} else {
-				return php_array_reverse_data_compare_string;
-			}
-
-		case PHP_SORT_NATURAL:
-			if (sort_type & PHP_SORT_FLAG_CASE) {
-				return php_array_reverse_natural_case_compare;
-			} else {
-				return php_array_reverse_natural_compare;
-			}
-
-		case PHP_SORT_LOCALE_STRING:
-			return php_array_reverse_data_compare_string_locale;
-
-		case PHP_SORT_REGULAR:
-		default:
-			return php_array_reverse_data_compare;
-	}
-	return NULL;
+	return php_array_data_comparators[php_array_data_compare_type(sort_type)].stable[false];
 }
 
-static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_type, bool reverse) /* {{{ */
+static bucket_compare_func_t php_get_data_reverse_compare_func(zend_long sort_type)
 {
-	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
-		case PHP_SORT_NUMERIC:
-			if (reverse) {
-				return php_array_reverse_data_compare_numeric_unstable;
-			} else {
-				return php_array_data_compare_numeric_unstable;
-			}
-			break;
-
-		case PHP_SORT_STRING:
-			if (sort_type & PHP_SORT_FLAG_CASE) {
-				if (reverse) {
-					return php_array_reverse_data_compare_string_case_unstable;
-				} else {
-					return php_array_data_compare_string_case_unstable;
-				}
-			} else {
-				if (reverse) {
-					return php_array_reverse_data_compare_string_unstable;
-				} else {
-					return php_array_data_compare_string_unstable;
-				}
-			}
-			break;
-
-		case PHP_SORT_NATURAL:
-			if (sort_type & PHP_SORT_FLAG_CASE) {
-				if (reverse) {
-					return php_array_reverse_natural_case_compare_unstable;
-				} else {
-					return php_array_natural_case_compare_unstable;
-				}
-			} else {
-				if (reverse) {
-					return php_array_reverse_natural_compare_unstable;
-				} else {
-					return php_array_natural_compare_unstable;
-				}
-			}
-			break;
-
-		case PHP_SORT_LOCALE_STRING:
-			if (reverse) {
-				return php_array_reverse_data_compare_string_locale_unstable;
-			} else {
-				return php_array_data_compare_string_locale_unstable;
-			}
-			break;
-
-		case PHP_SORT_REGULAR:
-		default:
-			if (reverse) {
-				return php_array_reverse_data_compare_unstable;
-			} else {
-				return php_array_data_compare_unstable;
-			}
-			break;
-	}
-	return NULL;
+	return php_array_data_comparators[php_array_data_compare_type(sort_type)].stable[true];
 }
-/* }}} */
+
+static compare_func_t php_get_packed_data_compare_func(zend_long sort_type)
+{
+	return php_array_data_comparators[php_array_data_compare_type(sort_type)].packed[false];
+}
+
+static compare_func_t php_get_packed_data_reverse_compare_func(zend_long sort_type)
+{
+	return php_array_data_comparators[php_array_data_compare_type(sort_type)].packed[true];
+}
+
+static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_type, bool reverse)
+{
+	return php_array_data_comparators[php_array_data_compare_type(sort_type)].unstable[reverse];
+}
 
 PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 {
@@ -694,8 +675,84 @@ PHP_FUNCTION(natcasesort)
 /* }}} */
 
 typedef bucket_compare_func_t(*get_compare_function)(zend_long);
+typedef compare_func_t (*get_packed_compare_function)(zend_long);
 
-static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compare_function get_cmp, bool renumber) {
+static int php_array_packed_long_compare(const void *a, const void *b)
+{
+	const zval *lhs = a, *rhs = b;
+	return ZEND_THREEWAY_COMPARE(Z_LVAL_P(lhs), Z_LVAL_P(rhs));
+}
+
+static int php_array_packed_long_reverse_compare(const void *a, const void *b)
+{
+	const zval *lhs = a, *rhs = b;
+	return ZEND_THREEWAY_COMPARE(Z_LVAL_P(rhs), Z_LVAL_P(lhs));
+}
+
+static void php_array_packed_long_swap(void *a, void *b)
+{
+	zend_long tmp = Z_LVAL_P((zval *) a);
+	Z_LVAL_P((zval *) a) = Z_LVAL_P((zval *) b);
+	Z_LVAL_P((zval *) b) = tmp;
+}
+
+static bool php_array_try_packed_scalar_sort(HashTable *array, compare_func_t cmp,
+		compare_func_t long_cmp)
+{
+	ZEND_ASSERT(GC_REFCOUNT(array) == 1);
+	ZEND_ASSERT(HT_IS_PACKED(array));
+	uint32_t i = 0;
+
+	if (long_cmp && HT_IS_WITHOUT_HOLES(array)) {
+		for (; i < array->nNumUsed; i++) {
+			if (Z_TYPE(array->arPacked[i]) != IS_LONG) {
+				break;
+			}
+		}
+		if (i == array->nNumUsed) {
+			if (array->nNumOfElements != 0) {
+				/* Direct integer ties are indistinguishable. Only the integer
+				 * payload needs to move; no stability metadata is required. */
+				zend_sort(array->arPacked, array->nNumUsed, sizeof(zval), long_cmp,
+					php_array_packed_long_swap);
+				array->nInternalPointer = 0;
+				array->nNextFreeElement = array->nNumUsed;
+			}
+			return true;
+		}
+	}
+
+	/* Continue after any integer prefix. These direct values cannot invoke user
+	 * code through a built-in comparator, so neither a lifetime pin nor possible
+	 * GC root registration is needed. NAN is excluded because string coercion
+	 * emits a warning, whose error handler can modify the array being sorted. */
+	for (; i < array->nNumUsed; i++) {
+		zval *value = &array->arPacked[i];
+		switch (Z_TYPE_P(value)) {
+			case IS_UNDEF:
+			case IS_NULL:
+			case IS_FALSE:
+			case IS_TRUE:
+			case IS_LONG:
+			case IS_STRING:
+				break;
+			case IS_DOUBLE:
+				if (!zend_isnan(Z_DVAL_P(value))) {
+					break;
+				}
+				ZEND_FALLTHROUGH;
+			default:
+				return false;
+		}
+	}
+
+	zend_hash_sort_packed(array, cmp);
+	return true;
+}
+
+static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS,
+		get_compare_function get_cmp, bool renumber, get_packed_compare_function get_packed_cmp,
+		compare_func_t long_cmp) {
 	HashTable *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 	bucket_compare_func_t cmp;
@@ -706,8 +763,24 @@ static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compar
 		Z_PARAM_LONG(sort_type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	cmp = get_cmp(sort_type);
+	if (renumber && get_packed_cmp && HT_IS_PACKED(array)) {
+		if (array->nNumOfElements <= 1) {
+			/* No comparison or type scan is needed, regardless of the value type. */
+			zend_hash_sort_packed(array, NULL);
+			RETURN_TRUE;
+		}
 
+		compare_func_t packed_cmp = get_packed_cmp(sort_type);
+		if (php_array_data_compare_type(sort_type) != PHP_ARRAY_CMP_REGULAR) {
+			long_cmp = NULL;
+		}
+		if (!php_array_try_packed_scalar_sort(array, packed_cmp, long_cmp)) {
+			zend_array_sort_packed(array, packed_cmp);
+		}
+		RETURN_TRUE;
+	}
+
+	cmp = get_cmp(sort_type);
 	zend_array_sort(array, cmp, renumber);
 
 	RETURN_TRUE;
@@ -716,52 +789,54 @@ static zend_always_inline void php_sort(INTERNAL_FUNCTION_PARAMETERS, get_compar
 /* {{{ Sort an array and maintain index association */
 PHP_FUNCTION(asort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_compare_func, false);
+	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_compare_func, false, NULL, NULL);
 }
 /* }}} */
 
 /* {{{ Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_reverse_compare_func, false);
+	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_reverse_compare_func, false, NULL, NULL);
 }
 /* }}} */
 
 /* {{{ Sort an array */
 PHP_FUNCTION(sort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_compare_func, true);
+	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_compare_func, true,
+		php_get_packed_data_compare_func, php_array_packed_long_compare);
 }
 /* }}} */
 
 /* {{{ Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_reverse_compare_func, true);
+	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_data_reverse_compare_func, true,
+		php_get_packed_data_reverse_compare_func, php_array_packed_long_reverse_compare);
 }
 /* }}} */
 
 /* {{{ Sort an array by key value in reverse order */
 PHP_FUNCTION(krsort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_key_reverse_compare_func, false);
+	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_key_reverse_compare_func, false, NULL, NULL);
 }
 /* }}} */
 
 /* {{{ Sort an array by key */
 PHP_FUNCTION(ksort)
 {
-	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_key_compare_func, false);
+	php_sort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_get_key_compare_func, false, NULL, NULL);
 }
 /* }}} */
 
-static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
+static inline int php_array_user_compare_zval_unstable(zval *f, zval *s) /* {{{ */
 {
 	zval args[2];
 	zval retval;
 
-	ZVAL_COPY_VALUE(&args[0], &f->val);
-	ZVAL_COPY_VALUE(&args[1], &s->val);
+	ZVAL_COPY_VALUE(&args[0], f);
+	ZVAL_COPY_VALUE(&args[1], s);
 
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
@@ -778,8 +853,8 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 
 		if (Z_TYPE(retval) == IS_FALSE) {
 			/* Retry with swapped operands. */
-			ZVAL_COPY_VALUE(&args[0], &s->val);
-			ZVAL_COPY_VALUE(&args[1], &f->val);
+			ZVAL_COPY_VALUE(&args[0], s);
+			ZVAL_COPY_VALUE(&args[1], f);
 			zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache));
 
 			zend_long ret = php_get_long(&retval);
@@ -792,11 +867,22 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 }
 /* }}} */
 
+static inline int php_array_user_compare_unstable(Bucket *a, Bucket *b)
+{
+	return php_array_user_compare_zval_unstable(&a->val, &b->val);
+}
+
 static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
 {
 	RETURN_STABLE_SORT(a, b, php_array_user_compare_unstable(a, b));
 }
 /* }}} */
+
+static int php_array_packed_user_compare(const void *a, const void *b)
+{
+	int result = php_array_user_compare_zval_unstable((zval *) a, (zval *) b);
+	return EXPECTED(result) ? result : stable_zval_sort_fallback(a, b);
+}
 
 #define PHP_ARRAY_CMP_FUNC_VARS \
 	zend_fcall_info old_user_compare_fci; \
@@ -812,7 +898,8 @@ static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 
-static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compare_func, bool renumber) /* {{{ */
+static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compare_func,
+		bool renumber, compare_func_t packed_compare_func) /* {{{ */
 {
 	zval *array;
 	zend_array *arr;
@@ -834,7 +921,11 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 	/* Copy array, so the in-place modifications will not be visible to the callback function */
 	arr = zend_array_dup(arr);
 
-	zend_array_sort(arr, compare_func, renumber);
+	if (renumber && packed_compare_func && HT_IS_PACKED(arr)) {
+		zend_array_sort_packed(arr, packed_compare_func);
+	} else {
+		zend_array_sort(arr, compare_func, renumber);
+	}
 
 	zval garbage;
 	ZVAL_COPY_VALUE(&garbage, array);
@@ -849,14 +940,15 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 /* {{{ Sort an array by values using a user-defined comparison function */
 PHP_FUNCTION(usort)
 {
-	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, true);
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, true,
+		php_array_packed_user_compare);
 }
 /* }}} */
 
 /* {{{ Sort an array with a user-defined comparison function and maintain index association */
 PHP_FUNCTION(uasort)
 {
-	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, false);
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_compare, false, NULL);
 }
 /* }}} */
 
@@ -923,7 +1015,7 @@ static int php_array_user_key_compare(Bucket *a, Bucket *b) /* {{{ */
 /* {{{ Sort an array by keys using a user-defined comparison function */
 PHP_FUNCTION(uksort)
 {
-	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_key_compare, false);
+	php_usort(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_array_user_key_compare, false, NULL);
 }
 /* }}} */
 

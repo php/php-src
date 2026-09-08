@@ -304,6 +304,19 @@ ZEND_API int   zend_hash_compare(HashTable *ht1, const HashTable *ht2, compare_f
 ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 ZEND_API void  ZEND_FASTCALL zend_array_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 
+/* Sort and renumber an exclusively owned packed array, compacting holes. The
+ * comparator receives zvals and must use the original positions initialized
+ * in Z_EXTRA_P() to break ties stably. It must not execute user code or modify
+ * the array. Compaction relocates iterators to their new positions, including
+ * cursors at holes and one past the end.
+ * Empty arrays retain their internal pointer and next free element. */
+ZEND_API void ZEND_FASTCALL zend_hash_sort_packed(HashTable *ht, compare_func_t compare_func);
+
+/* Sort and renumber a packed user array, compacting holes and keeping it alive
+ * across calls to user code. The comparator receives zvals and must use the
+ * original positions initialized in Z_EXTRA_P() to break ties stably. */
+ZEND_API void ZEND_FASTCALL zend_array_sort_packed(HashTable *ht, compare_func_t compare_func);
+
 static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucket_compare_func_t compare_func, bool renumber) {
 	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber);
 }
