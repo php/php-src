@@ -984,6 +984,56 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors(zval *erro
 	fill_errors_inner(Z_ARRVAL_P(errors));
 }
 
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_whatwg_build_path(
+	lxb_url_t *lexbor_url, const zval *path, const zval *query, const zval *fragment, zval *errors
+) {
+	zend_result result;
+	const char *path_start = Z_STRVAL_P(path);
+	const char *path_end = path_start + Z_STRLEN_P(path);
+	while (path_start < path_end && php_uri_whatwg_is_ascii_tab_or_newline(*path_start)) {
+		path_start++;
+	}
+
+	if (lexbor_url->host.type == LXB_URL_HOST_TYPE__UNDEF && (path_start == path_end || *path_start != '/')) {
+		/* A pathname setter cannot parse an opaque path. Let's parse it directly,
+		 * protecting component delimiters from reinterpretation. */
+		smart_str opaque_path = {0};
+		for (const char *p = Z_STRVAL_P(path); p < path_end; p++) {
+			if (*p == '?') {
+				smart_str_appends(&opaque_path, "%3F");
+			} else if (*p == '#') {
+				smart_str_appends(&opaque_path, "%23");
+			} else {
+				smart_str_appendc(&opaque_path, *p);
+			}
+		}
+
+		/* The opaque path parser needs the following delimiter to encode the
+		 * immediately preceding space, while still reporting all space errors. */
+		if (Z_TYPE_P(query) != IS_NULL) {
+			smart_str_appendc(&opaque_path, '?');
+		} else if (Z_TYPE_P(fragment) != IS_NULL) {
+			smart_str_appendc(&opaque_path, '#');
+		}
+
+		zend_string *input = smart_str_extract(&opaque_path);
+		lxb_url_parser_clean(&lexbor_parser);
+		const lxb_status_t status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, NULL,
+			(const lxb_char_t *) ZSTR_VAL(input), ZSTR_LEN(input),
+			LXB_URL_STATE_OPAQUE_PATH_STATE, LXB_ENCODING_UTF_8);
+		result = status == LXB_STATUS_OK ? SUCCESS : FAILURE;
+		if (result == FAILURE) {
+			throw_invalid_url_exception_during_write(NULL, "path");
+		}
+		php_uri_parser_whatwg_build_errors(errors);
+		zend_string_release(input);
+	} else {
+		result = php_uri_parser_whatwg_path_write(lexbor_url, path, NULL);
+	}
+
+	return result;
+}
+
 ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_build_from_zval(
 	lxb_url_t *lexbor_base_url, const zval *scheme, const zval *username, const zval *password,
 	const zval *host, const zval *port, const zval *path, const zval *query, const zval *fragment,
@@ -1016,10 +1066,14 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		goto failure;
 	}
 
-	result = php_uri_parser_whatwg_host_write(lexbor_url, host, NULL);
-	php_uri_parser_whatwg_build_errors(&errors);
-	if (result == FAILURE) {
-		goto failure;
+	/* Set the host when provided or required by a special scheme (file allows an empty host).
+	 * Otherwise, preserve the absent host so the path can be opaque. */
+	if (Z_TYPE_P(host) == IS_STRING || lxb_url_is_special(lexbor_url)) {
+		result = php_uri_parser_whatwg_host_write(lexbor_url, host, NULL);
+		php_uri_parser_whatwg_build_errors(&errors);
+		if (result == FAILURE) {
+			goto failure;
+		}
 	}
 
 	if (lexbor_url->host.type == LXB_URL_HOST_TYPE__UNDEF
@@ -1062,7 +1116,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		goto failure;
 	}
 
-	result = php_uri_parser_whatwg_path_write(lexbor_url, path, NULL);
+	result = php_uri_parser_whatwg_build_path(lexbor_url, path, query, fragment, &errors);
 	php_uri_parser_whatwg_build_errors(&errors);
 	if (result == FAILURE) {
 		goto failure;
