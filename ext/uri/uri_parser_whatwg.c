@@ -1068,13 +1068,27 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		goto failure;
 	}
 
-	result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
+	if (Z_TYPE_P(query) == IS_STRING && Z_STRLEN_P(query) == 0) {
+		/* The URL API setter treats an empty string as removal. The builder
+		 * distinguishes an empty component from an absent one. */
+		lexbor_str_destroy(&lexbor_url->query, lexbor_url->mraw, false);
+		lexbor_str_init(&lexbor_url->query, lexbor_url->mraw, 1);
+	} else {
+		result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
+	}
 	php_uri_parser_whatwg_build_errors(&errors);
 	if (result == FAILURE) {
 		goto failure;
 	}
 
-	result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
+	if (Z_TYPE_P(fragment) == IS_STRING && Z_STRLEN_P(fragment) == 0) {
+		/* The URL API setter treats an empty string as removal. The builder
+		 * distinguishes an empty component from an absent one. */
+		lexbor_str_destroy(&lexbor_url->fragment, lexbor_url->mraw, false);
+		lexbor_str_init(&lexbor_url->fragment, lexbor_url->mraw, 1);
+	} else {
+		result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
+	}
 	php_uri_parser_whatwg_build_errors(&errors);
 	if (result == FAILURE) {
 		goto failure;
