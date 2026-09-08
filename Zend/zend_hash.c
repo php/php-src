@@ -1438,6 +1438,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 
 		/* Migrate pointer to one past the end of the array to the new one past the end, so that
 		 * newly inserted elements are picked up correctly. */
+		if (ht->nInternalPointer >= old_num_used) {
+			ht->nInternalPointer = ht->nNumUsed;
+		}
 		if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
 			_zend_hash_iterators_update(ht, old_num_used, ht->nNumUsed);
 		}
@@ -2445,6 +2448,10 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 				/* Move past-the-end iterators so they can pick up newly appended elements. */
 				_zend_hash_iterators_update(target, source->nNumUsed, target_idx);
 			}
+			/* Same for a past-the-end internal pointer. */
+			if (target->nInternalPointer >= source->nNumUsed) {
+				target->nInternalPointer = target_idx;
+			}
 			return target_idx;
 		}
 		idx++; p++; q++;
@@ -2500,9 +2507,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 		target->nNextFreeElement = source->nNextFreeElement;
 		target->nTableSize = source->nTableSize;
 		HT_SET_DATA_ADDR(target, emalloc(HT_PACKED_SIZE_EX(target->nTableSize, HT_MIN_MASK)));
-		target->nInternalPointer =
-			(source->nInternalPointer < source->nNumUsed) ?
-				source->nInternalPointer : 0;
+		target->nInternalPointer = source->nInternalPointer;
 
 		HT_HASH_RESET_PACKED(target);
 
@@ -2516,9 +2521,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(const HashTable *source)
 		HT_FLAGS(target) = HT_FLAGS(source) & (HASH_FLAG_MASK & ~HASH_FLAG_HAS_EMPTY_IND);
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
-		target->nInternalPointer =
-			(source->nInternalPointer < source->nNumUsed) ?
-				source->nInternalPointer : 0;
+		target->nInternalPointer = source->nInternalPointer;
 
 		target->nTableSize = source->nTableSize;
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
