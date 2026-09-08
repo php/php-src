@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-Uri\WhatWg\InvalidUrlException: The specified URL cannot have password
+Uri\WhatWg\InvalidUrlException: The specified host is malformed (HostMissing)
