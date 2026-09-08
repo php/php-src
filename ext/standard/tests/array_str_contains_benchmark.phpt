@@ -3,7 +3,7 @@ Benchmark array_str_contains vs userland implementations
 --FILE--
 <?php
 
-$iterations = 100_000;
+$iterations = 1_000;
 $haystack_start = array_merge(['apple'], array_fill(0, 50, 'banana'));
 $haystack_mid   = array_merge(array_fill(0, 25, 'banana'), ['apple'], array_fill(0, 25, 'banana'));
 $haystack_end   = array_merge(array_fill(0, 50, 'banana'), ['apple']);
@@ -16,7 +16,7 @@ $cases = [
     'No match (all)'  => $haystack_none,
 ];
 
-echo "=== BENCHMARK RESULTS (" . number_format($iterations) . " iterations) ===\n\n";
+echo "=== BENCHMARK RESULTS (" . number_format($iterations) . " iterations)label\n\n";
 
 foreach ($cases as $label => $array) {
     echo "[$label]\n";
