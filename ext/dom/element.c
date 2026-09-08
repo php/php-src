@@ -2033,7 +2033,7 @@ PHP_METHOD(Dom_Element, up)
 	xmlNodePtr thisp;
 	dom_object *intern;
 	zval *id;
-	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
 	dom_element_up(thisp, intern, return_value, selectors_str, index);
 }
@@ -2057,7 +2057,7 @@ PHP_METHOD(Dom_Element, down)
 	xmlNodePtr thisp;
 	dom_object *intern;
 	zval *id;
-	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
 	dom_element_down(thisp, intern, return_value, selectors_str, index);
 }
@@ -2081,7 +2081,7 @@ PHP_METHOD(Dom_Element, next)
 	xmlNodePtr thisp;
 	dom_object *intern;
 	zval *id;
-	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
 	dom_element_next(thisp, intern, return_value, selectors_str, index);
 }
@@ -2105,7 +2105,7 @@ PHP_METHOD(Dom_Element, previous)
 	xmlNodePtr thisp;
 	dom_object *intern;
 	zval *id;
-	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
 	dom_element_previous(thisp, intern, return_value, selectors_str, index);
 }
@@ -2122,7 +2122,7 @@ PHP_METHOD(Dom_Element, siblings)
 	xmlNodePtr thisp;
 	dom_object *intern;
 	zval *id;
-	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
 	dom_element_siblings(thisp, intern, return_value, selectors_str);
 }
