@@ -26,6 +26,7 @@ function test(array $values): void {
     unset($outerValue);
     echo 'outer: ', implode(' ', $outerVisits), "\n";
     echo 'inner: ', implode(' ', $innerVisits), "\n";
+    echo 'copy: ', implode(' ', array_keys($copy)), "\n";
 }
 
 test(['a' => 10, 'b' => 11, 'c' => 12, 'd' => 13,
@@ -34,3 +35,4 @@ test(['a' => 10, 'b' => 11, 'c' => 12, 'd' => 13,
 --EXPECT--
 outer: a=>10 c=>12 d=>13 e=>14 f=>15 g=>16 h=>17 i=>18
 inner: a=>10 b=>11 c=>12 d=>13 e=>14 f=>15 g=>16 h=>17 i=>18
+copy: c d e f g h

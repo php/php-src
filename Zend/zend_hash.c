@@ -2408,7 +2408,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 			if (EXPECTED(!HT_HAS_ITERATORS(target))) {
 				while (p != end) {
 					if (zend_array_dup_element(source, target, target_idx, p, q, 0, static_keys, with_holes)) {
-						if (source->nInternalPointer == idx) {
+						if (UNEXPECTED(target->nInternalPointer > target_idx && target->nInternalPointer <= idx)) {
 							target->nInternalPointer = target_idx;
 						}
 						target_idx++; q++;
@@ -2421,7 +2421,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 
 				while (p != end) {
 					if (zend_array_dup_element(source, target, target_idx, p, q, 0, static_keys, with_holes)) {
-						if (source->nInternalPointer == idx) {
+						if (UNEXPECTED(target->nInternalPointer > target_idx && target->nInternalPointer <= idx)) {
 							target->nInternalPointer = target_idx;
 						}
 						if (UNEXPECTED(idx >= iter_pos)) {
@@ -2434,6 +2434,8 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 					}
 					idx++; p++;
 				}
+				/* Move past-the-end iterators so they can pick up newly appended elements. */
+				_zend_hash_iterators_update(target, source->nNumUsed, target_idx);
 			}
 			return target_idx;
 		}
