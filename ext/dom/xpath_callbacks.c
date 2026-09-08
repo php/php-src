@@ -76,18 +76,22 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_argument_stack(xmlXPathParserC
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_dtor(php_dom_xpath_callbacks *registry)
 {
 	if (registry->php_ns) {
-		php_dom_xpath_callback_ns_dtor(registry->php_ns);
-		efree(registry->php_ns);
+		php_dom_xpath_callback_ns *php_ns = registry->php_ns;
+		registry->php_ns = NULL;
+		php_dom_xpath_callback_ns_dtor(php_ns);
+		efree(php_ns);
 	}
 	if (registry->namespaces) {
+		HashTable *namespaces = registry->namespaces;
+		registry->namespaces = NULL;
 		php_dom_xpath_callback_ns *ns;
-		ZEND_HASH_MAP_FOREACH_PTR(registry->namespaces, ns) {
+		ZEND_HASH_MAP_FOREACH_PTR(namespaces, ns) {
 			php_dom_xpath_callback_ns_dtor(ns);
 			efree(ns);
 		} ZEND_HASH_FOREACH_END();
 
-		zend_hash_destroy(registry->namespaces);
-		FREE_HASHTABLE(registry->namespaces);
+		zend_hash_destroy(namespaces);
+		FREE_HASHTABLE(namespaces);
 	}
 	php_dom_xpath_callbacks_clean_node_list(registry);
 }
