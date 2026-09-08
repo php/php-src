@@ -826,8 +826,18 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_host_validate(const zen
 		first++;
 	}
 
+	/* Validate the entire host before the hostname setter can stop at a URL delimiter.
+	 * Backslash is a delimiter only for special URLs, but is also forbidden in opaque hosts.
+	 * https://url.spec.whatwg.org/#hostname-state
+	 * https://url.spec.whatwg.org/#opaque-host-parser */
+	for (const char *p = first; p < last; p++) {
+		if (*p == '/' || *p == '?' || *p == '#' || *p == '\\') {
+			return php_uri_parser_whatwg_component_error("host", LXB_URL_ERROR_TYPE_HOST_INVALID_CODE_POINT);
+		}
+	}
+
 	if (*first != '[') {
-		/* Skip validation - The host is not an IPv6 address */
+		/* Skip further validation - The host is not an IPv6 address */
 		return SUCCESS;
 	}
 
