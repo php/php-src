@@ -646,33 +646,34 @@ PHP_METHOD(Phar, webPhar)
 			pt = estrndup(Z_STRVAL_P(z_script_name), Z_STRLEN_P(z_script_name));
 
 		} else {
-			char *testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1);
+			zend_string *testit = sapi_getenv("SCRIPT_NAME", sizeof("SCRIPT_NAME")-1);
 			if (!testit) {
 				goto finish;
 			}
 
-			pt = strstr(testit, basename);
+			pt = strstr(ZSTR_VAL(testit), basename);
 			if (!pt) {
-				efree(testit);
+				zend_string_release(testit);
 				goto finish;
 			}
 
-			path_info = sapi_getenv("PATH_INFO", sizeof("PATH_INFO")-1);
+			zend_string *zs_path_info = sapi_getenv("PATH_INFO", sizeof("PATH_INFO")-1);
 
-			if (path_info) {
-				entry = path_info;
-				entry_len = strlen(entry);
-				spprintf(&path_info, 0, "%s%s", testit, path_info);
+			if (zs_path_info) {
+				entry = estrdup(ZSTR_VAL(zs_path_info));
+				entry_len = strlen(entry); /* not ZSTR_LEN, b/c strdup truncates on nul */
+				spprintf(&path_info, 0, "%s%s", ZSTR_VAL(testit), ZSTR_VAL(zs_path_info));
 				free_pathinfo = 1;
+				zend_string_release(zs_path_info);
 			} else {
-				path_info = testit;
+				path_info = estrdup(ZSTR_VAL(testit));
 				free_pathinfo = 1;
 				entry = estrndup("", 0);
 				entry_len = 0;
 			}
 
-			pt = estrndup(testit, (pt - testit) + (fname_len - (basename - fname)));
-			efree(testit);
+			pt = estrndup(ZSTR_VAL(testit), (pt - ZSTR_VAL(testit)) + (fname_len - (basename - fname)));
+			zend_string_release(testit);
 		}
 		not_cgi = 0;
 	} else {
