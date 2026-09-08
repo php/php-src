@@ -987,7 +987,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors(zval *erro
 ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_build_from_zval(
 	lxb_url_t *lexbor_base_url, const zval *scheme, const zval *username, const zval *password,
 	const zval *host, const zval *port, const zval *path, const zval *query, const zval *fragment,
-	zval *errors_zv
+	zval *soft_errors_zv
 ) {
 	if (Z_TYPE_P(host) == IS_NULL ||
 		Z_STRLEN_P(host) == 0 ||
@@ -1028,7 +1028,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	}
 
 	zval errors;
-	ZVAL_UNDEF(&errors);
+	array_init(&errors);
 
 	zend_result result = php_uri_parser_whatwg_scheme_write(lexbor_url, scheme, NULL);
 	php_uri_parser_whatwg_build_errors(&errors);
@@ -1085,13 +1085,32 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		/* TODO */
 	}
 
-	if (php_uri_pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE) {
-		goto failure;
+	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, &errors) == FAILURE) {
+		/* The errors zval was already consumed; goto failure would destroy it again. */
+		lxb_url_destroy(lexbor_url);
+		return NULL;
 	}
 
 	return lexbor_url;
 
 failure:
+	/* Include errors from earlier components in the exception raised by a later component. */
+	if (zend_hash_num_elements(Z_ARRVAL(errors)) > 0 && EG(exception)
+		&& instanceof_function(EG(exception)->ce, php_uri_ce_whatwg_invalid_url_exception)) {
+		zval rv;
+		zval *exception_errors = zend_read_property(php_uri_ce_whatwg_invalid_url_exception,
+			EG(exception), ZEND_STRL("errors"), true, &rv);
+		ZEND_ASSERT(Z_TYPE_P(exception_errors) == IS_ARRAY);
+
+		zval *error;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(exception_errors), error) {
+			Z_TRY_ADDREF_P(error);
+			zend_hash_next_index_insert(Z_ARRVAL(errors), error);
+		} ZEND_HASH_FOREACH_END();
+
+		zval_ptr_dtor(exception_errors);
+		ZVAL_COPY(exception_errors, &errors);
+	}
 	zval_ptr_dtor(&errors);
 	lxb_url_destroy(lexbor_url);
 	return NULL;
