@@ -33,4 +33,4 @@ include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
-uri=/
+uri=/a/

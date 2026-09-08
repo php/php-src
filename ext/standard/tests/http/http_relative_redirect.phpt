@@ -57,12 +57,12 @@ http_server_kill($pid);
 --EXPECT--
 # URI parser: 
 Redirect from '/dir/page' to '/dir/page': /dir/page
-Redirect from '/dir/page' to 'dir/page': /dir//dir/page
+Redirect from '/dir/page' to 'dir/page': /dir/dir/page
 Redirect from '/dir/page' to 'a': /a
-Redirect from '/dir/page' to 'other': /dir//other
-Redirect from '/dir/page' to '': /
-Redirect from '/dir/page' to '../../../foo': /dir//../../../foo
-Redirect from '/dir/page' to 'space bar': /dir//space bar
+Redirect from '/dir/page' to 'other': /dir/other
+Redirect from '/dir/page' to '': /dir/
+Redirect from '/dir/page' to '../../../foo': /dir/../../../foo
+Redirect from '/dir/page' to 'space bar': /dir/space bar
 Redirect from '/a' to '/dir/page': /dir/page
 Redirect from '/a' to 'dir/page': /dir/page
 Redirect from '/a' to 'a': /a
@@ -85,12 +85,12 @@ Redirect from '' to '': /
 Redirect from '' to '../../../foo': /../../../foo
 Redirect from '' to 'space bar': /space bar
 Redirect from '/../../../foo' to '/dir/page': /dir/page
-Redirect from '/../../../foo' to 'dir/page': /../../..//dir/page
+Redirect from '/../../../foo' to 'dir/page': /../../../dir/page
 Redirect from '/../../../foo' to 'a': /a
-Redirect from '/../../../foo' to 'other': /../../..//other
-Redirect from '/../../../foo' to '': /
-Redirect from '/../../../foo' to '../../../foo': /../../..//../../../foo
-Redirect from '/../../../foo' to 'space bar': /../../..//space bar
+Redirect from '/../../../foo' to 'other': /../../../other
+Redirect from '/../../../foo' to '': /../../../
+Redirect from '/../../../foo' to '../../../foo': /../../../../../../foo
+Redirect from '/../../../foo' to 'space bar': /../../../space bar
 Redirect from '/space bar' to '/dir/page': /dir/page
 Redirect from '/space bar' to 'dir/page': /dir/page
 Redirect from '/space bar' to 'a': /a
@@ -100,11 +100,11 @@ Redirect from '/space bar' to '../../../foo': /../../../foo
 Redirect from '/space bar' to 'space bar': /space bar
 # URI parser: Uri\Rfc3986\Uri
 Redirect from '/dir/page' to '/dir/page': /dir/page
-Redirect from '/dir/page' to 'dir/page': /dir//dir/page
+Redirect from '/dir/page' to 'dir/page': /dir/dir/page
 Redirect from '/dir/page' to 'a': /a
-Redirect from '/dir/page' to 'other': /dir//other
-Redirect from '/dir/page' to '': /
-Redirect from '/dir/page' to '../../../foo': /dir//../../../foo
+Redirect from '/dir/page' to 'other': /dir/other
+Redirect from '/dir/page' to '': /dir/
+Redirect from '/dir/page' to '../../../foo': /dir/../../../foo
 Redirect from '/dir/page' to 'space bar': failed
 Redirect from '/a' to '/dir/page': /dir/page
 Redirect from '/a' to 'dir/page': /dir/page
@@ -128,11 +128,11 @@ Redirect from '' to '': /
 Redirect from '' to '../../../foo': /../../../foo
 Redirect from '' to 'space bar': failed
 Redirect from '/../../../foo' to '/dir/page': /dir/page
-Redirect from '/../../../foo' to 'dir/page': /../../..//dir/page
+Redirect from '/../../../foo' to 'dir/page': /../../../dir/page
 Redirect from '/../../../foo' to 'a': /a
-Redirect from '/../../../foo' to 'other': /../../..//other
-Redirect from '/../../../foo' to '': /
-Redirect from '/../../../foo' to '../../../foo': /../../..//../../../foo
+Redirect from '/../../../foo' to 'other': /../../../other
+Redirect from '/../../../foo' to '': /../../../
+Redirect from '/../../../foo' to '../../../foo': /../../../../../../foo
 Redirect from '/../../../foo' to 'space bar': failed
 Redirect from '/space bar' to '/dir/page': failed
 Redirect from '/space bar' to 'dir/page': failed
@@ -143,12 +143,12 @@ Redirect from '/space bar' to '../../../foo': failed
 Redirect from '/space bar' to 'space bar': failed
 # URI parser: Uri\WhatWg\Url
 Redirect from '/dir/page' to '/dir/page': /dir/page
-Redirect from '/dir/page' to 'dir/page': /dir//dir/page
+Redirect from '/dir/page' to 'dir/page': /dir/dir/page
 Redirect from '/dir/page' to 'a': /a
-Redirect from '/dir/page' to 'other': /dir//other
-Redirect from '/dir/page' to '': /
+Redirect from '/dir/page' to 'other': /dir/other
+Redirect from '/dir/page' to '': /dir/
 Redirect from '/dir/page' to '../../../foo': /foo
-Redirect from '/dir/page' to 'space bar': /dir//space%20bar
+Redirect from '/dir/page' to 'space bar': /dir/space%20bar
 Redirect from '/a' to '/dir/page': /dir/page
 Redirect from '/a' to 'dir/page': /dir/page
 Redirect from '/a' to 'a': /a
