@@ -10213,12 +10213,17 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 				"is a special class name", ZSTR_VAL(old_name), ZSTR_VAL(new_name), ZSTR_VAL(new_name));
 		}
 
-		if (type != ZEND_SYMBOL_FUNCTION && zend_string_equals(new_name, ZSTR_CHAR('_'))) {
-			if (type == ZEND_SYMBOL_CLASS) {
+		if (zend_string_equals(new_name, ZSTR_CHAR('_'))) {
+			switch (type) {
+			case ZEND_SYMBOL_CLASS:
 				zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated");
-			} else {
-				ZEND_ASSERT(type == ZEND_SYMBOL_CONST);
+				break;
+			case ZEND_SYMBOL_CONST:
 				zend_error(E_DEPRECATED, "Using \"_\" as a constant name is deprecated");
+				break;
+			case ZEND_SYMBOL_FUNCTION:
+				break;
+			default: ZEND_UNREACHABLE();
 			}
 		}
 
