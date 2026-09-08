@@ -577,7 +577,7 @@ PHP_MINFO_FUNCTION(odbc)
 /* }}} */
 
 /* {{{ odbc_sql_error */
-void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
+void odbc_sql_error(odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, const char *func, ...)
 {
 	SQLINTEGER	error;        /* Not used */
 	SQLSMALLINT	errormsgsize; /* Not used */
@@ -608,7 +608,14 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 		memcpy(conn_resource->lasterrormsg, ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)));
 	}
 	if (func) {
-		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s in %s", ODBCG(lasterrormsg), ODBCG(laststate), func);
+		va_list args;
+		char *desc;
+
+		va_start(args, func);
+		vspprintf(&desc, 0, func, args);
+		va_end(args);
+		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s in %s", ODBCG(lasterrormsg), ODBCG(laststate), desc);
+		efree(desc);
 	} else {
 		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s", ODBCG(lasterrormsg), ODBCG(laststate));
 	}
@@ -785,25 +792,6 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 /* }}} */
 
-static void odbc_colattribute_failed(odbc_result *result, zend_long pv_num)
-{
-#if defined(ODBCVER) && (ODBCVER >= 0x0300)
-	SQLINTEGER diag_error;
-	SQLCHAR diag_state[6];
-	SQLCHAR diag_text[128];
-
-	memset(diag_state, '\0', sizeof(diag_state));
-	memset(diag_text, '\0', sizeof(diag_text));
-	if (SQL_SUCCESS == SQLGetDiagRec(SQL_HANDLE_STMT, result->stmt, 1, diag_state, &diag_error, diag_text, sizeof(diag_text), NULL)) {
-		diag_state[sizeof(diag_state) - 1] = '\0';
-		diag_text[sizeof(diag_text) - 1] = '\0';
-		php_error_docref(NULL, E_WARNING, "SQLColAttribute failed for field #%d: [%s] %s", (int)pv_num, diag_state, diag_text);
-		return;
-	}
-#endif
-	php_error_docref(NULL, E_WARNING, "SQLColAttribute failed for field #%d", (int)pv_num);
-}
-
 /* {{{ odbc_column_lengths */
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
@@ -836,7 +824,7 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT)(type ? SQL_COLUMN_SCALE : SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		odbc_colattribute_failed(result, pv_num);
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLColAttribute column #" ZEND_LONG_FMT, pv_num);
 		len = 0;
 	}
 
@@ -2368,7 +2356,7 @@ PHP_FUNCTION(odbc_field_type)
 	tmp[0] = '\0';
 	rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, sizeof(tmp) - 1, &tmplen, NULL);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		odbc_colattribute_failed(result, pv_num);
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLColAttribute column #" ZEND_LONG_FMT, pv_num);
 		RETURN_FALSE;
 	}
 
