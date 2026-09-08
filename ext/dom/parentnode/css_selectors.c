@@ -14,6 +14,239 @@
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+
+/* Prototype-like DOM Traversal Methods */
+
+void dom_element_up(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index)
+{
+	const xmlNode *current = thisp->parent;
+	zend_long current_index = 0;
+
+	if (selectors_str == NULL) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				if (current_index == index) {
+					DOM_RET_OBJ((xmlNodePtr) current, intern);
+					return;
+				}
+				current_index++;
+			}
+			current = current->parent;
+		}
+		RETURN_NULL();
+	}
+
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
+	
+	if (EXPECTED(list != NULL)) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				dom_query_selector_matches_ctx ctx = { current, false };
+				lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, dom_query_selector_find_matches_callback, &ctx);
+				status = dom_check_css_execution_status(status);
+				if (UNEXPECTED(status != LXB_STATUS_OK)) {
+					break;
+				}
+				if (ctx.result) {
+					if (current_index == index) {
+						DOM_RET_OBJ((xmlNodePtr) current, intern);
+						break;
+					}
+					current_index++;
+				}
+			}
+			current = current->parent;
+		}
+	}
+
+	dom_selector_cleanup(&parser, &selectors, list);
+}
+
+typedef struct {
+    xmlNodePtr result;
+    zend_long target_index;
+    zend_long current_index;
+} dom_query_down_ctx;
+
+static lxb_status_t dom_query_down_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
+{
+    dom_query_down_ctx *qctx = (dom_query_down_ctx *) ctx;
+    if (qctx->current_index == qctx->target_index) {
+        qctx->result = (xmlNodePtr) node;
+        return LXB_STATUS_STOP;
+    }
+    qctx->current_index++;
+    return LXB_STATUS_OK;
+}
+
+void dom_element_down(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index)
+{
+	dom_query_down_ctx ctx = { NULL, index, 0 };
+
+	if (selectors_str == NULL) {
+		/* Fast path for all elements: use universal selector */
+		zend_string *univ = zend_string_init("*", 1, 0);
+		dom_query_selector_common(thisp, intern, univ, dom_query_down_callback, &ctx, LXB_SELECTORS_OPT_DEFAULT);
+		zend_string_release(univ);
+	} else {
+		dom_query_selector_common(thisp, intern, selectors_str, dom_query_down_callback, &ctx, LXB_SELECTORS_OPT_DEFAULT);
+	}
+
+	if (ctx.result != NULL) {
+		DOM_RET_OBJ(ctx.result, intern);
+	} else {
+		RETURN_NULL();
+	}
+}
+
+void dom_element_next(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index)
+{
+	const xmlNode *current = thisp->next;
+	zend_long current_index = 0;
+
+	if (selectors_str == NULL) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				if (current_index == index) {
+					DOM_RET_OBJ((xmlNodePtr) current, intern);
+					return;
+				}
+				current_index++;
+			}
+			current = current->next;
+		}
+		RETURN_NULL();
+	}
+
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
+	
+	if (EXPECTED(list != NULL)) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				dom_query_selector_matches_ctx ctx = { current, false };
+				lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, dom_query_selector_find_matches_callback, &ctx);
+				status = dom_check_css_execution_status(status);
+				if (UNEXPECTED(status != LXB_STATUS_OK)) {
+					break;
+				}
+				if (ctx.result) {
+					if (current_index == index) {
+						DOM_RET_OBJ((xmlNodePtr) current, intern);
+						break;
+					}
+					current_index++;
+				}
+			}
+			current = current->next;
+		}
+	}
+
+	dom_selector_cleanup(&parser, &selectors, list);
+}
+
+void dom_element_previous(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index)
+{
+	const xmlNode *current = thisp->prev;
+	zend_long current_index = 0;
+
+	if (selectors_str == NULL) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				if (current_index == index) {
+					DOM_RET_OBJ((xmlNodePtr) current, intern);
+					return;
+				}
+				current_index++;
+			}
+			current = current->prev;
+		}
+		RETURN_NULL();
+	}
+
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
+	
+	if (EXPECTED(list != NULL)) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				dom_query_selector_matches_ctx ctx = { current, false };
+				lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, dom_query_selector_find_matches_callback, &ctx);
+				status = dom_check_css_execution_status(status);
+				if (UNEXPECTED(status != LXB_STATUS_OK)) {
+					break;
+				}
+				if (ctx.result) {
+					if (current_index == index) {
+						DOM_RET_OBJ((xmlNodePtr) current, intern);
+						break;
+					}
+					current_index++;
+				}
+			}
+			current = current->prev;
+		}
+	}
+
+	dom_selector_cleanup(&parser, &selectors, list);
+}
+
+void dom_element_siblings(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str)
+{
+	HashTable *list = zend_new_array(0);
+	const xmlNode *parent = thisp->parent;
+	
+	if (parent != NULL) {
+		const xmlNode *current = parent->children;
+
+		if (selectors_str == NULL) {
+			while (current != NULL) {
+				if (current->type == XML_ELEMENT_NODE && current != thisp) {
+					zval zv;
+					php_dom_create_object((xmlNodePtr) current, &zv, intern);
+					zend_hash_next_index_insert(list, &zv);
+				}
+				current = current->next;
+			}
+		} else {
+			lxb_css_parser_t parser;
+			lxb_selectors_t selectors;
+			lxb_css_selector_list_t *list_lxb = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
+			
+			if (EXPECTED(list_lxb != NULL)) {
+				while (current != NULL) {
+					if (current->type == XML_ELEMENT_NODE && current != thisp) {
+						dom_query_selector_matches_ctx ctx = { current, false };
+						lxb_status_t status = lxb_selectors_match_node(&selectors, current, list_lxb, dom_query_selector_find_matches_callback, &ctx);
+						status = dom_check_css_execution_status(status);
+						if (UNEXPECTED(status != LXB_STATUS_OK)) {
+							break;
+						}
+						if (ctx.result) {
+							zval zv;
+							php_dom_create_object((xmlNodePtr) current, &zv, intern);
+							zend_hash_next_index_insert(list, &zv);
+						}
+					}
+					current = current->next;
+				}
+			}
+			dom_selector_cleanup(&parser, &selectors, list_lxb);
+		}
+	}
+
+	object_init_ex(return_value, dom_modern_nodelist_class_entry);
+	dom_object *ret_obj = Z_DOMOBJ_P(return_value);
+	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) ret_obj->ptr;
+	mapptr->array = list;
+	mapptr->release_array = true;
+	mapptr->handler = &php_dom_obj_map_nodeset;
+}
+
 #endif
 
 #include "php.h"
@@ -277,6 +510,239 @@ void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_valu
 	if (EXPECTED(result != NULL)) {
 		DOM_RET_OBJ((xmlNodePtr) result, intern);
 	}
+}
+
+
+/* Prototype-like DOM Traversal Methods */
+
+void dom_element_up(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index)
+{
+	const xmlNode *current = thisp->parent;
+	zend_long current_index = 0;
+
+	if (selectors_str == NULL) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				if (current_index == index) {
+					DOM_RET_OBJ((xmlNodePtr) current, intern);
+					return;
+				}
+				current_index++;
+			}
+			current = current->parent;
+		}
+		RETURN_NULL();
+	}
+
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
+	
+	if (EXPECTED(list != NULL)) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				dom_query_selector_matches_ctx ctx = { current, false };
+				lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, dom_query_selector_find_matches_callback, &ctx);
+				status = dom_check_css_execution_status(status);
+				if (UNEXPECTED(status != LXB_STATUS_OK)) {
+					break;
+				}
+				if (ctx.result) {
+					if (current_index == index) {
+						DOM_RET_OBJ((xmlNodePtr) current, intern);
+						break;
+					}
+					current_index++;
+				}
+			}
+			current = current->parent;
+		}
+	}
+
+	dom_selector_cleanup(&parser, &selectors, list);
+}
+
+typedef struct {
+    xmlNodePtr result;
+    zend_long target_index;
+    zend_long current_index;
+} dom_query_down_ctx;
+
+static lxb_status_t dom_query_down_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
+{
+    dom_query_down_ctx *qctx = (dom_query_down_ctx *) ctx;
+    if (qctx->current_index == qctx->target_index) {
+        qctx->result = (xmlNodePtr) node;
+        return LXB_STATUS_STOP;
+    }
+    qctx->current_index++;
+    return LXB_STATUS_OK;
+}
+
+void dom_element_down(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index)
+{
+	dom_query_down_ctx ctx = { NULL, index, 0 };
+
+	if (selectors_str == NULL) {
+		/* Fast path for all elements: use universal selector */
+		zend_string *univ = zend_string_init("*", 1, 0);
+		dom_query_selector_common(thisp, intern, univ, dom_query_down_callback, &ctx, LXB_SELECTORS_OPT_DEFAULT);
+		zend_string_release(univ);
+	} else {
+		dom_query_selector_common(thisp, intern, selectors_str, dom_query_down_callback, &ctx, LXB_SELECTORS_OPT_DEFAULT);
+	}
+
+	if (ctx.result != NULL) {
+		DOM_RET_OBJ(ctx.result, intern);
+	} else {
+		RETURN_NULL();
+	}
+}
+
+void dom_element_next(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index)
+{
+	const xmlNode *current = thisp->next;
+	zend_long current_index = 0;
+
+	if (selectors_str == NULL) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				if (current_index == index) {
+					DOM_RET_OBJ((xmlNodePtr) current, intern);
+					return;
+				}
+				current_index++;
+			}
+			current = current->next;
+		}
+		RETURN_NULL();
+	}
+
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
+	
+	if (EXPECTED(list != NULL)) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				dom_query_selector_matches_ctx ctx = { current, false };
+				lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, dom_query_selector_find_matches_callback, &ctx);
+				status = dom_check_css_execution_status(status);
+				if (UNEXPECTED(status != LXB_STATUS_OK)) {
+					break;
+				}
+				if (ctx.result) {
+					if (current_index == index) {
+						DOM_RET_OBJ((xmlNodePtr) current, intern);
+						break;
+					}
+					current_index++;
+				}
+			}
+			current = current->next;
+		}
+	}
+
+	dom_selector_cleanup(&parser, &selectors, list);
+}
+
+void dom_element_previous(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index)
+{
+	const xmlNode *current = thisp->prev;
+	zend_long current_index = 0;
+
+	if (selectors_str == NULL) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				if (current_index == index) {
+					DOM_RET_OBJ((xmlNodePtr) current, intern);
+					return;
+				}
+				current_index++;
+			}
+			current = current->prev;
+		}
+		RETURN_NULL();
+	}
+
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
+	
+	if (EXPECTED(list != NULL)) {
+		while (current != NULL) {
+			if (current->type == XML_ELEMENT_NODE) {
+				dom_query_selector_matches_ctx ctx = { current, false };
+				lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, dom_query_selector_find_matches_callback, &ctx);
+				status = dom_check_css_execution_status(status);
+				if (UNEXPECTED(status != LXB_STATUS_OK)) {
+					break;
+				}
+				if (ctx.result) {
+					if (current_index == index) {
+						DOM_RET_OBJ((xmlNodePtr) current, intern);
+						break;
+					}
+					current_index++;
+				}
+			}
+			current = current->prev;
+		}
+	}
+
+	dom_selector_cleanup(&parser, &selectors, list);
+}
+
+void dom_element_siblings(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str)
+{
+	HashTable *list = zend_new_array(0);
+	const xmlNode *parent = thisp->parent;
+	
+	if (parent != NULL) {
+		const xmlNode *current = parent->children;
+
+		if (selectors_str == NULL) {
+			while (current != NULL) {
+				if (current->type == XML_ELEMENT_NODE && current != thisp) {
+					zval zv;
+					php_dom_create_object((xmlNodePtr) current, &zv, intern);
+					zend_hash_next_index_insert(list, &zv);
+				}
+				current = current->next;
+			}
+		} else {
+			lxb_css_parser_t parser;
+			lxb_selectors_t selectors;
+			lxb_css_selector_list_t *list_lxb = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
+			
+			if (EXPECTED(list_lxb != NULL)) {
+				while (current != NULL) {
+					if (current->type == XML_ELEMENT_NODE && current != thisp) {
+						dom_query_selector_matches_ctx ctx = { current, false };
+						lxb_status_t status = lxb_selectors_match_node(&selectors, current, list_lxb, dom_query_selector_find_matches_callback, &ctx);
+						status = dom_check_css_execution_status(status);
+						if (UNEXPECTED(status != LXB_STATUS_OK)) {
+							break;
+						}
+						if (ctx.result) {
+							zval zv;
+							php_dom_create_object((xmlNodePtr) current, &zv, intern);
+							zend_hash_next_index_insert(list, &zv);
+						}
+					}
+					current = current->next;
+				}
+			}
+			dom_selector_cleanup(&parser, &selectors, list_lxb);
+		}
+	}
+
+	object_init_ex(return_value, dom_modern_nodelist_class_entry);
+	dom_object *ret_obj = Z_DOMOBJ_P(return_value);
+	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) ret_obj->ptr;
+	mapptr->array = list;
+	mapptr->release_array = true;
+	mapptr->handler = &php_dom_obj_map_nodeset;
 }
 
 #endif

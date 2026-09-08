@@ -2013,6 +2013,120 @@ PHP_METHOD(Dom_Element, matches)
 	dom_element_matches(thisp, intern, return_value, selectors_str);
 }
 
+
+PHP_METHOD(Dom_Element, up)
+{
+	zend_string *selectors_str = NULL;
+	zend_long index = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(selectors_str)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (index < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+
+	dom_element_up(thisp, intern, return_value, selectors_str, index);
+}
+
+PHP_METHOD(Dom_Element, down)
+{
+	zend_string *selectors_str = NULL;
+	zend_long index = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(selectors_str)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (index < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+
+	dom_element_down(thisp, intern, return_value, selectors_str, index);
+}
+
+PHP_METHOD(Dom_Element, next)
+{
+	zend_string *selectors_str = NULL;
+	zend_long index = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(selectors_str)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (index < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+
+	dom_element_next(thisp, intern, return_value, selectors_str, index);
+}
+
+PHP_METHOD(Dom_Element, previous)
+{
+	zend_string *selectors_str = NULL;
+	zend_long index = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(selectors_str)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (index < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+
+	dom_element_previous(thisp, intern, return_value, selectors_str, index);
+}
+
+PHP_METHOD(Dom_Element, siblings)
+{
+	zend_string *selectors_str = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(selectors_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_OBJ(thisp, id, xmlNodePtr, intern);
+
+	dom_element_siblings(thisp, intern, return_value, selectors_str);
+}
+
 PHP_METHOD(Dom_Element, closest)
 {
 	zend_string *selectors_str;

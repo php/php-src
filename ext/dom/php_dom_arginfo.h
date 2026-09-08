@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_dom.stub.php instead.
- * Stub hash: 8d7713834c924709155ed7acc554c9efc55e96c1
+ * Stub hash: f53e8ef8b543d089b51a72828c57efa10acdc98d
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -831,6 +831,21 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Element_matches, 0, 1,
 	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Element_up, 0, 0, Dom\\Element, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, selectors, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Dom_Element_down arginfo_class_Dom_Element_up
+
+#define arginfo_class_Dom_Element_next arginfo_class_Dom_Element_up
+
+#define arginfo_class_Dom_Element_previous arginfo_class_Dom_Element_up
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Element_siblings, 0, 0, Dom\\\116odeList, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, selectors, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Dom_Element_getInScopeNamespaces arginfo_class_DOMNode___sleep
 
 #define arginfo_class_Dom_Element_getDescendantNamespaces arginfo_class_DOMNode___sleep
@@ -1288,6 +1303,11 @@ ZEND_METHOD(Dom_Element, querySelector);
 ZEND_METHOD(Dom_Element, querySelectorAll);
 ZEND_METHOD(Dom_Element, closest);
 ZEND_METHOD(Dom_Element, matches);
+ZEND_METHOD(Dom_Element, up);
+ZEND_METHOD(Dom_Element, down);
+ZEND_METHOD(Dom_Element, next);
+ZEND_METHOD(Dom_Element, previous);
+ZEND_METHOD(Dom_Element, siblings);
 ZEND_METHOD(Dom_Element, getInScopeNamespaces);
 ZEND_METHOD(Dom_Element, getDescendantNamespaces);
 ZEND_METHOD(Dom_Element, rename);
@@ -1671,6 +1691,11 @@ static const zend_function_entry class_Dom_Element_methods[] = {
 	ZEND_ME(Dom_Element, querySelectorAll, arginfo_class_Dom_Element_querySelectorAll, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, closest, arginfo_class_Dom_Element_closest, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, matches, arginfo_class_Dom_Element_matches, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_Element, up, arginfo_class_Dom_Element_up, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_Element, down, arginfo_class_Dom_Element_down, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_Element, next, arginfo_class_Dom_Element_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_Element, previous, arginfo_class_Dom_Element_previous, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_Element, siblings, arginfo_class_Dom_Element_siblings, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, getInScopeNamespaces, arginfo_class_Dom_Element_getInScopeNamespaces, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, getDescendantNamespaces, arginfo_class_Dom_Element_getDescendantNamespaces, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, rename, arginfo_class_Dom_Element_rename, ZEND_ACC_PUBLIC)

@@ -1410,6 +1410,12 @@ namespace Dom
         public function closest(string $selectors): ?Element {}
         public function matches(string $selectors): bool {}
 
+        public function up(?string $selectors = null, int $index = 0): ?Element {}
+        public function down(?string $selectors = null, int $index = 0): ?Element {}
+        public function next(?string $selectors = null, int $index = 0): ?Element {}
+        public function previous(?string $selectors = null, int $index = 0): ?Element {}
+        public function siblings(?string $selectors = null): NodeList {}
+
         /** @virtual */
         public string $innerHTML;
 

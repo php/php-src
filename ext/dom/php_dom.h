@@ -196,6 +196,11 @@ bool php_dom_pre_insert_is_parent_invalid(xmlNodePtr parent);
 void dom_parent_node_query_selector(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
+void dom_element_up(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index);
+void dom_element_down(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index);
+void dom_element_next(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index);
+void dom_element_previous(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str, zend_long index);
+void dom_element_siblings(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 xmlNodePtr dom_parse_fragment(dom_object *obj, xmlNodePtr context_node, const zend_string *input);
 
