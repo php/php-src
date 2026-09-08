@@ -3065,7 +3065,9 @@ static void zend_hash_sort_packed_internal(HashTable *ht, compare_func_t compar)
 
 	/* Compact holes and record the original order for stable comparisons. */
 	zend_hash_sort_packed_prepare(ht);
-	zend_sort(ht->arPacked, ht->nNumUsed, sizeof(zval), compar, zend_hash_packed_zval_swap);
+	if (EXPECTED(ht->nNumUsed > 1)) {
+		zend_sort(ht->arPacked, ht->nNumUsed, sizeof(zval), compar, zend_hash_packed_zval_swap);
+	}
 	ht->nInternalPointer = 0;
 	ht->nNextFreeElement = ht->nNumUsed;
 }
@@ -3088,7 +3090,7 @@ static zend_always_inline void zend_array_sort_release(HashTable *ht)
 ZEND_API void ZEND_FASTCALL zend_array_sort_packed(HashTable *ht, compare_func_t compar)
 {
 	HT_ASSERT_RC1(ht);
-	/* zend_sort() cannot invoke the comparator for at most one element. */
+	/* The packed sort does not invoke the comparator for at most one element. */
 	if (ht->nNumOfElements <= 1) {
 		zend_hash_sort_packed_internal(ht, compar);
 		return;

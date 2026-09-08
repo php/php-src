@@ -691,6 +691,9 @@ static int php_array_packed_long_reverse_compare(const void *a, const void *b)
 
 static void php_array_packed_long_swap(void *a, void *b)
 {
+	/* zend_sort() moves elements exclusively through this callback, without
+	 * copying whole zvals. All elements are direct longs and stability metadata
+	 * is unused, so their type_info and u2 can stay in place. */
 	zend_long tmp = Z_LVAL_P((zval *) a);
 	Z_LVAL_P((zval *) a) = Z_LVAL_P((zval *) b);
 	Z_LVAL_P((zval *) b) = tmp;
@@ -701,6 +704,7 @@ static bool php_array_try_packed_scalar_sort(HashTable *array, compare_func_t cm
 {
 	ZEND_ASSERT(GC_REFCOUNT(array) == 1);
 	ZEND_ASSERT(HT_IS_PACKED(array));
+	ZEND_ASSERT(array->nNumOfElements > 1);
 	uint32_t i = 0;
 
 	if (long_cmp && HT_IS_WITHOUT_HOLES(array)) {
@@ -710,14 +714,11 @@ static bool php_array_try_packed_scalar_sort(HashTable *array, compare_func_t cm
 			}
 		}
 		if (i == array->nNumUsed) {
-			if (array->nNumOfElements != 0) {
-				/* Direct integer ties are indistinguishable. Only the integer
-				 * payload needs to move; no stability metadata is required. */
-				zend_sort(array->arPacked, array->nNumUsed, sizeof(zval), long_cmp,
-					php_array_packed_long_swap);
-				array->nInternalPointer = 0;
-				array->nNextFreeElement = array->nNumUsed;
-			}
+			/* Direct integer ties are indistinguishable; no stability metadata is required. */
+			zend_sort(array->arPacked, array->nNumUsed, sizeof(zval), long_cmp,
+				php_array_packed_long_swap);
+			array->nInternalPointer = 0;
+			array->nNextFreeElement = array->nNumUsed;
 			return true;
 		}
 	}

@@ -2,6 +2,7 @@
 Packed single-element sorting resets metadata without invoking user code
 --FILE--
 <?php
+// Suppress the constant's PHP 8.6 deprecation before installing the error handler.
 $flags = [SORT_REGULAR, SORT_REGULAR | SORT_FLAG_CASE, SORT_NUMERIC,
     SORT_STRING, SORT_STRING | SORT_FLAG_CASE, SORT_NATURAL,
     SORT_NATURAL | SORT_FLAG_CASE, @SORT_LOCALE_STRING, -1];
