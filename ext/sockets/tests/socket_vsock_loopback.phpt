@@ -7,6 +7,9 @@ sockets
 if (!defined('AF_VSOCK')) {
     die('skip AF_VSOCK not available');
 }
+if (!defined('VMADDR_CID_LOCAL')) {
+    die('skip no vsock loopback context ID');
+}
 $socket = @socket_create(AF_VSOCK, SOCK_STREAM, 0);
 if ($socket === false) {
     die('skip no vsock transport available');

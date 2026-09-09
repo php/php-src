@@ -56,11 +56,13 @@ const VMADDR_CID_ANY = UNKNOWN;
  * @cvalue VMADDR_CID_HYPERVISOR
  */
 const VMADDR_CID_HYPERVISOR = UNKNOWN;
+#ifdef VMADDR_CID_LOCAL
 /**
  * @var int
  * @cvalue VMADDR_CID_LOCAL
  */
 const VMADDR_CID_LOCAL = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue VMADDR_CID_HOST

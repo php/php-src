@@ -74,6 +74,9 @@
 # endif
 # if defined(HAVE_LINUX_VM_SOCKETS_H)
 #  include <linux/vm_sockets.h>
+# elif defined(HAVE_SYS_VSOCK_H)
+#  include <sys/vsock.h>
+#  define PHP_VSOCK_HAS_SVM_LEN 1
 # else
 #  undef AF_VSOCK
 # endif
@@ -125,27 +128,55 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
 # define PHP_VSOCK_ID_OUT_OF_RANGE(v) 0
 #endif
 
+static bool php_vsock_parse_cid(zend_string *addr, uint32_t *cid)
+{
+	zend_long lval;
+	double dval;
+
+	switch (is_numeric_string(ZSTR_VAL(addr), ZSTR_LEN(addr), &lval, &dval, 0)) {
+		case IS_LONG:
+			if (PHP_VSOCK_ID_OUT_OF_RANGE(lval)) {
+				return false;
+			}
+			*cid = (uint32_t) lval;
+			return true;
+
+		case IS_DOUBLE:
+			if (!(dval >= (double) INT32_MIN && dval <= (double) UINT32_MAX)
+					|| dval != (double) (int64_t) dval) {
+				return false;
+			}
+			*cid = (uint32_t) (int64_t) dval;
+			return true;
+
+		default:
+			return false;
+	}
+}
+
 static bool php_set_vsock_addr(struct sockaddr_vm *svm, zend_string *addr, zend_long port,
 		uint32_t addr_arg_num, uint32_t port_arg_num)
 {
-	zend_long cid;
-	double dval;
+	uint32_t cid;
 
-	if (is_numeric_string(ZSTR_VAL(addr), ZSTR_LEN(addr), &cid, &dval, 0) != IS_LONG
-			|| PHP_VSOCK_ID_OUT_OF_RANGE(cid)) {
-		zend_argument_value_error(addr_arg_num, "must be a numeric context ID between 0 and " ZEND_ULONG_FMT,
-			(zend_ulong) UINT32_MAX);
+	if (!php_vsock_parse_cid(addr, &cid)) {
+		zend_argument_value_error(addr_arg_num, "must be a numeric context ID between %d and " ZEND_ULONG_FMT,
+			INT32_MIN, (zend_ulong) UINT32_MAX);
 		return false;
 	}
 
 	if (PHP_VSOCK_ID_OUT_OF_RANGE(port)) {
-		zend_argument_value_error(port_arg_num, "must be between 0 and " ZEND_ULONG_FMT, (zend_ulong) UINT32_MAX);
+		zend_argument_value_error(port_arg_num, "must be between %d and " ZEND_ULONG_FMT,
+			INT32_MIN, (zend_ulong) UINT32_MAX);
 		return false;
 	}
 
 	memset(svm, 0, sizeof(*svm));
+#ifdef PHP_VSOCK_HAS_SVM_LEN
+	svm->svm_len = sizeof(*svm);
+#endif
 	svm->svm_family = AF_VSOCK;
-	svm->svm_cid = (uint32_t) cid;
+	svm->svm_cid = cid;
 	svm->svm_port = (uint32_t) port;
 
 	return true;
