@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC1
 
+- DOM:
+  . Fixed use-after-free when re-constructing a DOMXPath whose php:function
+    registrations are freed while still reachable from the cycle collector.
+    (Ilia Alshanetsky)
+
 
 10 Sep 2026, PHP 8.6.0beta3
 
