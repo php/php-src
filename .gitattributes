@@ -26,3 +26,6 @@
 
 # The OSS fuzz files are bunary
 /ext/date/tests/ossfuzz*.txt binary
+
+# The phar has some binary
+/pear/install-pear-nozlib.phar binary
