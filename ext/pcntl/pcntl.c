@@ -31,6 +31,7 @@
 #include "ext/standard/info.h"
 #include "php_signal.h"
 #include "php_ticks.h"
+#include "zend_exceptions.h"
 #include "zend_fibers.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
@@ -1318,6 +1319,8 @@ void pcntl_signal_dispatch(void)
 {
 	zval params[2], *handle, retval;
 	struct php_pcntl_pending_signal *queue, *next;
+	zend_object *old_exception;
+	const zend_op *old_opline_before_exception = NULL;
 	sigset_t mask;
 	sigset_t old_mask;
 
@@ -1345,8 +1348,21 @@ void pcntl_signal_dispatch(void)
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
 	PCNTL_G(tail) = NULL;
 
+	/* Dispatching can happen while an exception is propagating, typically from the interrupt
+	 * check that runs right after an internal function returned with an exception pending.
+	 * Handlers cannot be called in that state, so set the exception aside while they run,
+	 * the way destructors are called during unwinding. */
+	old_exception = EG(exception);
+	if (old_exception && EG(current_execute_data)) {
+		EG(current_execute_data)->opline = EG(opline_before_exception);
+		old_opline_before_exception = EG(opline_before_exception);
+	}
+	EG(exception) = NULL;
+
 	/* Allocate */
 	while (queue) {
+		bool handler_threw = false;
+
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
 				ZVAL_NULL(&retval);
@@ -1365,9 +1381,7 @@ void pcntl_signal_dispatch(void)
 #ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
 #endif
-				if (EG(exception)) {
-					break;
-				}
+				handler_threw = NULL != EG(exception);
 			}
 		}
 
@@ -1375,17 +1389,44 @@ void pcntl_signal_dispatch(void)
 		queue->next = PCNTL_G(spares);
 		PCNTL_G(spares) = queue;
 		queue = next;
+
+		/* No other handler can be called while the exception propagates */
+		if (handler_threw) {
+			break;
+		}
 	}
 
-	/* drain the remaining in case of exception thrown */
-	while (queue) {
-		next = queue->next;
-		queue->next = PCNTL_G(spares);
-		PCNTL_G(spares) = queue;
-		queue = next;
+	if (old_exception) {
+		if (EG(current_execute_data)) {
+			EG(current_execute_data)->opline = EG(exception_op);
+			EG(opline_before_exception) = old_opline_before_exception;
+		}
+		if (EG(exception)) {
+			zend_exception_set_previous(EG(exception), old_exception);
+		} else {
+			EG(exception) = old_exception;
+		}
 	}
 
-	PCNTL_G(pending_signals) = 0;
+	if (UNEXPECTED(queue)) {
+		/* The signals a throwing handler left behind go back to the queue instead of being
+		 * dropped, and the engine is asked to dispatch again once that exception is handled.
+		 * Signals are still blocked here, so PCNTL_G(head) cannot have been repopulated. */
+		next = queue;
+
+		while (next->next) {
+			next = next->next;
+		}
+
+		PCNTL_G(head) = queue;
+		PCNTL_G(tail) = next;
+
+		if (PCNTL_G(async_signals)) {
+			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		}
+	} else {
+		PCNTL_G(pending_signals) = 0;
+	}
 
 	/* Re-enable queue */
 	PCNTL_G(processing_signal_queue) = 0;
