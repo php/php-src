@@ -538,6 +538,12 @@ ZEND_API zend_constant *zend_register_constant(zend_constant *c)
 
 	c->attributes = NULL;
 
+	if (
+		zend_string_equals(name, ZSTR_CHAR('_'))
+		|| (slash && zend_string_ends_with_literal(name, "\\_"))
+	) {
+		zend_error(E_DEPRECATED, "Calling a constant \"_\" is deprecated since 8.6");
+	}
 	/* Check if the user is trying to define any special constant */
 	if (zend_string_equals_literal(name, "__COMPILER_HALT_OFFSET__")
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
