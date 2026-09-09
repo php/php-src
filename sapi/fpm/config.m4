@@ -464,11 +464,6 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_unix.c \
     fpm/fpm_worker_pool.c \
     fpm/zlog.c \
-    fpm/events/select.c \
-    fpm/events/poll.c \
-    fpm/events/epoll.c \
-    fpm/events/kqueue.c \
-    fpm/events/port.c \
   "
 
   PHP_SELECT_SAPI([fpm],
