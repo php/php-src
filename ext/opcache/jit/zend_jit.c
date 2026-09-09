@@ -1594,6 +1594,23 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_BW_NOT:
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						/* Only the definitely-LONG fast path; anything else falls
+						 * through to the VM handler (its previous behaviour). */
+						if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != MAY_BE_LONG) {
+							break;
+						}
+						res_addr = RES_REG_ADDR();
+						if (!zend_jit_bw_not(&ctx, opline,
+								op1_info, OP1_REG_ADDR(),
+								RES_INFO(), res_addr)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_ADD:
 					case ZEND_SUB:
 					case ZEND_MUL:
