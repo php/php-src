@@ -753,7 +753,6 @@ PHP_FUNCTION(wordwrap)
 	if (breakchar_len == 1 && !docut) {
 		newtext = zend_string_init(ZSTR_VAL(text), ZSTR_LEN(text), 0);
 
-		laststart = lastspace = 0;
 		for (current = 0; current < (zend_long)ZSTR_LEN(text); current++) {
 			if (ZSTR_VAL(text)[current] == breakchar[0]) {
 				laststart = lastspace = current + 1;
@@ -785,7 +784,6 @@ PHP_FUNCTION(wordwrap)
 		/* now keep track of the actual new text length */
 		newtextlen = 0;
 
-		laststart = lastspace = 0;
 		for (current = 0; current < (zend_long)ZSTR_LEN(text); current++) {
 			if (chk == 0) {
 				alloced += (size_t) (((ZSTR_LEN(text) - current + 1)/linelength + 1) * breakchar_len) + 1;
