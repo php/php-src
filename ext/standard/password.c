@@ -46,7 +46,7 @@ void php_password_algo_unregister(const char *ident) {
 
 static int php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
 {
-	size_t pos = 0;
+	size_t pos;
 	zend_string *buffer;
 	if ((int) str_len < 0) {
 		return FAILURE;
@@ -303,7 +303,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
 	size_t encoded_len;
-	int status = 0;
+	int status;
 
 	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
 		memory_cost = zval_get_long(option_buffer);

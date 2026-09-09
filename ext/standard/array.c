@@ -557,7 +557,7 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 
 PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 {
-	zend_long cnt = 0;
+	zend_long cnt;
 	zval *element;
 
 #ifdef ZEND_CHECK_STACK_LIMIT
