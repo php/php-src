@@ -1769,8 +1769,9 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 /* old "C" */
 #define Z_PARAM_CLASS_EX(dest, check_null, deref) \
 		Z_PARAM_PROLOGUE(deref, 0); \
-		_error = dest ? ZSTR_VAL((dest)->name) : NULL; \
-		if (UNEXPECTED(!zend_parse_arg_class(_arg, &dest, _i, check_null))) { \
+		const zend_class_entry *_base_ce = dest; \
+		if (UNEXPECTED(!zend_parse_arg_class(_arg, &dest, _base_ce, _i, check_null))) { \
+			_error = _base_ce ? ZSTR_VAL((_base_ce)->name) : NULL; \
 			_expected_type = check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME; \
 			_error_code = check_null ? ZPP_ERROR_WRONG_CLASS_NAME_OR_NULL : ZPP_ERROR_WRONG_CLASS_NAME; \
 			break; \
@@ -2220,7 +2221,7 @@ typedef enum zpp_parse_bool_status {
 	ZPP_PARSE_BOOL_STATUS_ERROR = 2,
 } zpp_parse_bool_status;
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null);
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, const zend_class_entry *ce_base, uint32_t num, bool check_null);
 ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_parse_arg_bool_slow(const zval *arg, uint32_t arg_num);
 ZEND_API zpp_parse_bool_status ZEND_FASTCALL zend_parse_arg_bool_weak(const zval *arg, uint32_t arg_num);
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num);

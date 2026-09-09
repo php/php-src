@@ -528,10 +528,8 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, const zend_clas
 	zend_class_redeclaration_error_ex(type, old_ce->name, old_ce);
 }
 
-ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null)
+ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, const zend_class_entry *ce_base, uint32_t num, bool check_null)
 {
-	const zend_class_entry *ce_base = *pce;
-
 	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*pce = NULL;
 		return true;
@@ -1051,8 +1049,8 @@ static zend_expected_type zend_parse_arg_impl(zval *arg, va_list *va, const char
 				zend_class_entry **pce = va_arg(*va, zend_class_entry **);
 				const zend_class_entry *ce_base = *pce;
 
-				*error = *pce ? ZSTR_VAL(ce_base->name) : NULL;
-				if (!zend_parse_arg_class(arg, pce, arg_num, check_null)) {
+				if (!zend_parse_arg_class(arg, pce, ce_base, arg_num, check_null)) {
+					*error = ce_base ? ZSTR_VAL(ce_base->name) : NULL;
 					return check_null ? Z_EXPECTED_CLASS_NAME_OR_NULL : Z_EXPECTED_CLASS_NAME;
 				}
 			}
