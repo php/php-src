@@ -530,15 +530,17 @@ ZEND_API void zend_reset_lc_ctype_locale(void);
 #define ZVAL_OFFSETOF_TYPE	\
 	(offsetof(zval, u1.type_info) - offsetof(zval, value))
 
-//#if defined(HAVE_ASM_GOTO) && !__has_feature(memory_sanitizer)
-//# define ZEND_USE_ASM_ARITHMETIC 1
-//#else
+#if defined(HAVE_ASM_GOTO) && !__has_feature(memory_sanitizer)
+# define ZEND_USE_ASM_ARITHMETIC 1
+#else
 # define ZEND_USE_ASM_ARITHMETIC 0
-//#endif
+#endif
 
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
-#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) \
+	&& (SIZEOF_ZEND_LONG == 4 || SIZEOF_ZEND_LONG == 8) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+# if SIZEOF_ZEND_LONG == 4
 	__asm__ goto(
 		"addl $1,(%0)\n\t"
 		"jo  %l1\n"
@@ -546,6 +548,16 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 		: "r"(&op1->value)
 		: "cc", "memory"
 		: overflow);
+# else
+	__asm__ goto(
+		"addl $1,(%0)\n\t"
+		"adcl $0,4(%0)\n\t"
+		"jo  %l1\n"
+		:
+		: "r"(&op1->value)
+		: "cc", "memory"
+		: overflow);
+# endif
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
@@ -617,7 +629,9 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 
 static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
-#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) \
+	&& (SIZEOF_ZEND_LONG == 4 || SIZEOF_ZEND_LONG == 8) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+# if SIZEOF_ZEND_LONG == 4
 	__asm__ goto(
 		"subl $1,(%0)\n\t"
 		"jo  %l1\n"
@@ -625,6 +639,16 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 		: "r"(&op1->value)
 		: "cc", "memory"
 		: overflow);
+# else
+	__asm__ goto(
+		"subl $1,(%0)\n\t"
+		"sbbl $0,4(%0)\n\t"
+		"jo  %l1\n"
+		:
+		: "r"(&op1->value)
+		: "cc", "memory"
+		: overflow);
+# endif
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
@@ -696,7 +720,14 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 
 static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
 {
-#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+/* There is no SIZEOF_ZEND_LONG == 8 counterpart to the i386 sequence below:
+ * holding a 64-bit value takes two scratch registers, and inside execute_ex()
+ * %esi and %edi are pinned as the VM's global register variables, leaving only
+ * eax/ebx/ecx/edx. Three "r" operands plus two clobbers cannot be satisfied,
+ * and gcc loops in register allocation instead of reporting it. That
+ * configuration is served by the __builtin_s{add,sub}ll_overflow() paths
+ * further down. */
+#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && SIZEOF_ZEND_LONG == 4 && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
 		"movl	(%1), %%eax\n\t"
 		"addl   (%2), %%eax\n\t"
@@ -800,7 +831,14 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 
 static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, zval *op2)
 {
-#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+/* There is no SIZEOF_ZEND_LONG == 8 counterpart to the i386 sequence below:
+ * holding a 64-bit value takes two scratch registers, and inside execute_ex()
+ * %esi and %edi are pinned as the VM's global register variables, leaving only
+ * eax/ebx/ecx/edx. Three "r" operands plus two clobbers cannot be satisfied,
+ * and gcc loops in register allocation instead of reporting it. That
+ * configuration is served by the __builtin_s{add,sub}ll_overflow() paths
+ * further down. */
+#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && SIZEOF_ZEND_LONG == 4 && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
 		"movl	(%1), %%eax\n\t"
 		"subl   (%2), %%eax\n\t"

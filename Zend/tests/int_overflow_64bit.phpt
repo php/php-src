@@ -20,6 +20,17 @@ foreach ($doubles as $d) {
         var_dump($l);
 }
 
+/* ++ and -- overflow to float at the zend_long boundary, and must not do so
+ * anywhere below it. The 32-bit boundaries matter on builds where zend_long is
+ * wider than the platform word: they are the values a 32-bit increment would
+ * either wrap or wrongly report as overflowing. */
+$i = PHP_INT_MAX;   $i++; var_dump($i);
+$i = PHP_INT_MIN;   $i--; var_dump($i);
+$i = 2147483647;    $i++; var_dump($i);
+$i = 4294967295;    $i++; var_dump($i);
+$i = -2147483648;   $i--; var_dump($i);
+$i = -4294967296;   $i--; var_dump($i);
+
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -36,4 +47,10 @@ int(0)
 int(-9223372036854775808)
 int(-9223372036854775808)
 int(-9223372036854775808)
+float(9.223372036854776E+18)
+float(-9.223372036854776E+18)
+int(2147483648)
+int(4294967296)
+int(-2147483649)
+int(-4294967297)
 Done
