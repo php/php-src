@@ -1420,7 +1420,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 								do {
 									zend_hash_iterators_update(ht, iter_pos, j);
 									iter_pos = zend_hash_iterators_lower_pos(ht, iter_pos + 1);
-								} while (iter_pos < i);
+								} while (iter_pos <= i);
 							}
 							q++;
 							j++;
@@ -2416,7 +2416,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 			if (EXPECTED(!HT_HAS_ITERATORS(target))) {
 				while (p != end) {
 					if (zend_array_dup_element(source, target, target_idx, p, q, false, static_keys, with_holes)) {
-						if (source->nInternalPointer == idx) {
+						if (UNEXPECTED(target->nInternalPointer > target_idx && target->nInternalPointer <= idx)) {
 							target->nInternalPointer = target_idx;
 						}
 						target_idx++; q++;
@@ -2429,19 +2429,21 @@ static zend_always_inline uint32_t zend_array_dup_elements(const HashTable *sour
 
 				while (p != end) {
 					if (zend_array_dup_element(source, target, target_idx, p, q, false, static_keys, with_holes)) {
-						if (source->nInternalPointer == idx) {
+						if (UNEXPECTED(target->nInternalPointer > target_idx && target->nInternalPointer <= idx)) {
 							target->nInternalPointer = target_idx;
 						}
 						if (UNEXPECTED(idx >= iter_pos)) {
 							do {
 								zend_hash_iterators_update(target, iter_pos, target_idx);
 								iter_pos = zend_hash_iterators_lower_pos(target, iter_pos + 1);
-							} while (iter_pos < idx);
+							} while (iter_pos <= idx);
 						}
 						target_idx++; q++;
 					}
 					idx++; p++;
 				}
+				/* Move past-the-end iterators so they can pick up newly appended elements. */
+				_zend_hash_iterators_update(target, source->nNumUsed, target_idx);
 			}
 			return target_idx;
 		}
