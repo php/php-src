@@ -115,9 +115,9 @@ void SdnToFrench(
 }
 
 zend_long FrenchToSdn(
-						int year,
-						int month,
-						int day)
+						zend_long year,
+						zend_long month,
+						zend_long day)
 {
 	/* check for invalid dates */
 	if (year < 1 || year > 14 ||
