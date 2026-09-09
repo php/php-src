@@ -2288,10 +2288,6 @@ PHP_FUNCTION(chunk_split)
 		RETURN_NEW_STR(result);
 	}
 
-	if (!ZSTR_LEN(str)) {
-		RETURN_EMPTY_STRING();
-	}
-
 	result = php_chunk_split(ZSTR_VAL(str), ZSTR_LEN(str), end, endlen, (size_t)chunklen);
 
 	RETURN_STR(result);
