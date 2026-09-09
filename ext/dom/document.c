@@ -2287,32 +2287,33 @@ PHP_METHOD(DOMDocument, saveHTML)
 /* {{{ Register extended class used to create base node type */
 static void dom_document_register_node_class(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 {
-	zend_class_entry *basece = dom_get_node_ce(modern), *ce = NULL;
+	zend_class_entry *base_ce, *ce = NULL;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "CC!", &basece, &ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_DERIVED_CLASS_NAME(base_ce, dom_get_node_ce(modern))
+		Z_PARAM_CLASS_OR_NULL(ce)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (basece->ce_flags & ZEND_ACC_ABSTRACT) {
+	if (base_ce->ce_flags & ZEND_ACC_ABSTRACT) {
 		zend_argument_value_error(1, "must not be an abstract class");
 		RETURN_THROWS();
 	}
 
-	if (ce == NULL || instanceof_function(ce, basece)) {
+	if (ce == NULL || instanceof_function(ce, base_ce)) {
 		if (UNEXPECTED(ce != NULL && (ce->ce_flags & ZEND_ACC_ABSTRACT))) {
 			zend_argument_value_error(2, "must not be an abstract class");
 			RETURN_THROWS();
 		}
 		DOM_GET_THIS_INTERN(intern);
-		dom_set_doc_classmap(intern->document, basece, ce);
+		dom_set_doc_classmap(intern->document, base_ce, ce);
 		if (!modern) {
 			RETVAL_TRUE;
 		}
 		return;
 	}
 
-	zend_argument_error(NULL, 2, "must be a class name derived from %s or null, %s given", ZSTR_VAL(basece->name), ZSTR_VAL(ce->name));
+	zend_argument_error(NULL, 2, "must be a class name derived from %s or null, %s given", ZSTR_VAL(base_ce->name), ZSTR_VAL(ce->name));
 	RETURN_THROWS();
 }
 
