@@ -1669,6 +1669,9 @@ static zend_never_inline void *zend_mm_realloc_huge(zend_mm_heap *heap, void *pt
 #if ZEND_DEBUG
 	real_size = size;
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+	if (UNEXPECTED(size < real_size)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+	}
 #endif
 	if (size > ZEND_MM_MAX_LARGE_SIZE) {
 #if ZEND_DEBUG
@@ -1774,6 +1777,9 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 		size_t real_size = size;
 
 		size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+		if (UNEXPECTED(size < real_size)) {
+			zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+		}
 #endif
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
