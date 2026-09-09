@@ -1,7 +1,10 @@
 /* This is a generated file, edit test.stub.php instead.
- * Stub hash: 4d728e740122add9d4c91f5c1abb5f5017690636
+ * Stub hash: 2954e482259ba13b5b27c8652f388fb5e1b5dcb5
  * Has decl header: yes */
 
+#if 1
+#include "test_stub_cvalue.h"
+#endif
 #include "zend_constants.h"
 #if (PHP_VERSION_ID >= 80100)
 #include "zend_enum.h"
@@ -754,6 +757,7 @@ static void register_test_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_CS);
 	REGISTER_STRING_CONSTANT("ZEND_CONSTANT_A", "global", CONST_PERSISTENT | CONST_CS);
+	REGISTER_STRING_CONSTANT("ZEND_TEST_STUB_CVALUE_A", ZEND_TEST_STUB_CVALUE_A, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("ZEND_TEST_ATTRIBUTED_CONSTANT", 42, CONST_PERSISTENT | CONST_CS);
 	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT | CONST_CS);
 	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZendSubNS\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT | CONST_CS);

@@ -1343,6 +1343,14 @@ class VersionFlags {
     }
 }
 
+class IncludeInfo {
+    public function __construct(
+        public readonly string $include,
+        public readonly ?string $cond,
+    ) {
+    }
+}
+
 class FuncInfo {
 
     /**
@@ -4296,6 +4304,8 @@ class FileInfo {
     private array $funcInfos = [];
     /** @var ClassInfo[] */
     public array $classInfos = [];
+    /** @var IncludeInfo[] */
+    public array $includeInfos = [];
     private bool $generateFunctionEntries = false;
     private string $declarationPrefix = "";
     private bool $generateClassEntries = false;
@@ -4440,6 +4450,16 @@ class FileInfo {
         $conds = [];
         foreach ($stmts as $stmt) {
             $cond = self::handlePreprocessorConditions($conds, $stmt);
+
+            if ($stmt instanceof Stmt\Declare_) {
+                foreach ($stmt->declares as $declare) {
+                    if ($declare->key->name !== 'c_include') {
+                        throw new Exception("Unexpected declare {$declare->key->name}");
+                    }
+                    $this->includeInfos[] = new IncludeInfo((string)EvaluatedValue::createFromExpression($declare->value, null, null, [])->value, $cond);
+                }
+                continue;
+            }
 
             if ($stmt instanceof Stmt\Nop) {
                 continue;
@@ -4664,6 +4684,11 @@ class FileInfo {
         string $stubHash
     ): array {
         $headerDependencies = new HeaderDependencies();
+
+        foreach ($this->includeInfos as $includeInfo) {
+            $headerDependencies->add($includeInfo->include, $includeInfo->cond);
+        }
+
         $code = "";
 
         $generatedFuncInfos = [];
@@ -5377,7 +5402,7 @@ function generateCodeWithConditions(
             continue;
         }
 
-        if ($info->cond && $info->cond !== $parentCond) {
+        if ($info->cond !== null && $info->cond !== $parentCond) {
             if ($openCondition !== null
                 && $info->cond !== $openCondition
             ) {
