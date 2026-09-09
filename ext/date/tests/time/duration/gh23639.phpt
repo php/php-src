@@ -3,8 +3,6 @@ GH-23639 (object_properties_load allows creating readonly reference properties)
 --CREDITS--
 arnaud-lb
 ndossche
---XFAIL--
-Test can only succeed when GH-23629 is also merged
 --FILE--
 <?php
 
