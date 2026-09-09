@@ -101,7 +101,7 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 }
 /* }}} */
 
-static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_len, HashTable *options) {
+static zend_string* php_password_get_salt(size_t required_salt_len, HashTable *options) {
 	if (options && zend_hash_str_exists(options, "salt", sizeof("salt") - 1)) {
 		php_error_docref(NULL, E_WARNING, "The \"salt\" option has been ignored, since providing a custom salt is no longer supported");
 	}
@@ -194,7 +194,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	}
 
 	hash_format_len = snprintf(hash_format, sizeof(hash_format), "$2y$%02" ZEND_LONG_FMT_SPEC "$", cost);
-	if (!(salt = php_password_get_salt(NULL, Z_UL(22), options))) {
+	if (!(salt = php_password_get_salt(Z_UL(22), options))) {
 		return NULL;
 	}
 	ZSTR_VAL(salt)[ZSTR_LEN(salt)] = 0;
