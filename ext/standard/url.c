@@ -106,7 +106,6 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 					goto parse_port;
 				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 					s += 2;
-					e = 0;
 					goto parse_host;
 				} else {
 					goto just_path;
