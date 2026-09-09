@@ -4,9 +4,7 @@
 |                                                                      |
 |   PEAR: PHP Extension and Application Repository                     |
 |                                                                      |
-| To install these components, download                                |
-| https://pear.php.net/install-pear-nozlib.phar to php-src/pear/       |
-| become the superuser and execute:                                    |
+| To install these components, become the superuser and execute:       |
 |                                                                      |
 |   # make install-pear                                                |
 +----------------------------------------------------------------------+
