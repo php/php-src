@@ -177,6 +177,17 @@ const PHP_INT_SIZE = UNKNOWN;
  */
 const PHP_SYS_SIZE = UNKNOWN;
 /**
+ * The greatest length a string can have. This is the allocator's limit
+ * (ZSTR_MAX_LEN) capped to what a zend_long can express, because every
+ * userland string length travels through zend_long: strlen()'s return value,
+ * string offsets and substr()'s arguments. Allocating a string anywhere near
+ * this will normally fail long before the limit itself is reached.
+ *
+ * @var int
+ * @cvalue (SIZEOF_SIZE_T < SIZEOF_ZEND_LONG ? (zend_long) ZSTR_MAX_LEN : ZEND_LONG_MAX)
+ */
+const PHP_STRING_MAX_LENGTH = UNKNOWN;
+/**
  * @var int
  * @cvalue FD_SETSIZE
  */
