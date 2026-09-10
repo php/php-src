@@ -46,6 +46,10 @@ ZEND_API bool zend_fn_closure_equals_ex(
 	const zend_function *fn_b, const zend_object *closure_zobj_b
 );
 
+static zend_always_inline bool zend_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **this_ptr, bool check_only) {
+	return obj->handlers->get_closure && obj->handlers->get_closure(obj, ce_ptr, fptr_ptr, this_ptr, check_only) == SUCCESS;
+}
+
 END_EXTERN_C()
 
 #endif
