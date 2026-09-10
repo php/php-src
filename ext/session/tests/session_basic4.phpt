@@ -15,7 +15,7 @@ url_rewriter.tags="a=href,area=href,frame=src,form="
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

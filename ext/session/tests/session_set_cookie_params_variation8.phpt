@@ -3,7 +3,7 @@ Test session_set_cookie_params() function : negative and 0 lifetime
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

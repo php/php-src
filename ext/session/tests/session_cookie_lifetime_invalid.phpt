@@ -3,7 +3,7 @@ session.cookie_lifetime rejects invalid values
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -9,7 +9,7 @@ session.cookie_httponly=1
 --SKIPIF--
 <?php
 
-include('skipif.inc');
+include 'skipif.inc';
 
 require __DIR__.'/../../../sapi/cgi/tests/include.inc';
 
