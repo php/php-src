@@ -72,6 +72,14 @@
 # if defined(HAVE_LINUX_UDP_H)
 #  include <linux/udp.h>
 # endif
+# if defined(HAVE_LINUX_VM_SOCKETS_H)
+#  include <linux/vm_sockets.h>
+# elif defined(HAVE_SYS_VSOCK_H)
+#  include <sys/vsock.h>
+#  define PHP_VSOCK_HAS_SVM_LEN 1
+# else
+#  undef AF_VSOCK
+# endif
 #endif
 
 #include <stddef.h>
@@ -111,6 +119,68 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
 #define PHP_ETH_PROTO_CHECK(protocol, family)								\
 	(void)protocol;											\
 	(void)family
+#endif
+
+#ifdef AF_VSOCK
+#if SIZEOF_ZEND_LONG > 4
+# define PHP_VSOCK_ID_OUT_OF_RANGE(v) ((v) < INT32_MIN || (v) > (zend_long) UINT32_MAX)
+#else
+# define PHP_VSOCK_ID_OUT_OF_RANGE(v) 0
+#endif
+
+static bool php_vsock_parse_cid(zend_string *addr, uint32_t *cid)
+{
+	zend_long lval;
+	double dval;
+
+	switch (is_numeric_string(ZSTR_VAL(addr), ZSTR_LEN(addr), &lval, &dval, 0)) {
+		case IS_LONG:
+			if (PHP_VSOCK_ID_OUT_OF_RANGE(lval)) {
+				return false;
+			}
+			*cid = (uint32_t) lval;
+			return true;
+
+		case IS_DOUBLE:
+			if (!(dval >= (double) INT32_MIN && dval <= (double) UINT32_MAX)
+					|| dval != (double) (int64_t) dval) {
+				return false;
+			}
+			*cid = (uint32_t) (int64_t) dval;
+			return true;
+
+		default:
+			return false;
+	}
+}
+
+static bool php_set_vsock_addr(struct sockaddr_vm *svm, zend_string *addr, zend_long port,
+		uint32_t addr_arg_num, uint32_t port_arg_num)
+{
+	uint32_t cid;
+
+	if (!php_vsock_parse_cid(addr, &cid)) {
+		zend_argument_value_error(addr_arg_num, "must be a numeric context ID between %d and " ZEND_ULONG_FMT,
+			INT32_MIN, (zend_ulong) UINT32_MAX);
+		return false;
+	}
+
+	if (PHP_VSOCK_ID_OUT_OF_RANGE(port)) {
+		zend_argument_value_error(port_arg_num, "must be between %d and " ZEND_ULONG_FMT,
+			INT32_MIN, (zend_ulong) UINT32_MAX);
+		return false;
+	}
+
+	memset(svm, 0, sizeof(*svm));
+#ifdef PHP_VSOCK_HAS_SVM_LEN
+	svm->svm_len = sizeof(*svm);
+#endif
+	svm->svm_family = AF_VSOCK;
+	svm->svm_cid = cid;
+	svm->svm_port = (uint32_t) port;
+
+	return true;
+}
 #endif
 
 static PHP_GINIT_FUNCTION(sockets);
@@ -995,6 +1065,9 @@ PHP_FUNCTION(socket_getsockname)
 #ifdef AF_PACKET
 	struct sockaddr_ll              *sll;
 #endif
+#ifdef AF_VSOCK
+	struct sockaddr_vm              *svm;
+#endif
 	char					addrbuf[INET6_ADDRSTRLEN];
 	struct sockaddr_un		*s_un;
 	const char				*addr_string;
@@ -1060,9 +1133,23 @@ PHP_FUNCTION(socket_getsockname)
 			}
 			RETURN_TRUE;
 #endif
+#ifdef AF_VSOCK
+		case AF_VSOCK: {
+			size_t cid_len;
+
+			svm = (struct sockaddr_vm *) sa;
+			cid_len = (size_t) snprintf(addrbuf, sizeof(addrbuf), "%u", svm->svm_cid);
+
+			ZEND_TRY_ASSIGN_REF_STRINGL(addr, addrbuf, cid_len);
+			if (objint != NULL) {
+				ZEND_TRY_ASSIGN_REF_LONG(objint, (zend_long) svm->svm_port);
+			}
+			RETURN_TRUE;
+		}
+#endif
 
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_VSOCK, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 }
@@ -1078,6 +1165,9 @@ PHP_FUNCTION(socket_getpeername)
 	struct sockaddr_in		*sin;
 #ifdef HAVE_IPV6
 	struct sockaddr_in6		*sin6;
+#endif
+#ifdef AF_VSOCK
+	struct sockaddr_vm		*svm;
 #endif
 	char					addrbuf[INET6_ADDRSTRLEN];
 	struct sockaddr_un		*s_un;
@@ -1131,9 +1221,23 @@ PHP_FUNCTION(socket_getpeername)
 
 			ZEND_TRY_ASSIGN_REF_STRING(arg2, s_un->sun_path);
 			RETURN_TRUE;
+#ifdef AF_VSOCK
+		case AF_VSOCK: {
+			size_t cid_len;
+
+			svm = (struct sockaddr_vm *) sa;
+			cid_len = (size_t) snprintf(addrbuf, sizeof(addrbuf), "%u", svm->svm_cid);
+
+			ZEND_TRY_ASSIGN_REF_STRINGL(arg2, addrbuf, cid_len);
+			if (arg3 != NULL) {
+				ZEND_TRY_ASSIGN_REF_LONG(arg3, (zend_long) svm->svm_port);
+			}
+			RETURN_TRUE;
+		}
+#endif
 
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_VSOCK, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 }
@@ -1158,8 +1262,11 @@ PHP_FUNCTION(socket_create)
 #ifdef AF_PACKET
 		&& domain != AF_PACKET
 #endif
+#ifdef AF_VSOCK
+		&& domain != AF_VSOCK
+#endif
 		&& domain != AF_INET) {
-		zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_INET6, or AF_INET");
+		zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_VSOCK, AF_INET6, or AF_INET");
 		RETURN_THROWS();
 	}
 
@@ -1272,9 +1379,26 @@ PHP_FUNCTION(socket_connect)
 				(socklen_t)(offsetof(struct sockaddr_un, sun_path) + ZSTR_LEN(addr)));
 			break;
 		}
+#ifdef AF_VSOCK
+		case AF_VSOCK: {
+			struct sockaddr_vm svm;
+
+			if (port_is_null) {
+				zend_argument_value_error(3, "cannot be null when the socket type is AF_VSOCK");
+				RETURN_THROWS();
+			}
+
+			if (!php_set_vsock_addr(&svm, addr, port, 2, 3)) {
+				RETURN_THROWS();
+			}
+
+			retval = connect(php_sock->bsd_socket, (struct sockaddr *) &svm, sizeof(svm));
+			break;
+		}
+#endif
 
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_VSOCK, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 		}
 
@@ -1326,10 +1450,16 @@ PHP_FUNCTION(socket_bind)
 	php_sock = Z_SOCKET_P(arg1);
 	ENSURE_SOCKET_VALID(php_sock);
 
-	if (objint < 0 || objint > USHRT_MAX) {
-		zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
-		RETURN_THROWS();
+#ifdef AF_VSOCK
+	if (php_sock->type != AF_VSOCK) {
+#endif
+		if (objint < 0 || objint > USHRT_MAX) {
+			zend_argument_value_error(3, "must be between 0 and %u", USHRT_MAX);
+			RETURN_THROWS();
+		}
+#ifdef AF_VSOCK
 	}
+#endif
 
 	switch(php_sock->type) {
 		case AF_UNIX:
@@ -1396,8 +1526,21 @@ PHP_FUNCTION(socket_bind)
 				break;
 			}
 #endif
+#ifdef AF_VSOCK
+		case AF_VSOCK:
+			{
+				struct sockaddr_vm *sa = (struct sockaddr_vm *) sock_type;
+
+				if (!php_set_vsock_addr(sa, addr, objint, 2, 3)) {
+					RETURN_THROWS();
+				}
+
+				retval = bind(php_sock->bsd_socket, sock_type, sizeof(struct sockaddr_vm));
+				break;
+			}
+#endif
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_VSOCK, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
@@ -1501,6 +1644,9 @@ PHP_FUNCTION(socket_recvfrom)
 #endif
 #ifdef AF_PACKET
 	struct sockaddr_ll	sll;
+#endif
+#ifdef AF_VSOCK
+	struct sockaddr_vm	svm;
 #endif
 	char				addrbuf[INET6_ADDRSTRLEN];
 	socklen_t			slen;
@@ -1678,8 +1824,36 @@ PHP_FUNCTION(socket_recvfrom)
 			break;
 		}
 #endif
+#ifdef AF_VSOCK
+		case AF_VSOCK: {
+			size_t cid_len;
+
+			slen = sizeof(svm);
+			memset(&svm, 0, slen);
+
+			retval = recvfrom(php_sock->bsd_socket, ZSTR_VAL(recv_buf), length, flags, (struct sockaddr *)&svm, &slen);
+
+			if (retval < 0) {
+				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				zend_string_efree(recv_buf);
+				RETURN_FALSE;
+			}
+			ZSTR_LEN(recv_buf) = MIN((size_t)retval, (size_t)length);
+			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
+
+			cid_len = (size_t) snprintf(addrbuf, sizeof(addrbuf), "%u", svm.svm_cid);
+
+			ZEND_TRY_ASSIGN_REF_NEW_STR(zdata, recv_buf);
+			ZEND_TRY_ASSIGN_REF_STRINGL(zaddr, addrbuf, cid_len);
+
+			if (zport) {
+				ZEND_TRY_ASSIGN_REF_LONG(zport, (zend_long) svm.svm_port);
+			}
+			break;
+		}
+#endif
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_VSOCK, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
@@ -1699,6 +1873,9 @@ PHP_FUNCTION(socket_sendto)
 #endif
 #ifdef AF_PACKET
 	struct sockaddr_ll	sll;
+#endif
+#ifdef AF_VSOCK
+	struct sockaddr_vm	svm;
 #endif
 	int					retval;
 	size_t              buf_len;
@@ -1723,10 +1900,16 @@ PHP_FUNCTION(socket_sendto)
 #ifdef AF_PACKET
 	if (php_sock->type != AF_PACKET) {
 #endif
+#ifdef AF_VSOCK
+	if (php_sock->type != AF_VSOCK) {
+#endif
 		if (port < 0 || port > USHRT_MAX) {
 			zend_argument_value_error(6, "must be between 0 and %u", USHRT_MAX);
 			RETURN_THROWS();
 		}
+#ifdef AF_VSOCK
+	}
+#endif
 #ifdef AF_PACKET
 	}
 #endif
@@ -1799,8 +1982,22 @@ PHP_FUNCTION(socket_sendto)
 			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *)&sll, sizeof(sll));
 			break;
 #endif
+#ifdef AF_VSOCK
+		case AF_VSOCK:
+			if (port_is_null) {
+				zend_argument_value_error(6, "cannot be null when the socket type is AF_VSOCK");
+				RETURN_THROWS();
+			}
+
+			if (!php_set_vsock_addr(&svm, addr, port, 5, 6)) {
+				RETURN_THROWS();
+			}
+
+			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len, flags, (struct sockaddr *)&svm, sizeof(svm));
+			break;
+#endif
 		default:
-			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_INET, or AF_INET6");
+			zend_argument_value_error(1, "must be one of AF_UNIX, AF_PACKET, AF_VSOCK, AF_INET, or AF_INET6");
 			RETURN_THROWS();
 	}
 
