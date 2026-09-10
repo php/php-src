@@ -1794,6 +1794,10 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 						return;
 					}
 				}
+				if (ZEND_TYPE_IS_SET(property_info->type) && !zend_verify_property_type(property_info, prop, /* strict */ false)) {
+					return;
+				}
+
 				zval_ptr_dtor(slot);
 				ZVAL_COPY_VALUE(slot, prop);
 				zval_add_ref(slot);
