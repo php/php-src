@@ -398,6 +398,16 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
+			case ZEND_FAST_CALL:
+				if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
+					/* OP2 holds the pending return value, which is consumed by the
+					 * following RETURN, or destroyed by
+					 * zend_dispatch_try_catch_finally_helper() if the finally block
+					 * throws. Its source must not be removed. */
+					Tsource[VAR_NUM(opline->op2.var)] = NULL;
+				}
+				break;
+
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
 			case ZEND_MATCH:
