@@ -102,6 +102,11 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
 
 int php_json_scan(php_json_scanner *s)
 {
+	/* Comments are fully consumed before returning, so their opener location can remain local. */
+	php_json_ctype *comment_token = s->cursor;
+	php_json_ctype *comment_line_start = s->line_start;
+	uint64_t comment_line = s->line;
+
 	ZVAL_NULL(&s->value);
 
 std:
@@ -203,6 +208,23 @@ std:
 		goto std;
 	}
 	<JS>WS                   { goto std; }
+	<JS>"//"                 {
+		if (!(s->options & PHP_JSON_ALLOW_COMMENTS)) {
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+			return PHP_JSON_T_ERROR;
+		}
+		PHP_JSON_CONDITION_SET_AND_GOTO(COMMENT_LINE);
+	}
+	<JS>"/*"                 {
+		if (!(s->options & PHP_JSON_ALLOW_COMMENTS)) {
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+			return PHP_JSON_T_ERROR;
+		}
+		comment_token = s->token;
+		comment_line_start = s->line_start;
+		comment_line = s->line;
+		PHP_JSON_CONDITION_SET_AND_GOTO(COMMENT_BLOCK);
+	}
 	<JS>EOI                  {
 		if (s->limit < s->cursor) {
 			return PHP_JSON_T_EOI;
@@ -227,6 +249,68 @@ std:
 		return PHP_JSON_T_ERROR;
 	}
 	<JS>ANY                  {
+		s->errcode = PHP_JSON_ERROR_UTF8;
+		return PHP_JSON_T_ERROR;
+	}
+	<COMMENT_LINE>"\r\n"    {
+		s->line++;
+		s->line_start = s->cursor;
+		PHP_JSON_CONDITION_SET(JS);
+		goto std;
+	}
+	<COMMENT_LINE>[\r\n]     {
+		s->line++;
+		s->line_start = s->cursor;
+		PHP_JSON_CONDITION_SET(JS);
+		goto std;
+	}
+	<COMMENT_LINE>EOI        {
+		if (s->limit < s->cursor) {
+			s->token = s->limit;
+			PHP_JSON_CONDITION_SET(JS);
+			return PHP_JSON_T_EOI;
+		}
+		PHP_JSON_CONDITION_GOTO(COMMENT_LINE);
+	}
+	<COMMENT_LINE>UTF8       { PHP_JSON_CONDITION_GOTO(COMMENT_LINE); }
+	<COMMENT_LINE>ANY        {
+		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
+			PHP_JSON_CONDITION_GOTO(COMMENT_LINE);
+		}
+		s->token = s->cursor - 1;
+		s->errcode = PHP_JSON_ERROR_UTF8;
+		return PHP_JSON_T_ERROR;
+	}
+	<COMMENT_BLOCK>"*/"      {
+		PHP_JSON_CONDITION_SET(JS);
+		goto std;
+	}
+	<COMMENT_BLOCK>"\r\n"    {
+		s->line++;
+		s->line_start = s->cursor;
+		PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK);
+	}
+	<COMMENT_BLOCK>[\r\n]    {
+		s->line++;
+		s->line_start = s->cursor;
+		PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK);
+	}
+	<COMMENT_BLOCK>EOI       {
+		if (s->limit < s->cursor) {
+			s->token = comment_token;
+			s->line_start = comment_line_start;
+			s->line = comment_line;
+			s->errcode = PHP_JSON_ERROR_SYNTAX;
+			return PHP_JSON_T_ERROR;
+		}
+		PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK);
+	}
+	<COMMENT_BLOCK>UTF8      { PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK); }
+	<COMMENT_BLOCK>ANY       {
+		if (s->options & (PHP_JSON_INVALID_UTF8_IGNORE | PHP_JSON_INVALID_UTF8_SUBSTITUTE)) {
+			PHP_JSON_CONDITION_GOTO(COMMENT_BLOCK);
+		}
+		s->token = s->cursor - 1;
 		s->errcode = PHP_JSON_ERROR_UTF8;
 		return PHP_JSON_T_ERROR;
 	}
