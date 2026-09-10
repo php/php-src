@@ -2498,6 +2498,7 @@ PHP_FUNCTION(openssl_csr_parse)
 			if (attr) {
 				char objbuf[80];
 				/* Adapted from openssl's "req" app */
+				const ASN1_TYPE *at;
 				ASN1_STRING *bs = NULL;
 				const ASN1_OBJECT *aobj;
 				int j, type = 0, count = 1, ii = 0;
@@ -2512,7 +2513,7 @@ PHP_FUNCTION(openssl_csr_parse)
 						goto err_subitem;
 					}
 get_next:
-					const ASN1_TYPE *at = X509_ATTRIBUTE_get0_type(attr, ii);
+					at = X509_ATTRIBUTE_get0_type(attr, ii);
 					type = at->type;
 					bs = at->value.asn1_string;
 				} else {
@@ -2525,8 +2526,8 @@ get_next:
 					case V_ASN1_UTF8STRING:
 					case V_ASN1_IA5STRING:
 						add_assoc_stringl(&subitem, objbuf,
-								  ASN1_STRING_get0_data(bs),
-								  ASN1_STRING_get_length(bs));
+								  (const char *)ASN1_STRING_get0_data(bs),
+								  ASN1_STRING_length(bs));
 						break;
 					default:
 						add_assoc_stringl(&subitem, objbuf, unknown, sizeof(unknown));
