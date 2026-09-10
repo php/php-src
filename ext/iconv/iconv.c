@@ -2595,20 +2595,20 @@ static zend_result php_iconv_stream_filter_seek(
 		int whence)
 {
 	php_iconv_stream_filter *self = (php_iconv_stream_filter *)Z_PTR(filter->abstract);
+	iconv_t cd;
 
 	/* Reset stub buffer */
 	self->stub_len = 0;
 
-	/* Reset iconv conversion state by closing and reopening the converter */
-	iconv_close(self->cd);
-
-	self->cd = iconv_open(self->to_charset, self->from_charset);
-	if ((iconv_t)-1 == self->cd) {
+	cd = iconv_open(self->to_charset, self->from_charset);
+	if ((iconv_t)-1 == cd) {
 		php_error_docref(NULL, E_WARNING,
 				"iconv stream filter (\"%s\"=>\"%s\"): failed to reset conversion state",
 				self->from_charset, self->to_charset);
 		return FAILURE;
 	}
+	iconv_close(self->cd);
+	self->cd = cd;
 
 	return SUCCESS;
 }
