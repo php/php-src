@@ -2443,8 +2443,8 @@ PHP_FUNCTION(openssl_csr_parse)
 	zval subitem;
 	zval critext;
 	int critcount = 0;
-	X509_EXTENSION *extension;
-	X509_NAME *subject_name;
+	PHP_OPENSSL_X509_EXTENSION *extension;
+	const X509_NAME *subject_name;
 	char *csr_name;
 	char *extname;
 	BIO *bio_out;
@@ -2467,7 +2467,7 @@ PHP_FUNCTION(openssl_csr_parse)
 
 	subject_name = X509_REQ_get_subject_name(csr);
 	csr_name = X509_NAME_oneline(subject_name, NULL, 0);
-	if (csr_name) {
+	if (csr_name != NULL) {
 		add_assoc_string(return_value, "name", csr_name);
 		OPENSSL_free(csr_name);
 	}
@@ -2498,9 +2498,8 @@ PHP_FUNCTION(openssl_csr_parse)
 			if (attr) {
 				char objbuf[80];
 				/* Adapted from openssl's "req" app */
-				ASN1_TYPE *at;
-				ASN1_BIT_STRING *bs = NULL;
-				ASN1_OBJECT *aobj;
+				ASN1_STRING *bs = NULL;
+				const ASN1_OBJECT *aobj;
 				int j, type = 0, count = 1, ii = 0;
 
 				aobj = X509_ATTRIBUTE_get0_object(attr);
@@ -2513,7 +2512,7 @@ PHP_FUNCTION(openssl_csr_parse)
 						goto err_subitem;
 					}
 get_next:
-					at = X509_ATTRIBUTE_get0_type(attr, ii);
+					const ASN1_TYPE *at = X509_ATTRIBUTE_get0_type(attr, ii);
 					type = at->type;
 					bs = at->value.asn1_string;
 				} else {
@@ -2525,7 +2524,9 @@ get_next:
 					case V_ASN1_NUMERICSTRING:
 					case V_ASN1_UTF8STRING:
 					case V_ASN1_IA5STRING:
-						add_assoc_stringl(&subitem, objbuf, (char *)bs->data, bs->length);
+						add_assoc_stringl(&subitem, objbuf,
+								  ASN1_STRING_get0_data(bs),
+								  ASN1_STRING_get_length(bs));
 						break;
 					default:
 						add_assoc_stringl(&subitem, objbuf, unknown, sizeof(unknown));
@@ -2566,16 +2567,18 @@ get_next:
 				goto err_subitem;
 			}
 			if (nid == NID_subject_alt_name) {
-				if (openssl_x509v3_subjectAltName(bio_out, extension) == 0) {
-					BIO_get_mem_ptr(bio_out, &bio_buf);
+				if (openssl_x509v3_subjectAltName(bio_out, extension) == 0 && BIO_get_mem_ptr(bio_out, &bio_buf) > 0) {
 					add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 				} else {
 					BIO_free(bio_out);
 					goto err_subitem;
 				}
 			}
-			else if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
-				BIO_get_mem_ptr(bio_out, &bio_buf);
+			else if (X509V3_EXT_print(bio_out, extension, 0, 0) > 0) {
+				if (BIO_get_mem_ptr(bio_out, &bio_buf) <= 0) {
+					BIO_free(bio_out);
+					goto err_subitem;
+				}
 				add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 			} else {
 				php_openssl_add_assoc_asn1_string(&subitem, extname, X509_EXTENSION_get_data(extension));
