@@ -2190,11 +2190,6 @@ PHP_FUNCTION(realpath)
 			RETURN_FALSE;
 		}
 
-#ifdef ZTS
-		if (VCWD_ACCESS(resolved_path_buff, F_OK)) {
-			RETURN_FALSE;
-		}
-#endif
 		RETURN_STRING(resolved_path_buff);
 	} else {
 		RETURN_FALSE;
