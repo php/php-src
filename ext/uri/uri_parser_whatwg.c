@@ -1000,8 +1000,7 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_into_excep
 			EG(exception), ZEND_STRL("errors"), true, &rv);
 		ZEND_ASSERT(Z_TYPE_P(exception_errors) == IS_ARRAY);
 
-		zval *error;
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(exception_errors), error) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(exception_errors), zval *error) {
 			Z_TRY_ADDREF_P(error);
 			zend_hash_next_index_insert(Z_ARRVAL_P(errors), error);
 		} ZEND_HASH_FOREACH_END();
@@ -1050,6 +1049,22 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_fragment_set_null(lxb_u
 	}
 }
 
+ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) static lxb_url_t *php_uri_parser_whatwg_parse_scheme_reference(
+	const zval *scheme, const lxb_url_t *lexbor_base_url, zval *errors
+) {
+	zend_string *reference = zend_string_alloc(Z_STRLEN_P(scheme) + 1, false);
+	memcpy(ZSTR_VAL(reference), Z_STRVAL_P(scheme), Z_STRLEN_P(scheme));
+	ZSTR_VAL(reference)[Z_STRLEN_P(scheme)] = ':';
+	ZSTR_VAL(reference)[Z_STRLEN_P(scheme) + 1] = '\0';
+
+	lxb_url_t *url = php_uri_parser_whatwg_parse_ex(
+		ZSTR_VAL(reference), ZSTR_LEN(reference), lexbor_base_url, errors, false
+	);
+	zend_string_release(reference);
+
+	return url;
+}
+
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_resolve_reference_from_zval(
 	lxb_url_t *lexbor_base_url, const zval *scheme, const zval *username, const zval *password,
 	const zval *host, const zval *port, const zval *path, const zval *query, const zval *fragment,
@@ -1063,10 +1078,20 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 
 		/* A new authority inherits only the scheme, not the base URL's other components. */
 		zval base_scheme;
-		php_uri_parser_whatwg_scheme_read(lexbor_base_url, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &base_scheme);
-		lxb_url_t *url = php_uri_parser_whatwg_build_from_zval(NULL, &base_scheme,
+		const bool inherit_scheme = Z_STRLEN_P(scheme) == 0;
+		const zval *authority_scheme = scheme;
+		if (inherit_scheme) {
+			php_uri_parser_whatwg_scheme_read(
+				lexbor_base_url, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &base_scheme
+			);
+			authority_scheme = &base_scheme;
+		}
+
+		lxb_url_t *url = php_uri_parser_whatwg_build_from_zval(NULL, authority_scheme,
 			username, password, host, port, path, query, fragment, soft_errors_zv);
-		zval_ptr_dtor(&base_scheme);
+		if (inherit_scheme) {
+			zval_ptr_dtor(&base_scheme);
+		}
 		return url;
 	}
 
@@ -1092,15 +1117,25 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		first++;
 	}
 
-	lxb_status_t status;
 	zval errors;
-	array_init(&errors);
-
-	lxb_url_t *lexbor_url = php_uri_parser_whatwg_clone(lexbor_base_url);
-	if (lexbor_url == NULL) {
-		zend_throw_exception(php_uri_ce_error, "Memory allocation error", 0);
-		goto failure;
+	lxb_url_t *lexbor_url;
+	if (Z_STRLEN_P(scheme) > 0) {
+		ZVAL_UNDEF(&errors);
+		lexbor_url = php_uri_parser_whatwg_parse_scheme_reference(scheme, lexbor_base_url, &errors);
+		if (lexbor_url == NULL) {
+			zval_ptr_dtor(&errors);
+			return NULL;
+		}
+	} else {
+		array_init(&errors);
+		lexbor_url = php_uri_parser_whatwg_clone(lexbor_base_url);
+		if (lexbor_url == NULL) {
+			zend_throw_exception(php_uri_ce_error, "Memory allocation error", 0);
+			goto failure;
+		}
 	}
+
+	lxb_status_t status;
 	if (lexbor_base_url->path.opaque && first == end
 		&& (Z_TYPE_P(query) == IS_STRING || Z_TYPE_P(fragment) == IS_NULL)) {
 		php_uri_parser_whatwg_component_error(Z_TYPE_P(query) == IS_STRING ? "query" : "path",
@@ -1262,14 +1297,34 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 ) {
 	lxb_url_parser_clean(&lexbor_parser);
 
-	if (lexbor_base_url != NULL && Z_TYPE_P(scheme) == IS_STRING && Z_STRLEN_P(scheme) == 0) {
+	const lxb_url_scheme_type_t scheme_type = php_uri_parser_whatwg_get_special_scheme(Z_STR_P(scheme));
+	const bool resolve_reference = lexbor_base_url != NULL
+		&& (Z_STRLEN_P(scheme) == 0 || scheme_type == lexbor_base_url->scheme.type);
+	if (resolve_reference) {
 		return php_uri_parser_whatwg_resolve_reference_from_zval(
 			lexbor_base_url, scheme, username, password, host, port, path, query, fragment, soft_errors_zv
 		);
 	}
 
+	zval errors;
+	ZVAL_UNDEF(&errors);
+	bool parsed_scheme_reference = false;
+	if (lexbor_base_url != NULL
+		&& scheme_type != LXB_URL_SCHEMEL_TYPE__UNDEF
+		&& Z_TYPE_P(host) == IS_NULL
+	) {
+		lxb_url_t *url = php_uri_parser_whatwg_parse_scheme_reference(scheme, lexbor_base_url, &errors);
+		if (url == NULL) {
+			zval_ptr_dtor(&errors);
+			return NULL;
+		}
+		lxb_url_destroy(url);
+		parsed_scheme_reference = true;
+	}
+
 	lxb_url_t *lexbor_url = lexbor_mraw_calloc(lexbor_parser.mraw, sizeof(*lexbor_url));
 	if (lexbor_url == NULL) {
+		zval_ptr_dtor(&errors);
 		zend_throw_exception(php_uri_ce_error, "Memory allocation error", 0);
 		return NULL;
 	}
@@ -1284,11 +1339,17 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		lexbor_url->scheme.type = LXB_URL_SCHEMEL_TYPE__UNKNOWN;
 	}
 
-	zval errors;
-	array_init(&errors);
+	if (Z_ISUNDEF(errors)) {
+		array_init(&errors);
+	}
 
 	zend_result result = php_uri_parser_whatwg_scheme_write(lexbor_url, scheme, NULL);
-	php_uri_parser_whatwg_build_errors(&errors);
+	if (parsed_scheme_reference) {
+		/* already recorded by reference parser */
+		lxb_url_parser_clean(&lexbor_parser);
+	} else {
+		php_uri_parser_whatwg_build_errors(&errors);
+	}
 	if (result == FAILURE) {
 		goto failure;
 	}
