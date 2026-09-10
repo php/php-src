@@ -2104,7 +2104,10 @@ static int php_openssl_parse_validity_range(zval *validity, time_t *notBefore, t
 	time_t from = -1;
 	time_t to = -1;
 
-	if (Z_TYPE_P(validity) != IS_ARRAY ||
+	if (Z_TYPE_P(validity) != IS_ARRAY) {
+		php_error_docref(NULL, E_WARNING, "Incorrect type, not an array");
+		return FAILURE;
+	}
 	if ((tmp = zend_hash_index_find(Z_ARRVAL_P(validity), 2)) != NULL) {
 		php_error_docref(NULL, E_WARNING, "Too many timestamps");
 		return FAILURE;
