@@ -649,6 +649,39 @@ static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry *
 }
 /* }}} */
 
+ZEND_API bool zend_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **this_ptr, bool check_only) {
+	/* Fast path for native closures */
+	if (EXPECTED(obj->ce == zend_ce_closure)) {
+		zend_closure *closure = (zend_closure*)obj;
+
+		*fptr_ptr = &closure->func;
+		*ce_ptr = closure->called_scope;
+		*this_ptr = closure->this_ptr;
+		return true;
+	}
+
+	if (EXPECTED(obj->handlers->get_closure == zend_std_get_closure)) {
+		/* Inline zend_std_get_closure behaviour for fast path of __invoke() methods */
+		zend_class_entry *ce = obj->ce;
+		zend_function *func = zend_hash_find_ex_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE), /* known_hash */ true);
+
+		if (UNEXPECTED(func == NULL)) {
+			return false;
+		}
+		*fptr_ptr = func;
+		*ce_ptr = ce;
+		*this_ptr = obj;
+		return true;
+	}
+
+	if (UNEXPECTED(obj->handlers->get_closure == NULL)) {
+		return false;
+	}
+
+	/* Currently only FFI implements a custom get_closure */
+	return obj->handlers->get_closure(obj, ce_ptr, fptr_ptr, this_ptr, check_only) == SUCCESS;
+}
+
 /* *is_temp is int due to Object Handler API */
 static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
