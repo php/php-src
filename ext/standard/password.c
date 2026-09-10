@@ -332,7 +332,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (!(salt = php_password_get_salt(NULL, Z_UL(16), options))) {
+	if (!(salt = php_password_get_salt(Z_UL(16), options))) {
 		return NULL;
 	}
 
