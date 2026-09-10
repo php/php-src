@@ -1137,6 +1137,10 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 				smart_str_appends(&reference, "%3F");
 			} else if (*p == '#') {
 				smart_str_appends(&reference, "%23");
+				const char *reason;
+				append_validation_error(
+					Z_ARRVAL(errors), LXB_URL_ERROR_TYPE_INVALID_URL_UNIT, p, &reason
+				);
 			} else {
 				smart_str_appendc(&reference, *p);
 			}
