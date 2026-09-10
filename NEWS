@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- Zip:
+  . Fixed ZipArchive::extractTo() ignoring files given in a non-list array.
+    (David Carlier)
+
 
 24 Sep 2026, PHP 8.4.26
 
