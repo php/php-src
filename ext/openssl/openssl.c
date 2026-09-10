@@ -1562,7 +1562,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	} else {
 		zval_ptr_dtor(&critext);
 	}
-	ulong altcount = zend_hash_num_elements(Z_ARRVAL_P(&altname));
+	zend_ulong altcount = zend_hash_num_elements(Z_ARRVAL_P(&altname));
 	if (altcount > 0) {
 		add_assoc_zval(return_value, "subjectAlternativeName", &altname);
 	} else {

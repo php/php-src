@@ -711,14 +711,18 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 	num = sk_GENERAL_NAME_num(names);
 	for (i = 0; i < num; i++) {
 		GENERAL_NAME *name;
-		ASN1_STRING *as;
 		zval entry;
 		array_init(&entry);
 		name = sk_GENERAL_NAME_value(names, i);
-		switch (name->type) {
-			case GEN_EMAIL:
+		int type;
+		void *value = GENERAL_NAME_get0_value(name, &type);
+		if (value == NULL) {
+		    type = -1;
+		}
+		switch (type) {
+			case GEN_EMAIL: {
 				BIO_puts(bio, "email:");
-				as = name->d.rfc822Name;
+				ASN1_IA5STRING *as = (ASN1_IA5STRING *)value;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
 				if (altname != NULL) {
@@ -727,9 +731,10 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					add_index_zval(altname, index++, &entry);
 				}
 				break;
-			case GEN_DNS:
+			}
+			case GEN_DNS: {
 				BIO_puts(bio, "DNS:");
-				as = name->d.dNSName;
+				ASN1_IA5STRING *as = (ASN1_IA5STRING *)value;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
 				if (altname != NULL) {
@@ -738,9 +743,10 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					add_index_zval(altname, index++, &entry);
 				}
 				break;
-			case GEN_URI:
+			}
+			case GEN_URI: {
 				BIO_puts(bio, "URI:");
-				as = name->d.uniformResourceIdentifier;
+				ASN1_IA5STRING *as = (ASN1_IA5STRING *)value;
 				BIO_write(bio, ASN1_STRING_get0_data(as),
 					ASN1_STRING_length(as));
 				if (altname != NULL) {
@@ -749,32 +755,40 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					add_index_zval(altname, index++, &entry);
 				}
 				break;
-			case GEN_DIRNAME:
+			}
+			case GEN_DIRNAME: {
 				GENERAL_NAME_print(bio, name);
 				if (altname != NULL) {
 					add_assoc_string(&entry, "type", "DirName");
-					php_openssl_add_assoc_name_entry(&entry, "value", name->d.dirn, PHP_OPENSSL_OID);
+					X509_NAME *as = (X509_NAME *)value;
+					php_openssl_add_assoc_name_entry(&entry, "value", as, PHP_OPENSSL_OID);
 					add_index_zval(altname, index++, &entry);
 				}
 				break;
-			case GEN_RID:
+			}
+			case GEN_RID: {
 				GENERAL_NAME_print(bio, name);
 				if (altname != NULL) {
 					char buf[1024];
-					OBJ_obj2txt(buf, sizeof(buf)-1, name->d.rid, 1);
+					ASN1_OBJECT *as = (ASN1_OBJECT *)value;
+					OBJ_obj2txt(buf, sizeof(buf)-1, as, 1);
 					add_assoc_string(&entry, "type", "Registered ID");
 					add_assoc_string(&entry, "value", buf);
 					add_index_zval(altname, index++, &entry);
 				}
 				break;
-			case GEN_IPADD:
+			}
+			case GEN_IPADD: {
 				GENERAL_NAME_print(bio, name);
 				if (altname != NULL) {
 					char buf[1024];
-					if (name->d.ip->length == 4) {
-						inet_ntop(AF_INET, name->d.ip->data, buf, sizeof(buf)-1);
-					} else if (name->d.ip->length == 16) {
-						inet_ntop(AF_INET6, name->d.ip->data, buf, sizeof(buf)-1);
+					ASN1_OCTET_STRING *as = (ASN1_OCTET_STRING *)value;
+					int length = ASN1_STRING_length((ASN1_STRING *)as);
+					const unsigned char *ip = ASN1_STRING_get0_data((ASN1_STRING *)as);
+					if (length == 4) {
+						inet_ntop(AF_INET, ip, buf, sizeof(buf)-1);
+					} else if (length == 16) {
+						inet_ntop(AF_INET6, ip, buf, sizeof(buf)-1);
 					} else {
 						sprintf(buf, "<invalid>");
 					}
@@ -783,29 +797,33 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					add_index_zval(altname, index++, &entry);
 				}
 				break;
-			case GEN_OTHERNAME:
+			}
+			case GEN_OTHERNAME: {
 				GENERAL_NAME_print(bio, name);
 				if (altname != NULL) {
 					char oid[1024];
-					zval value;
-					array_init(&value);
+					zval other_zval;
+                                        array_init(&other_zval);
 
-					OBJ_obj2txt(oid, sizeof(oid)-1, name->d.otherName->type_id, 1);
+					OTHERNAME *as = (OTHERNAME *)value;
+
+					OBJ_obj2txt(oid, sizeof(oid)-1, as->type_id, 1);
 
 					BIO *bio_out;
 					BUF_MEM *bio_buf;
 					bio_out = BIO_new(BIO_s_mem());
-					print_asn1_type(bio_out, name->d.otherName->value);
+					print_asn1_type(bio_out, as->value);
 					BIO_get_mem_ptr(bio_out, &bio_buf);
 
-					add_assoc_stringl(&value, oid, bio_buf->data, bio_buf->length);
+					add_assoc_stringl(&other_zval, oid, bio_buf->data, bio_buf->length);
 					add_assoc_string(&entry, "type", "othername");
-					add_assoc_zval(&entry, "value", &value);
+					add_assoc_zval(&entry, "value", &other_zval);
 					add_index_zval(altname, index++, &entry);
 					BIO_free(bio_out);
 				}
 				break;
-			default:
+			}
+			default: {
 				GENERAL_NAME_print(bio, name);
 				if (altname != NULL) {
 					BIO *bio_out;
@@ -813,7 +831,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					bio_out = BIO_new(BIO_s_mem());
 					GENERAL_NAME_print(bio_out, name);
 					BIO_get_mem_ptr(bio_out, &bio_buf);
-					switch (name->type) {
+					switch (type) {
 						case GEN_X400:
 							add_assoc_string(&entry, "type", "X400Name");
 							break;
@@ -828,6 +846,7 @@ int openssl_x509v3_subjectAltName(BIO *bio, PHP_OPENSSL_X509_EXTENSION *extensio
 					add_index_zval(altname, index++, &entry);
 					BIO_free(bio_out);
 				}
+			}
 		}
 		/* trailing ', ' except for last element */
 		if (i < (num - 1)) {
