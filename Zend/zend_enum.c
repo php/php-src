@@ -143,8 +143,6 @@ static int zend_implement_unit_enum(zend_class_entry *interface, zend_class_entr
 	zend_error_noreturn(E_ERROR, "Non-enum class %s cannot implement interface %s",
 		ZSTR_VAL(class_type->name),
 		ZSTR_VAL(interface->name));
-
-	return FAILURE;
 }
 
 static int zend_implement_backed_enum(zend_class_entry *interface, zend_class_entry *class_type)
@@ -153,14 +151,12 @@ static int zend_implement_backed_enum(zend_class_entry *interface, zend_class_en
 		zend_error_noreturn(E_ERROR, "Non-enum class %s cannot implement interface %s",
 			ZSTR_VAL(class_type->name),
 			ZSTR_VAL(interface->name));
-		return FAILURE;
 	}
 
 	if (class_type->enum_backing_type == IS_UNDEF) {
 		zend_error_noreturn(E_ERROR, "Non-backed enum %s cannot implement interface %s",
 			ZSTR_VAL(class_type->name),
 			ZSTR_VAL(interface->name));
-		return FAILURE;
 	}
 
 	return SUCCESS;

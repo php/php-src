@@ -279,7 +279,6 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 		ZSTR_VAL(zend_ce_traversable->name),
 		ZSTR_VAL(zend_ce_iterator->name),
 		ZSTR_VAL(zend_ce_aggregate->name));
-	return FAILURE;
 }
 /* }}} */
 

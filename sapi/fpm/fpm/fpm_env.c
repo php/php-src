@@ -91,8 +91,9 @@ void unsetenv(const char *name) /* {{{ */
 		int del = 0;
 
 		while(environ[ct] != NULL) {
-			if (nvmatch(name, environ[ct]) != 0) del=ct; /* <--- WTF?! */
-			{ ct++; } /* <--- WTF?! */
+			if (nvmatch(name, environ[ct]) != 0)
+				del = ct;
+			ct++;
 		}
 		/* isn't needed free here?? */
 		environ[del] = environ[ct-1];
