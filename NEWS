@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- Session:
+  . Fixed calling SessionHandler::open() twice without an intervening
+    close() when re-initializing an active session. (Ilia Alshanetsky)
+
 
 10 Sep 2026, PHP 8.6.0beta3
 

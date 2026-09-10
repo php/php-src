@@ -1804,7 +1804,13 @@ static bool php_session_abort(void)
 
 static bool php_session_reset(void)
 {
-	return PS(session_status) == php_session_active && php_session_initialize() == SUCCESS;
+	if (PS(session_status) != php_session_active) {
+		return false;
+	}
+
+	php_session_abort();
+
+	return php_session_initialize() == SUCCESS;
 }
 
 
