@@ -559,6 +559,7 @@ AC_CHECK_FUNCS(m4_normalize([
   funopen
   gai_strerror
   getcwd
+  getdtablesize
   getgrnam_r
   gethostname
   getloadavg
