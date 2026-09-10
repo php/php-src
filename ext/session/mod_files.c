@@ -599,16 +599,10 @@ PS_DESTROY_FUNC(files)
 		return FAILURE;
 	}
 
-	if (data->fd != -1) {
-		ps_files_close(data);
+	ps_files_close(data);
 
-		if (VCWD_UNLINK(buf) == -1) {
-			/* This is a little safety check for instances when we are dealing with a regenerated session
-			 * that was not yet written to disk. */
-			if (!VCWD_ACCESS(buf, F_OK)) {
-				return FAILURE;
-			}
-		}
+	if (VCWD_UNLINK(buf) == -1 && !VCWD_ACCESS(buf, F_OK)) {
+		return FAILURE;
 	}
 
 	return SUCCESS;

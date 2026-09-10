@@ -11,6 +11,11 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- Session:
+  . Fixed session_destroy() not removing the session file when the files
+    save handler holds no open descriptor for it. (Ilia Alshanetsky)
+
+
 
 24 Sep 2026, PHP 8.4.26
 
