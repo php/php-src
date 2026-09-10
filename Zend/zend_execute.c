@@ -5012,6 +5012,17 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 
 	if (!ZEND_USER_CODE(EX(func)->common.type)) {
 		ZEND_ASSERT(!(EX_CALL_INFO() & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)));
+		/* An internal function frame owns the arguments that were pushed for it and releases
+		 * them when it returns. Execution can be suspended inside such a call: a fiber that
+		 * suspends below an internal function leaves that frame on its stack, e.g.
+		 * Fiber::suspend() reached through Generator::send($arg). The arguments are then still
+		 * live, so they have to be reported or a cycle running through one of them is never
+		 * collected. Entered calls are removed from the caller's EX(call) chain, so these are
+		 * not also reported by zend_unfinished_calls_gc(). */
+		uint32_t num_args = ZEND_CALL_NUM_ARGS(execute_data);
+		for (uint32_t i = 0; i < num_args; i++) {
+			zend_get_gc_buffer_add_zval(gc_buffer, ZEND_CALL_VAR_NUM(execute_data, i));
+		}
 		return NULL;
 	}
 
