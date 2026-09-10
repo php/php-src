@@ -139,7 +139,7 @@ static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
         ret  = LSAPI_Write( str, str_length );
         if ( ret < str_length ) {
             php_handle_aborted_connection();
-            return str_length - ret;
+            return ret;
         }
     } else {
         remain = str_length;
