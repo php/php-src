@@ -18,6 +18,13 @@ try {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
+/* the message names argument #1, so that name has to be the real one */
+foreach ((new ReflectionFunction('imagecolormatch'))->getParameters() as $parameter) {
+    echo '$', $parameter->getName(), "\n";
+}
+
 ?>
 --EXPECT--
-ValueError: imagecolormatch(): Argument #2 ($image2) must be the same size as argument #1 ($im1)
+ValueError: imagecolormatch(): Argument #2 ($image2) must be the same size as argument #1 ($image1)
+$image1
+$image2
