@@ -39,6 +39,9 @@ PHP                                                                        NEWS
     the null namespace in spec-following mode. (Ilia Alshanetsky)
   . Fixed stale getElementsByClassName() and other node list caches after
     className/classList writes and attribute removals. (Ilia Alshanetsky)
+  . Fixed reference cycles through DOMXPath and XSLTProcessor php:function
+    callback arguments and return values not being collectable.
+    (Ilia Alshanetsky)
 
 - Hash:
   . Fixed hash_file() reporting argument #1 ($algo) instead of argument #2
