@@ -27,6 +27,8 @@ PHP                                                                        NEWS
     empty class name). (spawnia)
   . Fixed bug GH-23301 (Nested "yield from" yields a value twice when the
     middle generator delegates again). (Lazizbek Ergashev)
+  . Fixed a use-after-free when piping a constant into a namespaced frameless
+    call. (Mrmaxmeier)
 
 - DOM:
   . Fixed NamedNodeMap::getNamedItemNS() with an empty URI not matching

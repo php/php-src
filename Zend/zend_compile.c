@@ -4731,6 +4731,26 @@ static uint32_t zend_compile_frameless_icall(znode *result, zend_ast_list *args,
 	return zend_compile_frameless_icall_ex(result, args, fbc, frameless_function_info, type);
 }
 
+/* The pipe operator passes its left hand side as a ZEND_AST_ZNODE argument holding
+ * a single reference to an already compiled value. zend_compile_ns_call() compiles
+ * its argument list twice and each compilation hands the constant over to
+ * zend_add_literal(), which may release it while interning. Take one extra reference
+ * per additional compilation, so neither the literals nor the AST are left with a
+ * dangling pointer. */
+static void zend_args_addref_const_znodes(const zend_ast_list *args)
+{
+	uint32_t i;
+	for (i = 0; i < args->children; ++i) {
+		zend_ast *arg = args->child[i];
+		if (arg->kind == ZEND_AST_ZNODE) {
+			znode *node = zend_ast_get_znode(arg);
+			if (node->op_type == IS_CONST) {
+				Z_TRY_ADDREF(node->u.constant);
+			}
+		}
+	}
+}
+
 static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno, uint32_t type) /* {{{ */
 {
 	int name_constants = zend_add_ns_func_name_literal(Z_STR(name_node->u.constant));
@@ -4751,6 +4771,8 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 	if (frameless_function) {
 		frameless_function_info = find_frameless_function_info(zend_ast_get_list(args_ast), frameless_function, type);
 		if (frameless_function_info) {
+			/* The argument list is compiled a second time below. */
+			zend_args_addref_const_znodes(zend_ast_get_list(args_ast));
 			CG(context).in_jmp_frameless_branch = true;
 			znode op1;
 			op1.op_type = IS_CONST;
