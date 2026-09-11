@@ -71,6 +71,13 @@ zend_object *IntlDateFormatter_object_clone(zend_object *object)
 	/* clone standard parts */
 	zend_objects_clone_members(&new_dfo->zo, &dfo->zo);
 
+	new_dfo->date_type = dfo->date_type;
+	new_dfo->time_type = dfo->time_type;
+	new_dfo->calendar = dfo->calendar;
+	if (dfo->requested_locale != NULL) {
+		new_dfo->requested_locale = estrdup(dfo->requested_locale);
+	}
+
 	/* clone formatter object */
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
 		UErrorCode error = U_ZERO_ERROR;
