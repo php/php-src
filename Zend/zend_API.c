@@ -1807,7 +1807,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 
 				if (is_typed) {
 					if (UNEXPECTED(Z_ISREF_P(prop))) {
-						if (UNEXPECTED(!zend_verify_prop_assignable_by_ref(property_info, prop, /* strict */ false))) {
+						if (UNEXPECTED(!zend_verify_prop_assignable_by_ref(property_info, prop, /* strict */ true))) {
 							ZEND_ASSERT(EG(exception));
 							return;
 						}
@@ -1815,7 +1815,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 						ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(&val), property_info);
 					} else {
 						ZVAL_COPY(&val, prop);
-						if (UNEXPECTED(!zend_verify_property_type(property_info, &val, /* strict */ false))) {
+						if (UNEXPECTED(!zend_verify_property_type(property_info, &val, /* strict */ true))) {
 							zval_ptr_dtor(&val);
 							return;
 						}
