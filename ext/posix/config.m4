@@ -42,12 +42,7 @@ if test "$PHP_POSIX" = "yes"; then
       #endif
     ])])
 
-dnl Skip pathconf and fpathconf check on musl libc due to limited implementation
-dnl (first argument is not validated and has different error).
-  PHP_C_STANDARD_LIBRARY
-  AS_VAR_IF([php_cv_c_standard_library], [musl],
-    [],
-    [AC_CHECK_FUNCS([pathconf fpathconf])])
+  AC_CHECK_FUNCS([pathconf fpathconf])
 
   AC_CACHE_CHECK([for working ttyname_r() implementation],
     [php_cv_func_ttyname_r],
