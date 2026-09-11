@@ -1026,6 +1026,11 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	zval *soft_errors_zv
 ) {
 	if (Z_TYPE_P(host) == IS_STRING) {
+		if (lexbor_base_url->path.opaque) {
+			php_uri_parser_whatwg_component_error("host", LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
+			return NULL;
+		}
+
 		/* A new authority inherits only the scheme, not the base URL's other components. */
 		zval base_scheme;
 		php_uri_parser_whatwg_scheme_read(lexbor_base_url, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &base_scheme);
@@ -1051,6 +1056,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		return NULL;
 	}
 
+	const char *first = Z_STRVAL_P(path);
+	const char *end = first + Z_STRLEN_P(path);
+	while (first < end && php_uri_whatwg_is_ascii_tab_or_newline(*first)) {
+		first++;
+	}
+
 	lxb_status_t status;
 	zval errors;
 	array_init(&errors);
@@ -1060,17 +1071,17 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		zend_throw_exception(php_uri_ce_error, "Memory allocation error", 0);
 		goto failure;
 	}
+	if (lexbor_base_url->path.opaque && first == end
+		&& (Z_TYPE_P(query) == IS_STRING || Z_TYPE_P(fragment) == IS_NULL)) {
+		php_uri_parser_whatwg_component_error(Z_TYPE_P(query) == IS_STRING ? "query" : "path",
+			LXB_URL_ERROR_TYPE_MISSING_SCHEME_NON_RELATIVE_URL);
+		goto failure;
+	}
 
 	/* Discard the base fragment; the reference fragment is applied below. */
 	lxb_url_fragment_set_null(lexbor_url);
 
 	if (Z_STRLEN_P(path) > 0) {
-		const char *first = Z_STRVAL_P(path);
-		const char *end = first + Z_STRLEN_P(path);
-		while (first < end && php_uri_whatwg_is_ascii_tab_or_newline(*first)) {
-			first++;
-		}
-
 		/* Resolve relative paths against the base directory. Absolute paths use
 		 * a path state so leading slashes cannot introduce a new authority. */
 		lxb_url_state_t state = LXB_URL_STATE_NO_SCHEME_STATE;
@@ -1099,6 +1110,13 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 			} else {
 				smart_str_appendc(&reference, *p);
 			}
+		}
+
+		/* After removing tabs and newlines, the parser must see a fragment
+		 * reference to accept an opaque base. Its actual value is applied below. */
+		if (lexbor_base_url->path.opaque && first == end
+			&& Z_TYPE_P(query) == IS_NULL && Z_TYPE_P(fragment) != IS_NULL) {
+			smart_str_appendc(&reference, '#');
 		}
 
 		zend_string *input = smart_str_extract(&reference);
