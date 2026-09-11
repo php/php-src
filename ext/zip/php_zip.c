@@ -2920,7 +2920,7 @@ PHP_METHOD(ZipArchive, extractTo)
 		}
 	}
 
-	uint32_t nelems, i;
+	uint32_t nelems;
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (files_str) {
@@ -2932,19 +2932,18 @@ PHP_METHOD(ZipArchive, extractTo)
 		if (nelems == 0 ) {
 			RETURN_FALSE;
 		}
-		for (i = 0; i < nelems; i++) {
-			zval *zval_file;
-			if ((zval_file = zend_hash_index_find_deref(files_ht, i)) != NULL) {
-				if (Z_TYPE_P(zval_file) == IS_STRING) {
-						if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), -1)) {
-							RETURN_FALSE;
-						}
-				} else {
-						zend_argument_type_error(2, "must only have elements of type string, %s given", zend_zval_value_name(zval_file));
-						RETURN_THROWS();
+		zval *zval_file;
+		ZEND_HASH_FOREACH_VAL(files_ht, zval_file) {
+			ZVAL_DEREF(zval_file);
+			if (Z_TYPE_P(zval_file) == IS_STRING) {
+				if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), -1)) {
+					RETURN_FALSE;
 				}
+			} else {
+				zend_argument_type_error(2, "must only have elements of type string, %s given", zend_zval_value_name(zval_file));
+				RETURN_THROWS();
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* Extract all files */
 		zip_int64_t i, filecount = zip_get_num_entries(intern, 0);
