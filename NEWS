@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   . Fixed incorrect internal pointer and foreach iterator positions when
     compacting arrays with holes. (Weilin Du)
   . Fixed bug GH-23644 (Optimizer leaves a constant-vs-constant comparison
-    unfolded, crashing the VM in zval_undefined_cv). (Lazizbek Ergashev)
+    unfolded, crashing the VM in zval_undefined_cv). (ndossche)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
