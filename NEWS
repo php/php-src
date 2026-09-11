@@ -16,6 +16,11 @@ PHP                                                                        NEWS
     such as dateType, timeType, calendar and the message pattern.
     (Ilia Alshanetsky)
 
+- Lexbor:
+  . Merge patches 8a14bc0 and f67ce4b, fixing a heap buffer overflow in
+    :lexbor-contains() parsing and buffer overflows in malformed decode
+    replay. (alexandre-daubois)
+
 - MBString:
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
