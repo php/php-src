@@ -890,6 +890,861 @@ static const zend_function_entry ext_function_legacy[] = {
 	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
 	ZEND_FE_END
 };
+/* Tests Z_PARAM_ENUM */
+static ZEND_FUNCTION(zend_enum)
+{
+	zend_long case_id;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ENUM(case_id, zend_test_unit_enum)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(case_id);
+}
+
+/* Tests Z_PARAM_ARRAY specifiers */
+static ZEND_FUNCTION(zend_array)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(zv)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_array_or_null)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_OR_NULL(zv)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zv) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_array_separate)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_EX(zv, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_array_deref_separate)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_EX2(zv, 0, 1, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_array_slow_zpp)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_array_or_null_slow_zpp)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!zv) {
+		RETURN_NULL();
+	}
+	RETURN_COPY(zv);
+}
+
+/* Tests Z_PARAM_ARRAY_OR_OBJECT specifiers */
+static ZEND_FUNCTION(zend_array_or_object)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_OR_OBJECT(zv)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_array_or_object_separate)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(zv, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_array_or_object_deref_separate)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_EX2(zv, 0, 1, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_array_or_object_slow_zpp)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(zv);
+}
+
+/* Tests Z_PARAM_ARRAY_HT specifiers */
+static ZEND_FUNCTION(zend_array_ht)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(ht)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+static ZEND_FUNCTION(zend_array_ht_or_null)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_OR_NULL(ht)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!ht) {
+		RETURN_NULL();
+	}
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+static ZEND_FUNCTION(zend_array_ht_separate)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_EX(ht, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+static ZEND_FUNCTION(zend_array_ht_deref_separate)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_EX2(ht, 0, 1, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+static ZEND_FUNCTION(zend_array_ht_slow_zpp)
+{
+	HashTable *ht;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &ht) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+static ZEND_FUNCTION(zend_array_ht_or_null_slow_zpp)
+{
+	HashTable *ht;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h!", &ht) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!ht) {
+		RETURN_NULL();
+	}
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+/* Tests Z_PARAM_ARRAY_HT_OR_LONG specifiers */
+static ZEND_FUNCTION(zend_array_ht_or_long)
+{
+	HashTable *ht = NULL;
+	zend_long l = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_OR_LONG(ht, l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ht) {
+		if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+			RETURN_EMPTY_ARRAY();
+		}
+		GC_ADDREF(ht);
+		RETURN_ARR(ht);
+	}
+	RETURN_LONG(l);
+}
+
+static ZEND_FUNCTION(zend_array_ht_or_long_or_null)
+{
+	HashTable *ht = NULL;
+	zend_long l = 0;
+	bool is_null = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_OR_LONG_OR_NULL(ht, l, is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	if (ht) {
+		if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+			RETURN_EMPTY_ARRAY();
+		}
+		GC_ADDREF(ht);
+		RETURN_ARR(ht);
+	}
+	RETURN_LONG(l);
+}
+
+/* Tests Z_PARAM_ARRAY_HT_OR_STR specifiers */
+static ZEND_FUNCTION(zend_array_ht_or_str)
+{
+	HashTable *ht = NULL;
+	zend_string *str = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_OR_STR(ht, str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ht) {
+		if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+			RETURN_EMPTY_ARRAY();
+		}
+		GC_ADDREF(ht);
+		RETURN_ARR(ht);
+	}
+	RETURN_STR_COPY(str);
+}
+
+static ZEND_FUNCTION(zend_array_ht_or_str_or_null)
+{
+	HashTable *ht = NULL;
+	zend_string *str = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(ht, str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ht) {
+		if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+			RETURN_EMPTY_ARRAY();
+		}
+		GC_ADDREF(ht);
+		RETURN_ARR(ht);
+	} else if (str) {
+		RETURN_STR_COPY(str);
+	}
+	RETURN_NULL();
+}
+
+/* Tests Z_PARAM_ARRAY_OR_OBJECT_HT specifiers */
+static ZEND_FUNCTION(zend_array_or_object_ht)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_HT(ht)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+static ZEND_FUNCTION(zend_array_or_object_ht_separate)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_HT_EX(ht, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+static ZEND_FUNCTION(zend_array_or_object_ht_deref_separate)
+{
+	HashTable *ht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_OR_OBJECT_HT_EX2(ht, 0, 1, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+static ZEND_FUNCTION(zend_array_or_object_ht_slow_zpp)
+{
+	HashTable *ht;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H", &ht) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		RETURN_EMPTY_ARRAY();
+	}
+	GC_ADDREF(ht);
+	RETURN_ARR(ht);
+}
+
+/* Tests Z_PARAM_FUNC specifiers */
+static ZEND_FUNCTION(zend_func)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR_COPY(fcc.function_handler->common.function_name);
+}
+
+static ZEND_FUNCTION(zend_func_or_null)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
+		RETURN_NULL();
+	}
+
+	RETURN_STR_COPY(fcc.function_handler->common.function_name);
+}
+
+static ZEND_FUNCTION(zend_func_no_trampoline_free)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR_COPY(fcc.function_handler->common.function_name);
+}
+
+static ZEND_FUNCTION(zend_func_no_trampoline_free_or_null)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
+		RETURN_NULL();
+	}
+
+	RETURN_STR_COPY(fcc.function_handler->common.function_name);
+}
+
+static ZEND_FUNCTION(zend_func_slow_zpp)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_STR_COPY(fcc.function_handler->common.function_name);
+}
+
+static ZEND_FUNCTION(zend_func_or_null_slow_zpp)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f!", &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!ZEND_FCC_INITIALIZED(fcc)) {
+		RETURN_NULL();
+	}
+
+	RETURN_STR_COPY(fcc.function_handler->common.function_name);
+}
+
+/* Tests Z_PARAM_PATH specifiers */
+static ZEND_FUNCTION(zend_path)
+{
+	char *path;
+	size_t path_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(path, path_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STRINGL(path, path_len);
+}
+
+static ZEND_FUNCTION(zend_path_or_null)
+{
+	char *path;
+	size_t path_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH_OR_NULL(path, path_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!path) {
+		RETURN_NULL();
+	}
+
+	RETURN_STRINGL(path, path_len);
+}
+
+static ZEND_FUNCTION(zend_path_slow_zpp)
+{
+	char *path;
+	size_t path_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &path, &path_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_STRINGL(path, path_len);
+}
+
+static ZEND_FUNCTION(zend_path_or_null_slow_zpp)
+{
+	char *path;
+	size_t path_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!", &path, &path_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!path) {
+		RETURN_NULL();
+	}
+
+	RETURN_STRINGL(path, path_len);
+}
+
+/* Tests Z_PARAM_PATH_STR specifiers */
+static ZEND_FUNCTION(zend_path_str)
+{
+	zend_string *path;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH_STR(path)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR_COPY(path);
+}
+
+static ZEND_FUNCTION(zend_path_str_or_null)
+{
+	zend_string *path;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH_STR_OR_NULL(path)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!path) {
+		RETURN_NULL();
+	}
+
+	RETURN_STR_COPY(path);
+}
+
+static ZEND_FUNCTION(zend_path_str_slow_zpp)
+{
+	zend_string *path;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &path) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_STR_COPY(path);
+}
+
+static ZEND_FUNCTION(zend_path_str_or_null_slow_zpp)
+{
+	zend_string *path;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P!", &path) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!path) {
+		RETURN_NULL();
+	}
+
+	RETURN_STR_COPY(path);
+}
+
+/* Tests Z_PARAM_STRING specifiers */
+static ZEND_FUNCTION(zend_string_param)
+{
+	char *str;
+	size_t str_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str, str_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STRINGL(str, str_len);
+}
+
+static ZEND_FUNCTION(zend_string_param_or_null)
+{
+	char *str;
+	size_t str_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING_OR_NULL(str, str_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!str) {
+		RETURN_NULL();
+	}
+
+	RETURN_STRINGL(str, str_len);
+}
+
+static ZEND_FUNCTION(zend_string_param_slow_zpp)
+{
+	char *str;
+	size_t str_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_STRINGL(str, str_len);
+}
+
+static ZEND_FUNCTION(zend_string_param_or_null_slow_zpp)
+{
+	char *str;
+	size_t str_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &str, &str_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!str) {
+		RETURN_NULL();
+	}
+
+	RETURN_STRINGL(str, str_len);
+}
+
+/* Tests Z_PARAM_STR specifiers */
+static ZEND_FUNCTION(zend_str)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR_COPY(str);
+}
+
+static ZEND_FUNCTION(zend_str_or_null)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_NULL(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!str) {
+		RETURN_NULL();
+	}
+
+	RETURN_STR_COPY(str);
+}
+
+static ZEND_FUNCTION(zend_str_slow_zpp)
+{
+	zend_string *str;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_STR_COPY(str);
+}
+
+static ZEND_FUNCTION(zend_str_or_null_slow_zpp)
+{
+	zend_string *str;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!", &str) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!str) {
+		RETURN_NULL();
+	}
+
+	RETURN_STR_COPY(str);
+}
+
+/* Tests Z_PARAM_STR_OR_LONG specifiers */
+static ZEND_FUNCTION(zend_str_or_long)
+{
+	zend_string *str = NULL;
+	zend_long l = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG(str, l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (str) {
+		RETURN_STR_COPY(str);
+	}
+	RETURN_LONG(l);
+}
+
+static ZEND_FUNCTION(zend_str_or_long_or_null)
+{
+	zend_string *str = NULL;
+	zend_long l = 0;
+	bool is_null = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG_OR_NULL(str, l, is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_null) {
+		RETURN_NULL();
+	}
+	if (str) {
+		RETURN_STR_COPY(str);
+	}
+	RETURN_LONG(l);
+}
+
+/* Tests Z_PARAM_ZVAL specifiers */
+static ZEND_FUNCTION(zend_zval)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(zv)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_zval_or_null)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_OR_NULL(zv)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zv) {
+		RETURN_NULL();
+	}
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_zval_separate)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_EX(zv, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_zval_deref_separate)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_EX2(zv, 0, 1, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_zval_slow_zpp)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_COPY(zv);
+}
+
+static ZEND_FUNCTION(zend_zval_or_null_slow_zpp)
+{
+	zval *zv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z!", &zv) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!zv) {
+		RETURN_NULL();
+	}
+
+	RETURN_COPY(zv);
+}
+
+/* Tests Z_PARAM_VARIADIC specifiers */
+static ZEND_FUNCTION(zend_variadic)
+{
+	zval *args;
+	uint32_t num_args;
+
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, num_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	array_init(return_value);
+	for (uint32_t i = 0; i < num_args; i++) {
+		add_next_index_zval(return_value, &args[i]);
+		if (Z_REFCOUNTED(args[i])) {
+			GC_TRY_ADDREF(Z_COUNTED(args[i]));
+		}
+	}
+}
+
+static ZEND_FUNCTION(zend_variadic_with_named)
+{
+	zval *args;
+	uint32_t num_args;
+	HashTable *named;
+
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC_WITH_NAMED(args, num_args, named)
+	ZEND_PARSE_PARAMETERS_END();
+
+	array_init(return_value);
+	for (uint32_t i = 0; i < num_args; i++) {
+		add_next_index_zval(return_value, &args[i]);
+		if (Z_REFCOUNTED(args[i])) {
+			GC_TRY_ADDREF(Z_COUNTED(args[i]));
+		}
+	}
+	if (named) {
+		zend_string *name;
+		zval *val;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(named, name, val) {
+			if (name) {
+				add_assoc_zval_ex(return_value, ZSTR_VAL(name), ZSTR_LEN(name), val);
+				if (Z_REFCOUNTED_P(val)) {
+					GC_TRY_ADDREF(Z_COUNTED_P(val));
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+
+static ZEND_FUNCTION(zend_variadic_slow_zpp)
+{
+	zval *args = NULL;
+	uint32_t num_args = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &num_args) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+	for (uint32_t i = 0; i < num_args; i++) {
+		add_next_index_zval(return_value, &args[i]);
+		if (Z_REFCOUNTED(args[i])) {
+			GC_TRY_ADDREF(Z_COUNTED(args[i]));
+		}
+	}
+}
+
 /* END ZPP test functions */
 
 static ZEND_FUNCTION(zend_test_compile_string)

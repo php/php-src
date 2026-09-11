@@ -378,6 +378,80 @@ namespace {
 
     function zend_number_or_string_or_null(string|int|float|null $param): string|int|float|null {}
 
+	function zend_enum(ZendTestUnitEnum $param): int {}
+
+	function zend_array(array $param): array {}
+	function zend_array_or_null(?array $param): ?array {}
+	function zend_array_separate(array $param): array {}
+	function zend_array_deref_separate(array &$param): array {}
+	function zend_array_slow_zpp(array $param): array {}
+	function zend_array_or_null_slow_zpp(?array $param): ?array {}
+
+	function zend_array_or_object(array|object $param): array|object {}
+	function zend_array_or_object_separate(array|object $param): array|object {}
+	function zend_array_or_object_deref_separate(array|object &$param): array|object {}
+	function zend_array_or_object_slow_zpp(array|object $param): array|object {}
+
+	function zend_array_ht(array $param): array {}
+	function zend_array_ht_or_null(?array $param): ?array {}
+	function zend_array_ht_separate(array $param): array {}
+	function zend_array_ht_deref_separate(array &$param): array {}
+	function zend_array_ht_slow_zpp(array $param): array {}
+	function zend_array_ht_or_null_slow_zpp(?array $param): ?array {}
+
+	function zend_array_ht_or_long(array|int $param): array|int {}
+	function zend_array_ht_or_long_or_null(array|int|null $param): array|int|null {}
+
+	function zend_array_ht_or_str(array|string $param): array|string {}
+	function zend_array_ht_or_str_or_null(array|string|null $param): array|string|null {}
+
+	function zend_array_or_object_ht(array|object $param): array {}
+	function zend_array_or_object_ht_separate(array|object $param): array {}
+	function zend_array_or_object_ht_deref_separate(array|object &$param): array {}
+	function zend_array_or_object_ht_slow_zpp(array|object $param): array {}
+
+	function zend_func(callable $param): string {}
+	function zend_func_or_null(?callable $param): ?string {}
+	function zend_func_no_trampoline_free(callable $param): string {}
+	function zend_func_no_trampoline_free_or_null(?callable $param): ?string {}
+	function zend_func_slow_zpp(callable $param): string {}
+	function zend_func_or_null_slow_zpp(?callable $param): ?string {}
+
+	function zend_path(string $param): string {}
+	function zend_path_or_null(?string $param): ?string {}
+	function zend_path_slow_zpp(string $param): string {}
+	function zend_path_or_null_slow_zpp(?string $param): ?string {}
+
+	function zend_path_str(string $param): string {}
+	function zend_path_str_or_null(?string $param): ?string {}
+	function zend_path_str_slow_zpp(string $param): string {}
+	function zend_path_str_or_null_slow_zpp(?string $param): ?string {}
+
+	function zend_string_param(string $param): string {}
+	function zend_string_param_or_null(?string $param): ?string {}
+	function zend_string_param_slow_zpp(string $param): string {}
+	function zend_string_param_or_null_slow_zpp(?string $param): ?string {}
+
+	function zend_str(string $param): string {}
+	function zend_str_or_null(?string $param): ?string {}
+	function zend_str_slow_zpp(string $param): string {}
+	function zend_str_or_null_slow_zpp(?string $param): ?string {}
+
+	function zend_str_or_long(string|int $param): string|int {}
+	function zend_str_or_long_or_null(string|int|null $param): string|int|null {}
+
+	function zend_zval(mixed $param): mixed {}
+	function zend_zval_or_null(mixed $param): mixed {}
+	function zend_zval_separate(mixed $param): mixed {}
+	function zend_zval_deref_separate(mixed &$param): mixed {}
+	function zend_zval_slow_zpp(mixed $param): mixed {}
+	function zend_zval_or_null_slow_zpp(mixed $param): mixed {}
+
+	function zend_variadic(mixed ...$args): array {}
+	function zend_variadic_with_named(mixed ...$args): array {}
+	function zend_variadic_slow_zpp(mixed ...$args): array {}
+
+
     function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
 
     function zend_weakmap_attach(object $object, mixed $value): bool {}
