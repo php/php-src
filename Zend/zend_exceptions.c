@@ -746,11 +746,9 @@ ZEND_METHOD(Exception, __toString)
 
 	zend_fcall_info fci;
 	fci.size = sizeof(fci);
-	ZVAL_UNDEF(&fci.function_name);
 	fci.retval = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;
-	fci.object = NULL;
 	fci.named_params = NULL;
 
 	zend_fcall_info_cache fcc;
@@ -765,7 +763,6 @@ ZEND_METHOD(Exception, __toString)
 		zend_long line = zval_get_long(GET_PROPERTY(exception, ZEND_STR_LINE));
 
 		fcc.object = Z_OBJ_P(exception);
-		fcc.calling_scope = Z_OBJCE_P(exception);
 		zend_call_function(&fci, &fcc);
 
 		if (Z_TYPE(trace) != IS_STRING) {
