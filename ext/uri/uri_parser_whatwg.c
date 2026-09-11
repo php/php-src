@@ -1060,16 +1060,59 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		zend_throw_exception(php_uri_ce_error, "Memory allocation error", 0);
 		goto failure;
 	}
-	if (Z_TYPE_P(path) == IS_STRING && Z_STRLEN_P(path) > 0) {
+
+	/* Discard the base fragment; the reference fragment is applied below. */
+	lxb_url_fragment_set_null(lexbor_url);
+
+	if (Z_STRLEN_P(path) > 0) {
+		const char *first = Z_STRVAL_P(path);
+		const char *end = first + Z_STRLEN_P(path);
+		while (first < end && php_uri_whatwg_is_ascii_tab_or_newline(*first)) {
+			first++;
+		}
+
+		/* Resolve relative paths against the base directory. Absolute paths use
+		 * a path state so leading slashes cannot introduce a new authority. */
+		lxb_url_state_t state = LXB_URL_STATE_NO_SCHEME_STATE;
+		if (!lexbor_base_url->path.opaque && first < end
+			&& (*first == '/' || (lxb_url_is_special(lexbor_base_url) && *first == '\\'))) {
+			/* A path beginning with // must not replace the authority. */
+			state = LXB_URL_STATE_PATH_START_STATE;
+			if (lexbor_base_url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE) {
+				const char *second = first + 1;
+				while (second < end && php_uri_whatwg_is_ascii_tab_or_newline(*second)) {
+					second++;
+				}
+				if (second == end || (*second != '/' && *second != '\\')) {
+					state = LXB_URL_STATE_FILE_STATE;
+				}
+			}
+		}
+
+		/* Keep delimiters inside the path when entering the reference parser. */
+		smart_str reference = {0};
+		for (const char *p = Z_STRVAL_P(path); p < end; p++) {
+			if (*p == '?') {
+				smart_str_appends(&reference, "%3F");
+			} else if (*p == '#') {
+				smart_str_appends(&reference, "%23");
+			} else {
+				smart_str_appendc(&reference, *p);
+			}
+		}
+
+		zend_string *input = smart_str_extract(&reference);
 		lxb_url_path_set_null(lexbor_url);
 		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
-			(lxb_char_t *) Z_STRVAL_P(path), Z_STRLEN_P(path),
-			lexbor_base_url->path.opaque ? LXB_URL_STATE_NO_SCHEME_STATE : LXB_URL_STATE_PATH_START_STATE, LXB_ENCODING_AUTO
-		);
+			(const lxb_char_t *) ZSTR_VAL(input), ZSTR_LEN(input), state, LXB_ENCODING_UTF_8);
 		php_uri_parser_whatwg_build_errors_and_throw(status, "path", &errors);
+		zend_string_release(input);
 		if (status != LXB_STATUS_OK) {
 			goto failure;
+		}
+		if (first < end) {
+			lxb_url_query_set_null(lexbor_url);
 		}
 	}
 
