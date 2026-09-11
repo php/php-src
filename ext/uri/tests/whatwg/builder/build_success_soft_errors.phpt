@@ -1,29 +1,30 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setUsername() - success - contains special characters
+Test Uri\WhatWg\UrlBuilder::build() - success - returns soft errors
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("https");
 $builder->setHost("example.com");
-$builder->setUsername("~%#");
+$builder->setFragment("a\tb");
 $softErrors = [];
-$url = $builder->build(null, $softErrors);
+$url = $builder->build(softErrors: $softErrors);
 
 var_dump($url->toAsciiString());
 var_dump($url);
+var_dump($softErrors);
 var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(26) "https://~%%23@example.com/"
+string(23) "https://example.com/#ab"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
   ["username"]=>
-  string(5) "~%%23"
+  NULL
   ["password"]=>
-  string(0) ""
+  NULL
   ["host"]=>
   string(11) "example.com"
   ["port"]=>
@@ -33,6 +34,17 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["query"]=>
   NULL
   ["fragment"]=>
-  NULL
+  string(2) "ab"
+}
+array(1) {
+  [0]=>
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
+    ["context"]=>
+    string(2) "	b"
+    ["type"]=>
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+    ["failure"]=>
+    bool(false)
+  }
 }
 bool(true)

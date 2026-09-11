@@ -1,12 +1,13 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setHost() - success - null in case of opaque hosts
+Test Uri\WhatWg\UrlBuilder::setFragment() - success - empty string
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setScheme("scheme");
+$builder->setScheme("https");
 $builder->setHost("example.com");
-$builder->setHost(null);
+$builder->setFragment("foo");
+$builder->setFragment("");
 $url = $builder->build();
 
 var_dump($url->toAsciiString());
@@ -15,23 +16,23 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(7) "scheme:"
+string(21) "https://example.com/#"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
-  string(6) "scheme"
+  string(5) "https"
   ["username"]=>
   NULL
   ["password"]=>
   NULL
   ["host"]=>
-  NULL
+  string(11) "example.com"
   ["port"]=>
   NULL
   ["path"]=>
-  string(0) ""
+  string(1) "/"
   ["query"]=>
   NULL
   ["fragment"]=>
-  NULL
+  string(0) ""
 }
 bool(true)

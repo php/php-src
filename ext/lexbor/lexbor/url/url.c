@@ -2329,6 +2329,17 @@ again:
                     lxb_url_parse_return(orig_data, buf, status);
                 }
 
+                /* Encode only the space immediately before a query or fragment. */
+                if (p > begin && p[-1] == ' ') {
+                    tmp_str.length--;
+                    if (lexbor_str_append(&tmp_str, url->mraw,
+                                          (const lxb_char_t *) "%20", 3) == NULL)
+                    {
+                        lxb_url_parse_return(orig_data, buf,
+                                             LXB_STATUS_ERROR_MEMORY_ALLOCATION);
+                    }
+                }
+
                 status = lxb_url_path_list_push(url, &tmp_str);
                 if (status != LXB_STATUS_OK) {
                     lxb_url_parse_return(orig_data, buf, status);

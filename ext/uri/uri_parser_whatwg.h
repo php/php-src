@@ -33,7 +33,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_whatwg_port_validate(zend_long
 ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_build_from_zval(
 	lxb_url_t *lexbor_base_url, const zval *scheme, const zval *username, const zval *password,
 	const zval *host, const zval *port, const zval *path, const zval *query, const zval *fragment,
-	zval *errors_zv
+	zval *soft_errors_zv
 );
 
 ZEND_ATTRIBUTE_NONNULL zend_string *php_uri_parser_whatwg_userinfo_percent_encode(const char *str, size_t str_length);

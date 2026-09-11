@@ -1,12 +1,12 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setFragment() - success - contains tab and newline characters
+Test Uri\WhatWg\UrlBuilder::setPath() - success - trailing spaces before a query
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("foo");
-$builder->setHost("example.com");
-$builder->setFragment("\tfo\no");
+$builder->setPath("abc  ");
+$builder->setQuery("q");
 $softErrors = [];
 $url = $builder->build(softErrors: $softErrors);
 
@@ -17,7 +17,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(21) "foo://example.com#foo"
+string(13) "foo:abc %20?q"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(3) "foo"
@@ -26,22 +26,30 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["password"]=>
   NULL
   ["host"]=>
-  string(11) "example.com"
+  NULL
   ["port"]=>
   NULL
   ["path"]=>
-  string(0) ""
+  string(7) "abc %20"
   ["query"]=>
-  NULL
+  string(1) "q"
   ["fragment"]=>
-  string(3) "foo"
+  NULL
 }
-array(%d) {
+array(2) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(5) "	fo
-o"
+    string(2) " ?"
+    ["type"]=>
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+    ["failure"]=>
+    bool(false)
+  }
+  [1]=>
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
+    ["context"]=>
+    string(3) "  ?"
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
     ["failure"]=>

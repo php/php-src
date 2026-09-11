@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 9e087e3aefdab5662892e7fad9de87857aa63057
+ * Stub hash: 0dc5793b7dffdb81e477b6f590faf7d0360f3ea9
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -175,7 +175,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Uri_WhatWg_UrlBuilder_build, 0, 0, Uri\\WhatWg\\\125rl, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseUrl, Uri\\WhatWg\\\125rl, 1, "null")
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errors, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, softErrors, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Uri_WhatWg_Url_parse, 0, 1, IS_STATIC, 1)
