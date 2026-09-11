@@ -3858,6 +3858,11 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 			scope = get_scope(frame);
 		}
 
+		zend_object *receiver = fcc->object;
+		if (receiver) {
+			GC_ADDREF(receiver);
+		}
+
 		zend_string *class_name = zend_string_init_interned(ZSTR_VAL(callable), class_name_len, 0);
 		if (ZSTR_HAS_CE_CACHE(class_name) && ZSTR_GET_CE_CACHE(class_name)) {
 			fcc->calling_scope = ZSTR_GET_CE_CACHE(class_name);
@@ -3878,6 +3883,9 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 			strict_class = true;
 		} else if (!zend_is_callable_check_class(class_name, scope, frame, fcc, &strict_class, error, suppress_deprecation || ce_org != NULL)) {
 			zend_string_release_ex(class_name, 0);
+			if (receiver) {
+				OBJ_RELEASE(receiver);
+			}
 			return 0;
 		}
 		zend_string_release_ex(class_name, 0);
@@ -3885,12 +3893,23 @@ static zend_always_inline bool zend_is_method_callable(zend_string *callable, co
 		ftable = &fcc->calling_scope->function_table;
 		if (ce_org && !instanceof_function(ce_org, fcc->calling_scope)) {
 			if (error) zend_spprintf(error, 0, "class %s is not a subclass of %s", ZSTR_VAL(ce_org->name), ZSTR_VAL(fcc->calling_scope->name));
+			if (receiver) {
+				OBJ_RELEASE(receiver);
+			}
 			return 0;
 		}
 		if (ce_org && !suppress_deprecation) {
 			zend_error(E_DEPRECATED,
 				"Callables of the form [\"%s\", \"%s\"] are deprecated",
 				ZSTR_VAL(ce_org->name), ZSTR_VAL(callable));
+		}
+		if (receiver) {
+			bool destroyed = GC_REFCOUNT(receiver) == 1;
+			OBJ_RELEASE(receiver);
+			if (UNEXPECTED(destroyed)) {
+				if (error) *error = estrdup("object was destroyed while resolving the callable");
+				return 0;
+			}
 		}
 		mname = zend_string_init(ZSTR_VAL(callable) + class_name_len + 2, mlen, 0);
 	} else if (ce_org) {

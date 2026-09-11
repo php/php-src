@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     (Yudai Takada)
   . Calling is_a() or is_subclass_of() with a string as the first argument
     when $allow_string is false is now deprecated. (Daniel Scherzer)
+  . Fixed use-after-free when an error handler frees an array callable while
+    it is being validated. (Ilia Alshanetsky)
   . Fixed bug GH-23232 (lone namespace separator asks the autoloader for an
     empty class name). (spawnia)
 
