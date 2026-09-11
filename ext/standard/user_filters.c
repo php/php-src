@@ -229,6 +229,11 @@ static php_stream_filter_status_t userfilter_filter(
 
 	if (buckets_in->head) {
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+		php_stream_bucket *bucket;
+		while ((bucket = buckets_in->head)) {
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
+		}
 	}
 
 	/* filter resources are cleaned up by the stream destructor,
