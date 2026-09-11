@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim=20D=C3=BCsterhus?= <tim@bastelstu.be>
+Date: Fri, 31 Jul 2026 20:56:18 +0200
+Subject: [PATCH 14/15] URL: Fix parsing of usernames containing `@`
+
+Fixes lexbor/lexbor#399.
+---
+ source/lexbor/url/url.c | 17 +++++++----------
+ 1 file changed, 7 insertions(+), 10 deletions(-)
+
+diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
+index fcae2d6..654e2e6 100644
+--- a/source/lexbor/url/url.c
++++ b/source/lexbor/url/url.c
+@@ -1753,16 +1753,13 @@ again:
+                         break;
+                     }
+ 
+-                    if (pswd == NULL || !at_sign) {
+-                        tmp = (pswd != NULL) ? pswd - 1 : p;
+-
+-                        if (tmp > begin) {
+-                            status = lxb_url_percent_encode_after_utf_8(begin, tmp,
+-                                                        &url->username, url->mraw,
+-                                                        LXB_URL_MAP_USERINFO, false);
+-                            if (status != LXB_STATUS_OK) {
+-                                lxb_url_parse_return(orig_data, buf, status);
+-                            }
++                    tmp = (pswd != NULL) ? pswd - 1 : p;
++                    if (tmp > begin) {
++                        status = lxb_url_percent_encode_after_utf_8(begin, tmp,
++                                                    &url->username, url->mraw,
++                                                    LXB_URL_MAP_USERINFO, false);
++                        if (status != LXB_STATUS_OK) {
++                            lxb_url_parse_return(orig_data, buf, status);
+                         }
+                     }
+ 

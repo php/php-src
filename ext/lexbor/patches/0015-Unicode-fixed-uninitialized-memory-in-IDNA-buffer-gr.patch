@@ -1,0 +1,81 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Borisov <lex.borisov@gmail.com>
+Date: Mon, 7 Sep 2026 22:11:39 +0300
+Subject: [PATCH 15/15] Unicode: fixed uninitialized memory in IDNA buffer
+ growth.
+
+When an IDNA buffer outgrew the stack allocation, the move to the heap
+did not copy the existing contents. The converted domain could therefore
+contain uninitialized heap data.
+
+Fixed copying of the codepoint, ASCII and UTF-8 buffers.
+
+Per report from Muhammad Daffa (@daffainfo).
+---
+ source/lexbor/unicode/idna.c | 28 +++++++++++++++++++---------
+ 1 file changed, 19 insertions(+), 9 deletions(-)
+
+diff --git a/source/lexbor/unicode/idna.c b/source/lexbor/unicode/idna.c
+index 754f6b2..b31ae33 100644
+--- a/source/lexbor/unicode/idna.c
++++ b/source/lexbor/unicode/idna.c
+@@ -117,12 +117,14 @@ lxb_unicode_idna_realloc(lxb_codepoint_t *buf, const lxb_codepoint_t *buffer,
+     lxb_codepoint_t *tmp;
+ 
+     nlen = ((*buf_end - buf) * 4) + len;
+- 
++
+     if (buf == buffer) {
+         tmp = lexbor_malloc(nlen * sizeof(lxb_codepoint_t));
+         if (tmp == NULL) {
+             return NULL;
+         }
++
++        memcpy(tmp, buf, (*buf_p - buf) * sizeof(lxb_codepoint_t));
+     }
+     else {
+         tmp = lexbor_realloc(buf, nlen * sizeof(lxb_codepoint_t));
+@@ -458,13 +460,17 @@ lxb_unicode_idna_ascii_puny_cb(const lxb_char_t *data, size_t length, void *ctx,
+ 
+         if (asc->buf == asc->buffer) {
+             tmp = lexbor_malloc(nlen);
++            if (tmp == NULL) {
++                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
++            }
++
++            memcpy(tmp, asc->buf, asc->p - asc->buf);
+         }
+         else {
+             tmp = lexbor_realloc(asc->buf, nlen);
+-        }
+-
+-        if (tmp == NULL) {
+-            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
++            if (tmp == NULL) {
++                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
++            }
+         }
+ 
+         asc->p = tmp + (asc->p - asc->buf);
+@@ -711,13 +717,17 @@ lxb_unicode_idna_to_unicode_cb(const lxb_codepoint_t *part, size_t len,
+ 
+         if (asc->buf == asc->buffer) {
+             tmp = lexbor_malloc(nlen);
++            if (tmp == NULL) {
++                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
++            }
++
++            memcpy(tmp, asc->buf, asc->p - asc->buf);
+         }
+         else {
+             tmp = lexbor_realloc(asc->buf, nlen);
+-        }
+-
+-        if (tmp == NULL) {
+-            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
++            if (tmp == NULL) {
++                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
++            }
+         }
+ 
+         asc->p = tmp + (asc->p - asc->buf);
