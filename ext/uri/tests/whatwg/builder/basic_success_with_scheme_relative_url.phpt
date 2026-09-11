@@ -15,7 +15,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(46) "https://example.net:124/foo/bar/baz?query#hash"
+string(35) "https://example.net:124/foo/bar/baz"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -30,8 +30,8 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["path"]=>
   string(12) "/foo/bar/baz"
   ["query"]=>
-  string(5) "query"
+  NULL
   ["fragment"]=>
-  string(4) "hash"
+  NULL
 }
 bool(true)
