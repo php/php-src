@@ -504,23 +504,20 @@ PHP_METHOD(UConverter, getDestinationType) {
 }
 /* }}} */
 
-/* {{{ php_converter_resolve_callback */
 static void php_converter_resolve_callback(
 	zend_fcall_info_cache *fcc,
-	zend_object *obj,
+	zend_object *this_ptr,
 	const char *callback_name,
 	size_t callback_name_len
 ) {
-	zend_function *fn = reinterpret_cast<zend_function *>(zend_hash_str_find_ptr_lc(&obj->ce->function_table, callback_name, callback_name_len));
+	zend_function *fn = reinterpret_cast<zend_function *>(zend_hash_str_find_ptr_lc(&this_ptr->ce->function_table, callback_name, callback_name_len));
 	ZEND_ASSERT(fn != nullptr);
 
 	fcc->function_handler = fn;
-	fcc->object = obj;
-	fcc->called_scope = obj->ce;
-	fcc->calling_scope = nullptr;
+	fcc->object = this_ptr;
+	fcc->called_scope = this_ptr->ce;
 	fcc->closure = nullptr;
 }
-/* }}} */
 
 /* {{{ */
 PHP_METHOD(UConverter, __construct) {
