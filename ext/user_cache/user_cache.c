@@ -788,8 +788,6 @@ static void user_cache_finish_fetch_multiple(
 				);
 			}
 		}
-
-		zend_string_release(storage_keys[i]);
 	}
 }
 
@@ -891,6 +889,7 @@ static zend_result user_cache_fetch_multiple_api(
 {
 	php_user_cache_fetch_pending_seed *pending_seeds;
 	zend_string **prepared_keys, **storage_keys;
+	zend_result result;
 	zval *vals;
 	uint32_t count, i, p, pending_count = 0, *pending_idx;
 	bool rlock_held, backend_readable;
@@ -989,46 +988,32 @@ static zend_result user_cache_fetch_multiple_api(
 	if (EG(exception)) {
 		for (i = 0; i < count; i++) {
 			zval_ptr_dtor(&vals[i]);
-
-			zend_string_release(storage_keys[i]);
 		}
 
-		if (vals != NULL) {
-			efree(vals);
+		result = FAILURE;
+	} else {
+		array_init_size(return_value, count);
+
+		for (i = 0; i < count; i++) {
+			if (Z_ISUNDEF(vals[i])) {
+				ZVAL_COPY(&vals[i], default_value);
+			}
+
+			/* Ownership of vals[i] moves into return_value. */
+			zend_symtable_update(Z_ARRVAL_P(return_value), prepared_keys[i], &vals[i]);
 		}
 
-		if (storage_keys != NULL) {
-			efree(storage_keys);
-		}
+		user_cache_finish_fetch_multiple(prepared_keys, storage_keys, pending_seeds, count, return_value);
 
-		if (pending_seeds != NULL) {
-			efree(pending_seeds);
-		}
-
-		user_cache_release_key_list(prepared_keys, count);
-
-		return FAILURE;
+		result = SUCCESS;
 	}
 
-	array_init_size(return_value, count);
-
-	for (i = 0; i < count; i++) {
-		if (Z_ISUNDEF(vals[i])) {
-			ZVAL_COPY(&vals[i], default_value);
-		}
-
-		zend_symtable_update(Z_ARRVAL_P(return_value), prepared_keys[i], &vals[i]);
-	}
-
+	/* vals[] entries were destroyed or moved above; only the buffers remain. */
 	if (vals != NULL) {
 		efree(vals);
 	}
 
-	user_cache_finish_fetch_multiple(prepared_keys, storage_keys, pending_seeds, count, return_value);
-
-	if (storage_keys != NULL) {
-		efree(storage_keys);
-	}
+	user_cache_release_key_list(storage_keys, count);
 
 	if (pending_seeds != NULL) {
 		efree(pending_seeds);
@@ -1036,7 +1021,7 @@ static zend_result user_cache_fetch_multiple_api(
 
 	user_cache_release_key_list(prepared_keys, count);
 
-	return SUCCESS;
+	return result;
 }
 
 static bool user_cache_atomic_update_api(
