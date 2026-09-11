@@ -366,6 +366,24 @@ PHP 8.6 UPGRADE NOTES
     failing with CURLE_SEND_FAIL_REWIND. The callback receives the CurlHandle,
     offset and origin, and must return one of CURL_SEEKFUNC_OK,
     CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK.
+  . Added CURLOPT_PRECONNECTFUNCTION to register a callback that allows or
+    refuses each socket libcurl is about to create, after DNS resolution and
+    before connect():
+
+        function (CurlHandle $handle, ?string $ip, int $port,
+                  CurlAddressFamily $family): bool
+
+    Returning false refuses the connection, and the transfer fails with
+    CURLE_COULDNT_CONNECT; any other return type raises a TypeError. $ip is
+    null for a UNIX domain socket. null as the option value restores libcurl's
+    own socket creation.
+
+    It is not on its own a complete SSRF defence: the callback is invoked per
+    socket created, so a connection reused from the pool is not seen by it;
+    with a proxy it sees the proxy, not the target; CURLOPT_DOH_URL connections
+    and schemes that open no socket (file:// in particular) bypass it entirely.
+    Combine it with CURLOPT_PROTOCOLS_STR and CURLOPT_REDIR_PROTOCOLS_STR, and
+    do not share CURL_LOCK_DATA_CONNECT between handles vetted differently.
 
 - Date:
   . Added a new Time\Duration class.
@@ -810,6 +828,9 @@ PHP 8.6 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- Curl:
+  . enum CurlAddressFamily
+
 - Date:
   . Time\Duration
     RFC: https://wiki.php.net/rfc/duration_class
@@ -886,6 +907,7 @@ PHP 8.6 UPGRADE NOTES
 - Curl:
   . CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0).
   . CURLOPT_SEEKFUNCTION.
+  . CURLOPT_PRECONNECTFUNCTION.
   . CURL_SEEKFUNC_OK.
   . CURL_SEEKFUNC_FAIL.
   . CURL_SEEKFUNC_CANTSEEK.

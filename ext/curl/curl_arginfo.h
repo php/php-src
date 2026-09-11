@@ -1,8 +1,9 @@
 /* This is a generated file, edit curl.stub.php instead.
- * Stub hash: 5da31d6790f9db408cac4aed3f81f7affb2849a6 */
+ * Stub hash: e695473e884d8ce44ac8f4e760bf9cef25053f75 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
+#include "zend_enum.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -995,6 +996,7 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURL_HTTP_VERSION_3ONLY", CURL_HTTP_VERSION_3ONLY, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("CURLOPT_SAFE_UPLOAD", CURLOPT_SAFE_UPLOAD, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLOPT_PRECONNECTFUNCTION", CURLOPT_PRECONNECTFUNCTION, CONST_PERSISTENT);
 
 
 	zend_attribute *attribute_Deprecated_func_curl_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "curl_close", sizeof("curl_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
@@ -1016,6 +1018,19 @@ static void register_curl_symbols(int module_number)
 	zend_string *attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1_str = zend_string_init("as it had no effect since 5.1.2", strlen("as it had no effect since 5.1.2"), 1);
 	ZVAL_STR(&attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[1].value, attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0_arg1_str);
 	attribute_Deprecated_const_CURLOPT_BINARYTRANSFER_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+}
+
+static zend_class_entry *register_class_CurlAddressFamily(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("CurlAddressFamily", IS_UNDEF, NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Inet", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Inet6", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Unix", NULL);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_CurlHandle(void)
