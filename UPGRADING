@@ -1105,6 +1105,12 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
   . Improved performance of str_split().
+  . sort() and rsort() now avoid converting packed arrays to mixed storage when
+    their values are null, booleans, integers, non-NaN floats, or strings,
+    without references. Other values retain the existing sorting path to
+    preserve behavior during implicit comparison callbacks.
+  . usort() now avoids converting packed arrays to mixed storage while sorting.
+    It continues to sort a copy of the input array.
 
 - URI:
   . Improved performance of Uri\WhatWg\Url::parse() when collecting
