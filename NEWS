@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- PDO:
+  . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
+    column index. (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.4.26
 

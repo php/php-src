@@ -1700,6 +1700,13 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 		RETURN_FALSE;
 	}
 
+	if (stmt->columns == NULL || colno >= stmt->column_count) {
+		zval_ptr_dtor(return_value);
+		ZVAL_UNDEF(return_value);
+		pdo_raise_impl_error(stmt->dbh, stmt, "07009", "invalid column index");
+		RETURN_FALSE;
+	}
+
 	/* add stock items */
 	col = &stmt->columns[colno];
 	add_assoc_str(return_value, "name", zend_string_copy(col->name));
