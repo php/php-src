@@ -4,26 +4,31 @@ Redirection support in proc_open
 <?php
 
 $php = getenv('TEST_PHP_EXECUTABLE');
+$args = getenv('TEST_PHP_EXTRA_ARGS');
+$cmd = "$php $args";
+
 try {
-    proc_open([$php], [['redirect']], $pipes);
+    proc_open($cmd, [['redirect']], $pipes);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 try {
-    proc_open([$php], [['redirect', 'foo']], $pipes);
+    proc_open($cmd, [['redirect', 'foo']], $pipes);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 try {
-    proc_open([$php], [['redirect', 42]], $pipes);
+    proc_open($cmd, [['redirect', 42]], $pipes);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 echo "\nWith pipe:\n";
-$cmd = [$php, '-r', 'echo "Test\n"; fprintf(STDERR, "Error");'];
+$fn = tempnam(sys_get_temp_dir(), "PROC_OPEN_TEST");
+file_put_contents($fn, '<?php echo "Test\n"; fprintf(STDERR, "Error");');
+$cmd = "$php $args " . escapeshellarg($fn);
 $proc = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['redirect', 1]], $pipes);
 var_dump($pipes);
 var_dump(stream_get_contents($pipes[1]));
@@ -49,6 +54,7 @@ unlink($fileName);
 echo "\nWith inherited stdout:\n";
 $proc = proc_open($cmd, [2 => ['redirect', 1]], $pipes);
 proc_close($proc);
+unlink($fn);
 
 ?>
 --EXPECTF--
@@ -60,7 +66,7 @@ Warning: proc_open(): Redirection target 42 not found in %s
 With pipe:
 array(1) {
   [1]=>
-  resource(4) of type (stream)
+  resource(6) of type (stream)
 }
 string(10) "Test
 Error"
