@@ -117,12 +117,14 @@ lxb_unicode_idna_realloc(lxb_codepoint_t *buf, const lxb_codepoint_t *buffer,
     lxb_codepoint_t *tmp;
 
     nlen = ((*buf_end - buf) * 4) + len;
- 
+
     if (buf == buffer) {
         tmp = lexbor_malloc(nlen * sizeof(lxb_codepoint_t));
         if (tmp == NULL) {
             return NULL;
         }
+
+        memcpy(tmp, buf, (*buf_p - buf) * sizeof(lxb_codepoint_t));
     }
     else {
         tmp = lexbor_realloc(buf, nlen * sizeof(lxb_codepoint_t));
@@ -458,13 +460,17 @@ lxb_unicode_idna_ascii_puny_cb(const lxb_char_t *data, size_t length, void *ctx,
 
         if (asc->buf == asc->buffer) {
             tmp = lexbor_malloc(nlen);
+            if (tmp == NULL) {
+                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+
+            memcpy(tmp, asc->buf, asc->p - asc->buf);
         }
         else {
             tmp = lexbor_realloc(asc->buf, nlen);
-        }
-
-        if (tmp == NULL) {
-            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+            if (tmp == NULL) {
+                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
         }
 
         asc->p = tmp + (asc->p - asc->buf);
@@ -711,13 +717,17 @@ lxb_unicode_idna_to_unicode_cb(const lxb_codepoint_t *part, size_t len,
 
         if (asc->buf == asc->buffer) {
             tmp = lexbor_malloc(nlen);
+            if (tmp == NULL) {
+                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
+
+            memcpy(tmp, asc->buf, asc->p - asc->buf);
         }
         else {
             tmp = lexbor_realloc(asc->buf, nlen);
-        }
-
-        if (tmp == NULL) {
-            return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+            if (tmp == NULL) {
+                return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
+            }
         }
 
         asc->p = tmp + (asc->p - asc->buf);

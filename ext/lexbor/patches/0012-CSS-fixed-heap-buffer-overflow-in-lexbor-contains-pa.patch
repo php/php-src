@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Borisov <lex.borisov@gmail.com>
+Date: Fri, 5 Jun 2026 22:34:23 +0300
+Subject: [PATCH 12/15] CSS: fixed heap buffer overflow in :lexbor-contains()
+ parsing.
+
+The contains string buffer was allocated by the size of the string
+structure instead of the content length, so any value longer than
+that overflowed the buffer.
+
+Per report from Xiansheng Cao (@HMF2021)
+---
+ source/lexbor/css/selectors/pseudo_state.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/source/lexbor/css/selectors/pseudo_state.c b/source/lexbor/css/selectors/pseudo_state.c
+index 263ca52..2321ddf 100644
+--- a/source/lexbor/css/selectors/pseudo_state.c
++++ b/source/lexbor/css/selectors/pseudo_state.c
+@@ -227,13 +227,12 @@ again:
+     contains->insensitive = false;
+     str = &contains->str;
+ 
+-    str->data = lexbor_mraw_alloc(parser->memory->mraw,
+-                                  sizeof(lexbor_str_t));
++    str->data = lexbor_mraw_alloc(parser->memory->mraw, length + 1);
+     if (str->data == NULL) {
+         return lxb_css_parser_memory_fail(parser);
+     }
+ 
+-    memcpy(str->data, data, length + 1);
++    memcpy(str->data, data, length);
+ 
+     str->length = length;
+     str->data[length] = '\0';

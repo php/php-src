@@ -11,6 +11,13 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- Lexbor:
+  . Merge patches 859f100, 8a14bc0, f67ce4b, a36e09a and b0f7412, fixing a heap
+    buffer overflow in :lexbor-contains() parsing, buffer overflows in malformed
+    decode replay, uninitialized memory in IDNA buffer growth, dropped usernames
+    containing an at sign and the URLSearchParams tail pointer.
+    (alexandre-daubois)
+
 
 24 Sep 2026, PHP 8.5.11
 

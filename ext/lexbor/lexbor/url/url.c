@@ -1753,16 +1753,13 @@ again:
                         break;
                     }
 
-                    if (pswd == NULL || !at_sign) {
-                        tmp = (pswd != NULL) ? pswd - 1 : p;
-
-                        if (tmp > begin) {
-                            status = lxb_url_percent_encode_after_utf_8(begin, tmp,
-                                                        &url->username, url->mraw,
-                                                        LXB_URL_MAP_USERINFO, false);
-                            if (status != LXB_STATUS_OK) {
-                                lxb_url_parse_return(orig_data, buf, status);
-                            }
+                    tmp = (pswd != NULL) ? pswd - 1 : p;
+                    if (tmp > begin) {
+                        status = lxb_url_percent_encode_after_utf_8(begin, tmp,
+                                                    &url->username, url->mraw,
+                                                    LXB_URL_MAP_USERINFO, false);
+                        if (status != LXB_STATUS_OK) {
+                            lxb_url_parse_return(orig_data, buf, status);
                         }
                     }
 
@@ -5105,6 +5102,8 @@ lxb_url_search_params_parse(lxb_url_search_params_t *search_params,
         if (status != LXB_STATUS_OK) {
             return status;
         }
+
+        last = entry;
 
         lexbor_str_init(&entry->value, mraw, 0);
         if (entry->value.data == NULL) {

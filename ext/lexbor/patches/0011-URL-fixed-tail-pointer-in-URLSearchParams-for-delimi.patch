@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Alexander Borisov <lex.borisov@gmail.com>
+Date: Fri, 5 Jun 2026 21:46:26 +0300
+Subject: [PATCH 11/15] URL: fixed tail pointer in URLSearchParams for
+ delimiter-free query.
+
+When a query had a single token without '=' or '&' (e.g. "?abc"), the
+internal tail pointer wasn't updated, so a later append() could lose the
+added parameter (and write through a stale pointer). Fixed by keeping the
+tail pointer in sync.
+
+Per report from Xiansheng Cao (@HMF2021)
+---
+ source/lexbor/url/url.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/source/lexbor/url/url.c b/source/lexbor/url/url.c
+index de19239..fcae2d6 100644
+--- a/source/lexbor/url/url.c
++++ b/source/lexbor/url/url.c
+@@ -5106,6 +5106,8 @@ lxb_url_search_params_parse(lxb_url_search_params_t *search_params,
+             return status;
+         }
+ 
++        last = entry;
++
+         lexbor_str_init(&entry->value, mraw, 0);
+         if (entry->value.data == NULL) {
+             return LXB_STATUS_ERROR_MEMORY_ALLOCATION;
