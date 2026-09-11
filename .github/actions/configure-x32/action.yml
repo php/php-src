@@ -3,6 +3,9 @@ inputs:
   configurationParameters:
     default: ''
     required: false
+  cflags:
+    default: '-m32 -msse2'
+    required: false
 runs:
   using: composite
   steps:
@@ -12,8 +15,8 @@ runs:
 
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/lib/i386-linux-gnu/pkgconfig"
         ./buildconf --force
-        export CFLAGS="-m32 -msse2"
-        export CXXFLAGS="-m32 -msse2"
+        export CFLAGS="${{ inputs.cflags }}"
+        export CXXFLAGS="${{ inputs.cflags }}"
         export LDFLAGS=-L/usr/lib/i386-linux-gnu
         ./configure ${{ inputs.configurationParameters }} \
             --enable-option-checking=fatal \
