@@ -856,38 +856,37 @@ static zend_always_inline zend_result zend_call_function_with_return_value(
 	return zend_call_function(fci, fci_cache);
 }
 
+ZEND_API void zend_call_known_fcc_ex(
+	zend_fcall_info_cache *fcc, zval *retval_ptr,
+	uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args);
+
+static zend_always_inline void zend_call_known_fcc(
+	zend_fcall_info_cache *fcc, zval *retval_ptr, uint32_t param_count, zval *params, HashTable *named_params)
+{
+	zend_call_known_fcc_ex(fcc, retval_ptr, param_count, params, named_params, 0);
+}
+
 /* Call the provided zend_function with the given params.
  * If retval_ptr is NULL, the return value is discarded.
  * If object is NULL, this must be a free function or static call.
  * called_scope must be provided for instance and static method calls. */
-ZEND_API void zend_call_known_function_ex(
+static zend_always_inline void zend_call_known_function_ex(
 		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
-		uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args);
+		uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args) {
+	ZEND_ASSERT(fn && "zend_function must be passed!");
+	ZEND_ASSERT((fn->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) == 0 && "fn cannot be a trampoline");
+
+	zend_fcall_info_cache fcc;
+	fcc.function_handler = fn;
+	fcc.object = object;
+	fcc.called_scope = called_scope;
+	zend_call_known_fcc_ex(&fcc, retval_ptr, param_count, params, named_params, consumed_args);
+}
 
 static zend_always_inline void zend_call_known_function(
 		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
 		uint32_t param_count, zval *params, HashTable *named_params) {
 	zend_call_known_function_ex(fn, object, called_scope, retval_ptr, param_count, params, named_params, 0);
-}
-
-static zend_always_inline void zend_call_known_fcc_ex(
-	const zend_fcall_info_cache *fcc, zval *retval_ptr,
-	uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args)
-{
-	zend_function *func = fcc->function_handler;
-	/* Need to copy trampolines as they get released after they are called */
-	if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		func = (zend_function*) emalloc(sizeof(zend_function));
-		memcpy(func, fcc->function_handler, sizeof(zend_function));
-		zend_string_addref(func->op_array.function_name);
-	}
-	zend_call_known_function_ex(func, fcc->object, fcc->called_scope, retval_ptr, param_count, params, named_params, consumed_args);
-}
-
-static zend_always_inline void zend_call_known_fcc(
-	const zend_fcall_info_cache *fcc, zval *retval_ptr, uint32_t param_count, zval *params, HashTable *named_params)
-{
-	zend_call_known_fcc_ex(fcc, retval_ptr, param_count, params, named_params, 0);
 }
 
 /* Call the provided zend_function instance method on an object. */
