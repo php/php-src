@@ -2918,7 +2918,7 @@ PHP_METHOD(ZipArchive, extractTo)
 		}
 	}
 
-	uint32_t nelems, i;
+	uint32_t nelems;
 
 	if (files_str) {
 		if (!php_zip_extract_file(intern, pathto, ZSTR_VAL(files_str), ZSTR_LEN(files_str), -1)) {
@@ -2929,20 +2929,19 @@ PHP_METHOD(ZipArchive, extractTo)
 		if (nelems == 0 ) {
 			RETURN_FALSE;
 		}
-		for (i = 0; i < nelems; i++) {
-			zval *zval_file;
-			if ((zval_file = zend_hash_index_find_deref(files_ht, i)) != NULL) {
-				switch (Z_TYPE_P(zval_file)) {
-					case IS_LONG:
-						break;
-					case IS_STRING:
-						if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), -1)) {
-							RETURN_FALSE;
-						}
-						break;
-				}
+		zval *zval_file;
+		ZEND_HASH_FOREACH_VAL(files_ht, zval_file) {
+			ZVAL_DEREF(zval_file);
+			switch (Z_TYPE_P(zval_file)) {
+				case IS_LONG:
+					break;
+				case IS_STRING:
+					if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), -1)) {
+						RETURN_FALSE;
+					}
+					break;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* Extract all files */
 		zip_int64_t i, filecount = zip_get_num_entries(intern, 0);
