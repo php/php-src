@@ -974,7 +974,7 @@ ZEND_ATTRIBUTE_NONNULL static lxb_url_scheme_type_t php_uri_parser_whatwg_get_sp
 	return LXB_URL_SCHEMEL_TYPE__UNDEF;
 }
 
-ZEND_ATTRIBUTE_NONNULL const char *php_uri_parser_whatwg_build_errors(zval *errors)
+ZEND_ATTRIBUTE_NONNULL static const char *php_uri_parser_whatwg_build_errors(zval *errors)
 {
 	size_t log_len;
 
@@ -990,29 +990,52 @@ ZEND_ATTRIBUTE_NONNULL const char *php_uri_parser_whatwg_build_errors(zval *erro
 	return fill_errors_inner(Z_ARRVAL_P(errors));
 }
 
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_into_exception(zval *errors)
+{
+	/* Include errors from earlier components in the exception raised by a later component. */
+	if (zend_hash_num_elements(Z_ARRVAL_P(errors)) > 0 && EG(exception)
+		&& instanceof_function(EG(exception)->ce, php_uri_ce_whatwg_invalid_url_exception)) {
+		zval rv;
+		zval *exception_errors = zend_read_property(php_uri_ce_whatwg_invalid_url_exception,
+			EG(exception), ZEND_STRL("errors"), true, &rv);
+		ZEND_ASSERT(Z_TYPE_P(exception_errors) == IS_ARRAY);
+
+		zval *error;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(exception_errors), error) {
+			Z_TRY_ADDREF_P(error);
+			zend_hash_next_index_insert(Z_ARRVAL_P(errors), error);
+		} ZEND_HASH_FOREACH_END();
+
+		zval_ptr_dtor(exception_errors);
+		ZVAL_COPY(exception_errors, errors);
+	}
+}
+
 ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_and_throw(const lxb_status_t status, const char *component, zval *errors)
 {
-	zval err;
-	ZVAL_UNDEF(&err);
-
-	const char *reason = php_uri_parser_whatwg_build_errors(&err);
-
 	if (status != LXB_STATUS_OK) {
-		throw_invalid_url_exception_with_reason(errors, component, reason, &err);
+		throw_invalid_url_exception_during_write(NULL, component);
+	} else {
+		php_uri_parser_whatwg_build_errors(errors);
 	}
 }
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_resolve_reference_from_zval(
 	lxb_url_t *lexbor_base_url, const zval *scheme, const zval *username, const zval *password,
 	const zval *host, const zval *port, const zval *path, const zval *query, const zval *fragment,
-	zval *errors_zv
+	zval *soft_errors_zv
 ) {
 	lxb_status_t status;
 	zval errors;
-	ZVAL_UNDEF(&errors);
+	array_init(&errors);
 
 	lxb_url_t *lexbor_url = php_uri_parser_whatwg_clone(lexbor_base_url);
+	if (lexbor_url == NULL) {
+		zend_throw_exception(php_uri_ce_error, "Memory allocation error", 0);
+		goto failure;
+	}
 	if (Z_TYPE_P(username) == IS_STRING) {
+		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(lxb_char_t *) Z_STRVAL_P(username), Z_STRLEN_P(username),
 			LXB_URL_STATE_AUTHORITY_STATE, LXB_ENCODING_AUTO
@@ -1032,6 +1055,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	}
 
 	if (Z_TYPE_P(password) == IS_STRING) {
+		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(lxb_char_t *) Z_STRVAL_P(password), Z_STRLEN_P(password),
 			LXB_URL_STATE_AUTHORITY_STATE, LXB_ENCODING_AUTO
@@ -1052,6 +1076,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 
 	if (Z_TYPE_P(host) == IS_STRING) {
 		lxb_url_host_set_empty(&lexbor_url->host, &lexbor_mraw);
+		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(lxb_char_t *) Z_STRVAL_P(host), Z_STRLEN_P(host),
 			LXB_URL_STATE_HOST_STATE, LXB_ENCODING_AUTO
@@ -1066,6 +1091,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		lexbor_str_t port_str = {0};
 		zval_long_or_null_to_lexbor_str(port, &port_str);
 
+		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			port_str.data, port_str.length, LXB_URL_STATE_PORT_STATE, LXB_ENCODING_AUTO
 		);
@@ -1085,6 +1111,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 
 	if (Z_TYPE_P(path) == IS_STRING && Z_STRLEN_P(path) > 0) {
 		lxb_url_path_set_null(lexbor_url);
+		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(lxb_char_t *) Z_STRVAL_P(path), Z_STRLEN_P(path),
 			lexbor_base_url->path.opaque ? LXB_URL_STATE_NO_SCHEME_STATE : LXB_URL_STATE_PATH_START_STATE, LXB_ENCODING_AUTO
@@ -1097,6 +1124,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 
 	if (Z_TYPE_P(query) == IS_STRING) {
 		lxb_url_query_set_null(lexbor_url);
+		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(lxb_char_t *) Z_STRVAL_P(query), Z_STRLEN_P(query),
 			LXB_URL_STATE_QUERY_STATE, LXB_ENCODING_AUTO
@@ -1109,6 +1137,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 
 	if (Z_TYPE_P(fragment) == IS_STRING) {
 		lxb_url_fragment_set_null(lexbor_url);
+		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(lxb_char_t *) Z_STRVAL_P(fragment), Z_STRLEN_P(fragment),
 			LXB_URL_STATE_FRAGMENT_STATE, LXB_ENCODING_AUTO
@@ -1119,13 +1148,16 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		}
 	}
 
-	if (php_uri_pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE) {
-		goto failure;
+	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, &errors) == FAILURE) {
+		/* The errors zval was already consumed; goto failure would destroy it again. */
+		lxb_url_destroy(lexbor_url);
+		return NULL;
 	}
 
 	return lexbor_url;
 
 failure:
+	php_uri_parser_whatwg_build_errors_into_exception(&errors);
 	zval_ptr_dtor(&errors);
 	lxb_url_destroy(lexbor_url);
 	return NULL;
@@ -1310,23 +1342,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	return lexbor_url;
 failure:
 	ZEND_ASSERT(EG(exception));
-
-	/* Include errors from earlier components in the exception raised by a later component. */
-	if (zend_hash_num_elements(Z_ARRVAL(errors)) > 0
-		&& instanceof_function(EG(exception)->ce, php_uri_ce_whatwg_invalid_url_exception)) {
-		zval rv;
-		zval *exception_errors = zend_read_property(php_uri_ce_whatwg_invalid_url_exception,
-			EG(exception), ZEND_STRL("errors"), true, &rv);
-		ZEND_ASSERT(Z_TYPE_P(exception_errors) == IS_ARRAY);
-
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(exception_errors), zval *error) {
-			Z_TRY_ADDREF_P(error);
-			zend_hash_next_index_insert(Z_ARRVAL(errors), error);
-		} ZEND_HASH_FOREACH_END();
-
-		zval_ptr_dtor(exception_errors);
-		ZVAL_COPY(exception_errors, &errors);
-	}
+	php_uri_parser_whatwg_build_errors_into_exception(&errors);
 	zval_ptr_dtor(&errors);
 	lxb_url_destroy(lexbor_url);
 	return NULL;
