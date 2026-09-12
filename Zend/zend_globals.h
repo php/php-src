@@ -51,8 +51,6 @@
 BEGIN_EXTERN_C()
 ZEND_API extern int compiler_globals_id;
 ZEND_API extern int executor_globals_id;
-ZEND_API extern size_t compiler_globals_offset;
-ZEND_API extern size_t executor_globals_offset;
 END_EXTERN_C()
 
 #endif
@@ -332,9 +330,12 @@ struct _zend_executor_globals {
 };
 
 #ifdef ZTS
-/* Compile-time offsets of the hot globals, in a reserved region just before *_tsrm_ls_cache. */
-# define ZEND_CG_OFFSET   (-(ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)))
-# define ZEND_EG_OFFSET   (ZEND_CG_OFFSET - (ptrdiff_t) TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)))
+struct _zend_tsrm_ls_cache {
+	void *cache;
+	void *self;
+	zend_executor_globals eg;
+	zend_compiler_globals cg;
+};
 #endif
 
 #define EG_FLAGS_INITIAL				(0)

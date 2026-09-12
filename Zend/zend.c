@@ -52,17 +52,16 @@ static bool startup_done = false;
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
-ZEND_API size_t compiler_globals_offset;
-ZEND_API size_t executor_globals_offset;
+ZEND_TLS_API TSRM_TLS TSRM_TLS_MODEL_ATTR zend_tsrm_ls_cache _tsrm_ls_cache = {0};
 /* ts_allocate_tls_id takes a callback so each thread resolves its own block.
- * A plain &language_scanner_globals would capture only the registering thread's address. */
+ * A plain &..._tls would capture only the registering thread's address. */
+static void *executor_globals_tls_addr(void) { return &_tsrm_ls_cache.eg; }
+static void *compiler_globals_tls_addr(void) { return &_tsrm_ls_cache.cg; }
 static void *language_scanner_globals_tls_addr(void) { return &language_scanner_globals; }
 static HashTable *global_function_table = NULL;
 static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
-static HashTable *global_persistent_list = NULL;
-TSRMLS_MAIN_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
 # define GLOBAL_CONSTANTS_TABLE		global_constants_table
@@ -804,6 +803,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 
 static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{{ */
 {
+	_tsrm_ls_cache.self = &_tsrm_ls_cache;
 	zend_startup_constants();
 	zend_copy_constants(executor_globals->zend_constants, GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
@@ -854,13 +854,17 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 }
 /* }}} */
 
-static void executor_globals_persistent_list_dtor(void *storage)
+static void zend_thread_free_handler(void)
 {
-	zend_executor_globals *executor_globals = storage;
+	volatile bool completed = false;
 
-	if (&executor_globals->persistent_list != global_persistent_list) {
-		zend_destroy_rsrc_list(&executor_globals->persistent_list);
-	}
+	do {
+		zend_try {
+			zend_destroy_rsrc_list(&EG(persistent_list));
+			completed = true;
+		} zend_end_try();
+	} while (!completed);
+	zend_init_rsrc_plist();
 }
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
@@ -1022,11 +1026,9 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	zend_init_rsrc_list_dtors();
 
 #ifdef ZTS
-	ts_allocate_fast_id_at(&compiler_globals_id, &compiler_globals_offset, ZEND_CG_OFFSET, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
-	ts_allocate_fast_id_at(&executor_globals_id, &executor_globals_offset, ZEND_EG_OFFSET, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
+	ts_allocate_tls_id(&compiler_globals_id, compiler_globals_tls_addr, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
+	ts_allocate_tls_id(&executor_globals_id, executor_globals_tls_addr, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
 	ts_allocate_tls_id(&language_scanner_globals_id, language_scanner_globals_tls_addr, sizeof(zend_php_scanner_globals), (ts_allocate_ctor) php_scanner_globals_ctor, NULL);
-	ZEND_ASSERT(compiler_globals_offset == ZEND_CG_OFFSET);
-	ZEND_ASSERT(executor_globals_offset == ZEND_EG_OFFSET);
 	ts_allocate_fast_id(&ini_scanner_globals_id, &ini_scanner_globals_offset, sizeof(zend_ini_scanner_globals), (ts_allocate_ctor) ini_scanner_globals_ctor, NULL);
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
@@ -1082,6 +1084,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
+	tsrm_set_thread_free_handler(zend_thread_free_handler);
 	tsrm_set_shutdown_handler(zend_interned_strings_dtor);
 #endif
 
@@ -1152,7 +1155,6 @@ zend_result zend_post_startup(void) /* {{{ */
 	EG(zend_constants) = NULL;
 
 	executor_globals_ctor(executor_globals);
-	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #else
 	global_map_ptr_last = CG(map_ptr_last);
@@ -1169,12 +1171,12 @@ zend_result zend_post_startup(void) /* {{{ */
 
 void zend_shutdown(void) /* {{{ */
 {
+#ifdef ZTS
+	tsrm_set_thread_free_handler(NULL);
+#endif
 	zend_vm_dtor();
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
-#ifdef ZTS
-	ts_apply_for_id(executor_globals_id, executor_globals_persistent_list_dtor);
-#endif
 	zend_destroy_modules();
 
 	virtual_cwd_deactivate();

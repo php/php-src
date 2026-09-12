@@ -2750,15 +2750,14 @@ PHPAPI zend_result php_lint_script(zend_file_handle *file)
 /* {{{ php_reserve_tsrm_memory */
 PHPAPI void php_reserve_tsrm_memory(void)
 {
+	/* CG/EG/GC globals live in native __thread storage and need no
+	 * reserved TSRM space. */
 	tsrm_reserve(
-		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
-		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_ini_scanner_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(virtual_cwd_globals)) +
 #ifdef ZEND_SIGNALS
 		TSRM_ALIGNED_SIZE(sizeof(zend_signal_globals_t)) +
 #endif
-		TSRM_ALIGNED_SIZE(zend_gc_globals_size()) +
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_accel_globals)) +
@@ -2774,10 +2773,6 @@ PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 {
 	bool ret = tsrm_startup(expected_threads, 1, 0, NULL);
 	php_reserve_tsrm_memory();
-	/* Must cover the total size of every ZEND_*_OFFSET global, or the furthest underflows the block. */
-	tsrm_reserve_fast_front(
-		TSRM_ALIGNED_SIZE(sizeof(zend_compiler_globals)) +
-		TSRM_ALIGNED_SIZE(sizeof(zend_executor_globals)));
 	(void)ts_resource(0);
 	return ret;
 }

@@ -69,10 +69,6 @@ void gc_globals_ctor(void);
 void gc_globals_dtor(void);
 void gc_reset(void);
 
-#ifdef ZTS
-size_t zend_gc_globals_size(void);
-#endif
-
 #define GC_REMOVE_FROM_BUFFER(p) do { \
 		zend_refcounted *_p = (zend_refcounted*)(p); \
 		if (GC_TYPE_INFO(_p) & GC_INFO_MASK) { \
