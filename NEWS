@@ -54,6 +54,11 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
 
+- JSON:
+  . Added a vectorized (SSE2/NEON) fast path to php_json_escape_string()
+    that bulk-copies runs of bytes which need no escaping, speeding up
+    json_encode() on ASCII-heavy strings. (adapik)
+
 - Opcache:
   . Fixed range inference of assignments through typed references.
     (Ilia Alshanetsky)
