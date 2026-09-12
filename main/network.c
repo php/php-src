@@ -322,6 +322,13 @@ static inline void php_network_set_limit_time(struct timeval *limit_time,
 }
 #endif
 
+/* whether a connect() error means the attempt has to be made again */
+#if defined(EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
+# define CONNECT_WOULD_BLOCK(e)	((e) == EAGAIN || (e) == EWOULDBLOCK)
+#else
+# define CONNECT_WOULD_BLOCK(e)	((e) == EAGAIN)
+#endif
+
 /* Connect to a socket using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
@@ -356,9 +363,11 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		 * whereas a blocking connect would wait for a slot to free up.
 		 * Wait and retry until the timeout (if any) expires instead of
 		 * surfacing the error to the caller. */
-		if (!asynchronous && error == EAGAIN && addr->sa_family == AF_UNIX) {
+		if (!asynchronous
+				&& CONNECT_WOULD_BLOCK(error)
+				&& addr->sa_family == AF_UNIX) {
 #ifdef HAVE_GETTIMEOFDAY
-			struct timeval limit_time, time_now;
+			struct timeval limit_time, time_now, remaining;
 
 			if (timeout) {
 				php_network_set_limit_time(&limit_time, timeout);
@@ -368,8 +377,6 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 			while (true) {
 				struct timeval slice = {0, 10000};
 
-				/* nothing to poll for here, the connection never started */
-				php_pollfd_for(sockfd, 0, &slice);
 #ifdef HAVE_GETTIMEOFDAY
 				if (timeout) {
 					gettimeofday(&time_now, NULL);
@@ -378,14 +385,20 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 						error = PHP_TIMEOUT_ERROR_VALUE;
 						break;
 					}
+					sub_times(limit_time, time_now, &remaining);
+					if (timercmp(&remaining, &slice, <)) {
+						slice = remaining;
+					}
 				}
 #endif
+				/* nothing to poll for here, the connection never started */
+				php_pollfd_for(sockfd, 0, &slice);
 				if ((n = connect(sockfd, addr, addrlen)) == 0) {
 					error = 0;
 					goto ok;
 				}
 				error = php_socket_errno();
-				if (error != EAGAIN) {
+				if (!CONNECT_WOULD_BLOCK(error)) {
 					break;
 				}
 			}
