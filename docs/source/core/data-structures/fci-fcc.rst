@@ -489,8 +489,14 @@ copying the arguments.
    -  -  Function
       -  Description
 
-   -  -  ``zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *retval, zval
-         *args)``
+   -  -  .. code:: c
+
+            zend_fcall_info_call(
+                zend_fcall_info *fci,
+                zend_fcall_info_cache *fcc,
+                zval *retval,
+                zval *args
+            )
 
       -  Call a function using information created by zend_fcall_info_init()/args() functions. If
          args is given then those replace the argument info in FCI is temporarily. ``args`` *must*
@@ -498,37 +504,89 @@ copying the arguments.
          ``zend_call_function_with_return_value()`` and if ``args`` is not ``NULL`` to set the
          ``fci.named_params = Z_ARR_P(args);``.
 
-   -  -  ``zend_fcall_info_args_clear(zend_fcall_info *fci, bool free_mem)``
+   -  -  .. code:: c
+
+            zend_fcall_info_args_clear(
+                zend_fcall_info *fci,
+                bool free_mem
+            )
+
       -  Clear arguments connected with the FCI. If free_mem is true then the params array gets
          free'd as well.
 
-   -  -  ``zend_fcall_info_args_save(zend_fcall_info *fci, uint32_t *param_count, zval **params)``
+   -  -  .. code:: c
+
+            zend_fcall_info_args_save(
+                zend_fcall_info *fci,
+                uint32_t *param_count,
+                zval **params
+            )
+
       -  Save current arguments from the FCI, the params array will be set to ``NULL``.
 
-   -  -  ``zend_fcall_info_args_restore(zend_fcall_info *fci, uint32_t param_count, zval *params)``
+   -  -  .. code:: c
+
+            zend_fcall_info_args_restore(
+                zend_fcall_info *fci,
+                uint32_t param_count,
+                zval *params
+            )
+
       -  Free arguments connected with the FCI, and set back saved ones.
 
-   -  -  ``zend_fcall_info_args(zend_fcall_info *fci, zval *args)``
+   -  -  .. code:: c
+
+            zend_fcall_info_args(
+                zend_fcall_info *fci,
+                zval *args
+            )
 
       -  Sets the arguments in the FCI taking care of refcount. ``args`` *must* be an IS_ARRAY zval.
          If ``args`` is ``NULL`` the FCI arguments are cleared. It is recommended to migrate away
          from this API by setting ``fci.named_params=Z_ARR_P(args)`` and calling
          ``zend_call_function(fci, NULL)``.
 
-   -  -  ``zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args)``
+   -  -  .. code:: c
+
+            zend_fcall_info_args_ex(
+                zend_fcall_info *fci,
+                zend_function *func,
+                zval *args
+            )
 
       -  Same as ``zend_fcall_info_args()`` but if ``func`` is not ``NULL`` it will check if a
          by-value argument needs to be passed by-ref and wraps it in a reference. This behaviour is
          **NON STANDARD** PHP behaviour and should never be used.
 
-   -  -  ``zend_fcall_info_argp(zend_fcall_info *fci, uint32_t argc, zval *argv)``
+   -  -  .. code:: c
+
+            zend_fcall_info_argp(
+                zend_fcall_info *fci,
+                uint32_t argc,
+                zval *argv
+            )
+
       -  Sets the arguments in the FCI taking care of refcount. If ``argc`` is ``0`` the FCI
          arguments are cleared, else pass a variable amount of zval** arguments.
 
-   -  -  ``zend_fcall_info_argv(zend_fcall_info *fci, uint32_t argc, va_list *argv)``
+   -  -  .. code:: c
+
+            zend_fcall_info_argv(
+                zend_fcall_info *fci,
+                uint32_t argc,
+                va_list *argv
+            )
+
       -  Sets the arguments in the FCI taking care of refcount. If ``argc`` is ``0`` the FCI
          arguments are cleared, else pass a variable amount of zval** arguments.
 
-   -  -  ``zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...)``
+   -  -  .. code:: c
+
+            zend_fcall_info_argn(
+                zend_fcall_info *fci,
+                uint32_t argc,
+                ...
+            )
+
       -  Sets the arguments in the FCI taking care of refcount. If ``argc`` is ``0`` the FCI
          arguments are cleared, else pass a variable amount of zval** arguments.
