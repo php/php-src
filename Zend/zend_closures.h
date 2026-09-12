@@ -40,6 +40,7 @@ ZEND_API void zend_create_partial_closure(zval *res, zend_function *func, zend_c
 ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *obj);
 ZEND_API const zend_function *zend_get_closure_method_def(zend_object *obj);
 ZEND_API zend_object* zend_get_closure_this_ptr(zval *obj);
+ZEND_API bool zend_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **this_ptr, bool check_only);
 
 END_EXTERN_C()
 

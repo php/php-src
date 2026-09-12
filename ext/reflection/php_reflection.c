@@ -1805,11 +1805,12 @@ ZEND_METHOD(ReflectionFunctionAbstract, getClosureCalledClass)
 	if (!Z_ISUNDEF(intern->obj)) {
 		zend_class_entry *called_scope;
 		zend_function *closure_func;
-		zend_object *object;
-		if (Z_OBJ_HANDLER(intern->obj, get_closure)
-			&& Z_OBJ_HANDLER(intern->obj, get_closure)(Z_OBJ(intern->obj), &called_scope, &closure_func, &object, true) == SUCCESS
-			&& closure_func && (called_scope || closure_func->common.scope)
-		) {
+		zend_object *this_ptr;
+
+		if (zend_get_closure(Z_OBJ(intern->obj), &called_scope, &closure_func, &this_ptr, true)
+			/* if zend_get_closure succeeds we have a non-NULL closure_func */
+			&& (called_scope || closure_func->common.scope)) {
+			ZEND_ASSERT(closure_func);
 			zend_reflection_class_factory(called_scope ? called_scope : closure_func->common.scope, return_value);
 		}
 	}
@@ -2062,8 +2063,7 @@ ZEND_METHOD(ReflectionFunction, invoke)
 	fcc.object = NULL;
 
 	if (!Z_ISUNDEF(intern->obj)) {
-		Z_OBJ_HT(intern->obj)->get_closure(
-			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object, false);
+		zend_get_closure(Z_OBJ(intern->obj), &fcc.calling_scope, &fcc.function_handler, &fcc.object, false);
 	}
 
 	zval retval;
@@ -2095,8 +2095,7 @@ ZEND_METHOD(ReflectionFunction, invokeArgs)
 	fcc.object = NULL;
 
 	if (!Z_ISUNDEF(intern->obj)) {
-		Z_OBJ_HT(intern->obj)->get_closure(
-			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object, false);
+		zend_get_closure(Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object, false);
 	}
 
 	zval retval;
