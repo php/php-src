@@ -509,8 +509,11 @@ copying the arguments.
       -  Free arguments connected with the FCI, and set back saved ones.
 
    -  -  ``zend_fcall_info_args(zend_fcall_info *fci, zval *args)``
+
       -  Sets the arguments in the FCI taking care of refcount. ``args`` *must* be an IS_ARRAY zval.
-         If ``args`` is ``NULL`` the FCI arguments are cleared.
+         If ``args`` is ``NULL`` the FCI arguments are cleared. It is recommended to migrate away
+         from this API by setting ``fci.named_params=Z_ARR_P(args)`` and calling
+         ``zend_call_function(fci, NULL)``.
 
    -  -  ``zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args)``
 
