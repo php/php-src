@@ -322,6 +322,13 @@ static inline void php_network_set_limit_time(struct timeval *limit_time,
 }
 #endif
 
+/* whether a connect() error means the attempt has to be made again */
+#if defined(EWOULDBLOCK) && EWOULDBLOCK != EAGAIN
+# define CONNECT_WOULD_BLOCK(e)	((e) == EAGAIN || (e) == EWOULDBLOCK)
+#else
+# define CONNECT_WOULD_BLOCK(e)	((e) == EAGAIN)
+#endif
+
 /* Connect to a socket using an interruptible connect with optional timeout.
  * Optionally, the connect can be made asynchronously, which will implicitly
  * enable non-blocking mode on the socket.
@@ -349,6 +356,63 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		if (error_code) {
 			*error_code = error;
 		}
+
+#ifdef AF_UNIX
+		/* connect() to a unix domain socket whose listen backlog is full
+		 * fails with EAGAIN while the socket is in non-blocking mode,
+		 * whereas a blocking connect would wait for a slot to free up.
+		 * Wait and retry until the timeout (if any) expires instead of
+		 * surfacing the error to the caller. */
+		if (!asynchronous
+				&& CONNECT_WOULD_BLOCK(error)
+				&& addr->sa_family == AF_UNIX) {
+#ifdef HAVE_GETTIMEOFDAY
+			struct timeval limit_time, time_now, remaining;
+
+			if (timeout) {
+				php_network_set_limit_time(&limit_time, timeout);
+			}
+#endif
+
+			while (true) {
+				struct timeval slice = {0, 10000};
+
+#ifdef HAVE_GETTIMEOFDAY
+				if (timeout) {
+					gettimeofday(&time_now, NULL);
+
+					if (!timercmp(&time_now, &limit_time, <)) {
+						error = PHP_TIMEOUT_ERROR_VALUE;
+						break;
+					}
+					sub_times(limit_time, time_now, &remaining);
+					if (timercmp(&remaining, &slice, <)) {
+						slice = remaining;
+					}
+				}
+#endif
+				/* nothing to poll for here, the connection never started */
+				php_pollfd_for(sockfd, 0, &slice);
+				if ((n = connect(sockfd, addr, addrlen)) == 0) {
+					error = 0;
+					goto ok;
+				}
+				error = php_socket_errno();
+				if (!CONNECT_WOULD_BLOCK(error)) {
+					break;
+				}
+			}
+
+			if (error_code) {
+				*error_code = error;
+			}
+			if (error_string) {
+				*error_string = php_socket_error_str(error);
+			}
+
+			return -1;
+		}
+#endif
 
 		if (error != EINPROGRESS) {
 			if (error_string) {
