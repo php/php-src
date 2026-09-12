@@ -1,7 +1,7 @@
 --TEST--
 Test Uri\WhatWg\UrlBuilder::setPath() - success - leading double backslash with special base URL
 --XFAIL--
-not yet: builder does not resolve this reference against the base URL correctly
+needs clarification https://github.com/lexbor/lexbor/issues/412
 --FILE--
 <?php
 
@@ -44,11 +44,20 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["fragment"]=>
   NULL
 }
-array(1) {
+array(2) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
     string(8) "\newPath"
+    ["type"]=>
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidReverseSoldius)
+    ["failure"]=>
+    bool(false)
+  }
+  [1]=>
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
+    ["context"]=>
+    string(9) "\\newPath"
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::InvalidReverseSoldius)
     ["failure"]=>
