@@ -5903,6 +5903,28 @@ PHP_FUNCTION(mb_chr)
 }
 /* }}} */
 
+static char *php_mb_str_pad_fill(char *buffer, zend_string *pad, size_t pad_bytes)
+{
+	if (pad_bytes == 0) {
+		return buffer;
+	}
+	if (ZSTR_LEN(pad) == 1) {
+		memset(buffer, ZSTR_VAL(pad)[0], pad_bytes);
+		return buffer + pad_bytes;
+	}
+
+	const char *start = buffer;
+	const char *end = buffer + pad_bytes;
+	buffer = zend_mempcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
+
+	/* Double the filled area on each iteration. */
+	while (buffer < end) {
+		size_t len = MIN(buffer - start, end - buffer);
+		buffer = zend_mempcpy(buffer, start, len);
+	}
+	return buffer;
+}
+
 PHP_FUNCTION(mb_str_pad)
 {
 	zend_string *input, *encoding_str = NULL, *pad = ZSTR_CHAR(' ');
@@ -6003,9 +6025,7 @@ PHP_FUNCTION(mb_str_pad)
 	char *buffer = ZSTR_VAL(result);
 
 	/* First we pad the left. */
-	for (size_t i = 0; i < full_left_pad_copies; i++, buffer += ZSTR_LEN(pad)) {
-		memcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
-	}
+	buffer = php_mb_str_pad_fill(buffer, pad, full_left_pad_bytes);
 	memcpy(buffer, ZSTR_VAL(remaining_left_pad_str), ZSTR_LEN(remaining_left_pad_str));
 	buffer += ZSTR_LEN(remaining_left_pad_str);
 
@@ -6014,9 +6034,7 @@ PHP_FUNCTION(mb_str_pad)
 	buffer += ZSTR_LEN(input);
 
 	/* Finally, we pad on the right. */
-	for (size_t i = 0; i < full_right_pad_copies; i++, buffer += ZSTR_LEN(pad)) {
-		memcpy(buffer, ZSTR_VAL(pad), ZSTR_LEN(pad));
-	}
+	buffer = php_mb_str_pad_fill(buffer, pad, full_right_pad_bytes);
 	memcpy(buffer, ZSTR_VAL(remaining_right_pad_str), ZSTR_LEN(remaining_right_pad_str));
 
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
