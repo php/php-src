@@ -112,7 +112,7 @@ PHPAPI int php_exec(int type, const char *cmd, zval *array, zval *return_value)
 	FILE *fp;
 	char *buf;
 	int pclose_return;
-	char *b, *d=NULL;
+	char *b;
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
@@ -184,9 +184,6 @@ done:
 		signal(SIGCHLD, sig_handler);
 	}
 #endif
-	if (d) {
-		efree(d);
-	}
 	return pclose_return;
 err:
 	pclose_return = -1;

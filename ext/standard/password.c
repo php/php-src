@@ -46,7 +46,7 @@ void php_password_algo_unregister(const char *ident) {
 
 static int php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
 {
-	size_t pos = 0;
+	size_t pos;
 	zend_string *buffer;
 	if ((int) str_len < 0) {
 		return FAILURE;
@@ -101,7 +101,7 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 }
 /* }}} */
 
-static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_len, HashTable *options) {
+static zend_string* php_password_get_salt(size_t required_salt_len, HashTable *options) {
 	if (options && zend_hash_str_exists(options, "salt", sizeof("salt") - 1)) {
 		php_error_docref(NULL, E_WARNING, "The \"salt\" option has been ignored, since providing a custom salt is no longer supported");
 	}
@@ -194,7 +194,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	}
 
 	hash_format_len = snprintf(hash_format, sizeof(hash_format), "$2y$%02" ZEND_LONG_FMT_SPEC "$", cost);
-	if (!(salt = php_password_get_salt(NULL, Z_UL(22), options))) {
+	if (!(salt = php_password_get_salt(Z_UL(22), options))) {
 		return NULL;
 	}
 	ZSTR_VAL(salt)[ZSTR_LEN(salt)] = 0;
@@ -303,7 +303,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 	size_t threads = PHP_PASSWORD_ARGON2_THREADS;
 	size_t encoded_len;
-	int status = 0;
+	int status;
 
 	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
 		memory_cost = zval_get_long(option_buffer);
@@ -332,7 +332,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (!(salt = php_password_get_salt(NULL, Z_UL(16), options))) {
+	if (!(salt = php_password_get_salt(Z_UL(16), options))) {
 		return NULL;
 	}
 

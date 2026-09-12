@@ -145,9 +145,6 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			if (ZSTR_VAL(key)[0] == '\0' && type != NULL) {
 				const char *tmp;
 				zend_unmangle_property_name_ex(key, &tmp, &prop_name, &prop_len);
-			} else {
-				prop_name = ZSTR_VAL(key);
-				prop_len = ZSTR_LEN(key);
 			}
 		} else {
 			prop_name = NULL;

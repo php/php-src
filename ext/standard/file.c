@@ -479,7 +479,6 @@ PHP_FUNCTION(file_put_contents)
 		}
 		mode[0] = 'c';
 	}
-	mode[2] = '\0';
 
 	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {

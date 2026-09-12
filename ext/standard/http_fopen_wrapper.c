@@ -157,7 +157,7 @@ static bool php_stream_http_response_header_trim(char *http_header_line,
 		size_t *http_header_line_length)
 {
 	char *http_header_line_end = http_header_line + *http_header_line_length - 1;
-	while (http_header_line_end >= http_header_line && 
+	while (http_header_line_end >= http_header_line &&
 			(*http_header_line_end == '\n' || *http_header_line_end == '\r')) {
 		http_header_line_end--;
 	}
@@ -985,7 +985,7 @@ finish:
 			} else {
 				last_line = false;
 			}
-			
+
 			if (last_header_line_str != NULL) {
 				/* Parse last header line. */
 				last_header_line_str = php_stream_http_response_headers_parse(wrapper, stream,
@@ -1072,8 +1072,7 @@ finish:
 							}
 						}
 						s[1] = '\0';
-						if (resource->path &&
-							ZSTR_VAL(resource->path)[0] == '/' &&
+						if (ZSTR_VAL(resource->path)[0] == '/' &&
 							ZSTR_VAL(resource->path)[1] == '\0') {
 							spprintf(&loc_path, 0, "%s%s", ZSTR_VAL(resource->path), header_info.location);
 						} else {
