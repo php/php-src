@@ -19,6 +19,8 @@ $values = array (
   0x1A,  //hexadecimal number
   2147483647,  //max positive integer number
   -2147483648,  //min negative integer
+  PHP_INT_MAX,
+  (2 ** (PHP_SYS_SIZE * 8 - 2) - 1 << 1) + 1, // SSIZE_MAX
 );
 
 //loop through each element of $values for 'split_length'
@@ -144,3 +146,13 @@ array(1) {
 }
 -- Iteration 7 --
 str_split(): Argument #2 ($length) must be greater than 0
+-- Iteration 8 --
+array(1) {
+  [0]=>
+  string(42) "This is a string with 123 & escape char \t"
+}
+-- Iteration 9 --
+array(1) {
+  [0]=>
+  string(42) "This is a string with 123 & escape char \t"
+}

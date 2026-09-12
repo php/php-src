@@ -130,6 +130,22 @@ static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
 #define ZSTR_MAX_OVERHEAD (ZEND_MM_ALIGNED_SIZE(_ZSTR_HEADER_SIZE + 1))
 #define ZSTR_MAX_LEN (SIZE_MAX - ZSTR_MAX_OVERHEAD)
 
+/* True when a zend_long is too large to be used as a zend_string length.
+ * zend_string_alloc() and zend_string_safe_alloc() add the header and the
+ * terminating NUL to the requested length without checking for overflow, so a
+ * length above ZSTR_MAX_LEN wraps to a tiny allocation carrying a huge
+ * ZSTR_LEN. Callers must reject negative values separately.
+ *
+ * Always false where zend_long is no wider than size_t: a non-negative
+ * zend_long cannot exceed ZSTR_MAX_LEN there. Note that the same is not true
+ * of a size_t operand, which is why plain comparisons against ZSTR_MAX_LEN are
+ * used for those. */
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+# define ZEND_LONG_ZSTR_LEN_OVFL(zlong) UNEXPECTED((zlong) > (zend_long) ZSTR_MAX_LEN)
+#else
+# define ZEND_LONG_ZSTR_LEN_OVFL(zlong) (0)
+#endif
+
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
 	GC_SET_REFCOUNT(str, 1); \
@@ -187,6 +203,7 @@ static zend_always_inline uint32_t zend_string_delref(zend_string *s)
 
 static zend_always_inline zend_string *zend_string_alloc(size_t len, bool persistent)
 {
+	ZEND_ASSERT(len <= ZSTR_MAX_LEN);
 	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
 
 	GC_SET_REFCOUNT(ret, 1);
@@ -198,6 +215,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, bool persis
 
 static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m, size_t l, bool persistent)
 {
+	ZEND_ASSERT(l <= ZSTR_MAX_LEN);
 	zend_string *ret = (zend_string *)safe_pemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent);
 
 	GC_SET_REFCOUNT(ret, 1);
@@ -261,6 +279,7 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 {
 	zend_string *ret;
 
+	ZEND_ASSERT(len <= ZSTR_MAX_LEN);
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
 			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
@@ -282,6 +301,7 @@ static zend_always_inline zend_string *zend_string_extend(zend_string *s, size_t
 	zend_string *ret;
 
 	ZEND_ASSERT(len >= ZSTR_LEN(s));
+	ZEND_ASSERT(len <= ZSTR_MAX_LEN);
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (EXPECTED(GC_REFCOUNT(s) == 1)) {
 			ret = (zend_string *)perealloc(s, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);

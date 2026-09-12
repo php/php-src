@@ -14,7 +14,7 @@ var_dump(fwrite($fp, "data"));
 
 $fp = fopen($filename, "w");
 var_dump(fwrite($fp, "data", -1));
-var_dump(fwrite($fp, "data", 100000));
+var_dump(fwrite($fp, "data", PHP_INT_MAX));
 fclose($fp);
 
 var_dump(file_get_contents($filename));

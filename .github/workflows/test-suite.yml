@@ -306,6 +306,93 @@ jobs:
           jitType: function
       - name: Extra tests
         uses: ./.github/actions/extra-tests
+  LINUX_X32_INT64:
+    if: ${{ fromJson(inputs.branch).jobs.LINUX_X32_INT64 }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(inputs.branch).jobs.LINUX_X32_INT64.matrix }}
+    name: "LINUX_X32_INT64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    container:
+      image: ubuntu:${{ fromJson(inputs.branch).config.ubuntu_version }}
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+      PDO_FIREBIRD_TEST_DSN: firebird:dbname=firebird:test.fdb
+    services:
+      mysql:
+        image: mysql:8.4
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ fromJson(inputs.branch).ref }}
+      - name: apt
+        uses: ./.github/actions/apt-x32
+      - name: ccache
+        uses: ./.github/actions/ccache
+        with:
+          name: "LINUX_X32_INT64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-x32
+        with:
+          # x87 computes at 80bit and feeds unrounded operands into double
+          # arithmetic, which diverges from every 64bit platform. SSE math
+          # keeps the results identical.
+          cflags: '-m32 -msse2 -mfpmath=sse'
+          configurationParameters: >-
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+            --enable-zend-int64
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux-x32
+      - name: Test
+        if: ${{ inputs.all_variations }}
+        uses: ./.github/actions/test-linux
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          enableOpcache: true
+          jitType: tracing
+      - name: Test OpCache
+        if: ${{ inputs.all_variations }}
+        uses: ./.github/actions/test-linux
+        with:
+          enableOpcache: true
+      - name: Test Function JIT
+        if: ${{ inputs.all_variations }}
+        uses: ./.github/actions/test-linux
+        with:
+          enableOpcache: true
+          jitType: function
+      - name: Extra tests
+        uses: ./.github/actions/extra-tests
   MACOS:
     if: ${{ fromJson(inputs.branch).jobs.MACOS }}
     strategy:

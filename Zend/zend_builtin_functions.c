@@ -404,6 +404,7 @@ ZEND_FUNCTION(strncmp)
 {
 	zend_string *s1, *s2;
 	zend_long len;
+	size_t cmp_len;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(s1)
@@ -416,7 +417,9 @@ ZEND_FUNCTION(strncmp)
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), len));
+	cmp_len = ZEND_LONG_SIZE_T_OVFL(len) ? SIZE_MAX : (size_t) len;
+
+	RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 }
 /* }}} */
 
@@ -439,6 +442,7 @@ ZEND_FUNCTION(strncasecmp)
 {
 	zend_string *s1, *s2;
 	zend_long len;
+	size_t cmp_len;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(s1)
@@ -451,7 +455,9 @@ ZEND_FUNCTION(strncasecmp)
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(zend_binary_strncasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), len));
+	cmp_len = ZEND_LONG_SIZE_T_OVFL(len) ? SIZE_MAX : (size_t) len;
+
+	RETURN_LONG(zend_binary_strncasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 }
 /* }}} */
 

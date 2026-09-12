@@ -57,6 +57,7 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     $test_libmysqlclient = in_array('CI: libmysqlclient', $labels, true);
     $test_linux_ppc64 = in_array('CI: Linux PPC64', $labels, true);
     $test_linux_x32 = in_array('CI: Linux X32', $labels, true);
+    $test_linux_x32_int64 = in_array('CI: Linux X32 INT64', $labels, true);
     $test_linux_x64 = in_array('CI: Linux X64', $labels, true);
     $test_macos = in_array('CI: macOS', $labels, true);
     $test_msan = in_array('CI: MSAN', $labels, true);
@@ -120,6 +121,13 @@ function select_jobs($repository, $trigger, $nightly, $labels, $php_version, $re
     }
     if ($all_jobs || !$no_jobs || $test_linux_x32) {
         $jobs['LINUX_X32']['matrix'] = $all_variations
+            ? ['debug' => [true, false], 'zts' => [true, false]]
+            : ['debug' => [true], 'zts' => [true]];
+    }
+    // 32bit userland with a 64bit zend_long. Version gated because
+    // --enable-zend-int64 does not exist on the older branches.
+    if (version_compare($php_version, '8.6', '>=') && ($all_jobs || !$no_jobs || $test_linux_x32_int64)) {
+        $jobs['LINUX_X32_INT64']['matrix'] = $all_variations
             ? ['debug' => [true, false], 'zts' => [true, false]]
             : ['debug' => [true], 'zts' => [true]];
     }
