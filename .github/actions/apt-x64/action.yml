@@ -22,6 +22,8 @@ runs:
 
         sudo apt-get update -y | true
         sudo apt-get install -y \
+          apache2 \
+          apache2-dev \
           autoconf \
           gcc \
           make \

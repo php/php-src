@@ -36,3 +36,5 @@ runs:
           libxslt \
           openssl@4
         brew link --force --overwrite openssl@4
+        brew install -v \
+          httpd
