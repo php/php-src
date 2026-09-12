@@ -44,7 +44,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
   }
 
-  - Constants [19] {
+  - Constants [20] {
     Constant [ <persistent> int PREG_PATTERN_ORDER ] { 1 }
     Constant [ <persistent> int PREG_SET_ORDER ] { 2 }
     Constant [ <persistent> int PREG_OFFSET_CAPTURE ] { 256 }
@@ -53,6 +53,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Constant [ <persistent> int PREG_SPLIT_DELIM_CAPTURE ] { 2 }
     Constant [ <persistent> int PREG_SPLIT_OFFSET_CAPTURE ] { 4 }
     Constant [ <persistent> int PREG_GREP_INVERT ] { 1 }
+    Constant [ <persistent> int PREG_THROW_ON_ERROR ] { 65536 }
     Constant [ <persistent> int PREG_NO_ERROR ] { 0 }
     Constant [ <persistent> int PREG_INTERNAL_ERROR ] { 1 }
     Constant [ <persistent> int PREG_BACKTRACK_LIMIT_ERROR ] { 2 }
@@ -91,23 +92,25 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
     Function [ <internal:pcre> function preg_replace ] {
 
-      - Parameters [5] {
+      - Parameters [6] {
         Parameter #0 [ <required> array|string $pattern ]
         Parameter #1 [ <required> array|string $replacement ]
         Parameter #2 [ <required> array|string $subject ]
         Parameter #3 [ <optional> int $limit = -1 ]
         Parameter #4 [ <optional> &$count = null ]
+        Parameter #5 [ <optional> int $flags = 0 ]
       }
       - Return [ array|string|null ]
     }
     Function [ <internal:pcre> function preg_filter ] {
 
-      - Parameters [5] {
+      - Parameters [6] {
         Parameter #0 [ <required> array|string $pattern ]
         Parameter #1 [ <required> array|string $replacement ]
         Parameter #2 [ <required> array|string $subject ]
         Parameter #3 [ <optional> int $limit = -1 ]
         Parameter #4 [ <optional> &$count = null ]
+        Parameter #5 [ <optional> int $flags = 0 ]
       }
       - Return [ array|string|null ]
     }
@@ -172,6 +175,12 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       - Parameters [0] {
       }
       - Return [ string ]
+    }
+  }
+
+  - Classes [1] {
+    Class [ <internal:pcre> class PregException extends Exception implements Throwable, Stringable ] {
+%A
     }
   }
 }
