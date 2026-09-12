@@ -65,8 +65,6 @@ There is a set of common parameters used within the callable APIs which are:
 There are some functions that do not require the use of either the FCI or the FCC structs:
 
 .. list-table:: Basic callable API
-   :width: 100%
-   :widths: 30 70
    :header-rows: 1
 
    -  -  Function/Macro
@@ -297,8 +295,6 @@ FCC API
 The FCC API is defined in ``Zend/zend_API.h``.
 
 .. list-table:: ``zend_fcall_info_cache`` API
-   :width: 100%
-   :widths: 30 70
    :header-rows: 1
 
    -  -  Function/Macro
@@ -428,8 +424,6 @@ FCI API
 The FCI API is defined in ``Zend/zend_API.h``.
 
 .. list-table:: ``zend_fcall_info`` API
-   :width: 100%
-   :widths: 10 90
    :header-rows: 1
 
    -  -  Function/Macro
@@ -482,8 +476,6 @@ In general the IS_ARRAY zval should be assigned to the ``named_params`` field of
 copying the arguments.
 
 .. list-table:: Deprecated ``zend_fcall_info`` API
-   :width: 100%
-   :widths: 30 70
    :header-rows: 1
 
    -  -  Function
