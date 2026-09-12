@@ -5891,13 +5891,15 @@ static void php_str_pad_fill(zend_string *result, size_t pad_chars, const char *
 		return;
 	}
 
+	const char *start = p;
 	const char *end = p + pad_chars;
-	while (p + pad_str_len <= end) {
-		p = zend_mempcpy(p, pad_str, pad_str_len);
-	}
+	size_t len = MIN(pad_str_len, pad_chars);
+	p = zend_mempcpy(p, pad_str, len);
 
-	if (p < end) {
-		memcpy(p, pad_str, end - p);
+	/* Double the filled area on each iteration. */
+	while (p < end) {
+		len = MIN(p - start, end - p);
+		p = zend_mempcpy(p, start, len);
 	}
 
 	ZSTR_LEN(result) += pad_chars;
