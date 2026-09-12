@@ -127,6 +127,8 @@ PHP                                                                        NEWS
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
   . Io\Poll\Context::wait() now rejects a $maxEvents value greater than
     INT_MAX instead of truncating it. (marc-mabe)
+  . Improved performance of array_chunk() when not preserving keys.
+    (mehmetcansahin)
   . Fixed GH-23338 (fsockopen()/pfsockopen() ValueError reported wrong
     argument number for $timeout). (lacatoire)
   . Fixed bug GH-23576 (Next index for array returned from array_keys() is

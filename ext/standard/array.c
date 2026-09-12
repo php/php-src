@@ -7293,6 +7293,42 @@ PHP_FUNCTION(array_chunk)
 	array_init_size(return_value, (uint32_t)(((num_in - 1) / size) + 1));
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
+	if (!preserve_keys) {
+		/* Every chunk is a list of exactly `size` elements (the last one possibly
+		 * shorter), so each one can be filled directly. The input is walked by
+		 * element pointer, so the packed/hash stride is computed only once. */
+		HashTable *ht = Z_ARRVAL_P(input);
+		uint32_t elem_size = ZEND_HASH_ELEMENT_SIZE(ht);
+		zval *zv = ht->arPacked;
+		uint32_t remaining = (uint32_t)num_in;
+
+		while (remaining > 0) {
+			uint32_t chunk_size = MIN((uint32_t)size, remaining);
+
+			array_init_size(&chunk, chunk_size);
+			zend_hash_real_init_packed(Z_ARRVAL(chunk));
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL(chunk)) {
+				uint32_t n = 0;
+				while (n < chunk_size) {
+					entry = zv;
+					zv = ZEND_HASH_NEXT_ELEMENT(zv, elem_size);
+					if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
+						continue;
+					}
+					if (UNEXPECTED(Z_ISREF_P(entry)) && Z_REFCOUNT_P(entry) == 1) {
+						entry = Z_REFVAL_P(entry);
+					}
+					Z_TRY_ADDREF_P(entry);
+					ZEND_HASH_FILL_ADD(entry);
+					n++;
+				}
+			} ZEND_HASH_FILL_END();
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &chunk);
+			remaining -= chunk_size;
+		}
+		return;
+	}
+
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, str_key, entry) {
 		/* If new chunk, create and initialize it. */
 		if (current == 0) {
@@ -7300,15 +7336,11 @@ PHP_FUNCTION(array_chunk)
 			add_next_index_zval(return_value, &chunk);
 		}
 
-		/* Add entry to the chunk, preserving keys if necessary. */
-		if (preserve_keys) {
-			if (str_key) {
-				entry = zend_hash_add_new(Z_ARRVAL(chunk), str_key, entry);
-			} else {
-				entry = zend_hash_index_add_new(Z_ARRVAL(chunk), num_key, entry);
-			}
+		/* Add entry to the chunk, preserving keys. */
+		if (str_key) {
+			entry = zend_hash_add_new(Z_ARRVAL(chunk), str_key, entry);
 		} else {
-			entry = zend_hash_next_index_insert(Z_ARRVAL(chunk), entry);
+			entry = zend_hash_index_add_new(Z_ARRVAL(chunk), num_key, entry);
 		}
 		zval_add_ref(entry);
 
