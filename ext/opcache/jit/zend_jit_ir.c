@@ -8130,7 +8130,8 @@ static zend_jit_addr zend_jit_guard_fetch_result_type(zend_jit_ctx         *jit,
                                                       uint8_t               type,
                                                       bool                  deref,
                                                       uint32_t              flags,
-                                                      bool                  op1_avoid_refcounting)
+                                                      bool                  op1_avoid_refcounting,
+                                                      bool                  undef_is_null)
 {
 	zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 	int32_t exit_point;
@@ -8158,7 +8159,7 @@ static zend_jit_addr zend_jit_guard_fetch_result_type(zend_jit_ctx         *jit,
 	if (deref) {
 		ir_ref if_type;
 
-		if (type == IS_NULL && (opline->opcode == ZEND_FETCH_DIM_IS || opline->opcode == ZEND_FETCH_OBJ_IS)) {
+		if (type == IS_NULL && undef_is_null) {
 			if_type = ir_IF(ir_ULE(jit_Z_TYPE(jit, val_addr), ir_CONST_U8(type)));
 		} else {
 			if_type = jit_if_Z_TYPE(jit, val_addr, type);
@@ -8187,7 +8188,7 @@ static zend_jit_addr zend_jit_guard_fetch_result_type(zend_jit_ctx         *jit,
 		return 0;
 	}
 
-	if (!deref && type == IS_NULL && (opline->opcode == ZEND_FETCH_DIM_IS || opline->opcode == ZEND_FETCH_OBJ_IS)) {
+	if (!deref && type == IS_NULL && undef_is_null) {
 		ir_GUARD(ir_ULE(jit_Z_TYPE(jit, val_addr), ir_CONST_U8(type)), ir_CONST_ADDR(res_exit_addr));
 	} else {
 		jit_guard_Z_TYPE(jit, val_addr, type, res_exit_addr);
@@ -8257,7 +8258,7 @@ static int zend_jit_fetch_constant(zend_jit_ctx         *jit,
 		uint8_t type = concrete_type(res_info);
 		zend_jit_addr const_addr = ZEND_ADDR_REF_ZVAL(ref);
 
-		const_addr = zend_jit_guard_fetch_result_type(jit, opline, const_addr, type, 0, 0, 0);
+		const_addr = zend_jit_guard_fetch_result_type(jit, opline, const_addr, type, 0, 0, 0, 0);
 		if (!const_addr) {
 			return 0;
 		}
@@ -12599,7 +12600,8 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 				}
 
 				val_addr = zend_jit_guard_fetch_result_type(jit, opline, val_addr, type,
-					(op1_info & MAY_BE_ARRAY_OF_REF) != 0, flags, op1_avoid_refcounting);
+					(op1_info & MAY_BE_ARRAY_OF_REF) != 0, flags, op1_avoid_refcounting,
+					opline->opcode == ZEND_FETCH_DIM_IS);
 				if (!val_addr) {
 					return 0;
 				}
@@ -14401,6 +14403,36 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				}
 				prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
 				ir_GUARD(prop_type_ref, ir_CONST_ADDR(exit_addr));
+			} else if (opline->opcode == ZEND_FETCH_OBJ_IS) {
+				/* The result type guard reads IS_UNDEF as NULL, which holds only while
+				 * nothing else answers for the slot: a lazy object initializes on read,
+				 * and unset() leaves a property to __isset()/__get() */
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				ir_ref if_def, undef_path;
+
+				if (!exit_addr) {
+					return 0;
+				}
+				if_def = ir_IF(jit_Z_TYPE_INFO(jit, prop_addr));
+				ir_IF_FALSE_cold(if_def);
+				ir_GUARD_NOT(
+					ir_AND_U32(
+						ir_LOAD_U32(ir_ADD_OFFSET(obj_ref, offsetof(zend_object, extra_flags))),
+						ir_CONST_U32(IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY)),
+					ir_CONST_ADDR(exit_addr));
+				if (!ce || ce_is_instanceof || ce->__isset || ce->__get) {
+					/* a typed property that was never assigned is the one IS_UNDEF slot
+					 * the accessors do not answer for */
+					ir_GUARD(
+						ir_AND_U32(
+							ir_LOAD_U32(ir_ADD_OFFSET(prop_ref, offsetof(zval, u2.extra))),
+							ir_CONST_U32(IS_PROP_UNINIT)),
+						ir_CONST_ADDR(exit_addr));
+				}
+				undef_path = ir_END();
+				ir_IF_TRUE(if_def);
+				ir_MERGE_WITH(undef_path);
 			}
 		} else {
 			prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
@@ -14583,7 +14615,9 @@ result_fetched:
 			}
 
 			val_addr = zend_jit_guard_fetch_result_type(jit, opline, val_addr, type,
-				1, flags, op1_avoid_refcounting);
+				1, flags, op1_avoid_refcounting,
+				/* an IS_UNDEF slot reaches the guard only once the check above cleared it */
+				opline->opcode == ZEND_FETCH_OBJ_IS && prop_info);
 			if (!val_addr) {
 				return 0;
 			}
