@@ -42,6 +42,8 @@ PHP                                                                        NEWS
     toUCallback/fromUCallback. (Ilia Alshanetsky)
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
+  . Fixed crash in intl_error_set_custom_msg() without an active call frame.
+    (David Carlier)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
