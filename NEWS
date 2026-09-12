@@ -70,6 +70,9 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #5674034779193344 (Read of uninitialized memory in
     is_cacheable_stream_path()). (ndossche)
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
+  . Fixed bug GH-23637 (PHP-FPM worker SIGSEGV: run_time_cache map_ptr offset
+    beyond CG(map_ptr_last) when a class is reached through the CE cache).
+    (David Carlier)
 
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
