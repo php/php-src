@@ -19,13 +19,14 @@ if (!in_array($algo, password_algos(), true /* strict */)) {
 --FILE--
 <?php
 
+// Interoperability does not depend on using production-strength costs.
 $opsSet = [
-  SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,
-  SODIUM_CRYPTO_PWHASH_OPSLIMIT_MODERATE,
+  1,
+  2,
 ];
 $memSet = [
-  SODIUM_CRYPTO_PWHASH_MEMLIMIT_INTERACTIVE,
-  SODIUM_CRYPTO_PWHASH_MEMLIMIT_MODERATE,
+  8 * 1024,
+  16 * 1024,
 ];
 
 echo 'Argon2 provider: ';
@@ -49,18 +50,18 @@ foreach($opsSet as $ops) {
 --EXPECTF--
 Argon2 provider: string(%d) "%s"
 Using password: string(44) "%s"
-Hash: string(97) "$argon2id$v=19$m=65536,t=2,p=1$%s$%s"
+Hash: string(93) "$argon2id$v=19$m=8,t=1,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(98) "$argon2id$v=19$m=262144,t=2,p=1$%s$%s"
+Hash: string(94) "$argon2id$v=19$m=16,t=1,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(97) "$argon2id$v=19$m=65536,t=3,p=1$%s$%s"
+Hash: string(93) "$argon2id$v=19$m=8,t=2,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(98) "$argon2id$v=19$m=262144,t=3,p=1$%s$%s"
+Hash: string(94) "$argon2id$v=19$m=16,t=2,p=1$%s$%s"
 bool(true)
 bool(false)

@@ -17,11 +17,12 @@ if (!in_array('argon2i', password_algos(), true /* strict */)) {
 echo 'Argon2 provider: ';
 var_dump(PASSWORD_ARGON2_PROVIDER);
 
+// Interoperability does not depend on using production-strength costs.
 foreach([1, 2] as $mem) {
-  foreach([1, 2] as $time) {
+  foreach([3, 4] as $time) {
     $opts = [
-      'memory_cost' => PASSWORD_ARGON2_DEFAULT_MEMORY_COST * $mem,
-      'time_cost'   => PASSWORD_ARGON2_DEFAULT_TIME_COST * $time,
+      'memory_cost' => 8 * 1024 * $mem,
+      'time_cost'   => $time,
       'threads'     => PASSWORD_ARGON2_DEFAULT_THREADS,
     ];
     $password = random_bytes(32);
@@ -40,18 +41,18 @@ foreach([1, 2] as $mem) {
 --EXPECTF--
 Argon2 provider: string(%d) "%s"
 Using password: string(44) "%s"
-Hash: string(96) "$argon2i$v=19$m=65536,t=4,p=1$%s$%s"
+Hash: string(95) "$argon2i$v=19$m=8192,t=3,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(96) "$argon2i$v=19$m=65536,t=8,p=1$%s$%s"
+Hash: string(95) "$argon2i$v=19$m=8192,t=4,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(97) "$argon2i$v=19$m=131072,t=4,p=1$%s$%s"
+Hash: string(96) "$argon2i$v=19$m=16384,t=3,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(97) "$argon2i$v=19$m=131072,t=8,p=1$%s$%s"
+Hash: string(96) "$argon2i$v=19$m=16384,t=4,p=1$%s$%s"
 bool(true)
 bool(false)
