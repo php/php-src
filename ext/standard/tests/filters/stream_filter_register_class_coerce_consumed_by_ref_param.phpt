@@ -1,7 +1,30 @@
 --TEST--
 stream_filter_register() with a class that coerces the $consumed parameter of filter method
---XFAIL--
-This leaks memory
+--SKIPIF--
+<?php
+
+// this leaks memory
+// remove SKIPIF section when GH-20058 is merged OR when debug
+// builds report "warn: XFAIL section but test passes"
+
+if (getenv('SKIP_MSAN')) {
+	die('skip requires a leak detector');
+}
+
+if (getenv('SKIP_ASAN') && PHP_OS_FAMILY !== 'Windows') {
+	die('xfail User filters leak unprocessed buckets');
+}
+
+if (PHP_DEBUG && getenv('USE_ZEND_ALLOC') !== '0') {
+	die('xfail User filters leak unprocessed buckets');
+}
+
+if (getenv('USE_ZEND_ALLOC') === '0' && getenv('ZEND_DONT_UNLOAD_MODULES') === '1') {
+	die('xleak User filters leak unprocessed buckets');
+}
+
+die('skip requires a leak detector');
+?>
 --FILE--
 <?php
 
