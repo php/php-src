@@ -62,10 +62,17 @@ PHP 8.6 UPGRADE NOTES
     behavior.
 
 - GMP:
-  . GMP power and shift operators now throw a ValueError when GMP right operands
-    are outside the unsigned long range, instead of silently truncating them.
+  . gmp_fact() now throws a ValueError if $num does not fit into an unsigned
+    long.
+  . gmp_pow(), gmp_binomial(), gmp_root() and gmp_rootrem() now throw a
+    ValueError if their second argument does not fit into an unsigned long.
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+    throw a ValueError when GMP right operands are outside the unsigned long range,
+    instead of silently truncating them.
   . GMP integer string parsing now throws a ValueError for strings containing NUL
     bytes, instead of silently truncating them.
+  . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
+    includes the function name and argument index ($modulus).
 
 - Intl:
   . Passing a non-stringable object as a time zone to Intl APIs that accept
@@ -270,7 +277,7 @@ PHP 8.6 UPGRADE NOTES
     additional locale arguments when $locales is an array now throws an
     ArgumentCountError.
   . linkinfo() now raises a ValueError when the $path argument is empty.
-  . pathinfo() now raises a ValueError when an invalid $flag argument value is
+  . pathinfo() now raises a ValueError when an invalid $flags argument value is
     passed.
   . scandir() now raises a ValueError when an invalid $sorting_order argument
     value is passed.
@@ -670,16 +677,6 @@ PHP 8.6 UPGRADE NOTES
     null was never returned. filter_input_array() is unaffected: it still
     returns null when the requested superglobal does not exist.
 
-- GMP:
-  . gmp_fact() now throws a ValueError if $num does not fit into an unsigned
-    long.
-  . gmp_pow(), gmp_binomial(), gmp_root() and gmp_rootrem() now throw a
-    ValueError if their second argument does not fit into an unsigned long.
-  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
-    throw a ValueError if the right operand does not fit into an unsigned long.
-  . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
-    includes the function name and argument index ($modulus).
-
 - LDAP:
   . ldap_free_result() return type has been narrowed from bool to true. The
     function already always returned true.
@@ -887,6 +884,7 @@ PHP 8.6 UPGRADE NOTES
   . Io\Poll\HandleAlreadyWatchedException
   . Io\Poll\InvalidHandleException
   . StreamPollHandle
+    RFC: https://wiki.php.net/rfc/poll_api
 
 - URI:
   . Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder
@@ -1003,6 +1001,7 @@ PHP 8.6 UPGRADE NOTES
     the function will be displayed. This uses the same infrastructure as stack
     traces, so i.e. sensitive parameters will not be displayed, and strings
     will be truncated according to zend.exception_string_param_max_len.
+    RFC: https://wiki.php.net/rfc/display_error_function_args
 
 - Mbstring:
   . The mbstring.detect_order INI directive now updates the internal detection
