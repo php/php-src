@@ -23,6 +23,8 @@
 #include "zend_API.h"
 #include "zend_objects_API.h"
 #include "zend_fibers.h"
+#include "zend_async_API.h"
+#include "zend_execute.h"
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
 {
@@ -59,6 +61,115 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_sto
 			}
 		}
 	}
+}
+
+/* Continue the pass in a fresh coroutine, picking up wherever the
+ * interrupted one left off. */
+static void zend_objects_store_call_destructors_async_iterator_entry(void)
+{
+	zend_objects_store_call_destructors_async(&EG(objects_store));
+}
+
+/* Reset the shutdown cursor if the iterator coroutine is torn down mid-pass
+ * (cancelled/errored) instead of finishing normally — otherwise the pass
+ * stays marked in flight forever. Dispose may run inside a bailout: no user
+ * code from here, the remaining destructors are given up. */
+static void zend_objects_store_call_destructors_async_coroutine_dtor(zend_coroutine_t *coroutine)
+{
+	if (EG(shutdown_context).coroutine == coroutine) {
+		EG(shutdown_context).coroutine = NULL;
+		EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_NONE;
+		zend_error(E_WARNING, "Object store destructors coroutine was not finished properly");
+		zend_objects_store_mark_destructed(&EG(objects_store));
+	}
+}
+
+/* On the driving coroutine's leave (a destructor suspended), continue the
+ * pass in a fresh iterator. Synchronous, not a microtask: this runs late in
+ * shutdown, where a next tick may never come. */
+static bool zend_objects_store_call_destructors_async_switch_handler(zend_coroutine_t *coroutine, bool is_enter)
+{
+	(void) coroutine;
+
+	if (is_enter) {
+		return true;
+	}
+
+	if (EG(shutdown_context).pass != ZEND_SHUTDOWN_PASS_OBJECTS) {
+		return false;
+	}
+
+	zend_coroutine_t *iterator = ZEND_ASYNC_GC_NEW_COROUTINE();
+
+	if (UNEXPECTED(iterator == NULL)) {
+		return false;
+	}
+
+	iterator->internal_entry = zend_objects_store_call_destructors_async_iterator_entry;
+	iterator->extended_dispose = zend_objects_store_call_destructors_async_coroutine_dtor;
+
+	ZEND_ASYNC_ENQUEUE_COROUTINE(iterator);
+
+	return false;
+}
+
+ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors_async(zend_objects_store *objects)
+{
+	if (objects->top <= 1) {
+		return;
+	}
+
+	EG(flags) |= EG_FLAGS_OBJECT_STORE_NO_REUSE;
+
+	zend_coroutine_t *coroutine = ZEND_ASYNC_IS_ACTIVE ? ZEND_ASYNC_CURRENT_COROUTINE : NULL;
+
+	if (coroutine != NULL) {
+		ZEND_ASYNC_ADD_SWITCH_HANDLER(
+				coroutine, zend_objects_store_call_destructors_async_switch_handler);
+	}
+
+	if (EG(shutdown_context).pass != ZEND_SHUTDOWN_PASS_OBJECTS) {
+		EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_OBJECTS;
+		EG(shutdown_context).coroutine = coroutine;
+		EG(shutdown_context).idx = 1;
+	}
+
+	/* Under a scheduler, skip live fibers and coroutine objects: a destructor
+	 * may spawn a fiber and await it, and destroying that still-parked fiber
+	 * would break the destructor about to resume it. The drain tears them down
+	 * later. Without a scheduler, fibers take the upstream path: the dtor
+	 * force-closes them (the parked GC destructor fiber relies on it). */
+	const bool skip_flows = ZEND_ASYNC_IS_ACTIVE;
+	zend_class_entry *coroutine_ce =
+			skip_flows ? ZEND_ASYNC_GET_CE(ZEND_ASYNC_CLASS_COROUTINE) : NULL;
+
+	for (uint32_t i = EG(shutdown_context).idx; i < objects->top; i++) {
+		zend_object *obj = objects->object_buckets[i];
+
+		if (IS_OBJ_VALID(obj)
+				&& (!skip_flows || (obj->ce != zend_ce_fiber && obj->ce != coroutine_ce))) {
+			if (!(OBJ_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+				GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
+
+				if (obj->handlers->dtor_obj != zend_objects_destroy_object
+						|| obj->ce->destructor) {
+					EG(shutdown_context).idx = i;
+					GC_ADDREF(obj);
+					obj->handlers->dtor_obj(obj);
+					GC_DELREF(obj);
+
+					/* Destructor suspended (current coroutine changed): stop —
+					 * the switch handler spawned an iterator to carry on. */
+					if (coroutine != NULL && coroutine != ZEND_ASYNC_CURRENT_COROUTINE) {
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	EG(shutdown_context).pass = ZEND_SHUTDOWN_PASS_NONE;
+	EG(shutdown_context).coroutine = NULL;
 }
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_mark_destructed(zend_objects_store *objects)
