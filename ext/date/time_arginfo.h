@@ -1,7 +1,11 @@
 /* This is a generated file, edit time.stub.php instead.
- * Stub hash: b145db05ac54d90df4a1d5eb139c2d0c5e70401c */
+ * Stub hash: 71349e499ff03529323bede7eb1e680637e81c85 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Time_Duration___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Time_Duration___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Time_Duration_fromSeconds, 0, 1, Time\\Duration, 0)
@@ -58,6 +62,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Time_Duration_compare, 0, 
 ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Time_Duration, __construct);
+ZEND_METHOD(Time_Duration, __unserialize);
 ZEND_METHOD(Time_Duration, fromSeconds);
 ZEND_METHOD(Time_Duration, fromNanoseconds);
 ZEND_METHOD(Time_Duration, fromMicroseconds);
@@ -75,6 +80,7 @@ ZEND_METHOD(Time_Duration, compare);
 
 static const zend_function_entry class_Time_Duration_methods[] = {
 	ZEND_ME(Time_Duration, __construct, arginfo_class_Time_Duration___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(Time_Duration, __unserialize, arginfo_class_Time_Duration___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Time_Duration, fromSeconds, arginfo_class_Time_Duration_fromSeconds, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Time_Duration, fromNanoseconds, arginfo_class_Time_Duration_fromNanoseconds, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Time_Duration, fromMicroseconds, arginfo_class_Time_Duration_fromMicroseconds, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

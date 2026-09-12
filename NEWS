@@ -5,6 +5,11 @@ PHP                                                                        NEWS
 - Core:
   . Fixed incorrect internal pointer and foreach iterator positions when
     compacting arrays with holes. (Weilin Du)
+  . Fix handling of references to typed properties during unserialization
+    of various internal classes. (ndossche, timwolla)
+
+- Date:
+  . Fix unserialization of Time\Duration. (timwolla)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function

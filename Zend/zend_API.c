@@ -1758,7 +1758,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 	zval *prop, tmp;
 	zend_string *key;
 	zend_long h;
-	const zend_property_info *property_info;
+	zend_property_info *property_info;
 
 	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
 		if (key) {
@@ -1785,18 +1785,52 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 			if (property_info != ZEND_WRONG_PROPERTY_INFO &&
 				property_info &&
 				(property_info->flags & ZEND_ACC_STATIC) == 0) {
-				zval *slot = OBJ_PROP(object, property_info->offset);
-				if (UNEXPECTED((property_info->flags & ZEND_ACC_READONLY) && !Z_ISUNDEF_P(slot))) {
-					if (Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE) {
-						Z_PROP_FLAG_P(slot) &= ~IS_PROP_REINITABLE;
-					} else {
-						zend_readonly_property_modification_error(property_info);
-						return;
-					}
+				bool is_typed = ZEND_TYPE_IS_SET(property_info->type);
+
+				/* Mimick unserialize behaviour for virtual properties. */
+				if (UNEXPECTED(property_info->flags & ZEND_ACC_VIRTUAL)) {
+					zend_throw_error(NULL, "Cannot unserialize value for virtual property %s::$%s", ZSTR_VAL(object->ce->name), zend_get_unmangled_property_name(property_info->name));
+					return;
 				}
+
+				zval *slot = OBJ_PROP(object, property_info->offset);
+
+				/* Mimick zend_assign_to_typed_prop() by reporting the error before doing work. */
+				if (UNEXPECTED((property_info->flags & ZEND_ACC_READONLY)
+				 && !Z_ISUNDEF_P(slot)
+				 && !(Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE))) {
+					zend_readonly_property_modification_error(property_info);
+					return;
+				}
+
+				zval val;
+
+				if (is_typed) {
+					if (UNEXPECTED(Z_ISREF_P(prop))) {
+						if (UNEXPECTED(!zend_verify_prop_assignable_by_ref(property_info, prop, /* strict */ true))) {
+							ZEND_ASSERT(EG(exception));
+							return;
+						}
+						ZVAL_COPY(&val, prop);
+						ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(&val), property_info);
+					} else {
+						ZVAL_COPY(&val, prop);
+						if (UNEXPECTED(!zend_verify_property_type(property_info, &val, /* strict */ true))) {
+							zval_ptr_dtor(&val);
+							return;
+						}
+					}
+					if (UNEXPECTED(Z_ISREF_P(slot))
+					 && (ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(slot)))) {
+						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(slot), property_info);
+					}
+				} else {
+					ZVAL_COPY(&val, prop);
+				}
+
+				Z_PROP_FLAG_P(slot) &= ~IS_PROP_REINITABLE;
 				zval_ptr_dtor(slot);
-				ZVAL_COPY_VALUE(slot, prop);
-				zval_add_ref(slot);
+				ZVAL_COPY_VALUE(slot, &val);
 				if (object->properties) {
 					ZVAL_INDIRECT(&tmp, slot);
 					zend_hash_update(object->properties, key, &tmp);
