@@ -2230,6 +2230,10 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 			}
 			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == i);
 			free_counter = ZEND_MM_SRUN_FREE_COUNTER(info) + 1;
+			/* A slot can only be on the free list once, so exceeding the number
+			 * of slots in the page means the list is corrupted, most likely a
+			 * cycle, which would loop here forever. */
+			ZEND_MM_CHECK(free_counter <= bin_elements[i], "zend_mm_heap corrupted");
 			if (free_counter == bin_elements[i]) {
 				has_free_pages = true;
 			}
