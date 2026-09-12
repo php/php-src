@@ -245,12 +245,18 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 
 		p = mmap(NULL, requested_size + huge_page_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 		if (p != MAP_FAILED) {
-			munmap(p, requested_size + huge_page_size);
+			void *reserved = p;
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
 			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
+				size_t head = (char*)p - (char*)reserved;
+				if (head != 0) {
+					munmap(reserved, head);
+				}
+				munmap((char*)p + requested_size, huge_page_size - head);
 				goto success;
 			} else {
+				munmap(reserved, requested_size + huge_page_size);
 				p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 				if (p != MAP_FAILED) {
 					goto success;
