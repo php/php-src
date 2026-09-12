@@ -1091,6 +1091,9 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of transliterator_list_ids() and
     resourcebundle_locales() by pre-allocating their returned arrays.
 
+- Mbstring:
+  . Improved performance of mb_str_pad().
+
 - Phar:
   . Reduced temporary allocations when iterating Phar directories.
 
