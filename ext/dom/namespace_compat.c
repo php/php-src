@@ -501,7 +501,7 @@ static xmlNsPtr dom_alloc_ns_decl(HashTable *links, xmlNodePtr node)
 		return NULL;
 	}
 
-	zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
+	zval *zv = zend_hash_index_lookup(links, ZEND_PTR_TO_ZEND_ULONG(node));
 	if (Z_ISNULL_P(zv)) {
 		ZVAL_LONG(zv, 1);
 	} else {
@@ -575,7 +575,7 @@ static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
 		if (node->ns && !node->ns->prefix) {
 			/* Workaround for the behaviour where the xmlSearchNs() call inside c14n.c
 			 * can return the current namespace. */
-			zend_hash_index_add_new_ptr(links, (zend_ulong) node | 1, node->ns);
+			zend_hash_index_add_new_ptr(links, ZEND_PTR_TO_ZEND_ULONG(node) | 1, node->ns);
 			node->ns = xmlSearchNs(node->doc, node, NULL);
 		} else if (node->ns) {
 			dom_add_synthetic_ns_decl(links, node, node->ns);
@@ -605,10 +605,10 @@ void dom_unlink_ns_decls(HashTable *links)
 {
 	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(links, zend_ulong h, zval *data) {
 		if (h & 1) {
-			xmlNodePtr node = (xmlNodePtr) (h ^ 1);
+			xmlNodePtr node = (xmlNodePtr) ZEND_ULONG_TO_PTR(h ^ 1);
 			node->ns = Z_PTR_P(data);
 		} else {
-			xmlNodePtr node = (xmlNodePtr) h;
+			xmlNodePtr node = (xmlNodePtr) ZEND_ULONG_TO_PTR(h);
 			while (Z_LVAL_P(data)-- > 0) {
 				xmlNsPtr ns = node->nsDef;
 				node->nsDef = ns->next;
