@@ -5903,7 +5903,7 @@ PHP_FUNCTION(mb_chr)
 }
 /* }}} */
 
-static char *php_mb_str_pad_fill(char *buffer, zend_string *pad, size_t pad_bytes)
+static char *php_mb_str_pad_fill(char *buffer, const zend_string *pad, size_t pad_bytes)
 {
 	if (pad_bytes == 0) {
 		return buffer;
