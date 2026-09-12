@@ -2,6 +2,10 @@
 mb_ereg_replace() with unterminated \k<name> backref must not embed a NUL byte
 --EXTENSIONS--
 mbstring
+--SKIPIF--
+<?php
+function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not available in this build");
+?>
 --FILE--
 <?php
 var_dump(bin2hex(mb_ereg_replace('(\d+)', '\k<num', '123')));
