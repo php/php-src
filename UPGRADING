@@ -1083,6 +1083,8 @@ PHP 8.6 UPGRADE NOTES
   . Improve performance of encoding arrays and objects.
   . Improved performance of indentation generation in json_encode()
     when using PHP_JSON_PRETTY_PRINT.
+  . Added an SSE2/NEON fast path for encoding strings that need no
+    escaping, speeding up json_encode() on ASCII-heavy payloads.
 
 - Intl:
   . Improved performance of IntlCalendar::getAvailableLocales() and
