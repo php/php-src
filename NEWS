@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- MBString:
+  . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
+    a truncated UTF-8 sequence). (Lazizbek Ergashev)
+
 
 24 Sep 2026, PHP 8.5.11
 
