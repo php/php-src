@@ -1,4 +1,4 @@
-# Fast Parameter Parsing API
+# Parameter Parsing
 
 In PHP 7, a "Fast Parameter Parsing API" was introduced. See
 [RFC](https://wiki.php.net/rfc/fast_zpp).
@@ -6,7 +6,7 @@ In PHP 7, a "Fast Parameter Parsing API" was introduced. See
 This API uses inlining to improve applications performance compared with the
 `zend_parse_parameters()` function described below.
 
-## Parameter parsing functions
+## Parameter Parsing Functions
 
 Borrowing from Python's example, there is a set of functions that given the
 string of type specifiers, can parse the input parameters and store the results
@@ -17,15 +17,14 @@ of parameters, and try to output meaningful error messages.
 ## Prototypes
 
 ```c
-/* Implemented. */
-int zend_parse_parameters(int num_args, char *type_spec, ...);
-int zend_parse_parameters_ex(int flags, int num_args, char *type_spec, ...);
+zend_result zend_parse_parameters(uint32_t num_args, const char *type_spec, ...);
+zend_result zend_parse_parameters_ex(int flags, uint32_t num_args, const char *type_spec, ...);
 ```
 
 The `zend_parse_parameters()` function takes the number of parameters passed to
 the extension function, the type specifier string, and the list of pointers to
-variables to store the results in. The _ex() version also takes 'flags' argument
--- current only `ZEND_PARSE_PARAMS_QUIET` can be used as 'flags' to specify that
+variables to store the results in. The `_ex()` version also takes a `flags` argument
+-- currently only `ZEND_PARSE_PARAMS_QUIET` can be used as `flags` to specify that
 the function should operate quietly and not output any error messages.
 
 Both functions return `SUCCESS` or `FAILURE` depending on the result.
@@ -33,30 +32,10 @@ Both functions return `SUCCESS` or `FAILURE` depending on the result.
 The auto-conversions are performed as necessary. Arrays, objects, and resources
 cannot be auto-converted.
 
-PHP 5.3 includes a new function (actually implemented as macro):
+The `zend_parse_parameters_none()` macro returns `SUCCESS` if no argument has
+been passed to the function, `FAILURE` otherwise.
 
-```c
-int zend_parse_parameters_none();
-```
-
-This returns `SUCCESS` if no argument has been passed to the function, `FAILURE`
-otherwise.
-
-PHP 5.5 includes a new function:
-
-```c
-int zend_parse_parameter(int flags, int arg_num, zval **arg, const char *spec, ...);
-```
-
-This function behaves like `zend_parse_parameters_ex()` except that instead of
-reading the arguments from the stack, it receives a single zval to convert
-(passed with double indirection). The passed zval may be changed in place as
-part of the conversion process.
-
-See also
-[Expose zend_parse_arg() as zend_parse_parameter()](https://wiki.php.net/rfc/zpp_improv#expose_zend_parse_arg_as_zend_parse_parameter).
-
-## Type specifiers
+## Type Specifiers
 
 The following list shows the type specifier, its meaning, and the parameter types
 that need to be passed by address. All passed parameters are set if the PHP
@@ -64,7 +43,7 @@ parameter is non-optional and untouched if optional and the parameter is not
 present. The only exception is O where the zend_class_entry* has to be provided
 on input and is used to verify the PHP parameter is an instance of that class.
 
-```txt
+```text
 a  - array (zval*)
 A  - array or object (zval*)
 b  - boolean (bool)
@@ -83,7 +62,7 @@ H  - array or HASH_OF(object) (returned as HashTable*)
 l  - long (zend_long)
 n  - long or double (zval*)
 o  - object of any type (zval*)
-O  - object of specific type given by class entry (zval*, zend_class_entry)
+O  - object of specific type given by class entry (zval*, zend_class_entry*)
 p  - valid path (string without null bytes in the middle) and its length (char*, size_t)
 P  - valid path (string without null bytes in the middle) as zend_string (zend_string*)
 r  - resource (zval*)
@@ -110,7 +89,7 @@ The following characters also have a meaning in the specifier string:
   has been provided and ``!ZEND_FCI_INITIALIZED(fci)`` to check if a PHP NULL
   is passed.
 
-## Note on 64bit compatibility
+## Note on 64-Bit Compatibility
 
 Please note that since version 7 PHP uses `zend_long` as integer type and
 `zend_string` with `size_t` as length, so make sure you pass `zend_long`s to "l"
@@ -124,14 +103,14 @@ Both mistakes might cause memory corruptions and segfaults:
 ```c
 char *str;
 long str_len; /* XXX THIS IS WRONG!! Use size_t instead. */
-zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len)
+zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len);
 ```
 
 * 2
 
 ```c
 int num; /* XXX THIS IS WRONG!! Use zend_long instead. */
-zend_parse_parameters(ZEND_NUM_ARGS(), "l", &num)
+zend_parse_parameters(ZEND_NUM_ARGS(), "l", &num);
 ```
 
 If you're in doubt, use check_parameters.php script to the parameters and their
@@ -141,7 +120,7 @@ types (it can be found in `./scripts/dev/` directory of PHP sources):
 php ./scripts/dev/check_parameters.php /path/to/your/sources/
 ```
 
-## Examples
+## Parameter Parsing Examples
 
 ```c
 /* Gets a long, a string and its length, and a zval */
@@ -205,7 +184,7 @@ if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(),
 
 /* Function that accepts only varargs (0 or more) */
 
-int i, num_varargs;
+uint32_t i, num_varargs;
 zval *varargs = NULL;
 
 if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &varargs, &num_varargs) == FAILURE) {
@@ -216,15 +195,13 @@ for (i = 0; i < num_varargs; i++) {
     /* do something with varargs[i] */
 }
 
-if (varargs) {
-    efree(varargs);
-}
+/* varargs points into the call frame and must not be freed. */
 
 /* Function that accepts a string, followed by varargs (1 or more) */
 
 char *str;
 size_t str_len;
-int i, num_varargs;
+uint32_t i, num_varargs;
 zval *varargs = NULL;
 
 if (zend_parse_parameters(ZEND_NUM_ARGS(), "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
@@ -238,7 +215,7 @@ for (i = 0; i < num_varargs; i++) {
 /* Function that takes an array, followed by varargs, and ending with a long */
 zend_long num;
 zval *array;
-int i, num_varargs;
+uint32_t i, num_varargs;
 zval *varargs = NULL;
 
 if (zend_parse_parameters(ZEND_NUM_ARGS(), "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
