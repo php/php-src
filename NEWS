@@ -159,6 +159,8 @@ PHP                                                                        NEWS
   . Set content length using CURLOPT_POSTFIELDSIZE_LARGE instead of
     CURLOPT_POSTFIELDSIZE. This makes it possible to post strings larger than
     2GB on some platforms, e.g. Windows. (Sjoerd Langkemper)
+  . Added CURLOPT_PRECONNECTFUNCTION to allow or refuse each connection libcurl
+    is about to make. (Xavier Leune)
 
 - DOM:
   . Fixed a typo in the DOMException message for INUSE_ATTRIBUTE_ERR.
