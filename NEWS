@@ -157,6 +157,10 @@ PHP                                                                        NEWS
     SimpleXMLElement::addChild() not being accessible by property name when
     namespaces are involved. (Ilia Alshanetsky)
 
+- Sysvshm:
+  . Fixed out-of-bounds reads and writes when a shared memory segment carries
+    a corrupted header or chunk length. (iliaal)
+
 - Zip:
   . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
     garbage collected). (Weilin Du, ndossche)
