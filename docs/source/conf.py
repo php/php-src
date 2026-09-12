@@ -15,9 +15,18 @@ lexers['php-annotations'] = PhpLexer(startinline=True)
 project = 'php-src docs'
 author = 'The PHP Group'
 extensions = [
+    'myst_parser',
     'sphinx_design',
     'sphinx.ext.autosectionlabel',
 ]
+exclude_patterns = ['**/*TODO.md']
+myst_enable_extensions = [
+    'alert',
+    'gfm_autolink',
+    'strikethrough',
+    'tasklist',
+]
+myst_heading_anchors = 6
 templates_path = ['_templates']
 html_theme = 'sphinxawesome_theme'
 html_static_path = ['_static']
@@ -58,3 +67,19 @@ theme_options = ThemeOptions(
 )
 html_theme_options = asdict(theme_options)
 pygments_style = 'sphinx'
+
+
+redirects = {
+    'core/data-structures/reference-counting': '../memory-management/reference-counting.html',
+    'miscellaneous/running-tests': '../testing/running-tests/index.html',
+    'miscellaneous/writing-tests': '../testing/writing-tests/index.html',
+}
+
+
+def generate_redirects(_app):
+    for source, target in redirects.items():
+        yield source, {'redirect_url': target}, 'redirect.html'
+
+
+def setup(app):
+    app.connect('html-collect-pages', generate_redirects)
