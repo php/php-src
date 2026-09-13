@@ -49,6 +49,8 @@ static PHP_MINIT_FUNCTION(json)
 
 	register_json_symbols(module_number);
 
+	php_json_escape_dirty_table_init();
+
 	return SUCCESS;
 }
 /* }}} */
