@@ -63,8 +63,7 @@
 typedef bool (*php_user_cache_shared_graph_state_getter_t)(
 	const zval *value,
 	HashTable *state_memo,
-	zval **state_ptr,
-	zval *owned_state
+	zval **state_ptr
 );
 
 /* CALC and COPY must use the same route precedence. */
@@ -89,6 +88,7 @@ typedef enum {
 typedef struct {
 	size_t size;
 	HashTable seen_arrays;
+	HashTable verbatim_seen;
 	HashTable seen_objects;
 	HashTable seen_references;
 	HashTable string_dedup;
@@ -115,6 +115,7 @@ typedef struct {
 	uint32_t fixup_count;
 	uint32_t fixup_capacity;
 	HashTable seen_arrays;
+	HashTable verbatim_seen;
 	/* Packs the aligned object offset and flags-field displacement. */
 	HashTable seen_objects;
 	HashTable seen_references;
@@ -386,6 +387,7 @@ static zend_always_inline void user_cache_shared_graph_calc_init(php_user_cache_
 	ctx->shared_verdicts = NULL;
 
 	zend_hash_init(&ctx->seen_arrays, 8, NULL, NULL, 0);
+	zend_hash_init(&ctx->verbatim_seen, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->seen_objects, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->seen_references, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->string_dedup, 8, NULL, NULL, 0);
@@ -406,6 +408,7 @@ static zend_always_inline void user_cache_shared_graph_calc_destroy(php_user_cac
 	zend_hash_destroy(&ctx->string_dedup);
 	zend_hash_destroy(&ctx->seen_references);
 	zend_hash_destroy(&ctx->seen_objects);
+	zend_hash_destroy(&ctx->verbatim_seen);
 	zend_hash_destroy(&ctx->seen_arrays);
 }
 
@@ -767,11 +770,7 @@ static bool user_cache_shared_graph_calc_array_shape(
 	}
 
 	if (zend_hash_exists(&ctx->array_shape_dedup, shape_key)) {
-		if (owns_shape_key) {
-			zend_string_release(shape_key);
-		}
-
-		return true;
+		goto cleanup;
 	}
 
 	if (!user_cache_shared_graph_calc_reserve(
@@ -783,11 +782,9 @@ static bool user_cache_shared_graph_calc_array_shape(
 			(size_t) arr->nNumOfElements * sizeof(php_user_cache_shared_graph_array_shape_element)
 		)
 	) {
-		if (owns_shape_key) {
-			zend_string_release(shape_key);
-		}
+		result = false;
 
-		return false;
+		goto cleanup;
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY((HashTable *) arr, key) {
@@ -802,6 +799,7 @@ static bool user_cache_shared_graph_calc_array_shape(
 		result = zend_hash_add_empty_element(&ctx->array_shape_dedup, shape_key) != NULL;
 	}
 
+cleanup:
 	if (owns_shape_key) {
 		zend_string_release(shape_key);
 	}
@@ -811,20 +809,13 @@ static bool user_cache_shared_graph_calc_array_shape(
 
 static zend_string *user_cache_shared_graph_state_schema_key(
 	zend_class_entry *ce,
-	const HashTable *arr,
-	zend_string **shape_key_out
+	zend_string *shape_key
 )
 {
-	zend_string *shape_key;
 	smart_str schema_key = {0};
 	uint32_t class_name_len, shape_key_len;
 
-	shape_key = user_cache_shared_graph_array_shape_key(arr);
-	if (shape_key == NULL || ZSTR_LEN(ce->name) > UINT32_MAX || ZSTR_LEN(shape_key) > UINT32_MAX) {
-		if (shape_key != NULL) {
-			zend_string_release(shape_key);
-		}
-
+	if (ZSTR_LEN(ce->name) > UINT32_MAX || ZSTR_LEN(shape_key) > UINT32_MAX) {
 		return NULL;
 	}
 
@@ -839,8 +830,6 @@ static zend_string *user_cache_shared_graph_state_schema_key(
 
 	smart_str_appendl(&schema_key, ZSTR_VAL(shape_key), ZSTR_LEN(shape_key));
 
-	*shape_key_out = shape_key;
-
 	return smart_str_extract(&schema_key);
 }
 
@@ -850,19 +839,23 @@ static bool user_cache_shared_graph_calc_state_schema(
 	const HashTable *arr
 )
 {
-	zend_string *schema_key, *shape_key = NULL;
-	bool result;
+	zend_string *schema_key, *shape_key;
+	bool result = true;
 
-	schema_key = user_cache_shared_graph_state_schema_key(ce, arr, &shape_key);
+	shape_key = user_cache_shared_graph_array_shape_key(arr);
+	if (shape_key == NULL) {
+		return false;
+	}
+
+	schema_key = user_cache_shared_graph_state_schema_key(ce, shape_key);
 	if (schema_key == NULL) {
+		zend_string_release(shape_key);
+
 		return false;
 	}
 
 	if (zend_hash_exists(&ctx->state_schema_dedup, schema_key)) {
-		zend_string_release(shape_key);
-		zend_string_release(schema_key);
-
-		return true;
+		goto cleanup;
 	}
 
 	result = user_cache_shared_graph_calc_reserve(
@@ -873,12 +866,12 @@ static bool user_cache_shared_graph_calc_state_schema(
 		user_cache_shared_graph_calc_array_shape(ctx, arr, shape_key)
 	;
 
-	zend_string_release(shape_key);
-
 	if (result) {
 		result = zend_hash_add_empty_element(&ctx->state_schema_dedup, schema_key) != NULL;
 	}
 
+cleanup:
+	zend_string_release(shape_key);
 	zend_string_release(schema_key);
 
 	return result;
@@ -1227,7 +1220,7 @@ static bool user_cache_shared_graph_calc_verbatim_value(
 				}
 			}
 
-			if (!php_user_cache_seen_test_and_add(&ctx->seen_arrays, arr)) {
+			if (!php_user_cache_seen_test_and_add(&ctx->verbatim_seen, arr)) {
 				return false;
 			}
 
@@ -1271,7 +1264,7 @@ static bool user_cache_shared_graph_calc_verbatim_value(
 			}
 
 done:
-			zend_hash_index_del(&ctx->seen_arrays, arr_key);
+			zend_hash_index_del(&ctx->verbatim_seen, arr_key);
 
 			if (result && GC_REFCOUNT(arr) > 1) {
 				ZVAL_TRUE(&seen_marker);
@@ -1399,14 +1392,11 @@ static bool user_cache_shared_graph_get_memoized_state(
 		const zval *value,
 		HashTable *state_memo,
 		bool (*produce_state)(const zval *value, zval *state),
-		zval **state_ptr,
-		zval *owned_state)
+		zval **state_ptr)
 {
 	zend_ulong memo_key;
 	zend_object *obj;
-	zval *memo_state;
-
-	ZVAL_UNDEF(owned_state);
+	zval *memo_state, produced;
 
 	*state_ptr = NULL;
 
@@ -1433,30 +1423,26 @@ static bool user_cache_shared_graph_get_memoized_state(
 	 * the same reason). Released in php_user_cache_destroy_prepared_value(). */
 	GC_ADDREF(obj);
 
-	if (!produce_state(value, owned_state)) {
+	ZVAL_UNDEF(&produced);
+
+	if (!produce_state(value, &produced)) {
 		OBJ_RELEASE(obj);
 
-		if (!Z_ISUNDEF_P(owned_state)) {
-			zval_ptr_dtor(owned_state);
-
-			ZVAL_UNDEF(owned_state);
+		if (!Z_ISUNDEF(produced)) {
+			zval_ptr_dtor(&produced);
 		}
 
 		return false;
 	}
 
-	memo_state = zend_hash_index_add(state_memo, memo_key, owned_state);
+	memo_state = zend_hash_index_add(state_memo, memo_key, &produced);
 	if (memo_state == NULL) {
 		OBJ_RELEASE(obj);
 
-		zval_ptr_dtor(owned_state);
-
-		ZVAL_UNDEF(owned_state);
+		zval_ptr_dtor(&produced);
 
 		return false;
 	}
-
-	ZVAL_UNDEF(owned_state);
 
 	*state_ptr = memo_state;
 
@@ -1470,17 +1456,16 @@ static bool user_cache_shared_graph_get_safe_direct_state(
 		zval **state_ptr,
 		zval *owned_state)
 {
+	ZVAL_UNDEF(owned_state);
+
 	if (state_memo != NULL) {
 		return user_cache_shared_graph_get_memoized_state(
 			value,
 			state_memo,
 			user_cache_shared_graph_produce_safe_direct_state,
-			state_ptr,
-			owned_state
+			state_ptr
 		);
 	}
-
-	ZVAL_UNDEF(owned_state);
 
 	*state_ptr = NULL;
 
@@ -1502,60 +1487,52 @@ static bool user_cache_shared_graph_get_safe_direct_state(
 static bool user_cache_shared_graph_get_magic_serialized_state(
 		const zval *value,
 		HashTable *state_memo,
-		zval **state_ptr,
-		zval *owned_state)
+		zval **state_ptr)
 {
 	return user_cache_shared_graph_get_memoized_state(
 		value,
 		state_memo,
 		user_cache_shared_graph_extract_serialize_snapshot,
-		state_ptr,
-		owned_state
+		state_ptr
 	);
 }
 
 static bool user_cache_shared_graph_get_magic_unserialized_state(
 		const zval *value,
 		HashTable *state_memo,
-		zval **state_ptr,
-		zval *owned_state)
+		zval **state_ptr)
 {
 	return user_cache_shared_graph_get_memoized_state(
 		value,
 		state_memo,
 		user_cache_shared_graph_extract_unserialize_route_snapshot,
-		state_ptr,
-		owned_state
+		state_ptr
 	);
 }
 
 static bool user_cache_shared_graph_get_sleep_state(
 		const zval *value,
 		HashTable *state_memo,
-		zval **state_ptr,
-		zval *owned_state)
+		zval **state_ptr)
 {
 	return user_cache_shared_graph_get_memoized_state(
 		value,
 		state_memo,
 		user_cache_shared_graph_extract_sleep_snapshot,
-		state_ptr,
-		owned_state
+		state_ptr
 	);
 }
 
 static bool user_cache_shared_graph_get_wakeup_state(
 		const zval *value,
 		HashTable *state_memo,
-		zval **state_ptr,
-		zval *owned_state)
+		zval **state_ptr)
 {
 	return user_cache_shared_graph_get_memoized_state(
 		value,
 		state_memo,
 		user_cache_shared_graph_extract_property_snapshot,
-		state_ptr,
-		owned_state
+		state_ptr
 	);
 }
 
@@ -1657,7 +1634,7 @@ static bool user_cache_shared_graph_calc_magic_state_object(
 {
 	php_user_cache_shared_graph_state_getter_t get_state;
 	HashTable *state_ht;
-	zval *state_ptr, state, state_zv;
+	zval *state_ptr, state_zv;
 	bool result;
 
 	if (!php_user_cache_seen_test_and_add(&ctx->seen_objects, obj)) {
@@ -1665,7 +1642,7 @@ static bool user_cache_shared_graph_calc_magic_state_object(
 	}
 
 	get_state = user_cache_shared_graph_route_state_getter(route);
-	if (!get_state(value, ctx->state_memo, &state_ptr, &state)) {
+	if (!get_state(value, ctx->state_memo, &state_ptr)) {
 		return false;
 	}
 
@@ -1688,10 +1665,6 @@ static bool user_cache_shared_graph_calc_magic_state_object(
 		;
 	}
 
-	if (!Z_ISUNDEF(state)) {
-		zval_ptr_dtor(&state);
-	}
-
 	return result;
 }
 
@@ -1704,7 +1677,7 @@ static bool user_cache_shared_graph_calc_sleep_state_object(
 	php_user_cache_shared_graph_state_getter_t get_state;
 	zend_ulong num_key;
 	zend_string *prop_name, *resolved_name;
-	zval *state_ptr, state, *prop_val;
+	zval *state_ptr, *prop_val;
 	HashTable *props;
 	uint32_t prop_count;
 	bool result;
@@ -1714,7 +1687,7 @@ static bool user_cache_shared_graph_calc_sleep_state_object(
 	}
 
 	get_state = user_cache_shared_graph_route_state_getter(route);
-	if (!get_state(value, ctx->state_memo, &state_ptr, &state)) {
+	if (!get_state(value, ctx->state_memo, &state_ptr)) {
 		return false;
 	}
 
@@ -1761,10 +1734,6 @@ static bool user_cache_shared_graph_calc_sleep_state_object(
 		}
 	}
 
-	if (!Z_ISUNDEF(state)) {
-		zval_ptr_dtor(&state);
-	}
-
 	return result;
 }
 
@@ -1773,9 +1742,9 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 	const zval *value,
 	zend_object *obj)
 {
-	const HashTable *state_ht;
+	HashTable *state_ht;
 	zend_string *prop_name;
-	zval *prop_val, *src_val, *state_ptr, state;
+	zval *prop_val, *src_val, *state_ptr, state, state_zv;
 	HashTable *props;
 	uint32_t prop_count;
 	bool result;
@@ -1790,7 +1759,7 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 		return false;
 	}
 
-	state_ht = Z_TYPE_P(state_ptr) == IS_ARRAY ? Z_ARRVAL_P(state_ptr) : NULL;
+	state_ht = Z_ARRVAL_P(state_ptr);
 
 	if (!php_user_cache_seen_test_and_add(&ctx->seen_objects, obj)) {
 		result = true;
@@ -1798,10 +1767,12 @@ static bool user_cache_shared_graph_calc_safe_direct_object(
 		goto cleanup;
 	}
 
+	ZVAL_ARR(&state_zv, state_ht);
+
 	if (!user_cache_shared_graph_calc_reserve(ctx,
 		sizeof(php_user_cache_shared_graph_safe_direct_object)) ||
 		!user_cache_shared_graph_calc_reserve_string(ctx, obj->ce->name) ||
-		!user_cache_shared_graph_calc_value(ctx, state_ptr)
+		!user_cache_shared_graph_calc_value(ctx, &state_zv)
 	) {
 		result = false;
 
@@ -1895,6 +1866,7 @@ static bool user_cache_shared_graph_calc_plain_object(
 	zval *prop_val, *src_val;
 	HashTable *props;
 	uint32_t prop_count;
+	bool result = true;
 
 	if (!php_user_cache_seen_test_and_add(&ctx->seen_objects, obj)) {
 		return true;
@@ -1917,19 +1889,17 @@ static bool user_cache_shared_graph_calc_plain_object(
 			(size_t) prop_count * sizeof(php_user_cache_shared_graph_property)
 		)
 	) {
-		if (props != NULL) {
-			zend_release_properties(props);
-		}
+		result = false;
 
-		return false;
+		goto cleanup;
 	}
 
 	if (props != NULL) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(props, prop_name, prop_val) {
 			if (prop_name == NULL) {
-				zend_release_properties(props);
+				result = false;
 
-				return false;
+				break;
 			}
 
 			src_val = Z_TYPE_P(prop_val) == IS_INDIRECT
@@ -1937,23 +1907,22 @@ static bool user_cache_shared_graph_calc_plain_object(
 				: prop_val
 			;
 
-			if (!user_cache_shared_graph_calc_reserve_string(ctx, prop_name)) {
-				zend_release_properties(props);
+			if (!user_cache_shared_graph_calc_reserve_string(ctx, prop_name) ||
+				!user_cache_shared_graph_calc_value(ctx, src_val)
+			) {
+				result = false;
 
-				return false;
-			}
-
-			if (!user_cache_shared_graph_calc_value(ctx, src_val)) {
-				zend_release_properties(props);
-
-				return false;
+				break;
 			}
 		} ZEND_HASH_FOREACH_END();
+	}
 
+cleanup:
+	if (props != NULL) {
 		zend_release_properties(props);
 	}
 
-	return true;
+	return result;
 }
 
 static bool user_cache_shared_graph_calc_object(
@@ -2048,10 +2017,9 @@ static bool user_cache_shared_graph_calc_array(
 )
 {
 	const HashTable *arr;
-	zend_ulong arr_key;
 	zend_string *key;
 	zval *elem, *verdict, verdict_zv;
-	bool result, verbatim;
+	bool verbatim;
 
 	arr = Z_ARRVAL_P(value);
 
@@ -2088,7 +2056,7 @@ static bool user_cache_shared_graph_calc_array(
 			verbatim = Z_TYPE_P(verdict) == IS_TRUE;
 		} else {
 			verbatim = user_cache_shared_graph_can_copy_verbatim_value(
-				&ctx->seen_arrays,
+				&ctx->verbatim_seen,
 				&ctx->direct_verdicts,
 				value
 			);
@@ -2108,9 +2076,6 @@ static bool user_cache_shared_graph_calc_array(
 		return true;
 	}
 
-	arr_key = (zend_ulong) (uintptr_t) arr;
-	result = true;
-
 	if (user_cache_shared_graph_array_has_shape(arr)) {
 		if (!user_cache_shared_graph_calc_reserve(
 				ctx,
@@ -2122,20 +2087,16 @@ static bool user_cache_shared_graph_calc_array(
 			) ||
 			!user_cache_shared_graph_calc_array_shape(ctx, arr, NULL)
 		) {
-			result = false;
-
-			goto done;
+			return false;
 		}
 
 		ZEND_HASH_FOREACH_VAL((HashTable *) arr, elem) {
 			if (!user_cache_shared_graph_calc_value(ctx, elem)) {
-				result = false;
-
-				break;
+				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		goto done;
+		return true;
 	}
 
 	if (!user_cache_shared_graph_calc_reserve(ctx, sizeof(php_user_cache_shared_graph_array)) ||
@@ -2148,29 +2109,20 @@ static bool user_cache_shared_graph_calc_array(
 			!user_cache_shared_graph_calc_reserve(ctx, sizeof(int64_t))
 		)
 	) {
-		result = false;
-
-		goto done;
+		return false;
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL((HashTable *) arr, key, elem) {
 		if (key != NULL && !user_cache_shared_graph_calc_reserve_string(ctx, key)) {
-			result = false;
-
-			break;
+			return false;
 		}
 
 		if (!user_cache_shared_graph_calc_value(ctx, elem)) {
-			result = false;
-
-			break;
+			return false;
 		}
 	} ZEND_HASH_FOREACH_END();
 
-done:
-	zend_hash_index_del(&ctx->seen_arrays, arr_key);
-
-	return result;
+	return true;
 }
 
 static bool user_cache_shared_graph_calc_value(
@@ -2235,6 +2187,7 @@ static void user_cache_shared_graph_copy_init(
 	ctx->fixup_capacity = 0;
 
 	zend_hash_init(&ctx->seen_arrays, 8, NULL, NULL, 0);
+	zend_hash_init(&ctx->verbatim_seen, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->seen_objects, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->seen_references, 8, NULL, NULL, 0);
 	zend_hash_init(&ctx->string_dedup, 8, NULL, NULL, 0);
@@ -2269,6 +2222,7 @@ static void user_cache_shared_graph_copy_destroy(php_user_cache_shared_graph_cop
 	zend_hash_destroy(&ctx->string_dedup);
 	zend_hash_destroy(&ctx->seen_references);
 	zend_hash_destroy(&ctx->seen_objects);
+	zend_hash_destroy(&ctx->verbatim_seen);
 	zend_hash_destroy(&ctx->seen_arrays);
 }
 
@@ -2414,7 +2368,7 @@ static bool user_cache_shared_graph_copy_array_shape(
 	zend_string *key;
 	zval *cached, cached_offset;
 	uint32_t shape_offset, elems_offset, key_offset;
-	bool owns_shape_key = false;
+	bool result = true, owns_shape_key = false;
 
 	if (shape_key == NULL) {
 		shape_key = user_cache_shared_graph_array_shape_key(arr);
@@ -2429,11 +2383,7 @@ static bool user_cache_shared_graph_copy_array_shape(
 	if (cached != NULL) {
 		*offset = (uint32_t) Z_LVAL_P(cached);
 
-		if (owns_shape_key) {
-			zend_string_release(shape_key);
-		}
-
-		return true;
+		goto cleanup;
 	}
 
 	if (!user_cache_shared_graph_copy_alloc(ctx, sizeof(*graph_shape), &shape_offset) ||
@@ -2443,11 +2393,9 @@ static bool user_cache_shared_graph_copy_array_shape(
 			&elems_offset
 		)
 	) {
-		if (owns_shape_key) {
-			zend_string_release(shape_key);
-		}
+		result = false;
 
-		return false;
+		goto cleanup;
 	}
 
 	graph_shape = (php_user_cache_shared_graph_array_shape *) (ctx->buffer + shape_offset);
@@ -2461,11 +2409,9 @@ static bool user_cache_shared_graph_copy_array_shape(
 		ZEND_ASSERT(key != NULL);
 
 		if (!user_cache_shared_graph_copy_string(ctx, key, &key_offset)) {
-			if (owns_shape_key) {
-				zend_string_release(shape_key);
-			}
+			result = false;
 
-			return false;
+			break;
 		}
 
 		shape_elem->key_offset = key_offset;
@@ -2473,22 +2419,21 @@ static bool user_cache_shared_graph_copy_array_shape(
 		++shape_elem;
 	} ZEND_HASH_FOREACH_END();
 
-	ZVAL_LONG(&cached_offset, (zend_long) shape_offset);
-	if (zend_hash_add(&ctx->array_shape_dedup, shape_key, &cached_offset) == NULL) {
-		if (owns_shape_key) {
-			zend_string_release(shape_key);
-		}
-
-		return false;
+	if (result) {
+		ZVAL_LONG(&cached_offset, (zend_long) shape_offset);
+		result = zend_hash_add(&ctx->array_shape_dedup, shape_key, &cached_offset) != NULL;
 	}
 
-	*offset = shape_offset;
+	if (result) {
+		*offset = shape_offset;
+	}
 
+cleanup:
 	if (owns_shape_key) {
 		zend_string_release(shape_key);
 	}
 
-	return true;
+	return result;
 }
 
 static bool user_cache_shared_graph_copy_state_schema(
@@ -2499,12 +2444,20 @@ static bool user_cache_shared_graph_copy_state_schema(
 )
 {
 	php_user_cache_shared_graph_state_schema *schema;
-	zend_string *schema_key, *shape_key = NULL;
+	zend_string *schema_key, *shape_key;
 	zval *cached, cached_offset;
 	uint32_t schema_offset, class_name_offset, shape_offset;
+	bool result = true;
 
-	schema_key = user_cache_shared_graph_state_schema_key(ce, arr, &shape_key);
+	shape_key = user_cache_shared_graph_array_shape_key(arr);
+	if (shape_key == NULL) {
+		return false;
+	}
+
+	schema_key = user_cache_shared_graph_state_schema_key(ce, shape_key);
 	if (schema_key == NULL) {
+		zend_string_release(shape_key);
+
 		return false;
 	}
 
@@ -2512,20 +2465,16 @@ static bool user_cache_shared_graph_copy_state_schema(
 	if (cached != NULL) {
 		*offset = (uint32_t) Z_LVAL_P(cached);
 
-		zend_string_release(shape_key);
-		zend_string_release(schema_key);
-
-		return true;
+		goto cleanup;
 	}
 
 	if (!user_cache_shared_graph_copy_alloc(ctx, sizeof(*schema), &schema_offset) ||
 		!user_cache_shared_graph_copy_string(ctx, ce->name, &class_name_offset) ||
 		!user_cache_shared_graph_copy_array_shape(ctx, arr, &shape_offset, shape_key)
 	) {
-		zend_string_release(shape_key);
-		zend_string_release(schema_key);
+		result = false;
 
-		return false;
+		goto cleanup;
 	}
 
 	schema = (php_user_cache_shared_graph_state_schema *) (ctx->buffer + schema_offset);
@@ -2533,19 +2482,20 @@ static bool user_cache_shared_graph_copy_state_schema(
 	schema->shape_offset = shape_offset;
 	schema->count = (uint32_t) arr->nNumOfElements;
 
-	zend_string_release(shape_key);
-
 	ZVAL_LONG(&cached_offset, (zend_long) schema_offset);
 	if (zend_hash_add(&ctx->state_schema_dedup, schema_key, &cached_offset) == NULL) {
-		zend_string_release(schema_key);
+		result = false;
 
-		return false;
+		goto cleanup;
 	}
 
 	*offset = schema_offset;
+
+cleanup:
+	zend_string_release(shape_key);
 	zend_string_release(schema_key);
 
-	return true;
+	return result;
 }
 
 static bool user_cache_shared_graph_copy_shaped_state_values(
@@ -2645,7 +2595,7 @@ static bool user_cache_shared_graph_copy_verbatim_value(
 				}
 			}
 
-			if (!php_user_cache_seen_test_and_add(&ctx->seen_arrays, src_arr)) {
+			if (!php_user_cache_seen_test_and_add(&ctx->verbatim_seen, src_arr)) {
 				return false;
 			}
 
@@ -2728,7 +2678,7 @@ static bool user_cache_shared_graph_copy_verbatim_value(
 			}
 
 done:
-			zend_hash_index_del(&ctx->seen_arrays, arr_key);
+			zend_hash_index_del(&ctx->verbatim_seen, arr_key);
 
 			if (!result) {
 				return false;
@@ -2827,9 +2777,8 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 	php_user_cache_copy_object_ref_result ref_result;
 	php_user_cache_shared_graph_state_getter_t get_state;
 	HashTable *sd_state_ht;
-	zval *sd_state_ptr, sd_state, sd_state_zv;
+	zval *sd_state_ptr, sd_state_zv;
 	uint32_t sd_offset, sd_class_offset;
-	bool result;
 
 	ctx->has_userland_restore_object = true;
 
@@ -2839,7 +2788,7 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 	}
 
 	get_state = user_cache_shared_graph_route_state_getter(route);
-	if (!get_state(src, ctx->state_memo, &sd_state_ptr, &sd_state)) {
+	if (!get_state(src, ctx->state_memo, &sd_state_ptr)) {
 		return false;
 	}
 
@@ -2848,15 +2797,13 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 	sd_state_ht = Z_ARRVAL_P(sd_state_ptr);
 
 	if (user_cache_shared_graph_state_array_fits_schema_memo(ctx->state_memo, sd_state_ht)) {
-		result = user_cache_shared_graph_copy_shaped_state_object(
+		return user_cache_shared_graph_copy_shaped_state_object(
 			ctx,
 			obj,
 			sd_state_ht,
 			PHP_USER_CACHE_SHARED_GRAPH_VALUE_SERIALIZED_SHAPED_OBJECT,
 			dst
 		);
-
-		goto cleanup;
 	}
 
 	if (!user_cache_shared_graph_copy_alloc(
@@ -2865,9 +2812,7 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 		) ||
 		!user_cache_shared_graph_copy_string(ctx, obj->ce->name, &sd_class_offset)
 	) {
-		result = false;
-
-		goto cleanup;
+		return false;
 	}
 
 	if (!user_cache_shared_graph_seen_record_object_offsets(
@@ -2877,9 +2822,7 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 			sd_offset + offsetof(php_user_cache_shared_graph_safe_direct_object, reserved)
 		)
 	) {
-		result = false;
-
-		goto cleanup;
+		return false;
 	}
 
 	graph_safe_direct = (php_user_cache_shared_graph_safe_direct_object *) (ctx->buffer + sd_offset);
@@ -2890,21 +2833,13 @@ static bool user_cache_shared_graph_copy_magic_state_object(
 
 	ZVAL_ARR(&sd_state_zv, sd_state_ht);
 	if (!user_cache_shared_graph_copy_value(ctx, &sd_state_zv, &graph_safe_direct->state)) {
-		result = false;
-
-		goto cleanup;
+		return false;
 	}
 
 	dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_SERIALIZED_OBJECT;
 	dst->payload.offset = sd_offset;
-	result = true;
 
-cleanup:
-	if (!Z_ISUNDEF(sd_state)) {
-		zval_ptr_dtor(&sd_state);
-	}
-
-	return result;
+	return true;
 }
 
 static bool user_cache_shared_graph_copy_sleep_state_object(
@@ -2920,7 +2855,7 @@ static bool user_cache_shared_graph_copy_sleep_state_object(
 	php_user_cache_shared_graph_state_getter_t get_state;
 	zend_ulong num_key;
 	zend_string *prop_name, *resolved_name;
-	zval *state_ptr, state, *prop_val;
+	zval *state_ptr, *prop_val;
 	HashTable *props;
 	uint32_t obj_offset, class_name_offset, properties_offset,
 		prop_idx, prop_count
@@ -2940,21 +2875,19 @@ static bool user_cache_shared_graph_copy_sleep_state_object(
 	}
 
 	get_state = user_cache_shared_graph_route_state_getter(route);
-	if (!get_state(src, ctx->state_memo, &state_ptr, &state)) {
+	if (!get_state(src, ctx->state_memo, &state_ptr)) {
 		return false;
 	}
 
 	props = Z_ARRVAL_P(state_ptr);
 	if (user_cache_shared_graph_state_array_fits_schema_memo(ctx->state_memo, props)) {
-		result = user_cache_shared_graph_copy_shaped_state_object(
+		return user_cache_shared_graph_copy_shaped_state_object(
 			ctx,
 			obj,
 			props,
 			PHP_USER_CACHE_SHARED_GRAPH_VALUE_SLEEP_SHAPED_OBJECT,
 			dst
 		);
-
-		goto cleanup;
 	}
 
 	prop_count = zend_hash_num_elements(props);
@@ -2970,9 +2903,7 @@ static bool user_cache_shared_graph_copy_sleep_state_object(
 			)
 		)
 	) {
-		result = false;
-
-		goto cleanup;
+		return false;
 	}
 
 	if (!user_cache_shared_graph_seen_record_object_offsets(
@@ -2982,9 +2913,7 @@ static bool user_cache_shared_graph_copy_sleep_state_object(
 			obj_offset + offsetof(php_user_cache_shared_graph_object, reserved)
 		)
 	) {
-		result = false;
-
-		goto cleanup;
+		return false;
 	}
 
 	graph_obj = (php_user_cache_shared_graph_object *) (ctx->buffer + obj_offset);
@@ -2996,9 +2925,8 @@ static bool user_cache_shared_graph_copy_sleep_state_object(
 	if (prop_count == 0) {
 		dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_SLEEP_OBJECT;
 		dst->payload.offset = obj_offset;
-		result = true;
 
-		goto cleanup;
+		return true;
 	}
 
 	graph_properties = (php_user_cache_shared_graph_property *) (ctx->buffer + properties_offset);
@@ -3044,11 +2972,6 @@ static bool user_cache_shared_graph_copy_sleep_state_object(
 		dst->payload.offset = obj_offset;
 	}
 
-cleanup:
-	if (!Z_ISUNDEF(state)) {
-		zval_ptr_dtor(&state);
-	}
-
 	return result;
 }
 
@@ -3058,12 +2981,12 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 	zend_object *obj,
 	php_user_cache_shared_graph_value *dst)
 {
-	const HashTable *sd_state_ht;
+	HashTable *sd_state_ht;
 	php_user_cache_shared_graph_safe_direct_object *graph_safe_direct;
 	php_user_cache_shared_graph_property *graph_properties;
 	php_user_cache_copy_object_ref_result ref_result;
 	zend_string *prop_name;
-	zval *prop_val, *src_val, *sd_state_ptr, sd_state;
+	zval *prop_val, *src_val, *sd_state_ptr, sd_state, sd_state_zv;
 	HashTable *props;
 	uint32_t string_offset, prop_idx, prop_count,
 		sd_offset, sd_class_offset,
@@ -3091,7 +3014,7 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 	}
 
 	/* sd_state_ptr may dangle once recursion resizes the memo; keep the array. */
-	sd_state_ht = Z_TYPE_P(sd_state_ptr) == IS_ARRAY ? Z_ARRVAL_P(sd_state_ptr) : NULL;
+	sd_state_ht = Z_ARRVAL_P(sd_state_ptr);
 
 	if (!user_cache_shared_graph_copy_alloc(
 			ctx,
@@ -3125,7 +3048,8 @@ static bool user_cache_shared_graph_copy_safe_direct_object(
 	graph_safe_direct->class_name_offset = sd_class_offset;
 	graph_safe_direct->reserved = 0;
 
-	if (!user_cache_shared_graph_copy_value(ctx, sd_state_ptr, &graph_safe_direct->state)) {
+	ZVAL_ARR(&sd_state_zv, sd_state_ht);
+	if (!user_cache_shared_graph_copy_value(ctx, &sd_state_zv, &graph_safe_direct->state)) {
 		result = false;
 
 		goto cleanup;
@@ -3306,6 +3230,7 @@ static bool user_cache_shared_graph_copy_plain_object(
 	uint32_t obj_offset, class_name_offset, properties_offset,
 		prop_idx, prop_count
 	;
+	bool result = true;
 
 	ctx->prefers_prototype = true;
 
@@ -3345,11 +3270,9 @@ static bool user_cache_shared_graph_copy_plain_object(
 			&properties_offset
 		)
 	) {
-		if (props != NULL) {
-			zend_release_properties(props);
-		}
+		result = false;
 
-		return false;
+		goto cleanup;
 	}
 
 	graph_obj = (php_user_cache_shared_graph_object *) (ctx->buffer + obj_offset);
@@ -3358,62 +3281,53 @@ static bool user_cache_shared_graph_copy_plain_object(
 	graph_obj->properties_offset = properties_offset;
 	graph_obj->reserved = 0;
 
-	if (prop_count == 0) {
-		if (props != NULL) {
-			zend_release_properties(props);
-		}
+	if (prop_count != 0) {
+		graph_properties = (php_user_cache_shared_graph_property *) (ctx->buffer + properties_offset);
+		prop_idx = 0;
 
-		dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_OBJECT;
-		dst->payload.offset = obj_offset;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(props, prop_name, prop_val) {
+			if (prop_name == NULL) {
+				result = false;
 
-		return true;
+				break;
+			}
+
+			graph_properties[prop_idx].name_offset = 0;
+			graph_properties[prop_idx].sleep_state_index = 0;
+			graph_properties[prop_idx].value.type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_UNDEF;
+
+			src_val = Z_TYPE_P(prop_val) == IS_INDIRECT
+				? Z_INDIRECT_P(prop_val)
+				: prop_val
+			;
+
+			if (!user_cache_shared_graph_copy_string(ctx, prop_name, &graph_properties[prop_idx].name_offset) ||
+				!user_cache_shared_graph_copy_value(
+					ctx,
+					src_val,
+					&graph_properties[prop_idx].value
+				)
+			) {
+				result = false;
+
+				break;
+			}
+
+			++prop_idx;
+		} ZEND_HASH_FOREACH_END();
 	}
 
-	graph_properties = (php_user_cache_shared_graph_property *) (ctx->buffer + properties_offset);
-	prop_idx = 0;
+	if (result) {
+		dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_OBJECT;
+		dst->payload.offset = obj_offset;
+	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(props, prop_name, prop_val) {
-		if (prop_name == NULL) {
-			zend_release_properties(props);
+cleanup:
+	if (props != NULL) {
+		zend_release_properties(props);
+	}
 
-			return false;
-		}
-
-		graph_properties[prop_idx].name_offset = 0;
-		graph_properties[prop_idx].sleep_state_index = 0;
-		graph_properties[prop_idx].value.type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_UNDEF;
-
-		src_val = Z_TYPE_P(prop_val) == IS_INDIRECT
-			? Z_INDIRECT_P(prop_val)
-			: prop_val
-		;
-
-		if (!user_cache_shared_graph_copy_string(ctx, prop_name, &graph_properties[prop_idx].name_offset)) {
-			zend_release_properties(props);
-
-			return false;
-		}
-
-		if (!user_cache_shared_graph_copy_value(
-				ctx,
-				src_val,
-				&graph_properties[prop_idx].value
-			)
-		) {
-			zend_release_properties(props);
-
-			return false;
-		}
-
-		++prop_idx;
-	} ZEND_HASH_FOREACH_END();
-
-	zend_release_properties(props);
-
-	dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_OBJECT;
-	dst->payload.offset = obj_offset;
-
-	return true;
+	return result;
 }
 
 static bool user_cache_shared_graph_copy_enum(
@@ -3546,10 +3460,8 @@ static bool user_cache_shared_graph_copy_array(
 		shared_offset, wide_next_free_offset
 	;
 	int64_t wide_next_free;
-	bool result, verbatim;
+	bool verbatim;
 	void *seen_offset;
-
-	result = true;
 
 	if (Z_ARRVAL_P(src)->nNumOfElements == 0) {
 		/* An emptied array with a non-zero next free index still needs a node
@@ -3605,7 +3517,7 @@ static bool user_cache_shared_graph_copy_array(
 				verbatim = Z_TYPE_P(verdict) == IS_TRUE;
 			} else {
 				verbatim = user_cache_shared_graph_can_copy_verbatim_value(
-					&ctx->seen_arrays,
+					&ctx->verbatim_seen,
 					&ctx->direct_verdicts,
 					src
 				);
@@ -3632,8 +3544,6 @@ static bool user_cache_shared_graph_copy_array(
 	seen_offset = zend_hash_index_find_ptr(&ctx->seen_arrays, arr_key);
 	if (seen_offset != NULL) {
 		shared_offset = (uint32_t) (uintptr_t) seen_offset;
-		/* seen_arrays also receives empty-element markers from the verbatim
-		 * walkers; a real offset entry must stay inside the buffer. */
 		ZEND_ASSERT((uintptr_t) seen_offset < ctx->size);
 		/* reserved lives at the same offset in shaped and plain array nodes,
 		 * so the SHARED flag can be set through the plain-array cast
@@ -3659,9 +3569,7 @@ static bool user_cache_shared_graph_copy_array(
 			) ||
 			!user_cache_shared_graph_copy_array_shape(ctx, Z_ARRVAL_P(src), &shape_offset, NULL)
 		) {
-			result = false;
-
-			goto done;
+			return false;
 		}
 
 		graph_shaped_array = (php_user_cache_shared_graph_shaped_array *) (ctx->buffer + array_offset);
@@ -3672,9 +3580,7 @@ static bool user_cache_shared_graph_copy_array(
 		graph_shaped_array->values_offset = values_offset;
 
 		if (zend_hash_index_add_ptr(&ctx->seen_arrays, arr_key, (void *) (uintptr_t) array_offset) == NULL) {
-			result = false;
-
-			goto done;
+			return false;
 		}
 
 		graph_vals = (php_user_cache_shared_graph_value *) (ctx->buffer + values_offset);
@@ -3682,20 +3588,16 @@ static bool user_cache_shared_graph_copy_array(
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(src), elem) {
 			if (!user_cache_shared_graph_copy_value(ctx, elem, &graph_vals[elem_idx])) {
-				result = false;
-
-				break;
+				return false;
 			}
 
 			++elem_idx;
 		} ZEND_HASH_FOREACH_END();
 
-		if (result) {
-			dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_SHAPED_ARRAY;
-			dst->payload.offset = array_offset;
-		}
+		dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_SHAPED_ARRAY;
+		dst->payload.offset = array_offset;
 
-		goto done;
+		return true;
 	}
 
 	if (!user_cache_shared_graph_copy_alloc(ctx, sizeof(*graph_array), &array_offset) ||
@@ -3705,9 +3607,7 @@ static bool user_cache_shared_graph_copy_array(
 			&elems_offset
 		)
 	) {
-		result = false;
-
-		goto done;
+		return false;
 	}
 
 	graph_array = (php_user_cache_shared_graph_array *) (ctx->buffer + array_offset);
@@ -3723,9 +3623,7 @@ static bool user_cache_shared_graph_copy_array(
 		wide_next_free = (int64_t) Z_ARRVAL_P(src)->nNextFreeElement;
 
 		if (!user_cache_shared_graph_copy_alloc(ctx, sizeof(wide_next_free), &wide_next_free_offset)) {
-			result = false;
-
-			goto done;
+			return false;
 		}
 
 		memcpy(ctx->buffer + wide_next_free_offset, &wide_next_free, sizeof(wide_next_free));
@@ -3737,9 +3635,7 @@ static bool user_cache_shared_graph_copy_array(
 	}
 
 	if (zend_hash_index_add_ptr(&ctx->seen_arrays, arr_key, (void *) (uintptr_t) array_offset) == NULL) {
-		result = false;
-
-		goto done;
+		return false;
 	}
 
 	graph_elems = (php_user_cache_shared_graph_array_element *) (ctx->buffer + elems_offset);
@@ -3751,32 +3647,23 @@ static bool user_cache_shared_graph_copy_array(
 
 		if (key != NULL) {
 			if (!user_cache_shared_graph_copy_string(ctx, key, &key_offset)) {
-				result = false;
-
-				break;
+				return false;
 			}
 
 			graph_elem->key_offset = key_offset;
 		}
 
 		if (!user_cache_shared_graph_copy_value(ctx, elem, &graph_elem->value)) {
-			result = false;
-
-			break;
+			return false;
 		}
 
 		++graph_elem;
 	} ZEND_HASH_FOREACH_END();
 
-	if (result) {
-		dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY;
-		dst->payload.offset = array_offset;
-	}
+	dst->type = PHP_USER_CACHE_SHARED_GRAPH_VALUE_DYNAMIC_ARRAY;
+	dst->payload.offset = array_offset;
 
-done:
-	zend_hash_index_del(&ctx->seen_arrays, arr_key);
-
-	return result;
+	return true;
 }
 
 static bool user_cache_shared_graph_copy_object(
@@ -4293,6 +4180,10 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 				return user_cache_decode_fail_zval(dst);
 			}
 
+			if (UNEXPECTED(graph_elem->value.type == PHP_USER_CACHE_SHARED_GRAPH_VALUE_UNDEF)) {
+				return user_cache_decode_fail_zval(dst);
+			}
+
 			if (!user_cache_shared_graph_decode_simple_value(buf, buf_len, &graph_elem->value, &val)) {
 				ZVAL_UNDEF(&val);
 
@@ -4321,6 +4212,10 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_dynamic_arr
 
 	for (i = 0; i < graph_array->count; i++) {
 		graph_elem = &graph_elems[i];
+
+		if (UNEXPECTED(graph_elem->value.type == PHP_USER_CACHE_SHARED_GRAPH_VALUE_UNDEF)) {
+			return user_cache_decode_fail_zval(dst);
+		}
 
 		if (!user_cache_shared_graph_decode_simple_value(buf, buf_len, &graph_elem->value, &val)) {
 			ZVAL_UNDEF(&val);
@@ -4389,32 +4284,16 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_apply_prope
 	zval *prop_val
 )
 {
-	bool result;
-
 	if (slot_idx_plus_one != 0) {
-		result = php_user_cache_shared_graph_update_object_property_at(
+		return php_user_cache_shared_graph_update_object_property_at(
 			dst,
 			prop_name,
 			slot_idx_plus_one - 1,
 			prop_val
 		);
-	} else {
-		result = php_user_cache_shared_graph_update_object_property(
-			dst,
-			prop_name,
-			prop_val
-		);
 	}
 
-	if (!result) {
-		zval_ptr_dtor(prop_val);
-
-		return user_cache_decode_fail_zval(dst);
-	}
-
-	zval_ptr_dtor(prop_val);
-
-	return true;
+	return php_user_cache_shared_graph_update_object_property(dst, prop_name, prop_val);
 }
 
 static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_object_properties(
@@ -4430,6 +4309,7 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_object_prop
 	zend_string *prop_name;
 	zval prop_val;
 	uint32_t i;
+	bool applied;
 
 	if (property_count == 0) {
 		return true;
@@ -4455,20 +4335,21 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_object_prop
 			ZVAL_UNDEF(&prop_val);
 
 			if (!user_cache_shared_graph_decode_value(buf, buf_len, &prop->value, &prop_val)) {
-				zval_ptr_dtor(&prop_val);
-
 				return user_cache_decode_fail_zval(dst);
 			}
 		}
 
-		if (!user_cache_shared_graph_decode_apply_property(
-				dst,
-				prop_name,
-				use_sleep_slots ? prop->sleep_state_index : i + 1,
-				&prop_val
-			)
-		) {
-			return false;
+		applied = user_cache_shared_graph_decode_apply_property(
+			dst,
+			prop_name,
+			use_sleep_slots ? prop->sleep_state_index : i + 1,
+			&prop_val
+		);
+
+		zval_ptr_dtor(&prop_val);
+
+		if (!applied) {
+			return user_cache_decode_fail_zval(dst);
 		}
 	}
 
@@ -4488,24 +4369,6 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_call_wakeup
 		if (EG(exception)) {
 			return user_cache_decode_fail_zval(dst);
 		}
-	}
-
-	return true;
-}
-
-static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_call_unserialize(zend_class_entry *ce, zval *dst, zval *state)
-{
-	zend_call_known_instance_method_with_1_params(
-		ce->__unserialize,
-		Z_OBJ_P(dst),
-		NULL,
-		state
-	);
-
-	zval_ptr_dtor(state);
-
-	if (EG(exception)) {
-		return user_cache_decode_fail_zval(dst);
 	}
 
 	return true;
@@ -4616,6 +4479,7 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_sleep_shape
 	zend_class_entry *ce;
 	zval prop_val;
 	uint32_t i, prop_idx_plus_one;
+	bool applied;
 
 	graph_shaped_state = (const php_user_cache_shared_graph_shaped_state_object *) (buf + (uint32_t) value->payload.offset);
 	if (!user_cache_decode_range_ok(buf_len, graph_shaped_state->state_schema_offset, sizeof(*state_schema))) {
@@ -4666,21 +4530,17 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_sleep_shape
 			ZVAL_UNDEF(&prop_val);
 
 			if (!user_cache_shared_graph_decode_value(buf, buf_len, &graph_vals[i], &prop_val)) {
-				zval_ptr_dtor(&prop_val);
-
 				return user_cache_decode_fail_zval(dst);
 			}
 		}
 
 		prop_idx_plus_one = php_user_cache_serdes_declared_property_index_plus_one(ce, prop_name);
-		if (!user_cache_shared_graph_decode_apply_property(
-				dst,
-				prop_name,
-				prop_idx_plus_one,
-				&prop_val
-			)
-		) {
-			return false;
+		applied = user_cache_shared_graph_decode_apply_property(dst, prop_name, prop_idx_plus_one, &prop_val);
+
+		zval_ptr_dtor(&prop_val);
+
+		if (!applied) {
+			return user_cache_decode_fail_zval(dst);
 		}
 	}
 
@@ -4791,7 +4651,15 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_serialized_
 		return user_cache_decode_fail_zval(dst);
 	}
 
-	return user_cache_shared_graph_decode_call_unserialize(ce, dst, &state);
+	zend_call_known_instance_method_with_1_params(ce->__unserialize, Z_OBJ_P(dst), NULL, &state);
+
+	zval_ptr_dtor(&state);
+
+	if (EG(exception)) {
+		return user_cache_decode_fail_zval(dst);
+	}
+
+	return true;
 }
 
 static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_serialized_shaped_object(
@@ -4847,7 +4715,15 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_serialized_
 		return user_cache_decode_fail_zval(dst);
 	}
 
-	return user_cache_shared_graph_decode_call_unserialize(ce, dst, &state);
+	zend_call_known_instance_method_with_1_params(ce->__unserialize, Z_OBJ_P(dst), NULL, &state);
+
+	zval_ptr_dtor(&state);
+
+	if (EG(exception)) {
+		return user_cache_decode_fail_zval(dst);
+	}
+
+	return true;
 }
 
 static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_serdes_object(
@@ -4973,6 +4849,7 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_reference(
 	return true;
 }
 
+/* On failure *dst owns nothing: UNDEF, or NULL when object_init_ex() failed. */
 static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_value(
 	const uint8_t *buf,
 	size_t buf_len,
@@ -4990,7 +4867,6 @@ static PHP_USER_CACHE_DECODE_HOT bool user_cache_shared_graph_decode_value(
 		return false;
 	}
 
-	/* Validate the node header before dereferencing it. */
 	node_header_size = user_cache_decode_node_header_size(value->type);
 	if (node_header_size != 0 &&
 		!user_cache_decode_range_ok(buf_len, (uint32_t) value->payload.offset, node_header_size)
@@ -5794,7 +5670,6 @@ static bool user_cache_shared_graph_rebase_payload_pointers(
 	return result;
 }
 
-/* Verify that relocation left no pointers to rewrite. */
 static void user_cache_shared_graph_check_rebase_complete(
 	const uint8_t *dst_base,
 	size_t graph_len,
@@ -5831,6 +5706,22 @@ static void user_cache_destroy_shared_graph_ref_index(void)
 	}
 }
 
+/* The buffer is request memory: leaving it registered would carry a
+ * dangling pointer (and a non-zero capacity) into the next request. */
+static void user_cache_shared_graph_reset_request_refs(void)
+{
+	if (UC_G(shared_graph_refs) != NULL) {
+		efree(UC_G(shared_graph_refs));
+
+		UC_G(shared_graph_refs) = NULL;
+	}
+
+	UC_G(shared_graph_ref_count) = 0;
+	UC_G(shared_graph_ref_capacity) = 0;
+
+	user_cache_destroy_shared_graph_ref_index();
+}
+
 static void user_cache_shared_graph_refs_check_fork(void)
 {
 	uint64_t pid = php_user_cache_cached_pid();
@@ -5840,16 +5731,7 @@ static void user_cache_shared_graph_refs_check_fork(void)
 	}
 
 	if (UC_G(shared_graph_ref_owner_pid) != 0) {
-		if (UC_G(shared_graph_refs) != NULL) {
-			efree(UC_G(shared_graph_refs));
-
-			UC_G(shared_graph_refs) = NULL;
-		}
-
-		UC_G(shared_graph_ref_count) = 0;
-		UC_G(shared_graph_ref_capacity) = 0;
-
-		user_cache_destroy_shared_graph_ref_index();
+		user_cache_shared_graph_reset_request_refs();
 	}
 
 	UC_G(shared_graph_ref_owner_pid) = pid;
@@ -6399,7 +6281,6 @@ bool php_user_cache_build_shared_graph_in_place(
 
 	ZEND_ASSERT(copy_ctx.has_verbatim_array || copy_ctx.fixup_count == 0);
 
-	/* Transfer relocation fixups to the prepared value. */
 	if (fixup_offsets != NULL) {
 		*fixup_offsets = copy_ctx.fixup_offsets;
 		*fixup_count = copy_ctx.fixup_count;
@@ -6485,6 +6366,8 @@ PHP_USER_CACHE_DECODE_HOT bool php_user_cache_shared_graph_decode(
 
 	/* Drop address-keyed caches after releasing a failed payload. */
 	if (!result) {
+		user_cache_decode_fail_zval(dst);
+
 		php_user_cache_decode_resolve_cache_release();
 		php_user_cache_decode_shape_prototype_cache_release();
 	}
@@ -6586,7 +6469,6 @@ bool php_user_cache_shared_graph_publish_copied_payload_locked(
 		return true;
 	}
 
-	/* Patch every recorded absolute pointer slot. */
 	ZEND_ASSERT(fixup_offsets != NULL && fixup_count > 0);
 
 	delta = (uintptr_t) dst_base - (uintptr_t) src_base;
@@ -6995,21 +6877,12 @@ bool php_user_cache_release_request_shared_graph_refs(void)
 	php_user_cache_shared_graph_ref *ref;
 	php_user_cache_context *ctx, *prev_ctx;
 	uint32_t i, inner;
-	bool released = false, recovered;
+	bool released = false, write_section_entered;
 
 	user_cache_shared_graph_refs_check_fork();
 
 	if (UC_G(shared_graph_ref_count) == 0) {
-		/* The buffer is request memory: leaving it registered would carry a
-		 * dangling pointer (and a non-zero capacity) into the next request. */
-		if (UC_G(shared_graph_refs) != NULL) {
-			efree(UC_G(shared_graph_refs));
-
-			UC_G(shared_graph_refs) = NULL;
-			UC_G(shared_graph_ref_capacity) = 0;
-		}
-
-		user_cache_destroy_shared_graph_ref_index();
+		user_cache_shared_graph_reset_request_refs();
 
 		return false;
 	}
@@ -7023,8 +6896,8 @@ bool php_user_cache_release_request_shared_graph_refs(void)
 
 		prev_ctx = php_user_cache_activate_context(ctx);
 
-		if (php_user_cache_wlock_for_ref_release(&recovered)) {
-			if (!recovered) {
+		if (php_user_cache_wlock_for_ref_release(&write_section_entered)) {
+			if (!write_section_entered) {
 				for (inner = i; inner < UC_G(shared_graph_ref_count); inner++) {
 					ref = &UC_G(shared_graph_refs)[inner];
 
@@ -7074,13 +6947,7 @@ bool php_user_cache_release_request_shared_graph_refs(void)
 		php_user_cache_restore_context(prev_ctx);
 	}
 
-	efree(UC_G(shared_graph_refs));
-
-	UC_G(shared_graph_refs) = NULL;
-	UC_G(shared_graph_ref_count) = 0;
-	UC_G(shared_graph_ref_capacity) = 0;
-
-	user_cache_destroy_shared_graph_ref_index();
+	user_cache_shared_graph_reset_request_refs();
 
 	return released;
 }

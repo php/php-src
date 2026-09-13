@@ -581,11 +581,11 @@ static bool user_cache_serdes_encode_serialized_object(
 		return false;
 	}
 
-	if (!php_user_cache_serdes_call_magic_serialize(obj, &retval)) {
-		return false;
-	}
+	ZVAL_UNDEF(&retval);
 
-	result = user_cache_serdes_encode_value(enc, &retval);
+	result = php_user_cache_serdes_call_magic_serialize(obj, &retval) &&
+		user_cache_serdes_encode_value(enc, &retval)
+	;
 
 	zval_ptr_dtor(&retval);
 
@@ -614,22 +614,17 @@ static bool user_cache_serdes_encode_custom_object(
 	PHP_VAR_SERIALIZE_DESTROY(ser_data);
 
 	if (!result || ser_len > UINT32_MAX) {
-		if (ser_buf != NULL) {
-			efree(ser_buf);
-		}
-
 		enc->failure_message = "the object could not be serialized for the user cache";
+		result = false;
 
-		return false;
+		goto cleanup;
 	}
 
 	user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_CUSTOM_OBJECT);
 	if (!user_cache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
-		if (ser_buf != NULL) {
-			efree(ser_buf);
-		}
+		result = false;
 
-		return false;
+		goto cleanup;
 	}
 
 	user_cache_serdes_put_u32(&enc->buf, (uint32_t) ser_len);
@@ -637,11 +632,12 @@ static bool user_cache_serdes_encode_custom_object(
 		smart_str_appendl(&enc->buf, (const char *) ser_buf, ser_len);
 	}
 
+cleanup:
 	if (ser_buf != NULL) {
 		efree(ser_buf);
 	}
 
-	return true;
+	return result;
 }
 
 static bool user_cache_serdes_put_object_header(
@@ -678,11 +674,11 @@ static bool user_cache_serdes_encode_sleep_object(
 		return false;
 	}
 
-	if (!php_user_cache_serdes_get_sleep_state(value, &sleep_state, &enc->failure_message)) {
-		return false;
-	}
+	ZVAL_UNDEF(&sleep_state);
 
-	result = user_cache_serdes_encode_property_table(enc, ce, Z_ARRVAL(sleep_state), count_pos);
+	result = php_user_cache_serdes_get_sleep_state(value, &sleep_state, &enc->failure_message) &&
+		user_cache_serdes_encode_property_table(enc, ce, Z_ARRVAL(sleep_state), count_pos)
+	;
 
 	zval_ptr_dtor(&sleep_state);
 
@@ -1036,6 +1032,7 @@ static bool user_cache_serdes_decode_object_properties(
 	zend_class_entry *ce = Z_OBJCE_P(dst);
 	zval *wakeup_zv, prop_val, retval;
 	uint32_t count, i, prop_idx_plus_one;
+	bool updated;
 
 	if (!user_cache_serdes_get_u32(dec, &count)) {
 		return false;
@@ -1055,43 +1052,25 @@ static bool user_cache_serdes_decode_object_properties(
 		ZVAL_UNDEF(&prop_val);
 
 		if (!user_cache_serdes_decode_value(dec, &prop_val)) {
-			zval_ptr_dtor(&prop_val);
-
-			zend_string_release(prop_name);
-
-			return false;
-		}
-
-		if (prop_idx_plus_one != PHP_USER_CACHE_SERDES_PROPERTY_INDEX_NONE) {
-			if (!php_user_cache_shared_graph_update_object_property_at(
-					dst,
-					prop_name,
-					prop_idx_plus_one - 1,
-					&prop_val
-				)
-			) {
-				zval_ptr_dtor(&prop_val);
-
-				zend_string_release(prop_name);
-
-				return false;
-			}
-		} else if (!php_user_cache_shared_graph_update_object_property(
+			updated = false;
+		} else if (prop_idx_plus_one != PHP_USER_CACHE_SERDES_PROPERTY_INDEX_NONE) {
+			updated = php_user_cache_shared_graph_update_object_property_at(
 				dst,
 				prop_name,
+				prop_idx_plus_one - 1,
 				&prop_val
-			)
-		) {
-			zval_ptr_dtor(&prop_val);
-
-			zend_string_release(prop_name);
-
-			return false;
+			);
+		} else {
+			updated = php_user_cache_shared_graph_update_object_property(dst, prop_name, &prop_val);
 		}
 
 		zval_ptr_dtor(&prop_val);
 
 		zend_string_release(prop_name);
+
+		if (!updated) {
+			return false;
+		}
 	}
 
 	if (call_wakeup) {

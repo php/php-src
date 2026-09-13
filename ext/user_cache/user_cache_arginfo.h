@@ -2,6 +2,8 @@
  * Stub hash: 8eec428bec19b14b6512b0c2ea607eba5945fac7
  * Has decl header: yes */
 
+#include "zend_enum.h"
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UserCache_CacheStatus___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
