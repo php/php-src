@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
     such as dateType, timeType, calendar and the message pattern.
     (Ilia Alshanetsky)
+  . Fixed a crash when converting with a cloned UConverter that uses
+    toUCallback/fromUCallback. (Ilia Alshanetsky)
 
 - MBString:
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
