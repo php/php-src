@@ -13,6 +13,11 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- Intl:
+  . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
+    such as dateType, timeType, calendar and the message pattern.
+    (Ilia Alshanetsky)
+
 - MBString:
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
