@@ -579,7 +579,6 @@ static int user_cache_wrap_mapped_segment(
 	*shared_segments_count = 1;
 	*shared_segments_p = (php_user_cache_shm_segment **) calloc(1, sizeof(php_user_cache_shm_segment *) + sizeof(php_user_cache_shm_segment));
 	if (*shared_segments_p == NULL) {
-		munmap(mapping, requested_size);
 		*error_in = "calloc";
 
 		return PHP_USER_CACHE_ALLOC_FAILURE;
@@ -620,7 +619,13 @@ static int user_cache_mmap_create_segments(
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
-	return user_cache_wrap_mapped_segment(mapping, requested_size, shared_segments_p, shared_segments_count, error_in);
+	if (user_cache_wrap_mapped_segment(mapping, requested_size, shared_segments_p, shared_segments_count, error_in) != PHP_USER_CACHE_ALLOC_SUCCESS) {
+		munmap(mapping, requested_size);
+
+		return PHP_USER_CACHE_ALLOC_FAILURE;
+	}
+
+	return PHP_USER_CACHE_ALLOC_SUCCESS;
 }
 #endif /* PHP_USER_CACHE_HAVE_ANON_MMAP */
 
@@ -1114,7 +1119,13 @@ static int user_cache_shared_boundary_create_segments(
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
-	return user_cache_wrap_mapped_segment(mapping, requested_size, shared_segments_p, shared_segments_count, error_in);
+	if (user_cache_wrap_mapped_segment(mapping, requested_size, shared_segments_p, shared_segments_count, error_in) != PHP_USER_CACHE_ALLOC_SUCCESS) {
+		munmap(mapping, requested_size);
+
+		return PHP_USER_CACHE_ALLOC_FAILURE;
+	}
+
+	return PHP_USER_CACHE_ALLOC_SUCCESS;
 }
 
 static const php_user_cache_shm_handler_entry *user_cache_shared_boundary_handler_entry(void)
@@ -1180,7 +1191,6 @@ static int user_cache_win32_reattach_segment(
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
-	/* The mapped object must cover the requested range. */
 	if (VirtualQuery(mapping_base, &info, sizeof(info)) == 0 ||
 		info.RegionSize < requested_size
 	) {
@@ -1991,24 +2001,15 @@ static bool user_cache_create_lock(void)
 
 		dir_fd = user_cache_shared_boundary_open_private_dir(dir_path, sizeof(dir_path), &error_in);
 		if (dir_fd < 0) {
-			user_cache_zts_lock_destroy(storage);
-
-			return false;
+			goto fail;
 		}
 
 		storage->lock_file = openat(dir_fd, storage->lockfile_name, O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600);
 		close(dir_fd);
-		if (storage->lock_file >= 0 &&
+		if (storage->lock_file < 0 ||
 			!user_cache_shared_boundary_fd_is_trusted(storage->lock_file, &lock_st)
 		) {
-			close(storage->lock_file);
-			storage->lock_file = -1;
-		}
-
-		if (storage->lock_file < 0) {
-			user_cache_zts_lock_destroy(storage);
-
-			return false;
+			goto fail;
 		}
 
 		storage->lock_initialized = true;
@@ -2044,19 +2045,8 @@ static bool user_cache_create_lock(void)
 	);
 
 	storage->lock_file = mkstemp(storage->lockfile_name);
-	if (storage->lock_file == -1) {
-		user_cache_zts_lock_destroy(storage);
-
-		return false;
-	}
-
-	if (fchmod(storage->lock_file, 0666) == -1) {
-		close(storage->lock_file);
-		storage->lock_file = -1;
-
-		user_cache_zts_lock_destroy(storage);
-
-		return false;
+	if (storage->lock_file == -1 || fchmod(storage->lock_file, 0666) == -1) {
+		goto fail;
 	}
 
 	val = fcntl(storage->lock_file, F_GETFD, 0);
@@ -2068,6 +2058,16 @@ static bool user_cache_create_lock(void)
 	storage->lock_initialized = true;
 
 	return true;
+
+fail:
+	if (storage->lock_file >= 0) {
+		close(storage->lock_file);
+		storage->lock_file = -1;
+	}
+
+	user_cache_zts_lock_destroy(storage);
+
+	return false;
 }
 
 static void user_cache_destroy_lock(void)
@@ -2567,6 +2567,17 @@ static bool user_cache_add_local_entry_lock(
 	return added;
 }
 
+static void user_cache_entry_lock_record_downgrade_to_lease_locked(
+		php_user_cache_header *header,
+		php_user_cache_entry_lock_record *record,
+		zend_long lease)
+{
+	record->owner_pid = 0;
+	record->owner_start_time = 0;
+	record->owner_token = 0;
+	record->expires_at = user_cache_entry_lock_expires_at(header, lease);
+}
+
 static void user_cache_drain_deferred_entry_lock_releases(void)
 {
 	php_user_cache_context *ctx;
@@ -2623,10 +2634,7 @@ static void user_cache_drain_deferred_entry_lock_releases(void)
 					record->owner_token == entries[i].owner_token
 				) {
 					if (entries[i].preserve_lease && entries[i].lease > 0) {
-						record->owner_pid = 0;
-						record->owner_start_time = 0;
-						record->owner_token = 0;
-						record->expires_at = user_cache_entry_lock_expires_at(header, entries[i].lease);
+						user_cache_entry_lock_record_downgrade_to_lease_locked(header, record, entries[i].lease);
 					} else {
 						user_cache_remove_entry_lock_record_locked(record);
 					}
@@ -2689,12 +2697,11 @@ static void user_cache_release_entry_lock_records_locked(
 			lock->preserve_lease &&
 			lock->lease > 0
 		) {
-			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_pid = 0;
-			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_start_time = 0;
-			php_user_cache_entry_lock_records_ptr(header)[slot_idx].owner_token = 0;
-			php_user_cache_entry_lock_records_ptr(header)[slot_idx].expires_at =
-				user_cache_entry_lock_expires_at(header, lock->lease)
-			;
+			user_cache_entry_lock_record_downgrade_to_lease_locked(
+				header,
+				&php_user_cache_entry_lock_records_ptr(header)[slot_idx],
+				lock->lease
+			);
 		} else {
 			user_cache_remove_entry_lock_record_locked(&php_user_cache_entry_lock_records_ptr(header)[slot_idx]);
 		}
@@ -3063,11 +3070,7 @@ static bool user_cache_acquire_entry_lock_record(
 		if (!php_user_cache_wlock()) {
 			php_user_cache_restore_context(prev_ctx);
 
-			efree(lock);
-
-			user_cache_destroy_entry_locks_if_empty(locks_ptr);
-
-			return false;
+			goto bailout;
 		}
 
 		header = php_user_cache_header_ptr();
@@ -3076,11 +3079,7 @@ static bool user_cache_acquire_entry_lock_record(
 			php_user_cache_unlock();
 			php_user_cache_restore_context(prev_ctx);
 
-			efree(lock);
-
-			user_cache_destroy_entry_locks_if_empty(locks_ptr);
-
-			return false;
+			goto bailout;
 		}
 
 		if (user_cache_find_entry_lock_record_slot_locked(header, key, hash, &slot_idx, &found)) {
@@ -3111,30 +3110,22 @@ static bool user_cache_acquire_entry_lock_record(
 				user_cache_defer_entry_lock_release(ctx, key, lock);
 			}
 
-			efree(lock);
-			user_cache_destroy_entry_locks_if_empty(locks_ptr);
-
-			return false;
+			goto bailout;
 		}
 
-		if (insert_failed) {
-			efree(lock);
-
-			user_cache_destroy_entry_locks_if_empty(locks_ptr);
-
-			return false;
-		}
-
-		if (!blocking || waited_us >= PHP_USER_CACHE_ENTRY_LOCK_WAIT_TIMEOUT_US) {
-			efree(lock);
-
-			user_cache_destroy_entry_locks_if_empty(locks_ptr);
-
-			return false;
+		if (insert_failed || !blocking || waited_us >= PHP_USER_CACHE_ENTRY_LOCK_WAIT_TIMEOUT_US) {
+			goto bailout;
 		}
 
 		waited_us += user_cache_sleep_entry_lock_retry_interval();
 	}
+
+bailout:
+	efree(lock);
+
+	user_cache_destroy_entry_locks_if_empty(locks_ptr);
+
+	return false;
 }
 
 static bool user_cache_acquire_entry_lock_records(
@@ -3824,6 +3815,22 @@ static bool user_cache_select_storage_handler(void)
 	return false;
 }
 
+static bool user_cache_enter_write_locked_section(void)
+{
+	UC_G(lock_held_is_write) = true;
+
+	if (!user_cache_recover_after_owner_death()) {
+		UC_G(lock_held_is_write) = false;
+		user_cache_unlock_impl();
+
+		return false;
+	}
+
+	user_cache_write_section_enter();
+
+	return true;
+}
+
 static bool user_cache_negotiate_lock_model(void)
 {
 	const php_user_cache_lock_ops *negotiated_ops;
@@ -3845,18 +3852,7 @@ static bool user_cache_negotiate_lock_model(void)
 		return php_user_cache_wlock();
 	}
 
-	UC_G(lock_held_is_write) = true;
-
-	if (!user_cache_recover_after_owner_death()) {
-		UC_G(lock_held_is_write) = false;
-		user_cache_unlock_impl();
-
-		return false;
-	}
-
-	user_cache_write_section_enter();
-
-	return true;
+	return user_cache_enter_write_locked_section();
 }
 
 static bool user_cache_startup_storage_impl(void)
@@ -4595,21 +4591,10 @@ bool php_user_cache_wlock(void)
 		return false;
 	}
 
-	UC_G(lock_held_is_write) = true;
-
-	if (!user_cache_recover_after_owner_death()) {
-		UC_G(lock_held_is_write) = false;
-		user_cache_unlock_impl();
-
-		return false;
-	}
-
-	user_cache_write_section_enter();
-
-	return true;
+	return user_cache_enter_write_locked_section();
 }
 
-bool php_user_cache_wlock_for_ref_release(bool *recovered)
+bool php_user_cache_wlock_for_ref_release(bool *write_section_entered)
 {
 	if (!user_cache_wlock_impl()) {
 		return false;
@@ -4617,17 +4602,13 @@ bool php_user_cache_wlock_for_ref_release(bool *recovered)
 
 	UC_G(lock_held_is_write) = true;
 
-	if (user_cache_recover_after_owner_death()) {
-		*recovered = true;
+	*write_section_entered = user_cache_recover_after_owner_death();
 
+	if (*write_section_entered) {
 		user_cache_write_section_enter();
-
-		return true;
+	} else {
+		UC_G(write_seq_bumped) = false;
 	}
-
-	*recovered = false;
-
-	UC_G(write_seq_bumped) = false;
 
 	return true;
 }

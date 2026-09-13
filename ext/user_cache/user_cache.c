@@ -962,10 +962,6 @@ static zend_result user_cache_fetch_multiple_api(
 					);
 
 					if (EG(exception)) {
-						zval_ptr_dtor(&vals[i]);
-
-						ZVAL_UNDEF(&vals[i]);
-
 						break;
 					}
 				}
@@ -1008,7 +1004,6 @@ static zend_result user_cache_fetch_multiple_api(
 		result = SUCCESS;
 	}
 
-	/* vals[] entries were destroyed or moved above; only the buffers remain. */
 	if (vals != NULL) {
 		efree(vals);
 	}
@@ -1613,14 +1608,20 @@ static zend_object *user_cache_get_or_create_pool(zend_string *pool)
 
 	existing = zend_hash_find(pools, pool);
 	if (existing != NULL) {
-		return Z_OBJ_P(existing);
+		obj = Z_OBJ_P(existing);
+
+		GC_ADDREF(obj);
+
+		return obj;
 	}
 
 	obj = user_cache_create_pool_object(pool);
 
-	ZVAL_OBJ(&pool_zv, obj);
+	ZVAL_OBJ_COPY(&pool_zv, obj);
 
 	if (zend_hash_add(pools, pool, &pool_zv) == NULL) {
+		zval_ptr_dtor(&pool_zv);
+
 		OBJ_RELEASE(obj);
 
 		return NULL;
@@ -1812,9 +1813,6 @@ static uint32_t user_cache_prepare_bulk_store_items(
 			zend_string_release(key);
 		}
 
-		storage_keys[i] = storage_key;
-		items[i].value = value;
-
 		if (!php_user_cache_prepare_value(storage_key, value, prep_opts, &items[i].prepared)) {
 			php_user_cache_destroy_prepared_value(&items[i].prepared);
 
@@ -1824,6 +1822,9 @@ static uint32_t user_cache_prepare_bulk_store_items(
 
 			break;
 		}
+
+		storage_keys[i] = storage_key;
+		items[i].value = value;
 
 		i++;
 	} ZEND_HASH_FOREACH_END();
@@ -2028,12 +2029,11 @@ static bool user_cache_instance_store_multiple(
 
 	for (i = 0; i < prepared_count; i++) {
 		php_user_cache_destroy_prepared_value(&items[i].prepared);
-
-		zend_string_release(storage_keys[i]);
 	}
 
+	user_cache_release_key_list(storage_keys, prepared_count);
+
 	efree(acquired);
-	efree(storage_keys);
 	efree(order);
 	efree(items);
 
@@ -2093,13 +2093,10 @@ static bool user_cache_instance_delete_multiple(
 
 	php_user_cache_release_entry_locks(storage_keys, acquired, count);
 
-	for (i = 0; i < count; i++) {
-		zend_string_release(storage_keys[i]);
-	}
+	user_cache_release_key_list(storage_keys, count);
 
 	efree(acquired);
 	efree(order);
-	efree(storage_keys);
 
 	user_cache_release_key_list(prepared_keys, count);
 
@@ -3052,8 +3049,6 @@ ZEND_METHOD(UserCache_Cache, getPool)
 		RETURN_THROWS();
 	}
 
-	GC_ADDREF(obj);
-
 	RETURN_OBJ(obj);
 }
 
@@ -3437,7 +3432,7 @@ ZEND_METHOD(UserCache_Cache, unlock)
 	RETURN_BOOL(unlocked);
 }
 
-static bool user_cache_invoke_remember_callback(
+static void user_cache_invoke_remember_callback(
 		zend_string *key,
 		zend_string *storage_key,
 		zend_fcall_info *fci,
@@ -3458,11 +3453,11 @@ static bool user_cache_invoke_remember_callback(
 	fci->named_params = NULL;
 
 	if (zend_call_function(fci, fcc) != SUCCESS || EG(exception)) {
-		return true;
+		return;
 	}
 
 	if (Z_TYPE_P(result) == IS_UNDEF) {
-		return true;
+		return;
 	}
 
 	/* A by-ref callback returns IS_REFERENCE; unwrap so validation, the
@@ -3472,14 +3467,12 @@ static bool user_cache_invoke_remember_callback(
 	}
 
 	if (!user_cache_validate_remember_value(result)) {
-		return false;
+		return;
 	}
 
-	if (user_cache_can_write() && user_cache_store_storage_key_prevalidated(storage_key, result, ttl, false)) {
-		return true;
+	if (user_cache_can_write()) {
+		(void) user_cache_store_storage_key_prevalidated(storage_key, result, ttl, false);
 	}
-
-	return !EG(exception);
 }
 
 ZEND_METHOD(UserCache_Cache, remember)
@@ -3490,9 +3483,7 @@ ZEND_METHOD(UserCache_Cache, remember)
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval result;
-	bool found = false, preheld = false,
-		locked = false, callback_failed = false
-	;
+	bool found = false, preheld = false, locked = false;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(key)
@@ -3555,9 +3546,7 @@ ZEND_METHOD(UserCache_Cache, remember)
 	}
 
 	zend_try {
-		callback_failed = !user_cache_invoke_remember_callback(
-			key, storage_key, &fci, &fcc, ttl, &result
-		);
+		user_cache_invoke_remember_callback(key, storage_key, &fci, &fcc, ttl, &result);
 	} zend_catch {
 		if (locked) {
 			(void) user_cache_unlock_api(storage_key);
@@ -3568,16 +3557,8 @@ ZEND_METHOD(UserCache_Cache, remember)
 		zend_bailout();
 	} zend_end_try();
 
-	if (callback_failed) {
+	if (EG(exception)) {
 		zval_ptr_dtor(&result);
-
-		if (locked) {
-			(void) user_cache_unlock_api(storage_key);
-		}
-
-		zend_string_release(storage_key);
-
-		RETURN_THROWS();
 	}
 
 	if (locked) {
@@ -3587,10 +3568,6 @@ ZEND_METHOD(UserCache_Cache, remember)
 	zend_string_release(storage_key);
 
 	if (EG(exception)) {
-		if (Z_TYPE(result) != IS_UNDEF) {
-			zval_ptr_dtor(&result);
-		}
-
 		RETURN_THROWS();
 	}
 
