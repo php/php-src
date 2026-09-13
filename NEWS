@@ -64,6 +64,10 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #5674034779193344 (Read of uninitialized memory in
     is_cacheable_stream_path()). (ndossche)
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
+  . Fixed bug GH-23628 (Tracing JIT reads undefined property slots of lazy
+    proxy objects instead of forwarding to the real instance). (lisachenko)
+  . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
+    child's shadowing public property). (Ilia Alshanetsky)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
@@ -97,10 +101,6 @@ PHP                                                                        NEWS
 - Zlib:
   . Fixed inflate_init() dropping the preset dictionary for raw streams with
     a non-default window. (Ilia Alshanetsky)
-
-- Opcache:
-  . Fixed bug GH-23628 (Tracing JIT reads undefined property slots of lazy
-    proxy objects instead of forwarding to the real instance). (lisachenko)
 
 
 24 Sep 2026, PHP 8.5.11
