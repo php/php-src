@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
 
+- PCNTL:
+  . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
+    an exception is pending. (nicolas-grekas)
+
 - Zip:
   . Fixed ZipArchive::extractTo() ignoring files given in a non-list array.
     (David Carlier)
