@@ -777,7 +777,7 @@ void php_user_cache_ensure_ready_impl(void);
 bool php_user_cache_rlock(void);
 bool php_user_cache_wlock(void);
 bool php_user_cache_wlock_for_entry_mutation(zend_string *key);
-bool php_user_cache_wlock_for_ref_release(bool *recovered);
+bool php_user_cache_wlock_for_ref_release(bool *write_section_entered);
 void php_user_cache_unlock(void);
 void php_user_cache_unlock_if_held(void);
 bool php_user_cache_try_acquire_entry_lock(zend_string *key, zend_long lease);

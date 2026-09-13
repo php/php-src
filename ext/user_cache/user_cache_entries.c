@@ -443,6 +443,20 @@ static zend_always_inline void user_cache_delete_entry_locked(php_user_cache_hea
 	php_user_cache_bump_mutation_epoch_locked(header);
 }
 
+/* Zeroing first keeps the delete from releasing the half-written block
+ * through the graph retire path; it is freed directly below. */
+static zend_always_inline void user_cache_drop_overwritten_combined_entry_locked(
+		php_user_cache_header *header,
+		php_user_cache_entry *entry,
+		uint32_t block_offset)
+{
+	entry->value_type = PHP_USER_CACHE_VALUE_NULL;
+	entry->value_offset = 0;
+
+	user_cache_delete_entry_locked(header, entry);
+	php_user_cache_free_locked(block_offset);
+}
+
 static zend_always_inline void user_cache_release_request_local_slot_table(HashTable **slots_ptr)
 {
 	HashTable *slots = *slots_ptr;
@@ -1162,6 +1176,7 @@ static bool user_cache_clone_request_local_array(
 
 	array = zend_array_dup(Z_ARRVAL_P(src));
 	if (ctx->track_identity) {
+		GC_ADDREF(array);
 		zend_hash_index_update_ptr(&ctx->arrays, key, array);
 	}
 
@@ -1173,9 +1188,7 @@ static bool user_cache_clone_request_local_array(
 		}
 
 		if (!user_cache_clone_request_local_value(ctx, &cloned_elem, elem)) {
-			if (!ctx->track_identity) {
-				zend_array_release(array);
-			}
+			zend_array_release(array);
 
 			ZVAL_UNDEF(dst);
 
@@ -1186,10 +1199,6 @@ static bool user_cache_clone_request_local_array(
 
 		ZVAL_COPY_VALUE(elem, &cloned_elem);
 	} ZEND_HASH_FOREACH_END();
-
-	if (ctx->track_identity) {
-		GC_ADDREF(array);
-	}
 
 	ZVAL_ARR(dst, array);
 
@@ -1222,13 +1231,12 @@ static bool user_cache_clone_request_local_reference(
 	ZVAL_UNDEF(&new_ref->val);
 
 	if (ctx->track_identity) {
+		GC_ADDREF(new_ref);
 		zend_hash_index_update_ptr(&ctx->references, key, new_ref);
 	}
 
 	if (!user_cache_clone_request_local_value(ctx, &inner, &src_ref->val)) {
-		if (!ctx->track_identity) {
-			zval_ptr_dtor(dst);
-		}
+		zval_ptr_dtor(dst);
 
 		ZVAL_UNDEF(dst);
 
@@ -1236,12 +1244,6 @@ static bool user_cache_clone_request_local_reference(
 	}
 
 	ZVAL_COPY_VALUE(&new_ref->val, &inner);
-
-	if (ctx->track_identity) {
-		GC_ADDREF(new_ref);
-
-		ZVAL_REF(dst, new_ref);
-	}
 
 	return true;
 }
@@ -1335,6 +1337,7 @@ static bool user_cache_clone_request_local_std_object(
 	new_obj = zend_objects_new(old_obj->ce);
 
 	if (ctx->track_identity) {
+		GC_ADDREF(new_obj);
 		zend_hash_index_update_ptr(
 			&ctx->objects,
 			(zend_ulong) (uintptr_t) old_obj,
@@ -1380,16 +1383,10 @@ static bool user_cache_clone_request_local_std_object(
 		}
 
 		if (!user_cache_clone_request_local_object_members(ctx, old_obj, new_obj)) {
-			if (!ctx->track_identity) {
-				OBJ_RELEASE(new_obj);
-			}
+			OBJ_RELEASE(new_obj);
 
 			return false;
 		}
-	}
-
-	if (ctx->track_identity) {
-		GC_ADDREF(new_obj);
 	}
 
 	*new_obj_ptr = new_obj;
@@ -1437,39 +1434,33 @@ static bool user_cache_clone_request_local_safe_direct_object(
 	key = (zend_ulong) (uintptr_t) old_obj;
 
 	if (ctx->track_identity) {
+		GC_ADDREF(new_obj);
 		zend_hash_index_update_ptr(&ctx->objects, key, new_obj);
 	}
 
-	if (!copy_func(
-			ctx,
-			new_obj,
-			old_obj,
-			user_cache_clone_request_local_value_callback
-		)
+	if (!copy_func(ctx, new_obj, old_obj, user_cache_clone_request_local_value_callback) ||
+		!user_cache_clone_request_local_object_members(ctx, old_obj, new_obj)
 	) {
-		if (!ctx->track_identity) {
-			OBJ_RELEASE(new_obj);
-		}
+		OBJ_RELEASE(new_obj);
 
 		return false;
-	}
-
-	if (!user_cache_clone_request_local_object_members(ctx, old_obj, new_obj)) {
-		if (!ctx->track_identity) {
-			OBJ_RELEASE(new_obj);
-		}
-
-		return false;
-	}
-
-	if (ctx->track_identity) {
-		GC_ADDREF(new_obj);
 	}
 
 	*new_obj_ptr = new_obj;
 
 	return true;
 }
+
+#if ZEND_DEBUG
+/* Debug-only fault injection: refuse to clone objects of the named class so
+ * the request-local clone failure paths become reachable from a PHPT. */
+static bool user_cache_debug_request_local_clone_fails_for(const zend_class_entry *ce)
+{
+	const char *name = getenv("USER_CACHE_DEBUG_FAIL_REQUEST_LOCAL_CLONE_CLASS");
+
+	return name != NULL && name[0] != '\0' && zend_string_equals_cstr(ce->name, name, strlen(name));
+}
+#endif /* ZEND_DEBUG */
 
 static bool user_cache_clone_request_local_object(
 		php_user_cache_request_local_clone_context *ctx,
@@ -1482,6 +1473,12 @@ static bool user_cache_clone_request_local_object(
 	if (old_obj == NULL || zend_object_is_lazy(old_obj)) {
 		return false;
 	}
+
+#if ZEND_DEBUG
+	if (user_cache_debug_request_local_clone_fails_for(old_obj->ce)) {
+		return false;
+	}
+#endif
 
 	if (ctx->track_identity) {
 		key = (zend_ulong) (uintptr_t) old_obj;
@@ -1525,6 +1522,8 @@ static bool user_cache_clone_request_local_value(
 			return user_cache_clone_request_local_array(ctx, dst, src, false);
 		case IS_OBJECT:
 			if (!user_cache_clone_request_local_object(ctx, Z_OBJ_P(src), &obj)) {
+				ZVAL_UNDEF(dst);
+
 				return false;
 			}
 
@@ -1659,12 +1658,6 @@ static bool user_cache_materialize_shared_graph_locked(
 				);
 			}
 
-			if (!lock_safe && !result && Z_TYPE_P(return_value) != IS_UNDEF) {
-				zval_ptr_dtor(return_value);
-
-				ZVAL_UNDEF(return_value);
-			}
-
 			if (!lock_safe && !php_user_cache_rlock()) {
 				*lock_held = false;
 
@@ -1678,12 +1671,6 @@ static bool user_cache_materialize_shared_graph_locked(
 			}
 
 			if (!result) {
-				if (lock_safe && Z_TYPE_P(return_value) != IS_UNDEF) {
-					zval_ptr_dtor(return_value);
-
-					ZVAL_UNDEF(return_value);
-				}
-
 				if (!EG(exception) && throw_if_missing) {
 					PHP_USER_CACHE_TRY_UNLOCK_ON_BAILOUT(
 						zend_throw_exception_ex(
@@ -2702,7 +2689,7 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 	if (!use_combined_publish && (!found || old_combined || capture_replaced)) {
 		new_key_offset = php_user_cache_alloc_locked(key_size, ZSTR_VAL(key));
 		if (new_key_offset == 0) {
-			can_reclaim = user_cache_payload_can_fit_locked(key_size);
+			can_reclaim = user_cache_payload_can_fit_locked(key_size + prepared->payload_size);
 
 			goto failure;
 		}
@@ -2791,10 +2778,14 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 					} zend_catch {
 						if (graph_offset != combined_reuse_offset) {
 							php_user_cache_free_locked(graph_offset);
+						} else {
+							user_cache_drop_overwritten_combined_entry_locked(header, entry, combined_reuse_offset);
 						}
+
 						if (!UC_G(store_defer_unlock)) {
 							php_user_cache_unlock_if_held();
 						}
+
 						zend_bailout();
 					} zend_end_try();
 
@@ -2812,11 +2803,7 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 					if (graph_offset != combined_reuse_offset) {
 						php_user_cache_free_locked(graph_offset);
 					} else {
-						entry->value_type = PHP_USER_CACHE_VALUE_NULL;
-						entry->value_offset = 0;
-
-						user_cache_delete_entry_locked(header, entry);
-						php_user_cache_free_locked(combined_reuse_offset);
+						user_cache_drop_overwritten_combined_entry_locked(header, entry, combined_reuse_offset);
 
 						combined_reuse_offset = 0;
 						old_value_offset = 0;
@@ -2892,7 +2879,9 @@ static php_user_cache_store_attempt_result user_cache_store_attempt_locked(
 				}
 			}
 
-			can_reclaim = user_cache_payload_can_fit_locked(prepared->payload_size);
+			can_reclaim = user_cache_payload_can_fit_locked(
+				use_combined_publish ? prepared->payload_size + key_size : prepared->payload_size
+			);
 
 			goto failure;
 		default:
@@ -3157,18 +3146,6 @@ static bool user_cache_prepare_shared_graph_value(
 
 			return true;
 		}
-
-		if (EG(exception)) {
-			return false;
-		}
-
-		efree(prepared->owned_buffer);
-
-		prepared->owned_buffer = NULL;
-	}
-
-	if (EG(exception)) {
-		return false;
 	}
 
 	return false;
@@ -3724,12 +3701,6 @@ static php_user_cache_optimistic_result user_cache_optimistic_emit_shared_graph(
 			return_value
 		)
 	) {
-		if (Z_TYPE_P(return_value) != IS_UNDEF) {
-			zval_ptr_dtor(return_value);
-
-			ZVAL_UNDEF(return_value);
-		}
-
 		return PHP_USER_CACHE_OPTIMISTIC_FALLBACK;
 	}
 
