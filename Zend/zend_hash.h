@@ -119,6 +119,11 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool
 ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed);
 ZEND_API void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht);
 
+/* Throws a catchable MemoryError and returns true when a table of "nelems"
+ * elements cannot fit in the configured memory limit; returns false (without
+ * throwing) otherwise. */
+ZEND_API bool zend_array_alloc_size_exceeds_memory(size_t nelems, bool packed);
+
 /* additions/updates/changes */
 ZEND_API zval* ZEND_FASTCALL zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag);
 ZEND_API zval* ZEND_FASTCALL zend_hash_update(HashTable *ht, zend_string *key,zval *pData);

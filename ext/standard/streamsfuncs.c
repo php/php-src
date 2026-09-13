@@ -430,6 +430,10 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(to_read, 1, 0))) {
+		RETURN_THROWS();
+	}
+
 	read_buf = zend_string_alloc(to_read, 0);
 
 	php_stream_error_operation_begin();

@@ -20,10 +20,14 @@ echo "*** Testing str_pad() function: with large value for for 'pad_length' argu
 //defining '$input' argument
 $input = "Test string";
 $pad_length = PHP_INT_MAX - 16; /* zend_string header is 16 bytes */
-var_dump( str_pad($input, $pad_length) );
+
+try {
+    var_dump( str_pad($input, $pad_length) );
+} catch (Throwable $t) {
+    echo $t::class . ': ' . $t->getMessage() . "\n";
+}
 
 ?>
 --EXPECTF--
 *** Testing str_pad() function: with large value for for 'pad_length' argument ***
-
-Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+MemoryError: The resulting string is too large to fit in the configured memory limit

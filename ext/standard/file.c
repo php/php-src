@@ -912,6 +912,10 @@ PHPAPI PHP_FUNCTION(fgets)
 			RETURN_THROWS();
 		}
 
+		if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(len, 1, 0))) {
+			RETURN_THROWS();
+		}
+
 		str = zend_string_alloc(len, 0);
 		buf = php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len);
 		php_stream_error_operation_end_for_stream(stream);
@@ -1618,6 +1622,10 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_THROWS();
 	}
 
+	if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(len, 1, 0))) {
+		RETURN_THROWS();
+	}
+
 	php_stream_error_operation_begin();
 	str = php_stream_read_to_str(stream, len);
 	php_stream_error_operation_end_for_stream(stream);
@@ -1881,6 +1889,10 @@ PHP_FUNCTION(fgetcsv)
 			RETURN_FALSE;
 		}
 	} else {
+		if (UNEXPECTED(zend_string_alloc_size_exceeds_memory(len, 1, 1))) {
+			php_stream_error_operation_end_for_stream(stream);
+			RETURN_THROWS();
+		}
 		buf = emalloc(len + 1);
 		if (php_stream_get_line(stream, buf, len + 1, &buf_len) == NULL) {
 			efree(buf);

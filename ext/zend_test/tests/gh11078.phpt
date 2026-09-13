@@ -26,10 +26,14 @@ class CrashingFifo {
     }
 }
 
-stream_register_wrapper('fifo', CrashingFifo::class);
-$readStream = fopen('fifo://1', 'r');
-zend_test_cast_fread($readStream);
+try {
+    stream_register_wrapper('fifo', CrashingFifo::class);
+    $readStream = fopen('fifo://1', 'r');
+    zend_test_cast_fread($readStream);
+} catch (Throwable $t) {
+    echo $t::class . ': ' . $t->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted %s
+--EXPECT--
+MemoryError: The resulting string is too large to fit in the configured memory limit

@@ -30,8 +30,28 @@ echo 'You should not see this.';
   <foo>
     <!-- init str_repeat() -->
     <str_repeat>
-
-Fatal error: Allowed memory size of 2097152 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+      <!-- Exception: MemoryError -->
     </str_repeat:NULL>
+    <!-- Exception: MemoryError -->
   </foo:NULL>
+  <!-- Exception: MemoryError -->
 </file '%s%eobserver_error_%d.php'>
+<!-- init Error::__toString() -->
+<Error::__toString>
+  <!-- init Error::getTraceAsString() -->
+  <Error::getTraceAsString>
+  </Error::getTraceAsString:'#0 %s(%d): str_repeat(\'.\', 2097152)
+#1 %s(%d): foo()
+#2 {main}'>
+</Error::__toString:'MemoryError: The resulting string is too large to fit in the configured memory limit in %s:%d
+Stack trace:
+#0 %s(%d): str_repeat(\'.\', 2097152)
+#1 %s(%d): foo()
+#2 {main}'>
+
+Fatal error: Uncaught MemoryError: The resulting string is too large to fit in the configured memory limit in %s:%d
+Stack trace:
+#0 %s(%d): str_repeat('.', 2097152)
+#1 %s(%d): foo()
+#2 {main}
+  thrown in %s on line %d

@@ -13,9 +13,9 @@ if (getenv("USE_ZEND_ALLOC") === "0") {
 
 $fiber = new Fiber(function (): void {
     $fiber = new Fiber(function (): void {
-        $buffer = '';
+        $buffer = '.';
         while (true) {
-            $buffer .= str_repeat('.', 1 << 10);
+            $buffer .= $buffer;
         }
     });
 

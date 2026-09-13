@@ -14,11 +14,14 @@ echo "Body generation\n";
 $body = str_repeat("Hello", 10000000);
 
 echo "Using chunk_split()\n";
-var_dump(chunk_split($body, $chunk_length));
+try {
+    var_dump(chunk_split($body, $chunk_length));
+} catch (MemoryError $e) {
+    echo $e->getMessage() . "\n";
+}
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : unexpected large 'end' string argument variation 2 ***
 Body generation
 Using chunk_split()
-
-Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+The resulting string is too large to fit in the configured memory limit

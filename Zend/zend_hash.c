@@ -391,6 +391,12 @@ ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 	pefree(old_data, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 }
 
+ZEND_API bool zend_array_alloc_size_exceeds_memory(size_t nelems, bool packed)
+{
+	size_t elem_size = packed ? sizeof(zval) : sizeof(Bucket) + sizeof(uint32_t);
+	return zend_alloc_size_exceeds_memory(nelems, elem_size, 0, "array");
+}
+
 ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool packed)
 {
 	HT_ASSERT_RC1(ht);

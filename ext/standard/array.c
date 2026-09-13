@@ -2718,6 +2718,10 @@ PHP_FUNCTION(array_fill)
 			/* create packed array */
 			zval *zv;
 
+			if (UNEXPECTED(zend_array_alloc_size_exceeds_memory((size_t)(start_key + num), true))) {
+				RETURN_THROWS();
+			}
+
 			array_init_size(return_value, (uint32_t)(start_key + num));
 			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 			Z_ARRVAL_P(return_value)->nNumUsed = (uint32_t)(start_key + num);
@@ -2740,6 +2744,9 @@ PHP_FUNCTION(array_fill)
 			}
 		} else {
 			/* create hash */
+			if (UNEXPECTED(zend_array_alloc_size_exceeds_memory((size_t)num, false))) {
+				RETURN_THROWS();
+			}
 			array_init_size(return_value, (uint32_t)num);
 			zend_hash_real_init_mixed(Z_ARRVAL_P(return_value));
 			if (Z_REFCOUNTED_P(val)) {
@@ -2802,6 +2809,9 @@ PHP_FUNCTION(array_fill_keys)
 			RETURN_THROWS(); \
 		} \
 		size = (uint32_t)_php_math_round(__calc_size, 0, PHP_ROUND_HALF_UP); \
+		if (UNEXPECTED(zend_array_alloc_size_exceeds_memory(size, true))) { \
+			RETURN_THROWS(); \
+		} \
 		array_init_size(return_value, size); \
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
@@ -2818,6 +2828,9 @@ PHP_FUNCTION(array_fill_keys)
 			RETURN_THROWS(); \
 		} \
 		size = (uint32_t)(__calc_size + 1); \
+		if (UNEXPECTED(zend_array_alloc_size_exceeds_memory(size, true))) { \
+			RETURN_THROWS(); \
+		} \
 		array_init_size(return_value, size); \
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
@@ -4781,6 +4794,9 @@ PHP_FUNCTION(array_pad)
 	}
 
 	num_pads = pad_size_abs - input_size;
+	if (UNEXPECTED(zend_array_alloc_size_exceeds_memory((size_t)pad_size_abs, HT_IS_PACKED(Z_ARRVAL_P(input))))) {
+		RETURN_THROWS();
+	}
 	if (Z_REFCOUNTED_P(pad_value)) {
 		GC_ADDREF_EX(Z_COUNTED_P(pad_value), num_pads);
 	}
