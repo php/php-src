@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
     an exception is pending. (nicolas-grekas)
+  . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
+    that throws. (nicolas-grekas)
 
 - Zip:
   . Fixed ZipArchive::extractTo() ignoring files given in a non-list array.
