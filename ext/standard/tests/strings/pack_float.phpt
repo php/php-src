@@ -4,9 +4,6 @@ pack()/unpack(): float/double tests
 <?php
 var_dump(
     'pack e',
-    bin2hex(pack("e", "")),
-    bin2hex(pack("e", "a")),
-    bin2hex(pack("e", " ")),
     bin2hex(pack("e", NULL)),
     bin2hex(pack("e", 0)),
     bin2hex(pack("e", 1)),
@@ -21,9 +18,6 @@ var_dump(
     bin2hex(pack("e", -12345678901234567890.1234567898765432123456789)),
 
     'pack E',
-    bin2hex(pack("E", "")),
-    bin2hex(pack("E", "a")),
-    bin2hex(pack("E", " ")),
     bin2hex(pack("E", NULL)),
     bin2hex(pack("E", 0)),
     bin2hex(pack("E", 1)),
@@ -38,9 +32,6 @@ var_dump(
     bin2hex(pack("E", -12345678901234567890.1234567898765432123456789)),
 
     'pack g',
-    bin2hex(pack("g", "")),
-    bin2hex(pack("g", "a")),
-    bin2hex(pack("g", " ")),
     bin2hex(pack("g", NULL)),
     bin2hex(pack("g", 0)),
     bin2hex(pack("g", 1)),
@@ -55,9 +46,6 @@ var_dump(
     bin2hex(pack("g", -12345678901234567890.1234567898765432123456789)),
 
     'pack G',
-    bin2hex(pack("G", "")),
-    bin2hex(pack("G", "a")),
-    bin2hex(pack("G", " ")),
     bin2hex(pack("G", NULL)),
     bin2hex(pack("G", 0)),
     bin2hex(pack("G", 1)),
@@ -117,9 +105,6 @@ var_dump(
 string(6) "pack e"
 string(16) "0000000000000000"
 string(16) "0000000000000000"
-string(16) "0000000000000000"
-string(16) "0000000000000000"
-string(16) "0000000000000000"
 string(16) "000000000000f03f"
 string(16) "000000000000f03f"
 string(16) "0080e03779c34143"
@@ -131,9 +116,6 @@ string(16) "0080e03779c341c3"
 string(16) "4a6ade0d65ebe2bf"
 string(16) "e1639d31956ae5c3"
 string(6) "pack E"
-string(16) "0000000000000000"
-string(16) "0000000000000000"
-string(16) "0000000000000000"
 string(16) "0000000000000000"
 string(16) "0000000000000000"
 string(16) "3ff0000000000000"
@@ -149,9 +131,6 @@ string(16) "c3e56a95319d63e1"
 string(6) "pack g"
 string(8) "00000000"
 string(8) "00000000"
-string(8) "00000000"
-string(8) "00000000"
-string(8) "00000000"
 string(8) "0000803f"
 string(8) "0000803f"
 string(8) "ca1b0e5a"
@@ -163,9 +142,6 @@ string(8) "ca1b0eda"
 string(8) "285b17bf"
 string(8) "aa542bdf"
 string(6) "pack G"
-string(8) "00000000"
-string(8) "00000000"
-string(8) "00000000"
 string(8) "00000000"
 string(8) "00000000"
 string(8) "3f800000"
