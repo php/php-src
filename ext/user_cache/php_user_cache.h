@@ -44,7 +44,8 @@ typedef enum {
 /* Handlers for copying native object state without invoking user code.
  * All handlers take the destination before the source; callers pass a NULL
  * clone_value callback to probe copy capability, so copy handlers must
- * return false without side effects in that case. */
+ * return false without side effects in that case. A handler that fails may
+ * leave its destination partially built: the caller owns and releases it. */
 typedef bool (*php_user_cache_safe_direct_clone_value_func_t)(
 	void *context,
 	zval *dst,
