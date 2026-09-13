@@ -483,8 +483,8 @@ PHP 8.6 UPGRADE NOTES
     tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
     options.
   . Added stream socket context option so_linger that sets SO_LINGER on TCP
-    and unix sockets. A positive value enables lingering for that many seconds,
-    zero or a negative value disables it. Values above 65535 are clamped as the
+    sockets. A positive value enables lingering for that many seconds, zero
+    or a negative value disables it. Values above 65535 are clamped as the
     linger time is limited to an unsigned short on some platforms.
   . Added stream socket context options so_rcvbuf and so_sndbuf that set the
     socket receive and send buffer sizes in bytes (SO_RCVBUF and SO_SNDBUF) on

@@ -687,7 +687,7 @@ static int php_sockop_parse_sockvals(php_stream *stream, php_stream_xport_param 
 	}
 
 #ifdef SO_LINGER
-	if ((PHP_STREAM_XPORT_IS_TCP(stream) || PHP_STREAM_XPORT_IS_UNIX_ST(stream))
+	if (PHP_STREAM_XPORT_IS_TCP(stream)
 		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_linger")) != NULL
 	) {
 		sockvals->mask |= PHP_SOCKVAL_SO_LINGER;
