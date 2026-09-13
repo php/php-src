@@ -3904,7 +3904,11 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, const char 
 					case '\v': *target++ = 'v'; break;
 					case '\b': *target++ = 'b'; break;
 					case '\f': *target++ = 'f'; break;
-					default: target += snprintf(target, 4, "%03o", (unsigned char) c);
+					default:
+						/* Write the byte as three octal digits, including leading zeros. */
+						*target++ = ((unsigned char) c >> 6) + '0';
+						*target++ = (((unsigned char) c >> 3) & 7) + '0';
+						*target++ = ((unsigned char) c & 7) + '0';
 				}
 				continue;
 			}
