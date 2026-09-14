@@ -1110,6 +1110,7 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
   . Improved performance of str_split().
   . Improved performance of str_pad().
+  . Improved performance of str_repeat() when the multiplier is 1.
 
 - URI:
   . Improved performance of Uri\WhatWg\Url::parse() when collecting
