@@ -152,12 +152,10 @@ static zend_result php_stream_apply_filter_list(php_stream *stream, char *filter
 	php_stream_filter *temp_filter;
 
 	zend_long max_filter_count = max_filter_count_default;
-	bool max_filter_count_configured = false;
 	if (context != NULL) {
 		zval *option_val = php_stream_context_get_option(context, "filter", "max_filter_count");
 		if (option_val) {
 			max_filter_count = zval_get_long(option_val);
-			max_filter_count_configured = true;
 		}
 	}
 
@@ -167,13 +165,7 @@ static zend_result php_stream_apply_filter_list(php_stream *stream, char *filter
 		zend_long write_count = write_chain ? stream->writefilters.num_filters : 0;
 
 		if (read_count == max_filter_count || write_count == max_filter_count) {
-			if (max_filter_count_configured) {
-				return FAILURE;
-			} else {
-				// No max_filter_count configured; raise deprecation error if over default
-				zend_error(E_DEPRECATED, "Using more than " ZEND_LONG_FMT " filters in a php://filter URL is deprecated, "
-					"set this limit using the stream context option max_filter_count, or use stream_filter_append", max_filter_count_default);
-			}
+			return FAILURE;
 		}
 
 		php_url_decode(p, strlen(p));

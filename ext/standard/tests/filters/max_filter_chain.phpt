@@ -90,24 +90,30 @@ int(1)
 int(1)
 # file_get_contents on 17 filters
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-string(9) "SEVENTEEN"
+Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
+bool(false)
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-string(9) "SEVENTEEN"
+Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
+bool(false)
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-string(9) "SEVENTEEN"
+Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
+bool(false)
 # include on 17 filters
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-int(1)
+Warning: include(): Failed to open stream: too many filters in %s on line %d
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-int(1)
+Warning: include(): Failed opening %s
+bool(false)
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-int(1)
+Warning: include(): Failed to open stream: too many filters in %s on line %d
+
+Warning: include(): Failed opening %s
+bool(false)
+
+Warning: include(): Failed to open stream: too many filters in %s on line %d
+
+Warning: include(): Failed opening %s
+bool(false)
 # file_get_contents on 3 filters, max_filter_count=2
 
 Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
@@ -124,18 +130,18 @@ string(8) "NINETEEN"
 string(8) "NINETEEN"
 # warning is only given once, even when we add two filters over the limit
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-string(8) "EIGHTEEN"
+Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
+bool(false)
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-string(8) "EIGHTEEN"
+Warning: file_get_contents(): Failed to open stream: too many filters in %s on line %d
+bool(false)
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-string(8) "EIGHTEEN"
+Warning: file_get_contents(): Failed to open stream: operation failed in %s on line %d
+bool(false)
 # warn on too many write filters, even when number of read filters is OK
 
-Deprecated: Using more than 16 filters in a php://filter URL is deprecated, set this limit using the stream context option max_filter_count, or use stream_filter_append in %smax_filter_chain.php on line %d
-bool(true)
+Warning: fopen(): Failed to open stream: too many filters in %s on line %d
+bool(false)
 # setting max_filter_count to -1 disables warning
 string(6) "TWENTY"
 string(6) "TWENTY"
