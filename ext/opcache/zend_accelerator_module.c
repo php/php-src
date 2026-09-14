@@ -79,7 +79,9 @@ static int validate_api_restriction(void)
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
 {
-	if (accel_startup_ok) {
+	/* On ZTS, each new thread runs the on_modify handlers at STAGE_STARTUP to
+	 * populate its own globals; that is thread init, not a post-startup change. */
+	if (accel_startup_ok && stage != ZEND_INI_STAGE_STARTUP) {
 		if (strcmp(sapi_module.name, "fpm-fcgi") == 0) {
 			zend_accel_error(ACCEL_LOG_WARNING, "opcache.memory_consumption cannot be changed when OPcache is already set up. Are you using php_admin_value[opcache.memory_consumption] in an individual pool's configuration?\n");
 		} else {
