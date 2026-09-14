@@ -1689,6 +1689,8 @@ EOF
       # -p, -pg, --coverage, -fprofile-* pass through profiling flag for GCC
       # -F/path gives path to uninstalled frameworks, gcc on darwin
       # @file GCC response files
+      # -ffixed-*, -fno-lto GCC LTO register reservations and cancellation
+      -ffixed-*|-fno-lto| \
       -64|-mips[0-9]|-r[0-9][0-9]*|-xarch=*|-xtarget=*|+DA*|+DD*|-q*|-m*| \
       -t[45]*|-txscale*|-p|-pg|--coverage|-fprofile-*|-F*|@*)
 
