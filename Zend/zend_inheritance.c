@@ -1241,6 +1241,16 @@ static inheritance_status do_inheritance_check_on_method(
 }
 /* }}} */
 
+static inheritance_status check_interface_method_compatibility(
+		zend_function *child, zend_function *parent, zend_class_entry *ce) /* {{{ */
+{
+	return do_inheritance_check_on_method(
+		child, child->common.scope, parent, parent->common.scope, ce, NULL,
+		ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY
+			| ZEND_INHERITANCE_CHECK_SILENT);
+}
+/* }}} */
+
 static void do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce, bool is_interface, uint32_t flags) /* {{{ */
 {
 	zval *child = zend_hash_find_known_hash(&ce->function_table, key);
@@ -1250,6 +1260,16 @@ static void do_inherit_method(zend_string *key, zend_function *parent, zend_clas
 
 		if (is_interface && UNEXPECTED(func == parent)) {
 			/* The same method in interface may be inherited few times */
+			return;
+		}
+
+		/* Otherwise linking would depend on the order the interfaces are listed in */
+		if (is_interface
+		 && func->common.scope != ce
+		 && (func->common.scope->ce_flags & ZEND_ACC_INTERFACE)
+		 && check_interface_method_compatibility(func, parent, ce) == INHERITANCE_ERROR
+		 && check_interface_method_compatibility(parent, func, ce) == INHERITANCE_SUCCESS) {
+			zend_hash_update_ptr(&ce->function_table, key, zend_duplicate_function(parent, ce));
 			return;
 		}
 
