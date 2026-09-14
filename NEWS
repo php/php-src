@@ -29,6 +29,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
 
+- OpenSSL:
+  . Fixed bug GH-20920 (Build failure with LibreSSL). (Eugene Gvozdetsky)
+
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
 
