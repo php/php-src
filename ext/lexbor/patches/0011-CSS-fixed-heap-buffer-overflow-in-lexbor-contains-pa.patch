@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Fri, 5 Jun 2026 22:34:23 +0300
-Subject: [PATCH 11/12] CSS: fixed heap buffer overflow in :lexbor-contains()
+Subject: [PATCH 11/17] CSS: fixed heap buffer overflow in :lexbor-contains()
  parsing.
 
 The contains string buffer was allocated by the size of the string
