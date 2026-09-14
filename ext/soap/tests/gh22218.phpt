@@ -21,5 +21,6 @@ $_SERVER = 79;
 $server = new SoapServer(null, ['uri' => 'http://test-uri']);
 $server->handle();
 ?>
---EXPECTF--
-%AFunction 'test' doesn't exist%A
+--EXPECT--
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Server</faultcode><faultstring>Call to undefined function test()</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
