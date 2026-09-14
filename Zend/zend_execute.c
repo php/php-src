@@ -5175,31 +5175,29 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 	zend_object *object;
 	uint32_t call_info;
 
-	if (EXPECTED(function->handlers->get_closure) &&
-	    EXPECTED(function->handlers->get_closure(function, &called_scope, &fbc, &object, 0) == SUCCESS)) {
-
-		object_or_called_scope = called_scope;
-		if (EXPECTED(fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
-			/* Delay closure destruction until its invocation */
-			GC_ADDREF(ZEND_CLOSURE_OBJECT(fbc));
-			ZEND_ASSERT(ZEND_ACC_FAKE_CLOSURE == ZEND_CALL_FAKE_CLOSURE);
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
-				(fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
-			if (object) {
-				call_info |= ZEND_CALL_HAS_THIS;
-				object_or_called_scope = object;
-			}
-		} else {
-			call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
-			if (object) {
-				call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
-				GC_ADDREF(object); /* For $this pointer */
-				object_or_called_scope = object;
-			}
-		}
-	} else {
+	if (UNEXPECTED(!zend_get_closure(function, &called_scope, &fbc, &object, false))) {
 		zend_throw_error(NULL, "Object of type %s is not callable", ZSTR_VAL(function->ce->name));
 		return NULL;
+	}
+
+	object_or_called_scope = called_scope;
+	if (EXPECTED(fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		/* Delay closure destruction until its invocation */
+		GC_ADDREF(ZEND_CLOSURE_OBJECT(fbc));
+		ZEND_ASSERT(ZEND_ACC_FAKE_CLOSURE == ZEND_CALL_FAKE_CLOSURE);
+		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
+			(fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
+		if (object) {
+			call_info |= ZEND_CALL_HAS_THIS;
+			object_or_called_scope = object;
+		}
+	} else {
+		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
+		if (object) {
+			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
+			GC_ADDREF(object); /* For $this pointer */
+			object_or_called_scope = object;
+		}
 	}
 
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {

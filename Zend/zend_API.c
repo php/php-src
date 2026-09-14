@@ -4236,9 +4236,9 @@ again:
 			}
 
 		case IS_OBJECT:
-			if (!Z_OBJ_HANDLER_P(callable, get_closure) || Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == FAILURE) {
+			if (UNEXPECTED(!zend_get_closure(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, true))) {
 				if (error) *error = estrdup("no array or string given");
-				return 0;
+				return false;
 			}
 			fcc->called_scope = fcc->calling_scope;
 			fcc->closure = Z_OBJ_P(callable);
