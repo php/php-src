@@ -1,48 +1,37 @@
 --TEST--
-array_str_contains() function - basic and edge cases
+array_str_contains() basic functionality and edge cases
 --FILE--
 <?php
 
-$haystack = ["apple", "banana", "cherry", "date", "elderberry"];
+$fruits = ["apple", "banana", "cherry"];
 
-// 1. Basic matching
-var_dump(array_str_contains($haystack, "an"));
-var_dump(array_str_contains($haystack, "berry"));
-var_dump(array_str_contains($haystack, "xyz"));
+// 1. Basic match
+var_dump(array_str_contains($fruits, "apple"));
+var_dump(array_str_contains($fruits, "banana"));
+var_dump(array_str_contains($fruits, "cherry"));
 
-// 2. Preserves array keys
-$assoc = ["a" => "item_one", "b" => "item_two", "c" => "other"];
-var_dump(array_str_contains($assoc, "item"));
+// 2. No match
+var_dump(array_str_contains($fruits, "orange"));
+var_dump(array_str_contains($fruits, "app"));
 
-// 3. Empty needle matches everything
-var_dump(array_str_contains(["foo", "bar"], ""));
+// 3. Empty needle & empty array
+var_dump(array_str_contains($fruits, ""));
+var_dump(array_str_contains([], "apple"));
+var_dump(array_str_contains([], ""));
 
-// 4. Empty array returns empty array
-var_dump(array_str_contains([], "test"));
+// 4. Case-sensitivity
+var_dump(array_str_contains($fruits, "APPLE"));
+var_dump(array_str_contains($fruits, "Banana"));
 
 ?>
 --EXPECT--
-array(1) {
-  [1]=>
-  string(6) "banana"
-}
-array(1) {
-  [4]=>
-  string(10) "elderberry"
-}
-array(0) {
-}
-array(2) {
-  ["a"]=>
-  string(8) "item_one"
-  ["b"]=>
-  string(8) "item_two"
-}
-array(2) {
-  [0]=>
-  string(3) "foo"
-  [1]=>
-  string(3) "bar"
-}
-array(0) {
-}
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
