@@ -229,8 +229,6 @@ static struct php_gfxinfo *php_handle_swc(php_stream * stream)
 			php_swf_get_bits (b, 5, bits)) / 20;
 		result->height = (php_swf_get_bits (b, 5 + (3 * bits), bits) -
 			php_swf_get_bits (b, 5 + (2 * bits), bits)) / 20;
-	} else {
-		result = NULL;
 	}
 
 	efree (b);

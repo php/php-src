@@ -105,13 +105,13 @@ static int compare_special_version_forms(char *form1, char *form2)
 	};
 	special_forms_t *pp;
 
-	for (pp = special_forms; pp && pp->name; pp++) {
+	for (pp = special_forms; pp->name; pp++) {
 		if (strncmp(form1, pp->name, pp->name_len) == 0) {
 			found1 = pp->order;
 			break;
 		}
 	}
-	for (pp = special_forms; pp && pp->name; pp++) {
+	for (pp = special_forms; pp->name; pp++) {
 		if (strncmp(form2, pp->name, pp->name_len) == 0) {
 			found2 = pp->order;
 			break;
