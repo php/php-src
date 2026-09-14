@@ -219,6 +219,18 @@ esac
 dnl See https://github.com/php/php-src/issues/14140
 AX_CHECK_COMPILE_FLAG([-ffp-contract=off], [CFLAGS="$CFLAGS -ffp-contract=off"])
 
+dnl Apple clang enables the AArch64 machine outliner and hot/cold code
+dnl splitting by default at -O2. Both trade speed for size: outlining
+dnl inserts extra calls into hot paths (including the zval destructor
+dnl loops) and cold-split fragments are compiled for size. Disabling them
+dnl speeds up CPU-bound scripts measurably (~4% on a large static
+dnl analysis workload). -Werror is needed because clang only warns about
+dnl unknown -m flags.
+AX_CHECK_COMPILE_FLAG([-mno-outline],
+  [CFLAGS="$CFLAGS -mno-outline"], [], [-Werror])
+AX_CHECK_COMPILE_FLAG([-Xclang -fno-split-cold-code],
+  [CFLAGS="$CFLAGS -Xclang -fno-split-cold-code"], [], [-Werror])
+
 dnl Mark symbols hidden by default if the compiler (for example, gcc >= 4)
 dnl supports it. This can help reduce the binary size and startup time.
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
