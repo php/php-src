@@ -2073,7 +2073,8 @@ static int calc_dimension_12(const char* str)
 		}
 		str++;
 	}
-	return i;
+	/* arraySize without dimension => one-dimension of unspecified size */
+	return i > 0 ? i : 1;
 }
 
 static void soap_array_position_add_digit(int *position, int digit)
