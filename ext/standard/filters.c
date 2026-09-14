@@ -953,7 +953,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 					err = PHP_CONV_ERR_INVALID_SEQ;
 					goto out;
 				}
-				next_char = (next_char << 4) | (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30);
+				next_char = (next_char << 4) | (*ps >= 'a' ? *ps - 0x57 : (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30));
 				scan_stat++;
 				ps++, icnt--;
 				if (scan_stat != 3) {
