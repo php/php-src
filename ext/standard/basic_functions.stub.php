@@ -2593,7 +2593,6 @@ function parse_str(string $string, &$result): void {}
  */
 function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array {}
 
-/** @refcount 1 */
 function str_repeat(string $string, int $times): string {}
 
 /**
