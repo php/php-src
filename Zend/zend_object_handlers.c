@@ -224,8 +224,8 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 			return Z_ARRVAL(retval);
 		}
 	} else if (Z_TYPE(retval) == IS_NULL) {
-		zend_error(E_DEPRECATED, "Returning null from %s::__debugInfo() is deprecated, return an empty array instead",
-			ZSTR_VAL(ce->name));
+		zend_error(E_DEPRECATED, "Returning null from %pS::__debugInfo() is deprecated, return an empty array instead",
+			ce->name);
 		*is_temp = 1;
 		ht = zend_new_array(0);
 		return ht;
@@ -309,7 +309,7 @@ static zend_never_inline zend_property_info *zend_get_parent_private_property(co
 
 static ZEND_COLD zend_never_inline void zend_bad_property_access(const zend_property_info *property_info, const zend_class_entry *ce, const zend_string *member) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	zend_throw_error(NULL, "Cannot access %s property %pS::$%pS", zend_visibility_string(property_info->flags), ce->name, member);
 }
 /* }}} */
 
@@ -321,22 +321,22 @@ static ZEND_COLD zend_never_inline void zend_bad_property_name(void) /* {{{ */
 
 static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
 		const zend_class_entry *ce, const zend_string *member) {
-	zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
-		ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	zend_throw_error(NULL, "Cannot create dynamic property %pS::$%pS",
+		ce->name, member);
 }
 
 static ZEND_COLD zend_never_inline bool zend_deprecated_dynamic_property(
 		zend_object *obj, const zend_string *member) {
 	GC_ADDREF(obj);
-	zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
-		ZSTR_VAL(obj->ce->name), ZSTR_VAL(member));
+	zend_error(E_DEPRECATED, "Creation of dynamic property %pS::$%pS is deprecated",
+		obj->ce->name, member);
 	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
 		const zend_class_entry *ce = obj->ce;
 		zend_objects_store_del(obj);
 		if (!EG(exception)) {
 			/* We cannot continue execution and have to throw an exception */
-			zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(member));
+			zend_throw_error(NULL, "Cannot create dynamic property %pS::$%pS",
+				ce->name, member);
 		}
 		return 0;
 	}
@@ -345,8 +345,8 @@ static ZEND_COLD zend_never_inline bool zend_deprecated_dynamic_property(
 
 static ZEND_COLD zend_never_inline void zend_readonly_property_unset_error(
 		const zend_class_entry *ce, const zend_string *member) {
-	zend_throw_error(NULL, "Cannot unset readonly property %s::$%s",
-		ZSTR_VAL(ce->name), ZSTR_VAL(member));
+	zend_throw_error(NULL, "Cannot unset readonly property %pS::$%pS",
+		ce->name, member);
 }
 
 static zend_always_inline const zend_class_entry *get_fake_or_executed_scope(void)
@@ -429,7 +429,7 @@ wrong:
 found:
 	if (UNEXPECTED(flags & ZEND_ACC_STATIC)) {
 		if (!silent) {
-			zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
+			zend_error(E_NOTICE, "Accessing static property %pS::$%pS as non static", ce->name, member);
 		}
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	}
@@ -522,7 +522,7 @@ wrong:
 found:
 	if (UNEXPECTED(flags & ZEND_ACC_STATIC)) {
 		if (!silent) {
-			zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(member));
+			zend_error(E_NOTICE, "Accessing static property %pS::$%pS as non static", ce->name, member);
 		}
 	}
 	return property_info;
@@ -680,9 +680,9 @@ static zend_always_inline zend_object *zend_lazy_proxy_get_guarded_instance(
 
 ZEND_COLD static void zend_typed_property_uninitialized_access(const zend_property_info *prop_info, zend_string *name)
 {
-	zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
-		ZSTR_VAL(prop_info->ce->name),
-		ZSTR_VAL(name));
+	zend_throw_error(NULL, "Typed property %pS::$%pS must not be accessed before initialization",
+		prop_info->ce->name,
+		name);
 }
 
 static ZEND_FUNCTION(zend_parent_hook_get_trampoline);
@@ -723,9 +723,9 @@ static bool zend_should_call_hook(const zend_property_info *prop_info, const zen
 
 static ZEND_COLD void zend_throw_no_prop_backing_value_access(const zend_string *class_name, const zend_string *prop_name, bool is_read)
 {
-	zend_throw_error(NULL, "Must not %s virtual property %s::$%s",
+	zend_throw_error(NULL, "Must not %s virtual property %pS::$%pS",
 		is_read ? "read from" : "write to",
-		ZSTR_VAL(class_name), ZSTR_VAL(prop_name));
+		class_name, prop_name);
 }
 
 static bool zend_call_get_hook(
@@ -754,7 +754,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 	uint32_t *guard = NULL;
 
 #if DEBUG_OBJECT_HANDLERS
-	fprintf(stderr, "Read object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
+	fprintf(stderr, "Read object #%d property: %pS\n", zobj->handle, name);
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
@@ -824,8 +824,8 @@ try_again:
 		zend_function *get = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Cannot read from set-only virtual property %s::$%s",
-					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Cannot read from set-only virtual property %pS::$%pS",
+					zobj->ce->name, name);
 				return &EG(uninitialized_zval);
 			}
 			/* Cache the fact that this hook has trivial read. This only applies to
@@ -842,8 +842,8 @@ try_again:
 
 			if (UNEXPECTED(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)) {
 				if (UNEXPECTED(Z_TYPE_P(retval) != IS_OBJECT)) {
-					zend_throw_error(NULL, "Indirect modification of %s::$%s is not allowed",
-						ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+					zend_throw_error(NULL, "Indirect modification of %pS::$%pS is not allowed",
+						zobj->ce->name, name);
 					goto exit;
 				}
 				ZVAL_COPY(rv, retval);
@@ -886,8 +886,8 @@ try_again:
 			if (!Z_ISREF_P(rv)
 			 && (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
 			 && UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
-				zend_throw_error(NULL, "Indirect modification of %s::$%s is not allowed",
-					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Indirect modification of %pS::$%pS is not allowed",
+					ce->name, name);
 			}
 		} else {
 			retval = &EG(uninitialized_zval);
@@ -991,7 +991,7 @@ call_getter:
 				if (!Z_ISREF_P(rv) &&
 				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
 					if (UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
-						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+						zend_error(E_NOTICE, "Indirect modification of overloaded property %pS::$%pS has no effect", zobj->ce->name, name);
 					}
 				}
 			} else {
@@ -1043,7 +1043,7 @@ uninit_error:
 		if (prop_info) {
 			zend_typed_property_uninitialized_access(prop_info, name);
 		} else {
-			zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+			zend_error(E_WARNING, "Undefined property: %pS::$%pS", zobj->ce->name, name);
 		}
 	}
 	retval = &EG(uninitialized_zval);
@@ -1218,7 +1218,7 @@ found:;
 
 		if (!set) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Cannot write to get-only virtual property %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Cannot write to get-only virtual property %pS::$%pS", zobj->ce->name, name);
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
@@ -1349,7 +1349,7 @@ lazy_init:
 
 static ZEND_COLD zend_never_inline void zend_bad_array_access(const zend_class_entry *ce) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
+	zend_throw_error(NULL, "Cannot use object of type %pS as array", ce->name);
 }
 /* }}} */
 
@@ -1392,7 +1392,7 @@ ZEND_API zval *zend_std_read_dimension(zend_object *object, zval *offset, int ty
 
 		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
 			if (UNEXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Undefined offset for object of type %s used as array", ZSTR_VAL(ce->name));
+				zend_throw_error(NULL, "Undefined offset for object of type %pS used as array", ce->name);
 			}
 			return NULL;
 		}
@@ -1465,7 +1465,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 	ZEND_ASSERT(type != BP_VAR_R && type != BP_VAR_IS);
 
 #if DEBUG_OBJECT_HANDLERS
-	fprintf(stderr, "Ptr object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
+	fprintf(stderr, "Ptr object #%d property: %pS\n", zobj->handle, name);
 #endif
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__get != NULL), cache_slot, &prop_info);
@@ -1502,7 +1502,7 @@ try_again:
 						zend_typed_property_uninitialized_access(prop_info, name);
 						retval = &EG(error_zval);
 					} else {
-						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+						zend_error(E_WARNING, "Undefined property: %pS::$%pS", zobj->ce->name, name);
 						/* An error handler may set the property */
 						 if (EXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 							ZVAL_NULL(retval);
@@ -1570,7 +1570,7 @@ try_again:
 				rebuild_object_properties_internal(zobj);
 			}
 			if (UNEXPECTED(type == BP_VAR_RW)) {
-				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				zend_error(E_WARNING, "Undefined property: %pS::$%pS", zobj->ce->name, name);
 			}
 			retval = zend_hash_add(zobj->properties, name, &EG(uninitialized_zval));
 		}
@@ -1665,8 +1665,8 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			return;
 		}
 	} else if (IS_HOOKED_PROPERTY_OFFSET(property_offset)) {
-		zend_throw_error(NULL, "Cannot unset hooked property %s::$%s",
-			ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+		zend_throw_error(NULL, "Cannot unset hooked property %pS::$%pS",
+			zobj->ce->name, name);
 		return;
 	} else if (UNEXPECTED(EG(exception))) {
 		return;
@@ -1949,8 +1949,8 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 
 ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_function *fbc, const zend_string *method_name, const zend_class_entry *scope) /* {{{ */
 {
-	zend_throw_error(NULL, "Call to %s method %s::%s() from %s%s",
-		zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZSTR_VAL(method_name),
+	zend_throw_error(NULL, "Call to %s method %s::%pS() from %s%s",
+		zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name,
 		scope ? "scope " : "global scope",
 		scope ? ZSTR_VAL(scope->name) : ""
 	);
@@ -1959,8 +1959,8 @@ ZEND_API ZEND_COLD zend_never_inline void zend_bad_method_call(const zend_functi
 
 ZEND_API ZEND_COLD zend_never_inline void zend_abstract_method_call(const zend_function *fbc) /* {{{ */
 {
-	zend_throw_error(NULL, "Cannot call abstract method %s::%s()",
-		ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+	zend_throw_error(NULL, "Cannot call abstract method %pS::%pS()",
+		fbc->common.scope->name, fbc->common.function_name);
 }
 /* }}} */
 
@@ -2082,9 +2082,9 @@ ZEND_API zend_function *zend_std_get_static_method(const zend_class_entry *ce, z
 			goto fail;
 		} else if (UNEXPECTED(fbc->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
 			zend_error(E_DEPRECATED,
-				"Calling static trait method %s::%s is deprecated, "
+				"Calling static trait method %pS::%pS is deprecated, "
 				"it should only be called on a class using the trait",
-				ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+				fbc->common.scope->name, fbc->common.function_name);
 			if (EG(exception)) {
 				goto fail;
 			}
@@ -2152,7 +2152,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 	if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
 undeclared_property:
 		if (type != BP_VAR_IS) {
-			zend_throw_error(NULL, "Access to undeclared static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+			zend_throw_error(NULL, "Access to undeclared static property %pS::$%pS", ce->name, property_name);
 		}
 		return NULL;
 	}
@@ -2173,16 +2173,16 @@ undeclared_property:
 
 	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
 				&& Z_TYPE_P(ret) == IS_UNDEF && ZEND_TYPE_IS_SET(property_info->type))) {
-		zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
-			ZSTR_VAL(property_info->ce->name), ZSTR_VAL(property_name));
+		zend_throw_error(NULL, "Typed static property %pS::$%pS must not be accessed before initialization",
+			property_info->ce->name, property_name);
 		return NULL;
 	}
 
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_TRAIT)) {
 		zend_error(E_DEPRECATED,
-			"Accessing static trait property %s::$%s is deprecated, "
+			"Accessing static trait property %pS::$%pS is deprecated, "
 			"it should only be accessed on a class using the trait",
-			ZSTR_VAL(property_info->ce->name), ZSTR_VAL(property_name));
+			property_info->ce->name, property_name);
 	}
 
 	return ret;
@@ -2197,22 +2197,22 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 
 ZEND_API ZEND_COLD void zend_std_unset_static_property(const zend_class_entry *ce, const zend_string *property_name) /* {{{ */
 {
-	zend_throw_error(NULL, "Attempt to unset static property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+	zend_throw_error(NULL, "Attempt to unset static property %pS::$%pS", ce->name, property_name);
 }
 /* }}} */
 
 static ZEND_COLD zend_never_inline void zend_bad_constructor_call(const zend_function *constructor, const zend_class_entry *scope) /* {{{ */
 {
 	if (scope) {
-		zend_throw_error(NULL, "Call to %s %s::__construct() from scope %s",
+		zend_throw_error(NULL, "Call to %s %pS::__construct() from scope %pS",
 			zend_visibility_string(constructor->common.fn_flags),
-			ZSTR_VAL(constructor->common.scope->name),
-			ZSTR_VAL(scope->name)
+			constructor->common.scope->name,
+			scope->name
 		);
 	} else {
-		zend_throw_error(NULL, "Call to %s %s::__construct() from global scope",
+		zend_throw_error(NULL, "Call to %s %pS::__construct() from global scope",
 			zend_visibility_string(constructor->common.fn_flags),
-			ZSTR_VAL(constructor->common.scope->name)
+			constructor->common.scope->name
 		);
 	}
 }
@@ -2269,8 +2269,8 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		if (Z_OBJ_HT_P(object)->cast_object(Z_OBJ_P(object), &casted, target_type) == FAILURE) {
 			// TODO: Less crazy.
 			if (target_type == IS_LONG || target_type == IS_DOUBLE) {
-				zend_error(E_NOTICE, "Object of class %s could not be converted to %s",
-						   ZSTR_VAL(Z_OBJCE_P(object)->name), zend_get_type_by_const(target_type));
+				zend_error(E_NOTICE, "Object of class %pS could not be converted to %s",
+						   Z_OBJCE_P(object)->name, zend_get_type_by_const(target_type));
 				if (target_type == IS_LONG) {
 					ZVAL_LONG(&casted, 1);
 				} else {
@@ -2451,8 +2451,8 @@ found:
 
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
-				zend_throw_error(NULL, "Cannot read from set-only virtual property %s::$%s",
-					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				zend_throw_error(NULL, "Cannot read from set-only virtual property %pS::$%pS",
+					zobj->ce->name, name);
 				return 0;
 			} else {
 				property_offset = prop_info->offset;
@@ -2598,7 +2598,7 @@ is_string:
 				}
 				zval_ptr_dtor(&retval);
 				if (!EG(exception)) {
-					zend_throw_error(NULL, "Method %s::__toString() must return a string value", ZSTR_VAL(ce->name));
+					zend_throw_error(NULL, "Method %pS::__toString() must return a string value", ce->name);
 				}
 			}
 			return FAILURE;
