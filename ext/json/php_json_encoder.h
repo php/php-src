@@ -35,6 +35,4 @@ zend_result php_json_encode_zval(smart_str *buf, zval *val, int options, php_jso
 
 zend_result php_json_escape_string(smart_str *buf, const char *s, size_t len, int options, php_json_encoder *encoder);
 
-void php_json_escape_dirty_table_init(void);
-
 #endif	/* PHP_JSON_ENCODER_H */

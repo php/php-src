@@ -22,6 +22,7 @@
 #include "zend_smart_str.h"
 #include "php_json.h"
 #include "php_json_encoder.h"
+#include "php_json_escape_table.h"
 #include "zend_portability.h"
 #include <zend_exceptions.h>
 #include "zend_enum.h"
@@ -29,18 +30,6 @@
 #include "zend_lazy_objects.h"
 
 static const char digits[] = "0123456789abcdef";
-
-static uint8_t php_json_escape_dirty_table[256];
-
-void php_json_escape_dirty_table_init(void)
-{
-	for (int b = 0; b < 256; b++) {
-		php_json_escape_dirty_table[b] =
-			b < 0x20 || b >= 0x80
-			|| b == '"' || b == '\\' || b == '/'
-			|| b == '<' || b == '>' || b == '&' || b == '\'';
-	}
-}
 
 static zend_always_inline bool php_json_check_stack_limit(void)
 {
