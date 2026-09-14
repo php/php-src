@@ -14,4 +14,4 @@ try {
 ?>
 --EXPECT--
 SoapFault
-SOAP-ERROR: Parsing WSDL: Couldn't bind to service
+SoapClient::__construct(): Parsing WSDL: Couldn't bind to service
