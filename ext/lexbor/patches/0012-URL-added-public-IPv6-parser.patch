@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Wed, 12 Aug 2026 23:29:20 +0300
-Subject: [PATCH 12/13] URL: added public IPv6 parser.
+Subject: [PATCH 12/15] URL: added public IPv6 parser.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
