@@ -154,6 +154,10 @@ PHP_FUNCTION(msg_set_queue)
 		if ((item = zend_hash_str_find(data, ZEND_STRL("msg_qbytes"))) != NULL) {
 			zend_long qbytes = zval_get_long(item);
 
+			if (ZEND_LONG_ULONG_UDFL(qbytes)) {
+				zend_argument_value_error(2, "\"msg_qbytes\" must be greater than or equal to 0");
+				RETURN_THROWS();
+			}
 			if (ZEND_LONG_ULONG_OVFL(qbytes)) {
 				zend_argument_value_error(2, "\"msg_qbytes\" must be less than or equal to %lu", ULONG_MAX);
 				RETURN_THROWS();
