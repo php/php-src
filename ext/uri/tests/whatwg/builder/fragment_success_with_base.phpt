@@ -1,11 +1,11 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder basic - success - with base URL
+Test Uri\WhatWg\UrlBuilder::setFragment() - success - with base URL
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setPath("/foo/bar/baz");
-$url = $builder->build(new Uri\WhatWg\Url("https://example.com"));
+$builder->setFragment("foo");
+$url = $builder->build(new Uri\WhatWg\Url("https://example.com/#bar"));
 
 var_dump($url->toAsciiString());
 var_dump($url);
@@ -13,7 +13,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(31) "https://example.com/foo/bar/baz"
+string(24) "https://example.com/#foo"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(5) "https"
@@ -26,10 +26,11 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  string(12) "/foo/bar/baz"
+  string(1) "/"
   ["query"]=>
   NULL
   ["fragment"]=>
-  NULL
+  string(3) "foo"
 }
 bool(true)
+
