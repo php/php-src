@@ -24,7 +24,7 @@ function phpt_has_sslv3() {
     if (!is_null($result)) {
         return $result;
     }
-    $server = @stream_socket_server('sslv3://127.0.0.1:10013');
+    $server = @stream_socket_server('sslv3://127.0.0.1:0');
     if ($result = !!$server) {
         fclose($server);
     }

@@ -1,6 +1,9 @@
 /* This is a generated file, edit pgsql.stub.php instead.
  * Stub hash: fa7cd778f4e791b15ffc8f1786384332449bda5a */
 
+#include "zend_attributes.h"
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")

@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setHost() - success - Registered name
+Test Uri\WhatWg\UrlBuilder::setHost() - success - registered name
 --FILE--
 <?php
 

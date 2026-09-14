@@ -41,7 +41,7 @@ enum cal_name_type_t {
 	CAL_NUM_CALS
 };
 
-typedef zend_long (*cal_to_jd_func_t) (int month, int day, int year);
+typedef zend_long (*cal_to_jd_func_t) (zend_long year, zend_long month, zend_long day);
 typedef void (*cal_from_jd_func_t) (zend_long jd, int *year, int *month, int *day);
 typedef char *(*cal_as_string_func_t) (int year, int month, int day);
 

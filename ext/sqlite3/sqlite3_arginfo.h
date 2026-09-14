@@ -1,6 +1,8 @@
 /* This is a generated file, edit sqlite3.stub.php instead.
  * Stub hash: 247f02e9b12b901b36bb863cf2a8e73b3d97a191 */
 
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE")

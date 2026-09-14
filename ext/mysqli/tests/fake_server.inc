@@ -721,19 +721,6 @@ function my_mysqli_test_auth_response_message_over_read(my_mysqli_fake_server_co
     $conn->read();
 }
 
-function my_mysqli_test_ok_packet_message_over_read(my_mysqli_fake_server_conn $conn): void
-{
-    $p = new my_mysqli_fake_packet();
-    $p->full = "08000001" . "00" . "00" . "00" . "0200" . "0000" . "fa";
-
-    $conn->send_server_greetings();
-    $conn->read_packets(1);
-    $conn->send_server_ok();
-    $conn->read_packets(1);
-    $conn->send($p->to_bytes(), "Malicious OK Packet [message length past the packet size]");
-    $conn->read();
-}
-
 function my_mysqli_test_stmt_response_row_over_read_string(my_mysqli_fake_server_conn $conn): void
 {
     $rh = $conn->packet_generator->server_stmt_execute_items_response();
@@ -827,50 +814,6 @@ function my_mysqli_test_stmt_response_row_read_two_fields(my_mysqli_fake_server_
         $conn->send_server_stmt_execute_data_response($field_name);
         $conn->read_packets(2);
     }
-}
-
-function my_mysqli_test_rset_field_metadata_len_over_read(my_mysqli_fake_server_conn $conn): void
-{
-    $rh = $conn->packet_generator->server_tabular_query_response();
-
-    $qr2 = new my_mysqli_fake_packet();
-    $qr2->packet_length = "0c0000";
-    $qr2->packet_number = "02";
-    $qr2->catalog_length_plus_name = "0161";
-    $qr2->db_length_plus_name = "0162";
-    $qr2->table_length_plus_name = "0163";
-    $qr2->original_t = "0164";
-    $qr2->name_length_plus_name = "0165";
-    $qr2->original_n = "fcff";
-
-    $conn->send_server_greetings();
-    $conn->read_packets(1);
-    $conn->send_server_ok();
-    $conn->read_packets(1);
-    $conn->send($conn->packets_to_bytes([$rh[0], $qr2]), "Malicious Tabular Response [metadata string length past the packet size]");
-    $conn->read();
-}
-
-function my_mysqli_test_rset_field_metadata_len_past_packet(my_mysqli_fake_server_conn $conn): void
-{
-    $rh = $conn->packet_generator->server_tabular_query_response();
-
-    $qr2 = new my_mysqli_fake_packet();
-    $qr2->packet_length = "0c0000";
-    $qr2->packet_number = "02";
-    $qr2->catalog_length_plus_name = "0161";
-    $qr2->db_length_plus_name = "0162";
-    $qr2->table_length_plus_name = "0163";
-    $qr2->original_t = "0164";
-    $qr2->name_length_plus_name = "0165";
-    $qr2->original_n = "0561";
-
-    $conn->send_server_greetings();
-    $conn->read_packets(1);
-    $conn->send_server_ok();
-    $conn->read_packets(1);
-    $conn->send($conn->packets_to_bytes([$rh[0], $qr2]), "Malicious Tabular Response [metadata string length past the packet size]");
-    $conn->read();
 }
 
 function my_mysqli_test_query_response_row_length_overflow(my_mysqli_fake_server_conn $conn): void

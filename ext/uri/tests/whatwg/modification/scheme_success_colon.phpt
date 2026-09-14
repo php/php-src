@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url component modification - scheme - trailing colon
+Test Uri\WhatWg\Url::withScheme() - success - trailing colon
 --FILE--
 <?php
 

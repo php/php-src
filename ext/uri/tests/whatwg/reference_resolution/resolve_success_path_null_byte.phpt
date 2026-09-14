@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\Url reference resolution - resolve() - null byte in path
+Test Uri\WhatWg\Url::resolve() - success - null byte in path
 --FILE--
 <?php
 

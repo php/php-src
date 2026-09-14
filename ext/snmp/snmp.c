@@ -1158,7 +1158,8 @@ static bool snmp_session_set_contextEngineID(struct snmp_session *s, zend_string
 	size_t	ebuf_len = 32, eout_len = 0;
 	uint8_t	*ebuf = (uint8_t *) emalloc(ebuf_len);
 
-	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, ZSTR_VAL(contextEngineID))) {
+	/* Disallow reallocation: ebuf comes from emalloc() and net-snmp would realloc() it. */
+	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 0, ZSTR_VAL(contextEngineID))) {
 		zend_argument_value_error(context_engine_id_arg_num, "must be a valid context engine ID");
 		efree(ebuf);
 		return false;

@@ -33,8 +33,8 @@ var_dump($output_invalid);
 try {
     var_dump(openssl_private_decrypt($encrypted_sha256, $output_invalid, $privkey, OPENSSL_PKCS1_OAEP_PADDING, "sha256\0extra"));
     var_dump($output_invalid);
-} catch (\ValueError $e) {
-    var_dump($e->getMessage());
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 openssl_public_encrypt($data, $encrypted_pkcs1, $pubkey, OPENSSL_PKCS1_PADDING);
@@ -52,6 +52,6 @@ NULL
 Warning: openssl_private_decrypt(): Unknown digest algorithm: invalid_hash in %s on line %d
 bool(false)
 NULL
-string(85) "openssl_private_decrypt(): Argument #5 ($digest_algo) must not contain any null bytes"
+ValueError: openssl_private_decrypt(): Argument #5 ($digest_algo) must not contain any null bytes
 bool(true)
 string(56) "Testing openssl_private_decrypt() with digest algorithms"

@@ -17,57 +17,57 @@ $options_6 = array("l_onoff" => "1", "l_linger" => PHP_INT_MAX);
 
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, new stdClass);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, $options_1);
-} catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_SNDTIMEO, $options_2);
-} catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_RCVTIMEO, "not good");
-} catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_LINGER, "not good neither");
-} catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_LINGER, $options_3);
-} catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_LINGER, $options_4);
-} catch (\TypeError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_LINGER, $options_5);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	socket_set_option( $socket, SOL_SOCKET, SO_LINGER, $options_6);
-} catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-socket_set_option(): Argument #4 ($value) must have key "sec"
+ValueError: socket_set_option(): Argument #4 ($value) must have key "sec"
 
 Warning: Object of class stdClass could not be converted to int in %s on line %d
-socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is SO_RCVTIMEO, string given
-socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is SO_LINGER, string given
-socket_set_option(): Argument #4 ($value) "l_onoff" must be between 0 and %d
-socket_set_option(): Argument #4 ($value) "l_linger" must be between 0 and %d
+TypeError: socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is SO_RCVTIMEO, string given
+TypeError: socket_set_option(): Argument #4 ($value) must be of type array when argument #3 ($option) is SO_LINGER, string given
+ValueError: socket_set_option(): Argument #4 ($value) "l_onoff" must be between 0 and %d
+ValueError: socket_set_option(): Argument #4 ($value) "l_linger" must be between 0 and %d

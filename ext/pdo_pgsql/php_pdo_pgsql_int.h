@@ -69,6 +69,7 @@ struct pdo_pgsql_stmt {
 	int                     current_row;
 	zend_long chunk_size;
 	bool is_prepared;
+	bool is_cursor_declared;
 	bool is_unbuffered;
 	bool is_running_unbuffered;
 };

@@ -447,7 +447,7 @@ slightly different steps. We'll call attention where the steps differ.
    # .
    #
    git add -p
-   git add archive/entries/*.xml
+   git add public/archive/entries/*.xml
    git commit --gpg-sign=YOURKEYID -m "Announce PHP X.Y.0RCn"
    git push upstream master
    ```
@@ -758,9 +758,9 @@ slightly different steps. We'll call attention where the steps differ.
    ./bin/createReleaseEntry -v X.Y.Z -r # --security for security releases
    ```
 
-   This will create a release file (i.e., `releases/X_Y_Z.php`) and a news entry
-   file (i.e., `archive/entries/YYYY-MM-DD-n.xml`), while also updating
-   `archive/archive.xml`.
+   This will create a release file (i.e., `public/releases/X_Y_Z.php`) and a news
+   entry file (i.e., `public/archive/entries/YYYY-MM-DD-n.xml`), while also
+   updating `public/archive/archive.xml`.
 
    Within these files, it will generate standard messages for the new version.
    You may edit the generated files to expand on the base message, if needed.
@@ -776,7 +776,7 @@ slightly different steps. We'll call attention where the steps differ.
    for PHP 8.4) added above the first anchor of the previous version.
 
    ```shell
-   ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'ChangeLog-X.php'
+   ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'public/ChangeLog-X.php'
    ```
 8. Update the information in the `$QA_RELEASES` array in `include/release-qa.php`.
 
@@ -792,7 +792,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    ```shell
    git add -p
-   git add archive/entries/*.xml releases/*.php
+   git add public/archive/entries/*.xml public/releases/*.php
    git commit --gpg-sign=YOURKEYID -m "Announce PHP X.Y.Z"
    git push upstream master
    ```
@@ -884,8 +884,8 @@ If you choose to create a patch-level release, follow these steps:
     * Call `php bin/createReleaseEntry -v <version> [ --security ]` in your
       local web-php checkout.
 
-4. Commit all the changes (`include/version.inc`, `archive/archive.xml`,
-   `archive/entries/YYYY-MM-DD-N.xml`).
+4. Commit all the changes (`include/version.inc`, `public/archive/archive.xml`,
+   `public/archive/entries/YYYY-MM-DD-N.xml`).
 
 5. Wait an hour or two, then send a mail to php-announce@lists.php.net,
    php-general@lists.php.net and internals@lists.php.net with a text similar to

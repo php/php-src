@@ -20,8 +20,6 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
-#include "zend_enum.h"
-#include "zend_attributes.h"
 #include "php_dom.h"
 #include "obj_map.h"
 #include "nodelist.h"

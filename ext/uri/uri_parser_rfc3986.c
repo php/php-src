@@ -703,7 +703,7 @@ static zend_always_inline zend_result php_uri_parser_rfc3986_validate_component_
 	return FAILURE;
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_scheme(const zend_string *scheme)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_scheme_validate(const zend_string *scheme)
 {
 	const char *p = ZSTR_VAL(scheme);
 	const size_t len = ZSTR_LEN(scheme);
@@ -712,7 +712,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_scheme(const 
 	return php_uri_parser_rfc3986_validate_component_result(well_formed, "scheme");
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_userinfo(const zend_string *userinfo)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_userinfo_validate(const zend_string *userinfo)
 {
 	const char *p = ZSTR_VAL(userinfo);
 	const size_t len = ZSTR_LEN(userinfo);
@@ -721,7 +721,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_userinfo(cons
 	return php_uri_parser_rfc3986_validate_component_result(well_formed, "userinfo");
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_host(const zend_string *host)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_host_validate(const zend_string *host)
 {
 	const char *p = ZSTR_VAL(host);
 	const size_t len = ZSTR_LEN(host);
@@ -758,7 +758,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_host(const ze
 	);
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_port(const zend_long port)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_port_validate(const zend_long port)
 {
 	char buf[MAX_LENGTH_OF_LONG + 1];
 	const char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, port);
@@ -768,7 +768,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_port(const ze
 	return php_uri_parser_rfc3986_validate_component_result(well_formed, "port");
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_path(const zend_string *path)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_path_validate(const zend_string *path)
 {
 	const char *p = ZSTR_VAL(path);
 	const size_t len = ZSTR_LEN(path);
@@ -779,7 +779,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_path(const ze
 	return php_uri_parser_rfc3986_validate_component_result(well_formed, "path");
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_query(const zend_string *query)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_query_validate(const zend_string *query)
 {
 	const char *p = ZSTR_VAL(query);
 	const size_t len = ZSTR_LEN(query);
@@ -788,7 +788,7 @@ ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_query(const z
 	return php_uri_parser_rfc3986_validate_component_result(well_formed, "query");
 }
 
-ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_validate_fragment(const zend_string *fragment)
+ZEND_ATTRIBUTE_NONNULL zend_result php_uri_parser_rfc3986_fragment_validate(const zend_string *fragment)
 {
 	const char *p = ZSTR_VAL(fragment);
 	const size_t len = ZSTR_LEN(fragment);

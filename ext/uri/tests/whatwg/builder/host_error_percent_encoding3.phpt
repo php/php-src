@@ -1,5 +1,5 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setHost() - error - invalid percent encoded octet in IPv4
+Test Uri\WhatWg\UrlBuilder::setHost() - error - invalid percent-encoded octet in IPv4
 --FILE--
 <?php
 
@@ -10,7 +10,7 @@ $builder->setHost("192.168.%8.1");
 try {
     $builder->build();
 } catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

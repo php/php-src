@@ -1,6 +1,9 @@
 /* This is a generated file, edit gd.stub.php instead.
  * Stub hash: 21f8a978b8e54da880315dd9dfeecaf0f7d5593b */
 
+#include "zend_attributes.h"
+#include "zend_constants.h"
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 

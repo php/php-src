@@ -32,7 +32,6 @@
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
 #include "php_memory_streams.h"
-#include "zend_attributes.h"
 #include "zend_object_handlers.h"
 
 #ifdef HAVE_SYS_WAIT_H
@@ -3422,14 +3421,16 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		im = php_gd_libgdimageptr_from_zval_p(IM);
 	}
 
+	uint32_t ptsize_arg_num = mode == TTFTEXT_BBOX ? 1 : 2;
+
 	// FT_F26Dot6 is a signed long alias
-	if (ptsize < (double)LONG_MIN / 64 || ptsize > (double)LONG_MAX / 64) {
-		zend_argument_value_error(2, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (zend_long)((double)LONG_MIN / 64), (zend_long)((double)LONG_MAX / 64));
+	if (ptsize < (double)LONG_MIN / 64 || ptsize >= (double)LONG_MAX / 64) {
+		zend_argument_value_error(ptsize_arg_num, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (zend_long)(LONG_MIN / 64), (zend_long)(LONG_MAX / 64));
 		RETURN_THROWS();
 	}
 
 	if (UNEXPECTED(!zend_finite(ptsize))) {
-		zend_argument_value_error(2, "must be finite");
+		zend_argument_value_error(ptsize_arg_num, "must be finite");
 		RETURN_THROWS();
 	}
 

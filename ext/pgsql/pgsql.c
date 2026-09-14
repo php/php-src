@@ -35,7 +35,6 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
-#include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "php_network.h"
 
@@ -2831,7 +2830,7 @@ PHP_FUNCTION(pg_lo_write)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_id, pgsql_lob_ce)
-		Z_PARAM_PATH_STR(str)
+		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(z_len, z_len_is_null)
 	ZEND_PARSE_PARAMETERS_END();

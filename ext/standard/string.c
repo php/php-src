@@ -651,12 +651,68 @@ PHP_FUNCTION(rtrim)
 }
 /* }}} */
 
+ZEND_FRAMELESS_FUNCTION(rtrim, 1)
+{
+	zval str_tmp;
+	zend_string *str;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, /* what */ NULL, /* what_len */ 0, /* mode */ 2));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+}
+
+ZEND_FRAMELESS_FUNCTION(rtrim, 2)
+{
+	zval str_tmp, what_tmp;
+	zend_string *str, *what;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR(2, what, what_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 2));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_STR(2, what_tmp);
+}
+
 /* {{{ Strips whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
 	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 1)
+{
+	zval str_tmp;
+	zend_string *str;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, /* what */ NULL, /* what_len */ 0, /* mode */ 1));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+}
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 2)
+{
+	zval str_tmp, what_tmp;
+	zend_string *str, *what;
+
+	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR(2, what, what_tmp);
+
+	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 1));
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_STR(2, what_tmp);
+}
 
 /* {{{ Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
@@ -865,7 +921,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 		to_return = limit + found;
 		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
 		for (i = 0; i < to_return; i++) { /* this checks also for to_return > 0 */
-			ZVAL_STRINGL(&tmp, positions[i], (positions[i+1] - ZSTR_LEN(delim)) - positions[i]);
+			ZVAL_STRINGL_FAST(&tmp, positions[i], (positions[i+1] - ZSTR_LEN(delim)) - positions[i]);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 		efree((void *)positions);
@@ -3848,7 +3904,11 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, const char 
 					case '\v': *target++ = 'v'; break;
 					case '\b': *target++ = 'b'; break;
 					case '\f': *target++ = 'f'; break;
-					default: target += snprintf(target, 4, "%03o", (unsigned char) c);
+					default:
+						/* Write the byte as three octal digits, including leading zeros. */
+						*target++ = ((unsigned char) c >> 6) + '0';
+						*target++ = (((unsigned char) c >> 3) & 7) + '0';
+						*target++ = ((unsigned char) c & 7) + '0';
 				}
 				continue;
 			}
@@ -5835,13 +5895,15 @@ static void php_str_pad_fill(zend_string *result, size_t pad_chars, const char *
 		return;
 	}
 
+	const char *start = p;
 	const char *end = p + pad_chars;
-	while (p + pad_str_len <= end) {
-		p = zend_mempcpy(p, pad_str, pad_str_len);
-	}
+	size_t len = MIN(pad_str_len, pad_chars);
+	p = zend_mempcpy(p, pad_str, len);
 
-	if (p < end) {
-		memcpy(p, pad_str, end - p);
+	/* Double the filled area on each iteration. */
+	while (p < end) {
+		len = MIN(p - start, end - p);
+		p = zend_mempcpy(p, start, len);
 	}
 
 	ZSTR_LEN(result) += pad_chars;

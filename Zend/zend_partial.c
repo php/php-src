@@ -472,7 +472,9 @@ static zend_ast *zp_attribute_to_ast(zend_attribute *attribute)
 	if (attribute->argc) {
 		args_ast = zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST);
 		for (uint32_t i = 0; i < attribute->argc; i++) {
-			zend_ast *arg_ast = zend_ast_create_zval(&attribute->args[i].value);
+			zval *zv = &attribute->args[i].value;
+			Z_TRY_ADDREF_P(zv);
+			zend_ast *arg_ast = zend_ast_create_zval(zv);
 			if (attribute->args[i].name) {
 				arg_ast = zend_ast_create(ZEND_AST_NAMED_ARG,
 						zend_ast_create_zval_from_str(
@@ -561,6 +563,7 @@ static zend_ast *zp_compile_forwarding_call(
 			args_ast = zend_ast_list_add(args_ast, default_value_ast);
 		} else if (zp_is_const_arg(const_args, offset)) {
 			ZEND_ASSERT(Z_TYPE(argv[offset]) < IS_OBJECT);
+			ZEND_ASSERT(!Z_REFCOUNTED(argv[offset]));
 
 			/* This argument never changes, so we can burn it into the op_array
 			 * and check its type ahead of time. */

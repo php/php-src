@@ -1167,6 +1167,9 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 		const zend_op *opline = NULL;
 		int call_level = 0;
 
+		/* Scan trace buffer forward to find the first recorded opline after
+		 * the sequence of ZEND_JIT_TRACE_INIT_CALL, and keep track of the
+		 * call level. */
 		p++;
 		while (1) {
 			if (p->op == ZEND_JIT_TRACE_VM) {
@@ -1178,8 +1181,9 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 			} else {
 				return NULL;
 			}
-			p--;
+			p++;
 		}
+		/* Scan oplines backward to find the init fcall op */
 		if (opline) {
 			while (opline > op_array->opcodes) {
 				opline--;

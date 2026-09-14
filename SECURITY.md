@@ -36,6 +36,13 @@ are not limited to):
 
 - Malicious `unserialize()` inputs.
 
+- Memory exhaustion from a size the input declares, where `memory_limit`
+  refuses the allocation and only the current request dies.
+
+When creating reports, please **skip** the theatrics. Drop the impact essay,
+send a short reproducer with the few lines that matter, and make each point
+once. This allows us to triage and respond to your report quickly.
+
 # Vulnerability Policy
 
 Our full policy is described at

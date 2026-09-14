@@ -65,8 +65,7 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 {
 	int rc = SUCCESS;
 	zval str1, str2;
-	zval num1, num2;
-	zval norm1, norm2;
+	zval tmp1, tmp2;
 	zval *num1_p = nullptr, *num2_p = nullptr;
 	zval *norm1_p = nullptr, *norm2_p = nullptr;
 	zval *str1_p = nullptr, *str2_p = nullptr;
@@ -87,8 +86,8 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	/* If both args are strings AND either of args is not numeric string
 	 * then use ICU-compare. Otherwise PHP-compare. */
 	if( Z_TYPE_P(str1_p) == IS_STRING && Z_TYPE_P(str2_p) == IS_STRING &&
-		( str1_p == ( num1_p = collator_convert_string_to_number_if_possible( str1_p, &num1 ) ) ||
-		  str2_p == ( num2_p = collator_convert_string_to_number_if_possible( str2_p, &num2 ) ) ) )
+		( str1_p == ( num1_p = collator_convert_string_to_number_if_possible( str1_p, &tmp1 ) ) ||
+		  str2_p == ( num2_p = collator_convert_string_to_number_if_possible( str2_p, &tmp2 ) ) ) )
 	{
 		/* Compare the strings using ICU. */
 		ZEND_ASSERT(INTL_G(current_collator) != nullptr);
@@ -99,49 +98,28 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	}
 	else
 	{
-		/* num1 is set if str1 and str2 are strings. */
+		/* num1 is set only if str1 and str2 are both numeric strings. */
 		if( num1_p )
 		{
-			if( num1_p == str1_p )
-			{
-				/* str1 is string but not numeric string
-				 * just convert it to utf8.
-				 */
-				norm1_p = collator_convert_zstr_utf16_to_utf8( str1_p, &norm1 );
-				if( norm1_p == nullptr ) {
-					rc = FAILURE;
-					goto cleanup;
-				}
+			/* str1 is numeric strings => passthru to PHP-compare. */
+			Z_TRY_ADDREF_P(num1_p);
+			norm1_p = num1_p;
 
-				/* num2 is not set but str2 is string => do normalization. */
-				norm2_p = collator_normalize_sort_argument( str2_p, &norm2 );
-				if( norm2_p == nullptr ) {
-					rc = FAILURE;
-					goto cleanup;
-				}
-			}
-			else
-			{
-				/* str1 is numeric strings => passthru to PHP-compare. */
-				Z_TRY_ADDREF_P(num1_p);
-				norm1_p = num1_p;
-
-				/* str2 is numeric strings => passthru to PHP-compare. */
-				Z_TRY_ADDREF_P(num2_p);
-				norm2_p = num2_p;
-			}
+			/* str2 is numeric strings => passthru to PHP-compare. */
+			Z_TRY_ADDREF_P(num2_p);
+			norm2_p = num2_p;
 		}
 		else
 		{
 			/* num1 is not set if str1 or str2 is not a string => do normalization. */
-			norm1_p = collator_normalize_sort_argument( str1_p, &norm1 );
+			norm1_p = collator_normalize_sort_argument( str1_p, &tmp1 );
 			if( norm1_p == nullptr ) {
 				rc = FAILURE;
 				goto cleanup;
 			}
 
 			/* if num1 is not set then num2 is not set as well => do normalization. */
-			norm2_p = collator_normalize_sort_argument( str2_p, &norm2 );
+			norm2_p = collator_normalize_sort_argument( str2_p, &tmp2 );
 			if( norm2_p == nullptr ) {
 				rc = FAILURE;
 				goto cleanup;

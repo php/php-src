@@ -1,6 +1,8 @@
 /* This is a generated file, edit pdo_odbc.stub.php instead.
  * Stub hash: 9136c911494c9e3462c49b3e58f4bcc15ebb2a9c */
 
+#include "zend_constants.h"
+
 static void register_pdo_odbc_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("PDO_ODBC_TYPE", PDO_ODBC_TYPE, CONST_PERSISTENT);
