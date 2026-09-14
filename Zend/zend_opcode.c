@@ -777,6 +777,22 @@ static void emit_live_range(
 			kind = ZEND_LIVE_LOOP;
 			start++;
 			break;
+		case ZEND_JMP_SET:
+		case ZEND_COALESCE:
+			/* These opcodes only write their result on the branch they take.
+			 * The live range must therefore start at the jump target, not
+			 * behind the definition, or it would also cover the fall-through
+			 * path on which the result was never written. */
+			if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
+				return;
+			}
+			kind = ZEND_LIVE_TMPVAR;
+			start = OP_JMP_ADDR(def_opline, def_opline->op2) - op_array->opcodes;
+			if (start >= end) {
+				/* The result is freed right at the jump target. */
+				return;
+			}
+			break;
 		/* Objects created via ZEND_NEW are only fully initialized
 		 * after the DO_FCALL (constructor call).
 		 * We are creating two live-ranges: ZEND_LINE_NEW for uninitialized
