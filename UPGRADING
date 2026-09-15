@@ -20,6 +20,9 @@ PHP 8.6 UPGRADE NOTES
 ========================================
 
 - Core:
+  . By-reference foreach loops may now visit previously skipped elements
+    after array compaction. Internal pointers on deleted elements now move
+    to the next surviving element during copy-on-write.
   . ??/empty() on a magic property no longer call __get() when __isset()
     has materialized the property by writing into the property table.
     The freshly-written value is returned directly. isset() is unaffected.
