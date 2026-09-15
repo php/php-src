@@ -1424,20 +1424,20 @@ PHP_FUNCTION(error_get_last)
 		array_init(return_value);
 
 		ZVAL_LONG(&tmp, PG(last_error_type));
-		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
+		zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TYPE), &tmp);
 
 		ZVAL_STR_COPY(&tmp, PG(last_error_message));
-		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
+		zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
 
 		ZVAL_STR_COPY(&tmp, PG(last_error_file));
-		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+		zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 
 		ZVAL_LONG(&tmp, (zend_long)PG(last_error_lineno));
-		zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+		zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 
 		if (!Z_ISUNDEF(EG(last_fatal_error_backtrace))) {
 			ZVAL_COPY(&tmp, &EG(last_fatal_error_backtrace));
-			zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TRACE), &tmp);
+			zend_hash_add_new(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_TRACE), &tmp);
 		}
 	}
 }
