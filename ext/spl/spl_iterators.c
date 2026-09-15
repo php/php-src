@@ -18,7 +18,9 @@
 
 #include "php.h"
 #include "zend_exceptions.h"
+#include "zend_generators.h"
 #include "zend_interfaces.h"
+#include "zend_weakrefs.h"
 #include "ext/pcre/php_pcre.h"
 
 #include "spl_iterators.h"
@@ -120,6 +122,7 @@ typedef struct _spl_dual_it_object {
 		struct {
 			zval                  zarrayit;
 			zend_object_iterator *iterator;
+			HashTable            *empty_generators;
 		} append;
 		struct {
 			zend_long        flags;
@@ -2024,6 +2027,11 @@ static void spl_dual_it_free_storage(zend_object *_object)
 
 	if (object->dit_type == DIT_AppendIterator) {
 		zend_iterator_dtor(object->u.append.iterator);
+		if (object->u.append.empty_generators) {
+			zend_weakrefs_hash_destroy(object->u.append.empty_generators);
+			FREE_HASHTABLE(object->u.append.empty_generators);
+			object->u.append.empty_generators = NULL;
+		}
 		if (Z_TYPE(object->u.append.zarrayit) != IS_UNDEF) {
 			zval_ptr_dtor(&object->u.append.zarrayit);
 		}
@@ -2783,6 +2791,13 @@ static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{
 		it  = intern->u.append.iterator->funcs->get_current_data(intern->u.append.iterator);
 		ZVAL_COPY(&intern->inner.zobject, it);
 		intern->inner.ce = Z_OBJCE_P(it);
+		if (intern->u.append.empty_generators) {
+			zval *dummy = zend_hash_index_find(intern->u.append.empty_generators,
+				zend_object_to_weakref_key(Z_OBJ_P(it)));
+			if (dummy) {
+				return SUCCESS;
+			}
+		}
 		intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, it, 0);
 		spl_dual_it_rewind(intern);
 		return SUCCESS;
@@ -2791,9 +2806,43 @@ static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{
 	}
 } /* }}} */
 
+static void spl_append_it_record_empty_generator(spl_dual_it_object *intern) /* {{{ */
+{
+	if (EG(exception)) {
+		return;
+	}
+
+	if (!intern->u.append.empty_generators) {
+		ALLOC_HASHTABLE(intern->u.append.empty_generators);
+		zend_hash_init(intern->u.append.empty_generators, 0, NULL, ZVAL_PTR_DTOR, 0);
+	}
+
+	zval *dummy = zend_hash_index_find(intern->u.append.empty_generators,
+		zend_object_to_weakref_key(Z_OBJ(intern->inner.zobject)));
+	if (!dummy) {
+		zval empty_zval;
+		ZVAL_NULL(&empty_zval);
+		dummy = zend_weakrefs_hash_add(intern->u.append.empty_generators,
+			Z_OBJ(intern->inner.zobject), &empty_zval);
+		ZEND_ASSERT(dummy != NULL);
+	}
+} /* }}} */
+
 static void spl_append_it_fetch(spl_dual_it_object *intern) /* {{{*/
 {
-	while (spl_dual_it_valid(intern) != SUCCESS) {
+	while (true) {
+		if (spl_dual_it_valid(intern) == SUCCESS) {
+			break;
+		}
+		if (intern->inner.ce == zend_ce_generator) {
+			zend_generator *generator = (zend_generator *) Z_OBJ(intern->inner.zobject);
+			/* A generator that finished while initialising never yielded, so it is
+			 * empty and can be skipped. One that yielded was consumed and still
+			 * reports "Cannot rewind a generator that was already run". */
+			if (generator->flags & ZEND_GENERATOR_AT_FIRST_YIELD) {
+				spl_append_it_record_empty_generator(intern);
+			}
+		}
 		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator);
 		if (spl_append_it_next_iterator(intern) != SUCCESS) {
 			return;
@@ -2824,6 +2873,7 @@ PHP_METHOD(AppendIterator, __construct)
 	}
 
 	intern->dit_type = DIT_AppendIterator;
+	intern->u.append.empty_generators = NULL;
 	object_init_with_constructor(&intern->u.append.zarrayit, spl_ce_ArrayIterator, 0, NULL, NULL);
 	intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
 
