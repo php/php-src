@@ -366,9 +366,16 @@ PHP_FUNCTION(get_meta_tags)
 
 	if (value) efree(value);
 	if (name) efree(name);
-	php_stream_close(md.stream);
 
-	php_stream_error_operation_end_for_stream(md.stream);
+	php_stream_context *context = PHP_STREAM_CONTEXT(md.stream);
+	if (context) {
+		GC_ADDREF(context->res);
+	}
+	php_stream_close(md.stream);
+	php_stream_error_operation_end(context);
+	if (context) {
+		zend_list_delete(context->res);
+	}
 }
 /* }}} */
 
@@ -775,11 +782,18 @@ PHPAPI PHP_FUNCTION(fclose)
 		RETURN_FALSE;
 	}
 
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+	if (context) {
+		GC_ADDREF(context->res);
+	}
 	php_stream_error_operation_begin();
 	php_stream_free(stream,
 		PHP_STREAM_FREE_KEEP_RSRC |
 		(stream->is_persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE));
-	php_stream_error_operation_end_for_stream(stream);
+	php_stream_error_operation_end(context);
+	if (context) {
+		zend_list_delete(context->res);
+	}
 
 	RETURN_TRUE;
 }
@@ -851,11 +865,18 @@ PHP_FUNCTION(pclose)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+	if (context) {
+		GC_ADDREF(context->res);
+	}
 	php_stream_error_operation_begin();
 	FG(pclose_wait) = 1;
 	zend_list_close(stream->res);
 	FG(pclose_wait) = 0;
-	php_stream_error_operation_end_for_stream(stream);
+	php_stream_error_operation_end(context);
+	if (context) {
+		zend_list_delete(context->res);
+	}
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */

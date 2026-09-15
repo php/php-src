@@ -178,9 +178,8 @@ static php_stream_error_store php_stream_get_error_store_mode(
 
 /* Helper functions */
 
-static bool php_stream_has_terminating_error(const php_stream_error_operation *op)
+static bool php_stream_has_terminating_error(const php_stream_error_entry *entry)
 {
-	const php_stream_error_entry *entry = op->first_error;
 	while (entry) {
 		if (entry->terminating) {
 			return true;
@@ -207,11 +206,11 @@ static inline php_stream_error_operation *php_stream_get_parent_operation(void)
 {
 	const php_stream_error_state *state = &FG(stream_error_state);
 
-	if (state->operation_depth <= 1) {
+	if (state->operation_depth <= state->operation_floor) {
 		return NULL;
 	}
 
-	return php_stream_get_operation_at_depth(state->operation_depth - 2);
+	return php_stream_get_operation_at_depth(state->operation_depth - 1);
 }
 
 /* Clean up functions */
@@ -232,6 +231,8 @@ PHPAPI void php_stream_error_state_cleanup(void)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
 
+	state->operation_floor = 0;
+	state->refused_operations = 0;
 	while (state->current_operation) {
 		php_stream_error_operation *op = state->current_operation;
 		state->operation_depth--;
@@ -301,6 +302,7 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 		php_error_docref(NULL, E_WARNING,
 				"Stream error operation depth exceeded (%"PRIu32"), possible infinite recursion",
 				state->operation_depth);
+		state->refused_operations++;
 		return NULL;
 	}
 
@@ -337,7 +339,10 @@ static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wra
 		zend_string *message, const char *docref, int severity, bool terminating)
 {
 	php_stream_error_operation *op = FG(stream_error_state).current_operation;
-	ZEND_ASSERT(op != NULL);
+	if (!op) {
+		zend_string_release(message);
+		return;
+	}
 
 	php_stream_error_entry *entry = emalloc(sizeof(php_stream_error_entry));
 	entry->message = message;
@@ -375,9 +380,9 @@ static void php_stream_call_error_handler(const zval *handler, zval *errors_arra
 	zend_call_known_fcc(&fcc, NULL, 1, errors_array, NULL);
 }
 
-static void php_stream_throw_exception_with_errors(const php_stream_error_operation *op)
+static void php_stream_throw_exception_with_errors(const php_stream_error_entry *first_error)
 {
-	if (!op->first_error) {
+	if (!first_error) {
 		return;
 	}
 
@@ -386,27 +391,27 @@ static void php_stream_throw_exception_with_errors(const php_stream_error_operat
 
 	/* Set message from first error */
 	zend_update_property_str(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("message"),
-			op->first_error->message);
+			first_error->message);
 
 	/* Set code from first error */
 	zend_update_property_long(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("code"),
-			(zend_long) op->first_error->code);
+			(zend_long) first_error->code);
 
 	/* Build errors array and set it */
 	zval errors_array;
-	php_stream_error_create_array(&errors_array, op->first_error);
+	php_stream_error_create_array(&errors_array, first_error);
 	zend_update_property(php_ce_stream_exception, Z_OBJ(ex), ZEND_STRL("errors"), &errors_array);
 	zval_ptr_dtor(&errors_array);
 
 	zend_throw_exception_object(&ex);
 }
 
-static void php_stream_report_errors(const php_stream_context *context, const php_stream_error_operation *op,
+static void php_stream_report_errors(const php_stream_context *context, const php_stream_error_entry *first_error,
 		php_stream_error_mode error_mode, bool is_terminating)
 {
 	switch (error_mode) {
 		case PHP_STREAM_ERROR_MODE_ERROR: {
-			const php_stream_error_entry *entry = op->first_error;
+			const php_stream_error_entry *entry = first_error;
 			while (entry) {
 				php_error_docref(entry->docref, entry->severity, "%s", ZSTR_VAL(entry->message));
 				entry = entry->next;
@@ -416,7 +421,7 @@ static void php_stream_report_errors(const php_stream_context *context, const ph
 
 		case PHP_STREAM_ERROR_MODE_EXCEPTION: {
 			if (is_terminating) {
-				php_stream_throw_exception_with_errors(op);
+				php_stream_throw_exception_with_errors(first_error);
 			}
 			break;
 		}
@@ -431,7 +436,7 @@ static void php_stream_report_errors(const php_stream_context *context, const ph
 
 	if (handler) {
 		zval errors_array;
-		php_stream_error_create_array(&errors_array, op->first_error);
+		php_stream_error_create_array(&errors_array, first_error);
 
 		php_stream_call_error_handler(handler, &errors_array);
 
@@ -446,97 +451,121 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 	php_stream_error_state *state = &FG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
 
+	if (state->refused_operations > 0) {
+		state->refused_operations--;
+		return;
+	}
+
 	if (!op) {
 		return;
 	}
 
-	if (op->error_count > 0) {
-		if (context == NULL) {
-			context = FG(default_context);
-		}
-
-		php_stream_error_mode error_mode = php_stream_get_error_mode(context);
-		php_stream_error_store store_mode = php_stream_get_error_store_mode(context, error_mode);
-
-		bool is_terminating = php_stream_has_terminating_error(op);
-
-		php_stream_report_errors(context, op, error_mode, is_terminating);
-
-		if (store_mode == PHP_STREAM_ERROR_STORE_NONE) {
-			php_stream_error_entry_free(op->first_error);
-			op->first_error = NULL;
-		} else {
-			php_stream_error_entry *entry = op->first_error;
-			php_stream_error_entry *prev = NULL;
-			php_stream_error_entry *to_store_first = NULL;
-			php_stream_error_entry *to_store_last = NULL;
-			uint32_t to_store_count = 0;
-			php_stream_error_entry *remaining_first = NULL;
-
-			while (entry) {
-				php_stream_error_entry *next = entry->next;
-				bool should_store = false;
-
-				if (store_mode == PHP_STREAM_ERROR_STORE_ALL) {
-					should_store = true;
-				} else if (store_mode == PHP_STREAM_ERROR_STORE_NON_TERM && !entry->terminating) {
-					should_store = true;
-				} else if (store_mode == PHP_STREAM_ERROR_STORE_TERMINAL && entry->terminating) {
-					should_store = true;
-				}
-
-				if (should_store) {
-					entry->next = NULL;
-					if (to_store_last) {
-						to_store_last->next = entry;
-					} else {
-						to_store_first = entry;
-					}
-					to_store_last = entry;
-					to_store_count++;
-				} else {
-					entry->next = NULL;
-					if (prev) {
-						prev->next = entry;
-					} else {
-						remaining_first = entry;
-					}
-					prev = entry;
-				}
-
-				entry = next;
-			}
-
-			if (to_store_first) {
-				php_stream_stored_error *stored = emalloc(sizeof(php_stream_stored_error));
-				stored->first_error = to_store_first;
-				stored->error_count = to_store_count;
-				stored->next = state->stored_errors;
-
-				state->stored_errors = stored;
-				state->stored_count++;
-			}
-
-			if (remaining_first) {
-				php_stream_error_entry_free(remaining_first);
-			}
-
-			op->first_error = NULL;
-		}
-	}
+	php_stream_error_entry *first_error = op->first_error;
+	op->first_error = NULL;
+	op->last_error = NULL;
+	op->error_count = 0;
 
 	state->operation_depth--;
 	state->current_operation = php_stream_get_parent_operation();
 
-	op->first_error = NULL;
-	op->last_error = NULL;
-	op->error_count = 0;
+	if (!first_error) {
+		return;
+	}
+
+	if (context == NULL) {
+		context = FG(default_context);
+	}
+
+	php_stream_error_mode error_mode = php_stream_get_error_mode(context);
+	php_stream_error_store store_mode = php_stream_get_error_store_mode(context, error_mode);
+
+	bool is_terminating = php_stream_has_terminating_error(first_error);
+
+	if (context) {
+		GC_ADDREF(context->res);
+	}
+
+	uint32_t saved_floor = state->operation_floor;
+	state->operation_floor = state->operation_depth;
+	state->current_operation = NULL;
+	php_stream_report_errors(context, first_error, error_mode, is_terminating);
+	state->operation_floor = saved_floor;
+	state->current_operation = php_stream_get_parent_operation();
+
+	if (context) {
+		zend_list_delete(context->res);
+	}
+
+	if (store_mode == PHP_STREAM_ERROR_STORE_NONE) {
+		php_stream_error_entry_free(first_error);
+		return;
+	}
+
+	php_stream_error_entry *entry = first_error;
+	php_stream_error_entry *prev = NULL;
+	php_stream_error_entry *to_store_first = NULL;
+	php_stream_error_entry *to_store_last = NULL;
+	uint32_t to_store_count = 0;
+	php_stream_error_entry *remaining_first = NULL;
+
+	while (entry) {
+		php_stream_error_entry *next = entry->next;
+		bool should_store = false;
+
+		if (store_mode == PHP_STREAM_ERROR_STORE_ALL) {
+			should_store = true;
+		} else if (store_mode == PHP_STREAM_ERROR_STORE_NON_TERM && !entry->terminating) {
+			should_store = true;
+		} else if (store_mode == PHP_STREAM_ERROR_STORE_TERMINAL && entry->terminating) {
+			should_store = true;
+		}
+
+		if (should_store) {
+			entry->next = NULL;
+			if (to_store_last) {
+				to_store_last->next = entry;
+			} else {
+				to_store_first = entry;
+			}
+			to_store_last = entry;
+			to_store_count++;
+		} else {
+			entry->next = NULL;
+			if (prev) {
+				prev->next = entry;
+			} else {
+				remaining_first = entry;
+			}
+			prev = entry;
+		}
+
+		entry = next;
+	}
+
+	if (to_store_first) {
+		php_stream_stored_error *stored = emalloc(sizeof(php_stream_stored_error));
+		stored->first_error = to_store_first;
+		stored->error_count = to_store_count;
+		stored->next = state->stored_errors;
+
+		state->stored_errors = stored;
+		state->stored_count++;
+	}
+
+	if (remaining_first) {
+		php_stream_error_entry_free(remaining_first);
+	}
 }
 
 PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
+
+	if (state->refused_operations > 0) {
+		state->refused_operations--;
+		return;
+	}
 
 	if (!op) {
 		return;
@@ -559,6 +588,11 @@ PHPAPI void php_stream_error_operation_abort(void)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
+
+	if (state->refused_operations > 0) {
+		state->refused_operations--;
+		return;
+	}
 
 	if (!op) {
 		return;
