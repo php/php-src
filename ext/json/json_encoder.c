@@ -27,8 +27,31 @@
 #include "zend_enum.h"
 #include "zend_property_hooks.h"
 #include "zend_lazy_objects.h"
+#include "zend_simd.h"
+#include "zend_bitset.h"
 
 static const char digits[] = "0123456789abcdef";
+
+#ifdef XSSE2
+/* Bytes that need escaping: < 0x20, >= 0x80, and the ASCII specials
+ * " \ / < > & '. Must be kept in sync with the `charmap` bitmap used by
+ * the scalar loop in php_json_escape_string(). _mm_cmplt_epi8() is a
+ * signed compare, so "< 0x20" already covers every byte >= 0x80 (negative
+ * as a signed int8), which is why there's no separate high-bit test. */
+static zend_always_inline __m128i php_json_escape_dirty_mask(__m128i chunk)
+{
+	__m128i dirty = _mm_cmplt_epi8(chunk, _mm_set1_epi8(0x20));
+
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('"')));
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('\\')));
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('/')));
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('<')));
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('>')));
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('&')));
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('\'')));
+	return dirty;
+}
+#endif
 
 static zend_always_inline bool php_json_check_stack_limit(void)
 {
@@ -379,7 +402,8 @@ zend_result php_json_escape_string(
 
 	/* pre-allocate for string length plus 2 quotes */
 	smart_str_alloc(buf, len+2, 0);
-	smart_str_appendc(buf, '"');
+	ZSTR_VAL(buf->s)[ZSTR_LEN(buf->s)] = '"';
+	ZSTR_LEN(buf->s)++;
 
 	pos = 0;
 
@@ -387,6 +411,58 @@ zend_result php_json_escape_string(
 		static const uint32_t charmap[8] = {
 			0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
 			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+
+#ifdef XSSE2
+#if defined(__aarch64__) || defined(_M_ARM64)
+		while (len >= sizeof(__m128i)) {
+			if (UNEXPECTED(ZEND_BIT_TEST(charmap, (unsigned char) s[pos]))) {
+				break;
+			}
+
+			__m128i chunk = _mm_loadu_si128((const __m128i *)(s + pos));
+			__m128i dirty = php_json_escape_dirty_mask(chunk);
+			uint8x16_t dirty_u8 = vreinterpretq_u8_s8(dirty);
+
+			if (vmaxvq_u8(dirty_u8) == 0) {
+				pos += sizeof(__m128i);
+				len -= sizeof(__m128i);
+				continue;
+			}
+			{
+				static const uint8_t lane_index[16] = {
+					0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+				uint8x16_t masked_idx = vbslq_u8(dirty_u8, vld1q_u8(lane_index), vdupq_n_u8(0xff));
+				size_t clean = vminvq_u8(masked_idx);
+				pos += clean;
+				len -= clean;
+			}
+			break;
+		}
+#else
+		while (len >= sizeof(__m128i)) {
+			if (UNEXPECTED(ZEND_BIT_TEST(charmap, (unsigned char) s[pos]))) {
+				break;
+			}
+
+			__m128i chunk = _mm_loadu_si128((const __m128i *)(s + pos));
+			__m128i dirty = php_json_escape_dirty_mask(chunk);
+
+			int mask = _mm_movemask_epi8(dirty);
+			if (mask != 0) {
+				size_t clean = zend_ulong_ntz((zend_ulong) (unsigned int) mask);
+				pos += clean;
+				len -= clean;
+				break;
+			}
+			pos += sizeof(__m128i);
+			len -= sizeof(__m128i);
+		}
+#endif
+		if (len == 0) {
+			smart_str_appendl(buf, s, pos);
+			break;
+		}
+#endif
 
 		unsigned int us = (unsigned char)s[pos];
 		if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
