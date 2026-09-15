@@ -1,7 +1,5 @@
 --TEST--
 stream_filter_register() with a class name exist that mocks php_user_filter with a filter method
---XFAIL--
-This leaks memory
 --FILE--
 <?php
 
