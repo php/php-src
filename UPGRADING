@@ -126,6 +126,10 @@ PHP 8.6 UPGRADE NOTES
     if ".phar" occurs as an extension in the filename component of their
     paths. Previously, it could occur in a directory name or as part of an
     extension such as ".pharma".
+  . Phar::buildFromIterator() now raises a BadMethodCallException when a
+    SplFileInfo::getMTime() override returns a negative timestamp on a 32bit
+    platform. It used to store the value as if it were unsigned. 64bit
+    platforms already rejected it.
 
 - Posix:
   . posix_access() now raises a ValueError when an invalid $flags
@@ -317,6 +321,11 @@ PHP 8.6 UPGRADE NOTES
   . shm_attach() now raises a ValueError when the $key argument is outside the
     platform's key_t range instead of passing a truncated key to the operating
     system.
+
+- Windows:
+  . sapi_windows_cp_set() and sapi_windows_cp_conv() now raise a ValueError
+    when a codepage argument is negative on a 32bit platform instead of
+    passing it on as if it were unsigned. 64bit platforms already rejected it.
 
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the files argument if one

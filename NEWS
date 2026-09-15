@@ -26,14 +26,26 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
+  . Fixed mbstring.regex_retry_limit being ignored rather than applied for
+    values above the range of an unsigned int. (Marc Bennewitz)
+  . Fixed mb_ereg_match() applying mbstring.regex_stack_limit and
+    mbstring.regex_retry_limit differently than the other regex functions.
+    (Marc Bennewitz)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
+
+- Phar:
+  . Fixed Phar::buildFromIterator() accepting a negative getMTime() on a 32bit
+    platform instead of rejecting it. (Marc Bennewitz)
 
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
     __serialize() removes an element). (David Carlier)
 
+- Windows:
+  . Fixed sapi_windows_cp_set() and sapi_windows_cp_conv() accepting a negative
+    codepage on a 32bit platform instead of rejecting it. (Marc Bennewitz)
 
 10 Sep 2026, PHP 8.6.0beta3
 

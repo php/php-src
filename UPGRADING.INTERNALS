@@ -15,6 +15,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
 ========================
 
 - Breaking changes:
+  . ZEND_LONG_UINT_OVFL() no longer reports a negative zend_long. Use
+    ZEND_LONG_EXCEEDS_UINT() to keep the previous meaning.
   . String formatting functions now support the custom conversion specifiers
     'pS' (zend_string*) and 'pp' (same as 'p'). Following the 'p' specifier with
     an alpha-numeric character other than 'S' or 'p' is now an error.
@@ -38,6 +40,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   . CHECK_ZVAL_NULL_PATH() and CHECK_NULL_PATH() have been removed, use
     zend_str_has_nul_byte(Z_STR_P(...)) and zend_char_has_nul_byte()
     respectively.
+
   . ZEND_LTOA() (and ZEND_LTOA_BUF_LEN) has been removed, as it was
     unsafe. Directly use ZEND_LONG_FMT with a function from the
     printf family.
@@ -235,6 +238,14 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     *failed is true, the returned value must not be used and an exception may
     already be pending. Passing an IS_UNDEF zval is a caller error.
 
+  . Added ZEND_LONG_UINT_UDFL() and ZEND_LONG_EXCEEDS_UINT() next to
+    ZEND_LONG_UINT_OVFL() in zend_range_check.h, completing the family for an
+    unsigned int the way it already exists for a signed one.
+  . Added the same family for a (unsigned) long in zend_range_check.h:
+    ZEND_LONG_LONG_OVFL(), ZEND_LONG_LONG_UDFL(), ZEND_LONG_EXCEEDS_LONG(),
+    ZEND_LONG_ULONG_OVFL(), ZEND_LONG_ULONG_UDFL() and
+    ZEND_LONG_EXCEEDS_ULONG(). A long is not of the same width as a zend_long
+    everywhere, LLP64 being the common case.
 ========================
 2. Build system changes
 ========================
