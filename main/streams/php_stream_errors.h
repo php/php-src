@@ -84,6 +84,7 @@ typedef struct _php_stream_stored_error {
 typedef struct {
 	php_stream_error_operation *current_operation;
 	uint32_t operation_depth;
+	uint32_t operation_floor;
 	php_stream_stored_error *stored_errors;
 	uint32_t stored_count;
 	php_stream_error_operation operation_pool[PHP_STREAM_ERROR_OPERATION_POOL_SIZE];
