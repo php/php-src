@@ -284,6 +284,9 @@ SAPI_SHARED=libs/$SAPI_LIBNAME_SHARED
 SAPI_STATIC=libs/$SAPI_LIBNAME_STATIC
 SAPI_LIBTOOL=libphp.la
 
+dnl Set by SAPIs whose host program dlopen()s libphp without linking against it.
+php_tsrm_dlopened_sapi=no
+
 PHP_CONFIGURE_PART([Configuring SAPI modules])
 
 esyscmd(./build/config-stubs sapi)
@@ -885,6 +888,38 @@ AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
 
   AC_MSG_CHECKING([for POSIX threads])
   AC_MSG_RESULT([yes])
+])
+
+PHP_ARG_WITH([tsrm-tls-model],,
+  [AS_HELP_STRING([[--with-tsrm-tls-model=MODEL]],
+    [TLS model for the ZTS globals cache: initial-exec, global-dynamic, or
+    auto for global-dynamic on dlopen()ed SAPIs and initial-exec elsewhere
+    [auto]])],
+  [auto],
+  [no])
+
+AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
+  AS_CASE([$PHP_TSRM_TLS_MODEL],
+    [auto], [
+      AS_VAR_IF([php_tsrm_dlopened_sapi], [yes],
+        [php_tsrm_tls_model=global-dynamic],
+        [php_tsrm_tls_model=initial-exec])
+    ],
+    [initial-exec|global-dynamic], [php_tsrm_tls_model=$PHP_TSRM_TLS_MODEL],
+    [AC_MSG_ERROR(m4_text_wrap([
+      Unknown TLS model '$PHP_TSRM_TLS_MODEL' given to --with-tsrm-tls-model.
+      Valid values are: auto, initial-exec, global-dynamic.
+    ]))])
+
+  AC_MSG_CHECKING([which TLS model to use for the ZTS globals cache])
+  AC_MSG_RESULT([$php_tsrm_tls_model])
+
+  dnl In php_config.h, not CFLAGS, so phpize builds use the same model.
+  AS_VAR_IF([php_tsrm_tls_model], [global-dynamic], [
+    AC_DEFINE([TSRM_TLS_MODEL_USE_GLOBAL_DYNAMIC], [1],
+      [Define to 1 to use the global-dynamic TLS model for the ZTS globals
+       cache.])
+  ])
 ])
 
 PHP_ARG_ENABLE([rtld-now],
