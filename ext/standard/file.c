@@ -1903,7 +1903,7 @@ PHPAPI HashTable *php_bc_fgetcsv_empty_line(void)
 	HashTable *values = zend_new_array(1);
 	zval tmp;
 	ZVAL_NULL(&tmp);
-	zend_hash_next_index_insert(values, &tmp);
+	zend_hash_next_index_insert_new(values, &tmp);
 	return values;
 }
 
@@ -2162,7 +2162,7 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 
 		zval z_tmp;
 		ZVAL_STRINGL(&z_tmp, temp, comp_end - temp);
-		zend_hash_next_index_insert(values, &z_tmp);
+		zend_hash_next_index_insert_new(values, &z_tmp);
 	} while (inc_len > 0);
 
 	efree(temp);
