@@ -207,11 +207,11 @@ static inline php_stream_error_operation *php_stream_get_parent_operation(void)
 {
 	const php_stream_error_state *state = &FG(stream_error_state);
 
-	if (state->operation_depth <= 1) {
+	if (state->operation_depth < 1) {
 		return NULL;
 	}
 
-	return php_stream_get_operation_at_depth(state->operation_depth - 2);
+	return php_stream_get_operation_at_depth(state->operation_depth - 1);
 }
 
 /* Clean up functions */
