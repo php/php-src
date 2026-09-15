@@ -28,6 +28,9 @@
 
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914 /* For Backward compatibility */
+/* PHP-specific option: the callback returns a bool rather than libcurl's socket,
+ * so it does not share CURLOPT_OPENSOCKETFUNCTION's name or number. */
+#define CURLOPT_PRECONNECTFUNCTION 19915
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
 #define PHP_CURL_USER   2
@@ -79,6 +82,7 @@ typedef struct {
 	zend_fcall_info_cache xferinfo;
 	zend_fcall_info_cache fnmatch;
 	zend_fcall_info_cache debug;
+	zend_fcall_info_cache preconnect;
 #if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
 	zend_fcall_info_cache prereq;
 #endif
