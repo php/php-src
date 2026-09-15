@@ -460,7 +460,13 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 
 		bool is_terminating = php_stream_has_terminating_error(op);
 
+		if (context) {
+			GC_ADDREF(context->res);
+		}
 		php_stream_report_errors(context, op, error_mode, is_terminating);
+		if (context) {
+			zend_list_delete(context->res);
+		}
 
 		if (store_mode == PHP_STREAM_ERROR_STORE_NONE) {
 			php_stream_error_entry_free(op->first_error);
