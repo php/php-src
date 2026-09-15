@@ -1008,9 +1008,9 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 	}
 }
 
-SAPI_API char *sapi_getenv(const char *name, size_t name_len)
+SAPI_API zend_string *sapi_getenv(const char *name, size_t name_len)
 {
-	char *value, *tmp;
+	zend_string *value = NULL;
 
 	if (!sapi_module.getenv) {
 		return NULL;
@@ -1019,19 +1019,18 @@ SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
 		return NULL;
 	}
-	tmp = sapi_module.getenv(name, name_len);
-	if (!tmp) {
+	value = sapi_module.getenv(name, name_len);
+	if (!value) {
 		return NULL;
 	}
-	value = estrdup(tmp);
-#ifdef PHP_WIN32
-	if (strlen(sapi_module.name) == sizeof("cgi-fcgi") - 1 && !strcmp(sapi_module.name, "cgi-fcgi")) {
-		/* XXX more modules to go, if needed. */
-		free(tmp);
-	}
-#endif
 	if (sapi_module.input_filter) {
-		sapi_module.input_filter(PARSE_STRING, name, &value, strlen(value), NULL);
+		/* XXX: pretty ugly because input filters aren't zend_string yet. */
+		char *tmp = estrdup(ZSTR_VAL(value));
+		size_t tmp_len = 0;
+		sapi_module.input_filter(PARSE_STRING, name, &tmp, ZSTR_LEN(value), &tmp_len);
+		zend_string_release(value);
+		value = zend_string_init(tmp, tmp_len, 0);
+		efree(tmp);
 	}
 	return value;
 }
