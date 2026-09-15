@@ -820,7 +820,6 @@ sapi_module_struct cli_server_sapi_module = {
 	sapi_cli_server_register_variables,	/* register server variables */
 	sapi_cli_server_log_message,	/* Log message */
 	NULL,							/* Get request time */
-	NULL,							/* Child terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 }; /* }}} */
