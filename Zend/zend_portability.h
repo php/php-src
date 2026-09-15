@@ -945,4 +945,33 @@ static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
 # define ZEND_OPCACHE_SHM_REATTACHMENT 1
 #endif
 
+/* A pointer always fits a zend_long on the supported platforms,
+ * so that direction is a plain cast. The reverse only narrows where zend_long is
+ * wider than a pointer, which is exactly what ZEND_INT64 on a 32bit platform
+ * does; the checks are compiled in only there, and only carry code in a debug
+ * build. Outside one ZEND_ASSERT() becomes ZEND_ASSUME(), which lets the
+ * optimizer drop the branch and reduce the call to the same plain cast. */
+#define ZEND_PTR_TO_ZEND_LONG(ptr)  ((zend_long) (intptr_t) (ptr))
+#define ZEND_PTR_TO_ZEND_ULONG(ptr) ((zend_ulong) (uintptr_t) (ptr))
+
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+static zend_always_inline void* _zend_long_to_ptr(zend_long zlong)
+{
+	ZEND_ASSERT(zlong >= (zend_long) INTPTR_MIN && zlong <= (zend_long) INTPTR_MAX);
+	return (void *) (intptr_t) zlong;
+}
+
+static zend_always_inline void* _zend_ulong_to_ptr(zend_ulong ulong)
+{
+	ZEND_ASSERT(ulong <= (zend_ulong) UINTPTR_MAX);
+	return (void *) (uintptr_t) ulong;
+}
+
+# define ZEND_LONG_TO_PTR(zlong)  _zend_long_to_ptr(zlong)
+# define ZEND_ULONG_TO_PTR(ulong) _zend_ulong_to_ptr(ulong)
+#else
+# define ZEND_LONG_TO_PTR(zlong)  ((void *) (intptr_t) (zlong))
+# define ZEND_ULONG_TO_PTR(ulong) ((void *) (uintptr_t) (ulong))
+#endif
+
 #endif /* ZEND_PORTABILITY_H */

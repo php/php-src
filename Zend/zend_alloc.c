@@ -173,7 +173,7 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #endif
 
 typedef uint32_t   zend_mm_page_info; /* 4-byte integer */
-typedef zend_ulong zend_mm_bitset;    /* 4-byte or 8-byte integer */
+typedef size_t     zend_mm_bitset;    /* 4-byte or 8-byte integer */
 
 #define ZEND_MM_ALIGNED_OFFSET(size, alignment) \
 	(((size_t)(size)) & ((alignment) - 1))
@@ -568,20 +568,20 @@ static void *zend_mm_mmap(size_t size)
 /* Bitmask */
 /***********/
 
-/* number of trailing set (1) bits */
-ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
+/* number of trailing zero (0) bits */
+ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
 {
-#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
-	return __builtin_ctzl(~bitset);
+#if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_SIZE_T == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
+	return __builtin_ctzl(bitset);
 #elif (defined(__GNUC__) || __has_builtin(__builtin_ctzll)) && defined(PHP_HAVE_BUILTIN_CTZLL)
-	return __builtin_ctzll(~bitset);
+	return __builtin_ctzll(bitset);
 #elif defined(_WIN32)
 	unsigned long index;
 
 #if defined(_WIN64)
-	if (!BitScanForward64(&index, ~bitset)) {
+	if (!BitScanForward64(&index, bitset)) {
 #else
-	if (!BitScanForward(&index, ~bitset)) {
+	if (!BitScanForward(&index, bitset)) {
 #endif
 		/* undefined behavior */
 		return 32;
@@ -591,20 +591,24 @@ ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_mm_bitset_nts(zend_mm_bi
 #else
 	int n;
 
-	if (bitset == (zend_mm_bitset)-1) return ZEND_MM_BITSET_LEN;
+	if (bitset == 0) return ZEND_MM_BITSET_LEN;
 
 	n = 0;
-#if SIZEOF_ZEND_LONG == 8
-	if (sizeof(zend_mm_bitset) == 8) {
-		if ((bitset & 0xffffffff) == 0xffffffff) {n += 32; bitset = bitset >> Z_UL(32);}
-	}
+#if SIZEOF_SIZE_T == 8
+	if ((bitset & 0xffffffff) == 0) {n += 32; bitset = bitset >> 32;}
 #endif
-	if ((bitset & 0x0000ffff) == 0x0000ffff) {n += 16; bitset = bitset >> 16;}
-	if ((bitset & 0x000000ff) == 0x000000ff) {n +=  8; bitset = bitset >>  8;}
-	if ((bitset & 0x0000000f) == 0x0000000f) {n +=  4; bitset = bitset >>  4;}
-	if ((bitset & 0x00000003) == 0x00000003) {n +=  2; bitset = bitset >>  2;}
-	return n + (bitset & 1);
+	if ((bitset & 0x0000ffff) == 0) {n += 16; bitset = bitset >> 16;}
+	if ((bitset & 0x000000ff) == 0) {n +=  8; bitset = bitset >>  8;}
+	if ((bitset & 0x0000000f) == 0) {n +=  4; bitset = bitset >>  4;}
+	if ((bitset & 0x00000003) == 0) {n +=  2; bitset = bitset >>  2;}
+	return n + !(bitset & 1);
 #endif
+}
+
+/* number of trailing set (1) bits */
+ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
+{
+	return zend_mm_bitset_ntz(~bitset);
 }
 
 static zend_always_inline int zend_mm_bitset_is_set(zend_mm_bitset *bitset, int bit)
@@ -614,12 +618,12 @@ static zend_always_inline int zend_mm_bitset_is_set(zend_mm_bitset *bitset, int 
 
 static zend_always_inline void zend_mm_bitset_set_bit(zend_mm_bitset *bitset, int bit)
 {
-	bitset[bit / ZEND_MM_BITSET_LEN] |= (Z_UL(1) << (bit & (ZEND_MM_BITSET_LEN-1)));
+	bitset[bit / ZEND_MM_BITSET_LEN] |= ((zend_mm_bitset)1 << (bit & (ZEND_MM_BITSET_LEN-1)));
 }
 
 static zend_always_inline void zend_mm_bitset_reset_bit(zend_mm_bitset *bitset, int bit)
 {
-	bitset[bit / ZEND_MM_BITSET_LEN] &= ~(Z_UL(1) << (bit & (ZEND_MM_BITSET_LEN-1)));
+	bitset[bit / ZEND_MM_BITSET_LEN] &= ~((zend_mm_bitset)1 << (bit & (ZEND_MM_BITSET_LEN-1)));
 }
 
 static zend_always_inline void zend_mm_bitset_set_range(zend_mm_bitset *bitset, int start, int len)
@@ -666,7 +670,7 @@ static zend_always_inline void zend_mm_bitset_reset_range(zend_mm_bitset *bitset
 
 		if (pos != end) {
 			/* reset bits from "bit" to ZEND_MM_BITSET_LEN-1 */
-			tmp = ~((Z_UL(1) << bit) - 1);
+			tmp = ~(((zend_mm_bitset)1 << bit) - 1);
 			bitset[pos++] &= ~tmp;
 			while (pos != end) {
 				/* set all bits */
@@ -1013,7 +1017,7 @@ static void *zend_mm_alloc_pages(zend_mm_heap *heap, uint32_t pages_count ZEND_F
 					tmp = *(bitset++);
 				}
 				/* find first 1 bit */
-				len = (i + zend_ulong_ntz(tmp)) - page_num;
+				len = (i + zend_mm_bitset_ntz(tmp)) - page_num;
 				if (len >= pages_count) {
 					goto found;
 				}
@@ -1070,7 +1074,7 @@ static void *zend_mm_alloc_pages(zend_mm_heap *heap, uint32_t pages_count ZEND_F
 					tmp = *(bitset++);
 				}
 				/* find first 1 bit */
-				len = i + zend_ulong_ntz(tmp) - page_num;
+				len = i + zend_mm_bitset_ntz(tmp) - page_num;
 				if (len >= pages_count) {
 					if (len == pages_count) {
 						goto found;
@@ -1669,6 +1673,9 @@ static zend_never_inline void *zend_mm_realloc_huge(zend_mm_heap *heap, void *pt
 #if ZEND_DEBUG
 	real_size = size;
 	size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+	if (UNEXPECTED(size < real_size)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+	}
 #endif
 	if (size > ZEND_MM_MAX_LARGE_SIZE) {
 #if ZEND_DEBUG
@@ -1774,6 +1781,9 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 		size_t real_size = size;
 
 		size = ZEND_MM_ALIGNED_SIZE(size) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info));
+		if (UNEXPECTED(size < real_size)) {
+			zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", ZEND_MM_ALIGNED_SIZE(real_size), ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
+		}
 #endif
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
@@ -2154,7 +2164,7 @@ static zend_mm_heap *zend_mm_init(void)
 	chunk->free_pages = ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE;
 	chunk->free_tail = ZEND_MM_FIRST_PAGE;
 	chunk->num = 0;
-	chunk->free_map[0] = (Z_L(1) << ZEND_MM_FIRST_PAGE) - 1;
+	chunk->free_map[0] = (1L << ZEND_MM_FIRST_PAGE) - 1;
 	chunk->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
 	heap->main_chunk = chunk;
 	heap->cached_chunks = NULL;
@@ -2174,7 +2184,7 @@ static zend_mm_heap *zend_mm_init(void)
 #endif
 	zend_mm_init_key(heap);
 #if ZEND_MM_LIMIT
-	heap->limit = (size_t)Z_L(-1) >> 1;
+	heap->limit = (size_t)-1 >> 1;
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM
@@ -2426,7 +2436,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 		repeated = zend_mm_find_leaks_huge(heap, list);
 		total += 1 + repeated;
 		if (repeated) {
-			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
+			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, ZEND_ULONG_TO_PTR(repeated));
 		}
 
 		heap->huge_list = list = list->next;
@@ -2465,7 +2475,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 							           zend_mm_find_leaks(heap, p, i + bin_pages[bin_num], &leak);
 							total += 1 + repeated;
 							if (repeated) {
-								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
+								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, ZEND_ULONG_TO_PTR(repeated));
 							}
 						}
 						dbg = (zend_mm_debug_info*)((char*)dbg + bin_data_size[bin_num]);
@@ -2491,7 +2501,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 					repeated = zend_mm_find_leaks(heap, p, i + pages_count, &leak);
 					total += 1 + repeated;
 					if (repeated) {
-						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(uintptr_t)repeated);
+						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, ZEND_ULONG_TO_PTR(repeated));
 					}
 					i += pages_count;
 				}
@@ -3079,14 +3089,14 @@ static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
 #if ZEND_MM_CUSTOM
 static zend_always_inline void tracked_add(zend_mm_heap *heap, void *ptr, size_t size) {
 	zval size_zv;
-	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
-	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
+	zend_ulong h = ZEND_PTR_TO_ZEND_ULONG(ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	ZEND_ASSERT(ZEND_ULONG_TO_PTR(h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
 	ZVAL_LONG(&size_zv, size);
 	zend_hash_index_add_new(heap->tracked_allocs, h, &size_zv);
 }
 
 static zend_always_inline zval *tracked_get_size_zv(zend_mm_heap *heap, void *ptr) {
-	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	zend_ulong h = ZEND_PTR_TO_ZEND_ULONG(ptr) >> ZEND_MM_ALIGNMENT_LOG2;
 	zval *size_zv = zend_hash_index_find(heap->tracked_allocs, h);
 	ZEND_ASSERT(size_zv && "Trying to free pointer not allocated through ZendMM");
 	return size_zv;
@@ -3172,7 +3182,7 @@ static void tracked_free_all(zend_mm_heap *heap) {
 	HashTable *tracked_allocs = heap->tracked_allocs;
 	zend_ulong h;
 	ZEND_HASH_FOREACH_NUM_KEY(tracked_allocs, h) {
-		void *ptr = (void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2);
+		void *ptr = ZEND_ULONG_TO_PTR(h << ZEND_MM_ALIGNMENT_LOG2);
 		free(ptr);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -3383,7 +3393,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
 		memset(mm_heap, 0, sizeof(zend_mm_heap));
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-		mm_heap->limit = (size_t)Z_L(-1) >> 1;
+		mm_heap->limit = (size_t)-1 >> 1;
 		mm_heap->overflow = 0;
 
 		if (!tracked) {
@@ -3586,7 +3596,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 	chunk->free_pages = ZEND_MM_PAGES - ZEND_MM_FIRST_PAGE;
 	chunk->free_tail = ZEND_MM_FIRST_PAGE;
 	chunk->num = 0;
-	chunk->free_map[0] = (Z_L(1) << ZEND_MM_FIRST_PAGE) - 1;
+	chunk->free_map[0] = (1L << ZEND_MM_FIRST_PAGE) - 1;
 	chunk->map[0] = ZEND_MM_LRUN(ZEND_MM_FIRST_PAGE);
 	heap->main_chunk = chunk;
 	heap->cached_chunks = NULL;
@@ -3606,7 +3616,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 #endif
 	zend_mm_init_key(heap);
 #if ZEND_MM_LIMIT
-	heap->limit = (size_t)Z_L(-1) >> 1;
+	heap->limit = (size_t)-1 >> 1;
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM

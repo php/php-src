@@ -8,7 +8,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-$file_path = __DIR__;
+$file_path = sys_get_temp_dir();
 
 /* Check umask() on file/dir */
 
