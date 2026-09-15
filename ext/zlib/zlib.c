@@ -901,6 +901,7 @@ PHP_FUNCTION(inflate_init)
 	ctx->inflateDictlen = dictlen;
 	ctx->status = Z_OK;
 
+	zend_long orig_encoding = encoding;
 	if (encoding < 0) {
 		encoding += 15 - window;
 	} else {
@@ -914,7 +915,7 @@ PHP_FUNCTION(inflate_init)
 		RETURN_FALSE;
 	}
 
-	if (encoding == PHP_ZLIB_ENCODING_RAW && dictlen > 0) {
+	if (orig_encoding == PHP_ZLIB_ENCODING_RAW && dictlen > 0) {
 		switch (inflateSetDictionary(&ctx->Z, (Bytef *) ctx->inflateDict, ctx->inflateDictlen)) {
 			case Z_OK:
 				efree(ctx->inflateDict);
