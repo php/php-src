@@ -7,10 +7,6 @@ opcache.optimization_level=0
 opcache.preload={PWD}/preload.inc
 --EXTENSIONS--
 opcache
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 $instance = new TheClass;
