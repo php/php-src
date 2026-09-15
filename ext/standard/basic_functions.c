@@ -1078,9 +1078,9 @@ PHP_FUNCTION(getopt)
 				if (Z_TYPE_P(args) != IS_ARRAY) {
 					convert_to_array(args);
 				}
-				zend_hash_next_index_insert(Z_ARRVAL_P(args), &val);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(args), &val);
 			} else {
-				zend_hash_index_update(Z_ARRVAL_P(return_value), opt_name_as_long, &val);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), opt_name_as_long, &val);
 			}
 		} else {
 			/* other strings */
@@ -1088,9 +1088,9 @@ PHP_FUNCTION(getopt)
 				if (Z_TYPE_P(args) != IS_ARRAY) {
 					convert_to_array(args);
 				}
-				zend_hash_next_index_insert(Z_ARRVAL_P(args), &val);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(args), &val);
 			} else {
-				zend_hash_str_add(Z_ARRVAL_P(return_value), optname, optname_len, &val);
+				zend_hash_str_add_new(Z_ARRVAL_P(return_value), optname, optname_len, &val);
 			}
 		}
 
