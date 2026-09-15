@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - Date:
   . Fix unserialization of Time\Duration. (timwolla)
+  . Add comparison handler for Time\Duration. (timwolla)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
