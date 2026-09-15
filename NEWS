@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
 
+- Opcache:
+  . Fixed GH-23679 (tracing JIT writes a parent private property into a
+    child's shadowing public property). (Ilia Alshanetsky)
+
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
 
