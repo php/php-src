@@ -702,9 +702,16 @@ php_mysqlnd_auth_response_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	if (0xFE == packet->response_code) {
 		/* Authentication Switch Response */
 		if (packet->header.size > (size_t) (p - buf)) {
-			packet->new_auth_protocol = mnd_pestrdup((char *)p, FALSE);
-			packet->new_auth_protocol_len = strlen(packet->new_auth_protocol);
-			p+= packet->new_auth_protocol_len + 1; /* +1 for the \0 */
+			const size_t remaining_size = packet->header.size - (size_t) (p - buf);
+			const char * const null_terminator = memchr(p, '\0', remaining_size);
+			const size_t auth_protocol_len = null_terminator ? (size_t) (null_terminator - (char *) p) : remaining_size;
+
+			packet->new_auth_protocol = mnd_pestrndup((char *) p, auth_protocol_len, FALSE);
+			packet->new_auth_protocol_len = auth_protocol_len;
+			p += auth_protocol_len;
+			if (null_terminator) {
+				p++; /* +1 for the \0 */
+			}
 
 			packet->new_auth_protocol_data_len = packet->header.size - (size_t) (p - buf);
 			if (packet->new_auth_protocol_data_len) {
@@ -1950,9 +1957,16 @@ php_mysqlnd_chg_user_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	}
 	BAIL_IF_NO_MORE_DATA;
 	if (packet->response_code == 0xFE && packet->header.size > (size_t) (p - buf)) {
-		packet->new_auth_protocol = mnd_pestrdup((char *)p, FALSE);
-		packet->new_auth_protocol_len = strlen(packet->new_auth_protocol);
-		p+= packet->new_auth_protocol_len + 1; /* +1 for the \0 */
+		const size_t remaining_size = packet->header.size - (size_t) (p - buf);
+		const char * const null_terminator = memchr(p, '\0', remaining_size);
+		const size_t auth_protocol_len = null_terminator ? (size_t) (null_terminator - (char *) p) : remaining_size;
+
+		packet->new_auth_protocol = mnd_pestrndup((char *) p, auth_protocol_len, FALSE);
+		packet->new_auth_protocol_len = auth_protocol_len;
+		p += auth_protocol_len;
+		if (null_terminator) {
+			p++; /* +1 for the \0 */
+		}
 		packet->new_auth_protocol_data_len = packet->header.size - (size_t) (p - buf);
 		if (packet->new_auth_protocol_data_len) {
 			packet->new_auth_protocol_data = mnd_emalloc(packet->new_auth_protocol_data_len);
@@ -2131,9 +2145,16 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	if (0xFE == packet->response_code) {
 		/* Authentication Switch Response */
 		if (packet->header.size > (size_t) (p - buf)) {
-			packet->new_auth_protocol = mnd_pestrdup((char *)p, FALSE);
-			packet->new_auth_protocol_len = strlen(packet->new_auth_protocol);
-			p+= packet->new_auth_protocol_len + 1; /* +1 for the \0 */
+			const size_t remaining_size = packet->header.size - (size_t) (p - buf);
+			const char * const null_terminator = memchr(p, '\0', remaining_size);
+			const size_t auth_protocol_len = null_terminator ? (size_t) (null_terminator - (char *) p) : remaining_size;
+
+			packet->new_auth_protocol = mnd_pestrndup((char *) p, auth_protocol_len, FALSE);
+			packet->new_auth_protocol_len = auth_protocol_len;
+			p += auth_protocol_len;
+			if (null_terminator) {
+				p++; /* +1 for the \0 */
+			}
 
 			packet->new_auth_protocol_data_len = packet->header.size - (size_t) (p - buf);
 			if (packet->new_auth_protocol_data_len) {
