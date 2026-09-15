@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
+  . Fixed mbstring.regex_retry_limit being ignored rather than applied for
+    values above the range of an unsigned int. (Marc Bennewitz)
   . Fixed mb_ereg_match() applying mbstring.regex_stack_limit and
     mbstring.regex_retry_limit differently than the other regex functions.
     (Marc Bennewitz)

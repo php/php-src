@@ -52,6 +52,23 @@
 # define ZEND_LONG_EXCEEDS_UINT(zlong) UNEXPECTED((zlong) < 0)
 #endif
 
+/* zend_long vs. (unsigned) long checks. A long is not of the same width as a
+ * zend_long everywhere, LLP64 being the common case. */
+#define ZEND_LONG_ULONG_UDFL(zlong) UNEXPECTED((zlong) < 0)
+#if SIZEOF_LONG < SIZEOF_ZEND_LONG
+# define ZEND_LONG_LONG_OVFL(zlong) UNEXPECTED((zlong) > (zend_long)LONG_MAX)
+# define ZEND_LONG_LONG_UDFL(zlong) UNEXPECTED((zlong) < (zend_long)LONG_MIN)
+# define ZEND_LONG_EXCEEDS_LONG(zlong) UNEXPECTED((zlong) < (zend_long)LONG_MIN || (zlong) > (zend_long)LONG_MAX)
+# define ZEND_LONG_ULONG_OVFL(zlong) UNEXPECTED((zlong) > (zend_long)ULONG_MAX)
+# define ZEND_LONG_EXCEEDS_ULONG(zlong) UNEXPECTED((zlong) < 0 || (zlong) > (zend_long)ULONG_MAX)
+#else
+# define ZEND_LONG_LONG_OVFL(zlong) (0)
+# define ZEND_LONG_LONG_UDFL(zlong) (0)
+# define ZEND_LONG_EXCEEDS_LONG(zlong) (0)
+# define ZEND_LONG_ULONG_OVFL(zlong) (0)
+# define ZEND_LONG_EXCEEDS_ULONG(zlong) UNEXPECTED((zlong) < 0)
+#endif
+
 /* size_t vs (unsigned) int checks. */
 #define ZEND_SIZE_T_INT_OVFL(size) 	UNEXPECTED((size) > (size_t)INT_MAX)
 #ifdef ZEND_SIZE_T_CAN_OVFL_UINT
