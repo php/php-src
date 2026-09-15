@@ -15,7 +15,7 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(16) "scheme:///%23foo"
+string(13) "scheme:%23foo"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
   string(6) "scheme"
@@ -24,11 +24,11 @@ object(Uri\WhatWg\Url)#%d (%d) {
   ["password"]=>
   NULL
   ["host"]=>
-  string(0) ""
+  NULL
   ["port"]=>
   NULL
   ["path"]=>
-  string(7) "/%23foo"
+  string(6) "%23foo"
   ["query"]=>
   NULL
   ["fragment"]=>

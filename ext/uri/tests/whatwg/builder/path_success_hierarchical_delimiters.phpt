@@ -1,12 +1,12 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::setHost() - success - null in case of opaque hosts
+Test Uri\WhatWg\UrlBuilder::setPath() - success - question mark and hashmark in a hierarchical path
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
-$builder->setScheme("scheme");
+$builder->setScheme("https");
 $builder->setHost("example.com");
-$builder->setHost(null);
+$builder->setPath("/a?b#c");
 $url = $builder->build();
 
 var_dump($url->toAsciiString());
@@ -15,20 +15,20 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
-string(7) "scheme:"
+string(29) "https://example.com/a%3Fb%23c"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
-  string(6) "scheme"
+  string(5) "https"
   ["username"]=>
   NULL
   ["password"]=>
   NULL
   ["host"]=>
-  NULL
+  string(11) "example.com"
   ["port"]=>
   NULL
   ["path"]=>
-  string(0) ""
+  string(10) "/a%3Fb%23c"
   ["query"]=>
   NULL
   ["fragment"]=>
