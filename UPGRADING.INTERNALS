@@ -182,6 +182,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     instead of a zval*. Accordingly, zend_get_closure_this_ptr() now returns
     that zend_object*, or NULL when the closure is unbound, instead of a
     zval* that is IS_UNDEF when the closure is unbound.
+  . object_properties_load() now verifies that the given value is assignable
+    to typed properties. The check is performed in strict mode.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
