@@ -877,10 +877,10 @@ static int _php_mb_onig_search(regex_t* reg, const OnigUChar* str, const OnigUCh
 	OnigMatchParam *mp = onig_new_match_param();
 	int err;
 	onig_initialize_match_param(mp);
-	if (!ZEND_LONG_UINT_OVFL(MBSTRG(regex_stack_limit))) {
+	if (!ZEND_LONG_EXCEEDS_UINT(MBSTRG(regex_stack_limit))) {
 		onig_set_match_stack_limit_size_of_match_param(mp, (unsigned int)MBSTRG(regex_stack_limit));
 	}
-	if (!ZEND_LONG_UINT_OVFL(MBSTRG(regex_retry_limit))) {
+	if (!ZEND_LONG_EXCEEDS_UINT(MBSTRG(regex_retry_limit))) {
 		onig_set_retry_limit_in_match_of_match_param(mp, (unsigned int)MBSTRG(regex_retry_limit));
 	}
 	/* search */
@@ -1302,10 +1302,10 @@ PHP_FUNCTION(mb_ereg_match)
 
 	mp = onig_new_match_param();
 	onig_initialize_match_param(mp);
-	if (MBSTRG(regex_stack_limit) > 0 && MBSTRG(regex_stack_limit) < UINT_MAX) {
+	if (!ZEND_LONG_EXCEEDS_UINT(MBSTRG(regex_stack_limit))) {
 		onig_set_match_stack_limit_size_of_match_param(mp, (unsigned int)MBSTRG(regex_stack_limit));
 	}
-	if (MBSTRG(regex_retry_limit) > 0 && MBSTRG(regex_retry_limit) < UINT_MAX) {
+	if (!ZEND_LONG_EXCEEDS_UINT(MBSTRG(regex_retry_limit))) {
 		onig_set_retry_limit_in_match_of_match_param(mp, (unsigned int)MBSTRG(regex_retry_limit));
 	}
 	/* match */

@@ -1360,7 +1360,7 @@ static phar_entry_data *phar_build_entry_data(zend_string *fname, char *path, si
 		}
 
 		/* Sanity check bounds. See GH-14141. */
-		if (ZEND_LONG_UINT_OVFL(Z_LVAL(rv))) {
+		if (ZEND_LONG_EXCEEDS_UINT(Z_LVAL(rv))) {
 			*error = estrdup("timestamp is limited to 32-bit");
 			return NULL;
 		}
