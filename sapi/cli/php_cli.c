@@ -23,6 +23,7 @@
 #include "zend_hash.h"
 #include "zend_modules.h"
 #include "zend_interfaces.h"
+#include "zend_closures.h"
 
 #include "ext/reflection/php_reflection.h"
 
@@ -930,7 +931,21 @@ do_repeat:
 			if (interactive) {
 				EG(exit_status) = cli_shell_callbacks.cli_shell_run();
 			} else {
-				php_execute_script(&file_handle);
+				zval retval;
+				ZVAL_UNDEF(&retval);
+				php_execute_script_ex(&file_handle, &retval);
+
+				/* Check if the primary script returned a Closure and execute it: This allows
+				 * a script to act both as a library and as an executable when executed directly.
+				 */
+				if (Z_TYPE(retval) == IS_OBJECT && Z_OBJCE(retval) == zend_ce_closure) {
+					zend_fcall_info_cache fcc = {0};
+					Z_OBJ_HANDLER(retval, get_closure)(Z_OBJ(retval), &fcc.calling_scope, &fcc.function_handler, &fcc.object, /* check_only */ false);					
+					fcc.called_scope = fcc.calling_scope;
+					fcc.closure = Z_OBJ(retval);
+					zend_call_known_fcc(&fcc, /* retval */ NULL, /* param_count */ 0, /* params */ NULL, /* named_params */ NULL);
+				}
+				zval_ptr_dtor(&retval);
 			}
 			break;
 		case PHP_CLI_MODE_LINT:
