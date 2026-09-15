@@ -47,8 +47,6 @@ static zend_module_entry **module_request_shutdown_handlers;
 static zend_module_entry **module_post_deactivate_handlers;
 static zend_module_entry **modules_dl_loaded;
 
-static zend_class_entry  **class_cleanup_handlers;
-
 ZEND_API void zend_set_dl_use_deepbind(bool use_deepbind)
 {
 	zend_dl_use_deepbind = use_deepbind;
@@ -2561,8 +2559,6 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	int shutdown_count = 0;
 	int post_deactivate_count = 0;
 	int dl_loaded_count = 0;
-	zend_class_entry *ce;
-	int class_count = 0;
 
 	/* Collect extensions with request startup/shutdown handlers */
 	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
@@ -2609,29 +2605,6 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 			modules_dl_loaded[--dl_loaded_count] = module;
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	/* Collect internal classes with static members */
-	ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
-		if (ce->type == ZEND_INTERNAL_CLASS &&
-		    ce->default_static_members_count > 0) {
-		    class_count++;
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	class_cleanup_handlers = (zend_class_entry**)perealloc(
-		class_cleanup_handlers,
-		sizeof(zend_class_entry*) *
-		(class_count + 1), true);
-	class_cleanup_handlers[class_count] = NULL;
-
-	if (class_count) {
-		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
-			if (ce->type == ZEND_INTERNAL_CLASS &&
-			    ce->default_static_members_count > 0) {
-			    class_cleanup_handlers[--class_count] = ce;
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
 }
 /* }}} */
 
@@ -2644,8 +2617,6 @@ ZEND_API void zend_startup_modules(void) /* {{{ */
 
 ZEND_API void zend_destroy_modules(void) /* {{{ */
 {
-	free(class_cleanup_handlers);
-	class_cleanup_handlers = NULL;
 	free(module_request_startup_handlers);
 	module_request_startup_handlers = NULL;
 	zend_hash_graceful_reverse_destroy(&module_registry);
