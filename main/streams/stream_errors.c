@@ -232,6 +232,7 @@ PHPAPI void php_stream_error_state_cleanup(void)
 	php_stream_error_state *state = &FG(stream_error_state);
 
 	state->operation_floor = 0;
+	state->refused_operations = 0;
 	while (state->current_operation) {
 		php_stream_error_operation *op = state->current_operation;
 		state->operation_depth--;
@@ -301,6 +302,7 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 		php_error_docref(NULL, E_WARNING,
 				"Stream error operation depth exceeded (%"PRIu32"), possible infinite recursion",
 				state->operation_depth);
+		state->refused_operations++;
 		return NULL;
 	}
 
@@ -337,7 +339,10 @@ static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wra
 		zend_string *message, const char *docref, int severity, bool terminating)
 {
 	php_stream_error_operation *op = FG(stream_error_state).current_operation;
-	ZEND_ASSERT(op != NULL);
+	if (!op) {
+		zend_string_release(message);
+		return;
+	}
 
 	php_stream_error_entry *entry = emalloc(sizeof(php_stream_error_entry));
 	entry->message = message;
@@ -446,6 +451,11 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 	php_stream_error_state *state = &FG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
 
+	if (state->refused_operations > 0) {
+		state->refused_operations--;
+		return;
+	}
+
 	if (!op) {
 		return;
 	}
@@ -552,6 +562,11 @@ PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream)
 	php_stream_error_state *state = &FG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
 
+	if (state->refused_operations > 0) {
+		state->refused_operations--;
+		return;
+	}
+
 	if (!op) {
 		return;
 	}
@@ -573,6 +588,11 @@ PHPAPI void php_stream_error_operation_abort(void)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
 	php_stream_error_operation *op = state->current_operation;
+
+	if (state->refused_operations > 0) {
+		state->refused_operations--;
+		return;
+	}
 
 	if (!op) {
 		return;
