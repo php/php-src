@@ -733,6 +733,9 @@ PHP 8.6 UPGRADE NOTES
     directive when $details is true. It holds the built-in default value of the
     directive (or null if it has none), independent of values set in php.ini,
     on the command line, or at runtime.
+  . fclose(), file_put_contents() and copy() now return false when flushing
+    or closing the stream fails. Previously such failures were silently
+    ignored.
 
 - Zip:
   . zip_entry_close() return type has been narrowed from bool to true. The
