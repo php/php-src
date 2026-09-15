@@ -1387,7 +1387,7 @@ PHPAPI void php_fstat(php_stream *stream, zval *return_value)
 	php_stream_statbuf stat_ssb;
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
-	char *stat_sb_names[13] = {
+	char *stat_sb_names[] = {
 		"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
@@ -1396,7 +1396,8 @@ PHPAPI void php_fstat(php_stream *stream, zval *return_value)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 2 * (sizeof(stat_sb_names) / sizeof(*stat_sb_names)));
+	zend_hash_real_init_mixed(Z_ARRVAL_P(return_value));
 
 	ZVAL_LONG(&stat_dev, stat_ssb.sb.st_dev);
 	ZVAL_LONG(&stat_ino, stat_ssb.sb.st_ino);
@@ -1424,19 +1425,19 @@ PHPAPI void php_fstat(php_stream *stream, zval *return_value)
 	ZVAL_LONG(&stat_blocks,-1);
 #endif
 	/* Store numeric indexes in proper order */
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_dev);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ino);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mode);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_nlink);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_uid);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_gid);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_rdev);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_size);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_atime);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mtime);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ctime);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blksize);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blocks);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_dev);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_ino);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_mode);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_nlink);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_uid);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_gid);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_rdev);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_size);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_atime);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_mtime);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_ctime);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_blksize);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_blocks);
 
 	/* Store string indexes referencing the same zval*/
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
