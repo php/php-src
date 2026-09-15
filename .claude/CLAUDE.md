@@ -1,3 +1,1 @@
-# Claude
-
-Go read `../AGENTS.md`.
+@../AGENTS.md
