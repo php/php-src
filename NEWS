@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
+  . Fixed bug GH-23365 (DOMNode::insertBefore($n, $n) drops the node and
+    leaves a self-referencing sibling list). (David Carlier)
 
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state

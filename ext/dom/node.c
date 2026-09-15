@@ -931,6 +931,9 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 			RETURN_FALSE;
 		}
+		if (refp == child) {
+			refp = child->next;
+		}
 	}
 
 	if (child->doc == NULL && parentp->doc != NULL) {
@@ -940,7 +943,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 
 	php_libxml_invalidate_node_list_cache(intern->document);
 
-	if (ref != NULL) {
+	if (refp != NULL) {
 		if (child->parent != NULL) {
 			xmlUnlinkNode(child);
 		}
