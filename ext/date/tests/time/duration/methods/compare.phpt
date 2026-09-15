@@ -1,5 +1,5 @@
 --TEST--
-Time\Duration::absolute()
+Time\Duration::compare()
 --FILE--
 <?php
 
