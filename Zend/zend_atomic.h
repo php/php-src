@@ -385,6 +385,23 @@ ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj);
 ZEND_API int zend_atomic_int_load(const zend_atomic_int *obj);
 #endif
 
+#if defined(HAVE_C11_ATOMICS)
+# define ZEND_ATOMIC_FENCE_RELEASE() __c11_atomic_thread_fence(__ATOMIC_RELEASE)
+# define ZEND_ATOMIC_FENCE_ACQUIRE() __c11_atomic_thread_fence(__ATOMIC_ACQUIRE)
+#elif defined(HAVE_GNUC_ATOMICS)
+# define ZEND_ATOMIC_FENCE_RELEASE() __atomic_thread_fence(__ATOMIC_RELEASE)
+# define ZEND_ATOMIC_FENCE_ACQUIRE() __atomic_thread_fence(__ATOMIC_ACQUIRE)
+#elif defined(HAVE_SYNC_ATOMICS)
+# define ZEND_ATOMIC_FENCE_RELEASE() __sync_synchronize()
+# define ZEND_ATOMIC_FENCE_ACQUIRE() __sync_synchronize()
+#elif defined(ZEND_WIN32)
+# define ZEND_ATOMIC_FENCE_RELEASE() MemoryBarrier()
+# define ZEND_ATOMIC_FENCE_ACQUIRE() MemoryBarrier()
+#else
+# define ZEND_ATOMIC_FENCE_RELEASE() ((void)0)
+# define ZEND_ATOMIC_FENCE_ACQUIRE() ((void)0)
+#endif
+
 END_EXTERN_C()
 
 #endif
