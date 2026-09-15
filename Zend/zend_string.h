@@ -46,6 +46,8 @@ ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_str
 ZEND_API void ZEND_FASTCALL zend_bin2hex(char *out, const unsigned char *in, size_t in_len);
 ZEND_API zend_string *zend_bin2hex_str(const unsigned char *in, size_t in_len);
 
+ZEND_API zend_long zend_levenshtein(const char *s1, size_t l1, const char *s2, size_t l2);
+
 ZEND_API zend_string *zend_string_concat2(
 	const char *str1, size_t str1_len,
 	const char *str2, size_t str2_len);
