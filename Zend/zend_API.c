@@ -1794,19 +1794,15 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 				}
 
 				zval *slot = OBJ_PROP(object, property_info->offset);
-
-				/* Mimick zend_assign_to_typed_prop() by reporting the error before doing work. */
-				if (UNEXPECTED((property_info->flags & ZEND_ACC_READONLY)
-				 && !Z_ISUNDEF_P(slot)
-				 && !(Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE))) {
-					zend_readonly_property_modification_error(property_info);
-					return;
-				}
-
 				zval val;
 
 				if (is_typed) {
 					if (UNEXPECTED(Z_ISREF_P(prop))) {
+						/* Block taking a reference to a readonly property. */
+						if (UNEXPECTED(property_info->flags & ZEND_ACC_READONLY)) {
+							zend_readonly_property_indirect_modification_error(property_info);
+							return;
+						}
 						if (UNEXPECTED(!zend_verify_prop_assignable_by_ref(property_info, prop, /* strict */ true))) {
 							ZEND_ASSERT(EG(exception));
 							return;
@@ -1814,6 +1810,14 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 						ZVAL_COPY(&val, prop);
 						ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(&val), property_info);
 					} else {
+						/* Mimick zend_assign_to_typed_prop() by reporting the error before doing work. */
+						if (UNEXPECTED((property_info->flags & ZEND_ACC_READONLY)
+						 && !Z_ISUNDEF_P(slot)
+						 && !(Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE))) {
+							zend_readonly_property_modification_error(property_info);
+							return;
+						}
+
 						ZVAL_COPY(&val, prop);
 						if (UNEXPECTED(!zend_verify_property_type(property_info, &val, /* strict */ true))) {
 							zval_ptr_dtor(&val);
