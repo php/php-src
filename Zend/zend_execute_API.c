@@ -1110,18 +1110,22 @@ cleanup_args:
 }
 /* }}} */
 
-ZEND_API void zend_call_known_function_ex(
-		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
+ZEND_API void zend_call_known_fcc_ex(
+		zend_fcall_info_cache *fcc, zval *retval_ptr,
 		uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args)
 {
 	zval retval;
 	zend_fcall_info fci;
-	zend_fcall_info_cache fcic;
 
-	ZEND_ASSERT(fn && "zend_function must be passed!");
+	zend_function *fn = fcc->function_handler;
+	/* Need to copy trampolines as they get released after they are called */
+	if (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		fn = (zend_function*) emalloc(sizeof(zend_function));
+		memcpy(fn, fcc->function_handler, sizeof(zend_function));
+		zend_string_addref(fn->op_array.function_name);
+	}
 
 	fci.size = sizeof(fci);
-	fci.object = object;
 	fci.retval = retval_ptr ? retval_ptr : &retval;
 	fci.param_count = param_count;
 	fci.params = params;
@@ -1129,11 +1133,8 @@ ZEND_API void zend_call_known_function_ex(
 	fci.consumed_args = consumed_args;
 	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
-	fcic.function_handler = fn;
-	fcic.object = object;
-	fcic.called_scope = called_scope;
 
-	zend_result result = zend_call_function(&fci, &fcic);
+	zend_result result = zend_call_function(&fci, fcc);
 	if (UNEXPECTED(result == FAILURE)) {
 		if (!EG(exception)) {
 			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s",
