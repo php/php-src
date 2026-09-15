@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fix handling of references to typed properties during unserialization
     of various internal classes. (ndossche, timwolla)
 
+- Date:
+  . Fix unserialization of Time\Duration. (timwolla)
+
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.
