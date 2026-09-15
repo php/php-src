@@ -114,7 +114,9 @@ typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
 	ssize_t (*write)(php_stream *stream, const char *buf, size_t count);
 	ssize_t (*read)(php_stream *stream, char *buf, size_t count);
+	/* returns 0 on success and non-zero on failure */
 	int    (*close)(php_stream *stream, int close_handle);
+	/* returns 0 on success (including nothing to flush) and non-zero on failure */
 	int    (*flush)(php_stream *stream);
 
 	const char *label; /* label for this ops structure */
