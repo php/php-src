@@ -400,6 +400,10 @@ static zval *extract_token_id_to_replace(zval *token_zv, const char *text, size_
 		return NULL;
 	}
 
+	if (!text_zv) {
+		return NULL;
+	}
+
 	/* There are multiple candidate tokens to which this feedback may apply,
 	 * check text to make sure this is the right one. */
 	ZEND_ASSERT(Z_TYPE_P(text_zv) == IS_STRING);
