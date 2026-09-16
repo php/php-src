@@ -7,8 +7,8 @@ gmp
 try {
 	gmp_random_bits(PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-gmp_random_bits(): Argument #1 ($bits) must be between 1 and %d
+ValueError: gmp_random_bits(): Argument #1 ($bits) must be between 1 and %d

@@ -2,18 +2,16 @@
 MessageFormat accepts IntlCalendar args
 --EXTENSIONS--
 intl
+--INI--
+date.timezone=Europe/Lisbon
 --SKIPIF--
 <?php
-if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1');
 if (str_contains(PHP_OS, 'FreeBSD')) {
     die('xfail Fails on FreeBSD for unknown reason');
 }
 ?>
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-//ini_set("intl.default_locale", "nl");
-ini_set('date.timezone', 'Europe/Lisbon');
 
 $cal = new IntlGregorianCalendar(2012,04,17,17,35,36);
 

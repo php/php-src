@@ -20,11 +20,11 @@ $ch = curl_init();
 try {
     curl_setopt($ch, CURLOPT_HTTPHEADER, 1);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $curl_content = curl_exec($ch);
-curl_close($ch);
+$ch = null;
 
 var_dump( $curl_content );
 
@@ -36,12 +36,12 @@ curl_setopt($ch, CURLOPT_URL, $host);
 
 $curl_content = curl_exec($ch);
 ob_end_clean();
-curl_close($ch);
+$ch = null;
 
 var_dump( $curl_content );
 ?>
 --EXPECT--
 *** curl_setopt() call with CURLOPT_HTTPHEADER
-curl_setopt(): The CURLOPT_HTTPHEADER option must have an array value
+TypeError: curl_setopt(): The CURLOPT_HTTPHEADER option must have an array value
 bool(false)
 bool(true)

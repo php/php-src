@@ -71,7 +71,7 @@ var_dump($_SESSION);
 <?php
 @unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_class_017');
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing session_set_save_handler() function: class with create_sid ***
 string(34) "session_set_save_handler_class_017"
 string(4) "user"
@@ -79,6 +79,8 @@ array(1) {
   ["foo"]=>
   string(5) "hello"
 }
+
+Warning: SessionHandler::validateId(): Parent session handler is not open, ignoring ID validation in %s on line %d
 array(1) {
   ["foo"]=>
   string(5) "hello"

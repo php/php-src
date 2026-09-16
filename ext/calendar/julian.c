@@ -67,7 +67,7 @@
  *     the Julian calendar.
  *
  *     The details are unknown, but the lengths of the months were adjusted
- *     until they finally stablized in 8 A.D. with their current lengths:
+ *     until they finally stabilized in 8 A.D. with their current lengths:
  *
  *         January          31
  *         February         28/29
@@ -213,12 +213,12 @@ fail:
 }
 
 zend_long JulianToSdn(
-						int inputYear,
-						int inputMonth,
-						int inputDay)
+						zend_long inputYear,
+						zend_long inputMonth,
+						zend_long inputDay)
 {
 	zend_long year;
-	int month;
+	zend_long month;
 
 	/* check for invalid dates */
 	if (inputYear == 0 || inputYear < -4713 ||

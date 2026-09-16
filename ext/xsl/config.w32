@@ -6,7 +6,7 @@ if (PHP_XSL != "no") {
 	if (PHP_DOM == "yes" && PHP_LIBXML == "yes"
 	&& ADD_EXTENSION_DEP('xsl', 'libxml')
 	&& ADD_EXTENSION_DEP('xsl', 'dom')
-	&& CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_XSL", PHP_PHP_BUILD + "\\include\\libxml2")
+	&& CHECK_HEADER("libxml/tree.h", "CFLAGS_XSL", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
 		var ext_xsl_lib_found = false;
 		var ext_exslt_lib_found = false;
@@ -25,9 +25,9 @@ if (PHP_XSL != "no") {
 			}
 		}
 
-		if (ext_xsl_lib_found && CHECK_HEADER_ADD_INCLUDE("libxslt\\xslt.h", "CFLAGS_XSL")) {
+		if (ext_xsl_lib_found && CHECK_HEADER("libxslt\\xslt.h", "CFLAGS_XSL")) {
 			if (ext_exslt_lib_found) {
-				if (CHECK_HEADER_ADD_INCLUDE("libexslt\\exslt.h", "CFLAGS_XSL")) {
+				if (CHECK_HEADER("libexslt\\exslt.h", "CFLAGS_XSL")) {
 					AC_DEFINE("HAVE_XSL_EXSLT", 1, "Define to 1 if the system has the EXSLT extension library for XSLT.");
 				}
 			}

@@ -16,7 +16,7 @@ require_once 'skipifconnectfailure.inc';
 
     require 'table.inc';
 
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'DO 1'))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (false !== ($tmp = mysqli_stmt_prepare($stmt, '')))

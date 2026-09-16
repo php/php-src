@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: print.c,v 1.99 2023/07/17 16:40:57 christos Exp $")
+FILE_RCSID("@(#)$File: print.c,v 1.106 2024/09/01 13:50:01 christos Exp $")
 #endif  /* lint */
 
 #include <string.h>
@@ -52,7 +52,8 @@ file_mdump(struct magic *m)
 	static const char optyp[] = { FILE_OPS };
 	char tbuf[256];
 
-	(void) fprintf(stderr, "%u: %.*s %d", m->lineno,
+	(void) fprintf(stderr, "%s, %u: %.*s %d", 
+	     m->desc[0] == '\0' ? m->desc + 1 : "*unknown*", m->lineno,
 	    (m->cont_level & 7) + 1, ">>>>>>>>", m->offset);
 
 	if (m->flag & INDIR) {
@@ -241,23 +242,43 @@ file_mdump(struct magic *m)
 }
 #endif
 
-/*VARARGS*/
-file_protected void
-file_magwarn(struct magic_set *ms, const char *f, ...)
+static void __attribute__((__format__(__printf__, 1, 0)))
+file_vmagwarn(const char *f, va_list va)
 {
-	va_list va;
 	char *expanded_format = NULL;
-	int expanded_len;
-
-	va_start(va, f);
-	expanded_len = vasprintf(&expanded_format, f, va);
-	va_end(va);
+	int expanded_len = vasprintf(&expanded_format, f, va);
 
 	if (expanded_len >= 0 && expanded_format) {
 		php_error_docref(NULL, E_WARNING, "%s", expanded_format);
 
 		free(expanded_format);
 	}
+}
+
+/*VARARGS*/
+file_protected void
+file_magwarn1(const char *f, ...)
+{
+	va_list va;
+
+	va_start(va, f);
+	file_vmagwarn(f, va);
+	va_end(va);
+}
+
+
+/*VARARGS*/
+file_protected void
+file_magwarn(struct magic_set *ms, const char *f, ...)
+{
+	/* Upstream has a check here: ++ms->magwarn == ms->magwarn_max,
+	 * but for PHP BC we keep emitting all warnings and
+	 * letting the user control the output behaviour. */
+	va_list va;
+
+	va_start(va, f);
+	file_vmagwarn(f, va);
+	va_end(va);
 }
 
 file_protected const char *
@@ -289,6 +310,7 @@ file_fmtdatetime(char *buf, size_t bsize, uint64_t v, int flags)
 		goto out;
 
 	if (flags & FILE_T_LOCAL) {
+		tzset();
 		tm = php_localtime_r(&t, &tmz);
 	} else {
 		tm = php_gmtime_r(&t, &tmz);

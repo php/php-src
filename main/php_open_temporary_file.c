@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -242,14 +240,14 @@ PHPAPI const char* php_get_temporary_directory(void)
 
 	/* Is there a temporary directory "sys_temp_dir" in .ini defined? */
 	{
-		char *sys_temp_dir = PG(sys_temp_dir);
+		const zend_string *sys_temp_dir = PG(sys_temp_dir);
 		if (sys_temp_dir) {
-			size_t len = strlen(sys_temp_dir);
-			if (len >= 2 && sys_temp_dir[len - 1] == DEFAULT_SLASH) {
-				PG(php_sys_temp_dir) = estrndup(sys_temp_dir, len - 1);
+			size_t len = ZSTR_LEN(sys_temp_dir);
+			if (len >= 2 && ZSTR_VAL(sys_temp_dir)[len - 1] == DEFAULT_SLASH) {
+				PG(php_sys_temp_dir) = estrndup(ZSTR_VAL(sys_temp_dir), len - 1);
 				return PG(php_sys_temp_dir);
-			} else if (len >= 1 && sys_temp_dir[len - 1] != DEFAULT_SLASH) {
-				PG(php_sys_temp_dir) = estrndup(sys_temp_dir, len);
+			} else if (len >= 1 && ZSTR_VAL(sys_temp_dir)[len - 1] != DEFAULT_SLASH) {
+				PG(php_sys_temp_dir) = estrndup(ZSTR_VAL(sys_temp_dir), len);
 				return PG(php_sys_temp_dir);
 			}
 		}

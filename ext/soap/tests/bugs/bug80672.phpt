@@ -8,8 +8,8 @@ try {
     $client = new SoapClient(__DIR__ . "/bug80672.xml");
     $query = $soap->query(array('sXML' => 'something'));
 } catch(SoapFault $e) {
-    print $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <>
+SoapFault: SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <>

@@ -37,7 +37,7 @@ try
 }
 catch (Exception $e)
 {
-    echo "CAUGHT: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 print_R($foo);
@@ -46,7 +46,7 @@ print_R($foo);
 FooBar::offsetSet(0, 0)
 FooBar::offsetSet(1, 1)
 FooBar::offsetSet(2, 2)
-CAUGHT: FAIL
+Exception: FAIL
 FooBar Object
 (
     [array:FooBar:private] => Array

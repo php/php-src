@@ -7,7 +7,10 @@ opcache.jit=1215
 opcache.jit_buffer_size=64M
 --FILE--
 <?php
-ini_set('opcache.jit', 'tracing');
+// Skip when JIT was completely disabled at runtime.
+if (($status = opcache_get_status()) === false || ($status['jit']['enabled'] ?? true)) {
+    ini_set('opcache.jit', 'tracing');
+}
 class Test {
 }
 $appendProp2 = (function() {
@@ -15,4 +18,4 @@ $appendProp2 = (function() {
 $appendProp2();
 ?>
 --EXPECTF--
-Warning: Undefined variable $test in %sgh16393.php on line 6
+Warning: Undefined variable $test in %sgh16393.php on line 9

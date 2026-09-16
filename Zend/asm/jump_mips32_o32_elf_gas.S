@@ -41,6 +41,7 @@
 .file "jump_mips32_o32_elf_gas.S"
 .text
 .globl jump_fcontext
+.hidden jump_fcontext
 .align 2
 .type jump_fcontext,@function
 .ent jump_fcontext
@@ -102,13 +103,13 @@ jump_fcontext:
 
     # adjust stack
     addiu $sp, $sp, 96
-    
+
     # return transfer_t from jump
     sw  $a0, ($v0)  # fctx of transfer_t
     sw  $a2, 4($v0) # data of transfer_t
     # pass transfer_t as first arg in context function
     # A0 == fctx, A1 == data
-    move  $a1, $a2 
+    move  $a1, $a2
 
     # jump to context
     jr  $t9

@@ -11,4 +11,4 @@ class Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Write-only virtual property Foo::$bar must not specify asymmetric visibility in %s on line %d
+Fatal error: set-only virtual property Foo::$bar must not specify asymmetric visibility in %s on line %d

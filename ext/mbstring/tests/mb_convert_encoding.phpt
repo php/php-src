@@ -89,7 +89,7 @@ function tryBadConversion($str, $encoding) {
     try {
         var_dump(mb_convert_encoding($str, $encoding));
     } catch (ValueError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -122,7 +122,7 @@ JIS: GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==
 == INVALID PARAMETER ==
 INT: 1234
 EUC-JP: 
-mb_convert_encoding(): Argument #2 ($to_encoding) must be a valid encoding, "BAD" given
+ValueError: mb_convert_encoding(): Argument #2 ($to_encoding) must be a valid encoding, "BAD" given
 
 Deprecated: mb_convert_encoding(): Handling QPrint via mbstring is deprecated; use quoted_printable_encode/quoted_printable_decode instead in %s on line %d
 string(3) "abc"

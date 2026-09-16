@@ -14,8 +14,8 @@ if (PHP_OS_FAMILY === 'Windows') die("skip not for windows");
 try {
 	ftp_ssl_connect('127.0.0.1', 1024, PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-ftp_ssl_connect(): Argument #3 ($timeout) must be less than %d
+ValueError: ftp_ssl_connect(): Argument #3 ($timeout) must be less than %d

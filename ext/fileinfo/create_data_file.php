@@ -19,6 +19,8 @@
     for ($i = ord(' '); $i < 0x7F; ++$i) {
         $map[chr($i)] = chr($i);
     }
+    // … Except trigraphs
+    $map["?"] = '\?';
     // … Except digits following a \0: \012 will be interpreted as octal 012, and not \0 followed by 12.
     // Then we have to express \0 in a full unambiguous 3-chars octal code.
     for ($i = ord('0'); $i <= ord('9'); ++$i) {

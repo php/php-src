@@ -33,5 +33,5 @@ http_server_kill($pid);
 var_dump($f);
 ?>
 --EXPECTF--
-Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%ain %s on line %d
+Warning: file_get_contents(): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%ain %s on line %d
 bool(false)

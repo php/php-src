@@ -74,7 +74,7 @@ if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && ($_
     $a = realpath(Extract_Phar::$temp . DIRECTORY_SEPARATOR . $pt);
     if (!$a || strlen(dirname($a)) < strlen(Extract_Phar::$temp)) {
         header('HTTP/1.0 404 Not Found');
-        echo "<html>\n <head>\n  <title>File Not Found<title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
+        echo "<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File Not Found</h1>\n </body>\n</html>";
         exit;
     }
     $b = pathinfo($a);
@@ -114,15 +114,15 @@ class Extract_Phar
     {
         $fp = fopen(__FILE__, 'rb');
         fseek($fp, self::LEN);
-        $L = unpack('V', $a = (binary)fread($fp, 4));
-        $m = (binary)'';
+        $L = unpack('V', $a = (string)fread($fp, 4));
+        $m = '';
 
         do {
             $read = 8192;
             if ($L[1] - strlen($m) < 8192) {
                 $read = $L[1] - strlen($m);
             }
-            $last = (binary)fread($fp, $read);
+            $last = (string)fread($fp, $read);
             $m .= $last;
         } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -268,7 +268,7 @@ class Extract_Phar
                 $entry[0] . ")");
         }
 
-        if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
+        if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
             die("Invalid internal .phar file (checksum error)");
         }
 

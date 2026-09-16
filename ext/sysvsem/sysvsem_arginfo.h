@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit sysvsem.stub.php instead.
  * Stub hash: 946ea9d0d2156ced1bac460d7d5fc3420e1934bb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_sem_get, 0, 1, SysvSemaphore, MAY_BE_FALSE)

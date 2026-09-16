@@ -6,9 +6,9 @@ bcmath
 <?php
 try {
     print bcmul("\xB26483605105519922841849335928742092", bcpowmod(2, 65535, -4e-4));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-bcpowmod(): Argument #3 ($modulus) cannot have a fractional part
+ValueError: bcpowmod(): Argument #3 ($modulus) cannot have a fractional part

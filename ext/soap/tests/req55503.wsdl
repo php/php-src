@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" elementFormDefault="qualified">
+    <types>
+        <schema
+                xmlns="http://www.w3.org/2001/XMLSchema"
+                targetNamespace="http://soapinterop.org/types">
+            <simpleType name="PersonaMemberType"> 
+                <restriction base="xsd:string"> 
+                    <enumeration value="NEW"/> 
+                    <enumeration value="LIMITED"/> 
+                    <enumeration value="FREE"/> 
+                    <enumeration value="PAID_ACTIVE"/> 
+                    <enumeration value="TRIAL_ACTIVE"/> 
+                    <enumeration value="PAID_EXPIRED"/> 
+                    <enumeration value="TRIAL_EXPIRED"/> 
+                </restriction> 
+            </simpleType>
+        </schema>
+    </types>
+	<portType name="testPortType">
+	</portType>
+	<binding name="testBinding" type="tns:testPortType">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+	</binding>
+	<service name="test">
+		<port name="testPort" binding="tns:testBinding">
+			<soap:address location="http://localhost:81/test/interface.php?class=test"/>
+		</port>
+	</service>
+</definitions>

@@ -4,9 +4,6 @@ Bug #47415 PDO_Firebird segfaults when passing lowercased column name to bindCol
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---XLEAK--
-A bug in firebird causes a memory leak when calling `isc_attach_database()`.
-See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require 'testdb.inc';

@@ -14,10 +14,10 @@ $dom->xinclude(PHP_INT_MAX);
 $dom = Dom\XMLDocument::createEmpty();
 try {
     $dom->xinclude(PHP_INT_MAX);
-} catch (ValueError $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Warning: DOMDocument::xinclude(): Invalid flags in %s on line %d
-Dom\XMLDocument::xinclude(): Argument #1 ($options) is too large
+ValueError: Dom\XMLDocument::xinclude(): Argument #1 ($options) is too large

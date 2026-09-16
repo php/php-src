@@ -9,10 +9,10 @@ function test(array &$foo = []) {
 try {
     $bar = 42;
     test($bar);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-test(): Argument #1 ($foo) must be of type array, int given, called in %s on line %d
+TypeError: test(): Argument #1 ($foo) must be of type array, int given, called in %s on line %d

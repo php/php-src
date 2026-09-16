@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -44,7 +43,7 @@ You can use the following macro to check the extension API version for compatibi
 
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..  */
-#define ZEND_EXTENSION_API_NO	420240924
+#define ZEND_EXTENSION_API_NO	420250926
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;

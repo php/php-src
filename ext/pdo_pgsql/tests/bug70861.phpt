@@ -1,7 +1,6 @@
 --TEST--
 Bug #70861 Segmentation fault in pdo_parse_params() during Drupal 8 test suite
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

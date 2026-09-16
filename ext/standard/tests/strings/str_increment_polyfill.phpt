@@ -10,9 +10,9 @@ function polyfill(string $s): string {
             /* Using increment operator would cast the string to float
              * Therefore we manually increment it to convert it to an "f"/"F" that doesn't get affected */
             $c = $s[$offset];
-            $c++;
+            @$c++;
             $s[$offset] = $c;
-            $s++;
+            @$s++;
             $s[$offset] = match ($s[$offset]) {
                 'f' => 'e',
                 'F' => 'E',
@@ -22,7 +22,7 @@ function polyfill(string $s): string {
             return $s;
         }
     }
-    return ++$s;
+    return @++$s;
 }
 
 $strictlyAlphaNumeric = [

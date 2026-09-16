@@ -112,6 +112,8 @@ int main(void) {
   char *out = malloc(out_left);
   char *out_p = out;
   size_t result = iconv(cd, (char **) &in_p, &in_left, (char **) &out_p, &out_left);
+  free(out);
+  iconv_close(cd);
   if(result == (size_t)-1) {
     return 1;
   }

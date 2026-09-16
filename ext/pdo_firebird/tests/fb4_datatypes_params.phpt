@@ -15,9 +15,6 @@ if (!$data || !array_key_exists('VERSION', $data) || version_compare($data['VERS
 	die("skip Firebird Server version must be greater than or equal to 4.0.0");
 }
 ?>
---XLEAK--
-A bug in firebird causes a memory leak when calling `isc_attach_database()`.
-See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require 'testdb.inc';

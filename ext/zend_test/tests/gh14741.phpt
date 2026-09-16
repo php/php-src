@@ -9,9 +9,9 @@ $it = $subject->getIterator();
 try {
     clone $it;
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Trying to clone an uncloneable object of class InternalIterator
+Error: Trying to clone an uncloneable object of class InternalIterator
 TraversableTest::drop

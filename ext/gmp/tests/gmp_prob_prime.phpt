@@ -31,7 +31,7 @@ var_dump(gmp_prob_prime($n));
 try {
     var_dump(gmp_prob_prime(array()));
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done\n";
@@ -75,5 +75,5 @@ int(0)
 int(0)
 int(0)
 int(0)
-gmp_prob_prime(): Argument #1 ($num) must be of type GMP|string|int, array given
+TypeError: gmp_prob_prime(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

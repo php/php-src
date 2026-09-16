@@ -4,7 +4,6 @@ IntlBreakIterator::getText(): basic test
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $bi = IntlBreakIterator::createWordInstance('pt');
 var_dump($bi->getText());

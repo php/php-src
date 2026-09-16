@@ -8,14 +8,14 @@ try {
     $o = new _ZendTestClass();
     $o->test('a', 'b', c: 'c');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     _ZendTestClass::test('a', 'b', c: 'c');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unknown named parameter $c
-Unknown named parameter $c
+Error: Unknown named parameter $c
+Error: Unknown named parameter $c

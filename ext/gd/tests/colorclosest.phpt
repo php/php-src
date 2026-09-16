@@ -8,22 +8,22 @@ gd
 $im = imagecreatetruecolor(5,5);
 $c = imagecolorclosest($im, 255,0,255);
 printf("%X\n", $c);
-imagedestroy($im);
+$im = null;
 
 $im = imagecreate(5,5);
 $c = imagecolorclosest($im, 255,0,255);
 try {
   imagecolorsforindex($im, $c);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
-imagedestroy($im);
+$im = null;
 
 $im = imagecreate(5,5);
 imagecolorallocate($im, 255, 0, 255);
 $c = imagecolorclosest($im, 255,0,255);
 print_r(imagecolorsforindex($im, $c));
-imagedestroy($im);
+$im = null;
 
 $im = imagecreate(5,5);
 for ($i=0; $i<255; $i++) imagecolorresolve($im, $i,0,0);
@@ -46,22 +46,22 @@ print_r(imagecolorsforindex($im, $c));
 $im = imagecreatetruecolor(5,5);
 $c = imagecolorclosestalpha($im, 255,0,255,100);
 printf("%X\n", $c);
-imagedestroy($im);
+$im = null;
 
 $im = imagecreate(5,5);
 $c = imagecolorclosestalpha($im, 255,0,255,100);
 try {
   imagecolorsforindex($im, $c);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
-imagedestroy($im);
+$im = null;
 
 $im = imagecreate(5,5);
 imagecolorallocatealpha($im, 255, 0, 255, 1);
 $c = imagecolorclosestalpha($im, 255,0,255,1);
 print_r(imagecolorsforindex($im, $c));
-imagedestroy($im);
+$im = null;
 
 $im = imagecreate(5,5);
 for ($i=0; $i<255; $i++) imagecolorresolvealpha($im, $i,0,0,1);
@@ -82,7 +82,7 @@ print_r(imagecolorsforindex($im, $c));
 ?>
 --EXPECT--
 FF00FF
-imagecolorsforindex(): Argument #2 ($color) is out of range
+ValueError: imagecolorsforindex(): Argument #2 ($color) is out of range
 Array
 (
     [red] => 255
@@ -105,7 +105,7 @@ Array
     [alpha] => 0
 )
 64FF00FF
-imagecolorsforindex(): Argument #2 ($color) is out of range
+ValueError: imagecolorsforindex(): Argument #2 ($color) is out of range
 Array
 (
     [red] => 255

@@ -5,7 +5,7 @@ error_reporting=2047
 date.timezone=UTC
 --SKIPIF--
 <?php
-if(PHP_OS == 'Darwin' || defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip strftime uses system TZ on Darwin and Windows");
+if(PHP_OS == 'Darwin' || PHP_OS_FAMILY === 'Solaris' || defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip strftime uses system TZ on Darwin, Solaris and Windows");
 if (!@strftime('%Z')) die('skip strftime does not support %Z');
 ?>
 --FILE--

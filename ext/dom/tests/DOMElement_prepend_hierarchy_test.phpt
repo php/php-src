@@ -48,8 +48,8 @@ $dom = clone $dom_original;
 $b_hello = $dom->firstChild->firstChild;
 try {
     $b_hello->prepend($b_hello);
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->saveHTML());
 
@@ -58,8 +58,8 @@ $dom = clone $dom_original;
 $b_hello = $dom->firstChild->firstChild;
 try {
     $b_hello->prepend($b_hello, "foo");
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->saveHTML());
 
@@ -69,8 +69,8 @@ $b_hello = $dom->firstChild->firstChild;
 $b_world = $b_hello->nextSibling;
 try {
     $b_world->firstChild->prepend($b_world);
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->saveHTML());
 
@@ -80,8 +80,8 @@ $dom2 = new DOMDocument;
 $dom2->loadXML('<p>other</p>');
 try {
     $dom->firstChild->firstChild->prepend($dom2->firstChild);
-} catch (\DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom2->saveHTML());
 var_dump($dom->saveHTML());
@@ -104,19 +104,19 @@ string(39) "<p><b><i><b>hello</b>world</i></b></p>
 string(42) "<p><b><i><b>hello</b>fooworld</i></b></p>
 "
 -- Prepend hello with itself --
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 string(39) "<p><b>hello</b><b><i>world</i></b></p>
 "
 -- Prepend hello with itself and text --
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 string(27) "<p><b><i>world</i></b></p>
 "
 -- Prepend world's i tag with the parent --
-Hierarchy Request Error
+DOMException: Hierarchy Request Error
 string(39) "<p><b>hello</b><b><i>world</i></b></p>
 "
 -- Append from another document --
-Wrong Document Error
+DOMException: Wrong Document Error
 string(13) "<p>other</p>
 "
 string(39) "<p><b>hello</b><b><i>world</i></b></p>

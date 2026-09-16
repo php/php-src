@@ -11,10 +11,10 @@ set_error_handler(function($errno, $errstr, $errfile, $errline){
 require 'notfound.php';
 ?>
 --EXPECTF--
-error(require(notfound.php): Failed to open stream: %s)
+error(require(): Failed to open stream: %s)
 Fatal error: Uncaught Exception: Foo in %sbug60909_1.php:5
 Stack trace:
-#0 %s(%d): {closure:%s:%d}(2, 'require(notfoun...', '%s', 8)
+#0 %s(%d): {closure:%s:%d}(2, 'require(): Fail...', '%s', 8)
 #1 %sbug60909_1.php(8): require()
 #2 {main}
   thrown in %sbug60909_1.php on line 5

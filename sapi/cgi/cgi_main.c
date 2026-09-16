@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Stig Bakken <ssb@php.net>                                   |
@@ -59,7 +57,6 @@
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "http_status_codes.h"
@@ -97,6 +94,8 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #  include "valgrind/cachegrind.h"
 # endif
 #endif
+
+#include "zend_perf_stat.h"
 
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
@@ -158,7 +157,6 @@ static const opt_struct OPTIONS[] = {
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
-	{'z', 1, "zend-extension"},
 	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
@@ -968,9 +966,9 @@ static int sapi_cgi_deactivate(void)
 	return SUCCESS;
 }
 
-static int php_cgi_startup(sapi_module_struct *sapi_module)
+static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 {
-	return php_module_startup(sapi_module, &cgi_module_entry);
+	return php_module_startup(sapi_module_ptr, &cgi_module_entry);
 }
 
 /* {{{ sapi_module_struct cgi_sapi_module */
@@ -1042,7 +1040,6 @@ static void php_cgi_usage(char *argv0)
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
 				"  -T <count>       Measure execution time of script repeated <count> times.\n",
 				prog, prog);
 }
@@ -1224,7 +1221,7 @@ static void init_request_info(fcgi_request *request)
 			size_t script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
-				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", PG(doc_root));
+				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", ZSTR_VAL(PG(doc_root)));
 				/* fix docroot */
 				TRANSLATE_SLASHES(env_document_root);
 			}
@@ -1518,23 +1515,23 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor */
-static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
+static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals_ptr)
 {
 #if defined(ZTS) && defined(PHP_WIN32)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	php_cgi_globals->rfc2616_headers = 0;
-	php_cgi_globals->nph = 0;
-	php_cgi_globals->check_shebang_line = 1;
-	php_cgi_globals->force_redirect = 1;
-	php_cgi_globals->redirect_status_env = NULL;
-	php_cgi_globals->fix_pathinfo = 1;
-	php_cgi_globals->discard_path = 0;
-	php_cgi_globals->fcgi_logging = 1;
+	php_cgi_globals_ptr->rfc2616_headers = 0;
+	php_cgi_globals_ptr->nph = 0;
+	php_cgi_globals_ptr->check_shebang_line = 1;
+	php_cgi_globals_ptr->force_redirect = 1;
+	php_cgi_globals_ptr->redirect_status_env = NULL;
+	php_cgi_globals_ptr->fix_pathinfo = 1;
+	php_cgi_globals_ptr->discard_path = 0;
+	php_cgi_globals_ptr->fcgi_logging = 1;
 #ifdef PHP_WIN32
-	php_cgi_globals->impersonate = 0;
+	php_cgi_globals_ptr->impersonate = 0;
 #endif
-	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals_ptr->user_config_cache, 8, NULL, user_config_cache_entry_dtor, 1);
 }
 /* }}} */
 
@@ -1690,9 +1687,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
@@ -1740,6 +1735,7 @@ int main(int argc, char *argv[])
 	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
+	bool perf_enabled = false;
 #ifdef HAVE_GETTIMEOFDAY
 	struct timeval start, end;
 #else
@@ -2043,6 +2039,8 @@ consult the installation file that came with this distribution, or visit \n\
 						 */
 						parent = 0;
 
+						php_child_init();
+
 						/* don't catch our signals */
 						sigaction(SIGTERM, &old_term, 0);
 						sigaction(SIGQUIT, &old_quit, 0);
@@ -2265,7 +2263,7 @@ parent_loop_end:
 					}
 					fcgi_shutdown();
 					no_headers = 1;
-					SG(headers_sent) = 1;
+					SG(headers_sent) = true;
 					php_cgi_usage(argv[0]);
 					php_output_end_all();
 					exit_status = 0;
@@ -2327,7 +2325,7 @@ parent_loop_end:
 								return FAILURE;
 							}
 							if (no_headers) {
-								SG(headers_sent) = 1;
+								SG(headers_sent) = true;
 								SG(request_info).no_headers = 1;
 							}
 							php_print_info(0xFFFFFFFF);
@@ -2345,7 +2343,7 @@ parent_loop_end:
 							if (script_file) {
 								efree(script_file);
 							}
-							SG(headers_sent) = 1;
+							SG(headers_sent) = true;
 							php_printf("[PHP Modules]\n");
 							print_modules();
 							php_printf("\n[Zend Modules]\n");
@@ -2371,7 +2369,7 @@ parent_loop_end:
 								free(bindpath);
 								return FAILURE;
 							}
-							SG(headers_sent) = 1;
+							SG(headers_sent) = true;
 							SG(request_info).no_headers = 1;
 							php_print_version(&cgi_sapi_module);
 							php_request_shutdown((void *) 0);
@@ -2381,10 +2379,6 @@ parent_loop_end:
 
 						case 'w':
 							behavior = PHP_MODE_STRIP;
-							break;
-
-						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
 							break;
 
 						default:
@@ -2412,7 +2406,7 @@ do_repeat:
 				}
 
 				if (no_headers) {
-					SG(headers_sent) = 1;
+					SG(headers_sent) = true;
 					SG(request_info).no_headers = 1;
 				}
 
@@ -2426,7 +2420,7 @@ do_repeat:
 				 *  test.php v1=test "v2=hello world!"
 				*/
 				if (!SG(request_info).query_string && argc > php_optind) {
-					size_t slen = strlen(PG(arg_separator).input);
+					size_t slen = ZSTR_LEN(PG(arg_separator).input);
 					len = 0;
 					for (i = php_optind; i < argc; i++) {
 						if (i < (argc - 1)) {
@@ -2442,7 +2436,7 @@ do_repeat:
 					for (i = php_optind; i < argc; i++) {
 						strlcat(s, argv[i], len);
 						if (i < (argc - 1)) {
-							strlcat(s, PG(arg_separator).input, len);
+							strlcat(s, ZSTR_VAL(PG(arg_separator).input), len);
 						}
 					}
 					SG(request_info).query_string = s;
@@ -2450,14 +2444,16 @@ do_repeat:
 				}
 			} /* end !cgi && !fastcgi */
 
-#ifdef HAVE_VALGRIND
 			if (warmup_repeats == 0) {
+				zend_perf_stat_enable();
+				perf_enabled = true;
+#ifdef HAVE_VALGRIND
 				CALLGRIND_START_INSTRUMENTATION;
 # ifdef HAVE_VALGRIND_CACHEGRIND_H
 				CACHEGRIND_START_INSTRUMENTATION;
 # endif
-			}
 #endif
+			}
 
 			/* request startup only after we've done all we can to
 			 * get path_translated */
@@ -2470,7 +2466,7 @@ do_repeat:
 				return FAILURE;
 			}
 			if (no_headers) {
-				SG(headers_sent) = 1;
+				SG(headers_sent) = true;
 				SG(request_info).no_headers = 1;
 			}
 
@@ -2548,11 +2544,11 @@ do_repeat:
 					break;
 				case PHP_MODE_HIGHLIGHT:
 					{
-						zend_syntax_highlighter_ini syntax_highlighter_ini;
+						zend_syntax_highlighter_ini default_syntax_highlighter_ini;
 
 						if (open_file_for_scanning(&file_handle) == SUCCESS) {
-							php_get_highlight_struct(&syntax_highlighter_ini);
-							zend_highlight(&syntax_highlighter_ini);
+							php_get_highlight_struct(&default_syntax_highlighter_ini);
+							zend_highlight(&default_syntax_highlighter_ini);
 						}
 					}
 					break;
@@ -2577,6 +2573,10 @@ fastcgi_request_done:
 				SG(request_info).query_string = NULL;
 			}
 
+			if (perf_enabled) {
+				zend_perf_stat_disable();
+				perf_enabled = false;
+			}
 #ifdef HAVE_VALGRIND
 			/* We're not interested in measuring shutdown */
 			CALLGRIND_STOP_INSTRUMENTATION;

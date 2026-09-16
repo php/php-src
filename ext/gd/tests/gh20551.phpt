@@ -21,16 +21,16 @@ foreach ($gammas as $gamma) {
 	try {
 		imagegammacorrect($im, $gamma[0], $gamma[1]);
 	} catch (\ValueError $e) {
-		echo $e->getMessage(), PHP_EOL;
+		echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 	}
 }
 ?>
 --EXPECT--
-imagegammacorrect(): Argument #2 ($input_gamma) must be finite
-imagegammacorrect(): Argument #2 ($input_gamma) must be finite
-imagegammacorrect(): Argument #2 ($input_gamma) must be finite
-imagegammacorrect(): Argument #2 ($input_gamma) must be greater than 0
-imagegammacorrect(): Argument #3 ($output_gamma) must be finite
-imagegammacorrect(): Argument #3 ($output_gamma) must be finite
-imagegammacorrect(): Argument #3 ($output_gamma) must be finite
-imagegammacorrect(): Argument #3 ($output_gamma) must be greater than 0
+ValueError: imagegammacorrect(): Argument #2 ($input_gamma) must be finite
+ValueError: imagegammacorrect(): Argument #2 ($input_gamma) must be finite
+ValueError: imagegammacorrect(): Argument #2 ($input_gamma) must be finite
+ValueError: imagegammacorrect(): Argument #2 ($input_gamma) must be greater than 0
+ValueError: imagegammacorrect(): Argument #3 ($output_gamma) must be finite
+ValueError: imagegammacorrect(): Argument #3 ($output_gamma) must be finite
+ValueError: imagegammacorrect(): Argument #3 ($output_gamma) must be finite
+ValueError: imagegammacorrect(): Argument #3 ($output_gamma) must be greater than 0

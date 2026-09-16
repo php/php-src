@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Removing unused variables                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
@@ -35,7 +33,7 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 	/* Determine which CVs are used */
 	zend_bitset_clear(used_vars, used_vars_len);
 	for (i = 0; i < op_array->last; i++) {
-		zend_op *opline = &op_array->opcodes[i];
+		const zend_op *opline = &op_array->opcodes[i];
 		if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			zend_bitset_incl(used_vars, VAR_NUM(opline->op1.var));
 		}

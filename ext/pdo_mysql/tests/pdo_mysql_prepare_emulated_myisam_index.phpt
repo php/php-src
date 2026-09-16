@@ -85,8 +85,8 @@ MySQLPDOTest::skip();
     }
 
     try {
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to switch to emulated prepared statements, test will fail\n");
 
         try {

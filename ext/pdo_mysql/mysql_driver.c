@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: George Schlossnagle <george@omniti.com>                      |
   |         Wez Furlong <wez@php.net>                                    |
@@ -84,7 +82,7 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 					"Cannot execute queries while other unbuffered queries are active.  "
 					"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
 					"is only ever going to run against mysql, you may enable query "
-					"buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
+					"buffering by setting the Pdo\\Mysql::ATTR_USE_BUFFERED_QUERY attribute.",
 					dbh->is_persistent);
 			}
 		} else if (einfo->errcode == 2057) {
@@ -308,21 +306,21 @@ static zend_string *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const zend_string *
 static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-	bool use_national_character_set = 0;
-	bool use_binary = 0;
+	bool use_national_character_set = false;
+	bool use_binary = false;
 	size_t quotedlen;
 
 	if ((paramtype & PDO_PARAM_LOB) == PDO_PARAM_LOB) {
-		use_binary = 1;
+		use_binary = true;
 	} else {
 		if (H->assume_national_character_set_strings) {
-			use_national_character_set = 1;
+			use_national_character_set = true;
 		}
 		if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
-			use_national_character_set = 1;
+			use_national_character_set = true;
 		}
 		if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
-			use_national_character_set = 0;
+			use_national_character_set = false;
 		}
 	}
 
@@ -454,7 +452,6 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
 			PDO_DBG_RETURN(true);
 
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
 			if (!pdo_get_bool_param(&bval, val)) {
 				PDO_DBG_RETURN(false);
@@ -555,7 +552,6 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 
 		case PDO_ATTR_EMULATE_PREPARES:
-		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 			ZVAL_BOOL(return_value, H->emulate_prepare);
 			break;
 
@@ -761,8 +757,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		zend_string *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
 		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 
-		H->emulate_prepare = pdo_attr_lval(driver_options,
-			PDO_MYSQL_ATTR_DIRECT_QUERY, H->emulate_prepare);
 		H->emulate_prepare = pdo_attr_lval(driver_options,
 			PDO_ATTR_EMULATE_PREPARES, H->emulate_prepare);
 

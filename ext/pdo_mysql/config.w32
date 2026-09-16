@@ -12,7 +12,7 @@ if (PHP_PDO_MYSQL != "no") {
 		ADD_MAKEFILE_FRAGMENT();
 	} else {
 		if (CHECK_LIB("libmysql.lib", "pdo_mysql", PHP_PDO_MYSQL) &&
-				CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_PDO_MYSQL",
+				CHECK_HEADER("mysql.h", "CFLAGS_PDO_MYSQL",
 					PHP_PDO_MYSQL + "\\include;" +
 					PHP_PHP_BUILD + "\\include\\mysql;" +
 					PHP_PDO_MYSQL)) {

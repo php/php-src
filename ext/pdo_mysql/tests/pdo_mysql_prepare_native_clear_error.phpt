@@ -17,8 +17,8 @@ MySQLPDOTest::skip();
         $db->exec(sprintf('CREATE TABLE test_prepare_native_clear_error(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
 
         // We need to run the emulated version first. Native version will cause a fatal error
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn on emulated prepared statements\n");
 
         // INSERT a single row
@@ -40,8 +40,8 @@ MySQLPDOTest::skip();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
         // Native PS
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[005] Unable to turn off emulated prepared statements\n");
 
         $stmt = $db->prepare('SELECT unknown_column FROM test_prepare_native_clear_error WHERE id > :placeholder ORDER BY id ASC');

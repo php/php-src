@@ -7,7 +7,7 @@ var_dump(getimagesize(__DIR__ . '/bug70052_2.wbmp'));
 ?>
 --EXPECT--
 bool(false)
-array(5) {
+array(7) {
   [0]=>
   int(3)
   [1]=>
@@ -18,4 +18,8 @@ array(5) {
   string(20) "width="3" height="3""
   ["mime"]=>
   string(18) "image/vnd.wap.wbmp"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }

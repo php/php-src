@@ -21,10 +21,9 @@ curl
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
 
   $copy = curl_copy_handle($ch);
-  curl_close($ch);
+  $ch = null;
 
   $curl_content = curl_exec($copy);
-  curl_close($copy);
 
   var_dump( $curl_content );
 ?>

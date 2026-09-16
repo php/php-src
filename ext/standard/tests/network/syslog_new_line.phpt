@@ -4,6 +4,8 @@ Test syslog() function : new line in message
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Won't run on Windows");
+if (!defined('LOG_PERROR'))
+  die("skip LOG_PERROR is not available on this platform");
 ?>
 --FILE--
 <?php

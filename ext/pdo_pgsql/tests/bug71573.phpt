@@ -1,7 +1,6 @@
 --TEST--
 Bug #71573 (Segfault (core dumped) if paramno beyond bound)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

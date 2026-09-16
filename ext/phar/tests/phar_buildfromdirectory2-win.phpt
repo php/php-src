@@ -19,6 +19,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---EXPECTF--
-%s(24) "UnexpectedValueException"
-RecursiveDirectoryIterator::__construct(1): %s (code: 2)
+--EXPECT--
+string(24) "UnexpectedValueException"
+RecursiveDirectoryIterator::__construct(): Failed to open directory: No such file or directory

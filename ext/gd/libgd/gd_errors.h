@@ -2,9 +2,9 @@
 #define GD_ERRORS_H
 
 #ifndef _WIN32
-# include <syslog.h>
+#include <syslog.h>
 #else
-# include "win32/syslog.h"
+#include "win32/syslog.h"
 #endif
 
 /*

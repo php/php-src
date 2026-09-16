@@ -9,13 +9,13 @@ $types = [[], new stdClass(), fopen(__FILE__, 'r')];
 foreach ($types as $type) {
     try {
         $type++;
-    } catch (\TypeError $e) {
-        echo $e->getMessage(), PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         $type--;
-    } catch (\TypeError $e) {
-        echo $e->getMessage(), PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -40,12 +40,12 @@ foreach ($values as $value) {
 }
 ?>
 --EXPECTF--
-Cannot increment array
-Cannot decrement array
-Cannot increment stdClass
-Cannot decrement stdClass
-Cannot increment resource
-Cannot decrement resource
+TypeError: Cannot increment array
+TypeError: Cannot decrement array
+TypeError: Cannot increment stdClass
+TypeError: Cannot decrement stdClass
+TypeError: Cannot increment resource
+TypeError: Cannot decrement resource
 Using increment:
 Initial value:NULL
 Result value:int(1)
@@ -63,11 +63,11 @@ Initial value:float(0)
 Result value:float(1)
 Initial value:string(0) ""
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(1) "1"
 Initial value:string(1) " "
 
-Deprecated: Increment on non-alphanumeric string is deprecated in %s on line %d
+Deprecated: Increment on non-numeric string is deprecated, use str_increment() instead in %s on line %d
 Result value:string(1) " "
 Initial value:string(1) "0"
 Result value:int(1)

@@ -1,5 +1,5 @@
 --TEST--
-Bug GH-8778 (Integer arithmethic with large number variants fails)
+Bug GH-8778 (Integer arithmetic with large number variants fails)
 --EXTENSIONS--
 com_dotnet
 --SKIPIF--

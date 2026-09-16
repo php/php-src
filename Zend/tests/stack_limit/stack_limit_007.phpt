@@ -18,8 +18,8 @@ function replace() {
         try {
             $tryExecuted = true;
             return replace();
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
             // We should not enter the catch block if we haven't executed at
             // least one op in the try block
             printf("Try executed: %d\n", $tryExecuted ?? 0);
@@ -41,5 +41,5 @@ array(4) {
   ["EG(stack_limit)"]=>
   string(%d) "0x%x"
 }
-Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+Error: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
 Try executed: 1

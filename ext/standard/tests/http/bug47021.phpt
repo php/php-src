@@ -75,22 +75,22 @@ echo "\n";
 Type='text/plain'
 Hello
 
-Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
+Warning: file_get_contents(): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
 
 
 Type='text/plain'
 Hello
 
-Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
+Warning: file_get_contents(): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
 
 
 Type='text/plain'
 Hello
 
-Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
+Warning: file_get_contents(): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
 
 
 Type='text/plain'
 Hello
 
-Warning: file_get_contents(http://%s:%d): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s
+Warning: file_get_contents(): Failed to open stream: HTTP invalid response format (no colon in header line)! in %s

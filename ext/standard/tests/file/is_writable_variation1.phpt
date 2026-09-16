@@ -31,11 +31,6 @@ $files_arr = array(
   "$file_path/is_writable_variation1/*.tmp",
   "$file_path/is_writable_variation1/b*.tmp",
 
-  /* Testing Binary safe */
-  "$file_path/is_writable_variation1".chr(0)."bar.tmp",
-  "$file_path".chr(0)."is_writable_variation1/bar.tmp",
-  "$file_path".chr(0)."is_writable_variation1/bar.tmp",
-
   /* Testing directories */
   ".",  // current directory, exp: bool(true)
   "$file_path/is_writable_variation1"  // temp directory, exp: bool(true)
@@ -87,18 +82,9 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 7 --
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 -- Iteration 8 --
-bool(false)
-bool(false)
--- Iteration 9 --
-bool(false)
-bool(false)
--- Iteration 10 --
-bool(true)
-bool(true)
--- Iteration 11 --
 bool(true)
 bool(true)
 Done

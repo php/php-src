@@ -19,7 +19,7 @@ $bad_level = 99;
 try {
     var_dump(gzencode($data, $bad_level));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\n-- Testing with incorrect encoding_mode --\n";
@@ -27,7 +27,7 @@ $bad_mode = 99;
 try {
     var_dump(gzencode($data, $level, $bad_mode));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -35,7 +35,7 @@ try {
 *** Testing gzencode() : error conditions ***
 
 -- Testing with incorrect compression level --
-gzencode(): Argument #2 ($level) must be between -1 and 9
+ValueError: gzencode(): Argument #2 ($level) must be between -1 and 9
 
 -- Testing with incorrect encoding_mode --
-gzencode(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+ValueError: gzencode(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE

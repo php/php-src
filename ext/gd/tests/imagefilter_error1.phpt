@@ -12,8 +12,14 @@ $image = imagecreatetruecolor(180, 30);
 try {
     var_dump(imagefilter($image));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    var_dump(imagefilter(20, 1));
+} catch (TypeError $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Wrong parameter count for imagefilter()
+ArgumentCountError: imagefilter() expects at least 2 arguments, 1 given
+TypeError: imagefilter(): Argument #1 ($image) must be of type GdImage, int given

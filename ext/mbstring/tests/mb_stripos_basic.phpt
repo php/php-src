@@ -2,6 +2,8 @@
 Test mb_stripos() function : basic functionality
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 /*
@@ -9,8 +11,6 @@ mbstring
  */
 
 echo "*** Testing mb_stripos() : basic functionality***\n";
-
-mb_internal_encoding('UTF-8');
 
 //ascii strings
 $ascii_haystacks = array(

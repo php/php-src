@@ -27,7 +27,6 @@ curl
   curl_setopt($ch, CURLOPT_FILE, $f_file);
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_exec($ch);
-  curl_close($ch);
 ?>
 --CLEAN--
 <?php

@@ -23,6 +23,9 @@ print "Emoji (\u{1F6DC}): " . mb_strwidth("\u{1F6DC}", 'UTF-8') . "\n";
 // Changed in Unicode 16.0, U+2630...U+2637 are wide
 print "Emoji (\u{2630}): " . mb_strwidth("\u{2630}", 'UTF-8') . "\n";
 
+// New in Unicode 17.0, width=2
+print "Emoji (\u{1FAEA}): " . mb_strwidth("\u{1FAEA}", "UTF-8") . "\n";
+
 echo "Char case changes:\n";
 
 print "Upper(\u{019b}) = \u{a7dc} : ";
@@ -37,5 +40,6 @@ Sinhalese (අයේෂ්): 5
 Emoji (🐘): 2
 Emoji (🛜): 2
 Emoji (☰): 2
+Emoji (🫪): 2
 Char case changes:
 Upper(ƛ) = Ƛ : bool(true)

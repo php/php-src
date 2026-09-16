@@ -12,9 +12,9 @@ $dimension = [];
 try {
     var_dump($container[$dimension]);
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot access offset of type array on string
+TypeError: Cannot access offset of type array on string

@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: David Wang <planetbeing@gmail.com>                          |
    |          Dmitry Stogov <dmitry@php.net>                              |
@@ -134,10 +133,24 @@ static zend_always_inline void zend_get_gc_buffer_add_zval(
 
 static zend_always_inline void zend_get_gc_buffer_add_obj(
 		zend_get_gc_buffer *gc_buffer, zend_object *obj) {
+	ZEND_ASSERT(obj != NULL);
+
 	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
 		zend_get_gc_buffer_grow(gc_buffer);
 	}
 	ZVAL_OBJ(gc_buffer->cur, obj);
+	gc_buffer->cur++;
+}
+
+static zend_always_inline void zend_get_gc_buffer_add_ht(
+		zend_get_gc_buffer *gc_buffer, HashTable *ht) {
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		return;
+	}
+	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
+		zend_get_gc_buffer_grow(gc_buffer);
+	}
+	ZVAL_ARR(gc_buffer->cur, ht);
 	gc_buffer->cur++;
 }
 

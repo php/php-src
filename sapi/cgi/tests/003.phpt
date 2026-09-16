@@ -37,9 +37,15 @@ class test { /* {{{ */
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -w "$filename"`);
-var_dump(`$php -n -w "wrong"`);
-var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w`);
+var_dump(shell_exec(<<<SHELL
+$php -n -w "$filename"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -w "wrong"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w
+SHELL));
 
 @unlink($filename);
 

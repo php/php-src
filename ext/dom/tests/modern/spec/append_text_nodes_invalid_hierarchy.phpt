@@ -9,20 +9,20 @@ $dom = Dom\HTMLDocument::createEmpty();
 
 try {
     $dom->append("foo", "bar", "baz", $dom);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $dom->append("foo", "bar", "baz");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump($dom->saveHtml());
 
 ?>
 --EXPECT--
-Hierarchy Request Error
-Cannot insert text as a child of a document
+DOMException: Hierarchy Request Error
+DOMException: Cannot insert text as a child of a document
 string(0) ""

@@ -4,9 +4,6 @@ GH-10908 (Bus error with PDO Firebird on RPI with 64 bit kernel and 32 bit userl
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---XLEAK--
-A bug in firebird causes a memory leak when calling `isc_attach_database()`.
-See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 

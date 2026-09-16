@@ -32,8 +32,6 @@ if test "$PHP_PHAR" != "no"; then
   PHP_ADD_EXTENSION_DEP(phar, spl)
   PHP_ADD_MAKEFILE_FRAGMENT
 
-  PHP_INSTALL_HEADERS([ext/phar], [php_phar.h])
-
   AC_CONFIG_FILES([
     $ext_dir/phar.1
     $ext_dir/phar.phar.1

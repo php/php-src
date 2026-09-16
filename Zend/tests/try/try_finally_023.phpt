@@ -31,6 +31,7 @@ try {
 
 ?>
 --EXPECTF--
+Deprecated: Returning from a finally block is deprecated in %s on line %d
 Exception: 1 in %s:%d
 Stack trace:
 #0 %s(%d): test()

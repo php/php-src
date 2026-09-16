@@ -10,10 +10,10 @@ spl_autoload_register(function($class) {
 try {
     class B extends A {
     }
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Class "B" not found
+Error: Class "B" not found

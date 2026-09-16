@@ -1,16 +1,5 @@
 <?php
 
-function filter_errors_skipif($needle) {
-    if (!function_exists('fnmatch')) {
-        die('skip fnmatch() not available');
-    }
-    $filters = stream_get_filters();
-    foreach($filters as $filter) {
-        if (fnmatch($filter, $needle)) return;
-    }
-    die("skip $needle not available");
-}
-
 function filter_errors_test($filter, $data) {
 
     echo "test filtering of buffered data\n";

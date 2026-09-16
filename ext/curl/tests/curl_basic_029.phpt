@@ -23,7 +23,6 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 var_dump(curl_setopt($ch, CURLOPT_WS_OPTIONS, 0));
 var_dump(curl_setopt($ch, CURLOPT_WS_OPTIONS, CURLWS_RAW_MODE));
 curl_exec($ch);
-curl_close($ch);
 ?>
 --EXPECTF--
 bool(%s)

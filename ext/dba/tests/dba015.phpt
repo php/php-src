@@ -48,7 +48,7 @@ var_dump($db_file1);
 try {
     dba_exists("key1", $db_file2);
 } catch (Error $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Test 6 - query after closing 2nd object\n";
@@ -75,7 +75,7 @@ This is a test insert 2
 Test 5 - close 2nd object
 object(Dba\Connection)#%d (%d) {
 }
-DBA connection has already been closed
+Error: DBA connection has already been closed
 Test 6 - query after closing 2nd object
 This is a test insert 1
 This is a test insert 2

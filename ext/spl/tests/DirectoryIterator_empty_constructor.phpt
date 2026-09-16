@@ -8,8 +8,8 @@ Havard Eide <nucleuz@gmail.com>
 try {
     $it = new DirectoryIterator("");
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-DirectoryIterator::__construct(): Argument #1 ($directory) must not be empty
+ValueError: DirectoryIterator::__construct(): Argument #1 ($directory) must not be empty

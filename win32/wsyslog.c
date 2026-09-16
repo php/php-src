@@ -89,7 +89,7 @@ void syslog(int priority, const char *message, ...)
 
 void vsyslog(int priority, const char *message, va_list args)
 {
-	LPTSTR strs[2];
+	LPCSTR strs[2];
 	unsigned short etype;
 	char *tmp = NULL;
 	DWORD evid;
@@ -120,7 +120,7 @@ void vsyslog(int priority, const char *message, va_list args)
 
 	/* report the event */
 	if (strsw[0] && strsw[1]) {
-		ReportEventW(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, strsw, NULL);
+		ReportEventW(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, (LPCWSTR *) strsw, NULL);
 		free(strsw[0]);
 		free(strsw[1]);
 		efree(tmp);

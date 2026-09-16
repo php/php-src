@@ -8,5 +8,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: closedir(): Passing null is deprecated, instead the last opened directory stream should be provided in %s on line %d
 No resource supplied

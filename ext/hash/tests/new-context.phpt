@@ -6,8 +6,8 @@ Hash: Attempt to instantiate a HashContext directly
 try {
   new HashContext;
 } catch (Error $e) {
-  echo "Exception: {$e->getMessage()}\n";
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Exception: Call to private HashContext::__construct() from global scope
+Error: Call to private HashContext::__construct() from global scope

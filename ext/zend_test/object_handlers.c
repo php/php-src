@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: George Peter Banyard <girgias@php.net>                      |
   +----------------------------------------------------------------------+
@@ -232,6 +230,44 @@ ZEND_METHOD(NumericCastableNoOperations, __construct)
 	ZVAL_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), n);
 }
 
+static zend_class_entry *vm_interrupt_comparable_ce;
+static zend_object_handlers vm_interrupt_comparable_object_handlers;
+
+static zend_object* vm_interrupt_comparable_object_create_ex(zend_class_entry* ce, zend_long l) {
+	zend_object *obj = zend_objects_new(ce);
+	object_properties_init(obj, ce);
+	obj->handlers = &vm_interrupt_comparable_object_handlers;
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 0), l);
+	return obj;
+}
+
+static zend_object *vm_interrupt_comparable_object_create(zend_class_entry *ce)
+{
+	return vm_interrupt_comparable_object_create_ex(ce, 0);
+}
+
+static int vm_interrupt_comparable_compare(zval *op1, zval *op2)
+{
+	ZEND_COMPARE_OBJECTS_FALLBACK(op1, op2);
+
+	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+
+	return ZEND_THREEWAY_COMPARE(
+		Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0)),
+		Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0)));
+}
+
+ZEND_METHOD(VmInterruptComparable, __construct)
+{
+	zend_long l;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), l);
+}
+
 static zend_class_entry *dimension_handlers_no_ArrayAccess_ce;
 static zend_object_handlers dimension_handlers_no_ArrayAccess_object_handlers;
 
@@ -301,6 +337,11 @@ void zend_test_object_handlers_init(void)
 	numeric_castable_no_operation_ce->create_object = numeric_castable_no_operation_object_create;
 	memcpy(&numeric_castable_no_operation_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	numeric_castable_no_operation_object_handlers.cast_object = numeric_castable_no_operation_cast_object;
+
+	vm_interrupt_comparable_ce = register_class_VmInterruptComparable();
+	vm_interrupt_comparable_ce->create_object = vm_interrupt_comparable_object_create;
+	memcpy(&vm_interrupt_comparable_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	vm_interrupt_comparable_object_handlers.compare = vm_interrupt_comparable_compare;
 
 	dimension_handlers_no_ArrayAccess_ce = register_class_DimensionHandlersNoArrayAccess();
 	dimension_handlers_no_ArrayAccess_ce->create_object = dimension_handlers_no_ArrayAccess_object_create;

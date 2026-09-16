@@ -68,6 +68,7 @@
 
 .text
 .align 2
+.private_extern _jump_fcontext
 .globl _jump_fcontext
 
 _jump_fcontext:

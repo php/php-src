@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -69,15 +67,6 @@ static int is_impersonate = 0;
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <signal.h>
-
-# if defined(HAVE_POLL_H) && defined(HAVE_POLL)
-#  include <poll.h>
-# elif defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
-#  include <sys/poll.h>
-# endif
-# if defined(HAVE_SYS_SELECT_H)
-#  include <sys/select.h>
-# endif
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned long) -1)
@@ -737,7 +726,7 @@ int fcgi_listen(const char *path, int backlog)
 		memset(&sa.sa_unix, 0, sizeof(sa.sa_unix));
 		sa.sa_unix.sun_family = AF_UNIX;
 		memcpy(sa.sa_unix.sun_path, path, path_len + 1);
-		sock_len = XtOffsetOf(struct sockaddr_un, sun_path) + path_len;
+		sock_len = offsetof(struct sockaddr_un, sun_path) + path_len;
 #ifdef HAVE_STRUCT_SOCKADDR_UN_SUN_LEN
 		sa.sa_unix.sun_len = sock_len;
 #endif
@@ -1428,42 +1417,16 @@ int fcgi_accept_request(fcgi_request *req)
 				break;
 #else
 				if (req->fd >= 0) {
-#if defined(HAVE_POLL)
-					struct pollfd fds;
 					int ret;
 
-					fds.fd = req->fd;
-					fds.events = POLLIN;
-					fds.revents = 0;
 					do {
 						errno = 0;
-						ret = poll(&fds, 1, 5000);
+						ret = php_pollfd_for_ms(req->fd, POLLIN, 5000);
 					} while (ret < 0 && errno == EINTR);
-					if (ret > 0 && (fds.revents & POLLIN)) {
+					if (ret & POLLIN) {
 						break;
 					}
 					fcgi_close(req, 1, 0);
-#else
-					if (req->fd < FD_SETSIZE) {
-						struct timeval tv = {5,0};
-						fd_set set;
-						int ret;
-
-						FD_ZERO(&set);
-						FD_SET(req->fd, &set);
-						do {
-							errno = 0;
-							ret = select(req->fd + 1, &set, NULL, NULL, &tv) >= 0;
-						} while (ret < 0 && errno == EINTR);
-						if (ret > 0 && FD_ISSET(req->fd, &set)) {
-							break;
-						}
-						fcgi_close(req, 1, 0);
-					} else {
-						fcgi_log(FCGI_ERROR, "Too many open file descriptors. FD_SETSIZE limit exceeded.");
-						fcgi_close(req, 1, 0);
-					}
-#endif
 				}
 #endif
 			}

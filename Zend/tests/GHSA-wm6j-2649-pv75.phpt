@@ -15,6 +15,8 @@ mb_regex_encoding('iso-8859-11');
 mb_ereg_search_init('x');
 ?>
 --EXPECTF--
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
 Fatal error: Uncaught ValueError: mb_regex_encoding(): Argument #1 ($encoding) must be a valid encoding, "iso-8859-11" given in %s:%d
 Stack trace:
 #0 %s(%d): mb_regex_encoding('iso-8859-11')

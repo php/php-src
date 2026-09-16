@@ -14,9 +14,9 @@ $a = new BCMath\Number("1");
 $b = new MyString();
 try {
     var_dump($a + $b);
-} catch (Error $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Unsupported operand types: BcMath\Number + MyString
+TypeError: Unsupported operand types: BcMath\Number + MyString

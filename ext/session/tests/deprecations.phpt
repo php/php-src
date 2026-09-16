@@ -60,5 +60,5 @@ Deprecated: session_start(): Disabling session.use_only_cookies INI setting is d
 
 Deprecated: session_start(): Enabling session.use_trans_sid INI setting is deprecated in %s on line 32
 
-Deprecated: Constant SID is deprecated in %s on line 34
+Deprecated: Constant SID is deprecated since 8.4, as GET/POST sessions were deprecated in %s on line %d
 PHPSESSID=%s

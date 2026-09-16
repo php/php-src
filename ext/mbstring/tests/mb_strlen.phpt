@@ -97,7 +97,7 @@ mb_internal_encoding('EUC-JP');
 try {
     var_dump( mb_strlen($euc_jp, 'BAD_NAME') );
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -147,4 +147,4 @@ try {
 2300
 2048
 == WRONG PARAMETERS ==
-mb_strlen(): Argument #2 ($encoding) must be a valid encoding, "BAD_NAME" given
+ValueError: mb_strlen(): Argument #2 ($encoding) must be a valid encoding, "BAD_NAME" given

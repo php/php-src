@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Stig Sæther Bakken <ssb@php.net>                            |
@@ -29,9 +27,9 @@ PHP_MINIT_FUNCTION(string_intrin);
 #endif
 
 #define strnatcmp(a, b) \
-	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)
+	strnatcmp_ex(a, strlen(a), b, strlen(b), false)
 #define strnatcasecmp(a, b) \
-	strnatcmp_ex(a, strlen(a), b, strlen(b), 1)
+	strnatcmp_ex(a, strlen(a), b, strlen(b), true)
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive);
 PHPAPI struct lconv *localeconv_r(struct lconv *out);
 PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen);

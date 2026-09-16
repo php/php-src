@@ -44,7 +44,7 @@ $client = new soapclient(NULL, [
 try {
     $client->__soapCall("foo", []);
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $headers = $client->__getLastRequestHeaders();
@@ -52,7 +52,7 @@ var_dump($headers);
 
 ?>
 --EXPECTF--
-Unauthorized
+SoapFault: Unauthorized
 string(%d) "POST / HTTP/1.1
 Host: %s
 Connection: Keep-Alive

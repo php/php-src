@@ -4,20 +4,19 @@ Bug #51936 (Crash with clone XMLReader)
 xmlreader
 --FILE--
 <?php
-echo "Test\n";
 
 $xmlreader = new XMLReader();
 $xmlreader->xml("<a><b/></a>");
 
 $xmlreader->next();
-$xmlreader2 = clone $xmlreader;
-$xmlreader2->next();
-?>
-Done
---EXPECTF--
-Test
 
-Fatal error: Uncaught Error: Trying to clone an uncloneable object of class XMLReader in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+try {
+    $xmlreader2 = clone $xmlreader;
+    $xmlreader2->next();
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
+?>
+--EXPECT--
+Error: Trying to clone an uncloneable object of class XMLReader

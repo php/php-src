@@ -48,6 +48,7 @@
 .file "jump_mips64_n64_elf_gas.S"
 .text
 .globl jump_fcontext
+.hidden jump_fcontext
 .align 3
 .type jump_fcontext,@function
 .ent jump_fcontext

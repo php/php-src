@@ -266,14 +266,14 @@ int ir_build_cfg(ir_ctx *ctx)
 				ir_bitset_incl(bb_leaks, *p);
 			}
 		}
-		/* Skip control nodes untill BB start */
+		/* Skip control nodes until BB start */
 		ref = insn->op1;
 		while (1) {
 			insn = &ctx->ir_base[ref];
 			if (IR_IS_BB_START(insn->op)) {
 				break;
 			}
-			ref = insn->op1; // follow connected control blocks untill BB start
+			ref = insn->op1; // follow connected control blocks until BB start
 		}
 		/* Mark BB Start */
 		bb_count++;
@@ -306,7 +306,7 @@ int ir_build_cfg(ir_ctx *ctx)
 			IR_ASSERT(IR_IS_BB_START(insn->op));
 			/* Remember BB start */
 			start = ref;
-			/* Skip control nodes untill BB end */
+			/* Skip control nodes until BB end */
 			while (1) {
 				ref = ir_next_control(ctx, ref);
 				insn = &ctx->ir_base[ref];

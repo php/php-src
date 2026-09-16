@@ -48,6 +48,7 @@ $result = curl_exec($ch);
 var_dump($result);
 var_dump(curl_error($ch));
 var_dump(curl_errno($ch));
+var_dump(curl_errno($ch) === CURLE_ABORTED_BY_CALLBACK);
 
 $returnValue = CURL_PREREQFUNC_OK;
 
@@ -72,7 +73,7 @@ curl_setopt($ch, CURLOPT_PREREQFUNCTION, function() use ($port) {
 try {
     curl_exec($ch);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\nTesting with invalid type\n";
@@ -82,7 +83,7 @@ curl_setopt($ch, CURLOPT_PREREQFUNCTION, function() use ($port) {
 try {
     curl_exec($ch);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\nTesting with invalid value\n";
@@ -92,21 +93,21 @@ curl_setopt($ch, CURLOPT_PREREQFUNCTION, function() use ($port) {
 try {
     curl_exec($ch);
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\nTesting with invalid option value\n";
 try {
     curl_setopt($ch, CURLOPT_PREREQFUNCTION, 42);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\nTesting with invalid option callback\n";
 try {
     curl_setopt($ch, CURLOPT_PREREQFUNCTION, 'function_does_not_exist');
 } catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "\nTesting with null as the callback\n";
@@ -133,6 +134,7 @@ bool(true)
 bool(false)
 string(41) "operation aborted by pre-request callback"
 int(42)
+bool(true)
 
 Testing with CURL_PREREQFUNC_OK
 string(8) "callback"
@@ -159,19 +161,19 @@ string(0) ""
 int(0)
 
 Testing with no return type
-The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT
+TypeError: The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT
 
 Testing with invalid type
-The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT
+TypeError: The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT
 
 Testing with invalid value
-The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT
+ValueError: The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT
 
 Testing with invalid option value
-curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_PREREQFUNCTION, no array or string given
+TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_PREREQFUNCTION, no array or string given
 
 Testing with invalid option callback
-curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_PREREQFUNCTION, function "function_does_not_exist" not found or invalid function name
+TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_PREREQFUNCTION, function "function_does_not_exist" not found or invalid function name
 
 Testing with null as the callback
 bool(true)

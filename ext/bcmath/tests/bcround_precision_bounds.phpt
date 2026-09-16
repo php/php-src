@@ -8,21 +8,21 @@ bcmath
 <?php
 try {
     bcround('1', PHP_INT_MAX);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     (new BcMath\Number('1'))->round(PHP_INT_MAX);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     (new BcMath\Number('1'))->round(2147483648); // INT_MAX + 1
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-bcround(): Argument #2 ($precision) must be between %i and %d
-BcMath\Number::round(): Argument #1 ($precision) must be between %i and %d
-BcMath\Number::round(): Argument #1 ($precision) must be between %i and %d
+ValueError: bcround(): Argument #2 ($precision) must be between %i and %d
+ValueError: BcMath\Number::round(): Argument #1 ($precision) must be between %i and %d
+ValueError: BcMath\Number::round(): Argument #1 ($precision) must be between %i and %d

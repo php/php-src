@@ -8,9 +8,9 @@ pcntl
 try {
     pcntl_signal(SIGTERM, -1);
 } catch (Error $error) {
-    echo $error->getMessage();
+    echo $error::class, ': ', $error->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-pcntl_signal(): Argument #2 ($handler) must be either SIG_DFL or SIG_IGN when an integer value is given
+ValueError: pcntl_signal(): Argument #2 ($handler) must be either SIG_DFL or SIG_IGN when an integer value is given

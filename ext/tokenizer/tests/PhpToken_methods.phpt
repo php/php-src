@@ -40,12 +40,12 @@ echo "\nError:\n";
 try {
     $token->is(3.141);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $token->is([3.141]);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 unset($token->id);
@@ -53,22 +53,22 @@ unset($token->text);
 try {
     $token->is(T_FUNCTION);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $token->is('function');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $token->is([T_FUNCTION]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $token->is(['function']);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\nName of unknown token:\n";
@@ -110,12 +110,12 @@ bool(false)
 bool(false)
 
 Error:
-PhpToken::is(): Argument #1 ($kind) must be of type string|int|array, float given
-PhpToken::is(): Argument #1 ($kind) must only have elements of type string|int, float given
-Typed property PhpToken::$id must not be accessed before initialization
-Typed property PhpToken::$text must not be accessed before initialization
-Typed property PhpToken::$id must not be accessed before initialization
-Typed property PhpToken::$text must not be accessed before initialization
+TypeError: PhpToken::is(): Argument #1 ($kind) must be of type string|int|array, float given
+TypeError: PhpToken::is(): Argument #1 ($kind) must only have elements of type string|int, float given
+Error: Typed property PhpToken::$id must not be accessed before initialization
+Error: Typed property PhpToken::$text must not be accessed before initialization
+Error: Typed property PhpToken::$id must not be accessed before initialization
+Error: Typed property PhpToken::$text must not be accessed before initialization
 
 Name of unknown token:
 NULL

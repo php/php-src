@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Func Info                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    |          Xinchen Hui <laruence@php.net>                              |
@@ -24,7 +22,6 @@
 #include "zend_inference.h"
 #include "zend_call_graph.h"
 #include "zend_func_info.h"
-#include "zend_inference.h"
 #ifdef _WIN32
 #include "win32/ioutil.h"
 #endif
@@ -57,7 +54,7 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 	 && (call_info->num_args == 2 || call_info->num_args == 3)
 	 && ssa
 	 && !(ssa->cfg.flags & ZEND_SSA_TSSA)) {
-		zend_op_array *op_array = call_info->caller_op_array;
+		const zend_op_array *op_array = call_info->caller_op_array;
 		uint32_t t1 = _ssa_op1_info(op_array, ssa, call_info->arg_info[0].opline,
 			ssa->ops ? &ssa->ops[call_info->arg_info[0].opline - op_array->opcodes] : NULL);
 		uint32_t t2 = _ssa_op1_info(op_array, ssa, call_info->arg_info[1].opline,
@@ -116,7 +113,7 @@ uint32_t zend_get_internal_func_info(
 		return 0;
 	}
 
-	func_info_t *info = Z_PTR_P(zv);
+	const func_info_t *info = Z_PTR_P(zv);
 	if (info->info_func) {
 		return call_info ? info->info_func(call_info, ssa) : 0;
 	} else {
@@ -136,7 +133,7 @@ ZEND_API uint32_t zend_get_func_info(
 	uint32_t ret = 0;
 	const zend_function *callee_func = call_info->callee_func;
 	*ce = NULL;
-	*ce_is_instanceof = 0;
+	*ce_is_instanceof = false;
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
 		uint32_t internal_ret = zend_get_internal_func_info(callee_func, call_info, ssa);
@@ -178,7 +175,7 @@ ZEND_API uint32_t zend_get_func_info(
 	} else {
 		if (!call_info->is_prototype) {
 			// FIXME: the order of functions matters!!!
-			zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)callee_func);
+			const zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)callee_func);
 			if (info) {
 				ret = info->return_info.type;
 				*ce = info->return_info.ce;
@@ -198,13 +195,13 @@ ZEND_API uint32_t zend_get_func_info(
 	return ret;
 }
 
-static void zend_func_info_add(const func_info_t *func_infos, size_t n)
+static void zend_func_info_add(const func_info_t *new_func_infos, size_t n)
 {
 	for (size_t i = 0; i < n; i++) {
-		zend_string *key = zend_string_init_interned(func_infos[i].name, func_infos[i].name_len, 1);
+		zend_string *key = zend_string_init_interned(new_func_infos[i].name, new_func_infos[i].name_len, 1);
 
-		if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
-			fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", func_infos[i].name);
+		if (zend_hash_add_ptr(&func_info, key, (void**)&new_func_infos[i]) == NULL) {
+			fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", new_func_infos[i].name);
 		}
 
 		zend_string_release_ex(key, 1);

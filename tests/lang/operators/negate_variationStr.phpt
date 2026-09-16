@@ -13,7 +13,7 @@ foreach ($strVals as $strVal) {
     try {
         var_dump(-$strVal);
     } catch (\TypeError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
@@ -30,7 +30,7 @@ float(-1.2)
 --- testing: '-7.7' ---
 float(7.7)
 --- testing: 'abc' ---
-Unsupported operand types: string * int
+TypeError: Unsupported operand types: string * int
 --- testing: '123abc' ---
 
 Warning: A non-numeric value encountered in %s on line %d
@@ -58,4 +58,4 @@ int(-123)
 Warning: A non-numeric value encountered in %s on line %d
 float(-3.4)
 --- testing: 'a5.9' ---
-Unsupported operand types: string * int
+TypeError: Unsupported operand types: string * int

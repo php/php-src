@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit zend_weakrefs.stub.php instead.
  * Stub hash: d91889851d9732d41e43fffddb6235d033c67534 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_WeakReference___construct, 0, 0, 0)

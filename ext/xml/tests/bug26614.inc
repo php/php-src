@@ -69,5 +69,4 @@ foreach ($xmls as $desc => $xml) {
     xml_set_character_data_handler($xml_parser, "characterData");
     if (!xml_parse($xml_parser, $xml, true))
         echo "Error: ".xml_error_string(xml_get_error_code($xml_parser))."\n";
-    xml_parser_free($xml_parser);
 }

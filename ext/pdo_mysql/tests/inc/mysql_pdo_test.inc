@@ -20,20 +20,19 @@ class MySQLPDOTest extends PDOTest {
             $attr = is_string($attr) && strlen($attr) ? unserialize($attr) : null;
         }
 
-        if ($useConnectMethod) {
-            $db = $classname::connect($dsn, $user, $pass, $attr);
-        } else {
-            $db = new $classname($dsn, $user, $pass, $attr);
+        $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attr];
+
+        try {
+            return ProbeCache::getFailure('pdo', $configuration, static function () use ($classname, $useConnectMethod, $dsn, $user, $pass, $attr): PDO {
+                try {
+                    return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attr);
+                } catch (PDOException $e) {
+                    throw new ProbeFailureException($e);
+                }
+            });
+        } catch (ProbeFailureException $e) {
+            throw new PDOException($e->getMessage());
         }
-
-        if (!$db) {
-            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
-        }
-
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
-
-        return $db;
     }
 
     static function factoryWithAttr($attr) {
@@ -168,7 +167,7 @@ class MySQLPDOTest extends PDOTest {
 
     static function skip() {
         try {
-            $db = self::factory();
+            self::factory();
         } catch (PDOException $e) {
             die('skip could not connect');
         }
@@ -211,6 +210,23 @@ class MySQLPDOTest extends PDOTest {
         $db = self::factory();
         $message = $message ?? 'skip Transactional engine not found';
         if (false == self::detect_transactional_mysql_engine($db)) die($message);
+    }
+
+    private static function createConnection($classname, bool $useConnectMethod, $dsn, $user, $pass, $attr) {
+        if ($useConnectMethod) {
+            $db = $classname::connect($dsn, $user, $pass, $attr);
+        } else {
+            $db = new $classname($dsn, $user, $pass, $attr);
+        }
+
+        if (!$db) {
+            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+        }
+
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+
+        return $db;
     }
 }
 ?>

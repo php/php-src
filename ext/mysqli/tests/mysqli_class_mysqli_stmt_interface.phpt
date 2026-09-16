@@ -132,6 +132,7 @@ printf("stmt->unknown = '%s'\n", @$stmt->unknown);
 print "done!";
 ?>
 --EXPECTF--
+Deprecated: Instantiation of mysqli_stmt without providing the $query parameter is deprecated in %s on line %d
 Parent class:
 bool(false)
 

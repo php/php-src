@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Ard Biesheuvel <abies@php.net>                               |
   +----------------------------------------------------------------------+
@@ -87,7 +85,6 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 	struct tm t;
 	ISC_TIME time;
 	char timeBuf[80] = {0};
-	char timeTzBuf[124] = {0};
 	if (fb_decode_time_tz(S->H->isc_status, timeTz, &hours, &minutes, &seconds, &fractions, sizeof(timeZoneBuffer), timeZoneBuffer)) {
 		return 1;
 	}
@@ -100,8 +97,8 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 		return 1;
 	}
 
-	size_t time_tz_len = sprintf(timeTzBuf, "%s %s", timeBuf, timeZoneBuffer);
-	ZVAL_STRINGL(result, timeTzBuf, time_tz_len);
+	zend_string *time_tz_str = zend_strpprintf(0, "%s %s", timeBuf, timeZoneBuffer);
+	ZVAL_NEW_STR(result, time_tz_str);
 	return 0;
 }
 
@@ -115,7 +112,6 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 	struct tm t;
 	ISC_TIMESTAMP ts;
 	char timestampBuf[80] = {0};
-	char timestampTzBuf[124] = {0};
 	if (fb_decode_timestamp_tz(S->H->isc_status, timestampTz, &year, &month, &day, &hours, &minutes, &seconds, &fractions, sizeof(timeZoneBuffer), timeZoneBuffer)) {
 		return 1;
 	}
@@ -130,8 +126,8 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 		return 1;
 	}
 
-	size_t timestamp_tz_len = sprintf(timestampTzBuf, "%s %s", timestampBuf, timeZoneBuffer);
-	ZVAL_STRINGL(result, timestampTzBuf, timestamp_tz_len);
+	zend_string *timestamp_tz_str = zend_strpprintf(0, "%s %s", timestampBuf, timeZoneBuffer);
+	ZVAL_NEW_STR(result, timestamp_tz_str);
 	return 0;
 }
 
@@ -158,15 +154,9 @@ static int pdo_firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int result = 1;
 
-	/* TODO: for master, move this check to a separate function shared between pdo drivers.
-	 *       pdo_pgsql and pdo_mysql do this exact same thing */
-	bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
-		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
-
 	/* release the statement.
 	 * Note: if the server object is already gone then the statement was closed already as well. */
-	if (server_obj_usable && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
+	if (php_pdo_stmt_valid_db_obj_handle(stmt) && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
 		php_firebird_error_stmt(stmt);
 		result = 0;
 	}
@@ -500,7 +490,7 @@ static int pdo_firebird_stmt_get_col(
 					break;
 				case SQL_DOUBLE:
 					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
+				default: ZEND_UNREACHABLE();
 			}
 
 			if ((var->sqltype & ~1) == SQL_DOUBLE) {
@@ -893,17 +883,28 @@ static int pdo_firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zva
 	switch (attr) {
 		default:
 			return 0;
-		case PDO_ATTR_CURSOR_NAME:
-			if (!try_convert_to_string(val)) {
+		case PDO_ATTR_CURSOR_NAME: {
+			zend_string *str_val = zval_try_get_string(val);
+			if (str_val == NULL) {
+				return 0;
+			}
+			// TODO Check cursor name does not have null bytes?
+			if (ZSTR_LEN(str_val) >= sizeof(S->name)) {
+				zend_value_error("Cursor name must not be longer than %zu bytes", sizeof(S->name) - 1);
+				zend_string_release(str_val);
 				return 0;
 			}
 
-			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
+			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, ZSTR_VAL(str_val), 0)) {
 				php_firebird_error_stmt(stmt);
+				zend_string_release(str_val);
 				return 0;
 			}
-			strlcpy(S->name, Z_STRVAL_P(val), sizeof(S->name));
+			/* Include trailing nul byte */
+			memcpy(S->name, ZSTR_VAL(str_val), ZSTR_LEN(str_val) + 1);
+			zend_string_release(str_val);
 			break;
+		}
 	}
 	return 1;
 }

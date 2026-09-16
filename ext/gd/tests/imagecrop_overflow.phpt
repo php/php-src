@@ -11,7 +11,7 @@ $arr = ["x" => 2147483647, "y" => 2147483647, "width" => 10, "height" => 10];
 try {
 	imagecrop($img, $arr);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $arr = ["x" => -2147483648, "y" => 0, "width" => -10, "height" => 10];
@@ -19,7 +19,7 @@ $arr = ["x" => -2147483648, "y" => 0, "width" => -10, "height" => 10];
 try {
 	imagecrop($img, $arr);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $arr = ["x" => 1, "y" => 2147483647, "width" => 10, "height" => 10];
@@ -27,7 +27,7 @@ $arr = ["x" => 1, "y" => 2147483647, "width" => 10, "height" => 10];
 try {
 	imagecrop($img, $arr);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $arr = ["x" => 1, "y" => -2147483648, "width" => 10, "height" => -10];
@@ -35,11 +35,11 @@ $arr = ["x" => 1, "y" => -2147483648, "width" => 10, "height" => -10];
 try {
 	imagecrop($img, $arr);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-imagecrop(): Argument #2 ($rectangle) overflow with "x" and "width" keys
-imagecrop(): Argument #2 ($rectangle) underflow with "x" and "width" keys
-imagecrop(): Argument #2 ($rectangle) overflow with "y" and "height" keys
-imagecrop(): Argument #2 ($rectangle) underflow with "y" and "height" keys
+ValueError: imagecrop(): Argument #2 ($rectangle) overflow with "x" and "width" keys
+ValueError: imagecrop(): Argument #2 ($rectangle) underflow with "x" and "width" keys
+ValueError: imagecrop(): Argument #2 ($rectangle) overflow with "y" and "height" keys
+ValueError: imagecrop(): Argument #2 ($rectangle) underflow with "y" and "height" keys

@@ -99,12 +99,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: file(%sfileVar8_win32.dir\fileVar8Sub\..\\\fileVar8Sub\\..\\..\fileVar8Sub\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file(%sfileVar8_win32.dir\fileVar8Sub\BADDIR\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -133,7 +133,7 @@ array(1) {
 
 -- Iteration 11 --
 
-Warning: file(BADDIR\FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 12 --

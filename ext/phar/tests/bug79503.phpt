@@ -7,8 +7,8 @@ phar
 try {
     new Phar(__DIR__ . '/bug79503.phar');
 } catch (UnexpectedValueException $ex) {
-    echo $ex->getMessage();
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-phar error: tar-based phar "%s%ebug79503.phar" has invalid metadata in magic file ".phar/.metadata.bin"
+UnexpectedValueException: phar error: tar-based phar "%s%ebug79503.phar" has invalid metadata in magic file ".phar/.metadata.bin"

@@ -87,14 +87,14 @@ try {
     var_dump(curl_setopt($ch, CURLINFO_HEADER_OUT, true));
 }
 catch (\ValueError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $chCopy = curl_copy_handle($ch);
 try {
     var_dump(curl_setopt($chCopy, CURLINFO_HEADER_OUT, true));
 }
 catch (\ValueError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(curl_setopt($chCopy, CURLOPT_DEBUGFUNCTION, null));
 var_dump(curl_setopt($chCopy, CURLINFO_HEADER_OUT, true));
@@ -138,7 +138,7 @@ try {
     var_dump($result = curl_exec($ch));
 }
 catch (\RuntimeException $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(curl_getinfo($ch, CURLINFO_HEADER_OUT));
 
@@ -183,8 +183,8 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-string(87) "CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set"
-string(87) "CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set"
+ValueError: CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set
+ValueError: CURLINFO_HEADER_OUT option must not be set when the CURLOPT_DEBUGFUNCTION option is set
 bool(true)
 bool(true)
 
@@ -216,7 +216,7 @@ Accept: */*
 
 ===Test CURLOPT_DEBUGFUNCTION can throw within callback===
 bool(true)
-string(41) "This should get caught after verbose=true"
+RuntimeException: This should get caught after verbose=true
 string(%d) "GET /get.inc?test=file HTTP/%s
 Host: %s:%d
 Accept: */*

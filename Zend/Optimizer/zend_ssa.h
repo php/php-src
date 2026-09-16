@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA - Static Single Assignment Form                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -66,7 +64,7 @@ struct _zend_ssa_phi {
 	zend_ssa_pi_constraint constraint;    /* e-SSA Pi constraint */
 	int                    var;           /* Original CV, VAR or TMP variable index */
 	int                    ssa_var;       /* SSA variable index */
-	int                    block;         /* current BB index */
+	uint32_t               block;         /* current BB index */
 	bool                   has_range_constraint;
 	zend_ssa_phi         **use_chains;
 	zend_ssa_phi          *sym_use_chain;
@@ -147,15 +145,15 @@ BEGIN_EXTERN_C()
 ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa);
 ZEND_API void zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 ZEND_API int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var);
-void zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
-void zend_ssa_replace_use_chain(zend_ssa *ssa, int op, int new_op, int var);
+void zend_ssa_unlink_use_chain(const zend_ssa *ssa, int op, int var);
+void zend_ssa_replace_use_chain(const zend_ssa *ssa, int op, int new_op, int var);
 
 void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to);
 void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op);
-void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
-void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi);
-void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num);
-void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int b);
+void zend_ssa_remove_instr(const zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
+void zend_ssa_remove_phi(const zend_ssa *ssa, zend_ssa_phi *phi);
+void zend_ssa_remove_uses_of_var(const zend_ssa *ssa, int var_num);
+void zend_ssa_remove_block(const zend_op_array *op_array, zend_ssa *ssa, uint32_t b);
 void zend_ssa_rename_var_uses(zend_ssa *ssa, int old_var, int new_var, bool update_types);
 void zend_ssa_remove_block_from_cfg(zend_ssa *ssa, int b);
 
@@ -207,8 +205,7 @@ static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ss
 	if (p->pi >= 0) {
 		return p->use_chains[0];
 	} else {
-		int j;
-		for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
+		for (uint32_t j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
 			if (p->sources[j] == var) {
 				return p->use_chains[j];
 			}
@@ -240,21 +237,21 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 	/* Rename def to use if possible. Mark variable as not defined otherwise. */
 	if (ssa_op->op1_def >= 0) {
 		if (ssa_op->op1_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->op1_def, ssa_op->op1_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->op1_def, ssa_op->op1_use, true);
 		}
 		ssa->vars[ssa_op->op1_def].definition = -1;
 		ssa_op->op1_def = -1;
 	}
 	if (ssa_op->op2_def >= 0) {
 		if (ssa_op->op2_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->op2_def, ssa_op->op2_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->op2_def, ssa_op->op2_use, true);
 		}
 		ssa->vars[ssa_op->op2_def].definition = -1;
 		ssa_op->op2_def = -1;
 	}
 	if (ssa_op->result_def >= 0) {
 		if (ssa_op->result_use >= 0) {
-			zend_ssa_rename_var_uses(ssa, ssa_op->result_def, ssa_op->result_use, 1);
+			zend_ssa_rename_var_uses(ssa, ssa_op->result_def, ssa_op->result_use, true);
 		}
 		ssa->vars[ssa_op->result_def].definition = -1;
 		ssa_op->result_def = -1;
@@ -285,7 +282,7 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 
 #define FOREACH_PHI_SOURCE(phi, source) do { \
 	zend_ssa_phi *_phi = (phi); \
-	int _i, _end = NUM_PHI_SOURCES(phi); \
+	uint32_t _i, _end = NUM_PHI_SOURCES(phi); \
 	for (_i = 0; _i < _end; _i++) { \
 		ZEND_ASSERT(_phi->sources[_i] >= 0); \
 		source = _phi->sources[_i];
@@ -294,8 +291,7 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 } while (0)
 
 #define FOREACH_PHI(phi) do { \
-	int _i; \
-	for (_i = 0; _i < ssa->cfg.blocks_count; _i++) { \
+	for (uint32_t _i = 0; _i < ssa->cfg.blocks_count; _i++) { \
 		phi = ssa->blocks[_i].phis; \
 		for (; phi; phi = phi->next) {
 #define FOREACH_PHI_END() \
@@ -304,8 +300,7 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 } while (0)
 
 #define FOREACH_BLOCK(block) do { \
-	int _i; \
-	for (_i = 0; _i < ssa->cfg.blocks_count; _i++) { \
+	for (uint32_t _i = 0; _i < ssa->cfg.blocks_count; _i++) { \
 		(block) = &ssa->cfg.blocks[_i]; \
 		if (!((block)->flags & ZEND_BB_REACHABLE)) { \
 			continue; \

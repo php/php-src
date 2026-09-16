@@ -9,12 +9,12 @@ include "skipif.inc";
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n --rf unknown`);
-var_dump(`$php -n --rf echo`);
-var_dump(`$php -n --rf phpinfo`);
+var_dump(shell_exec("$php -n --rf unknown"));
+var_dump(shell_exec("$php -n --rf echo"));
+var_dump(shell_exec("$php -n --rf phpinfo"));
 // Regression tests for https://github.com/php/php-src/issues/21754
-var_dump(`$php -n --rf ReflectionMethod::__construct`);
-var_dump(`$php -n --rf ReflectionMethod::missing`);
+var_dump(shell_exec("$php -n --rf ReflectionMethod::__construct"));
+var_dump(shell_exec("$php -n --rf ReflectionMethod::missing"));
 
 echo "Done\n";
 ?>

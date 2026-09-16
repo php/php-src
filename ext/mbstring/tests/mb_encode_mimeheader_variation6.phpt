@@ -2,6 +2,8 @@
 Test mb_encode_mimeheader() function : usage variations - Pass different strings to $linefeed arg
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=utf-8
 --FILE--
 <?php
 /* (string $str [, string $charset [, string $transfer_encoding [, string $linefeed [, int $indent]]]])
@@ -14,8 +16,6 @@ mbstring
  */
 
 echo "*** Testing mb_encode_mimeheader() : usage variations ***\n";
-
-mb_internal_encoding('utf-8');
 
 $linefeeds = array("\r\n",
                    "\n",

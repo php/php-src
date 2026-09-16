@@ -8,7 +8,7 @@ gd
 ?>
 --FILE--
 <?php
-$filename = __DIR__ . '/_tmp.wbmp';
+$filename = __DIR__ . '/_tmp_createfromwbmp2.wbmp';
 $fp = fopen($filename,"wb");
 if (!$fp) {
     exit("Failed to create <$filename>");

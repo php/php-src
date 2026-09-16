@@ -23,6 +23,11 @@ final class NumericCastableNoOperations {
     public function __construct(int|float $val) {}
 }
 
+final class VmInterruptComparable {
+    private int $val;
+    public function __construct(int $val) {}
+}
+
 class DimensionHandlersNoArrayAccess {
     public bool $read = false;
     public bool $write = false;

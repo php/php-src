@@ -14,6 +14,6 @@ var_dump($f, intl_get_error_message());
 ?>
 --EXPECT--
 NULL
-string(67) "datefmt_create: invalid date format style: U_ILLEGAL_ARGUMENT_ERROR"
+string(69) "datefmt_create(): invalid date format style: U_ILLEGAL_ARGUMENT_ERROR"
 NULL
-string(67) "datefmt_create: invalid time format style: U_ILLEGAL_ARGUMENT_ERROR"
+string(69) "datefmt_create(): invalid time format style: U_ILLEGAL_ARGUMENT_ERROR"

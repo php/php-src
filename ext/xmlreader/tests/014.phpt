@@ -26,21 +26,21 @@ while ($reader->read()) {
             // Try to set the value of the element from book1 to movie1
             try {
                 $reader->value = 'movie1';
-            } catch (Error $exception) {
-                echo $exception->getMessage() . "\n";
+            } catch (Throwable $exception) {
+                echo $exception::class, ': ', $exception->getMessage(), "\n";
             }
             // Try to set the value of the first "num" attribute from "1" to "num attribute 1"
             $attr = $reader->moveToFirstAttribute();
             try {
                 $reader->value = 'num attribute 1';
-            } catch (Error $exception) {
-                echo $exception->getMessage() . "\n";
+            } catch (Throwable $exception) {
+                echo $exception::class, ': ', $exception->getMessage(), "\n";
             }
             // Try to set the name of the first attribute from "num" to "number"
             try {
                 $reader->name = 'number';
-            } catch (Error $exception) {
-                echo $exception->getMessage() . "\n";
+            } catch (Throwable $exception) {
+                echo $exception::class, ': ', $exception->getMessage(), "\n";
             }
         }
     }
@@ -54,6 +54,6 @@ $reader->close();
 unlink(__DIR__.'/_014.xml');
 ?>
 --EXPECT--
-Cannot modify readonly property XMLReader::$value
-Cannot modify readonly property XMLReader::$value
-Cannot modify readonly property XMLReader::$name
+Error: Cannot modify readonly property XMLReader::$value
+Error: Cannot modify readonly property XMLReader::$value
+Error: Cannot modify readonly property XMLReader::$name

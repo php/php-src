@@ -9,7 +9,7 @@ function get_cgi_path() /* {{{ */
     $cgi = false;
 
     if (file_exists($php) && is_executable($php)) {
-        $version = `$php_escaped -n -v`;
+        $version = shell_exec("$php_escaped -n -v");
         if (strstr($version, "(cli)")) {
             /* that's cli */
             $cli = true;

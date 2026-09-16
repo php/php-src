@@ -19,7 +19,6 @@ curl
   ob_start(); // start output buffering
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
   $ok = curl_exec($ch);
-  curl_close($ch);
   $curl_content = ob_get_contents();
   ob_end_clean();
 

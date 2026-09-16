@@ -10,9 +10,9 @@ class MyPDO extends PDO {}
 try {
     MyPDO::connect('sqlite::memory:');
 } catch (PDOException $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-MyPDO::connect() cannot be used for connecting to the "sqlite" driver, either call Pdo\Sqlite::connect() or PDO::connect() instead
+PDOException: MyPDO::connect() cannot be used for connecting to the "sqlite" driver, either call Pdo\Sqlite::connect() or PDO::connect() instead

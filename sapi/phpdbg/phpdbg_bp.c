@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -805,7 +803,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opcode(const char *name, size_t name_len) 
 
 PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline) /* {{{ */
 {
-	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) {
+	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t) opline)) {
 		phpdbg_breakline_t new_break;
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
@@ -814,7 +812,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline) /* {
 		new_break.opline = (zend_ulong) opline;
 		new_break.base = NULL;
 
-		zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t));
+		zend_hash_index_update_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t) opline, &new_break, sizeof(phpdbg_breakline_t));
 
 		phpdbg_notice("Breakpoint #%d added at #"ZEND_ULONG_FMT, new_break.id, new_break.opline);
 		PHPDBG_BREAK_MAPPING(new_break.id, &PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
@@ -968,13 +966,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function *f
 	}
 
 	if (ops->function_name) {
-		phpdbg_breakbase_t *brake;
-		zend_string *fname = zend_string_tolower(ops->function_name);
-
-		brake = zend_hash_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], fname);
-
-		zend_string_release(fname);
-		return brake;
+		return zend_hash_find_ptr_lc(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], ops->function_name);
 	} else {
 		return zend_hash_str_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], ZEND_STRL("main"));
 	}
@@ -984,17 +976,11 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array *o
 {
 	HashTable *class_table;
 	phpdbg_breakbase_t *brake = NULL;
-	zend_string *class_lcname = zend_string_tolower(ops->scope->name);
 
-	if ((class_table = zend_hash_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], class_lcname))) {
-		zend_string *lcname = zend_string_tolower(ops->function_name);
-
-		brake = zend_hash_find_ptr(class_table, lcname);
-
-		zend_string_release(lcname);
+	if ((class_table = zend_hash_find_ptr_lc(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], ops->scope->name))) {
+		brake = zend_hash_find_ptr_lc(class_table, ops->function_name);
 	}
 
-	zend_string_release(class_lcname);
 	return brake;
 } /* }}} */
 
@@ -1002,7 +988,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 {
 	phpdbg_breakline_t *brake;
 
-	if ((brake = zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) && brake->base) {
+	if ((brake = zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong)(uintptr_t) opline)) && brake->base) {
 		return (phpdbg_breakbase_t *)brake->base;
 	}
 
@@ -1206,14 +1192,14 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num) /* {{{ */
 					name = estrdup(brake->name);
 					name_len = strlen(name);
 					if (zend_hash_num_elements(&PHPDBG_G(bp)[type]) == 1) {
-						PHPDBG_G(flags) &= ~(1<<(brake->type+1));
+						PHPDBG_G(flags) &= ~(1ull<<(brake->type+1));
 					}
 				}
 			break;
 
 			default: {
 				if (zend_hash_num_elements(table) == 1) {
-					PHPDBG_G(flags) &= ~(1<<(brake->type+1));
+					PHPDBG_G(flags) &= ~(1ull<<(brake->type+1));
 				}
 			}
 		}
@@ -1510,37 +1496,28 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type) /* {{{ */
 			phpdbg_out(SEPARATE "\n");
 			phpdbg_out("Opline Breakpoints:\n");
 			ZEND_HASH_MAP_FOREACH_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], brake) {
-				const char *type;
+				const char *str_type;
 				switch (brake->type) {
 					case PHPDBG_BREAK_METHOD_OPLINE:
-						type = "method";
-						goto print_opline;
+						str_type = "method";
+						break;
 					case PHPDBG_BREAK_FUNCTION_OPLINE:
-						type = "function";
-						goto print_opline;
+						str_type = "function";
+						break;
 					case PHPDBG_BREAK_FILE_OPLINE:
-						type = "method";
-
-					print_opline: {
-						if (brake->type == PHPDBG_BREAK_METHOD_OPLINE) {
-							type = "method";
-						} else if (brake->type == PHPDBG_BREAK_FUNCTION_OPLINE) {
-							type = "function";
-						} else if (brake->type == PHPDBG_BREAK_FILE_OPLINE) {
-							type = "file";
-						}
-
-						phpdbg_writeln("#%d\t\t#"ZEND_ULONG_FMT"\t\t(%s breakpoint)%s",
-							brake->id, brake->opline, type,
-							((phpdbg_breakbase_t *) brake)->disabled ? " [disabled]" : "");
-					} break;
+						str_type = "file";
+						break;
 
 					default:
 						phpdbg_writeln("#%d\t\t#"ZEND_ULONG_FMT"%s",
 							brake->id, brake->opline,
 							((phpdbg_breakbase_t *) brake)->disabled ? " [disabled]" : "");
-						break;
+						continue;
 				}
+
+				phpdbg_writeln("#%d\t\t#"ZEND_ULONG_FMT"\t\t(%s breakpoint)%s",
+					brake->id, brake->opline, str_type,
+					((phpdbg_breakbase_t *) brake)->disabled ? " [disabled]" : "");
 			} ZEND_HASH_FOREACH_END();
 		} break;
 

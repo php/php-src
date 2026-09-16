@@ -63,6 +63,7 @@ var_dump($o->username);
 
 ?>
 --EXPECTF--
+Deprecated: ArrayObject::__construct(): Using an object as a backing array for ArrayObject is deprecated, as it allows violating class constraints and invariants in %s on line %d
 Check object properties directly
 string(5) "FIRST"
 string(4) "last"

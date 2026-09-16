@@ -3,6 +3,7 @@ GH-21496 (UAF in dom_objects_free_storage when importing non-document node as st
 --EXTENSIONS--
 dom
 xsl
+simplexml
 --CREDITS--
 YuanchengJiang
 --FILE--

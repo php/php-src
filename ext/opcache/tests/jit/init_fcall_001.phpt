@@ -18,4 +18,3 @@ Stack trace:
 #0 %sinit_fcall_001.php(5): ini_set()
 #1 {main}
   thrown in %sinit_fcall_001.php on line 5
-

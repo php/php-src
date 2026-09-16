@@ -23,7 +23,7 @@ echo jdtojewish(gregoriantojd(1,1,9998)) . "\n";
 try {
     jdtojewish(gregoriantojd(1,1,9998),true);
 } catch (ValueError $ex) {
-    echo "{$ex->getMessage()}\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -42,4 +42,4 @@ string(%d) "2/22/5763
 2/30/5763
 3/16/5765
 3/8/13758
-Year out of range (0-9999)
+ValueError: Year out of range (0-9999)

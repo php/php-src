@@ -20,7 +20,7 @@ var_dump($zip->getCommentIndex($idx));
 try {
     echo $zip->getCommentName('') . "\n";
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 $zip->close();
@@ -30,4 +30,4 @@ $zip->close();
 Zip archive comment
 string(11) "foo comment"
 string(11) "foo comment"
-ZipArchive::getCommentName(): Argument #1 ($name) must not be empty
+ValueError: ZipArchive::getCommentName(): Argument #1 ($name) must not be empty

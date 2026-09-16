@@ -4,8 +4,7 @@ ARG_ENABLE("sockets", "SOCKETS support", "no");
 
 if (PHP_SOCKETS != "no") {
 	if (CHECK_LIB("ws2_32.lib", "sockets", PHP_SOCKETS)
-	&& CHECK_LIB("Iphlpapi.lib", "sockets", PHP_SOCKETS)
-	&& CHECK_HEADER_ADD_INCLUDE("winsock.h", "CFLAGS_SOCKETS")) {
+	&& CHECK_LIB("Iphlpapi.lib", "sockets", PHP_SOCKETS)) {
 		EXTENSION('sockets', 'sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c', PHP_SOCKETS_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE('HAVE_SOCKETS', 1, "Define to 1 if the PHP extension 'sockets' is available.");
 		PHP_INSTALL_HEADERS("ext/sockets", "php_sockets.h windows_common.h");

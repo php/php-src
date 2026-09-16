@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -52,7 +50,7 @@
 #endif
 
 #if defined(HAVE_JIT) && (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
-static void *find_prefered_mmap_base(size_t requested_size)
+static void *find_preferred_mmap_base(size_t requested_size)
 {
 	size_t huge_page_size = 2 * 1024 * 1024;
 	uintptr_t last_free_addr = huge_page_size;
@@ -204,7 +202,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	void *hint;
 	if (JIT_G(enabled) && JIT_G(buffer_size)
 			&& zend_jit_check_support() == SUCCESS) {
-		hint = find_prefered_mmap_base(requested_size);
+		hint = find_preferred_mmap_base(requested_size);
 	} else {
 		/* Do not use a hint if JIT is not enabled, as this profits only JIT and
 		 * this is potentially unsafe when the only suitable candidate is just

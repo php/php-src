@@ -21,8 +21,6 @@ unset($phar);
 echo "--- Include 1 ---\n";
 include("phar://" . $filename);
 echo "--- Include 2 ---\n";
-// Note: will warn because the halting offset is redefined, but won't display the name because "zend_mangle_property_name" starts the name with \0
-// However, this is just the easiest way to reproduce it, so go with this test.
 include("phar://" . $filename);
 echo "--- After unlink ---\n";
 unlink($filename);
@@ -41,6 +39,6 @@ hello world
 hello world
 --- After unlink ---
 
-Warning: include(%sbug77432.phar): Failed to open stream: phar error: could not reopen phar "%sbug77432.phar" in %s on line %d
+Warning: include(): Failed to open stream: phar error: could not reopen phar "%sbug77432.phar" in %s on line %d
 
 Warning: include(): Failed opening '%sbug77432.phar' for inclusion (include_path=%s) in %s on line %d

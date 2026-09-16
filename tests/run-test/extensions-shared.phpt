@@ -5,7 +5,7 @@ openssl
 --SKIPIF--
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
-if (false !== stripos(`$php -n -m`, 'openssl')) {
+if (false !== stripos(shell_exec("$php -n -m"), 'openssl')) {
     die('skip openssl is built static');
 }
 $ext_module = ini_get('extension_dir') . DIRECTORY_SEPARATOR . (substr(PHP_OS, 0, 3) === "WIN" ? "php_openssl." : "openssl.") . PHP_SHLIB_SUFFIX;

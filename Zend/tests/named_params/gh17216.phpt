@@ -12,11 +12,11 @@ $callback = [$o, 'trampoline'];
 $array = ["a" => "b", 1];
 try {
     forward_static_call_array($callback, $array);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "Done\n";
 ?>
 --EXPECT--
-Cannot use positional argument after named argument
+Error: Cannot use positional argument after named argument
 Done

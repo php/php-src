@@ -33,7 +33,7 @@ class Mysql extends \PDO
     /** @cvalue PDO_MYSQL_ATTR_COMPRESS */
     public const int ATTR_COMPRESS = UNKNOWN;
 
-    /** @cvalue PDO_MYSQL_ATTR_DIRECT_QUERY */
+    /** @cvalue PDO_ATTR_EMULATE_PREPARES */
     public const int ATTR_DIRECT_QUERY = UNKNOWN;
 
     /** @cvalue PDO_MYSQL_ATTR_FOUND_ROWS */

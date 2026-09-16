@@ -82,6 +82,12 @@ class SplPriorityQueue implements Iterator, Countable
 
     /** @tentative-return-type */
     public function __debugInfo(): array {}
+
+    /** @tentative-return-type */
+    public function __serialize(): array {}
+
+    /** @tentative-return-type */
+    public function __unserialize(array $data): void {}
 }
 
 abstract class SplHeap implements Iterator, Countable
@@ -127,6 +133,12 @@ abstract class SplHeap implements Iterator, Countable
 
     /** @tentative-return-type */
     public function __debugInfo(): array {}
+
+    /** @tentative-return-type */
+    public function __serialize(): array {}
+
+    /** @tentative-return-type */
+    public function __unserialize(array $data): void {}
 }
 
 class SplMinHeap extends SplHeap

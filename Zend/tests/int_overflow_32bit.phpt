@@ -20,10 +20,19 @@ foreach ($doubles as $d) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Warning: The float 2147483648 is not representable as an int, cast occurred in %s on line %d
 int(-2147483648)
+
+Warning: The float 2147483649 is not representable as an int, cast occurred in %s on line %d
 int(-2147483647)
+
+Warning: The float 2147483658 is not representable as an int, cast occurred in %s on line %d
 int(-2147483638)
+
+Warning: The float 2147483748 is not representable as an int, cast occurred in %s on line %d
 int(-2147483548)
+
+Warning: The float 2147484648 is not representable as an int, cast occurred in %s on line %d
 int(-2147482648)
 Done

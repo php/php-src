@@ -1,6 +1,6 @@
 <?php
 
-$socket = stream_socket_server("tcp://localhost:0", $errno, $errstr);
+$socket = stream_socket_server("tcp://127.0.0.1:0", $errno, $errstr);
 if (!$socket) {
     echo "Can't start server: $errstr ($errno)\n";
     exit(1);

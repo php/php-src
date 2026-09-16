@@ -1,5 +1,7 @@
 --TEST--
 GH-17469: UConverter::transcode() raises always E_WARNING regardless of INI settings
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === "Windows") die("skip currently unsupported on Windows");
@@ -17,18 +19,19 @@ ini_set("intl.use_exceptions", 1);
 try {
 	UConverter::transcode("\x0a", 'nein!!', 'UTF-8');
 } catch (IntlException $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	UConverter::transcode("\x0a", 'UTF-16BE', 'da!');
 } catch (IntlException $e) {
-	echo $e->getMessage(), PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
+Deprecated: ini_set(): Using a value different than 0 for intl.error_level is deprecated, as the intl.error_level INI setting is deprecated. Instead the intl.use_exceptions INI setting should be enabled to throw exceptions on errors or intl_get_error_code()/intl_get_error_message() should be used to manually deal with errors in %s on line %d
 
 Warning: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR in %s on line %d
 
-Warning: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR in %s on line 5
-Error setting encoding: 4 - U_FILE_ACCESS_ERROR
-Error setting encoding: 4 - U_FILE_ACCESS_ERROR
+Warning: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR in %s on line %d
+IntlException: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR
+IntlException: UConverter::transcode(): Error setting encoding: 4 - U_FILE_ACCESS_ERROR

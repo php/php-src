@@ -20,10 +20,13 @@ require_once 'skipifconnectfailure.inc';
         exit(1);
     }
 
+    if (!is_object($stmt = $link->stmt_init()))
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
     if (!is_object($stmt = mysqli_stmt_init($link)))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($stmt2 = @mysqli_stmt_init($link)))
+    if (!is_object($stmt2 = mysqli_stmt_init($link)))
         printf("[003a] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     try {
@@ -42,7 +45,14 @@ require_once 'skipifconnectfailure.inc';
 
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method mysqli::stmt_init() is deprecated since 8.6, use mysqli::prepare() instead in %s on line %d
+
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
+
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli_stmt object is not fully initialized
+
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli object is already closed
 done!

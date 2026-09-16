@@ -17,11 +17,11 @@ A::staticConstDump();
 try {
     constant('A::protectedConst');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 string(14) "protectedConst"
 string(14) "protectedConst"
-Cannot access protected constant A::protectedConst
+Error: Cannot access protected constant A::protectedConst

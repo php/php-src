@@ -1,5 +1,5 @@
 --TEST--
-Bug #69846 Segmenation fault (access violation) when iterating over DOMNodeList
+Bug #69846 Segmentation fault (access violation) when iterating over DOMNodeList
 --EXTENSIONS--
 dom
 --FILE--

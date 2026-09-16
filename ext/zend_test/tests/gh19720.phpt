@@ -15,8 +15,8 @@ set_error_handler(function ($_, $errstr) {
 try {
     var_dump(Test::MyConst);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Constant ZEND_TEST_DEPRECATED is deprecated
+Exception: Constant ZEND_TEST_DEPRECATED is deprecated

@@ -28,7 +28,7 @@ enum NonBackedEnum
 }
 
 class TestSoapClient extends SoapClient {
-    function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+    function __doRequest($request, $location, $action, $version, $one_way = false, ?string $uriParserClass = null): ?string {
         echo $request;
     }
 }
@@ -64,7 +64,7 @@ $book->short = NonBackedEnum::First;
 try {
     $client->dotest($book);
 } catch (ValueError $e) {
-    echo "ValueError: ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- Test with mismatched enum backing type ---\n";
@@ -74,7 +74,7 @@ $book->short = StringBackedEnum::First;
 try {
     $client->dotest($book);
 } catch (ValueError $e) {
-    echo "ValueError: ", $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

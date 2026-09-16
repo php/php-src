@@ -19,7 +19,8 @@ runs:
           tidy-html5 \
           libzip \
           libsodium \
-          icu4c
+          icu4c \
+          curl
         brew install -v \
           bison \
           re2c
@@ -32,4 +33,6 @@ runs:
           t1lib \
           libxml2 \
           libjpeg \
-          libxslt
+          libxslt \
+          openssl@4
+        brew link --force --overwrite openssl@4

@@ -24,7 +24,7 @@ foreach ($values as $value) {
     try {
         var_dump(filter_var($value[0], FILTER_VALIDATE_MAC, $value[1]));
     } catch (ValueError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -43,6 +43,6 @@ string(17) "01:23:45:67:89:aB"
 bool(false)
 bool(false)
 string(14) "0123.4567.89ab"
-filter_var(): "separator" option must be one character long
-filter_var(): "separator" option must be one character long
+ValueError: filter_var(): "separator" option must be one character long
+ValueError: filter_var(): "separator" option must be one character long
 Done

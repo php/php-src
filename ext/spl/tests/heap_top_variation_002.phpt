@@ -24,8 +24,8 @@ try {
 try {
     $h->top();
 } catch (Exception $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Heap is corrupted, heap properties are no longer ensured.
+RuntimeException: Heap is corrupted, heap properties are no longer ensured.

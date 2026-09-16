@@ -32,16 +32,6 @@
 #include <assert.h>
 #include <limits.h>
 
-#if defined(_MSC_VER)
-# define strtoll(s, f, b) _atoi64(s)
-#elif !defined(HAVE_STRTOLL)
-# if defined(HAVE_ATOLL)
-#  define strtoll(s, f, b) atoll(s)
-# else
-#  define strtoll(s, f, b) strtol(s, f, b)
-# endif
-#endif
-
 #define EOI      257
 #define TIME     258
 #define DATE     259

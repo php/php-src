@@ -13,5 +13,4 @@ foreach ($xmls as $xml) {
         var_dump(xml_get_error_code($xml_parser));
         var_dump(xml_error_string(xml_get_error_code($xml_parser)));
     }
-    xml_parser_free($xml_parser);
 }

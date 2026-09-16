@@ -18,9 +18,9 @@ try {
         echo $value, PHP_EOL;
     }
 } catch (\Error $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-An iterator cannot be used with foreach by reference
+Error: An iterator cannot be used with foreach by reference

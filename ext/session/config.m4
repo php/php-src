@@ -20,8 +20,6 @@ if test "$PHP_SESSION" != "no"; then
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   PHP_ADD_EXTENSION_DEP(session, date)
-  dnl https://bugs.php.net/53141
-  PHP_ADD_EXTENSION_DEP(session, spl, true)
 
   PHP_SUBST([SESSION_SHARED_LIBADD])
   PHP_INSTALL_HEADERS([ext/session], [php_session.h mod_files.h mod_user.h])

@@ -1,0 +1,41 @@
+--TEST--
+Testing call_user_func() with autoload and passing invalid params
+--FILE--
+<?php
+
+spl_autoload_register(function ($class) {
+    var_dump($class);
+});
+
+try {
+    call_user_func(array('foo', 'bar'));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    call_user_func(array('', 'bar'));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    call_user_func(array($foo, 'bar'));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    call_user_func(array($foo, ''));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECTF--
+string(3) "foo"
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class "foo" not found
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class "" not found
+
+Warning: Undefined variable $foo in %s on line %d
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object
+
+Warning: Undefined variable $foo in %s on line %d
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object

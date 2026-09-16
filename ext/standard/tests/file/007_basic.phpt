@@ -102,8 +102,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'wb' --
 resource(%d) of type (stream)
@@ -111,8 +111,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'wt' --
 resource(%d) of type (stream)
@@ -120,8 +120,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'w+' --
 resource(%d) of type (stream)
@@ -129,8 +129,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'w+b' --
 resource(%d) of type (stream)
@@ -138,8 +138,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'w+t' --
 resource(%d) of type (stream)
@@ -147,8 +147,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'r' --
 resource(%d) of type (stream)
@@ -156,8 +156,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'rb' --
 resource(%d) of type (stream)
@@ -165,8 +165,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'rt' --
 resource(%d) of type (stream)
@@ -174,8 +174,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'r+' --
 resource(%d) of type (stream)
@@ -183,8 +183,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'r+b' --
 resource(%d) of type (stream)
@@ -192,8 +192,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'r+t' --
 resource(%d) of type (stream)
@@ -201,8 +201,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'a' --
 resource(%d) of type (stream)
@@ -210,8 +210,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'ab' --
 resource(%d) of type (stream)
@@ -219,8 +219,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'at' --
 resource(%d) of type (stream)
@@ -228,8 +228,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'a+' --
 resource(%d) of type (stream)
@@ -237,8 +237,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'a+t' --
 resource(%d) of type (stream)
@@ -246,8 +246,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'a+b' --
 resource(%d) of type (stream)
@@ -255,8 +255,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 
 -- Iteration with mode 'x' --
 resource(%d) of type (stream)
@@ -264,8 +264,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 resource(%d) of type (Unknown)
 
 -- Iteration with mode 'xb' --
@@ -274,8 +274,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 resource(%d) of type (Unknown)
 
 -- Iteration with mode 'xt' --
@@ -284,8 +284,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 resource(%d) of type (Unknown)
 
 -- Iteration with mode 'x+' --
@@ -294,8 +294,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 resource(%d) of type (Unknown)
 
 -- Iteration with mode 'x+b' --
@@ -304,8 +304,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 resource(%d) of type (Unknown)
 
 -- Iteration with mode 'x+t' --
@@ -314,8 +314,8 @@ int(0)
 bool(false)
 bool(true)
 resource(%d) of type (Unknown)
-ftell(): supplied resource is not a valid stream resource
-feof(): supplied resource is not a valid stream resource
+ftell(): Argument #1 ($stream) must be an open stream resource
+feof(): Argument #1 ($stream) must be an open stream resource
 resource(%d) of type (Unknown)
 
 *** Done ***

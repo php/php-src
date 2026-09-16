@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DFG - Data Flow Graph                                   |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -19,7 +17,7 @@
 #include "zend_compile.h"
 #include "zend_dfg.h"
 
-static zend_always_inline void _zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
+static zend_always_inline void zend_dfg_add_use_def_op_impl(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
 {
 	uint32_t var_num;
 	const zend_op *next;
@@ -245,20 +243,18 @@ add_op1_def:
 
 ZEND_API void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
 {
-	_zend_dfg_add_use_def_op(op_array, opline, build_flags, use, def);
+	zend_dfg_add_use_def_op_impl(op_array, opline, build_flags, use, def);
 }
 /* }}} */
 
-void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags) /* {{{ */
+void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, const zend_dfg *dfg, uint32_t build_flags) /* {{{ */
 {
-	int set_size;
+	uint32_t set_size = dfg->size;
 	zend_basic_block *blocks = cfg->blocks;
-	int blocks_count = cfg->blocks_count;
+	uint32_t blocks_count = cfg->blocks_count;
 	zend_bitset tmp, def, use, in, out;
-	int k;
-	int j;
+	uint32_t j;
 
-	set_size = dfg->size;
 	tmp = dfg->tmp;
 	def = dfg->def;
 	use = dfg->use;
@@ -267,7 +263,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 
 	/* Collect "def" and "use" sets */
 	for (j = 0; j < blocks_count; j++) {
-		zend_op *opline, *end;
+		const zend_op *opline, *end;
 		zend_bitset b_use, b_def;
 
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
@@ -280,7 +276,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 		b_def = DFG_BITSET(def, set_size, j);
 		for (; opline < end; opline++) {
 			if (opline->opcode != ZEND_OP_DATA) {
-				_zend_dfg_add_use_def_op(op_array, opline, build_flags, b_use, b_def);
+				zend_dfg_add_use_def_op_impl(op_array, opline, build_flags, b_use, b_def);
 			}
 		}
 	}
@@ -306,7 +302,7 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 			}
 			if (blocks[j].successors_count != 0) {
 				zend_bitset_copy(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[0]), set_size);
-				for (k = 1; k < blocks[j].successors_count; k++) {
+				for (uint32_t k = 1; k < blocks[j].successors_count; k++) {
 					zend_bitset_union(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[k]), set_size);
 				}
 			} else {
@@ -318,8 +314,8 @@ void zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg
 
 				/* Add predecessors of changed block to worklist */
 				{
-					int *predecessors = &cfg->predecessors[blocks[j].predecessor_offset];
-					for (k = 0; k < blocks[j].predecessors_count; k++) {
+					const int *predecessors = &cfg->predecessors[blocks[j].predecessor_offset];
+					for (uint32_t k = 0; k < blocks[j].predecessors_count; k++) {
 						zend_bitset_incl(worklist, predecessors[k]);
 					}
 				}

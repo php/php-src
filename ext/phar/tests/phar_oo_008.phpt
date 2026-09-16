@@ -29,52 +29,33 @@ foreach($f as $k => $v)
     echo "$k=>$v\n";
 }
 
-class MyCSVFile extends SplFileObject
+class MyFile extends SplFileObject
 {
-    function current(): array|false
+    function current(): string
     {
-        return parent::fgetcsv(',', '"', escape: '');
+        return parent::fgets();
     }
 }
 
-$phar->setInfoClass('MyCSVFile');
-/** @var MyCSVFile $v */
+$phar->setInfoClass('MyFile');
+/** @var MyFile $v */
 $v = $phar['a.csv'];
 
 echo "===3===\n";
 while(!$v->eof())
 {
-    echo $v->key() . "=>" . join('|', $v->fgetcsv(escape: '')) . "\n";
+    echo $v->key() . "=>" . $v->fgets() . "\n";
 }
 
 echo "===4===\n";
 $v->rewind();
 while(!$v->eof())
 {
-    $l = $v->fgetcsv(escape: '');
-    echo $v->key() . "=>" . join('|', $l) . "\n";
+    $l = $v->fgets();
+    echo $v->key() . "=>" . $l . "\n";
 }
 
 echo "===5===\n";
-foreach($v as $k => $d)
-{
-    echo "$k=>" . join('|', $d) . "\n";
-}
-
-class MyCSVFile2 extends SplFileObject
-{
-    function getCurrentLine(): string
-    {
-        echo __METHOD__ . "\n";
-        return implode('|', parent::fgetcsv(',', '"', escape: ''));
-    }
-}
-
-$phar->setInfoClass('MyCSVFile2');
-/** @var MyCSVFile2 $v */
-$v = $phar['a.csv'];
-
-echo "===6===\n";
 foreach($v as $k => $d)
 {
     echo "$k=>" . $d . "\n";
@@ -98,21 +79,18 @@ __halt_compiler();
 1=>2,a,b
 2=>3,"c","'e'"
 ===3===
-0=>1|2|3
-0=>2|a|b
-1=>3|c|'e'
+0=>1,2,3
+
+1=>2,a,b
+
+2=>3,"c","'e'"
 ===4===
-0=>1|2|3
-1=>2|a|b
-2=>3|c|'e'
+1=>1,2,3
+
+2=>2,a,b
+
+3=>3,"c","'e'"
 ===5===
-0=>1|2|3
-1=>2|a|b
-2=>3|c|'e'
-===6===
-MyCSVFile2::getCurrentLine
-1=>1|2|3
-MyCSVFile2::getCurrentLine
-3=>2|a|b
-MyCSVFile2::getCurrentLine
-5=>3|c|'e'
+1=>1,2,3
+
+3=>3,"c","'e'"

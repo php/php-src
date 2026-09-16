@@ -86,6 +86,7 @@ function xmlwriter_output_memory(XMLWriter $writer, bool $flush = true): string 
 
 function xmlwriter_flush(XMLWriter $writer, bool $empty = true): string|int {}
 
+/** @not-serializable */
 class XMLWriter
 {
     /**

@@ -2,9 +2,10 @@
 MessageFormatter::format() insufficient numeric arguments
 --EXTENSIONS--
 intl
+--INI--
+intl.use_exceptions=On
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
 
 $fmt = <<<EOD
 {0} {1}

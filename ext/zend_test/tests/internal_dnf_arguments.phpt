@@ -15,7 +15,7 @@ var_dump((string)$paramType);
 try {
     zend_test_internal_dnf_arguments(new stdClass);
 } catch (\Throwable $err) {
-    echo $err->getMessage(), "\n";
+    echo $err::class, ': ', $err->getMessage(), "\n";
 }
 
 $obj = new \ArrayIterator([]);
@@ -26,7 +26,7 @@ var_dump($result);
 --EXPECT--
 string(32) "Iterator|(Traversable&Countable)"
 string(32) "Iterator|(Traversable&Countable)"
-zend_test_internal_dnf_arguments(): Argument #1 ($arg) must be of type Iterator|(Traversable&Countable), stdClass given
+TypeError: zend_test_internal_dnf_arguments(): Argument #1 ($arg) must be of type Iterator|(Traversable&Countable), stdClass given
 object(ArrayIterator)#5 (1) {
   ["storage":"ArrayIterator":private]=>
   array(0) {

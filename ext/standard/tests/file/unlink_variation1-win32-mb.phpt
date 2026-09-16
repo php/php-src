@@ -77,7 +77,7 @@ bool(true)
 -- Unlinking file without write permission, its dir having default permission --
 bool(true)
 
-Warning: unlink(%s/unlink_variation1/unlink_variation1-win32.tmp): Permission denied in %s on line %d
+Warning: unlink(): Permission denied in %s on line %d
 bool(false)
 bool(true)
 bool(false)

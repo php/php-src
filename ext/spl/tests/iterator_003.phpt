@@ -70,7 +70,7 @@ class StudentList implements IteratorAggregate
     }
 
     public function getIterator(): Traversable {
-        return new CachingIterator($this->students->getIterator(), true);
+        return new CachingIterator($this->students->getIterator());
     }
 }
 

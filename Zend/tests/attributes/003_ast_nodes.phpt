@@ -71,14 +71,14 @@ var_dump(count($attr));
 
 try {
     $attr[0]->getArguments();
-} catch (\Error $e) {
-    var_dump($e->getMessage());
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $attr[0]->newInstance();
-} catch (\Error $e) {
-    var_dump($e->getMessage());
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -104,5 +104,5 @@ array(1) {
 }
 
 int(1)
-string(30) "Class "MissingClass" not found"
-string(30) "Class "MissingClass" not found"
+Error: Class "MissingClass" not found
+Error: Class "MissingClass" not found

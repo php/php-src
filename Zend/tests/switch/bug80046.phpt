@@ -1,0 +1,22 @@
+--TEST--
+Bug #80046: FREE for SWITCH_STRING optimized away
+--FILE--
+<?php
+
+function test($foo) {
+    switch ($foo . 'Bar') {
+        case 'A':
+            throw new Exception('A');
+        default:
+            throw new Exception('Default');
+    }
+}
+try {
+    test('Foo');
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECT--
+Exception: Default

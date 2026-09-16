@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -126,7 +126,7 @@ void CodePointBreakIterator::setText(const UnicodeString &text)
 
 void CodePointBreakIterator::setText(UText *text, UErrorCode &status)
 {
-	if (U_FAILURE(status)) {
+	if (UNEXPECTED(U_FAILURE(status))) {
 		return;
 	}
 
@@ -234,7 +234,7 @@ CodePointBreakIterator *CodePointBreakIterator::createBufferClone(
 	void *stackBuffer, int32_t &bufferSize, UErrorCode &status)
 {
 	//see implementation of RuleBasedBreakIterator::createBufferClone()
-	if (U_FAILURE(status)) {
+	if (UNEXPECTED(U_FAILURE(status))) {
 		return NULL;
 	}
 
@@ -273,17 +273,17 @@ CodePointBreakIterator *CodePointBreakIterator::createBufferClone(
 CodePointBreakIterator &CodePointBreakIterator::refreshInputText(UText *input, UErrorCode &status)
 {
 	//see implementation of RuleBasedBreakIterator::createBufferClone()
-	if (U_FAILURE(status)) {
+	if (UNEXPECTED(U_FAILURE(status))) {
 		return *this;
 	}
-	if (input == NULL) {
+	if (UNEXPECTED(input == NULL)) {
 		status = U_ILLEGAL_ARGUMENT_ERROR;
 		return *this;
 	}
 
 	int64_t pos = utext_getNativeIndex(this->fText);
 	this->fText = utext_clone(this->fText, input, false, true, &status);
-	if (U_FAILURE(status)) {
+	if (UNEXPECTED(U_FAILURE(status))) {
 		return *this;
 	}
 

@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Georg Richter <georg@php.net>                               |
   |          Andrey Hristov <andrey@php.net>                             |
@@ -98,7 +96,7 @@ static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter)
 	mysqli_object *intern = iterator->result;
 	MYSQL_RES	*result;
 
-	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, MYSQLI_STATUS_VALID);
 
 	zval_ptr_dtor(&iterator->current_row);
 	php_mysqli_fetch_into_hash_aux(&iterator->current_row, result, MYSQLI_ASSOC);
@@ -115,7 +113,7 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 	mysqli_object *intern = iterator->result;
 	MYSQL_RES	*result;
 
-	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
+	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
 		if (result->unbuf->eof_reached) {

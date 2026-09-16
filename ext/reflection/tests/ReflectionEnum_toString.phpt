@@ -11,11 +11,14 @@ echo new ReflectionEnum(Foo::class);
 
 ?>
 --EXPECTF--
-Class [ <user> final class Foo implements UnitEnum ] {
+Enum [ <user> enum Foo implements UnitEnum ] {
   @@ %sReflectionEnum_toString.php 3-5
 
-  - Constants [1] {
-    Constant [ public Foo Bar ] { Object }
+  - Enum cases [1] {
+    Case Bar
+  }
+
+  - Constants [0] {
   }
 
   - Static properties [0] {

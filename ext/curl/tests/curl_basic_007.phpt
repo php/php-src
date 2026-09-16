@@ -15,9 +15,6 @@ $ch = curl_init();
 curl_exec($ch);
 var_dump(curl_error($ch));
 var_dump(curl_errno($ch));
-curl_close($ch);
-
-
 ?>
 --EXPECTF--
 string(%d) "No URL set%A"

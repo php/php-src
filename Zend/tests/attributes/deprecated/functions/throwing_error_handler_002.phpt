@@ -12,10 +12,10 @@ function test() {}
 
 try {
 	$x = test();
-} catch (ErrorException $e) {
-	echo "Caught: ", $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Caught: Function test() is deprecated
+ErrorException: Function test() is deprecated

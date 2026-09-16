@@ -1,4 +1,4 @@
-PHP 8.4 UPGRADE NOTES
+PHP 8.6 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -20,1238 +20,1113 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 
 - Core:
-  . The type of PHP_DEBUG and PHP_ZTS constants changed to bool.
-  . The name of uploaded files and files created by the tempnam() function are
-    now 13 bytes longer. Total length is platform-dependent.
-  . Encountering recursion during comparison now results in a Error exception,
-    rather than a fatal error.
-  . Indirect modification of readonly properties within __clone() is no longer
-    allowed, e.g. $ref = &$this->readonly. This was already forbidden for
-    readonly initialization, and was an oversight in the "readonly
-    reinitialization during cloning" implementation.
-  . The exit (and die) language constructs now behave more like a function.
-    They can be passed like callables, are affected by the strict_types
-    declare statement, and now perform the usual type coercions instead of
-    casting any non-integer value to a string.
-    As such, passing invalid types to exit/die may now result in a TypeError
-    being thrown.
-    RFC: https://wiki.php.net/rfc/exit-as-function
-  . The E_STRICT constant was deprecated and its corresponding error level was
-    removed.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
+  . By-reference foreach loops may now visit previously skipped elements
+    after array compaction. Internal pointers on deleted elements now move
+    to the next surviving element during copy-on-write.
+  . ??/empty() on a magic property no longer call __get() when __isset()
+    has materialized the property by writing into the property table.
+    The freshly-written value is returned directly. isset() is unaffected.
 
-- Extension Class constants are now typed:
-  . Date
-  . Intl
-  . PDO
-  . Reflection
-  . SPL
-  . Sqlite
-  . XMLReader
-
-- Resource to Object conversions:
-  Return value checks using is_resource() should be replaced with checks
-  for `false`, unless specified otherwise.
-  . DBA:
-    . dba_open() and dba_popen() will now return Dba\Connection
-  . ODBC:
-    . odbc_connect() and odbc_pconnect() will now return Odbc\Connection
-    . odbc_prepare(), odbc_exec(), and various other functions will now return
-      Odbc\Result
-  . SOAP:
-    . SoapClient::$httpurl is now a Soap\Url object rather than a resource.
-      Checks using is_resource() (i.e. is_resource($client->httpurl)) should be
-      replaced with checks for null (i.e. $client->httpurl !== null).
-    . SoapClient::$sdl is now a Soap\Sdl object rather than a resource.
-      Checks using is_resource() (i.e. is_resource($client->sdl)) should be
-      replaced with checks for null (i.e. $client->sdl !== null).
-
-- New warnings and exceptions:
-  . Curl:
-    . curl_multi_select throws a ValueError if the timeout argument if it's negative
-      or greater than PHP_INT_MAX.
-  . GD:
-    . imagejpeg/imagewebp/imagepng/imageavif throws an exception if an invalid
-      quality parameter value is passed. In addition, imageavif will throw an exception
-      if an invalid speed parameter value is passed.
-    . imagescale throws an exception if the width/height argument underflows/overflows or
-      if the mode argument is invalid.
-      imagefilter with IMG_FILTER_SCATTER throws an exception if the sub/plus arguments
-      underflows/overflows.
-  . Gettext:
-    . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
-      if the domain argument is empty.
-  . Intl:
-    . IntlCalendar::set(), IntlCalendar::setDate(), IntlCalendar::setDateTime(),
-      and IntlGregorianCalendar date/time construction now report the correct
-      argument position for out-of-bounds integer values.
-    . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
-      ResourceBundle object now throw:
-      - TypeError for invalid offset types
-      - ValueError for an empty string
-      - ValueError if the integer index does not fit in a signed 32 bit integer
-    . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
-    . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
-    . SpoofChecker::setAllowedChars() and IntlDateFormatter::__construct()
-      now report PHP constant names instead of ICU constant names in
-      user-visible error messages.
-  . MBString:
-    . mb_encode_numericentity() and mb_decode_numericentity() now check that
-      the $map is only composed of integers, if not a ValueError is thrown.
-    . mb_http_input() now always throws a ValueError if the $type is invalid.
-    . mb_http_output() now checks that the $encoding parameter does not
-      contain any null bytes. If it does, a ValueError is now thrown.
-  . ODBC:
-    . odbc_fetch_row() now emits a warning when a value less than or equal to 0 is
-      passed for parameter $row.
-  . PCNTL:
-    . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
-      pcntl_sigtimedwait() now throw:
-      - A ValueError if the $signals array is empty (except for
-        pcntl_sigprocmask() if the $mode is SIG_SETMASK).
-      - A TypeError if a value of the $signals array is not an integer
-      - A ValueError if a value of the $signals array is not a valid signal number
-    . The function pcntl_sigprocmask() now throw:
-      - A ValueError if $mode is not one of SIG_BLOCK, SIG_UNBLOCK, or SIG_SETMASK
-    . The function pcntl_sigtimedwait() now throw:
-      - A ValueError if $seconds is less than 0
-      - A ValueError if $nanoseconds is less than 0 or greater than 1e9
-      - A ValueError if both $seconds and $nanoseconds are 0
-  . SimpleXML:
-    . Calling simplexml_import_dom() with a non-XML object now throws a
-      TypeError instead of a ValueError.
-  . Standard:
-    . round() now validates the value of the $mode parameter and throws a
-      ValueError for invalid modes. Previously invalid modes would have been
-      interpreted as PHP_ROUND_HALF_UP.
-    . The str_getcsv() function now throws ValueErrors when the $separator and
-      $enclosure arguments are not one byte long, or if the $escape is not one
-      byte long or the empty string. This aligns the behaviour to be identical
-      to that of fputcsv() and fgetcsv().
-    . php_uname() now throws ValueErrors if the $move parameter is invalid.
-    . The "allowed_classes" option for unserialize() now throws TypeErrors and
-      ValueErrors if it is not an array of class names.
-  . XMLReader:
-    . Passing an invalid character encoding to XMLReader::open() or
-      XMLReader::XML() now throws a ValueError. Passing an encoding
-      containing null bytes previously emitted a warning and now throws
-      a ValueError as well.
-  . XMLWriter:
-    . Passing an encoding containing null bytes previously emitted a
-      warning and now throws a ValueError.
-  . XSL:
-    . XSLTProcessor::setParameter() will now throw a ValueError when its
-      arguments contain null bytes. This never actually worked correctly in
-      the first place, which is why it throws an exception nowadays.
-    . Calling XSLTProcessor::importStyleSheet() with a non-XML object now
-      throws a TypeError instead of a ValueError.
-    . Failure to call a PHP function callback during evaluation now throws
-      instead of emitting a warning.
-      RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
-
-- DOM:
-  . Some DOM methods previously returned false or a PHP_ERR DOMException if a new
-    node could not be allocated. They consistently throw an INVALID_STATE_ERR
-    DOMException now. This situation is extremely unlikely though and probably
-    will not affect you. As a result DOMImplementation::createDocument() now has
-    a tentative return type of DOMDocument instead of DOMDocument|false.
-  . Previously, DOMXPath objects could be cloned, but resulted in an unusable
-    object. This is no longer possible, and cloning a DOMXPath object now throws
-    an error.
-  . Removed DOMImplementation::getFeature().
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_domimplementationgetfeature_feature_version
-
-- GMP:
-  . The GMP class is now final and cannot be extended anymore.
-    RFC: https://wiki.php.net/rfc/gmp-final
-
-- MBString:
-  . On invalid strings (those with encoding errors), mb_substr() now interprets
-    character indices in the same manner as most other mbstring functions. This
-    means that character indices returned by mb_strpos() can be passed to mb_substr().
-  . For SJIS-Mac (MacJapanese) strings, character indices passed to mb_substr() now
-    refer to the indices of the Unicode codepoints which are produced when the string
-    is converted to Unicode. This is significant because around 40 SJIS-Mac characters
-    convert to a sequence of multiple Unicode codepoints.
-
-- Mysqli:
-  . The unused and undocumented constant MYSQLI_SET_CHARSET_DIR
-    has been removed.
-  . The MYSQLI_STMT_ATTR_PREFETCH_ROWS constant has been removed.
-    The feature is unavailable with mysqlnd.
-  . The MYSQLI_CURSOR_TYPE_FOR_UPDATE and MYSQLI_CURSOR_TYPE_SCROLLABLE
-    constants have been removed. This functionality was never implemented,
-    neither with mysqlnd nor with libmysql.
-  . The unused MYSQLI_TYPE_INTERVAL constant, which is currently a stub
-    and an alias for MYSQLI_TYPE_ENUM, has been removed. There are no
-    plans to add such data type to MySQL yet, so it's unclear what its value
-    would finally be.
-
-- MySQLnd:
-  . The error code reported for MySQL server wait timeouts has been changed from 2006
-    to 4031 for MySQL server versions 8.0.24 and above.
-
-- Opcache:
-  . The JIT config defaults changed from opcache.jit=tracing and
-    opcache.jit_buffer_size=0 to opcache.jit=disable and
-    opcache.jit_buffer_size=64M, respectively. This does not affect the default
-    behavior, the JIT is still disabled by default. However, it is now disabled
-    through the opcache.jit setting, rather than opcache.jit_buffer_size. This
-    may affect users who previously enabled JIT through opcache.jit_buffer_size
-    exclusively, without also specifying a JIT mode using opcache.jit. To enable
-    JIT, set the opcache.jit config value accordingly.
-  . The maximum value of the opcache.interned_strings_buffer setting on 64bit
-    architectures is now 32767 (it was previously 4095).
-  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
-    of JIT startup initialization issues.
-
-- PCNTL:
-  . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
-    pcntl_sigtimedwait() now always return false on failure.
-    In some case previously it could return the value -1.
-
-- PCRE:
-  . The bundled pcre2lib has been updated to version 10.44.
-    As a consequence, this means {,3} is now recognized as a quantifier instead
-    of as text. Furthermore, the meaning of some character classes in UCP mode
-    has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
-    for a full changelog.
-
-- PDO_DBLIB:
-  . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
-    have been changed to set value as a bool.
-
-- PDO_FIREBIRD:
-  . Since some Firebird C++ APIs are used now, this extension requires a C++
-    compiler to be built. This also implies that the extension has to be built
-    against fbclient 3.0 or higher.
-  . getAttribute, ATTR_AUTOCOMMIT has been changed to get the value as a bool.
-
-- PDO_MYSQL:
-  . getAttribute, ATTR_AUTOCOMMIT, ATTR_EMULATE_PREPARES, MYSQL_ATTR_DIRECT_QUERY have
-    been changed to get values as bool.
-
-- PDO_PGSQL:
-  . The DSN's credentials, when set, are given priority over their PDO
-    constructor counterparts, being closer to the documentation states.
-
-- SimpleXML:
-  . Get methods called, or casting to a string on a SimpleXMLElement will no
-    longer implicitly reset the iterator data, unless explicitly rewound.
-    For example, casting an element to a string within a foreach loop would
-    cause an infinite loop because it destroyed the current iterator data.
-    This is no longer the case as a consequence of the bugfixes for GH-12192,
-    GH-12208, #55098.
-
-- SOAP:
-  . SoapClient::$typemap is now an array rather than a resource.
-    Checks using is_resource() (i.e. is_resource($client->typemap)) should be
-    replaced with checks for null (i.e. $client->typemap !== null).
-  . The SOAP extension gained an optional dependency on the session extension.
-    If you build PHP without the session extension and with --enable-rtld-now,
-    you will experience errors on startup if you also use the SOAP extension.
-    To solve this, either don't use rtld-now or load the session extension.
-
-- Standard:
-  . strcspn() with empty $characters now returns the length of the string instead
-    of incorrectly stopping at the first NUL character. See GH-12592.
-  . http_build_query() now correctly handles backed enums.
-  . stream_bucket_make_writeable() and stream_bucket_new() will now return a
-    StreamBucket instance instead of an instance of stdClass.
-    RFC: https://wiki.php.net/rfc/dedicated_stream_bucket
-
-- Tidy:
-  . Failures in the constructor now throw exceptions rather than emitting
-    warnings and having a broken object.
-
-- XML:
-  . The xml_set_*_handler() functions now declare and check for an effective
-    signature of callable|string|null for the $handler parameters.
-    Moreover, values of type string that correspond to method names,
-    of object set with xml_set_object() are now checked to see if the method
-    exists on the class of the previously passed object.
-    This means that xml_set_object() must now always be called prior to setting
-    method names as callables.
-    Passing an empty string to disable the handler is still allowed,
-    but deprecated.
-
-========================================
-2. New Features
-========================================
-
-- Core:
-  . Added request_parse_body() function that allows parsing RFC1867 (multipart)
-    requests in non-POST HTTP requests.
-    RFC: https://wiki.php.net/rfc/rfc1867-non-post
-  . Getting the debug info for WeakReference will now also output the object
-    it references, or null if the reference is no longer valid.
-  . The output of Closure::__debugInfo() now includes the name, file, and line
-    of the Closure.
-  . new expressions with constructor arguments are now dereferencable, meaning
-    they allow chaining method calls, property accesses, etc. without enclosing
-    the expression in parentheses.
-    RFC: https://wiki.php.net/rfc/new_without_parentheses
-  . Added the #[\Deprecated] attribute.
-    RFC: https://wiki.php.net/rfc/deprecated_attribute
-  . Implemented property hooks.
-    RFC: https://wiki.php.net/rfc/property-hooks
-  . Exiting a namespace now clears seen symbols. This allows using a symbol in a
-    namespace block, even if a previous namespace block declared a symbol with
-    the same name.
-    See Zend/tests/use_function/ns_end_resets_seen_symbols_1.phpt.
-  . Implemented asymmetric property visibility.
-    RFC: https://wiki.php.net/rfc/asymmetric-visibility-v2
-  . Implemented lazy objects.
-    RFC: https://wiki.php.net/rfc/lazy-objects
+- COM:
+  . It is no longer possible to clone variant objects because the cloning
+    behavior was ill-defined.
 
 - Curl:
-  . curl_version() returns an additional feature_list value, which is an
-    associative array of all known Curl features, and whether they are
-    supported (true) or not (false).
-  . Added CURL_HTTP_VERSION_3 and CURL_HTTP_VERSION_3ONLY constants (available
-    since libcurl 7.66 and 7.88) as available options for CURLOPT_HTTP_VERSION.
-  . Added CURLOPT_PREREQFUNCTION as a Curl option that accepts a callback to
-    be called after the connection is made, but before the request is sent.
-    The callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT
-    to allow or abort the request.
-  . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
-    CURLOPT_FTP_RESPONSE_TIMEOUT. Both constants hold the same value.
-  . Added CURLOPT_DEBUGFUNCTION support. This Curl option accepts a callable
-    that gets called during the request lifetime with the CurlHandle object,
-    an integer containing the debug message type, and a string containing the
-    debug message. The debug message type is one of CURLINFO_TEXT, CURLINFO_HEADER_IN,
-    CURLINFO_HEADER_OUT, CURLINFO_DATA_IN, CURLINFO_DATA_OUT, CURLINFO_SSL_DATA_OUT,
-    CURLINFO_SSL_DATA_IN constants. Once this option is set, CURLINFO_HEADER_OUT
-    must not be set because it uses the same libcurl functionality.
-  . curl_getinfo() function now returns "posttransfer_time_us", containing the
-    number of microseconds from the start until the last byte is sent. When a
-    redirect is followed, the time from each request is added together. This
-    value can also be retrieved by passing CURLINFO_POSTTRANSFER_TIME_T to the
-    curl_getinfo() $option parameter. This requires libcurl 8.10.0 or later.
+  . The callback registered with CURLOPT_READFUNCTION now throws a ValueError
+    when returning an integer other than 0, CURL_READFUNC_ABORT or
+    CURL_READFUNC_PAUSE.
 
 - DOM:
-  . Added DOMNode::compareDocumentPosition()
-  . Added constant DOMNode::DOCUMENT_POSITION_DISCONNECTED.
-  . Added constant DOMNode::DOCUMENT_POSITION_PRECEDING.
-  . Added constant DOMNode::DOCUMENT_POSITION_FOLLOWING.
-  . Added constant DOMNode::DOCUMENT_POSITION_CONTAINS.
-  . Added constant DOMNode::DOCUMENT_POSITION_CONTAINED_BY.
-  . Added constant DOMNode::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC.
-  . It is now possible to pass any callable to registerPhpFunctions().
-    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
-
-- FPM:
-  . Flushing headers without a body will now succeed. See GH-12785.
-  . Status page has a new field to display a memory peak.
-
-- Intl:
-  . NumberFormatter::ROUND_HALFODD added to complement existing
-    NumberFormatter::ROUND_HALFEVEN functionality.
-
-- OpenSSL:
-  . Added support for Curve25519 + Curve448 based keys. Specifically x25519,
-    ed25519, x448 and ed448 fields are supported in openssl_pkey_new and
-    openssl_pkey_get_details as well as openssl_sign and openssl_verify were
-    extended to support those keys.
-  . Implement PASSWORD_ARGON2 password hashing.
-    Requires OpenSSL 3.2 and NTS build.
-
-- PCRE:
-  . The bundled pcre2lib has been updated to version 10.44.
-    As a consequence, LoongArch JIT support has been added, spaces
-    are now allowed between braces in Perl-compatible items, and
-    variable-length lookbehind assertions are now supported.
-  . With pcre2lib version 10.44, the maximum length of named capture groups
-    has changed from 32 to 128.
-  . Added support for the "r" (PCRE2_EXTRA_CASELESS_RESTRICT) modifier, as well
-    as the (?r) mode modifier. When enabled along with the case-insensitive
-    modifier ("i"), the expression locks out mixing of ASCII and non-ASCII
-    characters.
-
-- PDO:
-  . Added support for driver-specific subclasses.
-    RFC: https://wiki.php.net/rfc/pdo_driver_specific_subclasses
-    This RFC adds subclasses for PDO in order to better support
-    database-specific functionalities. The new classes are
-    instantiatable either via calling the PDO::connect() method
-    or by invoking their constructor directly.
-  . Added support for driver specific SQL parsers. The default parser supports:
-    - single and double quoted literals, with doubling as escaping mechanism.
-    - two-dashes and non-nested C-style comments.
-    RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
-
-- PDO_MYSQL:
-  . Added custom parser supporting:
-    - single and double-quoted literals, with doubling and backslash as escaping
-      mechanism
-    - backtick literal identifiers and with doubling as escaping mechanism
-    - two dashes followed by at least 1 whitespace, non-nested C-style comments,
-      and hash-comments
-    RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
-
-- PDO_PGSQL:
-  . Added custom parser supporting:
-    - single and double quoted literals, with doubling as escaping mechanism
-    - C-style "escape" string literals (E'string')
-    - dollar-quoted string literals
-    - two-dashes and C-style comments (non-nested)
-    - support for "??" as escape sequence for the "?" operator
-    RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
-
-- PDO_SQLITE:
-  . Added custom parser supporting:
-    - single, double quoted, and backtick literals, with doubling as escaping mechanism
-    - square brackets quoting for identifiers
-    - two-dashes and C-style comments (non-nested)
-    RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
-
-- Phar:
-  . Added support for the unix timestamp extension for zip archives.
-
-- Readfile:
-  . Added ability to change .php_history path through PHP_HISTFILE env variable.
-
-- Reflection:
-  . ReflectionAttribute now contains a $name property to improve the debugging
-    experience.
-  . ReflectionClassConstant::__toString() and ReflectionProperty::__toString()
-    now returns the attached doc comments.
-  . Multiple methods and constants related to lazy objects were introduced:
-    - ReflectionClass::newLazyGhost()
-    - ReflectionClass::newLazyProxy()
-    - ReflectionClass::resetAsLazyGhost()
-    - ReflectionClass::resetAsLazyProxy()
-    - ReflectionClass::isUninitializedLazyObject()
-    - ReflectionClass::initializeLazyObject()
-    - ReflectionClass::markLazyObjectAsInitialized()
-    - ReflectionClass::getLazyInitializer()
-    - ReflectionProperty::skipLazyInitialization()
-    - ReflectionProperty::setRawValueWithoutLazyInitialization()
-    - ReflectionClass::SKIP_INITIALIZATION_ON_SERIALIZE
-    - ReflectionClass::SKIP_DESTRUCTOR
-    RFC: https://wiki.php.net/rfc/lazy-objects
-
-- SOAP:
-  . Added support for clark notation for namespaces in class map.
-    It is now possible to specify entries in a class map with clark notation
-    to resolve a type with a specific namespace to a specific class.
-    For example: '{http://example.com}foo' => 'FooClass'.
-  . Instances of DateTimeInterface that are passed to xsd:datetime or similar
-    elements are now serialized as such instead of being serialized as an
-    empty string.
-  . Session persistence now works with a shared session module.
-
-- Standard:
-  . Added a new RoundingMode enum with clearer naming and improved discoverability
-    compared to the PHP_ROUND_* constants.
-    RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum
-
-- XSL:
-  . It is now possible to use parameters that contain both single and double
-    quotes.
-  . It is now possible to pass any callable to registerPhpFunctions().
-    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
-  . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars
-    to control the recursion depth of XSL template evaluation.
-
-- Zip:
-  . Added ZipArchive::ER_TRUNCATED_ZIP added in libzip 1.11
-
-========================================
-3. Changes in SAPI modules
-========================================
-
-- apache2handler
-  . Support for EOL Apache 2.0 and 2.2 has been removed. Minimum required Apache
-    version is now 2.4.
-
-- CLI:
-  . The builtin server looks for an index file recursively by traversing parent
-    directories in case the specified file cannot be located. This process was
-    previously skipped if the path looked like it was referring to a file, i.e.
-    if the last path component contained a period. In that case, a 404 error was
-    returned. The behavior has been changed to look for an index file in all
-    cases.
-
-- FPM:
-  . /dev/poll events.mechanism setting for Solaris/Illumos had been retired.
-
-========================================
-4. Deprecated Functionality
-========================================
-
-- Core:
-  . Implicitly nullable parameter types are now deprecated.
-    RFC: https://wiki.php.net/rfc/deprecate-implicitly-nullable-types
-  . Passing E_USER_ERROR to trigger_error() is now deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_e_user_error_to_trigger_error
-  . Using "_" as a class name is now deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_using_a_single_underscore_as_a_class_name
-  . Raising zero to the power of negative number is deprecated.
-    RFC: https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number
-  . The E_STRICT constant was deprecated and its corresponding error level was
-    removed.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
-
-- Curl:
-  . The CURLOPT_BINARYTRANSFER constant is deprecated.
-
-- Date:
-  . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
-    deprecated. Use DatePeriod::createFromISO8601String() instead.
-  . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and
-    SUNFUNCS_RET_DOUBLE are now deprecated, following the deprecation of
-    the associated date_sunset() and date_sunrise() functions in PHP 8.1.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#constants_sunfuncs_ret_string_sunfuncs_ret_double_sunfuncs_ret_timestamp
-
-- DBA:
-  . Passing null or false to dba_key_split() is deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_null_and_false_to_dba_key_split
-
-- DOM:
-  . Deprecated DOM_PHP_ERR constant.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_dom_php_err_constant
-  . DOMDocument::$actualEncoding, DOMDocument::config, DOMEntity::$actualEncoding,
-    DOMEntity::$encoding, DOMEntity::$version have been deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#formally_deprecate_soft-deprecated_domdocument_and_domentity_properties
-
-- Hash:
-  . Deprecated passing incorrect data types for options to ext/hash functions.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_incorrect_data_types_for_options_to_exthash_functions
-
-- Intl:
-  . Calling intlcal_set() as well as calling IntlCalendar::set() with
-    more than 2 arguments is deprecated. Use either IntlCalendar::setDate()
-    or IntlCalendar::setDateTime() instead.
-  . Calling intlgregcal_create_instance() as well as calling
-    IntlGregorianCalendar::__construct() with more than 2 arguments is
-    deprecated. Use either IntlGregorianCalendar::createFromDate() or
-    IntlGregorianCalendar::createFromDateTime() instead.
-
-- LDAP:
-  . Calling ldap_connect() with more than 2 arguments is deprecated. Use
-    ldap_connect_wallet() instead.
-  . Calling ldap_exop() with more than 4 arguments is deprecated. Use
-    ldap_exop_sync() instead.
-
-- Mysqli:
-  . The mysqli_ping() function and mysqli::ping() method are now deprecated,
-    as the reconnect feature was removed in PHP 8.2.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#mysqli_ping_and_mysqliping
-  . The mysqli_kill() function and mysqli::kill() method are now deprecated.
-    If this functionality is needed a SQL "KILL" command can be used instead.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_mysqli_kill
-  . The mysqli_refresh() function and mysqli::refresh() method are now deprecated.
-    If this functionality is needed a SQL "FLUSH" command can be used instead.
-    All MYSQLI_REFRESH_* constants have been deprecated as well.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_mysqli_refresh
-  . Passing explicitly the $mode parameter to mysqli_store_result() has been
-    deprecated. As the MYSQLI_STORE_RESULT_COPY_DATA constant was only used in
-    conjunction with this function it has also been deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_the_second_parameter_to_mysqli_store_result
-
-- PDO_PGSQL:
-  . Using escaped question marks (??) inside dollar-quoted strings is deprecated.
-    Since PDO_PGSQL has its own SQL parser with dollar-quoted strings support, it
-    is no longer necessary to escape question marks inside them.
-
-- PgSQL:
-  . Calling pg_fetch_result() with 2 arguments is deprecated. Use the
-    3-parameter signature with a null $row parameter instead.
-  . Calling pg_field_prtlen() with 2 arguments is deprecated. Use the
-    3-parameter signature with a null $row parameter instead.
-  . Calling pg_field_is_null() with 2 arguments is deprecated. Use the
-    3-parameter signature with a null $row parameter instead.
-
-- Random:
-  . lcg_value() is deprecated, as the function is broken in multiple ways.
-    Use \Random\Randomizer::getFloat() instead.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_lcg_value
-
-- Reflection:
-  . Calling ReflectionMethod::__construct() with 1 argument is deprecated.
-    Use ReflectionMethod::createFromMethodName() instead.
-
-- Session:
-  . Calling session_set_save_handler() with more than 2 arguments is
-    deprecated. Use the 2-parameter signature instead.
-  . Changing the INI settings session.sid_length and session.sid_bits_per_character
-    is deprecated. Update the session storage backend to accept 32 character
-    hexadecimal session IDs and stop changing these two INI settings.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#sessionsid_length_and_sessionsid_bits_per_character
-  . Changing the INI settings session.use_only_cookies, session.use_trans_sid,
-    session.trans_sid_tags, session.trans_sid_hosts, and session.referer_check
-    is deprecated. The SID constant is also deprecated.
-    RFC: https://wiki.php.net/rfc/deprecate-get-post-sessions
-
-- SOAP:
-  . Passing an int to SoapServer::addFunction() is now deprecated.
-    If all PHP functions need to be provided flatten the array returned by
-    get_defined_functions().
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_soap_functions_all_constant_and_passing_it_to_soapserveraddfunction
-  . The SOAP_FUNCTIONS_ALL constant is now deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_soap_functions_all_constant_and_passing_it_to_soapserveraddfunction
-
-- SPL:
-  . The SplFixedArray::__wakeup() method has been deprecated as it implements
-    __serialize() and __unserialize() which need to be overwritten instead.
-  . Using the default value for $escape parameter of:
-    - SplFileObject::setCsvControl()
-    - SplFileObject::fputcsv()
-    - SplFileObject::fgetcsv()
-    is now deprecated. It must be passed explicitly either positionally or via named arguments.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_proprietary_csv_escaping_mechanism
-
-- Standard:
-  . Calling stream_context_set_option() with 2 arguments is deprecated.
-    Use stream_context_set_options() instead.
-  . Unserializing strings using the uppercase 'S' tag is deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#unserialize_s_s_tag
-  . Using the default value for $escape parameter of:
-    - fputcsv()
-    - fgetcsv()
-    - str_getcsv()
-    is now deprecated. It must be passed explicitly either positionally or via named arguments.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_proprietary_csv_escaping_mechanism
-
-- XML:
-  . The xml_set_object() function has been deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#xml_set_object_and_xml_set_handler_with_string_method_names
-  . Passing non-callable strings to the xml_set_*_handler() functions is now
-    deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#xml_set_object_and_xml_set_handler_with_string_method_names
-
-========================================
-5. Changed Functions
-========================================
-
-- BCMath:
-  . bcround() and BcMath\Number::round() now throw a ValueError when the precision
-    argument is out of range.
-
-- Core:
-  . trigger_error() and user_error() now have a return type of true instead of
-    bool.
-
-- DOM:
-  . DOMDocument::registerNodeClass() now has a tentative return type of true.
-    Previously, the return type was bool but only true could be returned in practice.
-
-- GD:
-  . imagescale now throws a ValueError when both width and height arguments are negative.
-
-- Hash:
-  . Changed the return type of hash_update() to true. It was already the case that only
-    true could be returned, but the stub was not updated yet.
-
-- Intl:
-  . NumberFormatter::ROUND_TOWARD_ZERO and NumberFormatter::ROUND_AWAY_FROM_ZERO
-    have been added as aliases for NumberFormatter::ROUND_DOWN and
-    NumberFormatter::ROUND_UP to be consistent with the new PHP_ROUND_* modes.
-    RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
-  . ResourceBundle::get() now has a tentative return type of:
-    ResourceBundle|array|string|int|null
-  . The idn_to_ascii() and idn_to_utf8() now always throw ValueErrors if the
-    $domain name is empty or too long, and if $variant is not
-    INTL_IDNA_VARIANT_UTS46.
-
-- LibXML:
-  . libxml_set_streams_context() now immediately throws a TypeError when a
-    non-stream-context resource is passed to the function, instead of throwing
-    later when the stream context is used.
-
-- MBString:
-  . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
-    strings. (For valid UTF-8 and UTF-16 strings, there is no change.)
-
-- ODBC:
-  . Parameter $row of odbc_fetch_object(), odbc_fetch_array(), and
-    odbc_fetch_into() now has a default value of null, consistent with
-    odbc_fetch_row(). Previously, the default values were -1, -1, and 0,
-    respectively.
-
-- OpenSSL:
-  . The extra_attributes parameter in openssl_csr_new sets CSR attributes
-    instead of subject DN which was incorrectly done previously.
-  . The dn parameter in openssl_csr_new allows setting array of values for
-    a single entry.
-  . New serial_hex parameter added to openssl_csr_sign to allow setting serial
-    number in the hexadecimal format.
-  . Parsing ASN.1 UTCTime by openssl_x509_parse fails if seconds are omitted
-    for OpenSSL version below 3.2 (-1 is returned for such fields). The
-    OpenSSL version 3.3+ does not load such certificates already.
-
-- Output:
-  . Output handler status flags passed to the flags parameter of ob_start
-    are now cleared.
-
-- PDO:
-  . getAttribute, enabled to get the value of ATTR_STRINGIFY_FETCHES.
-
-- PDO_FIREBIRD:
-  . getAttribute, enabled to get values of FB_ATTR_DATE_FORMAT, FB_ATTR_TIME_FORMAT,
-    FB_ATTR_TIMESTAMP_FORMAT.
-  . Added new attributes to specify transaction isolation level and access mode.
-    Along with these, five constants (Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL,
-    Pdo\Firebird::READ_COMMITTED, Pdo\Firebird::REPEATABLE_READ,
-    Pdo\Firebird::SERIALIZABLE, Pdo\Firebird::WRITABLE_TRANSACTION) have been added.
-  . When using persistent connections, there is now a liveness check in the
-    constructor.
-  . The content that is built changes depending on the value of FB_API_VER in
-    ibase.h, so added static method Pdo\Firebird::getApiVersion() to obtain that
-    value. This value can also be referenced from phpinfo.
-  . Five new data types are now available: INT128, DEC16, DEC34, TIMESTAMP_TZ, TIME_TZ.
-    These are available starting with Firebird 4.0.
-
-- PDO_MYSQL:
-  . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
-
-- PDO_PGSQL:
-  . getAttribute() can now retrieve the memory usage of query results.
-    PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE was added for this feature.
-  . If the column is of FLOAT4OID/FLOAT8OID type, query returns it as a
-    float instead of a string.
-
-- PGSQL:
-  . pg_select, the conditions arguments accepts an empty array and is optional.
-
-- Phar:
-  . Phar::setAlias() and Phar::setDefaultStub() methods now have a tentative
-    return type of true instead of bool.
-
-- POSIX:
-  . posix_isatty now sets the error number when the file descriptor/stream argument
-    is invalid.
-
-- Reflection:
-  . ReflectionGenerator::getFunction() may now be called after the generator
-    finished executing.
-
-- Sockets:
-  . Parameter $backlog of socket_create_listen() now has a default value of SOMAXCONN.
-    Previously, it was 128.
-
-- SPL:
-  . SplPriorityQueue::insert() and SplPriorityQueue::recoverFromCorruption()
-    now has a tentative return type of true
-  . SplHeap::insert() and SplHeap::recoverFromCorruption()
-    now has a tentative return type of true instead of bool
-
-- Standard:
-  . The internal implementation for rounding to integers has been rewritten
-    to be easier to verify for correctness and to be easier to maintain.
-    Some rounding bugs have been fixed as a result of the rewrite. For
-    example previously rounding 0.49999999999999994 to the nearest integer
-    would have resulted in 1.0 instead of the correct result 0.0. Additional
-    inputs might also be affected and result in different outputs compared to
-    earlier PHP versions.
-  . The $mode parameter of the round() function has been widened to RoundingMode|int,
-    accepting instances of a new RoundingMode enum.
-    RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum
-  . Four new modes have been added to the round() function: RoundingMode::PositiveInfinity,
-    RoundingMode::NegativeInfinity, RoundingMode::TowardsZero, RoundingMode::AwayFromZero.
-    RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
-  . Fixed a bug caused by "pre-rounding" of the round() function. Previously, using
-    "pre-rounding" to treat a value like 0.285 (actually 0.28499999999999998) as a
-    decimal number and round it to 0.29. However, "pre-rounding" incorrectly rounds
-    certain numbers, so this fix removes "pre-rounding" and changes the way numbers
-    are compared, so that the values are correctly rounded as decimal numbers.
-  . The maximum precision that can be handled by round() has been extended by one
-    digit. For example, `round(4503599627370495.5)` returned in `4503599627370495.5`,
-    but now returns `4503599627370496`.
-  . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
-    has been increased from '10' to '12'.
-    RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
-  . debug_zval_dump() now indicates whether an array is packed.
-  . long2ip() now returns string instead of string|false.
-  . output_add_rewrite_var() now uses url_rewriter.hosts instead of
-    session.trans_sid_hosts for selecting hosts that will be rewritten.
-  . highlight_string() now has a return type of string|true instead of string|bool.
-  . print_r() now has a return type of string|true instead of string|bool.
-
-========================================
-6. New Functions
-========================================
-
-- Core:
-  . request_parse_body()
-
-- BCMath:
-  . Added bcfloor(), bcceil(), bcround().
-    RFC: https://wiki.php.net/rfc/adding_bcround_bcfloor_bcceil_to_bcmath
-  . Added bcdivmod().
-    RFC: https://wiki.php.net/rfc/add_bcdivmod_to_bcmath
-
-- Date:
-  . Added static methods
-    DateTime[Immutable]::createFromTimestamp(int|float $timestamp): static.
-  . Added method DateTime[Immutable]::getMicrosecond(): int.
-  . Added method
-    DateTime[Immutable]::setMicrosecond(int $microsecond): static.
-
-- DOM:
-  . Added DOMNode::compareDocumentPosition().
-  . Added DOMXPath::registerPhpFunctionNS().
-    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
-  . Added DOMXPath::quote() to quote a string for use in an XPath expression.
-    Example usage: "//span[contains(text()," . $xpath->quote($string) . ")]"
-
-- Hash:
-  . Added HashContext::__debugInfo().
-
-- Intl:
-  . Added IntlTimeZone::getIanaID()/intltz_get_iana_id() to
-    the IANA identifier from a given timezone.
-  . Added grapheme_str_split which allow to support emoji and Variation
-    Selectors.
-    RFC: https://wiki.php.net/rfc/grapheme_str_split
-  . Added IntlDateFormatter::parseToCalendar which behaves like
-    IntlDateFormatter::parse except the time zone is updated.
-  . Added SpoofChecker::setAllowedChars to limit the range of unicode
-    chars.
-
-- MBString:
-  . Added mb_trim, mb_ltrim and mb_rtrim functions.
-    RFC: https://wiki.php.net/rfc/mb_trim
-    Note: this was amended by GH-13820 to fix GH-13815.
-  . Added mb_ucfirst and mb_lcfirst functions.
-    RFC: https://wiki.php.net/rfc/mb_ucfirst
-
-- OPCache:
-  . Added opcache_jit_blacklist function. It allows skipping the tracing JIT
-    execution of select functions.
-
-- PCNTL:
-  . Added pcntl_setns allowing a process to be reassociated with a namespace in order
-    to share resources with other processes within this context.
-  . Added pcntl_getcpuaffinity to get the cpu(s) bound to a process and
-    pcntl_setcpuaffinity to bind 1 or more cpus to a process.
-  . Added pcntl_getcpu to get the cpu id from where the current process runs.
-  . Added pcntl_getqos_class to get the QoS level (aka performance and related
-    energy consumption) of the current process and pcntl_setqos_class to set it.
-  . Added pcntl_waitid to obtain status information pertaining to termination, stop,
-    and/or continue events in one of the caller's child processes.
-
-- PDO_PGSQL:
-  . Added Pdo\Pgsql::setNoticeCallback() to allow a callback to be triggered on
-    every notice sent (e.g. RAISE NOTICE).
-
-- PGSQL:
-  . Added pg_change_password to alter a given user's password. It handles
-    transparently the password encryption from the database settings.
-  . Added pg_put_copy_data to send COPY commands and pg_put_copy_end to send
-    end-of-data to the server.
-  . Added pg_socket_poll to check if there is any read and/or write events
-    with an optional timeout.
-  . Added pg_jit to get informations on the server JIT support.
-  . Added pg_set_chunked_rows_size to allow to fetch results in chunk of
-    max N rows.
-  . Added pg_result_memory_size to get the visibility the memory used by a query result.
-
-- Reflection:
-  . Multiple methods related to lazy objects were introduced:
-    - ReflectionClass::newLazyGhost()
-    - ReflectionClass::newLazyProxy()
-    - ReflectionClass::resetAsLazyGhost()
-    - ReflectionClass::resetAsLazyProxy()
-    - ReflectionClass::isUninitializedLazyObject()
-    - ReflectionClass::initializeLazyObject()
-    - ReflectionClass::markLazyObjectAsInitialized()
-    - ReflectionClass::getLazyInitializer()
-    - ReflectionProperty::skipLazyInitialization()
-    - ReflectionProperty::setRawValueWithoutLazyInitialization()
-    RFC: https://wiki.php.net/rfc/lazy-objects
-  . ReflectionClassConstant::isDeprecated() was introduced.
-  . ReflectionGenerator::isClosed() was introduced.
-  . ReflectionProperty::isDynamic() was introduced.
-
-- Sodium:
-  . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
-    functions to support the AEGIS family of authenticated encryption algorithms,
-    that was introduced in libsodium 1.0.19.
-  . sodium_crypto_aead_aes256gcm_*() functions are now enabled on aarch64 CPUs
-    with the ARM cryptographic extensions.
-
-- SPL:
-  . Added seek() method to SplObjectStorage, now it implements
-    SeekableIterator.
-
-- SOAP:
-  . Added SoapServer::__getLastResponse(). This only tracks the last response
-    if the trace option is set to true in the SoapServer constructor's $options
-    argument.
-
-- Standard:
-  . Added the http_get_last_response_headers() and
-    http_clear_last_response_headers() that allows retrieving the same content
-    as the magic $http_response_header variable.
-    RFC: https://wiki.php.net/rfc/http-last-response-headers
-  . Added function fpow() following rules of IEEE 754.
-    RFC: https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number
-  . Added functions array_find(), array_find_key(), array_all(), and
-    array_any().
-    RFC: https://wiki.php.net/rfc/array_find
-
-- Tidy:
-  . Added tidyNode::getNextSibling() and tidyNode::getPreviousSibling().
-
-- XMLReader:
-  . Added XMLReader::fromStream(), XMLReader::fromUri(), XMLReader::fromString().
-    RFC: https://wiki.php.net/rfc/xmlreader_writer_streams
-
-- XMLWriter:
-  . Added XMLWriter::toStream(), XMLWriter::toUri(), XMLWriter::toMemory().
-    RFC: https://wiki.php.net/rfc/xmlreader_writer_streams
-
-- XSL:
-  . Added XSLTProcessor::registerPhpFunctionNS().
-    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
-
-========================================
-7. New Classes and Interfaces
-========================================
-
-- BCMath:
-  . Added BcMath\Number class. It is an immutable object, has methods that are
-    equivalent to existing BCMath calculation functions, and can also be calculated
-    using operators.
-    The existing BCMath function returned a string for each calculation, but this
-    class returns an object.
-    RFC: https://wiki.php.net/rfc/support_object_type_in_bcmath,
-    https://wiki.php.net/rfc/fix_up_bcmath_number_class
-
-- Core:
-  . RequestParseBodyException.
-    RFC: https://wiki.php.net/rfc/rfc1867-non-post
-  . #[\Deprecated] attribute.
-    RFC: https://wiki.php.net/rfc/deprecated_attribute
-
-- DBA:
-  . Dba\Connection opaque object replacing DBA resources
-
-- DOM:
-  . Implemented DOM HTML5 parsing and serialization.
-    RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
-    This RFC adds the new Dom namespace along with new classes and
-    constant aliases.
-    There are two new classes to handle HTML and XML documents:
-    Dom\HTMLDocument and Dom\XMLDocument.
-    These classes provide a cleaner API to handle HTML and XML documents.
-    Furthermore, the Dom\HTMLDocument class implements spec-compliant HTML5
-    parsing and serialization.
-  . Implemented opt-in ext/dom spec compliance RFC.
-    This adds new classes in the DOM namespace that correspond to modern
-    equivalents to the old DOM classes in the global namespaces.
-    The new classes follow the DOM living spec.
-    RFC: https://wiki.php.net/rfc/opt_in_dom_spec_compliance
-  . Implemented "New ext-dom features in PHP 8.4" RFC.
-    RFC: https://wiki.php.net/rfc/dom_additions_84
-
-- ODBC:
-  . Odbc\Connection
-  . Odbc\Result
-
-- PDO_DBLIB:
-  . Pdo\DbLib.
-
-- PDO_FIREBIRD:
-  . Pdo\Firebird.
-
-- PDO_MYSQL:
-  . Pdo\Mysql.
-
-- PDO_ODBC:
-  . Pdo\Odbc.
-
-- PDO_PGSQL:
-  . Pdo\Pgsql.
-
-- PDO_SQLITE:
-  . Pdo\Sqlite.
-
-- Reflection:
-  . ReflectionConstant
-
-- SOAP:
-  . Soap\Url
-  . Soap\Sdl
-
-- Standard:
-  . StreamBucket
-
-========================================
-8. Removed Extensions and SAPIs
-========================================
-
-- IMAP:
-  . The IMAP extension has been unbundled and moved to PECL.
-    RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
-
-- OCI8:
-  . The OCI8 extension has been unbundled and moved to PECL.
-    RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
-
-- PDO_OCI:
-  . The PDO_OCI extension has been unbundled and moved to PECL.
-    RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
-
-- PSpell:
-  . The pspell extension has been unbundled and moved to PECL.
-    RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
-
-========================================
-9. Other Changes to Extensions
-========================================
-
-- Curl:
-  . The Curl extension now requires at least libcurl 7.61.0.
-  . The CURLOPT_DNS_USE_GLOBAL_CACHE Curl option no longer has any
-    effect, and is silently ignored. This underlying feature was
-    deprecated in libcurl 7.11.1 and removed in 7.62.0.
-
-- GMP:
-  . Casting a GMP object to bool is now possible instead of emitting a
-    E_RECOVERABLE_ERROR. The casting behaviour is overloaded such that a GMP
-    object representing the value 0 is cast to false.
-    RFC: https://wiki.php.net/rfc/fix_up_bcmath_number_class
-
-- Intl:
-  . The behaviour of Intl class has been normalized to always throw Error
-    exceptions when attempting to use a non-initialized object,
-    or when cloning fails.
-
-- LibXML:
-  . The libxml extension now requires at least libxml2 2.9.4.
-
-- MBString:
-  . Unicode data tables have been updated to Unicode 16.0.
-
-- Mysqlnd:
-  . Support for the new VECTOR data type from MySQL 9.
-
-- OpenSSL:
-  . The OpenSSL extension now requires at least OpenSSL 1.1.1.
-
-- PDO_PGSQL:
-  . The pdo_pgsql extension now requires at least libpq 10.0.
-
-- PgSQL:
-  . The pgsql extension now requires at least libpq 10.0.
-
-- SPL:
-  . Out of bounds accesses in SplFixedArray now throw an exception of type
-    OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
-    is a child class of RuntimeException, code that uses RuntimeException
-    continues to function.
-
-- XSL:
-  . The typed properties XSLTProcessor::$cloneDocument and
-    XSLTProcessor::$doXInclude are now declared.
-
-- zlib:
-  . The zlib extension now requires at least zlib 1.2.11.
-
-========================================
-10. New Global Constants
-========================================
-
-- Core:
-  . PHP_OUTPUT_HANDLER_PROCESSED.
-  . PHP_SBINDIR.
-
-- Curl:
-  . CURL_HTTP_VERSION_3.
-  . CURL_HTTP_VERSION_3ONLY.
-  . CURLOPT_TCP_KEEPCNT.
-  . CURLOPT_PREREQFUNCTION.
-  . CURL_PREREQFUNC_OK.
-  . CURL_PREREQFUNC_ABORT.
-  . CURLOPT_SERVER_RESPONSE_TIMEOUT.
-  . CURLOPT_DEBUGFUNCTION.
-  . CURLINFO_TEXT.
-  . CURLINFO_HEADER_IN.
-  . CURLINFO_DATA_IN.
-  . CURLINFO_DATA_OUT.
-  . CURLINFO_SSL_DATA_OUT.
-  . CURLINFO_SSL_DATA_IN.
-  . CURLINFO_POSTTRANSFER_TIME_T.
-
-- Intl:
-  . The IntlDateFormatter class exposes now the new PATTERN constant
-    reflecting udat api's UDAT_PATTERN.
-  . The IntlChar class exposes now the new PROPERTY_IDS_UNARY_OPERATOR (new
-    IDS binary operator), PROPERTY_ID_COMPAT_MATH_START,
-    PROPERTY_ID_COMPAT_MATH_CONTINUE (both for mathematical
-    identifier profiling purpose) constants.
-
-- LDAP:
-  . LDAP_OPT_X_TLS_PROTOCOL_MAX.
-  . LDAP_OPT_X_TLS_PROTOCOL_TLS1_3.
-
-- LibXML:
-  . LIBXML_RECOVER.
-  . LIBXML_NO_XXE.
-    This is used together with LIBXML_NOENT for when you want to perform entity
-    substitution, but want to disallow external entity loading.
-    This constant is available as of libxml2 2.13.
-
-- Mysqli:
-  . MYSQLI_TYPE_VECTOR.
-
-- OpenSSL:
-  . X509_PURPOSE_OCSP_HELPER.
-  . X509_PURPOSE_TIMESTAMP_SIGN.
-
-- PCNTL:
-  . Pcntl\QosClass::Background (macOs only).
-  . Pcntl\QosClass::Default (macOs only).
-  . Pctnl\QosClass::UserInteractive (macOs only).
-  . Pcntl\QosClass::UserInitiated (macOs only).
-  . Pcntl\QosClass::Utility (macOs only).
-  . SIGCKPT (DragonFlyBSD only).
-  . SIGCKPTEXIT (DragonFlyBSD only).
-  . WEXITED.
-  . WSTOPPED.
-  . WNOWAIT.
-  . P_ALL.
-  . P_PID.
-  . P_PGID.
-  . P_PIDFD (Linux only).
-  . P_UID (NetBSD/FreeBSD only).
-  . P_GID (NetBSD/FreeBSD only).
-  . P_SID (NetBSD/FreeBSD only).
-  . P_JAILID (FreeBSD only).
-
-- PgSQL:
-  . PGSQL_TUPLES_CHUNK
-
-- POSIX:
-  . POSIX_SC_CHILD_MAX
-  . POSIX_SC_CLK_TCK
-
-- Sockets:
-  . SO_EXCLUSIVEADDRUSE (Windows only).
-  . SOCK_CONN_DGRAM (NetBSD only).
-  . SOCK_DCCP (NetBSD only).
-  . TCP_SYNCNT (Linux only).
-  . SO_EXCLBIND (Solaris/Illumos only).
-  . SO_NOSIGPIPE (macOs and FreeBSD).
-  . SO_LINGER_SEC (macOs only).
-  . IP_PORTRANGE (FreeBSD/NetBSD/OpenBSD only).
-  . IP_PORTRANGE_DEFAULT (FreeBSD/NetBSD/OpenBSD only).
-  . IP_PORTRANGE_HIGH (FreeBSD/NetBSD/OpenBSD only).
-  . IP_PORTRANGE_LOW (FreeBSD/NetBSD/OpenBSD only).
-  . SOCK_NONBLOCK.
-  . SOCK_CLOEXEC.
-  . SO_BINDTOIFINDEX.
-
-- Sodium:
-  . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES
-  . SODIUM_CRYPTO_AEAD_AEGIS128L_NSECBYTES
-  . SODIUM_CRYPTO_AEAD_AEGIS128L_NPUBBYTES
-  . SODIUM_CRYPTO_AEAD_AEGIS128L_ABYTES
-  . SODIUM_CRYPTO_AEAD_AEGIS256_KEYBYTES
-  . SODIUM_CRYPTO_AEAD_AEGIS256_NSECBYTES
-  . SODIUM_CRYPTO_AEAD_AEGIS256_NPUBBYTES
-  . SODIUM_CRYPTO_AEAD_AEGIS256_ABYTES
-
-- XML:
-  . Added XML_OPTION_PARSE_HUGE to allow large inputs in xml_parse and
-    xml_parse_into_struct.
-    RFC: https://wiki.php.net/rfc/xml_option_parse_huge.
-
-========================================
-11. Changes to INI File Handling
-========================================
-
-========================================
-12. Windows Support
-========================================
-
-* Building with Visual Studio now requires at least Visual Studio 2019 (Visual
-  Studio 2022 is recommended, though).
-
-* AVX(2) CPU support is now properly detected for MSVC builds.
-
-* Native AVX-512 builds are now supported (--enable-native-intrinsics=avx512).
-
-========================================
-13. Other Changes
-========================================
-
-* Closure names have been adjusted to include the parent function's name
-  and the line of definition to make them easier to distinguish, for example
-  within stack traces.
-
-* run-tests.php now skips online tests by default. Set the SKIP_ONLINE_TESTS
-  environment variable to 0, or pass the --online flag to run-tests.php to
-  execute them.
-
-* Fiber switching during destructor execution is now allowed. It was previously
-  blocked due to conflicts with garbage collection.
-
-  Destructors may now be executed in a separate Fiber:
-
-  When garbage collection is triggered in a Fiber, destructors called by the GC
-  are executed in a separate Fiber: the gc_destructor_fiber. If this Fiber
-  suspends, a new one is created to execute the remaining destructors. The
-  previous gc_destructor_fiber is not referenced anymore by the GC and may be
-  collected if it's not referenced anywhere else. Objects whose destructor is
-  suspended will not be collected until the destructor returns or the Fiber is
-  collected.
-
-========================================
-14. Performance Improvements
-========================================
-
-- BCMath:
-  . Improved performance of number conversions and operations.
-
-- Core:
-  . Improved the performance of floating point number parsing and formatting in
-    ZTS builds under highly concurrent loads. This affects the `printf()` family
-    of functions as well as serialization functions such as `json_encode()`,
-    `serialize()`.
-  . `sprintf()` using only `%s` and `%d` will be compiled into the equivalent
-    string interpolation, avoiding the overhead of a function call and repeatedly
-    parsing the format string.
-
-- DOM:
-  . The performance of DOMNode::C14N() is greatly improved for the case without
-    an xpath query. This can give a time improvement of easily two order of
-    magnitude for documents with tens of thousands of nodes.
-  . Improved performance and reduce memory consumption of XML serialization.
-  . Reduced memory usage of node classes.
+  . Properties previously documented as @readonly (e.g. DOMNode::$nodeType,
+    DOMDocument::$xmlEncoding, DOMEntity::$actualEncoding,
+    DOMEntity::$encoding, DOMEntity::$version) are now declared with asymmetric
+    visibility (public private(set)). Attempts to write to them from outside
+    the class now raise "Cannot modify private(set) property <class>::$<prop>
+    from global scope" instead of the prior readonly modification error.
+    ReflectionProperty::isWritable() also reports these properties
+    accurately.
+  . Array access on Dom\DtdNamedNodeMap objects now returns null for negative
+    integer indexes instead of returning the first node.
+  . Array access on Dom\DtdNamedNodeMap objects now raises a ValueError when
+    the integer index is greater than INT_MAX instead of overflowing to a
+    smaller index.
 
 - FTP:
-  . Improved the performance of FTP uploads up to a factor of 10x for large
-    uploads.
+  . ftp_nb_fget(), ftp_nb_fput(), ftp_nb_get() and ftp_nb_put() now throw an
+    Error when the connection is already transferring, instead of emitting a
+    warning and returning false. ftp_close() already throws on the same
+    condition.
 
-- Hash:
-  . Added SSE2 and SHA-NI implementations of SHA-256. This improves the performance
-    on supported CPUs by ~1.3x (SSE2) and 3x - 5x (SHA-NI).
+- GD:
+  . imagesetstyle(), imagefilter() and imagecrop() filter the types / values of
+    their array arguments and raise a TypeError / ValueError accordingly.
+  . imageaffinematrixget() now enforces the documented array|float type for the
+    $options parameter, including the corresponding weak and strict typing
+    behavior.
 
-- MBString:
-  . mb_strcut() is much faster now for UTF-8 and UTF-16 strings.
-  . Looking up mbstring encoding names is much faster now.
-  . The performance of converting SJIS-win to unicode is greatly improved.
+- GMP:
+  . GMP power and shift operators now throw a ValueError when GMP right operands
+    are outside the unsigned long range, instead of silently truncating them.
+  . GMP integer string parsing now throws a ValueError for strings containing NUL
+    bytes, instead of silently truncating them.
 
-- MySQLnd:
-  . Improved the performance of MySQLnd quoting.
+- Intl:
+  . Passing a non-stringable object as a time zone to Intl APIs that accept
+    time zone objects or strings now raises a TypeError instead of an Error.
+  . IntlIterator::current() now returns null when called before the iterator is
+    positioned, or after the iterator becomes invalid, instead of exposing an
+    undefined value.
+  . IntlBreakIterator::getLocale() now raises a ValueError when the type is
+    neither Locale::ACTUAL_LOCALE nor Locale::VALID_LOCALE instead of
+    returning false.
+  . MessageFormatter::parse() and parseMessage() now return PHP_INT_MIN as
+    int, rather than float, on 64-bit platforms when parsing integer values.
+  . The $type parameter of IntlBreakIterator::getPartsIterator() has been
+    changed from string to int to match the underlying implementation.
+  . UConverter::transcode() now rejects from_subst and to_subst option values
+    longer than 127 bytes instead of silently truncating the length before
+    passing it to ICU.
+  . ResourceBundle::get() and resourcebundle_get() now report fallback-disabled
+    resource lookups with "without fallback to <locale>" instead of the
+    malformed "without fallback from to <locale>".
+  . IntlDateFormatter::parse()/datefmt_parse() and
+    IntlDateFormatter::localtime()/datefmt_localtime() now raise a TypeError
+    when the offset argument is not of type int instead of silently converting
+    the value.
+  . Collator::sort(), collator_sort(), Collator::asort(), and
+    collator_asort() now report UTF-8/UTF-16 conversion failures during
+    comparison through the intl error mechanism and return false. With
+    intl.use_exceptions enabled, these failures throw IntlException. Previously,
+    these paths emitted a warning and compared the value as an empty string.
+
+- PCNTL:
+  . pcntl_alarm() now raises a ValueError if the seconds argument is
+    lower than zero or greater than the platform's UINT_MAX.
+  . pcntl_exec() now raises a ValueError if the $args argument is not a list
+    array.
 
 - PCRE:
-  . Improved the performance of named capture groups.
+  . preg_grep() now returns false instead of a partial array when a PCRE
+    execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
+    This is consistent with other preg_* functions.
 
-- Random:
-  . Improved the performance of \Random\Randomizer, with a specific focus
-    on the getBytes() and getBytesFromString() methods.
+- PGSQL:
+  . pg_fetch_object() now reports the ValueError for a non-empty
+    $constructor_args on a class without a constructor on the
+    $constructor_args argument instead of $class. Errors raised when
+    the requested class is not instantiable (abstract, interface, enum)
+    now surface before the row is fetched.
+
+- Phar:
+  . Phar::mungServer() now raises a ValueError when an invalid argument value
+    is passed instead of being silently ignored.
+  . Phar::addEmptyDir() now rejects "/.phar" paths in addition to ".phar"
+    paths, and raises the same BadMethodCallException for attempts to create
+    the reserved magic ".phar" directory through that form.
+  . Phar::addEmptyDir() now treats non-magic names that merely share the
+    ".phar" prefix as ordinary directories.
+  . Files are only automatically interpreted as Phar archives when included
+    if ".phar" occurs as an extension in the filename component of their
+    paths. Previously, it could occur in a directory name or as part of an
+    extension such as ".pharma".
+
+- Posix:
+  . posix_access() now raises a ValueError when an invalid $flags
+    argument value is passed.
+  . posix_mkfifo() now raises a ValueError when an invalid $permissions
+    argument value is passed.
+
+- Session:
+  . Setting session.cookie_path, session.cookie_domain, or session.cache_limiter
+    to a value containing NUL bytes now emits a warning and leaves the setting
+    unchanged. Previously, NUL bytes were silently accepted: for cookie_path
+    and cookie_domain this caused the SAPI to drop the Set-Cookie header; for
+    cache_limiter the value was silently truncated at the NUL byte.
+  . A ValueError is thrown if $name is a string containing NUL bytes in
+    session_module_name().
+  . session_encode() now returns an empty string instead of false for empty
+    sessions. It only returns false now when the session data could not be
+    encoded. This mainly happens with the default serialization handler
+    if a key contains the pipe | character.
+  . When session.lazy_write is enabled and a session handler implements
+    SessionUpdateTimestampHandlerInterface, sessions that were read as empty
+    and remain empty at write time will now trigger updateTimestamp() instead
+    of write(). Previously, write() was always called for empty sessions
+    because session_encode() returned false, bypassing the lazy_write
+    comparison. Custom session handlers that rely on write() being called
+    with empty data (e.g. to destroy the session) should implement the same
+    logic in their updateTimestamp() method.
+  . The defaults of three session INI settings have changed to provide secure
+    behavior out of the box:
+      - session.use_strict_mode is now 1 (was 0). Strict mode rejects
+        uninitialized session IDs, mitigating session fixation. Custom session
+        handlers that previously relied on accepting externally supplied IDs
+        without a corresponding storage entry must either implement
+        validateId() / create_sid() or explicitly set this to 0.
+      - session.cookie_httponly is now 1 (was 0). Session cookies are no
+        longer accessible to JavaScript via document.cookie. Applications
+        that read the session cookie from JavaScript must explicitly set
+        this to 0.
+      - session.cookie_samesite is now "Lax" (was unset). Session cookies
+        are no longer sent on cross-site requests other than top-level
+        navigations using safe HTTP methods. Applications that depend on
+        session cookies being sent on cross-site POST submissions must
+        explicitly set this to "None" (and also set session.cookie_secure
+        to 1).
+    RFC: https://wiki.php.net/rfc/session_security_defaults
+  . SessionHandler::validateId() has been added and delegates to the
+    configured save handler. A subclass that declares validateId() without
+    a return type now emits a deprecation notice for the tentative bool
+    return type. A subclass that overrides open() without calling
+    parent::open() keeps its previous behavior and emits a warning when an
+    ID is validated.
+
+- Shmop:
+  . shmop_open() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
 
 - SimpleXML:
-  . Improved performance and reduce memory consumption of XML serialization.
+  . SimpleXMLElement::__construct() now raises a ValueError when the $data
+    argument contains NUL bytes, matching simplexml_load_file(). With
+    $dataIsURL set, it previously truncated the path at the first NUL byte.
+    Without it, the string went to libxml, which with default options rejects a
+    NUL on current versions but accepts the truncated document on older ones
+    and under LIBXML_RECOVER.
+
+- SOAP:
+  . The "classmap" option of SoapClient and SoapServer now rejects arrays
+    containing integer keys. Previously, sparse integer-keyed and mixed-keyed
+    arrays could be accepted. SoapClient now throws TypeError for non-array
+    "classmap" options and ValueError for arrays containing integer keys, also
+    when the "exceptions" option is disabled.
+  . WSDL/XML Schema parsing now rejects out-of-range integer values for
+    occurrence constraints and integer restriction facets. Negative minOccurs
+    and maxOccurs values are rejected as well.
+  . SOAP encoding errors now report the affected type or failing operation in
+    the error message instead of the generic "Encoding: Violation of encoding
+    rules" message. Code that compares the exact message may need to be
+    updated.
+
+- Sockets:
+  . socket_set_option() with SO_ATTACH_REUSEPORT_CBPF now requires an int
+    $value and a $level of SOL_SOCKET. Any other value type throws a TypeError
+    instead of being coerced, and any other level raises a warning and returns
+    false.
+  . socket_set_option() with SO_ATTACH_REUSEPORT_CBPF and a $value of 0 now
+    detaches the reuseport filter through SO_DETACH_REUSEPORT_BPF. It
+    previously used SO_DETACH_BPF, an alias of SO_DETACH_FILTER, which left the
+    reuseport program attached.
+
+- Sodium:
+  . The password-hashing functions sodium_crypto_pwhash(),
+    sodium_crypto_pwhash_str(),
+    sodium_crypto_pwhash_scryptsalsa208sha256() and
+    sodium_crypto_pwhash_scryptsalsa208sha256_str() now throw ValueError
+    instead of SodiumException when an argument is out of range, such as an
+    opslimit or memlimit below the documented minimum. SodiumException is
+    still thrown for internal libsodium failures.
+
+- SPL:
+  . SplObjectStorage::getHash() implementations may no longer mutate any
+    SplObjectStorage instance. Attempting to do so now throws an Error.
+  . SplFileObject::next() now advances the stream when no prior current()
+    call has cached a line. A subsequent current() call returns the new line
+    rather than the previous one.
+  . SplFileObject::fgets() no longer caches the returned line for subsequent
+    current() calls. current() now re-reads from the current stream position
+    instead of returning the line fgets() just returned.
+  . SplFileObject::next() past EOF no longer increments key() without bound.
+    SplFileObject::seek() past EOF now produces the same key() value as
+    SplTempFileObject; the two previously returned different values.
+  . DirectoryIterator::key() now returns int|string,
+    and DirectoryIterator::current() returns string|SplFileInfo|static.
 
 - Standard:
-  . Improved the performance of strpbrk().
-  . The performance of strspn() and strcspn() is greatly improved.
-    They now run in linear time instead of being bounded by quadratic time.
-  . get_browser() is much faster now, up to 1.5x - 2.5x for some test cases.
+  . array_intersect() with at least two arrays now converts values to strings
+    while scanning its inputs instead of during sort comparisons. This can
+    change the number and order of conversion warnings and __toString() calls,
+    which conversion exception is reached, and the result for stateful
+    __toString() implementations. Argument types are validated before checking
+    for empty arrays or converting values, so an invalid later argument can
+    suppress conversion side effects from earlier arrays. Values are not
+    converted if any input array is empty.
+  . Form feed (\f) is now added to the default trimmed characters of trim(),
+    rtrim() and ltrim().
+    RFC: https://wiki.php.net/rfc/trim_form_feed
+  . array_filter() now raises a ValueError when an invalid $mode argument value
+    is passed.
+  . array_change_key_case() now raises a ValueError when an invalid $case
+    argument value is passed.
+  . getenv() and putenv() now raise a ValueError when the first argument
+    contains NUL bytes.
+  . dl() now raises a ValueError when the $extension_filename argument contains
+    NUL bytes.
+  . openlog() now raises a ValueError when the $prefix argument contains NUL
+    bytes.
+  . parse_str() now raises a ValueError when the $string argument contains NUL
+    bytes.
+  . setlocale() now raises a ValueError when a locale name contains NUL bytes,
+    instead of silently truncating it.
+    Arrays are now accepted only for the $locales argument. Passing an array as
+    a later variadic locale argument now throws a TypeError. Passing any
+    additional locale arguments when $locales is an array now throws an
+    ArgumentCountError.
+  . linkinfo() now raises a ValueError when the $path argument is empty.
+  . pathinfo() now raises a ValueError when an invalid $flag argument value is
+    passed.
+  . scandir() now raises a ValueError when an invalid $sorting_order argument
+    value is passed.
+  . number_format() now raises a ValueError when $decimals is outside the
+    integer range instead of silently clamping very large positive values.
+  . sleep() now raises a ValueError when $seconds is greater than the platform
+    limit (UINT_MAX seconds, or UINT_MAX / 1000 seconds on Windows) instead of
+    allowing the value to overflow.
+  . usleep() now raises a ValueError when $microseconds is greater than
+    UINT_MAX instead of allowing the value to overflow.
+  . proc_open() now raises a ValueError when the $cwd argument contains NUL
+    bytes.
+  . base_convert(), bindec(), hexdec() and octdec() now raise a notice when
+    they cannot precisely convert the given number.
+  . The following functions now raise a ValueError when the $filename argument
+    contains NUL bytes:
+    - fileperms()
+    - fileinode()
+    - filesize()
+    - fileowner()
+    - filegroup()
+    - fileatime()
+    - filemtime()
+    - filectime()
+    - filetype()
+    - is_writable()
+    - is_readable()
+    - is_executable()
+    - is_file()
+    - is_dir()
+    - is_link()
+    - file_exists()
+    - lstat()
+    - stat()
+  . unpack() now reads a "<" or ">" immediately following a format code as an
+    endianness modifier rather than as the first character of the element name.
+    Formats such as "s<value" now produce the key "value" instead of "<value",
+    and "C>name" raises a ValueError because the C format code accepts no
+    endianness modifier. A name starting with these characters is unaffected
+    when a repeater precedes it, as in "s1<value".
+    RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support
 
+- Sysvshm:
+  . shm_attach() now raises a ValueError when the $key argument is outside the
+    platform's key_t range instead of passing a truncated key to the operating
+    system.
+
+- Zip:
+  . ZipArchive::extractTo now raises a TypeError for the files argument if one
+    or more of the entries is not a string.
+  . ZipArchive::addGlob() and ZipArchive::addPattern() now raise a TypeError
+    when the "remove_all_path" option is not of type bool, or when the
+    "comp_method", "comp_flags", or "enc_method" options are not of type int
+    (numeric strings are coerced), instead of emitting a warning.
+  . Serializing or unserializing a ZipArchive now throws an Exception. A
+    subclass can override __serialize() and __unserialize() to round-trip
+    through ZipArchive::closeString() and ZipArchive::openString().
+
+- Zlib:
+  . deflate_init() now raises a TypeError when the value for option "level",
+    "memory", "window", or "strategy" is not of type int.
+  . inflate_init() now raises a TypeError when the value for option "window" is
+    not of type int.
+
+========================================
+2. New Features
+========================================
+
+- Core:
+  . Readonly properties may now declare default values.
+    RFC: https://wiki.php.net/rfc/readonly_property_defaults
+  . It is now possible to use reference assignment on WeakMap without the key
+    needing to be present beforehand.
+  . It is now possible to define the __debugInfo() magic method on enums.
+    RFC: https://wiki.php.net/rfc/debugable-enums
+  . #[\Override] can now be applied to class constants, including enum cases.
+    RFC: https://wiki.php.net/rfc/override_constants
+  . Implemented partial function application
+    RFC: https://wiki.php.net/rfc/partial_function_application_v2
+  . Allow direct mutation of objects stored in constants or class constants via
+    OBJ->prop = $val.
+    RFC: https://wiki.php.net/rfc/const_object_property_write
+
+- Curl:
+  . curl_getinfo() return array now includes a new size_delivered key, which
+    indicates the total number of bytes passed to the download write callback.
+    This value can also be obtained by passing CURLINFO_SIZE_DELIVERED as the
+    $option parameter.
+    Requires libcurl 8.20.0 or later.
+  . Added CURLOPT_SEEKFUNCTION to register a callback that repositions a
+    streamed request body so libcurl can rewind and resend it on a redirect,
+    multi-pass authentication, or a retried reused connection instead of
+    failing with CURLE_SEND_FAIL_REWIND. The callback receives the CurlHandle,
+    offset and origin, and must return one of CURL_SEEKFUNC_OK,
+    CURL_SEEKFUNC_FAIL or CURL_SEEKFUNC_CANTSEEK.
+
+- Date:
+  . Added a new Time\Duration class.
+    RFC: https://wiki.php.net/rfc/duration_class
+
+- Fileinfo:
+  . finfo_file() now works with remote streams.
+
+- GMP:
+  . Added gmp_powm_sec() for side-channel quiet modular exponentiation.
+    Requires GNU MP 5.0.0 or later; it is not available on official Windows
+    builds using MPIR.
+  . Added gmp_prevprime() to get the largest prime smaller than the given
+    number. The optional $definitely_prime output parameter indicates whether
+    the returned number is definitely prime, as opposed to probably prime.
+    A ValueError is thrown if no such prime exists. This function is available
+    only when PHP is built against GNU MP 6.3.0 or later; it is not available
+    on official Windows builds using MPIR.
+
+- Intl:
+  . Added the static methods IntlDatePatternGenerator::getSkeleton() and
+    IntlDatePatternGenerator::getBaseSkeleton() to generate the unique skeleton
+    and base skeleton for a date/time pattern.
+  . Added Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue(),
+    with the aliases locale_get_display_keyword() and
+    locale_get_display_keyword_value(), respectively.
+    RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
+  . Added IntlNumberRangeFormatter class to format an interval of two numbers
+    with a given skeleton, locale, IntlNumberRangeFormatter::COLLAPSE_AUTO,
+    IntlNumberRangeFormatter::COLLAPSE_NONE,
+    IntlNumberRangeFormatter::COLLAPSE_UNIT,
+    IntlNumberRangeFormatter::COLLAPSE_ALL collapse and
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_SINGLE_VALUE,
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY_OR_SINGLE_VALUE,
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_APPROXIMATELY and
+    IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
+    It is supported as of ICU 63.
+  . Added SpoofChecker::areBidiConfusable() to check whether two strings are
+    confusable for a given text direction, along with the SpoofChecker::LTR
+    and SpoofChecker::RTL direction constants.
+    It is supported as of ICU 74.
+  . Added SpoofChecker::getBidiSkeleton() to generate a confusable skeleton for
+    a given text direction. It is supported as of ICU 74.
+  . Added SpoofChecker::getSkeleton() to generate a confusable skeleton for a
+    given string.
+
+- IO:
+  . Added new polling API.
+    RFC: https://wiki.php.net/rfc/poll_api
+
+- JSON:
+  . Added extra info about error location to the JSON error messages returned
+    from json_last_error_msg() and JsonException message.
+
+- OpenSSL:
+  . Added TLS session resumption support for streams with new stream context
+    options: session_data, session_new_cb, session_cache, session_cache_size,
+    session_timeout, session_id_context, session_get_cb, session_remove_cb,
+    and num_tickets. This allows saving and restoring client sessions across
+    requests, implementing custom server-side session storage, and controlling
+    session cache behavior.
+    RFC: https://wiki.php.net/rfc/tls_session_resumption
+  . Added TLS external PSK support for streams with new stream context options:
+    psk_client_cb and psk_server_cb. This allows setting and receiving PSK.
+  . Added TLS 1.3 early data (0-RTT) support for streams. Clients send early
+    data with the early_data context option; servers accept it with
+    max_early_data and receive it through the early_data_cb callback. The
+    outcome is reported as 'accepted', 'rejected' or 'not_sent' in the
+    early_data key of the crypto stream_get_meta_data() array.
+
+- PDO_PGSQL:
+  . Added Pdo\Pgsql::ATTR_CHUNK_SIZE, the number of rows a statement fetches
+    per chunk. A value of 1 or more enters the lazy fetch mode of
+    PDO::ATTR_PREFETCH => 0. Setting PDO::ATTR_PREFETCH replaces the chunk
+    size. Statements that are prepared with neither it nor PDO::ATTR_PREFETCH
+    fall back to the value set on the connection.
+    Requires libpq 17 or later.
+
+- Phar:
+  . Overriding the getMTime() and getPathname() methods of SplFileInfo now
+    influences the result of the phar buildFrom family of functions.
+    This makes it possible to override the timestamp and names of files.
+
+- SNMP:
+  . It is now possible to use AES192, AES192C, AES256, and AES256C as
+    SNMPv3 security protocols if the underlying library supports them.
+    RFC: https://wiki.php.net/rfc/snmp_improvements_2026#increase_the_number_of_snmpv3_security_protocols_supported
+  . It is now possible to reset the MIB tree using the new snmp_init_mib()
+    function.
+    RFC: https://wiki.php.net/rfc/snmp_improvements_2026#allow_the_snmp_mib_to_be_reset
+  . Additional MIB parsing and output control functionality has been exposed
+    via the snmp_set_mib_option(), snmp_set_output_option(),
+    snmp_set_string_output_format() functions, the $numeric_index,
+    $numeric_timeticks, $extended_index, $dont_print_units, $escape_quotes,
+    $print_hex_text SNMP properties, and the SNMP::setOidOutputFormat(),
+    SNMP::setStringOutputFormat() methods. (eskyuu)
+    RFC: https://wiki.php.net/rfc/snmp_improvements_2026#implement_more_mib_parsing_and_value_output_controls
+
+- Standard:
+  . pack() and unpack() now accept the "<" and ">" endianness modifiers on
+    the signed and unsigned integer format codes.
+    RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support
+  . pack() and unpack() now accept the "<" and ">" endianness modifiers on
+    the float and double format codes.
+    RFC: https://wiki.php.net/rfc/pack-unpack-float-endianness-modifier
+
+- Streams:
+  . Added new stream errors API including new classes, enums, functions and
+    internal API. It is controlled using error_mode, error_store and
+    error_handler stream context options.
+    RFC: https://wiki.php.net/rfc/stream_errors
+  . Added the "filter.max_filter_count" stream context option for php://filter
+    URLs. When set, opening the stream fails with a warning if the URL would
+    add more filters than the configured value. Negative values disable the
+    check.
+    RFC: https://wiki.php.net/rfc/limit-maximum-number-of-filter-chains
+  . Added stream socket context option so_reuseaddr that allows disabling
+    address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
+    Windows.
+  . Added stream socket context options so_keepalive, tcp_keepidle,
+    tcp_keepintvl and tcp_keepcnt that allow setting socket keepalive
+    options.
+  . Added stream socket context option so_linger that sets SO_LINGER on TCP
+    sockets. A positive value enables lingering for that many seconds, zero
+    or a negative value disables it. Values above 65535 are clamped as the
+    linger time is limited to an unsigned short on some platforms.
+  . Added stream socket context options so_rcvbuf and so_sndbuf that set the
+    socket receive and send buffer sizes in bytes (SO_RCVBUF and SO_SNDBUF) on
+    TCP and UDP sockets. The value must be an integer between 1 and 2147483647,
+    any other value makes the stream creation fail. The operating system may
+    round, cap or otherwise adjust the requested size, and may stop sizing that
+    buffer automatically, so the size read back can differ from the one
+    requested.
+  . Allowed casting filtered streams as file descriptors for select.
+  . Added the "write_seek_mode" filter parameter for the bz2, iconv,
+    zlib, and string stream filters. This parameter must be set via an
+    associative array where the key is "write_seek_mode" and the
+    value is one of the following strings: "preserve", "reset", or "strict".
+
+- URI:
+  . Added Uri\Rfc3986\Uri::getUriType() and Uri\WhatWg\Url::isSpecialScheme().
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
+  . Added Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType().
+    RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
+  . Added Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder.
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_building
+  . Added Uri\url_percent_encode().
+    RFC: https://wiki.php.net/rfc/uri_followup#percent-encoding_support
+
+========================================
+3. Changes in SAPI modules
+========================================
+
+- CLI:
+  . The built-in development server now accepts requests using the HTTP QUERY
+    method instead of returning 501 Not Implemented.
+
+========================================
+4. Deprecated Functionality
+========================================
+
+- Core:
+  . Using "namespace" as a class constant name is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_using_namespace_as_a_class_constant_name
+  . Using the return statement in a finally block is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_returning_from_a_finally_block
+  . Specifying a return type of array|null / ?array for __debugInfo() is now
+    deprecated. Specify array instead.
+  . Returning values from __construct() and __destruct() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
+  . Making __construct() and __destruct() a Generator is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-return-value-from-construct
+  . Naming a function readonly is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_the_possibility_to_name_a_function_readonly
+  . Passing a 3rd argument to define() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_define_with_case_insensitive_being_specified
+  . Calling is_a() or is_subclass_of() with a string as the first argument
+    when $allow_string is false is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_a_with_string_when_allow_string_is_false
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_subclass_of_with_string_when_allow_string_is_false
+
+- BZ2:
+  . Passing an object for the Bzip2 {de}compression stream filter is now
+    deprecated. Use get_object_vars() on the object instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_as_parameters_to_the_bzip2decompress_and_bzip2compress_stream_filters
+
+- GMP:
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+    emit a deprecation warning when converting a float right operand to int
+    loses precision.
+
+- Mbstring:
+  . Mbregex has been deprecated, because the underlying Oniguruma library
+    is no longer maintained.
+    RFC: https://wiki.php.net/rfc/eol-oniguruma
+  . Passing objects to mb_convert_variables() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_vars_parameter_of_mb_convert_variables
+
+- MySQLi:
+  . The mysqli_get_charset() function and mysqli::get_charset() method are now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_mysqli_get_charset
+  . The mysqli_stmt_init() function, mysqli::stmt_init() method, and calling the
+    mysqli_stmt constructor without providing the $query parameter are now
+    deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_mysqlistmt_init
+
+- Reflection:
+  . Calling ReflectionProperty::setValue() with an object that is not an
+    instance of the class on which the property was declared is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_reflectionpropertysetvalue_and_reflectionpropertysetrawvalue_with_wrong_types
+  . Calling ReflectionProperty::setRawValue() with an object that is not an
+    instance of the class on which the property was declared is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_reflectionpropertysetvalue_and_reflectionpropertysetrawvalue_with_wrong_types
+  . Calling ReflectionMethod::invoke() or ReflectionMethod::invokeArgs() with
+    an object and a static method is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_reflectionmethodinvoke_and_reflectionmethodinvokeargs_with_objects_for_static_methods
+
+- Session:
+  . It is now deprecated to pass an object that does not implement the
+    create_sid() and validateId() methods.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_passing_a_sessionhandler_object_to_session_set_save_handler_which_does_not_contain_the_create_sid_and_validateid
+  . A deprecation is now emitted when implementing SessionHandlerInterface on a
+    class which doesn't define the create_sid() or validateId() methods, as
+    those will be moved from SessionUpdateTimestampHandlerInterface and
+    SessionIdInterface to SessionHandlerInterface.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_passing_a_sessionhandler_object_to_session_set_save_handler_which_does_not_contain_the_create_sid_and_validateid
+
+- SPL:
+  . The spl_classes() function is now deprecated. Use
+    ReflectionExtension::getClassNames() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_spl_classes
+  . The spl_object_hash() function is now deprecated. Use spl_object_id()
+    instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_spl_object_hash
+  . The following ArrayIterator methods are now deprecated:
+    * ArrayIterator::getFlags()
+    * ArrayIterator::setFlags()
+    * ArrayIterator::asort()
+    * ArrayIterator::ksort()
+    * ArrayIterator::uasort()
+    * ArrayIterator::uksort()
+    * ArrayIterator::natsort()
+    * ArrayIterator::natcasesort()
+    * ArrayIterator::unserialize()
+    * ArrayIterator::serialize()
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_arrayiterator_methods_that_inherit_arrayobject_implementation
+  . The following SplFileObject methods are now deprecated:
+    * SplFileObject::fgetcsv()
+    * SplFileObject::fputcsv()
+    * SplFileObject::setCsvControl()
+    * SplFileObject::getCsvControl()
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_splfileobject_csv_methods
+
+- Standard:
+  . metaphone() is deprecated.
+    Please use a userland phonetic matching library instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_metaphone_function
+  . Using more than 16 filters in a php://filter URL without configuring the
+    "filter.max_filter_count" stream context option now emits an E_DEPRECATED
+    warning. Use stream_filter_append() or configure this option explicitly.
+    RFC: https://wiki.php.net/rfc/limit-maximum-number-of-filter-chains
+  . Passing an object to array_walk{_recursive} is now deprecated. Use
+    get_object_vars() on the object instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_array_parameter_of_array_walk_and_array_walk_recursive
+  . Passing an object as the $data argument to http_build_query() is now
+    deprecated. The interpretation of object values within $data as arrays
+    is also deprecated. Convert objects to arrays with get_object_vars()
+    before calling the function.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_data_parameter_of_http_build_query
+  . The is_double() function is now deprecated. Use is_float() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_double
+  . The is_long() and is_integer() functions are now deprecated. Use is_int()
+    instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_integer
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_is_long
+  . The doubleval() function is now deprecated. Use floatval() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_doubleval
+  . The strcoll() function is now deprecated. Use Collator::compare() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_strcoll
+  . The SORT_LOCALE_STRING constant for the family of sort functions is now
+    deprecated. Use one of the following functions instead:
+    * Collator::sort()
+    * Collator::asort()
+    * Collator::sortWithSortKeys()
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#deprecate_sort_locale_string_flag_for_sort_functions
+
+- Zlib:
+  . Passing an object for the zlib deflate and inflate stream filter is now
+    deprecated. Use get_object_vars() on the object instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_as_parameters_to_the_zlibinflate_and_zlibdeflate_stream_filters
+  . Passing an object as the $option argument to deflate_init and inflate_init
+    is now deprecated. Use get_object_vars() on the object instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_6#passing_objects_for_options_parameter_of_deflate_init_and_inflate_init
+
+========================================
+5. Changed Functions
+========================================
+
+- Filter:
+  . filter_var_array() return type has been narrowed from array|false|null to
+    array|false. The function always establishes an array before filtering, so
+    null was never returned. filter_input_array() is unaffected: it still
+    returns null when the requested superglobal does not exist.
+
+- GMP:
+  . gmp_fact() now throws a ValueError if $num does not fit into an unsigned
+    long.
+  . gmp_pow(), gmp_binomial(), gmp_root() and gmp_rootrem() now throw a
+    ValueError if their second argument does not fit into an unsigned long.
+  . The shift (<<, >>) and exponentiation (**) operators on GMP objects now
+    throw a ValueError if the right operand does not fit into an unsigned long.
+  . gmp_powm() modulo-by-zero now raises a DivisionByZeroError whose message
+    includes the function name and argument index ($modulus).
+
+- LDAP:
+  . ldap_free_result() return type has been narrowed from bool to true. The
+    function already always returned true.
+
+- MySQLi:
+  . The return structure of mysqli_get_charset() no longer contains the
+    undocumented "comment" element. The value of "charsetnr" is now set to a
+    constant 0 as this number was an implementation detail that should not have
+    been exposed to the public.
+
+- OpenSSL:
+  . Output of openssl_x509_parse() contains criticalExtensions listing all
+    critical certificate extensions.
+  . openssl_sign() and openssl_verify() now have an additional optional
+    argument $salt_length that allows controlling the RSA-PSS salt length
+    when OPENSSL_PKCS1_PSS_PADDING is used. It accepts an explicit length or
+    one of the new OPENSSL_RSA_PSS_SALTLEN_* constants.
+
+- PDO_DBLIB:
+  . When using persistent connections, there is now a liveness check in the
+    constructor.
+
+- Phar:
+  . Phar::mungServer() now supports reference values.
+
+- Readline:
+  . readline_completion_function() now declares true as its return type. The
+    function assigns a static callback and then tests whether the assignment
+    landed, which is a tautology; an invalid callback throws a TypeError via
+    ZPP before the function body is reached.
+
+- Sockets:
+  . socket_addrinfo_lookup() now has an additional optional argument $error_code
+    that, when not null, receives the error code on failure (one of the EAI_*
+    constants).
+  . socket_cmsg_space() return type has been narrowed from ?int to int. Every
+    failure path has thrown a ValueError since PHP 8.0, so null was never
+    returned.
+
+- Standard:
+  . header_register_callback() now declares true as its return type. It has not
+    been able to return false since PHP 8.0.0, when passing an invalid
+    callback started throwing a TypeError instead.
+  . register_tick_function() now declares true as its return type. It has
+    always returned true on success; an invalid callback throws a TypeError
+    via ZPP before the function body is reached.
+  . ini_get_all() now includes a "builtin_default_value" element for each
+    directive when $details is true. It holds the built-in default value of the
+    directive (or null if it has none), independent of values set in php.ini,
+    on the command line, or at runtime.
+  . fclose(), file_put_contents() and copy() now return false when flushing
+    or closing the stream fails. Previously such failures were silently
+    ignored.
+
+- Zip:
+  . zip_entry_close() return type has been narrowed from bool to true. The
+    function already always returned true.
+
+========================================
+6. New Functions
+========================================
+
+- GMP:
+  . gmp_powm_sec()
+  . gmp_prevprime()
+
+- Intl:
+  . grapheme_strrev()
+    RFC: https://wiki.php.net/rfc/grapheme_strrev
+  . IntlDatePatternGenerator::getSkeleton()
+  . IntlDatePatternGenerator::getBaseSkeleton()
+  . Locale::getDisplayKeyword() and Locale::getDisplayKeywordValue()
+    RFC: https://wiki.php.net/rfc/getdisplaykeyword_and_getdisplaykeywordvalue
+  . SpoofChecker::areBidiConfusable()
+  . SpoofChecker::getBidiSkeleton()
+  . SpoofChecker::getSkeleton()
+
+- MySQLi:
+  . Added mysqli::quote_string() and mysqli_quote_string().
+    RFC: https://wiki.php.net/rfc/mysqli_quote_string
+
+- Reflection:
+  . ReflectionConstant::inNamespace()
+  . ReflectionProperty::isReadable() and ReflectionProperty::isWritable()
+    RFC: https://wiki.php.net/rfc/isreadable-iswriteable
+  . ReflectionParameter::getDocComment()
+    RFC: https://wiki.php.net/rfc/parameter-doccomments
+  . ReflectionAttribute::inNamespace()
+  . ReflectionAttribute::getNamespaceName()
+  . ReflectionAttribute::getShortName()
+
+- SNMP:
+  . snmp_init_mib()
+  . snmp_set_mib_option()
+  . snmp_set_output_option()
+  . snmp_set_string_output_format()
+
+- Sodium:
+  . sodium_crypto_ipcrypt_keygen()
+  . sodium_crypto_ipcrypt_encrypt()
+  . sodium_crypto_ipcrypt_decrypt()
+  . sodium_crypto_ipcrypt_nd_keygen()
+  . sodium_crypto_ipcrypt_nd_encrypt()
+  . sodium_crypto_ipcrypt_nd_decrypt()
+  . sodium_crypto_ipcrypt_ndx_keygen()
+  . sodium_crypto_ipcrypt_ndx_encrypt()
+  . sodium_crypto_ipcrypt_ndx_decrypt()
+  . sodium_crypto_ipcrypt_pfx_keygen()
+  . sodium_crypto_ipcrypt_pfx_encrypt()
+  . sodium_crypto_ipcrypt_pfx_decrypt()
+  . sodium_bin2ip()
+  . sodium_ip2bin()
+  . sodium_crypto_xof_shake128()
+  . sodium_crypto_xof_shake128_init()
+  . sodium_crypto_xof_shake128_update()
+  . sodium_crypto_xof_shake128_squeeze()
+  . sodium_crypto_xof_shake256()
+  . sodium_crypto_xof_shake256_init()
+  . sodium_crypto_xof_shake256_update()
+  . sodium_crypto_xof_shake256_squeeze()
+  . sodium_crypto_xof_turboshake128()
+  . sodium_crypto_xof_turboshake128_init()
+  . sodium_crypto_xof_turboshake128_update()
+  . sodium_crypto_xof_turboshake128_squeeze()
+  . sodium_crypto_xof_turboshake256()
+  . sodium_crypto_xof_turboshake256_init()
+  . sodium_crypto_xof_turboshake256_update()
+  . sodium_crypto_xof_turboshake256_squeeze()
+  . sodium_crypto_kem_keypair(), sodium_crypto_kem_seed_keypair(),
+    sodium_crypto_kem_secretkey(), sodium_crypto_kem_publickey(),
+    sodium_crypto_kem_enc() and sodium_crypto_kem_dec() expose the X-Wing
+    KEM (hybrid ML-KEM768+X25519, libsodium's recommended KEM).
+    Available when PHP is built against libsodium >= 1.0.22.
+  . sodium_crypto_kem_mlkem768_keypair(),
+    sodium_crypto_kem_mlkem768_seed_keypair(),
+    sodium_crypto_kem_mlkem768_secretkey(),
+    sodium_crypto_kem_mlkem768_publickey(),
+    sodium_crypto_kem_mlkem768_enc() and sodium_crypto_kem_mlkem768_dec()
+    expose the ML-KEM768 (FIPS 203) KEM.
+    Available when PHP is built against libsodium >= 1.0.22.
+
+- Standard:
+  . clamp() returns the given value if in range, else returns the nearest
+    bound.
+    RFC: https://wiki.php.net/rfc/clamp_v2
+  . stream_last_errors() and stream_clear_errors()
+    RFC: https://wiki.php.net/rfc/stream_errors
+  . stream_socket_get_crypto_status()
+
+- URI:
+  . Uri\Rfc3986\Uri::getUriType() and Uri\WhatWg\Url::isSpecialScheme()
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_type_detection
+  . Uri\Rfc3986\Uri::getHostType() and Uri\WhatWg\Url::getHostType()
+    RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
+
+- Zip:
+  . ZipArchive::openString()
+  . ZipArchive::closeString()
+
+========================================
+7. New Classes and Interfaces
+========================================
+
+- Date:
+  . Time\Duration
+    RFC: https://wiki.php.net/rfc/duration_class
+  . Time\TimeException
+    RFC: https://wiki.php.net/rfc/duration_class
+
+- Intl:
+  . IntlNumberRangeFormatter
+
+- OpenSSL:
+  . Openssl\OpensslException
+  . Openssl\Session
+    RFC: https://wiki.php.net/rfc/tls_session_resumption
+  . Openssl\Psk
+
+- SNMP:
+  . enum: Snmp\Mib
+  . enum: Snmp\OidOutput
+  . enum: Snmp\Output
+  . enum: Snmp\StringOutput
+
+- Standard:
+  . enum SortDirection
+    RFC: https://wiki.php.net/rfc/sort_direction_enum
+  . StreamError
+  . StreamException
+  . enum StreamErrorStore
+  . enum StreamErrorMode
+  . enum StreamErrorCode
+    RFC: https://wiki.php.net/rfc/stream_errors
+  . Io\Poll\Context
+  . Io\Poll\Watcher
+  . enum Io\Poll\Backend
+  . enum Io\Poll\Event
+  . interface Io\Poll\Handle
+  . Io\IoException
+  . Io\Poll\PollException
+  . Io\Poll\FailedPollOperationException
+  . Io\Poll\FailedContextInitializationException
+  . Io\Poll\FailedHandleAddException
+  . Io\Poll\FailedWatcherModificationException
+  . Io\Poll\FailedPollWaitException
+  . Io\Poll\BackendUnavailableException
+  . Io\Poll\InactiveWatcherException
+  . Io\Poll\HandleAlreadyWatchedException
+  . Io\Poll\InvalidHandleException
+  . StreamPollHandle
+
+- URI:
+  . Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder
+    RFC: https://wiki.php.net/rfc/uri_followup#uri_building
+
+========================================
+8. Removed Extensions and SAPIs
+========================================
+
+========================================
+9. Other Changes to Extensions
+========================================
+
+- Hash:
+  . The bundled version of xxHash was upgraded to 0.8.2.
+
+- MySQLi:
+  . Added new constant MYSQLI_OPT_COMPRESS.
+
+- Opcache:
+  . JIT is now supported for ZTS builds on Apple Silicon.
+
+========================================
+10. New Global Constants
+========================================
+
+- Curl:
+  . CURLINFO_SIZE_DELIVERED (libcurl >= 8.20.0).
+  . CURLOPT_SEEKFUNCTION.
+  . CURL_SEEKFUNC_OK.
+  . CURL_SEEKFUNC_FAIL.
+  . CURL_SEEKFUNC_CANTSEEK.
+  . CURL_READFUNC_ABORT.
+
+- MySQLi:
+  . MYSQLI_OPT_COMPRESS.
+
+- OpenSSL:
+  . OPENSSL_RSA_PSS_SALTLEN_DIGEST.
+  . OPENSSL_RSA_PSS_SALTLEN_AUTO.
+  . OPENSSL_RSA_PSS_SALTLEN_MAX.
+
+- Sockets:
+  . TCP_USER_TIMEOUT (Linux only).
+  . AF_UNSPEC.
+  . EAI_BADFLAGS.
+  . EAI_NONAME.
+  . EAI_AGAIN.
+  . EAI_FAIL.
+  . EAI_NODATA.
+  . EAI_FAMILY.
+  . EAI_SOCKTYPE.
+  . EAI_SERVICE.
+  . EAI_ADDRFAMILY.
+  . EAI_SYSTEM.
+  . EAI_OVERFLOW.
+  . EAI_INPROGRESS.
+  . EAI_CANCELED.
+  . EAI_NOTCANCELED.
+  . EAI_ALLDONE.
+  . EAI_INTR.
+  . EAI_IDN_ENCODE.
+  . SO_DETACH_REUSEPORT_BPF (Linux only).
+
+- Sodium:
+  . SODIUM_CRYPTO_IPCRYPT_BYTES.
+  . SODIUM_CRYPTO_IPCRYPT_KEYBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_ND_KEYBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_ND_TWEAKBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_ND_INPUTBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_ND_OUTPUTBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_NDX_KEYBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_NDX_TWEAKBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_NDX_INPUTBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_NDX_OUTPUTBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_PFX_KEYBYTES.
+  . SODIUM_CRYPTO_IPCRYPT_PFX_BYTES.
+  . SODIUM_CRYPTO_XOF_SHAKE128_BLOCKBYTES.
+  . SODIUM_CRYPTO_XOF_SHAKE128_STATEBYTES.
+  . SODIUM_CRYPTO_XOF_SHAKE256_BLOCKBYTES.
+  . SODIUM_CRYPTO_XOF_SHAKE256_STATEBYTES.
+  . SODIUM_CRYPTO_XOF_TURBOSHAKE128_BLOCKBYTES.
+  . SODIUM_CRYPTO_XOF_TURBOSHAKE128_STATEBYTES.
+  . SODIUM_CRYPTO_XOF_TURBOSHAKE256_BLOCKBYTES.
+  . SODIUM_CRYPTO_XOF_TURBOSHAKE256_STATEBYTES.
+  . SODIUM_CRYPTO_KEM_PUBLICKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SECRETKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_CIPHERTEXTBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SHAREDSECRETBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_SEEDBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_KEYPAIRBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_PUBLICKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SECRETKEYBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_CIPHERTEXTBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SHAREDSECRETBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_SEEDBYTES (libsodium >= 1.0.22).
+  . SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES (libsodium >= 1.0.22).
+
+- Standard:
+  . ARRAY_FILTER_USE_VALUE.
+  . STREAM_CRYPTO_STATUS_NONE.
+  . STREAM_CRYPTO_STATUS_WANT_READ.
+  . STREAM_CRYPTO_STATUS_WANT_WRITE.
+
+========================================
+11. Changes to INI File Handling
+========================================
+
+- Core:
+  . The error_include_args INI option has been added to make the display of
+    function arguments consistent in errors; it is off by default. Previously,
+    some functions shown a parameter in the error that was up to each call to
+    the internal error function. Now, all parameters as were actually passed to
+    the function will be displayed. This uses the same infrastructure as stack
+    traces, so i.e. sensitive parameters will not be displayed, and strings
+    will be truncated according to zend.exception_string_param_max_len.
+
+- Mbstring:
+  . The mbstring.detect_order INI directive now updates the internal detection
+    order when changed at runtime via ini_set(). Previously, runtime changes
+    using ini_set() did not take effect for mb_detect_order(). Setting the
+    directive to NULL or an empty string at runtime now leaves the previously
+    configured detection order unchanged.
+
+- MySQLi:
+  . mysqli.default_port now checks the validity of the value which should be
+    between 0 and 65535 inclusive.
+
+- Opcache:
+  . opcache.jit_debug accepts a new flag: ZEND_JIT_DEBUG_TRACE_EXIT_INFO_SRC.
+    When used along with ZEND_JIT_DEBUG_TRACE_EXIT_INFO, the source of exit
+    points is printed in exit info output, in debug builds.
+
+========================================
+12. Windows Support
+========================================
+
+- Core:
+  . The official Windows builds now use Visual Studio 2026 (VS18).
+
+- LibXML:
+  . The libxml2 library used by the official Windows builds has been upgraded
+    to version 2.15.3. As a result, DOMDocument::$documentURI for documents
+    loaded from a local file now contains a native filesystem path instead of
+    a file URI.
+
+- OpenSSL:
+  . The OpenSSL library used by the official Windows builds has been upgraded
+    to OpenSSL 4.
+
+========================================
+13. Other Changes
+========================================
+
+- Core:
+  . In case of a hard OOM PHP now calls abort() instead of exit(1), changing
+    the exit code to 134 and possibly creating a core dump.
+  . The PHP_OS_FAMILY constant has an AIX value for when running on AIX or
+    IBM i via PASE.
+
+========================================
+14. Performance Improvements
+========================================
+
+- Core:
+  . printf() using only "%s" and "%d" will be compiled into the equivalent
+    string interpolation, avoiding the overhead of a function call and
+    repeatedly parsing the format string.
+  . Arguments are now passed more efficiently to known constructors (e.g. when
+    using new self()).
+  . array_map() using a first-class callable or partial function application
+    callback will be compiled into the equivalent foreach-loop, avoiding the
+    creation of intermediate Closures, the overhead of calling userland
+    callbacks from internal functions and providing for better insight for the
+    JIT.
+  . The performance of the TAILCALL VM has been improved.
+  . The TAILCALL VM is now enabled on Windows when compiling with Clang >= 19
+    on x86_64.
+  . The performance of ZTS builds has been improved.
+  . Added stateless closure cache.
+    RFC: https://wiki.php.net/rfc/closure-optimizations#stateless_closure_caching
+
+- DOM:
+  . Made splitText() faster and consume less memory.
+
+- GD:
+  . imagebmp(), imagewbmp(), imagegd(), and imagegd2() now buffer output when
+    writing to PHP streams, significantly improving performance when writing
+    images to files.
+  . Improved performance of imagegrabscreen() and imagegrabwindow() on
+    Windows.
+
+- JSON:
+  . Improve performance of encoding arrays and objects.
+  . Improved performance of indentation generation in json_encode()
+    when using PHP_JSON_PRETTY_PRINT.
+
+- Intl:
+  . Improved performance of IntlCalendar::getAvailableLocales() and
+    IntlDateFormatter::localtime() / datefmt_localtime() by pre-allocating
+    their returned arrays.
+  . Improved performance of transliterator_list_ids() and
+    resourcebundle_locales() by pre-allocating their returned arrays.
+
+- Mbstring:
+  . Improved performance of mb_str_pad().
+
+- Phar:
+  . Reduced temporary allocations when iterating Phar directories.
+
+- Standard:
+  . Improved performance of addcslashes() when generating octal escapes.
+  . Improved performance of sorting single-element arrays.
+  . Improved performance of array_fill_keys().
+  . Improved performance of array_intersect().
+  . Improved performance of array_map() with multiple arrays passed.
+  . Improved performance of array_sum() and array_product() for
+    integer-only arrays.
+  . Improved performance of array_unshift().
+  . Improved performance of array_walk().
+  . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
+  . Improved performance of str_split().
+  . Improved performance of str_pad().
+  . Improved performance of str_repeat() when the multiplier is 1.
+
+- URI:
+  . Improved performance of Uri\WhatWg\Url::parse() when collecting
+    validation errors by pre-allocating the error array.
+  . Reduced allocations when reading IPv6/IPvFuture hosts and paths with
+    Uri\Rfc3986\Uri.
+  . Improved performance and memory consumption when using normalizing
+    (non-raw) getters on already-normalized URIs with Uri\Rfc3986\Uri.
+
+- Zip:
+  . Improved performance of ZipArchive::addGlob() and
+    ZipArchive::addPattern() by pre-allocating their returned arrays.
+  . Avoid string copies in ZipArchive::addFromString().

@@ -12,6 +12,8 @@ set_time_limit(2);
 var_dump(preg_replace("/.*/", "b", "a"));
 var_dump(mb_ereg_replace(".*", "b", "a"));
 ?>
---EXPECT--
+--EXPECTF--
 string(2) "bb"
+
+Deprecated: Function mb_ereg_replace() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 string(2) "bb"

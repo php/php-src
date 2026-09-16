@@ -29,8 +29,8 @@ $test->setProp("a");
 var_dump($test->prop);
 try {
     $test->setProp("b");
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->prop);
 echo "\n";
@@ -38,13 +38,13 @@ echo "\n";
 $test = new Test;
 try {
     $test->initAndAppendProp2();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $test->initAndAppendProp2();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->prop2);
 echo "\n";
@@ -65,13 +65,13 @@ $appendProp2 = (function() {
 })->bindTo($test, Test::class);
 try {
     $appendProp2();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $appendProp2();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->prop2);
 echo "\n";
@@ -90,11 +90,11 @@ var_dump($test->prop3);
 ?>
 --EXPECTF--
 string(1) "a"
-Cannot modify readonly property Test::$prop
+Error: Cannot modify readonly property Test::$prop
 string(1) "a"
 
-Cannot indirectly modify readonly property Test::$prop2
-Cannot modify readonly property Test::$prop2
+Error: Cannot indirectly modify readonly property Test::$prop2
+Error: Cannot modify readonly property Test::$prop2
 array(0) {
 }
 
@@ -107,8 +107,8 @@ object(stdClass)#%d (1) {
   int(1)
 }
 
-Cannot indirectly modify readonly property Test::$prop2
-Cannot indirectly modify readonly property Test::$prop2
+Error: Cannot indirectly modify readonly property Test::$prop2
+Error: Cannot indirectly modify readonly property Test::$prop2
 array(0) {
 }
 

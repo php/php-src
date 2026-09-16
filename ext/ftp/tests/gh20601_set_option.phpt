@@ -19,8 +19,8 @@ ftp_login($ftp, 'user', 'pass');
 try {
 	ftp_set_option($ftp, FTP_TIMEOUT_SEC, PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECTF--
-ftp_set_option(): Argument #3 ($value) must be less than %d for the FTP_TIMEOUT_SEC option
+ValueError: ftp_set_option(): Argument #3 ($value) must be less than %d for the FTP_TIMEOUT_SEC option

@@ -23,13 +23,13 @@ if (PHP_OS == "Darwin") {
 try {
     $result = pcntl_setpriority(0, null, (PRIO_PGRP + PRIO_USER + PRIO_PROCESS + 10));
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 pcntl_setpriority(0, -123);
 
 ?>
 --EXPECTF--
-pcntl_setpriority(): Argument #3 ($mode) must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS
+ValueError: pcntl_setpriority(): Argument #3 ($mode) must be one of PRIO_PGRP, PRIO_USER, or PRIO_PROCESS
 
 Warning: pcntl_setpriority(): Error 3: No process was located using the given parameters in %s

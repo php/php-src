@@ -11,9 +11,9 @@ $container = new stdClass();
 try {
     $container[new stdClass()] .= 'append';
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot use object of type stdClass as array
+Error: Cannot use object of type stdClass as array

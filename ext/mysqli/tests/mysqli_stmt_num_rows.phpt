@@ -103,7 +103,8 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'clean_table.inc';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!
 mysqli_stmt object is already closed
 done!

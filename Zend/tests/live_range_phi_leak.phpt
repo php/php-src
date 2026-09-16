@@ -11,9 +11,9 @@ function test($k) {
 }
 try {
     test(new stdClass);
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Test
+Exception: Test

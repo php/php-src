@@ -1,5 +1,5 @@
 --TEST--
-DOMDocument::saveHTML() vs DOMDocumet::saveXML()
+DOMDocument::saveHTML() vs DOMDocument::saveXML()
 --EXTENSIONS--
 dom
 --FILE--

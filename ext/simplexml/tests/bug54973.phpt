@@ -11,8 +11,8 @@ var_dump($xml->number);
 $int = $xml->number / 1024 / 1024 / 1024;
 var_dump($int);
 
-$double = (double) $xml->number / 1024 / 1024 / 1024;
-var_dump($double);
+$float = (float) $xml->number / 1024 / 1024 / 1024;
+var_dump($float);
 ?>
 --EXPECT--
 object(SimpleXMLElement)#2 (1) {

@@ -12,11 +12,11 @@ class Collator2 extends Collator{
 }
 
 $c = new Collator2();
-$c->getSortKey('h');
+try {
+	$c->getSortKey('h');
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Object not initialized in %s:%d
-Stack trace:
-#0 %s(%d): Collator->getSortKey('h')
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+Error: Object not initialized

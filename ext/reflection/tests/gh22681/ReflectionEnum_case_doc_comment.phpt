@@ -16,12 +16,15 @@ echo $r;
 var_dump( new ReflectionEnumUnitCase(Demo::class, 'C')->getDocComment() );
 ?>
 --EXPECTF--
-Class [ <user> final class Demo implements UnitEnum ] {
+Enum [ <user> enum Demo implements UnitEnum ] {
   @@ %s(%d) : eval()'d code %d-%d
 
-  - Constants [1] {
+  - Enum cases [1] {
     /** F%0oo */
-    Constant [ public Demo C ] { Object }
+    Case C
+  }
+
+  - Constants [0] {
   }
 
   - Static properties [0] {

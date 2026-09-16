@@ -31,16 +31,65 @@ output_handler=
         do_tests( $enc );
     }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mb_regex_set_options() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)6162632064656620676869206a6b6c2064656620676869206a6b6c
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)a3e1a3e2a3e320a4a2a4aaa4a420a4aba4b3a4ca20a4efa4f1a4f320a3e1a3e2a3e320a4a2a4aaa4a420a4ab20a4b3a4ca20a4efa4f1a4f3
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)a3eda3faa3f8a3e6a3f020a4a6a4aaa4ab20a4ada4ab20a4f2a4f020a3eda3faa3f8a3e6a3f020a4a6a4aaa4ab2020a4ada4ab20a4f2a4f0
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)6162632064656620676869206a6b6c2064656620676869206a6b6c
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)a3e1a3e2a3e320a4a2a4aaa4a420a4aba4b3a4ca20a4efa4f1a4f320a3e1a3e2a3e320a4a2a4aaa4a420a4ab20a4b3a4ca20a4efa4f1a4f3
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)a3eda3faa3f8a3e6a3f020a4a6a4aaa4ab20a4ada4ab20a4f2a4f020a3eda3faa3f8a3e6a3f020a4a6a4aaa4ab2020a4ada4ab20a4f2a4f0
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)6162632064656620676869206a6b6c2064656620676869206a6b6c
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)a3e1a3e2a3e320a4a2a4aaa4a420a4aba4b3a4ca20a4efa4f1a4f320a3e1a3e2a3e320a4a2a4aaa4a420a4ab20a4b3a4ca20a4efa4f1a4f3
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)a3eda3faa3f8a3e6a3f020a4a6a4aaa4ab20a4ada4ab20a4f2a4f020a3eda3faa3f8a3e6a3f020a4a6a4aaa4ab2020a4ada4ab20a4f2a4f0
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)6162632064656620676869206a6b6c2064656620676869206a6b6c
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)a3e1a3e2a3e320a4a2a4aaa4a420a4aba4b3a4ca20a4efa4f1a4f320a3e1a3e2a3e320a4a2a4aaa4a420a4ab20a4b3a4ca20a4efa4f1a4f3
+
+Deprecated: Function mb_regex_encoding() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
+
+Deprecated: Function mb_ereg() is deprecated since 8.6, because the underlying library is no longer maintained in %s on line %d
 (1)a3eda3faa3f8a3e6a3f020a4a6a4aaa4ab20a4ada4ab20a4f2a4f020a3eda3faa3f8a3e6a3f020a4a6a4aaa4ab2020a4ada4ab20a4f2a4f0

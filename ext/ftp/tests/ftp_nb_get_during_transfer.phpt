@@ -10,11 +10,17 @@ require 'server.inc';
 class NbGetDuringGet {
     public $context;
     public static $ftp;
+    public static $error;
     public function stream_open($path, $mode, $options, &$opened_path) {
         return true;
     }
     public function stream_write($data) {
-        @ftp_nb_get(self::$ftp, 'php://memory', 'a story.txt', FTP_BINARY);
+        try {
+            ftp_nb_get(self::$ftp, 'php://memory', 'a story.txt', FTP_BINARY);
+        } catch (Throwable $e) {
+            /* recorded rather than echoed: stream_write() may run more than once */
+            self::$error = $e::class . ': ' . $e->getMessage();
+        }
         return strlen($data);
     }
     public function stream_close() {}
@@ -31,10 +37,13 @@ NbGetDuringGet::$ftp = $ftp;
 
 var_dump(@ftp_get($ftp, 'reentrantget://sink', 'a story.txt', FTP_BINARY));
 
+var_dump(NbGetDuringGet::$error);
+
 ftp_close($ftp);
 echo "closed\n";
 ?>
 --EXPECT--
 bool(true)
 bool(true)
+string(68) "Error: Cannot start a transfer while another transfer is in progress"
 closed

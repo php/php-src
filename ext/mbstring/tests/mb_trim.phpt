@@ -2,9 +2,10 @@
 mb_trim() function tests
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
-mb_internal_encoding("UTF-8");
 
 echo "== Copy from trim ==\n";
 var_dump('ABC' ===  mb_trim('ABC'));
@@ -77,7 +78,7 @@ echo "== \$encoding throws ValueError ==\n";
 try {
     var_dump(mb_trim( "\u{180F}", "", "NULL"));
 } catch (ValueError $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -135,4 +136,4 @@ string(3) "あ"
 == Same strings ==
 string(1) "f"
 == $encoding throws ValueError ==
-string(73) "mb_trim(): Argument #3 ($encoding) must be a valid encoding, "NULL" given"
+ValueError: mb_trim(): Argument #3 ($encoding) must be a valid encoding, "NULL" given

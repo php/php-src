@@ -46,5 +46,5 @@ try {
 @unlink(__DIR__ . "/gh7875.mail.out");
 ?>
 --EXPECTF--
-mail(%s): Failed to open stream: Permission denied
+mail(): Failed to open stream: Permission denied
 bool(false)

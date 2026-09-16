@@ -25,18 +25,17 @@ foreach ($regex_array as $regex_value) {
     try {
         var_dump(preg_split($regex_value, $subject));
     } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 $regex_value = new stdclass(); //Object
 try {
     var_dump(preg_split($regex_value, $subject));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-
 Warning: preg_split(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_split_error1.php on line %d
 bool(false)
 
@@ -48,7 +47,7 @@ bool(false)
 
 Warning: preg_split(): Unknown modifier 'F' in %spreg_split_error1.php on line %d
 bool(false)
-preg_split(): Argument #1 ($pattern) must be of type string, array given
+TypeError: preg_split(): Argument #1 ($pattern) must be of type string, array given
 array(3) {
   [0]=>
   string(4) "1 2 "
@@ -57,4 +56,4 @@ array(3) {
   [2]=>
   string(4) " 5 6"
 }
-preg_split(): Argument #1 ($pattern) must be of type string, stdClass given
+TypeError: preg_split(): Argument #1 ($pattern) must be of type string, stdClass given

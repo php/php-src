@@ -11,15 +11,15 @@ if (!getenv("TEST_PHP_EXECUTABLE") || !is_executable(getenv("TEST_PHP_EXECUTABLE
 try {
     pcntl_exec(getenv("TEST_PHP_EXECUTABLE"), ['-n', new stdClass()]);
 } catch (Error $error) {
-    echo $error->getMessage() . "\n";
+    echo $error::class, ': ', $error->getMessage(), "\n";
 }
 
 try {
     pcntl_exec(getenv("TEST_PHP_EXECUTABLE"), ['-n'], [new stdClass()]);
 } catch (Error $error) {
-    echo $error->getMessage() . "\n";
+    echo $error::class, ': ', $error->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string

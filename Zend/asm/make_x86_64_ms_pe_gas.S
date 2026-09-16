@@ -113,7 +113,7 @@ make_fcontext:
     /* save top address of context stack as 'base' */
     movq  %rcx, 0xc8(%rax)
     /* second arg of make_fcontext() == size of context-stack */
-    /* negate stack size for LEA instruction (== substraction) */
+    /* negate stack size for LEA instruction (== subtraction) */
     negq  %rdx
     /* compute bottom address of context stack (limit) */
     leaq  (%rcx,%rdx), %rcx
@@ -151,7 +151,7 @@ make_fcontext:
 
 trampoline:
     /* store return address on stack */
-    /* fix stack alignment */ 
+    /* fix stack alignment */
     pushq %rbp
     /* jump to context-function */
     jmp *%rbx

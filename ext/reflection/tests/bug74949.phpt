@@ -21,4 +21,4 @@ try  {
 Method [ <internal> public method __invoke ] {
 }
 
-Method Closure::__invoke does not have a prototype
+Method Closure::__invoke() does not have a prototype

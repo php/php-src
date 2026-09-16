@@ -7,10 +7,10 @@ Bug #72787 (json_decode reads out of bounds)
 
 try {
     var_dump(json_decode('[]', false, 0x100000000));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-json_decode(): Argument #3 ($depth) must be less than %d
+ValueError: json_decode(): Argument #3 ($depth) must be less than %d

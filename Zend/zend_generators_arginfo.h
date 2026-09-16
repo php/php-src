@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit zend_generators.stub.php instead.
  * Stub hash: d376e984db0db6ccd9356f632f9d7e1382b2afb7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Generator_rewind, 0, 0, IS_VOID, 0)

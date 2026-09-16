@@ -45,19 +45,17 @@
 #include <sys/types.h>
 #endif
 
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#endif
+#include <stdint.h>
 
-#if HAVE_UNISTD_H
+#if defined(HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
 
-#if HAVE_IO_H
+#if defined(HAVE_IO_H)
 # include <io.h>
 #endif
 
-#if HAVE_DIRENT_H
+#if defined(HAVE_DIRENT_H)
 # include <dirent.h>
 #endif
 
@@ -89,6 +87,8 @@
 #define SECS_PER_DAY   86400
 #define SECS_PER_HOUR   3600
 #define USECS_PER_HOUR TIMELIB_LL_CONST(3600000000)
+#define NSECS_PER_SEC  1000000000
+#define MAX_DURATION_SECONDS UINT64_C(9223372035)
 
 #define DAYS_PER_WEEK      7
 #define DAYS_PER_YEAR    365

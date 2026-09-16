@@ -14,10 +14,10 @@ var_dump( substr_count("abcabcabcabcabc", "abca") );
 var_dump( substr_count("abcabcabcabcabc", "abca", 2) );
 
 echo "\n-- complex strings containing other than 7-bit chars --\n";
-$str = chr(128).chr(129).chr(128).chr(256).chr(255).chr(254).chr(255);
+$str = chr(128).chr(129).chr(128).chr(0).chr(255).chr(254).chr(255);
 var_dump(substr_count($str, chr(128)));
 var_dump(substr_count($str, chr(255)));
-var_dump(substr_count($str, chr(256)));
+var_dump(substr_count($str, chr(0)));
 
 echo "\n-- heredoc string --\n";
 $string = <<<EOD

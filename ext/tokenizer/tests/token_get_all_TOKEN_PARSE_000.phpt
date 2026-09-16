@@ -8,12 +8,12 @@ tokenizer
 try {
     token_get_all('<?php invalid code;', TOKEN_PARSE);
 } catch (ParseError $e) {
-    echo $e->getMessage(), PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo "Done";
 
 ?>
 --EXPECT--
-syntax error, unexpected identifier "code"
+ParseError: syntax error, unexpected identifier "code"
 Done

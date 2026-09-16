@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
@@ -50,18 +48,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
-	char *opcache_path = get_opcache_path();
-	assert(opcache_path && "Failed to determine opcache path");
-
 	char ini_buf[512];
 	snprintf(ini_buf, sizeof(ini_buf),
-		"zend_extension=%s\n"
 		"opcache.validate_timestamps=0\n"
 		"opcache.file_update_protection=0\n"
 		"opcache.jit_buffer_size=128M\n"
-		"opcache.protect_memory=1\n",
-		opcache_path);
-	free(opcache_path);
+		"opcache.protect_memory=1\n");
 
 	create_file();
 	fuzzer_init_php_for_execute(ini_buf);

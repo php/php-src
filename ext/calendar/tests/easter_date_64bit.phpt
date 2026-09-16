@@ -20,7 +20,7 @@ echo date("Y-m-d", easter_date(2047))."\n";
 try {
     easter_date(1492);
 } catch (ValueError $ex) {
-    echo "{$ex->getMessage()}\n";
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -30,4 +30,4 @@ try {
 2045-04-09
 2046-03-25
 2047-04-14
-easter_date(): Argument #1 ($year) must be a year after 1970 (inclusive)
+ValueError: easter_date(): Argument #1 ($year) must be a year after 1970 (inclusive)

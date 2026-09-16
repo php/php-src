@@ -1,5 +1,5 @@
 --TEST--
-Test curl_multi_setopt() with options that take callabes
+Test curl_multi_setopt() with options that take callables
 --EXTENSIONS--
 curl
 --FILE--

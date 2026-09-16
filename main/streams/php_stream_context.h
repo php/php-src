@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
@@ -25,14 +23,17 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 
 #define PHP_STREAM_NOTIFIER_PROGRESS	1
 
+/* TODO: Remove dependence on ext/standard/file.h for the default context global */
+#define php_stream_context_get_default(without_context) \
+	(without_context) ? NULL : FG(default_context) ? FG(default_context) : \
+		(FG(default_context) = php_stream_context_alloc())
+
 /* Attempt to fetch context from the zval passed,
    If no context was passed, use the default context
    The default context has not yet been created, do it now. */
 #define php_stream_context_from_zval(zcontext, nocontext) ( \
 		(zcontext) ? zend_fetch_resource_ex(zcontext, "Stream-Context", php_le_stream_context()) : \
-		(nocontext) ? NULL : \
-		FG(default_context) ? FG(default_context) : \
-		(FG(default_context) = php_stream_context_alloc()) )
+		php_stream_context_get_default(nocontext))
 
 #define php_stream_context_to_zval(context, zval) { ZVAL_RES(zval, (context)->res); GC_ADDREF((context)->res); }
 
@@ -41,7 +42,7 @@ typedef struct _php_stream_notifier php_stream_notifier;
 struct _php_stream_notifier {
 	php_stream_notification_func func;
 	void (*dtor)(php_stream_notifier *notifier);
-	zval ptr;
+	void *ptr;
 	int mask;
 	size_t progress, progress_max; /* position for progress notification */
 };
@@ -53,14 +54,19 @@ struct _php_stream_context {
 };
 
 BEGIN_EXTERN_C()
+PHPAPI int php_le_stream_context(void);
 PHPAPI void php_stream_context_free(php_stream_context *context);
 PHPAPI php_stream_context *php_stream_context_alloc(void);
-PHPAPI zval *php_stream_context_get_option(php_stream_context *context,
+PHPAPI zval *php_stream_context_get_option(const php_stream_context *context,
 		const char *wrappername, const char *optionname);
 PHPAPI void php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue);
 void php_stream_context_unset_option(php_stream_context *context,
 	const char *wrappername, const char *optionname);
+
+struct php_uri_parser;
+
+PHPAPI const struct php_uri_parser *php_stream_context_get_uri_parser(const char *wrappername, php_stream_context *context);
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);
 END_EXTERN_C()

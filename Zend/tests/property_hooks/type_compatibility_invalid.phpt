@@ -1,5 +1,5 @@
 --TEST--
-Invalid type compatibility for read-only property
+Invalid type compatibility for get-only property
 --FILE--
 <?php
 

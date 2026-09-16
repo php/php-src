@@ -18,8 +18,8 @@ MySQLPDOTest::skip();
     try {
 
         // Emulated PS first
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
-        if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 1);
+        if (1 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn on emulated prepared statements\n");
 
         if (!is_object($stmt = $db->query("DESCRIBE {$table} id")))
@@ -68,8 +68,8 @@ MySQLPDOTest::skip();
             printf("[010] Emulated PS, EXPLAIN returned no results\n");
 
         // And now native PS
-        $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
-        if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
+        $db->setAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY, 0);
+        if (0 != $db->getAttribute(Pdo\Mysql::ATTR_DIRECT_QUERY))
             printf("[011] Unable to turn off emulated prepared statements\n");
 
         $native_support = 'no';

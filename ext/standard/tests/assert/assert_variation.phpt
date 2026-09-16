@@ -85,7 +85,7 @@ Deprecated: PHP Startup: assert.callback INI setting is deprecated in Unknown on
 
 Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 Initial values: assert_options(ASSERT_CALLBACK) => [f1]
@@ -98,7 +98,7 @@ Change callback function using ini.set and test return value
 Deprecated: ini_set(): assert.callback INI setting is deprecated in %s on line %d
 string(2) "f1"
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 assert_options(ASSERT_CALLBACK) => [f2]
@@ -108,12 +108,12 @@ bool(false)
 
 Change callback function using assert_options and test return value
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "f2"
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 assert_options(ASSERT_CALLBACK) => [f3]
@@ -123,12 +123,12 @@ bool(false)
 
 Reset the name of the callback routine to a class method
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "f3"
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 assert_options(ASSERT_CALLBACK) => [c1]
@@ -137,12 +137,12 @@ Invalid callback c1, function "c1" not found or invalid function name
 
 Reset callback options to use a class method
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 string(2) "c1"
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 array(2) {
@@ -158,7 +158,7 @@ bool(false)
 
 Reset callback options to use an object method
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 array(2) {
@@ -168,7 +168,7 @@ array(2) {
   string(6) "assert"
 }
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 array(2) {
@@ -185,11 +185,11 @@ bool(false)
 
 Set callback to something silly
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 
-Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+Deprecated: Constant ASSERT_CALLBACK is deprecated since 8.3, as assert_options() is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated since 8.3 in %s on line %d
 float(3.141)

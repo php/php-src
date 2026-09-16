@@ -27,7 +27,13 @@ foreach (['', ',', 'h2,', ',h2', 'h2,,http/1.1'] as $protocols) {
     try_alpn($protocols, []);
 }
 
-try_alpn('', []);
+try_alpn('', [
+    'error_mode' => StreamErrorMode::Silent,
+    'error_store' => StreamErrorStore::All,
+]);
+foreach (stream_last_errors() as $error) {
+    var_dump($error->code, $error->message);
+}
 ?>
 --EXPECTF--
 Warning: stream_socket_enable_crypto(): Failed setting TLS ALPN protocols, protocol names must not be empty in %s on line %d
@@ -44,6 +50,6 @@ bool(false)
 
 Warning: stream_socket_enable_crypto(): Failed setting TLS ALPN protocols, protocol names must not be empty in %s on line %d
 bool(false)
-
-Warning: stream_socket_enable_crypto(): Failed setting TLS ALPN protocols, protocol names must not be empty in %s on line %d
 bool(false)
+enum(StreamErrorCode::DecodingFailed)
+string(67) "Failed setting TLS ALPN protocols, protocol names must not be empty"

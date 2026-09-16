@@ -15,12 +15,12 @@ class Test {
 $test = new Test;
 try {
     var_dump($test->prop1);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($test->prop2);
 
 ?>
 --EXPECT--
-Test::$prop1::get(): Return value must be of type int, string returned
+TypeError: Test::$prop1::get(): Return value must be of type int, string returned
 int(42)

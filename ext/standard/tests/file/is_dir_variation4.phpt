@@ -23,10 +23,6 @@ $dirs_arr = array(
   "./is_dir_variation4//",
   ".//is_dir_variation4//",
   "is_dir_vari*",
-
-  /* Testing Binary safe */
-  "./is_dir_variation4/".chr(0),
-  "is_dir_variation4\0"
 );
 
 $count = 1;
@@ -73,12 +69,6 @@ bool(true)
 bool(true)
 
 -- Iteration 8 --
-bool(false)
-
--- Iteration 9 --
-bool(false)
-
--- Iteration 10 --
 bool(false)
 
 *** Done ***

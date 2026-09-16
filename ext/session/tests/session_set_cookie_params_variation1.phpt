@@ -24,7 +24,7 @@ var_dump(ini_get("session.cookie_lifetime"));
 var_dump(session_destroy());
 
 var_dump(ini_get("session.cookie_lifetime"));
-var_dump(session_set_cookie_params(1234567890));
+var_dump(session_set_cookie_params(1000000000));
 var_dump(ini_get("session.cookie_lifetime"));
 
 echo "Done";
@@ -38,11 +38,11 @@ string(4) "3600"
 bool(true)
 string(4) "3600"
 
-Warning: session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in %s on line %d
+Warning: session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(false)
 string(4) "3600"
 bool(true)
 string(4) "3600"
 bool(true)
-string(10) "1234567890"
+string(10) "1000000000"
 Done

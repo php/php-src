@@ -1,7 +1,6 @@
 --TEST--
 Bug #81343 pdo_pgsql: Inconsitent boolean conversion after calling closeCursor()
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

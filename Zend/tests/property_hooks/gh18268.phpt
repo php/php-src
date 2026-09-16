@@ -19,5 +19,6 @@ array_walk($b, function (&$item) {
 });
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: array_walk(): Passing an object for argument #1 $array to array_walk() is deprecated, call get_object_vars() first instead in %s on line %d
 int(42)

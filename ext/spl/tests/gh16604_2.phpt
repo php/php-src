@@ -9,7 +9,7 @@ $obj = new SplFileObject(__DIR__.'/gh16604_2.tmp');
 try {
     $obj->__construct(__DIR__.'/gh16604_2.tmp');
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -18,4 +18,4 @@ try {
 @unlink(__DIR__.'/gh16604_2.tmp');
 ?>
 --EXPECT--
-Cannot call constructor twice
+Error: Cannot call constructor twice

@@ -32,7 +32,7 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create();
     stream_context_set_params($ctx, array("notification" => "stream_notification_callback"));
     var_dump(file_get_contents("http://{{ ADDR }}", false, $ctx));
-    var_dump($http_response_header);
+    var_dump(http_get_last_response_headers());
 CODE;
 
 include sprintf("%s/../../../openssl/tests/ServerClientTestCase.inc", __DIR__);
@@ -40,7 +40,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 
-Warning: file_get_contents(http://127.0.0.1:%d): Failed to open stream: HTTP invalid header name (cannot start with CR character)! in %s
+Warning: file_get_contents(): Failed to open stream: HTTP invalid header name (cannot start with CR character)! in %s
 bool(false)
 array(1) {
   [0]=>

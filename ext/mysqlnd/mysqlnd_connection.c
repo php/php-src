@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -282,11 +280,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 
 	DBG_INF("Freeing memory of members");
 
-	mysqlnd_set_persistent_string(&conn->hostname, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->username, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->password, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->connect_or_select_db, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->unix_socket, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
 
@@ -692,22 +685,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		if (transport.s) {
 			mnd_sprintf_free(transport.s);
 			transport.s = NULL;
-		}
-
-		if (!conn->scheme.s) {
+		} else {
 			goto err; /* OOM */
 		}
 
-		mysqlnd_set_persistent_string(&conn->username, username.s, username.l, conn->persistent);
-		mysqlnd_set_persistent_string(&conn->password, username.s, password.l, conn->persistent);
 		conn->port				= port;
-		mysqlnd_set_persistent_string(&conn->connect_or_select_db, database.s, database.l, conn->persistent);
 
 		if (!unix_socket && !named_pipe) {
-			mysqlnd_set_persistent_string(&conn->hostname, hostname.s, hostname.l, conn->persistent);
 			{
 				char *p;
-				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname.s);
+				mnd_sprintf(&p, 0, "%s via TCP/IP", hostname.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -716,12 +703,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 				mnd_sprintf_free(p);
 			}
 		} else {
-			conn->unix_socket.s = mnd_pestrdup(socket_or_pipe.s, conn->persistent);
 			if (unix_socket) {
 				conn->host_info = mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			} else if (named_pipe) {
 				char *p;
-				mnd_sprintf(&p, 0, "%s via named pipe", conn->unix_socket.s);
+				mnd_sprintf(&p, 0, "%s via named pipe", socket_or_pipe.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -731,11 +717,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			} else {
 				php_error_docref(NULL, E_WARNING, "Impossible. Should be either socket or a pipe. Report a bug!");
 			}
-			if (!conn->unix_socket.s || !conn->host_info) {
+			if (!socket_or_pipe.s || !conn->host_info) {
 				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */
 			}
-			conn->unix_socket.l = strlen(conn->unix_socket.s);
 		}
 
 		SET_EMPTY_ERROR(conn->error_info);
@@ -1399,7 +1384,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */
 	ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, strlen(db),
 									 conn->authentication_plugin_data, conn->options->auth_protocol,
-									0 /*charset not used*/, conn->options, conn->server_capabilities, silent, TRUE/*is_change*/);
+									0 /*charset not used*/, conn->server_capabilities, silent, TRUE/*is_change*/);
 
 	/*
 	  Here we should close all statements. Unbuffered queries should not be a
@@ -2272,7 +2257,7 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
-		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
+		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=" PHP_SOCKET_FMT ")",
 						errno, strerror(errno), max_fd);
 		DBG_RETURN(FAIL);
 	}

@@ -28,8 +28,8 @@ $o = new test;
 file_put_contents($filename, $code);
 
 $filename_escaped = escapeshellarg($filename);
-var_dump(`$php -n -s $filename_escaped`);
-var_dump(`$php -n -s unknown`);
+var_dump(shell_exec("$php -n -s $filename_escaped"));
+var_dump(shell_exec("$php -n -s unknown"));
 
 @unlink($filename);
 

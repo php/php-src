@@ -50,12 +50,12 @@ foreach ($values as $key => $value) {
         $tidy->parseString($str, $config, 'utf8');
         echo $tidy->value, "\n";
     } catch (Throwable $e) {
-        echo $e::class, ": ", $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 --- string blocklevel ---
 <html>
 <head>
@@ -120,6 +120,8 @@ test
 </body>
 </html>
 --- NAN ---
+
+Warning: The float NAN is not representable as an int, cast occurred in %s on line %d
 <html>
 <head>
 <title></title>
@@ -129,6 +131,8 @@ test
 </body>
 </html>
 --- INF ---
+
+Warning: The float INF is not representable as an int, cast occurred in %s on line %d
 <html>
 <head>
 <title></title>

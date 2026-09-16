@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -17,50 +15,12 @@
  */
 
 #include "php.h"
-#include "zend_operators.h"
-#include "datetime.h"
 #include "php_globals.h"
 
 #include <time.h>
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
-#include <stdio.h>
-
-static const char * const mon_short_names[] = {
-	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-};
-
-static const char * const day_short_names[] = {
-	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-};
-
-/* {{{ PHPAPI char *php_std_date(time_t t)
-   Return date string in standard format for http headers */
-PHPAPI char *php_std_date(time_t t)
-{
-	struct tm *tm1, tmbuf;
-	char *str;
-
-	tm1 = php_gmtime_r(&t, &tmbuf);
-	str = emalloc(81);
-	str[0] = '\0';
-
-	if (!tm1) {
-		return str;
-	}
-
-	snprintf(str, 80, "%s, %02d %s %04d %02d:%02d:%02d GMT",
-			day_short_names[tm1->tm_wday],
-			tm1->tm_mday,
-			mon_short_names[tm1->tm_mon],
-			tm1->tm_year + 1900,
-			tm1->tm_hour, tm1->tm_min, tm1->tm_sec);
-
-	str[79] = 0;
-	return (str);
-}
-/* }}} */
 
 #ifdef HAVE_STRPTIME
 #ifndef HAVE_DECL_STRPTIME

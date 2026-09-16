@@ -13,7 +13,7 @@ var_dump(tidy_parse_file("does_not_exist.html"));
 try {
     $tidy = new tidy("does_not_exist.html");
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -22,4 +22,4 @@ bool(false)
 
 Warning: tidy_parse_file(): Cannot load "does_not_exist.html" into memory in %s on line %d
 bool(false)
-Cannot load "does_not_exist.html" into memory
+Exception: Cannot load "does_not_exist.html" into memory

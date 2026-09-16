@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes    <cataphract@php.net>                       |
    +----------------------------------------------------------------------+
@@ -94,7 +92,10 @@ static zend_result php_get_if_index_from_zval(zval *val, unsigned *out)
 		ret = SUCCESS;
 	} else {
 		zend_string *tmp_str;
-		zend_string *str = zval_get_tmp_string(val, &tmp_str);
+		zend_string *str = zval_try_get_tmp_string(val, &tmp_str);
+		if (UNEXPECTED(!str)) {
+			return FAILURE;
+		}
 		ret = php_string_to_if_index(ZSTR_VAL(str), out);
 		zend_tmp_string_release(tmp_str);
 	}
@@ -127,8 +128,11 @@ static zend_result php_get_address_from_array(const HashTable *ht, const char *k
 		zend_value_error("No key \"%s\" passed in optval", key);
 		return FAILURE;
 	}
-	str = zval_get_tmp_string(val, &tmp_str);
-	if (!php_set_inet46_addr(ss, ss_len, ZSTR_VAL(str), sock)) {
+	str = zval_try_get_tmp_string(val, &tmp_str);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+	if (!php_set_inet46_addr(ss, ss_len, str, sock)) {
 		zend_tmp_string_release(tmp_str);
 		return FAILURE;
 	}
@@ -159,8 +163,16 @@ mcast_req_fun: ;
 			php_sockaddr_storage	group = {0};
 			socklen_t				glen;
 
-			convert_to_array(arg4);
-			opt_ht = Z_ARRVAL_P(arg4);
+			if (Z_TYPE_P(arg4) != IS_ARRAY) {
+				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
+					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is MCAST_LEAVE_GROUP, %s given", zend_zval_value_name(arg4));
+					return FAILURE;
+				} else {
+					opt_ht = Z_OBJPROP_P(arg4);
+				}
+			} else {
+				opt_ht = Z_ARRVAL_P(arg4);
+			}
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 				&glen) == FAILURE) {
@@ -194,9 +206,16 @@ mcast_req_fun: ;
 									source = {0};
 			socklen_t				glen,
 									slen;
-
-			convert_to_array(arg4);
-			opt_ht = Z_ARRVAL_P(arg4);
+			if (Z_TYPE_P(arg4) != IS_ARRAY) {
+				if (UNEXPECTED(Z_TYPE_P(arg4) != IS_OBJECT)) {
+					zend_argument_type_error(4, "must be of type array when argument #3 ($option) is MCAST_LEAVE_SOURCE_GROUP, %s given", zend_zval_value_name(arg4));
+					return FAILURE;
+				} else {
+					opt_ht = Z_OBJPROP_P(arg4);
+				}
+			} else {
+				opt_ht = Z_ARRVAL_P(arg4);
+			}
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 					&glen) == FAILURE) {
@@ -272,8 +291,7 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		goto dosockopt;
 
 	case IP_MULTICAST_LOOP:
-		convert_to_boolean(arg4);
-		ipv4_mcast_ttl_lback = (unsigned char) (Z_TYPE_P(arg4) == IS_TRUE);
+		ipv4_mcast_ttl_lback = (unsigned char) zend_is_true(arg4);
 		goto ipv4_loop_ttl;
 
 	case IP_MULTICAST_TTL:
@@ -337,8 +355,7 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 		goto dosockopt;
 
 	case IPV6_MULTICAST_LOOP:
-		convert_to_boolean(arg4);
-		ov = (int) Z_TYPE_P(arg4) == IS_TRUE;
+		ov = (int) zend_is_true(arg4);
 		goto ipv6_loop_hops;
 	case IPV6_MULTICAST_HOPS:
 		convert_to_long(arg4);

@@ -79,6 +79,7 @@ enum php_http_method
   , PHP_HTTP_POST
   , PHP_HTTP_PUT
   , PHP_HTTP_PATCH
+  , PHP_HTTP_QUERY
   /* pathological */
   , PHP_HTTP_CONNECT
   , PHP_HTTP_OPTIONS

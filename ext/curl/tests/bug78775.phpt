@@ -24,7 +24,6 @@ curl_setopt_array(
 );
 
 var_dump(curl_exec($handle));
-curl_close($handle);
 
 fwrite($sock, "GET / HTTP/1.0\n\n");
 var_dump(fread($sock, 8));

@@ -29,5 +29,5 @@ var_dump(fopen($uri, "r", false, $ctx));
 --EXPECTF--
 resource(%d) of type (stream)
 
-Warning: fopen(http://%s): Failed to open stream: timeout must be lower than %d in %s on line %d
+Warning: fopen(): Failed to open stream: timeout must be lower than %d in %s on line %d
 bool(false)

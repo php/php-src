@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache, Escape Analysis                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -73,12 +71,11 @@ static zend_always_inline void union_find_unite(int *parent, int *size, int i, i
 }
 /* }}} */
 
-static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+static zend_result zend_build_equi_escape_sets(int *parent, const zend_op_array *op_array, const zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
-	zend_ssa_phi *p;
-	int i, j;
+	int i;
 	int *size;
 	ALLOCA_FLAG(use_heap)
 
@@ -90,18 +87,18 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 
 	for (i = 0; i < ssa_vars_count; i++) {
 		if (ssa_vars[i].definition_phi) {
-			p = ssa_vars[i].definition_phi;
+			const zend_ssa_phi *p = ssa_vars[i].definition_phi;
 			if (p->pi >= 0) {
 				union_find_unite(parent, size, i, p->sources[0]);
 			} else {
-				for (j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
+				for (uint32_t j = 0; j < ssa->cfg.blocks[p->block].predecessors_count; j++) {
 					union_find_unite(parent, size, i, p->sources[j]);
 				}
 			}
 		} else if (ssa_vars[i].definition >= 0) {
 			int def = ssa_vars[i].definition;
-			zend_ssa_op *op = ssa->ops + def;
-			zend_op *opline =  op_array->opcodes + def;
+			const zend_ssa_op *op = ssa->ops + def;
+			const zend_op *opline =  op_array->opcodes + def;
 
 			if (op->op1_def >= 0) {
 				if (op->op1_use >= 0) {
@@ -147,18 +144,18 @@ static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_ar
 }
 /* }}} */
 
-static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
+static bool is_allocation_def(const zend_op_array *op_array, const zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
 {
-	zend_ssa_op *ssa_op = ssa->ops + def;
+	const zend_ssa_op *ssa_op = ssa->ops + def;
 	zend_op *opline = op_array->opcodes + def;
 
 	if (ssa_op->result_def == var) {
 		switch (opline->opcode) {
 			case ZEND_INIT_ARRAY:
-				return 1;
+				return true;
 			case ZEND_NEW: {
 			    /* objects with destructors should escape */
-				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
+				const zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 					script, op_array, opline);
 				uint32_t forbidden_flags =
 					/* These flags will always cause an exception */
@@ -175,22 +172,22 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 				 && !ce->__set
 				 && !(ce->ce_flags & forbidden_flags)
 				 && (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-					return 1;
+					return true;
 				}
 				break;
 			}
 			case ZEND_QM_ASSIGN:
 				if (opline->op1_type == IS_CONST
 				 && Z_TYPE_P(CRT_CONSTANT(opline->op1)) == IS_ARRAY) {
-					return 1;
+					return true;
 				}
 				if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_ARRAY)) {
-					return 1;
+					return true;
 				}
 				break;
 			case ZEND_ASSIGN:
 				if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_ARRAY)) {
-					return 1;
+					return true;
 				}
 				break;
 		}
@@ -199,29 +196,29 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 			case ZEND_ASSIGN:
 				if (opline->op2_type == IS_CONST
 				 && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_ARRAY) {
-					return 1;
+					return true;
 				}
 				if (opline->op2_type == IS_CV && (OP2_INFO() & MAY_BE_ARRAY)) {
-					return 1;
+					return true;
 				}
 				break;
 			case ZEND_ASSIGN_DIM:
 				if (OP1_INFO() & (MAY_BE_UNDEF | MAY_BE_NULL | MAY_BE_FALSE)) {
 					/* implicit object/array allocation */
-					return 1;
+					return true;
 				}
 				break;
 		}
 	}
 
-	return 0;
+	return false;
 }
 /* }}} */
 
-static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
+static bool is_local_def(const zend_op_array *op_array, const zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
 {
-	zend_ssa_op *op = ssa->ops + def;
-	zend_op *opline = op_array->opcodes + def;
+	const zend_ssa_op *op = ssa->ops + def;
+	const zend_op *opline = op_array->opcodes + def;
 
 	if (op->result_def == var) {
 		switch (opline->opcode) {
@@ -229,10 +226,10 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 			case ZEND_ADD_ARRAY_ELEMENT:
 			case ZEND_QM_ASSIGN:
 			case ZEND_ASSIGN:
-				return 1;
+				return true;
 			case ZEND_NEW: {
 				/* objects with destructors should escape */
-				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
+				const zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 					script, op_array, opline);
 				if (ce
 				 && !ce->create_object
@@ -243,7 +240,7 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 				 && !ce->__get
 				 && !ce->__set
 				 && !ce->parent) {
-					return 1;
+					return true;
 				}
 				break;
 			}
@@ -260,18 +257,18 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 			case ZEND_PRE_DEC_OBJ:
 			case ZEND_POST_INC_OBJ:
 			case ZEND_POST_DEC_OBJ:
-				return 1;
+				return true;
 		}
 	}
 
-	return 0;
+	return false;
 }
 /* }}} */
 
-static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int var) /* {{{ */
+static bool is_escape_use(const zend_op_array *op_array, const zend_ssa *ssa, int use, int var) /* {{{ */
 {
-	zend_ssa_op *ssa_op = ssa->ops + use;
-	zend_op *opline = op_array->opcodes + use;
+	const zend_ssa_op *ssa_op = ssa->ops + use;
+	const zend_op *opline = op_array->opcodes + use;
 
 	if (ssa_op->op1_use == var) {
 		switch (opline->opcode) {
@@ -282,7 +279,7 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 				if (opline->op1_type == IS_CV) {
 					if (OP1_INFO() & MAY_BE_OBJECT) {
 						/* object aliasing */
-						return 1;
+						return true;
 					}
 				}
 				break;
@@ -294,7 +291,7 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 			case ZEND_FETCH_OBJ_IS:
 				break;
 			case ZEND_ASSIGN_OP:
-				return 1;
+				return true;
 			case ZEND_ASSIGN_DIM_OP:
 			case ZEND_ASSIGN_OBJ_OP:
 			case ZEND_ASSIGN_STATIC_PROP_OP:
@@ -310,22 +307,22 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 			case ZEND_INIT_ARRAY:
 			case ZEND_ADD_ARRAY_ELEMENT:
 				if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
-					return 1;
+					return true;
 				}
 				if (OP1_INFO() & MAY_BE_OBJECT) {
 					/* object aliasing */
-					return 1;
+					return true;
 				}
 				/* reference dependencies processed separately */
 				break;
 			case ZEND_OP_DATA:
 				if ((opline-1)->opcode != ZEND_ASSIGN_DIM
 				 && (opline-1)->opcode != ZEND_ASSIGN_OBJ) {
-					return 1;
+					return true;
 				}
 				if (OP1_INFO() & MAY_BE_OBJECT) {
 					/* object aliasing */
-					return 1;
+					return true;
 				}
 				opline--;
 				ssa_op--;
@@ -333,12 +330,12 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 				 || (OP1_INFO() & MAY_BE_REF)
 				 || (ssa_op->op1_def >= 0 && ssa->vars[ssa_op->op1_def].alias)) {
 					/* assignment into escaping structure */
-					return 1;
+					return true;
 				}
 				/* reference dependencies processed separately */
 				break;
 			default:
-				return 1;
+				return true;
 		}
 	}
 
@@ -349,17 +346,17 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 				 || (OP1_INFO() & MAY_BE_REF)
 				 || (ssa_op->op1_def >= 0 && ssa->vars[ssa_op->op1_def].alias)) {
 					/* assignment into escaping variable */
-					return 1;
+					return true;
 				}
 				if (opline->op2_type == IS_CV || opline->result_type != IS_UNUSED) {
 					if (OP2_INFO() & MAY_BE_OBJECT) {
 						/* object aliasing */
-						return 1;
+						return true;
 					}
 				}
 				break;
 			default:
-				return 1;
+				return true;
 		}
 	}
 
@@ -371,15 +368,15 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 			case ZEND_ADD_ARRAY_ELEMENT:
 				break;
 			default:
-				return 1;
+				return true;
 		}
 	}
 
-	return 0;
+	return false;
 }
 /* }}} */
 
-zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+zend_result zend_ssa_escape_analysis(const zend_script *script, const zend_op_array *op_array, const zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
@@ -393,12 +390,12 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 		return SUCCESS;
 	}
 
-	has_allocations = 0;
+	has_allocations = false;
 	for (i = op_array->last_var; i < ssa_vars_count; i++) {
 		if (ssa_vars[i].definition >= 0
 		  && (ssa->var_info[i].type & (MAY_BE_ARRAY|MAY_BE_OBJECT))
 		  && is_allocation_def(op_array, ssa, ssa_vars[i].definition, i, script)) {
-			has_allocations = 1;
+			has_allocations = true;
 			break;
 		}
 	}
@@ -470,14 +467,14 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 		bool changed;
 
 		do {
-			changed = 0;
+			changed = false;
 			for (i = 0; i < ssa_vars_count; i++) {
 				if (ssa_vars[i].use_chain >= 0) {
 					root = ees[i];
 					if (ssa_vars[root].escape_state == ESCAPE_STATE_NO_ESCAPE) {
 						FOREACH_USE(ssa_vars + i, use) {
-							zend_ssa_op *op = ssa->ops + use;
-							zend_op *opline = op_array->opcodes + use;
+							const zend_ssa_op *op = ssa->ops + use;
+							const zend_op *opline = op_array->opcodes + use;
 							int enclosing_root;
 
 							if (opline->opcode == ZEND_OP_DATA &&
@@ -506,13 +503,13 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 								if (ssa_vars[root].escape_state == ESCAPE_STATE_GLOBAL_ESCAPE) {
 									num_non_escaped--;
 									if (num_non_escaped == 0) {
-										changed = 0;
+										changed = false;
 									} else {
-										changed = 1;
+										changed = true;
 									}
 									break;
 								} else {
-									changed = 1;
+									changed = true;
 								}
 							}
 						} FOREACH_USE_END();

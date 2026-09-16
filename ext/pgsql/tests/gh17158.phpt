@@ -8,9 +8,9 @@ pgsql
 try {
     pg_fetch_result(null);
 } catch (ArgumentCountError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-pg_fetch_result() expects at least 2 arguments, 1 given
+ArgumentCountError: pg_fetch_result() expects at least 2 arguments, 1 given

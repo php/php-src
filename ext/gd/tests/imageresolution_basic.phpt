@@ -18,17 +18,17 @@ $res = imageresolution($exp);
 try {
 	imageresolution($exp, PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
 	imageresolution($exp, 127, -PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage() . PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 imageresolution($exp, 0, 0);
 var_dump(imageresolution($exp) == $res);
 ?>
 --EXPECTF--
-imageresolution(): Argument #2 ($resolution_x) must be between 0 and %d
-imageresolution(): Argument #3 ($resolution_y) must be between 0 and %d
+ValueError: imageresolution(): Argument #2 ($resolution_x) must be between 0 and %d
+ValueError: imageresolution(): Argument #3 ($resolution_y) must be between 0 and %d
 bool(true)

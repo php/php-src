@@ -7,14 +7,14 @@ invalid arguments and error messages
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n -F some.php -F some.php`);
-var_dump(`$php -n -F some.php -R some.php`);
-var_dump(`$php -n -R some.php -F some.php`);
-var_dump(`$php -n -R some.php -R some.php`);
-var_dump(`$php -n -f some.php -f some.php`);
-var_dump(`$php -n -B '' -B ''`);
-var_dump(`$php -n -E '' -E ''`);
-var_dump(`$php -n -r '' -r ''`);
+var_dump(shell_exec("$php -n -F some.php -F some.php"));
+var_dump(shell_exec("$php -n -F some.php -R some.php"));
+var_dump(shell_exec("$php -n -R some.php -F some.php"));
+var_dump(shell_exec("$php -n -R some.php -R some.php"));
+var_dump(shell_exec("$php -n -f some.php -f some.php"));
+var_dump(shell_exec("$php -n -B '' -B ''"));
+var_dump(shell_exec("$php -n -E '' -E ''"));
+var_dump(shell_exec("$php -n -r '' -r ''"));
 
 echo "Done\n";
 ?>

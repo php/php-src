@@ -59,7 +59,7 @@ DIR *opendir(const char *dir)
 		wcscpy(filespecw, resolvedw);
 		index = resolvedw_len - 1;
 	}
-	if (index >= 0 && filespecw[index] == L'/' || index == 0 && filespecw[index] == L'\\')
+	if ((index >= 0 && filespecw[index] == L'/') || (index == 0 && filespecw[index] == L'\\'))
 		filespecw[index] = L'\0';
 	wcscat(filespecw, L"\\*");
 

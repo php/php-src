@@ -5,14 +5,14 @@
 /**
  * @var int
  * @cvalue PHP_ENCHANT_MYSPELL
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated')]
 const ENCHANT_MYSPELL = UNKNOWN;
 /**
  * @var int
  * @cvalue PHP_ENCHANT_ISPELL
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'as enchant_broker_get_dict_path() and enchant_broker_set_dict_path() are deprecated')]
 const ENCHANT_ISPELL = UNKNOWN;
 #ifdef HAVE_ENCHANT_GET_VERSION
 /**
@@ -87,6 +87,8 @@ function enchant_dict_suggest(EnchantDictionary $dictionary, string $word): arra
 
 function enchant_dict_add(EnchantDictionary $dictionary, string $word): void {}
 
+function enchant_dict_remove(EnchantDictionary $dictionary, string $word): void {}
+
 /**
 * @alias enchant_dict_add
 */
@@ -94,6 +96,8 @@ function enchant_dict_add(EnchantDictionary $dictionary, string $word): void {}
 function enchant_dict_add_to_personal(EnchantDictionary $dictionary, string $word): void {}
 
 function enchant_dict_add_to_session(EnchantDictionary $dictionary, string $word): void {}
+
+function enchant_dict_remove_from_session(EnchantDictionary $dictionary, string $word): void {}
 
 function enchant_dict_is_added(EnchantDictionary $dictionary, string $word): bool {}
 

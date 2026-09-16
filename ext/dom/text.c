@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -96,7 +94,6 @@ Since:
 */
 PHP_METHOD(DOMText, splitText)
 {
-	zval       *id;
 	xmlChar    *first;
 	xmlChar    *second;
 	xmlNodePtr  node;
@@ -105,11 +102,10 @@ PHP_METHOD(DOMText, splitText)
 	int         length;
 	dom_object	*intern;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
 		RETURN_THROWS();
 	}
-	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(node, ZEND_THIS, xmlNodePtr, intern);
 
 	if (offset < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
@@ -129,16 +125,17 @@ PHP_METHOD(DOMText, splitText)
 	first = xmlUTF8Strndup(cur, (int)offset);
 	second = xmlUTF8Strsub(cur, (int)offset, (int)(length - offset));
 
-	xmlNodeSetContent(node, first);
-	nnode = xmlNewDocText(node->doc, second);
-
-	xmlFree(first);
-	xmlFree(second);
+	xmlNodeSetContent(node, NULL);
+	node->content = first;
+	nnode = xmlNewDocText(node->doc, NULL);
 
 	if (nnode == NULL) {
+		xmlFree(second);
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
+
+	nnode->content = second;
 
 	if (node->parent != NULL) {
 		nnode->type = XML_ELEMENT_NODE;
@@ -155,21 +152,11 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMText, isWhitespaceInElementContent)
 {
-	zval       *id;
 	xmlNodePtr  node;
 	dom_object	*intern;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
-
-	if (xmlIsBlankNode(node)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	DOM_GET_OBJ(node, ZEND_THIS, xmlNodePtr, intern);
+	RETURN_BOOL(xmlIsBlankNode(node));
 }
 /* }}} end dom_text_is_whitespace_in_element_content */
 

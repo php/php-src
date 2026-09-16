@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: encoding.c,v 1.42 2022/12/26 17:31:14 christos Exp $")
+FILE_RCSID("@(#)$File: encoding.c,v 1.43 2024/10/29 20:56:48 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -334,7 +334,7 @@ static const uint8_t first[] = {
 
 // acceptRange gives the range of valid values for the second byte in a UTF-8
 // sequence.
-struct accept_range {
+static struct accept_range {
 	uint8_t lo; // lowest value for second byte.
 	uint8_t hi; // highest value for second byte.
 } accept_ranges[16] = {

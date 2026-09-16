@@ -22,7 +22,6 @@ $b = new B();
 
 $reflector = new ReflectionClass($b);
 $property = $reflector->getProperty('prop2');
-$property->setAccessible(true);
 $property->setValue($b, new A());
 
 var_dump($b);

@@ -19,11 +19,11 @@ $long_addr = str_repeat('a', 512);
 
 try {
     socket_sendto($socket, "data", 4, 0, $long_addr);
-} catch (\ValueError $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 socket_close($socket);
 ?>
 --EXPECTF--
-socket_sendto(): Argument #5 ($address) must be less than %d
+ValueError: socket_sendto(): Argument #5 ($address) must be less than %d
