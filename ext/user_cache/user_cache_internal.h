@@ -21,12 +21,6 @@
 #ifdef ZTS
 # include "TSRM/TSRM.h"
 #endif
-#if defined(ZEND_WIN32) && defined(_MSC_VER)
-# include <intrin.h>
-#endif
-#ifndef ZEND_WIN32
-# include <pthread.h>
-#endif
 
 #include "Zend/zend_attributes.h"
 #include "Zend/zend_ast.h"
@@ -39,6 +33,39 @@
 
 #include "php_user_cache.h"
 #include "user_cache_shm.h"
+
+#ifdef ZEND_WIN32
+# include "zend_execute.h"
+# include "win32/ioutil.h"
+
+# include <fcntl.h>
+# include <io.h>
+# include <winbase.h>
+# ifdef _MSC_VER
+#  include <intrin.h>
+# endif
+#else
+# include <errno.h>
+# include <fcntl.h>
+# include <pthread.h>
+# include <signal.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
+# if defined(PHP_USER_CACHE_USE_MMAP) || (defined(__linux__) && defined(HAVE_MEMFD_CREATE))
+#  include <sys/mman.h>
+# endif
+#endif
+
+#if defined(__APPLE__) || defined(__FreeBSD__)
+# include <sys/sysctl.h>
+# ifdef __FreeBSD__
+#  include <sys/param.h>
+#  include <sys/user.h>
+# endif
+#endif
 
 #include "ext/standard/php_var.h"
 
@@ -58,7 +85,7 @@
 		) \
 		+ PHP_USER_CACHE_ENTRY_LOCK_MIN_CAPACITY * sizeof(php_user_cache_entry_lock_record) \
 	)
-#define PHP_USER_CACHE_AUTO_ENTRY_BYTES		2048U /* Auto entries hint density: one expected entry per 2KB of segment. */
+#define PHP_USER_CACHE_AUTO_ENTRY_BYTES		2048U
 #define PHP_USER_CACHE_ENTRIES_HINT_MAX		16777213
 
 #define PHP_USER_CACHE_KEY_DELIMITER		"\x1f"
@@ -158,6 +185,7 @@
 #define PHP_USER_CACHE_ENTRY_LOCK_MIN_CAPACITY		128U
 #define PHP_USER_CACHE_ENTRY_LOCK_MAX_CAPACITY		1024U
 #define PHP_USER_CACHE_ENTRY_LOCK_WAIT_TIMEOUT_US	(10U * 1000U * 1000U)
+#define PHP_USER_CACHE_ENTRY_LOCK_RETRY_INTERVAL_US	10000U
 #define PHP_USER_CACHE_ENTRY_LOCK_EMPTY				0
 #define PHP_USER_CACHE_ENTRY_LOCK_USED				1
 #define PHP_USER_CACHE_ENTRY_LOCK_TOMBSTONE			2
@@ -173,14 +201,16 @@
 # define PHP_USER_CACHE_HAVE_SHARED_MUTEX	1
 #endif
 
-/* Boundary partitions require named shared memory. */
-#if !defined(ZEND_WIN32) && defined(PHP_USER_CACHE_USE_SHM_OPEN)
-# define PHP_USER_CACHE_HAVE_BOUNDARY_SHM	1
-# define PHP_USER_CACHE_BOUNDARY_SALT_SIZE	32
-#endif
-
 #if defined(PHP_USER_CACHE_USE_MMAP) && !defined(ZEND_WIN32)
 # define PHP_USER_CACHE_HAVE_ANON_MMAP	1
+/* Boundary partitions never touch POSIX shm (/dev/shm): independently
+ * started processes rendezvous through a fully preallocated regular file
+ * below user_cache.lockfile_path that is mapped with mmap(). */
+# define PHP_USER_CACHE_HAVE_BOUNDARY_MMAP	1
+# define PHP_USER_CACHE_BOUNDARY_SALT_SIZE	32
+# if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
+#  define MAP_ANONYMOUS MAP_ANON
+# endif
 #endif
 
 #define PHP_USER_CACHE_LOCK_MODEL_FCNTL	0U
@@ -196,7 +226,6 @@
 #define PHP_USER_CACHE_GRAPH_PIN_SLOTS				256U
 #define PHP_USER_CACHE_GRAPH_PIN_WORDS				(PHP_USER_CACHE_GRAPH_PIN_SLOTS / 32U)
 #define PHP_USER_CACHE_GRAPH_PIN_CLAIM_MAX			4U
-/* Rate limit for the request-end dead-pin-owner probes. */
 #define PHP_USER_CACHE_GRAPH_PIN_PROBE_INTERVAL_SEC	8U
 
 #define PHP_USER_CACHE_LOOKUP_EMPTY	0
@@ -208,8 +237,22 @@
 #define PHP_USER_CACHE_BLOCK_FREE			1U
 #define PHP_USER_CACHE_LOOKUP_VALUE_NONE	0xFFU
 
-#ifndef ZEND_WIN32
+#ifdef ZEND_WIN32
+# define PHP_USER_CACHE_WIN32_MAPPING_NAME "PhpUserCache.SharedMemoryArea"
+# define PHP_USER_CACHE_WIN32_MAPPING_MUTEX_NAME "PhpUserCache.SharedMemoryMutex"
+# define PHP_USER_CACHE_WIN32_LOCK_FILE_NAME "PhpUserCache.LockFile"
+#else
 # define PHP_USER_CACHE_SEM_FILENAME_PREFIX	".PhpUserCacheSem."
+#endif
+
+#ifdef ZTS
+# ifdef ZEND_WIN32
+#  define PHP_USER_CACHE_STARTUP_LOCK_INITIALIZER SRWLOCK_INIT
+# else
+#  define PHP_USER_CACHE_STARTUP_LOCK_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+# endif
+#else
+# define PHP_USER_CACHE_STARTUP_LOCK_INITIALIZER 0
 #endif
 
 /* Clear the debug-only flag before exposing a decoded table. */
@@ -222,15 +265,18 @@
 #ifdef PHP_USER_CACHE_HAVE_OPTIMISTIC
 # define PHP_USER_CACHE_OPTIMISTIC_ENABLED 1
 #ifdef PHP_USER_CACHE_OPTIMISTIC_MSVC
+/* The winnt.h wrappers, not the intrinsics: on x86 only the 64-bit
+ * compare-exchange intrinsic exists, and winnt.h implements
+ * InterlockedOr64 / InterlockedExchange64 there as inline CAS loops. */
 # define PHP_USER_CACHE_ATOMIC_LOAD_64(target) \
-	((uint64_t) _InterlockedOr64((volatile __int64 *) (target), 0))
+	((uint64_t) InterlockedOr64((volatile LONG64 *) (target), 0))
 # define PHP_USER_CACHE_ATOMIC_STORE_64(target, value) \
-	((void) _InterlockedExchange64((volatile __int64 *) (target), (__int64) (value)))
+	((void) InterlockedExchange64((volatile LONG64 *) (target), (LONG64) (value)))
 # define PHP_USER_CACHE_ATOMIC_CAS_64(target, expected, desired) \
-	((uint64_t) _InterlockedCompareExchange64( \
-		(volatile __int64 *) (target), \
-		(__int64) (desired), \
-		(__int64) (expected) \
+	((uint64_t) InterlockedCompareExchange64( \
+		(volatile LONG64 *) (target), \
+		(LONG64) (desired), \
+		(LONG64) (expected) \
 	) == (expected))
 # define PHP_USER_CACHE_ATOMIC_LOAD_32(target) \
 	((uint32_t) _InterlockedOr((volatile long *) (target), 0))
@@ -290,13 +336,30 @@ typedef union {
 } php_user_cache_shared_mutex;
 #endif
 
+#ifdef ZTS
+# ifdef ZEND_WIN32
+typedef SRWLOCK php_user_cache_startup_lock;
+# else
+typedef pthread_mutex_t php_user_cache_startup_lock;
+# endif
+#else
+typedef char php_user_cache_startup_lock;
+#endif
+
+#ifdef ZEND_WIN32
+typedef struct _php_user_cache_win32_segment {
+	php_user_cache_shm_segment segment;
+	HANDLE memfile;
+	void *mapping_base;
+} php_user_cache_win32_segment;
+#endif
+
 typedef enum {
 	PHP_USER_CACHE_OPTIMISTIC_FALLBACK = 0,
 	PHP_USER_CACHE_OPTIMISTIC_FOUND,
 	PHP_USER_CACHE_OPTIMISTIC_MISS
 } php_user_cache_optimistic_result;
 
-/* Result of the root-array verbatim sizing attempt. */
 typedef enum {
 	PHP_USER_CACHE_VERBATIM_ROOT_UNDECIDED = 0,
 	PHP_USER_CACHE_VERBATIM_ROOT_SIZED,
@@ -333,7 +396,7 @@ typedef struct {
 	bool lock_initialized;
 	bool layout_memo_valid;
 	bool capacity_clamped;
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 	bool boundary_digest_memoized;
 	uint8_t boundary_digest_memo[32];
 	bool boundary_salt_loaded;
@@ -443,6 +506,10 @@ typedef struct {
 	/* Bumped under the write lock for every inserted lock record; the new
 	 * value becomes that record's owner_token. */
 	uint64_t entry_lock_acquire_seq;
+	/* A file-backed boundary image left by an earlier boot may be torn or
+	 * hold a robust mutex nobody can release; startup reformats it instead
+	 * of adopting it. */
+	uint64_t boot_token;
 	uint8_t boundary_identity_digest[32];
 	uint32_t orphaned_graphs[PHP_USER_CACHE_ORPHANED_GRAPH_SLOTS];
 	php_user_cache_graph_pin_slot graph_pin_slots[PHP_USER_CACHE_GRAPH_PIN_SLOTS];
@@ -472,7 +539,6 @@ typedef struct {
 	uint8_t state;
 	uint8_t value_type;
 	uint16_t reserved;
-	/* Discriminated by value_type. */
 	union {
 		zend_long long_value;
 		double double_value;
@@ -496,7 +562,6 @@ typedef struct {
 	uint8_t value_type;
 	uint8_t reserved[2];
 	zend_string *key;
-	/* Discriminated by value_type. */
 	union {
 		zend_long long_value;
 		double double_value;
@@ -512,7 +577,6 @@ typedef struct {
 	zend_string *owned_string;
 	/* Owned by the prepared value. */
 	uint32_t *fixup_offsets;
-	/* Discriminated by value_type. */
 	union {
 		zend_long long_value;
 		double double_value;
@@ -700,7 +764,7 @@ typedef struct {
 	HashTable *decode_array_map;
 	HashTable *decode_resolve_cache;
 	HashTable *decode_shape_prototype_cache;
-	HashTable *object_route_memo; /* Request-local class route cache. */
+	HashTable *object_route_memo;
 	const void *decode_resolve_direct_keys[PHP_USER_CACHE_DECODE_DIRECT_CACHE_SLOTS];
 	void *decode_resolve_direct_values[PHP_USER_CACHE_DECODE_DIRECT_CACHE_SLOTS];
 	const void *decode_shape_prototype_direct_keys[PHP_USER_CACHE_DECODE_DIRECT_CACHE_SLOTS];
@@ -710,7 +774,7 @@ typedef struct {
 #ifndef ZEND_WIN32
 	zend_ulong entry_lock_owner_pid;
 #endif /* ZEND_WIN32 */
-	uint64_t graph_pin_probe_last_at; /* Rate limit for request-end dead-pin sweeps. */
+	uint64_t graph_pin_probe_last_at;
 	uint64_t entry_lock_owner_probe_pid;
 	uint64_t entry_lock_owner_probe_start_time;
 	uint64_t entry_lock_owner_probe_at;
@@ -725,7 +789,7 @@ typedef struct {
 	uint32_t graph_pin_claim_count;
 	uint32_t expired_read_observations;
 	uint32_t expunge_write_ops; /* Write operations since the last bounded expiry scan. */
-	uint32_t expired_expunge_cursor; /* Process-local resume point for bounded expiry scans. */
+	uint32_t expired_expunge_cursor;
 	/* Request-lazy coarse clock for access stamps; refreshed opportunistically
 	 * and every PHP_USER_CACHE_ACCESS_NOW_REFRESH_INTERVAL touches. */
 	uint32_t access_now;
@@ -955,7 +1019,6 @@ static zend_always_inline bool php_user_cache_stack_overflowed(void)
 #ifdef ZEND_CHECK_STACK_LIMIT
 	bool overflowed = UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)));
 
-	/* Latch the failure for the rest of the request. */
 	if (overflowed) {
 		UC_G(stack_overflowed) = true;
 	}
@@ -1268,7 +1331,6 @@ static inline bool php_user_cache_class_uses_serdes(zend_class_entry *ce)
 		return true;
 	}
 
-	/* Honor native and Serializable handlers. */
 	return ce->serialize != NULL &&
 		ce->unserialize != NULL
 	;

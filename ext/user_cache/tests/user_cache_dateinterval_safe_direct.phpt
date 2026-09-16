@@ -46,12 +46,10 @@ var_dump($d->days);
 var_dump($d->invert);
 var_dump($d->format('%a days %h:%i'));
 
-/* --- inverted diff --- */
 $inv = (new DateTimeImmutable('2026-03-15'))->diff(new DateTimeImmutable('2026-01-01'));
 $cache->store('inv', $inv);
 var_dump($cache->fetch('inv')->invert);
 
-/* --- from_string interval --- */
 $fs = DateInterval::createFromDateString('2 days 4 hours');
 $cache->store('fs', $fs);
 $f = $cache->fetch('fs');

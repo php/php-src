@@ -19,7 +19,6 @@ var_dump($a->fetch('k', 'MISS'));
 echo "--- deletePool('delete-pool-a') ---\n";
 var_dump(UserCache\Cache::deletePool('delete-pool-a'));
 
-/* The pool is gone from the registry and getPools(). */
 var_dump(UserCache\Cache::hasPool('delete-pool-a'));
 var_dump(array_keys(UserCache\Cache::getPools()));
 
@@ -28,7 +27,6 @@ $a2 = UserCache\Cache::getPool('delete-pool-a');
 var_dump($a2->fetch('k', 'MISS'));
 var_dump($a2->has('k'));
 
-/* The other pool is untouched. */
 var_dump($b->fetch('k', 'MISS'));
 
 echo "--- deleting an unknown pool is a no-op success ---\n";

@@ -39,7 +39,7 @@ $baseline = free_memory();
  * them at its shutdown. */
 seed($cache);
 sleep(2);
-var_dump(free_memory() < $baseline); /* still occupied */
+var_dump(free_memory() < $baseline);
 
 $pid = pcntl_fork();
 if ($pid === 0) {
