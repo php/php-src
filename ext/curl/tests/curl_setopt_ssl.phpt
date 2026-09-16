@@ -74,7 +74,10 @@ if ($process === false) {
 }
 try {
     // Give the server time to start
-    sleep(1);
+    for ($i = 0; $i < 100; $i++) {
+        if (@fsockopen('127.0.0.1', $port)) break;
+        usleep(20000);
+    }
 
     echo "case 1: client cert and key from string\n";
     $ch = curl_init("https://127.0.0.1:$port/");
