@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf_time.c,v 1.25 2024/11/25 21:24:59 christos Exp $")
+FILE_RCSID("@(#)$File: cdf_time.c,v 1.26 2026/05/09 22:08:32 christos Exp $")
 #endif
 
 #include <time.h>
@@ -120,6 +120,9 @@ cdf_timestamp_to_timespec(struct timespec *ts, cdf_timestamp_t t)
 	/* XXX: Approx */
 	tm.tm_year = CAST(int, CDF_BASE_YEAR + (t / 365));
 
+	if (tm.tm_year > 9999)
+		goto out;
+
 	rdays = cdf_getdays(tm.tm_year);
 	t -= rdays - 1;
 	tm.tm_mday = cdf_getday(tm.tm_year, CAST(int, t));
@@ -135,11 +138,12 @@ cdf_timestamp_to_timespec(struct timespec *ts, cdf_timestamp_t t)
 #endif
 	tm.tm_year -= 1900;
 	ts->tv_sec = mktime(&tm);
-	if (ts->tv_sec == -1) {
-		errno = EINVAL;
-		return -1;
-	}
+	if (ts->tv_sec == -1)
+		goto out;
 	return 0;
+out:
+	errno = EINVAL;
+	return -1;
 }
 
 file_protected int

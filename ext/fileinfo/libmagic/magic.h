@@ -115,7 +115,7 @@ b\31transp_compression\0\
 #define	MAGIC_NO_CHECK_FORTRAN	0x000000 /* Don't check ascii/fortran */
 #define	MAGIC_NO_CHECK_TROFF	0x000000 /* Don't check ascii/troff */
 
-#define MAGIC_VERSION		546	/* This implementation */
+#define MAGIC_VERSION		548	/* This implementation */
 
 
 #ifdef __cplusplus
@@ -158,6 +158,7 @@ int magic_errno(magic_t);
 
 int magic_setparam(magic_t, int, const void *);
 int magic_getparam(magic_t, int, void *);
+ssize_t magic_getmaxparam(int);
 
 #ifdef __cplusplus
 };

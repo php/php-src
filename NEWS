@@ -16,6 +16,9 @@ PHP                                                                        NEWS
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
 
+- Fileinfo:
+  . Upgrade to file 5.48. (Weilin Du)
+
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
     such as dateType, timeType, calendar and the message pattern.
