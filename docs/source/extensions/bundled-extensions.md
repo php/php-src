@@ -1,5 +1,11 @@
 # PHP build system V5 overview
 
+```{toctree}
+   :hidden:
+
+bundled-extensions/filter
+```
+
 * supports Makefile.ins during transition phase
 * not-really-portable Makefile includes have been eliminated
 * supports separate build directories without VPATH by using explicit rules only
