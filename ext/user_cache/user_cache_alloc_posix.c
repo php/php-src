@@ -151,6 +151,22 @@ truncate_segment:
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
+#ifndef __APPLE__
+	/* ftruncate() leaves the object sparse; on a tmpfs-backed /dev/shm the
+	 * first touch beyond the free space raises SIGBUS, so commit it now and
+	 * fail closed instead. Darwin shm objects are not files (fcntl would
+	 * return EBADF) and are not size-capped by a filesystem. */
+	if (!php_user_cache_preallocate_fd(shared_segment->shm_fd, requested_size)) {
+		*error_in = "preallocate";
+
+		close(shared_segment->shm_fd);
+
+		shm_unlink(shared_segment_name);
+
+		return PHP_USER_CACHE_ALLOC_FAILURE;
+	}
+#endif /* __APPLE__ */
+
 	shared_segment->common.p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED, shared_segment->shm_fd, 0);
 	if (shared_segment->common.p == MAP_FAILED) {
 		*error_in = "mmap";

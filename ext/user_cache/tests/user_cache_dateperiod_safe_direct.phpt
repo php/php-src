@@ -60,7 +60,6 @@ function period_dates(DatePeriod $period): array
 $cache = UserCache\Cache::getPool('dateperiod-safe-direct');
 $cache->clear();
 
-/* --- recurrences-based --- */
 $byRecurrences = new DatePeriod(new DateTimeImmutable('2026-01-01'), new DateInterval('P1D'), 3);
 $cache->store('recurrences', $byRecurrences);
 $r = $cache->fetch('recurrences');
@@ -68,7 +67,6 @@ var_dump($r instanceof DatePeriod);
 var_dump(serialize($r) === serialize($byRecurrences));
 var_dump(period_dates($r) === ['2026-01-01', '2026-01-02', '2026-01-03', '2026-01-04']);
 
-/* --- end-based --- */
 $byEnd = new DatePeriod(
 	new DateTimeImmutable('2026-03-01'),
 	new DateInterval('P1M'),
@@ -77,7 +75,6 @@ $byEnd = new DatePeriod(
 $cache->store('end', $byEnd);
 var_dump(serialize($cache->fetch('end')) === serialize($byEnd));
 
-/* --- EXCLUDE_START_DATE --- */
 $excludeStart = new DatePeriod(
 	new DateTimeImmutable('2026-01-01'),
 	new DateInterval('P1D'),
@@ -87,7 +84,6 @@ $excludeStart = new DatePeriod(
 $cache->store('exclude-start', $excludeStart);
 var_dump(period_dates($cache->fetch('exclude-start')) === ['2026-01-02', '2026-01-03']);
 
-/* --- INCLUDE_END_DATE --- */
 $includeEnd = new DatePeriod(
 	new DateTimeImmutable('2026-01-01'),
 	new DateInterval('P1D'),
@@ -132,7 +128,6 @@ var_dump(serialize($g) === serialize($graph));
 var_dump($g['interval'] instanceof DateInterval && $g['zone']->getName() === 'Asia/Tokyo');
 var_dump(period_dates($g['period']) === ['2026-06-01', '2026-06-03', '2026-06-05']);
 
-/* --- members with offset timezones --- */
 $offsetPeriod = new DatePeriod(
 	new DateTimeImmutable('2026-01-01 00:00:00 +09:00'),
 	new DateInterval('P1D'),
@@ -144,7 +139,6 @@ var_dump(serialize($o) === serialize($offsetPeriod));
 var_dump(period_dates($o) === ['2026-01-01', '2026-01-02', '2026-01-03']);
 var_dump($o->getStartDate()->getTimezone()->getName());
 
-/* --- members with abbreviation timezones --- */
 $abbrPeriod = new DatePeriod(
 	new DateTimeImmutable('2026-01-01 00:00:00 PST'),
 	new DateInterval('P1D'),

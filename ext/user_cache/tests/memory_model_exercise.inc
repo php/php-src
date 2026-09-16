@@ -66,22 +66,18 @@ function user_cache_memory_model_exercise(string $expected): void
     $fetchedMagic = $cache->fetch('magic');
     var_dump($fetchedMagic instanceof MemoryModelMagic, $fetchedMagic->payload);
 
-    /* add / has / delete. */
     var_dump($cache->add('int', 99));
     var_dump($cache->add('added', 7), $cache->fetch('added'));
     var_dump($cache->delete('added'), $cache->has('added'));
 
-    /* increment / decrement. */
     var_dump($cache->store('counter', 10));
     var_dump($cache->increment('counter', 5));
     var_dump($cache->decrement('counter'));
 
-    /* Bulk operations. */
     var_dump($cache->storeMultiple(['m1' => 'a', 'm2' => 'b'], 60));
     var_dump($cache->fetchMultiple(['m1', 'm2', 'm3'], 'dflt'));
     var_dump($cache->deleteMultiple(['m1', 'm2']));
 
-    /* lock / unlock / remember. */
     var_dump($cache->lock('lk'));
     var_dump($cache->unlock('lk'));
     $calls = 0;

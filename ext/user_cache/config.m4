@@ -1,3 +1,5 @@
+AC_CHECK_FUNCS([posix_fallocate])
+
 PHP_NEW_EXTENSION([user_cache], m4_normalize([
     user_cache.c
     user_cache_storage.c

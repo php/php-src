@@ -34,7 +34,6 @@ foreach ($classes as $class) {
     }
 }
 
-/* No entry was written and the pool is still usable afterwards. */
 var_dump($cache->has('date'));
 var_dump($cache->store('scalar', 7));
 var_dump($cache->fetch('scalar'));
