@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed ZipArchive::extractTo() ignoring files given in a non-list array.
     (David Carlier)
 
+- SQLite:
+  . Fixed a crash when SQLite3::close() is called from a userland callback.
+    (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.4.26
 
