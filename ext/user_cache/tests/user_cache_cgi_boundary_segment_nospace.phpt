@@ -121,14 +121,18 @@ $privateDir = $lockfilePath . '/.PhpUserCacheBnd.' . fileowner($root);
 file_put_contents($script, <<<'PHP'
 <?php
 $cache = UserCache\Cache::getPool('nospace');
-/* 1 MiB values: on a sparse segment this store would be the one to hit the
- * unbacked page and die with SIGBUS. */
+/* 1 MiB values: on a sparse segment one of these stores would hit the
+ * unbacked page and die with SIGBUS. A fitting 2M segment only holds one
+ * value at a time, so LRU eviction leaves just the most recent key behind:
+ * probe that one rather than key0. */
+$last = null;
 for ($i = 0; $i < 64; $i++) {
     if (!$cache->store("key$i", str_repeat('x', 1024 * 1024))) {
         break;
     }
+    $last = "key$i";
 }
-echo UserCache\Cache::getStatus()->getAvailability()->name, ':', is_string($cache->fetch('key0')) ? 'HIT' : 'MISS', "\n";
+echo UserCache\Cache::getStatus()->getAvailability()->name, ':', $last !== null && is_string($cache->fetch($last)) ? 'HIT' : 'MISS', "\n";
 PHP);
 
 try {
