@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+>
+  <import location="http://localhost:{TARGET_PORT}/index.php"/>
+</definitions>
