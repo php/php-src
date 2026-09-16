@@ -32,7 +32,9 @@
 
 #include "zend_smart_str.h"
 #include "ext/standard/php_standard.h"
+#include "ext/user_cache/php_user_cache.h"
 
+#include "apr_file_info.h"
 #include "apr_strings.h"
 #include "ap_config.h"
 #include "util_filter.h"
@@ -63,6 +65,16 @@ char *apache2_php_ini_path_override = NULL;
 #if defined(PHP_WIN32) && defined(ZTS)
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
+
+typedef struct _php_apache_user_cache_partition_entry {
+	const server_rec *server;
+	const char *server_identity;
+	const char *configured_document_root;
+	php_user_cache_partition *partition;
+	struct _php_apache_user_cache_partition_entry *next;
+} php_apache_user_cache_partition_entry;
+
+static php_apache_user_cache_partition_entry *php_apache_user_cache_partitions = NULL;
 
 static size_t
 php_apache_sapi_ub_write(const char *str, size_t str_length)
@@ -418,6 +430,7 @@ static sapi_module_struct apache2_sapi_module = {
 static apr_status_t php_apache_server_shutdown(void *tmp)
 {
 	apache2_sapi_module.shutdown(&apache2_sapi_module);
+	php_apache_user_cache_partitions = NULL;
 	sapi_shutdown();
 #ifdef ZTS
 	tsrm_shutdown();
@@ -456,6 +469,145 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	 * php.ini path setting. */
 	apache2_php_ini_path_override = NULL;
 	return OK;
+}
+
+static const char *php_apache_user_cache_normalize_document_root(apr_pool_t *pool, const char *document_root)
+{
+	char *normalized;
+
+	if (document_root == NULL || document_root[0] == '\0') {
+		return NULL;
+	}
+
+	if (apr_filepath_merge(
+			&normalized,
+			NULL,
+			document_root,
+			APR_FILEPATH_NOTRELATIVE,
+			pool
+		) == APR_SUCCESS
+	) {
+		return normalized;
+	}
+
+	return apr_pstrdup(pool, document_root);
+}
+
+/* Linear over the vhost list, run once per request. */
+static php_apache_user_cache_partition_entry *php_apache_user_cache_partition_entry_for_server(
+		const server_rec *server)
+{
+	php_apache_user_cache_partition_entry *entry;
+
+	for (entry = php_apache_user_cache_partitions; entry != NULL; entry = entry->next) {
+		if (entry->server == server) {
+			return entry;
+		}
+	}
+
+	return NULL;
+}
+
+static void php_apache_user_cache_activate_request_partition(request_rec *r)
+{
+	const char *document_root, *boundary;
+	php_apache_user_cache_partition_entry *entry;
+
+	entry = php_apache_user_cache_partition_entry_for_server(r->server);
+	document_root = php_apache_user_cache_normalize_document_root(r->pool, ap_context_document_root(r));
+	if (document_root == NULL) {
+		document_root = php_apache_user_cache_normalize_document_root(r->pool, ap_document_root(r));
+	}
+
+	if (entry != NULL &&
+		entry->partition != NULL &&
+		entry->configured_document_root != NULL &&
+		document_root != NULL &&
+		strcmp(document_root, entry->configured_document_root) == 0
+	) {
+		php_user_cache_partition_activate(entry->partition);
+
+		return;
+	}
+
+	if (entry == NULL ||
+		entry->server_identity == NULL ||
+		document_root == NULL
+	) {
+		php_user_cache_activate_boundary_partition_by_id(
+			"apache2handler",
+			NULL,
+			0,
+			PHP_USER_CACHE_REASON_APACHE_BOUNDARY_UNAVAILABLE
+		);
+
+		return;
+	}
+
+	boundary = apr_psprintf(
+		r->pool,
+		"server:%" APR_SIZE_T_FMT ":%s;document-root:%" APR_SIZE_T_FMT ":%s",
+		(apr_size_t) strlen(entry->server_identity),
+		entry->server_identity,
+		(apr_size_t) strlen(document_root),
+		document_root
+	);
+	php_user_cache_activate_boundary_partition_by_id(
+		"apache2handler",
+		boundary,
+		strlen(boundary),
+		PHP_USER_CACHE_REASON_APACHE_BOUNDARY_UNAVAILABLE
+	);
+}
+
+static void php_apache_user_cache_init_partitions(apr_pool_t *pconf, server_rec *server)
+{
+	const char *hostname, *partition_name;
+	php_apache_user_cache_partition_entry *entry;
+	core_server_config *core_config;
+	server_rec *cur;
+	unsigned int i;
+
+	/* The partition entries are pool-allocated (freed with pconf); the
+	 * php_user_cache_partition objects created below are owned by the
+	 * user_cache extension and released together in its MSHUTDOWN
+	 * (user_cache_partitions_shutdown), so no SAPI-side shutdown hook is
+	 * required here. */
+	php_apache_user_cache_partitions = NULL;
+	php_user_cache_opt_in();
+
+	i = 0;
+	for (cur = server; cur != NULL; cur = cur->next, i++) {
+		hostname = cur->server_hostname != NULL ? cur->server_hostname : "default";
+		partition_name = apr_psprintf(
+			pconf,
+			"apache2handler:%u:%s:%u",
+			i,
+			hostname,
+			(unsigned int) cur->port
+		);
+
+		entry = apr_pcalloc(pconf, sizeof(*entry));
+		entry->server = cur;
+		entry->server_identity = partition_name;
+		core_config = ap_get_core_module_config(cur->module_config);
+		entry->configured_document_root = php_apache_user_cache_normalize_document_root(
+			pconf,
+			core_config != NULL ? core_config->ap_document_root : NULL
+		);
+		entry->partition = php_user_cache_partition_create(partition_name);
+		if (entry->partition == NULL) {
+			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "Unable to allocate UserCache partition");
+			continue;
+		}
+
+		if (!php_user_cache_partition_startup_storage(entry->partition)) {
+			ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cur, "UserCache partition startup failed; UserCache will be unavailable");
+		}
+
+		entry->next = php_apache_user_cache_partitions;
+		php_apache_user_cache_partitions = entry;
+	}
 }
 
 static int
@@ -500,6 +652,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	if (apache2_sapi_module.startup(&apache2_sapi_module) != SUCCESS) {
 		return DONE;
 	}
+	php_apache_user_cache_init_partitions(pconf, s);
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_add_version(pconf);
 
@@ -548,12 +701,21 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 
 	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
 
-	return php_request_startup();
+	php_apache_user_cache_activate_request_partition(r);
+
+	if (php_request_startup() == FAILURE) {
+		php_user_cache_partition_activate(NULL);
+
+		return FAILURE;
+	}
+
+	return SUCCESS;
 }
 
 static void php_apache_request_dtor(request_rec *r)
 {
 	php_request_shutdown(NULL);
+	php_user_cache_partition_activate(NULL);
 }
 
 static void php_apache_ini_dtor(request_rec *r, request_rec *p)

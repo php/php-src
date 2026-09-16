@@ -32,6 +32,8 @@
 
 #include "ext/standard/basic_functions.h"
 
+#include "ext/user_cache/php_user_cache.h"
+
 #if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
 #endif
@@ -698,6 +700,8 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 	if (php_module_startup(module, &sapi_phpdbg_module_entry) == FAILURE) {
 		return FAILURE;
 	}
+
+	php_user_cache_opt_in();
 
 	phpdbg_booted = 1;
 
