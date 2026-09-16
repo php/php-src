@@ -99,6 +99,11 @@ PHP_METHOD(PhpToken, tokenize)
 
 	token_class = zend_get_called_scope(execute_data);
 
+	if (!token_class) {
+		zend_throw_error(NULL, "Cannot call PhpToken::tokenize() without a called scope");
+		RETURN_THROWS();
+	}
+
 	/* Check construction preconditions in advance, so these are not repeated for each token. */
 	if (token_class->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
 		zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(token_class->name));
