@@ -14,7 +14,7 @@ var_dump($fp = fopen(__FILE__, 'r'));
 echo "\n-- Try to close the file pointer using closedir() --\n";
 try {
     var_dump(closedir($fp));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "\n-- Check file pointer: --\n";

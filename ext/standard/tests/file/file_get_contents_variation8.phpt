@@ -34,7 +34,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo "-- Iteration $i --\n";
     try {
         var_dump(file_get_contents($names_arr[$i]));
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }

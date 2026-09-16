@@ -18,7 +18,7 @@ try {
 }
 try {
     var_dump( vfprintf( $fp, 'Foo %$c-0202Sd', array( 2 ) ) );
-} catch(\Throwable $e) {
+} catch(Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 // Close handle

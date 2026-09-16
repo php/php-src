@@ -5,7 +5,7 @@ Bug #61058 (array_fill leaks if start index is PHP_INT_MAX)
 
 try {
     array_fill(PHP_INT_MAX, 2, '*');
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

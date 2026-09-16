@@ -101,7 +101,7 @@ foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
         var_dump( array_multisort($ar1, $value) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 };

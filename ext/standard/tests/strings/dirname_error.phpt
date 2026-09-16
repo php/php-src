@@ -7,7 +7,7 @@ echo "*** Testing error conditions ***\n";
 // Bad arg
 try {
     dirname("/var/tmp/bar.gz", 0);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

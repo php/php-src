@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 foreach([INF, -INF, 10e300, -10e300, NAN, -NAN] as $var) {
 	try {
 		time_sleep_until($var);
-	} catch (\Throwable $e) {
+	} catch (Throwable $e) {
 		echo $e::class, ': ', $e->getMessage(), "\n";
 	}
 }

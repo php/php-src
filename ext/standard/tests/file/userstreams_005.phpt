@@ -41,7 +41,7 @@ test("stream_truncate size 0", $fd, 0);
 test("stream_truncate size 10", $fd, 10);
 try {
     test("stream_truncate negative size", $fd, -1);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 test("stream_truncate bad return", $fd3, 0);

@@ -22,7 +22,7 @@ $arr = array('string' => new obj);
 
 try {
     array_walk_recursive($arr, 'settype');
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

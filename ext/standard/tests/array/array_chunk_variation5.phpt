@@ -23,17 +23,17 @@ foreach ($sizes as $size){
     echo "\n-- Testing array_chunk() when size = $size --\n";
     try {
         var_dump( array_chunk($input_array, $size) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, true) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, false) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }

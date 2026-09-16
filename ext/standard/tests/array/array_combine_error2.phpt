@@ -12,7 +12,7 @@ var_dump( array_combine(array(), array()) );
 echo "\n-- Testing array_combine() function with empty array for \$keys argument --\n";
 try {
     var_dump( array_combine(array(), array(1, 2)) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -20,7 +20,7 @@ try {
 echo "-- Testing array_combine() function with empty array for \$values argument --\n";
 try {
     var_dump( array_combine(array(1, 2), array()) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -28,7 +28,7 @@ try {
 echo "-- Testing array_combine() function by passing array with unequal number of elements --\n";
 try {
     var_dump( array_combine(array(1, 2), array(1, 2, 3)) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

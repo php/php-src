@@ -13,38 +13,38 @@ $enclosure = '"';
 echo 'fgetcsv() with negative length' . \PHP_EOL;
 try {
     var_dump( fgetcsv($file_handle, -10, escape: "\\") );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( fgetcsv($file_handle, -10, $delimiter, escape: "\\") );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( fgetcsv($file_handle, -10, $delimiter, $enclosure, escape: "\\") );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo 'fgetcsv() with delimiter as empty string' . \PHP_EOL;
 try {
     var_dump( fgetcsv($file_handle, $length, '', $enclosure, escape: "\\") );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo 'fgetcsv() with enclosure as empty string' . \PHP_EOL;
 try {
     var_dump( fgetcsv($file_handle, $length, $delimiter, '', escape: "\\") );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo 'fgetcsv() with delimiter & enclosure as empty string' . \PHP_EOL;
 try {
     var_dump( fgetcsv($file_handle, $length, '', '', escape: "\\") );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

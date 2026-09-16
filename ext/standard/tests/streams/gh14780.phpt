@@ -10,23 +10,23 @@ $code = null;
 $err = null;
 try {
 	pfsockopen('udp://127.0.0.1', '63844', $code, $err, (PHP_INT_MAX/100000)+1);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pfsockopen('udp://127.0.0.1', '63844', $code, $err, (PHP_INT_MIN/100000)-1);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(pfsockopen('udp://127.0.0.1', '63844', $code, $err, -1));
 try {
 	pfsockopen('udp://127.0.0.1', '63844', $code, $err, NAN);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pfsockopen('udp://127.0.0.1', '63844', $code, $err, INF);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

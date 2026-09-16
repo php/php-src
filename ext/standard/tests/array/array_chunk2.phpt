@@ -6,13 +6,13 @@ $input_array = array('a', 'b', 'c', 'd', 'e');
 
 try {
     var_dump(array_chunk($input_array, 0));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(array_chunk($input_array, 0, true));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

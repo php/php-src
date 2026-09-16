@@ -6,42 +6,42 @@ Only arrays and countable objects can be counted
 try {
     $result = count(null);
     var_dump($result);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $result = count("string");
     var_dump($result);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $result = count(123);
     var_dump($result);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $result = count(true);
     var_dump($result);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $result = count(false);
     var_dump($result);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $result = count((object) []);
     var_dump($result);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

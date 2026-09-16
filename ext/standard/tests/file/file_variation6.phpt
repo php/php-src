@@ -11,7 +11,7 @@ fclose($fd);
 for ($flags = 0; $flags <= 32; $flags++) {
     try {
         var_dump(file($filepath, $flags));
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }

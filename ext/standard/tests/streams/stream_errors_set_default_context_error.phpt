@@ -9,7 +9,7 @@ try {
             'error_mode' => StreamErrorMode::Exception,
         ]
     ]);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

@@ -9,7 +9,7 @@ $intMax = 2147483647;
 // calling array_fill() with 'count' larger than INT_MAX
 try {
     $array = array_fill(0, $intMax+1, 1);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

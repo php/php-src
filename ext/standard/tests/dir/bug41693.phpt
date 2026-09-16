@@ -5,7 +5,7 @@ Bug #41693 (scandir() allows empty directory names)
 
 try {
     var_dump(scandir(''));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

@@ -13,7 +13,7 @@ fwrite($fp, "This is ");
 fclose($fp);
 try {
     stream_filter_remove($rot13_filter);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

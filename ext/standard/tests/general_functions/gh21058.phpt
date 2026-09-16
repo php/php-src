@@ -5,7 +5,7 @@ GH-21058 (error_log() crash with null destination and message type 3)
 
 try {
 	error_log("test", 3, null);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

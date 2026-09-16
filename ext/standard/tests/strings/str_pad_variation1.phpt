@@ -20,7 +20,7 @@ $input = "Test string";
 $extra_large_pad_length = PHP_INT_MAX*5;
 try {
     var_dump( str_pad($input, $extra_large_pad_length) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

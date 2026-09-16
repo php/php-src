@@ -18,7 +18,7 @@ $bar = null;
 if (!is_countable($bar)) {
     try {
         count($bar);
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }

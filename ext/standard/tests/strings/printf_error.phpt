@@ -22,36 +22,36 @@ $arg2 = 'two';
 echo "\n-- Call printf with one argument less than expected --\n";
 try {
     var_dump( printf($format1) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( printf($format2,$arg1) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( printf($format3,$arg1,$arg2) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- Call printf with two argument less than expected --\n";
 try {
     var_dump( printf($format2) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( printf($format3,$arg1) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n-- Call printf with three argument less than expected --\n";
 try {
     var_dump( printf($format3) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

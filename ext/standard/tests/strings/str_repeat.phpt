@@ -30,7 +30,7 @@ foreach($variations as $input) {
 echo "\n\n*** Testing error conditions ***\n";
 try {
     str_repeat($input[0], -1); // Invalid arg for multiplier
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

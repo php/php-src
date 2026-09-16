@@ -34,7 +34,7 @@ chmod(__DIR__ . "/gh7875.mail.log", 0444);
 try {
 	mail('recipient@example.com', 'Subject', 'Body', []);
 	echo 'Not Reached';
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump(file_exists(__DIR__ . "/gh7875.mail.out"));
 }

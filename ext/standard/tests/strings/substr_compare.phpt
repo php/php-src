@@ -17,7 +17,7 @@ echo "Test\n";
 
 try {
     substr_compare("abcde", "abc", 0, -1);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(substr_compare("abcde", "abc", -1, NULL, -5) > 0);

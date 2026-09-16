@@ -4,13 +4,13 @@ dns_check_record() error conditions
 <?php
 try {
     dns_check_record('');
-} catch (\Throwable $exception) {
+} catch (Throwable $exception) {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 try {
     // A random DNS Mode
     dns_check_record('php.net', 15263480);
-} catch (\Throwable $exception) {
+} catch (Throwable $exception) {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>

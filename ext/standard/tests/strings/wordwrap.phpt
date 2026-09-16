@@ -29,7 +29,7 @@ var_dump("123|==1234567890|==123" === wordwrap("123 1234567890 123", 10, "|==", 
 
 try {
     wordwrap(chr(0), 0, "");
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

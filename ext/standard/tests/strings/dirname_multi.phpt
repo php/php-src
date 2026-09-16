@@ -10,7 +10,7 @@ if((substr(PHP_OS, 0, 3) == "WIN"))
 for ($i=0 ; $i<5 ; $i++) {
     try {
         var_dump(dirname("/foo/bar/baz", $i));
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }

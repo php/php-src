@@ -160,7 +160,7 @@ class mystream
 try {
     stream_wrapper_register("bogus", "class_not_exist");
     die("Registered a non-existent class!!!???");
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "Not Registered\n";

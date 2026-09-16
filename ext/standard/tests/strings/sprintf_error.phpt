@@ -22,42 +22,42 @@ $arg2 = 'two';
 // with one argument less than expected
 try {
     var_dump( sprintf($format1) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( sprintf($format2,$arg1) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( sprintf($format3,$arg1,$arg2) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // with two argument less than expected
 try {
     var_dump( sprintf($format2) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( sprintf($format3,$arg1) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // with three argument less than expected
 try {
     var_dump( sprintf($format3) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(sprintf('%100$d %d'));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

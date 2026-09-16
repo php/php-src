@@ -10,17 +10,17 @@ exec, system, passthru  — Basic command execution functions
 $cmd = "echo abc\n\0command";
 try {
     var_dump(exec($cmd, $output));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(system($cmd, $output));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(passthru($cmd, $output));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

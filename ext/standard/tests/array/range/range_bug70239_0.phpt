@@ -4,7 +4,7 @@ Bug #70239 Creating a huge array doesn't result in exhausted, but segfault, var 
 <?php
 try {
     range(0, pow(2.0, 100000000));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

@@ -7,13 +7,13 @@ var_dump(str_word_count(""));
 
 try {
     var_dump(str_word_count("", -1));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(str_word_count("", -1, $a));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

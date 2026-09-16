@@ -34,7 +34,7 @@ file_put_contents($filename, "some test data inside");
 $fp = fopen($filename, "a");
 try {
     var_dump(ftruncate($fp, -1000000000));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 fclose($fp);

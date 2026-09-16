@@ -41,7 +41,7 @@ var_dump(flock($fp, -1));
 
 try {
     var_dump(flock($fp, 0));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

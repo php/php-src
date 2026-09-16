@@ -13,7 +13,7 @@ $data = [['aa'=> 'bb',], ['aa'=> 'bb',],];
 
 try {
     array_multisort(array_column($data, 'bb'),SORT_DESC, $data); // PHP Warning error
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

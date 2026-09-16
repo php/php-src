@@ -31,7 +31,7 @@ foreach($operations as $operation) {
     echo "--- Iteration $i ---" . \PHP_EOL;
     try {
         var_dump(flock($fp, $operation));
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $i++;

@@ -11,14 +11,14 @@ echo "-- Testing fread() with invalid length arguments --\n";
 $len = 0;
 try {
     var_dump( fread($file_handle, $len) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $len = -10;
 try {
     var_dump( fread($file_handle, $len) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

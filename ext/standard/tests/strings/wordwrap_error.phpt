@@ -24,7 +24,7 @@ $cut = true;
 
 try {
     wordwrap($str, $width, $break, $cut);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

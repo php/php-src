@@ -9,7 +9,7 @@ $resourceFileTemp = fopen('php://temp', 'r+');
 stream_context_set_params($resourceFileTemp, array());
 try {
     preg_replace('', function() {}, $resourceFileTemp);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

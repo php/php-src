@@ -29,7 +29,7 @@ for($count = 0; $count < count($values); $count++) {
 
     try {
         var_dump( str_split($str, $values[$count]) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }

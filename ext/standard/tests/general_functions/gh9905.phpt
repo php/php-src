@@ -4,7 +4,7 @@ GH-9905 (constant() behaves inconsistent when class is undefined)
 <?php
 try {
     \constant("\NonExistantClass::non_existant_constant");
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

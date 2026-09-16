@@ -12,7 +12,7 @@ echo "*** Testing array_push() : error conditions ***\n";
 $array = array(PHP_INT_MAX => 'max');
 try {
     var_dump(array_push($array, 'new'));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($array);

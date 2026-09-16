@@ -11,14 +11,14 @@ echo "-- Testing fgets() with invalid length arguments --\n";
 $len = 0;
 try {
     var_dump( fgets($fp, $len) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $len = -10;
 try {
     var_dump( fgets($fp, $len) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $len = 1;

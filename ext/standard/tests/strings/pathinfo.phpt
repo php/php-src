@@ -17,43 +17,43 @@ var_dump(pathinfo(__FILE__, PATHINFO_DIRNAME));
 
 try {
 	pathinfo(__FILE__, PATHINFO_EXTENSION|PATHINFO_FILENAME|PATHINFO_DIRNAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo(__FILE__, PATHINFO_EXTENSION|PATHINFO_FILENAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo(__FILE__, PATHINFO_EXTENSION|PATHINFO_DIRNAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo(__FILE__, PATHINFO_FILENAME|PATHINFO_BASENAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo(__FILE__, PATHINFO_DIRNAME|PATHINFO_EXTENSION);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo(__FILE__, PATHINFO_DIRNAME|PATHINFO_BASENAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
 	pathinfo(__FILE__, PATHINFO_DIRNAME-1);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo(__FILE__, PATHINFO_ALL+1);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

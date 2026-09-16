@@ -10,12 +10,12 @@ echo "\n-- Testing readfile() with invalid arguments --\n";
 // invalid arguments
 try {
     var_dump( readfile('') );  // empty string as $filename
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump( readfile(false) );  // boolean false as $filename
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

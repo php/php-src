@@ -12,7 +12,7 @@ echo "*** Testing readdir() : usage variations ***\n";
 var_dump($fp = fopen(__FILE__, "r"));
 try {
     var_dump( readdir($fp) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

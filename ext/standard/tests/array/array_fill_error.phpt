@@ -11,7 +11,7 @@ $val = 1;
 
 try {
     var_dump( array_fill($start_key,$num,$val) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

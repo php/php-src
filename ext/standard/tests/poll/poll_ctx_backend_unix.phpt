@@ -18,7 +18,7 @@ $backend = $poll_ctx->getBackend();
 var_dump($backend->name);
 try {
     new Io\Poll\Context(Io\Poll\Backend::WSAPoll);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

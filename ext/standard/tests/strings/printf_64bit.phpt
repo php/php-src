@@ -41,7 +41,7 @@ $nbr = 5;
 $name = "voudras";
 try {
     printf("%d $string %s", $nbr, $name);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

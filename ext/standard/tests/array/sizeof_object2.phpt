@@ -76,21 +76,21 @@ for($i = 0; $i < count($objects); $i++)
   echo "Default Mode: ";
   try {
     var_dump( sizeof($var) );
-  } catch (\Throwable $e) {
+  } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
   }
 
   echo "COUNT_NORMAL Mode: ";
   try {
     var_dump( sizeof($var, COUNT_NORMAL) );
-  } catch (\Throwable $e) {
+  } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
   }
 
   echo "COUNT_RECURSIVE Mode: ";
   try {
     var_dump( sizeof($var, COUNT_RECURSIVE) );
-  } catch (\Throwable $e) {
+  } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
   }
 

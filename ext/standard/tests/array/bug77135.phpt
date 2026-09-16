@@ -36,7 +36,7 @@ class Extract
 
             echo "  \$this = " . get_class($this) . "\n";
             echo "  \$v_this = " . (isset($x_this) ? $x_this : "NULL") . "\n";
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }

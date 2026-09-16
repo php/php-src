@@ -4,12 +4,12 @@ Creating a range that exceeds the maximum array size
 <?php
 try {
     var_dump(range(0, 100_000_000_000, 0.1));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(range(PHP_INT_MIN, PHP_INT_MAX, 1));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

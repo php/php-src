@@ -28,7 +28,7 @@ foreach ($fs as $s) {
         echo 'range(', safe_to_string($s), ', ', safe_to_string($e), ");\n";
         try {
             var_dump( range($s, $e) );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }

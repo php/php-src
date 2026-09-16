@@ -7,7 +7,7 @@ $haystack = 'This is a Simple text.';
 echo "-- Testing strpbrk() function with empty second argument --\n";
 try {
     strpbrk($haystack, '');
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

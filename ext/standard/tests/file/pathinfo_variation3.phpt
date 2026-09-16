@@ -18,32 +18,32 @@ var_dump(pathinfo($testfile, PATHINFO_DIRNAME));
 
 try {
 	pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_FILENAME|PATHINFO_DIRNAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_FILENAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo($testfile, PATHINFO_EXTENSION|PATHINFO_DIRNAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo($testfile, PATHINFO_FILENAME|PATHINFO_BASENAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_EXTENSION);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
 	pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_BASENAME);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
 	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

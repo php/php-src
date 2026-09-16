@@ -5,7 +5,7 @@ Bug #71882 (Negative ftruncate() on php://memory exhausts memory)
 $fd = fopen("php://memory", "w+");
 try {
     var_dump(ftruncate($fd, -1));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

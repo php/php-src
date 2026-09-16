@@ -5,7 +5,7 @@ Bug #36944 (strncmp & strncasecmp do not return false on negative string length)
 
 try {
     var_dump(strncmp("test ", "e", -1));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(strncmp("test ", "e", 10));
@@ -13,7 +13,7 @@ var_dump(strncmp("test ", "e", 0));
 
 try {
     var_dump(strncasecmp("test ", "E", -1));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(strncasecmp("test ", "E", 10));

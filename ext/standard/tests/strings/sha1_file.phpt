@@ -34,7 +34,7 @@ echo "\n*** Testing for error conditions ***\n";
 echo "\n-- No filename --\n";
 try {
     var_dump( sha1_file("") );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -47,7 +47,7 @@ var_dump( sha1_file(12) );
 echo "\n-- NULL as filename --\n";
 try {
     var_dump( sha1_file(NULL) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

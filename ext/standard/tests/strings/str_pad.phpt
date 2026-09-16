@@ -66,7 +66,7 @@ echo "\n--- empty padding string ---\n";
 
 try {
     str_pad($input_string, 12, "");
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -74,7 +74,7 @@ try {
 
 try {
     str_pad($input_string, $pad_length, "+", 15);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

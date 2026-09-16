@@ -16,17 +16,17 @@ echo "\n";
 
 try {
     var_dump(explode("", ""));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(explode("", NULL));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(explode(NULL, ""));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
@@ -35,7 +35,7 @@ var_dump(explode("a", "a"));
 var_dump(explode("a", NULL));
 try {
     var_dump(explode(NULL, "a"));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(explode("abc", "acb"));

@@ -35,7 +35,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo "-- testing '$name' --\n";
     try {
         readfile($name);
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }

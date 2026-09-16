@@ -31,7 +31,7 @@ echo "\n*** Testing for error conditions ***\n";
 /* No filename */
 try {
     var_dump( md5_file("") );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 /* invalid filename */

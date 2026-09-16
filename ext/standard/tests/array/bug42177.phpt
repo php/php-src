@@ -20,7 +20,7 @@ $a2 = array( 'key1' => &$a1 );
 $a1 = array_merge_recursive( $a1, $a2 );
 try {
     $a1 = array_merge_recursive( $a1, $a2 );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), ' on line ', $e->getLine(), "\n";
 }
 unset( $a1, $a2 );

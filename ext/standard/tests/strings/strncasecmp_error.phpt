@@ -11,7 +11,7 @@ $len = -10;
 
 try {
     var_dump( strncasecmp($str1, $str2, $len) );
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

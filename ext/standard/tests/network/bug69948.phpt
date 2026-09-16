@@ -4,12 +4,12 @@ Bug #69948 (path/domain are not sanitized for special characters in setcookie)
 <?php
 try {
     var_dump(setcookie('foo', 'bar', 0, 'asdf;asdf'));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(setcookie('foo', 'bar', 0, '/', 'foobar; secure'));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

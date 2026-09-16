@@ -4,7 +4,7 @@ setcookie() allows empty cookie name
 <?php
 try {
     setcookie('', 'foo');
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>

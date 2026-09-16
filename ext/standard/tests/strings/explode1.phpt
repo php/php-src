@@ -29,22 +29,22 @@ foreach($delimiters as $delimiter) {
 
     try {
         var_dump( explode($delimiter, $string, -1) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( explode($delimiter, $string, 0) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( explode($delimiter, $string, 1) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump( explode($delimiter, $string, 2) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $counter++;

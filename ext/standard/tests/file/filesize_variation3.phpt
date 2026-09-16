@@ -18,7 +18,7 @@ for($size = filesize($filename); $size>=-1200; $size-=1200) {
     $file_handle = fopen($filename, "r+");
     try {
         var_dump( ftruncate($file_handle, $size) );
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
     fclose($file_handle);

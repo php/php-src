@@ -10,44 +10,44 @@ ob_start();
 // Unrecognized key and no valid keys
 try {
     setcookie('name', 'value', ['unknown_key' => 'only']);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 // Numeric key and no valid keys
 try {
     setcookie('name2', 'value2', [0 => 'numeric_key']);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 // Unrecognized key
 try {
     setcookie('name3', 'value3', ['path' => '/path/', 'foo' => 'bar']);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 // Invalid path key content
 try {
     setcookie('name', 'value', ['path' => '/;/']);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 // Invalid domain key content
 try {
     setcookie('name', 'value', ['path' => '/path/', 'domain' => 'ba;r']);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 // Partitioned without secure
 try {
     setcookie('name', 'value', ['partitioned' => true]);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // Arguments after options array (will not be set)
 try {
     setcookie('name4', 'value4', [], "path", "domain.tld", true, true);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 

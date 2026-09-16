@@ -6,12 +6,12 @@ Test substr_count() function (basic)
 echo "***Testing basic operations ***\n";
 try {
     substr_count("", "");
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     substr_count("a", "");
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(substr_count("", "a"));

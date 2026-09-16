@@ -48,7 +48,7 @@ foreach($file_content_types as $file_content_type) {
         var_dump( ftell($file_handle) );
         try {
             var_dump( ftruncate($file_handle, $new_size) ); // truncate it
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             echo $e::class, ': ', $e->getMessage(), "\n";
         }
         var_dump( ftell($file_handle) );

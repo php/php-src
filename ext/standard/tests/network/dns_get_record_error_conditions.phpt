@@ -5,7 +5,7 @@ dns_get_record() error conditions
 try {
     // A random DNS Mode
     dns_get_record('php.net', 15263480);
-} catch (\Throwable $exception) {
+} catch (Throwable $exception) {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 try {
@@ -13,7 +13,7 @@ try {
     $auth = [];
     $additional = [];
     dns_get_record('php.net', 0, $auth, $additional, true);
-} catch (\Throwable $exception) {
+} catch (Throwable $exception) {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 try {
@@ -21,7 +21,7 @@ try {
     $auth = [];
     $additional = [];
     dns_get_record('php.net', 15263480, $auth, $additional, true);
-} catch (\Throwable $exception) {
+} catch (Throwable $exception) {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>

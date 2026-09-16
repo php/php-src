@@ -17,7 +17,7 @@ $modes = [
 foreach ($modes as $mode) {
     try {
         var_dump(count([], $mode));
-    } catch (\Throwable $error) {
+    } catch (Throwable $error) {
         echo $error::class, ': ', $error->getMessage(), "\n";
     }
 }

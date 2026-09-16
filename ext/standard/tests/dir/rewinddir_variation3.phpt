@@ -15,7 +15,7 @@ $result1 = fread($fp, 5);
 
 try {
     var_dump(rewinddir($fp));
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $result2 = fread($fp, 5);
