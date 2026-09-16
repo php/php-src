@@ -93,13 +93,14 @@ function user_cache_cgi_rm_rf(string $path): void
 }
 
 /* The header records the first 64 bits of the kernel boot_id (dashes
- * stripped) in native byte order. */
+ * stripped) as a native-endian uint64_t. Probe the byte order with a 32-bit
+ * format code: 'J'/'P'/'Q' are unavailable on 32-bit builds. */
 function user_cache_boot_token(): string
 {
     $hex = substr(str_replace('-', '', trim(file_get_contents('/proc/sys/kernel/random/boot_id'))), 0, 16);
     $bigEndian = hex2bin($hex);
 
-    return pack('J', 1) === pack('P', 1) ? $bigEndian : strrev($bigEndian);
+    return pack('L', 1) === pack('N', 1) ? $bigEndian : strrev($bigEndian);
 }
 
 function user_cache_boot_token_offset(string $segment, string $token): int|false
