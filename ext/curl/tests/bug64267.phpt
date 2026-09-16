@@ -2,16 +2,13 @@
 Bug #64267 (CURLOPT_INFILE doesn't allow reset)
 --EXTENSIONS--
 curl
---SKIPIF--
-<?php
-if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
-?>
 --FILE--
 <?php
-
+include 'server.inc';
 echo "TEST\n";
 
-$c = curl_init("http://google.com");
+$host = curl_cli_server_start();
+$c = curl_init($host);
 $f = fopen(__FILE__,"r");
 var_dump(curl_setopt_array($c, [
     CURLOPT_RETURNTRANSFER => true,
@@ -30,8 +27,8 @@ var_dump(curl_setopt_array($c, [
 curl_exec($c);
 var_dump(curl_getinfo($c, CURLINFO_RESPONSE_CODE));
 ?>
---EXPECTF--
+--EXPECT--
 TEST
 bool(true)
 bool(true)
-int(30%d)
+int(200)
