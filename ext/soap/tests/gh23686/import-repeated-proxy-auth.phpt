@@ -1,5 +1,5 @@
 --TEST--
-GH-23686: Regression tests for repeated proxy authorization headers (which doesn't work) (`<import>`)
+GH-23686: Regression tests for repeated proxy authorization headers (which previously didn't work) (`<import>`)
 --EXTENSIONS--
 soap
 --INI--
@@ -32,13 +32,11 @@ check_headers_for_import(LOGS_PATH, $context, false);
 
 ?>
 --EXPECTF--
-SoapFault: SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://localhost:%d/index.php' : failed to load external entity "http://localhost:%d/index.php"
-
-bool(false)
-SoapFault: SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://localhost:%d/index.php' : failed to load external entity "http://localhost:%d/index.php"
-
-bool(false)
-Server exited with non-zero status: 1
-
-Warning: file_get_contents(): Failed to open stream: No such file or directory in %s on line %d
-Server output:
+string(%d) "array (
+  'Host' => 'localhost:%d',
+  'Connection' => 'close',
+)"
+string(%d) "array (
+  'Host' => 'localhost:%d',
+  'Connection' => 'close',
+)"

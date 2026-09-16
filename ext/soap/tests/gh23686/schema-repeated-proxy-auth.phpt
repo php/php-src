@@ -1,5 +1,5 @@
 --TEST--
-GH-23686: Regression tests for repeated proxy authorization headers (which doesn't work) (`<schema>`)
+GH-23686: Regression tests for repeated proxy authorization headers (which previously didn't work) (`<schema>`)
 --EXTENSIONS--
 soap
 --INI--
@@ -32,11 +32,11 @@ check_headers_for_schema(LOGS_PATH, $context, false);
 
 ?>
 --EXPECTF--
-SoapFault: SOAP-ERROR: Parsing Schema: can't import schema from 'http://localhost:%d/index.php'
-bool(false)
-SoapFault: SOAP-ERROR: Parsing Schema: can't import schema from 'http://localhost:%d/index.php'
-bool(false)
-Server exited with non-zero status: 1
-
-Warning: file_get_contents(): Failed to open stream: No such file or directory in %s on line %d
-Server output:
+string(%d) "array (
+  'Host' => 'localhost:%d',
+  'Connection' => 'close',
+)"
+string(%d) "array (
+  'Host' => 'localhost:%d',
+  'Connection' => 'close',
+)"
