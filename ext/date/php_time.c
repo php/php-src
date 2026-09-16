@@ -48,6 +48,13 @@ static zend_object *time_duration_object_clone(zend_object *object)
 	return &new_obj->std;
 }
 
+static int time_duration_object_compare(zval *a, zval *b)
+{
+	ZEND_COMPARE_OBJECTS_FALLBACK(a, b);
+
+	return timelib_duration_compare(&Z_DATE_TIME_DURATION_P(a)->duration, &Z_DATE_TIME_DURATION_P(b)->duration);
+}
+
 PHP_MINIT_FUNCTION(date_time)
 {
 	/* Time\TimeException */
@@ -57,6 +64,7 @@ PHP_MINIT_FUNCTION(date_time)
 	memcpy(&time_duration_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	time_duration_object_handlers.offset = offsetof(php_date_time_duration, std);
 	time_duration_object_handlers.clone_obj = time_duration_object_clone;
+	time_duration_object_handlers.compare = time_duration_object_compare;
 	php_date_ce_time_duration = register_class_Time_Duration();
 	php_date_ce_time_duration->create_object = time_duration_object_create;
 	php_date_ce_time_duration->default_object_handlers = &time_duration_object_handlers;
