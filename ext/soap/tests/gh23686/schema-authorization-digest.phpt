@@ -32,10 +32,8 @@ check_headers_for_schema(LOGS_PATH, $context);
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'Authorization' => 'Digest secret-token',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'Authorization' => 'Digest secret-token',
 )"
