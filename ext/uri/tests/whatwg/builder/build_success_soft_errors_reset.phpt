@@ -10,6 +10,8 @@ $builder->setFragment("a\tb");
 $softErrors = [];
 $builder->build(softErrors: $softErrors);
 
+var_dump($softErrors);
+
 $builder->setFragment("ab");
 $url = $builder->build(softErrors: $softErrors);
 
@@ -20,6 +22,17 @@ var_dump($url->equals(new Uri\WhatWg\Url($url->toAsciiString())));
 
 ?>
 --EXPECTF--
+array(1) {
+  [0]=>
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
+    ["context"]=>
+    string(2) "	b"
+    ["type"]=>
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+    ["failure"]=>
+    bool(false)
+  }
+}
 string(23) "https://example.com/#ab"
 object(Uri\WhatWg\Url)#%d (%d) {
   ["scheme"]=>
