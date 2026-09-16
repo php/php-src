@@ -148,6 +148,10 @@ struct _soapService {
 #define SOAP_SSL_METHOD_SSLv3   2
 #define SOAP_SSL_METHOD_SSLv23  3
 
+/* Some headers are redacted on requests to other hosts unless requested otherwise */
+#define WSDL_HEADER_KEEP_AUTHORIZATION (1 << 0)
+#define WSDL_HEADER_KEEP_PROXY_AUTHORIZATION (1 << 1)
+#define WSDL_HEADER_KEEP_COOKIES (1 << 2)
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *typemap;
@@ -252,6 +256,7 @@ static zend_always_inline zval *php_soap_deref(zval *zv) {
 #define Z_CLIENT_LAST_RESPONSE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 32)
 #define Z_CLIENT_LAST_REQUEST_HEADERS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 33)
 #define Z_CLIENT_LAST_RESPONSE_HEADERS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 34)
+#define Z_CLIENT_KEEP_HEADERS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 35)
 
 typedef struct soap_url_object {
 	php_uri *uri;

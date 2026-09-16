@@ -2105,6 +2105,7 @@ PHP_METHOD(SoapClient, __construct)
 	sdlPtr sdl = NULL;
 	HashTable *typemap_ht = NULL;
 	zval *this_ptr = ZEND_THIS;
+	zend_long keep_headers = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!|a", &wsdl, &options) == FAILURE) {
 		RETURN_THROWS();
@@ -2301,6 +2302,26 @@ PHP_METHOD(SoapClient, __construct)
 			php_error_docref(NULL, E_DEPRECATED,
 				"The \"ssl_method\" option is deprecated. "
 				"Use \"ssl\" stream context options instead");
+		}
+
+		if ((tmp = zend_hash_str_find(ht, "keep_headers", sizeof("keep_headers")-1)) != NULL
+			&& Z_TYPE_P(tmp) == IS_ARRAY
+		) {
+			ZEND_HASH_FOREACH_VAL(Z_ARR_P(tmp), zval *to_keep) {
+				if (Z_TYPE_P(to_keep) != IS_STRING) {
+					continue;
+				}
+				zend_string *header_name = Z_STR_P(to_keep);
+				if (zend_string_equals_literal_ci(header_name, "authorization")) {
+					keep_headers |= WSDL_HEADER_KEEP_AUTHORIZATION;
+				} else if (zend_string_equals_literal_ci(header_name, "proxy-authorization")) {
+					keep_headers |= WSDL_HEADER_KEEP_PROXY_AUTHORIZATION;
+				} else if (zend_string_equals_literal_ci(header_name, "cookie")) {
+					keep_headers |= WSDL_HEADER_KEEP_COOKIES;
+				}
+			} ZEND_HASH_FOREACH_END();
+			ZVAL_LONG(Z_CLIENT_KEEP_HEADERS_P(this_ptr), keep_headers);
+
 		}
 	} else if (!wsdl) {
 		php_error_docref(NULL, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");

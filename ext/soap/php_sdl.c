@@ -321,6 +321,15 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 		zend_string *lc_headers = zend_string_tolower(Z_STR_P(header));
 		// Fast path: no redaction needed
 		uint32_t redaction = header_needs_redaction(lc_headers);
+		if (ctx->headers_to_keep & WSDL_HEADER_KEEP_AUTHORIZATION) {
+			redaction &= ~REDACT_AUTHORIZATION;
+		}
+		if (ctx->headers_to_keep & WSDL_HEADER_KEEP_PROXY_AUTHORIZATION) {
+			redaction &= ~REDACT_PROXY_AUTH;
+		}
+		if (ctx->headers_to_keep & WSDL_HEADER_KEEP_COOKIES) {
+			redaction &= ~REDACT_COOKIE;
+		}
 		if (redaction == REDACT_NONE) {
 			zend_string_release(lc_headers);
 			return;
@@ -818,6 +827,11 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.bindings, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
+
+	ctx.headers_to_keep = 0;
+	if (instanceof_function(Z_OBJCE_P(this_ptr), soap_class_entry)) {
+		ctx.headers_to_keep = Z_LVAL_P(Z_CLIENT_KEEP_HEADERS_P(this_ptr));
+	}
 
 	zend_try {
 		load_wsdl_ex(this_ptr, struri, &ctx, false);
