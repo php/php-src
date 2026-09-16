@@ -198,6 +198,75 @@ static int is_wsdl_element(xmlNodePtr node)
 	return 1;
 }
 
+// Which headers need to be redacted
+#define REDACT_NONE 0
+#define REDACT_AUTHORIZATION (1 << 0)
+#define REDACT_PROXY_AUTH (1 << 1)
+#define REDACT_COOKIE (1 << 2)
+
+static uint32_t header_needs_redaction(zend_string *header) {
+	uint32_t redaction = REDACT_NONE;
+	/* The various loops are so that if the first use of "authorization" is in
+	 * some other header, we still redact the actual "authorization" header.
+	 *
+	 * We check if the character before the start of the header is a '\n' but
+	 * not if the character before that was a `\r`; per RFC9112 while the
+	 * separator is officially both (CRLF) recipients "MAY" recognize just a
+	 * '\n' (LF) as a line terminator. A recipient "MUST" treat a bare '\r' (CR)
+	 * as invalid or replace it, so a '\r' on its own does not start a new
+	 * header.
+	 */
+	char *auth_start = strstr(ZSTR_VAL(header), "authorization:");
+	while (auth_start && *auth_start) {
+		if (auth_start == ZSTR_VAL(header) || *(auth_start - 1) == '\n') {
+			redaction |= REDACT_AUTHORIZATION;
+			break;
+		}
+		auth_start = strstr(auth_start + 1, "authorization:");
+	}
+
+	char *proxy_start = strstr(ZSTR_VAL(header), "proxy-authorization:");
+	while (proxy_start && *proxy_start) {
+		if (proxy_start == ZSTR_VAL(header) || *(proxy_start - 1) == '\n') {
+			redaction |= REDACT_PROXY_AUTH;
+			break;
+		}
+		proxy_start = strstr(proxy_start + 1, "proxy-authorization:");
+	}
+
+	char *cookie_start = strstr(ZSTR_VAL(header), "cookie:");
+	while (cookie_start && *cookie_start) {
+		if (cookie_start == ZSTR_VAL(header) || *(cookie_start - 1) == '\n') {
+			redaction |= REDACT_COOKIE;
+			break;
+		}
+		cookie_start = strstr(cookie_start + 1, "cookie:");
+	}
+	return redaction;
+}
+
+static bool redact_header(char *header_start, uint32_t to_redact) {
+	/* When redacting, we don't remove the REDACT_* flag from to_redact, because
+	 * a header might have been specified multiple times and we want to remove
+	 * all of those uses. */
+	if (to_redact & REDACT_AUTHORIZATION
+		&& strncmp(header_start, "authorization:", strlen("authorization:")) == 0
+	) {
+		return true;
+	}
+	if (to_redact & REDACT_PROXY_AUTH
+		&& strncmp(header_start, "proxy-authorization:", strlen("proxy-authorization:")) == 0
+	) {
+		return true;
+	}
+	if (to_redact & REDACT_COOKIE
+		&& strncmp(header_start, "cookie:", strlen("cookie:")) == 0
+	) {
+		return true;
+	}
+	return false;
+}
+
 void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 {
 	char *s;
@@ -264,26 +333,107 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 		return;
 	}
 
-	if ((header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL &&
-		Z_TYPE_P(header) == IS_STRING
-	) {
-		/* TODO: should support header as an array, but this code path is untested */
-		s = strstr(Z_STRVAL_P(header), "Authorization: Basic");
-		if (s && (s == Z_STRVAL_P(header) || *(s-1) == '\n' || *(s-1) == '\r')) {
-			char *rest = strstr(s, "\r\n");
-			if (rest) {
-				zval new_header;
+	header = php_stream_context_get_option(ctx->context, "http", "header");
+	if (header == NULL) {
+		return;
+	}
 
-				rest += 2;
-				ZVAL_NEW_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
-				memcpy(Z_STRVAL(new_header), Z_STRVAL_P(header), s - Z_STRVAL_P(header));
-				memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
-				ZVAL_COPY(&ctx->old_header, header);
-				php_stream_context_set_option(ctx->context, "http", "header", &new_header);
-				zval_ptr_dtor(&new_header);
+	zend_string *flat_headers;
+	if (Z_TYPE_P(header) == IS_STRING) {
+		flat_headers = zend_string_copy(Z_STR_P(header));
+	} else if (Z_TYPE_P(header) == IS_ARRAY) {
+		smart_str buf = {0};
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(header), zval *value) {
+			if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value)) {
+				if (buf.s) {
+					smart_str_appendl(&buf, "\r\n", 2);
+				}
+				smart_str_append(&buf, Z_STR_P(value));
+			}
+		} ZEND_HASH_FOREACH_END();
+		flat_headers = smart_str_extract(&buf);
+	} else {
+		return;
+	}
+	zend_string *lc_headers = zend_string_tolower(flat_headers);
+	// Fast path: no redaction needed
+	uint32_t redaction = header_needs_redaction(lc_headers);
+	if (redaction == REDACT_NONE) {
+		zend_string_release(lc_headers);
+		zend_string_release(flat_headers);
+		return;
+	}
+	// At least one of the headers needs to be stripped. To avoid repeated
+	// copying and case comparisons, we go through the headers one at a time.
+	// Will be allocated on the first header that should be kept.
+	zend_string *redacted = NULL;
+	// Pointer to the current read location
+	char *read_ptr = ZSTR_VAL(flat_headers);
+	// Offset from the start of the read location
+	size_t read_offset = 0;
+	// Offset from the start of the write location
+	size_t write_offset = 0;
+
+	while (true) {
+		if (redact_header(ZSTR_VAL(lc_headers) + read_offset, redaction)) {
+			/* Current header should be skipped
+			 * As with header_needs_redaction() we treat a '\n' as the end
+			 * of the header even if not preceded by '\r'. */
+			char *header_end = memchr(read_ptr, '\n', ZSTR_LEN(flat_headers) - read_offset);
+			if (header_end) {
+				// Skip the current header and the \n
+				size_t header_length = (header_end - read_ptr) + 1;
+				read_offset += header_length;
+				read_ptr += header_length;
+			} else {
+				// This is the end
+				break;
+			}
+		} else {
+			// Current header (from `read_offset`) should be kept
+			if (redacted == NULL) {
+				// This will over allocate the redacted header string but
+				// that isn't a big deal, the headers should be fairly short
+				redacted = zend_string_alloc(ZSTR_LEN(flat_headers), false);
+			}
+			char *header_end = memchr(read_ptr, '\n', ZSTR_LEN(flat_headers) - read_offset);
+			if (header_end) {
+				// Copy the current header and the \n
+				size_t header_length = (header_end - read_ptr) + 1;
+				memcpy(ZSTR_VAL(redacted) + write_offset, read_ptr, header_length);
+				// Update offsets
+				read_offset += header_length;
+				read_ptr += header_length;
+				write_offset += header_length;
+			} else {
+				// Copy until the end of the headers
+				size_t header_length = ZSTR_LEN(lc_headers) - read_offset;
+				memcpy(ZSTR_VAL(redacted) + write_offset, read_ptr, header_length);
+				write_offset += header_length;
+				break;
 			}
 		}
 	}
+	zend_string_release(lc_headers);
+	zend_string_release(flat_headers);
+
+	ZVAL_COPY(&ctx->old_header, header);
+	zval new_header;
+	if (redacted == NULL) {
+		// All headers were redacted
+		ZVAL_EMPTY_STRING(&new_header);
+	} else {
+		// Only some headers were redacted
+		// The zval_ptr_dtor call will ensure that the redacted headers
+		// are freed;
+		// Make sure that we don't read garbage
+		ZSTR_VAL(redacted)[write_offset] = '\0';
+		ZSTR_LEN(redacted) = write_offset;
+
+		ZVAL_STR(&new_header, redacted);
+	}
+	php_stream_context_set_option(ctx->context, "http", "header", &new_header);
+	zval_ptr_dtor(&new_header);
 }
 
 void sdl_restore_uri_credentials(sdlCtx *ctx)

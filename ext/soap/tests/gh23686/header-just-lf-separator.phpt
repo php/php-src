@@ -23,7 +23,7 @@ const LOGS_PATH = __DIR__ . "/header-just-lf-separator-logs.txt";
 
 // Headers reach sdl_set_uri_credentials() as a string
 $context = stream_context_create([
-	'http' => ['header' => "Authorization: Basic\nFoo: bar"],
+	'http' => ['header' => "Authorization: Basic\nFoo: bar\nProxy-Authorization: Something\nBaz: Qux\nCookie: Tasty"],
 ]);
 
 echo "Headers are in a string:\n";
@@ -35,7 +35,7 @@ $context = stream_context_create([
 	'http' => [
 		// having a protocol here means that SOAP won't add it itself
 		'protocol_version' => 1.1,
-		'header' => "Authorization: Basic\nFoo: bar"
+		'header' => "Authorization: Basic\nFoo: bar\nProxy-Authorization: Something\nBaz: Qux\nCookie: Tasty"
 	],
 ]);
 
@@ -50,44 +50,48 @@ string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
   'Foo' => 'bar',
+  'Baz' => 'Qux',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
   'Foo' => 'bar',
+  'Baz' => 'Qux',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
   'Foo' => 'bar',
+  'Baz' => 'Qux',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
   'Foo' => 'bar',
+  'Baz' => 'Qux',
 )"
 Headers are in an array:
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'Authorization' => 'Basic',
   'Foo' => 'bar',
+  'Baz' => 'Qux',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'Authorization' => 'Basic',
   'Foo' => 'bar',
+  'Baz' => 'Qux',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'Authorization' => 'Basic',
   'Foo' => 'bar',
+  'Baz' => 'Qux',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'Authorization' => 'Basic',
   'Foo' => 'bar',
+  'Baz' => 'Qux',
 )"

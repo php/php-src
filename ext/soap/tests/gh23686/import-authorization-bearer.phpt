@@ -32,10 +32,8 @@ check_headers_for_import(LOGS_PATH, $context);
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'Authorization' => 'Bearer secret-token',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'Authorization' => 'Bearer secret-token',
 )"

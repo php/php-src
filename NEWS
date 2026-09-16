@@ -95,6 +95,10 @@ PHP                                                                        NEWS
   . Fixed session data loss in the files save handler when writing the session
     file fails after it was already truncated. (Ilia Alshanetsky)
 
+- SOAP:
+  . Fixed bug GH-23686 (SoapClient only strips `Authorization: Basic` when a
+    WSDL imports from another host). (DanielEScherzer)
+
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
