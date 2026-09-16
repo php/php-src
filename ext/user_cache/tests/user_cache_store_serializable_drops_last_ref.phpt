@@ -96,7 +96,6 @@ ok('serializable snapshot fetched class', $fetched instanceof SerSnapshotHolder)
 ok('serializable snapshot inner class', $fetched->inner instanceof SerDropper2);
 ok('serializable snapshot inner value', $fetched->inner->a === 7);
 
-/* The pool survives every one of those stores. */
 ok('cache still usable', $cache->store('scalar', 5) && $cache->fetch('scalar') === 5);
 
 SerDropper::$holder = null;

@@ -130,7 +130,6 @@ ok('serialize snapshot fetched class', $fetched instanceof SerializeSnapshotHold
 ok('serialize snapshot inner class', $fetched->inner instanceof SerializeDropper);
 ok('serialize snapshot inner value', $fetched->inner->a === 1);
 
-/* The pool survives every one of those stores. */
 ok('cache still usable', $cache->store('scalar', 7) && $cache->fetch('scalar') === 7);
 
 SleepDropper::$holder = null;

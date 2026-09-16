@@ -106,4 +106,8 @@ extern const php_user_cache_shm_handlers php_user_cache_alloc_shm_handlers;
 extern const php_user_cache_shm_handlers php_user_cache_alloc_posix_handlers;
 #endif
 
+#ifndef ZEND_WIN32
+bool php_user_cache_preallocate_fd(int fd, size_t size);
+#endif
+
 #endif /* PHP_USER_CACHE_SHM_H */

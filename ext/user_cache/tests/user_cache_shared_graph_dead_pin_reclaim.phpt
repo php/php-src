@@ -86,7 +86,6 @@ $status = UserCache\Cache::getStatus();
 var_dump($status->getDeadPinOwnersReclaimed() - $owners0);
 var_dump($status->getDeadPinsStripped() - $stripped0 === KEYS);
 
-/* No pins remain in any owner slot. */
 var_dump($status->getGraphPinnedReferences());
 ?>
 --EXPECT--

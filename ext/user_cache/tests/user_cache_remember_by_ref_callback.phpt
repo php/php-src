@@ -24,7 +24,6 @@ $computed = [$cache->remember('by-ref', $byRef)];
 var_dump($computed);
 var_dump($cache->fetch('by-ref'));
 
-/* The second call is a cache hit and must return the same plain value. */
 $cached = [$cache->remember('by-ref', $byRef)];
 var_dump($cached);
 

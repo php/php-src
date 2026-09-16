@@ -16,7 +16,6 @@ for ($i = 0; $i < 476; $i++) {
     }
 }
 
-/* Hold a per-key lock on one cold entry. */
 var_dump($cache->lock('k3'));
 
 /* Advance the coarse access clock, then churn far past the old cohort so
@@ -27,7 +26,6 @@ for ($i = 0; $i < 600; $i++) {
     $cache->store('new' . $i, $blob . 'n' . $i);
 }
 
-/* The locked key survived the full churn; its unlocked neighbors did not. */
 var_dump($cache->fetch('k3') !== null);
 var_dump($cache->fetch('k2', 'MISS') === 'MISS');
 var_dump($cache->fetch('k4', 'MISS') === 'MISS');

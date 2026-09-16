@@ -96,7 +96,6 @@ typedef struct {
 	HashTable state_schema_dedup;
 	HashTable direct_array_dedup;
 	HashTable direct_verdicts;
-	/* Enum cases are per-case singletons: one node per case. */
 	HashTable enum_dedup;
 	bool verbatim_arrays_allowed;
 	/* Distinguishes a sizing failure from an ineligible node. */
@@ -1059,8 +1058,8 @@ static php_user_cache_object_route user_cache_shared_graph_classify_object_route
 
 static php_user_cache_object_route user_cache_shared_graph_classify_object_route(zend_class_entry *ce)
 {
-	zval *cached, route_zv;
 	php_user_cache_object_route route;
+	zval *cached, route_zv;
 
 	if (UC_G(object_route_memo) != NULL) {
 		cached = zend_hash_index_find(UC_G(object_route_memo), (zend_ulong) (uintptr_t) ce);

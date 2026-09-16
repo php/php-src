@@ -2020,7 +2020,6 @@ static bool user_cache_expunge_expired_locked(void)
 	return removed;
 }
 
-/* Bound each expiry scan and resume from a process-local cursor. */
 static bool user_cache_expunge_expired_bounded_locked(void)
 {
 	php_user_cache_header *header = php_user_cache_header_ptr();

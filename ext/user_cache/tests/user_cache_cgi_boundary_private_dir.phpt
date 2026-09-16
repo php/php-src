@@ -1,5 +1,5 @@
 --TEST--
-CGI/FastCGI: boundary rendezvous objects live in a per-uid private directory and fail closed when it is squatted
+CGI/FastCGI: boundary rendezvous files live in a per-uid private directory and fail closed when it is squatted
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') die('skip boundary shared memory is not supported on Windows');
@@ -109,7 +109,7 @@ mkdir($docRoot, 0777, true);
 
 /* A directory created by this process is owned by the effective uid. */
 $uid = fileowner($root);
-$privateName = '.ZendUserCacheBnd.' . $uid;
+$privateName = '.PhpUserCacheBnd.' . $uid;
 
 file_put_contents($script, <<<'PHP'
 <?php
@@ -145,7 +145,11 @@ try {
     var_dump(sprintf('%04o', fileperms($privateDir . '/salt') & 0777));
     var_dump(preg_match('/^[0-9a-f]{24}\.lock$/', $entries[0]) === 1);
     var_dump(sprintf('%04o', fileperms($privateDir . '/' . $entries[0]) & 0777));
-    /* Nothing but the private directory lands in user_cache.lockfile_path. */
+    var_dump(preg_match('/^[0-9a-f]{24}\.seg$/', $entries[1]) === 1);
+    var_dump(substr($entries[1], 0, 24) === substr($entries[0], 0, 24));
+    var_dump(is_file($privateDir . '/' . $entries[1]) && !is_link($privateDir . '/' . $entries[1]));
+    var_dump(sprintf('%04o', fileperms($privateDir . '/' . $entries[1]) & 0777));
+    var_dump(filesize($privateDir . '/' . $entries[1]) === 16 * 1024 * 1024);
     var_dump(user_cache_private_dir_entries($lockfilePath) === [$privateName]);
 
     /* Squatted directory (same uid, wrong mode): startup fails closed,
@@ -181,19 +185,24 @@ second: Available:seeded
 bool(true)
 bool(true)
 string(4) "0700"
-int(2)
+int(3)
 int(32)
 string(4) "0600"
 bool(true)
 string(4) "0600"
 bool(true)
+bool(true)
+bool(true)
+string(4) "0600"
+bool(true)
+bool(true)
 wrong-mode: UnavailableBySharedMemoryInitializationFailed:MISS
-UserCache boundary directory %ROOT%/lock-mode/.ZendUserCacheBnd.%d is unusable (not a private directory owned by this uid); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
+UserCache boundary directory %ROOT%/lock-mode/.PhpUserCacheBnd.%d is unusable (not a private directory owned by this uid); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
 UserCache partition startup failed; UserCache will be unavailable
 array(0) {
 }
 symlink: UnavailableBySharedMemoryInitializationFailed:MISS
-UserCache boundary directory %ROOT%/lock-symlink/.ZendUserCacheBnd.%d is unusable (%s); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
+UserCache boundary directory %ROOT%/lock-symlink/.PhpUserCacheBnd.%d is unusable (%s); it must be a directory owned by uid %d with mode 0700 (see user_cache.lockfile_path)
 UserCache partition startup failed; UserCache will be unavailable
 array(0) {
 }
