@@ -13,5 +13,5 @@ function readonly() {}
 ?>
 DONE
 --EXPECTF--
-Deprecated: Calling a function “readonly” is deprecated in %s on line %d
+Deprecated: Calling a function "readonly" is deprecated since 8.6 in %s on line %d
 DONE

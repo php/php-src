@@ -254,6 +254,10 @@ void zend_assert_valid_class_name(const zend_string *name, const char *type) /* 
 	}
 	if (zend_string_equals_literal(name, "_") || zend_string_ends_with_literal(name, "\\_")) {
 		zend_error(E_DEPRECATED, "Using \"_\" as %s is deprecated since 8.4", type);
+	} else if (zend_string_equals_literal_ci(name, "let") || zend_string_ends_with_literal(name, "\\let")) {
+		zend_error(E_DEPRECATED, "Using \"let\" as %s is deprecated since 8.6", type);
+	} else if (zend_string_equals_literal_ci(name, "is") || zend_string_ends_with_literal(name, "\\is")) {
+		zend_error(E_DEPRECATED, "Using \"is\" as %s is deprecated since 8.6", type);
 	}
 }
 /* }}} */
@@ -8952,8 +8956,12 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			"__autoload() is no longer supported, use spl_autoload_register() instead");
 	}
 
-	if (zend_string_equals_literal_ci(unqualified_name, "readonly")) {
-		zend_error(E_DEPRECATED, "Calling a function “readonly” is deprecated");
+	if (
+		zend_string_equals_literal_ci(unqualified_name, "readonly")
+		|| zend_string_equals_literal_ci(unqualified_name, "let")
+		|| zend_string_equals_literal_ci(unqualified_name, "is")
+	) {
+		zend_error(E_DEPRECATED, "Calling a function \"%pS\" is deprecated since 8.6", unqualified_name);
 	}
 
 	if (zend_string_equals_literal_ci(unqualified_name, "assert")) {
@@ -10213,15 +10221,23 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 				"is a special class name", ZSTR_VAL(old_name), ZSTR_VAL(new_name), ZSTR_VAL(new_name));
 		}
 
-		if (zend_string_equals(new_name, ZSTR_CHAR('_'))) {
+		if (
+			zend_string_equals(new_name, ZSTR_CHAR('_'))
+			|| zend_string_equals_literal_ci(new_name, "let")
+			|| zend_string_equals_literal_ci(new_name, "is")
+		) {
 			switch (type) {
 				case ZEND_SYMBOL_CLASS:
-					zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated");
+					zend_error(E_DEPRECATED, "Using \"%pS\" as a class name is deprecated", new_name);
 					break;
 				case ZEND_SYMBOL_CONST:
-					zend_error(E_DEPRECATED, "Using \"_\" as a constant name is deprecated since 8.6");
+					zend_error(E_DEPRECATED, "Using \"%pS\" as a constant name is deprecated since 8.6", new_name);
 					break;
 				case ZEND_SYMBOL_FUNCTION:
+					if (zend_string_equals(new_name, ZSTR_CHAR('_'))) {
+						break;
+					}
+					zend_error(E_DEPRECATED, "Using \"%pS\" as a function name is deprecated since 8.6", new_name);
 					break;
 				default: ZEND_UNREACHABLE();
 			}
