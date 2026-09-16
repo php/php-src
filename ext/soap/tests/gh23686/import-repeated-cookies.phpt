@@ -28,7 +28,7 @@ $context = stream_context_create([
 	]],
 ]);
 
-check_headers_for_import(LOGS_PATH, $context, false);
+check_headers_for_import(LOGS_PATH, $context, [], false);
 
 ?>
 --EXPECTF--

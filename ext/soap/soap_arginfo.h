@@ -1,5 +1,5 @@
 /* This is a generated file, edit soap.stub.php instead.
- * Stub hash: 14c74a5d6f547837f536920d5abb741e2b6e4373 */
+ * Stub hash: c3509a1552db7edabc48d89eea67ff2e1e7d9115 */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -747,6 +747,12 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string *property___last_response_headers_name = zend_string_init("__last_response_headers", sizeof("__last_response_headers") - 1, true);
 	zend_declare_typed_property(class_entry, property___last_response_headers_name, &property___last_response_headers_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release_ex(property___last_response_headers_name, true);
+
+	zval property__keep_headers_default_value;
+	ZVAL_LONG(&property__keep_headers_default_value, 0);
+	zend_string *property__keep_headers_name = zend_string_init("_keep_headers", sizeof("_keep_headers") - 1, true);
+	zend_declare_typed_property(class_entry, property__keep_headers_name, &property__keep_headers_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release_ex(property__keep_headers_name, true);
 
 	return class_entry;
 }

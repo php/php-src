@@ -20,7 +20,12 @@ function start_server(string $code, ?string $entry_point) {
  * When an <import> switches to a different server, check the headers that the
  * second server recieves
  */
-function check_headers_for_import(string $logs_path, $context, bool $verbose_failure = true) {
+function check_headers_for_import(
+	string $logs_path,
+	$context,
+	array $options = [],
+	bool $verbose_failure = true,
+) {
 	$code = file_get_contents(__DIR__ . "/soap-respond-with-headers.inc");
 	$code = substr($code, strpos($code, "<?php") + strlen("<?php"));
 	$code = str_replace('"{LOG_FILE}"', var_export($logs_path, true), $code);
@@ -42,6 +47,7 @@ function check_headers_for_import(string $logs_path, $context, bool $verbose_fai
 			$client = new SoapClient("http://localhost:$wsdl_server_port", [
 				'soap_version' => $version,
 				'stream_context' => $context,
+				...$options,
 			]);
 		} catch (SoapFault $e) {
 			if ($verbose_failure) {
@@ -61,7 +67,12 @@ function check_headers_for_import(string $logs_path, $context, bool $verbose_fai
  * When an <import> leads to a <schema> on a different server, check the
  * headers that the *third* server recieves
  */
-function check_headers_for_schema(string $logs_path, $context, bool $verbose_failure = true) {
+function check_headers_for_schema(
+	string $logs_path,
+	$context,
+	array $options = [],
+	bool $verbose_failure = true
+) {
 	$code = file_get_contents(__DIR__ . "/schema-respond-with-headers.inc");
 	$code = substr($code, strpos($code, "<?php") + strlen("<?php"));
 	$code = str_replace('"{LOG_FILE}"', var_export($logs_path, true), $code);
@@ -85,6 +96,7 @@ function check_headers_for_schema(string $logs_path, $context, bool $verbose_fai
 			$client = new SoapClient("http://localhost:$import_wsdl_server_port", [
 				'soap_version' => $version,
 				'stream_context' => $context,
+				...$options,
 			]);
 		} catch (SoapFault $e) {
 			if ($verbose_failure) {
