@@ -16,6 +16,11 @@ PHP                                                                        NEWS
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.
     (Ilia Alshanetsky)
+  . Fixed Dom\HTMLDocument::getElementById() not finding ids of SVG and
+    MathML elements. (Ilia Alshanetsky)
+  . Fixed Dom\HTMLDocument giving attributes the namespace of their element
+    when a fragment is parsed with an xlink, xml or xmlns context element.
+    (Ilia Alshanetsky)
 
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
