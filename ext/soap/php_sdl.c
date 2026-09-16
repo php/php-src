@@ -248,33 +248,39 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 			l2 -= 4;
 		}
 	}
-	if (l1 != l2 || memcmp(ctx->sdl->source, uri, l1) != 0) {
-		/* another server. clear authentication credentals */
-		php_libxml_switch_context(NULL, &context);
-		php_libxml_switch_context(&context, NULL);
-		if (Z_TYPE(context) != IS_UNDEF) {
-			zval *context_ptr = &context;
-			ctx->context = php_stream_context_from_zval(context_ptr, 1);
+	if (l1 == l2 && memcmp(ctx->sdl->source, uri, l1) == 0) {
+		return;
+	}
+	/* another server. clear authentication credentals */
+	php_libxml_switch_context(NULL, &context);
+	php_libxml_switch_context(&context, NULL);
+	if (Z_TYPE(context) == IS_UNDEF) {
+		return;
+	}
+	zval *context_ptr = &context;
+	ctx->context = php_stream_context_from_zval(context_ptr, 1);
 
-			if (ctx->context &&
-			    (header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL &&
-				Z_TYPE_P(header) == IS_STRING) {
-				/* TODO: should support header as an array, but this code path is untested */
-				s = strstr(Z_STRVAL_P(header), "Authorization: Basic");
-				if (s && (s == Z_STRVAL_P(header) || *(s-1) == '\n' || *(s-1) == '\r')) {
-					char *rest = strstr(s, "\r\n");
-					if (rest) {
-						zval new_header;
+	if (!ctx->context) {
+		return;
+	}
 
-						rest += 2;
-						ZVAL_NEW_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
-						memcpy(Z_STRVAL(new_header), Z_STRVAL_P(header), s - Z_STRVAL_P(header));
-						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
-						ZVAL_COPY(&ctx->old_header, header);
-						php_stream_context_set_option(ctx->context, "http", "header", &new_header);
-						zval_ptr_dtor(&new_header);
-					}
-				}
+	if ((header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL &&
+		Z_TYPE_P(header) == IS_STRING
+	) {
+		/* TODO: should support header as an array, but this code path is untested */
+		s = strstr(Z_STRVAL_P(header), "Authorization: Basic");
+		if (s && (s == Z_STRVAL_P(header) || *(s-1) == '\n' || *(s-1) == '\r')) {
+			char *rest = strstr(s, "\r\n");
+			if (rest) {
+				zval new_header;
+
+				rest += 2;
+				ZVAL_NEW_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
+				memcpy(Z_STRVAL(new_header), Z_STRVAL_P(header), s - Z_STRVAL_P(header));
+				memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
+				ZVAL_COPY(&ctx->old_header, header);
+				php_stream_context_set_option(ctx->context, "http", "header", &new_header);
+				zval_ptr_dtor(&new_header);
 			}
 		}
 	}
