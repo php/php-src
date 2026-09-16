@@ -187,7 +187,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 {
-	zend_object *object = emalloc(sizeof(zend_object) + zend_object_properties_size(ce));
+	zend_object *object = zend_object_alloc(sizeof(zend_object), ce);
 
 	_zend_object_std_init(object, ce);
 	return object;
