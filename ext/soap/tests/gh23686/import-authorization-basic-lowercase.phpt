@@ -32,10 +32,8 @@ check_headers_for_import(LOGS_PATH, $context);
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'authorization' => 'Basic foo bar',
 )"
 string(%d) "array (
   'Host' => 'localhost:%d',
   'Connection' => 'close',
-  'authorization' => 'Basic foo bar',
 )"
