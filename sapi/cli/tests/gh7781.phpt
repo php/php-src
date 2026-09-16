@@ -20,12 +20,10 @@ fclose($pipes[2]);
 $status = proc_close($process);
 
 var_dump($status);
-var_dump(str_contains($stdout, '<br'));
-var_dump(str_contains($stdout, 'Warning: Unknown: php_network_getaddresses:'));
-var_dump(str_contains($stderr, 'Failed to listen on 0.0..0:8080'));
+var_dump($stdout);
+var_dump(str_contains($stderr, 'Failed to listen on 0.0..0:8080 (reason: php_network_getaddresses:'));
 ?>
 --EXPECT--
 int(1)
-bool(false)
-bool(true)
+string(0) ""
 bool(true)

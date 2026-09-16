@@ -2540,6 +2540,7 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	char *_router = NULL;
 	int port = 3000;
 	php_socket_t server_sock = SOCK_ERR;
+	uint8_t display_errors;
 
 	host = php_cli_server_parse_addr(addr, &port);
 	if (!host) {
@@ -2548,7 +2549,11 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 		goto out;
 	}
 
+	/* A resolver failure raises a warning whose text is repeated in the "Failed to listen" message below. */
+	display_errors = PG(display_errors);
+	PG(display_errors) = 0;
 	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr);
+	PG(display_errors) = display_errors;
 	if (server_sock == SOCK_ERR) {
 		if (strchr(host, ':')) {
 			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on [%s]:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
@@ -2797,8 +2802,6 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	char *php_optarg = NULL;
 	int php_optind = 1;
 	int c, r;
-	bool html_errors;
-	zend_result server_ctor_result;
 	const char *server_bind_address = NULL;
 	extern const opt_struct OPTIONS[];
 	const char *document_root = NULL;
@@ -2870,12 +2873,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 		router = argv[php_optind];
 	}
 
-	/* Startup diagnostics are written to a terminal, not an HTTP response. */
-	html_errors = PG(html_errors);
-	PG(html_errors) = false;
-	server_ctor_result = php_cli_server_ctor(&server, server_bind_address, document_root, router);
-	PG(html_errors) = html_errors;
-	if (FAILURE == server_ctor_result) {
+	if (FAILURE == php_cli_server_ctor(&server, server_bind_address, document_root, router)) {
 		return 1;
 	}
 	sapi_module.phpinfo_as_text = 0;
