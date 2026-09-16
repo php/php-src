@@ -44,6 +44,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
     __serialize() removes an element). (David Carlier)
 
+- SQLite:
+  . Fixed a crash when SQLite3::close() is called from a userland callback.
+    (Ilia Alshanetsky)
+
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
     properly). (Jakub Zelenka, Ilija Tovilo)
