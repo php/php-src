@@ -20,7 +20,7 @@ user_cache.shm_size=16M
 $a = UserCache\Cache::getPool('live-ref');
 $a->store('k', 'v');
 var_dump(UserCache\Cache::deletePool('live-ref'));
-var_dump($a->has('k'));                 /* value deleted */
+var_dump($a->has('k'));
 var_dump($a->store('again', 1));        /* object still usable (recreates pool) */
 var_dump($a->fetch('again', 'MISS'));
 

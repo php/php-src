@@ -13,7 +13,6 @@
 */
 
 #include "user_cache_internal.h"
-#include "user_cache_storage_portability.h"
 
 #include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"
@@ -21,9 +20,15 @@
 
 #define PHP_USER_CACHE_READER_OWNER_RECLAIMING UINT64_MAX
 
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
-# define PHP_USER_CACHE_BOUNDARY_DIR_PREFIX	".ZendUserCacheBnd."
-# define PHP_USER_CACHE_BOUNDARY_SALT_NAME	"salt"
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
+# define PHP_USER_CACHE_BOUNDARY_DIR_PREFIX		".PhpUserCacheBnd."
+# define PHP_USER_CACHE_BOUNDARY_SALT_NAME		"salt"
+# define PHP_USER_CACHE_BOUNDARY_SEGMENT_SUFFIX	".seg"
+# define PHP_USER_CACHE_BOUNDARY_LOCK_SUFFIX	".lock"
+#endif
+
+#ifndef ZEND_WIN32
+# define PHP_USER_CACHE_PREALLOCATE_CHUNK	65536U
 #endif
 
 typedef enum {
@@ -72,8 +77,10 @@ struct _php_user_cache_lock_ops {
 
 static bool user_cache_capacity_clamp_warned = false;
 
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 static bool user_cache_boundary_dir_failure_logged = false;
+static bool user_cache_boundary_boot_token_loaded = false;
+static uint64_t user_cache_boundary_boot_token_memo = 0;
 #endif
 
 static uint64_t user_cache_reader_incarnation = 0;
@@ -551,6 +558,39 @@ static void user_cache_posix_log_alloc_failure(const char *error_in, int error_c
 	);
 }
 
+/* Filesystems without native preallocation commit blocks only when written. */
+static bool user_cache_posix_zero_fill_fd(int fd, size_t size)
+{
+	static const uint8_t zeros[PHP_USER_CACHE_PREALLOCATE_CHUNK];
+	size_t offset = 0, chunk;
+	ssize_t written;
+
+	if (ftruncate(fd, (off_t) size) != 0) {
+		return false;
+	}
+
+	while (offset < size) {
+		chunk = size - offset < sizeof(zeros) ? size - offset : sizeof(zeros);
+		written = pwrite(fd, zeros, chunk, (off_t) offset);
+		if (written < 0) {
+			if (errno == EINTR) {
+				continue;
+			}
+
+			return false;
+		}
+		if (written == 0) {
+			errno = EIO;
+
+			return false;
+		}
+
+		offset += (size_t) written;
+	}
+
+	return true;
+}
+
 static const php_user_cache_platform_ops user_cache_platform_ops_table = {
 	user_cache_posix_sleep_us,
 	user_cache_posix_process_start_time_token,
@@ -565,7 +605,7 @@ static const php_user_cache_platform_ops *user_cache_platform_ops(void)
 	return &user_cache_platform_ops_table;
 }
 
-#if defined(PHP_USER_CACHE_HAVE_ANON_MMAP) || defined(PHP_USER_CACHE_HAVE_BOUNDARY_SHM)
+#if defined(PHP_USER_CACHE_HAVE_ANON_MMAP) || defined(PHP_USER_CACHE_HAVE_BOUNDARY_MMAP)
 static int user_cache_wrap_mapped_segment(
 	void *mapping,
 	size_t requested_size,
@@ -600,7 +640,7 @@ static int user_cache_munmap_detach_segment(php_user_cache_shm_segment *shared_s
 	return 0;
 }
 
-#endif /* defined(PHP_USER_CACHE_HAVE_ANON_MMAP) || defined(PHP_USER_CACHE_HAVE_BOUNDARY_SHM) */
+#endif /* defined(PHP_USER_CACHE_HAVE_ANON_MMAP) || defined(PHP_USER_CACHE_HAVE_BOUNDARY_MMAP) */
 
 #ifdef PHP_USER_CACHE_HAVE_ANON_MMAP
 static int user_cache_mmap_create_segments(
@@ -629,7 +669,7 @@ static int user_cache_mmap_create_segments(
 }
 #endif /* PHP_USER_CACHE_HAVE_ANON_MMAP */
 
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 static void user_cache_shared_boundary_digest(
 	const php_user_cache_context *ctx,
 	size_t requested_size,
@@ -663,7 +703,7 @@ static void user_cache_shared_boundary_digest(
 		prefix_len = snprintf(
 			prefix,
 			sizeof(prefix),
-			"PhpUserCache.boundary-shm|%u|%zu|" ZEND_LONG_FMT "|%u|%zu|",
+			"PhpUserCache.boundary-mmap|%u|%zu|" ZEND_LONG_FMT "|%u|%zu|",
 			PHP_USER_CACHE_VERSION,
 			requested_size,
 			UC_G(entries_hint),
@@ -727,7 +767,7 @@ static void user_cache_shared_boundary_identity(
 	user_cache_shared_boundary_digest_to_identity(digest, identity_high, identity_low);
 }
 
-static void user_cache_shared_boundary_shm_name(char *buf, size_t buf_size, size_t requested_size)
+static void user_cache_shared_boundary_segment_name(char *buf, size_t buf_size, size_t requested_size)
 {
 	uint64_t identity_high;
 	uint32_t identity_low;
@@ -739,7 +779,7 @@ static void user_cache_shared_boundary_shm_name(char *buf, size_t buf_size, size
 		&identity_low
 	);
 
-	snprintf(buf, buf_size, "/ZUC.%016" PRIx64 "%08" PRIx32, identity_high, identity_low);
+	snprintf(buf, buf_size, "%016" PRIx64 "%08" PRIx32 PHP_USER_CACHE_BOUNDARY_SEGMENT_SUFFIX, identity_high, identity_low);
 }
 
 static void user_cache_shared_boundary_lock_name(char *buf, size_t buf_size, size_t requested_size)
@@ -754,7 +794,7 @@ static void user_cache_shared_boundary_lock_name(char *buf, size_t buf_size, siz
 		&identity_low
 	);
 
-	snprintf(buf, buf_size, "%016" PRIx64 "%08" PRIx32 ".lock", identity_high, identity_low);
+	snprintf(buf, buf_size, "%016" PRIx64 "%08" PRIx32 PHP_USER_CACHE_BOUNDARY_LOCK_SUFFIX, identity_high, identity_low);
 }
 
 static bool user_cache_shared_boundary_fd_is_trusted(int fd, struct stat *st)
@@ -764,6 +804,81 @@ static bool user_cache_shared_boundary_fd_is_trusted(int fd, struct stat *st)
 	}
 
 	return st->st_uid == geteuid() && (st->st_mode & 0077) == 0;
+}
+
+/* Zero when the platform offers no boot identity (stale images then go
+ * undetected). */
+static uint64_t user_cache_shared_boundary_boot_token(void)
+{
+#if defined(__linux__)
+	ssize_t len;
+	uint32_t digits = 0;
+	int fd;
+	const char *p;
+	char buf[64], hex[17];
+#elif defined(__APPLE__) || defined(__FreeBSD__)
+	struct timeval boottime;
+	size_t size = sizeof(boottime);
+	int mib[2] = { CTL_KERN, KERN_BOOTTIME };
+#endif
+
+	if (user_cache_boundary_boot_token_loaded) {
+		return user_cache_boundary_boot_token_memo;
+	}
+
+#if defined(__linux__)
+	/* boot_id stays fixed for the whole boot, unlike /proc/stat btime which
+	 * follows wall-clock steps. */
+	fd = open("/proc/sys/kernel/random/boot_id", O_RDONLY | O_CLOEXEC);
+	if (fd >= 0) {
+		len = read(fd, buf, sizeof(buf) - 1);
+		close(fd);
+		if (len > 0) {
+			buf[len] = '\0';
+			for (p = buf; *p != '\0' && digits < 16; p++) {
+				if (*p == '-') {
+					continue;
+				}
+				if (!isxdigit((unsigned char) *p)) {
+					break;
+				}
+
+				hex[digits++] = *p;
+			}
+			hex[digits] = '\0';
+
+			if (digits == 16) {
+				user_cache_boundary_boot_token_memo = (uint64_t) strtoull(hex, NULL, 16);
+			}
+		}
+	}
+#elif defined(__APPLE__) || defined(__FreeBSD__)
+	if (sysctl(mib, 2, &boottime, &size, NULL, 0) == 0 && size == sizeof(boottime)) {
+		user_cache_boundary_boot_token_memo = (uint64_t) boottime.tv_sec;
+	}
+#endif
+
+	user_cache_boundary_boot_token_loaded = true;
+
+	return user_cache_boundary_boot_token_memo;
+}
+
+/* Caller holds the fcntl bootstrap lock and has not yet switched to the
+ * header's own lock: an image from an earlier boot may be torn or hold a
+ * robust mutex whose owner the kernel never saw die. Clearing the magic
+ * makes php_user_cache_header_init_locked() format it afresh instead. */
+static bool user_cache_shared_boundary_discard_stale_image_locked(void)
+{
+	php_user_cache_header *header = php_user_cache_header_ptr();
+
+	if (header->boot_token == user_cache_shared_boundary_boot_token()) {
+		return false;
+	}
+
+	user_cache_atomic_store_32(&header->magic, 0);
+	user_cache_atomic_fence_seq_cst();
+
+	return true;
 }
 
 static void user_cache_shared_boundary_log_dir_failure(const char *dir_path, const char *reason)
@@ -972,20 +1087,14 @@ static bool user_cache_shared_boundary_create_salt(int dir_fd, const char **erro
 	return true;
 }
 
-static bool user_cache_shared_boundary_load_salt(const char **error_in)
+static bool user_cache_shared_boundary_load_salt(int dir_fd, const char *dir_path, const char **error_in)
 {
 	php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
 	bool missing, loaded = false;
-	char dir_path[MAXPATHLEN];
-	int dir_fd, saved_errno, attempt;
+	int attempt;
 
 	if (storage->boundary_salt_loaded) {
 		return true;
-	}
-
-	dir_fd = user_cache_shared_boundary_open_private_dir(dir_path, sizeof(dir_path), error_in);
-	if (dir_fd < 0) {
-		return false;
 	}
 
 	for (attempt = 0; attempt < 2 && !loaded; attempt++) {
@@ -995,33 +1104,36 @@ static bool user_cache_shared_boundary_load_salt(const char **error_in)
 		}
 	}
 
-	saved_errno = errno;
-	close(dir_fd);
-	errno = saved_errno;
-
 	storage->boundary_salt_loaded = loaded;
 
 	return loaded;
 }
 
-/* Recreate a zero-length shm object left by a failed creator. */
-static int user_cache_shared_boundary_open_shm_fd(
-	const char *shm_name,
+/* Published (linkat, no replace) only once fully preallocated: attachers never
+ * see a partial file, and a full filesystem fails here with ENOSPC instead of
+ * SIGBUS on first touch. */
+static int user_cache_shared_boundary_open_segment_fd(
+	int dir_fd,
+	const char *segment_name,
 	size_t requested_size,
 	const char **error_in
 )
 {
 	struct stat st;
-	uint32_t attempts;
-	int fd, create_attempts;
+	int fd, saved_errno, attempt;
+	char tmp_name[96];
 
-	for (create_attempts = 0; create_attempts < 2; create_attempts++) {
-		fd = shm_open(shm_name, O_RDWR | O_CREAT | O_EXCL, 0600);
+	for (attempt = 0; attempt < 2; attempt++) {
+		fd = openat(dir_fd, segment_name, O_RDWR | O_NOFOLLOW | O_CLOEXEC);
 		if (fd >= 0) {
-			if (ftruncate(fd, (off_t) requested_size) != 0) {
+			if (!user_cache_shared_boundary_fd_is_trusted(fd, &st) ||
+				!S_ISREG(st.st_mode) ||
+				st.st_size < 0 ||
+				(uint64_t) st.st_size != (uint64_t) requested_size
+			) {
 				close(fd);
-				shm_unlink(shm_name);
-				*error_in = "ftruncate";
+				errno = EACCES;
+				*error_in = "segment file";
 
 				return -1;
 			}
@@ -1029,56 +1141,54 @@ static int user_cache_shared_boundary_open_shm_fd(
 			return fd;
 		}
 
-		if (errno != EEXIST) {
-			*error_in = "shm_open";
+		if (errno != ENOENT) {
+			*error_in = "open segment";
 
 			return -1;
 		}
 
-		fd = shm_open(shm_name, O_RDWR, 0600);
+		snprintf(tmp_name, sizeof(tmp_name), "%s.%lu.tmp", segment_name, (unsigned long) getpid());
+
+		fd = openat(dir_fd, tmp_name, O_RDWR | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+		if (fd < 0 && errno == EEXIST) {
+			unlinkat(dir_fd, tmp_name, 0);
+			fd = openat(dir_fd, tmp_name, O_RDWR | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+		}
 		if (fd < 0) {
-			*error_in = "shm_open";
+			*error_in = "create segment";
 
 			return -1;
 		}
 
-		if (!user_cache_shared_boundary_fd_is_trusted(fd, &st)) {
+		if (!php_user_cache_preallocate_fd(fd, requested_size)) {
+			saved_errno = errno;
 			close(fd);
-			*error_in = "shm ownership";
+			unlinkat(dir_fd, tmp_name, 0);
+			errno = saved_errno;
+			*error_in = "preallocate segment";
 
 			return -1;
 		}
 
-		for (attempts = 0; (size_t) st.st_size != requested_size && attempts < 1000; attempts++) {
-			if (st.st_size != 0) {
-				break;
-			}
+		if (linkat(dir_fd, tmp_name, dir_fd, segment_name, 0) == 0) {
+			unlinkat(dir_fd, tmp_name, 0);
 
-			usleep(1000);
-
-			if (fstat(fd, &st) != 0) {
-				break;
-			}
-		}
-
-		if ((size_t) st.st_size == requested_size) {
 			return fd;
 		}
 
+		saved_errno = errno;
 		close(fd);
+		unlinkat(dir_fd, tmp_name, 0);
+		if (saved_errno != EEXIST) {
+			errno = saved_errno;
+			*error_in = "publish segment";
 
-		if (st.st_size == 0 && create_attempts == 0) {
-			shm_unlink(shm_name);
-
-			continue;
+			return -1;
 		}
-
-		*error_in = "shm size";
-
-		return -1;
 	}
 
-	*error_in = "shm size";
+	errno = EEXIST;
+	*error_in = "publish segment";
 
 	return -1;
 }
@@ -1090,8 +1200,8 @@ static int user_cache_shared_boundary_create_segments(
 	const char **error_in
 )
 {
-	int fd;
-	char shm_name[64];
+	int dir_fd, fd, saved_errno;
+	char segment_name[64], dir_path[MAXPATHLEN];
 	void *mapping;
 
 	if (requested_size > (size_t) SSIZE_MAX) {
@@ -1100,13 +1210,22 @@ static int user_cache_shared_boundary_create_segments(
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
-	if (!user_cache_shared_boundary_load_salt(error_in)) {
+	dir_fd = user_cache_shared_boundary_open_private_dir(dir_path, sizeof(dir_path), error_in);
+	if (dir_fd < 0) {
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
 
-	user_cache_shared_boundary_shm_name(shm_name, sizeof(shm_name), requested_size);
+	fd = -1;
+	if (user_cache_shared_boundary_load_salt(dir_fd, dir_path, error_in)) {
+		user_cache_shared_boundary_segment_name(segment_name, sizeof(segment_name), requested_size);
 
-	fd = user_cache_shared_boundary_open_shm_fd(shm_name, requested_size, error_in);
+		fd = user_cache_shared_boundary_open_segment_fd(dir_fd, segment_name, requested_size, error_in);
+	}
+
+	saved_errno = errno;
+	close(dir_fd);
+	errno = saved_errno;
+
 	if (fd < 0) {
 		return PHP_USER_CACHE_ALLOC_FAILURE;
 	}
@@ -1135,12 +1254,12 @@ static const php_user_cache_shm_handler_entry *user_cache_shared_boundary_handle
 		user_cache_munmap_detach_segment
 	};
 	static const php_user_cache_shm_handler_entry entry = {
-		"boundary-shm", &handlers
+		"boundary-mmap", &handlers
 	};
 
 	return &entry;
 }
-#endif /* PHP_USER_CACHE_HAVE_BOUNDARY_SHM */
+#endif /* PHP_USER_CACHE_HAVE_BOUNDARY_MMAP */
 
 #ifdef ZEND_WIN32
 static inline void user_cache_win32_set_segment(
@@ -1666,7 +1785,7 @@ static void user_cache_restore_recovery_entry_locks(
 	}
 }
 
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 static bool user_cache_header_boundary_identity_matches_locked(
 		const php_user_cache_header *header,
 		size_t requested_size)
@@ -1690,7 +1809,7 @@ static bool user_cache_header_boundary_identity_matches_locked(
 
 	return memcmp(header->boundary_identity_digest, storage->boundary_digest_memo, sizeof(storage->boundary_digest_memo)) == 0;
 }
-#endif /* PHP_USER_CACHE_HAVE_BOUNDARY_SHM */
+#endif /* PHP_USER_CACHE_HAVE_BOUNDARY_MMAP */
 
 static bool user_cache_recovery_blocked_by_live_reference(const php_user_cache_header *header)
 {
@@ -1972,9 +2091,9 @@ static bool user_cache_create_lock(void)
 {
 	php_user_cache_context *ctx = php_user_cache_active_context();
 	php_user_cache_storage *storage = &ctx->storage;
-#ifdef PHP_USER_CACHE_USE_SHM_OPEN
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 	struct stat lock_st;
-#endif /* PHP_USER_CACHE_USE_SHM_OPEN */
+#endif /* PHP_USER_CACHE_HAVE_BOUNDARY_MMAP */
 	int val;
 
 	if (storage->lock_initialized) {
@@ -1987,7 +2106,7 @@ static bool user_cache_create_lock(void)
 
 	storage->lock_ops = &user_cache_fcntl_lock_ops;
 
-#ifdef PHP_USER_CACHE_USE_SHM_OPEN
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 	if (ctx->boundary_shared) {
 		const char *error_in;
 		char dir_path[MAXPATHLEN];
@@ -2016,7 +2135,7 @@ static bool user_cache_create_lock(void)
 
 		return true;
 	}
-#endif /* PHP_USER_CACHE_USE_SHM_OPEN */
+#endif /* PHP_USER_CACHE_HAVE_BOUNDARY_MMAP */
 
 #if defined(__linux__) && defined(HAVE_MEMFD_CREATE) && defined(MFD_CLOEXEC)
 	storage->lock_file = memfd_create(ctx->lock_name, MFD_CLOEXEC);
@@ -3610,7 +3729,7 @@ static bool user_cache_header_format_fresh_locked(
 	header->lock_model = PHP_USER_CACHE_LOCK_MODEL_FCNTL;
 #endif
 	if (php_user_cache_active_context()->boundary_shared) {
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 		user_cache_shared_boundary_digest(
 			php_user_cache_active_context(),
 			storage->size,
@@ -3618,6 +3737,7 @@ static bool user_cache_header_format_fresh_locked(
 		);
 
 		header->boundary_identity_digest_set = 1;
+		header->boot_token = user_cache_shared_boundary_boot_token();
 #else
 		header->boundary_identity_digest_set = 0;
 #endif
@@ -3769,7 +3889,7 @@ static bool user_cache_select_storage_handler(void)
 	const char *model = UC_G(memory_model), *error_in = NULL;
 	int saved_error = 0;
 
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 	if (php_user_cache_active_context()->boundary_shared) {
 		if (user_cache_try_storage_handler(
 				user_cache_shared_boundary_handler_entry(),
@@ -3834,13 +3954,25 @@ static bool user_cache_enter_write_locked_section(void)
 static bool user_cache_negotiate_lock_model(void)
 {
 	const php_user_cache_lock_ops *negotiated_ops;
-	php_user_cache_storage *storage = &php_user_cache_active_context()->storage;
+	php_user_cache_context *ctx = php_user_cache_active_context();
+	php_user_cache_storage *storage = &ctx->storage;
+	bool header_initialized;
 
 	if (!user_cache_wlock_impl()) {
 		return false;
 	}
 
-	negotiated_ops = user_cache_header_is_initialized_acquire()
+	header_initialized = user_cache_header_is_initialized_acquire();
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
+	if (header_initialized &&
+		ctx->boundary_shared &&
+		user_cache_shared_boundary_discard_stale_image_locked()
+	) {
+		header_initialized = false;
+	}
+#endif
+
+	negotiated_ops = header_initialized
 		? user_cache_lock_ops_for_model(php_user_cache_header_ptr()->lock_model)
 		: storage->lock_ops
 	;
@@ -4334,7 +4466,7 @@ bool php_user_cache_header_init_locked(void)
 			header->entry_lock_capacity == storage->entry_lock_capacity_memo &&
 			header->entry_lock_offset == storage->entry_lock_offset_memo
 		) {
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 			return user_cache_header_boundary_identity_matches_locked(header, storage->size);
 #else
 			return true;
@@ -4367,7 +4499,7 @@ bool php_user_cache_header_adoptable_locked(void)
 		return false;
 	}
 
-#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_SHM
+#ifdef PHP_USER_CACHE_HAVE_BOUNDARY_MMAP
 	return user_cache_header_boundary_identity_matches_locked(header, storage->size);
 #else
 	return true;
@@ -4832,6 +4964,65 @@ void php_user_cache_release_request_entry_locks(void)
 	UC_G(entry_lock_owner_pid) = 0;
 #endif
 }
+
+#ifndef ZEND_WIN32
+/* Commit every block up front so no later page fault can hit ENOSPC (SIGBUS
+ * on a sparse file). Returns false with errno set. */
+bool php_user_cache_preallocate_fd(int fd, size_t size)
+{
+#if defined(HAVE_POSIX_FALLOCATE)
+	int result;
+#elif defined(__APPLE__)
+	fstore_t store;
+#endif
+
+	if (size > (size_t) SSIZE_MAX) {
+		errno = EOVERFLOW;
+
+		return false;
+	}
+
+#if defined(HAVE_POSIX_FALLOCATE)
+	do {
+		result = posix_fallocate(fd, 0, (off_t) size);
+	} while (result == EINTR);
+
+	if (result == 0) {
+		return true;
+	}
+
+	if (result != EOPNOTSUPP &&
+#if defined(ENOTSUP) && ENOTSUP != EOPNOTSUPP
+		result != ENOTSUP &&
+#endif
+		result != ENOSYS &&
+		result != EINVAL &&
+		result != ENODEV
+	) {
+		errno = result;
+
+		return false;
+	}
+#elif defined(__APPLE__)
+	memset(&store, 0, sizeof(store));
+	store.fst_flags = F_ALLOCATECONTIG | F_ALLOCATEALL;
+	store.fst_posmode = F_PEOFPOSMODE;
+	store.fst_offset = 0;
+	store.fst_length = (off_t) size;
+
+	if (fcntl(fd, F_PREALLOCATE, &store) == 0) {
+		return ftruncate(fd, (off_t) size) == 0;
+	}
+
+	store.fst_flags = F_ALLOCATEALL;
+	if (fcntl(fd, F_PREALLOCATE, &store) == 0) {
+		return ftruncate(fd, (off_t) size) == 0;
+	}
+#endif
+
+	return user_cache_posix_zero_fill_fd(fd, size);
+}
+#endif /* ZEND_WIN32 */
 
 #ifdef ZTS
 void php_user_cache_free_thread_deferred_entry_lock_releases(php_user_cache_globals *globals)
