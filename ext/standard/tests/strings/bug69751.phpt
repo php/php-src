@@ -23,6 +23,6 @@ try {
 
 ?>
 --EXPECTF--
-Argument number specifier must be greater than zero and less than %d
+Argument number specifier must not be empty
 4 arguments are required, 3 given
 Argument number specifier must be greater than zero and less than %d
