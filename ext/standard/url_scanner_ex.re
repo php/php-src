@@ -191,7 +191,9 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	php_url *url_parts;
 
 	smart_str_0(url); /* FIXME: Bug #70480 php_url_parse_ex() crashes by processing chars exceed len */
-	url_parts = php_url_parse_ex(ZSTR_VAL(url->s), ZSTR_LEN(url->s));
+	php_url_error url_error = PHP_URL_ERR_NONE;
+
+	url_parts = php_url_parse_ex(ZSTR_VAL(url->s), ZSTR_LEN(url->s), &url_error);
 
 	/* Ignore malformed URLs */
 	if (!url_parts) {
@@ -383,11 +385,12 @@ static zend_result check_host_whitelist(url_adapt_state_ex_t *ctx)
 {
 	php_url *url_parts = NULL;
 	HashTable *allowed_hosts = ctx->type ? &BG(url_adapt_session_hosts_ht) : &BG(url_adapt_output_hosts_ht);
+    php_url_error url_error = PHP_URL_ERR_NONE;
 
 	ZEND_ASSERT(ctx->tag_type == TAG_FORM);
 
 	if (ctx->attr_val.s && ZSTR_LEN(ctx->attr_val.s)) {
-		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->attr_val.s), ZSTR_LEN(ctx->attr_val.s));
+		url_parts = php_url_parse_ex(ZSTR_VAL(ctx->attr_val.s), ZSTR_LEN(ctx->attr_val.s), &url_error);
 	} else {
 		return SUCCESS; /* empty URL is valid */
 	}
