@@ -1696,7 +1696,30 @@ PHP_FUNCTION(stream_is_local)
 
 		php_stream_error_operation_begin();
 		context = php_stream_context_from_zval(zcontext, 0);
-		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0);
+
+		// Skip past any of `zlib:`, `compress.zlib://`, and `compress.bzip2://`
+		// if they are present, since they are wrappers that set is_url to
+		// 0 but the underlying wrapped stream might be a URL. But, only do
+		// that if the relevant extensions are registered
+		const HashTable *wrapper_hash = php_stream_get_url_stream_wrappers_hash();
+		const bool zlib_registered = zend_hash_str_exists(wrapper_hash, "compress.zlib", strlen("compress.zlib"));
+		const bool bzip2_registered = zend_hash_str_exists(wrapper_hash, "compress.bzip2", strlen("compress.bzip2"));
+
+		const char *path = Z_STRVAL_P(zstream);
+		if (zlib_registered || bzip2_registered) {
+			while (*path) {
+				if (zlib_registered && strncasecmp("compress.zlib://", path, strlen("compress.zlib://")) == 0) {
+					path += strlen("compress.zlib://");
+				} else if (bzip2_registered && strncasecmp("compress.bzip2://", path, strlen("compress.bzip2://")) == 0) {
+					path += strlen("compress.bzip2://");
+				} else if (zlib_registered && strncasecmp("zlib:", path, strlen("zlib:")) == 0) {
+					path += strlen("zlib:");
+				} else {
+					break;
+				}
+			}
+		}
+		wrapper = php_stream_locate_url_wrapper(path, NULL, 0);
 		php_stream_error_operation_end(context);
 	}
 
