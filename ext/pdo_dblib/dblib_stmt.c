@@ -95,6 +95,8 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 
+	dbsetuserdata(H->link, (BYTE*) &S->err);
+
 	/* Cancel any pending results */
 	dbcancel(H->link);
 
@@ -152,6 +154,8 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
 	pdo_dblib_db_handle *H = S->H;
 	RETCODE ret = SUCCESS;
 
+	dbsetuserdata(H->link, (BYTE*) &S->err);
+
 	/* Ideally use dbcanquery here, but there is a bug in FreeTDS's implementation of dbcanquery
 	 * It has been resolved but is currently only available in nightly builds
 	 */
@@ -201,6 +205,8 @@ static int pdo_dblib_stmt_fetch(pdo_stmt_t *stmt,
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 
+	dbsetuserdata(H->link, (BYTE*) &S->err);
+
 	ret = dbnextrow(H->link);
 
 	if (FAIL == ret) {
@@ -225,6 +231,8 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	if(colno >= stmt->column_count || colno < 0)  {
 		return FAILURE;
 	}
+
+	dbsetuserdata(H->link, (BYTE*) &S->err);
 
 	if (colno == 0) {
 		S->computed_column_name_count = 0;
@@ -350,6 +358,8 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *zv, enum pd
 	DBCHAR *tmp_data;
 	DBINT data_len, tmp_data_len;
 
+	dbsetuserdata(H->link, (BYTE*) &S->err);
+
 	coltype = dbcoltype(H->link, colno+1);
 	data = dbdata(H->link, colno+1);
 	data_len = dbdatlen(H->link, colno+1);
@@ -472,13 +482,15 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 		return FAILURE;
 	}
 
-	array_init(return_value);
+	dbsetuserdata(H->link, (BYTE*) &S->err);
 
 	dbtypeinfo = dbcoltypeinfo(H->link, colno+1);
 
 	if(!dbtypeinfo) return FAILURE;
 
 	coltype = dbcoltype(H->link, colno+1);
+
+	array_init(return_value);
 
 	add_assoc_long(return_value, "max_length", dbcollen(H->link, colno+1) );
 	add_assoc_long(return_value, "precision", (int) dbtypeinfo->precision );
