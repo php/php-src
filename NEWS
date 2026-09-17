@@ -43,6 +43,10 @@ PHP                                                                        NEWS
   . Fixed a crash when SQLite3::close() is called from a userland callback.
     (Ilia Alshanetsky)
 
+- Opcache:
+  . Fixed bug GH-23628 (Tracing JIT reads undefined property slots of lazy
+    proxy objects instead of forwarding to the real instance). (lisachenko)
+
 
 24 Sep 2026, PHP 8.5.11
 

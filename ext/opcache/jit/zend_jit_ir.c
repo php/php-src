@@ -14247,6 +14247,18 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), on_this, op_array->filename);
 
+	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && prop_type == IS_UNDEF) {
+		/* The property slot was IS_UNDEF when the trace was recorded. This
+		 * happens for lazy objects (a lazy proxy keeps its own slots undefined
+		 * and forwards the accesses to the real instance), as well as for
+		 * uninitialized or unset properties. The fast path with a known
+		 * property offset would deoptimize on every execution, so use the
+		 * generic code path that falls back to the object handlers for
+		 * undefined slots instead. */
+		prop_info = NULL;
+		trace_ce = NULL;
+	}
+
 	if (on_this) {
 		zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 		obj_ref = jit_Z_PTR(jit, this_addr);
