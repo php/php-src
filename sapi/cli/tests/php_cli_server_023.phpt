@@ -32,7 +32,6 @@ fclose($fp);
 ?>
 --EXPECTF--
 HTTP/1.1 200 OK
-Host: Foo Bar Baz
 Date: %s
 Connection: close
 X-Powered-By: %s
