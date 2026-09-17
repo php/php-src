@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fixed Dom\HTMLDocument giving attributes the namespace of their element
     when a fragment is parsed with an xlink, xml or xmlns context element.
     (Ilia Alshanetsky)
+  . Fixed bug GH-23729 (DOMXPath::__construct() use-after-free during an
+    evaluation). (David Carlier)
 
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
