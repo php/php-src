@@ -289,41 +289,6 @@ typedef struct _zend_fcall_info_cache {
 		class_container.info.internal.builtin_functions = functions;	\
 	}
 
-#define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions) \
-	{															\
-		class_container.default_object_handlers = &std_object_handlers;	\
-		class_container.constructor = NULL;						\
-		class_container.destructor = NULL;						\
-		class_container.clone = NULL;							\
-		class_container.serialize = NULL;						\
-		class_container.unserialize = NULL;						\
-		class_container.create_object = NULL;					\
-		class_container.get_static_method = NULL;				\
-		class_container.__call = NULL;							\
-		class_container.__callstatic = NULL;					\
-		class_container.__tostring = NULL;						\
-		class_container.__get = NULL;							\
-		class_container.__set = NULL;							\
-		class_container.__unset = NULL;							\
-		class_container.__isset = NULL;							\
-		class_container.__debugInfo = NULL;						\
-		class_container.__serialize = NULL;						\
-		class_container.__unserialize = NULL;					\
-		class_container.parent = NULL;							\
-		class_container.num_interfaces = 0;						\
-		class_container.trait_names = NULL;						\
-		class_container.num_traits = 0;							\
-		class_container.trait_aliases = NULL;					\
-		class_container.trait_precedences = NULL;				\
-		class_container.interfaces = NULL;						\
-		class_container.get_iterator = NULL;					\
-		class_container.iterator_funcs_ptr = NULL;				\
-		class_container.arrayaccess_funcs_ptr = NULL;			\
-		class_container.info.internal.module = NULL;			\
-		class_container.info.internal.builtin_functions = functions;	\
-	}
-
-
 #define INIT_NS_CLASS_ENTRY(class_container, ns, class_name, functions) \
 	INIT_CLASS_ENTRY(class_container, ZEND_NS_NAME(ns, class_name), functions)
 
