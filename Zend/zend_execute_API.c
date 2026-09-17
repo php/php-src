@@ -1118,12 +1118,6 @@ ZEND_API void zend_call_known_fcc_ex(
 	zend_fcall_info fci;
 
 	zend_function *fn = fcc->function_handler;
-	/* Need to copy trampolines as they get released after they are called */
-	if (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		fn = (zend_function*) emalloc(sizeof(zend_function));
-		memcpy(fn, fcc->function_handler, sizeof(zend_function));
-		zend_string_addref(fn->op_array.function_name);
-	}
 
 	fci.size = sizeof(fci);
 	fci.retval = retval_ptr ? retval_ptr : &retval;
@@ -1133,8 +1127,23 @@ ZEND_API void zend_call_known_fcc_ex(
 	fci.consumed_args = consumed_args;
 	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
+	zend_result result;
+	/* Need to copy trampolines as they get released after they are called */
+	if (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		fn = (zend_function*) emalloc(sizeof(zend_function));
+		memcpy(fn, fcc->function_handler, sizeof(zend_function));
+		zend_string_addref(fn->op_array.function_name);
 
-	zend_result result = zend_call_function(&fci, fcc);
+		zend_fcall_info_cache trampoline_fcc = {
+			.function_handler = fn,
+			.called_scope = fcc->called_scope,
+			.object = fcc->object,
+			.closure = fcc->closure,
+		};
+		result = zend_call_function(&fci, &trampoline_fcc);
+	} else {
+		result = zend_call_function(&fci, fcc);
+	}
 	if (UNEXPECTED(result == FAILURE)) {
 		if (!EG(exception)) {
 			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s",

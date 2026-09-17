@@ -874,7 +874,6 @@ static zend_always_inline void zend_call_known_function_ex(
 		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
 		uint32_t param_count, zval *params, HashTable *named_params, uint32_t consumed_args) {
 	ZEND_ASSERT(fn && "zend_function must be passed!");
-	ZEND_ASSERT((fn->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) == 0 && "fn cannot be a trampoline");
 
 	zend_fcall_info_cache fcc;
 	fcc.function_handler = fn;
