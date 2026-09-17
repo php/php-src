@@ -634,23 +634,12 @@ static bool pdo_do_key_pair_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation o
 }
 
 /* Return value MUST be an initialized object */
-static bool pdo_call_fetch_object_constructor(zend_function *constructor, HashTable *ctor_args, zval *return_value)
+static bool pdo_call_fetch_object_constructor(zend_function *constructor, HashTable *ctor_args, zend_object *this_ptr)
 {
 	zval retval_constructor_call;
-	zend_fcall_info fci = { 0 };
-	fci.size = sizeof(zend_fcall_info);
-	fci.object = Z_OBJ_P(return_value);
-	fci.retval = &retval_constructor_call;
-	fci.named_params = ctor_args;
-	zend_fcall_info_cache fcc = {
-		.function_handler = constructor,
-		.object = Z_OBJ_P(return_value),
-		.called_scope = Z_OBJCE_P(return_value),
-		.calling_scope = NULL,
-		.closure = NULL,
-	};
 
-	zend_call_function(&fci, &fcc);
+	zend_call_known_function(constructor, this_ptr, this_ptr->ce, &retval_constructor_call, 0, NULL, ctor_args);
+
 	bool failed = Z_ISUNDEF(retval_constructor_call);
 	zval_ptr_dtor(&retval_constructor_call);
 
@@ -784,7 +773,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 					goto in_fetch_error;
 				}
 				if (ce->constructor && (flags & PDO_FETCH_PROPS_LATE)) {
-					bool failed = pdo_call_fetch_object_constructor(ce->constructor, ctor_arguments, return_value);
+					bool failed = pdo_call_fetch_object_constructor(ce->constructor, ctor_arguments, Z_OBJ_P(return_value));
 					if (UNEXPECTED(failed)) {
 						zval_ptr_dtor(return_value);
 						goto in_fetch_error;
@@ -922,7 +911,7 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 
 	/* Run constructor for objects if not already run and not unserialized */
 	if (how == PDO_FETCH_CLASS && ce->constructor && !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
-		bool failed = pdo_call_fetch_object_constructor(ce->constructor, ctor_arguments, return_value);
+		bool failed = pdo_call_fetch_object_constructor(ce->constructor, ctor_arguments, Z_OBJ_P(return_value));
 		if (UNEXPECTED(failed)) {
 			zval_ptr_dtor(return_value);
 			goto in_fetch_error;
