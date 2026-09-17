@@ -567,7 +567,7 @@ static int php_sock_array_to_fd_set(uint32_t arg_num, zval *sock_array, fd_set *
 		num++;
 	} ZEND_HASH_FOREACH_END();
 
-	return num ? 1 : 0;
+	return num;
 }
 /* }}} */
 
@@ -618,7 +618,7 @@ PHP_FUNCTION(socket_select)
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
 	PHP_SOCKET		max_fd = 0;
-	int				retval, sets = 0;
+	int				retval, max_set_count = 0;
 	zend_long		sec, usec = 0;
 	bool		sec_is_null = 0;
 
@@ -636,30 +636,39 @@ PHP_FUNCTION(socket_select)
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(1, r_array, &rfds, &max_fd);
+		retval = php_sock_array_to_fd_set(1, r_array, &rfds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
+		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
 		}
 	}
 	if (w_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(2, w_array, &wfds, &max_fd);
+		retval = php_sock_array_to_fd_set(2, w_array, &wfds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
+		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
 		}
 	}
 	if (e_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(3, e_array, &efds, &max_fd);
+		retval = php_sock_array_to_fd_set(3, e_array, &efds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
 		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
+		}
 	}
 
-	if (!sets) {
+	if (!max_set_count) {
 		zend_value_error("socket_select(): At least one array argument must be passed");
 		RETURN_THROWS();
 	}
 
-	if (!PHP_SAFE_MAX_FD(max_fd, 0)) {
+	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
 		RETURN_FALSE;
 	}
 
