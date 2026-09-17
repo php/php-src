@@ -322,10 +322,41 @@ ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
 ZEND_API void zend_vm_stack_init(void);
 ZEND_API void zend_vm_stack_init_ex(size_t page_size);
 ZEND_API void zend_vm_stack_destroy(void);
+ZEND_API void zend_vm_stack_destroy_caches(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 
+#define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
+
+static zend_always_inline zend_vm_stack zend_vm_stack_cached_page(size_t size) {
+	zend_vm_stack page;
+
+	if (size == ZEND_FIBER_VM_STACK_SIZE) {
+		page = EG(fiber_vm_stack_page_cache);
+		if (page) {
+			ZEND_ASSERT((size_t)((char*)page->end - (char*)page) == size);
+			EG(fiber_vm_stack_page_cache) = page->prev;
+			EG(fiber_vm_stack_page_cache_count)--;
+			return page;
+		}
+	} else {
+		page = EG(vm_stack_page_cache);
+		ZEND_ASSERT(!page || ((size_t)((char*)page->end - (char*)page) == size) || size != EG(vm_stack_page_size));
+		if (page && EXPECTED((size_t)((char*)page->end - (char*)page) == size)) {
+			EG(vm_stack_page_cache) = page->prev;
+			EG(vm_stack_page_cache_count)--;
+			return page;
+		}
+	}
+
+	return NULL;
+}
+
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
-	zend_vm_stack page = (zend_vm_stack)emalloc(size);
+	zend_vm_stack page = zend_vm_stack_cached_page(size);
+
+	if (!page) {
+		page = (zend_vm_stack)emalloc(size);
+	}
 
 	page->top = ZEND_VM_STACK_ELEMENTS(page);
 	page->end = (zval*)((char*)page + size);
@@ -421,7 +452,24 @@ static zend_always_inline void zend_vm_stack_free_call_frame_ex(uint32_t call_in
 		EG(vm_stack_top) = prev->top;
 		EG(vm_stack_end) = prev->end;
 		EG(vm_stack) = prev;
-		efree(p);
+		if ((size_t)((char*)p->end - (char*)p) == ZEND_FIBER_VM_STACK_SIZE) {
+			if (EG(fiber_vm_stack_page_cache_count) < 32) {
+				p->prev = EG(fiber_vm_stack_page_cache);
+				EG(fiber_vm_stack_page_cache) = p;
+				EG(fiber_vm_stack_page_cache_count)++;
+			} else {
+				efree(p);
+			}
+		} else {
+			if (EG(vm_stack_page_cache_count) < 32
+					&& (size_t)((char*)p->end - (char*)p) == EG(vm_stack_page_size)) {
+				p->prev = EG(vm_stack_page_cache);
+				EG(vm_stack_page_cache) = p;
+				EG(vm_stack_page_cache_count)++;
+			} else {
+				efree(p);
+			}
+		}
 	} else {
 		EG(vm_stack_top) = (zval*)call;
 	}

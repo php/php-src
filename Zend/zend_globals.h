@@ -202,6 +202,11 @@ struct _zend_executor_globals {
 	zval          *vm_stack_end;
 	zend_vm_stack  vm_stack;
 	size_t         vm_stack_page_size;
+	zend_vm_stack  vm_stack_page_cache;
+	uint32_t       vm_stack_page_cache_count;
+	/* Fibers use a different page size, so they need a separate cache */
+	zend_vm_stack  fiber_vm_stack_page_cache;
+	uint32_t       fiber_vm_stack_page_cache_count;
 
 	struct _zend_execute_data *current_execute_data;
 	const zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
