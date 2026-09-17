@@ -2612,6 +2612,7 @@ is_string:
 }
 /* }}} */
 
+/* Note: changes to zend_std_get_closure should be applied to zend_get_closure() in zend_closure.c */
 ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
 {
 	zend_class_entry *ce = obj->ce;
