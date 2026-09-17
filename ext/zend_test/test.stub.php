@@ -6,6 +6,13 @@
  * @generate-legacy-arginfo 70000
  * @undocumentable
  */
+
+#if 1
+declare(
+    c_include='test_stub_cvalue.h'
+);
+#endif
+
 namespace {
     require "Zend/zend_attributes.stub.php";
 
@@ -17,6 +24,12 @@ namespace {
 
     /** @var string */
     const ZEND_CONSTANT_A = "global";
+
+    /**
+     * @var string
+     * @cvalue ZEND_TEST_STUB_CVALUE_A
+     */
+    const ZEND_TEST_STUB_CVALUE_A = UNKNOWN;
 
     /**
      * @var int
