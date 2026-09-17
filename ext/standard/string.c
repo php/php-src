@@ -1131,7 +1131,7 @@ ZEND_FRAMELESS_FUNCTION(implode, 2)
 {
 	zval str_tmp;
 	zend_string *str;
-	zval *pieces;
+	HashTable *pieces = NULL;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
 	Z_FLF_PARAM_ARRAY_OR_NULL(2, pieces);
@@ -1145,10 +1145,11 @@ ZEND_FRAMELESS_FUNCTION(implode, 2)
 		goto flf_clean;
 	}
 
-	php_implode(str, Z_ARR_P(pieces), return_value);
+	php_implode(str, pieces, return_value);
 
 flf_clean:;
 	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_ARRAY(pieces);
 }
 
 #define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]
@@ -3558,7 +3559,7 @@ ZEND_FRAMELESS_FUNCTION(strtr, 2)
 {
 	zval str_tmp;
 	zend_string *str;
-	zval *from;
+	HashTable *from = NULL;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
 	Z_FLF_PARAM_ARRAY(2, from);
@@ -3568,10 +3569,11 @@ ZEND_FRAMELESS_FUNCTION(strtr, 2)
 		goto flf_clean;
 	}
 
-	php_strtr_array(return_value, str, Z_ARR_P(from));
+	php_strtr_array(return_value, str, from);
 
 flf_clean:
 	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_ARRAY(from);
 }
 
 ZEND_FRAMELESS_FUNCTION(strtr, 3)
@@ -4660,7 +4662,7 @@ PHP_FUNCTION(str_replace)
 ZEND_FRAMELESS_FUNCTION(str_replace, 3)
 {
 	zend_string *search_str, *replace_str, *subject_str;
-	HashTable *search_ht, *replace_ht, *subject_ht;
+	HashTable *search_ht = NULL, *replace_ht = NULL, *subject_ht = NULL;
 	zval search_tmp, replace_tmp, subject_tmp;
 
 	Z_FLF_PARAM_ARRAY_HT_OR_STR(1, search_ht, search_str, search_tmp);
@@ -4670,9 +4672,9 @@ ZEND_FRAMELESS_FUNCTION(str_replace, 3)
 	_php_str_replace_common(return_value, search_ht, search_str, replace_ht, replace_str, subject_ht, subject_str, /* zcount */ NULL, /* case_sensitivity */ true);
 
 flf_clean:;
-	Z_FLF_PARAM_FREE_STR(1, search_tmp);
-	Z_FLF_PARAM_FREE_STR(2, replace_tmp);
-	Z_FLF_PARAM_FREE_STR(3, subject_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(1, search_ht, search_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(2, replace_ht, replace_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(3, subject_ht, subject_tmp);
 }
 
 /* {{{ Replaces all occurrences of search in haystack with replace / case-insensitive */
