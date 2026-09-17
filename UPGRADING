@@ -1114,6 +1114,7 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of array_unshift().
   . Improved performance of array_walk().
   . Improved performance of intval('+0b...', 2) and intval('0b...', 2).
+  . Improved performance of pathinfo() when requesting a single component.
   . Improved performance of str_split().
   . Improved performance of str_pad().
   . Improved performance of str_repeat() when the multiplier is 1.
