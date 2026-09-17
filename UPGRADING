@@ -130,12 +130,6 @@ PHP 8.6 UPGRADE NOTES
     paths. Previously, it could occur in a directory name or as part of an
     extension such as ".pharma".
 
-- Posix:
-  . posix_access() now raises a ValueError when an invalid $flags
-    argument value is passed.
-  . posix_mkfifo() now raises a ValueError when an invalid $permissions
-    argument value is passed.
-
 - Session:
   . Setting session.cookie_path, session.cookie_domain, or session.cache_limiter
     to a value containing NUL bytes now emits a warning and leaves the setting

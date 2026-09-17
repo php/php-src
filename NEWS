@@ -45,6 +45,10 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
 
+- Posix:
+  . Reverted the validity check on the flags argument of posix_access().
+    (David Carlier)
+
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
     __serialize() removes an element). (David Carlier)
