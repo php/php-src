@@ -28,7 +28,6 @@ echo $header_contents, "\n";
 ?>
 --EXPECTF--
 HTTP/1.1 200 OK
-Host: localhost:%d
 Date: %s
 Connection: close
 X-Powered-By: PHP/%s
