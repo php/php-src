@@ -1968,20 +1968,34 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		return plain_files_wrapper;
 	}
 
-	if (wrapper && wrapper->is_url &&
+	if (wrapper &&
 	    (options & STREAM_DISABLE_URL_PROTECTION) == 0 &&
 	    (!PG(allow_url_fopen) ||
 	     (((options & STREAM_OPEN_FOR_INCLUDE) ||
-	       PG(in_user_include)) && !PG(allow_url_include)))) {
-		if (options & REPORT_ERRORS) {
-			/* protocol[n] probably isn't '\0' */
-			if (!PG(allow_url_fopen)) {
-				php_error_docref(NULL, E_WARNING, "%.*s:// wrapper is disabled in the server configuration by allow_url_fopen=0", (int)n, protocol);
-			} else {
-				php_error_docref(NULL, E_WARNING, "%.*s:// wrapper is disabled in the server configuration by allow_url_include=0", (int)n, protocol);
-			}
+	       PG(in_user_include)) && !PG(allow_url_include)))
+	) {
+		bool is_url = false;
+		if (wrapper->is_url == STREAM_IS_URL_ALWAYS) {
+			is_url = true;
+		} else if (wrapper->is_url == STREAM_IS_URL_NEVER) {
+			is_url = false;
+		} else {
+			ZEND_ASSERT(wrapper->is_url == STREAM_IS_URL_SOMETIMES);
+			ZEND_ASSERT(wrapper->wops->stream_is_url != NULL);
+			is_url = (wrapper->wops->stream_is_url)(wrapper, path, NULL);
 		}
-		return NULL;
+
+		if (is_url) {
+			if (options & REPORT_ERRORS) {
+				/* protocol[n] probably isn't '\0' */
+				if (!PG(allow_url_fopen)) {
+					php_error_docref(NULL, E_WARNING, "%.*s:// wrapper is disabled in the server configuration by allow_url_fopen=0", (int)n, protocol);
+				} else {
+					php_error_docref(NULL, E_WARNING, "%.*s:// wrapper is disabled in the server configuration by allow_url_include=0", (int)n, protocol);
+				}
+			}
+			return NULL;
+		}
 	}
 
 	return wrapper;
@@ -2127,11 +2141,23 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			"Failed to open stream: no suitable wrapper could be found");
 		goto cleanup_no_wrapper_name;
 	}
-	if ((options & STREAM_USE_URL) && !wrapper->is_url) {
-		php_stream_wrapper_warn(wrapper, context, options,
-			ProtocolUnsupported,
-			"This function may only be used against URLs");
-		goto cleanup_no_wrapper_name;
+	if (options & STREAM_USE_URL) {
+		bool is_url = false;
+		if (wrapper->is_url == STREAM_IS_URL_ALWAYS) {
+			is_url = true;
+		} else if (wrapper->is_url == STREAM_IS_URL_NEVER) {
+			is_url = false;
+		} else {
+			ZEND_ASSERT(wrapper->is_url == STREAM_IS_URL_SOMETIMES);
+			ZEND_ASSERT(wrapper->wops->stream_is_url != NULL);
+			is_url = (wrapper->wops->stream_is_url)(wrapper, path, context);
+		}
+		if (!is_url) {
+			php_stream_wrapper_warn(wrapper, context, options,
+				ProtocolUnsupported,
+				"This function may only be used against URLs");
+			goto cleanup_no_wrapper_name;
+		}
 	}
 
 	if (!wrapper->wops->stream_opener) {

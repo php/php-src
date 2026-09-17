@@ -481,11 +481,12 @@ static const php_stream_wrapper_ops php_stdio_wops = {
 	NULL, /* rename */
 	NULL, /* mkdir */
 	NULL, /* rmdir */
-	NULL
+	NULL,
+	NULL, /* is_url, unneeded since php is never for URLs */
 };
 
 PHPAPI const php_stream_wrapper php_stream_php_wrapper =	{
 	&php_stdio_wops,
 	NULL,
-	0, /* is_url */
+	STREAM_IS_URL_NEVER,
 };

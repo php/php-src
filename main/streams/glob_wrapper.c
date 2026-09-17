@@ -309,11 +309,12 @@ static const php_stream_wrapper_ops  php_glob_stream_wrapper_ops = {
 	NULL,
 	NULL,
 	NULL,
-	NULL
+	NULL,
+	NULL, /* is_url, unneeded since globs are never for URLs */
 };
 
 const php_stream_wrapper  php_glob_stream_wrapper = {
 	&php_glob_stream_wrapper_ops,
 	NULL,
-	0
+	STREAM_IS_URL_NEVER,
 };

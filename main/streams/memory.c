@@ -778,10 +778,11 @@ PHPAPI const php_stream_wrapper_ops php_stream_rfc2397_wops = {
 	NULL, /* mkdir */
 	NULL, /* rmdir */
 	NULL, /* stream_metadata */
+	NULL, /* is_url, unneeded since memory streams are always considered to be for URLs */
 };
 
 PHPAPI const php_stream_wrapper php_stream_rfc2397_wrapper =	{
 	&php_stream_rfc2397_wops,
 	NULL,
-	1, /* is_url */
+	STREAM_IS_URL_ALWAYS,
 };

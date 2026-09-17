@@ -1717,12 +1717,13 @@ static const php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_rename,
 	php_plain_files_mkdir,
 	php_plain_files_rmdir,
-	php_plain_files_metadata
+	php_plain_files_metadata,
+	NULL, /* is_url, unneeded since local files are never for URLs */
 };
 
 /* TODO: We have to make php_plain_files_wrapper writable to support SWOOLE */
 PHPAPI /*const*/ php_stream_wrapper php_plain_files_wrapper = {
 	&php_plain_files_wrapper_ops,
 	NULL,
-	0
+	STREAM_IS_URL_NEVER,
 };

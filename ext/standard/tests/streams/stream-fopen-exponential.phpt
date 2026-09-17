@@ -19,11 +19,17 @@ var_dump(fopen($target, "r"));
 
 ?>
 --EXPECTF--
-Warning: fopen(): Failed to open stream: operation failed in %s on line %d
+Warning: fopen(): compress.zlib:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
+
+Warning: fopen(): Failed to open stream: no suitable wrapper could be found in %s on line %d
 bool(false)
 
-Warning: fopen(): Failed to open stream: operation failed in %s on line %d
+Warning: fopen(): compress.zlib:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
+
+Warning: fopen(): Failed to open stream: no suitable wrapper could be found in %s on line %d
 bool(false)
 
-Warning: fopen(): Failed to open stream: operation failed in %s on line %d
+Warning: fopen(): compress.zlib:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
+
+Warning: fopen(): Failed to open stream: no suitable wrapper could be found in %s on line %d
 bool(false)

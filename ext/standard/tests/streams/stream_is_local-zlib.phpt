@@ -32,19 +32,19 @@ http://127.0.0.1/example.html
 bool(false)
 
 compress.zlib://http://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 compress.zlib://compress.zlib://http://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 ftp://127.0.0.1/example.html
 bool(false)
 
 compress.zlib://ftp://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 compress.zlib://compress.zlib://ftp://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 /etc/os-release
 bool(true)

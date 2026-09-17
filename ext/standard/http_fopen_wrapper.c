@@ -1245,11 +1245,12 @@ static const php_stream_wrapper_ops http_stream_wops = {
 	NULL, /* rename */
 	NULL, /* mkdir */
 	NULL, /* rmdir */
-	NULL
+	NULL,
+	NULL, /* is_url, unneeded since HTTP is always for URLs */
 };
 
 PHPAPI const php_stream_wrapper php_stream_http_wrapper = {
 	&http_stream_wops,
 	NULL,
-	1 /* is_url */
+	STREAM_IS_URL_ALWAYS,
 };

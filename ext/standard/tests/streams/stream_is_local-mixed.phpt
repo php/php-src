@@ -34,25 +34,25 @@ http://127.0.0.1/example.html
 bool(false)
 
 compress.bzip2://compress.zlib://http://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 compress.zlib://compress.bzip2://http://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 %r(compress\.zlib:\/\/compress\.bzip2:\/\/){20}%rhttp://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 ftp://127.0.0.1/example.html
 bool(false)
 
 compress.bzip2://compress.zlib://ftp://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 compress.zlib://compress.bzip2://ftp://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 %r(compress\.zlib:\/\/compress\.bzip2:\/\/){20}%rftp://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 /etc/os-release
 bool(true)

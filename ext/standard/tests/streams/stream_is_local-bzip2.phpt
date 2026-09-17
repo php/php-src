@@ -32,19 +32,19 @@ http://127.0.0.1/example.html
 bool(false)
 
 compress.bzip2://http://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 compress.bzip2://compress.bzip2://http://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 ftp://127.0.0.1/example.html
 bool(false)
 
 compress.bzip2://ftp://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 compress.bzip2://compress.bzip2://ftp://127.0.0.1/example.html
-bool(true)
+bool(false)
 
 /etc/os-release
 bool(true)

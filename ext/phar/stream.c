@@ -43,13 +43,14 @@ static const php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_rename,   /* rename */
 	phar_wrapper_mkdir,    /* create directory */
 	phar_wrapper_rmdir,    /* remove directory */
-	NULL
+	NULL,
+	NULL,                   /* is_url, unneeded since phars are never for URLs */
 };
 
 const php_stream_wrapper php_stream_phar_wrapper = {
 	&phar_stream_wops,
 	NULL,
-	0 /* is_url */
+	STREAM_IS_URL_NEVER,
 };
 
 /**

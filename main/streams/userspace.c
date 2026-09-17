@@ -61,7 +61,8 @@ static const php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_rename,
 	user_wrapper_mkdir,
 	user_wrapper_rmdir,
-	user_wrapper_metadata
+	user_wrapper_metadata,
+	NULL, /* is_url - userspace streams that are only sometimes local are not (yet) supported */
 };
 
 
@@ -296,10 +297,11 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 	/* if the user stream was registered as local and we are in include context,
 		we add allow_url_include restrictions to allow_url_fopen ones */
-	/* we need only is_url == 0 here since if is_url == 1 and remote wrappers
-		were restricted we wouldn't get here */
+	/* we need only is_url == STREAM_IS_URL_NEVER here since if
+	 * is_url == STREAM_IS_URL_ALWAYS and remote wrappers were restricted we
+	 * wouldn't get here; user streams do not yet support STREAM_IS_URL_SOMETIMES */
 	old_in_user_include = PG(in_user_include);
-	if(uwrap->wrapper.is_url == 0 &&
+	if(uwrap->wrapper.is_url == STREAM_IS_URL_NEVER &&
 		(options & STREAM_OPEN_FOR_INCLUDE) &&
 		!PG(allow_url_include)) {
 		PG(in_user_include) = 1;
@@ -473,7 +475,11 @@ PHP_FUNCTION(stream_wrapper_register)
 	uwrap->ce = ce;
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
-	uwrap->wrapper.is_url = ((flags & PHP_STREAM_IS_URL) != 0);
+	if ((flags & PHP_STREAM_IS_URL) != 0) {
+		uwrap->wrapper.is_url = STREAM_IS_URL_ALWAYS;
+	} else {
+		uwrap->wrapper.is_url = STREAM_IS_URL_NEVER;
+	}
 
 	rsrc = zend_register_resource(uwrap, le_protocols);
 
