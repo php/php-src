@@ -7,20 +7,20 @@ zend_test
 
 try {
 	  var_dump(zend_iterable("string"));
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
 	  var_dump(zend_iterable(1));
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
 	  var_dump(zend_iterable(null));
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 
@@ -34,14 +34,13 @@ zend_iterable($iterator, null);
 
 try {
 	  var_dump(zend_iterable([], "string"));
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, string given
-zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, int given
-zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, null given
-zend_iterable(): Argument #2 ($arg2) must be of type Traversable|array|null, string given
-
+TypeError: zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, string given
+TypeError: zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, int given
+TypeError: zend_iterable(): Argument #1 ($arg1) must be of type Traversable|array, null given
+TypeError: zend_iterable(): Argument #2 ($arg2) must be of type Traversable|array|null, string given

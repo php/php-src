@@ -41,14 +41,14 @@ Using 73.5:
 TypeError: zend_obj_or_class_name(): Argument #1 ($param) must be an object or a valid class name, float given
 TypeError: zend_obj_or_class_name_or_null(): Argument #1 ($param) must be an object, a valid class name, or null, float given
 Using 'string':
-TypeError: zend_obj_or_class_name(): Argument #1 ($param) must be an object or a valid class name, string given
-TypeError: zend_obj_or_class_name_or_null(): Argument #1 ($param) must be an object, a valid class name, or null, string given
+TypeError: zend_obj_or_class_name(): Argument #1 ($param) must be an object or a valid class name, "string" given
+TypeError: zend_obj_or_class_name_or_null(): Argument #1 ($param) must be an object, a valid class name, or null, "string" given
 Using '15':
-TypeError: zend_obj_or_class_name(): Argument #1 ($param) must be an object or a valid class name, string given
-TypeError: zend_obj_or_class_name_or_null(): Argument #1 ($param) must be an object, a valid class name, or null, string given
+TypeError: zend_obj_or_class_name(): Argument #1 ($param) must be an object or a valid class name, "15" given
+TypeError: zend_obj_or_class_name_or_null(): Argument #1 ($param) must be an object, a valid class name, or null, "15" given
 Using '56.7':
-TypeError: zend_obj_or_class_name(): Argument #1 ($param) must be an object or a valid class name, string given
-TypeError: zend_obj_or_class_name_or_null(): Argument #1 ($param) must be an object, a valid class name, or null, string given
+TypeError: zend_obj_or_class_name(): Argument #1 ($param) must be an object or a valid class name, "56.7" given
+TypeError: zend_obj_or_class_name_or_null(): Argument #1 ($param) must be an object, a valid class name, or null, "56.7" given
 Using 'stdClass':
 string(8) "stdClass"
 string(8) "stdClass"

@@ -92,7 +92,6 @@ php_file_globals file_globals;
 # include <fnmatch.h>
 #endif
 
-#include "zend_attributes.h"
 #include "file_arginfo.h"
 
 /* }}} */
@@ -367,9 +366,16 @@ PHP_FUNCTION(get_meta_tags)
 
 	if (value) efree(value);
 	if (name) efree(name);
-	php_stream_close(md.stream);
 
-	php_stream_error_operation_end_for_stream(md.stream);
+	php_stream_context *context = PHP_STREAM_CONTEXT(md.stream);
+	if (context) {
+		GC_ADDREF(context->res);
+	}
+	php_stream_close(md.stream);
+	php_stream_error_operation_end(context);
+	if (context) {
+		zend_list_delete(context->res);
+	}
 }
 /* }}} */
 
@@ -572,10 +578,10 @@ PHP_FUNCTION(file_put_contents)
 			numbytes = -1;
 			break;
 	}
-	php_stream_close(stream);
+	int close_result = php_stream_close(stream);
 	php_stream_error_operation_end(context);
 
-	if (numbytes < 0) {
+	if (numbytes < 0 || close_result) {
 		RETURN_FALSE;
 	}
 
@@ -776,13 +782,20 @@ PHPAPI PHP_FUNCTION(fclose)
 		RETURN_FALSE;
 	}
 
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+	if (context) {
+		GC_ADDREF(context->res);
+	}
 	php_stream_error_operation_begin();
-	php_stream_free(stream,
+	int free_result = php_stream_free(stream,
 		PHP_STREAM_FREE_KEEP_RSRC |
 		(stream->is_persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE));
-	php_stream_error_operation_end_for_stream(stream);
+	php_stream_error_operation_end(context);
+	if (context) {
+		zend_list_delete(context->res);
+	}
 
-	RETURN_TRUE;
+	RETURN_BOOL(!free_result);
 }
 /* }}} */
 
@@ -852,11 +865,18 @@ PHP_FUNCTION(pclose)
 		PHP_Z_PARAM_STREAM(stream)
 	ZEND_PARSE_PARAMETERS_END();
 
+	php_stream_context *context = PHP_STREAM_CONTEXT(stream);
+	if (context) {
+		GC_ADDREF(context->res);
+	}
 	php_stream_error_operation_begin();
 	FG(pclose_wait) = 1;
 	zend_list_close(stream->res);
 	FG(pclose_wait) = 0;
-	php_stream_error_operation_end_for_stream(stream);
+	php_stream_error_operation_end(context);
+	if (context) {
+		zend_list_delete(context->res);
+	}
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
@@ -1388,7 +1408,7 @@ PHPAPI void php_fstat(php_stream *stream, zval *return_value)
 	php_stream_statbuf stat_ssb;
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
-	char *stat_sb_names[13] = {
+	char *stat_sb_names[] = {
 		"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
@@ -1397,7 +1417,8 @@ PHPAPI void php_fstat(php_stream *stream, zval *return_value)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	array_init_size(return_value, 2 * (sizeof(stat_sb_names) / sizeof(*stat_sb_names)));
+	zend_hash_real_init_mixed(Z_ARRVAL_P(return_value));
 
 	ZVAL_LONG(&stat_dev, stat_ssb.sb.st_dev);
 	ZVAL_LONG(&stat_ino, stat_ssb.sb.st_ino);
@@ -1425,19 +1446,19 @@ PHPAPI void php_fstat(php_stream *stream, zval *return_value)
 	ZVAL_LONG(&stat_blocks,-1);
 #endif
 	/* Store numeric indexes in proper order */
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_dev);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ino);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mode);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_nlink);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_uid);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_gid);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_rdev);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_size);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_atime);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_mtime);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_ctime);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blksize);
-	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blocks);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_dev);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_ino);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_mode);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_nlink);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_uid);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_gid);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_rdev);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_size);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_atime);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_mtime);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_ctime);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_blksize);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stat_blocks);
 
 	/* Store string indexes referencing the same zval*/
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
@@ -1595,8 +1616,8 @@ safe_to_copy:
 		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
 	}
 	php_stream_close(srcstream);
-	if (deststream) {
-		php_stream_close(deststream);
+	if (deststream && php_stream_close(deststream)) {
+		ret = FAILURE;
 	}
 	return ret;
 }
@@ -1904,7 +1925,7 @@ PHPAPI HashTable *php_bc_fgetcsv_empty_line(void)
 	HashTable *values = zend_new_array(1);
 	zval tmp;
 	ZVAL_NULL(&tmp);
-	zend_hash_next_index_insert(values, &tmp);
+	zend_hash_next_index_insert_new(values, &tmp);
 	return values;
 }
 
@@ -2163,7 +2184,7 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 
 		zval z_tmp;
 		ZVAL_STRINGL(&z_tmp, temp, comp_end - temp);
-		zend_hash_next_index_insert(values, &z_tmp);
+		zend_hash_next_index_insert_new(values, &z_tmp);
 	} while (inc_len > 0);
 
 	efree(temp);

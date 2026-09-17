@@ -443,6 +443,20 @@ ok:
 }
 /* }}} */
 
+static void php_network_set_socket_buffers(php_socket_t sock, const php_sockvals *sockvals)
+{
+#ifdef SO_RCVBUF
+	if (sockvals->mask & PHP_SOCKVAL_SO_RCVBUF) {
+		setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char*)&sockvals->rcvbuf, sizeof(sockvals->rcvbuf));
+	}
+#endif
+#ifdef SO_SNDBUF
+	if (sockvals->mask & PHP_SOCKVAL_SO_SNDBUF) {
+		setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char*)&sockvals->sndbuf, sizeof(sockvals->sndbuf));
+	}
+#endif
+}
+
 /* Bind to a local IP address.
  * Returns the bound socket, or -1 on failure.
  * */
@@ -573,6 +587,7 @@ php_socket_t php_network_bind_socket_to_local_addr_ex(const char *host, unsigned
 				setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (char*)&sockvals->keepalive.keepcnt, sizeof(sockvals->keepalive.keepcnt));
 			}
 #endif
+			php_network_set_socket_buffers(sock, sockvals);
 		}
 
 		n = bind(sock, sa, socklen);
@@ -1077,6 +1092,7 @@ php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsigned sh
 				setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (char*)&sockvals->keepalive.keepcnt, sizeof(sockvals->keepalive.keepcnt));
 			}
 #endif
+			php_network_set_socket_buffers(sock, sockvals);
 		}
 
 		n = php_network_connect_socket(sock, sa, socklen, asynchronous,

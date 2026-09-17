@@ -5,8 +5,8 @@ func_get_arg() invalid usage
 
 try {
     var_dump(func_get_arg(1));
-} catch (\Error $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 function bar() {
@@ -19,11 +19,11 @@ function foo() {
 
 try {
     foo(1,2);
-} catch (\Error $e) {
-    echo $e->getMessage() . \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-func_get_arg() cannot be called from the global scope
-func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function
+Error: func_get_arg() cannot be called from the global scope
+ValueError: func_get_arg(): Argument #1 ($position) must be less than the number of the arguments passed to the currently executed function

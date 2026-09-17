@@ -69,4 +69,3 @@ Error on line 7, column 1:
 bool(false)
 int(4)
 string(30) "Syntax error near location 7:1"
-

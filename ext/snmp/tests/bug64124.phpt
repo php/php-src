@@ -12,9 +12,8 @@ $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
     die("skip no IPv6 support");
 }
+if (PHP_OS_FAMILY === 'Windows') die('xfail SNMP tests might possibly fail on Windows');
 ?>
---XFAIL--
-SNMP tests might possibly fail on Windows
 --FILE--
 <?php
 require_once(__DIR__.'/snmp_include.inc');

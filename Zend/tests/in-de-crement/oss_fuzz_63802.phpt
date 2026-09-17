@@ -21,14 +21,14 @@ foreach (['pre', 'post'] as $prePost) {
     foreach (['inc', 'dec'] as $incDec) {
         try {
             $foo->{$prePost . ucfirst($incDec)}();
-        } catch (TypeError $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
 ?>
 --EXPECT--
-Cannot increment Foo
-Cannot decrement Foo
-Cannot increment Foo
-Cannot decrement Foo
+TypeError: Cannot increment Foo
+TypeError: Cannot decrement Foo
+TypeError: Cannot increment Foo
+TypeError: Cannot decrement Foo

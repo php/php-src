@@ -26,22 +26,22 @@ function test_invalid_obj_type($c) {
 
 try {
     test_invalid_prop_type();
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test_invalid_prop_name("\0");
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test_invalid_obj_type(false);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot assign string to property Test::$x of type stdClass
-Cannot access property starting with "\0"
-Attempt to assign property "x" on null
+TypeError: Cannot assign string to property Test::$x of type stdClass
+Error: Cannot access property starting with "\0"
+Error: Attempt to assign property "x" on null

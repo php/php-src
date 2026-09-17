@@ -36,8 +36,8 @@ echo "\n";
 var_dump($a->test2());
 try {
     var_dump($b->test2());
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -48,8 +48,8 @@ echo "\n";
 var_dump($a->test4());
 try {
     var_dump($b->test4());
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "\n";
@@ -59,8 +59,8 @@ $test = function($x): static {
 
 try {
     var_dump($test(new stdClass));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $test = $test->bindTo($a);
@@ -75,7 +75,7 @@ object(B)#%d (0) {
 
 object(A)#%d (0) {
 }
-A::test2(): Return value must be of type B, A returned
+TypeError: A::test2(): Return value must be of type B, A returned
 
 object(A)#%d (0) {
 }
@@ -84,8 +84,8 @@ object(C)#%d (0) {
 
 object(A)#%d (0) {
 }
-A::test4(): Return value must be of type B|array, A returned
+TypeError: A::test4(): Return value must be of type B|array, A returned
 
-{closure:%s:%d}(): Return value must be of type static, stdClass returned
+TypeError: {closure:%s:%d}(): Return value must be of type static, stdClass returned
 object(A)#%d (0) {
 }

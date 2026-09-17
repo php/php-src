@@ -80,6 +80,8 @@ array(1) {
   ["foo"]=>
   string(5) "hello"
 }
+
+Warning: SessionHandler::validateId(): Parent session handler is not open, ignoring ID validation in %s on line %d
 array(1) {
   ["foo"]=>
   string(5) "hello"

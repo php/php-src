@@ -17,7 +17,6 @@
 #endif
 
 #include "php_spl.h"
-#include "zend_attributes.h"
 #include "php_spl_arginfo.h"
 #include "zend_autoload.h"
 #include "zend_exceptions.h"

@@ -109,6 +109,9 @@ static zend_object *BreakIterator_clone_obj(zend_object *object)
 		} else {
 			bio_new->biter = new_biter;
 			ZVAL_COPY(&bio_new->text, &bio_orig->text);
+			if (bio_orig->compiled_rules) {
+				bio_new->compiled_rules = zend_string_copy(bio_orig->compiled_rules);
+			}
 		}
 	} else {
 		zend_throw_error(NULL, "Cannot clone uninitialized BreakIterator");
@@ -163,6 +166,7 @@ static void breakiterator_object_init(BreakIterator_object *bio)
 {
 	intl_error_init(BREAKITER_ERROR_P(bio));
 	bio->biter = NULL;
+	bio->compiled_rules = NULL;
 	ZVAL_UNDEF(&bio->text);
 }
 /* }}} */
@@ -176,6 +180,10 @@ static void BreakIterator_objects_free(zend_object *object)
 	if (bio->biter) {
 		delete bio->biter;
 		bio->biter = NULL;
+	}
+	if (bio->compiled_rules) {
+		zend_string_release(bio->compiled_rules);
+		bio->compiled_rules = NULL;
 	}
 	intl_error_reset(BREAKITER_ERROR_P(bio));
 

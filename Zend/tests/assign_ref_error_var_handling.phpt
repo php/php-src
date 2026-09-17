@@ -11,20 +11,20 @@ $var = 24;
 $arr = [PHP_INT_MAX => "foo"];
 try {
     var_dump($arr[] =& $var);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(count($arr));
 try {
     var_dump($arr[] =& val());
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(count($arr));
 
 ?>
 --EXPECT--
-Cannot add element to the array as the next element is already occupied
+Error: Cannot add element to the array as the next element is already occupied
 int(1)
-Cannot add element to the array as the next element is already occupied
+Error: Cannot add element to the array as the next element is already occupied
 int(1)

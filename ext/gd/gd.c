@@ -32,7 +32,6 @@
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
 #include "php_memory_streams.h"
-#include "zend_attributes.h"
 #include "zend_object_handlers.h"
 
 #ifdef HAVE_SYS_WAIT_H
@@ -1097,6 +1096,51 @@ PHP_FUNCTION(imagecopyresampled)
 /* }}} */
 
 #ifdef PHP_WIN32
+/* The bitmap must not be selected into a device context. */
+static gdImagePtr php_gd_image_from_bitmap(HDC hdc, HBITMAP bitmap, int width, int height)
+{
+	BITMAPINFO bitmap_info = {0};
+	RGBQUAD *pixels;
+	gdImagePtr im;
+	size_t num_pixels;
+	bool overflow;
+	int x, y;
+
+	bitmap_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bitmap_info.bmiHeader.biWidth = width;
+	/* Request a top-down DIB so its row order matches GD's. */
+	bitmap_info.bmiHeader.biHeight = -height;
+	bitmap_info.bmiHeader.biPlanes = 1;
+	bitmap_info.bmiHeader.biBitCount = 32;
+	bitmap_info.bmiHeader.biCompression = BI_RGB;
+
+	num_pixels = zend_safe_address((size_t) width, (size_t) height, 0, &overflow);
+	if (overflow) {
+		return NULL;
+	}
+
+	pixels = safe_emalloc(num_pixels, sizeof(*pixels), 0);
+	if (GetDIBits(hdc, bitmap, 0, (UINT) height, pixels, &bitmap_info, DIB_RGB_COLORS) != height) {
+		efree(pixels);
+		return NULL;
+	}
+
+	im = gdImageCreateTrueColor(width, height);
+	if (im) {
+		for (y = 0; y < height; y++) {
+			const RGBQUAD *src = pixels + (size_t) y * width;
+			int *dst = im->tpixels[y];
+
+			for (x = 0; x < width; x++) {
+				dst[x] = gdTrueColor(src[x].rgbRed, src[x].rgbGreen, src[x].rgbBlue);
+			}
+		}
+	}
+
+	efree(pixels);
+	return im;
+}
+
 /* {{{ Grab a window or its client area using a windows handle (HWND property in COM instance) */
 PHP_FUNCTION(imagegrabwindow)
 {
@@ -1144,18 +1188,8 @@ PHP_FUNCTION(imagegrabwindow)
 
 	PrintWindow(window, memDC, (UINT) client_area);
 
-	im = gdImageCreateTrueColor(Width, Height);
-	if (im) {
-		int x,y;
-		for (y=0; y <= Height; y++) {
-			for (x=0; x <= Width; x++) {
-				int c = GetPixel(memDC, x,y);
-				gdImageSetPixel(im, x, y, gdTrueColor(GetRValue(c), GetGValue(c), GetBValue(c)));
-			}
-		}
-	}
-
 	SelectObject(memDC,hOld);
+	im = php_gd_image_from_bitmap(hdc, memBM, Width, Height);
 	DeleteObject(memBM);
 	DeleteDC(memDC);
 	ReleaseDC( 0, hdc );
@@ -1198,18 +1232,8 @@ PHP_FUNCTION(imagegrabscreen)
 	hOld	= (HBITMAP) SelectObject (memDC, memBM);
 	BitBlt( memDC, 0, 0, Width, Height , hdc, rc.left, rc.top , SRCCOPY );
 
-	im = gdImageCreateTrueColor(Width, Height);
-	if (im) {
-		int x,y;
-		for (y=0; y <= Height; y++) {
-			for (x=0; x <= Width; x++) {
-				int c = GetPixel(memDC, x,y);
-				gdImageSetPixel(im, x, y, gdTrueColor(GetRValue(c), GetGValue(c), GetBValue(c)));
-			}
-		}
-	}
-
 	SelectObject(memDC,hOld);
+	im = php_gd_image_from_bitmap(hdc, memBM, Width, Height);
 	DeleteObject(memBM);
 	DeleteDC(memDC);
 	ReleaseDC( 0, hdc );
@@ -3397,14 +3421,16 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		im = php_gd_libgdimageptr_from_zval_p(IM);
 	}
 
+	uint32_t ptsize_arg_num = mode == TTFTEXT_BBOX ? 1 : 2;
+
 	// FT_F26Dot6 is a signed long alias
-	if (ptsize < (double)LONG_MIN / 64 || ptsize > (double)LONG_MAX / 64) {
-		zend_argument_value_error(2, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (zend_long)((double)LONG_MIN / 64), (zend_long)((double)LONG_MAX / 64));
+	if (ptsize < (double)LONG_MIN / 64 || ptsize >= (double)LONG_MAX / 64) {
+		zend_argument_value_error(ptsize_arg_num, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, (zend_long)(LONG_MIN / 64), (zend_long)(LONG_MAX / 64));
 		RETURN_THROWS();
 	}
 
 	if (UNEXPECTED(!zend_finite(ptsize))) {
-		zend_argument_value_error(2, "must be finite");
+		zend_argument_value_error(ptsize_arg_num, "must be finite");
 		RETURN_THROWS();
 	}
 
@@ -4152,37 +4178,51 @@ PHP_FUNCTION(imageaffine)
 }
 /* }}} */
 
+#define PHP_GD_Z_PARAM_ARRAY_HT_OR_DOUBLE(dest_ht, dest_double) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (EXPECTED(Z_TYPE_P(_arg) == IS_ARRAY)) { \
+		dest_ht = Z_ARRVAL_P(_arg); \
+	} else { \
+		dest_ht = NULL; \
+		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest_double, NULL, false, _i))) { \
+			zend_argument_type_error(_i, "must be of type array|float, %s given", zend_zval_value_name(_arg)); \
+			_error_code = ZPP_ERROR_FAILURE; \
+			break; \
+		} \
+	}
+
 /* {{{ Return an image containing the affine tramsformed src image, using an optional clipping area */
 PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
+	double dval_option = 0.0;
 	zend_long type;
-	zval *options = NULL;
+	HashTable *options;
 	zval *tmp;
 	int res = GD_FALSE;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(type)
-		Z_PARAM_ZVAL(options)
+		PHP_GD_Z_PARAM_ARRAY_HT_OR_DOUBLE(options, dval_option)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch((gdAffineStandardMatrix)type) {
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
-			if (Z_TYPE_P(options) != IS_ARRAY) {
-				zend_argument_type_error(1, "must be of type array when using translate or scale");
+			if (options == NULL) {
+				zend_argument_type_error(2, "must be of type array when using translate or scale");
 				RETURN_THROWS();
 			}
 
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(options, "x", sizeof("x") - 1)) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
 				zend_argument_value_error(2, "must have an \"x\" key");
 				RETURN_THROWS();
 			}
 
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(options, "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
 				zend_argument_value_error(2, "must have a \"y\" key");
@@ -4202,7 +4242,11 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SHEAR_VERTICAL: {
 			double angle;
 
-			angle = zval_get_double(options);
+			if (options != NULL) {
+				zend_argument_type_error(2, "must be of type float when using rotate or shear");
+				RETURN_THROWS();
+			}
+			angle = dval_option;
 
 			if (type == GD_AFFINE_SHEAR_HORIZONTAL) {
 				res = gdAffineShearHorizontal(affine, angle);
@@ -4253,7 +4297,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(z_m2)) != 6) {
-		zend_argument_value_error(1, "must have 6 elements");
+		zend_argument_value_error(2, "must have 6 elements");
 		RETURN_THROWS();
 	}
 
@@ -4422,21 +4466,39 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 	efree(ctx);
 } /* }}} */
 
+typedef struct {
+	gdIOCtx ctx;
+	size_t buf_len;
+	unsigned char buf[8192];
+} php_gd_stream_ctx;
+
+static void _php_image_stream_flush(php_gd_stream_ctx *stream_ctx) /* {{{ */
+{
+	if (stream_ctx->buf_len) {
+		php_stream_write((php_stream *) stream_ctx->ctx.data, (char *) stream_ctx->buf, stream_ctx->buf_len);
+		stream_ctx->buf_len = 0;
+	}
+} /* }}} */
+
 static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
-	char ch = (char) c;
-	php_stream * stream = (php_stream *)ctx->data;
-	php_stream_write(stream, &ch, 1);
+	php_gd_stream_ctx *stream_ctx = (php_gd_stream_ctx *) ctx;
+	if (stream_ctx->buf_len == sizeof(stream_ctx->buf)) {
+		_php_image_stream_flush(stream_ctx);
+	}
+	stream_ctx->buf[stream_ctx->buf_len++] = (unsigned char) c;
 } /* }}} */
 
 static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
 {
 	php_stream * stream = (php_stream *)ctx->data;
+	_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 	return php_stream_write(stream, (void *)buf, l);
 } /* }}} */
 
 static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
 	if(ctx->data) {
+		_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 		ctx->data = NULL;
 	}
 	efree(ctx);
@@ -4445,6 +4507,7 @@ static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 {
 	if(ctx->data) {
+		_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 		php_stream_close((php_stream *) ctx->data);
 		ctx->data = NULL;
 	}
@@ -4452,7 +4515,8 @@ static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 } /* }}} */
 
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream) {
-	gdIOCtx *ctx = ecalloc(1, sizeof(gdIOCtx));
+	php_gd_stream_ctx *stream_ctx = ecalloc(1, sizeof(php_gd_stream_ctx));
+	gdIOCtx *ctx = &stream_ctx->ctx;
 
 	ctx->putC = _php_image_stream_putc;
 	ctx->putBuf = _php_image_stream_putbuf;

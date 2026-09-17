@@ -18,8 +18,8 @@ c1::$a1[] = 1;
 c1::$a2[] = 1;
 try {
     c1::$a3[] = 1;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 var_dump(c1::$a1);
@@ -27,7 +27,7 @@ var_dump(c1::$a2);
 var_dump(c1::$a3);
 ?>
 --EXPECTF--
-Cannot add element to the array as the next element is already occupied
+Error: Cannot add element to the array as the next element is already occupied
 array(2) {
   [1]=>
   string(3) "one"

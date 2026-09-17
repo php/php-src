@@ -9,10 +9,10 @@ $dom = DOM\XMLDocument::createFromString("<root/>");
 
 try {
   var_dump($dom->documentElement->closest('@invalid'));
-} catch (DOMException $e) {
-  echo $e->getMessage();
+} catch (Throwable $e) {
+  echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Invalid selector (Selectors. Unexpected token: @invalid)
+DOMException: Invalid selector (Selectors. Unexpected token: @invalid)

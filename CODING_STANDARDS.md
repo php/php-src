@@ -300,7 +300,8 @@ rewritten to comply with these rules.
 ```diff
   try {
       throw new ValueError('foo');
-  } catch (ValueError $e) {
+-  } catch (ValueError $e) {
++  } catch (Throwable $e) {
 -     echo $e->getMessage(), "\n";
 +     echo $e::class, ': ', $e->getMessage(), "\n";
   }

@@ -24,8 +24,8 @@ class Test {
 $test = new Test;
 try {
     var_dump($test->foo);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(isset($test->foo));
 $test->foo = 42;
@@ -61,7 +61,7 @@ $test->foo = 42;
 
 ?>
 --EXPECT--
-Typed property Test::$foo must not be accessed before initialization
+Error: Typed property Test::$foo must not be accessed before initialization
 bool(false)
 int(42)
 __set foo = 42

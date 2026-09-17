@@ -171,6 +171,8 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 		FREE_HASHTABLE(debug_info_tz);
 
 		zend_hash_str_update(debug_info, "timeZone", sizeof("timeZone") - 1, &ztz_debug);
+
+		zval_ptr_dtor(&ztz);
 	}
 
 	{

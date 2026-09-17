@@ -714,6 +714,18 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, bool only_subclass) /* {{{ *
 		if (!instance_ce) {
 			RETURN_FALSE;
 		}
+	} else if (Z_TYPE_P(obj) == IS_STRING) {
+		// is_a() uses only_subclass as false, is_subclass_of() uses it as true
+		zend_error(
+			E_DEPRECATED,
+			only_subclass
+				? "Calling is_subclass_of() with a string when $allow_string is false"
+				: "Calling is_a() with a string when $allow_string is false"
+		);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+		RETURN_FALSE;
 	} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 		instance_ce = Z_OBJCE_P(obj);
 	} else {

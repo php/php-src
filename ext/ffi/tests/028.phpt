@@ -10,37 +10,37 @@ try {
     FFI::cdef("struct _x {int a; int b[0];};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     FFI::cdef("struct _x {int a; int b[];};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     FFI::cdef("struct _x {int a[0]; int b;};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     FFI::cdef("struct _x {int a[]; int b;};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     FFI::cdef("struct _x { struct {int a; int b[];}; int c;};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     FFI::cdef("union _x {int a; int b[];};");
     echo "ok\n";
 } catch (Throwable $e) {
-    echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

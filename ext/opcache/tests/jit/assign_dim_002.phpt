@@ -30,8 +30,8 @@ function foo3() {
     $array = array(PHP_INT_MAX => "dummy");
     try {
         $array[] = array();
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     $array = new ArrayObject();
@@ -59,8 +59,8 @@ function foo4() {
 
     try {
         $array[function() {}] = 2;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($array);
 
@@ -73,8 +73,8 @@ function foo5() {
     $a = 1;
     try {
         $a[2] = 1;
-    } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     return $a;
 }
@@ -108,15 +108,15 @@ var_dump(false_to_array(false));
 var_dump(false_to_array_append(false));
 try {
     var_dump(false_to_array_invalid_index(false));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump(false_to_array_nested(false));
 var_dump(false_to_array_nested_append(false));
 try {
     var_dump(false_to_array_nested_invalid_index(false));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 function array_access_undef() {
@@ -141,7 +141,7 @@ array(1) {
   array(0) {
   }
 }
-Cannot add element to the array as the next element is already occupied
+Error: Cannot add element to the array as the next element is already occupied
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
@@ -160,7 +160,7 @@ array(1) {
     int(1)
   }
 }
-Cannot access offset of type Closure on array
+TypeError: Cannot access offset of type Closure on array
 array(1) {
   [0]=>
   array(2) {
@@ -179,7 +179,7 @@ array(1) {
     int(1)
   }
 }
-Cannot use a scalar value as an array
+Error: Cannot use a scalar value as an array
 int(1)
 
 Deprecated: Automatic conversion of false to array is deprecated in %s
@@ -197,7 +197,7 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type array on array
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 int(1)
@@ -220,7 +220,7 @@ array(1) {
 }
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type array on array
 
 Warning: Undefined variable $undef in %s on line %d
 NULL

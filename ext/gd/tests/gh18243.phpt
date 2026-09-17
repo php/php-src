@@ -34,9 +34,16 @@ try {
 } catch (\ValueError $e) {
 	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
+
+try {
+	imagettftext($im, 144115188075855872.0, 0, 15, 60, 0, $font, "");
+} catch (Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
 ValueError: imagettftext(): Argument #2 ($size) must be between %i and %d
 ValueError: imagettftext(): Argument #2 ($size) must be between %i and %d
 ValueError: imagettftext(): Argument #2 ($size) must be finite
+ValueError: imagettftext(): Argument #2 ($size) must be between %i and %d
 ValueError: imagettftext(): Argument #2 ($size) must be between %i and %d

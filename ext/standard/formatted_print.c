@@ -379,6 +379,11 @@ int php_sprintf_get_argnum(char **format, size_t *format_len) {
 		return ARG_NUM_NEXT;
 	}
 
+	if (UNEXPECTED(temppos == *format)) {
+		zend_value_error("Argument number specifier must not be empty");
+		return ARG_NUM_INVALID;
+	}
+
 	int argnum = php_sprintf_getnumber(format, format_len);
 	if (argnum <= 0) {
 		zend_value_error("Argument number specifier must be greater than zero and less than %d", INT_MAX);

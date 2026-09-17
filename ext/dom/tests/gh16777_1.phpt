@@ -13,12 +13,12 @@ echo $doc->saveXML();
 $dom2 = new DOMDocument();
 try {
     $dom2->appendChild($text);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 <?xml version="1.0"?>
 my value
 my new value
-Wrong Document Error
+DOMException: Wrong Document Error

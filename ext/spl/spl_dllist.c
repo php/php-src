@@ -962,12 +962,16 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 
 	/* elements */
 	while (current) {
+		zval data;
+
 		smart_str_appendc(&buf, ':');
 		next = current->next;
 
 		SPL_LLIST_CHECK_ADDREF(next);
 
-		php_var_serialize(&buf, &current->data, &var_hash);
+		ZVAL_COPY(&data, &current->data);
+		php_var_serialize(&buf, &data, &var_hash);
+		zval_ptr_dtor(&data);
 
 		SPL_LLIST_CHECK_DELREF_EX(next, break;);
 

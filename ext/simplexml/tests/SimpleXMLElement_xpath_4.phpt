@@ -11,11 +11,11 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 
 try {
     simplexml_load_string("XXXXXXX^", $x, 0x6000000000000001);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 Warning: Undefined variable $x in %s on line %d
-simplexml_load_string(): Argument #3 ($options) is too large
+ValueError: simplexml_load_string(): Argument #3 ($options) is too large

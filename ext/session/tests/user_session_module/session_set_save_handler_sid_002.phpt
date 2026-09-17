@@ -48,6 +48,10 @@ class MySession2 implements SessionHandlerInterface, SessionIdInterface {
     public function create_sid() {
         return false;
     }
+
+	public function validateId(string $id): bool {
+	    return true;
+	}
 }
 
 session_set_save_handler(new MySession2());

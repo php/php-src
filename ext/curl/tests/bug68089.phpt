@@ -4,7 +4,7 @@ Bug #68089 (NULL byte injection - cURL lib)
 curl
 --FILE--
 <?php
-$url = "file:///etc/passwd\0http://google.com";
+$url = "file:///etc/passwd\0http://example.com";
 $ch = curl_init();
 
 try {

@@ -16,13 +16,13 @@ function createContainer() {
 function test($container) {
     try {
         var_dump($container->innerHTML);
-    } catch (DOMException $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         var_dump($container->outerHTML);
-    } catch (DOMException $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -96,33 +96,33 @@ test($container);
 
 ?>
 --EXPECT--
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
-The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed
+DOMException: The resulting XML serialization is not well-formed

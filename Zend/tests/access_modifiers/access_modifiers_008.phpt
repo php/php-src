@@ -33,18 +33,18 @@ class B2 extends A {
         try {
             echo A::mp() . "\n";
         } catch (\Throwable $e) {
-            echo $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         echo B1::ma() . "\n"; // protected method defined also in A
         try {
             echo B1::mp() . "\n"; // protected method defined also in A but as private
         } catch (\Throwable $e) {
-            echo $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         try {
             echo B1::mb() . "\n";
         } catch (\Throwable $e) {
-            echo $e->getMessage() . "\n";
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -54,7 +54,7 @@ B2::test();
 ?>
 --EXPECT--
 A::ma()
-Call to private method A::mp() from scope B2
+Error: Call to private method A::mp() from scope B2
 B1::ma()
-Call to protected method B1::mp() from scope B2
-Call to protected method B1::mb() from scope B2
+Error: Call to protected method B1::mp() from scope B2
+Error: Call to protected method B1::mb() from scope B2

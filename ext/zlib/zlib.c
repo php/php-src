@@ -779,11 +779,26 @@ PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
+ZEND_ATTRIBUTE_NONNULL static zval *zlib_find_option(HashTable *options, const char *name, size_t name_len)
+{
+	zval *option = zend_hash_str_find(options, name, name_len);
+
+	if (!option) {
+		return NULL;
+	}
+
+	ZVAL_DEINDIRECT(option);
+
+	if (UNEXPECTED(Z_TYPE_P(option) == IS_UNDEF)) {
+		return NULL;
+	}
+	return option;
+}
+
 static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_t *dictlen) {
 	zval *option_buffer;
 
-	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("dictionary"))) != NULL) {
-		ZVAL_DEINDIRECT(option_buffer);
+	if (options && (option_buffer = zlib_find_option(options, ZEND_STRL("dictionary"))) != NULL) {
 		ZVAL_DEREF(option_buffer);
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING: {
@@ -853,14 +868,12 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 ZEND_ATTRIBUTE_NONNULL static bool zlib_get_long_option(HashTable *options, const char *option_name, size_t option_name_len, zend_long *value)
 {
 	bool failed = false;
-	zval *option_buffer = zend_hash_str_find(options, option_name, option_name_len);
+	zval *option_buffer = zlib_find_option(options, option_name, option_name_len);
 
 	if (!option_buffer) {
 		return true;
 	}
 
-	/* The |H ZPP specifier may leave HashTable entries wrapped in IS_INDIRECT. */
-	ZVAL_DEINDIRECT(option_buffer);
 	*value = zval_try_get_long(option_buffer, &failed);
 	if (UNEXPECTED(failed)) {
 		zend_argument_type_error(

@@ -44,9 +44,8 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 
 static const size_t DEF_SORT_KEYS_BUF_SIZE = 1048576;
 static const size_t DEF_SORT_KEYS_BUF_INCREMENT = 1048576;
-
-static const size_t DEF_SORT_KEYS_INDX_BUF_SIZE = 1048576;
-static const size_t DEF_SORT_KEYS_INDX_BUF_INCREMENT = 1048576;
+static const size_t MIN_SORT_KEYS_BUF_SIZE = 4096;
+static const size_t SORT_KEY_LENGTH_ESTIMATE = 32;
 
 static const size_t DEF_UTF16_BUF_SIZE = 1024;
 
@@ -66,8 +65,7 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 {
 	int rc = SUCCESS;
 	zval str1, str2;
-	zval num1, num2;
-	zval norm1, norm2;
+	zval tmp1, tmp2;
 	zval *num1_p = nullptr, *num2_p = nullptr;
 	zval *norm1_p = nullptr, *norm2_p = nullptr;
 	zval *str1_p = nullptr, *str2_p = nullptr;
@@ -88,8 +86,8 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	/* If both args are strings AND either of args is not numeric string
 	 * then use ICU-compare. Otherwise PHP-compare. */
 	if( Z_TYPE_P(str1_p) == IS_STRING && Z_TYPE_P(str2_p) == IS_STRING &&
-		( str1_p == ( num1_p = collator_convert_string_to_number_if_possible( str1_p, &num1 ) ) ||
-		  str2_p == ( num2_p = collator_convert_string_to_number_if_possible( str2_p, &num2 ) ) ) )
+		( str1_p == ( num1_p = collator_convert_string_to_number_if_possible( str1_p, &tmp1 ) ) ||
+		  str2_p == ( num2_p = collator_convert_string_to_number_if_possible( str2_p, &tmp2 ) ) ) )
 	{
 		/* Compare the strings using ICU. */
 		ZEND_ASSERT(INTL_G(current_collator) != nullptr);
@@ -100,49 +98,28 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	}
 	else
 	{
-		/* num1 is set if str1 and str2 are strings. */
+		/* num1 is set only if str1 and str2 are both numeric strings. */
 		if( num1_p )
 		{
-			if( num1_p == str1_p )
-			{
-				/* str1 is string but not numeric string
-				 * just convert it to utf8.
-				 */
-				norm1_p = collator_convert_zstr_utf16_to_utf8( str1_p, &norm1 );
-				if( norm1_p == nullptr ) {
-					rc = FAILURE;
-					goto cleanup;
-				}
+			/* str1 is numeric strings => passthru to PHP-compare. */
+			Z_TRY_ADDREF_P(num1_p);
+			norm1_p = num1_p;
 
-				/* num2 is not set but str2 is string => do normalization. */
-				norm2_p = collator_normalize_sort_argument( str2_p, &norm2 );
-				if( norm2_p == nullptr ) {
-					rc = FAILURE;
-					goto cleanup;
-				}
-			}
-			else
-			{
-				/* str1 is numeric strings => passthru to PHP-compare. */
-				Z_TRY_ADDREF_P(num1_p);
-				norm1_p = num1_p;
-
-				/* str2 is numeric strings => passthru to PHP-compare. */
-				Z_TRY_ADDREF_P(num2_p);
-				norm2_p = num2_p;
-			}
+			/* str2 is numeric strings => passthru to PHP-compare. */
+			Z_TRY_ADDREF_P(num2_p);
+			norm2_p = num2_p;
 		}
 		else
 		{
 			/* num1 is not set if str1 or str2 is not a string => do normalization. */
-			norm1_p = collator_normalize_sort_argument( str1_p, &norm1 );
+			norm1_p = collator_normalize_sort_argument( str1_p, &tmp1 );
 			if( norm1_p == nullptr ) {
 				rc = FAILURE;
 				goto cleanup;
 			}
 
 			/* if num1 is not set then num2 is not set as well => do normalization. */
-			norm2_p = collator_normalize_sort_argument( str2_p, &norm2 );
+			norm2_p = collator_normalize_sort_argument( str2_p, &tmp2 );
 			if( norm2_p == nullptr ) {
 				rc = FAILURE;
 				goto cleanup;
@@ -427,17 +404,17 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	zval*       hashData             = nullptr;                     /* currently processed item of input hash */
 
 	char*       sortKeyBuf           = nullptr;                     /* buffer to store sort keys */
-	uint32_t    sortKeyBufSize       = DEF_SORT_KEYS_BUF_SIZE;   /* buffer size */
+	uint32_t    sortKeyBufSize       = 0;                        /* buffer size */
 	ptrdiff_t   sortKeyBufOffset     = 0;                        /* pos in buffer to store sort key */
 	uint32_t    sortKeyLen           = 0;                        /* the length of currently processing key */
 	uint32_t    bufLeft              = 0;
 	uint32_t    bufIncrement         = 0;
 
 	collator_sort_key_index_t* sortKeyIndxBuf = nullptr;            /* buffer to store 'indexes' which will be passed to 'qsort' */
-	uint32_t    sortKeyIndxBufSize   = DEF_SORT_KEYS_INDX_BUF_SIZE;
 	uint32_t    sortKeyIndxSize      = sizeof( collator_sort_key_index_t );
 
 	uint32_t    sortKeyCount         = 0;
+	uint32_t    numElements          = 0;
 	uint32_t    j                    = 0;
 
 	UChar*      utf16_buf            = nullptr;                     /* tmp buffer to hold current processing string in utf-16 */
@@ -472,9 +449,20 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( !hash || zend_hash_num_elements( hash ) == 0 )
 		RETURN_TRUE;
 
+	numElements = zend_hash_num_elements( hash );
+
+	if( numElements > DEF_SORT_KEYS_BUF_SIZE / SORT_KEY_LENGTH_ESTIMATE ) {
+		sortKeyBufSize = DEF_SORT_KEYS_BUF_SIZE;
+	} else {
+		sortKeyBufSize = numElements * SORT_KEY_LENGTH_ESTIMATE;
+	}
+	if( sortKeyBufSize < MIN_SORT_KEYS_BUF_SIZE ) {
+		sortKeyBufSize = MIN_SORT_KEYS_BUF_SIZE;
+	}
+
 	/* Create buffers */
-	sortKeyBuf     = reinterpret_cast<char *>(ecalloc( sortKeyBufSize,     sizeof( char    ) ));
-	sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(ecalloc( sortKeyIndxBufSize, sizeof( uint8_t ) ));
+	sortKeyBuf     = reinterpret_cast<char *>(ecalloc( sortKeyBufSize, sizeof( char ) ));
+	sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(ecalloc( numElements, sortKeyIndxSize ));
 	utf16_buf      = eumalloc( utf16_buf_size );
 
 	/* Iterate through input hash and create a sort key for each value. */
@@ -524,7 +512,15 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 		/* check for sortKeyBuf overflow, increasing its size of the buffer if needed */
 		if( sortKeyLen > bufLeft )
 		{
-			bufIncrement = ( sortKeyLen > DEF_SORT_KEYS_BUF_INCREMENT ) ? sortKeyLen : DEF_SORT_KEYS_BUF_INCREMENT;
+			bufIncrement = sortKeyBufSize;
+
+			if( bufIncrement > DEF_SORT_KEYS_BUF_INCREMENT ) {
+				bufIncrement = DEF_SORT_KEYS_BUF_INCREMENT;
+			}
+
+			if( bufIncrement < sortKeyLen ) {
+				bufIncrement = sortKeyLen;
+			}
 
 			sortKeyBufSize += bufIncrement;
 			bufLeft += bufIncrement;
@@ -532,16 +528,6 @@ U_CFUNC PHP_FUNCTION( collator_sort_with_sort_keys )
 			sortKeyBuf = reinterpret_cast<char *>(erealloc( sortKeyBuf, sortKeyBufSize ));
 
 			sortKeyLen = ucol_getSortKey( co->ucoll, utf16_buf, utf16_len, (uint8_t*)sortKeyBuf + sortKeyBufOffset, bufLeft );
-		}
-
-		/*  check sortKeyIndxBuf overflow, increasing its size of the buffer if needed */
-		if( ( sortKeyCount + 1 ) * sortKeyIndxSize > sortKeyIndxBufSize )
-		{
-			bufIncrement = ( sortKeyIndxSize > DEF_SORT_KEYS_INDX_BUF_INCREMENT ) ? sortKeyIndxSize : DEF_SORT_KEYS_INDX_BUF_INCREMENT;
-
-			sortKeyIndxBufSize += bufIncrement;
-
-			sortKeyIndxBuf = reinterpret_cast<collator_sort_key_index_t *>(erealloc( sortKeyIndxBuf, sortKeyIndxBufSize ));
 		}
 
 		sortKeyIndxBuf[sortKeyCount].key = (char*)sortKeyBufOffset;    /* remember just offset, cause address */

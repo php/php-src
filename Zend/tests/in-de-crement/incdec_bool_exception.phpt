@@ -11,18 +11,18 @@ $values = [false, true];
 foreach ($values as $value) {
     try {
         $value++;
-    } catch (\Exception $e) {
-        echo $e->getMessage(), PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         $value--;
-    } catch (\Exception $e) {
-        echo $e->getMessage(), PHP_EOL;
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
 --EXPECT--
-Increment on type bool has no effect, this will change in the next major version of PHP
-Decrement on type bool has no effect, this will change in the next major version of PHP
-Increment on type bool has no effect, this will change in the next major version of PHP
-Decrement on type bool has no effect, this will change in the next major version of PHP
+Exception: Increment on type bool has no effect, this will change in the next major version of PHP
+Exception: Decrement on type bool has no effect, this will change in the next major version of PHP
+Exception: Increment on type bool has no effect, this will change in the next major version of PHP
+Exception: Decrement on type bool has no effect, this will change in the next major version of PHP

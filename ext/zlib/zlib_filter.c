@@ -24,9 +24,9 @@ typedef struct _php_zlib_filter_data {
 	size_t inbuf_len;
 	unsigned char *outbuf;
 	size_t outbuf_len;
-	int persistent;
-	bool finished; /* for zlib.deflate: signals that no flush is pending */
 	int windowBits;
+	bool persistent;
+	bool finished; /* for zlib.deflate: signals that no flush is pending */
 } php_zlib_filter_data;
 
 /* }}} */

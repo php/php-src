@@ -37,7 +37,7 @@ foreach ($microsecondList as $microsecond) {
     try {
         var_dump($dt->setMicrosecond($microsecond));
     } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     echo 'DateTime::getMicrosecond(): ' . var_export($dt->getMicrosecond(), true) . "\n";
 
@@ -45,7 +45,7 @@ foreach ($microsecondList as $microsecond) {
     try {
         var_dump($dti->setMicrosecond($microsecond));
     } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     echo 'DateTimeImmutable::getMicrosecond(): ' . var_export($dti->getMicrosecond(), true) . "\n";
 
@@ -53,7 +53,7 @@ foreach ($microsecondList as $microsecond) {
     try {
         var_dump($myDt->setMicrosecond($microsecond));
     } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     echo 'MyDateTime::getMicrosecond(): ' . var_export($myDt->getMicrosecond(), true) . "\n";
 
@@ -61,7 +61,7 @@ foreach ($microsecondList as $microsecond) {
     try {
         var_dump($myDti->setMicrosecond($microsecond));
     } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     echo 'MyDateTimeImmutable::getMicrosecond(): ' . var_export($myDti->getMicrosecond(), true) . "\n";
 }

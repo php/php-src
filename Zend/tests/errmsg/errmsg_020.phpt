@@ -7,10 +7,10 @@ disable_functions=phpinfo
 
 try {
     phpinfo();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Call to undefined function phpinfo()
+Error: Call to undefined function phpinfo()

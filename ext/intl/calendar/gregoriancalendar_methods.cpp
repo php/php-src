@@ -165,7 +165,6 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "error creating ICU "
 				"GregorianCalendar from time zone and locale");
-			delete tz;
 			if (!is_constructor) {
 				zval_ptr_dtor(return_value);
 				RETVAL_NULL();

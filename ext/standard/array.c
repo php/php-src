@@ -4037,12 +4037,13 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 						GC_TRY_UNPROTECT_RECURSION(thash);
 					}
 					if (!ret) {
+						zval_ptr_dtor(&tmp);
 						return 0;
 					}
 				} else {
 					Z_TRY_ADDREF_P(src_zval);
 					zval *zv = zend_hash_next_index_insert(Z_ARRVAL_P(dest_zval), src_zval);
-					if (EXPECTED(!zv)) {
+					if (UNEXPECTED(!zv)) {
 						Z_TRY_DELREF_P(src_zval);
 						zend_cannot_add_element();
 						return 0;
@@ -4405,7 +4406,7 @@ PHP_FUNCTION(array_keys)
 
 	/* Base case: empty input */
 	if (!elem_count) {
-		RETURN_COPY(input);
+		RETURN_EMPTY_ARRAY();
 	}
 
 	/* Initialize return array */
@@ -4895,7 +4896,7 @@ PHP_FUNCTION(array_change_key_case)
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, entry) {
 		if (!string_key) {
-			entry = zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
+			entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, entry);
 		} else {
 			if (change_to_upper == PHP_CASE_UPPER) {
 				new_key = zend_string_toupper(string_key);

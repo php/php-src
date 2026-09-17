@@ -1,12 +1,16 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: cf2ea35cd867f7091ee1fcf83bbfb543b51e5786
+ * Stub hash: b67e9418e158d5726b6a54d446b816264c747116
  * Has decl header: yes */
+
+#include "zend_attributes.h"
+#include "zend_constants.h"
+#include "zend_enum.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_header_register_callback, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_header_register_callback, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
@@ -574,7 +578,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getprotobynumber, 0, 1, MAY_BE_S
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_tick_function, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_tick_function, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -2238,6 +2242,22 @@ static const zend_frameless_function_info frameless_function_infos_trim[] = {
 	{ 0 },
 };
 
+ZEND_FRAMELESS_FUNCTION(rtrim, 1);
+ZEND_FRAMELESS_FUNCTION(rtrim, 2);
+static const zend_frameless_function_info frameless_function_infos_rtrim[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(rtrim, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(rtrim, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(ltrim, 1);
+ZEND_FRAMELESS_FUNCTION(ltrim, 2);
+static const zend_frameless_function_info frameless_function_infos_ltrim[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(ltrim, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(ltrim, 2), 2 },
+	{ 0 },
+};
+
 ZEND_FRAMELESS_FUNCTION(implode, 1);
 ZEND_FRAMELESS_FUNCTION(implode, 2);
 static const zend_frameless_function_info frameless_function_infos_implode[] = {
@@ -2291,6 +2311,12 @@ static const zend_frameless_function_info frameless_function_infos_str_contains[
 ZEND_FRAMELESS_FUNCTION(str_starts_with, 2);
 static const zend_frameless_function_info frameless_function_infos_str_starts_with[] = {
 	{ ZEND_FRAMELESS_FUNCTION_NAME(str_starts_with, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(str_ends_with, 2);
+static const zend_frameless_function_info frameless_function_infos_str_ends_with[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(str_ends_with, 2), 2 },
 	{ 0 },
 };
 
@@ -3172,9 +3198,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_RAW_FENTRY("strcoll", zif_strcoll, arginfo_strcoll, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("trim", zif_trim, arginfo_trim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_trim, NULL)
-	ZEND_RAW_FENTRY("rtrim", zif_rtrim, arginfo_rtrim, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("rtrim", zif_rtrim, arginfo_rtrim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_rtrim, NULL)
 	ZEND_RAW_FENTRY("chop", zif_rtrim, arginfo_chop, 0, NULL, NULL)
-	ZEND_RAW_FENTRY("ltrim", zif_ltrim, arginfo_ltrim, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("ltrim", zif_ltrim, arginfo_ltrim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_ltrim, NULL)
 	ZEND_RAW_FENTRY("wordwrap", zif_wordwrap, arginfo_wordwrap, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("explode", zif_explode, arginfo_explode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("implode", zif_implode, arginfo_implode, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_implode, NULL)
@@ -3197,7 +3223,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("strrchr", zif_strrchr, arginfo_strrchr, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("str_contains", zif_str_contains, arginfo_str_contains, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_contains, NULL)
 	ZEND_RAW_FENTRY("str_starts_with", zif_str_starts_with, arginfo_str_starts_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_starts_with, NULL)
-	ZEND_RAW_FENTRY("str_ends_with", zif_str_ends_with, arginfo_str_ends_with, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_ends_with", zif_str_ends_with, arginfo_str_ends_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_ends_with, NULL)
 	ZEND_RAW_FENTRY("chunk_split", zif_chunk_split, arginfo_chunk_split, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("substr", zif_substr, arginfo_substr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_substr, NULL)
 	ZEND_RAW_FENTRY("substr_replace", zif_substr_replace, arginfo_substr_replace, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

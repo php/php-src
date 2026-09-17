@@ -9,10 +9,10 @@ set_error_handler(function($_, $m) {
 
 try {
     $foo?->foo;
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Undefined variable $foo
+Exception: Undefined variable $foo

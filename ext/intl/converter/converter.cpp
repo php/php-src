@@ -504,23 +504,20 @@ PHP_METHOD(UConverter, getDestinationType) {
 }
 /* }}} */
 
-/* {{{ php_converter_resolve_callback */
 static void php_converter_resolve_callback(
 	zend_fcall_info_cache *fcc,
-	zend_object *obj,
+	zend_object *this_ptr,
 	const char *callback_name,
 	size_t callback_name_len
 ) {
-	zend_function *fn = reinterpret_cast<zend_function *>(zend_hash_str_find_ptr_lc(&obj->ce->function_table, callback_name, callback_name_len));
+	zend_function *fn = reinterpret_cast<zend_function *>(zend_hash_str_find_ptr_lc(&this_ptr->ce->function_table, callback_name, callback_name_len));
 	ZEND_ASSERT(fn != nullptr);
 
 	fcc->function_handler = fn;
-	fcc->object = obj;
-	fcc->called_scope = obj->ce;
-	fcc->calling_scope = nullptr;
+	fcc->object = this_ptr;
+	fcc->called_scope = this_ptr->ce;
 	fcc->closure = nullptr;
 }
-/* }}} */
 
 /* {{{ */
 PHP_METHOD(UConverter, __construct) {
@@ -550,8 +547,6 @@ PHP_METHOD(UConverter, __construct) {
 		ZEND_ASSERT(EG(exception));
 		goto cleanup;
 	}
-	php_converter_resolve_callback(&objval->to_cache, Z_OBJ_P(ZEND_THIS), ZEND_STRL("toUCallback"));
-	php_converter_resolve_callback(&objval->from_cache, Z_OBJ_P(ZEND_THIS), ZEND_STRL("fromUCallback"));
 cleanup:
 	INTL_G(use_exceptions) = old_use_exception;
 	INTL_G(error_level) = old_error_level;
@@ -930,6 +925,8 @@ static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converte
 	zend_object_std_init(&objval->obj, ce);
 	object_properties_init(&objval->obj, ce);
 	intl_error_init(&(objval->error));
+	php_converter_resolve_callback(&objval->to_cache, &objval->obj, ZEND_STRL("toUCallback"));
+	php_converter_resolve_callback(&objval->from_cache, &objval->obj, ZEND_STRL("fromUCallback"));
 
 	*pobjval = objval;
 

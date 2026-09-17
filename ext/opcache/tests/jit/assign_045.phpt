@@ -15,4 +15,3 @@ test(null, 1);
 ?>
 --EXPECT--
 int(1)
-

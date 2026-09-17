@@ -31,24 +31,24 @@ $a->foo = PHP_INT_MIN;
 
 try {
         $a[0]--;
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 echo gettype($a->foo),"\n";
 
 try {
     --$a[0];
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 echo gettype($a->foo),"\n";
 
 $a->foo = PHP_INT_MAX;
 
 try {
     $a[0]++;
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 echo gettype($a->foo),"\n";
 
 try {
     ++$a[0];
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+} catch (Throwable $e) { echo $e::class, ': ', $e->getMessage(), "\n"; }
 echo gettype($a->foo),"\n";
 
 ?>
@@ -61,11 +61,11 @@ offsetSet(1e50)
 int(1)
 int(0)
 int(-1)
-Cannot decrement a reference held by property ArrayAccess@anonymous::$foo of type int past its minimal value
+TypeError: Cannot decrement a reference held by property ArrayAccess@anonymous::$foo of type int past its minimal value
 integer
-Cannot decrement a reference held by property ArrayAccess@anonymous::$foo of type int past its minimal value
+TypeError: Cannot decrement a reference held by property ArrayAccess@anonymous::$foo of type int past its minimal value
 integer
-Cannot increment a reference held by property ArrayAccess@anonymous::$foo of type int past its maximal value
+TypeError: Cannot increment a reference held by property ArrayAccess@anonymous::$foo of type int past its maximal value
 integer
-Cannot increment a reference held by property ArrayAccess@anonymous::$foo of type int past its maximal value
+TypeError: Cannot increment a reference held by property ArrayAccess@anonymous::$foo of type int past its maximal value
 integer

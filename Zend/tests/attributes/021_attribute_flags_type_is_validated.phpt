@@ -11,10 +11,10 @@ class Foo {}
 
 try {
     (new ReflectionClass(Foo::class))->getAttributes()[0]->newInstance();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Attribute::__construct(): Argument #1 ($flags) must be of type int, string given
+Error: Attribute::__construct(): Argument #1 ($flags) must be of type int, string given

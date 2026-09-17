@@ -22,7 +22,6 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "zend_attributes.h"
 
 #include "ext/standard/info.h"
 #include "Zend/zend_interfaces.h"
@@ -577,11 +576,31 @@ PHP_MINFO_FUNCTION(odbc)
 }
 /* }}} */
 
-/* {{{ odbc_sql_error */
-void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
+static SQLRETURN odbc_diag_rec(ODBC_SQL_ENV_T henv, ODBC_SQL_CONN_T conn, ODBC_SQL_STMT_T stmt,
+		char *state, char *errormsg, SQLSMALLINT errormsg_size)
 {
-	SQLINTEGER	error;        /* Not used */
-	SQLSMALLINT	errormsgsize; /* Not used */
+	SQLINTEGER native_error;
+	SQLSMALLINT handle_type;
+	SQLHANDLE handle;
+
+	if (stmt != SQL_NULL_HSTMT) {
+		handle_type = SQL_HANDLE_STMT;
+		handle = (SQLHANDLE) stmt;
+	} else if (conn != SQL_NULL_HDBC) {
+		handle_type = SQL_HANDLE_DBC;
+		handle = (SQLHANDLE) conn;
+	} else {
+		handle_type = SQL_HANDLE_ENV;
+		handle = (SQLHANDLE) henv;
+	}
+
+	return SQLGetDiagRec(handle_type, handle, 1, (SQLCHAR *) state, &native_error,
+			(SQLCHAR *) errormsg, errormsg_size, NULL);
+}
+
+/* {{{ odbc_sql_error */
+void odbc_sql_error(odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, const char *func, ...)
+{
 	RETCODE rc;
 	ODBC_SQL_ENV_T henv;
 	ODBC_SQL_CONN_T conn;
@@ -594,12 +613,7 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 		conn = SQL_NULL_HDBC;
 	}
 
-	/* This leads to an endless loop in many drivers!
-	 *
-	   while(henv != SQL_NULL_HENV){
-		do {
-	 */
-	rc = SQLError(henv, conn, stmt, (SQLCHAR *) ODBCG(laststate), &error, (SQLCHAR *) ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg))-1, &errormsgsize);
+	rc = odbc_diag_rec(henv, conn, stmt, ODBCG(laststate), ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg))-1);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		snprintf(ODBCG(laststate), sizeof(ODBCG(laststate)), "HY000");
 		snprintf(ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)), "Failed to fetch error message");
@@ -609,14 +623,17 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 		memcpy(conn_resource->lasterrormsg, ODBCG(lasterrormsg), sizeof(ODBCG(lasterrormsg)));
 	}
 	if (func) {
-		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s in %s", ODBCG(lasterrormsg), ODBCG(laststate), func);
+		va_list args;
+		char *desc;
+
+		va_start(args, func);
+		vspprintf(&desc, 0, func, args);
+		va_end(args);
+		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s in %s", ODBCG(lasterrormsg), ODBCG(laststate), desc);
+		efree(desc);
 	} else {
 		php_error_docref(NULL, E_WARNING, "SQL error: %s, SQL state %s", ODBCG(lasterrormsg), ODBCG(laststate));
 	}
-	/*
-		} while (SQL_SUCCEEDED(rc));
-	}
-	*/
 }
 /* }}} */
 
@@ -677,6 +694,7 @@ void odbc_bindcols(odbc_result *result)
 		result->values[i].value_max_len = 0;
 		colfieldid = SQL_COLUMN_DISPLAY_SIZE;
 
+		result->values[i].name[0] = '\0';
 		rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)(i+1), SQL_DESC_NAME,
 				result->values[i].name, sizeof(result->values[i].name), &colnamelen, 0);
 		result->values[i].coltype = 0;
@@ -789,6 +807,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
+	RETCODE rc;
 	SQLLEN len;
 	zend_long pv_num;
 
@@ -814,7 +833,11 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
-	SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT) (type?SQL_COLUMN_SCALE:SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+	rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT)(type ? SQL_COLUMN_SCALE : SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLColAttribute column #" ZEND_LONG_FMT, pv_num);
+		len = 0;
+	}
 
 	RETURN_LONG(len);
 }
@@ -1149,14 +1172,16 @@ PHP_FUNCTION(odbc_cursor)
 		cursorname = emalloc(max_len + 1);
 		rc = SQLGetCursorName(result->stmt, (SQLCHAR *) cursorname, (SQLSMALLINT)max_len, &len);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-			char        state[6];     /* Not used */
-	 		SQLINTEGER  error;        /* Not used */
+			char        state[6];
 			char        errormsg[SQL_MAX_MESSAGE_LENGTH];
-			SQLSMALLINT errormsgsize; /* Not used */
+			SQLRETURN   diag_rc;
 
-			SQLError( result->conn_ptr->henv, result->conn_ptr->hdbc,
-						result->stmt, (SQLCHAR *) state, &error, (SQLCHAR *) errormsg,
-						sizeof(errormsg)-1, &errormsgsize);
+			diag_rc = odbc_diag_rec(result->conn_ptr->henv, result->conn_ptr->hdbc, result->stmt,
+					state, errormsg, sizeof(errormsg)-1);
+			if (diag_rc != SQL_SUCCESS && diag_rc != SQL_SUCCESS_WITH_INFO) {
+				snprintf(state, sizeof(state), "HY000");
+				snprintf(errormsg, sizeof(errormsg), "Failed to fetch error message");
+			}
 			if (!strncmp(state,"S1015",5)) {
 				snprintf(cursorname, max_len+1, "php_curs_" ZEND_ULONG_FMT, (zend_ulong)result->stmt);
 				if (SQLSetCursorName(result->stmt, (SQLCHAR *) cursorname, SQL_NTS) != SQL_SUCCESS) {
@@ -2316,6 +2341,7 @@ PHP_FUNCTION(odbc_field_type)
 	odbc_result	*result;
 	char    	tmp[32];
 	SQLSMALLINT	tmplen;
+	RETCODE		rc;
 	zend_long		pv_num;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -2340,7 +2366,13 @@ PHP_FUNCTION(odbc_field_type)
 		RETURN_FALSE;
 	}
 
-	SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
+	tmp[0] = '\0';
+	rc = SQLColAttribute(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, sizeof(tmp) - 1, &tmplen, NULL);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLColAttribute column #" ZEND_LONG_FMT, pv_num);
+		RETURN_FALSE;
+	}
+
 	RETURN_STRING(tmp);
 }
 /* }}} */

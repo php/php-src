@@ -46,9 +46,9 @@ foreach (outer(withNext()) as $s) {
     echo $s, "\n";
 }
 
-// A shared, pre-primed generator consumed through two nested "yield from"
-// levels must still present its current value once to each consumer (the fix
-// must not over-clear the middle level's first-touch).
+// Reading a pre-primed generator through two nested "yield from" levels primes
+// the whole chain but advances nothing. A later next() on a middle level then
+// advances the shared generator, like any other next() would.
 echo "shared primed:\n";
 function counter() {
     yield 1;
@@ -58,11 +58,11 @@ $gen1 = counter();
 $gen1->valid();
 $gen2 = outer($gen1);
 $gen3 = outer($gen2);
-echo "gen3 current: ", $gen3->current(), "\n";
+var_dump($gen3->current());
 $gen2->next();
-echo "gen2 current: ", $gen2->current(), "\n";
+var_dump($gen2->current());
 $gen2->next();
-echo "gen2 current: ", $gen2->current(), "\n";
+var_dump($gen2->current());
 
 ?>
 --EXPECT--
@@ -84,6 +84,6 @@ six
 eight
 nine
 shared primed:
-gen3 current: 1
-gen2 current: 1
-gen2 current: 2
+int(1)
+int(2)
+NULL

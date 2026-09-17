@@ -19,38 +19,38 @@ XML, LIBXML_DTDATTR);
 $root = $dom->documentElement;
 try {
     $root->attributes[0]->rename(NULL, 'c');
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $root->attributes[0]->rename(NULL, 'c');
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $root->attributes[1]->rename(NULL, 'a');
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $root->attributes[1]->rename('urn:a', 'foo');
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $root->attributes[3]->rename('', 'a');
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $root->firstElementChild->attributes[0]->rename(NULL, 'hello');
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $root->firstElementChild->attributes[1]->rename(NULL, 'my-attr');
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 // This is here to validate that nothing actually changed
@@ -58,12 +58,12 @@ echo $dom->saveXML();
 
 ?>
 --EXPECT--
-An attribute with the given name in the given namespace already exists
-An attribute with the given name in the given namespace already exists
-An attribute with the given name in the given namespace already exists
-An attribute with the given name in the given namespace already exists
-An attribute with the given name in the given namespace already exists
-An attribute with the given name in the given namespace already exists
+DOMException: An attribute with the given name in the given namespace already exists
+DOMException: An attribute with the given name in the given namespace already exists
+DOMException: An attribute with the given name in the given namespace already exists
+DOMException: An attribute with the given name in the given namespace already exists
+DOMException: An attribute with the given name in the given namespace already exists
+DOMException: An attribute with the given name in the given namespace already exists
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root [
 <!ELEMENT implied-attribute ANY>

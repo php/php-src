@@ -21,7 +21,6 @@
 #include "php.h"
 
 #include "zend_variables.h"
-#include "zend_attributes.h"
 #include "ext/standard/info.h"
 #include "ext/standard/html.h" /* For php_next_utf8_char() */
 

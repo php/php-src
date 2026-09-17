@@ -29,8 +29,8 @@ $attr = $root->getAttributeNode('a');
 echo get_class($attr), "\n";
 try {
     print $attr->testit()."\n";
-} catch (Error $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -39,4 +39,4 @@ HELLO Element
 myAttribute
 HELLO Attribute
 DOMAttr
-Call to undefined method DOMAttr::testit()
+Error: Call to undefined method DOMAttr::testit()

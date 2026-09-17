@@ -34,6 +34,14 @@ extern zend_module_entry sodium_module_entry;
 
 #define SODIUM_CRYPTO_SIGN_KEYPAIRBYTES() crypto_sign_SECRETKEYBYTES + crypto_sign_PUBLICKEYBYTES
 
+#ifdef crypto_kem_PUBLICKEYBYTES
+#define SODIUM_CRYPTO_KEM_KEYPAIRBYTES() crypto_kem_SECRETKEYBYTES + crypto_kem_PUBLICKEYBYTES
+#endif
+
+#ifdef crypto_kem_mlkem768_PUBLICKEYBYTES
+#define SODIUM_CRYPTO_KEM_MLKEM768_KEYPAIRBYTES() crypto_kem_mlkem768_SECRETKEYBYTES + crypto_kem_mlkem768_PUBLICKEYBYTES
+#endif
+
 #if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 
 /**

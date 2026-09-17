@@ -529,7 +529,7 @@ static inline pdo_dbh_t *php_pdo_dbh_fetch_inner(zend_object *obj) {
 /* describes a column */
 struct pdo_column_data {
 	zend_string *name;
-	size_t maxlen;
+	zend_long maxlen;
 	zend_ulong precision;
 };
 

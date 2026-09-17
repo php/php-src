@@ -12,10 +12,10 @@ enum Suit: string {
 
 try {
     var_dump(Suit::from('A'));
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-"A" is not a valid backing value for enum Suit
+ValueError: "A" is not a valid backing value for enum Suit

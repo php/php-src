@@ -1,0 +1,67 @@
+--TEST--
+ftp_nb_fget(), ftp_nb_fput(), ftp_nb_get() and ftp_nb_put() throw when a transfer is already in progress
+--EXTENSIONS--
+ftp
+pcntl
+--FILE--
+<?php
+require 'server.inc';
+
+class TransferDuringNbWrite {
+    public $context;
+    public static $ftp;
+    public static $call;
+    public function stream_open($path, $mode, $options, &$opened_path) {
+        return true;
+    }
+    public function stream_write($data) {
+        try {
+            (self::$call)(self::$ftp);
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
+        }
+        return strlen($data);
+    }
+    public function stream_close() {}
+    public function stream_eof() {
+        return true;
+    }
+}
+
+stream_wrapper_register('reentrantnb', TransferDuringNbWrite::class);
+
+$ftp = ftp_connect('127.0.0.1', $port);
+var_dump(ftp_login($ftp, 'user', 'pass'));
+TransferDuringNbWrite::$ftp = $ftp;
+
+$sink = fopen('php://memory', 'w+');
+/* ftp_nb_put() opens the local file before it reaches the guard, so it has to exist. */
+$local = __DIR__ . '/ftp_nb_transfer_during_transfer.tmp';
+file_put_contents($local, 'payload');
+
+$calls = [
+    static fn ($ftp) => ftp_nb_fget($ftp, $sink, 'a story.txt', FTP_BINARY),
+    static fn ($ftp) => ftp_nb_fput($ftp, 'a story.txt', $sink, FTP_BINARY),
+    static fn ($ftp) => ftp_nb_get($ftp, $local, 'a story.txt', FTP_BINARY),
+    static fn ($ftp) => ftp_nb_put($ftp, 'a story.txt', $local, FTP_BINARY),
+];
+
+foreach ($calls as $call) {
+    TransferDuringNbWrite::$call = $call;
+    @ftp_nb_get($ftp, 'reentrantnb://sink', 'a story.txt', FTP_BINARY);
+}
+
+ftp_close($ftp);
+echo "closed\n";
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . '/ftp_nb_transfer_during_transfer.tmp');
+?>
+--EXPECT--
+bool(true)
+Error: Cannot start a transfer while another transfer is in progress
+Error: Cannot start a transfer while another transfer is in progress
+Error: Cannot start a transfer while another transfer is in progress
+Error: Cannot start a transfer while another transfer is in progress
+closed

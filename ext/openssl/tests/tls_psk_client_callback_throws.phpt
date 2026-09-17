@@ -45,4 +45,3 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECT--
 caught: callback boom
-

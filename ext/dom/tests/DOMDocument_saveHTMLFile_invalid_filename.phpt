@@ -19,9 +19,9 @@ $text = $doc->createTextNode('This is the title');
 $text = $title->appendChild($text);
 try {
     $doc->saveHTMLFile($filename);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-DOMDocument::saveHTMLFile(): Argument #1 ($filename) must not be empty
+ValueError: DOMDocument::saveHTMLFile(): Argument #1 ($filename) must not be empty

@@ -16,7 +16,7 @@ var_dump($out);
 
 ?>
 --EXPECTF--
-TypeError: stream_filter_register(): Argument #2 ($class) must be a valid class name, not_existing given
+TypeError: stream_filter_register(): Argument #2 ($class) must be a valid class name, "not_existing" given
 
 Warning: stream_filter_append(): Unable to locate filter "not_existing_filter" in %s on line %d
 Hello

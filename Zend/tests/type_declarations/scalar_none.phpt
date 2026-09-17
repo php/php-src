@@ -19,20 +19,20 @@ foreach ($functions as $type => $function) {
     try {
         var_dump($function());
     } catch (Throwable $e) {
-        echo "*** Caught " . $e->getMessage() . PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 echo PHP_EOL . "Done";
 ?>
 --EXPECTF--
 Testing int:
-*** Caught Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
+ArgumentCountError: Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
 Testing float:
-*** Caught Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
+ArgumentCountError: Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
 Testing string:
-*** Caught Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
+ArgumentCountError: Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
 Testing bool:
-*** Caught Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
+ArgumentCountError: Too few arguments to function {closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
 Testing int nullable:
 NULL
 Testing float nullable:

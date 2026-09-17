@@ -19,6 +19,13 @@ try {
     echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
+echo "\n-- Testing hash_file() function with a null byte in the filename --\n";
+try {
+    hash_file('md5', $filename . chr(0) . $filename);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
 echo "\n-- Testing hash_file() function with a non-existent file --\n";
 var_dump(hash_file('md5', 'nonexistent.txt'));
 
@@ -35,6 +42,9 @@ unlink( $filename );
 
 -- Testing hash_file() function with an unknown algorithm --
 ValueError: hash_file(): Argument #1 ($algo) must be a valid hashing algorithm
+
+-- Testing hash_file() function with a null byte in the filename --
+ValueError: hash_file(): Argument #2 ($filename) must not contain any null bytes
 
 -- Testing hash_file() function with a non-existent file --
 

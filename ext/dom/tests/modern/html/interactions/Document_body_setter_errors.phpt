@@ -12,7 +12,7 @@ function testNormalReplace($cb)
     try {
         $dom->body = $cb($dom);
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump($dom->body?->nodeName);
 }
@@ -33,8 +33,8 @@ echo "--- Set body without document element ---\n";
 $dom = DOM\XMLDocument::createEmpty();
 try {
     $dom->body = $dom->createElementNS("http://www.w3.org/1999/xhtml", "body");
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($dom->body?->nodeName);
 
@@ -42,20 +42,20 @@ var_dump($dom->body?->nodeName);
 --EXPECT--
 --- Set body to NULL ---
 string(4) "BODY"
-The new body must either be a body or a frameset tag
+DOMException: The new body must either be a body or a frameset tag
 string(4) "BODY"
 --- Wrong element tag in right namespace ---
 string(4) "BODY"
-The new body must either be a body or a frameset tag
+DOMException: The new body must either be a body or a frameset tag
 string(4) "BODY"
 --- Right element tag in wrong namespace ---
 string(4) "BODY"
-Cannot assign Dom\Element to property Dom\Document::$body of type ?Dom\HTMLElement
+TypeError: Cannot assign Dom\Element to property Dom\Document::$body of type ?Dom\HTMLElement
 string(4) "BODY"
 --- Right element tag in no namespace ---
 string(4) "BODY"
-Cannot assign Dom\Element to property Dom\Document::$body of type ?Dom\HTMLElement
+TypeError: Cannot assign Dom\Element to property Dom\Document::$body of type ?Dom\HTMLElement
 string(4) "BODY"
 --- Set body without document element ---
-A body can only be set if there is a document element
+DOMException: A body can only be set if there is a document element
 NULL

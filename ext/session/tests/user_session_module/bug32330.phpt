@@ -49,6 +49,14 @@ class MySessionHandler implements SessionHandlerInterface {
         echo "gc: maxlifetime = {$maxlifetime}\n";
         return 1;
     }
+
+    private int $id = 0;
+	public function create_sid(): string {
+	    return ++$this->id;
+	}
+	public function validateId(string $id): bool {
+	    return $id > 0 && $id <= $this->id;
+	}
 }
 
 session_set_save_handler(new MySessionHandler());

@@ -21,7 +21,7 @@ function test($c) {
     try {
         echo $c(), "\n";
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -32,6 +32,6 @@ test(fn() => Foo::{bar()}::{foo()});
 --EXPECT--
 foo()
 bar()
-Undefined constant Foo::BAR
+Error: Undefined constant Foo::BAR
 bar()
-Undefined constant Foo::BAR
+Error: Undefined constant Foo::BAR

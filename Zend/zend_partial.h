@@ -31,7 +31,7 @@ BEGIN_EXTERN_C()
  * 'declaring_lineno_ptr' should be a pointer the zend_op.lineno or
  * zend_ast.lineno that declares the PFA. The address is used to build a cache
  * key. */
-void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
+void zend_partial_create(zval *result, zend_class_entry *scope, zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		zend_string *declaring_filename,

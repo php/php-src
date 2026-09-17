@@ -6,10 +6,10 @@ Calling a static method on a non-existing class
 $str = "foo";
 try {
     Test::{$str . "bar"}();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Class "Test" not found
+Error: Class "Test" not found

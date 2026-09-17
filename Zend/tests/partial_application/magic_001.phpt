@@ -46,7 +46,7 @@ Closure [ <user> public method {closure:%s:%d} ] {
     Parameter #0 [ <required> mixed $arguments0 ]
   }
 }
-ArgumentCountError: Too few arguments to function Foo::{closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
+ArgumentCountError: Too few arguments to function Closure::{closure:%s:%d}(), 0 passed in %s on line %d and exactly 1 expected
 Foo::method
 int(1)
 Foo::method

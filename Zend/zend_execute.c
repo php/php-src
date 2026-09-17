@@ -1080,8 +1080,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(const zend_property_inf
 		}
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(&tmp, value);
+	ZVAL_COPY_DEREF(&tmp, value);
 
 	if (UNEXPECTED(!i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(&tmp);

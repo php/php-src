@@ -29,7 +29,7 @@
 #include "zend_vm.h"
 
 /* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
-static zend_always_inline bool in_hitlist(zend_op *target, zend_op **jmp_hitlist, int jmp_hitlist_count)
+static zend_always_inline bool in_hitlist(const zend_op *target, zend_op **jmp_hitlist, int jmp_hitlist_count)
 {
 	int i;
 
@@ -51,7 +51,6 @@ static zend_always_inline bool in_hitlist(zend_op *target, zend_op **jmp_hitlist
 void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline;
-	zend_op *end;
 	zend_op *target;
 	zend_op **jmp_hitlist;
 	int jmp_hitlist_count;
@@ -59,7 +58,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 	jmp_hitlist = (zend_op**)do_alloca(sizeof(zend_op*)*op_array->last, use_heap);
 	opline = op_array->opcodes;
-	end =  opline + op_array->last;
+	const zend_op *end =  opline + op_array->last;
 
 	while (opline < end) {
 

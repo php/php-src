@@ -17,14 +17,14 @@ foreach ($obj as $k => &$v) {
     try {
         $v = [];
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 foreach ($obj as $k => &$v) {
     try {
         $v = [];
     } catch (Throwable $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -32,10 +32,10 @@ var_dump($obj);
 ?>
 --EXPECTF--
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
-Cannot assign array to reference held by property A::$foo of type string
+TypeError: Cannot assign array to reference held by property A::$foo of type string
 
 Deprecated: ArrayIterator::__construct(): Using an object as a backing array for ArrayIterator is deprecated, as it allows violating class constraints and invariants in %s on line %d
-Cannot assign array to reference held by property A::$foo of type string
+TypeError: Cannot assign array to reference held by property A::$foo of type string
 object(A)#1 (1) {
   ["foo"]=>
   &string(3) "bar"

@@ -15,14 +15,14 @@ function &noref() { $foo = 1; return $foo; }
 $foo = new foo;
 try {
     $foo->i = &noref();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($foo);
 
 ?>
 --EXPECT--
-Cannot assign by reference to overloaded object
+Error: Cannot assign by reference to overloaded object
 object(foo)#1 (1) {
   ["var":"foo":private]=>
   NULL

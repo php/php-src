@@ -13,13 +13,13 @@ $fragment->appendChild($dom->createElement('bar'));
 
 try {
     $dom->appendChild($fragment);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo $dom->saveXml($fragment), "\n";
 
 ?>
 --EXPECT--
-Cannot have more than one element child in a document
+DOMException: Cannot have more than one element child in a document
 <foo/><bar/>

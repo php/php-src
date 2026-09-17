@@ -230,6 +230,57 @@ class Context {
     public array $parsedFiles = [];
 }
 
+// Headers the generated arginfo file needs to be self-contained, each with the
+// preprocessor condition and minimum PHP version its code is guarded by
+class HeaderDependencies {
+    /** @var array<string, list<array{?string, ?int}>> */
+    private array $headers = [];
+
+    public function add(string $header, ?string $cond = null, ?int $minPhpVersionId = null): void {
+        $this->headers[$header][] = [$cond, $minPhpVersionId];
+    }
+
+    public function generateCode(): string {
+        ksort($this->headers);
+
+        $code = "";
+        foreach ($this->headers as $header => $guards) {
+            $conds = [];
+            $minPhpVersionId = null;
+
+            foreach ($guards as [$cond, $versionId]) {
+                // An unconditional use overrides any guarded ones
+                if ($cond === null) {
+                    $conds = null;
+                } elseif ($conds !== null) {
+                    $conds[$cond] = $cond;
+                }
+
+                if ($versionId !== null && ($minPhpVersionId === null || $versionId < $minPhpVersionId)) {
+                    $minPhpVersionId = $versionId;
+                }
+            }
+
+            $include = "#include \"$header\"\n";
+
+            if ($conds) {
+                $cond = count($conds) === 1
+                    ? reset($conds)
+                    : implode(" || ", array_map(static fn (string $cond): string => "($cond)", $conds));
+                $include = "#if $cond\n" . $include . "#endif\n";
+            }
+
+            if ($minPhpVersionId !== null) {
+                $include = "#if (PHP_VERSION_ID >= $minPhpVersionId)\n" . $include . "#endif\n";
+            }
+
+            $code .= $include;
+        }
+
+        return $code;
+    }
+}
+
 class ArrayType extends SimpleType {
 
     public function __construct(
@@ -2649,7 +2700,7 @@ class ConstInfo extends VariableLike
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function getDeclaration(array $allConstInfos): string
+    public function getDeclaration(array $allConstInfos, HeaderDependencies $headerDependencies): string
     {
         $type = $this->phpDocType ?? $this->type;
         $simpleType = $type?->tryToSimpleType();
@@ -2672,15 +2723,17 @@ class ConstInfo extends VariableLike
         if ($this->name instanceof ClassConstName) {
             $code = $this->getClassConstDeclaration($value);
         } else {
-            $code = $this->getGlobalConstDeclaration($value);
+            $code = $this->getGlobalConstDeclaration($value, $headerDependencies);
         }
         $code .= $this->getValueAssertion($value);
 
         return $code;
     }
 
-    private function getGlobalConstDeclaration(EvaluatedValue $value): string
+    private function getGlobalConstDeclaration(EvaluatedValue $value, HeaderDependencies $headerDependencies): string
     {
+        $headerDependencies->add("zend_constants.h", $this->cond);
+
         $constName = str_replace('\\', '\\\\', $this->name->__toString());
         $constValue = $value->value;
         $cExpr = $value->getCExpr();
@@ -3226,7 +3279,9 @@ class EnumCaseInfo {
     ) {}
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function getDeclaration(array $allConstInfos): string {
+    public function getDeclaration(array $allConstInfos, HeaderDependencies $headerDependencies, ?string $cond = null, ?int $minPhpVersionId = null): string {
+        $headerDependencies->add("zend_enum.h", $cond, $minPhpVersionId);
+
         $escapedName = addslashes($this->name->case);
         if ($this->value === null) {
             return "\n\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
@@ -3305,7 +3360,13 @@ class AttributeInfo {
      * @param array<string, string> &$declaredStrings Map of string content to
      *   the name of a zend_string already created with that content
      */
-    public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, array &$declaredStrings = []): string {
+    public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, HeaderDependencies $headerDependencies, ?string $cond = null, array &$declaredStrings = []): string {
+        $headerDependencies->add(
+            "zend_attributes.h",
+            $cond,
+            $phpVersionIdMinimumCompatibility !== null && $phpVersionIdMinimumCompatibility < PHP_80_VERSION_ID ? PHP_80_VERSION_ID : null
+        );
+
         $escapedAttributeName = strtr($this->class, '\\', '_');
         [$stringInit, $nameCode, $stringRelease] = StringBuilder::getString(
             "attribute_name_{$escapedAttributeName}_$nameSuffix",
@@ -3419,7 +3480,7 @@ class ClassInfo {
     ) {}
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function getRegistration(array $allConstInfos): string
+    public function getRegistration(array $allConstInfos, HeaderDependencies $headerDependencies): string
     {
         $params = [];
         foreach ($this->extends as $extends) {
@@ -3459,6 +3520,7 @@ class ClassInfo {
             $name = addslashes((string) $this->name);
             $backingType = $this->enumBackingType
                 ? $this->enumBackingType->toTypeCode() : "IS_UNDEF";
+            $headerDependencies->add("zend_enum.h", $this->cond, $php81MinimumCompatibility ? null : PHP_81_VERSION_ID);
             $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, $classMethods);\n";
             if (!$flags->isEmpty()) {
                 $code .= $this->getFlagsByPhpVersion()->generateVersionDependentFlagCode("\tclass_entry->ce_flags = %s;\n", $this->phpVersionIdMinimumCompatibility);
@@ -3546,11 +3608,11 @@ class ClassInfo {
         $code .= generateCodeWithConditions(
             $this->constInfos,
             '',
-            static fn (ConstInfo $const): string => $const->getDeclaration($allConstInfos)
+            static fn (ConstInfo $const): string => $const->getDeclaration($allConstInfos, $headerDependencies)
         );
 
         foreach ($this->enumCaseInfos as $enumCase) {
-            $code .= $enumCase->getDeclaration($allConstInfos);
+            $code .= $enumCase->getDeclaration($allConstInfos, $headerDependencies, $this->cond, $php81MinimumCompatibility ? null : PHP_81_VERSION_ID);
         }
 
         foreach ($this->propertyInfos as $property) {
@@ -3576,6 +3638,8 @@ class ClassInfo {
                     "class_{$escapedName}_$key",
                     $allConstInfos,
                     $this->phpVersionIdMinimumCompatibility,
+                    $headerDependencies,
+                    $this->cond,
                     $declaredStrings
                 );
             }
@@ -3583,19 +3647,19 @@ class ClassInfo {
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond, $declaredStrings)) {
+        if ($attributeInitializationCode = generateConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $headerDependencies, $this->cond, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $declaredStrings)) {
+        if ($attributeInitializationCode = generatePropertyAttributeInitialization($this->propertyInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $headerDependencies, $this->cond, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
         }
 
-        if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $this->cond, $declaredStrings)) {
+        if ($attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->phpVersionIdMinimumCompatibility, $headerDependencies, $this->cond, $declaredStrings)) {
             $code .= $php80CondStart;
             $code .= "\n" . $attributeInitializationCode;
             $code .= $php80CondEnd;
@@ -4562,11 +4626,11 @@ class FileInfo {
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    public function generateClassEntryCode(array $allConstInfos): string {
+    public function generateClassEntryCode(array $allConstInfos, HeaderDependencies $headerDependencies): string {
         $code = "";
 
         foreach ($this->classInfos as $class) {
-            $code .= "\n" . $class->getRegistration($allConstInfos);
+            $code .= "\n" . $class->getRegistration($allConstInfos, $headerDependencies);
         }
 
         return $code;
@@ -4599,6 +4663,7 @@ class FileInfo {
         array $allConstInfos,
         string $stubHash
     ): array {
+        $headerDependencies = new HeaderDependencies();
         $code = "";
 
         $generatedFuncInfos = [];
@@ -4662,8 +4727,8 @@ class FileInfo {
 
         if ($this->generateClassEntries) {
             $declaredStrings = [];
-            $attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
-            $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), null, $declaredStrings);
+            $attributeInitializationCode = generateFunctionAttributeInitialization($this->funcInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), $headerDependencies, null, $declaredStrings);
+            $attributeInitializationCode .= generateGlobalConstantAttributeInitialization($this->constInfos, $allConstInfos, $this->getMinimumPhpVersionIdCompatibility(), $headerDependencies, null, $declaredStrings);
             if ($attributeInitializationCode) {
                 if (!$php80MinimumCompatibility) {
                     $attributeInitializationCode = "\n#if (PHP_VERSION_ID >= " . PHP_80_VERSION_ID . ")" . $attributeInitializationCode . "#endif\n";
@@ -4677,7 +4742,7 @@ class FileInfo {
                 $code .= generateCodeWithConditions(
                     $this->constInfos,
                     '',
-                    static fn (ConstInfo $constInfo): string => $constInfo->getDeclaration($allConstInfos)
+                    static fn (ConstInfo $constInfo): string => $constInfo->getDeclaration($allConstInfos, $headerDependencies)
                 );
 
                 if ($attributeInitializationCode !== "" && $this->constInfos) {
@@ -4688,7 +4753,7 @@ class FileInfo {
                 $code .= "}\n";
             }
 
-            $code .= $this->generateClassEntryCode($allConstInfos);
+            $code .= $this->generateClassEntryCode($allConstInfos, $headerDependencies);
         }
 
         $hasDeclFile = false;
@@ -4705,9 +4770,12 @@ class FileInfo {
                 . "#endif /* {$headerName} */\n";
         }
 
+        $includeCode = $headerDependencies->generateCode();
+
         $code = "/* This is a generated file, edit {$stubFilenameWithoutExtension}.stub.php instead.\n"
             . " * Stub hash: $stubHash"
             . ($hasDeclFile ? "\n * Has decl header: yes */\n" : " */\n")
+            . ($includeCode !== "" ? "\n" . $includeCode : "")
             . $code;
 
         return [$code, $declCode];
@@ -5378,11 +5446,11 @@ function generateFunctionEntries(?Name $className, array $funcInfos, ?string $co
  * @param array<string, string> &$declaredStrings Map of string content to
  *   the name of a zend_string already created with that content
  */
-function generateFunctionAttributeInitialization(iterable $funcInfos, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, ?string $parentCond = null, array &$declaredStrings = []): string {
+function generateFunctionAttributeInitialization(iterable $funcInfos, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility, HeaderDependencies $headerDependencies, ?string $parentCond = null, array &$declaredStrings = []): string {
     return generateCodeWithConditions(
         $funcInfos,
         "",
-        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, &$declaredStrings) {
+        static function (FuncInfo $funcInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, $headerDependencies, $parentCond, &$declaredStrings) {
             $code = null;
 
             if ($funcInfo->name instanceof MethodName) {
@@ -5406,6 +5474,8 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
                     "func_" . $funcInfo->name->getNameForAttributes() . "_$key",
                     $allConstInfos,
                     $phpVersionIdMinimumCompatibility,
+                    $headerDependencies,
+                    $funcInfo->cond ?? $parentCond,
                     $useDeclared
                 );
             }
@@ -5417,6 +5487,8 @@ function generateFunctionAttributeInitialization(iterable $funcInfos, array $all
                         "func_{$funcInfo->name->getNameForAttributes()}_arg{$index}_$key",
                         $allConstInfos,
                         $phpVersionIdMinimumCompatibility,
+                        $headerDependencies,
+                        $funcInfo->cond ?? $parentCond,
                         $useDeclared
                     );
                 }
@@ -5438,6 +5510,7 @@ function generateGlobalConstantAttributeInitialization(
     iterable $constInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
+    HeaderDependencies $headerDependencies,
     ?string $parentCond = null,
     array &$declaredStrings = []
 ): string {
@@ -5448,7 +5521,7 @@ function generateGlobalConstantAttributeInitialization(
     $code = generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional, &$declaredStrings) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $isConditional, $headerDependencies, $parentCond, &$declaredStrings) {
             $code = "";
 
             if ($constInfo->attributes === []) {
@@ -5477,6 +5550,8 @@ function generateGlobalConstantAttributeInitialization(
                     $constVarName . "_$key",
                     $allConstInfos,
                     PHP_85_VERSION_ID,
+                    $headerDependencies,
+                    $constInfo->cond ?? $parentCond,
                     $useDeclared
                 );
             }
@@ -5501,13 +5576,14 @@ function generateConstantAttributeInitialization(
     iterable $constInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
+    HeaderDependencies $headerDependencies,
     ?string $parentCond = null,
     array &$declaredStrings = []
 ): string {
     return generateCodeWithConditions(
         $constInfos,
         "",
-        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, &$declaredStrings) {
+        static function (ConstInfo $constInfo) use ($allConstInfos, $phpVersionIdMinimumCompatibility, $headerDependencies, $parentCond, &$declaredStrings) {
             $code = null;
 
             // Make sure we don't try and use strings that might only be
@@ -5524,6 +5600,8 @@ function generateConstantAttributeInitialization(
                     "const_" . $constInfo->name->getDeclarationName() . "_$key",
                     $allConstInfos,
                     $phpVersionIdMinimumCompatibility,
+                    $headerDependencies,
+                    $constInfo->cond ?? $parentCond,
                     $useDeclared
                 );
             }
@@ -5544,6 +5622,8 @@ function generatePropertyAttributeInitialization(
     iterable $propertyInfos,
     array $allConstInfos,
     ?int $phpVersionIdMinimumCompatibility,
+    HeaderDependencies $headerDependencies,
+    ?string $cond,
     array &$declaredStrings
 ): string {
     $code = "";
@@ -5554,6 +5634,8 @@ function generatePropertyAttributeInitialization(
                 "property_" . $propertyInfo->name->getDeclarationName() . "_" . $key,
                 $allConstInfos,
                 $phpVersionIdMinimumCompatibility,
+                $headerDependencies,
+                $cond,
                 $declaredStrings
             );
         }

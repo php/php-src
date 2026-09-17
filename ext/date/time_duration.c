@@ -77,11 +77,11 @@ static inline php_date_time_duration *create_duration_shell(zval *target)
 	return Z_DATE_TIME_DURATION_P(target);
 }
 
-ZEND_ATTRIBUTE_NODISCARD static inline zend_result sync_properties(php_date_time_duration *object)
+static inline bool duration_representable(const timelib_duration *duration)
 {
-	if (
+	return
 		/* Check if the duration would overflow the $seconds property. */
-		object->duration.seconds > ((uint64_t)ZEND_LONG_MAX)
+		duration->seconds <= ((uint64_t)ZEND_LONG_MAX)
 		/* This constraint is an explicit part of PHP's API: It is the maximum $seconds
 		 * value that allows storing the entire duration as a single int64_t counting
 		 * nanoseconds, which might be desirable in the future when userland `int` is
@@ -89,8 +89,12 @@ ZEND_ATTRIBUTE_NODISCARD static inline zend_result sync_properties(php_date_time
 		 *
 		 * While it is currently also enforced by timelib, this might change
 		 * in a future version of timelib, thus we also enforce it manually. */
-		|| object->duration.seconds > UINT64_C(9223372035)
-	) {
+		&& duration->seconds <= UINT64_C(9223372035);
+}
+
+ZEND_ATTRIBUTE_NODISCARD static inline zend_result sync_properties(php_date_time_duration *object)
+{
+	if (!duration_representable(&object->duration)) {
 		throw_out_of_range_exception();
 		return FAILURE;
 	}
@@ -147,6 +151,52 @@ ZEND_ATTRIBUTE_NODISCARD static zend_result create_duration(zval *target, zend_u
 PHP_METHOD(Time_Duration, __construct)
 {
 	zend_throw_error(NULL, "Cannot directly construct Time\\Duration, use Time\\Duration::from*() methods instead");
+}
+
+PHP_METHOD(Time_Duration, __unserialize)
+{
+	php_date_time_duration *duration = Z_DATE_TIME_DURATION_P(ZEND_THIS);
+
+	HashTable *data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(data);
+	ZEND_PARSE_PARAMETERS_END();
+
+	object_properties_load(&duration->std, data);
+	if (EG(exception)) {
+		goto fail;
+	}
+
+	zval *seconds = OBJ_PROP_NUM(&duration->std, 0);
+	zval *nanoseconds = OBJ_PROP_NUM(&duration->std, 1);
+	zval *negative = OBJ_PROP_NUM(&duration->std, 2);
+
+	/* Verify that both properties are positive, since the timelib_duration_ctor_static() takes unsigned. */
+	if (Z_LVAL_P(seconds) < 0 || Z_LVAL_P(nanoseconds) < 0) {
+		goto fail;
+	}
+
+	int error = timelib_duration_ctor_static(&duration->duration, Z_LVAL_P(seconds), Z_LVAL_P(nanoseconds), Z_TYPE_P(negative) == IS_TRUE);
+	if (error != TIMELIB_ERROR_NO_ERROR) {
+		throw_timelib_error(error);
+		goto fail;
+	}
+
+	if (!duration_representable(&duration->duration)) {
+		throw_out_of_range_exception();
+		goto fail;
+	}
+
+	return;
+
+ fail:
+
+	/* If an exception is already active (e.g. for unrepresentable durations) it will be wrapped for
+	 * uniform exceptions thrown from unserialization handlers, but to still provide additional
+	 * context for a human reader. */
+	zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(duration->std.ce->name));
+	RETURN_THROWS();
 }
 
 PHP_METHOD(Time_Duration, fromSeconds)

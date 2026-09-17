@@ -245,11 +245,21 @@ zend_result dom_node_node_type_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+static xmlNodePtr dom_node_get_parent(dom_object *obj, xmlNodePtr nodep)
+{
+	if (nodep->type == XML_NAMESPACE_DECL) {
+		dom_object_namespace_node *ns = php_dom_namespace_node_obj_from_obj(&obj->std);
+		return ns->parent_intern ? dom_object_get_node(ns->parent_intern) : NULL;
+	}
+	return nodep->parent;
+}
+
+
 static zend_result dom_node_parent_get(dom_object *obj, zval *retval, bool only_element)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	xmlNodePtr nodeparent = nodep->parent;
+	xmlNodePtr nodeparent = dom_node_get_parent(obj, nodep);
 	if (!nodeparent || (only_element && nodeparent->type != XML_ELEMENT_NODE)) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
@@ -457,7 +467,12 @@ Since:
 zend_result dom_node_is_connected_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
-	ZVAL_BOOL(retval, php_dom_is_node_connected(nodep));
+	if (nodep->type == XML_NAMESPACE_DECL) {
+		xmlNodePtr parent = dom_node_get_parent(obj, nodep);
+		ZVAL_BOOL(retval, parent && php_dom_is_node_connected(parent));
+	} else {
+		ZVAL_BOOL(retval, php_dom_is_node_connected(nodep));
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -936,6 +951,9 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 			RETURN_FALSE;
 		}
+		if (refp == child) {
+			refp = child->next;
+		}
 	}
 
 	if (child->doc == NULL && parentp->doc != NULL) {
@@ -945,7 +963,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 
 	php_libxml_invalidate_node_list_cache(intern->document);
 
-	if (ref != NULL) {
+	if (refp != NULL) {
 		if (child->parent != NULL) {
 			xmlUnlinkNode(child);
 		}

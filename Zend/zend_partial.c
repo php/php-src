@@ -472,7 +472,9 @@ static zend_ast *zp_attribute_to_ast(zend_attribute *attribute)
 	if (attribute->argc) {
 		args_ast = zend_ast_create_arg_list(0, ZEND_AST_ARG_LIST);
 		for (uint32_t i = 0; i < attribute->argc; i++) {
-			zend_ast *arg_ast = zend_ast_create_zval(&attribute->args[i].value);
+			zval *zv = &attribute->args[i].value;
+			Z_TRY_ADDREF_P(zv);
+			zend_ast *arg_ast = zend_ast_create_zval(zv);
 			if (attribute->args[i].name) {
 				arg_ast = zend_ast_create(ZEND_AST_NAMED_ARG,
 						zend_ast_create_zval_from_str(
@@ -561,6 +563,7 @@ static zend_ast *zp_compile_forwarding_call(
 			args_ast = zend_ast_list_add(args_ast, default_value_ast);
 		} else if (zp_is_const_arg(const_args, offset)) {
 			ZEND_ASSERT(Z_TYPE(argv[offset]) < IS_OBJECT);
+			ZEND_ASSERT(!Z_REFCOUNTED(argv[offset]));
 
 			/* This argument never changes, so we can burn it into the op_array
 			 * and check its type ahead of time. */
@@ -701,8 +704,7 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	zend_op_array *op_array = NULL;
 
 	if (UNEXPECTED(function->common.fn_flags2 & ZEND_ACC2_FORBID_DYN_CALLS)) {
-		const char *format = "Cannot call %S() dynamically";
-		zend_throw_error(NULL, format, function->common.function_name);
+		zend_throw_error(NULL, "Cannot call %pS() dynamically", function->common.function_name);
 		return NULL;
 	}
 
@@ -1127,7 +1129,7 @@ static void zp_bind(zval *result, zend_function *function, uint32_t argc, zval *
 	}
 }
 
-void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
+void zend_partial_create(zval *result, zend_class_entry *scope, zval *this_ptr, zend_function *function,
 		uint32_t argc, zval *argv, zend_array *extra_named_params,
 		const zend_array *named_positions,
 		zend_string *declaring_filename,
@@ -1163,8 +1165,16 @@ void zend_partial_create(zval *result, zval *this_ptr, zend_function *function,
 		object = NULL;
 	}
 
+
+	/* We conveniently use the function's scope for the scope of the generated closure as this allows const exprs
+	 * referencing self:: or parent:: to behave normally without rewriting them.
+	 * This affects method resolution for magic methods, so use the actual scope for them. */
+	if (!(function->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+		scope = function->common.scope;
+	}
+
 	zend_create_partial_closure(result, (zend_function*)op_array,
-			function->common.scope, called_scope, object,
+			scope, called_scope, object,
 			(function->common.fn_flags & ZEND_ACC_CLOSURE) != 0);
 
 	zp_bind(result, function, argc, argv, extra_named_params, const_args);

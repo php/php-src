@@ -11,9 +11,9 @@ abstract class AbstractClass {
 $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
 try {
     echo $methodWithArgs++;
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot increment ReflectionMethod
+TypeError: Cannot increment ReflectionMethod

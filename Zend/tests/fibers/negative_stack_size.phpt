@@ -7,7 +7,7 @@ $fiber = new Fiber(function() {});
 try {
     $fiber->start();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage()."\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 DONE

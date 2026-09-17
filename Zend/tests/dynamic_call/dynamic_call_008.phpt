@@ -6,12 +6,12 @@ Don't optimize dynamic call to non-dynamic one if it drops the warning
 function test() {
     try {
         ((string) 'extract')(['a' => 42]);
-    } catch (\Error $e) {
-        echo $e->getMessage() . "\n";
+    } catch (\Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 test();
 
 ?>
 --EXPECT--
-Cannot call extract() dynamically
+Error: Cannot call extract() dynamically

@@ -21,4 +21,3 @@ DONE
 --EXPECTF--
 Warning: Undefined variable $a in %sassign_047.php on line 5
 DONE
-

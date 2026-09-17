@@ -13,9 +13,9 @@ $xml = @simplexml_load_string("XXXXXXX^", 'SimpleXMLElement', XML_PARSE_RECOVER)
 // $xml is supposed to hold a SimpleXMLElement, but not FALSE/NULL
 try {
     var_dump($xml->xpath("BBBB"));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-SimpleXMLElement is not properly initialized
+Error: SimpleXMLElement is not properly initialized

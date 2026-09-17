@@ -19,14 +19,14 @@ class D extends C {
 $c = new D();
 try {
     $c->a = 2;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($c);
 
 ?>
 --EXPECTF--
-Cannot modify private(set) property C::$a from scope D
+Error: Cannot modify private(set) property C::$a from scope D
 object(D)#%d (0) {
   ["a"]=>
   uninitialized(int)

@@ -147,4 +147,7 @@ class SessionHandler implements SessionHandlerInterface, SessionIdInterface
 
     /** @tentative-return-type */
     public function create_sid(): string {}
+
+    /** @tentative-return-type */
+    public function validateId(string $id): bool {}
 }

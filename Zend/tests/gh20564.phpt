@@ -16,9 +16,9 @@ class A {
 try {
     (new A)->test();
 } catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-array_map(): Argument #1 ($callback) must be a valid callback or null, class "B" not found
+TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, class "B" not found

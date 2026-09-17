@@ -92,16 +92,28 @@ object(SNMP)#%d (%d) {
   }
   ["max_oids"]=>
   NULL
-  ["valueretrieval"]=>
-  int(1)
+  ["oid_increasing_check"]=>
+  bool(true)
   ["quick_print"]=>
   bool(false)
   ["enum_print"]=>
   bool(false)
+  ["numeric_index"]=>
+  bool(false)
+  ["numeric_timeticks"]=>
+  bool(false)
+  ["extended_index"]=>
+  bool(false)
+  ["dont_print_units"]=>
+  bool(false)
+  ["escape_quotes"]=>
+  bool(false)
+  ["print_hex_text"]=>
+  bool(false)
+  ["valueretrieval"]=>
+  int(1)
   ["oid_output_format"]=>
   int(3)
-  ["oid_increasing_check"]=>
-  bool(true)
   ["exceptions_enabled"]=>
   int(0)
 }
@@ -117,16 +129,28 @@ object(SNMP)#%d (%d) {
   }
   ["max_oids"]=>
   int(40)
-  ["valueretrieval"]=>
-  int(0)
+  ["oid_increasing_check"]=>
+  bool(false)
   ["quick_print"]=>
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_index"]=>
+  bool(false)
+  ["numeric_timeticks"]=>
+  bool(false)
+  ["extended_index"]=>
+  bool(false)
+  ["dont_print_units"]=>
+  bool(false)
+  ["escape_quotes"]=>
+  bool(false)
+  ["print_hex_text"]=>
+  bool(false)
+  ["valueretrieval"]=>
+  int(0)
   ["oid_output_format"]=>
   int(4)
-  ["oid_increasing_check"]=>
-  bool(false)
   ["exceptions_enabled"]=>
   int(0)
 }
@@ -142,16 +166,28 @@ object(SNMP)#%d (%d) {
   }
   ["max_oids"]=>
   int(40)
-  ["valueretrieval"]=>
-  int(1)
+  ["oid_increasing_check"]=>
+  bool(true)
   ["quick_print"]=>
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_index"]=>
+  bool(false)
+  ["numeric_timeticks"]=>
+  bool(false)
+  ["extended_index"]=>
+  bool(false)
+  ["dont_print_units"]=>
+  bool(false)
+  ["escape_quotes"]=>
+  bool(false)
+  ["print_hex_text"]=>
+  bool(false)
+  ["valueretrieval"]=>
+  int(1)
   ["oid_output_format"]=>
   int(3)
-  ["oid_increasing_check"]=>
-  bool(true)
   ["exceptions_enabled"]=>
   int(0)
 }
@@ -172,16 +208,28 @@ object(SNMP)#%d (%d) {
   }
   ["max_oids"]=>
   int(40)
-  ["valueretrieval"]=>
-  int(1)
+  ["oid_increasing_check"]=>
+  bool(true)
   ["quick_print"]=>
   bool(true)
   ["enum_print"]=>
   bool(true)
+  ["numeric_index"]=>
+  bool(false)
+  ["numeric_timeticks"]=>
+  bool(false)
+  ["extended_index"]=>
+  bool(false)
+  ["dont_print_units"]=>
+  bool(false)
+  ["escape_quotes"]=>
+  bool(false)
+  ["print_hex_text"]=>
+  bool(false)
+  ["valueretrieval"]=>
+  int(1)
   ["oid_output_format"]=>
   int(3)
-  ["oid_increasing_check"]=>
-  bool(true)
   ["exceptions_enabled"]=>
   int(0)
   ["123"]=>
@@ -195,6 +243,6 @@ Warning: Undefined property: SNMP::$there is no such parameter in %s on line %d
 NULL
 bool(false)
 SNMP retrieval method must be a bitmask of SNMP_VALUE_LIBRARY, SNMP_VALUE_PLAIN, and SNMP_VALUE_OBJECT
-SNMP output print format must be an SNMP_OID_OUTPUT_* constant
+SNMP output print format must be a SNMP_OID_OUTPUT_* constant
 Cannot write read-only property SNMP::$info
 NULL

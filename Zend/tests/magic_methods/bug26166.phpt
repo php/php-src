@@ -40,8 +40,8 @@ class NoneTest
 $o = new NoneTest;
 try {
     echo $o;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "===THROW===\n";
@@ -56,14 +56,14 @@ class ErrorTest
 $o = new ErrorTest;
 try {
     echo $o;
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 Hello World!
 ===NONE===
-NoneTest::__toString(): Return value must be of type string, none returned
+TypeError: NoneTest::__toString(): Return value must be of type string, none returned
 ===THROW===
-This is an error!
+Exception: This is an error!

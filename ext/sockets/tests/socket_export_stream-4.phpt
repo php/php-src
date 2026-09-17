@@ -17,8 +17,8 @@ function test($stream, $sock) {
         echo "stream_set_blocking ";
         try {
             print_r(stream_set_blocking($stream, false));
-        } catch (Error $e) {
-            echo get_class($e), ": ", $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         echo "\n";
     }
@@ -26,8 +26,8 @@ function test($stream, $sock) {
         echo "socket_set_block ";
         try {
             print_r(socket_set_block($sock));
-        } catch (Error $e) {
-            echo get_class($e), ": ", $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         echo "\n";
         echo "socket_get_option ";
@@ -35,8 +35,8 @@ function test($stream, $sock) {
             // Solaris uses different numeric values for SOCK_* constants
             $opt = socket_get_option($sock, SOL_SOCKET, SO_TYPE);
             print_r($opt === SOCK_DGRAM ? "DGRAM" : $opt);
-        } catch (Error $e) {
-            echo get_class($e), ": ", $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         echo "\n";
     }

@@ -25,14 +25,14 @@ class B extends A {
 
         try {
             call_user_func_array(array($this, 'parent::func22'), array($str));
-        } catch (\TypeError $e) {
-            echo $e->getMessage() . \PHP_EOL;
+        } catch (\Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
 
         try {
             call_user_func_array(array($this, 'parent::inexistent'), array($str));
-        } catch (\TypeError $e) {
-            echo $e->getMessage() . \PHP_EOL;
+        } catch (\Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
     private function func2($str) {
@@ -61,7 +61,7 @@ Deprecated: Callables of the form ["C", "parent::func3"] are deprecated in %s on
 string(27) "B::func3: This should work!"
 
 Deprecated: Callables of the form ["C", "parent::func22"] are deprecated in %s on line %d
-call_user_func_array(): Argument #1 ($callback) must be a valid callback, cannot access private method B::func22()
+TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, cannot access private method B::func22()
 
 Deprecated: Callables of the form ["C", "parent::inexistent"] are deprecated in %s on line %d
-call_user_func_array(): Argument #1 ($callback) must be a valid callback, class B does not have a method "inexistent"
+TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class B does not have a method "inexistent"

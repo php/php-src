@@ -26,7 +26,7 @@ echo "Fiber suspended\n";
 try {
     $a->next();
 } catch (Throwable $t) {
-    echo $t->getMessage(), "\n";
+    echo $t::class, ': ', $t->getMessage(), "\n";
 }
 echo "Destroying fiber\n";
 $fiber = null;
@@ -35,6 +35,6 @@ echo "Shutdown\n";
 --EXPECT--
 Fiber start
 Fiber suspended
-Cannot resume an already running generator
+Error: Cannot resume an already running generator
 Destroying fiber
 Shutdown

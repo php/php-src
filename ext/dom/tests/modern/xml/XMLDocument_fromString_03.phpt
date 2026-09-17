@@ -11,8 +11,8 @@ $flags = [
 
 try {
     Dom\XMLDocument::createFromString('<?xml version="1.0"?><container/>', -1);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 foreach ($flags as $flag) {
@@ -21,7 +21,7 @@ foreach ($flags as $flag) {
 
 ?>
 --EXPECTF--
-Dom\XMLDocument::createFromString(): Argument #2 ($options) contains invalid flags (allowed flags: %s)
+ValueError: Dom\XMLDocument::createFromString(): Argument #2 ($options) contains invalid flags (allowed flags: %s)
 bool(true)
 bool(true)
 bool(true)

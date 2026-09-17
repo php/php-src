@@ -13,11 +13,11 @@ $o->foo = "1" . str_repeat("0", 2);
 try {
     $o->foo += 5;
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump($o->foo);
 unset($o);
 ?>
 --EXPECT--
-Cannot assign int to property A::$foo of type string
+TypeError: Cannot assign int to property A::$foo of type string
 string(3) "100"

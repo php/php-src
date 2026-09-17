@@ -15,10 +15,10 @@ function &test(): int {
 try {
     $x = &test();
     var_dump($x);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-test(): Return value must be of type int, string returned
+TypeError: test(): Return value must be of type int, string returned

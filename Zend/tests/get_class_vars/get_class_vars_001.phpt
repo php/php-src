@@ -21,8 +21,8 @@ var_dump(get_class_vars('B'));
 
 try {
     get_class_vars("Unknown");
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -37,4 +37,4 @@ array(2) {
   ["aa"]=>
   int(4)
 }
-get_class_vars(): Argument #1 ($class) must be a valid class name, Unknown given
+TypeError: get_class_vars(): Argument #1 ($class) must be a valid class name, "Unknown" given

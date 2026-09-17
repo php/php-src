@@ -10,31 +10,31 @@ enum Foo: int {
 
 try {
     var_dump(Foo::Bar);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(Foo::Bar);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(Foo::from(42));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     var_dump(Foo::tryFrom('bar'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Duplicate value in enum Foo for cases Bar and Baz
-Duplicate value in enum Foo for cases Bar and Baz
-Duplicate value in enum Foo for cases Bar and Baz
-Foo::tryFrom(): Argument #1 ($value) must be of type int, string given
+Error: Duplicate value in enum Foo for cases Bar and Baz
+Error: Duplicate value in enum Foo for cases Bar and Baz
+Error: Duplicate value in enum Foo for cases Bar and Baz
+TypeError: Foo::tryFrom(): Argument #1 ($value) must be of type int, string given

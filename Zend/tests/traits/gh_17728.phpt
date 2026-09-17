@@ -15,10 +15,10 @@ trait Foo {
 
 try {
     Foo::bar();
-} catch (ErrorException $e) {
-    echo $e->getMessage(), PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Calling static trait method Foo::bar is deprecated, it should only be called on a class using the trait
+ErrorException: Calling static trait method Foo::bar is deprecated, it should only be called on a class using the trait

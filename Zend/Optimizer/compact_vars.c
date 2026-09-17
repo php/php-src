@@ -33,7 +33,7 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 	/* Determine which CVs are used */
 	zend_bitset_clear(used_vars, used_vars_len);
 	for (i = 0; i < op_array->last; i++) {
-		zend_op *opline = &op_array->opcodes[i];
+		const zend_op *opline = &op_array->opcodes[i];
 		if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			zend_bitset_incl(used_vars, VAR_NUM(opline->op1.var));
 		}

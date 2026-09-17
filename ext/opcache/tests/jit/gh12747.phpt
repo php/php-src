@@ -11,25 +11,25 @@ try {
     echo "isset():\n";
     var_dump(isset($container[new stdClass()]));
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     echo "empty():\n";
     var_dump(empty($container[new stdClass()]));
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     echo "Coalesce():\n";
     var_dump($container[new stdClass()] ?? 'default');
 } catch (\Throwable $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 isset():
-Cannot access offset of type stdClass in isset or empty
+TypeError: Cannot access offset of type stdClass in isset or empty
 empty():
-Cannot access offset of type stdClass in isset or empty
+TypeError: Cannot access offset of type stdClass in isset or empty
 Coalesce():
-Cannot access offset of type stdClass on array
+TypeError: Cannot access offset of type stdClass on array

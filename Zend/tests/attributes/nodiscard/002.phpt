@@ -41,4 +41,3 @@ __callStatic(test)
 
 Warning: The return value of method Clazz::__invoke() should either be used or intentionally ignored by casting it as (void) in %s on line %d
 __invoke(foo)
-

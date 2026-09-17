@@ -20,8 +20,8 @@ $foo = new Foo(1);
 
 try {
     clone $foo;
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "done";
@@ -32,5 +32,5 @@ object(Foo)#2 (1) {
   ["bar"]=>
   int(2)
 }
-Cannot modify readonly property Foo::$bar
+Error: Cannot modify readonly property Foo::$bar
 done

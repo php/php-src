@@ -14,8 +14,8 @@ function test() {
 try {
     @test();
 } catch (Throwable $e) {
-	echo $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Division by zero
+DivisionByZeroError: Division by zero

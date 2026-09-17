@@ -8,10 +8,10 @@ class A  {
 }
 try {
     constant('A::B1');
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Undefined constant A::B1
+Error: Undefined constant A::B1

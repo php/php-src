@@ -847,8 +847,36 @@ bool phpdbg_try_re_adding_watch_element(zval *parent, phpdbg_watch_element *elem
 	return true;
 }
 
+/* watch_recreation is keyed by element->str, so a parent and its child are stored
+ * under distinct keys and the deduplication in phpdbg_queue_element_for_recreation()
+ * cannot notice that they belong to the same chain. As phpdbg_free_watch_element_tree()
+ * frees the whole chain, any other entry referencing a member of it must be dropped
+ * first, or the chain gets freed twice. The buckets are only nulled out as the hash is
+ * being iterated over by the callers; they clean it right after. */
+static void phpdbg_forget_queued_watch_element(phpdbg_watch_element *element) {
+	zval *zv = zend_hash_find(&PHPDBG_G(watch_recreation), element->str);
+	if (zv && Z_PTR_P(zv) == element) {
+		Z_PTR_P(zv) = NULL;
+	}
+}
+
+static void phpdbg_dequeue_watch_element_tree(phpdbg_watch_element *element) {
+	phpdbg_watch_element *cur;
+
+	for (cur = element->parent; cur; cur = cur->parent) {
+		phpdbg_forget_queued_watch_element(cur);
+	}
+	for (cur = element->child; cur; cur = cur->child) {
+		phpdbg_forget_queued_watch_element(cur);
+	}
+	phpdbg_forget_queued_watch_element(element);
+}
+
 void phpdbg_automatic_dequeue_free(phpdbg_watch_element *element) {
 	phpdbg_watch_element *child = element;
+
+	phpdbg_dequeue_watch_element_tree(element);
+
 	while (child->child && !(child->flags & PHPDBG_WATCH_RECURSIVE_ROOT)) {
 		child = child->child;
 	}
@@ -863,6 +891,10 @@ void phpdbg_dequeue_elements_for_recreation(void) {
 	phpdbg_watch_element *element;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&PHPDBG_G(watch_recreation), element) {
+		if (!element) {
+			/* freed along with an already dequeued element of the same chain */
+			continue;
+		}
 		ZEND_ASSERT(element->flags & (PHPDBG_WATCH_IMPLICIT | PHPDBG_WATCH_RECURSIVE_ROOT | PHPDBG_WATCH_SIMPLE));
 		if (element->parent || zend_hash_index_find(&PHPDBG_G(watch_free), (zend_ulong)(uintptr_t) element->parent_container)) {
 			zval _zv, *zv = &_zv;
@@ -1641,7 +1673,9 @@ void phpdbg_destroy_watchpoints(void) {
 
 	/* unconditionally free all remaining elements to avoid memory leaks */
 	ZEND_HASH_MAP_FOREACH_PTR(&PHPDBG_G(watch_recreation), element) {
-		phpdbg_automatic_dequeue_free(element);
+		if (element) {
+			phpdbg_automatic_dequeue_free(element);
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	/* upon fatal errors etc. (i.e. CG(unclean_shutdown) == 1), some watchpoints may still be active. Ensure memory is not watched anymore for next run. Do not care about memory freeing here, shutdown is unclean and near anyway. */
@@ -1669,7 +1703,9 @@ void phpdbg_release_watch_elements(void) {
 	uint32_t guard;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&PHPDBG_G(watch_recreation), element) {
-		phpdbg_automatic_dequeue_free(element);
+		if (element) {
+			phpdbg_automatic_dequeue_free(element);
+		}
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_clean(&PHPDBG_G(watch_recreation));
 

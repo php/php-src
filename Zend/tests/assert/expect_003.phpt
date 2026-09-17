@@ -7,9 +7,9 @@ assert.exception=1
 <?php
 try {
     assert(false);
-} catch (AssertionError $ex) {
-    var_dump($ex->getMessage());
+} catch (Throwable $ex) {
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(13) "assert(false)"
+AssertionError: assert(false)

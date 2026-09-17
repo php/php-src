@@ -804,12 +804,15 @@ PHP_METHOD(Io_Poll_Context, wait)
 		if (max_events <= 0) {
 			max_events = 64;
 		}
-	} else if (max_events <= 0) {
+	} else if (UNEXPECTED(max_events <= 0)) {
 		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	} else if (ZEND_LONG_INT_OVFL(max_events)) {
+		zend_argument_value_error(2, "must be less than or equal to %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
-	php_poll_event *events = safe_emalloc(max_events, sizeof(*events), 0);
+	php_poll_event *events = safe_emalloc((size_t) max_events, sizeof(*events), 0);
 	int num_events = php_poll_wait(intern->ctx, events, (int) max_events, timeout ? &timeout_ts : NULL);
 
 	if (num_events < 0) {
