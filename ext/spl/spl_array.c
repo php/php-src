@@ -1565,7 +1565,7 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 	}
 	// ZEND_FE_FETCH_RW converts the value to a reference but doesn't know the source is a property.
 	// Typed properties must add a type source to the reference, and readonly properties must fail.
-	if (array_iter->by_ref
+	if (data && array_iter->by_ref
 	 && Z_TYPE_P(data) != IS_REFERENCE
 	 && Z_TYPE(object->array) == IS_OBJECT
 	 && !(object->ar_flags & (SPL_ARRAY_IS_SELF|SPL_ARRAY_USE_OTHER))) {
