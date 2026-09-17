@@ -1554,6 +1554,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 
 	php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 	intern->register_node_ns = true;
+	intern->evaluation_count = 0;
 
 	intern->dom.prop_handler = &dom_xpath_prop_handlers;
 

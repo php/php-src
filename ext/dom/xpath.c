@@ -165,13 +165,18 @@ static void dom_xpath_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *
 
 	DOM_GET_OBJ(docp, doc, xmlDocPtr, docobj);
 
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+	if (UNEXPECTED(intern->evaluation_count > 0)) {
+		zend_throw_error(NULL, "Cannot re-initialize DOMXPath while an XPath expression is being evaluated");
+		RETURN_THROWS();
+	}
+
 	xmlXPathContextPtr ctx = xmlXPathNewContext(docp);
 	if (ctx == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
-	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 	xmlXPathContextPtr oldctx = intern->dom.ptr;
 	if (oldctx != NULL) {
 		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
@@ -326,7 +331,9 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 		ctxp->nsNr = in_scope_ns.count;
 	}
 
+	intern->evaluation_count++;
 	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression(BAD_CAST expr, ctxp);
+	intern->evaluation_count--;
 	ctxp->node = NULL;
 
 	if (register_node_ns && nodep != NULL) {
