@@ -1671,9 +1671,10 @@ PHP_FUNCTION(pathinfo)
 	}
 
 	const char *p = zend_memrchr(ZSTR_VAL(basename), '.', ZSTR_LEN(basename));
+	size_t extension_len = p ? ZSTR_LEN(basename) - (p - ZSTR_VAL(basename)) - 1 : 0;
 	if (opt == PHP_PATHINFO_EXTENSION) {
 		if (p) {
-			RETVAL_STRINGL(p + 1, ZSTR_LEN(basename) - (p - ZSTR_VAL(basename)) - 1);
+			RETVAL_STRINGL(p + 1, extension_len);
 		} else {
 			RETVAL_EMPTY_STRING();
 		}
@@ -1701,7 +1702,7 @@ PHP_FUNCTION(pathinfo)
 
 	add_assoc_str(return_value, "basename", basename);
 	if (p) {
-		add_assoc_stringl(return_value, "extension", p + 1, ZSTR_LEN(basename) - (p - ZSTR_VAL(basename)) - 1);
+		add_assoc_stringl(return_value, "extension", p + 1, extension_len);
 	}
 	add_assoc_str(return_value, "filename", filename);
 }
