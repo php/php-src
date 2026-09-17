@@ -2606,6 +2606,7 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	char *_router = NULL;
 	int port = 3000;
 	php_socket_t server_sock = SOCK_ERR;
+	uint8_t display_errors;
 
 	host = php_cli_server_parse_addr(addr, &port);
 	if (!host) {
@@ -2614,7 +2615,11 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 		goto out;
 	}
 
+	/* A resolver failure raises a warning whose text is repeated in the "Failed to listen" message below. */
+	display_errors = PG(display_errors);
+	PG(display_errors) = 0;
 	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr);
+	PG(display_errors) = display_errors;
 	if (server_sock == SOCK_ERR) {
 		if (strchr(host, ':')) {
 			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to listen on [%s]:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
