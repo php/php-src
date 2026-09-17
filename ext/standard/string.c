@@ -1660,11 +1660,7 @@ PHP_FUNCTION(pathinfo)
 	if (opt == PHP_PATHINFO_DIRNAME) {
 		char *dirname = estrndup(path, path_len);
 		php_dirname(dirname, path_len);
-		if (*dirname) {
-			RETVAL_STRING(dirname);
-		} else {
-			RETVAL_EMPTY_STRING();
-		}
+		RETVAL_STRING_FAST(dirname);
 		efree(dirname);
 		return;
 	}
@@ -1685,13 +1681,12 @@ PHP_FUNCTION(pathinfo)
 		return;
 	}
 
+	zend_string *filename = p
+		? zend_string_init(ZSTR_VAL(basename), p - ZSTR_VAL(basename), 0)
+		: zend_string_copy(basename);
 	if (opt == PHP_PATHINFO_FILENAME) {
-		if (!p) {
-			RETURN_STR(basename);
-		}
-		RETVAL_STRINGL(ZSTR_VAL(basename), p - ZSTR_VAL(basename));
 		zend_string_release_ex(basename, 0);
-		return;
+		RETURN_STR(filename);
 	}
 
 	ZEND_ASSERT(opt == PHP_PATHINFO_ALL);
@@ -1708,7 +1703,7 @@ PHP_FUNCTION(pathinfo)
 	if (p) {
 		add_assoc_stringl(return_value, "extension", p + 1, ZSTR_LEN(basename) - (p - ZSTR_VAL(basename)) - 1);
 	}
-	add_assoc_stringl(return_value, "filename", ZSTR_VAL(basename), p ? (size_t)(p - ZSTR_VAL(basename)) : ZSTR_LEN(basename));
+	add_assoc_str(return_value, "filename", filename);
 }
 /* }}} */
 
