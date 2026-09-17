@@ -117,6 +117,12 @@ PHP                                                                        NEWS
   . Fixed PDOStatement::bindParam() and bindColumn() leaking the driver
     options value. (Ilia Alshanetsky)
 
+- PDO_DBLIB:
+  . Fixed bug GH-23741 (segfault after a failed query inside a PDO
+    transaction). Errors raised by beginTransaction(), commit(), rollBack()
+    and lastInsertId() are now reported instead of being dropped.
+    (Ilia Alshanetsky)
+
 - PDO_Firebird:
   . Fixed bug GH-23758 (PDO_Firebird returns null for non-null empty BLOBs).
     (Lazizbek Ergashev)
