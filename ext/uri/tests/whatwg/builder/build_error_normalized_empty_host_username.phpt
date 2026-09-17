@@ -7,16 +7,13 @@ $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("foo");
 $builder->setHost("\t\n");
 $builder->setUsername("user");
-$softErrors = ["unchanged"];
 
 try {
-    $builder->build(softErrors: $softErrors);
+    $builder->build();
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump($e->errors);
 }
-
-var_dump($softErrors);
 
 ?>
 --EXPECTF--
@@ -32,8 +29,4 @@ array(1) {
     ["failure"]=>
     bool(false)
   }
-}
-array(1) {
-  [0]=>
-  string(9) "unchanged"
 }

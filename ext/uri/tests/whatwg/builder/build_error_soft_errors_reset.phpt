@@ -1,12 +1,12 @@
 --TEST--
-Test Uri\WhatWg\UrlBuilder::build() - error - leaves soft errors unchanged
+Test Uri\WhatWg\UrlBuilder::build() - error - clears soft errors when an exception is thrown
 --FILE--
 <?php
 
 $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("ht\ttps");
 $builder->setHost(null);
-$softErrors = ["unchanged"];
+$softErrors = ["previous error"];
 
 try {
     $builder->build(softErrors: $softErrors);
@@ -40,7 +40,5 @@ array(2) {
     bool(true)
   }
 }
-array(1) {
-  [0]=>
-  string(9) "unchanged"
+array(0) {
 }

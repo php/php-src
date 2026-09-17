@@ -387,6 +387,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2) PHPAPI void php_uri_instantiate_uri(
 	if (UNEXPECTED(uri == NULL)) {
 		if (should_throw) {
 			zval_ptr_dtor(&errors);
+			ZVAL_EMPTY_ARRAY(&errors);
+			pass_errors_by_ref_and_free(errors_zv, &errors);
 			RETURN_THROWS();
 		} else {
 			if (pass_errors_by_ref_and_free(errors_zv, &errors) == FAILURE) {
@@ -1433,6 +1435,9 @@ PHP_METHOD(Uri_WhatWg_UrlBuilder, build)
 		soft_errors
 	);
 	if (lexbor_url == NULL) {
+		zval errors;
+		ZVAL_EMPTY_ARRAY(&errors);
+		pass_errors_by_ref_and_free(soft_errors, &errors);
 		RETURN_THROWS();
 	}
 
