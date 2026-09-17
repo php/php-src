@@ -22,9 +22,11 @@ fclose($fp);
 --EXPECTF--
 HTTP/1.1 200 OK
 %a
-array(2) {
+array(3) {
   ["Host"]=>
   string(%d) "%s"
   ["X-Foo"]=>
+  string(1) "a"
+  ["x-foo"]=>
   string(4) "a, b"
 }
