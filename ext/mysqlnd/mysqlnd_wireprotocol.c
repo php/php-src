@@ -1497,7 +1497,10 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fi
 				php_error_docref(NULL, E_WARNING, "Malformed server packet. No packet space left for the field");
 				DBG_RETURN(FAIL);
 			}
-			mysqlnd_ps_fetch_functions[type].func(current_field, &fields_metadata[i], rbs - row_position, &p);
+			const ps_field_fetch_func type_fetch = mysqlnd_ps_fetch_functions[type].func;
+			/* Some agents think that this can be null. */
+			ZEND_ASSERT(type_fetch != NULL && "Type was validated, known types have functions set properly");
+			type_fetch(current_field, &fields_metadata[i], rbs - row_position, &p);
 			if (p == NULL) {
 				for (j = 0, current_field = start_field; j < i; current_field++, j++) {
 					zval_ptr_dtor(current_field);
