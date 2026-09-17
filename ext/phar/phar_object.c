@@ -4494,7 +4494,19 @@ PHP_METHOD(PharFileInfo, getCompressedSize)
 
 	PHAR_ENTRY_OBJECT();
 
-	RETURN_LONG(entry_obj->entry->compressed_filesize);
+	uint32_t compressed_filesize = entry_obj->entry->compressed_filesize;
+
+#if SIZEOF_ZEND_LONG < 8
+	/* The size is read as an unsigned 32-bit value from the archive, so it
+	 * does not necessarily fit into a 32-bit zend_long. */
+	if (UNEXPECTED(compressed_filesize > (uint32_t) ZEND_LONG_MAX)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
+			"Phar entry has a compressed size that is too large to be represented as an int on this platform");
+		RETURN_THROWS();
+	}
+#endif
+
+	RETURN_LONG((zend_long) compressed_filesize);
 }
 /* }}} */
 
