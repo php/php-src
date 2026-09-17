@@ -736,9 +736,9 @@ static void php_uri_parser_whatwg_destroy(void *uri)
 	lxb_url_destroy(lexbor_uri);
 }
 
-ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_throw_exception(zend_class_entry *exception_ce, const char *message)
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_throw_exception(const char *message)
 {
-	zend_object *exception = zend_throw_exception(exception_ce, message, 0);
+	zend_object *exception = zend_throw_exception(php_uri_ce_whatwg_invalid_url_exception, message, 0);
 	zval errors;
 	ZVAL_EMPTY_ARRAY(&errors);
 	zend_update_property(exception->ce, exception, ZEND_STRL("errors"), &errors);
@@ -1043,7 +1043,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 
 	lxb_url_t *lexbor_url = lexbor_mraw_calloc(lexbor_parser.mraw, sizeof(*lexbor_url));
 	if (lexbor_url == NULL) {
-		php_uri_parser_whatwg_throw_exception(php_uri_ce_error, "Memory allocation error");
+		zend_throw_exception(php_uri_ce_error, "Memory allocation error", 0);
 		return NULL;
 	}
 
@@ -1080,17 +1080,17 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		|| lexbor_url->host.type == LXB_URL_HOST_TYPE_EMPTY
 		|| lexbor_url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE) {
 		if (Z_TYPE_P(username) != IS_NULL) {
-			php_uri_parser_whatwg_throw_exception(php_uri_ce_whatwg_invalid_url_exception, "The specified URL cannot have username");
+			php_uri_parser_whatwg_throw_exception("The specified URL cannot have username");
 			goto failure;
 		}
 
 		if (Z_TYPE_P(password) != IS_NULL) {
-			php_uri_parser_whatwg_throw_exception(php_uri_ce_whatwg_invalid_url_exception, "The specified URL cannot have password");
+			php_uri_parser_whatwg_throw_exception("The specified URL cannot have password");
 			goto failure;
 		}
 
 		if (Z_TYPE_P(port) != IS_NULL) {
-			php_uri_parser_whatwg_throw_exception(php_uri_ce_whatwg_invalid_url_exception, "The specified URL cannot have port");
+			php_uri_parser_whatwg_throw_exception("The specified URL cannot have port");
 			goto failure;
 		}
 	}
