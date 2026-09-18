@@ -1020,18 +1020,6 @@ static php_cli_server_chunk *php_cli_server_chunk_immortal_new(const char *buf, 
 	return chunk;
 } /* }}} */
 
-static php_cli_server_chunk *php_cli_server_chunk_heap_new(void *block, char *buf, size_t len) /* {{{ */
-{
-	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk), 1);
-
-	chunk->type = PHP_CLI_SERVER_CHUNK_HEAP;
-	chunk->next = NULL;
-	chunk->data.heap.block = block;
-	chunk->data.heap.p = buf;
-	chunk->data.heap.len = len;
-	return chunk;
-} /* }}} */
-
 static php_cli_server_chunk *php_cli_server_chunk_heap_new_self_contained(size_t len) /* {{{ */
 {
 	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk) + len, 1);
@@ -2147,9 +2135,12 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 		}
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 
-		chunk = php_cli_server_chunk_heap_new(buffer.s, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+		chunk = php_cli_server_chunk_heap_new_self_contained(ZSTR_LEN(buffer.s));
+		if (chunk) {
+			memcpy(chunk->data.heap.p, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+		}
+		smart_str_free_ex(&buffer, 1);
 		if (!chunk) {
-			smart_str_free_ex(&buffer, 1);
 			goto fail;
 		}
 		php_cli_server_buffer_prepend(&client->content_sender.buffer, chunk);
@@ -2260,9 +2251,13 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 		smart_str_append_unsigned_ex(&buffer, client->request.sb.st_size, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
-		chunk = php_cli_server_chunk_heap_new(buffer.s, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+
+		chunk = php_cli_server_chunk_heap_new_self_contained(ZSTR_LEN(buffer.s));
+		if (chunk) {
+			memcpy(chunk->data.heap.p, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
+		}
+		smart_str_free_ex(&buffer, 1);
 		if (!chunk) {
-			smart_str_free_ex(&buffer, 1);
 			php_cli_server_log_response(client, 500, NULL);
 			return FAILURE;
 		}
