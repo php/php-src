@@ -72,6 +72,9 @@
 # if defined(HAVE_LINUX_UDP_H)
 #  include <linux/udp.h>
 # endif
+# if defined(HAVE_SYS_UCRED_H)
+#  include <sys/ucred.h>
+# endif
 #endif
 
 #include <stddef.h>
@@ -2007,10 +2010,66 @@ PHP_FUNCTION(socket_get_option)
 				return;
 			}
 #endif
+#if defined(SO_PEERCRED) && defined(__linux__)
+			case SO_PEERCRED: {
+				struct ucred cred;
+				optlen = sizeof(cred);
 
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&cred, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				array_init_size(return_value, 3);
+				add_assoc_long(return_value, "pid", cred.pid);
+				add_assoc_long(return_value, "uid", cred.uid == (uid_t)-1 ? -1 : (zend_long)cred.uid);
+				add_assoc_long(return_value, "gid", cred.gid == (gid_t)-1 ? -1 : (zend_long)cred.gid);
+				return;
+			}
+#endif
 		}
 	}
 
+#if defined(LOCAL_PEERCRED)
+	if (level == SOL_LOCAL) {
+		switch (optname) {
+			case LOCAL_PEERCRED: {
+				struct xucred cred;
+
+				if (php_sock->type != AF_UNIX) {
+					zend_argument_value_error(1, "must be used with an AF_UNIX socket");
+					RETURN_THROWS();
+				}
+
+				optlen = sizeof(cred);
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&cred, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				if (UNEXPECTED(cred.cr_version != XUCRED_VERSION)) {
+					php_error_docref(NULL, E_WARNING, "Unsupported peer credentials version");
+					RETURN_FALSE;
+				}
+
+				array_init_size(return_value, 3);
+#if defined(__FreeBSD__)
+				add_assoc_long(return_value, "pid", (zend_long)cred.cr_pid);
+#elif defined(LOCAL_PEERPID)
+				pid_t pid;
+				socklen_t pidlen = sizeof(pid);
+				if (getsockopt(php_sock->bsd_socket, SOL_LOCAL, LOCAL_PEERPID, &pid, &pidlen) == 0) {
+					add_assoc_long(return_value, "pid", (zend_long)pid);
+				}
+#endif
+				add_assoc_long(return_value, "uid", (zend_long)cred.cr_uid);
+				add_assoc_long(return_value, "gid", (zend_long)cred.cr_groups[0]);
+				return;
+			}
+		}
+	}
+#endif
+	
 #ifdef SOL_FILTER
 	if (level == SOL_FILTER) {
 		switch (optname) {
