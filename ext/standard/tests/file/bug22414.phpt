@@ -9,8 +9,8 @@ output_handler=
 --FILE--
 <?php
 
-    $php = getenv('TEST_PHP_EXECUTABLE');
     $php_escaped = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
+    $source = tempnam(__DIR__, 'phpt');
     $tmpfile = tempnam(__DIR__, 'phpt');
     $args = ' -n ';
 
@@ -20,7 +20,14 @@ output_handler=
     echo "\n";
 
     /* Binary Data Test */
-    $cmd = $php_escaped . $args . ' -r ' . escapeshellarg("readfile(@getenv('TEST_PHP_EXECUTABLE'));");
+    $binaryData = '';
+    for ($i = 0; $i < 256; $i++) {
+        $binaryData .= chr($i);
+    }
+    file_put_contents($source, str_repeat($binaryData, 1024));
+    putenv('TEST_PHP_PASSTHRU_SOURCE=' . $source);
+
+    $cmd = $php_escaped . $args . ' -r ' . escapeshellarg("readfile(@getenv('TEST_PHP_PASSTHRU_SOURCE'));");
     if (substr(PHP_OS, 0, 3) != 'WIN') {
         $cmd = $php_escaped . $args . ' -r ' . escapeshellarg('passthru("'.$cmd.'");') . ' > '.escapeshellarg($tmpfile);
     } else {
@@ -28,12 +35,13 @@ output_handler=
     }
     exec($cmd);
 
-    if (md5_file($php) == md5_file($tmpfile)) {
+    if (md5_file($source) == md5_file($tmpfile)) {
         echo "Works\n";
     } else {
         echo "Does not work\n";
     }
 
+    @unlink($source);
     @unlink($tmpfile);
 ?>
 --EXPECT--
