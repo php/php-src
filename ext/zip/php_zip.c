@@ -1582,8 +1582,16 @@ PHP_METHOD(ZipArchive, open)
 
 	if (ze_obj->archive) {
 		/* we already have an opened zip, free it */
+		if (ze_obj->archive->close) {
+			efree(resolved_path);
+			zend_throw_error(NULL, "Already being closed");
+			RETURN_THROWS();
+		}
 		intern = ze_obj->archive->za;
-		if (zip_close(intern) != 0) {
+		ze_obj->archive->close = true;
+		err = zip_close(intern);
+		ze_obj->archive->close = false;
+		if (err != 0) {
 			php_error_docref(NULL, E_WARNING, "Empty string as source");
 			efree(resolved_path);
 			RETURN_FALSE;
@@ -1668,7 +1676,14 @@ PHP_METHOD(ZipArchive, close)
 
 	ze_obj = Z_ZIP_P(self);
 
+	if (ze_obj->archive->close) {
+		zend_throw_error(NULL, "Already being closed");
+		RETURN_THROWS();
+	}
+
+	ze_obj->archive->close = true;
 	err = zip_close(intern);
+	ze_obj->archive->close = false;
 	if (err) {
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 		/* Save error for property reader */
