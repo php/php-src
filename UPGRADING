@@ -908,6 +908,8 @@ PHP 8.6 UPGRADE NOTES
 - URI:
   . Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder
     RFC: https://wiki.php.net/rfc/uri_followup#uri_building
+  . enum Uri\WhatWg\UrlPercentEncodingMode
+    RFC: https://wiki.php.net/rfc/uri_followup#percent-encoding_support
 
 ========================================
 8. Removed Extensions and SAPIs
