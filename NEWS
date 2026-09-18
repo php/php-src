@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.6.0RC1
 
 - Core:
+  . Fixed bug GH-23725 (use-after-free when __toString() destroys an array or
+    string argument of a frameless in_array(), preg_replace() or
+    str_replace() call). (Ilia Alshanetsky)
   . Fixed incorrect internal pointer and foreach iterator positions when
     compacting arrays with holes. (Weilin Du)
   . Fix handling of references to typed properties during unserialization

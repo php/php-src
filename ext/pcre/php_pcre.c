@@ -2378,7 +2378,7 @@ PHP_FUNCTION(preg_replace)
 ZEND_FRAMELESS_FUNCTION(preg_replace, 3)
 {
 	zend_string *regex_str, *replace_str, *subject_str;
-	HashTable *regex_ht, *replace_ht, *subject_ht;
+	HashTable *regex_ht = NULL, *replace_ht = NULL, *subject_ht = NULL;
 	zval regex_tmp, replace_tmp, subject_tmp;
 
 	Z_FLF_PARAM_ARRAY_HT_OR_STR(1, regex_ht, regex_str, regex_tmp);
@@ -2393,9 +2393,9 @@ ZEND_FRAMELESS_FUNCTION(preg_replace, 3)
 		/* limit */ -1, /* zcount */ NULL, /* is_filter */ false);
 
 flf_clean:;
-	Z_FLF_PARAM_FREE_STR(1, regex_tmp);
-	Z_FLF_PARAM_FREE_STR(2, replace_tmp);
-	Z_FLF_PARAM_FREE_STR(3, subject_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(1, regex_ht, regex_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(2, replace_ht, replace_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(3, subject_ht, subject_tmp);
 }
 
 /* {{{ Perform Perl-style regular expression replacement using replacement callback. */

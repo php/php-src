@@ -43,23 +43,30 @@
 
 #define Z_FLF_PARAM_ZVAL(arg_num, dest) \
 	dest = arg ## arg_num;
-#define Z_FLF_PARAM_ARRAY(arg_num, dest) \
-	if (!zend_parse_arg_array(arg ## arg_num, &dest, /* null_check */ false, /* or_object */ false)) { \
+#define Z_FLF_PARAM_ARRAY(arg_num, dest_ht) \
+	if (!zend_parse_arg_array_ht(arg ## arg_num, &dest_ht, /* null_check */ false, /* or_object */ false, /* separate */ false)) { \
 		zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_ARRAY, arg ## arg_num); \
 		goto flf_clean; \
-	}
-#define Z_FLF_PARAM_ARRAY_OR_NULL(arg_num, dest) \
-	if (!zend_parse_arg_array(arg ## arg_num, &dest, /* null_check */ true, /* or_object */ false)) { \
+	} \
+	GC_TRY_ADDREF(dest_ht);
+#define Z_FLF_PARAM_ARRAY_OR_NULL(arg_num, dest_ht) \
+	if (!zend_parse_arg_array_ht(arg ## arg_num, &dest_ht, /* null_check */ true, /* or_object */ false, /* separate */ false)) { \
 		zend_wrong_parameter_type_error(arg_num, Z_EXPECTED_ARRAY_OR_NULL, arg ## arg_num); \
 		goto flf_clean; \
+	} \
+	if (dest_ht) { \
+		GC_TRY_ADDREF(dest_ht); \
 	}
 #define Z_FLF_PARAM_ARRAY_HT_OR_STR(arg_num, dest_ht, dest_str, str_tmp) \
 	if (Z_TYPE_P(arg ## arg_num) == IS_STRING) { \
 		dest_ht = NULL; \
+		ZVAL_COPY(&str_tmp, arg ## arg_num); \
+		arg ## arg_num = &str_tmp; \
 		dest_str = Z_STR_P(arg ## arg_num); \
 	} else if (EXPECTED(Z_TYPE_P(arg ## arg_num) == IS_ARRAY)) { \
 		dest_ht = Z_ARRVAL_P(arg ## arg_num); \
 		dest_str = NULL; \
+		GC_TRY_ADDREF(dest_ht); \
 	} else { \
 		dest_ht = NULL; \
 		ZVAL_COPY(&str_tmp, arg ## arg_num); \
@@ -97,6 +104,16 @@
 	}
 #define Z_FLF_PARAM_FREE_STR(arg_num, tmp) \
 	if (UNEXPECTED(arg ## arg_num == &tmp)) { \
+		zval_ptr_dtor(arg ## arg_num); \
+	}
+#define Z_FLF_PARAM_FREE_ARRAY(dest_ht) \
+	if (dest_ht) { \
+		GC_TRY_DTOR_NO_REF(dest_ht); \
+	}
+#define Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(arg_num, dest_ht, str_tmp) \
+	if (dest_ht) { \
+		GC_TRY_DTOR_NO_REF(dest_ht); \
+	} else if (arg ## arg_num == &str_tmp) { \
 		zval_ptr_dtor(arg ## arg_num); \
 	}
 

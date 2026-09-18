@@ -1579,7 +1579,7 @@ PHP_FUNCTION(array_walk_recursive)
  * 0 = return boolean
  * 1 = return key
  */
-static zend_always_inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
+static zend_always_inline void _php_search_array(zval *return_value, zval *value, HashTable *array, bool strict, int behavior) /* {{{ */
 {
 	zval *entry; /* pointer to array entry */
 	zend_ulong num_idx;
@@ -1587,7 +1587,7 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 
 	if (strict) {
 		if (Z_TYPE_P(value) == IS_LONG) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL(array, num_idx, str_idx, entry) {
 				ZVAL_DEREF(entry);
 				if (Z_TYPE_P(entry) == IS_LONG && Z_LVAL_P(entry) == Z_LVAL_P(value)) {
 					if (behavior == 0) {
@@ -1602,7 +1602,7 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL(array, num_idx, str_idx, entry) {
 				ZVAL_DEREF(entry);
 				if (fast_is_identical_function(value, entry)) {
 					if (behavior == 0) {
@@ -1619,7 +1619,7 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 		}
 	} else {
 		if (Z_TYPE_P(value) == IS_LONG) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL(array, num_idx, str_idx, entry) {
 				if (fast_equal_check_long(value, entry)) {
 					if (behavior == 0) {
 						RETURN_TRUE;
@@ -1633,7 +1633,7 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else if (Z_TYPE_P(value) == IS_STRING) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL(array, num_idx, str_idx, entry) {
 				if (fast_equal_check_string(value, entry)) {
 					if (behavior == 0) {
 						RETURN_TRUE;
@@ -1647,7 +1647,7 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL(array, num_idx, str_idx, entry) {
 				if (fast_equal_check_function(value, entry)) {
 					if (behavior == 0) {
 						RETURN_TRUE;
@@ -1673,13 +1673,13 @@ static zend_always_inline void _php_search_array(zval *return_value, zval *value
  */
 static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
-	zval *value,		/* value to check for */
-		 *array;		/* array to check in */
+	zval *value;		/* value to check for */
+	HashTable *array;	/* array to check in */
 	bool strict = 0;	/* strict comparison or not */
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ZVAL(value)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(array)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(strict)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1696,7 +1696,8 @@ PHP_FUNCTION(in_array)
 
 ZEND_FRAMELESS_FUNCTION(in_array, 2)
 {
-	zval *value, *array;
+	zval *value;
+	HashTable *array = NULL;
 
 	Z_FLF_PARAM_ZVAL(1, value);
 	Z_FLF_PARAM_ARRAY(2, array);
@@ -1704,11 +1705,13 @@ ZEND_FRAMELESS_FUNCTION(in_array, 2)
 	_php_search_array(return_value, value, array, false, 0);
 
 flf_clean:;
+	Z_FLF_PARAM_FREE_ARRAY(array);
 }
 
 ZEND_FRAMELESS_FUNCTION(in_array, 3)
 {
-	zval *value, *array;
+	zval *value;
+	HashTable *array = NULL;
 	bool strict;
 
 	Z_FLF_PARAM_ZVAL(1, value);
@@ -1718,6 +1721,7 @@ ZEND_FRAMELESS_FUNCTION(in_array, 3)
 	_php_search_array(return_value, value, array, strict, 0);
 
 flf_clean:;
+	Z_FLF_PARAM_FREE_ARRAY(array);
 }
 
 /* {{{ Searches the array for a given value and returns the corresponding key if successful */
