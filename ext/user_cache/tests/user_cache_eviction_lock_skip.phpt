@@ -7,7 +7,11 @@ opcache.file_cache_only=0
 user_cache.shm_size=4M
 --FILE--
 <?php
+/* The segment outlives the request (php --repeat): drop the previous run's
+ * entries and count expunges relative to where this run found them. */
+UserCache\Cache::deletePool('lockskip');
 $cache = UserCache\Cache::getPool('lockskip');
+$baseExpunges = UserCache\Cache::getStatus()->getExpungeCount();
 $blob = str_repeat('x', 8192);
 
 for ($i = 0; $i < 476; $i++) {
@@ -29,7 +33,7 @@ for ($i = 0; $i < 600; $i++) {
 var_dump($cache->fetch('k3') !== null);
 var_dump($cache->fetch('k2', 'MISS') === 'MISS');
 var_dump($cache->fetch('k4', 'MISS') === 'MISS');
-var_dump(UserCache\Cache::getStatus()->getExpungeCount() === 0);
+var_dump(UserCache\Cache::getStatus()->getExpungeCount() === $baseExpunges);
 
 var_dump($cache->unlock('k3'));
 ?>
