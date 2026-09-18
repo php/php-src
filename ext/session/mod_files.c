@@ -236,11 +236,6 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 		return FAILURE;
 	}
 
-	/* Truncate file if the amount of new data is smaller than the existing data set. */
-	if (ZSTR_LEN(val) < data->st_size) {
-		php_ignore_value(ftruncate(data->fd, 0));
-	}
-
 #ifdef HAVE_PWRITE
 	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
 #else
@@ -272,6 +267,10 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 			php_error_docref(NULL, E_WARNING, "Write wrote less bytes than requested");
 		}
 		return FAILURE;
+	}
+
+	if (ZSTR_LEN(val) < data->st_size) {
+		php_ignore_value(ftruncate(data->fd, ZSTR_LEN(val)));
 	}
 
 	return SUCCESS;
