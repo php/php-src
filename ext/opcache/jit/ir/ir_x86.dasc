@@ -1923,6 +1923,21 @@ static bool ir_match_has_mem_deps(ir_ctx *ctx, ir_ref ref, ir_ref root)
 	return 0;
 }
 
+/* A naive check if anything that emits code, and so clobbers the flags, is
+ * scheduled between the flags setting instruction and the fusion root */
+static bool ir_match_has_flags_deps(ir_ctx *ctx, ir_ref ref, ir_ref root)
+{
+	ir_ref pos = ctx->prev_ref[root];
+
+	while (pos > ref) {
+		if (ctx->ir_base[pos].op != IR_SNAPSHOT) {
+			return 1;
+		}
+		pos = ctx->prev_ref[pos];
+	}
+	return pos != ref;
+}
+
 static void ir_match_fuse_load(ir_ctx *ctx, ir_ref ref, ir_ref root)
 {
 	if (ir_in_same_block(ctx, ref) &&
@@ -3089,7 +3104,9 @@ store_int:
 						if (IR_IS_CONST_REF(op2_insn->op2)
 						 && !IR_IS_SYM_CONST(ctx->ir_base[op2_insn->op2].op)
 						 && ctx->ir_base[op2_insn->op2].val.i64 == 0) {
-							if (op2_insn->op1 == insn->op2 - 1) { /* previous instruction */
+							if (op2_insn->op1 == insn->op2 - 1 /* previous instruction */
+							 && ir_in_same_block(ctx, op2_insn->op1)
+							 && !ir_match_has_flags_deps(ctx, insn->op2, ref)) {
 								ir_insn *op1_insn = &ctx->ir_base[op2_insn->op1];
 
 								if ((op1_insn->op == IR_OR || op1_insn->op == IR_AND || op1_insn->op == IR_XOR) ||

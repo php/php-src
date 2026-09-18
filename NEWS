@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
 
+- Opcache:
+  . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a
+    loop-invariant addition). (Ilia Alshanetsky)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
