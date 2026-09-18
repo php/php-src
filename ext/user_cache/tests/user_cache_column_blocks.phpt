@@ -67,7 +67,8 @@ $fetched = $cache->fetch('payload');
 
 var_dump($fetched['packed'] === $packed, array_is_list($fetched['packed']));
 var_dump($fetched['holes'] === $holes, array_keys($fetched['holes']));
-var_dump($fetched['sparse'] === $sparse, array_keys($fetched['sparse']));
+/* PHP_INT_MAX differs per platform, so compare the keys rather than print them. */
+var_dump($fetched['sparse'] === $sparse, array_keys($fetched['sparse']) === [5, -3, PHP_INT_MAX, 0]);
 var_dump($fetched['strings'] === $strings);
 var_dump($fetched['mixed'] === $mixed, array_keys($fetched['mixed']));
 var_dump($fetched['plain'] == $plain, $fetched['plain']->p39 === $tag, $fetched['plain']->p17);
@@ -116,16 +117,7 @@ array(3) {
   int(3)
 }
 bool(true)
-array(4) {
-  [0]=>
-  int(5)
-  [1]=>
-  int(-3)
-  [2]=>
-  int(9223372036854775807)
-  [3]=>
-  int(0)
-}
+bool(true)
 bool(true)
 bool(true)
 array(6) {
