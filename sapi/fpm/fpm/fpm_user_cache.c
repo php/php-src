@@ -14,7 +14,6 @@
 
 #include "fpm_config.h"
 
-#include "fpm.h"
 #include "fpm_worker_pool.h"
 #include "fpm_user_cache.h"
 #include "zlog.h"
@@ -25,16 +24,17 @@ int fpm_user_cache_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 
-	php_user_cache_opt_in();
+	php_ucache_opt_in();
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
-		wp->user_cache_partition = php_user_cache_partition_create(wp->config->name);
-		if (wp->user_cache_partition == NULL) {
+		wp->ucache_partition = php_ucache_partition_create(wp->config->name);
+		if (wp->ucache_partition == NULL) {
 			zlog(ZLOG_ERROR, "[pool %s] unable to allocate UserCache partition", wp->config->name);
+
 			return -1;
 		}
 
-		if (!php_user_cache_partition_startup_storage(wp->user_cache_partition)) {
+		if (!php_ucache_partition_startup_storage(wp->ucache_partition)) {
 			zlog(ZLOG_WARNING, "[pool %s] UserCache partition startup failed; UserCache will be unavailable", wp->config->name);
 		}
 	}

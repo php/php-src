@@ -62,6 +62,12 @@ function run_pinner(UserCache\Cache $cache, string $mode): void {
 	@unlink($ready);
 }
 
+/* Interned key strings outlive their entries until a sweep and the pool's
+ * counter slot is allocated on its first fold: take both before the
+ * baseline so the reclaim checks below compare like with like. */
+seed($cache);
+forget($cache);
+$cache->fetch('warm');
 $baseline = free_memory();
 $status = UserCache\Cache::getStatus();
 $owners0 = $status->getDeadPinOwnersReclaimed();
