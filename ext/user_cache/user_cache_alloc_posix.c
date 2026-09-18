@@ -73,8 +73,8 @@ static bool ucache_alloc_posix_create_segments(size_t requested_size, php_ucache
 	 * result as a signed int: its -1 error return in a size_t would pass
 	 * the > 0 guard and index far outside the array (see the equivalent
 	 * upstream fix in ext/opcache/shared_alloc_posix.c, GH-22429). */
-	const size_t entries = sizeof(shared_segments_indexes) / sizeof(shared_segments_indexes[0]);
 	size_t shared_segment_lg_index = 0, shared_segments_indexes[3] = {0};
+	const size_t entries = sizeof(shared_segments_indexes) / sizeof(shared_segments_indexes[0]);
 	int i, shared_segment_sizes;
 
 	shared_segment_sizes = getpagesizes(shared_segments_indexes, entries);
