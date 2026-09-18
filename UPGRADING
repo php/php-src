@@ -99,6 +99,9 @@ PHP 8.6 UPGRADE NOTES
     intl.use_exceptions enabled, these failures throw IntlException. Previously,
     these paths emitted a warning and compared the value as an empty string.
 
+- MBstring:
+  . Unicode data tables have been updated to Unicode 18.0
+
 - PCNTL:
   . pcntl_alarm() now raises a ValueError if the seconds argument is
     lower than zero or greater than the platform's UINT_MAX.
