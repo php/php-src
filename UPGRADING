@@ -1096,6 +1096,7 @@ PHP 8.6 UPGRADE NOTES
     their returned arrays.
   . Improved performance of transliterator_list_ids() and
     resourcebundle_locales() by pre-allocating their returned arrays.
+  . Optimized callback invocation in IntlChar::enumCharTypes().
 
 - Mbstring:
   . Improved performance of mb_str_pad().
