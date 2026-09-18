@@ -6415,12 +6415,13 @@ static void ucache_ensure_shared_graph_ref_index(void)
 	}
 }
 
-/* Include the context to disambiguate equal offsets in different pools. */
+/* The context disambiguates pools. Mixed because same-sized payloads sit a
+ * power-of-two stride apart and zend_hash buckets by the low bits. */
 static zend_ulong ucache_shared_graph_ref_index_key(
 		const php_ucache_ctx_t *ctx,
 		uint32_t payload_offset)
 {
-	return ((zend_ulong) (uintptr_t) ctx) ^ (zend_ulong) payload_offset;
+	return (zend_ulong) ucache_shared_graph_content_hash_mix((uint64_t) (uintptr_t) ctx, (uint64_t) payload_offset);
 }
 
 /* Returns true only when this drops the last reference of an already-retired
