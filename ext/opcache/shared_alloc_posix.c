@@ -50,16 +50,16 @@ static int create_segments(size_t requested_size, zend_shared_segment_posix ***s
 	 * archs are on interest here.
 	 */
 	size_t shared_segment_lg_index = 0;
-	size_t shared_segments_indexes[3] = {0};
-	const size_t entries = sizeof(shared_segments_indexes) / sizeof(shared_segments_indexes[0]);
+	size_t shared_segment_sindexes[3] = {0};
+	const size_t entries = sizeof(shared_segment_sindexes) / sizeof(shared_segment_sindexes[0]);
 	int i, shared_segment_sizes;
 
-	shared_segment_sizes = getpagesizes(shared_segments_indexes, entries);
+	shared_segment_sizes = getpagesizes(shared_segment_sindexes, entries);
 
 	if (shared_segment_sizes > 0) {
 		for (i = shared_segment_sizes - 1; i >= 0; i --) {
-			if (shared_segments_indexes[i] != 0 &&
-			    !(requested_size % shared_segments_indexes[i])) {
+			if (shared_segment_sindexes[i] != 0 &&
+			    !(requested_size % shared_segment_sindexes[i])) {
 				shared_segment_lg_index = i;
 				break;
 			}
