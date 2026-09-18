@@ -19,12 +19,15 @@ if (!file_exists('/proc/meminfo')) {
     die('skip Cannot check free RAM from /proc/meminfo on this platform');
 }
 
+/* The client allocates a ~4 GiB response buffer (a 2 GiB chunk plus the
+ * oversized realloc for the second chunk), so require real headroom to avoid
+ * swapping, which is what makes this test time out on constrained machines. */
 $free_ram = 0;
 if ($f = fopen("/proc/meminfo","r")) {
     while (!feof($f)) {
         if (preg_match('/MemFree[^\d]*(\d+)/i', fgets($f), $m)) {
             $free_ram = max($free_ram, $m[1]/1024/1024);
-            if ($free_ram > 4) {
+            if ($free_ram > 6) {
                 $enough_free_ram = true;
             }
         }
@@ -32,7 +35,7 @@ if ($f = fopen("/proc/meminfo","r")) {
 }
 
 if (empty($enough_free_ram)) {
-    die(sprintf("skip need +4G free RAM, but only %01.2f available", $free_ram));
+    die(sprintf("skip need +6G free RAM, but only %01.2f available", $free_ram));
 }
 --FILE--
 <?php
@@ -52,32 +55,86 @@ function chunk_body($body, $n)
 
 $wsdl = file_get_contents(__DIR__.'/../server030.wsdl');
 
-$soap = <<<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testuri.org" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:getItemsResponse><getItemsReturn SOAP-ENC:arrayType="ns1:Item[10]" xsi:type="ns1:ItemArray"><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text0</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text1</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text2</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text3</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text4</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text5</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text6</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text7</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text8</text></item><item xsi:type="ns1:Item"><text xsi:type="xsd:string">text9</text></item></getItemsReturn></ns1:getItemsResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
-EOF;
-
-$responses = [
-    "data://text/plain,HTTP/1.1 200 OK\r\n".
+$headers =
+    "HTTP/1.1 200 OK\r\n".
     "Content-Type: text/xml;charset=utf-8\r\n".
     "Transfer-Encoding: \t  chunked\t \r\n".
     "Connection: close\r\n".
-    "\r\n".
-    chunk_body($wsdl, 64),
-    "data://text/plain,HTTP/1.1 200 OK\r\n".
-    "Content-Type: text/xml;charset=utf-8\r\n".
-    "Transfer-Encoding: \t  chunked\t \r\n".
-    "Connection: close\r\n".
-    "\r\n".
-    /* The second chunk only needs its size header: the reallocation for it
-     * happens before its body is read, so the overflow triggers on the first
-     * read into the undersized buffer. */
-    sprintf("%08x\r\n", 0x7fffffff).str_repeat('x', 0x7fffffff)."\r\n" .
-    sprintf("%08x\r\n", 0x7fffffff)."xxxx",
-];
+    "\r\n";
 
+/* Custom minimal server. Unlike the generic http_server() helper it streams the
+ * 2 GiB filler in bounded blocks instead of materialising it (and a data://
+ * copy of it) in memory. That keeps the sender's footprint tiny: only the
+ * client needs to hold the large buffers, so total memory and run time stay far
+ * lower and the test no longer thrashes on slower machines. */
+function heavy_soap_server($wsdl, $headers)
+{
+    $server = stream_socket_server('tcp://localhost:0', $errno, $errstr);
+    if (!$server) {
+        return false;
+    }
+    $uri = 'http://' . stream_socket_get_name($server, false);
 
-['pid' => $pid, 'uri' => $uri] = http_server($responses);
+    $pid = pcntl_fork();
+    if ($pid == -1) {
+        die('could not fork');
+    } else if ($pid) {
+        return ['pid' => $pid, 'uri' => $uri];
+    }
+
+    /* Child: streaming 2 GiB can exceed the 60s alarm the helper would use, so
+     * match the run-tests per-test timeout instead. */
+    pcntl_alarm(120);
+
+    $drain = static function ($sock) {
+        stream_set_blocking($sock, false);
+        while (!feof($sock)) {
+            $r = [$sock]; $w = $e = null;
+            if (!stream_select($r, $w, $e, 1)) continue;
+            $line = stream_get_line($sock, 8192, "\r\n");
+            if ($line === '') break;
+        }
+        stream_set_blocking($sock, true);
+    };
+
+    /* Response 1: the WSDL, chunked. */
+    $sock = stream_socket_accept($server, 60);
+    if ($sock) {
+        $drain($sock);
+        fwrite($sock, $headers . chunk_body($wsdl, 64));
+        fclose($sock);
+    }
+
+    /* Response 2: an oversized chunk. Only the size header of the second chunk
+     * is needed: the reallocation for it happens before its body is read, so on
+     * the unfixed code the overflow triggers on the first read into the
+     * undersized buffer. The 2 GiB first-chunk body is streamed in 8 MiB blocks
+     * rather than built as one string. */
+    $sock = stream_socket_accept($server, 60);
+    if ($sock) {
+        $drain($sock);
+        fwrite($sock, $headers);
+        fwrite($sock, sprintf("%08x\r\n", 0x7fffffff));
+
+        $remaining = 0x7fffffff;
+        $block = str_repeat('x', 1 << 23); // 8 MiB
+        $block_len = strlen($block);
+        while ($remaining > 0) {
+            $n = $remaining < $block_len ? $remaining : $block_len;
+            fwrite($sock, $n === $block_len ? $block : substr($block, 0, $n));
+            $remaining -= $n;
+        }
+
+        fwrite($sock, "\r\n");
+        fwrite($sock, sprintf("%08x\r\n", 0x7fffffff));
+        fwrite($sock, "xxxx");
+        fclose($sock);
+    }
+
+    exit(0);
+}
+
+['pid' => $pid, 'uri' => $uri] = heavy_soap_server($wsdl, $headers);
 
 $options = [
     'trace' => false,
