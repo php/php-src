@@ -181,6 +181,8 @@ PHP                                                                        NEWS
 - PDO_SQLite:
   . Fixed bug GH-25588 (Use-after-free of a string parameter omitted on a later
     execute() or rebound while fetching). (Ilia Alshanetsky)
+  . Fixed bug GH-23756 (Crash when a callback closes the cursor of or
+    re-executes the statement being executed). (Lazizbek Ergashev)
 
 - PGSQL:
   . Fixed bug GH-25772 (pg_fetch_object() crashes with JIT when the constructor
