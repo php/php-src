@@ -2763,7 +2763,7 @@ PHPAPI void php_reserve_tsrm_memory(void)
 		TSRM_ALIGNED_SIZE(sizeof(php_core_globals)) +
 		TSRM_ALIGNED_SIZE(sizeof(sapi_globals_struct)) +
 		TSRM_ALIGNED_SIZE(sizeof(zend_accel_globals)) +
-		TSRM_ALIGNED_SIZE(php_user_cache_globals_size()) +
+		TSRM_ALIGNED_SIZE(php_ucache_globals_size()) +
 #ifdef HAVE_JIT
 		TSRM_ALIGNED_SIZE(sizeof(zend_jit_globals)) +
 #endif
@@ -2783,7 +2783,7 @@ PHPAPI bool php_tsrm_startup_ex(int expected_threads)
 	(void)ts_resource(0);
 	/* Allocated here rather than from the user_cache module wiring: SAPI
 	 * activate hooks consume these globals before the module MINIT runs. */
-	php_user_cache_globals_startup();
+	php_ucache_globals_startup();
 	return ret;
 }
 

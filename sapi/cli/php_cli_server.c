@@ -509,7 +509,7 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module_ptr) /* {{{ *
 		return FAILURE;
 	}
 
-	php_user_cache_opt_in();
+	php_ucache_opt_in();
 
 	return SUCCESS;
 } /* }}} */
@@ -2645,7 +2645,7 @@ static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr,
 	}
 	server->server_sock = server_sock;
 
-	if (!php_user_cache_startup_default_context_storage()) {
+	if (!php_ucache_startup_default_context_storage()) {
 		php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "UserCache startup failed; UserCache will be unavailable");
 	}
 

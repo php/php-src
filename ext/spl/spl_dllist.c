@@ -17,7 +17,7 @@
 #endif
 
 #include "php.h"
-#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
+
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_hash.h"
@@ -28,6 +28,8 @@
 #include "spl_dllist_arginfo.h"
 #include "spl_exceptions.h"
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
+
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 static zend_object_handlers spl_handler_SplDoublyLinkedList;
 PHPAPI zend_class_entry  *spl_ce_SplDoublyLinkedList;
@@ -1121,67 +1123,24 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 } /* }}} */
 
-/* Strict restore for the machine-written user-cache state: validates the flags
- * value and requires an empty list. Returns false on malformed data. */
-static bool spl_dllist_object_user_cache_unserialize_state(zval *object, HashTable *data)
-{
-	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
-	zend_long flags;
-	zval *flags_zv, *storage_zv, *elem;
-
-	flags_zv = zend_hash_index_find(data, 0);
-	storage_zv = zend_hash_index_find(data, 1);
-	if (!flags_zv ||
-		!storage_zv ||
-		Z_TYPE_P(flags_zv) != IS_LONG ||
-		Z_TYPE_P(storage_zv) != IS_ARRAY
-	) {
-		return false;
-	}
-
-	flags = Z_LVAL_P(flags_zv);
-	if ((flags & ~(SPL_DLLIST_IT_MASK | SPL_DLLIST_IT_FIX)) != 0) {
-		return false;
-	}
-
-	if (intern->llist->count != 0) {
-		return false;
-	}
-
-	intern->flags = (int) flags;
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
-		spl_ptr_llist_push(intern->llist, elem);
-	} ZEND_HASH_FOREACH_END();
-
-	return !EG(exception);
-}
-
 static bool spl_dllist_object_copy_user_cache_state(
 		void *ctx,
 		zend_object *new_obj,
 		zend_object *old_obj,
-		php_user_cache_safe_direct_clone_value_func_t clone_value)
+		php_ucache_safe_direct_clone_value_func_t clone_value)
 {
 	spl_dllist_object *old_intern, *new_intern;
 	spl_ptr_llist_element *current;
 	zval cloned_elem;
 
-	if (clone_value == NULL) {
-		return false;
-	}
-
 	old_intern = spl_dllist_from_obj(old_obj);
 	new_intern = spl_dllist_from_obj(new_obj);
-	if (new_intern->llist->count != 0) {
-		return false;
-	}
+
+	ZEND_ASSERT(new_intern->llist->count == 0);
 
 	new_intern->flags = old_intern->flags;
 	current = old_intern->llist->head;
 	while (current) {
-		ZVAL_UNDEF(&cloned_elem);
-
 		if (!clone_value(ctx, &cloned_elem, &current->data)) {
 			return false;
 		}
@@ -1199,14 +1158,10 @@ static bool spl_dllist_object_copy_user_cache_state(
 static bool spl_dllist_object_user_cache_state_has_unstorable(
 		void *ctx,
 		const zval *object,
-		php_user_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+		php_ucache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
 {
 	spl_dllist_object *intern;
 	spl_ptr_llist_element *current;
-
-	if (value_has_unstorable == NULL) {
-		return false;
-	}
 
 	intern = Z_SPLDLLIST_P((zval *) object);
 	current = intern->llist->head;
@@ -1228,16 +1183,41 @@ static bool spl_dllist_object_serialize_user_cache_state(zval *state, const zval
 	return true;
 }
 
+/* Strict restore for the machine-written user-cache state: validates the flags
+ * value. Returns false on malformed data. */
 static bool spl_dllist_object_unserialize_user_cache_state(zval *object, zval *state)
 {
-	if (Z_TYPE_P(state) != IS_ARRAY) {
+	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
+	zend_long flags;
+	zval *flags_zv, *storage_zv, *elem;
+
+	flags_zv = zend_hash_index_find(Z_ARRVAL_P(state), 0);
+	storage_zv = zend_hash_index_find(Z_ARRVAL_P(state), 1);
+	if (!flags_zv ||
+		!storage_zv ||
+		Z_TYPE_P(flags_zv) != IS_LONG ||
+		Z_TYPE_P(storage_zv) != IS_ARRAY
+	) {
 		return false;
 	}
 
-	return spl_dllist_object_user_cache_unserialize_state(object, Z_ARRVAL_P(state));
+	flags = Z_LVAL_P(flags_zv);
+	if ((flags & ~(SPL_DLLIST_IT_MASK | SPL_DLLIST_IT_FIX)) != 0) {
+		return false;
+	}
+
+	ZEND_ASSERT(intern->llist->count == 0);
+
+	intern->flags = (int) flags;
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
+		spl_ptr_llist_push(intern->llist, elem);
+	} ZEND_HASH_FOREACH_END();
+
+	return !EG(exception);
 }
 
-static const php_user_cache_safe_direct_handlers spl_dllist_user_cache_handlers = {
+static const php_ucache_safe_direct_handlers_t spl_dllist_user_cache_handlers = {
 	.copy = spl_dllist_object_copy_user_cache_state,
 	.state_has_unstorable = spl_dllist_object_user_cache_state_has_unstorable,
 	.state_serialize = spl_dllist_object_serialize_user_cache_state,
@@ -1362,7 +1342,7 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_ce_SplStack->create_object = spl_dllist_object_new;
 	spl_ce_SplStack->get_iterator = spl_dllist_get_iterator;
 
-	php_user_cache_safe_direct_register_class(spl_ce_SplDoublyLinkedList, &spl_dllist_user_cache_handlers);
+	php_ucache_safe_direct_register_class(spl_ce_SplDoublyLinkedList, &spl_dllist_user_cache_handlers);
 
 	return SUCCESS;
 }

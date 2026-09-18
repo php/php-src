@@ -160,6 +160,17 @@ static inline php_random_algo_with_state php_random_default_engine(void)
 	return raws;
 }
 
+static inline uint64_t php_random_splitmix64(uint64_t *seed)
+{
+	uint64_t r;
+
+	r = (*seed += 0x9e3779b97f4a7c15ULL);
+	r = (r ^ (r >> 30)) * 0xbf58476d1ce4e5b9ULL;
+	r = (r ^ (r >> 27)) * 0x94d049bb133111ebULL;
+
+	return (r ^ (r >> 31));
+}
+
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len);
 PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest);
 

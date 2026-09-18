@@ -9,11 +9,12 @@ user_cache.enable=1
 user_cache.enable_cli=1
 opcache.file_cache_only=0
 opcache.log_verbosity_level=1
-user_cache.shm_size=8192M
+user_cache.shm_size=32768M
+user_cache.entries_hint=1024
 --FILE--
 <?php
 var_dump(UserCache\Cache::getStatus()->getConfiguredMemory() > 0);
 ?>
 --EXPECTF--
-Warning: user_cache.shm_size is limited to slightly under 4096M; clamping in Unknown on line 0
+Warning: user_cache.shm_size is limited to slightly under 16384M; clamping in Unknown on line 0
 bool(true)

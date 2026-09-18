@@ -785,7 +785,7 @@ static const char *cgi_user_cache_getenv(const char *name)
 	fcgi_request *request;
 	int name_len;
 
-	if (SG(server_context) != NULL && SG(server_context) != (void *) 1) {
+	if (fcgi_is_fastcgi()) {
 		request = (fcgi_request*) SG(server_context);
 		if (fcgi_has_env(request)) {
 			name_len = (int) strlen(name);
@@ -808,11 +808,11 @@ static void cgi_user_cache_activate_request_partition(void)
 	int boundary_len;
 
 	if (server_name == NULL || server_name[0] == '\0') {
-		php_user_cache_activate_boundary_partition_by_id(
+		php_ucache_activate_boundary_partition_by_id(
 			"cgi-fcgi",
 			NULL,
 			0,
-			PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+			PHP_UCACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
 		);
 
 		return;
@@ -832,11 +832,11 @@ static void cgi_user_cache_activate_request_partition(void)
 		document_root_len + server_name_len;
 	boundary = malloc(boundary_size);
 	if (boundary == NULL) {
-		php_user_cache_activate_boundary_partition_by_id(
+		php_ucache_activate_boundary_partition_by_id(
 			"cgi-fcgi",
 			NULL,
 			0,
-			PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+			PHP_UCACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
 		);
 
 		return;
@@ -858,11 +858,11 @@ static void cgi_user_cache_activate_request_partition(void)
 		server_name
 	);
 	ZEND_ASSERT(boundary_len > 0 && (size_t) boundary_len < boundary_size);
-	php_user_cache_activate_boundary_partition_by_id(
+	php_ucache_activate_boundary_partition_by_id(
 		"cgi-fcgi",
 		boundary,
 		(size_t) boundary_len,
-		PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
+		PHP_UCACHE_REASON_CGI_BOUNDARY_UNAVAILABLE
 	);
 	free(boundary);
 }
@@ -1057,7 +1057,8 @@ static int sapi_cgi_deactivate(void)
 			sapi_cgi_flush(SG(server_context));
 		}
 	}
-	php_user_cache_partition_activate(NULL);
+
+	php_ucache_partition_activate(NULL);
 
 	return SUCCESS;
 }
@@ -1068,7 +1069,7 @@ static int php_cgi_startup(sapi_module_struct *sapi_module_ptr)
 		return FAILURE;
 	}
 
-	php_user_cache_opt_in();
+	php_ucache_opt_in();
 
 	return SUCCESS;
 }

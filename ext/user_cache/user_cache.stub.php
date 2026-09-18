@@ -60,6 +60,12 @@ final readonly class CacheStatus
 	public function getDeadPinOwnersReclaimed(): int {}
 
 	public function getDeadPinsStripped(): int {}
+
+	public function getHitCount(): int {}
+
+	public function getMissCount(): int {}
+
+	public function getInternedKeyCount(): int {}
 }
 
 /**
@@ -78,6 +84,10 @@ final readonly class CachePoolStatus
 	public function getEntryKeys(): array {}
 
 	public function getUsedMemory(): int {}
+
+	public function getHitCount(): int {}
+
+	public function getMissCount(): int {}
 }
 
 /** @not-serializable */

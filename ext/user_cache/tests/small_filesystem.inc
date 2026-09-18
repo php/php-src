@@ -26,7 +26,7 @@ function user_cache_small_filesystem(): ?array
         }
 
         /* Leave headroom over the free space; stay well below the INI clamp
-         * (slightly under 4096M) so the size is applied as given. */
+         * (slightly under 16384M) so the size is applied as given. */
         $sizeMiB = (int) ceil($free / (1024 * 1024)) + 64;
         if ($sizeMiB > 3584) {
             continue;

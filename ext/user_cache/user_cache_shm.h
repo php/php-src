@@ -19,95 +19,102 @@
 
 #if defined(__APPLE__) && defined(__MACH__) /* Darwin */
 # ifdef HAVE_SHM_MMAP_POSIX
-#  define PHP_USER_CACHE_USE_SHM_OPEN  1
+#  define PHP_UCACHE_USE_SHM_OPEN  1
 # endif
 # ifdef HAVE_SHM_MMAP_ANON
-#  define PHP_USER_CACHE_USE_MMAP      1
+#  define PHP_UCACHE_USE_MMAP      1
 # endif
 #elif defined(__linux__) || defined(_AIX)
 # ifdef HAVE_SHM_MMAP_POSIX
-#  define PHP_USER_CACHE_USE_SHM_OPEN  1
+#  define PHP_UCACHE_USE_SHM_OPEN  1
 # endif
 # ifdef HAVE_SHM_IPC
-#  define PHP_USER_CACHE_USE_SHM       1
+#  define PHP_UCACHE_USE_SHM       1
 # endif
 # ifdef HAVE_SHM_MMAP_ANON
-#  define PHP_USER_CACHE_USE_MMAP      1
+#  define PHP_UCACHE_USE_MMAP      1
 # endif
 #elif defined(__sparc) || defined(__sun)
 # ifdef HAVE_SHM_MMAP_POSIX
-#  define PHP_USER_CACHE_USE_SHM_OPEN  1
+#  define PHP_UCACHE_USE_SHM_OPEN  1
 # endif
 # ifdef HAVE_SHM_IPC
-#  define PHP_USER_CACHE_USE_SHM       1
+#  define PHP_UCACHE_USE_SHM       1
 # endif
 # if defined(__i386)
 #  ifdef HAVE_SHM_MMAP_ANON
-#   define PHP_USER_CACHE_USE_MMAP     1
+#   define PHP_UCACHE_USE_MMAP     1
 #  endif
 # endif
 #else
 # ifdef HAVE_SHM_MMAP_POSIX
-#  define PHP_USER_CACHE_USE_SHM_OPEN  1
+#  define PHP_UCACHE_USE_SHM_OPEN  1
 # endif
 # ifdef HAVE_SHM_MMAP_ANON
-#  define PHP_USER_CACHE_USE_MMAP      1
+#  define PHP_UCACHE_USE_MMAP      1
 # endif
 # ifdef HAVE_SHM_IPC
-#  define PHP_USER_CACHE_USE_SHM       1
+#  define PHP_UCACHE_USE_SHM       1
 # endif
-#endif
-
-#define PHP_USER_CACHE_ALLOC_FAILURE  0
-#define PHP_USER_CACHE_ALLOC_SUCCESS  1
+#endif /* defined(__APPLE__) && defined(__MACH__) */
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
-# define PHP_USER_CACHE_PLATFORM_ALIGNMENT (alignof(php_user_cache_align_test) < 8 ? 8 : alignof(php_user_cache_align_test))
+# define PHP_UCACHE_PLATFORM_ALIGNMENT (alignof(php_ucache_align_test_t) < 8 ? 8 : alignof(php_ucache_align_test_t))
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
-# define PHP_USER_CACHE_PLATFORM_ALIGNMENT (_Alignof(php_user_cache_align_test) < 8 ? 8 : _Alignof(php_user_cache_align_test))
+# define PHP_UCACHE_PLATFORM_ALIGNMENT (_Alignof(php_ucache_align_test_t) < 8 ? 8 : _Alignof(php_ucache_align_test_t))
 #elif ZEND_GCC_VERSION >= 2000 || defined(__clang__)
-# define PHP_USER_CACHE_PLATFORM_ALIGNMENT (__alignof__(php_user_cache_align_test) < 8 ? 8 : __alignof__(php_user_cache_align_test))
+# define PHP_UCACHE_PLATFORM_ALIGNMENT (__alignof__(php_ucache_align_test_t) < 8 ? 8 : __alignof__(php_ucache_align_test_t))
 #else
-# define PHP_USER_CACHE_PLATFORM_ALIGNMENT (sizeof(php_user_cache_align_test))
+# define PHP_UCACHE_PLATFORM_ALIGNMENT (sizeof(php_ucache_align_test_t))
 #endif
 
-#define PHP_USER_CACHE_ALIGNED_SIZE(size) \
-	ZEND_MM_ALIGNED_SIZE_EX(size, PHP_USER_CACHE_PLATFORM_ALIGNMENT)
+#define PHP_UCACHE_ALIGNED_SIZE(size) \
+	ZEND_MM_ALIGNED_SIZE_EX(size, PHP_UCACHE_PLATFORM_ALIGNMENT)
 
-/* Part of the shared-memory layout; bump PHP_USER_CACHE_VERSION if changed. */
+/* Segment offsets and block sizes are 32-bit counts of this many bytes, so a
+ * segment can span 16 GiB without widening any stored field. */
+#define PHP_UCACHE_SHM_UNIT 4
+#define PHP_UCACHE_SHM_UNIT_ALIGNED_SIZE(size) \
+	ZEND_MM_ALIGNED_SIZE_EX(size, PHP_UCACHE_SHM_UNIT)
+
+/* Part of the shared-memory layout; bump PHP_UCACHE_VERSION if changed. */
 typedef union {
 	void *ptr;
 	double dbl;
 	zend_long lng;
-} php_user_cache_align_test;
+} php_ucache_align_test_t;
 
 typedef struct {
 	size_t size;
 	void *p;
-} php_user_cache_shm_segment;
+} php_ucache_shm_segment_t;
 
-typedef int (*php_user_cache_create_segments_t)(size_t requested_size, php_user_cache_shm_segment ***shared_segments, int *shared_segment_count, const char **error_in);
-typedef int (*php_user_cache_detach_segment_t)(php_user_cache_shm_segment *shared_segment);
+typedef bool (*php_ucache_create_segments_t)(
+		size_t requested_size,
+		php_ucache_shm_segment_t ***shared_segments,
+		uint32_t *shared_segment_count,
+		const char **error_in);
+typedef void (*php_ucache_detach_segment_t)(php_ucache_shm_segment_t *shared_segment);
 
 typedef struct {
-	php_user_cache_create_segments_t create_segments;
-	php_user_cache_detach_segment_t detach_segment;
-} php_user_cache_shm_handlers;
+	php_ucache_create_segments_t create_segments;
+	php_ucache_detach_segment_t detach_segment;
+} php_ucache_shm_handlers_t;
 
 typedef struct {
 	const char *name;
-	const php_user_cache_shm_handlers *handler;
-} php_user_cache_shm_handler_entry;
+	const php_ucache_shm_handlers_t *handler;
+} php_ucache_shm_handler_entry_t;
 
-#ifdef PHP_USER_CACHE_USE_SHM
-extern const php_user_cache_shm_handlers php_user_cache_alloc_shm_handlers;
+#ifdef PHP_UCACHE_USE_SHM
+extern const php_ucache_shm_handlers_t php_ucache_alloc_shm_handlers;
 #endif
-#ifdef PHP_USER_CACHE_USE_SHM_OPEN
-extern const php_user_cache_shm_handlers php_user_cache_alloc_posix_handlers;
+#ifdef PHP_UCACHE_USE_SHM_OPEN
+extern const php_ucache_shm_handlers_t php_ucache_alloc_posix_handlers;
 #endif
 
 #ifndef ZEND_WIN32
-bool php_user_cache_preallocate_fd(int fd, size_t size);
+bool php_ucache_preallocate_fd(int fd, size_t size);
 #endif
 
 #endif /* PHP_USER_CACHE_SHM_H */

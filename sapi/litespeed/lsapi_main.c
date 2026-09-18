@@ -178,7 +178,7 @@ static int sapi_lsapi_deactivate(void)
         SG(request_info).path_translated = NULL;
     }
 
-    php_user_cache_partition_activate(NULL);
+    php_ucache_partition_activate(NULL);
 
     return SUCCESS;
 }
@@ -524,10 +524,10 @@ static const char *lsapi_user_cache_get_boundary_value(const char *name)
 
 static void lsapi_user_cache_activate_request_partition(void)
 {
-    php_user_cache_activate_boundary_partition(
+    php_ucache_activate_boundary_partition(
         "litespeed",
         lsapi_user_cache_get_boundary_value,
-        PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE
+        PHP_UCACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE
     );
 }
 
@@ -1540,7 +1540,7 @@ int main( int argc, char * argv[] )
         return FAILURE;
     }
 
-    php_user_cache_opt_in();
+    php_ucache_opt_in();
 
     if ( climode ) {
         return cli_main(argc, argv);

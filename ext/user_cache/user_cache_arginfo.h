@@ -1,5 +1,5 @@
 /* This is a generated file, edit user_cache.stub.php instead.
- * Stub hash: 8eec428bec19b14b6512b0c2ea607eba5945fac7
+ * Stub hash: 542aa0a48af905b8e70306dac42d8b6eca5b9b87
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -41,6 +41,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_UserCache_CacheStatus_getDeadPinsStripped arginfo_class_UserCache_CacheStatus_getConfiguredMemory
 
+#define arginfo_class_UserCache_CacheStatus_getHitCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
+#define arginfo_class_UserCache_CacheStatus_getMissCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
+#define arginfo_class_UserCache_CacheStatus_getInternedKeyCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
 #define arginfo_class_UserCache_CachePoolStatus___construct arginfo_class_UserCache_CacheStatus___construct
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UserCache_CachePoolStatus_getPoolName, 0, 0, IS_STRING, 0)
@@ -52,6 +58,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UserCache_CachePoolStatus_
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_UserCache_CachePoolStatus_getUsedMemory arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
+#define arginfo_class_UserCache_CachePoolStatus_getHitCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
+
+#define arginfo_class_UserCache_CachePoolStatus_getMissCount arginfo_class_UserCache_CacheStatus_getConfiguredMemory
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UserCache_Cache_hasPool, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, pool, IS_STRING, 0)
@@ -147,11 +157,16 @@ ZEND_METHOD(UserCache_CacheStatus, getGraphPinSlotsInUse);
 ZEND_METHOD(UserCache_CacheStatus, getGraphPinnedReferences);
 ZEND_METHOD(UserCache_CacheStatus, getDeadPinOwnersReclaimed);
 ZEND_METHOD(UserCache_CacheStatus, getDeadPinsStripped);
+ZEND_METHOD(UserCache_CacheStatus, getHitCount);
+ZEND_METHOD(UserCache_CacheStatus, getMissCount);
+ZEND_METHOD(UserCache_CacheStatus, getInternedKeyCount);
 ZEND_METHOD(UserCache_CachePoolStatus, __construct);
 ZEND_METHOD(UserCache_CachePoolStatus, getPoolName);
 ZEND_METHOD(UserCache_CachePoolStatus, getEntryCount);
 ZEND_METHOD(UserCache_CachePoolStatus, getEntryKeys);
 ZEND_METHOD(UserCache_CachePoolStatus, getUsedMemory);
+ZEND_METHOD(UserCache_CachePoolStatus, getHitCount);
+ZEND_METHOD(UserCache_CachePoolStatus, getMissCount);
 ZEND_METHOD(UserCache_Cache, hasPool);
 ZEND_METHOD(UserCache_Cache, getPool);
 ZEND_METHOD(UserCache_Cache, deletePool);
@@ -192,6 +207,9 @@ static const zend_function_entry class_UserCache_CacheStatus_methods[] = {
 	ZEND_ME(UserCache_CacheStatus, getGraphPinnedReferences, arginfo_class_UserCache_CacheStatus_getGraphPinnedReferences, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getDeadPinOwnersReclaimed, arginfo_class_UserCache_CacheStatus_getDeadPinOwnersReclaimed, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CacheStatus, getDeadPinsStripped, arginfo_class_UserCache_CacheStatus_getDeadPinsStripped, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CacheStatus, getHitCount, arginfo_class_UserCache_CacheStatus_getHitCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CacheStatus, getMissCount, arginfo_class_UserCache_CacheStatus_getMissCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CacheStatus, getInternedKeyCount, arginfo_class_UserCache_CacheStatus_getInternedKeyCount, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -201,6 +219,8 @@ static const zend_function_entry class_UserCache_CachePoolStatus_methods[] = {
 	ZEND_ME(UserCache_CachePoolStatus, getEntryCount, arginfo_class_UserCache_CachePoolStatus_getEntryCount, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CachePoolStatus, getEntryKeys, arginfo_class_UserCache_CachePoolStatus_getEntryKeys, ZEND_ACC_PUBLIC)
 	ZEND_ME(UserCache_CachePoolStatus, getUsedMemory, arginfo_class_UserCache_CachePoolStatus_getUsedMemory, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CachePoolStatus, getHitCount, arginfo_class_UserCache_CachePoolStatus_getHitCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(UserCache_CachePoolStatus, getMissCount, arginfo_class_UserCache_CachePoolStatus_getMissCount, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

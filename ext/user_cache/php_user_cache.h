@@ -21,108 +21,99 @@
  * handlers) clustered in .text.hot: the repeated-fetch working set spans
  * several translation units and is sensitive to I-cache placement. */
 #if (defined(__GNUC__) && ZEND_GCC_VERSION >= 4003) || __has_attribute(hot)
-# define PHP_USER_CACHE_HOT __attribute__((hot))
+# define PHP_UCACHE_HOT __attribute__((hot))
 #else
-# define PHP_USER_CACHE_HOT
+# define PHP_UCACHE_HOT
 #endif
 
 /* Public API for extensions, SAPIs and embedders. */
-/* Keep in sync with user_cache_availability_enum_case(). */
+/* Keep in sync with ucache_availability_enum_case(). */
 typedef enum {
-	PHP_USER_CACHE_REASON_NONE = 0,
-	PHP_USER_CACHE_REASON_DISABLED_BY_INI,
-	PHP_USER_CACHE_REASON_SHM_INIT_FAILED,
-	PHP_USER_CACHE_REASON_SAPI_NOT_ENABLED,
-	PHP_USER_CACHE_REASON_BACKEND_NOT_INITIALIZED_BEFORE_WORKER,
-	PHP_USER_CACHE_REASON_BACKEND_INITIALIZED_AFTER_WORKER,
-	PHP_USER_CACHE_REASON_CGI_BOUNDARY_UNAVAILABLE,
-	PHP_USER_CACHE_REASON_APACHE_BOUNDARY_UNAVAILABLE,
-	PHP_USER_CACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE,
-	PHP_USER_CACHE_REASON_REQUEST_SHUTDOWN
-} php_user_cache_reason;
+	PHP_UCACHE_REASON_NONE = 0,
+	PHP_UCACHE_REASON_DISABLED_BY_INI,
+	PHP_UCACHE_REASON_SHM_INIT_FAILED,
+	PHP_UCACHE_REASON_SAPI_NOT_ENABLED,
+	PHP_UCACHE_REASON_BACKEND_NOT_INITIALIZED_BEFORE_WORKER,
+	PHP_UCACHE_REASON_BACKEND_INITIALIZED_AFTER_WORKER,
+	PHP_UCACHE_REASON_CGI_BOUNDARY_UNAVAILABLE,
+	PHP_UCACHE_REASON_APACHE_BOUNDARY_UNAVAILABLE,
+	PHP_UCACHE_REASON_LSAPI_BOUNDARY_UNAVAILABLE,
+	PHP_UCACHE_REASON_REQUEST_SHUTDOWN
+} php_ucache_reason_t;
 
 /* Handlers for copying native object state without invoking user code.
- * All handlers take the destination before the source; callers pass a NULL
- * clone_value callback to probe copy capability, so copy handlers must
- * return false without side effects in that case. A handler that fails may
- * leave its destination partially built: the caller owns and releases it. */
-typedef bool (*php_user_cache_safe_direct_clone_value_func_t)(
-	void *context,
-	zval *dst,
-	zval *src
-);
+ * All handlers take the destination before the source; copy() and
+ * state_unserialize() always receive a freshly created, empty destination
+ * object. A clone_value callback always writes *dst (IS_UNDEF on failure).
+ * A state handler that fails may leave its destination partially built: the
+ * caller owns and releases it. */
+typedef bool (*php_ucache_safe_direct_clone_value_func_t)(
+		void *ctx,
+		zval *dst,
+		zval *src);
 
-typedef bool (*php_user_cache_safe_direct_value_has_unstorable_func_t)(
-	void *context,
-	const zval *value
-);
+typedef bool (*php_ucache_safe_direct_value_has_unstorable_func_t)(
+		void *ctx,
+		const zval *value);
 
-typedef bool (*php_user_cache_safe_direct_state_copy_func_t)(
-	void *context,
-	zend_object *new_object,
-	zend_object *old_object,
-	php_user_cache_safe_direct_clone_value_func_t clone_value
-);
+typedef bool (*php_ucache_safe_direct_state_copy_func_t)(
+		void *ctx,
+		zend_object *new_object,
+		zend_object *old_object,
+		php_ucache_safe_direct_clone_value_func_t clone_value);
 
-typedef bool (*php_user_cache_safe_direct_state_has_unstorable_func_t)(
-	void *context,
-	const zval *value,
-	php_user_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable
-);
+typedef bool (*php_ucache_safe_direct_state_has_unstorable_func_t)(
+		void *ctx,
+		const zval *value,
+		php_ucache_safe_direct_value_has_unstorable_func_t value_has_unstorable);
 
-typedef bool (*php_user_cache_safe_direct_state_serialize_func_t)(
-	zval *state,
-	const zval *object
-);
+typedef bool (*php_ucache_safe_direct_state_serialize_func_t)(
+		zval *state,
+		const zval *object);
 
-typedef bool (*php_user_cache_safe_direct_state_unserialize_func_t)(
-	zval *object,
-	zval *state
-);
+typedef bool (*php_ucache_safe_direct_state_unserialize_func_t)(
+		zval *object,
+		zval *state);
 
 typedef struct {
 	bool prefer_request_local_prototype;
-	php_user_cache_safe_direct_state_copy_func_t copy;
-	php_user_cache_safe_direct_state_has_unstorable_func_t state_has_unstorable;
-	php_user_cache_safe_direct_state_serialize_func_t state_serialize;
-	php_user_cache_safe_direct_state_unserialize_func_t state_unserialize;
-} php_user_cache_safe_direct_handlers;
+	php_ucache_safe_direct_state_copy_func_t copy;
+	php_ucache_safe_direct_state_has_unstorable_func_t state_has_unstorable;
+	php_ucache_safe_direct_state_serialize_func_t state_serialize;
+	php_ucache_safe_direct_state_unserialize_func_t state_unserialize;
+} php_ucache_safe_direct_handlers_t;
 
-typedef struct _php_user_cache_partition php_user_cache_partition;
+typedef struct _php_ucache_partition php_ucache_partition_t;
 
 BEGIN_EXTERN_C()
 
 /* The handler structure is copied and may be temporary. */
-ZEND_API void php_user_cache_safe_direct_register_class(
-	zend_class_entry *ce,
-	const php_user_cache_safe_direct_handlers *handlers
-);
+ZEND_API void php_ucache_safe_direct_register_class(
+		zend_class_entry *ce,
+		const php_ucache_safe_direct_handlers_t *handlers);
 /* SAPI and embedder integration. */
-ZEND_API void php_user_cache_opt_in(void);
-ZEND_API bool php_user_cache_startup_default_context_storage(void);
-ZEND_API php_user_cache_partition *php_user_cache_partition_create(const char *name);
-ZEND_API bool php_user_cache_partition_startup_storage(php_user_cache_partition *partition);
-ZEND_API void php_user_cache_partition_activate(php_user_cache_partition *partition);
+ZEND_API void php_ucache_opt_in(void);
+ZEND_API bool php_ucache_startup_default_context_storage(void);
+ZEND_API php_ucache_partition_t *php_ucache_partition_create(const char *name);
+ZEND_API bool php_ucache_partition_startup_storage(php_ucache_partition_t *partition);
+ZEND_API void php_ucache_partition_activate(php_ucache_partition_t *partition);
 /* Activate a request partition keyed by a caller-composed boundary id; the
  * id does not need to be NUL-terminated. */
-ZEND_API void php_user_cache_activate_boundary_partition_by_id(
-	const char *sapi_prefix,
-	const char *boundary,
-	size_t boundary_len,
-	php_user_cache_reason failure_reason
-);
+ZEND_API void php_ucache_activate_boundary_partition_by_id(
+		const char *sapi_prefix,
+		const char *boundary,
+		size_t boundary_len,
+		php_ucache_reason_t failure_reason);
 /* Activate a request partition using DOCUMENT_ROOT or SERVER_NAME. */
-ZEND_API void php_user_cache_activate_boundary_partition(
-	const char *sapi_prefix,
-	const char *(*get_env)(const char *name),
-	php_user_cache_reason failure_reason
-);
-ZEND_API void php_user_cache_boundary_partitions_shutdown(void);
+ZEND_API void php_ucache_activate_boundary_partition(
+		const char *sapi_prefix,
+		const char *(*get_env)(const char *name),
+		php_ucache_reason_t failure_reason);
 
 #ifdef ZTS
 /* Called by php_tsrm_startup_ex() before module startup. */
-size_t php_user_cache_globals_size(void);
-void php_user_cache_globals_startup(void);
+size_t php_ucache_globals_size(void);
+void php_ucache_globals_startup(void);
 #endif
 
 extern zend_module_entry user_cache_module_entry;

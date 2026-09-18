@@ -18,7 +18,7 @@
 
 #include "php.h"
 #include "ext/standard/php_var.h"
-#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
+
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
@@ -28,6 +28,8 @@
 #include "spl_array_arginfo.h"
 #include "spl_exceptions.h"
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
+
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 /* Defined later in the file */
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
@@ -1445,7 +1447,7 @@ static void spl_array_object_serialize_state(zval *object, zval *return_value, b
 
 /* Restores the state array built above. Throws and returns false on malformed
  * data; the caller decides how to propagate the failure. */
-static PHP_USER_CACHE_HOT bool spl_array_object_unserialize_state(zval *object, HashTable *data, bool with_members)
+static PHP_UCACHE_HOT bool spl_array_object_unserialize_state(zval *object, HashTable *data, bool with_members)
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	zend_long flags;
@@ -1549,15 +1551,11 @@ static bool spl_array_object_copy_user_cache_state(
 		void *ctx,
 		zend_object *new_obj,
 		zend_object *old_obj,
-		php_user_cache_safe_direct_clone_value_func_t clone_value)
+		php_ucache_safe_direct_clone_value_func_t clone_value)
 {
 	spl_array_object *old_intern, *new_intern;
 	zval new_zv, cloned_storage_zv;
 	bool result;
-
-	if (clone_value == NULL) {
-		return false;
-	}
 
 	result = false;
 	old_intern = spl_array_from_obj(old_obj);
@@ -1577,22 +1575,20 @@ static bool spl_array_object_copy_user_cache_state(
 
 		result = true;
 
-		goto cleanup;
+		goto bailout;
 	}
 
 	if (!clone_value(ctx, &cloned_storage_zv, &old_intern->array) ||
 		(Z_TYPE(cloned_storage_zv) != IS_OBJECT && Z_TYPE(cloned_storage_zv) != IS_ARRAY)
 	) {
-		goto cleanup;
+		goto bailout;
 	}
 
 	spl_array_set_array(&new_zv, new_intern, &cloned_storage_zv, old_intern->ar_flags & SPL_ARRAY_CLONE_MASK, true);
 	result = !EG(exception);
 
-cleanup:
-	if (Z_TYPE(cloned_storage_zv) != IS_UNDEF) {
-		zval_ptr_dtor(&cloned_storage_zv);
-	}
+bailout:
+	zval_ptr_dtor(&cloned_storage_zv);
 
 	return result;
 }
@@ -1600,15 +1596,10 @@ cleanup:
 static bool spl_array_object_user_cache_state_has_unstorable(
 		void *ctx,
 		const zval *object,
-		php_user_cache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+		php_ucache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
 {
-	spl_array_object *intern;
+	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	if (value_has_unstorable == NULL) {
-		return false;
-	}
-
-	intern = Z_SPLARRAY_P(object);
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		return false;
 	}
@@ -1618,34 +1609,19 @@ static bool spl_array_object_user_cache_state_has_unstorable(
 
 static bool spl_array_object_serialize_user_cache_state(zval *state, const zval *object)
 {
-	ZVAL_UNDEF(state);
-
 	spl_array_object_serialize_state((zval *) object, state, /* with_members */ false);
-
-	if (EG(exception) || Z_TYPE_P(state) != IS_ARRAY) {
-		if (Z_TYPE_P(state) != IS_UNDEF) {
-			zval_ptr_dtor(state);
-		}
-
-		ZVAL_UNDEF(state);
-
-		return false;
-	}
 
 	return true;
 }
 
-static PHP_USER_CACHE_HOT bool spl_array_object_unserialize_user_cache_state(zval *object, zval *state)
+static PHP_UCACHE_HOT bool spl_array_object_unserialize_user_cache_state(zval *object, zval *state)
 {
-	if (Z_TYPE_P(state) != IS_ARRAY) {
-		return false;
-	}
-
 	return spl_array_object_unserialize_state(object, Z_ARRVAL_P(state), /* with_members */ false)
-		&& !EG(exception);
+		&& !EG(exception)
+	;
 }
 
-static const php_user_cache_safe_direct_handlers spl_array_user_cache_handlers = {
+static const php_ucache_safe_direct_handlers_t spl_array_user_cache_handlers = {
 	.copy = spl_array_object_copy_user_cache_state,
 	.state_has_unstorable = spl_array_object_user_cache_state_has_unstorable,
 	.state_serialize = spl_array_object_serialize_user_cache_state,
@@ -2029,8 +2005,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
 
-	php_user_cache_safe_direct_register_class(spl_ce_ArrayObject, &spl_array_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(spl_ce_ArrayIterator, &spl_array_user_cache_handlers);
+	php_ucache_safe_direct_register_class(spl_ce_ArrayObject, &spl_array_user_cache_handlers);
+	php_ucache_safe_direct_register_class(spl_ce_ArrayIterator, &spl_array_user_cache_handlers);
 
 	return SUCCESS;
 }

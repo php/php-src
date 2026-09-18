@@ -16,36 +16,37 @@
 
 #include "Zend/zend_closures.h"
 #include "Zend/zend_enum.h"
-#include "Zend/zend_interfaces.h"
+
+#include "ext/standard/php_var.h"
 
 /* Position-independent tagged stream using native byte order. */
-#define PHP_USER_CACHE_SERDES_TAG_NULL				1
-#define PHP_USER_CACHE_SERDES_TAG_FALSE				2
-#define PHP_USER_CACHE_SERDES_TAG_TRUE				3
-#define PHP_USER_CACHE_SERDES_TAG_LONG				4
-#define PHP_USER_CACHE_SERDES_TAG_DOUBLE			5
-#define PHP_USER_CACHE_SERDES_TAG_STRING			6
-#define PHP_USER_CACHE_SERDES_TAG_EMPTY_ARRAY		7
-#define PHP_USER_CACHE_SERDES_TAG_PACKED_ARRAY		8
-#define PHP_USER_CACHE_SERDES_TAG_HASHED_ARRAY		9
-#define PHP_USER_CACHE_SERDES_TAG_OBJECT			10
-#define PHP_USER_CACHE_SERDES_TAG_SERIALIZED_OBJECT	11
-#define PHP_USER_CACHE_SERDES_TAG_CUSTOM_OBJECT		12
-#define PHP_USER_CACHE_SERDES_TAG_ENUM				13
-#define PHP_USER_CACHE_SERDES_TAG_REFERENCE			14
-#define PHP_USER_CACHE_SERDES_TAG_BACKREF			15
+#define PHP_UCACHE_SERDES_TAG_NULL				1
+#define PHP_UCACHE_SERDES_TAG_FALSE				2
+#define PHP_UCACHE_SERDES_TAG_TRUE				3
+#define PHP_UCACHE_SERDES_TAG_LONG				4
+#define PHP_UCACHE_SERDES_TAG_DOUBLE			5
+#define PHP_UCACHE_SERDES_TAG_STRING			6
+#define PHP_UCACHE_SERDES_TAG_EMPTY_ARRAY		7
+#define PHP_UCACHE_SERDES_TAG_PACKED_ARRAY		8
+#define PHP_UCACHE_SERDES_TAG_HASHED_ARRAY		9
+#define PHP_UCACHE_SERDES_TAG_OBJECT			10
+#define PHP_UCACHE_SERDES_TAG_SERIALIZED_OBJECT	11
+#define PHP_UCACHE_SERDES_TAG_CUSTOM_OBJECT		12
+#define PHP_UCACHE_SERDES_TAG_ENUM				13
+#define PHP_UCACHE_SERDES_TAG_REFERENCE			14
+#define PHP_UCACHE_SERDES_TAG_BACKREF			15
 
-#define PHP_USER_CACHE_SERDES_KEY_LONG		0
-#define PHP_USER_CACHE_SERDES_KEY_STRING	1
+#define PHP_UCACHE_SERDES_KEY_LONG		0
+#define PHP_UCACHE_SERDES_KEY_STRING	1
 
-#define PHP_USER_CACHE_SERDES_PROPERTY_INDEX_NONE	0
+#define PHP_UCACHE_SERDES_PROPERTY_INDEX_NONE	0
 
-#define PHP_USER_CACHE_SERDES_STRING_RAW	0
-#define PHP_USER_CACHE_SERDES_STRING_INLINE	1
-#define PHP_USER_CACHE_SERDES_STRING_REF	2
+#define PHP_UCACHE_SERDES_STRING_RAW	0
+#define PHP_UCACHE_SERDES_STRING_INLINE	1
+#define PHP_UCACHE_SERDES_STRING_REF	2
 
-#define PHP_USER_CACHE_SERDES_INLINE_IDS		8
-#define PHP_USER_CACHE_SERDES_INLINE_STRINGS	32
+#define PHP_UCACHE_SERDES_INLINE_IDS		8
+#define PHP_UCACHE_SERDES_INLINE_STRINGS	32
 
 typedef struct {
 	smart_str buf;
@@ -57,7 +58,7 @@ typedef struct {
 	HashTable pins;
 	uint32_t string_count;
 	const char *failure_message;
-} php_user_cache_serdes_encoder;
+} php_ucache_serdes_encoder_t;
 
 typedef struct {
 	const uint8_t *data;
@@ -69,76 +70,75 @@ typedef struct {
 	zend_string **strings;
 	uint32_t string_count;
 	uint32_t string_capacity;
-	zval inline_ids[PHP_USER_CACHE_SERDES_INLINE_IDS];
-	zend_string *inline_strings[PHP_USER_CACHE_SERDES_INLINE_STRINGS];
-} php_user_cache_serdes_decoder;
+	zval inline_ids[PHP_UCACHE_SERDES_INLINE_IDS];
+	zend_string *inline_strings[PHP_UCACHE_SERDES_INLINE_STRINGS];
+} php_ucache_serdes_decoder_t;
 
-static bool user_cache_serdes_encode_value(
-	php_user_cache_serdes_encoder *enc,
-	zval *value
-);
+static bool ucache_serdes_encode_value(
+		php_ucache_serdes_encoder_t *enc,
+		zval *value);
 
-static bool user_cache_serdes_decode_value(
-	php_user_cache_serdes_decoder *dec,
-	zval *dst
-);
+static bool ucache_serdes_decode_value(
+		php_ucache_serdes_decoder_t *dec,
+		zval *dst);
 
-static bool user_cache_serdes_decoder_register_string(
-	php_user_cache_serdes_decoder *dec,
-	zend_string *str
-);
+static bool ucache_serdes_decoder_register_string(
+		php_ucache_serdes_decoder_t *dec,
+		zend_string *str);
 
 /* Fixed-width values are self-aligned; the padding is part of the wire
  * format. */
-static zend_always_inline void user_cache_serdes_put_pad(smart_str *buf, size_t align)
+static zend_always_inline void ucache_serdes_put_pad(smart_str *buf, size_t align)
 {
-	size_t len = smart_str_get_len(buf), pad = (align - (len & (align - 1))) & (align - 1);
+	size_t len = smart_str_get_len(buf), pad = ZEND_MM_ALIGNED_SIZE_EX(len, align) - len;
 
 	if (pad != 0) {
 		memset(smart_str_extend(buf, pad), 0, pad);
 	}
 }
 
-static zend_always_inline void user_cache_serdes_put_u8(smart_str *buf, uint8_t value)
+static zend_always_inline void ucache_serdes_put_u8(smart_str *buf, uint8_t value)
 {
 	smart_str_appendc(buf, (char) value);
 }
 
-static zend_always_inline void user_cache_serdes_put_fixed(smart_str *buf, const void *value, size_t size)
+static zend_always_inline void ucache_serdes_put_fixed(smart_str *buf, const void *value, size_t size)
 {
-	user_cache_serdes_put_pad(buf, size);
+	ucache_serdes_put_pad(buf, size);
+
 	smart_str_appendl(buf, (const char *) value, size);
 }
 
-static zend_always_inline void user_cache_serdes_put_u32(smart_str *buf, uint32_t value)
+static zend_always_inline void ucache_serdes_put_u32(smart_str *buf, uint32_t value)
 {
-	user_cache_serdes_put_fixed(buf, &value, sizeof(value));
+	ucache_serdes_put_fixed(buf, &value, sizeof(value));
 }
 
-static zend_always_inline void user_cache_serdes_put_u64(smart_str *buf, uint64_t value)
+static zend_always_inline void ucache_serdes_put_u64(smart_str *buf, uint64_t value)
 {
-	user_cache_serdes_put_fixed(buf, &value, sizeof(value));
+	ucache_serdes_put_fixed(buf, &value, sizeof(value));
 }
 
-static zend_always_inline void user_cache_serdes_put_long(smart_str *buf, zend_long value)
+static zend_always_inline void ucache_serdes_put_long(smart_str *buf, zend_long value)
 {
-	user_cache_serdes_put_fixed(buf, &value, sizeof(value));
+	ucache_serdes_put_fixed(buf, &value, sizeof(value));
 }
 
-static zend_always_inline void user_cache_serdes_put_double(smart_str *buf, double value)
+static zend_always_inline void ucache_serdes_put_double(smart_str *buf, double value)
 {
-	user_cache_serdes_put_fixed(buf, &value, sizeof(value));
+	ucache_serdes_put_fixed(buf, &value, sizeof(value));
 }
 
-static zend_always_inline size_t user_cache_serdes_reserve_u32(smart_str *buf)
+static zend_always_inline size_t ucache_serdes_reserve_u32(smart_str *buf)
 {
-	user_cache_serdes_put_pad(buf, sizeof(uint32_t));
+	ucache_serdes_put_pad(buf, sizeof(uint32_t));
+
 	memset(smart_str_extend(buf, sizeof(uint32_t)), 0, sizeof(uint32_t));
 
 	return smart_str_get_len(buf) - sizeof(uint32_t);
 }
 
-static zend_always_inline void user_cache_serdes_patch_u32(
+static zend_always_inline void ucache_serdes_patch_u32(
 		smart_str *buf,
 		size_t pos,
 		uint32_t value)
@@ -151,8 +151,8 @@ static zend_always_inline void user_cache_serdes_patch_u32(
 /* Back-ref ids are assigned in traversal order and must match the decoder's
  * registration order; ids are stored biased by one so an empty slot stays
  * distinguishable from id 0. */
-static zend_always_inline bool user_cache_serdes_encode_backref_or_register(
-		php_user_cache_serdes_encoder *enc,
+static zend_always_inline bool ucache_serdes_encode_backref_or_register(
+		php_ucache_serdes_encoder_t *enc,
 		const void *container,
 		zval *container_zv,
 		bool *is_backref)
@@ -165,8 +165,8 @@ static zend_always_inline bool user_cache_serdes_encode_backref_or_register(
 	if (Z_TYPE_P(slot) == IS_PTR) {
 		*is_backref = true;
 
-		user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_BACKREF);
-		user_cache_serdes_put_u32(&enc->buf, (uint32_t) ((uintptr_t) Z_PTR_P(slot) - 1));
+		ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_BACKREF);
+		ucache_serdes_put_u32(&enc->buf, (uint32_t) ((uintptr_t) Z_PTR_P(slot) - 1));
 
 		return true;
 	}
@@ -190,11 +190,11 @@ static zend_always_inline bool user_cache_serdes_encode_backref_or_register(
 	return true;
 }
 
-static zend_always_inline bool user_cache_serdes_skip_pad(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_skip_pad(
+		php_ucache_serdes_decoder_t *dec,
 		size_t align)
 {
-	size_t pad = (align - (dec->pos & (align - 1))) & (align - 1);
+	size_t pad = ZEND_MM_ALIGNED_SIZE_EX(dec->pos, align) - dec->pos;
 
 	if (pad > dec->len - dec->pos) {
 		return false;
@@ -205,8 +205,8 @@ static zend_always_inline bool user_cache_serdes_skip_pad(
 	return true;
 }
 
-static zend_always_inline bool user_cache_serdes_get_u8(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_get_u8(
+		php_ucache_serdes_decoder_t *dec,
 		uint8_t *value)
 {
 	if (dec->pos >= dec->len) {
@@ -218,12 +218,12 @@ static zend_always_inline bool user_cache_serdes_get_u8(
 	return true;
 }
 
-static zend_always_inline bool user_cache_serdes_get_fixed(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_get_fixed(
+		php_ucache_serdes_decoder_t *dec,
 		void *value,
 		size_t size)
 {
-	if (!user_cache_serdes_skip_pad(dec, size) ||
+	if (!ucache_serdes_skip_pad(dec, size) ||
 		size > dec->len - dec->pos
 	) {
 		return false;
@@ -235,36 +235,36 @@ static zend_always_inline bool user_cache_serdes_get_fixed(
 	return true;
 }
 
-static zend_always_inline bool user_cache_serdes_get_u32(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_get_u32(
+		php_ucache_serdes_decoder_t *dec,
 		uint32_t *value)
 {
-	return user_cache_serdes_get_fixed(dec, value, sizeof(*value));
+	return ucache_serdes_get_fixed(dec, value, sizeof(*value));
 }
 
-static zend_always_inline bool user_cache_serdes_get_u64(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_get_u64(
+		php_ucache_serdes_decoder_t *dec,
 		uint64_t *value)
 {
-	return user_cache_serdes_get_fixed(dec, value, sizeof(*value));
+	return ucache_serdes_get_fixed(dec, value, sizeof(*value));
 }
 
-static zend_always_inline bool user_cache_serdes_get_long(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_get_long(
+		php_ucache_serdes_decoder_t *dec,
 		zend_long *value)
 {
-	return user_cache_serdes_get_fixed(dec, value, sizeof(*value));
+	return ucache_serdes_get_fixed(dec, value, sizeof(*value));
 }
 
-static zend_always_inline bool user_cache_serdes_get_double(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_get_double(
+		php_ucache_serdes_decoder_t *dec,
 		double *value)
 {
-	return user_cache_serdes_get_fixed(dec, value, sizeof(*value));
+	return ucache_serdes_get_fixed(dec, value, sizeof(*value));
 }
 
-static zend_always_inline bool user_cache_serdes_get_bytes(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_get_bytes(
+		php_ucache_serdes_decoder_t *dec,
 		size_t len,
 		const uint8_t **bytes)
 {
@@ -278,8 +278,8 @@ static zend_always_inline bool user_cache_serdes_get_bytes(
 	return true;
 }
 
-static zend_always_inline bool user_cache_serdes_get_str(
-		php_user_cache_serdes_decoder *dec,
+static zend_always_inline bool ucache_serdes_get_str(
+		php_ucache_serdes_decoder_t *dec,
 		zend_string **value)
 {
 	const uint8_t *bytes;
@@ -287,12 +287,12 @@ static zend_always_inline bool user_cache_serdes_get_str(
 	uint32_t byte_len, string_id;
 	uint8_t kind;
 
-	if (!user_cache_serdes_get_u8(dec, &kind)) {
+	if (!ucache_serdes_get_u8(dec, &kind)) {
 		return false;
 	}
 
-	if (kind == PHP_USER_CACHE_SERDES_STRING_REF) {
-		if (!user_cache_serdes_get_u32(dec, &string_id) ||
+	if (kind == PHP_UCACHE_SERDES_STRING_REF) {
+		if (!ucache_serdes_get_u32(dec, &string_id) ||
 			string_id >= dec->string_count
 		) {
 			return false;
@@ -303,22 +303,22 @@ static zend_always_inline bool user_cache_serdes_get_str(
 		return true;
 	}
 
-	if ((kind != PHP_USER_CACHE_SERDES_STRING_INLINE &&
-		kind != PHP_USER_CACHE_SERDES_STRING_RAW) ||
-		!user_cache_serdes_get_u32(dec, &byte_len) ||
-		!user_cache_serdes_get_bytes(dec, byte_len, &bytes)
+	if ((kind != PHP_UCACHE_SERDES_STRING_INLINE &&
+		kind != PHP_UCACHE_SERDES_STRING_RAW) ||
+		!ucache_serdes_get_u32(dec, &byte_len) ||
+		!ucache_serdes_get_bytes(dec, byte_len, &bytes)
 	) {
 		return false;
 	}
 
 	str = zend_string_init((const char *) bytes, byte_len, 0);
-	if (kind == PHP_USER_CACHE_SERDES_STRING_RAW) {
+	if (kind == PHP_UCACHE_SERDES_STRING_RAW) {
 		*value = str;
 
 		return true;
 	}
 
-	if (!user_cache_serdes_decoder_register_string(dec, str)) {
+	if (!ucache_serdes_decoder_register_string(dec, str)) {
 		zend_string_release(str);
 
 		return false;
@@ -329,8 +329,8 @@ static zend_always_inline bool user_cache_serdes_get_str(
 	return true;
 }
 
-static bool user_cache_serdes_put_str(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_put_str(
+		php_ucache_serdes_encoder_t *enc,
 		const char *value,
 		size_t len)
 {
@@ -350,8 +350,8 @@ static bool user_cache_serdes_put_str(
 
 			ZVAL_LONG(string_id, (zend_long) id + 1);
 
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_STRING_INLINE);
-			user_cache_serdes_put_u32(&enc->buf, (uint32_t) len);
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_STRING_INLINE);
+			ucache_serdes_put_u32(&enc->buf, (uint32_t) len);
 			if (len != 0) {
 				smart_str_appendl(&enc->buf, value, len);
 			}
@@ -361,8 +361,8 @@ static bool user_cache_serdes_put_str(
 
 		id = (uint32_t) (Z_LVAL_P(string_id) - 1);
 
-		user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_STRING_REF);
-		user_cache_serdes_put_u32(&enc->buf, id);
+		ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_STRING_REF);
+		ucache_serdes_put_u32(&enc->buf, id);
 
 		return true;
 	}
@@ -374,12 +374,10 @@ static bool user_cache_serdes_put_str(
 	}
 
 	ZVAL_LONG(&new_string_id, 0);
-	if (zend_hash_str_add_new(&enc->strings, value, len, &new_string_id) == NULL) {
-		return false;
-	}
+	zend_hash_str_add_new(&enc->strings, value, len, &new_string_id);
 
-	user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_STRING_RAW);
-	user_cache_serdes_put_u32(&enc->buf, (uint32_t) len);
+	ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_STRING_RAW);
+	ucache_serdes_put_u32(&enc->buf, (uint32_t) len);
 	if (len != 0) {
 		smart_str_appendl(&enc->buf, value, len);
 	}
@@ -387,7 +385,7 @@ static bool user_cache_serdes_put_str(
 	return true;
 }
 
-static zend_result user_cache_serdes_try_add_sleep_prop(
+static zend_result ucache_serdes_try_add_sleep_prop(
 		zval *obj_zv,
 		HashTable *props,
 		zend_string *name,
@@ -426,7 +424,7 @@ static zend_result user_cache_serdes_try_add_sleep_prop(
 	return SUCCESS;
 }
 
-static bool user_cache_serdes_get_sleep_props(
+static bool ucache_serdes_get_sleep_props(
 		zval *obj_zv,
 		HashTable *sleep_retval,
 		zval *state)
@@ -452,7 +450,7 @@ static bool user_cache_serdes_get_sleep_props(
 		name = zval_get_tmp_string(name_val, &tmp_name);
 
 		/* Try unmangled, private and protected names in order. */
-		added = user_cache_serdes_try_add_sleep_prop(obj_zv, props, name, name, Z_ARRVAL_P(state));
+		added = ucache_serdes_try_add_sleep_prop(obj_zv, props, name, name, Z_ARRVAL_P(state));
 
 		if (added == FAILURE && !EG(exception)) {
 			candidate = zend_mangle_property_name(
@@ -460,7 +458,7 @@ static bool user_cache_serdes_get_sleep_props(
 				ZSTR_VAL(name), ZSTR_LEN(name), ce->type == ZEND_INTERNAL_CLASS
 			);
 
-			added = user_cache_serdes_try_add_sleep_prop(obj_zv, props, candidate, name, Z_ARRVAL_P(state));
+			added = ucache_serdes_try_add_sleep_prop(obj_zv, props, candidate, name, Z_ARRVAL_P(state));
 
 			zend_string_release(candidate);
 		}
@@ -470,7 +468,7 @@ static bool user_cache_serdes_get_sleep_props(
 				"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type == ZEND_INTERNAL_CLASS
 			);
 
-			added = user_cache_serdes_try_add_sleep_prop(obj_zv, props, candidate, name, Z_ARRVAL_P(state));
+			added = ucache_serdes_try_add_sleep_prop(obj_zv, props, candidate, name, Z_ARRVAL_P(state));
 
 			zend_string_release(candidate);
 		}
@@ -499,26 +497,26 @@ static bool user_cache_serdes_get_sleep_props(
 	return result;
 }
 
-static bool user_cache_serdes_encode_property(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_property(
+		php_ucache_serdes_encoder_t *enc,
 		zend_class_entry *ce,
 		zend_string *name,
 		zval *value)
 {
-	if (!user_cache_serdes_put_str(enc, ZSTR_VAL(name), ZSTR_LEN(name))) {
+	if (!ucache_serdes_put_str(enc, ZSTR_VAL(name), ZSTR_LEN(name))) {
 		return false;
 	}
 
-	user_cache_serdes_put_u32(
+	ucache_serdes_put_u32(
 		&enc->buf,
-		php_user_cache_serdes_declared_property_index_plus_one(ce, name)
+		php_ucache_serdes_declared_property_index_plus_one(ce, name)
 	);
 
-	return user_cache_serdes_encode_value(enc, value);
+	return ucache_serdes_encode_value(enc, value);
 }
 
-static bool user_cache_serdes_encode_property_table(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_property_table(
+		php_ucache_serdes_encoder_t *enc,
 		zend_class_entry *ce,
 		HashTable *props,
 		size_t count_pos)
@@ -528,7 +526,7 @@ static bool user_cache_serdes_encode_property_table(
 	zval *value;
 	uint32_t count = 0;
 	size_t digits_len;
-	char numeric_key_buf[32], *digits;
+	char numeric_key_buf[MAX_LENGTH_OF_LONG + 1], *digits;
 
 	ZEND_HASH_FOREACH_KEY_VAL(props, h, name, value) {
 		if (Z_TYPE_P(value) == IS_INDIRECT) {
@@ -540,20 +538,20 @@ static bool user_cache_serdes_encode_property_table(
 		}
 
 		if (name != NULL) {
-			if (!user_cache_serdes_encode_property(enc, ce, name, value)) {
+			if (!ucache_serdes_encode_property(enc, ce, name, value)) {
 				return false;
 			}
 		} else {
 			digits = zend_print_long_to_buf(numeric_key_buf + sizeof(numeric_key_buf) - 1, (zend_long) h);
 			digits_len = numeric_key_buf + sizeof(numeric_key_buf) - 1 - digits;
 
-			if (!user_cache_serdes_put_str(enc, digits, digits_len)) {
+			if (!ucache_serdes_put_str(enc, digits, digits_len)) {
 				return false;
 			}
 
-			user_cache_serdes_put_u32(&enc->buf, PHP_USER_CACHE_SERDES_PROPERTY_INDEX_NONE);
+			ucache_serdes_put_u32(&enc->buf, PHP_UCACHE_SERDES_PROPERTY_INDEX_NONE);
 
-			if (!user_cache_serdes_encode_value(enc, value)) {
+			if (!ucache_serdes_encode_value(enc, value)) {
 				return false;
 			}
 		}
@@ -561,13 +559,13 @@ static bool user_cache_serdes_encode_property_table(
 		count++;
 	} ZEND_HASH_FOREACH_END();
 
-	user_cache_serdes_patch_u32(&enc->buf, count_pos, count);
+	ucache_serdes_patch_u32(&enc->buf, count_pos, count);
 
 	return true;
 }
 
-static bool user_cache_serdes_encode_serialized_object(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_serialized_object(
+		php_ucache_serdes_encoder_t *enc,
 		zval *value)
 {
 	zend_object *obj = Z_OBJ_P(value);
@@ -576,15 +574,15 @@ static bool user_cache_serdes_encode_serialized_object(
 	zval retval;
 	bool result;
 
-	user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_SERIALIZED_OBJECT);
-	if (!user_cache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
+	ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_SERIALIZED_OBJECT);
+	if (!ucache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
 		return false;
 	}
 
 	ZVAL_UNDEF(&retval);
 
-	result = php_user_cache_serdes_call_magic_serialize(obj, &retval) &&
-		user_cache_serdes_encode_value(enc, &retval)
+	result = php_ucache_serdes_call_magic_serialize(obj, &retval) &&
+		ucache_serdes_encode_value(enc, &retval)
 	;
 
 	zval_ptr_dtor(&retval);
@@ -592,8 +590,8 @@ static bool user_cache_serdes_encode_serialized_object(
 	return result;
 }
 
-static bool user_cache_serdes_encode_custom_object(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_custom_object(
+		php_ucache_serdes_encoder_t *enc,
 		zval *value)
 {
 	zend_class_entry *ce = Z_OBJCE_P(value);
@@ -604,7 +602,7 @@ static bool user_cache_serdes_encode_custom_object(
 	bool result;
 
 	if (ce->serialize == NULL || ce->unserialize == NULL) {
-		enc->failure_message = PHP_USER_CACHE_MSG_OPAQUE_OBJECT_UNSTORABLE;
+		enc->failure_message = PHP_UCACHE_MSG_OPAQUE_OBJECT_UNSTORABLE;
 
 		return false;
 	}
@@ -617,22 +615,22 @@ static bool user_cache_serdes_encode_custom_object(
 		enc->failure_message = "the object could not be serialized for the user cache";
 		result = false;
 
-		goto cleanup;
+		goto bailout;
 	}
 
-	user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_CUSTOM_OBJECT);
-	if (!user_cache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
+	ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_CUSTOM_OBJECT);
+	if (!ucache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
 		result = false;
 
-		goto cleanup;
+		goto bailout;
 	}
 
-	user_cache_serdes_put_u32(&enc->buf, (uint32_t) ser_len);
+	ucache_serdes_put_u32(&enc->buf, (uint32_t) ser_len);
 	if (ser_len != 0) {
 		smart_str_appendl(&enc->buf, (const char *) ser_buf, ser_len);
 	}
 
-cleanup:
+bailout:
 	if (ser_buf != NULL) {
 		efree(ser_buf);
 	}
@@ -640,27 +638,27 @@ cleanup:
 	return result;
 }
 
-static bool user_cache_serdes_put_object_header(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_put_object_header(
+		php_ucache_serdes_encoder_t *enc,
 		zend_string *class_name,
 		bool has_wakeup,
 		size_t *count_pos)
 {
-	user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_OBJECT);
+	ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_OBJECT);
 
-	if (!user_cache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
+	if (!ucache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
 		return false;
 	}
 
-	user_cache_serdes_put_u8(&enc->buf, has_wakeup ? 1 : 0);
+	ucache_serdes_put_u8(&enc->buf, has_wakeup ? 1 : 0);
 
-	*count_pos = user_cache_serdes_reserve_u32(&enc->buf);
+	*count_pos = ucache_serdes_reserve_u32(&enc->buf);
 
 	return true;
 }
 
-static bool user_cache_serdes_encode_sleep_object(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_sleep_object(
+		php_ucache_serdes_encoder_t *enc,
 		zval *value,
 		bool has_wakeup)
 {
@@ -670,14 +668,14 @@ static bool user_cache_serdes_encode_sleep_object(
 	size_t count_pos;
 	bool result;
 
-	if (!user_cache_serdes_put_object_header(enc, class_name, has_wakeup, &count_pos)) {
+	if (!ucache_serdes_put_object_header(enc, class_name, has_wakeup, &count_pos)) {
 		return false;
 	}
 
 	ZVAL_UNDEF(&sleep_state);
 
-	result = php_user_cache_serdes_get_sleep_state(value, &sleep_state, &enc->failure_message) &&
-		user_cache_serdes_encode_property_table(enc, ce, Z_ARRVAL(sleep_state), count_pos)
+	result = php_ucache_serdes_get_sleep_state(value, &sleep_state, &enc->failure_message) &&
+		ucache_serdes_encode_property_table(enc, ce, Z_ARRVAL(sleep_state), count_pos)
 	;
 
 	zval_ptr_dtor(&sleep_state);
@@ -685,8 +683,8 @@ static bool user_cache_serdes_encode_sleep_object(
 	return result;
 }
 
-static bool user_cache_serdes_encode_plain_object(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_plain_object(
+		php_ucache_serdes_encoder_t *enc,
 		zval *value,
 		bool has_wakeup)
 {
@@ -697,31 +695,29 @@ static bool user_cache_serdes_encode_plain_object(
 	bool result;
 
 	if (ce->type != ZEND_USER_CLASS && ce->create_object != NULL && !has_wakeup) {
-		enc->failure_message = PHP_USER_CACHE_MSG_OPAQUE_OBJECT_UNSTORABLE;
+		enc->failure_message = PHP_UCACHE_MSG_OPAQUE_OBJECT_UNSTORABLE;
 
 		return false;
 	}
 
-	if (!user_cache_serdes_put_object_header(enc, class_name, has_wakeup, &count_pos)) {
+	if (!ucache_serdes_put_object_header(enc, class_name, has_wakeup, &count_pos)) {
 		return false;
 	}
 
 	props = zend_get_properties_for(value, ZEND_PROP_PURPOSE_SERIALIZE);
 	if (props == NULL) {
-		user_cache_serdes_patch_u32(&enc->buf, count_pos, 0);
-
 		return true;
 	}
 
-	result = user_cache_serdes_encode_property_table(enc, ce, props, count_pos);
+	result = ucache_serdes_encode_property_table(enc, ce, props, count_pos);
 
 	zend_release_properties(props);
 
 	return result;
 }
 
-static bool user_cache_serdes_encode_object(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_object(
+		php_ucache_serdes_encoder_t *enc,
 		zval *value)
 {
 	zend_object *obj = Z_OBJ_P(value);
@@ -730,26 +726,26 @@ static bool user_cache_serdes_encode_object(
 	bool has_sleep, has_wakeup, is_backref;
 
 	if (ce == zend_ce_closure) {
-		enc->failure_message = PHP_USER_CACHE_MSG_CLOSURE_UNSTORABLE;
+		enc->failure_message = PHP_UCACHE_MSG_CLOSURE_UNSTORABLE;
 
 		return false;
 	}
 
 	if (zend_object_is_lazy(obj)) {
-		enc->failure_message = PHP_USER_CACHE_MSG_LAZY_OBJECT_UNSTORABLE;
+		enc->failure_message = PHP_UCACHE_MSG_LAZY_OBJECT_UNSTORABLE;
 
 		return false;
 	}
 
 	if (ce->ce_flags & ZEND_ACC_ENUM) {
-		user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_ENUM);
+		ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_ENUM);
 
-		if (!user_cache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
+		if (!ucache_serdes_put_str(enc, ZSTR_VAL(class_name), ZSTR_LEN(class_name))) {
 			return false;
 		}
 
 		case_name = Z_STR_P(zend_enum_fetch_case_name(obj));
-		if (!user_cache_serdes_put_str(enc, ZSTR_VAL(case_name), ZSTR_LEN(case_name))) {
+		if (!ucache_serdes_put_str(enc, ZSTR_VAL(case_name), ZSTR_LEN(case_name))) {
 			return false;
 		}
 
@@ -757,12 +753,12 @@ static bool user_cache_serdes_encode_object(
 	}
 
 	if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
-		enc->failure_message = PHP_USER_CACHE_MSG_OPAQUE_OBJECT_UNSTORABLE;
+		enc->failure_message = PHP_UCACHE_MSG_OPAQUE_OBJECT_UNSTORABLE;
 
 		return false;
 	}
 
-	if (!user_cache_serdes_encode_backref_or_register(enc, obj, value, &is_backref)) {
+	if (!ucache_serdes_encode_backref_or_register(enc, obj, value, &is_backref)) {
 		return false;
 	}
 
@@ -771,26 +767,26 @@ static bool user_cache_serdes_encode_object(
 	}
 
 	if (ce->__serialize != NULL && ce->__unserialize != NULL) {
-		return user_cache_serdes_encode_serialized_object(enc, value);
+		return ucache_serdes_encode_serialized_object(enc, value);
 	}
 
 	/* Match native serialization precedence. */
 	if (ce->serialize != NULL || ce->unserialize != NULL) {
-		return user_cache_serdes_encode_custom_object(enc, value);
+		return ucache_serdes_encode_custom_object(enc, value);
 	}
 
-	has_sleep = zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP)) != NULL;
-	has_wakeup = zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP)) != NULL;
+	has_sleep = php_ucache_class_has_sleep(ce);
+	has_wakeup = php_ucache_class_has_wakeup(ce);
 
 	if (has_sleep) {
-		return user_cache_serdes_encode_sleep_object(enc, value, has_wakeup);
+		return ucache_serdes_encode_sleep_object(enc, value, has_wakeup);
 	}
 
-	return user_cache_serdes_encode_plain_object(enc, value, has_wakeup);
+	return ucache_serdes_encode_plain_object(enc, value, has_wakeup);
 }
 
-static bool user_cache_serdes_encode_array(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_array(
+		php_ucache_serdes_encoder_t *enc,
 		zval *value)
 {
 	zend_ulong h;
@@ -800,13 +796,14 @@ static bool user_cache_serdes_encode_array(
 	uint32_t count = zend_hash_num_elements(arr);
 	bool is_backref;
 
-	if (count == 0 && arr->nNextFreeElement == 0) {
-		user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_EMPTY_ARRAY);
+	/* Both decode to a pristine array; the next appended key is 0 either way. */
+	if (count == 0 && (arr->nNextFreeElement == ZEND_LONG_MIN || arr->nNextFreeElement == 0)) {
+		ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_EMPTY_ARRAY);
 
 		return true;
 	}
 
-	if (!user_cache_serdes_encode_backref_or_register(enc, arr, value, &is_backref)) {
+	if (!ucache_serdes_encode_backref_or_register(enc, arr, value, &is_backref)) {
 		return false;
 	}
 
@@ -815,12 +812,12 @@ static bool user_cache_serdes_encode_array(
 	}
 
 	if (HT_IS_PACKED(arr) && arr->nNumUsed == count) {
-		user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_PACKED_ARRAY);
-		user_cache_serdes_put_u64(&enc->buf, (uint64_t) arr->nNextFreeElement);
-		user_cache_serdes_put_u32(&enc->buf, count);
+		ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_PACKED_ARRAY);
+		ucache_serdes_put_u64(&enc->buf, (uint64_t) arr->nNextFreeElement);
+		ucache_serdes_put_u32(&enc->buf, count);
 
 		ZEND_HASH_PACKED_FOREACH_VAL(arr, elem) {
-			if (!user_cache_serdes_encode_value(enc, elem)) {
+			if (!ucache_serdes_encode_value(enc, elem)) {
 				return false;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -828,22 +825,22 @@ static bool user_cache_serdes_encode_array(
 		return true;
 	}
 
-	user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_HASHED_ARRAY);
-	user_cache_serdes_put_u64(&enc->buf, (uint64_t) arr->nNextFreeElement);
-	user_cache_serdes_put_u32(&enc->buf, count);
+	ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_HASHED_ARRAY);
+	ucache_serdes_put_u64(&enc->buf, (uint64_t) arr->nNextFreeElement);
+	ucache_serdes_put_u32(&enc->buf, count);
 
 	ZEND_HASH_FOREACH_KEY_VAL(arr, h, key, elem) {
 		if (key != NULL) {
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_KEY_STRING);
-			if (!user_cache_serdes_put_str(enc, ZSTR_VAL(key), ZSTR_LEN(key))) {
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_KEY_STRING);
+			if (!ucache_serdes_put_str(enc, ZSTR_VAL(key), ZSTR_LEN(key))) {
 				return false;
 			}
 		} else {
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_KEY_LONG);
-			user_cache_serdes_put_u64(&enc->buf, (uint64_t) h);
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_KEY_LONG);
+			ucache_serdes_put_u64(&enc->buf, (uint64_t) h);
 		}
 
-		if (!user_cache_serdes_encode_value(enc, elem)) {
+		if (!ucache_serdes_encode_value(enc, elem)) {
 			return false;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -851,15 +848,15 @@ static bool user_cache_serdes_encode_array(
 	return true;
 }
 
-static bool user_cache_serdes_encode_value(
-		php_user_cache_serdes_encoder *enc,
+static bool ucache_serdes_encode_value(
+		php_ucache_serdes_encoder_t *enc,
 		zval *value)
 {
 	zend_reference *ref;
 	bool is_backref;
 
-	if (php_user_cache_stack_overflowed()) {
-		enc->failure_message = "value is nested too deeply to be stored in the user cache";
+	if (php_ucache_stack_overflowed()) {
+		enc->failure_message = PHP_UCACHE_MSG_NESTED_TOO_DEEP_UNSTORABLE;
 
 		return false;
 	}
@@ -867,42 +864,42 @@ static bool user_cache_serdes_encode_value(
 	switch (Z_TYPE_P(value)) {
 		case IS_UNDEF:
 		case IS_NULL:
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_NULL);
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_NULL);
 
 			return true;
 		case IS_FALSE:
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_FALSE);
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_FALSE);
 
 			return true;
 		case IS_TRUE:
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_TRUE);
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_TRUE);
 
 			return true;
 		case IS_LONG:
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_LONG);
-			user_cache_serdes_put_long(&enc->buf, Z_LVAL_P(value));
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_LONG);
+			ucache_serdes_put_long(&enc->buf, Z_LVAL_P(value));
 
 			return true;
 		case IS_DOUBLE:
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_DOUBLE);
-			user_cache_serdes_put_double(&enc->buf, Z_DVAL_P(value));
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_DOUBLE);
+			ucache_serdes_put_double(&enc->buf, Z_DVAL_P(value));
 
 			return true;
 		case IS_STRING:
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_STRING);
-			if (!user_cache_serdes_put_str(enc, Z_STRVAL_P(value), Z_STRLEN_P(value))) {
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_STRING);
+			if (!ucache_serdes_put_str(enc, Z_STRVAL_P(value), Z_STRLEN_P(value))) {
 				return false;
 			}
 
 			return true;
 		case IS_ARRAY:
-			return user_cache_serdes_encode_array(enc, value);
+			return ucache_serdes_encode_array(enc, value);
 		case IS_OBJECT:
-			return user_cache_serdes_encode_object(enc, value);
+			return ucache_serdes_encode_object(enc, value);
 		case IS_REFERENCE:
 			ref = Z_REF_P(value);
 
-			if (!user_cache_serdes_encode_backref_or_register(enc, ref, value, &is_backref)) {
+			if (!ucache_serdes_encode_backref_or_register(enc, ref, value, &is_backref)) {
 				return false;
 			}
 
@@ -910,11 +907,11 @@ static bool user_cache_serdes_encode_value(
 				return true;
 			}
 
-			user_cache_serdes_put_u8(&enc->buf, PHP_USER_CACHE_SERDES_TAG_REFERENCE);
+			ucache_serdes_put_u8(&enc->buf, PHP_UCACHE_SERDES_TAG_REFERENCE);
 
-			return user_cache_serdes_encode_value(enc, &ref->val);
+			return ucache_serdes_encode_value(enc, &ref->val);
 		case IS_RESOURCE:
-			enc->failure_message = PHP_USER_CACHE_MSG_RESOURCE_UNSTORABLE;
+			enc->failure_message = PHP_UCACHE_MSG_RESOURCE_UNSTORABLE;
 
 			return false;
 		default:
@@ -924,7 +921,7 @@ static bool user_cache_serdes_encode_value(
 	}
 }
 
-static void *user_cache_serdes_registry_reserve(
+static void *ucache_serdes_registry_reserve(
 		void *items,
 		void *inline_items,
 		uint32_t count,
@@ -956,8 +953,8 @@ static void *user_cache_serdes_registry_reserve(
 	return new_items;
 }
 
-static bool user_cache_serdes_decoder_register_string(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decoder_register_string(
+		php_ucache_serdes_decoder_t *dec,
 		zend_string *str)
 {
 	zend_string **strings;
@@ -966,7 +963,7 @@ static bool user_cache_serdes_decoder_register_string(
 		return false;
 	}
 
-	strings = user_cache_serdes_registry_reserve(
+	strings = ucache_serdes_registry_reserve(
 		dec->strings, dec->inline_strings, dec->string_count,
 		&dec->string_capacity, sizeof(zend_string *)
 	);
@@ -981,8 +978,8 @@ static bool user_cache_serdes_decoder_register_string(
 	return true;
 }
 
-static bool user_cache_serdes_decoder_register(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decoder_register(
+		php_ucache_serdes_decoder_t *dec,
 		zval *container)
 {
 	zval *ids;
@@ -991,7 +988,7 @@ static bool user_cache_serdes_decoder_register(
 		return false;
 	}
 
-	ids = user_cache_serdes_registry_reserve(
+	ids = ucache_serdes_registry_reserve(
 		dec->ids, dec->inline_ids, dec->id_count,
 		&dec->id_capacity, sizeof(zval)
 	);
@@ -1006,13 +1003,13 @@ static bool user_cache_serdes_decoder_register(
 	return true;
 }
 
-static zend_class_entry *user_cache_serdes_decode_class(
-		php_user_cache_serdes_decoder *dec)
+static zend_class_entry *ucache_serdes_decode_class(
+		php_ucache_serdes_decoder_t *dec)
 {
 	zend_string *class_name;
 	zend_class_entry *ce;
 
-	if (!user_cache_serdes_get_str(dec, &class_name)) {
+	if (!ucache_serdes_get_str(dec, &class_name)) {
 		return NULL;
 	}
 
@@ -1023,8 +1020,8 @@ static zend_class_entry *user_cache_serdes_decode_class(
 	return ce;
 }
 
-static bool user_cache_serdes_decode_object_properties(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decode_object_properties(
+		php_ucache_serdes_decoder_t *dec,
 		bool call_wakeup,
 		zval *dst)
 {
@@ -1034,34 +1031,32 @@ static bool user_cache_serdes_decode_object_properties(
 	uint32_t count, i, prop_idx_plus_one;
 	bool updated;
 
-	if (!user_cache_serdes_get_u32(dec, &count)) {
+	if (!ucache_serdes_get_u32(dec, &count)) {
 		return false;
 	}
 
 	for (i = 0; i < count; i++) {
-		if (!user_cache_serdes_get_str(dec, &prop_name)) {
+		if (!ucache_serdes_get_str(dec, &prop_name)) {
 			return false;
 		}
 
-		if (!user_cache_serdes_get_u32(dec, &prop_idx_plus_one)) {
+		if (!ucache_serdes_get_u32(dec, &prop_idx_plus_one)) {
 			zend_string_release(prop_name);
 
 			return false;
 		}
 
-		ZVAL_UNDEF(&prop_val);
-
-		if (!user_cache_serdes_decode_value(dec, &prop_val)) {
+		if (!ucache_serdes_decode_value(dec, &prop_val)) {
 			updated = false;
-		} else if (prop_idx_plus_one != PHP_USER_CACHE_SERDES_PROPERTY_INDEX_NONE) {
-			updated = php_user_cache_shared_graph_update_object_property_at(
+		} else if (prop_idx_plus_one != PHP_UCACHE_SERDES_PROPERTY_INDEX_NONE) {
+			updated = php_ucache_shared_graph_update_object_property_at(
 				dst,
 				prop_name,
 				prop_idx_plus_one - 1,
 				&prop_val
 			);
 		} else {
-			updated = php_user_cache_shared_graph_update_object_property(dst, prop_name, &prop_val);
+			updated = php_ucache_shared_graph_update_object_property(dst, prop_name, &prop_val);
 		}
 
 		zval_ptr_dtor(&prop_val);
@@ -1089,20 +1084,20 @@ static bool user_cache_serdes_decode_object_properties(
 	return true;
 }
 
-static bool user_cache_serdes_decode_array(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decode_array(
+		php_ucache_serdes_decoder_t *dec,
 		uint8_t tag,
 		zval *dst)
 {
-	zend_string *key = NULL;
+	zend_string *key;
 	zval elem;
 	uint64_t next_free, key_h = 0;
 	uint32_t count, i;
 	uint8_t key_kind;
 	bool result;
 
-	if (!user_cache_serdes_get_u64(dec, &next_free) ||
-		!user_cache_serdes_get_u32(dec, &count)
+	if (!ucache_serdes_get_u64(dec, &next_free) ||
+		!ucache_serdes_get_u32(dec, &count)
 	) {
 		return false;
 	}
@@ -1116,7 +1111,7 @@ static bool user_cache_serdes_decode_array(
 
 	/* Initialize before registering the array: registration raises its refcount,
 	 * but the first insertion requires a refcount of one. */
-	if (tag == PHP_USER_CACHE_SERDES_TAG_PACKED_ARRAY) {
+	if (tag == PHP_UCACHE_SERDES_TAG_PACKED_ARRAY) {
 		zend_hash_real_init_packed(Z_ARRVAL_P(dst));
 	} else {
 		zend_hash_real_init_mixed(Z_ARRVAL_P(dst));
@@ -1124,8 +1119,9 @@ static bool user_cache_serdes_decode_array(
 
 	HT_ALLOW_COW_VIOLATION(Z_ARRVAL_P(dst));
 
-	if (!user_cache_serdes_decoder_register(dec, dst)) {
+	if (!ucache_serdes_decoder_register(dec, dst)) {
 		zval_ptr_dtor(dst);
+
 		ZVAL_UNDEF(dst);
 
 		return false;
@@ -1133,33 +1129,31 @@ static bool user_cache_serdes_decode_array(
 
 	for (i = 0; i < count; i++) {
 		key = NULL;
-		if (tag == PHP_USER_CACHE_SERDES_TAG_HASHED_ARRAY) {
-			if (!user_cache_serdes_get_u8(dec, &key_kind)) {
-				goto failure;
+		if (tag == PHP_UCACHE_SERDES_TAG_HASHED_ARRAY) {
+			if (!ucache_serdes_get_u8(dec, &key_kind)) {
+				goto bailout;
 			}
 
-			if (key_kind == PHP_USER_CACHE_SERDES_KEY_STRING) {
-				if (!user_cache_serdes_get_str(dec, &key)) {
-					goto failure;
+			if (key_kind == PHP_UCACHE_SERDES_KEY_STRING) {
+				if (!ucache_serdes_get_str(dec, &key)) {
+					goto bailout;
 				}
-			} else if (key_kind == PHP_USER_CACHE_SERDES_KEY_LONG) {
-				if (!user_cache_serdes_get_u64(dec, &key_h)) {
-					goto failure;
+			} else if (key_kind == PHP_UCACHE_SERDES_KEY_LONG) {
+				if (!ucache_serdes_get_u64(dec, &key_h)) {
+					goto bailout;
 				}
 			} else {
-				goto failure;
+				goto bailout;
 			}
 		}
 
-		ZVAL_UNDEF(&elem);
-
-		if (!user_cache_serdes_decode_value(dec, &elem)) {
+		if (!ucache_serdes_decode_value(dec, &elem)) {
 			zval_ptr_dtor(&elem);
 			if (key != NULL) {
 				zend_string_release(key);
 			}
 
-			goto failure;
+			goto bailout;
 		}
 
 		if (key != NULL) {
@@ -1168,7 +1162,7 @@ static bool user_cache_serdes_decode_array(
 			result = zend_hash_add(Z_ARRVAL_P(dst), key, &elem) != NULL;
 
 			zend_string_release(key);
-		} else if (tag == PHP_USER_CACHE_SERDES_TAG_HASHED_ARRAY) {
+		} else if (tag == PHP_UCACHE_SERDES_TAG_HASHED_ARRAY) {
 			result = zend_hash_index_add(Z_ARRVAL_P(dst), (zend_ulong) key_h, &elem) != NULL;
 		} else {
 			result = zend_hash_next_index_insert_new(Z_ARRVAL_P(dst), &elem) != NULL;
@@ -1177,7 +1171,7 @@ static bool user_cache_serdes_decode_array(
 		if (!result) {
 			zval_ptr_dtor(&elem);
 
-			goto failure;
+			goto bailout;
 		}
 	}
 
@@ -1189,15 +1183,15 @@ static bool user_cache_serdes_decode_array(
 			(int64_t) next_free < (int64_t) ZEND_LONG_MIN
 		)
 	) {
-		goto failure;
+		goto bailout;
 	}
 
 	Z_ARRVAL_P(dst)->nNextFreeElement = (zend_long) (int64_t) next_free;
-	PHP_USER_CACHE_HT_DISALLOW_COW_VIOLATION(Z_ARRVAL_P(dst));
+	PHP_UCACHE_HT_DISALLOW_COW_VIOLATION(Z_ARRVAL_P(dst));
 
 	return true;
 
-failure:
+bailout:
 	zval_ptr_dtor(dst);
 
 	ZVAL_UNDEF(dst);
@@ -1205,14 +1199,14 @@ failure:
 	return false;
 }
 
-static bool user_cache_serdes_decode_object(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decode_object(
+		php_ucache_serdes_decoder_t *dec,
 		zval *dst)
 {
 	zend_class_entry *ce;
 	uint8_t call_wakeup;
 
-	ce = user_cache_serdes_decode_class(dec);
+	ce = ucache_serdes_decode_class(dec);
 	if (ce == NULL ||
 		(ce->ce_flags & (ZEND_ACC_NOT_SERIALIZABLE|ZEND_ACC_ENUM)) != 0 ||
 		object_init_ex(dst, ce) != SUCCESS
@@ -1220,9 +1214,9 @@ static bool user_cache_serdes_decode_object(
 		return false;
 	}
 
-	if (!user_cache_serdes_get_u8(dec, &call_wakeup) ||
-		!user_cache_serdes_decoder_register(dec, dst) ||
-		!user_cache_serdes_decode_object_properties(dec, call_wakeup != 0, dst)
+	if (!ucache_serdes_get_u8(dec, &call_wakeup) ||
+		!ucache_serdes_decoder_register(dec, dst) ||
+		!ucache_serdes_decode_object_properties(dec, call_wakeup != 0, dst)
 	) {
 		zval_ptr_dtor(dst);
 
@@ -1234,14 +1228,14 @@ static bool user_cache_serdes_decode_object(
 	return true;
 }
 
-static bool user_cache_serdes_decode_serialized_object(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decode_serialized_object(
+		php_ucache_serdes_decoder_t *dec,
 		zval *dst)
 {
 	zend_class_entry *ce;
 	zval state;
 
-	ce = user_cache_serdes_decode_class(dec);
+	ce = ucache_serdes_decode_class(dec);
 	if (ce == NULL ||
 		ce->__unserialize == NULL ||
 		(ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) != 0 ||
@@ -1250,7 +1244,7 @@ static bool user_cache_serdes_decode_serialized_object(
 		return false;
 	}
 
-	if (!user_cache_serdes_decoder_register(dec, dst)) {
+	if (!ucache_serdes_decoder_register(dec, dst)) {
 		zval_ptr_dtor(dst);
 
 		ZVAL_UNDEF(dst);
@@ -1258,9 +1252,7 @@ static bool user_cache_serdes_decode_serialized_object(
 		return false;
 	}
 
-	ZVAL_UNDEF(&state);
-
-	if (!user_cache_serdes_decode_value(dec, &state) ||
+	if (!ucache_serdes_decode_value(dec, &state) ||
 		Z_TYPE(state) != IS_ARRAY
 	) {
 		zval_ptr_dtor(&state);
@@ -1286,8 +1278,8 @@ static bool user_cache_serdes_decode_serialized_object(
 	return true;
 }
 
-static bool user_cache_serdes_decode_custom_object(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decode_custom_object(
+		php_ucache_serdes_decoder_t *dec,
 		zval *dst)
 {
 	const uint8_t *payload;
@@ -1296,12 +1288,12 @@ static bool user_cache_serdes_decode_custom_object(
 	uint32_t payload_len;
 	bool result;
 
-	ce = user_cache_serdes_decode_class(dec);
+	ce = ucache_serdes_decode_class(dec);
 	if (ce == NULL ||
 		ce->unserialize == NULL ||
 		(ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) != 0 ||
-		!user_cache_serdes_get_u32(dec, &payload_len) ||
-		!user_cache_serdes_get_bytes(dec, payload_len, &payload)
+		!ucache_serdes_get_u32(dec, &payload_len) ||
+		!ucache_serdes_get_bytes(dec, payload_len, &payload)
 	) {
 		return false;
 	}
@@ -1318,7 +1310,7 @@ static bool user_cache_serdes_decode_custom_object(
 		return false;
 	}
 
-	if (!user_cache_serdes_decoder_register(dec, dst)) {
+	if (!ucache_serdes_decoder_register(dec, dst)) {
 		zval_ptr_dtor(dst);
 
 		ZVAL_UNDEF(dst);
@@ -1329,23 +1321,23 @@ static bool user_cache_serdes_decode_custom_object(
 	return true;
 }
 
-static bool user_cache_serdes_decode_enum(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decode_enum(
+		php_ucache_serdes_decoder_t *dec,
 		zval *dst)
 {
 	zend_string *case_name;
 	zend_class_entry *ce;
 	zend_object *case_obj;
 
-	ce = user_cache_serdes_decode_class(dec);
+	ce = ucache_serdes_decode_class(dec);
 	if (ce == NULL ||
 		(ce->ce_flags & ZEND_ACC_ENUM) == 0 ||
-		!user_cache_serdes_get_str(dec, &case_name)
+		!ucache_serdes_get_str(dec, &case_name)
 	) {
 		return false;
 	}
 
-	case_obj = php_user_cache_enum_case_find(ce, case_name);
+	case_obj = php_ucache_enum_case_find(ce, case_name);
 
 	zend_string_release(case_name);
 
@@ -1358,8 +1350,8 @@ static bool user_cache_serdes_decode_enum(
 	return true;
 }
 
-static bool user_cache_serdes_decode_reference(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decode_reference(
+		php_ucache_serdes_decoder_t *dec,
 		zval *dst)
 {
 	zend_reference *ref;
@@ -1369,7 +1361,7 @@ static bool user_cache_serdes_decode_reference(
 	ref = Z_REF_P(dst);
 	ZVAL_NULL(&ref->val);
 
-	if (!user_cache_serdes_decoder_register(dec, dst)) {
+	if (!ucache_serdes_decoder_register(dec, dst)) {
 		zval_ptr_dtor(dst);
 
 		ZVAL_UNDEF(dst);
@@ -1377,9 +1369,7 @@ static bool user_cache_serdes_decode_reference(
 		return false;
 	}
 
-	ZVAL_UNDEF(&val);
-
-	if (!user_cache_serdes_decode_value(dec, &val)) {
+	if (!ucache_serdes_decode_value(dec, &val)) {
 		zval_ptr_dtor(&val);
 		zval_ptr_dtor(dst);
 
@@ -1395,8 +1385,8 @@ static bool user_cache_serdes_decode_reference(
 	return true;
 }
 
-static bool user_cache_serdes_decode_value(
-		php_user_cache_serdes_decoder *dec,
+static bool ucache_serdes_decode_value(
+		php_ucache_serdes_decoder_t *dec,
 		zval *dst)
 {
 	zend_long lval;
@@ -1407,70 +1397,70 @@ static bool user_cache_serdes_decode_value(
 
 	ZVAL_UNDEF(dst);
 
-	if (php_user_cache_stack_overflowed()) {
+	if (php_ucache_stack_overflowed()) {
 		return false;
 	}
 
-	if (!user_cache_serdes_get_u8(dec, &tag)) {
+	if (!ucache_serdes_get_u8(dec, &tag)) {
 		return false;
 	}
 
 	switch (tag) {
-		case PHP_USER_CACHE_SERDES_TAG_NULL:
+		case PHP_UCACHE_SERDES_TAG_NULL:
 			ZVAL_NULL(dst);
 
 			return true;
-		case PHP_USER_CACHE_SERDES_TAG_FALSE:
+		case PHP_UCACHE_SERDES_TAG_FALSE:
 			ZVAL_FALSE(dst);
 
 			return true;
-		case PHP_USER_CACHE_SERDES_TAG_TRUE:
+		case PHP_UCACHE_SERDES_TAG_TRUE:
 			ZVAL_TRUE(dst);
 
 			return true;
-		case PHP_USER_CACHE_SERDES_TAG_LONG:
-			if (!user_cache_serdes_get_long(dec, &lval)) {
+		case PHP_UCACHE_SERDES_TAG_LONG:
+			if (!ucache_serdes_get_long(dec, &lval)) {
 				return false;
 			}
 
 			ZVAL_LONG(dst, lval);
 
 			return true;
-		case PHP_USER_CACHE_SERDES_TAG_DOUBLE:
-			if (!user_cache_serdes_get_double(dec, &dval)) {
+		case PHP_UCACHE_SERDES_TAG_DOUBLE:
+			if (!ucache_serdes_get_double(dec, &dval)) {
 				return false;
 			}
 
 			ZVAL_DOUBLE(dst, dval);
 
 			return true;
-		case PHP_USER_CACHE_SERDES_TAG_STRING:
-			if (!user_cache_serdes_get_str(dec, &str)) {
+		case PHP_UCACHE_SERDES_TAG_STRING:
+			if (!ucache_serdes_get_str(dec, &str)) {
 				return false;
 			}
 
 			ZVAL_STR(dst, str);
 
 			return true;
-		case PHP_USER_CACHE_SERDES_TAG_EMPTY_ARRAY:
+		case PHP_UCACHE_SERDES_TAG_EMPTY_ARRAY:
 			ZVAL_EMPTY_ARRAY(dst);
 
 			return true;
-		case PHP_USER_CACHE_SERDES_TAG_PACKED_ARRAY:
-		case PHP_USER_CACHE_SERDES_TAG_HASHED_ARRAY:
-			return user_cache_serdes_decode_array(dec, tag, dst);
-		case PHP_USER_CACHE_SERDES_TAG_OBJECT:
-			return user_cache_serdes_decode_object(dec, dst);
-		case PHP_USER_CACHE_SERDES_TAG_SERIALIZED_OBJECT:
-			return user_cache_serdes_decode_serialized_object(dec, dst);
-		case PHP_USER_CACHE_SERDES_TAG_CUSTOM_OBJECT:
-			return user_cache_serdes_decode_custom_object(dec, dst);
-		case PHP_USER_CACHE_SERDES_TAG_ENUM:
-			return user_cache_serdes_decode_enum(dec, dst);
-		case PHP_USER_CACHE_SERDES_TAG_REFERENCE:
-			return user_cache_serdes_decode_reference(dec, dst);
-		case PHP_USER_CACHE_SERDES_TAG_BACKREF:
-			if (!user_cache_serdes_get_u32(dec, &backref_id) ||
+		case PHP_UCACHE_SERDES_TAG_PACKED_ARRAY:
+		case PHP_UCACHE_SERDES_TAG_HASHED_ARRAY:
+			return ucache_serdes_decode_array(dec, tag, dst);
+		case PHP_UCACHE_SERDES_TAG_OBJECT:
+			return ucache_serdes_decode_object(dec, dst);
+		case PHP_UCACHE_SERDES_TAG_SERIALIZED_OBJECT:
+			return ucache_serdes_decode_serialized_object(dec, dst);
+		case PHP_UCACHE_SERDES_TAG_CUSTOM_OBJECT:
+			return ucache_serdes_decode_custom_object(dec, dst);
+		case PHP_UCACHE_SERDES_TAG_ENUM:
+			return ucache_serdes_decode_enum(dec, dst);
+		case PHP_UCACHE_SERDES_TAG_REFERENCE:
+			return ucache_serdes_decode_reference(dec, dst);
+		case PHP_UCACHE_SERDES_TAG_BACKREF:
+			if (!ucache_serdes_get_u32(dec, &backref_id) ||
 				backref_id >= dec->id_count
 			) {
 				return false;
@@ -1484,7 +1474,7 @@ static bool user_cache_serdes_decode_value(
 	}
 }
 
-uint32_t php_user_cache_serdes_declared_property_index_plus_one(
+uint32_t php_ucache_serdes_declared_property_index_plus_one(
 		zend_class_entry *ce,
 		zend_string *name)
 {
@@ -1496,7 +1486,7 @@ uint32_t php_user_cache_serdes_declared_property_index_plus_one(
 		ce->type != ZEND_USER_CLASS ||
 		ce->properties_info_table == NULL
 	) {
-		return PHP_USER_CACHE_SERDES_PROPERTY_INDEX_NONE;
+		return PHP_UCACHE_SERDES_PROPERTY_INDEX_NONE;
 	}
 
 	prop_info = zend_get_property_info(ce, name, true);
@@ -1505,18 +1495,18 @@ uint32_t php_user_cache_serdes_declared_property_index_plus_one(
 		(prop_info->flags & (ZEND_ACC_STATIC|ZEND_ACC_VIRTUAL)) != 0 ||
 		prop_info->offset == ZEND_VIRTUAL_PROPERTY_OFFSET
 	) {
-		return PHP_USER_CACHE_SERDES_PROPERTY_INDEX_NONE;
+		return PHP_UCACHE_SERDES_PROPERTY_INDEX_NONE;
 	}
 
 	prop_idx = OBJ_PROP_TO_NUM(prop_info->offset);
 	if (prop_idx >= ce->default_properties_count || prop_idx == UINT32_MAX) {
-		return PHP_USER_CACHE_SERDES_PROPERTY_INDEX_NONE;
+		return PHP_UCACHE_SERDES_PROPERTY_INDEX_NONE;
 	}
 
 	return prop_idx + 1;
 }
 
-bool php_user_cache_serdes_get_sleep_state(
+bool php_ucache_serdes_get_sleep_state(
 		zval *obj_zv,
 		zval *state,
 		const char **failure_msg)
@@ -1528,9 +1518,7 @@ bool php_user_cache_serdes_get_sleep_state(
 
 	ZVAL_UNDEF(state);
 
-	if (failure_msg != NULL) {
-		*failure_msg = NULL;
-	}
+	*failure_msg = NULL;
 
 	sleep_zv = zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP));
 	if (sleep_zv == NULL) {
@@ -1540,6 +1528,7 @@ bool php_user_cache_serdes_get_sleep_state(
 	/* Held across the property walk too: __sleep() may drop the caller's
 	 * last reference, and the walk keeps dereferencing the object. */
 	GC_ADDREF(obj);
+
 	zend_call_known_instance_method(Z_FUNC_P(sleep_zv), obj, &retval, 0, NULL);
 
 	if (Z_ISUNDEF(retval) || EG(exception)) {
@@ -1557,9 +1546,7 @@ bool php_user_cache_serdes_get_sleep_state(
 			ZSTR_VAL(ce->name)
 		);
 
-		if (failure_msg != NULL) {
-			*failure_msg = "__sleep() did not return an array of member names; the object cannot be stored in the user cache";
-		}
+		*failure_msg = "__sleep() did not return an array of member names; the object cannot be stored in the user cache";
 
 		OBJ_RELEASE(obj);
 
@@ -1571,7 +1558,7 @@ bool php_user_cache_serdes_get_sleep_state(
 	ZVAL_OBJ(&obj_holder, obj);
 
 	/* Failure may leave a partially initialized state array. */
-	result = user_cache_serdes_get_sleep_props(&obj_holder, Z_ARRVAL(retval), state);
+	result = ucache_serdes_get_sleep_props(&obj_holder, Z_ARRVAL(retval), state);
 	zval_ptr_dtor(&retval);
 
 	if (!result) {
@@ -1585,7 +1572,7 @@ bool php_user_cache_serdes_get_sleep_state(
 	return result;
 }
 
-bool php_user_cache_serdes_call_magic_serialize(zend_object *obj, zval *state)
+bool php_ucache_serdes_call_magic_serialize(zend_object *obj, zval *state)
 {
 	bool result = true;
 
@@ -1613,14 +1600,10 @@ bool php_user_cache_serdes_call_magic_serialize(zend_object *obj, zval *state)
 	return result;
 }
 
-bool php_user_cache_serdes_encode(zval *value, smart_str *buf, const char **failure_msg)
+bool php_ucache_serdes_encode(zval *value, smart_str *buf, const char **failure_msg)
 {
-	php_user_cache_serdes_encoder enc;
+	php_ucache_serdes_encoder_t enc;
 	bool result;
-
-	if (failure_msg != NULL) {
-		*failure_msg = NULL;
-	}
 
 	enc.buf = *buf;
 	enc.failure_message = NULL;
@@ -1630,24 +1613,21 @@ bool php_user_cache_serdes_encode(zval *value, smart_str *buf, const char **fail
 	zend_hash_init(&enc.strings, 32, NULL, NULL, 0);
 	zend_hash_init(&enc.pins, 8, NULL, ZVAL_PTR_DTOR, 0);
 
-	result = user_cache_serdes_encode_value(&enc, value);
+	result = ucache_serdes_encode_value(&enc, value);
 
 	zend_hash_destroy(&enc.pins);
 	zend_hash_destroy(&enc.strings);
 	zend_hash_destroy(&enc.seen);
 
 	*buf = enc.buf;
-
-	if (!result && failure_msg != NULL) {
-		*failure_msg = enc.failure_message;
-	}
+	*failure_msg = enc.failure_message;
 
 	return result;
 }
 
-bool php_user_cache_serdes_decode(const uint8_t *data, size_t len, zval *dst)
+bool php_ucache_serdes_decode(const uint8_t *data, size_t len, zval *dst)
 {
-	php_user_cache_serdes_decoder dec;
+	php_ucache_serdes_decoder_t dec;
 	uint32_t i;
 	bool result;
 
@@ -1662,12 +1642,12 @@ bool php_user_cache_serdes_decode(const uint8_t *data, size_t len, zval *dst)
 	dec.pos = 0;
 	dec.ids = dec.inline_ids;
 	dec.id_count = 0;
-	dec.id_capacity = PHP_USER_CACHE_SERDES_INLINE_IDS;
+	dec.id_capacity = PHP_UCACHE_SERDES_INLINE_IDS;
 	dec.strings = dec.inline_strings;
 	dec.string_count = 0;
-	dec.string_capacity = PHP_USER_CACHE_SERDES_INLINE_STRINGS;
+	dec.string_capacity = PHP_UCACHE_SERDES_INLINE_STRINGS;
 
-	result = user_cache_serdes_decode_value(&dec, dst);
+	result = ucache_serdes_decode_value(&dec, dst);
 
 	if (result && dec.pos != dec.len) {
 		result = false;
@@ -1676,6 +1656,7 @@ bool php_user_cache_serdes_decode(const uint8_t *data, size_t len, zval *dst)
 	for (i = 0; i < dec.id_count; i++) {
 		zval_ptr_dtor(&dec.ids[i]);
 	}
+
 	for (i = 0; i < dec.string_count; i++) {
 		zend_string_release(dec.strings[i]);
 	}
@@ -1683,6 +1664,7 @@ bool php_user_cache_serdes_decode(const uint8_t *data, size_t len, zval *dst)
 	if (dec.ids != dec.inline_ids) {
 		efree(dec.ids);
 	}
+
 	if (dec.strings != dec.inline_strings) {
 		efree(dec.strings);
 	}

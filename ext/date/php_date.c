@@ -17,7 +17,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_versioning.h"
-#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
+
 #include "php_date.h"
 #include "php_time.h"
 #include "zend_interfaces.h"
@@ -29,6 +29,8 @@
 #else
 #include "win32/time.h"
 #endif
+
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 static inline uint64_t php_date_llabs(int64_t i) { return i >= 0 ? (uint64_t)i : -(uint64_t)i; }
 
@@ -5954,7 +5956,7 @@ static bool php_date_copy_user_cache_state(
 		void *ctx,
 		zend_object *new_object,
 		zend_object *old_object,
-		php_user_cache_safe_direct_clone_value_func_t clone_value)
+		php_ucache_safe_direct_clone_value_func_t clone_value)
 {
 	php_date_obj *new_obj, *old_obj;
 	php_timezone_obj *new_tzobj, *old_tzobj;
@@ -5962,14 +5964,9 @@ static bool php_date_copy_user_cache_state(
 	php_period_obj *new_periodobj, *old_periodobj;
 
 	(void) ctx;
+	(void) clone_value;
 
-	if (clone_value == NULL) {
-		return false;
-	}
-
-	if (instanceof_function(old_object->ce, date_ce_date) ||
-		instanceof_function(old_object->ce, date_ce_immutable)
-	) {
+	if (instanceof_function(old_object->ce, date_ce_interface)) {
 		old_obj = php_date_obj_from_obj(old_object);
 		new_obj = php_date_obj_from_obj(new_object);
 
@@ -6142,8 +6139,10 @@ static bool php_date_user_cache_timezone_to_hash(
 static bool php_date_user_cache_time_to_hash(
 		const timelib_time *time,
 		HashTable *props,
-		const char *ctime_key, size_t ctime_key_len,
-		const char *tz_key, size_t tz_key_len)
+		const char *ctime_key,
+		size_t ctime_key_len,
+		const char *tz_key,
+		size_t tz_key_len)
 {
 	timelib_time snapshot;
 	zval zv;
@@ -6162,8 +6161,10 @@ static bool php_date_user_cache_time_to_hash(
 
 static timelib_time *php_date_user_cache_time_from_hash(
 		const HashTable *props,
-		const char *ctime_key, size_t ctime_key_len,
-		const char *tz_key, size_t tz_key_len)
+		const char *ctime_key,
+		size_t ctime_key_len,
+		const char *tz_key,
+		size_t tz_key_len)
 {
 	timelib_time *time;
 	timelib_tzinfo *tzi;
@@ -6250,21 +6251,14 @@ static bool php_date_serialize_datetime_user_cache_state(php_date_obj *dateobj, 
 
 	array_init_size(state, 2);
 
-	if (!php_date_user_cache_time_to_hash(
-			dateobj->time,
-			Z_ARRVAL_P(state),
-			PHP_DATE_USER_CACHE_STATE_CTIME, PHP_DATE_USER_CACHE_STATE_CTIME_LEN,
-			PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN
-		)
-	) {
-		zval_ptr_dtor(state);
-
-		ZVAL_UNDEF(state);
-
-		return false;
-	}
-
-	return true;
+	return php_date_user_cache_time_to_hash(
+		dateobj->time,
+		Z_ARRVAL_P(state),
+		PHP_DATE_USER_CACHE_STATE_CTIME,
+		PHP_DATE_USER_CACHE_STATE_CTIME_LEN,
+		PHP_DATE_USER_CACHE_STATE_TIMEZONE,
+		PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN
+	);
 }
 
 static bool php_date_serialize_interval_user_cache_state(php_interval_obj *intervalobj, zval *state)
@@ -6320,30 +6314,42 @@ static bool php_date_serialize_period_user_cache_state(php_period_obj *periodobj
 
 	array_init_size(state, 11);
 
-	if (!php_date_user_cache_time_to_hash(periodobj->start, Z_ARRVAL_P(state),
-			"start_ctime", sizeof("start_ctime") - 1,
-			"start_tz", sizeof("start_tz") - 1
+	if (!php_date_user_cache_time_to_hash(
+			periodobj->start,
+			Z_ARRVAL_P(state),
+			"start_ctime",
+			sizeof("start_ctime") - 1,
+			"start_tz",
+			sizeof("start_tz") - 1
 		)
 	) {
-		goto fail;
+		return false;
 	}
 
 	if (periodobj->current != NULL &&
-		!php_date_user_cache_time_to_hash(periodobj->current, Z_ARRVAL_P(state),
-			"current_ctime", sizeof("current_ctime") - 1,
-			"current_tz", sizeof("current_tz") - 1
+		!php_date_user_cache_time_to_hash(
+			periodobj->current,
+			Z_ARRVAL_P(state),
+			"current_ctime",
+			sizeof("current_ctime") - 1,
+			"current_tz",
+			sizeof("current_tz") - 1
 		)
 	) {
-		goto fail;
+		return false;
 	}
 
 	if (periodobj->end != NULL &&
-		!php_date_user_cache_time_to_hash(periodobj->end, Z_ARRVAL_P(state),
-			"end_ctime", sizeof("end_ctime") - 1,
-			"end_tz", sizeof("end_tz") - 1
+		!php_date_user_cache_time_to_hash(
+			periodobj->end,
+			Z_ARRVAL_P(state),
+			"end_ctime",
+			sizeof("end_ctime") - 1,
+			"end_tz",
+			sizeof("end_tz") - 1
 		)
 	) {
-		goto fail;
+		return false;
 	}
 
 	php_date_user_cache_copy_rel_time_snapshot(&rel_snapshot, periodobj->interval);
@@ -6364,24 +6370,13 @@ static bool php_date_serialize_period_user_cache_state(php_period_obj *periodobj
 	zend_hash_str_update(Z_ARRVAL_P(state), "start_ce", sizeof("start_ce") - 1, &zv);
 
 	return true;
-
-fail:
-	zval_ptr_dtor(state);
-
-	ZVAL_UNDEF(state);
-
-	return false;
 }
 
 static bool php_date_serialize_user_cache_state(zval *state, const zval *object)
 {
 	php_timezone_obj *tzobj;
 
-	ZVAL_UNDEF(state);
-
-	if (instanceof_function(Z_OBJCE_P(object), date_ce_date) ||
-		instanceof_function(Z_OBJCE_P(object), date_ce_immutable)
-	) {
+	if (instanceof_function(Z_OBJCE_P(object), date_ce_interface)) {
 		return php_date_serialize_datetime_user_cache_state(Z_PHPDATE_P((zval *) object), state);
 	}
 
@@ -6418,8 +6413,10 @@ static bool php_date_unserialize_datetime_user_cache_state(zval *object, zval *s
 
 	time = php_date_user_cache_time_from_hash(
 		Z_ARRVAL_P(state),
-		PHP_DATE_USER_CACHE_STATE_CTIME, PHP_DATE_USER_CACHE_STATE_CTIME_LEN,
-		PHP_DATE_USER_CACHE_STATE_TIMEZONE, PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN
+		PHP_DATE_USER_CACHE_STATE_CTIME,
+		PHP_DATE_USER_CACHE_STATE_CTIME_LEN,
+		PHP_DATE_USER_CACHE_STATE_TIMEZONE,
+		PHP_DATE_USER_CACHE_STATE_TIMEZONE_LEN
 	);
 	if (time == NULL) {
 		return false;
@@ -6517,9 +6514,12 @@ static bool php_date_unserialize_period_user_cache_state(zval *object, zval *sta
 		timelib_time_dtor(periodobj->start);
 	}
 
-	periodobj->start = php_date_user_cache_time_from_hash(Z_ARRVAL_P(state),
-		"start_ctime", sizeof("start_ctime") - 1,
-		"start_tz", sizeof("start_tz") - 1
+	periodobj->start = php_date_user_cache_time_from_hash(
+		Z_ARRVAL_P(state),
+		"start_ctime",
+		sizeof("start_ctime") - 1,
+		"start_tz",
+		sizeof("start_tz") - 1
 	);
 	if (periodobj->start == NULL) {
 		return false;
@@ -6529,22 +6529,28 @@ static bool php_date_unserialize_period_user_cache_state(zval *object, zval *sta
 		if (periodobj->current != NULL) {
 			timelib_time_dtor(periodobj->current);
 		}
-		periodobj->current = php_date_user_cache_time_from_hash(Z_ARRVAL_P(state),
-			"current_ctime", sizeof("current_ctime") - 1,
-			"current_tz", sizeof("current_tz") - 1
+		periodobj->current = php_date_user_cache_time_from_hash(
+			Z_ARRVAL_P(state),
+			"current_ctime",
+			strlen("current_ctime"),
+			"current_tz",
+			strlen("current_tz")
 		);
 		if (periodobj->current == NULL) {
 			return false;
 		}
 	}
 
-	if (zend_hash_str_exists(Z_ARRVAL_P(state), "end_ctime", sizeof("end_ctime") - 1)) {
+	if (zend_hash_str_exists(Z_ARRVAL_P(state), "end_ctime", strlen("end_ctime"))) {
 		if (periodobj->end != NULL) {
 			timelib_time_dtor(periodobj->end);
 		}
-		periodobj->end = php_date_user_cache_time_from_hash(Z_ARRVAL_P(state),
-			"end_ctime", sizeof("end_ctime") - 1,
-			"end_tz", sizeof("end_tz") - 1
+		periodobj->end = php_date_user_cache_time_from_hash(
+			Z_ARRVAL_P(state),
+			"end_ctime",
+			strlen("end_ctime"),
+			"end_tz",
+			strlen("end_tz")
 		);
 		if (periodobj->end == NULL) {
 			return false;
@@ -6581,13 +6587,7 @@ static bool php_date_unserialize_user_cache_state(zval *object, zval *state)
 {
 	php_timezone_obj *tzobj;
 
-	if (Z_TYPE_P(state) != IS_ARRAY) {
-		return false;
-	}
-
-	if (instanceof_function(Z_OBJCE_P(object), date_ce_date) ||
-		instanceof_function(Z_OBJCE_P(object), date_ce_immutable)
-	) {
+	if (instanceof_function(Z_OBJCE_P(object), date_ce_interface)) {
 		return php_date_unserialize_datetime_user_cache_state(object, state);
 	}
 
@@ -6608,7 +6608,7 @@ static bool php_date_unserialize_user_cache_state(zval *object, zval *state)
 	return false;
 }
 
-static const php_user_cache_safe_direct_handlers php_date_user_cache_handlers = {
+static const php_ucache_safe_direct_handlers_t php_date_user_cache_handlers = {
 	.prefer_request_local_prototype = true,
 	.copy = php_date_copy_user_cache_state,
 	.state_serialize = php_date_serialize_user_cache_state,
@@ -6617,11 +6617,11 @@ static const php_user_cache_safe_direct_handlers php_date_user_cache_handlers = 
 
 static void php_date_register_user_cache_handlers(void)
 {
-	php_user_cache_safe_direct_register_class(date_ce_date, &php_date_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(date_ce_immutable, &php_date_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(date_ce_timezone, &php_date_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(date_ce_interval, &php_date_user_cache_handlers);
-	php_user_cache_safe_direct_register_class(date_ce_period, &php_date_user_cache_handlers);
+	php_ucache_safe_direct_register_class(date_ce_date, &php_date_user_cache_handlers);
+	php_ucache_safe_direct_register_class(date_ce_immutable, &php_date_user_cache_handlers);
+	php_ucache_safe_direct_register_class(date_ce_timezone, &php_date_user_cache_handlers);
+	php_ucache_safe_direct_register_class(date_ce_interval, &php_date_user_cache_handlers);
+	php_ucache_safe_direct_register_class(date_ce_period, &php_date_user_cache_handlers);
 }
 
 /* {{{ */

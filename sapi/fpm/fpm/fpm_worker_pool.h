@@ -43,7 +43,7 @@ struct fpm_worker_pool_s {
 	struct fpm_scoreboard_s *scoreboard;
 	int log_fd;
 	char **limit_extensions;
-	struct _php_user_cache_partition *user_cache_partition;
+	struct _php_ucache_partition *ucache_partition;
 
 	/* for ondemand PM */
 	struct fpm_event_s *ondemand_event;

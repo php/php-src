@@ -383,7 +383,7 @@ static int php_cli_startup(sapi_module_struct *sapi_module_ptr) /* {{{ */
 		return FAILURE;
 	}
 
-	php_user_cache_opt_in();
+	php_ucache_opt_in();
 
 	return SUCCESS;
 }
