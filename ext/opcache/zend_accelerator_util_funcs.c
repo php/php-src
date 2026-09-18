@@ -159,7 +159,13 @@ static zend_always_inline void _zend_accel_function_hash_copy(HashTable *target,
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_known_hash(target, p->key);
 		if (UNEXPECTED(t != NULL)) {
-			goto failure;
+			if (*ZSTR_VAL(p->key) == '\0') {
+				/* Runtime definition key, keep old value */
+				continue;
+			} else if (!ZCG(accel_directives).ignore_dups) {
+				goto failure;
+			}
+			continue;
 		}
 		_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
 		if (UNEXPECTED(call_observers) && *ZSTR_VAL(p->key)) { // if not rtd key
