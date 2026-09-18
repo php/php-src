@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
 
+- PDO Sqlite:
+  . Fixed bug GH-23756 (crash when a callback closes the cursor of or
+    re-executes the statement being executed). (Lazizbek Ergashev)
+
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)
