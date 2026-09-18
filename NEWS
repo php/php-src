@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 - SQLite:
   . Fixed a crash when SQLite3::close() is called from a userland callback.
     (Ilia Alshanetsky)
+  . Fixed bug GH-23728 (crash when a callback closes, finalizes or resets the
+    statement being executed). (Ilia Alshanetsky)
 
 - XSL:
   . Fixed bug GH-23730 (use-after-free when XSLTProcessor::importStylesheet()
