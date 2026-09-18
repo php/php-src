@@ -55,6 +55,7 @@ extern zend_module_entry xsl_module_entry;
 typedef struct xsl_object {
 	void *ptr;
 	HashTable *parameter;
+	uint32_t transform_depth;
 	bool hasKeys;
 	php_libxml_ref_obj *sheet_ref_obj;
 	zend_long securityPrefs;
