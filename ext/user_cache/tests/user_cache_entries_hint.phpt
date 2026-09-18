@@ -11,7 +11,7 @@ user_cache.entries_hint=1000
 /* capacity = next_prime(ceil(hint / 0.75)) = next_prime(1334) */
 var_dump(UserCache\Cache::getStatus()->getEntryCapacity());
 
-/* Auto sizing (hint 0): one expected entry per 2KB of segment. */
+/* Auto sizing (hint 0): one expected entry per 4KB of segment. */
 $php = escapeshellarg(getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY);
 $args = '-n -d user_cache.enable=1 -d user_cache.enable_cli=1 -d user_cache.shm_size=16M';
 $code = 'echo UserCache\\Cache::getStatus()->getEntryCapacity();';
@@ -31,8 +31,8 @@ var_dump($cap >= 100000, $cap * ($entry_bytes + 4) + 1024 * $lock_bytes <= 8 * 1
 ?>
 --EXPECTF--
 int(1361)
-10937
-%Auser_cache.entries_hint must be greater than or equal to 0, -1 given%A10937
+5471
+%Auser_cache.entries_hint must be greater than or equal to 0, -1 given%A5471
 %Auser_cache.entries_hint (16777213) exceeds what user_cache.shm_size can index; clamping capacity to %d%A
 bool(true)
 bool(true)

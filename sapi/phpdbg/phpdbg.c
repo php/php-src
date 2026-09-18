@@ -701,7 +701,7 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 		return FAILURE;
 	}
 
-	php_user_cache_opt_in();
+	php_ucache_opt_in();
 
 	phpdbg_booted = 1;
 

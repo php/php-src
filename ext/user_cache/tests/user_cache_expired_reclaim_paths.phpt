@@ -19,6 +19,11 @@ const KEYS = 100;
 
 $cache = UserCache\Cache::getPool('expired-reclaim');
 
+/* The pool's lookup-counter slot is allocated on its first fold; take it
+ * before measuring the baseline. */
+$cache->fetch('warm');
+UserCache\Cache::getStatus();
+
 function free_memory(): int {
 	return UserCache\Cache::getStatus()->getFreeMemory();
 }
