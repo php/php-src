@@ -107,6 +107,8 @@ static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 
+	/* Do not leave DB-Library callbacks pointing at statement-owned storage. */
+	dbsetuserdata(S->H->link, (BYTE*) &S->H->err);
 	pdo_dblib_err_dtor(&S->err);
 
 	efree(S);
