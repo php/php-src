@@ -519,6 +519,8 @@ PHP 8.6 UPGRADE NOTES
 - CLI:
   . The built-in development server now accepts requests using the HTTP QUERY
     method instead of returning 501 Not Implemented.
+  . The built-in development server no longer reflects the "Host" header from
+    requests.
 
 ========================================
 4. Deprecated Functionality
