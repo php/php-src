@@ -30,6 +30,7 @@ $action = $_GET['action'] ?? 'seed';
 if ($action === 'seed') {
     $cache->clear();
     $cache->store('a', 'ORIGINAL');
+    $cache->fetch('a'); /* For initialization of pool stats */
     echo UserCache\Cache::getStatus()->getFreeMemory(), "\n";
     return;
 }
