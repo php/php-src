@@ -73,6 +73,7 @@ typedef struct _php_zip_archive {
 	/* libzip reads buffers until the archive is closed, can outlive the object. */
 	char **buffers;
 	int buffers_cnt;
+	bool close;
 #ifdef HAVE_PROGRESS_CALLBACK
 	zend_fcall_info_cache progress_callback;
 #endif
