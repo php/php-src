@@ -1,0 +1,778 @@
+{
+    "environment": {
+        "php": "8.6.0-dev",
+        "binary": "\/home\/yanick\/workspace\/php-src-value-class\/sapi\/cli\/php",
+        "debug": false,
+        "zts": false,
+        "os": "Linux yanick-Precision-7670 7.0.0-30-generic #30~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Aug  7 13:27:52 UTC 2 x86_64",
+        "opcache": false,
+        "jit": false
+    },
+    "iterations": 2000000,
+    "repeats": 9,
+    "instances": 200000,
+    "summary": {
+        "construct": {
+            "regular": {
+                "unit": "ns\/op",
+                "median": 32.5438205,
+                "min": 31.8821335,
+                "max": 76.1211335
+            },
+            "readonly": {
+                "unit": "ns\/op",
+                "median": 32.775675,
+                "min": 32.086236,
+                "max": 33.375723
+            },
+            "value": {
+                "unit": "ns\/op",
+                "median": 32.8655525,
+                "min": 32.152195,
+                "max": 33.4734095
+            }
+        },
+        "read": {
+            "regular": {
+                "unit": "ns\/op",
+                "median": 5.8070075,
+                "min": 5.77864,
+                "max": 5.8438805
+            },
+            "readonly": {
+                "unit": "ns\/op",
+                "median": 5.8085105,
+                "min": 5.7752145,
+                "max": 5.8420395
+            },
+            "value": {
+                "unit": "ns\/op",
+                "median": 5.8069505,
+                "min": 5.789717,
+                "max": 5.922839
+            }
+        },
+        "method": {
+            "regular": {
+                "unit": "ns\/op",
+                "median": 12.411052,
+                "min": 12.3060155,
+                "max": 12.5473205
+            },
+            "readonly": {
+                "unit": "ns\/op",
+                "median": 12.4529005,
+                "min": 12.3231355,
+                "max": 13.4840685
+            },
+            "value": {
+                "unit": "ns\/op",
+                "median": 12.4396695,
+                "min": 12.3148115,
+                "max": 13.683672
+            }
+        },
+        "memory": {
+            "regular": {
+                "unit": "bytes\/instance",
+                "median": 66.44496,
+                "min": 66.44496,
+                "max": 66.44496
+            },
+            "readonly": {
+                "unit": "bytes\/instance",
+                "median": 66.44496,
+                "min": 66.44496,
+                "max": 66.44496
+            },
+            "value": {
+                "unit": "bytes\/instance",
+                "median": 66.44496,
+                "min": 66.44496,
+                "max": 66.44496
+            }
+        }
+    },
+    "samples": {
+        "construct": {
+            "regular": [
+                {
+                    "elapsed_ns": 152242267,
+                    "ns_per_op": 76.1211335,
+                    "ops_per_second": 13136956.243564082,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65087641,
+                    "ns_per_op": 32.5438205,
+                    "ops_per_second": 30727799.767700907,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65808477,
+                    "ns_per_op": 32.9042385,
+                    "ops_per_second": 30391221.483517997,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65449182,
+                    "ns_per_op": 32.724591,
+                    "ops_per_second": 30558059.533883862,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65484055,
+                    "ns_per_op": 32.7420275,
+                    "ops_per_second": 30541786.08823171,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 64533917,
+                    "ns_per_op": 32.2669585,
+                    "ops_per_second": 30991455.237406403,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 64418908,
+                    "ns_per_op": 32.209454,
+                    "ops_per_second": 31046785.20784612,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 63764267,
+                    "ns_per_op": 31.8821335,
+                    "ops_per_second": 31365529.537099518,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 64521630,
+                    "ns_per_op": 32.260815,
+                    "ops_per_second": 30997357.01035451,
+                    "checksum": 11
+                }
+            ],
+            "readonly": [
+                {
+                    "elapsed_ns": 65551350,
+                    "ns_per_op": 32.775675,
+                    "ops_per_second": 30510431.89804634,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 66106521,
+                    "ns_per_op": 33.0532605,
+                    "ops_per_second": 30254201.39716625,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65038140,
+                    "ns_per_op": 32.51907,
+                    "ops_per_second": 30751186.918937102,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 66751446,
+                    "ns_per_op": 33.375723,
+                    "ops_per_second": 29961897.754244905,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 64172472,
+                    "ns_per_op": 32.086236,
+                    "ops_per_second": 31166011.494773023,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65804080,
+                    "ns_per_op": 32.90204,
+                    "ops_per_second": 30393252.211716965,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65095116,
+                    "ns_per_op": 32.547558,
+                    "ops_per_second": 30724271.234112248,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65874563,
+                    "ns_per_op": 32.9372815,
+                    "ops_per_second": 30360732.71560071,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65544590,
+                    "ns_per_op": 32.772295,
+                    "ops_per_second": 30513578.6187693,
+                    "checksum": 11
+                }
+            ],
+            "value": [
+                {
+                    "elapsed_ns": 66062767,
+                    "ns_per_op": 33.0313835,
+                    "ops_per_second": 30274239.04299982,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65276358,
+                    "ns_per_op": 32.638179,
+                    "ops_per_second": 30638964.263294224,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 66116930,
+                    "ns_per_op": 33.058465,
+                    "ops_per_second": 30249438.38136465,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 66519075,
+                    "ns_per_op": 33.2595375,
+                    "ops_per_second": 30066563.61351988,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 66946819,
+                    "ns_per_op": 33.4734095,
+                    "ops_per_second": 29874459.009023268,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65496161,
+                    "ns_per_op": 32.7480805,
+                    "ops_per_second": 30536140.889234714,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 64304390,
+                    "ns_per_op": 32.152195,
+                    "ops_per_second": 31102075.61256704,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 64553004,
+                    "ns_per_op": 32.276502,
+                    "ops_per_second": 30982291.69939171,
+                    "checksum": 11
+                },
+                {
+                    "elapsed_ns": 65731105,
+                    "ns_per_op": 32.8655525,
+                    "ops_per_second": 30426994.951629065,
+                    "checksum": 11
+                }
+            ]
+        },
+        "read": {
+            "regular": [
+                {
+                    "elapsed_ns": 11687761,
+                    "ns_per_op": 5.8438805,
+                    "ops_per_second": 171119173.29589474,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11573417,
+                    "ns_per_op": 5.7867085,
+                    "ops_per_second": 172809810.62032068,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11557280,
+                    "ns_per_op": 5.77864,
+                    "ops_per_second": 173051098.52837345,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11574503,
+                    "ns_per_op": 5.7872515,
+                    "ops_per_second": 172793596.407552,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11622932,
+                    "ns_per_op": 5.811466,
+                    "ops_per_second": 172073621.35474938,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11613934,
+                    "ns_per_op": 5.806967,
+                    "ops_per_second": 172206936.94315812,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11614015,
+                    "ns_per_op": 5.8070075,
+                    "ops_per_second": 172205735.91475472,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11618190,
+                    "ns_per_op": 5.809095,
+                    "ops_per_second": 172143853.73281035,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11656082,
+                    "ns_per_op": 5.828041,
+                    "ops_per_second": 171584242.45814332,
+                    "checksum": 22000000
+                }
+            ],
+            "readonly": [
+                {
+                    "elapsed_ns": 11656605,
+                    "ns_per_op": 5.8283025,
+                    "ops_per_second": 171576543.9422542,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11684079,
+                    "ns_per_op": 5.8420395,
+                    "ops_per_second": 171173098.02509895,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11617021,
+                    "ns_per_op": 5.8085105,
+                    "ops_per_second": 172161176.2602478,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11550429,
+                    "ns_per_op": 5.7752145,
+                    "ops_per_second": 173153741.73548013,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11620233,
+                    "ns_per_op": 5.8101165,
+                    "ops_per_second": 172113588.42804614,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11663233,
+                    "ns_per_op": 5.8316165,
+                    "ops_per_second": 171479040.15979102,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11584352,
+                    "ns_per_op": 5.792176,
+                    "ops_per_second": 172646687.53159434,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11582751,
+                    "ns_per_op": 5.7913755,
+                    "ops_per_second": 172670551.23605782,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11593991,
+                    "ns_per_op": 5.7969955,
+                    "ops_per_second": 172503152.71074474,
+                    "checksum": 22000000
+                }
+            ],
+            "value": [
+                {
+                    "elapsed_ns": 11591772,
+                    "ns_per_op": 5.795886,
+                    "ops_per_second": 172536174.79708883,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11579434,
+                    "ns_per_op": 5.789717,
+                    "ops_per_second": 172720013.7761483,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11634043,
+                    "ns_per_op": 5.8170215,
+                    "ops_per_second": 171909283.81474954,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11613901,
+                    "ns_per_op": 5.8069505,
+                    "ops_per_second": 172207426.25582913,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11584357,
+                    "ns_per_op": 5.7921785,
+                    "ops_per_second": 172646613.01442972,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11618058,
+                    "ns_per_op": 5.809029,
+                    "ops_per_second": 172145809.5664525,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11845678,
+                    "ns_per_op": 5.922839,
+                    "ops_per_second": 168837950.8543116,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11586216,
+                    "ns_per_op": 5.793108,
+                    "ops_per_second": 172618911.9899025,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 11739265,
+                    "ns_per_op": 5.8696325,
+                    "ops_per_second": 170368417.44351116,
+                    "checksum": 22000000
+                }
+            ]
+        },
+        "method": {
+            "regular": [
+                {
+                    "elapsed_ns": 24822104,
+                    "ns_per_op": 12.411052,
+                    "ops_per_second": 80573347.04584269,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24628295,
+                    "ns_per_op": 12.3141475,
+                    "ops_per_second": 81207407.98337847,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 25062844,
+                    "ns_per_op": 12.531422,
+                    "ops_per_second": 79799403.45157956,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24856362,
+                    "ns_per_op": 12.428181,
+                    "ops_per_second": 80462297.74091639,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 25094641,
+                    "ns_per_op": 12.5473205,
+                    "ops_per_second": 79698290.96180336,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24823197,
+                    "ns_per_op": 12.4115985,
+                    "ops_per_second": 80569799.28894734,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24773222,
+                    "ns_per_op": 12.386611,
+                    "ops_per_second": 80732332.67759842,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24612031,
+                    "ns_per_op": 12.3060155,
+                    "ops_per_second": 81261071.05910926,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24659790,
+                    "ns_per_op": 12.329895,
+                    "ops_per_second": 81103691.47506933,
+                    "checksum": 22000000
+                }
+            ],
+            "readonly": [
+                {
+                    "elapsed_ns": 24971131,
+                    "ns_per_op": 12.4855655,
+                    "ops_per_second": 80092487.60098211,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24905801,
+                    "ns_per_op": 12.4529005,
+                    "ops_per_second": 80302576.89764726,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24853525,
+                    "ns_per_op": 12.4267625,
+                    "ops_per_second": 80471482.41547225,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 25145722,
+                    "ns_per_op": 12.572861,
+                    "ops_per_second": 79536391.91588931,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 26968137,
+                    "ns_per_op": 13.4840685,
+                    "ops_per_second": 74161592.99398397,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24646271,
+                    "ns_per_op": 12.3231355,
+                    "ops_per_second": 81148178.56218493,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24806426,
+                    "ns_per_op": 12.403213,
+                    "ops_per_second": 80624270.50152247,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24984709,
+                    "ns_per_op": 12.4923545,
+                    "ops_per_second": 80048961.1465957,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24768036,
+                    "ns_per_op": 12.384018,
+                    "ops_per_second": 80749236.63709146,
+                    "checksum": 22000000
+                }
+            ],
+            "value": [
+                {
+                    "elapsed_ns": 24741407,
+                    "ns_per_op": 12.3707035,
+                    "ops_per_second": 80836146.46491204,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 27367344,
+                    "ns_per_op": 13.683672,
+                    "ops_per_second": 73079799.04809177,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24804556,
+                    "ns_per_op": 12.402278,
+                    "ops_per_second": 80630348.71496995,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24729427,
+                    "ns_per_op": 12.3647135,
+                    "ops_per_second": 80875306.97739175,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 25040490,
+                    "ns_per_op": 12.520245,
+                    "ops_per_second": 79870641.509012,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24879339,
+                    "ns_per_op": 12.4396695,
+                    "ops_per_second": 80387987.79983665,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24933382,
+                    "ns_per_op": 12.466691,
+                    "ops_per_second": 80213747.17637584,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24629623,
+                    "ns_per_op": 12.3148115,
+                    "ops_per_second": 81203029.37645452,
+                    "checksum": 22000000
+                },
+                {
+                    "elapsed_ns": 24902732,
+                    "ns_per_op": 12.451366,
+                    "ops_per_second": 80312473.3462979,
+                    "checksum": 22000000
+                }
+            ]
+        },
+        "memory": {
+            "regular": [
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                }
+            ],
+            "readonly": [
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                }
+            ],
+            "value": [
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                },
+                {
+                    "live_bytes": 13288992,
+                    "allocator_pages_bytes": 12582912,
+                    "bytes_per_instance": 66.44496,
+                    "checksum": 200011
+                }
+            ]
+        }
+    }
+}
