@@ -554,14 +554,24 @@ typedef struct {
 #endif
 } php_ucache_header_t;
 
-/* Sizes and offsets count PHP_UCACHE_SHM_UNIT bytes. */
+/* Sizes and offsets count PHP_UCACHE_SHM_UNIT bytes. The header is padded to
+ * ZEND_MM_ALIGNMENT: blocks start aligned (data_offset and every block size
+ * are PHP_UCACHE_ALIGNED_SIZE multiples), so the payload behind the header
+ * starts aligned too. Payloads hold engine structures such as zend_string,
+ * which require 8-byte alignment. */
 typedef struct {
 	uint32_t size;
 	uint32_t prev_size;
 	uint32_t next_free;
 	uint32_t prev_free;
 	uint32_t flags;
+	uint32_t reserved; /* for memory alignment */
 } php_ucache_block_t;
+
+ZEND_STATIC_ASSERT(
+	sizeof(php_ucache_block_t) % ZEND_MM_ALIGNMENT == 0,
+	"php_ucache_block_t must keep block payloads ZEND_MM_ALIGNMENT-aligned"
+);
 
 ZEND_STATIC_ASSERT(sizeof(php_ucache_block_t) % PHP_UCACHE_SHM_UNIT == 0, "block header must be unit aligned");
 
