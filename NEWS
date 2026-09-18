@@ -32,6 +32,12 @@ PHP                                                                        NEWS
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
 
+- PDO_DBLIB:
+  . Fixed bug GH-23741 (segfault after a failed query inside a PDO
+    transaction). Errors raised by beginTransaction(), commit(), rollBack()
+    and lastInsertId() are now reported instead of being dropped.
+    (Ilia Alshanetsky)
+
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)
