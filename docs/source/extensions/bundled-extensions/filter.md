@@ -1,4 +1,4 @@
-# Input filter support in PHP
+# ext/filter
 
 XSS (Cross Site Scripting) hacks are becoming more and more prevalent, and can
 be quite difficult to prevent. Whenever you accept user data and somehow display
