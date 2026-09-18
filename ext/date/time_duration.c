@@ -171,6 +171,9 @@ PHP_METHOD(Time_Duration, __unserialize)
 	zval *seconds = OBJ_PROP_NUM(&duration->std, 0);
 	zval *nanoseconds = OBJ_PROP_NUM(&duration->std, 1);
 	zval *negative = OBJ_PROP_NUM(&duration->std, 2);
+	if (Z_ISUNDEF_P(seconds) || Z_ISUNDEF_P(nanoseconds) || Z_ISUNDEF_P(negative)) {
+		goto fail;
+	}
 
 	/* Verify that both properties are positive, since the timelib_duration_ctor_static() takes unsigned. */
 	if (Z_LVAL_P(seconds) < 0 || Z_LVAL_P(nanoseconds) < 0) {
