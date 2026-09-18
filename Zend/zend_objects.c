@@ -263,6 +263,10 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		zend_ulong num_key;
 		zend_string *key;
 
+		if (HT_IS_PACKED(old_object->properties)) {
+			zend_hash_packed_to_hash(old_object->properties);
+		}
+
 		if (!new_object->properties) {
 			new_object->properties = zend_new_array(zend_hash_num_elements(old_object->properties));
 			zend_hash_real_init_mixed(new_object->properties);
