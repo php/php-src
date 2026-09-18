@@ -1,8 +1,8 @@
 --TEST--
-json_encode() SSE2 fast-path boundary handling
+json_encode() SIMD fast-path boundary handling
 --FILE--
 <?php
-/* Regression tests for the SSE2 chunked fast path in
+/* Regression tests for the SIMD (SSE2/NEON) chunked fast path in
  * php_json_escape_string() (ext/json/json_encoder.c). The fast path scans
  * 16-byte chunks and resumes scanning right after each escaped byte, so
  * exercise lengths and escape/codepoint positions around that boundary. */
@@ -72,6 +72,20 @@ foreach ([14, 15, 16, 17] as $off) {
         json_encode($s, JSON_INVALID_UTF8_SUBSTITUTE),
         '"' . str_repeat('a', $off) . "\\ufffd" . $tail . '"');
 }
+
+// 6. A single escapable byte mid-chunk, followed only by clean bytes up to
+// (and past) the chunk boundary. This targets the "no more dirty lanes
+// left in this chunk" exit of the scan loop (bitmap becomes 0 while
+// chunk_left > 0, so the loop flushes the rest of chunk_left at once and
+// breaks) rather than the "escape lands on the last lane of the chunk"
+// exit (consumed >= chunk_left) already covered by case 2 above.
+foreach ([1, 5, 10, 14] as $off) {
+    foreach ([16, 24, 32] as $len) {
+        $s = str_repeat('a', $off) . '"' . str_repeat('a', $len - $off - 1);
+        $expected = '"' . str_repeat('a', $off) . '\\"' . str_repeat('a', $len - $off - 1) . '"';
+        check("mid-chunk quote at offset=$off, len=$len", json_encode($s), $expected);
+    }
+}
 ?>
 --EXPECT--
 clean len=15: OK
@@ -114,3 +128,15 @@ invalid utf8 at offset=16, SUBSTITUTE: OK
 invalid utf8 at offset=17, no flag: OK
 invalid utf8 at offset=17, IGNORE: OK
 invalid utf8 at offset=17, SUBSTITUTE: OK
+mid-chunk quote at offset=1, len=16: OK
+mid-chunk quote at offset=1, len=24: OK
+mid-chunk quote at offset=1, len=32: OK
+mid-chunk quote at offset=5, len=16: OK
+mid-chunk quote at offset=5, len=24: OK
+mid-chunk quote at offset=5, len=32: OK
+mid-chunk quote at offset=10, len=16: OK
+mid-chunk quote at offset=10, len=24: OK
+mid-chunk quote at offset=10, len=32: OK
+mid-chunk quote at offset=14, len=16: OK
+mid-chunk quote at offset=14, len=24: OK
+mid-chunk quote at offset=14, len=32: OK

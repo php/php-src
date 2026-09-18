@@ -1,8 +1,8 @@
 --TEST--
-json_encode()/json_decode() round-trip across many lengths (SSE2 fast path)
+json_encode()/json_decode() round-trip across many lengths (SIMD fast path)
 --FILE--
 <?php
-/* The SSE2 fast path in php_json_escape_string() scans fixed 16-byte
+/* The SIMD (SSE2/NEON) fast path in php_json_escape_string() scans fixed 16-byte
  * chunks, so a string containing a mix of clean ASCII, escapable ASCII,
  * and multi-byte UTF-8 sequences will place its "interesting" bytes at
  * every possible offset relative to a chunk boundary as its length
