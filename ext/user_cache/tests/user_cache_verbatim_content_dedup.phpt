@@ -13,22 +13,28 @@ $usedMemory = static fn (): int => UserCache\Cache::getStatus()->getUsedMemory()
 $row = ['controller' => 'CatalogController::show', 'methods' => ['GET'], 'flags' => [true, false, true], 'score' => 100];
 $identicalRows = [];
 $distinctRows = [];
-for ($i = 0; $i < 64; $i++) {
+for ($i = 0; $i < 128; $i++) {
     $identicalRows[] = $row;
     $distinctRows[] = ['controller' => 'CatalogController::show', 'methods' => ['GET'], 'flags' => [true, false, true], 'score' => $i];
 }
 
-$cache->clear();
-$before = $usedMemory();
-var_dump($cache->store('identical', $identicalRows));
-$identicalCost = $usedMemory() - $before;
+$cost = static function (string $key, array $rows) use ($cache, $usedMemory): int {
+    $cache->clear();
+    $before = $usedMemory();
+    var_dump($cache->store($key, $rows));
 
-$cache->clear();
-$before = $usedMemory();
-var_dump($cache->store('distinct', $distinctRows));
-$distinctCost = $usedMemory() - $before;
+    return $usedMemory() - $before;
+};
 
-var_dump($identicalCost * 8 < $distinctCost);
+$identicalCost64 = $cost('identical', array_slice($identicalRows, 0, 64));
+$identicalCost128 = $cost('identical', $identicalRows);
+$distinctCost64 = $cost('distinct', array_slice($distinctRows, 0, 64));
+$distinctCost128 = $cost('distinct', $distinctRows);
+
+/* Compare what the second 64 rows cost: the entry, key and root-array
+ * overhead is paid either way and its size depends on the platform, so it
+ * must not take part in the ratio. */
+var_dump(($identicalCost128 - $identicalCost64) * 8 < ($distinctCost128 - $distinctCost64));
 
 $cache->clear();
 var_dump($cache->store('identical', $identicalRows));
@@ -56,6 +62,8 @@ $fetched = $cache->fetch('object-root');
 var_dump($fetched[1] === $row, $fetched[2] === $row);
 ?>
 --EXPECT--
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
