@@ -1,12 +1,12 @@
 --TEST--
-Readonly property cannot implement set hook of get/set abstract property
+Readonly property cannot implement set hook of public get/set abstract property
 --FILE--
 <?php
 abstract class A {
-    protected abstract int $prop { get; set; }
+    public abstract int $prop { get; set; }
 }
 class C extends A {
-    protected readonly int $prop;
+    public readonly int $prop;
     public function __construct(int $prop) {
         $this->prop = $prop;
     }
