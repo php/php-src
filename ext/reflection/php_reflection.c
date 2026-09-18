@@ -346,6 +346,9 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zend_object *obj
 		if (ce->ce_flags & ZEND_ACC_READONLY_CLASS) {
 			smart_str_appends(str, "readonly ");
 		}
+		if (ce->ce_flags & ZEND_ACC_VALUE_CLASS) {
+			smart_str_appends(str, "value ");
+		}
 		smart_str_appends(str, "class ");
 	}
 	smart_str_append(str, ce->name);
@@ -4302,7 +4305,7 @@ ZEND_METHOD(ReflectionClass, isUserDefined)
 /* }}} */
 
 /* {{{ _class_check_flag */
-static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
+static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, uint32_t mask)
 {
 	const reflection_object *intern;
 	const zend_class_entry *ce;
@@ -4927,6 +4930,11 @@ ZEND_METHOD(ReflectionClass, isFinal)
 ZEND_METHOD(ReflectionClass, isReadOnly)
 {
 	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_READONLY_CLASS);
+}
+
+ZEND_METHOD(ReflectionClass, isValue)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VALUE_CLASS);
 }
 
 /* {{{ Returns whether this class is abstract */

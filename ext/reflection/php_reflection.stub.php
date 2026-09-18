@@ -359,6 +359,8 @@ class ReflectionClass implements Reflector
 
     public function isReadOnly(): bool {}
 
+    public function isValue(): bool {}
+
     /** @tentative-return-type */
     public function getModifiers(): int {}
 

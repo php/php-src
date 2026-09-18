@@ -30,7 +30,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     Property [ public string $name ]
   }
 
-  - Methods [64] {
+  - Methods [65] {
     Method [ <internal:Reflection> private method __clone ] {
 
       - Parameters [0] {
@@ -288,6 +288,13 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     }
 
     Method [ <internal:Reflection> public method isReadOnly ] {
+
+      - Parameters [0] {
+      }
+      - Return [ bool ]
+    }
+
+    Method [ <internal:Reflection> public method isValue ] {
 
       - Parameters [0] {
       }

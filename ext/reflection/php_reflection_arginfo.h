@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_reflection.stub.php instead.
- * Stub hash: c4dcc2653f826c2c437065faec4bf77772ef88b1
+ * Stub hash: b54c21a98f27d63c9d2f0e89bb5d87a8e8217b8f
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -275,6 +275,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClass_isFinal arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionClass_isReadOnly arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+#define arginfo_class_ReflectionClass_isValue arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionClass_getModifiers arginfo_class_ReflectionFunctionAbstract_getNumberOfParameters
 
@@ -845,6 +847,7 @@ ZEND_METHOD(ReflectionClass, isEnum);
 ZEND_METHOD(ReflectionClass, isAbstract);
 ZEND_METHOD(ReflectionClass, isFinal);
 ZEND_METHOD(ReflectionClass, isReadOnly);
+ZEND_METHOD(ReflectionClass, isValue);
 ZEND_METHOD(ReflectionClass, getModifiers);
 ZEND_METHOD(ReflectionClass, isInstance);
 ZEND_METHOD(ReflectionClass, newInstance);
@@ -1145,6 +1148,7 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, isAbstract, arginfo_class_ReflectionClass_isAbstract, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isFinal, arginfo_class_ReflectionClass_isFinal, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isReadOnly, arginfo_class_ReflectionClass_isReadOnly, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isValue, arginfo_class_ReflectionClass_isValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getModifiers, arginfo_class_ReflectionClass_getModifiers, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isInstance, arginfo_class_ReflectionClass_isInstance, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, newInstance, arginfo_class_ReflectionClass_newInstance, ZEND_ACC_PUBLIC)
