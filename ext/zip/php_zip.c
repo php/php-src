@@ -634,6 +634,16 @@ static char * php_zipobj_get_zip_comment(ze_zip_object *obj, int *len) /* {{{ */
 }
 /* }}} */
 
+static bool php_zipobj_closing(ze_zip_object *obj) /* {{{ */
+{
+	if (obj->archive && obj->archive->close) {
+		zend_throw_error(NULL, "Already being closed");
+		return true;
+	}
+	return false;
+}
+/* }}} */
+
 /* Close and free the zip_t. If the archive was opened as a string, the
  * final contents of the archive will be assigned to *out_str and that
  * string will afterwards be owned by the caller.
@@ -647,7 +657,9 @@ static bool php_zipobj_close(ze_zip_object *obj, zend_string **out_str) /* {{{ *
 	bool success = false;
 
 	if (intern) {
+		archive->close = true;
 		int err = zip_close(intern);
+		archive->close = false;
 		if (err) {
 			php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 			/* Save error for property reader */
@@ -1599,6 +1611,11 @@ PHP_METHOD(ZipArchive, open)
 		RETURN_FALSE;
 	}
 
+	if (php_zipobj_closing(ze_obj)) {
+		efree(resolved_path);
+		RETURN_THROWS();
+	}
+
 	/* If we already have an opened zip, free it */
 	php_zipobj_close(ze_obj, NULL);
 
@@ -1645,6 +1662,10 @@ PHP_METHOD(ZipArchive, openString)
 
 	ze_zip_object *ze_obj = Z_ZIP_P(self);
 	php_zip_archive *archive;
+
+	if (php_zipobj_closing(ze_obj)) {
+		RETURN_THROWS();
+	}
 
 	php_zipobj_close(ze_obj, NULL);
 
@@ -1712,6 +1733,10 @@ PHP_METHOD(ZipArchive, close)
 
 	ZIP_FROM_OBJECT(intern, self);
 
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
+		RETURN_THROWS();
+	}
+
 	RETURN_BOOL(php_zipobj_close(Z_ZIP_P(self), NULL));
 }
 /* }}} */
@@ -1729,6 +1754,10 @@ PHP_METHOD(ZipArchive, closeString)
 	if (!Z_ZIP_P(self)->archive->from_string) {
 		zend_throw_error(NULL, "ZipArchive::closeString can only be called on "
 				"an archive opened with ZipArchive::openString");
+		RETURN_THROWS();
+	}
+
+	if (php_zipobj_closing(Z_ZIP_P(self))) {
 		RETURN_THROWS();
 	}
 

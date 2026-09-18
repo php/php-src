@@ -72,6 +72,7 @@ typedef struct _php_zip_archive {
 	zend_string *out_str;
 	bool from_string;
 	bool bailout_callback;
+	bool close;
 #ifdef HAVE_PROGRESS_CALLBACK
 	zend_fcall_info_cache progress_callback;
 #endif
