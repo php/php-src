@@ -211,7 +211,11 @@ static php_stream_filter_status_t userfilter_filter(
 		*bytes_consumed = zval_get_long(&args[2]);
 	}
 
-	if (buckets_in->head) {
+	/* A filter that returns PSFS_FEED_ME may put buckets back on the input
+	 * brigade to see them again with the next chunk; the read path keeps
+	 * that brigade across calls. For any other status the input brigade
+	 * is discarded by the caller, so release what the filter left behind. */
+	if (ret != PSFS_FEED_ME && buckets_in->head) {
 		php_stream_bucket *bucket;
 		do {
 			bucket = buckets_in->head;
@@ -222,7 +226,7 @@ static php_stream_filter_status_t userfilter_filter(
 	}
 
 	/* Filter could've broken contract and added buckets anyway. */
-	if (ret == PSFS_FEED_ME && buckets_out->head) {
+	if (ret != PSFS_PASS_ON && buckets_out->head) {
 		php_stream_bucket *bucket;
 		do {
 			bucket = buckets_out->head;
