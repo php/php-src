@@ -22,6 +22,9 @@ PHP                                                                        NEWS
     when a fragment is parsed with an xlink, xml or xmlns context element.
     (Ilia Alshanetsky)
 
+- Fileinfo:
+  . Upgrade to file 5.48. (Weilin Du)
+
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
     such as dateType, timeType, calendar and the message pattern.

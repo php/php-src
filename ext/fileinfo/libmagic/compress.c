@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.158 2024/11/10 16:52:27 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.162 2026/05/17 17:10:25 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -119,12 +119,11 @@ static const char *zlib_args[] = { "python", "-c", zlibcode, NULL };
 static int
 zlibcmp(const unsigned char *buf)
 {
-	unsigned short x = 1;
-	unsigned char *s = CAST(unsigned char *, CAST(void *, &x));
+	unsigned short x;
 
 	if ((buf[0] & 0xf) != 8 || (buf[0] & 0x80) != 0)
 		return 0;
-	if (s[0] != 1)	/* endianness test */
+	if (file_bigendian())	/* endianness test */
 		x = buf[0] | (buf[1] << 8);
 	else
 		x = buf[1] | (buf[0] << 8);
@@ -1121,9 +1120,9 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, int nofork,
 
 	posix_spawn_file_actions_destroy(&fa);
 
-	if (status == -1) {
+	if (status != 0) {
 		return makeerror(newch, n, "Cannot posix_spawn `%s', %s",
-		    compr[method].argv[0], strerror(errno));
+		    compr[method].argv[0], strerror(status));
 	}
 #else
 	/* For processes with large mapped virtual sizes, vfork

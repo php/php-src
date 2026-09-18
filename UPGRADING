@@ -919,6 +919,10 @@ PHP 8.6 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Fileinfo:
+  . Upgraded to file 5.48.
+    Custom compiled magic databases from older file versions must be regenerated.
+
 - Hash:
   . The bundled version of xxHash was upgraded to 0.8.2.
 
