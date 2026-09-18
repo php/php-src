@@ -2010,9 +2010,13 @@ PHP_FUNCTION(socket_get_option)
 				return;
 			}
 #endif
-#if defined(SO_PEERCRED) && defined(__linux__)
+#if defined(SO_PEERCRED)
 			case SO_PEERCRED: {
+#if defined(__OpenBSD__)
+				struct sockpeercred cred;
+#else
 				struct ucred cred;
+#endif
 				optlen = sizeof(cred);
 
 				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&cred, &optlen) != 0) {
