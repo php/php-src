@@ -764,6 +764,11 @@ const T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG = UNKNOWN;
 const T_BAD_CHARACTER = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_VALUE
+ */
+const T_VALUE = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_PAAMAYIM_NEKUDOTAYIM
  */
 const T_DOUBLE_COLON = UNKNOWN;

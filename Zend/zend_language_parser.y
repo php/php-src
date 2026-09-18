@@ -249,6 +249,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
+%token <ident> T_VALUE "'value'"
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement trait_declaration_statement legacy_namespace_name
@@ -630,6 +631,7 @@ class_modifier:
 		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
 	|	T_READONLY 		{ $$ = ZEND_ACC_READONLY_CLASS|ZEND_ACC_NO_DYNAMIC_PROPERTIES; }
+	|	T_VALUE			{ $$ = ZEND_ACC_VALUE_CLASS; }
 ;
 
 trait_declaration_statement:

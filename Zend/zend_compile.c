@@ -1024,6 +1024,15 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 		zend_throw_exception(zend_ce_compile_error, "Multiple readonly modifiers are not allowed", 0);
 		return 0;
 	}
+	if ((flags & ZEND_ACC_VALUE_CLASS) && (new_flag & ZEND_ACC_VALUE_CLASS)) {
+		zend_throw_exception(zend_ce_compile_error, "Multiple value modifiers are not allowed", 0);
+		return 0;
+	}
+	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_VALUE_CLASS)) {
+		zend_throw_exception(zend_ce_compile_error,
+			"Cannot use the value modifier on an abstract class", 0);
+		return 0;
+	}
 	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Cannot use the final modifier on an abstract class", 0);
@@ -1036,6 +1045,10 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag)
 {
 	uint32_t new_flags = flags | new_flag;
+	if (new_flag & ZEND_ACC_VALUE_CLASS) {
+		zend_throw_exception(zend_ce_compile_error, "Cannot use the value modifier on an anonymous class", 0);
+		return 0;
+	}
 	if (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Cannot use the abstract modifier on an anonymous class", 0);
@@ -9897,6 +9910,9 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 	}
 
 	ce->ce_flags |= decl->flags;
+	if (ce->ce_flags & ZEND_ACC_VALUE_CLASS) {
+		ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_READONLY_CLASS | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	}
 	ce->info.user.filename = zend_string_copy(zend_get_compiled_filename());
 	ce->info.user.line_start = decl->start_lineno;
 	ce->info.user.line_end = decl->end_lineno;
@@ -9911,6 +9927,9 @@ static void zend_compile_class_decl(znode *result, const zend_ast *ast, bool top
 	}
 
 	if (extends_ast) {
+		if (ce->ce_flags & ZEND_ACC_VALUE_CLASS) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Value class %s cannot extend another class", ZSTR_VAL(ce->name));
+		}
 		ce->parent_name =
 			zend_resolve_const_class_name_reference(extends_ast, "class name");
 	}

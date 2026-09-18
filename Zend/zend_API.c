@@ -2906,6 +2906,14 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 
 ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, const zend_string *lcname)
 {
+	/* This also checks magic methods imported or aliased from traits. */
+	if ((ce->ce_flags & ZEND_ACC_VALUE_CLASS)
+			&& (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)
+				|| zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Value class %s cannot include magic method %s",
+			ZSTR_VAL(ce->name), ZSTR_VAL(lcname));
+	}
+
 	if (ZSTR_VAL(lcname)[0] != '_' || ZSTR_VAL(lcname)[1] != '_') {
 		/* pass */
 	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {

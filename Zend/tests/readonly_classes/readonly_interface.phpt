@@ -9,4 +9,4 @@ readonly interface Foo
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "interface", expecting "abstract" or "final" or "readonly" or "class" in %s on line %d
+Parse error: syntax error, unexpected token "interface" in %s on line %d

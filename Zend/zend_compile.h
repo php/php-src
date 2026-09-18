@@ -275,7 +275,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_PROTECTED_SET           (1 << 11) /*     |     |  X  |     */
 #define ZEND_ACC_PRIVATE_SET             (1 << 12) /*     |     |  X  |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 31)                               |     |     |     */
+/* Class Flags (unused: none)                             |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -310,6 +310,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Readonly class                                         |     |     |     */
 #define ZEND_ACC_READONLY_CLASS          (1 << 16) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Value class                                           |     |     |     */
+#define ZEND_ACC_VALUE_CLASS            (1U << 31) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Parent class is resolved (CE).                         |     |     |     */
 #define ZEND_ACC_RESOLVED_PARENT         (1 << 17) /*  X  |     |     |     */

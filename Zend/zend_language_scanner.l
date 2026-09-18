@@ -1832,6 +1832,12 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_READONLY);
 }
 
+/* Keep value available as an identifier outside class modifier lists. */
+<ST_IN_SCRIPTING>"value"({WHITESPACE_OR_COMMENTS}("abstract"|"final"|"readonly"|"value"))*{WHITESPACE_OR_COMMENTS}"class"[^a-zA-Z0-9_\x80-\xff] {
+	yyless(sizeof("value") - 1);
+	RETURN_TOKEN_WITH_IDENT(T_VALUE);
+}
+
 <ST_IN_SCRIPTING>"unset" {
 	RETURN_TOKEN_WITH_IDENT(T_UNSET);
 }

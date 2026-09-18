@@ -175,6 +175,7 @@ char *get_token_type_name(int token_type)
 		case T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG: return "T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG";
 		case T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG: return "T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG";
 		case T_BAD_CHARACTER: return "T_BAD_CHARACTER";
+		case T_VALUE: return "T_VALUE";
 
 	}
 	return NULL;
