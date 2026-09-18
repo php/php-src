@@ -110,6 +110,15 @@ typedef enum {
 	PHP_WIN32_IOUTIL_NORM_FAIL,
 } php_win32_ioutil_normalization_result;
 
+typedef enum {
+	PHP_WIN32_IOUTIL_PATH_OK,
+	PHP_WIN32_IOUTIL_PATH_DEVICE,
+	PHP_WIN32_IOUTIL_PATH_RESERVED,
+} php_win32_ioutil_path_kind;
+
+PW32IO php_win32_ioutil_path_kind php_win32_ioutil_path_kind_w(const wchar_t *path, size_t path_len);
+PW32IO php_win32_ioutil_path_kind php_win32_ioutil_path_kind_a(const char *path, size_t path_len);
+
 #define PHP_WIN32_IOUTIL_FW_SLASHW L'/'
 #define PHP_WIN32_IOUTIL_FW_SLASH '/'
 #define PHP_WIN32_IOUTIL_BW_SLASHW L'\\'
@@ -155,7 +164,8 @@ typedef enum {
 
 #define PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, len) \
 	(!((len) >= 1 && L' ' == pathw[(len)-1] || \
-	(len) > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[(len)-2]) && L'.' != pathw[(len)-2] && L'.' == pathw[(len)-1]))
+	(len) > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[(len)-2]) && L'.' != pathw[(len)-2] && L'.' == pathw[(len)-1]) \
+	&& PHP_WIN32_IOUTIL_PATH_RESERVED != php_win32_ioutil_path_kind_w(pathw, len))
 
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret, dealloc) do { \
 		size_t _len = wcslen(pathw); \
