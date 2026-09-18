@@ -446,6 +446,8 @@ static int php_firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, IS
 			php_firebird_error_stmt_with_info(stmt, "HY000", strlen("HY000"), msg, strlen(msg));
 			goto fetch_blob_end;
 		}
+	} else {
+		ZVAL_EMPTY_STRING(result);
 	}
 	retval = 1;
 

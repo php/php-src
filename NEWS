@@ -103,6 +103,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
 
+- PDO_Firebird:
+  . Fixed bug GH-23758 (PDO_Firebird returns null for non-null empty BLOBs).
+    (Lazizbek Ergashev)
+
 - Readline:
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
     set to an empty string. (Ilia Alshanetsky)
