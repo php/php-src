@@ -7,6 +7,9 @@ opcache.file_cache_only=0
 user_cache.shm_size=16M
 --FILE--
 <?php
+/* The segment outlives the request (php --repeat): start from fresh pools. */
+UserCache\Cache::deletePool('occupancy-a');
+UserCache\Cache::deletePool('occupancy-b');
 $a = UserCache\Cache::getPool('occupancy-a');
 $b = UserCache\Cache::getPool('occupancy-b');
 

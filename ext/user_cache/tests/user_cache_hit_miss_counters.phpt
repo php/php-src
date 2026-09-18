@@ -15,17 +15,24 @@ opcache.file_cache_only=0
 user_cache.shm_size=16M
 --FILE--
 <?php
+/* The segment outlives the request (php --repeat): start from fresh pools and
+ * report the segment-lifetime totals relative to where this run found them. */
+UserCache\Cache::deletePool('hits-a');
+UserCache\Cache::deletePool('hits-b');
 $a = UserCache\Cache::getPool('hits-a');
 $b = UserCache\Cache::getPool('hits-b');
+$baseHits = UserCache\Cache::getStatus()->getHitCount();
+$baseMisses = UserCache\Cache::getStatus()->getMissCount();
 
 function counts(): string {
+    global $baseHits, $baseMisses;
     $status = UserCache\Cache::getStatus();
     $a = UserCache\Cache::getPool('hits-a')->getPoolStatus();
     $b = UserCache\Cache::getPool('hits-b')->getPoolStatus();
 
     return sprintf(
         'total %d/%d a %d/%d b %d/%d',
-        $status->getHitCount(), $status->getMissCount(),
+        $status->getHitCount() - $baseHits, $status->getMissCount() - $baseMisses,
         $a->getHitCount(), $a->getMissCount(),
         $b->getHitCount(), $b->getMissCount()
     );
