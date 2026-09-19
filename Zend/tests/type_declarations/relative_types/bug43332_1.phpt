@@ -1,5 +1,5 @@
 --TEST--
-Bug #43332.1 (self and parent as type hint in namespace)
+Bug #43332.1 (self and parent as type declaration in namespace)
 --FILE--
 <?php
 namespace foobar;
