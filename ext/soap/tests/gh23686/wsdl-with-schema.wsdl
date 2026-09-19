@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns="http://schemas.xmlsoap.org/wsdl/"
+>
+<types>
+	<xsd:schema>
+		<xsd:include schemaLocation="http://localhost:{TARGET_PORT}/index.php"/>
+	</xsd:schema>
+</types>
+<portType name="soapServicePortType" />
+<binding name="soapServiceBinding" type="typens:soapServicePortType" />
+<service name="soapServiceService">
+	<port name="soapServicePort" binding="typens:soapServiceBinding">
+		<soap:address location="###PHP_SELF###" />
+	</port>
+</service>
+</definitions>
