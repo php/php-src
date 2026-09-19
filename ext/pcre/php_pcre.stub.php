@@ -44,6 +44,11 @@ const PREG_SPLIT_OFFSET_CAPTURE = UNKNOWN;
 const PREG_GREP_INVERT = UNKNOWN;
 /**
  * @var int
+ * @cvalue PREG_THROW_ON_ERROR
+ */
+const PREG_THROW_ON_ERROR = UNKNOWN;
+/**
+ * @var int
  * @cvalue PHP_PCRE_NO_ERROR
  */
 const PREG_NO_ERROR = UNKNOWN;
@@ -112,13 +117,13 @@ function preg_match_all(string $pattern, string $subject, &$matches = null, int 
  * @return string|array<int|string, string>|null
  * @frameless-function {"arity": 3}
  */
-function preg_replace(string|array $pattern, string|array $replacement, string|array $subject, int $limit = -1, &$count = null): string|array|null {}
+function preg_replace(string|array $pattern, string|array $replacement, string|array $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
 
 /**
  * @param int $count
  * @return string|array<int|string, string>|null
  */
-function preg_filter(string|array $pattern, string|array $replacement, string|array $subject, int $limit = -1, &$count = null): string|array|null {}
+function preg_filter(string|array $pattern, string|array $replacement, string|array $subject, int $limit = -1, &$count = null, int $flags = 0): string|array|null {}
 
 /**
  * @param int $count
@@ -144,3 +149,8 @@ function preg_grep(string $pattern, array $array, int $flags = 0): array|false {
 function preg_last_error(): int {}
 
 function preg_last_error_msg(): string {}
+
+/**
+ * @strict-properties
+ */
+class PregException extends \Exception {}
