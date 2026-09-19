@@ -25,6 +25,7 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "ext/json/php_json.h" /* For php_json_serializable_ce */
+#include "ext/user_cache/php_user_cache.h" /* For user_cache safe direct path */
 
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
@@ -651,6 +652,111 @@ PHP_METHOD(SplFixedArray, __unserialize)
 	}
 }
 
+static bool spl_fixedarray_object_copy_user_cache_state(
+		void *ctx,
+		zend_object *new_obj,
+		zend_object *old_obj,
+		php_ucache_safe_direct_clone_value_func_t clone_value)
+{
+	spl_fixedarray_object *old_intern, *new_intern;
+	zend_long size, i;
+	zval cloned_elem;
+
+	old_intern = spl_fixed_array_from_obj(old_obj);
+	new_intern = spl_fixed_array_from_obj(new_obj);
+
+	ZEND_ASSERT(new_intern->array.size == 0);
+
+	size = old_intern->array.size;
+
+	/* spl_fixedarray_init() NULL-fills the newly allocated elements before we
+	 * populate them one at a time below, so a clone failure partway through
+	 * the loop leaves the not-yet-cloned tail as NULL for the destructor to
+	 * walk, instead of the uninitialized memory init_non_empty_struct() alone
+	 * would leave behind. */
+	spl_fixedarray_init(&new_intern->array, size);
+
+	for (i = 0; i < size; i++) {
+		if (!clone_value(ctx, &cloned_elem, &old_intern->array.elements[i])) {
+			return false;
+		}
+
+		ZVAL_COPY_DEREF(&new_intern->array.elements[i], &cloned_elem);
+
+		zval_ptr_dtor(&cloned_elem);
+	}
+
+	return !EG(exception);
+}
+
+static bool spl_fixedarray_object_user_cache_state_has_unstorable(
+		void *ctx,
+		const zval *object,
+		php_ucache_safe_direct_value_has_unstorable_func_t value_has_unstorable)
+{
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P((zval *) object);
+	zend_long i;
+
+	for (i = 0; i < intern->array.size; i++) {
+		if (value_has_unstorable(ctx, &intern->array.elements[i])) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool spl_fixedarray_object_serialize_user_cache_state(zval *state, const zval *object)
+{
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P((zval *) object);
+	zend_long i;
+	zval *current;
+
+	/* Building the element list only addrefs existing zvals and cannot
+	 * fail. */
+	array_init_size(state, intern->array.size);
+
+	for (i = 0; i < intern->array.size; i++) {
+		current = &intern->array.elements[i];
+
+		zend_hash_next_index_insert(Z_ARRVAL_P(state), current);
+
+		Z_TRY_ADDREF_P(current);
+	}
+
+	return true;
+}
+
+static bool spl_fixedarray_object_unserialize_user_cache_state(zval *object, zval *state)
+{
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(object);
+	zend_long size;
+	zval *elem;
+
+	ZEND_ASSERT(intern->array.size == 0);
+
+	size = zend_hash_num_elements(Z_ARRVAL_P(state));
+	if (size != 0) {
+		spl_fixedarray_init_non_empty_struct(&intern->array, size);
+
+		intern->array.size = 0;
+
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(state), elem) {
+			ZVAL_COPY_DEREF(&intern->array.elements[intern->array.size], elem);
+			intern->array.size++;
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	return !EG(exception);
+}
+
+static const php_ucache_safe_direct_handlers_t spl_fixedarray_user_cache_handlers = {
+	.copy = spl_fixedarray_object_copy_user_cache_state,
+	.state_has_unstorable = spl_fixedarray_object_user_cache_state_has_unstorable,
+	.state_serialize = spl_fixedarray_object_serialize_user_cache_state,
+	.state_unserialize = spl_fixedarray_object_unserialize_user_cache_state,
+};
+
 PHP_METHOD(SplFixedArray, count)
 {
 	zval *object = ZEND_THIS;
@@ -958,6 +1064,8 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.get_properties_for = spl_fixedarray_object_get_properties_for;
 	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 	spl_handler_SplFixedArray.free_obj        = spl_fixedarray_object_free_storage;
+
+	php_ucache_safe_direct_register_class(spl_ce_SplFixedArray, &spl_fixedarray_user_cache_handlers);
 
 	return SUCCESS;
 }
