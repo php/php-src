@@ -32,8 +32,7 @@
 #include "zend_jit_internal.h"
 
 #ifdef HAVE_GCC_GLOBAL_REGS
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wvolatile-register-var"
+ZEND_DIAGNOSTIC_IGNORED_START("-Wvolatile-register-var")
 # if defined(__x86_64__)
 register zend_execute_data* volatile execute_data __asm__("%r14");
 register const zend_op* volatile opline __asm__("%r15");
@@ -44,7 +43,7 @@ register const zend_op* volatile opline __asm__("%edi");
 register zend_execute_data* volatile execute_data __asm__("x27");
 register const zend_op* volatile opline __asm__("x28");
 # endif
-# pragma GCC diagnostic pop
+ZEND_DIAGNOSTIC_IGNORED_END
 #endif
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_DATA_DC)
