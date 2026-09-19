@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.27
 
+- CLI:
+  . Fixed bug GH-23764 (Built-in server leaks a file descriptor on every HEAD
+    request for a static file). (Jakub Skopal)
+
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.
