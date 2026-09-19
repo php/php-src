@@ -8,4 +8,4 @@ test(0);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use "array" as a type name as it is reserved in %s on line %d
+Fatal error: Type declaration 'array' must be unqualified in %s on line %d

@@ -281,6 +281,9 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{ZEND_STRL("object"), IS_OBJECT},
 	{ZEND_STRL("mixed"), IS_MIXED},
+	/* Should be handled as ZEND_TYPE_ASTs but it may have a namespace component */
+	{ZEND_STRL("array"), IS_ARRAY},
+	{ZEND_STRL("callable"), IS_CALLABLE},
 	{ZEND_STRL("static"), IS_STATIC},
 	{NULL, 0, IS_UNDEF}
 };
@@ -7642,7 +7645,8 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 					ZSTR_VAL(zend_string_tolower(type_name)));
 			}
 
-			ZEND_ASSERT(type_code != IS_STATIC && "unqualified static type should have been handled by ZEND_AST_TYPE branch");
+			ZEND_ASSERT(type_code != IS_STATIC && type_code != IS_ARRAY && type_code != IS_CALLABLE
+				&& "unqualified array/callable/static type should have been handled by ZEND_AST_TYPE branch");
 
 			/* Transform iterable into a type union alias */
 			if (type_code == IS_ITERABLE) {
