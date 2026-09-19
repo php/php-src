@@ -127,7 +127,11 @@ static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
 
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 
-#define ZSTR_MAX_OVERHEAD (ZEND_MM_ALIGNED_SIZE(_ZSTR_HEADER_SIZE + 1))
+/* Allocation rounds _ZSTR_STRUCT_SIZE() up to ZEND_MM_ALIGNMENT, so the padding
+ * depends on the length, not on the header, and is up to ZEND_MM_ALIGNMENT - 1
+ * bytes. Rounding the header alone is only equivalent while the header is a
+ * multiple of the alignment, which a 64-bit hash on a 32-bit platform is not. */
+#define ZSTR_MAX_OVERHEAD (_ZSTR_HEADER_SIZE + 1 + (ZEND_MM_ALIGNMENT - 1))
 #define ZSTR_MAX_LEN (SIZE_MAX - ZSTR_MAX_OVERHEAD)
 
 /* True when a zend_long is too large to be used as a zend_string length.
