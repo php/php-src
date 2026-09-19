@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
     request activation). (matyhtf)
+  . Fixed bug GH-23764 (Built-in server leaks a file descriptor on every HEAD
+    request for a static file). (jakubskopal)
 
 - Core
   . Fix GH-21999: GC inconsistency with lazy object, var_dump(), and object
