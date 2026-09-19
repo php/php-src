@@ -8,6 +8,11 @@ PHP                                                                        NEWS
   . Fix handling of references to typed properties during unserialization
     of various internal classes. (ndossche, timwolla)
   . Fixed OSS-Fuzz 532353396 (assertion	failure	with static type). (Girgias)
+  . Fix GH-23662 (Avoid NAN warning in print_r()). (CodedByManish)
+
+- CLI
+  . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
+    request activation). (matyhtf)
 
 - Date:
   . Fix unserialization of Time\Duration. (timwolla)
