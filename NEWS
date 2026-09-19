@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     compacting arrays with holes. (Weilin Du)
   . Fix handling of references to typed properties during unserialization
     of various internal classes. (ndossche, timwolla)
+  . Fixed OSS-Fuzz 532353396 (assertion	failure	with static type). (Girgias)
 
 - Date:
   . Fix unserialization of Time\Duration. (timwolla)

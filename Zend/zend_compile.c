@@ -281,6 +281,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{ZEND_STRL("object"), IS_OBJECT},
 	{ZEND_STRL("mixed"), IS_MIXED},
+	{ZEND_STRL("static"), IS_STATIC},
 	{NULL, 0, IS_UNDEF}
 };
 
@@ -7640,6 +7641,8 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(type_name)));
 			}
+
+			ZEND_ASSERT(type_code != IS_STATIC && "unqualified static type should have been handled by ZEND_AST_TYPE branch");
 
 			/* Transform iterable into a type union alias */
 			if (type_code == IS_ITERABLE) {
