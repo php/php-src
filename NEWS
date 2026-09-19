@@ -78,6 +78,10 @@ PHP                                                                        NEWS
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
 
+- Zlib:
+  . Fixed inflate_init() dropping the preset dictionary for raw streams with
+    a non-default window. (Ilia Alshanetsky)
+
 
 10 Sep 2026, PHP 8.6.0beta3
 
