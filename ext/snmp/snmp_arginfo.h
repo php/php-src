@@ -1,7 +1,8 @@
 /* This is a generated file, edit snmp.stub.php instead.
- * Stub hash: 9916f5e1d4db267e7f5d6709adf90decc9dc7f0a
+ * Stub hash: 9a32b308176289c1b1475524372a69257f464bd4
  * Has decl header: yes */
 
+#include "zend_attributes.h"
 #include "zend_constants.h"
 #include "zend_enum.h"
 
@@ -301,6 +302,49 @@ static void register_snmp_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SNMP_UINTEGER", ASN_UINTEGER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_INTEGER", ASN_INTEGER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SNMP_COUNTER64", ASN_COUNTER64, CONST_PERSISTENT);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmpget", sizeof("snmpget") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmpgetnext", sizeof("snmpgetnext") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmpwalk", sizeof("snmpwalk") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmprealwalk", sizeof("snmprealwalk") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmpwalkoid", sizeof("snmpwalkoid") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmpset", sizeof("snmpset") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp2_get", sizeof("snmp2_get") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp2_getnext", sizeof("snmp2_getnext") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp2_walk", sizeof("snmp2_walk") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp2_real_walk", sizeof("snmp2_real_walk") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp2_set", sizeof("snmp2_set") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_get", sizeof("snmp3_get") - 1), 4, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_get", sizeof("snmp3_get") - 1), 6, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_getnext", sizeof("snmp3_getnext") - 1), 4, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_getnext", sizeof("snmp3_getnext") - 1), 6, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_walk", sizeof("snmp3_walk") - 1), 4, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_walk", sizeof("snmp3_walk") - 1), 6, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_real_walk", sizeof("snmp3_real_walk") - 1), 4, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_real_walk", sizeof("snmp3_real_walk") - 1), 6, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_set", sizeof("snmp3_set") - 1), 4, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "snmp3_set", sizeof("snmp3_set") - 1), 6, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 }
 
 static zend_class_entry *register_class_SNMP(void)
@@ -465,6 +509,13 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_string *property_exceptions_enabled_name = zend_string_init("exceptions_enabled", sizeof("exceptions_enabled") - 1, true);
 	zend_declare_typed_property(class_entry, property_exceptions_enabled_name, &property_exceptions_enabled_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(property_exceptions_enabled_name, true);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setsecurity", sizeof("setsecurity") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setsecurity", sizeof("setsecurity") - 1), 4, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

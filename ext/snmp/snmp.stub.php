@@ -115,18 +115,18 @@ namespace
      */
     const SNMP_COUNTER64 = UNKNOWN;
 
-    function snmpget(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
+    function snmpget(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
-    function snmpgetnext(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
+    function snmpgetnext(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
-    function snmpwalk(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
+    function snmpwalk(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
-    function snmprealwalk(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
+    function snmprealwalk(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
     /** @alias snmprealwalk */
-    function snmpwalkoid(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
+    function snmpwalkoid(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
-    function snmpset(string $hostname, string $community, array|string $object_id, array|string $type, array|string $value, int $timeout = -1, int $retries = -1): bool {}
+    function snmpset(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, array|string $type, array|string $value, int $timeout = -1, int $retries = -1): bool {}
 
     function snmp_get_quick_print(): bool {}
 
@@ -145,44 +145,44 @@ namespace
     /** @alias snmp_set_oid_output_format */
     function snmp_set_oid_numeric_print(Snmp\OidOutput|int $format): true {}
 
-    function snmp2_get(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
+    function snmp2_get(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
-    function snmp2_getnext(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
+    function snmp2_getnext(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
-    function snmp2_walk(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
+    function snmp2_walk(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
-    function snmp2_real_walk(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
+    function snmp2_real_walk(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
-    function snmp2_set(string $hostname, string $community, array|string $object_id, array|string $type, array|string $value, int $timeout = -1, int $retries = -1): bool {}
+    function snmp2_set(string $hostname, #[\SensitiveParameter] string $community, array|string $object_id, array|string $type, array|string $value, int $timeout = -1, int $retries = -1): bool {}
 
     function snmp3_get(
         string $hostname, string $security_name, string $security_level,
-        string $auth_protocol, string $auth_passphrase,
-        string $privacy_protocol, string $privacy_passphrase,
+        string $auth_protocol, #[\SensitiveParameter] string $auth_passphrase,
+        string $privacy_protocol, #[\SensitiveParameter] string $privacy_passphrase,
         array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
     function snmp3_getnext(
         string $hostname, string $security_name, string $security_level,
-        string $auth_protocol, string $auth_passphrase,
-        string $privacy_protocol, string $privacy_passphrase,
+        string $auth_protocol, #[\SensitiveParameter] string $auth_passphrase,
+        string $privacy_protocol, #[\SensitiveParameter] string $privacy_passphrase,
         array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
     function snmp3_walk(
         string $hostname, string $security_name, string $security_level,
-        string $auth_protocol, string $auth_passphrase,
-        string $privacy_protocol, string $privacy_passphrase,
+        string $auth_protocol, #[\SensitiveParameter] string $auth_passphrase,
+        string $privacy_protocol, #[\SensitiveParameter] string $privacy_passphrase,
         array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
     function snmp3_real_walk(
         string $hostname, string $security_name, string $security_level,
-        string $auth_protocol, string $auth_passphrase,
-        string $privacy_protocol, string $privacy_passphrase,
+        string $auth_protocol, #[\SensitiveParameter] string $auth_passphrase,
+        string $privacy_protocol, #[\SensitiveParameter] string $privacy_passphrase,
         array|string $object_id, int $timeout = -1, int $retries = -1): array|false {}
 
     function snmp3_set(
         string $hostname, string $security_name, string $security_level,
-        string $auth_protocol, string $auth_passphrase,
-        string $privacy_protocol, string $privacy_passphrase,
+        string $auth_protocol, #[\SensitiveParameter] string $auth_passphrase,
+        string $privacy_protocol, #[\SensitiveParameter] string $privacy_passphrase,
         array|string $object_id, array|string $type, array|string $value,
         int $timeout = -1, int $retries = -1): bool {}
 
@@ -239,15 +239,15 @@ namespace
         public int $oid_output_format;
         public int $exceptions_enabled;
 
-        public function __construct(int $version, string $hostname, string $community, int $timeout = -1, int $retries = -1) {}
+        public function __construct(int $version, string $hostname, #[\SensitiveParameter] string $community, int $timeout = -1, int $retries = -1) {}
 
         /** @tentative-return-type */
         public function close(): bool {}
 
         /** @tentative-return-type */
         public function setSecurity(
-            string $securityLevel, string $authProtocol = "", string $authPassphrase = "",
-            string $privacyProtocol = "", string $privacyPassphrase = "",
+            string $securityLevel, string $authProtocol = "", #[\SensitiveParameter] string $authPassphrase = "",
+            string $privacyProtocol = "", #[\SensitiveParameter] string $privacyPassphrase = "",
             string $contextName = "", string $contextEngineId = ""): bool {}
 
 	    /** @tentative-return-type */
