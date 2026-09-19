@@ -1,0 +1,6 @@
+ARG_ENABLE("test-scheduler", "test_scheduler extension: a reference C scheduler for the Async Core hooks (testing only)", "no");
+
+if (PHP_TEST_SCHEDULER != "no") {
+	EXTENSION("test_scheduler", "test_scheduler.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	AC_DEFINE("HAVE_TEST_SCHEDULER", 1, "Define to 1 if the PHP extension 'test_scheduler' is available.");
+}
