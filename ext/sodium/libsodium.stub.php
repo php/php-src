@@ -696,12 +696,12 @@ function sodium_crypto_pwhash_scryptsalsa208sha256_str(#[\SensitiveParameter] st
 function sodium_crypto_pwhash_scryptsalsa208sha256_str_verify(string $hash, #[\SensitiveParameter] string $password): bool {}
 #endif
 
-function sodium_crypto_scalarmult(string $n, string $p): string {}
+function sodium_crypto_scalarmult(#[\SensitiveParameter] string $n, string $p): string {}
 
 #ifdef crypto_core_ristretto255_HASHBYTES
-function sodium_crypto_scalarmult_ristretto255(string $n, string $p): string {}
+function sodium_crypto_scalarmult_ristretto255(#[\SensitiveParameter] string $n, string $p): string {}
 
-function sodium_crypto_scalarmult_ristretto255_base(string $n): string {}
+function sodium_crypto_scalarmult_ristretto255_base(#[\SensitiveParameter] string $n): string {}
 #endif
 
 function sodium_crypto_secretbox(#[\SensitiveParameter] string $message, string $nonce, #[\SensitiveParameter] string $key): string {}
