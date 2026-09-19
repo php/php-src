@@ -43,11 +43,17 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 } else { \
 	CHECK_STATUS(statusval, quiet);\
 	p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;\
+	if (!p) { \
+		if (!quiet) { \
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name)); \
+		} \
+		return FAILURE; \
+	} \
 }
 
 #define MYSQLI_GET_RESULT(statusval) \
 MYSQL_RES *p; \
-if (!obj->ptr) { \
+if (!obj->ptr || !(MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	if (!quiet) { \
 		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
 	} \
@@ -55,11 +61,17 @@ if (!obj->ptr) { \
 } else { \
 	CHECK_STATUS(statusval, quiet);\
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr; \
+	if (!p) { \
+		if (!quiet) { \
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name)); \
+		} \
+		return FAILURE; \
+	} \
 }
 
 #define MYSQLI_GET_STMT(statusval) \
 MYSQL_STMT *p; \
-if (!obj->ptr) { \
+if (!obj->ptr || !(MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	if (!quiet) { \
 		zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name)); \
 	} \
@@ -67,6 +79,12 @@ if (!obj->ptr) { \
 } else { \
 	CHECK_STATUS(statusval, quiet); \
 	p = (MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt; \
+	if (!p) { \
+		if (!quiet) { \
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name)); \
+		} \
+		return FAILURE; \
+	} \
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_LONG_OR_STR( __func, __int_func, __get_type, __ret_type, __ret_type_sprint_mod)\
@@ -172,7 +190,12 @@ static zend_result link_affected_rows_read(mysqli_object *obj, zval *retval, boo
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
 	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	ZEND_ASSERT(mysql);
+	if (!mysql || !mysql->mysql) {
+		if (!quiet) {
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name));
+		}
+		return FAILURE;
+	}
 
 	rc = mysql_affected_rows(mysql->mysql);
 
@@ -200,7 +223,7 @@ static zend_result link_error_list_read(mysqli_object *obj, zval *retval, bool q
 
 	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	if (mysql) {
+	if (mysql && mysql->mysql) {
 		array_init(retval);
 		MYSQLND_ERROR_LIST_ELEMENT * message;
 		zend_llist_position pos;
@@ -247,7 +270,12 @@ static zend_result result_type_read(mysqli_object *obj, zval *retval, bool quiet
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	ZEND_ASSERT(p);
+	if (!p) {
+		if (!quiet) {
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name));
+		}
+		return FAILURE;
+	}
 	ZVAL_LONG(retval, mysqli_result_is_unbuffered(p) ? MYSQLI_USE_RESULT:MYSQLI_STORE_RESULT);
 
 	return SUCCESS;
@@ -263,8 +291,14 @@ static zend_result result_lengths_read(mysqli_object *obj, zval *retval, bool qu
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	if (!p) {
+		if (!quiet) {
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name));
+		}
+		return FAILURE;
+	}
 	field_count = mysql_num_fields(p);
-	if (!p || !field_count || !(ret = mysql_fetch_lengths(p))) {
+	if (!field_count || !(ret = mysql_fetch_lengths(p))) {
 		ZVAL_NULL(retval);
 	} else {
 		zend_ulong i;
@@ -295,7 +329,12 @@ static zend_result stmt_id_read(mysqli_object *obj, zval *retval, bool quiet)
 
 	p = (MY_STMT*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	ZEND_ASSERT(p);
+	if (!p || !p->stmt) {
+		if (!quiet) {
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name));
+		}
+		return FAILURE;
+	}
 	ZVAL_LONG(retval, mysqli_stmt_get_id(p->stmt));
 
 	return SUCCESS;
@@ -312,7 +351,12 @@ static zend_result stmt_affected_rows_read(mysqli_object *obj, zval *retval, boo
 
 	p = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	ZEND_ASSERT(p);
+	if (!p || !p->stmt) {
+		if (!quiet) {
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name));
+		}
+		return FAILURE;
+	}
 	rc = mysql_stmt_affected_rows(p->stmt);
 
 	if (rc == (my_ulonglong) -1) {
