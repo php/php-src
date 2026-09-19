@@ -74,6 +74,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #60110 (fclose(), file_put_contents(), copy() do not return false
     properly). (Jakub Zelenka, Ilija Tovilo)
+  . Fixed three Windows-only proc_open() defects: an uninitialized
+    PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
+    lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
 
 
 10 Sep 2026, PHP 8.6.0beta3
