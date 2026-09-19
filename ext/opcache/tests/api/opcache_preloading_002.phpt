@@ -10,7 +10,7 @@ posix
 zend_test
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+if (PHP_OS_FAMILY == 'Windows') die('skip opcache.preload_user is not supported on Windows');
 if (posix_geteuid() !== 0) die('skip Test needs root user');
 ?>
 --FILE--
