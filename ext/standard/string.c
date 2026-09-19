@@ -19,6 +19,9 @@
 #include "php_string.h"
 #include "php_variables.h"
 #include <locale.h>
+#ifdef HAVE_NL_LANGINFO
+# include <langinfo.h>
+#endif
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
@@ -87,6 +90,20 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 	return str;
 }
 /* }}} */
+
+#ifdef ZTS
+/* read the decimal point through nl_langinfo() (thread-safe), instead of taking the lock. */
+PHPAPI char localeconv_decimal_point(void)
+{
+#if defined(HAVE_NL_LANGINFO) && (defined(__GLIBC__) || defined(__MUSL__))
+	return *nl_langinfo(RADIXCHAR);
+#else
+	struct lconv lc;
+	localeconv_r(&lc);
+	return *lc.decimal_point;
+#endif
+}
+#endif
 
 /* {{{ localeconv_r
  * glibc's localeconv is not reentrant, so lets make it so ... sorta */
