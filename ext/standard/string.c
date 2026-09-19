@@ -5524,6 +5524,7 @@ PHP_FUNCTION(str_repeat)
 
 		while (e<ee) {
 			l = (e-s) < (ee-e) ? (e-s) : (ee-e);
+			/* src [s, s+l) and dst [e, e+l) cannot overlap: l <= e-s */
 			memcpy(e, s, l);
 			e += l;
 		}
