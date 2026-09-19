@@ -13073,6 +13073,16 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_eval_const_expr(&ast->child[0]);
 			zend_eval_const_expr(&ast->child[1]);
 			return;
+		// Only FCC and PFA can appear in constant expressions.
+		case ZEND_AST_CALL:
+		case ZEND_AST_STATIC_CALL:
+		{
+			zend_ast *args_ast = zend_ast_call_get_args(ast);
+			if (args_ast && args_ast->kind == ZEND_AST_CALLABLE_CONVERT) {
+				zend_eval_const_expr(&((zend_ast_fcc *) args_ast)->args);
+			}
+			return;
+		}
 		case ZEND_AST_NAMED_ARG:
 			zend_eval_const_expr(&ast->child[1]);
 			return;
