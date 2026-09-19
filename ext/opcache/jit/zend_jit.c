@@ -3745,6 +3745,18 @@ int zend_jit_check_support(void)
 {
 	int i;
 
+#if SIZEOF_ZEND_LONG > SIZEOF_SIZE_T
+	/* The IR x86 backend emits 64bit integer instructions only when built for
+	 * X64. With a zend_long wider than the target word the 8 byte cases are
+	 * absent, so an emit falls through to the byte sized instruction and the
+	 * JIT would silently produce wrong code. */
+	zend_accel_error(ACCEL_LOG_WARNING,
+		"JIT is not supported when zend_long is wider than the platform word. JIT disabled.");
+	JIT_G(enabled) = 0;
+	JIT_G(on) = 0;
+	return FAILURE;
+#endif
+
 #ifdef ZEND_JIT_USE_APPLE_MAP_JIT
 	if (!pthread_jit_write_protect_supported_np()) {
 		zend_accel_error(ACCEL_LOG_WARNING,

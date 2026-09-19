@@ -146,8 +146,6 @@ typedef psetid_t cpu_set_t;
 # define NSIG 32
 #endif
 
-#define LONG_CONST(c) (zend_long) c
-
 #include "Zend/zend_enum.h"
 #include "Zend/zend_max_execution_timer.h"
 
@@ -234,8 +232,8 @@ PHP_RSHUTDOWN_FUNCTION(pcntl)
 
 	/* Reset all signals to their default disposition */
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&PCNTL_G(php_signal_table), signo, handle) {
-		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != (zend_long)SIG_DFL) {
-			php_signal(signo, (Sigfunc *)(zend_long)SIG_DFL, false);
+		if (Z_TYPE_P(handle) != IS_LONG || Z_LVAL_P(handle) != ZEND_PTR_TO_ZEND_LONG(SIG_DFL)) {
+			php_signal(signo, (Sigfunc *) (void *) SIG_DFL, false);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -827,11 +825,11 @@ PHP_FUNCTION(pcntl_signal)
 
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
-		if (Z_LVAL_P(handle) != (zend_long) SIG_DFL && Z_LVAL_P(handle) != (zend_long) SIG_IGN) {
+		if (Z_LVAL_P(handle) != ZEND_PTR_TO_ZEND_LONG(SIG_DFL) && Z_LVAL_P(handle) != ZEND_PTR_TO_ZEND_LONG(SIG_IGN)) {
 			zend_argument_value_error(2, "must be either SIG_DFL or SIG_IGN when an integer value is given");
 			RETURN_THROWS();
 		}
-		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), restart_syscalls) == (void *)SIG_ERR) {
+		if (php_signal(signo, (Sigfunc *) ZEND_LONG_TO_PTR(Z_LVAL_P(handle)), restart_syscalls) == (void *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
@@ -879,7 +877,7 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 	if ((prev_handle = zend_hash_index_find(&PCNTL_G(php_signal_table), signo)) != NULL) {
 		RETURN_COPY(prev_handle);
 	} else {
-		RETURN_LONG((zend_long)SIG_DFL);
+		RETURN_LONG(ZEND_PTR_TO_ZEND_LONG(SIG_DFL));
 	}
 }
 
@@ -1145,7 +1143,7 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 			case SIGFPE:
 			case SIGSEGV:
 			case SIGBUS:
-				add_assoc_long_ex(user_siginfo, "addr", sizeof("addr")-1, (zend_long)siginfo->si_addr);
+				add_assoc_long_ex(user_siginfo, "addr", sizeof("addr")-1, ZEND_PTR_TO_ZEND_LONG(siginfo->si_addr));
 				break;
 #if defined(SIGPOLL) && !defined(__CYGWIN__)
 			case SIGPOLL:
