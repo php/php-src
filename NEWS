@@ -14,6 +14,7 @@ PHP                                                                        NEWS
     restored). (yqtian-se)
   . Fixed OSS-Fuzz #538730793 (Assertion failure when returning by-ref from
     closure invoke). (ndossche)
+  . Fixed OSS-Fuzz #540904105 (ASSERT: ast->attr == T_CLASS_C). (ndossche)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
