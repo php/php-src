@@ -312,6 +312,11 @@ PHP 8.6 UPGRADE NOTES
     endianness modifier. A name starting with these characters is unaffected
     when a repeater precedes it, as in "s1<value".
     RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support
+  . stream_is_local() now returns false for zlib and bzip2 wrappers around
+    non-local streams, e.g. the following are now no longer considered local:
+      - `compress.bzip2://http://127.0.0.1/example.html`
+      - `compress.zlib://http://127.0.0.1/example.html`
+      - `zlib:http://127.0.0.1/example.html`
 
 - Sysvshm:
   . shm_attach() now raises a ValueError when the $key argument is outside the
