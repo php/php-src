@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     unfolded, crashing the VM in zval_undefined_cv). (ndossche)
   . Fixed OSS-Fuzz 532353396 (assertion failure with static type). (Girgias)
 
+- CLI
+  . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
+    request activation). (matyhtf)
+
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.
