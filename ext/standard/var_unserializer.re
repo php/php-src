@@ -265,27 +265,15 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 			if (Z_EXTRA_P(zv) == VAR_WAKEUP_FLAG) {
 				/* Perform delayed __wakeup calls */
 				if (!delayed_call_failed) {
-					zval retval;
-					zend_fcall_info fci;
-					zend_fcall_info_cache fci_cache;
-
 					ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
 
-					fci.size = sizeof(fci);
-					fci.object = Z_OBJ_P(zv);
-					fci.retval = &retval;
-					fci.param_count = 0;
-					fci.params = NULL;
-					fci.named_params = NULL;
-					ZVAL_UNDEF(&fci.function_name);
-
-					fci_cache.function_handler = zend_hash_find_ptr(
-						&fci.object->ce->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP));
-					fci_cache.object = fci.object;
-					fci_cache.called_scope = fci.object->ce;
+					zend_function *fn = zend_hash_find_ptr(&Z_OBJCE_P(zv)->function_table, ZSTR_KNOWN(ZEND_STR_WAKEUP));
+					zval retval;
 
 					BG(serialize_lock)++;
-					if (zend_call_function(&fci, &fci_cache) == FAILURE || Z_ISUNDEF(retval)) {
+					zend_call_known_instance_method(fn, Z_OBJ_P(zv), &retval, 0, NULL);
+					/* Exception thrown */
+					if (Z_ISUNDEF(retval)) {
 						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
