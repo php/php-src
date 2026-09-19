@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
 
+- Opcache:
+  . Fixed OSS-Fuzz #546798343 (Heap-buffer-overflow in optimizer with
+    FCCs and inlining). (ndossche)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
