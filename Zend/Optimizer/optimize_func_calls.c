@@ -61,6 +61,8 @@ static void zend_delete_call_instructions(const zend_op_array *op_array, zend_op
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_CALLABLE_CONVERT:
+			case ZEND_CALLABLE_CONVERT_PARTIAL:
 				call++;
 				break;
 			case ZEND_SEND_VAL:
