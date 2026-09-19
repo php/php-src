@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
 
+- Zip:
+  . Fixed use-after-free when re-entering ZipArchive during destruction or
+    a close warning, and rejected opening streams while closing. (jvoisin)
+
 22 Oct 2026, PHP 8.4.27
 
 - BCMath:

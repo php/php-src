@@ -1089,6 +1089,10 @@ static void _php_zip_progress_callback_free(void *ptr)
 {
 	php_zip_archive *archive = ptr;
 
+	if (UNEXPECTED(!EG(active))) {
+		return;
+	}
+
 	if (!Z_ISUNDEF(archive->progress_callback)) {
 		zval_ptr_dtor(&archive->progress_callback);
 		ZVAL_UNDEF(&archive->progress_callback);
@@ -1100,6 +1104,10 @@ static void _php_zip_progress_callback_free(void *ptr)
 static void _php_zip_cancel_callback_free(void *ptr)
 {
 	php_zip_archive *archive = ptr;
+
+	if (UNEXPECTED(!EG(active))) {
+		return;
+	}
 
 	if (!Z_ISUNDEF(archive->cancel_callback)) {
 		zval_ptr_dtor(&archive->cancel_callback);
@@ -1132,7 +1140,12 @@ void php_zip_archive_release(php_zip_archive *archive)
 	}
 
 	if (archive->za) {
-		if (zip_close(archive->za) != 0) {
+		/* Guard against a re-entrant close() or open() from a progress/cancel
+		 * callback fired during zip_close(), which would run a nested zip_close()
+		 * on the same archive (see ZipArchive::close()). */
+		archive->close = true;
+		int err = zip_close(archive->za);
+		if (err != 0) {
 			php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(archive->za));
 			zip_discard(archive->za);
 		}
@@ -1164,6 +1177,7 @@ static void php_zip_object_detach_archive(ze_zip_object *ze_obj, struct zip *rel
 	ZEND_ASSERT(ze_obj->archive != NULL);
 	ZEND_ASSERT(ze_obj->archive->za == released_za);
 	ze_obj->archive->za = NULL;
+	ze_obj->archive->close = false;
 	php_zip_archive_release(ze_obj->archive);
 	ze_obj->archive = NULL;
 }
@@ -1683,7 +1697,6 @@ PHP_METHOD(ZipArchive, close)
 
 	ze_obj->archive->close = true;
 	err = zip_close(intern);
-	ze_obj->archive->close = false;
 	if (err) {
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 		/* Save error for property reader */
@@ -3159,6 +3172,11 @@ static void php_zip_get_stream(INTERNAL_FUNCTION_PARAMETERS, int type, bool acce
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
+
+	if (Z_ZIP_P(self)->archive->close) {
+		zend_throw_error(NULL, "Already being closed");
+		RETURN_THROWS();
+	}
 
 	if (type) {
 		PHP_ZIP_STAT_PATH(intern, ZSTR_VAL(filename), ZSTR_LEN(filename), flags, sb);
