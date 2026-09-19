@@ -1169,7 +1169,13 @@ bool php_zip_archive_release(php_zip_archive *archive)
 	}
 
 	if (archive->za) {
-		if (zip_close(archive->za) != 0) {
+		/* Guard against a re-entrant close() or open() from a progress/cancel
+		 * callback fired during zip_close(), which would run a nested zip_close()
+		 * on the same archive (see php_zipobj_close()). */
+		archive->close = true;
+		int err = zip_close(archive->za);
+		archive->close = false;
+		if (err != 0) {
 			if (!archive->bailout_callback) {
 				php_error_docref(NULL, E_WARNING, "Cannot destroy the zip context: %s", zip_strerror(archive->za));
 			}
