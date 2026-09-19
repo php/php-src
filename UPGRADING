@@ -318,6 +318,12 @@ PHP 8.6 UPGRADE NOTES
     platform's key_t range instead of passing a truncated key to the operating
     system.
 
+- URI:
+  . Uri\WhatWg\Url::__construct() now sets $softErrors to an empty array when
+    URL processing throws an exception, instead of preserving its value.
+    URL validation errors remain available in the
+    Uri\WhatWg\InvalidUrlException::$errors property.
+
 - Zip:
   . ZipArchive::extractTo now raises a TypeError for the files argument if one
     or more of the entries is not a string.

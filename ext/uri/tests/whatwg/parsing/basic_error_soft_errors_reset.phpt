@@ -1,9 +1,9 @@
 --TEST--
-Test Uri\WhatWg\Url::__construct() - error - leaves soft errors unchanged
+Test Uri\WhatWg\Url::__construct() - error - clears soft errors when an exception is thrown
 --FILE--
 <?php
 
-$softErrors = ["unchanged"];
+$softErrors = ["previous error"];
 
 try {
     new Uri\WhatWg\Url("🐘", softErrors: $softErrors);
@@ -28,7 +28,5 @@ array(1) {
     bool(true)
   }
 }
-array(1) {
-  [0]=>
-  string(9) "unchanged"
+array(0) {
 }
