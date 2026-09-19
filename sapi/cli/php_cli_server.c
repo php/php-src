@@ -1396,9 +1396,11 @@ static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->query_string = NULL;
 	req->query_string_len = 0;
 	zend_hash_init(&req->headers, 0, NULL, cli_header_value_dtor, 1);
-	/* No destructor is registered as the value pointed by is the same as for &req->headers */
 	GC_MAKE_PERSISTENT_LOCAL(&req->headers);
-	zend_hash_init(&req->headers_original_case, 0, NULL, NULL, 1);
+	/* headers and headers_original_case are keyed differently (lowercased vs
+	 * as-sent) and can therefore diverge on a case-varying duplicate header,
+	 * so each table owns its own reference to the value. */
+	zend_hash_init(&req->headers_original_case, 0, NULL, cli_header_value_dtor, 1);
 	GC_MAKE_PERSISTENT_LOCAL(&req->headers_original_case);
 	req->content = NULL;
 	req->content_len = 0;
@@ -1697,8 +1699,11 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 		ZVAL_STR(&tmp, newval);
 	}
 
-	/* Add/Update the wrapped zend_string to the HashTable */
+	/* Add/Update the wrapped zend_string to the HashTable. Both tables now own
+	 * a reference to the same value, so take one before handing it to the
+	 * second table. */
 	zend_hash_update(&client->request.headers, lc_header_name, &tmp);
+	zend_string_addref(Z_STR(tmp));
 	zend_hash_update(&client->request.headers_original_case, client->current_header_name, &tmp);
 
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
