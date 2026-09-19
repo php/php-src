@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Core
   . Fix GH-21999: GC inconsistency with lazy object, var_dump(), and object
     comparison. (Arnaud)
+  . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
+    (ndossche)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
