@@ -40,6 +40,7 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-23106 (mb_strpos() reads past the end of a haystack ending in
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
+  . Updated Unicode data tables to Unicode 18.0 (Yuya Hamada)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
