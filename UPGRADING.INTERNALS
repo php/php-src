@@ -184,6 +184,19 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zval* that is IS_UNDEF when the closure is unbound.
   . object_properties_load() now verifies that the given value is assignable
     to typed properties. The check is performed in strict mode.
+  . `php_stream_wrapper.is_url` switched from a binary flag (stored as an `int`)
+    to an instance of the new `php_stream_wrapper_is_url` enum:
+    * the value `0` maintains the same meaning of a stream never being a URL,
+      and is equivalent to the new `STREAM_IS_URL_NEVER` case which has the
+      underlying value `0`.
+    * the value `1` maintains the same meaning of a stream always being a URL,
+      and is equivalent to the new `STREAM_IS_URL_ALWAYS` case which has the
+      underlying value `1`.
+    * a value of `2` is now supported, using `STREAM_IS_URL_SOMETIMES`, which
+      indicates that the `stream_is_url` callback should be consulted.
+  . Extended `php_stream_wrapper_ops()` with a new `stream_is_url` callback,
+    which is required when `php_stream_wrapper.is_url` is set to
+    `STREAM_IS_URL_SOMETIMES`.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
@@ -236,6 +249,7 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     "INF" and "NAN" fail, while leading-numeric strings emit E_WARNING. When
     *failed is true, the returned value must not be used and an exception may
     already be pending. Passing an IS_UNDEF zval is a caller error.
+  . Added `php_stream_wrapper_is_url` C enum.
 
 ========================
 2. Build system changes
