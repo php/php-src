@@ -1,6 +1,7 @@
 /* This is a generated file, edit sqlite3.stub.php instead.
- * Stub hash: 247f02e9b12b901b36bb863cf2a8e73b3d97a191 */
+ * Stub hash: 0c37fc2e489ac04aa5d663644396cdd914a4e3a4 */
 
+#include "zend_attributes.h"
 #include "zend_constants.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
@@ -549,6 +550,11 @@ static zend_class_entry *register_class_SQLite3(void)
 	zend_declare_typed_class_constant(class_entry, const_RECURSIVE_name, &const_RECURSIVE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_RECURSIVE_name, true);
 #endif
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "open", sizeof("open") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }
