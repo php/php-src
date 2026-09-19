@@ -41,10 +41,12 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
-#elif (defined(__i386__) || defined(__x86_64__)) && defined(__GNUC__)
+#elif defined(__GNUC__) && \
+    ((defined(__i386__) && SIZEOF_ZEND_LONG == 4) || \
+     (defined(__x86_64__) && SIZEOF_ZEND_LONG == 8))
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long __tmpvar; 													\
+	zend_long __tmpvar; 											\
 	__asm__ ("imul %3,%0\n"											\
 		"adc $0,%1" 												\
 			: "=r"(__tmpvar),"=r"(usedval) 							\
@@ -53,10 +55,10 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
-#elif defined(__arm__) && defined(__GNUC__)
+#elif defined(__arm__) && defined(__GNUC__) && SIZEOF_ZEND_LONG == 4
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long __tmpvar; 													\
+	zend_long __tmpvar; 											\
 	__asm__("smull %0, %1, %2, %3\n"								\
 		"sub %1, %1, %0, asr #31"									\
 			: "=r"(__tmpvar), "=r"(usedval)							\
@@ -65,10 +67,10 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
-#elif defined(__aarch64__) && defined(__GNUC__)
+#elif defined(__aarch64__) && defined(__GNUC__) && SIZEOF_ZEND_LONG == 8
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long __tmpvar; 													\
+	zend_long __tmpvar; 											\
 	__asm__("mul %0, %2, %3\n"										\
 		"smulh %1, %2, %3\n"										\
 		"sub %1, %1, %0, asr #63\n"									\
@@ -98,10 +100,10 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
-#elif defined(__powerpc64__) && defined(__GNUC__)
+#elif defined(__powerpc64__) && defined(__GNUC__) && SIZEOF_ZEND_LONG == 8
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	long __low, __high;						\
+	zend_long __low, __high;						\
 	__asm__("mulld %0,%2,%3\n\t"					\
 		"mulhd %1,%2,%3\n"					\
 		: "=&r"(__low), "=&r"(__high)				\
@@ -123,7 +125,7 @@
 		(dval) = (double) __result;									\
 		(usedval) = 1;												\
 	} else {														\
-		(lval) = (long) __result;									\
+		(lval) = (zend_long) __result;								\
 		(usedval) = 0;												\
 	}																\
 } while (0)
@@ -131,7 +133,7 @@
 #else
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	long   __lres  = (a) * (b);										\
+	zend_long __lres = (a) * (b);									\
 	long double __dres  = (long double)(a) * (long double)(b);		\
 	long double __delta = (long double) __lres - __dres;			\
 	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
