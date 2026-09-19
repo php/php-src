@@ -59,6 +59,10 @@ PHP                                                                        NEWS
   . Reverted the validity check on the flags argument of posix_access().
     (David Carlier)
 
+- Readline:
+  . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
+    set to an empty string. (Ilia Alshanetsky)
+
 - SPL:
   . Fixed bug GH-23385 (SplDoublyLinkedList::serialize() use-after-free when
     __serialize() removes an element). (David Carlier)
