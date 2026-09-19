@@ -12749,25 +12749,59 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 					ir_IF_TRUE(if_type);
 				}
 			}
-			jit_SET_EX_OPLINE(jit, opline);
 			str_ref = jit_Z_PTR(jit, op1_addr);
-			if (opline->opcode != ZEND_FETCH_DIM_IS) {
-				ir_ref ref;
-
-				if ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_LONG) {
-					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_str_offset_r_helper),
-						str_ref, jit_Z_LVAL(jit, op2_addr));
-				} else {
-					ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_str_r_helper),
-						str_ref, jit_ZVAL_ADDR(jit, op2_addr));
+			if (opline->opcode != ZEND_FETCH_DIM_IS
+			 && (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_LONG) {
+				ir_ref offset_ref = jit_Z_LVAL(jit, op2_addr);
+				ir_ref len_ref = ir_LOAD_L(ir_ADD_OFFSET(str_ref, offsetof(zend_string, len)));
+				ir_ref real_offset_ref = offset_ref;
+				if (!op2_range || op2_range->min < 0) {
+					// JIT: if (offset < 0) offset += ZSTR_LEN(str);
+					/* Branchless way to add -1 for negative offsets to the string length. */
+					real_offset_ref = ir_ADD_L(offset_ref,
+						ir_AND_L(len_ref,
+							ir_SAR_L(offset_ref, ir_CONST_LONG(SIZEOF_ZEND_LONG * 8 - 1))));
 				}
+
+				/* An offset that is still negative wraps around and fails this check as well. */
+				ir_ref if_in_range = ir_IF(ir_ULT(real_offset_ref, len_ref));
+
+				ir_IF_TRUE(if_in_range);
+				// JIT: result = ZSTR_CHAR((uint8_t)ZSTR_VAL(str)[offset]);
+				ir_ref ref = ir_LOAD_A(
+					ir_ADD_A(
+						ir_CONST_ADDR(zend_one_char_string),
+						ir_MUL_A(
+							ir_ZEXT_A(
+								ir_LOAD_U8(
+									ir_ADD_A(ir_ADD_OFFSET(str_ref, offsetof(zend_string, val)),
+										ir_BITCAST_A(real_offset_ref)))),
+							ir_CONST_ADDR(sizeof(zend_string*)))));
+				ir_ref fast_path = ir_END();
+
+				ir_IF_FALSE_cold(if_in_range);
+				jit_SET_EX_OPLINE(jit, opline);
+				ir_ref slow_ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_str_offset_r_helper),
+					str_ref, offset_ref);
+
+				ir_MERGE_WITH(fast_path);
+				ref = ir_PHI_2(IR_ADDR, slow_ref, ref);
 				jit_set_Z_PTR(jit, res_addr, ref);
 				jit_set_Z_TYPE_INFO(jit, res_addr, IS_STRING);
 			} else {
-				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_fetch_dim_str_is_helper),
-					str_ref,
-					jit_ZVAL_ADDR(jit, op2_addr),
-					jit_ZVAL_ADDR(jit, res_addr));
+				jit_SET_EX_OPLINE(jit, opline);
+				if (opline->opcode != ZEND_FETCH_DIM_IS) {
+					ir_ref ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_dim_str_r_helper),
+						str_ref, jit_ZVAL_ADDR(jit, op2_addr));
+
+					jit_set_Z_PTR(jit, res_addr, ref);
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_STRING);
+				} else {
+					ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_fetch_dim_str_is_helper),
+						str_ref,
+						jit_ZVAL_ADDR(jit, op2_addr),
+						jit_ZVAL_ADDR(jit, res_addr));
+				}
 			}
 			ir_END_list(end_inputs);
 		}
