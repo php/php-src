@@ -148,7 +148,7 @@
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)
 {
 	size_t res = nmemb;
-	size_t m_overflow = 0;
+	size_t m_overflow;
 
 	if (ZEND_CONST_COND(offset == 0, 0)) {
 		__asm__ ("mull %3\n\tadcl $0,%1"
@@ -178,7 +178,7 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)
 {
 	size_t res;
-	zend_ulong m_overflow = 0;
+	size_t m_overflow = 0;
 
 #ifdef __ILP32__ /* x32 */
 # define LP_SUFF "l"
@@ -226,7 +226,7 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)
 {
 	size_t res;
-	zend_ulong m_overflow;
+	size_t m_overflow;
 
 	__asm__ ("umlal %0,%1,%2,%3"
 		: "=r"(res), "=r"(m_overflow)
@@ -248,7 +248,7 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)
 {
 	size_t res;
-	zend_ulong m_overflow;
+	size_t m_overflow;
 
 	__asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,xzr"
 		: "=&r"(res), "=&r"(m_overflow)
@@ -270,7 +270,7 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)
 {
         size_t res;
-        unsigned long m_overflow;
+        size_t m_overflow;
 
         __asm__ ("mulld %0,%2,%3\n\t"
                  "mulhdu %1,%2,%3\n\t"
