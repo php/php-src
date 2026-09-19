@@ -27,8 +27,8 @@ for ($i = 0; $i < 30000; $i++) {
 
 try {
     serialize($firstNode);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 while ($next = $firstNode->next) {
@@ -37,4 +37,4 @@ while ($next = $firstNode->next) {
 
 ?>
 --EXPECTF--
-Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+Error: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?

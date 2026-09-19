@@ -39,8 +39,8 @@ foreach ($inputs as $i => $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(dechex($input));
-    } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -61,10 +61,10 @@ string(4) "3039"
 string(16) "fffffffffffff6d7"
 
 -- Iteration 5 --
-dechex(): Argument #1 ($num) must be of type int, float given
+TypeError: dechex(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 6 --
-dechex(): Argument #1 ($num) must be of type int, float given
+TypeError: dechex(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
 string(10) "1cbe991a08"
@@ -82,7 +82,7 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 12 --
-dechex(): Argument #1 ($num) must be of type int, string given
+TypeError: dechex(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 13 --
-dechex(): Argument #1 ($num) must be of type int, string given
+TypeError: dechex(): Argument #1 ($num) must be of type int, string given

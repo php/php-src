@@ -14,8 +14,8 @@ echo "\n-- Testing for invalid negative maxlen values --\n";
 file_put_contents($file_path."/file_put_contents_error1.tmp", "Garbage data in the file");
 try {
     file_get_contents($file_path."/file_put_contents_error1.tmp", FALSE, NULL, 0, -5);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\n*** Done ***\n";
@@ -34,6 +34,6 @@ unlink($file_path."/file_put_contents_error1.tmp");
 Warning: file_get_contents(): Failed to open stream: No such file or directory in %s on line %d
 
 -- Testing for invalid negative maxlen values --
-file_get_contents(): Argument #5 ($length) must be greater than or equal to 0
+ValueError: file_get_contents(): Argument #5 ($length) must be greater than or equal to 0
 
 *** Done ***

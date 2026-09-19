@@ -19,8 +19,8 @@ $values = array(10,
 foreach ($values as $value) {
     try {
        var_dump(decoct($value));
-    } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -43,6 +43,6 @@ string(4) "7556"
 Deprecated: Implicit conversion from float-string "3.9505e3" to int loses precision in %s on line %d
 string(4) "7556"
 string(2) "47"
-decoct(): Argument #1 ($num) must be of type int, string given
+TypeError: decoct(): Argument #1 ($num) must be of type int, string given
 string(1) "1"
 string(1) "0"

@@ -23,8 +23,8 @@ $fp = fopen( __FILE__, "r" );
 $fp_copy = $fp;
 try {
     var_dump( str_replace($fp_copy, $fp_copy, $fp_copy, $fp_copy) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 var_dump( $fp_copy );
 fclose($fp);
@@ -40,5 +40,5 @@ string(1) "q"
 int(1)
 string(0) ""
 int(0)
-str_replace(): Argument #1 ($search) must be of type array|string, resource given
+TypeError: str_replace(): Argument #1 ($search) must be of type array|string, resource given
 resource(%d) of type (stream)

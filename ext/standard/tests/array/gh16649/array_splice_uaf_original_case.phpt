@@ -21,10 +21,10 @@ $arr = ["a" => "1", "3" => new C, "2" => "2"];
 try {
     array_splice($arr, 1, 2);
     echo "ERROR: Should have thrown exception\n";
-} catch (Error $e) {
-    echo "Exception caught: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
 Deprecated: Returning a value from a destructor is deprecated in %s on line %d
-Exception caught: Array was modified during array_splice operation
+Error: Array was modified during array_splice operation

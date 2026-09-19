@@ -54,8 +54,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(base_convert($input, 10, 8));
-    } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
     $iterator++;
 }
@@ -125,7 +125,7 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 17 --
-base_convert(): Argument #1 ($num) must be of type string, array given
+TypeError: base_convert(): Argument #1 ($num) must be of type string, array given
 
 -- Iteration 18 --
 
@@ -143,4 +143,4 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 string(1) "0"
 
 -- Iteration 21 --
-base_convert(): Argument #1 ($num) must be of type string, resource given
+TypeError: base_convert(): Argument #1 ($num) must be of type string, resource given
