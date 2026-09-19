@@ -188,16 +188,11 @@ IC_METHOD(getNumericValue) {
 /* }}} */
 
 /* {{{ */
-typedef struct _enumCharType_data {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache;
-} enumCharType_data;
-static UBool enumCharType_callback(enumCharType_data *context,
+static UBool enumCharType_callback(const void *context,
 		UChar32 start, UChar32 limit, UCharCategory type) {
-	zval retval;
+	const zend_fcall_info_cache *fcc = static_cast<const zend_fcall_info_cache *>(context);
 	zval args[3];
 
-	ZVAL_NULL(&retval);
 	/* Note that $start is INclusive, while $limit is EXclusive
 	 * Therefore (0, 32, 15) means CPs 0..31 are of type 15
 	 */
@@ -205,27 +200,19 @@ static UBool enumCharType_callback(enumCharType_data *context,
 	ZVAL_LONG(&args[1], limit);
 	ZVAL_LONG(&args[2], type);
 
-	context->fci.retval = &retval;
-	context->fci.param_count = 3;
-	context->fci.params = args;
-
-	if (zend_call_function(&context->fci, &context->fci_cache) == FAILURE) {
-		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
-		intl_errors_set_custom_msg(NULL, "enumCharTypes callback failed");
-		zval_ptr_dtor(&retval);
-		return 0;
-	}
-	zval_ptr_dtor(&retval);
-	return 1;
+	zend_call_known_fcc(fcc, NULL, 3, args, NULL);
+	return !EG(exception);
 }
 IC_METHOD(enumCharTypes) {
-	enumCharType_data context;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(context.fci, context.fci_cache)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
-	u_enumCharTypes((UCharEnumTypeRange*)enumCharType_callback, &context);
+	u_enumCharTypes(enumCharType_callback, &fcc);
+	zend_release_fcall_info_cache(&fcc);
 }
 /* }}} */
 

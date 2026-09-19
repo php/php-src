@@ -1111,6 +1111,7 @@ PHP 8.6 UPGRADE NOTES
     their returned arrays.
   . Improved performance of transliterator_list_ids() and
     resourcebundle_locales() by pre-allocating their returned arrays.
+  . Optimized callback invocation in IntlChar::enumCharTypes().
 
 - JSON:
   . Improve performance of encoding arrays and objects.
