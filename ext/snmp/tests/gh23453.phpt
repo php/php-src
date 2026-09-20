@@ -10,8 +10,8 @@ $session = new SNMP(SNMP::VERSION_3, 'localhost', 'user');
 var_dump($session->setSecurity('authPriv', 'SHA', 'authpassword12345', 'AES', 'privpassword12345', 'myContext', str_repeat('aa', 32)));
 try {
     var_dump($session->setSecurity('authPriv', 'SHA', 'authpassword12345', 'AES', 'privpassword12345', 'myContext', str_repeat('aa', 33)));
-} catch (\ValueError $e) {
-    echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
