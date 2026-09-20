@@ -3672,7 +3672,7 @@ file_cache_fallback:
 	}
 
 	if (ZCG(enabled) && accel_startup_ok) {
-		/* Override inheritance cache callbaks */
+		/* Override inheritance cache callbacks */
 		accelerator_orig_inheritance_cache_get = zend_inheritance_cache_get;
 		accelerator_orig_inheritance_cache_add = zend_inheritance_cache_add;
 		zend_inheritance_cache_get = zend_accel_inheritance_cache_get;

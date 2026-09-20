@@ -10,7 +10,7 @@ the PHP binary is in the auto load safe path:
 See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-Auto_002dloading.html
 See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html#Auto_002dloading-safe-path
 
-If needed, pretty printers can be by-passed by using the /r flag:
+If needed, pretty printers can be bypassed by using the /r flag:
   (gdb) p /r any_variable
 
 Use |set print pretty| to enable multi-line printing and indentation:

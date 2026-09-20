@@ -1785,7 +1785,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 				(property_info->flags & ZEND_ACC_STATIC) == 0) {
 				bool is_typed = ZEND_TYPE_IS_SET(property_info->type);
 
-				/* Mimick unserialize behaviour for virtual properties. */
+				/* Mimic unserialize behaviour for virtual properties. */
 				if (UNEXPECTED(property_info->flags & ZEND_ACC_VIRTUAL)) {
 					zend_throw_error(NULL, "Cannot unserialize value for virtual property %s::$%s", ZSTR_VAL(object->ce->name), zend_get_unmangled_property_name(property_info->name));
 					return;
@@ -1808,7 +1808,7 @@ ZEND_API void object_properties_load(zend_object *object, const HashTable *prope
 						ZVAL_COPY(&val, prop);
 						ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(&val), property_info);
 					} else {
-						/* Mimick zend_assign_to_typed_prop() by reporting the error before doing work. */
+						/* Mimic zend_assign_to_typed_prop() by reporting the error before doing work. */
 						if (UNEXPECTED((property_info->flags & ZEND_ACC_READONLY)
 						 && !Z_ISUNDEF_P(slot)
 						 && !(Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE))) {

@@ -914,13 +914,13 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	/**
 	 * Generate function body.
 	 *
-	 * If we may need to forward superflous arguments, do that conditionally, as
+	 * If we may need to forward superfluous arguments, do that conditionally, as
 	 * it's faster:
 	 *
 	 * if (func_num_args() <= n) {
 	 *    // normal call
 	 * } else {
-	 *    // call with superflous arg forwarding
+	 *    // call with superfluous arg forwarding
 	 * }
 	 *
 	 * The func_num_args() call should be compiled to a single FUNC_NUM_ARGS op.

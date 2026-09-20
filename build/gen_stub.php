@@ -2413,7 +2413,7 @@ class EvaluatedValue
             // interpolation shouldn't be possible in a stub, so we don't need
             // to worry about mangling such a case.
             if (preg_match("/(^'|'$)/", $expr)) {
-                $expr = substr($expr, 1, -1); // strip quotes, readd later
+                $expr = substr($expr, 1, -1); // strip quotes, re-add later
                 $expr = str_replace("\\'", "'", $expr);
                 $expr = addcslashes($expr, "\\\"");
                 $expr = "\"$expr\"";
