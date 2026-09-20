@@ -5,7 +5,7 @@ Test Uri\WhatWg\UrlBuilder::build() - error - preserves soft errors output with 
 
 $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setPath("/a\tb");
-$softErrors = ["unchanged"];
+$softErrors = ["previous error"];
 
 try {
     $builder->build(new Uri\WhatWg\Url("foo:opaque"), $softErrors);
@@ -23,7 +23,5 @@ var_dump($softErrors);
 Uri\WhatWg\InvalidUrlException: The specified path is malformed (MissingSchemeNonRelativeUrl)
 enum(Uri\WhatWg\UrlValidationErrorType::MissingSchemeNonRelativeUrl)
 enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
-array(1) {
-  [0]=>
-  string(9) "unchanged"
+array(0) {
 }

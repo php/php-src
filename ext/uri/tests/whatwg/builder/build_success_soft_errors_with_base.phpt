@@ -7,13 +7,11 @@ $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setPath("/a\tb");
 $builder->setFragment("x\ny");
 $base = new Uri\WhatWg\Url("https://example.com/");
-$softErrors = ["old"];
+$softErrors = ["previous error"];
 $url = $builder->build($base, $softErrors);
 
 var_dump($url->toAsciiString());
-foreach ($softErrors as $error) {
-    var_dump($error->type);
-}
+var_dump($softErrors);
 
 $builder->setPath("/ab");
 $builder->setFragment("xy");
@@ -21,9 +19,28 @@ $builder->build($base, $softErrors);
 var_dump($softErrors);
 
 ?>
---EXPECT--
+--EXPECTF--
 string(25) "https://example.com/ab#xy"
-enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
-enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+array(2) {
+  [0]=>
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
+    ["context"]=>
+    string(2) "	b"
+    ["type"]=>
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+    ["failure"]=>
+    bool(false)
+  }
+  [1]=>
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
+    ["context"]=>
+    string(2) "
+y"
+    ["type"]=>
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+    ["failure"]=>
+    bool(false)
+  }
+}
 array(0) {
 }
