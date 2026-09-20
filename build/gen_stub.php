@@ -2169,7 +2169,7 @@ OUPUT_EXAMPLE
 
                 $methodSynopsis->appendChild($methodparam);
                 foreach ($arg->attributes as $attribute) {
-                    $attribute = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                    $attribute = $doc->createElement("modifier", (string) $attribute);
                     $attribute->setAttribute("role", "attribute");
 
                     $methodparam->appendChild($attribute);
@@ -3355,6 +3355,24 @@ class AttributeInfo {
         private readonly array $args,
     ) {}
 
+    public function __toString(): string {
+        $code = '#[\\' . $this->class;
+        if (!empty($this->args)) {
+            $prettyPrinter = new Standard;
+            $args = [];
+            foreach ($this->args as $arg) {
+                $argStr = $prettyPrinter->prettyPrintExpr($arg->value);
+                if ($arg->name !== null) {
+                    $argStr = $arg->name->name . ': ' . $argStr;
+                }
+                $args[] = $argStr;
+            }
+            $code .= '(' . implode(', ', $args) . ')';
+        }
+        $code .= ']';
+        return $code;
+    }
+
     /**
      * @param array<string, ConstInfo> $allConstInfos
      * @param array<string, string> &$declaredStrings Map of string content to
@@ -4407,6 +4425,7 @@ class FileInfo {
     public static function parseStubFile(string $code): FileInfo {
         $parser = new PhpParser\Parser\Php7(new PhpParser\Lexer\Emulative());
         $nodeTraverser = new PhpParser\NodeTraverser;
+        $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\CloningVisitor);
         $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
         $prettyPrinter = new class extends Standard {
             protected function pName_FullyQualified(Name\FullyQualified $node): string {
@@ -4415,7 +4434,7 @@ class FileInfo {
         };
 
         $stmts = $parser->parse($code);
-        $nodeTraverser->traverse($stmts);
+        $stmts = $nodeTraverser->traverse($stmts);
 
         $fileTags = DocCommentTag::parseDocComments(self::getFileDocComments($stmts));
         $fileInfo = new FileInfo($fileTags);
