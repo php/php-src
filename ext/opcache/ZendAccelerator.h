@@ -340,6 +340,7 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
 const zend_op_array *zend_accel_pfa_cache_get(
 		const uint32_t *declaring_lineno_ptr, const zend_function *called_function, bool cacheable_in_shm);
 
+/* Compiles ast into an op_array, and caches it. Takes ownership of ast. */
 zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		zend_string *declaring_filename,
 		const uint32_t *declaring_lineno_ptr,
