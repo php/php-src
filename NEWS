@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23729 (DOMXPath::__construct() use-after-free during an
     evaluation). (David Carlier)
 
+- FTP:
+  . Fixed bug GH-23619 (cryptic error on servers that don't support TLS
+    session resumption on data connection). (ndossche)
+
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
     such as dateType, timeType, calendar and the message pattern.
