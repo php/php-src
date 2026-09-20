@@ -9,6 +9,9 @@ PHP                                                                        NEWS
     of various internal classes. (ndossche, timwolla)
   . Fixed OSS-Fuzz 532353396 (assertion	failure	with static type). (Girgias)
   . Fix GH-23662 (Avoid NAN warning in print_r()). (CodedByManish)
+  . Fixed bug GH-23752 (Use scoped diagnostic suppression for the global
+    register declarations so the caller's -Wvolatile-register-var state is
+    restored). (yqtian-se)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
