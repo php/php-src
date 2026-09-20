@@ -561,6 +561,169 @@ static void fpm_status_handle_xml(struct fpm_scoreboard_s *scoreboard_p, int ful
 	PUTS("</processes>\n</status>");
 }
 
+static void fpm_status_handle_json(struct fpm_scoreboard_s *scoreboard_p, int full)
+{
+	char *buffer;
+	char time_buffer[64];
+	time_t now_epoch;
+
+	sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1);
+
+	now_epoch = time(NULL);
+	strftime(time_buffer, sizeof(time_buffer) - 1, "%s", localtime(&scoreboard_p->start_epoch));
+
+	spprintf(&buffer, 0,
+		"{"
+		"\"pool\":\"%s\","
+		"\"process manager\":\"%s\","
+		"\"start time\":%s,"
+		"\"start since\":%lu,"
+		"\"accepted conn\":%lu,"
+		"\"listen queue\":%d,"
+		"\"max listen queue\":%d,"
+		"\"listen queue len\":%u,"
+		"\"idle processes\":%d,"
+		"\"active processes\":%d,"
+		"\"total processes\":%d,"
+		"\"max active processes\":%d,"
+		"\"max children reached\":%u,"
+		"\"slow requests\":%lu,"
+		"\"memory peak\":%zu",
+		scoreboard_p->pool,
+		PM2STR(scoreboard_p->pm),
+		time_buffer,
+		(unsigned long) (now_epoch - scoreboard_p->start_epoch),
+		scoreboard_p->requests,
+		scoreboard_p->lq,
+		scoreboard_p->lq_max,
+		scoreboard_p->lq_len,
+		scoreboard_p->idle,
+		scoreboard_p->active,
+		scoreboard_p->idle + scoreboard_p->active,
+		scoreboard_p->active_max,
+		scoreboard_p->max_children_reached,
+		scoreboard_p->slow_rq,
+		scoreboard_p->memory_peak);
+
+	PUTS(buffer);
+	efree(buffer);
+
+	if (!full) {
+		PUTS("}");
+		return;
+	}
+
+	unsigned int i;
+	int first;
+	struct fpm_scoreboard_proc_s *proc;
+	struct timeval duration, now;
+	float cpu;
+	zend_string *tmp_request_uri_string, *tmp_query_string;
+	char *request_uri_string, *query_string;
+
+	fpm_clock_get(&now);
+
+	PUTS(", \"processes\":[");
+
+	first = 1;
+	for (i = 0; i < scoreboard_p->nprocs; i++) {
+		if (!scoreboard_p->procs[i].used) {
+			continue;
+		}
+		proc = &scoreboard_p->procs[i];
+
+		if (first) {
+			first = 0;
+		} else {
+			PUTS(",");
+		}
+
+		request_uri_string = NULL;
+		tmp_request_uri_string = NULL;
+		if (proc->request_uri[0] != '\0') {
+			tmp_request_uri_string = php_json_encode_string(proc->request_uri,
+					strlen(proc->request_uri), PHP_JSON_INVALID_UTF8_IGNORE);
+			request_uri_string = ZSTR_VAL(tmp_request_uri_string);
+			if (ZSTR_LEN(tmp_request_uri_string) >= 2) {
+				request_uri_string[ZSTR_LEN(tmp_request_uri_string) - 1] = '\0';
+				++request_uri_string;
+			}
+		}
+
+		query_string = NULL;
+		tmp_query_string = NULL;
+		if (proc->query_string[0] != '\0') {
+			tmp_query_string = php_json_encode_string(proc->query_string,
+					strlen(proc->query_string), PHP_JSON_INVALID_UTF8_IGNORE);
+			if (tmp_query_string) {
+				query_string = ZSTR_VAL(tmp_query_string);
+				if (ZSTR_LEN(tmp_query_string) >= 2) {
+					query_string[ZSTR_LEN(tmp_query_string) - 1] = '\0';
+					++query_string;
+				}
+			}
+		}
+
+		if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
+			cpu = 0.;
+		} else {
+			cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
+		}
+
+		if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
+			duration = proc->duration;
+		} else {
+			timersub(&now, &proc->accepted, &duration);
+		}
+
+		strftime(time_buffer, sizeof(time_buffer) - 1, "%s", localtime(&proc->start_epoch));
+
+		spprintf(&buffer, 0,
+			"{"
+			"\"pid\":%d,"
+			"\"state\":\"%s\","
+			"\"start time\":%s,"
+			"\"start since\":%lu,"
+			"\"requests\":%lu,"
+			"\"request duration\":%lu,"
+			"\"request method\":\"%s\","
+			"\"request uri\":\"%s%s%s\","
+			"\"content length\":%zu,"
+			"\"user\":\"%s\","
+			"\"script\":\"%s\","
+			"\"last request cpu\":%.2f,"
+			"\"last request memory\":%zu"
+			"}",
+			(int) proc->pid,
+			fpm_request_get_stage_name(proc->request_stage),
+			time_buffer,
+			(unsigned long) (now_epoch - proc->start_epoch),
+			proc->requests,
+			(unsigned long) (duration.tv_sec * 1000000UL + duration.tv_usec),
+			proc->request_method[0] != '\0' ? proc->request_method : "-",
+			request_uri_string ? request_uri_string : "-",
+			query_string ? "?" : "",
+			query_string ? query_string : "",
+			proc->content_length,
+			proc->auth_user[0] != '\0' ? proc->auth_user : "-",
+			proc->script_filename[0] != '\0' ? proc->script_filename : "-",
+			proc->request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
+			proc->request_stage == FPM_REQUEST_ACCEPTING ? proc->memory : 0);
+
+		PUTS(buffer);
+		efree(buffer);
+
+		if (tmp_request_uri_string) {
+			zend_string_free(tmp_request_uri_string);
+		}
+		if (tmp_query_string) {
+			zend_string_free(tmp_query_string);
+		}
+	}
+
+	PUTS("]}");
+}
+
 int fpm_status_handle_request(void) /* {{{ */
 {
 	struct fpm_scoreboard_s *scoreboard_p;
@@ -662,56 +825,14 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		/* JSON */
 		if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("json"))) {
-			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1);
-			time_format = "%s";
+			fpm_status_handle_json(scoreboard_p, full);
+			zend_string_release_ex(_GET_str, 0);
+			fpm_scoreboard_free_copy(scoreboard_p);
+			return 1;
+		}
 
-			encode_json = true;
-
-			short_syntax =
-				"{"
-				"\"pool\":\"%s\","
-				"\"process manager\":\"%s\","
-				"\"start time\":%s,"
-				"\"start since\":%lu,"
-				"\"accepted conn\":%lu,"
-				"\"listen queue\":%d,"
-				"\"max listen queue\":%d,"
-				"\"listen queue len\":%u,"
-				"\"idle processes\":%d,"
-				"\"active processes\":%d,"
-				"\"total processes\":%d,"
-				"\"max active processes\":%d,"
-				"\"max children reached\":%u,"
-				"\"slow requests\":%lu,"
-				"\"memory peak\":%zu";
-
-			if (!full) {
-				short_post = "}";
-			} else {
-				full_separator = ",";
-				full_pre = ", \"processes\":[";
-
-				full_syntax = "{"
-					"\"pid\":%d,"
-					"\"state\":\"%s\","
-					"\"start time\":%s,"
-					"\"start since\":%lu,"
-					"\"requests\":%lu,"
-					"\"request duration\":%lu,"
-					"\"request method\":\"%s\","
-					"\"request uri\":\"%s%s%s\","
-					"\"content length\":%zu,"
-					"\"user\":\"%s\","
-					"\"script\":\"%s\","
-					"\"last request cpu\":%.2f,"
-					"\"last request memory\":%zu"
-					"}";
-
-				full_post = "]}";
-			}
-
-			/* OpenMetrics */
-		} else if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("openmetrics"))) {
+		/* OpenMetrics */
+		if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("openmetrics"))) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: application/openmetrics-text; version=1.0.0; charset=utf-8"), 1, 1);
 			time_format = "%s";
 
