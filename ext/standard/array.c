@@ -4660,8 +4660,8 @@ PHP_FUNCTION(array_column)
 		RETURN_EMPTY_ARRAY();
 	}
 
-	array_init_size(return_value, num_elements);
 	if (column_is_null && index_is_null) {
+		array_init_size(return_value, num_elements);
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			ZEND_HASH_FOREACH_VAL(input, data) {
@@ -4681,6 +4681,7 @@ PHP_FUNCTION(array_column)
 
 	/* Index param is not passed */
 	if (index_is_null) {
+		array_init_size(return_value, num_elements);
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			ZEND_HASH_FOREACH_VAL(input, data) {
@@ -4697,6 +4698,7 @@ PHP_FUNCTION(array_column)
 		index_long = (zend_long) index;
 		void *cache_slot_index[3] = { NULL, NULL, NULL };
 
+		array_init_size(return_value, num_elements);
 		ZEND_HASH_FOREACH_VAL(input, data) {
 			ZVAL_DEREF(data);
 
