@@ -1346,7 +1346,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 					SKIP_IF_TOP(data);
 
-					if (ct_eval_fetch_obj(&tmp, op1, op2) == SUCCESS) {
+					if (op2 && ct_eval_fetch_obj(&tmp, op1, op2) == SUCCESS) {
 						if (IS_BOT(data)) {
 							dup_partial_object(&zv, op1);
 							ct_eval_del_obj_prop(&zv, op2);
