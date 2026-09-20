@@ -28,8 +28,8 @@ $sock = stream_context_create();
 var_dump($sock);
 try {
     var_dump(stream_supports_lock($sock));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -44,5 +44,5 @@ bool(false)
 resource(%d) of type (stream)
 bool(false)
 resource(%d) of type (stream-context)
-stream_supports_lock(): Argument #1 ($stream) must be an open stream resource
+TypeError: stream_supports_lock(): Argument #1 ($stream) must be an open stream resource
 Done

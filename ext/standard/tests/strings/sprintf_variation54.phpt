@@ -11,8 +11,8 @@ foreach ($formats as $format) {
         echo "$format with " . (is_resource($value) ? "resource" : json_encode($value)) . ":\n";
         try {
             echo sprintf("%" . $format, $value), "\n";
-        } catch (Error $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
         echo "\n";
     }
@@ -52,7 +52,7 @@ Array
 Resource id #%d
 
 %s with {}:
-Object of class stdClass could not be converted to string
+Error: Object of class stdClass could not be converted to string
 
 d with null:
 0

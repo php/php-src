@@ -36,8 +36,8 @@ class Extract
 
             echo "  \$this = " . get_class($this) . "\n";
             echo "  \$v_this = " . (isset($x_this) ? $x_this : "NULL") . "\n";
-        } catch (\Throwable $e) {
-            echo "  Exception: " . $e->getMessage() . "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -47,8 +47,8 @@ class Extract
 ?>
 --EXPECT--
 EXTR_OVERWRITE
-  Exception: Cannot re-assign $this
-  Exception: Cannot re-assign $this
+Error: Cannot re-assign $this
+Error: Cannot re-assign $this
 
 EXTR_SKIP
   extract() = 0

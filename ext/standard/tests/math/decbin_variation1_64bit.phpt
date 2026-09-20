@@ -39,8 +39,8 @@ foreach ($inputs as $i => $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(decbin($input));
-    } catch (TypeError $exception) {
-        echo $exception->getMessage() . "\n";
+    } catch (Throwable $exception) {
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 }
 
@@ -61,10 +61,10 @@ string(14) "11000000111001"
 string(64) "1111111111111111111111111111111111111111111111111111011011010111"
 
 -- Iteration 5 --
-decbin(): Argument #1 ($num) must be of type int, float given
+TypeError: decbin(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 6 --
-decbin(): Argument #1 ($num) must be of type int, float given
+TypeError: decbin(): Argument #1 ($num) must be of type int, float given
 
 -- Iteration 7 --
 string(37) "1110010111110100110010001101000001000"
@@ -82,7 +82,7 @@ string(1) "1"
 string(1) "0"
 
 -- Iteration 12 --
-decbin(): Argument #1 ($num) must be of type int, string given
+TypeError: decbin(): Argument #1 ($num) must be of type int, string given
 
 -- Iteration 13 --
-decbin(): Argument #1 ($num) must be of type int, string given
+TypeError: decbin(): Argument #1 ($num) must be of type int, string given

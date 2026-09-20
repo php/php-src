@@ -17,8 +17,8 @@ proc_open("$php -n $callee_escaped", $spec, $pipes);
 $spec[$i] = 1;
 try {
     proc_open("$php -n $callee_escaped", $spec, $pipes);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $spec[$i] = array('pipe', "test");
@@ -33,7 +33,7 @@ echo "END\n";
 ?>
 --EXPECTF--
 Warning: proc_open(): pi is not a valid descriptor spec/mode in %s on line %d
-proc_open(): Argument #2 ($descriptor_spec) must only contain arrays and streams
+ValueError: proc_open(): Argument #2 ($descriptor_spec) must only contain arrays and streams
 array(4) {
   [3]=>
   resource(%d) of type (Unknown)

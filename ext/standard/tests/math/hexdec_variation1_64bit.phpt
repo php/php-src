@@ -61,8 +61,8 @@ foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(hexdec($input));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     $iterator++;
 };
@@ -133,7 +133,7 @@ int(0)
 int(0)
 
 -- Iteration 18 --
-hexdec(): Argument #1 ($hex_string) must be of type string, array given
+TypeError: hexdec(): Argument #1 ($hex_string) must be of type string, array given
 
 -- Iteration 19 --
 
@@ -151,4 +151,4 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 int(2748)
 
 -- Iteration 22 --
-hexdec(): Argument #1 ($hex_string) must be of type string, resource given
+TypeError: hexdec(): Argument #1 ($hex_string) must be of type string, resource given
