@@ -485,20 +485,6 @@ PHP_METHOD(StreamPollHandle, isValid)
 	RETURN_BOOL(intern->ops->is_valid(intern));
 }
 
-PHP_METHOD(StreamPollHandle, getFileDescriptor)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
-	php_socket_t fd = php_poll_handle_get_fd(intern);
-
-	if (fd == SOCK_ERR) {
-		RETURN_LONG(0);
-	}
-
-	RETURN_LONG((zend_long) fd);
-}
-
 PHP_METHOD(Io_Poll_Watcher, __construct)
 {
 	zend_throw_error(NULL, "Cannot directly construct Watcher, use Context::add");
