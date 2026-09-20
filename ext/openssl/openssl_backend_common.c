@@ -1974,6 +1974,8 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	}
 
 	if (free_password) {
+		/* password points at a heap copy of the symmetric key; scrub it before freeing */
+		ZEND_SECURE_ZERO((void *) password, password_len);
 		efree((void *) password);
 	}
 	if (free_iv) {
@@ -2052,6 +2054,8 @@ PHP_OPENSSL_API zend_string* php_openssl_decrypt(
 	}
 
 	if (free_password) {
+		/* password points at a heap copy of the symmetric key; scrub it before freeing */
+		ZEND_SECURE_ZERO((void *) password, password_len);
 		efree((void *) password);
 	}
 	if (free_iv) {
