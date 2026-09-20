@@ -1145,6 +1145,7 @@ PHP 8.6 UPGRADE NOTES
   . Improved performance of str_split().
   . Improved performance of str_pad().
   . Improved performance of str_repeat() when the multiplier is 1.
+  . Removed redundant branches from the SSE2 implementation of str_rot13().
 
 - URI:
   . Improved performance of Uri\WhatWg\Url::parse() when collecting
