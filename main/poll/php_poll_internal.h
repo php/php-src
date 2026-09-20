@@ -164,6 +164,12 @@ static inline int php_poll_timespec_to_ms(const struct timespec *timeout)
 		return -1;
 	}
 
+	/* Cap rather than wrap around: a timeout that long is as good as indefinite,
+	 * where truncating it to an int made poll() return after a few milliseconds */
+	if (timeout->tv_sec >= (INT_MAX - 1000) / 1000) {
+		return INT_MAX;
+	}
+
 	int ms = (int) (timeout->tv_sec * 1000);
 	/* Round nanoseconds up to the next millisecond to avoid premature return */
 	if (timeout->tv_nsec > 0) {
