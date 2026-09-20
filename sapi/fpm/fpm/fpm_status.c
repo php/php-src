@@ -122,6 +122,121 @@ int fpm_status_export_to_zval(zval *status)
 }
 /* }}} */
 
+static void fpm_status_handle_plaintext(struct fpm_scoreboard_s *scoreboard_p, int full)
+{
+	char *buffer;
+	char time_buffer[64];
+	time_t now_epoch;
+
+	sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
+
+	now_epoch = time(NULL);
+	strftime(time_buffer, sizeof(time_buffer) - 1, "%d/%b/%Y:%H:%M:%S %z", localtime(&scoreboard_p->start_epoch));
+
+	spprintf(&buffer, 0,
+		"pool:                 %s\n"
+		"process manager:      %s\n"
+		"start time:           %s\n"
+		"start since:          %lu\n"
+		"accepted conn:        %lu\n"
+		"listen queue:         %d\n"
+		"max listen queue:     %d\n"
+		"listen queue len:     %u\n"
+		"idle processes:       %d\n"
+		"active processes:     %d\n"
+		"total processes:      %d\n"
+		"max active processes: %d\n"
+		"max children reached: %u\n"
+		"slow requests:        %lu\n"
+		"memory peak:          %zu\n",
+		scoreboard_p->pool,
+		PM2STR(scoreboard_p->pm),
+		time_buffer,
+		(unsigned long) (now_epoch - scoreboard_p->start_epoch),
+		scoreboard_p->requests,
+		scoreboard_p->lq,
+		scoreboard_p->lq_max,
+		scoreboard_p->lq_len,
+		scoreboard_p->idle,
+		scoreboard_p->active,
+		scoreboard_p->idle + scoreboard_p->active,
+		scoreboard_p->active_max,
+		scoreboard_p->max_children_reached,
+		scoreboard_p->slow_rq,
+		scoreboard_p->memory_peak);
+
+	PUTS(buffer);
+	efree(buffer);
+
+	if (!full) {
+		return;
+	}
+
+	unsigned int i;
+	struct fpm_scoreboard_proc_s *proc;
+	struct timeval duration, now;
+	float cpu;
+
+	fpm_clock_get(&now);
+
+	for (i = 0; i < scoreboard_p->nprocs; i++) {
+		if (!scoreboard_p->procs[i].used) {
+			continue;
+		}
+
+		proc = &scoreboard_p->procs[i];
+
+		if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
+			cpu = 0.;
+		} else {
+			cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
+		}
+
+		if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
+			duration = proc->duration;
+		} else {
+			timersub(&now, &proc->accepted, &duration);
+		}
+
+		strftime(time_buffer, sizeof(time_buffer) - 1, "%d/%b/%Y:%H:%M:%S %z", localtime(&proc->start_epoch));
+
+		spprintf(&buffer, 0,
+			"\n"
+			"************************\n"
+			"pid:                  %d\n"
+			"state:                %s\n"
+			"start time:           %s\n"
+			"start since:          %lu\n"
+			"requests:             %lu\n"
+			"request duration:     %lu\n"
+			"request method:       %s\n"
+			"request URI:          %s%s%s\n"
+			"content length:       %zu\n"
+			"user:                 %s\n"
+			"script:               %s\n"
+			"last request cpu:     %.2f\n"
+			"last request memory:  %zu\n",
+			(int) proc->pid,
+			fpm_request_get_stage_name(proc->request_stage),
+			time_buffer,
+			(unsigned long) (now_epoch - proc->start_epoch),
+			proc->requests,
+			(unsigned long) (duration.tv_sec * 1000000UL + duration.tv_usec),
+			proc->request_method[0] != '\0' ? proc->request_method : "-",
+			proc->request_uri[0] != '\0' ? proc->request_uri : "-",
+			proc->query_string[0] != '\0' ? "?" : "",
+			proc->query_string[0] != '\0' ? proc->query_string : "",
+			proc->content_length,
+			proc->auth_user[0] != '\0' ? proc->auth_user : "-",
+			proc->script_filename[0] != '\0' ? proc->script_filename : "-",
+			proc->request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
+			proc->request_stage == FPM_REQUEST_ACCEPTING ? proc->memory : 0);
+
+		PUTS(buffer);
+		efree(buffer);
+	}
+}
+
 int fpm_status_handle_request(void) /* {{{ */
 {
 	struct fpm_scoreboard_s *scoreboard_p;
@@ -433,44 +548,10 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		/* TEXT */
 		} else {
-			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
-			time_format = "%d/%b/%Y:%H:%M:%S %z";
-
-			short_syntax =
-				"pool:                 %s\n"
-				"process manager:      %s\n"
-				"start time:           %s\n"
-				"start since:          %lu\n"
-				"accepted conn:        %lu\n"
-				"listen queue:         %d\n"
-				"max listen queue:     %d\n"
-				"listen queue len:     %u\n"
-				"idle processes:       %d\n"
-				"active processes:     %d\n"
-				"total processes:      %d\n"
-				"max active processes: %d\n"
-				"max children reached: %u\n"
-				"slow requests:        %lu\n"
-				"memory peak:          %zu\n";
-
-				if (full) {
-					full_syntax =
-						"\n"
-						"************************\n"
-						"pid:                  %d\n"
-						"state:                %s\n"
-						"start time:           %s\n"
-						"start since:          %lu\n"
-						"requests:             %lu\n"
-						"request duration:     %lu\n"
-						"request method:       %s\n"
-						"request URI:          %s%s%s\n"
-						"content length:       %zu\n"
-						"user:                 %s\n"
-						"script:               %s\n"
-						"last request cpu:     %.2f\n"
-						"last request memory:  %zu\n";
-				}
+			fpm_status_handle_plaintext(scoreboard_p, full);
+			zend_string_release_ex(_GET_str, 0);
+			fpm_scoreboard_free_copy(scoreboard_p);
+			return 1;
 		}
 
 		now_epoch = time(NULL);
