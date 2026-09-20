@@ -67,7 +67,6 @@ struct php_io_poll_context_object {
 
 /* Stream poll handle specific data */
 typedef struct php_stream_poll_handle_data {
-	php_stream *stream;
 	zend_resource *res;
 } php_stream_poll_handle_data;
 
@@ -180,16 +179,29 @@ static const char *php_io_poll_backend_type_to_name(php_poll_backend_type type)
 
 /* Stream Poll Handle Implementation */
 
-static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle)
+static php_stream *php_stream_poll_handle_get_stream(php_poll_handle_object *handle)
 {
 	php_stream_poll_handle_data *data = handle->handle_data;
+
+	/* The reference taken on the resource keeps it alive, but fclose() may have
+	 * destroyed the stream it points to in the meantime. */
+	if (!data || !data->res || data->res->ptr == NULL) {
+		return NULL;
+	}
+
+	return (php_stream *) data->res->ptr;
+}
+
+static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle)
+{
+	php_stream *stream = php_stream_poll_handle_get_stream(handle);
 	php_socket_t fd;
 
-	if (!data || !data->stream) {
+	if (!stream) {
 		return SOCK_ERR;
 	}
 
-	if (php_stream_cast(data->stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+	if (php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 				(void *) &fd, 1)
 					!= SUCCESS
 			|| fd == -1) {
@@ -201,8 +213,8 @@ static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle
 
 static int php_stream_poll_handle_is_valid(php_poll_handle_object *handle)
 {
-	php_stream_poll_handle_data *data = handle->handle_data;
-	return data && data->stream && !php_stream_eof(data->stream);
+	php_stream *stream = php_stream_poll_handle_get_stream(handle);
+	return stream && !php_stream_eof(stream);
 }
 
 static void php_stream_poll_handle_cleanup(php_poll_handle_object *handle)
@@ -454,7 +466,6 @@ PHP_METHOD(StreamPollHandle, __construct)
 
 	/* Set up stream-specific data */
 	php_stream_poll_handle_data *data = emalloc(sizeof(php_stream_poll_handle_data));
-	data->stream = stream;
 	data->res = stream->res;
 	intern->handle_data = data;
 
@@ -469,12 +480,12 @@ PHP_METHOD(StreamPollHandle, getStream)
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
 	php_stream_poll_handle_data *data = intern->handle_data;
 
-	if (!data || !data->stream) {
+	if (!data || !data->res) {
 		RETURN_NULL();
 	}
 
-	GC_ADDREF(data->stream->res);
-	php_stream_to_zval(data->stream, return_value);
+	GC_ADDREF(data->res);
+	RETURN_RES(data->res);
 }
 
 PHP_METHOD(StreamPollHandle, isValid)
