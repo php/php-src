@@ -17,6 +17,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#ifdef __APPLE__
+# include <mach-o/dyld.h>
+#endif
+
 #if ZEND_DEBUG
 # include <assert.h>
 # define TSRM_ASSERT(c) assert(c)
@@ -218,7 +222,28 @@ static pthread_key_t tsrm_exit_key;
 # define TSRM_THREAD_EXIT_CC
 # define tsrm_tls_set(what)		pthread_setspecific(tls_key, (void*)(what))
 # define tsrm_tls_get()			pthread_getspecific(tls_key)
-# define tsrm_exit_key_set(what)	do { if (tsrm_thread_exit_armed) { pthread_setspecific(tsrm_exit_key, (void*)(what)); } } while (0)
+
+# ifdef __APPLE__
+static TSRM_TLS bool tsrm_thread_exit_registered = false;
+static void tsrm_thread_exit_handler(void *arg);
+
+static void tsrm_exit_key_set(tsrm_tls_entry *thread_resources)
+{
+	if (!tsrm_thread_exit_armed) {
+		return;
+	}
+
+	if (pthread_setspecific(tsrm_exit_key, thread_resources) != 0) {
+		return;
+	}
+	if (thread_resources && !tsrm_thread_exit_registered) {
+		tsrm_thread_exit_registered = true;
+		_tlv_atexit(tsrm_thread_exit_handler, NULL);
+	}
+}
+# else
+#  define tsrm_exit_key_set(what)	do { if (tsrm_thread_exit_armed) { pthread_setspecific(tsrm_exit_key, (void*)(what)); } } while (0)
+# endif
 #endif
 
 TSRM_TLS bool in_main_thread = false;
@@ -251,9 +276,16 @@ static void TSRM_THREAD_EXIT_CC tsrm_thread_exit_handler(void *arg)
 		return;
 	}
 #else
+# ifdef __APPLE__
+	tsrm_thread_exit_registered = false;
+	if (!tsrm_thread_exit_armed) {
+		return;
+	}
+	arg = pthread_getspecific(tsrm_exit_key);
+# endif
 	tsrm_tls_entry *thread_resources = (tsrm_tls_entry *) arg;
 
-	if (!tsrm_thread_exit_armed || arg != TSRMLS_CACHE || in_main_thread || !tsrm_tls_table) {
+	if (!tsrm_thread_exit_armed || !arg || arg != TSRMLS_CACHE || in_main_thread || !tsrm_tls_table) {
 		return;
 	}
 #endif
@@ -334,6 +366,8 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 	tsrm_dll_shutdown_in_progress = (BOOLEAN (NTAPI *)(void)) (void *) GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlDllShutdownInProgress");
 	tsrm_exit_key = tsrm_dll_shutdown_in_progress ? FlsAlloc(tsrm_thread_exit_handler) : FLS_OUT_OF_INDEXES;
 	tsrm_thread_exit_armed = tsrm_exit_key != FLS_OUT_OF_INDEXES;
+#elif defined(__APPLE__)
+	tsrm_thread_exit_armed = pthread_key_create(&tsrm_exit_key, NULL) == 0;
 #else
 	tsrm_thread_exit_armed = pthread_key_create(&tsrm_exit_key, tsrm_thread_exit_handler) == 0;
 #endif
