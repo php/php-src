@@ -122,6 +122,25 @@ int fpm_status_export_to_zval(zval *status)
 }
 /* }}} */
 
+static void fpm_status_proc_get_duration_and_cpu(
+	struct fpm_scoreboard_proc_s *proc,
+	struct timeval *now,
+	struct timeval *duration,
+	float *cpu)
+{
+	if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
+		*duration = proc->duration;
+	} else {
+		timersub(now, &proc->accepted, duration);
+	}
+
+	if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
+		*cpu = 0.;
+	} else {
+		*cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
+	}
+}
+
 static void fpm_status_handle_plaintext(struct fpm_scoreboard_s *scoreboard_p, int full)
 {
 	char *buffer;
@@ -186,17 +205,7 @@ static void fpm_status_handle_plaintext(struct fpm_scoreboard_s *scoreboard_p, i
 
 		proc = &scoreboard_p->procs[i];
 
-		if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
-			cpu = 0.;
-		} else {
-			cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
-		}
-
-		if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
-			duration = proc->duration;
-		} else {
-			timersub(&now, &proc->accepted, &duration);
-		}
+		fpm_status_proc_get_duration_and_cpu(proc, &now, &duration, &cpu);
 
 		strftime(time_buffer, sizeof(time_buffer) - 1, "%d/%b/%Y:%H:%M:%S %z", localtime(&proc->start_epoch));
 
@@ -349,17 +358,7 @@ static void fpm_status_handle_html(struct fpm_scoreboard_s *scoreboard_p, int fu
 			}
 		}
 
-		if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
-			cpu = 0.;
-		} else {
-			cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
-		}
-
-		if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
-			duration = proc->duration;
-		} else {
-			timersub(&now, &proc->accepted, &duration);
-		}
+		fpm_status_proc_get_duration_and_cpu(proc, &now, &duration, &cpu);
 
 		strftime(time_buffer, sizeof(time_buffer) - 1, "%d/%b/%Y:%H:%M:%S %z", localtime(&proc->start_epoch));
 
@@ -501,17 +500,7 @@ static void fpm_status_handle_xml(struct fpm_scoreboard_s *scoreboard_p, int ful
 			}
 		}
 
-		if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
-			cpu = 0.;
-		} else {
-			cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
-		}
-
-		if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
-			duration = proc->duration;
-		} else {
-			timersub(&now, &proc->accepted, &duration);
-		}
+		fpm_status_proc_get_duration_and_cpu(proc, &now, &duration, &cpu);
 
 		strftime(time_buffer, sizeof(time_buffer) - 1, "%s", localtime(&proc->start_epoch));
 
@@ -664,17 +653,7 @@ static void fpm_status_handle_json(struct fpm_scoreboard_s *scoreboard_p, int fu
 			}
 		}
 
-		if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
-			cpu = 0.;
-		} else {
-			cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
-		}
-
-		if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
-			duration = proc->duration;
-		} else {
-			timersub(&now, &proc->accepted, &duration);
-		}
+		fpm_status_proc_get_duration_and_cpu(proc, &now, &duration, &cpu);
 
 		strftime(time_buffer, sizeof(time_buffer) - 1, "%s", localtime(&proc->start_epoch));
 
@@ -795,8 +774,6 @@ static void fpm_status_handle_openmetrics(struct fpm_scoreboard_s *scoreboard_p,
 
 int fpm_status_handle_request(void) /* {{{ */
 {
-	struct fpm_scoreboard_s *scoreboard_p;
-
 	if (!SG(request_info).request_uri) {
 		return 0;
 	}
@@ -820,6 +797,7 @@ int fpm_status_handle_request(void) /* {{{ */
 
 	/* STATUS */
 	if (fpm_status_uri && !strcmp(fpm_status_uri, SG(request_info).request_uri)) {
+		struct fpm_scoreboard_s *scoreboard_p;
 		zend_string *_GET_str;
 		int full;
 
@@ -865,40 +843,18 @@ int fpm_status_handle_request(void) /* {{{ */
 			return 1;
 		}
 
-		/* HTML */
 		if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("html"))) {
 			fpm_status_handle_html(scoreboard_p, full);
-			zend_string_release_ex(_GET_str, 0);
-			fpm_scoreboard_free_copy(scoreboard_p);
-			return 1;
-		}
-
-		/* XML */
-		if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("xml"))) {
+		} else if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("xml"))) {
 			fpm_status_handle_xml(scoreboard_p, full);
-			zend_string_release_ex(_GET_str, 0);
-			fpm_scoreboard_free_copy(scoreboard_p);
-			return 1;
-		}
-
-		/* JSON */
-		if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("json"))) {
+		} else if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("json"))) {
 			fpm_status_handle_json(scoreboard_p, full);
-			zend_string_release_ex(_GET_str, 0);
-			fpm_scoreboard_free_copy(scoreboard_p);
-			return 1;
-		}
-
-		/* OpenMetrics */
-		if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("openmetrics"))) {
+		} else if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("openmetrics"))) {
 			fpm_status_handle_openmetrics(scoreboard_p, full);
-			zend_string_release_ex(_GET_str, 0);
-			fpm_scoreboard_free_copy(scoreboard_p);
-			return 1;
+		} else {
+			fpm_status_handle_plaintext(scoreboard_p, full);
 		}
 
-		/* TEXT */
-		fpm_status_handle_plaintext(scoreboard_p, full);
 		zend_string_release_ex(_GET_str, 0);
 		fpm_scoreboard_free_copy(scoreboard_p);
 		return 1;
