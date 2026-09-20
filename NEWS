@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-23752 (Use scoped diagnostic suppression for the global
     register declarations so the caller's -Wvolatile-register-var state is
     restored). (yqtian-se)
+  . Fixed OSS-Fuzz #538730793 (Assertion failure when returning by-ref from
+    closure invoke). (ndossche)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
