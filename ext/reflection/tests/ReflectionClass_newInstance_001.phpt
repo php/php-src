@@ -35,26 +35,26 @@ $rcE = new ReflectionClass('E');
 try {
     var_dump($rcB->newInstance());
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($rcB->newInstance('x', 123));
 } catch (Throwable $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $rcC->newInstance();
     echo "you should not see this\n";
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
     $rcD->newInstance();
     echo "you should not see this\n";
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $e1 = $rcE->newInstance();
@@ -63,17 +63,17 @@ var_dump($e1);
 try {
     $e2 = $rcE->newInstance('x');
     echo "you should not see this\n";
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
-Exception: Too few arguments to function B::__construct(), 0 passed and exactly 2 expected
+ArgumentCountError: Too few arguments to function B::__construct(), 0 passed and exactly 2 expected
 In constructor of class B with args x, 123
 object(B)#%d (0) {
 }
-Access to non-public constructor of class C
-Access to non-public constructor of class D
+ReflectionException: Access to non-public constructor of class C
+ReflectionException: Access to non-public constructor of class D
 object(E)#%d (0) {
 }
-Class E does not have a constructor, so you cannot pass any constructor arguments
+ReflectionException: Class E does not have a constructor, so you cannot pass any constructor arguments

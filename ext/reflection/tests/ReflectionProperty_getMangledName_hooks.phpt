@@ -31,8 +31,8 @@ function testHookedProperty($obj, $property, $description) {
         echo "  Found in array cast: " . (array_key_exists($reflection->getMangledName(), $array) ? "yes" : "no") . "\n";
         echo "  Has hooks: " . ($reflection->hasHooks() ? "yes" : "no") . "\n";
         echo "\n";
-    } catch (ReflectionException $e) {
-        echo "$description: EXCEPTION - " . $e->getMessage() . "\n\n";
+    } catch (Throwable $e) {
+        echo "$description: ", $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 

@@ -245,4 +245,3 @@ string(%d) "/** Doc comment for $h after parameter */"
 
 ---> Doc comment for property hook parameter $value:
 string(%d) "/** Doc Comment for property hook parameter $value */"
-
