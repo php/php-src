@@ -2,6 +2,7 @@
 
 #include "php.h"
 #include "zend_long.h"
+#include "zend_smart_str.h"
 #include "SAPI.h"
 #include <stdio.h>
 
@@ -13,6 +14,7 @@
 #include "fpm_atomic.h"
 #include "fpm_conf.h"
 #include "fpm_php.h"
+#include "fpm_request.h"
 #include "ext/standard/html.h"
 #include "ext/json/php_json.h"
 
@@ -751,8 +753,7 @@ static void fpm_status_handle_openmetrics(struct fpm_scoreboard_s *scoreboard_p,
 		"phpfpm_slow_requests %lu\n"
 		"# TYPE phpfpm_memory_peak gauge\n"
 		"# HELP phpfpm_memory_peak The memory usage peak since FPM has started.\n"
-		"phpfpm_memory_peak %zu\n"
-		"# EOF\n",
+		"phpfpm_memory_peak %zu\n",
 		scoreboard_p->pool,
 		PM2STR(scoreboard_p->pm),
 		(unsigned long) (now_epoch - scoreboard_p->start_epoch),
@@ -770,6 +771,101 @@ static void fpm_status_handle_openmetrics(struct fpm_scoreboard_s *scoreboard_p,
 
 	PUTS(buffer);
 	efree(buffer);
+
+	if (!full) {
+		PUTS("# EOF\n");
+		return;
+	}
+
+	unsigned int i;
+	struct fpm_scoreboard_proc_s *proc;
+	struct timeval duration, now;
+	float cpu;
+	smart_str buf_state = {0};
+	smart_str buf_requests = {0};
+	smart_str buf_duration = {0};
+	smart_str buf_cpu = {0};
+	smart_str buf_memory = {0};
+
+	fpm_clock_get(&now);
+
+	for (i = 0; i < scoreboard_p->nprocs; i++) {
+		if (!scoreboard_p->procs[i].used) {
+			continue;
+		}
+		proc = &scoreboard_p->procs[i];
+
+		fpm_status_proc_get_duration_and_cpu(proc, &now, &duration, &cpu);
+
+		for (int s = FPM_REQUEST_CREATING; s <= FPM_REQUEST_FINISHED; s++) {
+			smart_str_append_printf(&buf_state,
+				"phpfpm_process_state{pool=\"%s\",child=\"%u\",state=\"%s\"} %d\n",
+				scoreboard_p->pool, i, fpm_request_get_stage_name(s),
+				proc->request_stage == s ? 1 : 0);
+		}
+
+		smart_str_append_printf(&buf_requests,
+			"phpfpm_process_requests{pool=\"%s\",child=\"%u\"} %lu\n",
+			scoreboard_p->pool, i, proc->requests);
+
+		smart_str_append_printf(&buf_duration,
+			"phpfpm_process_request_duration{pool=\"%s\",child=\"%u\"} %lu\n",
+			scoreboard_p->pool, i,
+			(unsigned long) (duration.tv_sec * 1000000UL + duration.tv_usec));
+
+		smart_str_append_printf(&buf_cpu,
+			"phpfpm_process_last_request_cpu{pool=\"%s\",child=\"%u\"} %.2f\n",
+			scoreboard_p->pool, i,
+			proc->request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.);
+
+		smart_str_append_printf(&buf_memory,
+			"phpfpm_process_last_request_memory{pool=\"%s\",child=\"%u\"} %zu\n",
+			scoreboard_p->pool, i,
+			proc->request_stage == FPM_REQUEST_ACCEPTING ? proc->memory : 0);
+	}
+
+	/* buf.s is NULL for all smart_strs when no workers have used == true */
+	PUTS("# TYPE phpfpm_process_state gauge\n"
+		"# HELP phpfpm_process_state The state of the process (Idle, Running, ...).\n");
+	smart_str_0(&buf_state);
+	if (buf_state.s) {
+		PUTS(ZSTR_VAL(buf_state.s));
+	}
+	smart_str_free(&buf_state);
+
+	PUTS("# TYPE phpfpm_process_requests counter\n"
+		"# HELP phpfpm_process_requests The number of requests the process has served.\n");
+	smart_str_0(&buf_requests);
+	if (buf_requests.s) {
+		PUTS(ZSTR_VAL(buf_requests.s));
+	}
+	smart_str_free(&buf_requests);
+
+	PUTS("# TYPE phpfpm_process_request_duration gauge\n"
+		"# HELP phpfpm_process_request_duration The duration in microseconds of the current or last request.\n");
+	smart_str_0(&buf_duration);
+	if (buf_duration.s) {
+		PUTS(ZSTR_VAL(buf_duration.s));
+	}
+	smart_str_free(&buf_duration);
+
+	PUTS("# TYPE phpfpm_process_last_request_cpu gauge\n"
+		"# HELP phpfpm_process_last_request_cpu The %cpu the last request consumed.\n");
+	smart_str_0(&buf_cpu);
+	if (buf_cpu.s) {
+		PUTS(ZSTR_VAL(buf_cpu.s));
+	}
+	smart_str_free(&buf_cpu);
+
+	PUTS("# TYPE phpfpm_process_last_request_memory gauge\n"
+		"# HELP phpfpm_process_last_request_memory The max amount of memory the last request consumed.\n");
+	smart_str_0(&buf_memory);
+	if (buf_memory.s) {
+		PUTS(ZSTR_VAL(buf_memory.s));
+	}
+	smart_str_free(&buf_memory);
+
+	PUTS("# EOF\n");
 }
 
 int fpm_status_handle_request(void) /* {{{ */
