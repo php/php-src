@@ -4593,7 +4593,7 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
-static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, zend_long name_long, void **cache_slot, zval *rv) /* {{{ */
+static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, zend_long name_long, bool is_string_key, void **cache_slot, zval *rv) /* {{{ */
 {
 	zval *prop = NULL;
 
@@ -4620,9 +4620,8 @@ static inline zval *array_column_fetch_prop(zval *data, zend_string *name_str, z
 		}
 		zend_string_release(tmp_str);
 	} else if (Z_TYPE_P(data) == IS_ARRAY) {
-		/* Name is a string */
-		if (name_str != NULL) {
-			prop = zend_symtable_find(Z_ARRVAL_P(data), name_str);
+		if (is_string_key) {
+			prop = zend_hash_find(Z_ARRVAL_P(data), name_str);
 		} else {
 			prop = zend_hash_index_find(Z_ARRVAL_P(data), name_long);
 		}
@@ -4656,38 +4655,62 @@ PHP_FUNCTION(array_column)
 		Z_PARAM_STR_OR_LONG_OR_NULL(index_str, index_long, index_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	void* cache_slot_column[3] = { NULL, NULL, NULL };
-	void* cache_slot_index[3] = { NULL, NULL, NULL };
+	uint32_t num_elements = zend_hash_num_elements(input);
+	if (num_elements == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
 
-	array_init_size(return_value, zend_hash_num_elements(input));
-	/* Index param is not passed */
-	if (index_is_null) {
+	if (column_is_null && index_is_null) {
+		array_init_size(return_value, num_elements);
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			ZEND_HASH_FOREACH_VAL(input, data) {
 				ZVAL_DEREF(data);
-				if (column_is_null) {
-					Z_TRY_ADDREF_P(data);
-					colval = data;
-				} else if ((colval = array_column_fetch_prop(data, column_str, column_long, cache_slot_column, &rv)) == NULL) {
+				Z_TRY_ADDREF_P(data);
+				ZEND_HASH_FILL_ADD(data);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FILL_END();
+		return;
+	}
+
+	/* Normalize array keys once, retaining the original names for object properties. */
+	zend_ulong column_index = (zend_ulong) column_long;
+	bool column_is_string_key = column_str && !ZEND_HANDLE_NUMERIC(column_str, column_index);
+	column_long = (zend_long) column_index;
+	void *cache_slot_column[3] = { NULL, NULL, NULL };
+
+	/* Index param is not passed */
+	if (index_is_null) {
+		array_init_size(return_value, num_elements);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			ZEND_HASH_FOREACH_VAL(input, data) {
+				ZVAL_DEREF(data);
+				if ((colval = array_column_fetch_prop(data, column_str, column_long, column_is_string_key, cache_slot_column, &rv)) == NULL) {
 					continue;
 				}
 				ZEND_HASH_FILL_ADD(colval);
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
 	} else {
+		zend_ulong index = (zend_ulong) index_long;
+		bool index_is_string_key = index_str && !ZEND_HANDLE_NUMERIC(index_str, index);
+		index_long = (zend_long) index;
+		void *cache_slot_index[3] = { NULL, NULL, NULL };
+
+		array_init_size(return_value, num_elements);
 		ZEND_HASH_FOREACH_VAL(input, data) {
 			ZVAL_DEREF(data);
 
 			if (column_is_null) {
 				Z_TRY_ADDREF_P(data);
 				colval = data;
-			} else if ((colval = array_column_fetch_prop(data, column_str, column_long, cache_slot_column, &rv)) == NULL) {
+			} else if ((colval = array_column_fetch_prop(data, column_str, column_long, column_is_string_key, cache_slot_column, &rv)) == NULL) {
 				continue;
 			}
 
 			zval rv;
-			zval *keyval = array_column_fetch_prop(data, index_str, index_long, cache_slot_index, &rv);
+			zval *keyval = array_column_fetch_prop(data, index_str, index_long, index_is_string_key, cache_slot_index, &rv);
 			if (keyval) {
 				array_set_zval_key(Z_ARRVAL_P(return_value), keyval, colval);
 				zval_ptr_dtor(colval);
