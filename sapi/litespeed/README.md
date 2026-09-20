@@ -76,6 +76,14 @@ have lsphp bind to address 192.168.0.2:3000,
 
 have lsphp accept request on Unix domain socket `/tmp/lsphp_manual.sock`.
 
+### INI Security
+
+The lsphp listener must only be reachable by trusted sources, generally just 
+LiteSpeed web front end. Any source that can set its own environment variables
+can configure arbitrary PHP INI directives at the `ZEND_INI_SYSTEM` level for
+that request. This is the equivalent level of access as the Apache
+`php_admin_value` directive or the FPM's `PHP_ADMIN_VALUE` parameter.
+
 ## Using LiteSpeed PHP with LiteSpeed Web Server
 
 Detailed information about how to configure LiteSpeed web server with PHP

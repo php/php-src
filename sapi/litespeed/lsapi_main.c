@@ -774,6 +774,11 @@ static int lsapi_module_main(int show_source)
 }
 
 
+/* The use of `type = ZEND_INI_SYSTEM when the key starts with `\x01\x04` is
+ * intentional - this is the mechanism by which LiteSpeed communicates the
+ * system-level INI options that should be set. This is only called from
+ * override_ini() with LSAPI_ForeachSpecialEnv(). See README.md in this
+ * directory for more details. */
 static int alter_ini( const char * pKey, int keyLen, const char * pValue, int valLen,
                 void * arg )
 {
