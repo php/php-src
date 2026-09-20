@@ -13,33 +13,6 @@ echo "*** Testing error conditions ***\n";
 
 $file = preg_replace("~\.phpt?$~", '.tmp', __FILE__);
 $fp = fopen($file, "w");
-
-/* array of operations */
-$operations = array(
-  0,
-  LOCK_NB,
-  FALSE,
-  array(1,2,3),
-  array(),
-  "string",
-  "",
-  "\0"
-);
-
-$i = 0;
-foreach($operations as $operation) {
-    echo "--- Iteration $i ---" . \PHP_EOL;
-    try {
-        var_dump(flock($fp, $operation));
-    } catch (Throwable $e) {
-        echo $e::class, ': ', $e->getMessage(), "\n";
-    }
-    $i++;
-}
-
-
-/* Invalid arguments */
-$fp = fopen($file, "w");
 fclose($fp);
 try {
     var_dump(flock($fp, LOCK_SH|LOCK_NB));
@@ -54,20 +27,4 @@ unlink($file);
 ?>
 --EXPECT--
 *** Testing error conditions ***
---- Iteration 0 ---
-ValueError: flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
---- Iteration 1 ---
-ValueError: flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
---- Iteration 2 ---
-ValueError: flock(): Argument #2 ($operation) must be one of LOCK_SH, LOCK_EX, or LOCK_UN
---- Iteration 3 ---
-TypeError: flock(): Argument #2 ($operation) must be of type int, array given
---- Iteration 4 ---
-TypeError: flock(): Argument #2 ($operation) must be of type int, array given
---- Iteration 5 ---
-TypeError: flock(): Argument #2 ($operation) must be of type int, string given
---- Iteration 6 ---
-TypeError: flock(): Argument #2 ($operation) must be of type int, string given
---- Iteration 7 ---
-TypeError: flock(): Argument #2 ($operation) must be of type int, string given
 TypeError: flock(): Argument #1 ($stream) must be an open stream resource

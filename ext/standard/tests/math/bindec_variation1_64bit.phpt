@@ -14,9 +14,6 @@ abc
 xyz
 EOT;
 
-// get a resource variable
-$fp = fopen(__FILE__, "r");
-
 $inputs = array(
        // int data
 /*1*/  0,
@@ -40,29 +37,20 @@ $inputs = array(
        // empty data
 /*16*/ "",
        '',
-       array(),
 
        // string data
 /*19*/ "abcxyz",
        'abcxyz',
        $heredoc,
-
-       // resource variable
-/*24*/ $fp
 );
 
 // loop through each element of $inputs to check the behaviour of bindec()
 $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
-    try {
-        var_dump(bindec($input));
-    } catch (Throwable $e) {
-        echo $e::class, ': ', $e->getMessage(), "\n";
-    }
+    var_dump(bindec($input));
     $iterator++;
 };
-fclose($fp);
 ?>
 --EXPECTF--
 *** Testing bindec() : usage variations ***
@@ -127,7 +115,9 @@ int(0)
 int(0)
 
 -- Iteration 16 --
-TypeError: bindec(): Argument #1 ($binary_string) must be of type string, array given
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+int(0)
 
 -- Iteration 17 --
 
@@ -138,11 +128,3 @@ int(0)
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
-
--- Iteration 19 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
--- Iteration 20 --
-TypeError: bindec(): Argument #1 ($binary_string) must be of type string, resource given

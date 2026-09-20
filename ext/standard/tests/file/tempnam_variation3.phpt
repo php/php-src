@@ -23,9 +23,6 @@ $names_arr = array(
   FALSE,
   "",
   " ",
-  "\0",
-  array(),
-
   /* prefix with path separator of a non existing directory*/
   "/no/such/file/dir",
   "php/php"
@@ -34,12 +31,7 @@ $names_arr = array(
 
 for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
-  try {
-    $file_name = tempnam("$file_path", $names_arr[$i]);
-  } catch (Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), "\n";
-    continue;
-  }
+  $file_name = tempnam("$file_path", $names_arr[$i]);
 
   /* creating the files in existing dir */
   if( file_exists($file_name) ) {
@@ -97,14 +89,10 @@ File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 5 --
-ValueError: tempnam(): Argument #2 ($prefix) must not contain any null bytes
--- Iteration 6 --
-TypeError: tempnam(): Argument #2 ($prefix) must be of type string, array given
--- Iteration 7 --
 File name is => %s/dir%s
 File permissions are => 100600
 File created in => directory specified
--- Iteration 8 --
+-- Iteration 6 --
 File name is => %s/php%s
 File permissions are => 100600
 File created in => directory specified

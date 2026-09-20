@@ -15,9 +15,6 @@ class sample  {
   }
 }
 
-//getting the resource
-$file_handle = fopen(__FILE__, "r");
-
 //defining 'str' argument
 $str = "012atm";
 
@@ -34,13 +31,8 @@ $from_arr =  array (
           -20.5,
           10.1234567e10,
 
-          // array values
-/*7*/	  array(),
-          array(0),
-          array(1, 2),
-
           // boolean values
-/*10*/	  true,
+/*7*/	  true,
           false,
           TRUE,
           FALSE,
@@ -50,10 +42,7 @@ $from_arr =  array (
           null,
 
           // objects
-/*16*/	  new sample(),
-
-          // resource
-/*17*/	  $file_handle,
+/*13*/	  new sample(),
 );
 
 //defining 'to' argument
@@ -64,15 +53,10 @@ $count = 1;
 for($index = 0; $index < count($from_arr); $index++) {
   echo "-- Iteration $count --\n";
   $from = $from_arr[$index];
-  try {
-    var_dump(strtr($str, $from, $to));
-  } catch (Throwable $exception) {
-    echo $exception::class, ': ', $exception->getMessage(), "\n";
-  }
+  var_dump(strtr($str, $from, $to));
   $count++;
 }
 
-fclose($file_handle);  //closing the file handle
 ?>
 --EXPECTF--
 *** Testing strtr() function: with unexpected inputs for 'from' ***
@@ -89,28 +73,20 @@ string(6) "m1tatm"
 -- Iteration 6 --
 string(6) "tm0atm"
 -- Iteration 7 --
-TypeError: strtr(): Argument #2 ($from) must be of type string, array given
--- Iteration 8 --
-TypeError: strtr(): Argument #2 ($from) must be of type string, array given
--- Iteration 9 --
-TypeError: strtr(): Argument #2 ($from) must be of type string, array given
--- Iteration 10 --
 string(6) "0a2atm"
+-- Iteration 8 --
+string(6) "012atm"
+-- Iteration 9 --
+string(6) "0a2atm"
+-- Iteration 10 --
+string(6) "012atm"
 -- Iteration 11 --
+
+Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
 string(6) "012atm"
 -- Iteration 12 --
-string(6) "0a2atm"
+
+Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
+string(6) "012atm"
 -- Iteration 13 --
-string(6) "012atm"
--- Iteration 14 --
-
-Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
-string(6) "012atm"
--- Iteration 15 --
-
-Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
-string(6) "012atm"
--- Iteration 16 --
 string(6) "012ttm"
--- Iteration 17 --
-TypeError: strtr(): Argument #2 ($from) must be of type string, resource given

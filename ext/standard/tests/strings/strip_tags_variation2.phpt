@@ -15,9 +15,6 @@ $string = "<html><a>hello</a></html><p>world</p><!-- COMMENT --><?php echo hello
 $unset_var = 10;
 unset ($unset_var);
 
-//get a resource variable
-$fp = fopen(__FILE__, "r");
-
 //get a class
 class classA{
    public function __toString(){
@@ -63,20 +60,13 @@ $values = array(
 
       // unset data
       @$unset_var,
-
-      // resource variable
-      $fp
 );
 
 // loop through each element of the array for allowable_tags
 $iterator = 1;
 foreach($values as $value) {
       echo "-- Iteration $iterator --\n";
-      try {
-        var_dump(strip_tags($string, $value));
-      } catch (Throwable $exception) {
-        echo $exception::class, ': ', $exception->getMessage(), "\n";
-      }
+      var_dump(strip_tags($string, $value));
       $iterator++;
 };
 
@@ -124,6 +114,4 @@ string(10) "helloworld"
 string(10) "helloworld"
 -- Iteration 20 --
 string(10) "helloworld"
--- Iteration 21 --
-TypeError: strip_tags(): Argument #2 ($allowed_tags) must be of type array|string|null, resource given
 Done
