@@ -125,7 +125,13 @@ static zend_result epoll_backend_add(php_poll_ctx *ctx, int fd, uint32_t events,
 	ev.data.ptr = data;
 
 	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
-		php_poll_set_error(ctx, (errno == EEXIST) ? PHP_POLL_ERR_EXISTS : PHP_POLL_ERR_SYSTEM);
+		/* EPERM means the target file does not implement polling, which is the case
+		 * for regular files and for character devices such as /dev/null. */
+		if (errno == EPERM) {
+			php_poll_set_error(ctx, PHP_POLL_ERR_NOSUPPORT);
+		} else {
+			php_poll_set_current_errno_error(ctx);
+		}
 		return FAILURE;
 	}
 	backend_data->fd_count++;
@@ -142,7 +148,7 @@ static zend_result epoll_backend_modify(php_poll_ctx *ctx, int fd, uint32_t even
 	ev.data.ptr = data;
 
 	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_MOD, fd, &ev) == -1) {
-		php_poll_set_error(ctx, (errno == ENOENT) ? PHP_POLL_ERR_NOTFOUND : PHP_POLL_ERR_SYSTEM);
+		php_poll_set_current_errno_error(ctx);
 		return FAILURE;
 	}
 
@@ -154,7 +160,7 @@ static zend_result epoll_backend_remove(php_poll_ctx *ctx, int fd)
 	epoll_backend_data_t *backend_data = (epoll_backend_data_t *) ctx->backend_data;
 
 	if (epoll_ctl(backend_data->epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1) {
-		php_poll_set_error(ctx, (errno == ENOENT) ? PHP_POLL_ERR_NOTFOUND : PHP_POLL_ERR_SYSTEM);
+		php_poll_set_current_errno_error(ctx);
 		return FAILURE;
 	}
 	backend_data->fd_count--;
