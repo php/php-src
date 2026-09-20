@@ -214,6 +214,21 @@ jobs:
 
             PHP_JIT=0
           EOF
+      - name: Setup PHP config - benchmarked PHP version with JIT
+        if: env.JIT == '1'
+        run: |
+          set -e
+
+          cat << EOF > ./php-version-benchmarks/config/php/this_jit.ini
+            PHP_NAME="PHP - ${{ env.BRANCH }} (JIT)"
+            PHP_ID=php_${{ env.ID }}_jit
+
+            PHP_REPO=${{ github.server_url }}/${{ env.REPOSITORY }}.git
+            PHP_BRANCH=${{ env.BRANCH }}
+            PHP_COMMIT=${{ env.COMMIT }}
+
+            PHP_JIT=${{ env.JIT }}
+          EOF
       - name: Setup test config
         run: |
           set -e
