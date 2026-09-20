@@ -2121,6 +2121,8 @@ zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
 		zend_bailout();
 	} zend_end_try();
 
+	zend_ast_destroy(ast);
+
 	ZEND_ASSERT(op_array->num_dynamic_func_defs == 1);
 
 	zend_string_release(op_array->dynamic_func_defs[0]->function_name);
