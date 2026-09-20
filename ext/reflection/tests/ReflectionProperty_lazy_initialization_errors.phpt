@@ -16,13 +16,13 @@ function test(object $obj, string $propertyName) {
     $r = new ReflectionProperty($obj, $propertyName);
     try {
         $r->setRawValueWithoutLazyInitialization($obj, true);
-    } catch (ReflectionException $e) {
-        echo $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     try {
         $r->skipLazyInitialization($obj);
-    } catch (ReflectionException $e) {
-        echo $e->getMessage() . "\n\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 
@@ -38,14 +38,11 @@ test($obj, 'name');
 
 ?>
 --EXPECT--
-Cannot use setRawValueWithoutLazyInitialization() on static property Demo::$myStatic
-Cannot use skipLazyInitialization() on static property Demo::$myStatic
-
-Cannot use setRawValueWithoutLazyInitialization() on virtual property Demo::$myVirtual
-Cannot use skipLazyInitialization() on virtual property Demo::$myVirtual
-
-Cannot use setRawValueWithoutLazyInitialization() on dynamic property Demo::$myDynamic
-Cannot use skipLazyInitialization() on dynamic property Demo::$myDynamic
-
-Cannot use setRawValueWithoutLazyInitialization() on internal class ReflectionClass
-Cannot use skipLazyInitialization() on internal class ReflectionClass
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on static property Demo::$myStatic
+ReflectionException: Cannot use skipLazyInitialization() on static property Demo::$myStatic
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on virtual property Demo::$myVirtual
+ReflectionException: Cannot use skipLazyInitialization() on virtual property Demo::$myVirtual
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on dynamic property Demo::$myDynamic
+ReflectionException: Cannot use skipLazyInitialization() on dynamic property Demo::$myDynamic
+ReflectionException: Cannot use setRawValueWithoutLazyInitialization() on internal class ReflectionClass
+ReflectionException: Cannot use skipLazyInitialization() on internal class ReflectionClass
