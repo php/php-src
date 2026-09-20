@@ -74,6 +74,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	zend_closure_get_closure(Z_OBJ_P(ZEND_THIS), &fcc.calling_scope, &fcc.function_handler, &fcc.object, false);
 	fcc.called_scope = fcc.calling_scope;
 	zend_call_known_fcc(&fcc, return_value, num_args, args, named_args);
+	zend_return_unwrap_ref(execute_data, return_value);
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release_ex(func->internal_function.function_name, 0);
