@@ -695,10 +695,10 @@ function openssl_error_string(): string|false {}
  * @param string $signature
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0, int $salt_length = OPENSSL_RSA_PSS_SALTLEN_AUTO): bool {}
+function openssl_sign(string $data, &$signature, #[\SensitiveParameter] $private_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0, int $salt_length = OPENSSL_RSA_PSS_SALTLEN_AUTO, bool $data_is_digest = false): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key */
-function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0, int $salt_length = OPENSSL_RSA_PSS_SALTLEN_AUTO): int|false {}
+function openssl_verify(string $data, string $signature, $public_key, string|int $algorithm = OPENSSL_ALGO_SHA1, int $padding = 0, int $salt_length = OPENSSL_RSA_PSS_SALTLEN_AUTO, bool $data_is_digest = false): int|false {}
 
 /**
  * @param string $sealed_data
