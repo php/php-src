@@ -4674,7 +4674,9 @@ PHP_FUNCTION(array_column)
 	}
 
 	/* Normalize array keys once, retaining the original names for object properties. */
-	bool column_is_string_key = column_str && !ZEND_HANDLE_NUMERIC(column_str, column_long);
+	zend_ulong column_index = (zend_ulong) column_long;
+	bool column_is_string_key = column_str && !ZEND_HANDLE_NUMERIC(column_str, column_index);
+	column_long = (zend_long) column_index;
 	void *cache_slot_column[3] = { NULL, NULL, NULL };
 
 	/* Index param is not passed */
@@ -4690,7 +4692,9 @@ PHP_FUNCTION(array_column)
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FILL_END();
 	} else {
-		bool index_is_string_key = index_str && !ZEND_HANDLE_NUMERIC(index_str, index_long);
+		zend_ulong index = (zend_ulong) index_long;
+		bool index_is_string_key = index_str && !ZEND_HANDLE_NUMERIC(index_str, index);
+		index_long = (zend_long) index;
 		void *cache_slot_index[3] = { NULL, NULL, NULL };
 
 		ZEND_HASH_FOREACH_VAL(input, data) {
