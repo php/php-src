@@ -235,6 +235,38 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 	return NULL;
 }
 
+static bool gzip_stream_is_url(php_stream_wrapper *wrapper, const char *path, php_stream_context *context)
+{
+	const char *inner_path = path;
+	while (*inner_path) {
+		if (strncasecmp("compress.zlib://", inner_path, strlen("compress.zlib://")) == 0) {
+			inner_path += strlen("compress.zlib://");
+		} else if (strncasecmp("zlib:", inner_path, strlen("zlib:")) == 0) {
+			inner_path += strlen("zlib:");
+		} else {
+			break;
+		}
+	}
+	/* Disable URL protection, which would cause php_stream_locate_url_wrapper()
+	 * to do its own filtering of inner stream_is_url callbacks; we do that
+	 * check here anyway. */
+	php_stream_wrapper *inner_wrapper = php_stream_locate_url_wrapper(inner_path, NULL, STREAM_DISABLE_URL_PROTECTION);
+	if (inner_wrapper == NULL) {
+		// No actual target being compressed, so not a URL
+		return false;
+	}
+	switch (inner_wrapper->is_url) {
+		case STREAM_IS_URL_NEVER:
+			return false;
+		case STREAM_IS_URL_ALWAYS:
+			return true;
+		case STREAM_IS_URL_SOMETIMES:
+			ZEND_ASSERT(inner_wrapper->wops->stream_is_url != NULL);
+			return (inner_wrapper->wops->stream_is_url)(inner_wrapper, inner_path, context);
+		default: ZEND_UNREACHABLE();
+	}
+}
+
 static const php_stream_wrapper_ops gzip_stream_wops = {
 	php_stream_gzopen,
 	NULL, /* close */
@@ -246,11 +278,12 @@ static const php_stream_wrapper_ops gzip_stream_wops = {
 	NULL, /* rename */
 	NULL, /* mkdir */
 	NULL, /* rmdir */
-	NULL
+	NULL,
+	gzip_stream_is_url,
 };
 
 const php_stream_wrapper php_stream_gzip_wrapper =	{
 	&gzip_stream_wops,
 	NULL,
-	0, /* is_url */
+	STREAM_IS_URL_SOMETIMES,
 };

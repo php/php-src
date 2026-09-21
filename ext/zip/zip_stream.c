@@ -389,12 +389,13 @@ static const php_stream_wrapper_ops zip_stream_wops = {
 	NULL,	/* rename */
 	NULL,	/* mkdir */
 	NULL,	/* rmdir */
-	NULL	/* metadata */
+	NULL,	/* metadata */
+	NULL,   /* is_url, unneeded since ZIPs are never for URLs */
 };
 
 const php_stream_wrapper php_stream_zip_wrapper = {
 	&zip_stream_wops,
 	NULL,
-	0 /* is_url */
+	STREAM_IS_URL_NEVER,
 };
 #endif /* HAVE_ZIP */

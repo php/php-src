@@ -155,12 +155,20 @@ typedef struct _php_stream_wrapper_ops {
 	int (*stream_rmdir)(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 	/* Metadata handling */
 	int (*stream_metadata)(php_stream_wrapper *wrapper, const char *url, int options, void *value, php_stream_context *context);
+	/* Required if the wrapper is_url is STREAM_IS_URL_SOMETIMES, otherwise ignored */
+	bool (*stream_is_url)(php_stream_wrapper *wrapper, const char *url, php_stream_context *context);
 } php_stream_wrapper_ops;
+
+C23_ENUM(php_stream_wrapper_is_url, uint8_t) {
+	STREAM_IS_URL_NEVER = 0,
+	STREAM_IS_URL_ALWAYS = 1,
+	STREAM_IS_URL_SOMETIMES = 2,
+};
 
 struct _php_stream_wrapper	{
 	const php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
-	int is_url;						/* so that PG(allow_url_fopen) can be respected */
+	php_stream_wrapper_is_url is_url; /* so that PG(allow_url_fopen) can be respected */
 };
 
 #define PHP_STREAM_FLAG_NO_SEEK						0x1

@@ -1182,11 +1182,12 @@ static const php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_ftp_rename, /* rename */
 	php_stream_ftp_mkdir,  /* mkdir */
 	php_stream_ftp_rmdir,  /* rmdir */
-	NULL
+	NULL,
+	NULL,                   /* is_url, unneeded since FTP is always for URLs */
 };
 
 PHPAPI const php_stream_wrapper php_stream_ftp_wrapper =	{
 	&ftp_stream_wops,
 	NULL,
-	1 /* is_url */
+	STREAM_IS_URL_ALWAYS,
 };

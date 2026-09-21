@@ -1686,9 +1686,12 @@ PHP_FUNCTION(stream_is_local)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	const char *path;
+
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
 		php_stream_from_zval(stream, zstream);
 		wrapper = stream->wrapper;
+		path = stream->orig_path;
 	} else {
 		if (!try_convert_to_string(zstream)) {
 			RETURN_THROWS();
@@ -1696,11 +1699,27 @@ PHP_FUNCTION(stream_is_local)
 
 		php_stream_error_operation_begin();
 		context = php_stream_context_from_zval(zcontext, 0);
-		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0);
+
+		path = Z_STRVAL_P(zstream);
+		wrapper = php_stream_locate_url_wrapper(path, NULL, 0);
 		php_stream_error_operation_end(context);
 	}
 
-	RETURN_BOOL(wrapper && wrapper->is_url == 0);
+	if (!wrapper) {
+		RETURN_FALSE;
+	}
+	switch (wrapper->is_url) {
+		case STREAM_IS_URL_NEVER:
+			RETURN_TRUE;
+		case STREAM_IS_URL_ALWAYS:
+			RETURN_FALSE;
+		case STREAM_IS_URL_SOMETIMES:
+			ZEND_ASSERT(wrapper->wops->stream_is_url != NULL);
+			RETURN_BOOL(
+				!(wrapper->wops->stream_is_url)(wrapper, path, NULL)
+			);
+		default: ZEND_UNREACHABLE();
+	}
 }
 /* }}} */
 
