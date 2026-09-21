@@ -154,6 +154,9 @@ namespace {
         public function __construct(string $parameter) {}
     }
 
+    #[Attribute(Attribute::TARGET_CLASS)]
+    final class ZendTestAttributeAddsInterface {}
+
     class ZendTestClassWithMethodWithParameterAttribute {
         final public function no_override(
             #[ZendTestParameterAttribute("value2")]
