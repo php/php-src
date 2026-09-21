@@ -265,7 +265,8 @@ static int php_tiger_unserialize(php_hashcontext_object *hash, zend_long magic, 
 		b/8, \
 		64, \
 		sizeof(PHP_TIGER_CTX), \
-		1 \
+		1, \
+		0 \
 	}
 
 PHP_HASH_TIGER_OPS(3, 128);

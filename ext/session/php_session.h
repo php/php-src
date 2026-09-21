@@ -202,6 +202,7 @@ typedef struct _php_ps_globals {
 	bool lazy_write; /* omit session write when it is possible */
 	bool in_save_handler; /* state if session is in save handler or not */
 	bool set_handler;     /* state if session module i setting handler or not */
+	bool random_seeded;
 	zend_string *session_vars; /* serialized original session data */
 } php_ps_globals;
 

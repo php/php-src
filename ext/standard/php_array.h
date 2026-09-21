@@ -29,6 +29,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src);
 PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src);
 PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src);
 PHPAPI int php_multisort_compare(const void *a, const void *b);
+/* Returns -1 and throws if the array is nested too deeply. */
 PHPAPI zend_long php_count_recursive(HashTable *ht);
 
 PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *array);

@@ -210,6 +210,7 @@ typedef enum _ir_type {
  * arg - argument reference CALL/TAILCALL/CARG->CARG
  * src - reference to a previous control region (IF, IF_TRUE, IF_FALSE, MERGE, LOOP_BEGIN, LOOP_END, RETURN)
  * reg - data-control dependency on region (PHI, VAR, PARAM)
+ * grd - optional data-control dependency guard (DIV, MOD)
  * ret - reference to a previous RETURN instruction (RETURN)
  * str - string: variable/argument name (VAR, PARAM, CALL, TAILCALL)
  * num - number: argument number (PARAM)
@@ -265,8 +266,8 @@ typedef enum _ir_type {
 	_(ADD,          d2C,  def, def, ___) /* addition                    */ \
 	_(SUB,          d2,   def, def, ___) /* subtraction (must be ADD+1) */ \
 	_(MUL,          d2C,  def, def, ___) /* multiplication              */ \
-	_(DIV,          d2,   def, def, ___) /* division                    */ \
-	_(MOD,          d2,   def, def, ___) /* modulo                      */ \
+	_(DIV,          d3,   def, def, grd) /* division                    */ \
+	_(MOD,          d3,   def, def, grd) /* modulo                      */ \
 	_(NEG,          d1,   def, ___, ___) /* change sign                 */ \
 	_(ABS,          d1,   def, ___, ___) /* absolute value              */ \
 	/* (LDEXP, MIN, MAX, FPMATH)                                        */ \
@@ -382,6 +383,14 @@ typedef enum _ir_type {
 	_(IJMP,         T2X1, src, def, ret) /* computed goto (terminating) */ \
 	_(RETURN,       T2X1, src, def, ret) /* function return             */ \
 	_(UNREACHABLE,  T1X2, src, ___, ret) /* unreachable (tailcall, etc) */ \
+	\
+	/* inline assembler                                                 */ \
+	_(ASM,          xN,   src, def, def) /* GCC inline assembler        */ \
+	                                     /* op2 - asm template string   */ \
+	                                     /* op3 - asm constraint string */ \
+	                                     /* opN - asm input argument    */ \
+	_(ASM_OUT,      x1,   src, ___, ___) /* ASM data output projection  */ \
+	_(ASM_GOTO,     E1,   src, ___, ___) /* ASM goto (bb end after ASM) */ \
 	\
 	/* deoptimization helper                                            */ \
 	_(EXITCALL,     x2,   src, def, ___) /* save CPU regs and call op2  */ \

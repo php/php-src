@@ -73,6 +73,7 @@ typedef struct ftpbuf
 	databuf_t		*data;	/* Data connection for "nonblocking" transfers */
 	php_stream		*stream; /* output stream for "nonblocking" transfers */
 	bool			nb;		/* "nonblocking" transfer in progress */
+	bool			in_use;		/* engine transfer in progress; blocks re-entrant ftp_close */
 	char			lastch;		/* last char of previous call */
 	bool			direction;	/* recv = 0 / send = 1 */
 	bool			closestream;/* close or not close stream */

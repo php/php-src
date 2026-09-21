@@ -2306,13 +2306,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type single");
 #endif
-						info_value->f = php_ifd_get_float(value);
+						info_value->f = php_ifd_get_float(vptr);
 						break;
 					case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type double");
 #endif
-						info_value->d = php_ifd_get_double(value);
+						info_value->d = php_ifd_get_double(vptr);
 						break;
 				}
 			}
@@ -3642,8 +3642,14 @@ static bool exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start
 	 * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
 	 */
 	if (!exif_offset_info_contains(info, dir_start+2+NumDirEntries*12, 4)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size");
-		return false;
+		/*
+		 * A TIFF/EXIF IFD ends with a 4-byte offset to the next IFD (IFD1 here,
+		 * which links the thumbnail), or zero when there is none. Some files end
+		 * the EXIF segment right after the entries and omit those 4 bytes. A
+		 * missing offset is valid and just means there is no next IFD, so stop
+		 * here instead of reporting the size as illegal.
+		 */
+		return true;
 	}
 
 	if (tag != TAG_EXIF_IFD_POINTER && tag != TAG_GPS_IFD_POINTER) {

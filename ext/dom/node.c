@@ -931,6 +931,9 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 			RETURN_FALSE;
 		}
+		if (refp == child) {
+			refp = child->next;
+		}
 	}
 
 	if (child->doc == NULL && parentp->doc != NULL) {
@@ -940,7 +943,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 
 	php_libxml_invalidate_node_list_cache(intern->document);
 
-	if (ref != NULL) {
+	if (refp != NULL) {
 		if (child->parent != NULL) {
 			xmlUnlinkNode(child);
 		}
@@ -965,7 +968,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			xmlAttrPtr lastattr;
 
 			if (child->ns == NULL)
-				lastattr = xmlHasProp(refp->parent, child->name);
+				lastattr = xmlHasNsProp(refp->parent, child->name, NULL);
 			else
 				lastattr = xmlHasNsProp(refp->parent, child->name, child->ns->href);
 			if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
@@ -1012,7 +1015,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			xmlAttrPtr lastattr;
 
 			if (child->ns == NULL)
-				lastattr = xmlHasProp(parentp, child->name);
+				lastattr = xmlHasNsProp(parentp, child->name, NULL);
 			else
 				lastattr = xmlHasNsProp(parentp, child->name, child->ns->href);
 			if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
@@ -1374,7 +1377,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 		xmlAttrPtr lastattr;
 
 		if (child->ns == NULL)
-			lastattr = xmlHasProp(nodep, child->name);
+			lastattr = xmlHasNsProp(nodep, child->name, NULL);
 		else
 			lastattr = xmlHasNsProp(nodep, child->name, child->ns->href);
 		if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
@@ -1730,10 +1733,26 @@ static bool php_dom_is_equal_attr(const xmlAttr *this_attr, const xmlAttr *other
 		&& php_dom_node_is_content_equal((const xmlNode *) this_attr, (const xmlNode *) other_attr);
 }
 
+static zend_always_inline bool php_dom_node_is_equal_node_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other, bool spec_compliant)
 {
 	ZEND_ASSERT(this != NULL);
 	ZEND_ASSERT(other != NULL);
+
+	if (UNEXPECTED(php_dom_node_is_equal_node_check_stack_limit())) {
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Maximum call stack size reached.");
+		}
+		return false;
+	}
 
 	if (this->type != other->type) {
 		return false;
@@ -1795,6 +1814,7 @@ static void dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAMETERS, bool mod
 	zval *id, *node;
 	xmlNodePtr otherp, nodep;
 	dom_object *intern;
+	bool result;
 
 	id = ZEND_THIS;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1817,7 +1837,11 @@ static void dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAMETERS, bool mod
 		RETURN_BOOL(nodep == NULL && otherp == NULL);
 	}
 
-	RETURN_BOOL(php_dom_node_is_equal_node(nodep, otherp, modern));
+	result = php_dom_node_is_equal_node(nodep, otherp, modern);
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+	RETURN_BOOL(result);
 }
 
 PHP_METHOD(DOMNode, isEqualNode)
@@ -2102,146 +2126,6 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_namespace_uri */
-
-/* Allocate, track and prepend a temporary nsDef entry for C14N.
- * Returns the new xmlNsPtr for the caller to fill in href/prefix/_private,
- * or NULL on allocation failure. */
-static xmlNsPtr dom_alloc_ns_decl(HashTable *links, xmlNodePtr node)
-{
-	xmlNsPtr ns = xmlMalloc(sizeof(*ns));
-	if (!ns) {
-		return NULL;
-	}
-
-	zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
-	if (Z_ISNULL_P(zv)) {
-		ZVAL_LONG(zv, 1);
-	} else {
-		Z_LVAL_P(zv)++;
-	}
-
-	memset(ns, 0, sizeof(*ns));
-	ns->type = XML_LOCAL_NAMESPACE;
-	ns->next = node->nsDef;
-	node->nsDef = ns;
-
-	return ns;
-}
-
-/* Mint a temporary nsDef entry so C14N finds namespaces that live on node->ns
- * but have no matching xmlns attribute (typical for createElementNS). */
-static void dom_add_synthetic_ns_decl(HashTable *links, xmlNodePtr node, xmlNsPtr src_ns)
-{
-	xmlNsPtr ns = dom_alloc_ns_decl(links, node);
-	if (!ns) {
-		return;
-	}
-
-	ns->href = xmlStrdup(src_ns->href);
-	ns->prefix = src_ns->prefix ? xmlStrdup(src_ns->prefix) : NULL;
-}
-
-/* Same, but for attribute namespaces, which may collide by prefix with the
- * element's own ns or with a sibling attribute's ns. */
-static void dom_add_synthetic_ns_decl_for_attr(HashTable *links, xmlNodePtr node, xmlNsPtr src_ns)
-{
-	for (xmlNsPtr existing = node->nsDef; existing; existing = existing->next) {
-		if (xmlStrEqual(existing->prefix, src_ns->prefix)) {
-			return;
-		}
-	}
-
-	dom_add_synthetic_ns_decl(links, node, src_ns);
-}
-
-static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
-{
-	if (node->type == XML_ELEMENT_NODE) {
-		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
-			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
-				xmlNsPtr ns = dom_alloc_ns_decl(links, node);
-				if (!ns) {
-					return;
-				}
-
-				bool should_free;
-				xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
-
-				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
-				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
-				ns->_private = attr;
-				if (attr->prev) {
-					attr->prev->next = attr->next;
-				} else {
-					node->properties = attr->next;
-				}
-				if (attr->next) {
-					attr->next->prev = attr->prev;
-				}
-			}
-		}
-
-		/* The default namespace is handled separately from the other namespaces in C14N.
-		 * The default namespace is explicitly looked up while the other namespaces are
-		 * deduplicated and compared to a list of visible namespaces. */
-		if (node->ns && !node->ns->prefix) {
-			/* Workaround for the behaviour where the xmlSearchNs() call inside c14n.c
-			 * can return the current namespace. */
-			zend_hash_index_add_new_ptr(links, (zend_ulong) node | 1, node->ns);
-			node->ns = xmlSearchNs(node->doc, node, NULL);
-		} else if (node->ns) {
-			dom_add_synthetic_ns_decl(links, node, node->ns);
-		}
-
-		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
-			if (attr->ns && !php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
-				dom_add_synthetic_ns_decl_for_attr(links, node, attr->ns);
-			}
-		}
-	}
-}
-
-static void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
-{
-	dom_relink_ns_decls_element(links, root);
-
-	xmlNodePtr base = root;
-	xmlNodePtr node = base->children;
-	while (node != NULL) {
-		dom_relink_ns_decls_element(links, node);
-		node = php_dom_next_in_tree_order(node, base);
-	}
-}
-
-static void dom_unlink_ns_decls(HashTable *links)
-{
-	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(links, zend_ulong h, zval *data) {
-		if (h & 1) {
-			xmlNodePtr node = (xmlNodePtr) (h ^ 1);
-			node->ns = Z_PTR_P(data);
-		} else {
-			xmlNodePtr node = (xmlNodePtr) h;
-			while (Z_LVAL_P(data)-- > 0) {
-				xmlNsPtr ns = node->nsDef;
-				node->nsDef = ns->next;
-
-				xmlAttrPtr attr = ns->_private;
-				if (attr) {
-					if (attr->prev) {
-						attr->prev->next = attr;
-					} else {
-						node->properties = attr;
-					}
-					if (attr->next) {
-						attr->next->prev = attr;
-					}
-				}
-
-				xmlFreeNs(ns);
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-}
 
 static int dom_canonicalize_node_parent_lookup_cb(void *user_data, xmlNodePtr node, xmlNodePtr parent)
 {

@@ -33,6 +33,7 @@ const php_hash_ops php_hash_murmur3a_ops = {
 	4,
 	4,
 	sizeof(PHP_MURMUR3A_CTX),
+	0,
 	0
 };
 
@@ -95,6 +96,7 @@ const php_hash_ops php_hash_murmur3c_ops = {
 	16,
 	4,
 	sizeof(PHP_MURMUR3C_CTX),
+	0,
 	0
 };
 
@@ -174,6 +176,7 @@ const php_hash_ops php_hash_murmur3f_ops = {
 	16,
 	8,
 	sizeof(PHP_MURMUR3F_CTX),
+	0,
 	0
 };
 

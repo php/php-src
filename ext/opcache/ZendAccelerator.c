@@ -2715,7 +2715,7 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 				zend_reset_cache_vars();
 				zend_accel_hash_clean(&ZCSG(hash));
 
-				if (ZCG(accel_directives).interned_strings_buffer) {
+				if (ZCSG(interned_strings).saved_top) {
 					accel_interned_strings_restore_state();
 				}
 
@@ -3444,6 +3444,8 @@ void accel_shutdown(void)
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
 		ini_entry->on_modify = orig_include_path_on_modify;
 	}
+
+	accel_startup_ok = false;
 }
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason)
@@ -4290,12 +4292,14 @@ static void preload_fix_trait_op_array(zend_op_array *op_array)
 	uint32_t fn_flags = op_array->fn_flags;
 	zend_function *prototype = op_array->prototype;
 	HashTable *ht = op_array->static_variables;
+	const zend_property_info *prop_info = op_array->prop_info;
 	*op_array = *orig_op_array;
 	op_array->function_name = function_name;
 	op_array->scope = scope;
 	op_array->fn_flags = fn_flags;
 	op_array->prototype = prototype;
 	op_array->static_variables = ht;
+	op_array->prop_info = prop_info;
 }
 
 static void preload_fix_trait_methods(zend_class_entry *ce)

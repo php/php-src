@@ -2,7 +2,7 @@
  * Copyright (C) 2021-2025 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
- * Adapted for PHP libxml2 by: Niels Dossche <nielsdos@php.net>
+ * Adapted for PHP libxml2 by: Nora Dossche  <ndossche@php.net>
  */
 
 

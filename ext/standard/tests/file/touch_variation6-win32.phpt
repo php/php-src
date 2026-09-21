@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 ?>
 --FILE--
 <?php
-$workDir = "touchVar5.tmp";
+$workDir = "touchVar6.tmp";
 $subDirOrFile = "aSubDirOrFile";
 chdir(__DIR__);
 mkdir($workDir);
@@ -154,80 +154,80 @@ function get_atime($path) {
 *** Testing touch() : variation ***
 
 *** testing nonexisting paths ***
---- testing touchVar5.tmp\aSubDirOrFile ---
-PASSED: touchVar5.tmp\aSubDirOrFile - created
---- testing .\touchVar5.tmp\aSubDirOrFile ---
-PASSED: .\touchVar5.tmp\aSubDirOrFile - created
---- testing touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile ---
-PASSED: touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - created
---- testing touchVar5.tmp\..\BADDIR\aSubDirOrFile ---
+--- testing touchVar6.tmp\aSubDirOrFile ---
+PASSED: touchVar6.tmp\aSubDirOrFile - created
+--- testing .\touchVar6.tmp\aSubDirOrFile ---
+PASSED: .\touchVar6.tmp\aSubDirOrFile - created
+--- testing touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile ---
+PASSED: touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile - created
+--- testing touchVar6.tmp\..\BADDIR\aSubDirOrFile ---
 
-Warning: touch(): Unable to create file touchVar5.tmp\..\BADDIR\aSubDirOrFile because %s in %s on line %d
+Warning: touch(): Unable to create file touchVar6.tmp\..\BADDIR\aSubDirOrFile because %s in %s on line %d
 --- testing BADDIR\aSubDirOrFile ---
 
 Warning: touch(): Unable to create file BADDIR\aSubDirOrFile because %s in %s on line %d
---- testing %s\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\touchVar5.tmp\aSubDirOrFile - created
---- testing %s\.\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\.\touchVar5.tmp\aSubDirOrFile - created
---- testing %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - created
+--- testing %s\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\touchVar6.tmp\aSubDirOrFile - created
+--- testing %s\.\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\.\touchVar6.tmp\aSubDirOrFile - created
+--- testing %s\touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile - created
 --- testing %s\BADDIR\aSubDirOrFile ---
 
 Warning: touch(): Unable to create file %s\BADDIR\aSubDirOrFile because %s in %s on line %d
---- testing touchVar5.tmp\aSubDirOrFile\ ---
+--- testing touchVar6.tmp\aSubDirOrFile\ ---
 
-Warning: touch(): Unable to create file touchVar5.tmp\aSubDirOrFile\ because %s in %s on line %d
---- testing %s\touchVar5.tmp\aSubDirOrFile\ ---
+Warning: touch(): Unable to create file touchVar6.tmp\aSubDirOrFile\ because %s in %s on line %d
+--- testing %s\touchVar6.tmp\aSubDirOrFile\ ---
 
-Warning: touch(): Unable to create file %s\touchVar5.tmp\aSubDirOrFile\ because %s in %s on line %d
---- testing touchVar5.tmp\\aSubDirOrFile ---
-PASSED: touchVar5.tmp\\aSubDirOrFile - created
---- testing %s\\touchVar5.tmp\\aSubDirOrFile ---
-PASSED: %s\\touchVar5.tmp\\aSubDirOrFile - created
---- testing /%s/touchVar5.tmp/aSubDirOrFile ---
-PASSED: /%s/touchVar5.tmp/aSubDirOrFile - created
+Warning: touch(): Unable to create file %s\touchVar6.tmp\aSubDirOrFile\ because %s in %s on line %d
+--- testing touchVar6.tmp\\aSubDirOrFile ---
+PASSED: touchVar6.tmp\\aSubDirOrFile - created
+--- testing %s\\touchVar6.tmp\\aSubDirOrFile ---
+PASSED: %s\\touchVar6.tmp\\aSubDirOrFile - created
+--- testing /%s/touchVar6.tmp/aSubDirOrFile ---
+PASSED: /%s/touchVar6.tmp/aSubDirOrFile - created
 
 *** testing existing files ***
---- testing touchVar5.tmp\aSubDirOrFile ---
-PASSED: touchVar5.tmp\aSubDirOrFile - touched
---- testing .\touchVar5.tmp\aSubDirOrFile ---
-PASSED: .\touchVar5.tmp\aSubDirOrFile - touched
---- testing touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile ---
-PASSED: touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - touched
---- testing %s\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\touchVar5.tmp\aSubDirOrFile - touched
---- testing %s\.\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\.\touchVar5.tmp\aSubDirOrFile - touched
---- testing %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - touched
---- testing touchVar5.tmp\\aSubDirOrFile ---
-PASSED: touchVar5.tmp\\aSubDirOrFile - touched
---- testing %s\\touchVar5.tmp\\aSubDirOrFile ---
-PASSED: %s\\touchVar5.tmp\\aSubDirOrFile - touched
---- testing /%s/touchVar5.tmp/aSubDirOrFile ---
-PASSED: /%s/touchVar5.tmp/aSubDirOrFile - touched
+--- testing touchVar6.tmp\aSubDirOrFile ---
+PASSED: touchVar6.tmp\aSubDirOrFile - touched
+--- testing .\touchVar6.tmp\aSubDirOrFile ---
+PASSED: .\touchVar6.tmp\aSubDirOrFile - touched
+--- testing touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile ---
+PASSED: touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile - touched
+--- testing %s\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\touchVar6.tmp\aSubDirOrFile - touched
+--- testing %s\.\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\.\touchVar6.tmp\aSubDirOrFile - touched
+--- testing %s\touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile - touched
+--- testing touchVar6.tmp\\aSubDirOrFile ---
+PASSED: touchVar6.tmp\\aSubDirOrFile - touched
+--- testing %s\\touchVar6.tmp\\aSubDirOrFile ---
+PASSED: %s\\touchVar6.tmp\\aSubDirOrFile - touched
+--- testing /%s/touchVar6.tmp/aSubDirOrFile ---
+PASSED: /%s/touchVar6.tmp/aSubDirOrFile - touched
 
 *** testing existing directories ***
---- testing touchVar5.tmp\aSubDirOrFile ---
-PASSED: touchVar5.tmp\aSubDirOrFile - touched
---- testing .\touchVar5.tmp\aSubDirOrFile ---
-PASSED: .\touchVar5.tmp\aSubDirOrFile - touched
---- testing touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile ---
-PASSED: touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - touched
---- testing %s\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\touchVar5.tmp\aSubDirOrFile - touched
---- testing %s\.\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\.\touchVar5.tmp\aSubDirOrFile - touched
---- testing %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile ---
-PASSED: %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - touched
---- testing touchVar5.tmp\aSubDirOrFile\ ---
-PASSED: touchVar5.tmp\aSubDirOrFile\ - touched
---- testing %s\touchVar5.tmp\aSubDirOrFile\ ---
-PASSED: %s\touchVar5.tmp\aSubDirOrFile\ - touched
---- testing touchVar5.tmp\\aSubDirOrFile ---
-PASSED: touchVar5.tmp\\aSubDirOrFile - touched
---- testing %s\\touchVar5.tmp\\aSubDirOrFile ---
-PASSED: %s\\touchVar5.tmp\\aSubDirOrFile - touched
---- testing /%s/touchVar5.tmp/aSubDirOrFile ---
-PASSED: /%s/touchVar5.tmp/aSubDirOrFile - touched
+--- testing touchVar6.tmp\aSubDirOrFile ---
+PASSED: touchVar6.tmp\aSubDirOrFile - touched
+--- testing .\touchVar6.tmp\aSubDirOrFile ---
+PASSED: .\touchVar6.tmp\aSubDirOrFile - touched
+--- testing touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile ---
+PASSED: touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile - touched
+--- testing %s\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\touchVar6.tmp\aSubDirOrFile - touched
+--- testing %s\.\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\.\touchVar6.tmp\aSubDirOrFile - touched
+--- testing %s\touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile ---
+PASSED: %s\touchVar6.tmp\..\touchVar6.tmp\aSubDirOrFile - touched
+--- testing touchVar6.tmp\aSubDirOrFile\ ---
+PASSED: touchVar6.tmp\aSubDirOrFile\ - touched
+--- testing %s\touchVar6.tmp\aSubDirOrFile\ ---
+PASSED: %s\touchVar6.tmp\aSubDirOrFile\ - touched
+--- testing touchVar6.tmp\\aSubDirOrFile ---
+PASSED: touchVar6.tmp\\aSubDirOrFile - touched
+--- testing %s\\touchVar6.tmp\\aSubDirOrFile ---
+PASSED: %s\\touchVar6.tmp\\aSubDirOrFile - touched
+--- testing /%s/touchVar6.tmp/aSubDirOrFile ---
+PASSED: /%s/touchVar6.tmp/aSubDirOrFile - touched

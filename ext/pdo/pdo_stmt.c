@@ -1700,6 +1700,13 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 		RETURN_FALSE;
 	}
 
+	if (stmt->columns == NULL || colno >= stmt->column_count) {
+		zval_ptr_dtor(return_value);
+		ZVAL_UNDEF(return_value);
+		pdo_raise_impl_error(stmt->dbh, stmt, "07009", "invalid column index");
+		RETURN_FALSE;
+	}
+
 	/* add stock items */
 	col = &stmt->columns[colno];
 	add_assoc_str(return_value, "name", zend_string_copy(col->name));
@@ -1729,13 +1736,15 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 			;
 	}
 
-	stmt->default_fetch_type = PDO_FETCH_BOTH;
+	stmt->default_fetch_type = stmt->dbh->default_fetch_type;
 
 	flags = mode & PDO_FETCH_FLAGS;
 
 	if (!pdo_stmt_verify_mode(stmt, mode, mode_arg_num, false)) {
 		return false;
 	}
+
+	bool use_default = (mode & ~PDO_FETCH_FLAGS) == PDO_FETCH_USE_DEFAULT;
 
 	switch (mode & ~PDO_FETCH_FLAGS) {
 		case PDO_FETCH_USE_DEFAULT:
@@ -1858,7 +1867,9 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 			return false;
 	}
 
-	stmt->default_fetch_type = mode;
+	if (!use_default) {
+		stmt->default_fetch_type = mode;
+	}
 
 	return true;
 }

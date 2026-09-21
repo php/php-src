@@ -145,6 +145,11 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t
 	}
 	if (JIT_G(current_frame)) {
 		op_array = &JIT_G(current_frame)->func->op_array;
+		if (!(op_array->fn_flags & ZEND_ACC_IMMUTABLE)) {
+			zend_jit_op_array_trace_extension *jit_extension =
+				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
+			op_array = jit_extension->op_array;
+		}
 		stack_size = op_array->last_var + op_array->T;
 		if (stack_size) {
 			stack = JIT_G(current_frame)->stack;
@@ -2314,6 +2319,9 @@ propagate_arg:
 			 && ssa_opcodes[idx + 1] == ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value)) {
 				if (ssa_ops[idx].op2_use >= 0 && ssa_ops[idx].op2_def >= 0) {
 					ssa_var_info[ssa_ops[idx].op2_def] = ssa_var_info[ssa_ops[idx].op2_use];
+				}
+				if (ssa_ops[idx].result_use >= 0 && ssa_ops[idx].result_def >= 0) {
+					ssa_var_info[ssa_ops[idx].result_def] = ssa_var_info[ssa_ops[idx].result_use];
 				}
 			} else {
 				if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
@@ -7361,7 +7369,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 
 	name = zend_jit_trace_escape_name(trace_num, exit_num);
 
-	if (!zend_jit_deoptimizer_start(&ctx, name, trace_num, exit_num)) {
+	if (!zend_jit_deoptimizer_start(&ctx, name, trace_num, &zend_jit_traces[trace_num], exit_num)) {
 		zend_string_release(name);
 		return NULL;
 	}
@@ -8479,7 +8487,7 @@ int ZEND_FASTCALL zend_jit_trace_hot_side(zend_execute_data *execute_data, uint3
 			do {
 				ex = ex->prev_execute_data;
 				n++;
-			} while (ex && zend_jit_traces[root].op_array != &ex->func->op_array);
+			} while (ex && (!ex->func || zend_jit_traces[root].op_array != &ex->func->op_array));
 			if (ex && n <= ZEND_JIT_TRACE_MAX_RET_DEPTH) {
 				ret_depth = n;
 			}

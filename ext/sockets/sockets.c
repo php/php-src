@@ -542,7 +542,7 @@ static int php_sock_array_to_fd_set(uint32_t arg_num, zval *sock_array, fd_set *
 		num++;
 	} ZEND_HASH_FOREACH_END();
 
-	return num ? 1 : 0;
+	return num;
 }
 /* }}} */
 
@@ -593,7 +593,7 @@ PHP_FUNCTION(socket_select)
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
 	PHP_SOCKET		max_fd = 0;
-	int				retval, sets = 0;
+	int				retval, max_set_count = 0;
 	zend_long		sec, usec = 0;
 	bool		sec_is_null = 0;
 
@@ -611,30 +611,39 @@ PHP_FUNCTION(socket_select)
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(1, r_array, &rfds, &max_fd);
+		retval = php_sock_array_to_fd_set(1, r_array, &rfds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
+		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
 		}
 	}
 	if (w_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(2, w_array, &wfds, &max_fd);
+		retval = php_sock_array_to_fd_set(2, w_array, &wfds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
+		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
 		}
 	}
 	if (e_array != NULL) {
-		sets += retval = php_sock_array_to_fd_set(3, e_array, &efds, &max_fd);
+		retval = php_sock_array_to_fd_set(3, e_array, &efds, &max_fd);
 		if (retval == -1) {
 			RETURN_THROWS();
 		}
+		if (retval > max_set_count) {
+			max_set_count = retval;
+		}
 	}
 
-	if (!sets) {
+	if (!max_set_count) {
 		zend_value_error("socket_select(): At least one array argument must be passed");
 		RETURN_THROWS();
 	}
 
-	if (!PHP_SAFE_MAX_FD(max_fd, 0)) {
+	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
 		RETURN_FALSE;
 	}
 
@@ -1839,6 +1848,7 @@ PHP_FUNCTION(socket_get_option)
 #endif
 
 	optlen = sizeof(other_val);
+	other_val = 0;
 
 	if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&other_val, &optlen) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
@@ -1864,6 +1874,10 @@ PHP_FUNCTION(socket_set_option)
 	int						timeout;
 #else
 	struct					timeval tv;
+#endif
+#ifdef SO_ATTACH_REUSEPORT_CBPF
+	struct sock_filter cbpf[8] = {0};
+	struct sock_fprog bpfprog;
 #endif
 	zend_long					level, optname;
 	void 					*opt_ptr;
@@ -2074,8 +2088,6 @@ PHP_FUNCTION(socket_set_option)
 				optname = SO_DETACH_BPF;
 			} else {
 				uint32_t k = (uint32_t)cbpf_val;
-				static struct sock_filter cbpf[8] = {0};
-				static struct sock_fprog bpfprog;
 
 				switch (k) {
 					case SKF_AD_CPU:
@@ -2357,6 +2369,7 @@ PHP_FUNCTION(socket_import_stream)
 	retsock = Z_SOCKET_P(return_value);
 
 	if (!socket_import_file_descriptor(socket, retsock)) {
+		retsock->bsd_socket = -1;
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}

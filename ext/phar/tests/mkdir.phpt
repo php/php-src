@@ -24,6 +24,13 @@ $a->addEmptyDir('.phar');
 } catch (Exception $e) {
 echo $e->getMessage(),"\n";
 }
+try {
+$a->addEmptyDir('/.phar');
+} catch (Exception $e) {
+echo $e->getMessage(),"\n";
+}
+$a->addEmptyDir('/.pharx');
+var_dump(is_dir($pname . '/.pharx'));
 ?>
 --CLEAN--
 <?php
@@ -43,3 +50,5 @@ Warning: rmdir(): phar error: cannot remove directory "" in phar "foo.phar", dir
 
 Warning: rmdir(): phar error: cannot remove directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is a not a directory in %smkdir.php on line %d
 Cannot create a directory in magic ".phar" directory
+Cannot create a directory in magic ".phar" directory
+bool(true)

@@ -1206,6 +1206,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	if (iovlen > UINT_MAX) {
 		do_to_zval_err(ctx, "unexpectedly large value for iov_len: %lu",
 				(unsigned long)iovlen);
+		return;
 	}
 	array_init_size(zv, (uint32_t)iovlen);
 
@@ -1385,7 +1386,7 @@ static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, se
 			return;
 		}
 
-		iarr[i] = sock->bsd_socket;
+		iarr[i - 1] = sock->bsd_socket;
 		return;
 	}
 

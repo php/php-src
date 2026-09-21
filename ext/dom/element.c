@@ -468,6 +468,8 @@ PHP_METHOD(DOMElement, setAttribute)
 					break;
 				case XML_NAMESPACE_DECL:
 					RETURN_FALSE;
+				case XML_ATTRIBUTE_DECL:
+					break;
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 		}
@@ -595,6 +597,8 @@ static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
 
 			break;
 		}
+		case XML_ATTRIBUTE_DECL:
+			return false;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	return true;
@@ -722,11 +726,17 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	nsp = attrp->ns;
 	if (use_ns && nsp != NULL) {
 		existattrp = xmlHasNsProp(nodep, attrp->name, nsp->href);
+	} else if (nsp == NULL) {
+		existattrp = xmlHasNsProp(nodep, attrp->name, NULL);
 	} else {
 		existattrp = xmlHasProp(nodep, attrp->name);
 	}
 
-	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
+	if (existattrp != NULL && existattrp->type == XML_ATTRIBUTE_DECL) {
+		existattrp = NULL;
+	}
+
+	if (existattrp != NULL) {
 		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
 			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
@@ -1020,6 +1030,10 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 	if (errorcode == 0) {
 		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
+		xmlNodePtr existing = (xmlNodePtr) xmlHasNsProp(elemp, localname, ns == NULL ? NULL : ns->href);
+		if (existing != NULL && existing->type != XML_ATTRIBUTE_DECL) {
+			node_list_unlink(existing->children);
+		}
 		xmlAttrPtr attr = xmlSetNsProp(elemp, ns, localname, BAD_CAST value);
 		if (UNEXPECTED(attr == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
@@ -1788,8 +1802,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 
 	/* Step 5 */
 	if (force_is_null || !force) {
-		dom_remove_attribute(thisp, attribute);
-		retval = false;
+		retval = !dom_remove_attribute(thisp, attribute);
 		goto out;
 	}
 

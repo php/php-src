@@ -156,7 +156,11 @@ static php_stream_filter_status_t userfilter_filter(
 	bool stream_property_exists = Z_OBJ_HT_P(obj)->has_property(Z_OBJ_P(obj), stream_name, ZEND_PROPERTY_EXISTS, NULL);
 	if (stream_property_exists) {
 		zval stream_zval;
-		php_stream_to_zval(stream, &stream_zval);
+		if (EXPECTED(stream->res && stream->res->type >= 0)) {
+			php_stream_to_zval(stream, &stream_zval);
+		} else {
+			ZVAL_NULL(&stream_zval);
+		}
 		zend_update_property_ex(Z_OBJCE_P(obj), Z_OBJ_P(obj), stream_name, &stream_zval);
 		/* If property update threw an exception, skip filter execution */
 		if (EG(exception)) {
@@ -419,7 +423,11 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (NULL != (pzdata = zend_read_property(NULL, Z_OBJ_P(zobject), "data", sizeof("data")-1, false, &rv))) {
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		ZVAL_DEREF(pzdata);
+		ZEND_ASSERT(Z_TYPE_P(pzdata) == IS_STRING);
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}

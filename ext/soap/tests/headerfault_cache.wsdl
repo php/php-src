@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://example.com/hf" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.com/hf">
+  <wsdl:message name="message">
+    <wsdl:part name="param" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="authToken">
+    <wsdl:part name="authToken" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="traceId">
+    <wsdl:part name="traceId" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="faultToken">
+    <wsdl:part name="faultToken" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="faultTrace">
+    <wsdl:part name="faultTrace" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:portType name="hf">
+    <wsdl:operation name="testHeader">
+      <wsdl:input message="tns:message"/>
+      <wsdl:output message="tns:message"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="hfBinding" type="tns:hf">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="testHeader">
+      <soap:operation soapAction="http://example.com/hf/testHeader"/>
+      <wsdl:input>
+        <soap:body namespace="http://example.com/hf" use="literal"/>
+        <soap:header namespace="http://example.com/hf" use="literal" part="authToken" message="tns:authToken">
+          <soap:headerfault namespace="http://example.com/hf" use="literal" part="faultToken" message="tns:faultToken"/>
+        </soap:header>
+        <soap:header namespace="http://example.com/hf" use="literal" part="traceId" message="tns:traceId">
+          <soap:headerfault namespace="http://example.com/hf" use="literal" part="faultTrace" message="tns:faultTrace"/>
+        </soap:header>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body namespace="http://example.com/hf" use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="hfService">
+    <wsdl:port binding="tns:hfBinding" name="hfPort">
+      <soap:address location="http://localhost/hf.php"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -1,7 +1,7 @@
-From 0cd2add6c46400b808329442f81451b369863983 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Sat, 26 Aug 2023 15:08:59 +0200
-Subject: [PATCH 1/6] Expose line and column information for use in PHP
+Subject: [PATCH 1/8] Expose line and column information for use in PHP
 
 ---
  source/lexbor/dom/interfaces/node.h  |  2 ++
@@ -183,6 +183,3 @@ index 7a212af..b186772 100644
  }
  lxb_html_tree_error_t;
  
--- 
-2.51.2
-

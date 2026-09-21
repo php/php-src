@@ -68,6 +68,7 @@ typedef struct {
 	Oid *param_types;
 	int                     current_row;
 	bool is_prepared;
+	bool is_cursor_declared;
 } pdo_pgsql_stmt;
 
 typedef struct {

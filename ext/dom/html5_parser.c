@@ -10,7 +10,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -241,7 +241,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 lxml_attr->children = lxml_attr->last = lxml_text;
                 lxml_text->parent = (xmlNodePtr) lxml_attr;
 
-                if (attr->node.ns == LXB_NS_XMLNS) {
+                if (attr->node.ns == LXB_NS_XMLNS && (attr->node.prefix || strcmp((const char *) local_name, "xmlns") == 0)) {
                     if (strcmp((const char *) local_name, "xmlns") != 0) {
                         if (prefixed_xmlns_ns == NULL) {
                             prefixed_xmlns_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xmlns", DOM_XMLNS_NS_URI);
@@ -251,13 +251,13 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                         lxml_attr->ns = php_dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(ns_mapper);
                     }
                     lxml_attr->ns->_private = (void *) php_dom_ns_is_xmlns_magic_token;
-                } else if (attr->node.ns == LXB_NS_XLINK) {
+                } else if (attr->node.prefix && attr->node.ns == LXB_NS_XLINK) {
                     if (xlink_ns == NULL) {
                         xlink_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xlink", DOM_XLINK_NS_URI);
                         xlink_ns->_private = (void *) php_dom_ns_is_xlink_magic_token;
                     }
                     lxml_attr->ns = xlink_ns;
-                } else if (attr->node.ns == LXB_NS_XML) {
+                } else if (attr->node.prefix && attr->node.ns == LXB_NS_XML) {
                     if (xml_ns == NULL) {
                         xml_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xml", DOM_XML_NS_URI);
                         xml_ns->_private = (void *) php_dom_ns_is_xml_magic_token;
@@ -274,7 +274,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 last_added_attr = lxml_attr;
 
                 /* xmlIsID does some other stuff too that is irrelevant here. */
-                if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd' && attr->node.ns == LXB_NS_HTML) {
+                if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd' && lxml_attr->ns == NULL) {
                     if (xmlAddID(NULL, lxml_doc, value, lxml_attr) == 0) {
                         /* If the ID already exists, the ID attribute still needs to be marked as an ID. */
                         lxml_attr->atype = XML_ATTRIBUTE_ID;

@@ -234,7 +234,7 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 
 	RETCODE ret;
 	char *id = NULL;
-	size_t len;
+	DBINT len;
 	zend_string *ret_id;
 
 	/*
@@ -267,9 +267,14 @@ zend_string *dblib_handle_last_id(pdo_dbh_t *dbh, const zend_string *name)
 		return NULL;
 	}
 
-	id = emalloc(32);
-	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
+	id = emalloc(40);
+	len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)40);
 	dbcancel(H->link);
+
+	if (len < 0) {
+		efree(id);
+		return NULL;
+	}
 
 	ret_id = zend_string_init(id, len, 0);
 	efree(id);
@@ -539,7 +544,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		}
 
 		if (i==nvers) {
-			printf("Invalid version '%s'\n", vars[5].optval);
 			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string.");
 			goto cleanup; /* unknown version specified */
 		}

@@ -213,6 +213,9 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 	objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap != NULL) {
+		if (urilen == 0 && objmap->baseobj != NULL && objmap->nodetype != XML_NOTATION_NODE && objmap->nodetype != XML_ENTITY_NODE && php_dom_follow_spec_intern(objmap->baseobj)) {
+			uri = NULL;
+		}
 		if ((objmap->nodetype == XML_NOTATION_NODE) ||
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
@@ -229,6 +232,9 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 			nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
 				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, BAD_CAST named, BAD_CAST uri);
+				if (itemnode != NULL && itemnode->type == XML_ATTRIBUTE_DECL) {
+					itemnode = NULL;
+				}
 			}
 		}
 	}

@@ -168,7 +168,6 @@ static void _php_intlgregcal_constructor_body(
 			if (gcal) {
 				delete gcal;
 			}
-			delete tz;
 			if (!is_constructor) {
 				zval_ptr_dtor(return_value);
 				RETVAL_NULL();
@@ -178,7 +177,7 @@ static void _php_intlgregcal_constructor_body(
 	} else {
 		// From date/time (3, 5 or 6 arguments)
 		for (int i = 0; i < variant; i++) {
-			ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(largs[i], hasThis() ? (i-1) : i);
+			ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(largs[i], i + 1);
 		}
 
 		if (variant == 3) {

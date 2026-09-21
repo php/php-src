@@ -25,7 +25,7 @@ echo $html->saveHtml(), "\n";
 <container xmlns="some:ns" xmlns:bar="another:ns">
     <x>
         <subcontainer>
-            <test xmlns="x:y"/>
+            <test xmlns="xy:z"/>
             <child2/>
         </subcontainer>
         <subcontainer2>
@@ -38,7 +38,7 @@ echo $html->saveHtml(), "\n";
 <html xmlns="http://www.w3.org/1999/xhtml"><head></head><body><p>foo<container xmlns="some:ns" xmlns:bar="another:ns">
     <x>
         <subcontainer>
-            <test xmlns="x:y"/>
+            <test xmlns="xy:z"/>
             <child2/>
         </subcontainer>
         <subcontainer2>
@@ -49,7 +49,7 @@ echo $html->saveHtml(), "\n";
 <html><head></head><body><p>foo<container xmlns="some:ns" xmlns:bar="another:ns">
     <x>
         <subcontainer>
-            <test xmlns="x:y"></test>
+            <test xmlns="xy:z"></test>
             <child2></child2>
         </subcontainer>
         <subcontainer2>

@@ -556,7 +556,7 @@ PHP_FUNCTION(imageloadfont)
 	 */
 	font = (gdFontPtr) emalloc(sizeof(gdFont));
 	b = 0;
-	while (b < hdr_size && (n = php_stream_read(stream, (char*)&font[b], hdr_size - b)) > 0) {
+	while (b < hdr_size && (n = php_stream_read(stream, (char *) font + b, hdr_size - b)) > 0) {
 		b += n;
 	}
 
@@ -4210,7 +4210,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SCALE: {
 			double x, y;
 			if (Z_TYPE_P(options) != IS_ARRAY) {
-				zend_argument_type_error(1, "must be of type array when using translate or scale");
+				zend_argument_type_error(2, "must be of type array when using translate or scale");
 				RETURN_THROWS();
 			}
 
@@ -4291,7 +4291,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(z_m2)) != 6) {
-		zend_argument_value_error(1, "must have 6 elements");
+		zend_argument_value_error(2, "must have 6 elements");
 		RETURN_THROWS();
 	}
 
@@ -4464,21 +4464,39 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 	efree(ctx);
 } /* }}} */
 
+typedef struct {
+	gdIOCtx ctx;
+	size_t buf_len;
+	unsigned char buf[8192];
+} php_gd_stream_ctx;
+
+static void _php_image_stream_flush(php_gd_stream_ctx *stream_ctx) /* {{{ */
+{
+	if (stream_ctx->buf_len) {
+		php_stream_write((php_stream *) stream_ctx->ctx.data, (char *) stream_ctx->buf, stream_ctx->buf_len);
+		stream_ctx->buf_len = 0;
+	}
+} /* }}} */
+
 static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
-	char ch = (char) c;
-	php_stream * stream = (php_stream *)ctx->data;
-	php_stream_write(stream, &ch, 1);
+	php_gd_stream_ctx *stream_ctx = (php_gd_stream_ctx *) ctx;
+	if (stream_ctx->buf_len == sizeof(stream_ctx->buf)) {
+		_php_image_stream_flush(stream_ctx);
+	}
+	stream_ctx->buf[stream_ctx->buf_len++] = (unsigned char) c;
 } /* }}} */
 
 static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
 {
 	php_stream * stream = (php_stream *)ctx->data;
+	_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 	return php_stream_write(stream, (void *)buf, l);
 } /* }}} */
 
 static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
 	if(ctx->data) {
+		_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 		ctx->data = NULL;
 	}
 	efree(ctx);
@@ -4487,6 +4505,7 @@ static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 {
 	if(ctx->data) {
+		_php_image_stream_flush((php_gd_stream_ctx *) ctx);
 		php_stream_close((php_stream *) ctx->data);
 		ctx->data = NULL;
 	}
@@ -4494,7 +4513,8 @@ static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 } /* }}} */
 
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream) {
-	gdIOCtx *ctx = ecalloc(1, sizeof(gdIOCtx));
+	php_gd_stream_ctx *stream_ctx = ecalloc(1, sizeof(php_gd_stream_ctx));
+	gdIOCtx *ctx = &stream_ctx->ctx;
 
 	ctx->putC = _php_image_stream_putc;
 	ctx->putBuf = _php_image_stream_putbuf;

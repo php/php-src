@@ -680,8 +680,10 @@ void odbc_bindcols(odbc_result *result)
 
 	for(i = 0; i < result->numcols; i++) {
 		charextraalloc = 0;
+		result->values[i].value_max_len = 0;
 		colfieldid = SQL_COLUMN_DISPLAY_SIZE;
 
+		result->values[i].name[0] = '\0';
 		rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), PHP_ODBC_SQL_DESC_NAME,
 				result->values[i].name, sizeof(result->values[i].name), &colnamelen, 0);
 		result->values[i].coltype = 0;
@@ -706,6 +708,7 @@ void odbc_bindcols(odbc_result *result)
 #ifdef HAVE_ADABAS
 			case SQL_TIMESTAMP:
 				result->values[i].value = (char *)emalloc(27);
+				result->values[i].value_max_len = 26;
 				SQLBindCol(result->stmt, (SQLUSMALLINT)(i+1), SQL_C_CHAR, result->values[i].value,
 							27, &result->values[i].vallen);
 				break;
@@ -775,6 +778,7 @@ void odbc_bindcols(odbc_result *result)
 					displaysize *= 4;
 				}
 				result->values[i].value = (char *)emalloc(displaysize + 1);
+				result->values[i].value_max_len = displaysize;
 				rc = SQLBindCol(result->stmt, (SQLUSMALLINT)(i+1), SQL_C_CHAR, result->values[i].value,
 							displaysize + 1, &result->values[i].vallen);
 				break;
@@ -806,10 +810,30 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 /* }}} */
 
+static void odbc_colattribute_failed(odbc_result *result, zend_long pv_num)
+{
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+	SQLINTEGER diag_error;
+	SQLCHAR diag_state[6];
+	SQLCHAR diag_text[128];
+
+	memset(diag_state, '\0', sizeof(diag_state));
+	memset(diag_text, '\0', sizeof(diag_text));
+	if (SQL_SUCCESS == SQLGetDiagRec(SQL_HANDLE_STMT, result->stmt, 1, diag_state, &diag_error, diag_text, sizeof(diag_text), NULL)) {
+		diag_state[sizeof(diag_state) - 1] = '\0';
+		diag_text[sizeof(diag_text) - 1] = '\0';
+		php_error_docref(NULL, E_WARNING, "SQLColAttribute failed for field #%d: [%s] %s", (int)pv_num, diag_state, diag_text);
+		return;
+	}
+#endif
+	php_error_docref(NULL, E_WARNING, "SQLColAttribute failed for field #%d", (int)pv_num);
+}
+
 /* {{{ odbc_column_lengths */
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
+	RETCODE rc;
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30)
 	/* this seems to be necessary for Solid2.3 ( tested by
 	 * tammy@synchronis.com) and Solid 3.0 (tested by eric@terra.telemediair.nl)
@@ -846,7 +870,11 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
-	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT) (type?SQL_COLUMN_SCALE:SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+	rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, (SQLUSMALLINT)(type ? SQL_COLUMN_SCALE : SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		odbc_colattribute_failed(result, pv_num);
+		len = 0;
+	}
 
 	RETURN_LONG(len);
 }
@@ -1492,7 +1520,11 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 					ZVAL_FALSE(&tmp);
 					break;
 				}
-				ZVAL_STRINGL(&tmp, result->values[i].value, result->values[i].vallen);
+				SQLLEN str_len = result->values[i].vallen;
+				if (str_len > result->values[i].value_max_len) {
+					str_len = result->values[i].value_max_len;
+				}
+				ZVAL_STRINGL(&tmp, result->values[i].value, str_len);
 				break;
 		}
 
@@ -1660,7 +1692,11 @@ PHP_FUNCTION(odbc_fetch_into)
 					ZVAL_FALSE(&tmp);
 					break;
 				}
-				ZVAL_STRINGL(&tmp, result->values[i].value, result->values[i].vallen);
+				SQLLEN str_len = result->values[i].vallen;
+				if (str_len > result->values[i].value_max_len) {
+					str_len = result->values[i].value_max_len;
+				}
+				ZVAL_STRINGL(&tmp, result->values[i].value, str_len);
 				break;
 		}
 		zend_hash_index_update(Z_ARRVAL_P(pv_res_arr), i, &tmp);
@@ -1910,7 +1946,11 @@ PHP_FUNCTION(odbc_result)
 				php_error_docref(NULL, E_WARNING, "Cannot get data of column #%d (driver cannot determine length)", field_ind + 1);
 				RETURN_FALSE;
 			} else {
-				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen);
+				SQLLEN str_len = result->values[field_ind].vallen;
+				if (str_len > result->values[field_ind].value_max_len) {
+					str_len = result->values[field_ind].value_max_len;
+				}
+				RETURN_STRINGL(result->values[field_ind].value, str_len);
 			}
 			break;
 	}
@@ -2202,9 +2242,9 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 
 			/* Force UID and PWD to be set in the DSN */
 			if (use_uid_arg || use_pwd_arg) {
-				db_end--;
-				if ((unsigned char)*(db_end) == ';') {
-					*db_end = '\0';
+				size_t base_len = db_len;
+				if (base_len > 0 && db[base_len - 1] == ';') {
+					base_len--;
 				}
 
 				char *uid_quoted = NULL, *pwd_quoted = NULL;
@@ -2220,7 +2260,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 					}
 
 					if (!use_pwd_arg) {
-						spprintf(&ldb, 0, "%s;UID=%s;", db, uid_quoted);
+						spprintf(&ldb, 0, "%.*s;UID=%s;", (int) base_len, db, uid_quoted);
 					}
 				}
 
@@ -2235,12 +2275,12 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 					}
 
 					if (!use_uid_arg) {
-						spprintf(&ldb, 0, "%s;PWD=%s;", db, pwd_quoted);
+						spprintf(&ldb, 0, "%.*s;PWD=%s;", (int) base_len, db, pwd_quoted);
 					}
 				}
 
 				if (use_uid_arg && use_pwd_arg) {
-					spprintf(&ldb, 0, "%s;UID=%s;PWD=%s;", db, uid_quoted, pwd_quoted);
+					spprintf(&ldb, 0, "%.*s;UID=%s;PWD=%s;", (int) base_len, db, uid_quoted, pwd_quoted);
 				}
 
 				if (uid_quoted && should_quote_uid) {
@@ -2582,6 +2622,7 @@ PHP_FUNCTION(odbc_field_type)
 	odbc_result	*result;
 	char    	tmp[32];
 	SQLSMALLINT	tmplen;
+	RETCODE		rc;
 	zval		*pv_res;
 	zend_long		pv_num;
 
@@ -2607,7 +2648,13 @@ PHP_FUNCTION(odbc_field_type)
 		RETURN_FALSE;
 	}
 
-	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
+	tmp[0] = '\0';
+	rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, sizeof(tmp) - 1, &tmplen, NULL);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		odbc_colattribute_failed(result, pv_num);
+		RETURN_FALSE;
+	}
+
 	RETURN_STRING(tmp);
 }
 /* }}} */

@@ -1478,7 +1478,11 @@ PHP_METHOD(SoapServer, handle)
 
 		/* If new session or something weird happned */
 		if (soap_obj == NULL) {
-			object_init_ex(&tmp_soap, service->soap_class.ce);
+			if (UNEXPECTED(object_init_ex(&tmp_soap, service->soap_class.ce) != SUCCESS)) {
+				php_output_discard();
+				_soap_server_exception(service, function, ZEND_THIS);
+				goto fail;
+			}
 
 			/* Call constructor */
 			if (service->soap_class.ce->constructor) {
@@ -2235,6 +2239,10 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 		return false;
 	}
 
+	ZVAL_UNDEF(&params[0]);
+	ZVAL_UNDEF(&params[1]);
+	ZVAL_UNDEF(&params[2]);
+
 	zend_try {
 		zval *trace = Z_CLIENT_TRACE_P(this_ptr);
 		if (Z_TYPE_P(trace) == IS_TRUE) {
@@ -2408,9 +2416,19 @@ static void do_soap_call(zend_execute_data *execute_data,
 				request = NULL;
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
+					bool parse_bailout = false;
+
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+					zend_try {
+						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), fn, NULL, return_value, output_headers);
+					} zend_catch {
+						parse_bailout = true;
+					} zend_end_try();
 					encode_finish();
+					if (parse_bailout) {
+						zval_ptr_dtor(&response);
+						zend_bailout();
+					}
 				}
 
 				zval_ptr_dtor(&response);
@@ -2452,9 +2470,19 @@ static void do_soap_call(zend_execute_data *execute_data,
 				request = NULL;
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
+					bool parse_bailout = false;
+
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+					zend_try {
+						ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
+					} zend_catch {
+						parse_bailout = true;
+					} zend_end_try();
 					encode_finish();
+					if (parse_bailout) {
+						zval_ptr_dtor(&response);
+						zend_bailout();
+					}
 				}
 
 				zval_ptr_dtor(&response);

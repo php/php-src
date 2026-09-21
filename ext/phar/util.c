@@ -60,14 +60,10 @@ static char *phar_get_link_location(phar_entry_info *entry) /* {{{ */
 }
 /* }}} */
 
-phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
+static phar_entry_info *phar_follow_one_link(phar_entry_info *entry)
 {
 	phar_entry_info *link_entry;
 	char *link;
-
-	if (!entry->link) {
-		return entry;
-	}
 
 	link = phar_get_link_location(entry);
 	if (NULL != (link_entry = zend_hash_str_find_ptr(&(entry->phar->manifest), entry->link, strlen(entry->link))) ||
@@ -75,15 +71,48 @@ phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 		if (link != entry->link) {
 			efree(link);
 		}
-		return phar_get_link_source(link_entry);
-	} else {
-		if (link != entry->link) {
-			efree(link);
+		return link_entry;
+	}
+
+	if (link != entry->link) {
+		efree(link);
+	}
+	return NULL;
+}
+
+phar_entry_info *phar_get_link_source(phar_entry_info *entry)
+{
+	phar_entry_info *slow, *fast;
+
+	if (!entry->link) {
+		return entry;
+	}
+
+	/*
+	 * Use Floyd's cycle detection algorithm to follow the symlink chain without unbounded
+	 * recursion. Each entry has at most one outgoing link, so if a cycle exists the fast pointer
+	 * will eventually meet the slow one. Otherwise the fast pointer reaches the end first.
+	 */
+	slow = fast = entry;
+	while (1) {
+		fast = phar_follow_one_link(fast);
+		if (!fast || !fast->link) {
+			return fast;
 		}
-		return NULL;
+		fast = phar_follow_one_link(fast);
+		if (!fast || !fast->link) {
+			return fast;
+		}
+
+		/* no need to check slow as it's always behind */
+		slow = phar_follow_one_link(slow);
+
+		if (slow == fast) {
+			/* circular symlink chain */
+			return NULL;
+		}
 	}
 }
-/* }}} */
 
 static php_stream *phar_get_entrypufp(const phar_entry_info *entry)
 {
@@ -198,7 +227,7 @@ zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t fil
 		return FAILURE;
 	}
 
-	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (phar_path_is_magic_phar_ex(path, path_len)) {
 		/* no creating magic phar files by mounting them */
 		return FAILURE;
 	}
@@ -1280,7 +1309,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 		*error = NULL;
 	}
 
-	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (security && phar_path_is_magic_phar_ex(path, path_len)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
 		}
@@ -1353,7 +1382,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 			if (ZSTR_LEN(str_key) >= path_len || strncmp(ZSTR_VAL(str_key), path, ZSTR_LEN(str_key))) {
 				continue;
 			} else {
-				char *test;
+				char *test, *mount_path;
 				size_t test_len;
 				php_stream_statbuf ssb;
 
@@ -1396,22 +1425,25 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 				}
 
 				/* mount the file just in time */
-				if (SUCCESS != phar_mount_entry(phar, test, test_len, path, path_len)) {
-					efree(test);
+				mount_path = estrndup(path, path_len);
+				if (SUCCESS != phar_mount_entry(phar, test, test_len, mount_path, path_len)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: path \"%s\" exists as file \"%s\" and could not be mounted", path, test);
 					}
+					efree(mount_path);
+					efree(test);
 					return NULL;
 				}
-
-				efree(test);
+				efree(mount_path);
 
 				if (NULL == (entry = zend_hash_str_find_ptr(&phar->manifest, path, path_len))) {
 					if (error) {
 						spprintf(error, 4096, "phar error: path \"%s\" exists as file \"%s\" and could not be retrieved after being mounted", path, test);
 					}
+					efree(test);
 					return NULL;
 				}
+				efree(test);
 				return entry;
 			}
 		} ZEND_HASH_FOREACH_END();

@@ -2,6 +2,12 @@
 GH-17349 (Tiled truecolor filling looses single color transparency)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
+?>
 --FILE--
 <?php
 require_once __DIR__ . "/func.inc";

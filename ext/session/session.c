@@ -394,6 +394,18 @@ static zend_long php_session_gc(bool immediate) /* {{{ */
 	/* GC must be done before reading session data. */
 	if ((PS(mod_data) || PS(mod_user_implemented))) {
 		if (!collect && PS(gc_probability) > 0) {
+			/* Seed lazily on first GC draw per process. */
+			if (UNEXPECTED(!PS(random_seeded))) {
+				php_random_uint128_t seed;
+				if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+					seed = php_random_uint128_constant(
+						php_random_generate_fallback_seed(),
+						php_random_generate_fallback_seed()
+					);
+				}
+				php_random_pcgoneseq128xslrr64_seed128(PS(random).state, seed);
+				PS(random_seeded) = true;
+			}
 			collect = php_random_range(PS(random), 0, PS(gc_divisor) - 1) < PS(gc_probability);
 		}
 
@@ -431,6 +443,7 @@ static zend_result php_session_initialize(void) /* {{{ */
 	if (!PS(id) || !ZSTR_VAL(PS(id))[0]) {
 		if (PS(id)) {
 			zend_string_release_ex(PS(id), 0);
+			PS(id) = NULL;
 		}
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
@@ -448,6 +461,7 @@ static zend_result php_session_initialize(void) /* {{{ */
 	) {
 		if (PS(id)) {
 			zend_string_release_ex(PS(id), 0);
+			PS(id) = NULL;
 		}
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
@@ -1485,10 +1499,10 @@ static zend_result php_session_send_cookie(void) /* {{{ */
 	php_session_remove_cookie(); /* remove already sent session ID cookie */
 	/*	'replace' must be 0 here, else a previous Set-Cookie
 		header, probably sent with setcookie() will be replaced! */
-	sapi_add_header_ex(estrndup(ZSTR_VAL(ncookie.s), ZSTR_LEN(ncookie.s)), ZSTR_LEN(ncookie.s), 0, 0);
+	zend_result result = sapi_add_header_ex(estrndup(ZSTR_VAL(ncookie.s), ZSTR_LEN(ncookie.s)), ZSTR_LEN(ncookie.s), 0, 0);
 	smart_str_free(&ncookie);
 
-	return SUCCESS;
+	return result;
 }
 /* }}} */
 
@@ -2428,6 +2442,7 @@ PHP_FUNCTION(session_regenerate_id)
 			/* Try to generate non-existing ID */
 			while (limit-- && PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == SUCCESS) {
 				zend_string_release_ex(PS(id), 0);
+				PS(id) = NULL;
 				PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 				if (!PS(id)) {
 					PS(mod)->s_close(&PS(mod_data));
@@ -2493,6 +2508,9 @@ PHP_FUNCTION(session_create_id)
 		int limit = 3;
 		while (limit--) {
 			new_id = PS(mod)->s_create_sid(&PS(mod_data));
+			if (!new_id) {
+				break;
+			}
 			if (!PS(mod)->s_validate_sid || (PS(mod_user_implemented) && Z_ISUNDEF(PS(mod_user_names).ps_validate_sid))) {
 				break;
 			} else {
@@ -2514,6 +2532,9 @@ PHP_FUNCTION(session_create_id)
 		zend_string_release_ex(new_id, 0);
 	} else {
 		smart_str_free(&id);
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
 		php_error_docref(NULL, E_WARNING, "Failed to create new ID");
 		RETURN_FALSE;
 	}
@@ -2984,14 +3005,7 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 		.algo = &php_random_algo_pcgoneseq128xslrr64,
 		.state = &ps_globals->random_state,
 	};
-	php_random_uint128_t seed;
-	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-		seed = php_random_uint128_constant(
-			php_random_generate_fallback_seed(),
-			php_random_generate_fallback_seed()
-		);
-	}
-	php_random_pcgoneseq128xslrr64_seed128(ps_globals->random.state, seed);
+	ps_globals->random_seeded = false;
 }
 /* }}} */
 

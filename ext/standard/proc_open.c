@@ -695,7 +695,7 @@ static void init_startup_info(STARTUPINFOW *si, descriptorspec_item *descriptors
 
 static void init_process_info(PROCESS_INFORMATION *pi)
 {
-	memset(&pi, 0, sizeof(pi));
+	memset(pi, 0, sizeof(*pi));
 }
 
 /* on success, returns length of *comspec, which then needs to be efree'd by caller */
@@ -746,7 +746,7 @@ out:
 
 static zend_result convert_command_to_use_shell(wchar_t **cmdw, size_t cmdw_len)
 {
-	wchar_t *comspec;
+	wchar_t *comspec = NULL;
 	size_t len = find_comspec_nt(&comspec);
 	if (len == 0) {
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
@@ -829,7 +829,7 @@ static zend_result set_proc_descriptor_to_blackhole(descriptorspec_item *desc)
 #ifdef PHP_WIN32
 	desc->childend = CreateFileA("nul", GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
-	if (desc->childend == NULL) {
+	if (desc->childend == INVALID_HANDLE_VALUE) {
 		php_error_docref(NULL, E_WARNING, "Failed to open nul");
 		return FAILURE;
 	}
@@ -1371,7 +1371,6 @@ PHP_FUNCTION(proc_open)
 
 	if (newprocok == FALSE) {
 		DWORD dw = GetLastError();
-		close_all_descriptors(descriptors, ndesc);
 		char *msg = php_win32_error_to_msg(dw);
 		php_error_docref(NULL, E_WARNING, "CreateProcess failed: %s", msg);
 		php_win32_error_msg_free(msg);
@@ -1388,7 +1387,6 @@ PHP_FUNCTION(proc_open)
 
 	if (close_parentends_of_pipes(&factions, descriptors, ndesc) == FAILURE) {
 		posix_spawn_file_actions_destroy(&factions);
-		close_all_descriptors(descriptors, ndesc);
 		goto exit_fail;
 	}
 
@@ -1408,7 +1406,6 @@ PHP_FUNCTION(proc_open)
 	}
 	posix_spawn_file_actions_destroy(&factions);
 	if (r != 0) {
-		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
 		goto exit_fail;
 	}
@@ -1450,7 +1447,6 @@ PHP_FUNCTION(proc_open)
 		_exit(127);
 	} else if (child < 0) {
 		/* Failed to fork() */
-		close_all_descriptors(descriptors, ndesc);
 		php_error_docref(NULL, E_WARNING, "Fork failed: %s", strerror(errno));
 		goto exit_fail;
 	}
@@ -1540,6 +1536,9 @@ PHP_FUNCTION(proc_open)
 	} else {
 exit_fail:
 		_php_free_envp(env);
+		if (descriptors) {
+			close_all_descriptors(descriptors, ndesc);
+		}
 		RETVAL_FALSE;
 	}
 

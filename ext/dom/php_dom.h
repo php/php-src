@@ -66,6 +66,7 @@ extern zend_module_entry dom_module_entry;
 
 typedef struct dom_xpath_object {
 	php_dom_xpath_callbacks xpath_callbacks;
+	uint32_t evaluation_depth;
 	bool register_node_ns;
 	dom_object dom;
 } dom_xpath_object;
@@ -187,6 +188,13 @@ bool php_dom_create_nullable_object(xmlNodePtr obj, zval *return_value, dom_obje
 xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
 void dom_set_document_ref_pointers(xmlNodePtr node, php_libxml_ref_obj *document);
 void dom_set_document_ref_pointers_attr(xmlAttrPtr attr, php_libxml_ref_obj *document);
+
+/* Temporarily materialize namespace declarations as nsDef entries on the tree so
+ * that libxml's native validators/canonicalizers can resolve prefixed QNames that
+ * appear in element/attribute *content*. Modern DOM keeps declarations off the
+ * tree (node->nsDef == NULL), which xmlSearchNs() cannot follow. Internal only. */
+void dom_relink_ns_decls(HashTable *links, xmlNodePtr root);
+void dom_unlink_ns_decls(HashTable *links);
 zval *dom_element_class_list_zval(dom_object *obj);
 
 typedef enum {

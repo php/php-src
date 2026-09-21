@@ -625,9 +625,9 @@ static ssize_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t coun
 
 	basename = php_basename(ent->d_name, tmp_len, NULL, 0);
 
-	tmp_len = MIN(sizeof(ent->d_name), ZSTR_LEN(basename) - 1);
+	tmp_len = MIN(sizeof(ent->d_name) - 1, ZSTR_LEN(basename));
 	memcpy(ent->d_name, ZSTR_VAL(basename), tmp_len);
-	ent->d_name[tmp_len - 1] = '\0';
+	ent->d_name[tmp_len] = '\0';
 	zend_string_release_ex(basename, 0);
 	ent->d_type = DT_UNKNOWN;
 

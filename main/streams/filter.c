@@ -459,9 +459,9 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 		/* Dump any newly flushed data to the read buffer */
 		if (stream->readpos > 0) {
 			/* Back the buffer up */
-			memcpy(stream->readbuf, stream->readbuf + stream->readpos, stream->writepos - stream->readpos);
-			stream->readpos = 0;
+			memmove(stream->readbuf, stream->readbuf + stream->readpos, stream->writepos - stream->readpos);
 			stream->writepos -= stream->readpos;
+			stream->readpos = 0;
 		}
 		if (flushed_size > (stream->readbuflen - stream->writepos)) {
 			/* Grow the buffer */

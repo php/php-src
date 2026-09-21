@@ -2169,6 +2169,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	str_serial = i2s_ASN1_INTEGER(NULL, asn1_serial);
 	/* Can return NULL on error or memory allocation failure */
 	if (!str_serial) {
+		OPENSSL_free(hex_serial);
 		php_openssl_store_errors();
 		goto err;
 	}
@@ -2517,9 +2518,20 @@ PHP_FUNCTION(openssl_x509_read)
 		RETURN_FALSE;
 	}
 
+	X509 *obj_x509;
+	if (cert_obj) {
+		obj_x509 = X509_dup(cert);
+		if (!obj_x509) {
+			php_error_docref(NULL, E_WARNING, "X.509 Certificate could not be duplicated");
+			RETURN_FALSE;
+		}
+	} else {
+		obj_x509 = cert;
+	}
+
 	object_init_ex(return_value, php_openssl_certificate_ce);
 	x509_cert_obj = Z_OPENSSL_CERTIFICATE_P(return_value);
-	x509_cert_obj->x509 = cert_obj ? X509_dup(cert) : cert;
+	x509_cert_obj->x509 = obj_x509;
 }
 /* }}} */
 
@@ -2847,6 +2859,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 		zout = zend_try_array_init(zout);
 		if (!zout) {
+			sk_X509_pop_free(ca, X509_free);
 			goto cleanup;
 		}
 
@@ -7932,6 +7945,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		const char *aad, size_t aad_len, int enc)  /* {{{ */
 {
 	int i = 0;
+	size_t outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 
 	if (mode->is_single_run_aead && !EVP_CipherUpdate(cipher_ctx, NULL, &i, NULL, (int)data_len)) {
 		php_openssl_store_errors();
@@ -7945,7 +7959,19 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		return FAILURE;
 	}
 
-	*poutbuf = zend_string_alloc((int)data_len + EVP_CIPHER_block_size(cipher_type), 0);
+#ifdef EVP_CIPH_WRAP_MODE
+	if ((EVP_CIPHER_mode(cipher_type)) == EVP_CIPH_WRAP_MODE) {
+		/*
+		 * RFC 5649 wrap-with-padding rounds the input up to the block size
+		 * and prepends an integrity block, we reserve one extra block.
+		 * See EVP_EncryptUpdate(3): wrap mode may write up to
+		 * inl + cipher_block_size bytes.
+		 */
+		outlen += EVP_CIPHER_block_size(cipher_type);
+	}
+#endif
+
+	*poutbuf = zend_string_alloc(outlen, false);
 
 	if (!EVP_CipherUpdate(cipher_ctx, (unsigned char*)ZSTR_VAL(*poutbuf),
 					&i, (const unsigned char *)data, (int)data_len)) {
@@ -7957,7 +7983,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 		}
 		*/
 		php_openssl_store_errors();
-		zend_string_release_ex(*poutbuf, 0);
+		zend_string_release_ex(*poutbuf, false);
 		return FAILURE;
 	}
 

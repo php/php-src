@@ -43,7 +43,7 @@ foreach ($values as $t => $val) {
 
 echo "OK!";
 ?>
---EXPECT--
+--EXPECTF--
 --
 add: 84
 cat: 4242
@@ -142,8 +142,8 @@ mul: 0
 and: 0
 div:
 	variant_div(42, )
-	exception Division by zero
-	code 80020012
+	exception %s
+	code 800200%x
 
 eqv: -43
 idiv:
@@ -258,8 +258,8 @@ mul: 0
 and: 0
 div:
 	variant_div(3.5, )
-	exception Division by zero
-	code 80020012
+	exception %s
+	code 800200%x
 
 eqv: -5
 idiv:

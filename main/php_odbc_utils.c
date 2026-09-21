@@ -64,12 +64,17 @@ PHPAPI bool php_odbc_connstr_is_quoted(const char *str)
  * attribute values that contain the characters []{}(),;?*=!@ not enclosed
  * with braces should be avoided."
  *
+ * We also add spaces too, as driver connection string parameter parsing isn't
+ * standardized and can be quite sloppy; it can lead to significant whitespace
+ * not being parsed or confusing parsing of different sections. Note that this
+ * lacks security impact as we already quote the ';=' characters when parsing.
+ *
  * Note that it assumes that the string is *not* already quoted. You should
  * check beforehand.
  */
 PHPAPI bool php_odbc_connstr_should_quote(const char *str)
 {
-	return strpbrk(str, "[]{}(),;?*=!@") != NULL;
+	return strpbrk(str, "[]{}(),;?*=!@ ") != NULL;
 }
 
 /**

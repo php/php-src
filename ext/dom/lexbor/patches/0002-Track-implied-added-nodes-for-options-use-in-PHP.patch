@@ -1,7 +1,7 @@
-From a4c29ba8d1ea1065ce6bd4a34382d53140cf1924 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Mon, 14 Aug 2023 20:18:51 +0200
-Subject: [PATCH 2/6] Track implied added nodes for options use in PHP
+Subject: [PATCH 2/8] Track implied added nodes for options use in PHP
 
 ---
  source/lexbor/html/tree.h                            | 3 +++
@@ -62,6 +62,3 @@ index 05fe738..1e09cda 100644
              tree->mode = lxb_html_tree_insertion_mode_before_head;
  
              break;
--- 
-2.51.2
-

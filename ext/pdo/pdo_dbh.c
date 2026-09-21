@@ -411,9 +411,12 @@ PDO_API void php_pdo_internal_construct_driver(INTERNAL_FUNCTION_PARAMETERS, zen
 
 					/* is the connection still alive ? */
 					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
-						/* nope... need to kill it */
-						pdbh->refcount--;
-						zend_list_close(le);
+						if (pdbh->refcount > 1) {
+							pdbh->refcount--;
+							zend_list_close(le);
+						} else {
+							zend_hash_str_del(&EG(persistent_list), hashkey, plen);
+						}
 						pdbh = NULL;
 					}
 				}

@@ -82,6 +82,9 @@ PHP 8.4 UPGRADE NOTES
     . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
       if the domain argument is empty.
   . Intl:
+    . IntlCalendar::set(), IntlCalendar::setDate(), IntlCalendar::setDateTime(),
+      and IntlGregorianCalendar date/time construction now report the correct
+      argument position for out-of-bounds integer values.
     . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
       ResourceBundle object now throw:
       - TypeError for invalid offset types
@@ -89,6 +92,9 @@ PHP 8.4 UPGRADE NOTES
       - ValueError if the integer index does not fit in a signed 32 bit integer
     . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
     . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
+    . SpoofChecker::setAllowedChars() and IntlDateFormatter::__construct()
+      now report PHP constant names instead of ICU constant names in
+      user-visible error messages.
   . MBString:
     . mb_encode_numericentity() and mb_decode_numericentity() now check that
       the $map is only composed of integers, if not a ValueError is thrown.
@@ -618,6 +624,10 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+
+- BCMath:
+  . bcround() and BcMath\Number::round() now throw a ValueError when the precision
+    argument is out of range.
 
 - Core:
   . trigger_error() and user_error() now have a return type of true instead of

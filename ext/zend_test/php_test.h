@@ -51,6 +51,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_fiber_switch;
 	int observer_fiber_destroy;
 	int observer_execute_internal;
+	int observer_reserve_op_array_handle;
 	HashTable *global_weakmap;
 	int replace_zend_execute_ex;
 	int register_passes;

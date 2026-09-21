@@ -329,7 +329,8 @@ const php_hash_ops php_hash_gost_ops = {
 	32,
 	32,
 	sizeof(PHP_GOST_CTX),
-	1
+	1,
+	0
 };
 
 const php_hash_ops php_hash_gost_crypto_ops = {
@@ -344,5 +345,6 @@ const php_hash_ops php_hash_gost_crypto_ops = {
 	32,
 	32,
 	sizeof(PHP_GOST_CTX),
-	1
+	1,
+	0
 };

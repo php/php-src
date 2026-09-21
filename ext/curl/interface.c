@@ -441,7 +441,6 @@ static zend_object *curl_clone_obj(zend_object *object) {
 
 	clone_object = curl_create_object(curl_ce);
 	clone_ch = curl_from_obj(clone_object);
-	init_curl_handle(clone_ch);
 
 	ch = curl_from_obj(object);
 	cp = curl_easy_duphandle(ch->cp);
@@ -450,6 +449,7 @@ static zend_object *curl_clone_obj(zend_object *object) {
 		return &clone_ch->std;
 	}
 
+	init_curl_handle(clone_ch);
 	clone_ch->cp = cp;
 	_php_setup_easy_copy_handlers(clone_ch, ch);
 
@@ -770,6 +770,7 @@ static int curl_prereqfunction(void *clientp, char *conn_primary_ip, char *conn_
 				zend_value_error("The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT");
 			}
 		} else {
+			zval_ptr_dtor(&retval);
 			zend_type_error("The CURLOPT_PREREQFUNCTION callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT");
 		}
 	}

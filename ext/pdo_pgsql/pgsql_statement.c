@@ -56,7 +56,47 @@
 #define FLOAT8LABEL "float8"
 #define FLOAT8OID 701
 
+#ifndef HAVE_PQCLOSEPORTAL
+static bool pdo_pgsql_try_cmd(const char *cmd, const char *ok_sqlstate, pdo_pgsql_db_handle *H)
+{
+	bool result = false;
+	char *q = NULL;
+	PGresult *res = NULL;
 
+	PGTransactionStatusType status = PQtransactionStatus(H->server);
+
+	switch (status) {
+		case PQTRANS_ACTIVE:
+		case PQTRANS_INERROR:
+			break;
+		case PQTRANS_INTRANS: /* failure must not abort the caller's transaction */
+			/* PQexec does not run the statements following a failed one */
+			spprintf(&q, 0, "SAVEPOINT pdo_pgsql_savepoint; %s; RELEASE SAVEPOINT pdo_pgsql_savepoint;", cmd);
+			res = PQexec(H->server, q);
+
+			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				PQclear(PQexec(H->server, "ROLLBACK TO SAVEPOINT pdo_pgsql_savepoint; RELEASE SAVEPOINT pdo_pgsql_savepoint"));
+			}
+
+			break;
+		default:
+			res = PQexec(H->server, cmd);
+	}
+
+	if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+		result = true;
+	} else if (res) {
+		const char *sqlstate = pdo_pgsql_sqlstate(res);
+
+		result = sqlstate && !strcmp(sqlstate, ok_sqlstate);
+	}
+
+	if (q) efree(q);
+	if (res) PQclear(res);
+
+	return result;
+}
+#endif
 
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 {
@@ -114,15 +154,16 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	}
 
 	if (S->cursor_name) {
-		if (server_obj_usable) {
+		if (S->is_cursor_declared && server_obj_usable) {
 			pdo_pgsql_db_handle *H = S->H;
-			char *q = NULL;
-			PGresult *res;
-
+#ifndef HAVE_PQCLOSEPORTAL
+			char *q;
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			res = PQexec(H->server, q);
+			pdo_pgsql_try_cmd(q, "34000", H); /* 34000: invalid_cursor_name */
 			efree(q);
-			if (res) PQclear(res);
+#else
+			PQclear(PQclosePortal(H->server, S->cursor_name));
+#endif
 		}
 		efree(S->cursor_name);
 		S->cursor_name = NULL;
@@ -156,10 +197,25 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	if (S->cursor_name) {
 		char *q = NULL;
 
-		if (S->is_prepared) {
+		if (S->is_cursor_declared) {
+#ifndef HAVE_PQCLOSEPORTAL
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			PQclear(PQexec(H->server, q));
+
+			/* 34000: invalid_cursor_name */
+			if (pdo_pgsql_try_cmd(q, "34000", H)) {
+				S->is_cursor_declared = false;
+			}
+
 			efree(q);
+#else
+			PGresult *res = PQclosePortal(H->server, S->cursor_name);
+
+			if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+				S->is_cursor_declared = false;
+			}
+
+			PQclear(res);
+#endif
 		}
 
 		spprintf(&q, 0, "DECLARE %s SCROLL CURSOR WITH HOLD FOR %s", S->cursor_name, ZSTR_VAL(stmt->active_query_string));
@@ -175,7 +231,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 		PQclear(S->result);
 
 		/* the cursor was declared correctly */
-		S->is_prepared = 1;
+		S->is_cursor_declared = true;
 
 		/* fetch to be able to get the number of tuples later, but don't advance the cursor pointer */
 		spprintf(&q, 0, "FETCH FORWARD 0 FROM %s", S->cursor_name);

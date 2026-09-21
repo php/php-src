@@ -175,6 +175,12 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		RETURN_THROWS();
 	}
 
+	xsl_object *intern = Z_XSL_P(id);
+	if (UNEXPECTED(intern->transform_depth > 0)) {
+		zend_throw_error(NULL, "Cannot call XSLTProcessor::importStylesheet() while a transformation is in progress");
+		RETURN_THROWS();
+	}
+
 	nodep = php_libxml_import_node(docp);
 	if (nodep == NULL) {
 		zend_argument_type_error(1, "must be a valid XML node");
@@ -227,6 +233,12 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 
 	php_libxml_node_object *clone_lxml_obj = Z_LIBXML_NODE_P(&clone_zv);
 
+	if (GC_REFCOUNT(clone) > 1 || clone_lxml_obj->document->refcount > 1) {
+		OBJ_RELEASE(clone);
+		zend_argument_value_error(1, "must not have its clone retained by __clone()");
+		RETURN_THROWS();
+	}
+
 	PHP_LIBXML_SANITIZE_GLOBALS(parse);
 	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	xmlSubstituteEntitiesDefault(1);
@@ -244,8 +256,6 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		OBJ_RELEASE(clone);
 		RETURN_FALSE;
 	}
-
-	xsl_object *intern = Z_XSL_P(id);
 
 	/* Detach object */
 	clone_lxml_obj->document->ptr = NULL;
@@ -326,6 +336,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		zend_string_release(name);
 		return NULL;
 	}
+
+	intern->transform_depth++;
 
 	if (intern->profiling) {
 		if (php_check_open_basedir(ZSTR_VAL(intern->profiling))) {
@@ -431,6 +443,8 @@ out:
 	php_libxml_decrement_doc_ref(intern->doc);
 	efree(intern->doc);
 	intern->doc = NULL;
+
+	intern->transform_depth--;
 
 	return newdocp;
 

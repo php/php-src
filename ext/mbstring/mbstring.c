@@ -1891,6 +1891,9 @@ static unsigned char* offset_to_pointer_utf8(unsigned char *str, unsigned char *
 			}
 			pos += u8_tbl[*pos];
 		}
+		if (pos > end) {
+			pos = end;
+		}
 		return pos;
 	}
 }
@@ -1931,7 +1934,7 @@ static size_t mb_find_strpos(zend_string *haystack, zend_string *needle, const m
 	} else if (offset >= 0) {
 		found_pos = zend_memnrstr((const char*)offset_pointer, ZSTR_VAL(needle_u8), ZSTR_LEN(needle_u8), ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8));
 	} else {
-		size_t needle_len = pointer_to_offset_utf8((unsigned char*)ZSTR_VAL(needle), (unsigned char*)ZSTR_VAL(needle) + ZSTR_LEN(needle));
+		size_t needle_len = pointer_to_offset_utf8((unsigned char*)ZSTR_VAL(needle_u8), (unsigned char*)ZSTR_VAL(needle_u8) + ZSTR_LEN(needle_u8));
 		offset_pointer = offset_to_pointer_utf8(offset_pointer, (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8), needle_len);
 		if (!offset_pointer) {
 			offset_pointer = (unsigned char*)ZSTR_VAL(haystack_u8) + ZSTR_LEN(haystack_u8);
@@ -4444,12 +4447,14 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 								fld_val = zend_string_init(token, token_pos, 0);
 							}
 
-							if (fld_name != NULL && fld_val != NULL) {
-								zval val;
-								zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
-								ZVAL_STR(&val, fld_val);
+							if (fld_name != NULL) {
+								if (fld_val != NULL) {
+									zval val;
+									zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+									ZVAL_STR(&val, fld_val);
 
-								zend_hash_update(ht, fld_name, &val);
+									zend_hash_update(ht, fld_name, &val);
+								}
 
 								zend_string_release_ex(fld_name, 0);
 							}
@@ -4490,11 +4495,13 @@ out:
 		if(token && token_pos > 0) {
 			fld_val = zend_string_init(token, token_pos, 0);
 		}
-		if (fld_name != NULL && fld_val != NULL) {
-			zval val;
-			zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
-			ZVAL_STR(&val, fld_val);
-			zend_hash_update(ht, fld_name, &val);
+		if (fld_name != NULL) {
+			if (fld_val != NULL) {
+				zval val;
+				zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+				ZVAL_STR(&val, fld_val);
+				zend_hash_update(ht, fld_name, &val);
+			}
 
 			zend_string_release_ex(fld_name, 0);
 		}
