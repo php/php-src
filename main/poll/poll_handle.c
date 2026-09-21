@@ -51,9 +51,22 @@ static void php_poll_handle_default_cleanup(php_poll_handle_object *handle)
 }
 
 /* Default operations that call PHP userspace methods */
-php_poll_handle_ops php_poll_handle_default_ops = { .get_fd = php_poll_handle_default_get_fd,
+PHPAPI php_poll_handle_ops php_poll_handle_default_ops = { .get_fd = php_poll_handle_default_get_fd,
 	.is_valid = php_poll_handle_default_is_valid,
 	.cleanup = php_poll_handle_default_cleanup };
+
+/* Set when ext/standard registers the interface */
+PHPAPI zend_class_entry *php_poll_handle_ce = NULL;
+
+PHPAPI php_poll_handle_object *php_poll_handle_from_zval(const zval *zv)
+{
+	if (Z_TYPE_P(zv) != IS_OBJECT || php_poll_handle_ce == NULL
+			|| !instanceof_function(Z_OBJCE_P(zv), php_poll_handle_ce)) {
+		return NULL;
+	}
+
+	return PHP_POLL_HANDLE_OBJ_FROM_ZV(zv);
+}
 
 /* Allocate a new poll handle object */
 PHPAPI php_poll_handle_object *php_poll_handle_object_create(

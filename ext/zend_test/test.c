@@ -29,6 +29,7 @@
 #include "zend_attributes.h"
 #include "zend_enum.h"
 #include "zend_interfaces.h"
+#include "main/php_poll.h"
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "Zend/zend_alloc.h"
@@ -1191,6 +1192,23 @@ static ZEND_FUNCTION(zend_test_zstr_init_literal)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STR(ZSTR_INIT_LITERAL("foo\0bar", false));
+}
+
+static ZEND_FUNCTION(zend_test_poll_handle_descriptor)
+{
+	zval *zv;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(zv)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_poll_handle_object *handle = php_poll_handle_from_zval(zv);
+
+	if (handle == NULL) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG((zend_long) php_poll_handle_get_fd(handle));
 }
 
 static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8)

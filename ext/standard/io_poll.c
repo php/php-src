@@ -26,7 +26,6 @@ static zend_class_entry *php_io_poll_backend_class_entry;
 static zend_class_entry *php_io_poll_event_class_entry;
 static zend_class_entry *php_io_poll_context_class_entry;
 static zend_class_entry *php_io_poll_watcher_class_entry;
-static zend_class_entry *php_io_poll_handle_class_entry;
 static zend_class_entry *php_io_exception_class_entry;
 static zend_class_entry *php_io_poll_exception_class_entry;
 static zend_class_entry *php_io_poll_failed_backend_unavailable_class_entry;
@@ -709,7 +708,7 @@ PHP_METHOD(Io_Poll_Context, add)
 	zval *data = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_OBJECT_OF_CLASS(handle_obj, php_io_poll_handle_class_entry)
+		Z_PARAM_OBJECT_OF_CLASS(handle_obj, php_poll_handle_ce)
 		Z_PARAM_ARRAY(event_enums)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(data)
@@ -861,13 +860,13 @@ PHP_MINIT_FUNCTION(poll)
 	/* Register event enum */
 	php_io_poll_event_class_entry = register_class_Io_Poll_Event();
 
-	/* Register Handle interface */
-	php_io_poll_handle_class_entry = register_class_Io_Poll_Handle();
-	php_io_poll_handle_class_entry->interface_gets_implemented = php_stream_poll_handle_implement_interface;
+	/* Register Handle interface, which php_poll.h exports to extensions */
+	php_poll_handle_ce = register_class_Io_Poll_Handle();
+	php_poll_handle_ce->interface_gets_implemented = php_stream_poll_handle_implement_interface;
 
 	/* Register StreamPollHandle class */
 	php_stream_poll_handle_class_entry
-			= register_class_StreamPollHandle(php_io_poll_handle_class_entry);
+			= register_class_StreamPollHandle(php_poll_handle_ce);
 	php_stream_poll_handle_class_entry->create_object = php_stream_poll_handle_create_object;
 
 	memcpy(&php_io_poll_handle_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));

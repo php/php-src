@@ -163,12 +163,18 @@ struct php_poll_handle_object {
 #define PHP_POLL_HANDLE_OBJ_FROM_ZV(zv) PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(Z_OBJ_P(zv))
 
 /* Default operations */
-extern php_poll_handle_ops php_poll_handle_default_ops;
+PHPAPI extern php_poll_handle_ops php_poll_handle_default_ops;
+
+/* The Io\Poll\Handle interface, to declare a handle type and to accept one */
+PHPAPI extern zend_class_entry *php_poll_handle_ce;
 
 /* Utility functions for extensions */
 PHPAPI php_poll_handle_object *php_poll_handle_object_create(
 		size_t obj_size, zend_class_entry *ce, php_poll_handle_ops *ops);
 PHPAPI void php_poll_handle_object_free(zend_object *obj);
+
+/* The handle a zval holds, or NULL when it holds anything else */
+PHPAPI php_poll_handle_object *php_poll_handle_from_zval(const zval *zv);
 
 /* Get file descriptor from any poll handle */
 PHPAPI php_socket_t php_poll_handle_get_fd(php_poll_handle_object *handle);

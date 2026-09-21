@@ -419,6 +419,12 @@ namespace {
 
     function zend_test_is_string_marked_as_valid_utf8(string $string): bool {}
 
+    /**
+     * Resolves a handle the way an extension consuming Io\Poll\Handle does, or false when
+     * the argument is not a handle.
+     */
+    function zend_test_poll_handle_descriptor(mixed $handle): int|false {}
+
     function zend_get_map_ptr_last(): int {}
 
     function zend_test_crash(?string $message = null): void {}
