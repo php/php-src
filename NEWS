@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     unfolded, crashing the VM in zval_undefined_cv). (ndossche)
   . Fixed OSS-Fuzz 532353396 (assertion failure with static type). (Girgias)
   . Fix GH-23662 (Avoid NAN warning in print_r()). (CodedByManish)
+  . Fix GH-21999: GC inconsistency with lazy object, var_dump(), and object
+    comparison. (Arnaud)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
