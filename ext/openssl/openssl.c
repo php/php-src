@@ -32,7 +32,6 @@
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_fopen_wrappers.h"
-#include "ext/standard/md5.h" /* For make_digest_ex() */
 #include "ext/standard/base64.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
@@ -4973,7 +4972,7 @@ PHP_FUNCTION(openssl_digest)
 			int digest_str_len = siglen * 2;
 			zend_string *digest_str = zend_string_alloc(digest_str_len, 0);
 
-			make_digest_ex(ZSTR_VAL(digest_str), (unsigned char*)ZSTR_VAL(sigbuf), siglen);
+			zend_bin2hex(ZSTR_VAL(digest_str), (unsigned char*)ZSTR_VAL(sigbuf), siglen);
 			ZSTR_VAL(digest_str)[digest_str_len] = '\0';
 			zend_string_release_ex(sigbuf, 0);
 			RETVAL_NEW_STR(digest_str);
