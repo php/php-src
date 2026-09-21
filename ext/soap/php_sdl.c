@@ -198,6 +198,57 @@ static int is_wsdl_element(xmlNodePtr node)
 	return 1;
 }
 
+// Which headers need to be redacted
+#define REDACT_NONE 0
+#define REDACT_AUTHORIZATION (1 << 0)
+#define REDACT_PROXY_AUTH (1 << 1)
+#define REDACT_COOKIE (1 << 2)
+
+uint32_t header_needs_redaction(zend_string *header) {
+	uint32_t redaction = REDACT_NONE;
+	char *auth_start = strstr(ZSTR_VAL(header), "authorization:");
+	if (auth_start &&
+		(auth_start == ZSTR_VAL(header) || *(auth_start - 1) == '\n' || *(auth_start - 1) == '\r')
+	) {
+		redaction |= REDACT_AUTHORIZATION;
+	}
+	char *proxy_start = strstr(ZSTR_VAL(header), "proxy-authorization:");
+	if (proxy_start &&
+		(proxy_start == ZSTR_VAL(header) || *(proxy_start - 1) == '\n' || *(proxy_start - 1) == '\r')
+	) {
+		redaction |= REDACT_PROXY_AUTH;
+	}
+	char *cookie_start = strstr(ZSTR_VAL(header), "cookie:");
+	if (cookie_start &&
+		(cookie_start == ZSTR_VAL(header) || *(cookie_start - 1) == '\n' || *(cookie_start - 1) == '\r')
+	) {
+		redaction |= REDACT_COOKIE;
+	}
+	return redaction;
+}
+
+bool redact_header(char *header_start, uint32_t *to_redact) {
+	if (*to_redact & REDACT_AUTHORIZATION) {
+		if (strncmp(header_start, "authorization:", strlen("authorization:")) == 0) {
+			(*to_redact) &= ~REDACT_AUTHORIZATION;
+			return true;
+		}
+	}
+	if (*to_redact & REDACT_PROXY_AUTH) {
+		if (strncmp(header_start, "proxy-authorization:", strlen("proxy-authorization:")) == 0) {
+			(*to_redact) &= ~REDACT_PROXY_AUTH;
+			return true;
+		}
+	}
+	if (*to_redact & REDACT_COOKIE) {
+		if (strncmp(header_start, "cookie:", strlen("cookie:")) == 0) {
+			(*to_redact) &= ~REDACT_COOKIE;
+			return true;
+		}
+	}
+	return false;
+}
+
 void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 {
 	char *s;
@@ -248,35 +299,110 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 			l2 -= 4;
 		}
 	}
-	if (l1 != l2 || memcmp(ctx->sdl->source, uri, l1) != 0) {
-		/* another server. clear authentication credentals */
-		php_libxml_switch_context(NULL, &context);
-		php_libxml_switch_context(&context, NULL);
-		if (Z_TYPE(context) != IS_UNDEF) {
-			zval *context_ptr = &context;
-			ctx->context = php_stream_context_from_zval(context_ptr, 1);
+	if (l1 == l2 && memcmp(ctx->sdl->source, uri, l1) == 0) {
+		return;
+	}
+	/* another server. clear authentication credentals */
+	php_libxml_switch_context(NULL, &context);
+	php_libxml_switch_context(&context, NULL);
+	if (Z_TYPE(context) == IS_UNDEF) {
+		return;
+	}
+	zval *context_ptr = &context;
+	ctx->context = php_stream_context_from_zval(context_ptr, 1);
 
-			if (ctx->context &&
-			    (header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL &&
-				Z_TYPE_P(header) == IS_STRING) {
-				/* TODO: should support header as an array, but this code path is untested */
-				s = strstr(Z_STRVAL_P(header), "Authorization: Basic");
-				if (s && (s == Z_STRVAL_P(header) || *(s-1) == '\n' || *(s-1) == '\r')) {
-					char *rest = strstr(s, "\r\n");
-					if (rest) {
-						zval new_header;
+	if (!ctx->context) {
+		return;
+	}
 
-						rest += 2;
-						ZVAL_NEW_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
-						memcpy(Z_STRVAL(new_header), Z_STRVAL_P(header), s - Z_STRVAL_P(header));
-						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
-						ZVAL_COPY(&ctx->old_header, header);
-						php_stream_context_set_option(ctx->context, "http", "header", &new_header);
-						zval_ptr_dtor(&new_header);
-					}
+	if ((header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL &&
+		Z_TYPE_P(header) == IS_STRING
+	) {
+		zend_string *lc_headers = zend_string_tolower(Z_STR_P(header));
+		// Fast path: no redaction needed
+		uint32_t redaction = header_needs_redaction(lc_headers);
+		if (ctx->headers_to_keep & WSDL_HEADER_KEEP_AUTHORIZATION) {
+			redaction &= ~REDACT_AUTHORIZATION;
+		}
+		if (ctx->headers_to_keep & WSDL_HEADER_KEEP_PROXY_AUTHORIZATION) {
+			redaction &= ~REDACT_PROXY_AUTH;
+		}
+		if (ctx->headers_to_keep & WSDL_HEADER_KEEP_COOKIES) {
+			redaction &= ~REDACT_COOKIE;
+		}
+		if (redaction == REDACT_NONE) {
+			zend_string_release(lc_headers);
+			return;
+		}
+		// At least one of the headers needs to be stripped. To avoid repeated
+		// copying and case comparisons, we go through the headers one at a time.
+		// Will be allocated on the first header that should be kept.
+		zend_string *redacted = NULL;
+		// Pointer to the current read location
+		char *read_ptr = Z_STRVAL_P(header);
+		// Offset from the start of the read location
+		size_t read_offset = 0;
+		// Offset from the start of the write location
+		size_t write_offset = 0;
+
+		while (true) {
+			if (redact_header(ZSTR_VAL(lc_headers) + read_offset, &redaction)) {
+				// Current header should be skipped
+				char *header_end = strstr(read_ptr, "\r\n");
+				if (header_end) {
+					// Skip the current header and the \r\n
+					size_t header_length = (header_end - read_ptr) + 2;
+					read_offset += header_length;
+					read_ptr += header_length;
+				} else {
+					// This is the end
+					break;
+				}
+			} else {
+				// Current header (from `read_offset`) should be kept
+				if (redacted == NULL) {
+					// This will over allocate the redacted header string but
+					// that isn't a big deal, the headers should be fairly short
+					redacted = zend_string_alloc(Z_STRLEN_P(header), false);
+				}
+				char *header_end = strstr(read_ptr, "\r\n");
+				if (header_end) {
+					// Copy the current header and the \r\n
+					size_t header_length = (header_end - read_ptr) + 2;
+					memcpy(ZSTR_VAL(redacted) + write_offset, read_ptr, header_length);
+					// Update offsets
+					read_offset += header_length;
+					read_ptr += header_length;
+					write_offset += header_length;
+				} else {
+					// Copy until the end of the headers
+					size_t header_length = ZSTR_LEN(lc_headers) - read_offset;
+					memcpy(ZSTR_VAL(redacted) + write_offset, read_ptr, header_length);
+					write_offset += header_length;
+					break;
 				}
 			}
 		}
+		ZEND_ASSERT(redaction == REDACT_NONE && "Everything should have been redacted");
+		zend_string_release(lc_headers);
+
+		ZVAL_COPY(&ctx->old_header, header);
+		zval new_header;
+		if (redacted == NULL) {
+			// All headers were redacted
+			ZVAL_EMPTY_STRING(&new_header);
+		} else {
+			// Only some headers were redacted
+			// The zval_ptr_dtor call will ensure that the redacted headers
+			// are freed;
+			// Make sure that we don't read garbage
+			ZSTR_VAL(redacted)[write_offset] = '\0';
+			ZSTR_LEN(redacted) = write_offset;
+
+			ZVAL_STR(&new_header, redacted);
+		}
+		php_stream_context_set_option(ctx->context, "http", "header", &new_header);
+		zval_ptr_dtor(&new_header);
 	}
 }
 
@@ -701,6 +827,11 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.bindings, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
+
+	ctx.headers_to_keep = 0;
+	if (instanceof_function(Z_OBJCE_P(this_ptr), soap_class_entry)) {
+		ctx.headers_to_keep = Z_LVAL_P(Z_CLIENT_KEEP_HEADERS_P(this_ptr));
+	}
 
 	zend_try {
 		load_wsdl_ex(this_ptr, struri, &ctx, false);
