@@ -55,6 +55,8 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed SplFixedArray::setSize() doing nothing on subclasses whose
     constructor does not call parent::__construct(). (Marc Bennewitz)
+  . Fixed memory leak when __construct(), __wakeup() or __unserialize() is
+    called from an element destructor during setSize(0). (Marc Bennewitz)
 
 - SQLite:
   . Fixed a crash when SQLite3::close() is called from a userland callback.
