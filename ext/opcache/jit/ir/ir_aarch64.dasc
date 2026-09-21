@@ -375,6 +375,8 @@ const ir_call_conv_dsc ir_call_conv_aarch64_preserve_none = {
 	_(RETURN_INT)          \
 	_(RETURN_FP)           \
 	_(IGOTO_DUP)           \
+	_(TLS_LOAD)            \
+	_(TLS_STORE)           \
 
 #define IR_RULE_ENUM(name) IR_ ## name,
 
@@ -631,6 +633,24 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 				n++;
 			}
 			break;
+		case IR_TLS_LOAD:
+			insn = &ctx->ir_base[ref];
+			flags = IR_USE_MUST_BE_IN_REG;
+			if (!IR_IS_TYPE_INT(insn->type)) {
+				constraints->tmp_regs[0] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n = 1;
+			}
+			break;
+		case IR_TLS_STORE:
+			insn = &ctx->ir_base[ref];
+			flags = IR_OP3_MUST_BE_IN_REG;
+			if (IR_IS_CONST_REF(insn->op3)) {
+				constraints->tmp_regs[n] = IR_TMP_REG(3, ctx->ir_base[insn->op3].type, IR_LOAD_SUB_REF, IR_USE_SUB_REF);
+				n++;
+			}
+			constraints->tmp_regs[n] = IR_TMP_REG(0, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+			n++;
+			break;
 		case IR_SWITCH:
 			insn = &ctx->ir_base[ref];
 			n = 0;
@@ -858,6 +878,33 @@ static bool all_usages_are_fusable(ir_ctx *ctx, ir_ref ref)
 	return 0;
 }
 
+
+bool ir_may_fuse_tls_addr(ir_ctx *ctx, ir_ref ref)
+{
+	ir_use_list *use_list = &ctx->use_lists[ref];
+	ir_ref n, *p;
+
+	if (use_list->count == 2 || (ctx->rules[ref] & IR_FUSED)) {
+		return 1;
+	}
+	n = use_list->count;
+	for (p = ctx->use_edges + use_list->refs; n > 0; p++, n--) {
+		ir_ref use = *p;
+		ir_op op = ctx->ir_base[use].op;
+		if (op == IR_LOAD || op == IR_LOAD_v) {
+			/* pass */
+		} else if (op == IR_STORE || op == IR_STORE_v) {
+			if (ctx->ir_base[use].op3 == ref) {
+				return 0;
+			}
+		} else if (ctx->ir_base[use].op1 == ref && (ir_op_flags[op] & (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM))) {
+			/* ignore control link */
+		} else {
+			return 0;
+		}
+	}
+	return 1;
+}
 
 static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 {
@@ -1113,6 +1160,10 @@ binop_fp:
 			return IR_ALLOCA;
 		case IR_LOAD:
 		case IR_LOAD_v:
+			if (ctx->ir_base[insn->op2].op == IR_TLS_ADDR && ir_may_fuse_tls_addr(ctx, insn->op2)) {
+				ctx->rules[insn->op2] = IR_FUSED | IR_SIMPLE | IR_TLS_ADDR;
+				return IR_TLS_LOAD;
+			}
 			ir_match_fuse_addr(ctx, insn->op2, insn->type);
 			if (IR_IS_TYPE_INT(insn->type)) {
 				return IR_LOAD_INT;
@@ -1122,6 +1173,10 @@ binop_fp:
 			break;
 		case IR_STORE:
 		case IR_STORE_v:
+			if (ctx->ir_base[insn->op2].op == IR_TLS_ADDR && ir_may_fuse_tls_addr(ctx, insn->op2)) {
+				ctx->rules[insn->op2] = IR_FUSED | IR_SIMPLE | IR_TLS_ADDR;
+				return IR_TLS_STORE;
+			}
 			ir_match_fuse_addr(ctx, insn->op2, ctx->ir_base[insn->op3].type);
 			if (IR_IS_TYPE_INT(ctx->ir_base[insn->op3].type)) {
 				return IR_STORE_INT;
@@ -5830,48 +5885,104 @@ static void ir_emit_guard_overflow(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	}
 }
 
-static void ir_emit_tls(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+static void ir_emit_tls_base_addr(ir_ctx *ctx, ir_reg reg, int mod)
 {
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	uint32_t code;
+
+||#ifdef __APPLE__
+||	code = 0xd53bd060 | reg; // TODO: hard-coded: mrs reg, tpidrro_el0
+|	.long code
+|	and Rx(reg), Rx(reg), #0xfffffffffffffff8
+|//???	MEM_ACCESS_64_WITH_UOFFSET_64 ldr, Rx(reg), Rx(reg), #mod, TMP1
+||#else
+||	code = 0xd53bd040 | reg; // TODO: hard-coded: mrs reg, tpidr_el0
+|	.long code
+||# ifndef __MUSL__
+||	if (mod >= 0) {
+||		IR_ASSERT(aarch64_may_encode_addr_offset(mod, sizeof(void*)));
+|		ldr Rx(reg), [Rx(reg), #0]
+|		ldr Rx(reg), [Rx(reg), #mod]
+||	}
+||# else
+||	if (mod >= 0) {
+||		IR_ASSERT(aarch64_may_encode_addr_offset(mod, sizeof(void*)));
+|		ldr Rx(reg), [Rx(reg), #-8]
+|		ldr Rx(reg), [Rx(reg), #mod]
+||	}
+||# endif
+||#endif
+}
+
+static void ir_emit_tls_addr(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
 	ir_reg reg = IR_REG_NUM(ctx->regs[def][0]);
+
+	IR_ASSERT(reg != IR_REG_NONE);
+
+	ir_emit_tls_base_addr(ctx, reg, insn->op2);
+
+	if (insn->op3) {
+		if (aarch64_may_encode_imm12(insn->op3)) {
+			|	add Rx(reg), Rx(reg), #insn->op3
+		} else if (aarch64_may_encode_imm12(-insn->op3)) {
+			|	sub Rx(reg), Rx(reg), #(-insn->op3)
+		} else {
+			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, insn->op3);
+			|	add Rx(reg), Rx(reg), Rx(IR_REG_INT_TMP)
+		}
+	}
+
+	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+		ir_emit_store(ctx, IR_ADDR, def, reg);
+	}
+}
+
+static void ir_emit_tls_load(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
+	ir_reg reg = IR_IS_TYPE_INT(insn->type) ? def_reg : ctx->regs[def][3];
+	ir_insn *addr_insn = &ctx->ir_base[insn->op2];
+	ir_mem mem;
 
 	if (ctx->use_lists[def].count == 1) {
 		/* dead load */
 		return;
 	}
 
-||#ifdef __APPLE__
-||	code = 0xd53bd060 | reg; // TODO: hard-coded: mrs reg, tpidrro_el0
-|	.long code
-|	and Rx(reg), Rx(reg), #0xfffffffffffffff8
-|//???	MEM_ACCESS_64_WITH_UOFFSET_64 ldr, Rx(reg), Rx(reg), #insn->op2, TMP1
-|//???	MEM_ACCESS_64_WITH_UOFFSET_64 ldr, Rx(reg), Rx(reg), #insn->op3, TMP1
-||#else
-||	code = 0xd53bd040 | reg; // TODO: hard-coded: mrs reg, tpidr_el0
-|	.long code
-||# ifndef __MUSL__
-||	if (insn->op3 == IR_NULL) {
-|		ldr Rx(reg), [Rx(reg), #insn->op2]
-||	} else {
-|		ldr Rx(reg), [Rx(reg), #0]
-|		ldr Rx(reg), [Rx(reg), #insn->op2]
-|		ldr Rx(reg), [Rx(reg), #insn->op3]
-||	}
-||# else
-||	if (insn->op3 == IR_NULL) {
-|		ldr Rx(reg), [Rx(reg), #insn->op2]
-||	} else {
-|		ldr Rx(reg), [Rx(reg), #-8]
-|		ldr Rx(reg), [Rx(reg), #insn->op2]
-|		ldr Rx(reg), [Rx(reg), #insn->op3]
-||	}
-||# endif
-||#endif
+	IR_ASSERT(def_reg != IR_REG_NONE && reg != IR_REG_NONE);
+	IR_ASSERT(addr_insn->op == IR_TLS_ADDR);
+	ir_emit_tls_base_addr(ctx, reg, addr_insn->op2);
+	mem = IR_MEM_BO(reg, addr_insn->op3);
+	ir_emit_load_mem(ctx, insn->type, def_reg, mem);
+
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
-		ir_emit_store(ctx, IR_ADDR, def, reg);
+		ir_emit_store(ctx, insn->type, def, def_reg);
 	}
+}
+
+static void ir_emit_tls_store(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
+{
+	ir_type type = ctx->ir_base[insn->op3].type;
+	ir_reg op3_reg = ctx->regs[ref][3];
+	ir_insn *addr_insn = &ctx->ir_base[insn->op2];
+	ir_reg reg = ctx->regs[ref][0];
+	ir_mem mem;
+
+	IR_ASSERT(addr_insn->op == IR_TLS_ADDR);
+
+	IR_ASSERT(op3_reg != IR_REG_NONE && reg != IR_REG_NONE);
+	if (IR_REG_SPILLED(op3_reg)) {
+		op3_reg = IR_REG_NUM(op3_reg);
+		ir_emit_load(ctx, type, op3_reg, insn->op3);
+	}
+
+	ir_emit_tls_base_addr(ctx, reg, addr_insn->op2);
+	mem = IR_MEM_BO(reg, addr_insn->op3);
+	ir_emit_store_mem(ctx, type, mem, op3_reg);
 }
 
 static void ir_emit_exitcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
@@ -6783,8 +6894,14 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 				case IR_GUARD_OVERFLOW:
 					ir_emit_guard_overflow(ctx, i, insn);
 					break;
-				case IR_TLS:
-					ir_emit_tls(ctx, i, insn);
+				case IR_TLS_ADDR:
+					ir_emit_tls_addr(ctx, i, insn);
+					break;
+				case IR_TLS_LOAD:
+					ir_emit_tls_load(ctx, i, insn);
+					break;
+				case IR_TLS_STORE:
+					ir_emit_tls_store(ctx, i, insn);
 					break;
 				case IR_TRAP:
 					|	brk

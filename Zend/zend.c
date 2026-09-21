@@ -803,7 +803,6 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 
 static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{{ */
 {
-	_tsrm_ls_cache.self = &_tsrm_ls_cache;
 	zend_startup_constants();
 	zend_copy_constants(executor_globals->zend_constants, GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();

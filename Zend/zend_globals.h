@@ -332,7 +332,6 @@ struct _zend_executor_globals {
 #ifdef ZTS
 struct _zend_tsrm_ls_cache {
 	void *cache;
-	void *self;
 	zend_executor_globals eg;
 	zend_compiler_globals cg;
 };

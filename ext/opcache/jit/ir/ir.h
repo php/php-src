@@ -346,7 +346,8 @@ typedef enum _ir_type {
 	_(LOAD_v,       l2,   src, ref, ___) /* volatile variant of VLOAD   */ \
 	_(STORE,        s3,   src, ref, def) /* store to memory             */ \
 	_(STORE_v,      s3,   src, ref, def) /* volatile variant of VSTORE  */ \
-	_(TLS,          l1X2, src, num, num) /* thread local variable       */ \
+	_(TLS_ADDR,     l1X2, src, num, num) /* TLS_ADDR(_, module, offset) */ \
+	                                     /* for static TLS module is -1 */ \
 	_(TRAP,         x1,   src, ___, ___) /* DebugBreak                  */ \
 	/* memory reference ops (A, H, U, S, TMP, STR, NEW, X, V) ???       */ \
 	\
