@@ -146,6 +146,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	{
 		/* already connected, we should close the connection */
 		php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT, mysqli_resource->status);
+		/* the link is not connected anymore, even if the new connection fails */
+		mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
 	}
 
 	if (strlen(SAFE_STR(hostname)) > 2 && !strncasecmp(hostname, "p:", 2)) {
