@@ -78,6 +78,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-24046 (FPM worker stdio pipe fd closed twice when a child
     process outlives the worker, breaking a later worker's stdio).
     (Ian P. Christian, ndossche)
+  . Fixed null pointer dereference in fpm_get_status() when the scoreboard
+    copy fails. (Marcel Hernandez)
 
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
