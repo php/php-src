@@ -973,7 +973,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNo
 		ZVAL_STR(&tmp, get_serialization_string_from_zval(data));
 		data = &tmp;
 	}
-	str = (unsigned char *) safe_emalloc(Z_STRLEN_P(data) * 2, sizeof(char), 1);
+	str = (unsigned char *) safe_emalloc(Z_STRLEN_P(data), 2, 1);
 
 	for (i = j = 0; i < Z_STRLEN_P(data); i++) {
 		str[j++] = hexconvtab[((unsigned char)Z_STRVAL_P(data)[i]) >> 4];
