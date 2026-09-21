@@ -15,7 +15,6 @@
 #include "php_openssl_backend.h"
 
 #include "zend_exceptions.h"
-#include "ext/standard/md5.h" /* For make_digest_ex() */
 #include "ext/standard/base64.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
@@ -611,7 +610,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 		ret = zend_string_init((char*)md, n, 0);
 	} else {
 		ret = zend_string_alloc(n * 2, 0);
-		make_digest_ex(ZSTR_VAL(ret), md, n);
+		zend_bin2hex(ZSTR_VAL(ret), md, n);
 		ZSTR_VAL(ret)[n * 2] = '\0';
 	}
 
