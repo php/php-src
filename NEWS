@@ -51,6 +51,10 @@ PHP                                                                        NEWS
     a truncated UTF-8 sequence). (Lazizbek Ergashev)
   . Updated Unicode data tables to Unicode 18.0 (Yuya Hamada)
 
+- MySQLi:
+  . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
+    failed reconnection. (Kamil Tekiela)
+
 - Opcache:
   . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a
     loop-invariant addition). (Ilia Alshanetsky)

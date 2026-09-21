@@ -41,6 +41,12 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 } else { \
 	CHECK_STATUS(statusval, quiet);\
 	p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;\
+	if (!p) { \
+		if (!quiet) { \
+			zend_throw_error(NULL, "%s object is not fully initialized", ZSTR_VAL(obj->zo.ce->name)); \
+		} \
+		return FAILURE; \
+	} \
 }
 
 #define MYSQLI_GET_RESULT(statusval) \
