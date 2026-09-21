@@ -989,8 +989,7 @@ ZEND_ATTRIBUTE_NONNULL static const char *php_uri_parser_whatwg_build_errors(zva
 	array_init_size(errors, log_len + zend_hash_num_elements(Z_ARRVAL(previous_errors)));
 
 	const char *reason = fill_errors_inner(Z_ARRVAL_P(errors));
-	zval *error;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(previous_errors), error) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(previous_errors), zval *error) {
 		Z_TRY_ADDREF_P(error);
 		zend_hash_next_index_insert(Z_ARRVAL_P(errors), error);
 	} ZEND_HASH_FOREACH_END();
