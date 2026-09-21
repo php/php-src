@@ -2430,6 +2430,7 @@ PHP_FUNCTION(session_regenerate_id)
 
 	PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 	if (!PS(id)) {
+		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
 		if (!EG(exception)) {
 			zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
