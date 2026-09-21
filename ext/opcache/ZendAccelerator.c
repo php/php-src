@@ -2970,6 +2970,10 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 					ZCSG(last_restart_time)++;
 				}
 				accel_restart_leave();
+
+				if (UNEXPECTED(zend_accel_restart_hook)) {
+					zend_accel_restart_hook(ZCSG(restart_reason));
+				}
 			}
 		}
 		zend_shared_alloc_unlock();
