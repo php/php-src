@@ -3740,6 +3740,23 @@ const CURL_HTTP_VERSION_3ONLY  = UNKNOWN;
 const CURLOPT_SAFE_UPLOAD = UNKNOWN;
 
 /**
+ * @var int
+ * @cvalue CURLOPT_PRECONNECTFUNCTION
+ */
+const CURLOPT_PRECONNECTFUNCTION = UNKNOWN;
+
+/**
+ * The address family of the endpoint libcurl is about to connect to, as reported
+ * to the CURLOPT_PRECONNECTFUNCTION callback.
+ */
+enum CurlAddressFamily
+{
+    case Inet;
+    case Inet6;
+    case Unix;
+}
+
+/**
  * @strict-properties
  * @not-serializable
  */
