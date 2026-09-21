@@ -7106,7 +7106,7 @@ PHP_FUNCTION(array_map)
 
 		if (!ZEND_FCI_INITIALIZED(fci)) {
 			uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
-			zval zv;
+			zval zv = {0};
 
 			/* We iterate through all the arrays at once. */
 			for (k = 0; k < maxlen; k++) {
