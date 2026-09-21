@@ -319,6 +319,7 @@ PHPAPI void *php_random_default_status(void)
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len)
 {
 #ifdef WORDS_BIGENDIAN
+	ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
 	zend_string *str;
 	size_t i;
 
@@ -328,8 +329,8 @@ PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len)
 	/* force little endian */
 	for (size_t h = len; 0 < h; h--) {
 		size_t j = h-1;
-		zend_bin2hex(ZSTR_VAL(str) + i, (const unsigned char *) ptr + j, 1);
-		i += 2;
+		ZSTR_VAL(str)[i++] = hexconvtab[((const unsigned char *) ptr)[j] >> 4];
+		ZSTR_VAL(str)[i++] = hexconvtab[((const unsigned char *) ptr)[j] & 15];
 	}
 	ZSTR_VAL(str)[i] = '\0';
 
