@@ -1,5 +1,7 @@
 /* This is a generated file, edit phar_object.stub.php instead.
- * Stub hash: 031dc8f07d2d9bac4a5f82f4ac2c5b3da5995405 */
+ * Stub hash: 4d1023618fff80be6c8f49864312600adf358ff4 */
+
+#include "zend_attributes.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -718,6 +720,9 @@ static zend_class_entry *register_class_Phar(zend_class_entry *class_entry_Recur
 	zend_declare_typed_class_constant(class_entry, const_SHA512_name, &const_SHA512_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release_ex(const_SHA512_name, true);
 
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setsignaturealgorithm", sizeof("setsignaturealgorithm") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
 	return class_entry;
 }
 
@@ -728,6 +733,9 @@ static zend_class_entry *register_class_PharData(zend_class_entry *class_entry_R
 	INIT_CLASS_ENTRY(ce, "PharData", class_PharData_methods);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
+
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setsignaturealgorithm", sizeof("setsignaturealgorithm") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

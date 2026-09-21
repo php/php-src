@@ -1,5 +1,5 @@
 /* This is a generated file, edit libsodium.stub.php instead.
- * Stub hash: 82dc3f80ea85b0c71ed9db9b111097f3eb49d71d */
+ * Stub hash: 3660efaec3ee273ff570540c372d284c72468abb */
 
 #include "zend_attributes.h"
 #include "zend_constants.h"
@@ -1263,6 +1263,14 @@ static void register_libsodium_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_pwhash_scryptsalsa208sha256_str", sizeof("sodium_crypto_pwhash_scryptsalsa208sha256_str") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_pwhash_scryptsalsa208sha256_str_verify", sizeof("sodium_crypto_pwhash_scryptsalsa208sha256_str_verify") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_scalarmult", sizeof("sodium_crypto_scalarmult") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(crypto_core_ristretto255_HASHBYTES)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_scalarmult_ristretto255", sizeof("sodium_crypto_scalarmult_ristretto255") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_scalarmult_ristretto255_base", sizeof("sodium_crypto_scalarmult_ristretto255_base") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_secretbox", sizeof("sodium_crypto_secretbox") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
