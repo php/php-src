@@ -34,11 +34,13 @@ PHPAPI zend_class_entry *spl_ce_SplFixedArray;
 #define HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, method) UNEXPECTED((object)->ce != spl_ce_SplFixedArray && (object)->ce->arrayaccess_funcs_ptr->method->common.scope != spl_ce_SplFixedArray)
 
 typedef struct _spl_fixedarray {
-	zend_long size;
+	/* A count of elements, so it is bounded by what can be allocated. Signed so
+	 * that cached_resize can carry its sentinel in the same type. */
+	ssize_t size;
 	/* It is possible to resize this, so this can't be combined with the object */
 	zval *elements;
 	/* If positive, it's a resize within a resize and the value gives the desired size. If -1, it's not. */
-	zend_long cached_resize;
+	ssize_t cached_resize;
 } spl_fixedarray;
 
 typedef struct _spl_fixedarray_object {
@@ -87,9 +89,9 @@ static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 }
 
 /* Initializes the range [from, to) to null. Does not dtor existing elements. */
-static void spl_fixedarray_init_elems(spl_fixedarray *array, zend_long from, zend_long to)
+static void spl_fixedarray_init_elems(spl_fixedarray *array, ssize_t from, ssize_t to)
 {
-	ZEND_ASSERT(from <= to);
+	ZEND_ASSERT(from >= 0 && from <= to);
 	zval *begin = array->elements + from, *end = array->elements + to;
 
 	while (begin != end) {
@@ -97,15 +99,17 @@ static void spl_fixedarray_init_elems(spl_fixedarray *array, zend_long from, zen
 	}
 }
 
-static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, zend_long size)
+static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, ssize_t size)
 {
+	ZEND_ASSERT(size >= 0);
+
 	array->size = 0; /* reset size in case ecalloc() fails */
 	array->elements = size ? safe_emalloc(size, sizeof(zval), 0) : NULL;
 	array->size = size;
 	array->cached_resize = -1;
 }
 
-static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
+static void spl_fixedarray_init(spl_fixedarray *array, ssize_t size)
 {
 	if (size > 0) {
 		spl_fixedarray_init_non_empty_struct(array, size);
@@ -118,7 +122,7 @@ static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 /* Copies the range [begin, end) into the fixedarray, beginning at `offset`.
  * Does not dtor the existing elements.
  */
-static void spl_fixedarray_copy_range(spl_fixedarray *array, zend_long offset, zval *begin, zval *end)
+static void spl_fixedarray_copy_range(spl_fixedarray *array, ssize_t offset, zval *begin, zval *end)
 {
 	ZEND_ASSERT(offset >= 0);
 	ZEND_ASSERT(array->size - offset >= end - begin);
@@ -131,7 +135,7 @@ static void spl_fixedarray_copy_range(spl_fixedarray *array, zend_long offset, z
 
 static void spl_fixedarray_copy_ctor(spl_fixedarray *to, spl_fixedarray *from)
 {
-	zend_long size = from->size;
+	ssize_t size = from->size;
 	spl_fixedarray_init(to, size);
 	if (size != 0) {
 		zval *begin = from->elements, *end = from->elements + size;
@@ -142,7 +146,7 @@ static void spl_fixedarray_copy_ctor(spl_fixedarray *to, spl_fixedarray *from)
 /* Destructs the elements in the range [from, to).
  * Caller is expected to bounds check.
  */
-static void spl_fixedarray_dtor_range(spl_fixedarray *array, zend_long from, zend_long to)
+static void spl_fixedarray_dtor_range(spl_fixedarray *array, ssize_t from, ssize_t to)
 {
 	array->size = from;
 	zval *begin = array->elements + from, *end = array->elements + to;
@@ -167,7 +171,7 @@ static void spl_fixedarray_dtor(spl_fixedarray *array)
 	}
 }
 
-static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
+static void spl_fixedarray_resize(spl_fixedarray *array, ssize_t size)
 {
 	if (size == array->size) {
 		/* nothing to do */
@@ -206,7 +210,7 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 	/* If resized within the destructor, take the last resize command and
 	 * perform it. The sentinel is still set: re-initialising during a
 	 * resize is refused. */
-	zend_long cached_resize = array->cached_resize;
+	ssize_t cached_resize = array->cached_resize;
 	ZEND_ASSERT(cached_resize >= 0);
 
 	array->cached_resize = -1;
@@ -241,7 +245,7 @@ static HashTable* spl_fixedarray_object_get_properties_for(zend_object *obj, zen
 	 */
 	HashTable *source_properties = obj->properties ? obj->properties : (obj->ce->default_properties_count ? zend_std_get_properties(obj) : NULL);
 
-	const zend_long size = intern->array.size;
+	const ssize_t size = intern->array.size;
 	if (size == 0 && (!source_properties || !zend_hash_num_elements(source_properties))) {
 		return NULL;
 	}
@@ -535,7 +539,7 @@ static zend_result spl_fixedarray_object_count_elements(zend_object *object, zen
 			*count = 0;
 		}
 	} else {
-		*count = intern->array.size;
+		*count = (zend_long) intern->array.size;
 	}
 	return SUCCESS;
 }
@@ -553,6 +557,9 @@ PHP_METHOD(SplFixedArray, __construct)
 	if (size < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
+	} else if (ZEND_LONG_SSIZE_T_OVFL(size)) {
+		zend_argument_value_error(1, "must be less than or equal to %zd", SSIZE_MAX);
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);
@@ -562,7 +569,7 @@ PHP_METHOD(SplFixedArray, __construct)
 		return;
 	}
 
-	spl_fixedarray_init(&intern->array, size);
+	spl_fixedarray_init(&intern->array, (ssize_t) size);
 }
 
 PHP_METHOD(SplFixedArray, __wakeup)
@@ -600,10 +607,10 @@ PHP_METHOD(SplFixedArray, __serialize)
 
 	HashTable *ht = zend_std_get_properties(&intern->std);
 	uint32_t num_properties = zend_hash_num_elements(ht);
-	array_init_size(return_value, intern->array.size + num_properties);
+	array_init_size(return_value, (uint32_t) intern->array.size + num_properties);
 
 	/* elements */
-	for (zend_long i = 0; i < intern->array.size; i++) {
+	for (ssize_t i = 0; i < intern->array.size; i++) {
 		current = &intern->array.elements[i];
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), current);
 		Z_TRY_ADDREF_P(current);
@@ -674,7 +681,7 @@ PHP_METHOD(SplFixedArray, count)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLFIXEDARRAY_P(object);
-	RETURN_LONG(intern->array.size);
+	RETURN_LONG((zend_long) intern->array.size);
 }
 
 PHP_METHOD(SplFixedArray, toArray)
@@ -691,7 +698,7 @@ PHP_METHOD(SplFixedArray, toArray)
 		zend_hash_real_init_packed(ht);
 
 		ZEND_HASH_FILL_PACKED(ht) {
-			for (zend_long i = 0; i < intern->array.size; i++) {
+			for (ssize_t i = 0; i < intern->array.size; i++) {
 				ZEND_HASH_FILL_ADD(&intern->array.elements[i]);
 				Z_TRY_ADDREF(intern->array.elements[i]);
 			}
@@ -738,13 +745,13 @@ PHP_METHOD(SplFixedArray, fromArray)
 			} ZEND_HASH_FOREACH_END();
 
 			tmp = max_index + 1;
-			if (tmp <= 0) {
+			if (UNEXPECTED(tmp <= 0 || ZEND_LONG_SSIZE_T_OVFL(tmp))) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "integer overflow detected");
 				RETURN_THROWS();
 			}
 		}
 
-		spl_fixedarray_init(&array, tmp);
+		spl_fixedarray_init(&array, (ssize_t) tmp);
 
 		ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(data), num_index, element) {
 			ZVAL_COPY_DEREF(&array.elements[num_index], element);
@@ -778,7 +785,7 @@ PHP_METHOD(SplFixedArray, getSize)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLFIXEDARRAY_P(object);
-	RETURN_LONG(intern->array.size);
+	RETURN_LONG((zend_long) intern->array.size);
 }
 
 PHP_METHOD(SplFixedArray, setSize)
@@ -794,11 +801,14 @@ PHP_METHOD(SplFixedArray, setSize)
 	if (size < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
+	} else if (ZEND_LONG_SSIZE_T_OVFL(size)) {
+		zend_argument_value_error(1, "must be less than or equal to %zd", SSIZE_MAX);
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 
-	spl_fixedarray_resize(&intern->array, size);
+	spl_fixedarray_resize(&intern->array, (ssize_t) size);
 	RETURN_TRUE;
 }
 
