@@ -27,8 +27,75 @@
 #include "zend_enum.h"
 #include "zend_property_hooks.h"
 #include "zend_lazy_objects.h"
+#include "zend_simd.h"
+#include "zend_bitset.h"
 
 static const char digits[] = "0123456789abcdef";
+
+#ifdef XSSE2
+static zend_always_inline __m128i php_json_escape_dirty_mask(
+		__m128i chunk, bool esc_slash, bool esc_lt_gt, bool esc_amp, bool esc_apos)
+{
+	__m128i dirty = _mm_cmplt_epi8(chunk, _mm_set1_epi8(0x20));
+
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('"')));
+	dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('\\')));
+	if (esc_slash) {
+		dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('/')));
+	}
+	if (esc_lt_gt) {
+		dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('<')));
+		dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('>')));
+	}
+	if (esc_amp) {
+		dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('&')));
+	}
+	if (esc_apos) {
+		dirty = _mm_or_si128(dirty, _mm_cmpeq_epi8(chunk, _mm_set1_epi8('\'')));
+	}
+	return dirty;
+}
+
+#if defined(__aarch64__) || defined(_M_ARM64)
+#define PHP_JSON_DIRTY_BITMAP_LANE_BITS 4
+#else
+#define PHP_JSON_DIRTY_BITMAP_LANE_BITS 1
+#endif
+
+static zend_always_inline uint64_t php_json_escape_dirty_bitmap(
+		__m128i chunk, bool esc_slash, bool esc_lt_gt, bool esc_amp, bool esc_apos)
+{
+	__m128i dirty = php_json_escape_dirty_mask(chunk, esc_slash, esc_lt_gt, esc_amp, esc_apos);
+#if defined(__aarch64__) || defined(_M_ARM64)
+	uint8x16_t dirty_u8 = vreinterpretq_u8_s8(dirty);
+	return vget_lane_u64(
+		vreinterpret_u64_u8(vshrn_n_u16(vreinterpretq_u16_u8(dirty_u8), 4)), 0);
+#else
+	return (uint64_t) (unsigned int) _mm_movemask_epi8(dirty);
+#endif
+}
+
+/* zend_ulong_ntz() takes a zend_ulong, so the uint64_t bitmap is narrowed to
+ * it first. That's lossless only because the two lane widths above line up
+ * with the zend_ulong sizes they actually run on: the 1-bit-per-lane (x86)
+ * bitmap never exceeds 16 set bits, fitting a 32-bit zend_ulong, while the
+ * 4-bit-per-lane (aarch64) bitmap needs up to 64 bits and only occurs on
+ * 64-bit zend_ulong builds. Guard that pairing so a future architecture
+ * can't silently violate it. */
+ZEND_STATIC_ASSERT(
+	PHP_JSON_DIRTY_BITMAP_LANE_BITS == 1 || SIZEOF_ZEND_LONG == 8,
+	"nibble-per-lane dirty bitmap requires a 64-bit zend_ulong for zend_ulong_ntz() to see all bits");
+
+static zend_always_inline unsigned int php_json_dirty_bitmap_lane(uint64_t bitmap)
+{
+	return (unsigned int) (zend_ulong_ntz((zend_ulong) bitmap) / PHP_JSON_DIRTY_BITMAP_LANE_BITS);
+}
+
+static zend_always_inline uint64_t php_json_dirty_bitmap_advance(uint64_t bitmap, unsigned int lanes)
+{
+	return bitmap >> (lanes * PHP_JSON_DIRTY_BITMAP_LANE_BITS);
+}
+#endif
 
 static zend_always_inline bool php_json_check_stack_limit(void)
 {
@@ -347,12 +414,213 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 }
 /* }}} */
 
+static zend_always_inline zend_result php_json_escape_dirty_char(
+		smart_str *buf, const char **s_ptr, size_t *len_ptr, size_t *pos_ptr,
+		int options, php_json_encoder *encoder, size_t checkpoint, size_t *consumed_ptr)
+{
+	const char *s = *s_ptr;
+	size_t len = *len_ptr;
+	size_t pos = *pos_ptr;
+	char *dst;
+
+	if (pos) {
+		smart_str_appendl(buf, s, pos);
+		s += pos;
+		pos = 0;
+	}
+
+	unsigned int us = (unsigned char)s[0];
+	if (UNEXPECTED(us >= 0x80)) {
+		zend_result status;
+		us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
+
+		/* check whether UTF8 character is correct */
+		if (UNEXPECTED(status != SUCCESS)) {
+			if (options & PHP_JSON_INVALID_UTF8_IGNORE) {
+				/* ignore invalid UTF8 character */
+			} else if (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
+				/* Use Unicode character 'REPLACEMENT CHARACTER' (U+FFFD) */
+				if (options & PHP_JSON_UNESCAPED_UNICODE) {
+					smart_str_appendl(buf, "\xef\xbf\xbd", 3);
+				} else {
+					smart_str_appendl(buf, "\\ufffd", 6);
+				}
+			} else {
+				ZSTR_LEN(buf->s) = checkpoint;
+				encoder->error_code = PHP_JSON_ERROR_UTF8;
+				if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+					smart_str_appendl(buf, "null", 4);
+				}
+				*s_ptr = s;
+				*len_ptr = len;
+				*pos_ptr = pos;
+				*consumed_ptr = pos;
+				return FAILURE;
+			}
+
+		/* Escape U+2028/U+2029 line terminators, UNLESS both
+		   JSON_UNESCAPED_UNICODE and
+		   JSON_UNESCAPED_LINE_TERMINATORS were provided */
+		} else if ((options & PHP_JSON_UNESCAPED_UNICODE)
+		    && ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
+				|| us < 0x2028 || us > 0x2029)) {
+			smart_str_appendl(buf, s, pos);
+		} else {
+			/* From http://en.wikipedia.org/wiki/UTF16 */
+			if (us >= 0x10000) {
+				unsigned int next_us;
+
+				us -= 0x10000;
+				next_us = (unsigned short)((us & 0x3ff) | 0xdc00);
+				us = (unsigned short)((us >> 10) | 0xd800);
+				dst = smart_str_extend(buf, 6);
+				dst[0] = '\\';
+				dst[1] = 'u';
+				dst[2] = digits[(us >> 12) & 0xf];
+				dst[3] = digits[(us >> 8) & 0xf];
+				dst[4] = digits[(us >> 4) & 0xf];
+				dst[5] = digits[us & 0xf];
+				us = next_us;
+			}
+			dst = smart_str_extend(buf, 6);
+			dst[0] = '\\';
+			dst[1] = 'u';
+			dst[2] = digits[(us >> 12) & 0xf];
+			dst[3] = digits[(us >> 8) & 0xf];
+			dst[4] = digits[(us >> 4) & 0xf];
+			dst[5] = digits[us & 0xf];
+		}
+		s += pos;
+		len -= pos;
+		*consumed_ptr = pos;
+		pos = 0;
+	} else {
+		s++;
+		switch (us) {
+			case '"':
+				if (options & PHP_JSON_HEX_QUOT) {
+					smart_str_appendl(buf, "\\u0022", 6);
+				} else {
+					smart_str_appendl(buf, "\\\"", 2);
+				}
+				break;
+
+			case '\\':
+				smart_str_appendl(buf, "\\\\", 2);
+				break;
+
+			case '/':
+				if (options & PHP_JSON_UNESCAPED_SLASHES) {
+					smart_str_appendc(buf, '/');
+				} else {
+					smart_str_appendl(buf, "\\/", 2);
+				}
+				break;
+
+			case '\b':
+				smart_str_appendl(buf, "\\b", 2);
+				break;
+
+			case '\f':
+				smart_str_appendl(buf, "\\f", 2);
+				break;
+
+			case '\n':
+				smart_str_appendl(buf, "\\n", 2);
+				break;
+
+			case '\r':
+				smart_str_appendl(buf, "\\r", 2);
+				break;
+
+			case '\t':
+				smart_str_appendl(buf, "\\t", 2);
+				break;
+
+			case '<':
+				if (options & PHP_JSON_HEX_TAG) {
+					smart_str_appendl(buf, "\\u003C", 6);
+				} else {
+					smart_str_appendc(buf, '<');
+				}
+				break;
+
+			case '>':
+				if (options & PHP_JSON_HEX_TAG) {
+					smart_str_appendl(buf, "\\u003E", 6);
+				} else {
+					smart_str_appendc(buf, '>');
+				}
+				break;
+
+			case '&':
+				if (options & PHP_JSON_HEX_AMP) {
+					smart_str_appendl(buf, "\\u0026", 6);
+				} else {
+					smart_str_appendc(buf, '&');
+				}
+				break;
+
+			case '\'':
+				if (options & PHP_JSON_HEX_APOS) {
+					smart_str_appendl(buf, "\\u0027", 6);
+				} else {
+					smart_str_appendc(buf, '\'');
+				}
+				break;
+
+			default:
+				ZEND_ASSERT(us < ' ');
+				dst = smart_str_extend(buf, 6);
+				dst[0] = '\\';
+				dst[1] = 'u';
+				dst[2] = '0';
+				dst[3] = '0';
+				dst[4] = digits[(us >> 4) & 0xf];
+				dst[5] = digits[us & 0xf];
+				break;
+		}
+		len--;
+		*consumed_ptr = 1;
+	}
+
+	*s_ptr = s;
+	*len_ptr = len;
+	*pos_ptr = pos;
+	return SUCCESS;
+}
+
+static zend_always_inline zend_result php_json_escape_scalar_tail(
+		smart_str *buf, const char *s, size_t len, size_t pos,
+		int options, php_json_encoder *encoder, size_t checkpoint)
+{
+	static const uint32_t charmap[8] = {
+		0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
+		0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+
+	while (len) {
+		unsigned int us = (unsigned char)s[pos];
+		if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
+			pos++;
+			len--;
+		} else {
+			size_t consumed;
+			if (php_json_escape_dirty_char(buf, &s, &len, &pos, options, encoder, checkpoint, &consumed) == FAILURE) {
+				return FAILURE;
+			}
+		}
+	}
+
+	smart_str_appendl(buf, s, pos);
+	smart_str_appendc(buf, '"');
+	return SUCCESS;
+}
+
 zend_result php_json_escape_string(
 		smart_str *buf, const char *s, size_t len,
 		int options, php_json_encoder *encoder) /* {{{ */
 {
-	size_t pos, checkpoint;
-	char *dst;
+	size_t checkpoint;
 
 	if (len == 0) {
 		smart_str_appendl(buf, "\"\"", 2);
@@ -381,181 +649,89 @@ zend_result php_json_escape_string(
 	smart_str_alloc(buf, len+2, 0);
 	smart_str_appendc(buf, '"');
 
-	pos = 0;
+#ifdef XSSE2
+	if (len >= sizeof(__m128i)) {
+		size_t pos = 0;
 
-	do {
-		static const uint32_t charmap[8] = {
+		/* Loop-invariant for the whole call -- see
+		 * php_json_escape_dirty_mask(). */
+		bool esc_slash = !(options & PHP_JSON_UNESCAPED_SLASHES);
+		bool esc_lt_gt = (options & PHP_JSON_HEX_TAG) != 0;
+		bool esc_amp = (options & PHP_JSON_HEX_AMP) != 0;
+		bool esc_apos = (options & PHP_JSON_HEX_APOS) != 0;
+
+		/* Same narrowing as php_json_escape_dirty_mask(), as a bitmap
+		 * instead of SIMD compares: a cheap pre-check against the
+		 * CURRENT byte before paying for a load at all.  */
+		uint32_t vec_charmap[8] = {
 			0xffffffff, 0x500080c4, 0x10000000, 0x00000000,
 			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+		if (!esc_lt_gt) {
+			vec_charmap[1] &= ~((1u << ('<' & 31)) | (1u << ('>' & 31)));
+		}
+		if (!esc_amp) {
+			vec_charmap[1] &= ~(1u << ('&' & 31));
+		}
+		if (!esc_apos) {
+			vec_charmap[1] &= ~(1u << ('\'' & 31));
+		}
+		if (!esc_slash) {
+			vec_charmap[1] &= ~(1u << ('/' & 31));
+		}
 
-		unsigned int us = (unsigned char)s[pos];
-		if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
-			pos++;
-			len--;
-			if (len == 0) {
-				smart_str_appendl(buf, s, pos);
-				break;
-			}
-		} else {
-			if (pos) {
-				smart_str_appendl(buf, s, pos);
-				s += pos;
-				pos = 0;
-			}
-			us = (unsigned char)s[0];
-			if (UNEXPECTED(us >= 0x80)) {
-				zend_result status;
-				us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
-
-				/* check whether UTF8 character is correct */
-				if (UNEXPECTED(status != SUCCESS)) {
-					if (options & PHP_JSON_INVALID_UTF8_IGNORE) {
-						/* ignore invalid UTF8 character */
-					} else if (options & PHP_JSON_INVALID_UTF8_SUBSTITUTE) {
-						/* Use Unicode character 'REPLACEMENT CHARACTER' (U+FFFD) */
-						if (options & PHP_JSON_UNESCAPED_UNICODE) {
-							smart_str_appendl(buf, "\xef\xbf\xbd", 3);
-						} else {
-							smart_str_appendl(buf, "\\ufffd", 6);
-						}
-					} else {
-						ZSTR_LEN(buf->s) = checkpoint;
-						encoder->error_code = PHP_JSON_ERROR_UTF8;
-						if (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-							smart_str_appendl(buf, "null", 4);
-						}
-						return FAILURE;
-					}
-
-				/* Escape U+2028/U+2029 line terminators, UNLESS both
-				   JSON_UNESCAPED_UNICODE and
-				   JSON_UNESCAPED_LINE_TERMINATORS were provided */
-				} else if ((options & PHP_JSON_UNESCAPED_UNICODE)
-				    && ((options & PHP_JSON_UNESCAPED_LINE_TERMINATORS)
-						|| us < 0x2028 || us > 0x2029)) {
-					smart_str_appendl(buf, s, pos);
-				} else {
-					/* From http://en.wikipedia.org/wiki/UTF16 */
-					if (us >= 0x10000) {
-						unsigned int next_us;
-
-						us -= 0x10000;
-						next_us = (unsigned short)((us & 0x3ff) | 0xdc00);
-						us = (unsigned short)((us >> 10) | 0xd800);
-						dst = smart_str_extend(buf, 6);
-						dst[0] = '\\';
-						dst[1] = 'u';
-						dst[2] = digits[(us >> 12) & 0xf];
-						dst[3] = digits[(us >> 8) & 0xf];
-						dst[4] = digits[(us >> 4) & 0xf];
-						dst[5] = digits[us & 0xf];
-						us = next_us;
-					}
-					dst = smart_str_extend(buf, 6);
-					dst[0] = '\\';
-					dst[1] = 'u';
-					dst[2] = digits[(us >> 12) & 0xf];
-					dst[3] = digits[(us >> 8) & 0xf];
-					dst[4] = digits[(us >> 4) & 0xf];
-					dst[5] = digits[us & 0xf];
+		while (len >= sizeof(__m128i)) {
+			if (UNEXPECTED(ZEND_BIT_TEST(vec_charmap, (unsigned char) s[pos]))) {
+				size_t consumed;
+				if (php_json_escape_dirty_char(buf, &s, &len, &pos, options, encoder, checkpoint, &consumed) == FAILURE) {
+					return FAILURE;
 				}
-				s += pos;
-				len -= pos;
-				pos = 0;
-			} else {
-				s++;
-				switch (us) {
-					case '"':
-						if (options & PHP_JSON_HEX_QUOT) {
-							smart_str_appendl(buf, "\\u0022", 6);
-						} else {
-							smart_str_appendl(buf, "\\\"", 2);
-						}
-						break;
+				continue;
+			}
 
-					case '\\':
-						smart_str_appendl(buf, "\\\\", 2);
-						break;
+			__m128i chunk = _mm_loadu_si128((const __m128i *)(s + pos));
+			uint64_t bitmap = php_json_escape_dirty_bitmap(chunk, esc_slash, esc_lt_gt, esc_amp, esc_apos);
 
-					case '/':
-						if (options & PHP_JSON_UNESCAPED_SLASHES) {
-							smart_str_appendc(buf, '/');
-						} else {
-							smart_str_appendl(buf, "\\/", 2);
-						}
-						break;
+			if (bitmap == 0) {
+				pos += sizeof(__m128i);
+				len -= sizeof(__m128i);
+				continue;
+			}
 
-					case '\b':
-						smart_str_appendl(buf, "\\b", 2);
-						break;
-
-					case '\f':
-						smart_str_appendl(buf, "\\f", 2);
-						break;
-
-					case '\n':
-						smart_str_appendl(buf, "\\n", 2);
-						break;
-
-					case '\r':
-						smart_str_appendl(buf, "\\r", 2);
-						break;
-
-					case '\t':
-						smart_str_appendl(buf, "\\t", 2);
-						break;
-
-					case '<':
-						if (options & PHP_JSON_HEX_TAG) {
-							smart_str_appendl(buf, "\\u003C", 6);
-						} else {
-							smart_str_appendc(buf, '<');
-						}
-						break;
-
-					case '>':
-						if (options & PHP_JSON_HEX_TAG) {
-							smart_str_appendl(buf, "\\u003E", 6);
-						} else {
-							smart_str_appendc(buf, '>');
-						}
-						break;
-
-					case '&':
-						if (options & PHP_JSON_HEX_AMP) {
-							smart_str_appendl(buf, "\\u0026", 6);
-						} else {
-							smart_str_appendc(buf, '&');
-						}
-						break;
-
-					case '\'':
-						if (options & PHP_JSON_HEX_APOS) {
-							smart_str_appendl(buf, "\\u0027", 6);
-						} else {
-							smart_str_appendc(buf, '\'');
-						}
-						break;
-
-					default:
-						ZEND_ASSERT(us < ' ');
-						dst = smart_str_extend(buf, 6);
-						dst[0] = '\\';
-						dst[1] = 'u';
-						dst[2] = '0';
-						dst[3] = '0';
-						dst[4] = digits[(us >> 4) & 0xf];
-						dst[5] = digits[us & 0xf];
-						break;
+			unsigned int chunk_left = sizeof(__m128i);
+			for (;;) {
+				unsigned int clean = php_json_dirty_bitmap_lane(bitmap);
+				if (clean >= chunk_left) {
+					pos += chunk_left;
+					len -= chunk_left;
+					break;
 				}
-				len--;
+				pos += clean;
+				len -= clean;
+				chunk_left -= clean;
+				bitmap = php_json_dirty_bitmap_advance(bitmap, clean);
+
+				size_t consumed;
+				if (php_json_escape_dirty_char(buf, &s, &len, &pos, options, encoder, checkpoint, &consumed) == FAILURE) {
+					return FAILURE;
+				}
+				if (consumed >= chunk_left) {
+					break;
+				}
+				chunk_left -= (unsigned int) consumed;
+				bitmap = php_json_dirty_bitmap_advance(bitmap, (unsigned int) consumed);
+				if (bitmap == 0) {
+					pos += chunk_left;
+					len -= chunk_left;
+					break;
+				}
 			}
 		}
-	} while (len);
 
-	smart_str_appendc(buf, '"');
+		return php_json_escape_scalar_tail(buf, s, len, pos, options, encoder, checkpoint);
+	}
+#endif
 
-	return SUCCESS;
+	return php_json_escape_scalar_tail(buf, s, len, 0, options, encoder, checkpoint);
 }
 /* }}} */
 
