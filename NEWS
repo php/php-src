@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
     request activation). (matyhtf)
 
+- Core
+  . Fix GH-21999: GC inconsistency with lazy object, var_dump(), and object
+    comparison. (Arnaud)
+
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
     registrations are freed while still reachable from the cycle collector.
