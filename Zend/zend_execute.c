@@ -191,6 +191,10 @@ ZEND_API const zend_internal_function zend_pass_function = {
 ZEND_API void zend_vm_stack_init(void)
 {
 	EG(vm_stack_page_size) = ZEND_VM_STACK_PAGE_SIZE;
+	EG(vm_stack_page_cache) = NULL;
+	EG(vm_stack_page_cache_count) = 0;
+	EG(fiber_vm_stack_page_cache) = NULL;
+	EG(fiber_vm_stack_page_cache_count) = 0;
 	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
@@ -201,6 +205,10 @@ ZEND_API void zend_vm_stack_init_ex(size_t page_size)
 	/* page_size must be a power of 2 */
 	ZEND_ASSERT(page_size > 0 && (page_size & (page_size - 1)) == 0);
 	EG(vm_stack_page_size) = page_size;
+	EG(vm_stack_page_cache) = NULL;
+	EG(vm_stack_page_cache_count) = 0;
+	EG(fiber_vm_stack_page_cache) = NULL;
+	EG(fiber_vm_stack_page_cache_count) = 0;
 	EG(vm_stack) = zend_vm_stack_new_page(page_size, NULL);
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
@@ -215,6 +223,23 @@ ZEND_API void zend_vm_stack_destroy(void)
 		efree(stack);
 		stack = p;
 	}
+}
+
+ZEND_API void zend_vm_stack_destroy_caches(void)
+{
+	while (EG(vm_stack_page_cache) != NULL) {
+		zend_vm_stack cached = EG(vm_stack_page_cache);
+		EG(vm_stack_page_cache) = cached->prev;
+		efree(cached);
+	}
+	EG(vm_stack_page_cache_count) = 0;
+
+	while (EG(fiber_vm_stack_page_cache) != NULL) {
+		zend_vm_stack cached = EG(fiber_vm_stack_page_cache);
+		EG(fiber_vm_stack_page_cache) = cached->prev;
+		efree(cached);
+	}
+	EG(fiber_vm_stack_page_cache_count) = 0;
 }
 
 ZEND_API void* zend_vm_stack_extend(size_t size)

@@ -1101,6 +1101,8 @@ PHP 8.6 UPGRADE NOTES
   . The performance of ZTS builds has been improved.
   . Added stateless closure cache.
     RFC: https://wiki.php.net/rfc/closure-optimizations#stateless_closure_caching
+  . Deeply recursive code that causes the VM to allocate new stack pages should
+    now be faster.
 
 - DOM:
   . Made splitText() faster and consume less memory.
