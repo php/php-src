@@ -29,9 +29,16 @@ ZEND_TLS uint8_t lexbor_custom_url_map[256] = {0};
 
 static const size_t lexbor_mraw_byte_size = 8192;
 
+ZEND_ATTRIBUTE_NONNULL static zend_always_inline bool zval_string_or_null_is_non_empty(const zval *value)
+{
+	ZEND_ASSERT(Z_ISNULL_P(value) || Z_TYPE_P(value) == IS_STRING);
+
+	return Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0;
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_string_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
 {
-	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) {
+	if (zval_string_or_null_is_non_empty(value)) {
 		lexbor_str->data = (lxb_char_t *) Z_STRVAL_P(value);
 		lexbor_str->length = Z_STRLEN_P(value);
 	} else {
@@ -1071,12 +1078,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	}
 
 	/* Credentials and ports require an authority in the reference itself. */
-	if (Z_TYPE_P(username) == IS_STRING) {
+	if (zval_string_or_null_is_non_empty(username)) {
 		php_uri_parser_whatwg_throw_exception("The specified URL cannot have username");
 		return NULL;
 	}
 
-	if (Z_TYPE_P(password) == IS_STRING) {
+	if (zval_string_or_null_is_non_empty(password)) {
 		php_uri_parser_whatwg_throw_exception("The specified URL cannot have password");
 		return NULL;
 	}
@@ -1306,12 +1313,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	if (lexbor_url->host.type == LXB_URL_HOST_TYPE__UNDEF
 		|| lexbor_url->host.type == LXB_URL_HOST_TYPE_EMPTY
 		|| lexbor_url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE) {
-		if (Z_TYPE_P(username) != IS_NULL) {
+		if (zval_string_or_null_is_non_empty(username)) {
 			php_uri_parser_whatwg_throw_exception("The specified URL cannot have username");
 			goto failure;
 		}
 
-		if (Z_TYPE_P(password) != IS_NULL) {
+		if (zval_string_or_null_is_non_empty(password)) {
 			php_uri_parser_whatwg_throw_exception("The specified URL cannot have password");
 			goto failure;
 		}
