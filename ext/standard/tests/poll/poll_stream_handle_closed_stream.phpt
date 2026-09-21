@@ -19,7 +19,7 @@ var_dump(get_debug_type($handle->getStream()));
 
 try {
     $watcher->modifyEvents([Io\Poll\Event::Write]);
-} catch (Io\Poll\InvalidHandleException $e) {
+} catch (Io\Poll\InactiveWatcherException $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -37,7 +37,7 @@ var_dump($watcher->isActive());
 --EXPECT--
 bool(false)
 string(17) "resource (closed)"
-Invalid handle for polling
+Cannot modify inactive watcher
 Invalid handle for polling
 Events count: 0
 bool(false)

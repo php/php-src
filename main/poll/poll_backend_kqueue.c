@@ -279,6 +279,11 @@ static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 		return FAILURE;
 	}
 
+	/* Remove from tracking */
+	if (!ctx->raw_events) {
+		zend_hash_index_del(backend_data->fd_tracking, fd);
+	}
+
 	/* If no filters were successfully deleted, that's an error */
 	if (successful_deletes == 0) {
 		php_poll_set_error(ctx, PHP_POLL_ERR_NOTFOUND);
@@ -288,11 +293,6 @@ static zend_result kqueue_backend_remove(php_poll_ctx *ctx, int fd)
 	/* Update counters */
 	backend_data->fd_count--;
 	backend_data->filter_count -= successful_deletes;
-
-	/* Remove from tracking */
-	if (!ctx->raw_events) {
-		zend_hash_index_del(backend_data->fd_tracking, fd);
-	}
 
 	return SUCCESS;
 }

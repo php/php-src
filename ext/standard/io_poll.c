@@ -17,6 +17,7 @@
 #include "zend_exceptions.h"
 #include "php_network.h"
 #include "php_poll.h"
+#include "io_poll.h"
 #include "io_poll_arginfo.h"
 #include "io_poll_decl.h"
 #include "ext/date/php_time.h"
@@ -54,14 +55,17 @@ typedef struct php_io_poll_watcher_object {
 	uint32_t triggered_events;
 	zval data;
 	bool active;
+	bool closed; /* Deactivated because its stream was closed */
 	php_io_poll_context_object *context; /* Back reference to Context object */
+	php_socket_t fd; /* Registered fd, SOCK_ERR when inactive */
+	php_stream *stream; /* Watched stream, NULL when not registered in its watcher list */
 	zend_object std;
 } php_io_poll_watcher_object;
 
 /* Context object structure */
 struct php_io_poll_context_object {
 	php_poll_ctx *ctx;
-	HashTable *watchers; /* Maps handle pointer -> watcher object */
+	HashTable *watchers; /* Maps fd -> watcher object */
 	zend_object std;
 };
 
@@ -266,7 +270,10 @@ static zend_object *php_io_poll_watcher_create_object(zend_class_entry *ce)
 	intern->watched_events = 0;
 	intern->triggered_events = 0;
 	intern->active = false;
+	intern->closed = false;
 	intern->context = NULL;
+	intern->fd = SOCK_ERR;
+	intern->stream = NULL;
 	ZVAL_NULL(&intern->data);
 
 	return &intern->std;
@@ -285,12 +292,88 @@ static zend_object *php_io_poll_context_create_object(zend_class_entry *ce)
 	return &intern->std;
 }
 
+/* Watcher registration helpers */
+
+static zend_always_inline zend_ulong php_io_poll_compute_ptr_key(void *ptr)
+{
+	zend_ulong key = (zend_ulong) (uintptr_t) ptr;
+	return (key >> 3) | (key << ((sizeof(key) * 8) - 3));
+}
+
+static zend_always_inline void php_io_poll_watcher_deactivate(php_io_poll_watcher_object *watcher)
+{
+	watcher->active = false;
+	watcher->context = NULL;
+	watcher->fd = SOCK_ERR;
+}
+
+static void php_io_poll_stream_watch(php_stream *stream, php_io_poll_watcher_object *watcher)
+{
+	if (!stream->poll_watchers) {
+		stream->poll_watchers = pemalloc(sizeof(HashTable), stream->is_persistent);
+		zend_hash_init(stream->poll_watchers, 4, NULL, NULL, stream->is_persistent);
+	}
+
+	zval zv;
+	ZVAL_PTR(&zv, watcher);
+	zend_hash_index_add_new(stream->poll_watchers, php_io_poll_compute_ptr_key(watcher), &zv);
+	watcher->stream = stream;
+}
+
+static void php_io_poll_stream_unwatch(php_io_poll_watcher_object *watcher)
+{
+	php_stream *stream = watcher->stream;
+
+	if (!stream) {
+		return;
+	}
+	watcher->stream = NULL;
+
+	zend_hash_index_del(stream->poll_watchers, php_io_poll_compute_ptr_key(watcher));
+	if (zend_hash_num_elements(stream->poll_watchers) == 0) {
+		zend_hash_destroy(stream->poll_watchers);
+		pefree(stream->poll_watchers, stream->is_persistent);
+		stream->poll_watchers = NULL;
+	}
+}
+
+static void php_io_poll_context_retire_watcher(
+		php_io_poll_context_object *context, php_io_poll_watcher_object *watcher)
+{
+	php_socket_t fd = watcher->fd;
+
+	php_poll_remove(context->ctx, (int) fd);
+	php_io_poll_stream_unwatch(watcher);
+	php_io_poll_watcher_deactivate(watcher);
+	zend_hash_index_del(context->watchers, (zend_ulong) fd);
+}
+
+/* Called from php_stream_free() while the fd is still open */
+PHPAPI void php_io_poll_stream_notify_close(php_stream *stream)
+{
+	HashTable *watchers = stream->poll_watchers;
+	stream->poll_watchers = NULL;
+
+	ZEND_HASH_FOREACH_VAL(watchers, zval *zv) {
+		php_io_poll_watcher_object *watcher = Z_PTR_P(zv);
+		watcher->stream = NULL;
+		watcher->closed = true;
+		if (watcher->context) {
+			php_io_poll_context_retire_watcher(watcher->context, watcher);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zend_hash_destroy(watchers);
+	pefree(watchers, stream->is_persistent);
+}
+
 /* Object Destruction Functions */
 
 static void php_io_poll_watcher_free_object(zend_object *obj)
 {
 	php_io_poll_watcher_object *intern = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(obj);
 
+	php_io_poll_stream_unwatch(intern);
 	zval_ptr_dtor(&intern->data);
 
 	if (intern->handle) {
@@ -307,8 +390,8 @@ static void php_io_poll_context_free_object(zend_object *obj)
 	if (intern->watchers) {
 		ZEND_HASH_FOREACH_VAL(intern->watchers, zval *zv) {
 			php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(zv));
-			watcher->active = false;
-			watcher->context = NULL;
+			php_io_poll_stream_unwatch(watcher);
+			php_io_poll_watcher_deactivate(watcher);
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -355,12 +438,6 @@ static HashTable *php_io_poll_context_get_gc(zend_object *obj, zval **table, int
 
 /* Utility functions */
 
-static zend_always_inline zend_ulong php_io_poll_compute_ptr_key(void *ptr)
-{
-	zend_ulong key = (zend_ulong) (uintptr_t) ptr;
-	return (key >> 3) | (key << ((sizeof(key) * 8) - 3));
-}
-
 static zend_result php_io_poll_watcher_modify_events(
 		php_io_poll_watcher_object *watcher, uint32_t events)
 {
@@ -370,16 +447,12 @@ static zend_result php_io_poll_watcher_modify_events(
 		return FAILURE;
 	}
 
-	php_socket_t fd = php_poll_handle_get_fd(watcher->handle);
-	if (fd == SOCK_ERR) {
-		zend_throw_exception(
-				php_io_poll_invalid_handle_class_entry, "Invalid handle for polling", 0);
-		return FAILURE;
-	}
-
-	/* Modify in poll context */
+	/* Re-add if the backend dropped a fired one-shot registration */
 	php_poll_ctx *poll_ctx = watcher->context->ctx;
-	if (php_poll_modify(poll_ctx, (int) fd, events, watcher) != SUCCESS) {
+	int fd = (int) watcher->fd;
+	if (php_poll_modify(poll_ctx, fd, events, watcher) != SUCCESS
+			&& (php_poll_get_error(poll_ctx) != PHP_POLL_ERR_NOTFOUND
+					|| php_poll_add(poll_ctx, fd, events, watcher) != SUCCESS)) {
 		php_poll_error err = php_poll_get_error(poll_ctx);
 		php_io_poll_throw_failed_operation(php_io_poll_failed_watcher_mod_class_entry,
 				"Failed to modify watcher in polling system", err);
@@ -634,26 +707,16 @@ PHP_METHOD(Io_Poll_Watcher, remove)
 	php_io_poll_watcher_object *intern = PHP_POLL_WATCHER_OBJ_FROM_ZV(getThis());
 
 	if (!intern->active || !intern->context) {
+		/* Closing the stream already removed it, so this is just the expected cleanup */
+		if (intern->closed) {
+			return;
+		}
 		zend_throw_exception(
 				php_io_poll_inactive_watcher_class_entry, "Cannot remove inactive watcher", 0);
 		RETURN_THROWS();
 	}
 
-	php_io_poll_context_object *context = intern->context;
-	php_poll_ctx *poll_ctx = context->ctx;
-	HashTable *watchers = context->watchers;
-	zend_ulong hash_key = php_io_poll_compute_ptr_key(intern->handle);
-	php_socket_t fd = php_poll_handle_get_fd(intern->handle);
-	if (fd != SOCK_ERR) {
-		php_poll_remove(poll_ctx, (int) fd);
-	}
-
-	intern->active = false;
-	intern->context = NULL;
-
-	if (watchers) {
-		zend_hash_index_del(watchers, hash_key);
-	}
+	php_io_poll_context_retire_watcher(intern->context, intern);
 }
 
 PHP_METHOD(Io_Poll_Context, __construct)
@@ -715,6 +778,12 @@ PHP_METHOD(Io_Poll_Context, add)
 	php_io_poll_context_object *intern = PHP_POLL_CONTEXT_OBJ_FROM_ZV(getThis());
 	php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZV(handle_obj);
 
+	events = php_io_poll_event_enums_to_events(event_enums);
+	if (!events) {
+		zend_argument_type_error(2, "must be array of Event enums");
+		RETURN_THROWS();
+	}
+
 	/* Get file descriptor */
 	php_socket_t fd = php_poll_handle_get_fd(handle);
 	if (fd == SOCK_ERR) {
@@ -723,15 +792,20 @@ PHP_METHOD(Io_Poll_Context, add)
 		RETURN_THROWS();
 	}
 
+	zval *existing_zv = zend_hash_index_find(intern->watchers, (zend_ulong) fd);
+	if (existing_zv) {
+		php_io_poll_watcher_object *existing = PHP_POLL_WATCHER_OBJ_FROM_ZOBJ(Z_OBJ_P(existing_zv));
+		if (php_poll_handle_get_fd(existing->handle) == fd) {
+			zend_throw_exception(
+					php_io_poll_handle_already_watched_class_entry, "Handle already added", 0);
+			RETURN_THROWS();
+		}
+		php_io_poll_context_retire_watcher(intern, existing);
+	}
+
 	/* Create watcher object */
 	object_init_ex(return_value, php_io_poll_watcher_class_entry);
 	php_io_poll_watcher_object *watcher = PHP_POLL_WATCHER_OBJ_FROM_ZV(return_value);
-
-	events = php_io_poll_event_enums_to_events(event_enums);
-	if (!events) {
-		zend_argument_type_error(2, "must be array of Event enums");
-		RETURN_THROWS();
-	}
 
 	watcher->handle = handle;
 	watcher->watched_events = events;
@@ -758,16 +832,22 @@ PHP_METHOD(Io_Poll_Context, add)
 		RETURN_THROWS();
 	}
 
-	/* Store in our watchers map using shifted pointer as key */
+	/* Store in our watchers map */
 	zval watcher_zv;
 	ZVAL_OBJ(&watcher_zv, &watcher->std);
 	GC_ADDREF(&watcher->std);
-
-	zend_ulong hash_key = php_io_poll_compute_ptr_key(handle);
-	zend_hash_index_add_new(intern->watchers, hash_key, &watcher_zv);
+	zend_hash_index_add_new(intern->watchers, (zend_ulong) fd, &watcher_zv);
 
 	watcher->active = true;
 	watcher->context = intern;
+	watcher->fd = fd;
+
+	if (handle->ops == &php_stream_poll_handle_ops) {
+		php_stream *stream = php_stream_poll_handle_get_stream(handle);
+		if (stream) {
+			php_io_poll_stream_watch(stream, watcher);
+		}
+	}
 }
 
 PHP_METHOD(Io_Poll_Context, wait)

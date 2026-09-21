@@ -250,6 +250,8 @@ struct _php_stream  {
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
 
 	zend_llist *error_list;
+
+	HashTable *poll_watchers; /* Io\Poll watchers notified before the stream is closed */
 }; /* php_stream */
 
 #define PHP_STREAM_CONTEXT(stream) \
