@@ -56,6 +56,9 @@ int fpm_status_export_to_zval(zval *status)
 	int i;
 
 	scoreboard_p = fpm_scoreboard_copy(NULL, 1);
+	if (!scoreboard_p) {
+		return -1;
+	}
 
 	now_epoch = time(NULL);
 	fpm_clock_get(&now);
