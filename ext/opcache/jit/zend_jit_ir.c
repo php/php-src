@@ -212,10 +212,10 @@ static size_t tsrm_tls_offset = -1;
 	(offsetof(zend_tsrm_ls_cache, cg) + offsetof(zend_compiler_globals, field))
 
 # define jit_EG(_field) \
-	ir_ADD_OFFSET(jit_TLS(jit), EG_TLS_OFFSET(_field))
+	jit_TLS_ADDR(jit, EG_TLS_OFFSET(_field))
 
 # define jit_CG(_field) \
-	ir_ADD_OFFSET(jit_TLS(jit), CG_TLS_OFFSET(_field))
+	jit_TLS_ADDR(jit, CG_TLS_OFFSET(_field))
 
 #else
 
@@ -359,6 +359,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
                                        bool       check_exception);
 
 static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags);
+static ir_ref jit_ADD_OFFSET(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset);
 
 static void zend_jit_preserve_parent_regs(zend_jit_ctx *jit,
                                           zend_ssa *ssa,
@@ -499,17 +500,23 @@ static void * ZEND_FASTCALL zend_jit_get_tsrm_ls_cache(void)
 	return &_tsrm_ls_cache;
 }
 
-static ir_ref jit_TLS(zend_jit_ctx *jit)
+static ir_ref jit_TLS_ADDR(zend_jit_ctx *jit, size_t offset)
 {
 	ZEND_ASSERT(jit->ctx.control);
+	if (tsrm_ls_cache_tcb_offset) {
+		return ir_TLS_ADDR(-1, tsrm_ls_cache_tcb_offset + offset);
+	} else if (tsrm_tls_index != -1) {
+		return ir_TLS_ADDR(tsrm_tls_index, tsrm_tls_offset + offset);
+	}
+
 	if (jit->tls) {
-		/* Emit "TLS" once for basic block */
+		/* Reuse the fallback call within a basic block. */
 		ir_insn *insn;
 		ir_ref ref = jit->ctx.control;
 
 		while (1) {
 			if (ref == jit->tls) {
-				return jit->tls;
+				return ir_ADD_OFFSET(jit->tls, offset);
 			}
 			insn = &jit->ctx.ir_base[ref];
 			if (insn->op >= IR_START || insn->op == IR_CALL) {
@@ -519,22 +526,9 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 		}
 	}
 
-	if (tsrm_ls_cache_tcb_offset == 0 && tsrm_tls_index == -1) {
-		jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
-	} else {
-		/* ir_TLS() loads the word stored at _tsrm_ls_cache, so read the "self"
-		 * back-pointer to end up with the address of the cache struct itself.
-		 * The globals live inside it, not behind its first (`cache`) field. */
-		jit->tls = ir_TLS(
-				tsrm_ls_cache_tcb_offset
-					? tsrm_ls_cache_tcb_offset + offsetof(zend_tsrm_ls_cache, self)
-					: tsrm_tls_index,
-				tsrm_ls_cache_tcb_offset
-					? IR_NULL
-					: tsrm_tls_offset + offsetof(zend_tsrm_ls_cache, self));
-	}
+	jit->tls = ir_CALL(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_get_tsrm_ls_cache));
 
-	return jit->tls;
+	return ir_ADD_OFFSET(jit->tls, offset);
 }
 #endif
 
