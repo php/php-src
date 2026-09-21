@@ -53,6 +53,8 @@ PHP                                                                        NEWS
     FCCs and inlining). (ndossche)
   . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a
     loop-invariant addition). (Ilia Alshanetsky)
+  . Fixed OSS-Fuzz #5674034779193344 (Read of uninitialized memory in
+    is_cacheable_stream_path()). (ndossche)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid

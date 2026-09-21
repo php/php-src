@@ -202,10 +202,10 @@ static time_t zend_accel_get_time(void)
 # define zend_accel_get_time() time(NULL)
 #endif
 
-static inline bool is_cacheable_stream_path(const char *filename)
+static inline bool is_cacheable_stream_path(const zend_string *filename)
 {
-	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
-	       memcmp(filename, "phar://", sizeof("phar://") - 1) == 0;
+	return zend_string_starts_with_literal(filename, "file://") ||
+	       zend_string_starts_with_literal(filename, "phar://");
 }
 
 /* O+ overrides PHP chdir() function and remembers the current working directory
@@ -1212,7 +1212,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
 		/* pass */
 	} else if (UNEXPECTED(php_is_stream_path(path))) {
-		if (!is_cacheable_stream_path(path)) {
+		if (!is_cacheable_stream_path(str)) {
 			return NULL;
 		}
 		/* pass */
@@ -1890,7 +1890,7 @@ static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int
 	bool from_memory; /* if the script we've got is stored in SHM */
 
 	if (php_is_stream_path(ZSTR_VAL(file_handle->filename)) &&
-	    !is_cacheable_stream_path(ZSTR_VAL(file_handle->filename))) {
+	    !is_cacheable_stream_path(file_handle->filename)) {
 		return accelerator_orig_compile_file(file_handle, type);
 	}
 
@@ -2048,7 +2048,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				return accelerator_orig_compile_file(file_handle, type);
 			}
 			persistent_script = zend_accel_hash_find(&ZCSG(hash), key);
-		} else if (UNEXPECTED(php_is_stream_path(ZSTR_VAL(file_handle->filename)) && !is_cacheable_stream_path(ZSTR_VAL(file_handle->filename)))) {
+		} else if (UNEXPECTED(php_is_stream_path(ZSTR_VAL(file_handle->filename)) && !is_cacheable_stream_path(file_handle->filename))) {
 			ZCG(cache_opline) = NULL;
 			ZCG(cache_persistent_script) = NULL;
 			return accelerator_orig_compile_file(file_handle, type);
