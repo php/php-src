@@ -1337,7 +1337,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 				context = php_hash_alloc_context(ops);
 				ops->hash_init(context, NULL);
 
-				key = ecalloc(1, times * block_size);
+				key = ecalloc(times, block_size);
 				digest = emalloc(ops->digest_size + 1);
 
 				for (i = 0; i < times; i++) {
