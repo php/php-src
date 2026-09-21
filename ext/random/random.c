@@ -315,32 +315,28 @@ PHPAPI void *php_random_default_status(void)
 }
 /* }}} */
 
-/* this is read-only, so it's ok */
-ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
-
 /* {{{ php_random_bin2hex_le */
-/* stolen from standard/string.c */
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len)
 {
+#ifdef WORDS_BIGENDIAN
 	zend_string *str;
 	size_t i;
 
 	str = zend_string_safe_alloc(len, 2 * sizeof(char), 0, 0);
 
 	i = 0;
-#ifdef WORDS_BIGENDIAN
 	/* force little endian */
 	for (size_t h = len; 0 < h; h--) {
 		size_t j = h-1;
-#else
-	for (size_t j = 0; j < len; j++) {
-#endif
-		ZSTR_VAL(str)[i++] = hexconvtab[((unsigned char *) ptr)[j] >> 4];
-		ZSTR_VAL(str)[i++] = hexconvtab[((unsigned char *) ptr)[j] & 15];
+		zend_bin2hex(ZSTR_VAL(str) + i, (const unsigned char *) ptr + j, 1);
+		i += 2;
 	}
 	ZSTR_VAL(str)[i] = '\0';
 
 	return str;
+#else
+	return zend_bin2hex_str(ptr, len);
+#endif
 }
 /* }}} */
 

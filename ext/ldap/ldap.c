@@ -3884,7 +3884,6 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 
 static zend_string* php_ldap_do_escape(const bool *map, const char *value, size_t valuelen, zend_long flags)
 {
-	char hex[] = "0123456789abcdef";
 	size_t i, p = 0;
 	size_t len = 0;
 	zend_string *ret;
@@ -3917,8 +3916,8 @@ static zend_string* php_ldap_do_escape(const bool *map, const char *value, size_
 
 		if (map[v] || ((flags & PHP_LDAP_ESCAPE_DN) && ((i == 0) || (i + 1 == valuelen)) && (v == ' '))) {
 			ZSTR_VAL(ret)[p++] = '\\';
-			ZSTR_VAL(ret)[p++] = hex[v >> 4];
-			ZSTR_VAL(ret)[p++] = hex[v & 0x0f];
+			zend_bin2hex(ZSTR_VAL(ret) + p, &v, 1);
+			p += 2;
 		} else {
 			ZSTR_VAL(ret)[p++] = v;
 		}

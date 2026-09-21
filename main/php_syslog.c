@@ -56,11 +56,10 @@ PHPAPI void php_syslog_str(int priority, const zend_string* message)
 		} else if ((c < 0x20) && (PG(syslog_filter) == PHP_SYSLOG_FILTER_ALL)) {
 			smart_string_appendc(&sbuf, c);
 		} else {
-			static const char xdigits[] = "0123456789abcdef";
+			char escaped[4] = "\\x";
 
-			smart_string_appendl(&sbuf, "\\x", 2);
-			smart_string_appendc(&sbuf, xdigits[c >> 4]);
-			smart_string_appendc(&sbuf, xdigits[c & 0xf]);
+			zend_bin2hex(escaped + 2, &c, 1);
+			smart_string_appendl(&sbuf, escaped, sizeof(escaped));
 		}
 	}
 

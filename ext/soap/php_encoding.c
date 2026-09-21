@@ -920,8 +920,8 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 		if (c) {
 			err[i-1] = '\\';
 			err[i++] = 'x';
-			err[i++] = ((unsigned char)c >> 4) + ((((unsigned char)c >> 4) > 9) ? ('a' - 10) : '0');
-			err[i++] = (c & 15) + (((c & 15) > 9) ? ('a' - 10) : '0');
+			zend_bin2hex(err + i, (const unsigned char *) &c, 1);
+			i += 2;
 			err[i++] = '.';
 			err[i++] = '.';
 			err[i++] = '.';
