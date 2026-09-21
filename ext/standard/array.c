@@ -7115,37 +7115,40 @@ PHP_FUNCTION(array_map)
 				 * entries from all arrays. */
 				array_init_size(&result, n_arrays);
 
-				for (i = 0; i < n_arrays; i++) {
-					/* If this array still has elements, add the current one to the
-					 * parameter list, otherwise use null value. */
-					uint32_t pos = array_pos[i];
-					if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
-						while (1) {
-							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-								ZVAL_NULL(&zv);
-								break;
-							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
-								ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arPacked[pos]);
-								array_pos[i] = pos + 1;
-								break;
+				zend_hash_real_init_packed(Z_ARRVAL(result));
+				ZEND_HASH_FILL_PACKED(Z_ARRVAL(result)) {
+					for (i = 0; i < n_arrays; i++) {
+						/* If this array still has elements, add the current one to the
+						 * parameter list, otherwise use null value. */
+						uint32_t pos = array_pos[i];
+						if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
+							while (1) {
+								if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
+									ZVAL_NULL(&zv);
+									break;
+								} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
+									ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arPacked[pos]);
+									array_pos[i] = pos + 1;
+									break;
+								}
+								pos++;
 							}
-							pos++;
-						}
-					} else {
-						while (1) {
-							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-								ZVAL_NULL(&zv);
-								break;
-							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-								ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arData[pos].val);
-								array_pos[i] = pos + 1;
-								break;
+						} else {
+							while (1) {
+								if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
+									ZVAL_NULL(&zv);
+									break;
+								} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
+									ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arData[pos].val);
+									array_pos[i] = pos + 1;
+									break;
+								}
+								pos++;
 							}
-							pos++;
 						}
+						ZEND_HASH_FILL_ADD(&zv);
 					}
-					zend_hash_next_index_insert_new(Z_ARRVAL(result), &zv);
-				}
+				} ZEND_HASH_FILL_END();
 
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
 			}
