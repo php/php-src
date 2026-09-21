@@ -2198,9 +2198,12 @@ PHP_METHOD(SplFileObject, setMaxLineLen)
 	if (max_len < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
+	} else if (ZEND_LONG_SIZE_T_OVFL(max_len)) {
+		zend_argument_value_error(1, "must be less than or equal to %zu", SIZE_MAX);
+		RETURN_THROWS();
 	}
 
-	intern->u.file.max_line_len = max_len;
+	intern->u.file.max_line_len = (size_t) max_len;
 } /* }}} */
 
 /* {{{ Get maximum line length */
