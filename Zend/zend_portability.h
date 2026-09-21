@@ -65,6 +65,17 @@
 
 #include <limits.h>
 
+/* Windows defines SIZE_MAX but not SSIZE_MAX */
+#ifdef ZEND_WIN32
+# ifndef SSIZE_MAX
+#  ifdef _WIN64
+#   define SSIZE_MAX _I64_MAX
+#  else
+#   define SSIZE_MAX INT_MAX
+#  endif
+# endif
+#endif
+
 #if defined(ZEND_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
