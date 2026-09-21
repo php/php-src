@@ -29,6 +29,28 @@ foreach ($lengths as $len) {
     }
 }
 
+// Dedicated regression cases for the early-exit in php_hex2bin_simd_chunk's
+// per-half loop
+$prefix = str_repeat('0123456789abcdef', 4); // 64 valid hex chars, unrelated leading chunk
+$validChunk32 = str_repeat('0123456789abcdef', 2); // exactly one 32-byte SIMD chunk
+$suffix = str_repeat('abcdef0123456789', 4); // 64 more valid hex chars after
+
+// Invalid byte at position 5 -> falls in the FIRST half (offsets 0-15) of the chunk.
+$chunk = $validChunk32;
+$chunk[5] = 'z';
+$s = $prefix . $chunk . $suffix;
+if (@hex2bin($s) !== false) {
+    echo "FAIL: invalid byte in first half (pos 5) was not rejected\n";
+}
+
+// Invalid byte at position 20 -> falls in the SECOND half (offsets 16-31) of the chunk.
+$chunk = $validChunk32;
+$chunk[20] = 'z';
+$s = $prefix . $chunk . $suffix;
+if (@hex2bin($s) !== false) {
+    echo "FAIL: invalid byte in second half (pos 20) was not rejected\n";
+}
+
 // Invalid byte at every offset 0..63 relative to the 32-byte SIMD chunk
 // boundary (two full SIMD chunks), across a few different bad-byte classes.
 $valid64 = str_repeat('0123456789abcdef', 4);

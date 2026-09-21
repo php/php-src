@@ -78,6 +78,8 @@ static zend_never_inline void zend_bin2hex_simd(char *out, const unsigned char *
 		__m128i hi_nib = _mm_and_si128(_mm_srli_epi16(v, 4), nibble_mask);
 		__m128i lo_nib = _mm_and_si128(v, nibble_mask);
 
+		/* Signed cmpgt is safe here: every threshold is < 0x80, so bytes >= 0x80
+		   compare as negative and correctly fail every range test. */
 		__m128i hi_hex = _mm_add_epi8(_mm_add_epi8(hi_nib, zero_digit),
 			_mm_and_si128(_mm_cmpgt_epi8(hi_nib, nine), alpha_offset));
 		__m128i lo_hex = _mm_add_epi8(_mm_add_epi8(lo_nib, zero_digit),

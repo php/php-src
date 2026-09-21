@@ -59,9 +59,9 @@ static zend_never_inline bool php_hex2bin_simd_chunk(unsigned char *out16, const
 	const __m128i hi_bound_upper = _mm_set1_epi8(0x47); /* 'F' + 1 */
 	const __m128i lo_bound_lower = _mm_set1_epi8(0x60); /* 'a' - 1 */
 	const __m128i hi_bound_lower = _mm_set1_epi8(0x67); /* 'f' + 1 */
-	const __m128i digit_base = _mm_set1_epi8('0');
-	const __m128i upper_base = _mm_set1_epi8('A' - 10);
-	const __m128i lower_base = _mm_set1_epi8('a' - 10);
+	const __m128i letter_bit_mask = _mm_set1_epi8(0x40); /* set in 'A'-'F' and 'a'-'f', clear in '0'-'9' */
+	const __m128i low_nibble_mask = _mm_set1_epi8(0x0f);
+	const __m128i letter_nib_offset = _mm_set1_epi8(9);
 	const __m128i word_lo_mask = _mm_set1_epi16(0x00ff);
 	const __m128i nibble_hi_mask = _mm_set1_epi8((char) 0xf0);
 	const __m128i zero = _mm_setzero_si128();
@@ -71,6 +71,8 @@ static zend_never_inline bool php_hex2bin_simd_chunk(unsigned char *out16, const
 	for (int half = 0; half < 2; half++) {
 		__m128i c = _mm_loadu_si128((const __m128i *) (in32 + half * sizeof(__m128i)));
 
+		/* Signed cmpgt is safe here: every threshold is < 0x80, so bytes >= 0x80
+		   compare as negative and correctly fail every range test. */
 		__m128i is_digit = _mm_and_si128(_mm_cmpgt_epi8(c, lo_bound_digit), _mm_cmpgt_epi8(hi_bound_digit, c));
 		__m128i is_upper = _mm_and_si128(_mm_cmpgt_epi8(c, lo_bound_upper), _mm_cmpgt_epi8(hi_bound_upper, c));
 		__m128i is_lower = _mm_and_si128(_mm_cmpgt_epi8(c, lo_bound_lower), _mm_cmpgt_epi8(hi_bound_lower, c));
@@ -78,12 +80,11 @@ static zend_never_inline bool php_hex2bin_simd_chunk(unsigned char *out16, const
 
 		if (_mm_movemask_epi8(valid) != 0xffff) {
 			chunk_valid = false;
+			break;
 		}
 
-		__m128i nib_digit = _mm_and_si128(is_digit, _mm_sub_epi8(c, digit_base));
-		__m128i nib_upper = _mm_and_si128(is_upper, _mm_sub_epi8(c, upper_base));
-		__m128i nib_lower = _mm_and_si128(is_lower, _mm_sub_epi8(c, lower_base));
-		__m128i nib = _mm_or_si128(_mm_or_si128(nib_digit, nib_upper), nib_lower);
+		__m128i is_letter = _mm_cmpeq_epi8(_mm_and_si128(c, letter_bit_mask), letter_bit_mask);
+		__m128i nib = _mm_add_epi8(_mm_and_si128(c, low_nibble_mask), _mm_and_si128(is_letter, letter_nib_offset));
 
 		__m128i hi_src = _mm_and_si128(nib, word_lo_mask);
 		__m128i lo_src = _mm_srli_epi16(nib, 8);
