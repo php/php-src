@@ -61,8 +61,8 @@ it may have been freed if you were its last user.
  API
 *****
 
-The string API is defined in ``Zend/zend_string.h``. It contains creation, resizing, comparison,
-hashing, and interning helpers.
+The string API is defined in ``Zend/zend_string.h``. It provides functions for creating, resizing,
+comparing, hashing and interning strings.
 
 .. list-table:: Creation and allocation APIs
    :header-rows: 1
@@ -84,7 +84,7 @@ hashing, and interning helpers.
       -  Allocates a new string of length ``l`` without initializing its contents.
 
    -  -  ``zend_string_safe_alloc(n, m, l, p)``
-      -  Allocates ``n * m + l`` bytes of payload with overflow checks.
+      -  Allocates a string of length ``n * m + l`` with overflow checks.
 
    -  -  ``zend_string_concat2(s1, l1, s2, l2)``
       -  Creates a non-persistent string by concatenating two character buffers.
@@ -104,11 +104,8 @@ hashing, and interning helpers.
          ``"class"``. See ``ZEND_KNOWN_STRINGS`` in ``Zend/zend_string.h``. This does not allocate
          memory.
 
-   -  -  ``ZSTR_MAX_OVERHEAD``
-      -  Maximum allocator/header overhead used by ``zend_string``.
-
    -  -  ``ZSTR_MAX_LEN``
-      -  Maximum representable payload length for a ``zend_string``.
+      -  Maximum representable length for a ``zend_string``.
 
 .. list-table:: Resizing and copy-on-write APIs
    :header-rows: 1
@@ -120,11 +117,11 @@ hashing, and interning helpers.
 
       -  Changes the size of the string. If the string has a reference count greater than 1 or if
          the string is interned, a new string is created. You must always use the return value of
-         this function, as the original array may have been moved to a new location in memory.
+         this function, as the original string may have been moved to a new location in memory.
 
    -  -  ``zend_string_safe_realloc(s, n, m, l, p)``
-      -  Resizes a string to ``n * m + l`` bytes with overflow checks. Allocates a string of length
-         ``n * m + l``. This function is commonly useful for encoding changes.
+      -  Resizes a string to length ``n * m + l`` with overflow checks. This function is commonly
+         useful for encoding changes.
 
    -  -  ``zend_string_extend(s, l, p)``
       -  Extends a string to a larger length (``l >= ZSTR_LEN(s)``).
@@ -142,8 +139,8 @@ hashing, and interning helpers.
 
 .. [#persistent]
 
-   ``s`` = ``zend_string``, ``l`` = ``length``, ``p`` = ``persistent``, ``n * m + l`` = checked size
-   expression used for safe allocation/reallocation.
+   ``s`` = ``zend_string``, ``l`` = ``length``, ``p`` = ``persistent``, ``n`` and ``m`` = checked size
+   operands used for safe allocation/reallocation.
 
 As per php-src fashion, you are not supposed to access the ``zend_string`` fields directly. Instead,
 use the following macros. There are macros for both ``zend_string`` and ``zvals`` known to contain
@@ -182,7 +179,7 @@ strings.
    -  -  ``ZSTR_IS_VALID_UTF8(s)``
       -  Checks whether a string has the ``IS_STR_VALID_UTF8`` flag set.
 
-.. list-table:: Reference counting and lifetime APIs
+.. list-table:: Reference counting APIs
    :header-rows: 1
 
    -  -  Function/Macro [#persistent]_
@@ -192,35 +189,31 @@ strings.
       -  Increases the reference count and returns the same string. The reference count is not
          increased if the string is interned.
 
-   -  -  ``zend_string_refcount(s)``
-      -  Returns the reference count. Interned strings always report ``1``.
-
    -  -  ``zend_string_addref(s)``
 
-      -  Increments the reference count of a non-interned string. the function that is used most
-         often by far is zend_string_copy(). This function not only increments the refcount, but
-         also returns the original string. This makes code more readable in practice.
+      -  Increments the reference count of a non-interned string. In most code, prefer
+         ``zend_string_copy()``, which increments the reference count and returns the original
+         string.
 
    -  -  ``zend_string_delref(s)``
-      -  Decrements the reference count of a non-interned string.
+      -  Decrements the reference count of a non-interned string. Use this only when you are certain
+         the reference count is greater than 1; otherwise use ``zend_string_release()``.
 
    -  -  ``zend_string_release(s)``
       -  Decreases the reference count and frees the string if it goes to 0.
 
    -  -  ``zend_string_release_ex(s, p)``
+
       -  Like ``zend_string_release()``, but allows you to specify whether the passed string is
-         persistent or non-persistent. If it is persistent, ``p`` should be ``0``.
+         persistent or non-persistent. Pass ``true`` for persistent strings and ``false`` for
+         non-persistent strings.
 
    -  -  ``zend_string_free(s)``
-
-      -  Frees a non-interned string directly. The caller must ensure it is no longer shared.
-         Requires refcount 1 or immutable.You should avoid using these functions, as it is easy to
-         introduce critical bugs when some API changes from returning new strings to reusing
-         existing ones.
+      -  Frees a string directly if it is not interned. Requires refcount 1 or an interned string.
+         Prefer ``zend_string_release()`` unless ownership is certain.
 
    -  -  ``zend_string_efree(s)``
-      -  Similar to ``zend_string_free``. Frees a non-persistent, non-interned string with
-         ``efree``. Requires refcount 1 and not immutable.
+      -  Frees a non-persistent, non-interned string directly with ``efree``. Requires refcount 1.
 
 There are various functions to compare strings.
 
@@ -229,30 +222,44 @@ There are various functions to compare strings.
 
    -  -  Function/Macro
       -  Description
+
    -  -  ``zend_string_equals(s1, s2)``
       -  Full equality check for two ``zend_string`` values.
+
    -  -  ``zend_string_equal_content(s1, s2)``
-      -  Full equality check assuming both arguments are ``zend_string`` pointers.
+      -  Full equality check without the pointer equality fast path used by
+         ``zend_string_equals()``.
+
    -  -  ``zend_string_equal_val(s1, s2)``
-      -  Compares only the string payload bytes (caller must ensure equal lengths).
+      -  Compares only the string bytes (caller must ensure equal lengths).
+
    -  -  ``zend_string_equals_cstr(s1, s2, l2)``
       -  Compares a ``zend_string`` with a ``char*`` buffer and explicit length.
+
    -  -  ``zend_string_equals_ci(s1, s2)``
       -  Case-insensitive full equality check.
+
    -  -  ``zend_string_equals_literal(str, literal)``
       -  Equality check against a string literal with compile-time literal length.
+
    -  -  ``zend_string_equals_literal_ci(str, literal)``
       -  Case-insensitive literal equality check.
+
    -  -  ``zend_string_starts_with(str, prefix)``
       -  Checks whether ``str`` begins with ``prefix``.
+
    -  -  ``zend_string_starts_with_cstr(str, prefix, prefix_length)``
       -  Prefix check against a ``char*`` buffer and explicit length.
+
    -  -  ``zend_string_starts_with_ci(str, prefix)``
       -  Case-insensitive prefix check for two ``zend_string`` values.
+
    -  -  ``zend_string_starts_with_cstr_ci(str, prefix, prefix_length)``
       -  Case-insensitive prefix check against a ``char*`` buffer.
+
    -  -  ``zend_string_starts_with_literal(str, prefix)``
       -  Prefix check against a string literal.
+
    -  -  ``zend_string_starts_with_literal_ci(str, prefix)``
       -  Case-insensitive prefix check against a string literal.
 
@@ -349,9 +356,9 @@ this is delayed until the script is persisted to shared memory. This means that
 ``zend_new_interned_string`` may not actually return an interned string if opcache is enabled.
 Usually you don't have to worry about this.
 
-Also, here are some API helpers that might be useful in stack allocation.
+The following macros are useful for stack allocation.
 
-.. list-table:: Stack allocation helper macros
+.. list-table:: Stack allocation macros
    :header-rows: 1
 
    -  -  Macro
