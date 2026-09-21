@@ -1033,12 +1033,14 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_into_excep
 	}
 }
 
-ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_and_throw(const lxb_status_t status, const char *component, zval *errors)
+ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_reference_errors_and_throw(
+	const lxb_status_t status, const char *component, zval *errors
+)
 {
 	if (status != LXB_STATUS_OK) {
 		throw_invalid_url_exception_during_write(NULL, component);
 	} else {
-		php_uri_parser_whatwg_build_errors(errors);
+		php_uri_parser_whatwg_build_reference_errors(errors);
 	}
 }
 
@@ -1182,7 +1184,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		lxb_url_parser_clean(&lexbor_parser);
 		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
 			(const lxb_char_t *) ZSTR_VAL(input), ZSTR_LEN(input), state, LXB_ENCODING_UTF_8);
-		php_uri_parser_whatwg_build_errors_and_throw(status, "path", &errors);
+		php_uri_parser_whatwg_build_reference_errors_and_throw(status, "path", &errors);
 		zend_string_release(input);
 		if (status != LXB_STATUS_OK) {
 			goto failure;
@@ -1199,7 +1201,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 			(lxb_char_t *) Z_STRVAL_P(query), Z_STRLEN_P(query),
 			LXB_URL_STATE_QUERY_STATE, LXB_ENCODING_AUTO
 		);
-		php_uri_parser_whatwg_build_errors_and_throw(status, "query", &errors);
+		php_uri_parser_whatwg_build_reference_errors_and_throw(status, "query", &errors);
 		if (status != LXB_STATUS_OK) {
 			goto failure;
 		}
@@ -1212,7 +1214,7 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 			(lxb_char_t *) Z_STRVAL_P(fragment), Z_STRLEN_P(fragment),
 			LXB_URL_STATE_FRAGMENT_STATE, LXB_ENCODING_AUTO
 		);
-		php_uri_parser_whatwg_build_errors_and_throw(status, "fragment", &errors);
+		php_uri_parser_whatwg_build_reference_errors_and_throw(status, "fragment", &errors);
 		if (status != LXB_STATUS_OK) {
 			goto failure;
 		}
