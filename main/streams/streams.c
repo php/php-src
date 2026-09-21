@@ -28,6 +28,7 @@
 #include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include "ext/uri/php_uri.h"
+#include "ext/standard/io_poll.h"
 #include <stddef.h>
 #include <fcntl.h>
 #include "php_streams_int.h"
@@ -371,6 +372,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			return ret;
 		}
 
+		/* Watchers must unregister while the fd is still open */
+		if (stream->poll_watchers) {
+			php_io_poll_stream_notify_close(stream);
+		}
+
 		ret = stream->ops->close(stream, preserve_handle ? 0 : 1);
 		if (!ret) {
 			ret = flush_result;
@@ -386,6 +392,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 	}
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
+		if (stream->poll_watchers) {
+			php_io_poll_stream_notify_close(stream);
+		}
+
 		while (stream->readfilters.head) {
 			if (stream->readfilters.head->res != NULL) {
 				zend_list_close(stream->readfilters.head->res);
