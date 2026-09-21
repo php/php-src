@@ -71,10 +71,13 @@
 # define ZEND_SIZE_T_UINT_OVFL(size) (0)
 #endif
 
-/* zend_long vs size_t checks. */
+/* zend_long vs (signed) size_t checks. */
 #if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
 # define ZEND_SIZE_T_ZEND_LONG_OVFL(size) (0)
 # define ZEND_LONG_SIZE_T_OVFL(zlong) UNEXPECTED((zlong) > (zend_long)SIZE_MAX)
+# define ZEND_LONG_SSIZE_T_OVFL(zlong) UNEXPECTED((zlong) > (zend_long)SSIZE_MAX)
+# define ZEND_LONG_SSIZE_T_UDFL(zlong) UNEXPECTED((zlong) < (zend_long)(-SSIZE_MAX - 1))
+# define ZEND_LONG_EXCEEDS_SSIZE_T(zlong) UNEXPECTED((zlong) < (zend_long)(-SSIZE_MAX - 1) || (zlong) > (zend_long)SSIZE_MAX)
 
 # define ZEND_SIZE_T_GT_ZEND_LONG(size, zlong) ((zlong) < 0 || ((zlong) < SIZE_MAX && (size) > (size_t)(zlong)))
 # define ZEND_SIZE_T_GT_ZEND_ULONG(size, zulong) ((zulong) < SIZE_MAX && (size) > (size_t)(zulong))
@@ -87,6 +90,9 @@
 #else
 # define ZEND_SIZE_T_ZEND_LONG_OVFL(size) UNEXPECTED((size) > (size_t)ZEND_LONG_MAX)
 # define ZEND_LONG_SIZE_T_OVFL(zlong) (0)
+# define ZEND_LONG_SSIZE_T_OVFL(zlong) (0)
+# define ZEND_LONG_SSIZE_T_UDFL(zlong) (0)
+# define ZEND_LONG_EXCEEDS_SSIZE_T(zlong) (0)
 
 # define ZEND_SIZE_T_GT_ZEND_LONG(size, zlong) ((zlong) < 0 || (size) > (size_t)(zlong))
 # define ZEND_SIZE_T_GT_ZEND_ULONG(size, zulong) ((size) > (size_t)(zulong))
