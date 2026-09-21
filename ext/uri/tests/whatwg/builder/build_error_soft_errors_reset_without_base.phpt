@@ -3,6 +3,14 @@ Test Uri\WhatWg\UrlBuilder::build() - error - clears soft errors when an excepti
 --FILE--
 <?php
 
+$referenceErrors = [];
+
+try {
+    new Uri\WhatWg\Url("ht\ttps://");
+} catch (Throwable $e) {
+    $referenceErrors = $e->errors;
+}
+
 $builder = new Uri\WhatWg\UrlBuilder();
 $builder->setScheme("ht\ttps");
 $builder->setHost(null);
@@ -13,6 +21,10 @@ try {
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), "\n";
     var_dump($e->errors);
+    var_dump(
+        array_map(static fn($error) => $error->type, $e->errors)
+        === array_map(static fn($error) => $error->type, $referenceErrors)
+    );
 }
 
 var_dump($softErrors);
@@ -24,21 +36,22 @@ array(2) {
   [0]=>
   object(Uri\WhatWg\UrlValidationError)#%d (%d) {
     ["context"]=>
-    string(4) "	tps"
-    ["type"]=>
-    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
-    ["failure"]=>
-    bool(false)
-  }
-  [1]=>
-  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
-    ["context"]=>
     string(0) ""
     ["type"]=>
     enum(Uri\WhatWg\UrlValidationErrorType::HostMissing)
     ["failure"]=>
     bool(true)
   }
+  [1]=>
+  object(Uri\WhatWg\UrlValidationError)#%d (%d) {
+    ["context"]=>
+    string(4) "	tps"
+    ["type"]=>
+    enum(Uri\WhatWg\UrlValidationErrorType::InvalidUrlUnit)
+    ["failure"]=>
+    bool(false)
+  }
 }
+bool(true)
 array(0) {
 }
