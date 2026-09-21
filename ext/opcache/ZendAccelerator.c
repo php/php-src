@@ -2974,6 +2974,9 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 		ZCG(counted) = false;
 	}
 
+	bool restarted = false;
+	zend_accel_restart_reason restart_reason = ACCEL_RESTART_OOM;
+
 	if (ZCSG(restart_pending)) {
 		zend_shared_alloc_lock();
 		if (ZCSG(restart_pending)) { /* check again, to ensure that the cache wasn't already cleaned by another process */
@@ -3019,6 +3022,9 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 					ZCSG(last_restart_time)++;
 				}
 				accel_restart_leave();
+
+				restarted = true;
+				restart_reason = ZCSG(restart_reason);
 			}
 		}
 		zend_shared_alloc_unlock();
@@ -3028,6 +3034,11 @@ ZEND_RINIT_FUNCTION(zend_accelerator)
 
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
+
+	/* Called once the SHM lock is released and the memory is protected again */
+	if (UNEXPECTED(restarted) && zend_accel_restart_hook) {
+		zend_accel_restart_hook(restart_reason);
+	}
 
 	if (ZCG(accelerator_enabled) && ZCSG(last_restart_time) != ZCG(last_restart_time)) {
 		/* SHM was reinitialized. */
