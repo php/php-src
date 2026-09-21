@@ -52,6 +52,10 @@ PHP                                                                        NEWS
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)
 
+- SPL:
+  . Fixed SplFixedArray::setSize() doing nothing on subclasses whose
+    constructor does not call parent::__construct(). (Marc Bennewitz)
+
 - SQLite:
   . Fixed a crash when SQLite3::close() is called from a userland callback.
     (Ilia Alshanetsky)

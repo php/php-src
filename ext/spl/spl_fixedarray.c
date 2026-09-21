@@ -285,6 +285,9 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	if (orig && clone_orig) {
 		spl_fixedarray_object *other = spl_fixed_array_from_obj(orig);
 		spl_fixedarray_copy_ctor(&intern->array, &other->array);
+	} else {
+		/* The zeroed struct would mean "resizing"; set the sentinel. */
+		spl_fixedarray_default_ctor(&intern->array);
 	}
 
 	while (parent) {
