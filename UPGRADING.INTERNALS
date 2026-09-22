@@ -18,6 +18,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
+- Unix build system changes:
+  . Autoconf minimum required version upgraded to 2.71.
+
 ========================
 3. Module changes
 ========================
