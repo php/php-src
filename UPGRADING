@@ -1071,11 +1071,12 @@ PHP 8.6 UPGRADE NOTES
     to OpenSSL 4.
 
 - Standard:
-  . stream_select() no longer caps the number of sockets at FD_SETSIZE; the
-    winsock fd_set now grows on demand, so socket-heavy code (event loops,
-    servers) behaves like it does on POSIX. Selecting on more than 64 pipe or
-    file handles no longer crashes the process; it fails with a warning instead,
-    as that path is still bounded by the WaitForMultipleObjects() limit.
+  . stream_select() no longer fails once a watched descriptor exceeds
+    FD_SETSIZE. The descriptor set now grows on demand on both POSIX (bitset)
+    and Windows (winsock fd_set), so code watching many streams works without
+    rebuilding PHP with --enable-fd-setsize. On Windows, selecting on more than
+    64 pipe or file handles no longer crashes; it fails with a warning, as that
+    path remains bounded by WaitForMultipleObjects().
 
 ========================================
 13. Other Changes
