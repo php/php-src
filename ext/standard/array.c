@@ -7102,33 +7102,92 @@ PHP_FUNCTION(array_map)
 			}
 		}
 
+		if (!maxlen) {
+			RETURN_EMPTY_ARRAY();
+		}
+
 		array_init_size(return_value, maxlen);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
-		if (!ZEND_FCI_INITIALIZED(fci)) {
-			uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
-			zval zv = {0};
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			if (!ZEND_FCI_INITIALIZED(fci)) {
+				uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
+				zval zv;
 
-			/* We iterate through all the arrays at once. */
-			for (k = 0; k < maxlen; k++) {
+				/* We iterate through all the arrays at once. */
+				for (k = 0; k < maxlen; k++) {
 
-				/* If no callback, the result will be an array, consisting of current
-				 * entries from all arrays. */
-				array_init_size(&result, n_arrays);
+					/* If no callback, the result will be an array, consisting of current
+					 * entries from all arrays. */
+					array_init_size(&result, n_arrays);
 
-				zend_hash_real_init_packed(Z_ARRVAL(result));
-				ZEND_HASH_FILL_PACKED(Z_ARRVAL(result)) {
+					zend_hash_real_init_packed(Z_ARRVAL(result));
+					ZEND_HASH_FILL_PACKED(Z_ARRVAL(result)) {
+						for (i = 0; i < n_arrays; i++) {
+							/* If this array still has elements, add the current one to the
+							 * parameter list, otherwise use null value. */
+							uint32_t pos = array_pos[i];
+							if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
+								while (1) {
+									if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
+										ZEND_HASH_FILL_SET_NULL();
+										break;
+									} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
+										ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arPacked[pos]);
+										ZEND_HASH_FILL_SET(&zv);
+										array_pos[i] = pos + 1;
+										break;
+									}
+									pos++;
+								}
+							} else {
+								while (1) {
+									if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
+										ZEND_HASH_FILL_SET_NULL();
+										break;
+									} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
+										ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arData[pos].val);
+										ZEND_HASH_FILL_SET(&zv);
+										array_pos[i] = pos + 1;
+										break;
+									}
+									pos++;
+								}
+							}
+							ZEND_HASH_FILL_NEXT();
+						}
+					} ZEND_HASH_FILL_END();
+
+					ZEND_HASH_FILL_ADD(&result);
+				}
+
+				efree(array_pos);
+			} else {
+				zval *params = (zval *)safe_emalloc(n_arrays, sizeof(zval), 0);
+
+				/* Remember next starting point in the array, initialize those as zeros. */
+				for (i = 0; i < n_arrays; i++) {
+					Z_EXTRA(params[i]) = 0;
+				}
+
+				fci.retval = &result;
+				fci.param_count = n_arrays;
+				fci.params = params;
+
+				/* We iterate through all the arrays at once. */
+				for (k = 0; k < maxlen; k++) {
 					for (i = 0; i < n_arrays; i++) {
 						/* If this array still has elements, add the current one to the
 						 * parameter list, otherwise use null value. */
-						uint32_t pos = array_pos[i];
+						uint32_t pos = Z_EXTRA(params[i]);
 						if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
 							while (1) {
 								if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-									ZVAL_NULL(&zv);
+									ZVAL_NULL(&params[i]);
 									break;
 								} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
-									ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arPacked[pos]);
-									array_pos[i] = pos + 1;
+									ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
+									Z_EXTRA(params[i]) = pos + 1;
 									break;
 								}
 								pos++;
@@ -7136,83 +7195,34 @@ PHP_FUNCTION(array_map)
 						} else {
 							while (1) {
 								if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-									ZVAL_NULL(&zv);
+									ZVAL_NULL(&params[i]);
 									break;
 								} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-									ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arData[pos].val);
-									array_pos[i] = pos + 1;
+									ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
+									Z_EXTRA(params[i]) = pos + 1;
 									break;
 								}
 								pos++;
 							}
 						}
-						ZEND_HASH_FILL_ADD(&zv);
 					}
-				} ZEND_HASH_FILL_END();
 
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
-			}
+					zend_result ret = zend_call_function(&fci, &fci_cache);
+					ZEND_ASSERT(ret == SUCCESS);
+					ZEND_IGNORE_VALUE(ret);
 
-			efree(array_pos);
-		} else {
-			zval *params = (zval *)safe_emalloc(n_arrays, sizeof(zval), 0);
-
-			/* Remember next starting point in the array, initialize those as zeros. */
-			for (i = 0; i < n_arrays; i++) {
-				Z_EXTRA(params[i]) = 0;
-			}
-
-			fci.retval = &result;
-			fci.param_count = n_arrays;
-			fci.params = params;
-
-			/* We iterate through all the arrays at once. */
-			for (k = 0; k < maxlen; k++) {
-				for (i = 0; i < n_arrays; i++) {
-					/* If this array still has elements, add the current one to the
-					 * parameter list, otherwise use null value. */
-					uint32_t pos = Z_EXTRA(params[i]);
-					if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
-						while (1) {
-							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-								ZVAL_NULL(&params[i]);
-								break;
-							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
-								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
-								Z_EXTRA(params[i]) = pos + 1;
-								break;
-							}
-							pos++;
-						}
-					} else {
-						while (1) {
-							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-								ZVAL_NULL(&params[i]);
-								break;
-							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
-								Z_EXTRA(params[i]) = pos + 1;
-								break;
-							}
-							pos++;
-						}
+					if (Z_TYPE(result) == IS_UNDEF) {
+						ZEND_HASH_FILL_FINISH();
+						efree(params);
+						RETURN_THROWS();
 					}
+
+					ZEND_HASH_FILL_ADD(&result);
 				}
 
-				zend_result ret = zend_call_function(&fci, &fci_cache);
-				ZEND_ASSERT(ret == SUCCESS);
-				ZEND_IGNORE_VALUE(ret);
-
-				if (Z_TYPE(result) == IS_UNDEF) {
-					efree(params);
-					RETURN_THROWS();
-				}
-
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
+				efree(params);
 			}
-
-			efree(params);
-		}
+		} ZEND_HASH_FILL_END();
 	}
 }
 /* }}} */
