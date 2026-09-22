@@ -299,12 +299,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 		/* if you prepare and then execute passing an array of params keyed by names,
 		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
-			/* Should this always be an Error? */
-			char *tmp;
-			/* TODO Error? */
-			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", ZSTR_VAL(param->name));
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp);
-			efree(tmp);
+			zend_argument_value_error(1, "must refer to a column present in the result set");
 			return false;
 		}
 	}
