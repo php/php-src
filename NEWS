@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-23764 (Built-in server leaks a file descriptor on every HEAD
     request for a static file). (jakubskopal)
 
+- Standard:
+  . Fixed bug GH-23780 (unserialize('') fails silently). (timwolla)
+
 24 Sep 2026, PHP 8.6.0RC1
 
 - Core:
