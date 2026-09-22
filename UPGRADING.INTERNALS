@@ -236,6 +236,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     "INF" and "NAN" fail, while leading-numeric strings emit E_WARNING. When
     *failed is true, the returned value must not be used and an exception may
     already be pending. Passing an IS_UNDEF zval is a caller error.
+  . Added the zend_accel_restart_hook callback, which OPcache calls once a
+    scheduled restart has been carried out, on the thread that carried it out,
+    with the same reason as the zend_accel_schedule_restart_hook callback.
 
 ========================
 2. Build system changes
