@@ -404,6 +404,8 @@ PHP                                                                        NEWS
     parent slot when a child class hooks an inherited property. (iliaal)
   . Fixed segfault in ReflectionMethod::createFromMethodName() on an
     uninstantiable subclass. (iliaal)
+  . Fixed bug GH-23842 (ReflectionProperty::skipLazyInitialization() copies
+    invalid constant defaults with OPcache). (DirkTrunkstar, Lazizbek Ergashev)
 
 - Readline:
   . Fixed class constant completion in the interactive shell. (Weilin Du)
