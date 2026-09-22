@@ -952,7 +952,6 @@ feature development that cannot go into the new version.
      `Zend/zend.h`, and `win32/build/confutils.js`;
    * update the API version numbers in `Zend/zend_extensions.h`,
      `Zend/zend_modules.h`, and `main/php.h`; and
-   * add the new branch to the list in `CONTRIBUTING.md`.
 
    See [Prepare for PHP 8.2][] and [Prepare for PHP 8.2 (bis)][] for an example
    of what this commit should include.
