@@ -11,7 +11,7 @@ $formatter = new IntlRelativeDateTimeFormatter('en_US');
 printRelativeDateTimeTable(
     $formatter,
     offsets: [-INF, INF, NAN],
-    units: ['second' => IntlRelativeDateTimeFormatter::UNIT_SECOND],
+    units: ['second' => IntlRelativeDateTimeFormatterUnit::Second],
 );
 
 var_dump($formatter->getErrorCode());

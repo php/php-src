@@ -6,33 +6,33 @@ intl
 <?php
 
 $french = new IntlRelativeDateTimeFormatter('fr_FR');
-echo $french->formatNumeric(-1, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $french->formatNumeric(1.5, IntlRelativeDateTimeFormatter::UNIT_HOUR), "\n";
+echo $french->formatNumeric(-1, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $french->formatNumeric(1.5, IntlRelativeDateTimeFormatterUnit::Hour), "\n";
 
 $chinese = new IntlRelativeDateTimeFormatter('zh_CN');
-echo $chinese->formatNumeric(3, IntlRelativeDateTimeFormatter::UNIT_MONTH), "\n";
+echo $chinese->formatNumeric(3, IntlRelativeDateTimeFormatterUnit::Month), "\n";
 
 $beginning = new IntlRelativeDateTimeFormatter(
     'en_US',
-    IntlRelativeDateTimeFormatter::STYLE_LONG,
-    IntlRelativeDateTimeFormatter::CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE,
+    IntlRelativeDateTimeFormatterStyle::Long,
+    IntlRelativeDateTimeFormatterCapitalization::BeginningOfSentence,
 );
-echo $beginning->format(-1, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
+echo $beginning->format(-1, IntlRelativeDateTimeFormatterUnit::Day), "\n";
 
 $short = new IntlRelativeDateTimeFormatter(
     'en_US',
-    IntlRelativeDateTimeFormatter::STYLE_SHORT,
+    IntlRelativeDateTimeFormatterStyle::Short,
 );
 $narrow = new IntlRelativeDateTimeFormatter(
     'en_US',
-    IntlRelativeDateTimeFormatter::STYLE_NARROW,
+    IntlRelativeDateTimeFormatterStyle::Narrow,
 );
-echo $short->formatNumeric(3, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $narrow->formatNumeric(3, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
+echo $short->formatNumeric(3, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $narrow->formatNumeric(3, IntlRelativeDateTimeFormatterUnit::Day), "\n";
 
 Locale::setDefault('en_US');
 $defaultLocale = new IntlRelativeDateTimeFormatter();
-echo $defaultLocale->format(1, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
+echo $defaultLocale->format(1, IntlRelativeDateTimeFormatterUnit::Day), "\n";
 
 ?>
 --EXPECT--

@@ -7,18 +7,18 @@ intl
 
 $formatter = new IntlRelativeDateTimeFormatter('en_US');
 
-echo $formatter->format(-1, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $formatter->format(0, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $formatter->format(1, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $formatter->format(-1, IntlRelativeDateTimeFormatter::UNIT_WEEK), "\n";
-echo $formatter->format(2, IntlRelativeDateTimeFormatter::UNIT_WEEK), "\n";
-echo $formatter->format(-1, IntlRelativeDateTimeFormatter::UNIT_SUNDAY), "\n";
+echo $formatter->format(-1, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $formatter->format(0, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $formatter->format(1, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $formatter->format(-1, IntlRelativeDateTimeFormatterUnit::Week), "\n";
+echo $formatter->format(2, IntlRelativeDateTimeFormatterUnit::Week), "\n";
+echo $formatter->format(-1, IntlRelativeDateTimeFormatterUnit::Sunday), "\n";
 
-echo $formatter->formatNumeric(-1, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $formatter->formatNumeric(1, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $formatter->formatNumeric(1.5, IntlRelativeDateTimeFormatter::UNIT_HOUR), "\n";
+echo $formatter->formatNumeric(-1, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $formatter->formatNumeric(1, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $formatter->formatNumeric(1.5, IntlRelativeDateTimeFormatterUnit::Hour), "\n";
 
-$relativeDate = $formatter->format(-1, IntlRelativeDateTimeFormatter::UNIT_DAY);
+$relativeDate = $formatter->format(-1, IntlRelativeDateTimeFormatterUnit::Day);
 echo $formatter->combineDateAndTime($relativeDate, '3:45 PM'), "\n";
 
 var_dump($formatter->getErrorCode());

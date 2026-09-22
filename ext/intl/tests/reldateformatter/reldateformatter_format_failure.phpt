@@ -18,7 +18,7 @@ function createFailingFormatter(): IntlRelativeDateTimeFormatter
 foreach (['format', 'formatNumeric'] as $method) {
     $formatter = createFailingFormatter();
 
-    var_dump($formatter->$method(1, IntlRelativeDateTimeFormatter::UNIT_SECOND));
+    var_dump($formatter->$method(1, IntlRelativeDateTimeFormatterUnit::Second));
     var_dump($formatter->getErrorCode() !== U_ZERO_ERROR);
     var_dump(intl_get_error_code() === $formatter->getErrorCode());
 }

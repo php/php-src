@@ -14,6 +14,7 @@
 
 extern "C" {
 #include "php.h"
+#include "zend_enum.h"
 #include "zend_exceptions.h"
 }
 
@@ -36,11 +37,15 @@ extern "C" {
 #include "../intl_convertcpp.h"
 #include "reldateformatter_class.h"
 #include "reldateformatter_arginfo.h"
+#include "reldateformatter_decl.h"
 
 using icu::Locale;
 using icu::UnicodeString;
 
 zend_class_entry *IntlRelativeDateTimeFormatter_ce_ptr;
+static zend_class_entry *reldateformatter_style_ce;
+static zend_class_entry *reldateformatter_capitalization_ce;
+static zend_class_entry *reldateformatter_unit_ce;
 static zend_object_handlers reldateformatter_handlers;
 
 static void reldateformatter_free_object(zend_object *object)
@@ -100,23 +105,71 @@ static HashTable *reldateformatter_get_gc(zend_object *object, zval **table, int
 	return nullptr;
 }
 
-static bool reldateformatter_valid_style(zend_long style)
+static UDateRelativeDateTimeFormatterStyle reldateformatter_style_from_enum(zend_object *style)
 {
-	return style == UDAT_STYLE_LONG || style == UDAT_STYLE_SHORT || style == UDAT_STYLE_NARROW;
+	switch (static_cast<zend_enum_IntlRelativeDateTimeFormatterStyle>(zend_enum_fetch_case_id(style))) {
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterStyle_Long:
+			return UDAT_STYLE_LONG;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterStyle_Short:
+			return UDAT_STYLE_SHORT;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterStyle_Narrow:
+			return UDAT_STYLE_NARROW;
+	}
+	ZEND_UNREACHABLE();
 }
 
-static bool reldateformatter_valid_capitalization_context(zend_long context)
+static UDisplayContext reldateformatter_capitalization_from_enum(zend_object *context)
 {
-	return context == UDISPCTX_CAPITALIZATION_NONE
-		|| context == UDISPCTX_CAPITALIZATION_FOR_MIDDLE_OF_SENTENCE
-		|| context == UDISPCTX_CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE
-		|| context == UDISPCTX_CAPITALIZATION_FOR_UI_LIST_OR_MENU
-		|| context == UDISPCTX_CAPITALIZATION_FOR_STANDALONE;
+	switch (static_cast<zend_enum_IntlRelativeDateTimeFormatterCapitalization>(zend_enum_fetch_case_id(context))) {
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_None:
+			return UDISPCTX_CAPITALIZATION_NONE;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_MiddleOfSentence:
+			return UDISPCTX_CAPITALIZATION_FOR_MIDDLE_OF_SENTENCE;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_BeginningOfSentence:
+			return UDISPCTX_CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_UiListAndMenu:
+			return UDISPCTX_CAPITALIZATION_FOR_UI_LIST_OR_MENU;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterCapitalization_Standalone:
+			return UDISPCTX_CAPITALIZATION_FOR_STANDALONE;
+	}
+	ZEND_UNREACHABLE();
 }
 
-static bool reldateformatter_valid_unit(zend_long unit)
+static URelativeDateTimeUnit reldateformatter_unit_from_enum(zend_object *unit)
 {
-	return unit >= UDAT_REL_UNIT_YEAR && unit <= UDAT_REL_UNIT_SATURDAY;
+	switch (static_cast<zend_enum_IntlRelativeDateTimeFormatterUnit>(zend_enum_fetch_case_id(unit))) {
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Year:
+			return UDAT_REL_UNIT_YEAR;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Quarter:
+			return UDAT_REL_UNIT_QUARTER;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Month:
+			return UDAT_REL_UNIT_MONTH;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Week:
+			return UDAT_REL_UNIT_WEEK;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Day:
+			return UDAT_REL_UNIT_DAY;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Hour:
+			return UDAT_REL_UNIT_HOUR;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Minute:
+			return UDAT_REL_UNIT_MINUTE;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Second:
+			return UDAT_REL_UNIT_SECOND;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Sunday:
+			return UDAT_REL_UNIT_SUNDAY;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Monday:
+			return UDAT_REL_UNIT_MONDAY;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Tuesday:
+			return UDAT_REL_UNIT_TUESDAY;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Wednesday:
+			return UDAT_REL_UNIT_WEDNESDAY;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Thursday:
+			return UDAT_REL_UNIT_THURSDAY;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Friday:
+			return UDAT_REL_UNIT_FRIDAY;
+		case ZEND_ENUM_IntlRelativeDateTimeFormatterUnit_Saturday:
+			return UDAT_REL_UNIT_SATURDAY;
+	}
+	ZEND_UNREACHABLE();
 }
 
 static void reldateformatter_throw_constructor_failure(
@@ -138,8 +191,8 @@ static void reldateformatter_throw_constructor_failure(
 
 static URelativeDateTimeFormatter *reldateformatter_open(
 	const char *locale,
-	zend_long style,
-	zend_long capitalization_context,
+	UDateRelativeDateTimeFormatterStyle style,
+	UDisplayContext capitalization_context,
 	const NumberFormatter_object *number_formatter,
 	UErrorCode *status
 )
@@ -157,8 +210,8 @@ static URelativeDateTimeFormatter *reldateformatter_open(
 	return ureldatefmt_open(
 		locale,
 		number_formatter_clone,
-		static_cast<UDateRelativeDateTimeFormatterStyle>(style),
-		static_cast<UDisplayContext>(capitalization_context),
+		style,
+		capitalization_context,
 		status);
 }
 
@@ -200,15 +253,15 @@ PHP_METHOD(IntlRelativeDateTimeFormatter, __construct)
 	IntlRelativeDateTimeFormatter_object *obj = Z_INTL_RELDATEFORMATTER_P(ZEND_THIS);
 	char *locale = nullptr;
 	size_t locale_len = 0;
-	zend_long style = UDAT_STYLE_LONG;
-	zend_long capitalization_context = UDISPCTX_CAPITALIZATION_NONE;
+	zend_object *style = nullptr;
+	zend_object *capitalization_context = nullptr;
 	zval *number_formatter = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(0, 4)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(locale, locale_len)
-		Z_PARAM_LONG(style)
-		Z_PARAM_LONG(capitalization_context)
+		Z_PARAM_OBJ_OF_CLASS(style, reldateformatter_style_ce)
+		Z_PARAM_OBJ_OF_CLASS(capitalization_context, reldateformatter_capitalization_ce)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(number_formatter, NumberFormatter_ce_ptr)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -233,19 +286,10 @@ PHP_METHOD(IntlRelativeDateTimeFormatter, __construct)
 		RETURN_THROWS();
 	}
 
-	if (!reldateformatter_valid_style(style)) {
-		zend_argument_value_error(2,
-			"must be one of IntlRelativeDateTimeFormatter::STYLE_LONG, "
-			"IntlRelativeDateTimeFormatter::STYLE_SHORT, or "
-			"IntlRelativeDateTimeFormatter::STYLE_NARROW");
-		RETURN_THROWS();
-	}
-
-	if (!reldateformatter_valid_capitalization_context(capitalization_context)) {
-		zend_argument_value_error(3,
-			"must be one of the IntlRelativeDateTimeFormatter::CAPITALIZATION_* constants");
-		RETURN_THROWS();
-	}
+	const UDateRelativeDateTimeFormatterStyle icu_style =
+		style != nullptr ? reldateformatter_style_from_enum(style) : UDAT_STYLE_LONG;
+	const UDisplayContext icu_capitalization_context = capitalization_context != nullptr
+		? reldateformatter_capitalization_from_enum(capitalization_context) : UDISPCTX_CAPITALIZATION_NONE;
 
 	NumberFormatter_object *number_formatter_obj = nullptr;
 	if (number_formatter != nullptr) {
@@ -259,8 +303,8 @@ PHP_METHOD(IntlRelativeDateTimeFormatter, __construct)
 	UErrorCode status = U_ZERO_ERROR;
 	RELDATEFORMATTER_OBJECT(obj) = reldateformatter_open(
 		locale,
-		style,
-		capitalization_context,
+		icu_style,
+		icu_capitalization_context,
 		number_formatter_obj,
 		&status);
 
@@ -274,8 +318,8 @@ PHP_METHOD(IntlRelativeDateTimeFormatter, __construct)
 	}
 
 	obj->locale = zend_string_init(locale, strlen(locale), false);
-	obj->style = style;
-	obj->capitalization_context = capitalization_context;
+	obj->style = icu_style;
+	obj->capitalization_context = icu_capitalization_context;
 	if (number_formatter != nullptr) {
 		obj->number_formatter = Z_OBJ_P(number_formatter);
 		GC_ADDREF(obj->number_formatter);
@@ -323,11 +367,11 @@ static zend_string *reldateformatter_format_result(
 static void reldateformatter_format(INTERNAL_FUNCTION_PARAMETERS, bool numeric)
 {
 	zval *offset;
-	zend_long unit;
+	zend_object *unit_object;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_NUMBER(offset)
-		Z_PARAM_LONG(unit)
+		Z_PARAM_OBJ_OF_CLASS(unit_object, reldateformatter_unit_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IntlRelativeDateTimeFormatter_object *obj = Z_INTL_RELDATEFORMATTER_P(ZEND_THIS);
@@ -338,24 +382,19 @@ static void reldateformatter_format(INTERNAL_FUNCTION_PARAMETERS, bool numeric)
 		RETURN_THROWS();
 	}
 
-	if (!reldateformatter_valid_unit(unit)) {
-		zend_argument_value_error(2,
-			"must be one of the IntlRelativeDateTimeFormatter::UNIT_* constants");
-		RETURN_THROWS();
-	}
-
 	if (!reldateformatter_refresh_number_formatter(obj)) {
 		RETURN_FALSE;
 	}
 
 	const double numeric_offset = zval_get_double(offset);
+	const URelativeDateTimeUnit unit = reldateformatter_unit_from_enum(unit_object);
 	zend_string *result;
 	if (numeric) {
 		result = reldateformatter_format_result(obj,
 			[obj, numeric_offset, unit](UChar *buffer, int32_t capacity, UErrorCode *status) {
 				return ureldatefmt_formatNumeric(
 					RELDATEFORMATTER_OBJECT(obj), numeric_offset,
-					static_cast<URelativeDateTimeUnit>(unit), buffer, capacity, status);
+					unit, buffer, capacity, status);
 			},
 			"Failed to format relative date/time numerically");
 	} else {
@@ -363,7 +402,7 @@ static void reldateformatter_format(INTERNAL_FUNCTION_PARAMETERS, bool numeric)
 			[obj, numeric_offset, unit](UChar *buffer, int32_t capacity, UErrorCode *status) {
 				return ureldatefmt_format(
 					RELDATEFORMATTER_OBJECT(obj), numeric_offset,
-					static_cast<URelativeDateTimeUnit>(unit), buffer, capacity, status);
+					unit, buffer, capacity, status);
 			},
 			"Failed to format relative date/time");
 	}
@@ -454,6 +493,10 @@ PHP_METHOD(IntlRelativeDateTimeFormatter, getErrorMessage)
 
 void reldateformatter_register_class(void)
 {
+	reldateformatter_style_ce = register_class_IntlRelativeDateTimeFormatterStyle();
+	reldateformatter_capitalization_ce = register_class_IntlRelativeDateTimeFormatterCapitalization();
+	reldateformatter_unit_ce = register_class_IntlRelativeDateTimeFormatterUnit();
+
 	IntlRelativeDateTimeFormatter_ce_ptr = register_class_IntlRelativeDateTimeFormatter();
 	IntlRelativeDateTimeFormatter_ce_ptr->create_object = reldateformatter_create_object;
 	IntlRelativeDateTimeFormatter_ce_ptr->default_object_handlers = &reldateformatter_handlers;

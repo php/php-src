@@ -9,21 +9,21 @@ $numberFormatter = new NumberFormatter('en_US', NumberFormatter::DECIMAL);
 $numberFormatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, 1);
 $formatter = new IntlRelativeDateTimeFormatter(
     'en_US',
-    IntlRelativeDateTimeFormatter::STYLE_LONG,
-    IntlRelativeDateTimeFormatter::CAPITALIZATION_NONE,
+    IntlRelativeDateTimeFormatterStyle::Long,
+    IntlRelativeDateTimeFormatterCapitalization::None,
     $numberFormatter,
 );
 
-echo $formatter->formatNumeric(2, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $formatter->format(2, IntlRelativeDateTimeFormatter::UNIT_WEEK), "\n";
+echo $formatter->formatNumeric(2, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $formatter->format(2, IntlRelativeDateTimeFormatterUnit::Week), "\n";
 
 $numberFormatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, 0);
 
-echo $formatter->formatNumeric(2, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
-echo $formatter->format(2, IntlRelativeDateTimeFormatter::UNIT_WEEK), "\n";
+echo $formatter->formatNumeric(2, IntlRelativeDateTimeFormatterUnit::Day), "\n";
+echo $formatter->format(2, IntlRelativeDateTimeFormatterUnit::Week), "\n";
 
 unset($numberFormatter);
-echo $formatter->formatNumeric(2, IntlRelativeDateTimeFormatter::UNIT_DAY), "\n";
+echo $formatter->formatNumeric(2, IntlRelativeDateTimeFormatterUnit::Day), "\n";
 
 ?>
 --EXPECT--

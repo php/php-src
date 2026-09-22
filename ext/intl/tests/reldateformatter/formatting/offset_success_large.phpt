@@ -10,7 +10,7 @@ require_once __DIR__ . '/format.inc';
 printRelativeDateTimeTable(
     new IntlRelativeDateTimeFormatter('en_US'),
     offsets: [-1e20, -1e6, 1e6, 1e20],
-    units: ['second' => IntlRelativeDateTimeFormatter::UNIT_SECOND],
+    units: ['second' => IntlRelativeDateTimeFormatterUnit::Second],
 );
 
 ?>

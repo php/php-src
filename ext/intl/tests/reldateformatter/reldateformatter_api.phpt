@@ -9,39 +9,32 @@ $reflection = new ReflectionClass(IntlRelativeDateTimeFormatter::class);
 var_dump($reflection->isFinal());
 var_dump($reflection->isInternal());
 var_dump($reflection->isInstantiable());
-var_dump(count($reflection->getConstants()));
+var_dump($reflection->getConstants());
 
 foreach ([
-    'STYLE_LONG',
-    'STYLE_SHORT',
-    'STYLE_NARROW',
-    'CAPITALIZATION_NONE',
-    'CAPITALIZATION_FOR_MIDDLE_OF_SENTENCE',
-    'CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE',
-    'CAPITALIZATION_FOR_UI_LIST_OR_MENU',
-    'CAPITALIZATION_FOR_STANDALONE',
-    'UNIT_YEAR',
-    'UNIT_QUARTER',
-    'UNIT_MONTH',
-    'UNIT_WEEK',
-    'UNIT_DAY',
-    'UNIT_HOUR',
-    'UNIT_MINUTE',
-    'UNIT_SECOND',
-    'UNIT_SUNDAY',
-    'UNIT_MONDAY',
-    'UNIT_TUESDAY',
-    'UNIT_WEDNESDAY',
-    'UNIT_THURSDAY',
-    'UNIT_FRIDAY',
-    'UNIT_SATURDAY',
-] as $constant) {
-    var_dump($reflection->getReflectionConstant($constant)->getType()->getName());
+    IntlRelativeDateTimeFormatterStyle::class,
+    IntlRelativeDateTimeFormatterCapitalization::class,
+    IntlRelativeDateTimeFormatterUnit::class,
+] as $class) {
+    $enum = new ReflectionEnum($class);
+    echo $enum->getName(), "\n";
+    var_dump($enum->isInternal(), $enum->isBacked());
+    echo implode(', ', array_column($class::cases(), 'name')), "\n";
 }
 
 $constructor = $reflection->getConstructor();
 foreach ($constructor->getParameters() as $parameter) {
     echo $parameter->getName(), ': ', $parameter->getType(), "\n";
+    $default = $parameter->getDefaultValue();
+    echo 'default: ', $default instanceof UnitEnum ? $default::class . '::' . $default->name : 'null', "\n";
+}
+
+foreach (['format', 'formatNumeric'] as $name) {
+    $method = $reflection->getMethod($name);
+    echo $name, ': ', $method->getReturnType(), "\n";
+    foreach ($method->getParameters() as $parameter) {
+        echo $parameter->getName(), ': ', $parameter->getType(), "\n";
+    }
 }
 
 ?>
@@ -49,31 +42,31 @@ foreach ($constructor->getParameters() as $parameter) {
 bool(true)
 bool(true)
 bool(true)
-int(23)
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
-string(3) "int"
+array(0) {
+}
+IntlRelativeDateTimeFormatterStyle
+bool(true)
+bool(false)
+Long, Short, Narrow
+IntlRelativeDateTimeFormatterCapitalization
+bool(true)
+bool(false)
+None, MiddleOfSentence, BeginningOfSentence, UiListAndMenu, Standalone
+IntlRelativeDateTimeFormatterUnit
+bool(true)
+bool(false)
+Year, Quarter, Month, Week, Day, Hour, Minute, Second, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 locale: ?string
-style: int
-capitalizationContext: int
+default: null
+style: IntlRelativeDateTimeFormatterStyle
+default: IntlRelativeDateTimeFormatterStyle::Long
+capitalizationContext: IntlRelativeDateTimeFormatterCapitalization
+default: IntlRelativeDateTimeFormatterCapitalization::None
 numberFormatter: ?NumberFormatter
+default: null
+format: string|false
+offset: int|float
+unit: IntlRelativeDateTimeFormatterUnit
+formatNumeric: string|false
+offset: int|float
+unit: IntlRelativeDateTimeFormatterUnit

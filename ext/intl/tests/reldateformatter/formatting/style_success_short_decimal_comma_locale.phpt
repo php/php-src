@@ -8,12 +8,12 @@ intl
 require_once __DIR__ . '/format.inc';
 
 printRelativeDateTimeTable(
-    new IntlRelativeDateTimeFormatter('de_DE', IntlRelativeDateTimeFormatter::STYLE_SHORT),
+    new IntlRelativeDateTimeFormatter('de_DE', IntlRelativeDateTimeFormatterStyle::Short),
     offsets: [-2.75, -1.75, -1.5, 1.5, 1.75, 2.75],
     units: [
-        'day' => IntlRelativeDateTimeFormatter::UNIT_DAY,
-        'hour' => IntlRelativeDateTimeFormatter::UNIT_HOUR,
-        'minute' => IntlRelativeDateTimeFormatter::UNIT_MINUTE,
+        'day' => IntlRelativeDateTimeFormatterUnit::Day,
+        'hour' => IntlRelativeDateTimeFormatterUnit::Hour,
+        'minute' => IntlRelativeDateTimeFormatterUnit::Minute,
     ],
 );
 

@@ -1,21 +1,21 @@
 <?php
 
 const RELATIVE_DATE_TIME_UNITS = [
-    'year' => IntlRelativeDateTimeFormatter::UNIT_YEAR,
-    'quarter' => IntlRelativeDateTimeFormatter::UNIT_QUARTER,
-    'month' => IntlRelativeDateTimeFormatter::UNIT_MONTH,
-    'week' => IntlRelativeDateTimeFormatter::UNIT_WEEK,
-    'day' => IntlRelativeDateTimeFormatter::UNIT_DAY,
-    'hour' => IntlRelativeDateTimeFormatter::UNIT_HOUR,
-    'minute' => IntlRelativeDateTimeFormatter::UNIT_MINUTE,
-    'second' => IntlRelativeDateTimeFormatter::UNIT_SECOND,
-    'sunday' => IntlRelativeDateTimeFormatter::UNIT_SUNDAY,
-    'monday' => IntlRelativeDateTimeFormatter::UNIT_MONDAY,
-    'tuesday' => IntlRelativeDateTimeFormatter::UNIT_TUESDAY,
-    'wednesday' => IntlRelativeDateTimeFormatter::UNIT_WEDNESDAY,
-    'thursday' => IntlRelativeDateTimeFormatter::UNIT_THURSDAY,
-    'friday' => IntlRelativeDateTimeFormatter::UNIT_FRIDAY,
-    'saturday' => IntlRelativeDateTimeFormatter::UNIT_SATURDAY,
+    'year' => IntlRelativeDateTimeFormatterUnit::Year,
+    'quarter' => IntlRelativeDateTimeFormatterUnit::Quarter,
+    'month' => IntlRelativeDateTimeFormatterUnit::Month,
+    'week' => IntlRelativeDateTimeFormatterUnit::Week,
+    'day' => IntlRelativeDateTimeFormatterUnit::Day,
+    'hour' => IntlRelativeDateTimeFormatterUnit::Hour,
+    'minute' => IntlRelativeDateTimeFormatterUnit::Minute,
+    'second' => IntlRelativeDateTimeFormatterUnit::Second,
+    'sunday' => IntlRelativeDateTimeFormatterUnit::Sunday,
+    'monday' => IntlRelativeDateTimeFormatterUnit::Monday,
+    'tuesday' => IntlRelativeDateTimeFormatterUnit::Tuesday,
+    'wednesday' => IntlRelativeDateTimeFormatterUnit::Wednesday,
+    'thursday' => IntlRelativeDateTimeFormatterUnit::Thursday,
+    'friday' => IntlRelativeDateTimeFormatterUnit::Friday,
+    'saturday' => IntlRelativeDateTimeFormatterUnit::Saturday,
 ];
 
 const RELATIVE_DATE_TIME_OFFSETS = [

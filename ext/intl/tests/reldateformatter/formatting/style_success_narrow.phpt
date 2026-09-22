@@ -13,7 +13,7 @@ if (version_compare(INTL_ICU_VERSION, '65.0', '<')) {
 
 require_once __DIR__ . '/format.inc';
 
-$formatter = new IntlRelativeDateTimeFormatter('en_US', IntlRelativeDateTimeFormatter::STYLE_NARROW);
+$formatter = new IntlRelativeDateTimeFormatter('en_US', IntlRelativeDateTimeFormatterStyle::Narrow);
 printRelativeDateTimeTable($formatter);
 
 ?>

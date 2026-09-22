@@ -12,7 +12,7 @@ var_dump($formatter->getErrorCode() === U_INVALID_CHAR_FOUND);
 var_dump(intl_get_error_code() === $formatter->getErrorCode());
 var_dump(str_contains($formatter->getErrorMessage(), 'Failed to convert relative date to UTF-16'));
 
-var_dump($formatter->format(1, IntlRelativeDateTimeFormatter::UNIT_DAY));
+var_dump($formatter->format(1, IntlRelativeDateTimeFormatterUnit::Day));
 var_dump($formatter->getErrorCode());
 var_dump(intl_get_error_code());
 
