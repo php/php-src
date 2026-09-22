@@ -6461,7 +6461,7 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 		RETURN_THROWS();
 	}
 
-	zval *src = &object->ce->default_properties_table[OBJ_PROP_TO_NUM(prop->offset)];
+	zval *src = &CE_DEFAULT_PROPERTIES_TABLE(object->ce)[OBJ_PROP_TO_NUM(prop->offset)];
 	zval *dst = OBJ_PROP(object, prop->offset);
 
 	if (!(Z_PROP_FLAG_P(dst) & IS_PROP_LAZY)) {
