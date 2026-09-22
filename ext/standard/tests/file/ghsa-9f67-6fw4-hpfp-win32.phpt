@@ -22,12 +22,28 @@ foreach (['NUL', 'nul:', '\\\\.\\NUL'] as $name) {
 }
 
 echo "Reserved names in paths are rejected:\n";
-foreach (['NUL', 'con', 'COM1', 'LPT9', 'CONIN$', 'NUL.txt', 'con.php', 'aux:stream', 'NUL .txt', 'NUL :txt', '.\\NUL'] as $name) {
+foreach (['NUL', 'con', 'COM1', 'LPT9', 'CONIN$', '.\\NUL'] as $name) {
     $blocked = $dir . DIRECTORY_SEPARATOR . $name;
     var_dump(@fopen($blocked, 'wb') === false);
     var_dump(file_exists($blocked));
 }
-var_dump(@fopen('NUL.txt', 'wb') === false);
+
+echo "Suffixed device names:\n";
+foreach (['NUL.txt', 'con.php', 'aux:stream', 'NUL .txt', 'NUL :txt'] as $name) {
+    $file = $dir . DIRECTORY_SEPARATOR . $name;
+    $h = @fopen($file, 'wb');
+    if (PHP_WINDOWS_VERSION_BUILD < 22000) {
+        var_dump($h === false);
+    } else {
+        // Windows 11 treats these as regular files
+        var_dump(is_resource($h) && (fstat($h)['mode'] & 0170000) === 0100000);
+        fclose($h);
+        // Delete the base file and its streams
+        $base = $dir . DIRECTORY_SEPARATOR . explode(':', $name)[0];
+        unlink('\\\\.\\' . $base . '::$DATA');
+    }
+    var_dump(file_exists($file));
+}
 var_dump(@stat($dir . DIRECTORY_SEPARATOR . 'NUL') === false);
 var_dump(@mkdir($dir . DIRECTORY_SEPARATOR . 'NUL') === false);
 var_dump(@rename(__FILE__, $dir . DIRECTORY_SEPARATOR . 'PRN') === false);
@@ -61,6 +77,7 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
+Suffixed device names:
 bool(true)
 bool(false)
 bool(true)
@@ -71,7 +88,6 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-bool(true)
 bool(true)
 bool(true)
 bool(true)
