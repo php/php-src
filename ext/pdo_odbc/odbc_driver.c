@@ -408,16 +408,14 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			return pdo_odbc_get_info_string(dbh, SQL_DBMS_VER, val);
 		case PDO_ATTR_SERVER_INFO:
 			return pdo_odbc_get_info_string(dbh, SQL_DBMS_NAME, val);
-		case PDO_ATTR_PREFETCH:
-		case PDO_ATTR_TIMEOUT:
-		case PDO_ATTR_CONNECTION_STATUS:
-			break;
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
 			ZVAL_BOOL(val, H->assume_utf8);
 			return 1;
 		case PDO_ATTR_AUTOCOMMIT:
 			ZVAL_BOOL(val, dbh->auto_commit);
 			return 1;
+		default:
+			break;
 	}
 	return 0;
 }
