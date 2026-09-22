@@ -1,10 +1,13 @@
 --TEST--
 GH-23842: skipLazyInitialization() copies an unresolved constant default with opcache
+--CREDITS--
+DirkTrunkstar
 --EXTENSIONS--
 opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
+opcache.file_cache_only=0
 --FILE--
 <?php
 
