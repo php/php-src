@@ -84,8 +84,13 @@
 #define TAR_FILE    '0'
 #define TAR_LINK    '1'
 #define TAR_SYMLINK '2'
+#define TAR_CHAR    '3'
+#define TAR_BLOCK   '4'
 #define TAR_DIR     '5'
+#define TAR_FIFO    '6'
 #define TAR_NEW     '8'
+#define TAR_LONGLINK 'K'
+#define TAR_LONGNAME 'L'
 #define TAR_GLOBAL_HDR 'g'
 #define TAR_FILE_HDR   'x'
 

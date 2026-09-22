@@ -1160,7 +1160,7 @@ try_again:
 							char *t = ZSTR_VAL(phpurl->path);
 							char *p = strrchr(t, '/');
 							if (p) {
-								zend_string *s = zend_string_alloc((p - t) + ZSTR_LEN(new_url->path) + 2, 0);
+								zend_string *s = zend_string_safe_alloc(1, p - t, ZSTR_LEN(new_url->path) + 2, 0);
 								strncpy(ZSTR_VAL(s), t, (p - t) + 1);
 								ZSTR_VAL(s)[(p - t) + 1] = 0;
 								strcat(ZSTR_VAL(s), ZSTR_VAL(new_url->path));
@@ -1452,7 +1452,8 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 {
 	zend_string *http_buf = NULL;
 	char *header;
-	int header_close = close, header_chunked = 0, header_length = 0, http_buf_size = 0;
+	int header_close = close, header_chunked = 0, header_length = 0;
+	size_t http_buf_size = 0;
 
 	if (!close) {
 		header = get_http_header_value(headers, "Connection:");
@@ -1482,14 +1483,14 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 		done = FALSE;
 
 		while (!done) {
-			int buf_size = 0;
+			unsigned int buf_size = 0;
 
 			php_stream_gets(stream, headerbuf, sizeof(headerbuf));
 			if (sscanf(headerbuf, "%x", &buf_size) > 0 ) {
 				if (buf_size > 0) {
 					size_t len_size = 0;
 
-					if (http_buf_size + buf_size + 1 < 0) {
+					if (buf_size >= ZSTR_MAX_LEN - http_buf_size) {
 						if (http_buf) {
 							zend_string_release_ex(http_buf, 0);
 						}
@@ -1497,7 +1498,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 					}
 
 					if (http_buf) {
-						http_buf = zend_string_realloc(http_buf, http_buf_size + buf_size, 0);
+						http_buf = zend_string_safe_realloc(http_buf, 1, http_buf_size, buf_size, false);
 					} else {
 						http_buf = zend_string_alloc(buf_size, 0);
 					}
@@ -1556,7 +1557,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 		}
 
 	} else if (header_length) {
-		if (header_length < 0 || header_length >= INT_MAX) {
+		if (header_length < 0 || header_length >= ZSTR_MAX_LEN) {
 			return NULL;
 		}
 		http_buf = zend_string_alloc(header_length, 0);
@@ -1571,7 +1572,11 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 		do {
 			ssize_t len_read;
 			if (http_buf) {
-				http_buf = zend_string_realloc(http_buf, http_buf_size + 4096, 0);
+				if (UNEXPECTED(http_buf_size >= ZSTR_MAX_LEN - 4096)) {
+					zend_string_efree(http_buf);
+					return NULL;
+				}
+				http_buf = zend_string_realloc(http_buf, http_buf_size + 4096, false);
 			} else {
 				http_buf = zend_string_alloc(4096, 0);
 			}
