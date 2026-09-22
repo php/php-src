@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     request activation). (matyhtf)
   . Fixed bug GH-23764 (Built-in server leaks a file descriptor on every HEAD
     request for a static file). (jakubskopal)
+  . Fixed crash in the built-in server when a client is reset before being
+    accepted. (David Carlier)
 
 - Core
   . Fix GH-21999: GC inconsistency with lazy object, var_dump(), and object

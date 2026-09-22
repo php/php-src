@@ -1970,9 +1970,13 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	// Create a new php_network_populate_name_from_sockaddr_ex() API with a persistent flag?
 	zend_string *tmp_addr = NULL;
 	php_network_populate_name_from_sockaddr(addr, addr_len, &tmp_addr, NULL, 0);
-	client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
+	if (EXPECTED(tmp_addr != NULL)) {
+		client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
+		zend_string_release_ex(tmp_addr, /* persistent */ false);
+	} else {
+		client->addr_str = zend_string_init(ZEND_STRL("-"), /* persistent */ true);
+	}
 	GC_MAKE_PERSISTENT_LOCAL(client->addr_str);
-	zend_string_release_ex(tmp_addr, /* persistent */ false);
 
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = false;
@@ -2717,7 +2721,7 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 		php_cli_server_client *client = NULL;
 		php_socket_t client_sock;
 		socklen_t socklen = server->socklen;
-		struct sockaddr *sa = pemalloc(server->socklen, 1);
+		struct sockaddr *sa = pecalloc(1, server->socklen, 1);
 		client_sock = accept(server->server_sock, sa, &socklen);
 		if (!ZEND_VALID_SOCKET(client_sock)) {
 			pefree(sa, 1);
