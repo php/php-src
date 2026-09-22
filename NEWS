@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.34
+24 Sep 2026, PHP 8.3.35
 
 - Filter:
   . Fixed GHSA-ch8v-r6jh-4vvr (FILTER_SANITIZE_ENCODED does not encode 0xFF).
