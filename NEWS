@@ -98,6 +98,10 @@ PHP                                                                        NEWS
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
 
+- URI:
+  . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
+    and PHP’s naming policy. (timwolla)
+
 - Zlib:
   . Fixed inflate_init() dropping the preset dictionary for raw streams with
     a non-default window. (Ilia Alshanetsky)
