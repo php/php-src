@@ -83,27 +83,36 @@
 #define HTTP_WRAPPER_HEADER_INIT    1
 #define HTTP_WRAPPER_REDIRECTED     2
 #define HTTP_WRAPPER_KEEP_METHOD    4
+#define HTTP_WRAPPER_STRIP_AUTH     8
 
+/* Removes every line whose header name matches. Neither a repeated header nor an
+ * occurrence of the name inside another header's value may leave the real header
+ * behind, as that would defeat HTTP_WRAPPER_STRIP_AUTH. */
 static inline void strip_header(char *header_bag, char *lc_header_bag,
 		const char *lc_header_name)
 {
-	char *lc_header_start = strstr(lc_header_bag, lc_header_name);
-	if (lc_header_start
-	&& (lc_header_start == lc_header_bag || *(lc_header_start-1) == '\n')
-	) {
+	char *lc_header_start = lc_header_bag;
+
+	while ((lc_header_start = strstr(lc_header_start, lc_header_name))) {
+		if (lc_header_start != lc_header_bag && *(lc_header_start-1) != '\n') {
+			lc_header_start += strlen(lc_header_name);
+			continue;
+		}
+
 		char *header_start = header_bag + (lc_header_start - lc_header_bag);
 		char *lc_eol = strchr(lc_header_start, '\n');
 
-		if (lc_eol) {
-			char *eol = header_start + (lc_eol - lc_header_start);
-			size_t eollen = strlen(lc_eol);
-
-			memmove(lc_header_start, lc_eol+1, eollen);
-			memmove(header_start, eol+1, eollen);
-		} else {
+		if (!lc_eol) {
 			*lc_header_start = '\0';
 			*header_start = '\0';
+			return;
 		}
+
+		char *eol = header_start + (lc_eol - lc_header_start);
+		size_t eollen = strlen(lc_eol);
+
+		memmove(lc_header_start, lc_eol+1, eollen);
+		memmove(header_start, eol+1, eollen);
 	}
 }
 
@@ -704,6 +713,21 @@ finish:
 				strip_header(user_headers, t, "content-type:");
 			}
 
+			if (flags & HTTP_WRAPPER_STRIP_AUTH) {
+				strip_header(user_headers, t, "authorization:");
+				strip_header(user_headers, t, "cookie:");
+				if (!use_proxy) {
+					strip_header(user_headers, t, "proxy-authorization:");
+				}
+			}
+
+			if (*user_headers == '\0') {
+				/* everything got stripped, keeping the empty bag would append a
+				 * stray CRLF and end the header block early */
+				efree(user_headers);
+				user_headers = NULL;
+			}
+
 			if (check_has_header(t, "user-agent:")) {
 				have_header |= HTTP_HEADER_USER_AGENT;
 			}
@@ -1101,13 +1125,23 @@ finish:
 				header_info.location = NULL;
 			}
 
-			php_uri_struct_free(resource);
-			/* check for invalid redirection URLs */
-			if ((resource = php_uri_parse_to_struct(uri_parser, new_path, strlen(new_path), PHP_URI_COMPONENT_READ_MODE_RAW, true)) == NULL) {
+			php_uri *new_resource = php_uri_parse_to_struct(uri_parser, new_path, strlen(new_path), PHP_URI_COMPONENT_READ_MODE_RAW, true);
+			if (new_resource == NULL) {
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path);
 				efree(new_path);
 				goto out;
 			}
+
+			zend_long default_port = use_ssl ? 443 : 80;
+			bool same_origin = resource->scheme && new_resource->scheme
+				&& zend_string_equals_ci(resource->scheme, new_resource->scheme)
+				&& resource->host && new_resource->host
+				&& zend_string_equals_ci(resource->host, new_resource->host)
+				&& (resource->port ? resource->port : default_port)
+					== (new_resource->port ? new_resource->port : default_port);
+
+			php_uri_struct_free(resource);
+			resource = new_resource;
 
 #define CHECK_FOR_CNTRL_CHARS(val) { \
 	if (val) { \
@@ -1130,7 +1164,10 @@ finish:
 				CHECK_FOR_CNTRL_CHARS(resource->password);
 				CHECK_FOR_CNTRL_CHARS(resource->path);
 			}
-			int new_flags = HTTP_WRAPPER_REDIRECTED;
+			int new_flags = HTTP_WRAPPER_REDIRECTED | (flags & HTTP_WRAPPER_STRIP_AUTH);
+			if (!same_origin) {
+				new_flags |= HTTP_WRAPPER_STRIP_AUTH;
+			}
 			if (response_code == 307 || response_code == 308) {
 				/* RFC 7538 specifies that status code 308 does not allow changing the request method from POST to GET.
 				 * RFC 7231 does the same for status code 307.

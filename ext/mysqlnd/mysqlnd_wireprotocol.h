@@ -295,9 +295,19 @@ typedef struct st_mysqlnd_packet_cached_sha2_result {
 	unsigned int 	error_no;
 } MYSQLND_PACKET_CACHED_SHA2_RESULT;
 
+/* The following structure implements an optional value,
+ * which forces the caller to check if the value was correctly read, for safety reasons. */
 
+typedef struct st_mysqlnd_optional_uint64_t {
+	uint64_t value;
+	bool has_value;
+} MYSQLND_OPTIONAL_UINT64_T;
 
-zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet);
+/* must not be equal to MYSQLND_NULL_LENGTH, but larger than 2**24 */
+#define MYSQLND_INVALID_NET_FIELD_LENGTH ((zend_ulong) -2)
+
+/* Returns MYSQLND_INVALID_NET_FIELD_LENGTH on error */
+zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet, size_t remaining_size);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, const uint64_t length);
 size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 

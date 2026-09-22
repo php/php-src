@@ -150,6 +150,8 @@ struct _soapService {
 #define SOAP_SSL_METHOD_SSLv3   2
 #define SOAP_SSL_METHOD_SSLv23  3
 
+#define SOAP_MAX_XML_DEPTH 2048
+#define SOAP_MAX_DECODE_DEPTH (SOAP_MAX_XML_DEPTH * 2)
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *typemap;
@@ -171,6 +173,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  wsdl_cache;
 	int        cur_uniq_ref;
 	HashTable *ref_map;
+	unsigned int decode_depth;
 ZEND_END_MODULE_GLOBALS(soap)
 
 extern zend_string *soap_lang_en;

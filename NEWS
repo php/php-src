@@ -119,6 +119,8 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug GH-19320 (FPM UID and GID overflow). (Pratik Bhujel)
+  . Fixed GHSA-62xp-839h-2637 (IPv6 ACL bypass in FastCGI listen.allowed_clients
+    due to partial address comparison). (CVE-2026-91768) (Alexandre Daubois)
 
 - Intl:
   . Fixed grapheme_strpos() and grapheme_strrpos() with an empty needle
@@ -143,6 +145,10 @@ PHP                                                                        NEWS
     replacement when a \k<name> backref has no closing delimiter.
     (Ilia Alshanetsky)
 
+- MySQLnd:
+  . Fixed GHSA-r6x9-5r99-36j7 (Various packet overreads in mysqlnd wire
+    protocol). (CVE-2025-1218) (Jakub Zelenka, Nora Dossche)
+
 - ODBC:
   . Fixed odbc_field_len(), odbc_field_scale() and odbc_field_type()
     returning uninitialized memory when SQLColAttribute fails.
@@ -155,6 +161,13 @@ PHP                                                                        NEWS
     (Arnaud, iliaal)
   . Fixed a crash when the huge page SHM remap discarded mappings outside the
     reserved address range. (Piotr Hałas)
+
+- OpenSSL:
+  . Fixed GHSA-vvx9-73fr-5jjx (TLS hostname verification falls back to CN after
+    SAN mismatch). (CVE-2026-91769) (Jakub Zelenka)
+  . Fixed GHSA-xr7j-rvgx-xq5p (Heap buffer overflow in
+    php_openssl_matches_wildcard_name() on crafted server certificate wildcard
+    CN). (CVE-2026-91767) (Jakub Zelenka)
 
 - PDO:
   . Fixed a leak when a persistent connection failed a liveness check
@@ -173,6 +186,8 @@ PHP                                                                        NEWS
     (Weilin Du)
   . Fixed bug GH-23477 (Memory leak on duplicate native Phar manifest entries).
     (Weilin Du)
+  . Fixed GHSA-j3wh-g957-2m85 (Integer overflow in phar_tar_number() allowing
+    TAR archive entry injection). (CVE-2026-6103) (Jakub Zelenka)
 
 - Readline:
   . Fixed the interactive shell not waiting for the pager process to exit.
@@ -183,12 +198,17 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed stack overflow when parsing a WSDL with self-referential schema
     groups or attributeGroups. (Ilia Alshanetsky)
+  . Fixed GHSA-rgrp-mwpx-f6rm (Unbounded recursion in server-side
+    cleanup_xml_node()). (CVE-2026-91765) (Alexandre Daubois)
+  . Fixed GHSA-cj93-vc83-wgqv (Integer overflow to buffer overflow in SOAP HTTP
+    parsing). (CVE-2025-14181) (Nora Dossche, Jakub Zelenka)
 
 - Standard:
   . Fixed a segfault when a stream filter callback unsets StreamBucket::$data
     before re-attaching the bucket. (iliaal)
-  . Fixed an out-of-bounds read when following a redirect response with an
-    empty Location header. (iliaal)
+  . Fixed GHSA-7875-c8px-7q5f (Out-of-bounds read in the HTTP stream wrapper
+    when following a redirect with an empty Location header). (CVE-2026-93682)
+    (Ilia Alshanetsky, Jordi Kroon)
   . Fixed read buffer compaction in php_stream_filter_flush(). (crystarm)
   . Fixed bug GH-22410 (Incorrect float behavior with large numbers).
     (arshidkv12)
@@ -196,6 +216,10 @@ PHP                                                                        NEWS
     argument number for $timeout). (lacatoire)
   . Fixed bug GH-23576 (Next index for array returned from array_keys() is
     wrong). (Lazizbek Ergashev)
+  . Fixed GHSA-88hq-2827-7pg6 (Out-of-bounds read in convert.* stream filters
+    when line-break-chars contains NUL). (CVE-2026-92842) (geeknik)
+  . Fixed GHSA-fpwc-w8rq-cr92 (Cross-origin credential leak in HTTP stream
+    wrapper redirects). (CVE-2026-91766) (Alexandre Daubois)
 
 - SimpleXML:
   . Fixed writing to a dimension of the object returned by attributes() not
@@ -203,6 +227,10 @@ PHP                                                                        NEWS
   . Fixed child elements of the element returned by
     SimpleXMLElement::addChild() not being accessible by property name when
     namespaces are involved. (Ilia Alshanetsky)
+
+- Windows:
+  . Fixed GHSA-9f67-6fw4-hpfp (Reserved device names are not rejected before
+    file and stream I/O). (CVE-2026-17545) (Shivam Mathur, Jakub Zelenka)
 
 - Zip:
   . Fixed bug GH-17787 (ZipArchive stream stops reading early when the archive
