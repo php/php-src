@@ -95,6 +95,12 @@ PHP                                                                        NEWS
   . Fixed three Windows-only proc_open() defects: an uninitialized
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
+  . Fixed stream_select() on Windows overflowing a fixed 64-entry stack array
+    (crashing with a stack buffer overrun) when passed more than 64 pipe or file
+    handles; it now fails gracefully instead. (Frode Børli)
+  . Removed the FD_SETSIZE ceiling on the number of sockets stream_select() can
+    watch on Windows; the winsock fd_set now grows on demand, matching POSIX.
+    (Frode Børli)
 
 - Zlib:
   . Fixed inflate_init() dropping the preset dictionary for raw streams with

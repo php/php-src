@@ -1070,6 +1070,13 @@ PHP 8.6 UPGRADE NOTES
   . The OpenSSL library used by the official Windows builds has been upgraded
     to OpenSSL 4.
 
+- Standard:
+  . stream_select() no longer caps the number of sockets at FD_SETSIZE; the
+    winsock fd_set now grows on demand, so socket-heavy code (event loops,
+    servers) behaves like it does on POSIX. Selecting on more than 64 pipe or
+    file handles no longer crashes the process; it fails with a warning instead,
+    as that path is still bounded by the WaitForMultipleObjects() limit.
+
 ========================================
 13. Other Changes
 ========================================

@@ -799,7 +799,7 @@ static int stream_array_from_fd_bigset(zval *stream_array, const fd_bigset *fds)
 #else /* PHP_WIN32 */
 /* {{{ Windows keeps the original native fd_set based implementation for now (capped at FD_SETSIZE); see the
  * comment above the fd_bigset typedef for why. */
-static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, php_socket_t *max_fd)
+static int stream_array_to_fd_set(const HashTable *stream_array, php_growable_fd_set *fds, php_socket_t *max_fd)
 {
 	zval *elem;
 	php_stream *stream;
@@ -823,7 +823,7 @@ static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, ph
 		 * */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
 
-			PHP_SAFE_FD_SET(this_fd, fds);
+			php_growable_fd_set_add(fds, (SOCKET)this_fd);
 
 			if (this_fd > *max_fd) {
 				*max_fd = this_fd;
@@ -834,7 +834,7 @@ static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, ph
 	return cnt ? 1 : 0;
 }
 
-static int stream_array_from_fd_set(zval *stream_array, const fd_set *fds)
+static int stream_array_from_fd_set(zval *stream_array, const php_growable_fd_set *fds)
 {
 	zval *elem, *dest_elem;
 	HashTable *ht;
@@ -860,7 +860,7 @@ static int stream_array_from_fd_set(zval *stream_array, const fd_set *fds)
 		 * is not displayed.
 		 */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
-			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
+			if (FD_ISSET(this_fd, fds->set)) {
 				if (!key) {
 					dest_elem = zend_hash_index_update(ht, num_ind, elem);
 				} else {
@@ -936,7 +936,11 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	FD_BIGSET_FREE(&efds); \
 } while (0)
 #else
-# define STREAM_SELECT_FREE_SETS() do {} while (0)
+# define STREAM_SELECT_FREE_SETS() do { \
+	php_growable_fd_set_destroy(&rfds); \
+	php_growable_fd_set_destroy(&wfds); \
+	php_growable_fd_set_destroy(&efds); \
+} while (0)
 #endif
 
 /* {{{ Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
@@ -947,7 +951,7 @@ PHP_FUNCTION(stream_select)
 #ifndef PHP_WIN32
 	fd_bigset rfds, wfds, efds;
 #else
-	fd_set rfds, wfds, efds;
+	php_growable_fd_set rfds, wfds, efds;
 #endif
 	php_socket_t max_fd = 0;
 	int retval, sets = 0;
@@ -1011,9 +1015,11 @@ PHP_FUNCTION(stream_select)
 		sets += set_count;
 	}
 #else
-	FD_ZERO(&rfds);
-	FD_ZERO(&wfds);
-	FD_ZERO(&efds);
+	/* Size the growable sets to each array's element count (clamped to at least
+	 * FD_SETSIZE); they still grow on demand, so this is only a starting guess. */
+	php_growable_fd_set_init(&rfds, r_array != NULL ? zend_hash_num_elements(Z_ARR_P(r_array)) : 0);
+	php_growable_fd_set_init(&wfds, w_array != NULL ? zend_hash_num_elements(Z_ARR_P(w_array)) : 0);
+	php_growable_fd_set_init(&efds, e_array != NULL ? zend_hash_num_elements(Z_ARR_P(e_array)) : 0);
 
 	if (r_array != NULL) {
 		set_count = stream_array_to_fd_set(Z_ARR_P(r_array), &rfds, &max_fd);
@@ -1116,7 +1122,7 @@ PHP_FUNCTION(stream_select)
 
 	retval = php_select(max_fd + 1, (fd_set *) rfds.fds_bits, (fd_set *) wfds.fds_bits, (fd_set *) efds.fds_bits, tv_p);
 #else
-	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
+	retval = php_select(max_fd + 1, rfds.set, wfds.set, efds.set, tv_p);
 #endif
 	php_stream_error_operation_end(context);
 
