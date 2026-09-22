@@ -168,16 +168,27 @@ class my_mysqli_fake_packet_generator
         return new my_mysqli_fake_packet_item(null, $packed_value, $is_hex);
     }
 
-    public function server_ok(): my_mysqli_fake_packet
+    public function server_ok($number = "02"): my_mysqli_fake_packet
     {
         $packet = new my_mysqli_fake_packet();
         $packet->packet_length = "070000";
-        $packet->packet_number = "02";
+        $packet->packet_number = $number;
         $packet->header = "00"; // OK
         $packet->affected_rows = "00";
         $packet->last_insert_id = "00";
         $packet->server_status = "0200";
         $packet->warning_count = "0000";
+        return $packet;
+    }
+
+    public function server_eof(): my_mysqli_fake_packet
+    {
+        $packet = new my_mysqli_fake_packet();
+        $packet->packet_length = "050000";
+        $packet->packet_number = "01";
+        $packet->header = "fe"; // EOF
+        $packet->warning_count = "0000";
+        $packet->server_status = "0200";
         return $packet;
     }
 
@@ -204,6 +215,25 @@ class my_mysqli_fake_packet_generator
         return $packet;
     }
 
+    public function server_greetings_sha256(): my_mysqli_fake_packet
+    {
+        $packet = $this->server_greetings();
+        // 6 bytes shorter than the default mysql_native_password greeting
+        $packet->packet_length = "520000";
+        $packet->mariadb_extended_server_capabilities_auth_plugin =
+            self::create_packet_item('sha256_password');
+
+        return $packet;
+    }
+    public function server_greetings_caching_sha2(): my_mysqli_fake_packet
+    {
+        $packet = $this->server_greetings();
+        // same length as the default mysql_native_password so the length stays
+        $packet->mariadb_extended_server_capabilities_auth_plugin =
+            self::create_packet_item('caching_sha2_password');
+
+        return $packet;
+    }
     public function server_tabular_query_response(): array
     {
         $qr1 = new my_mysqli_fake_packet();
@@ -246,7 +276,6 @@ class my_mysqli_fake_packet_generator
         $qr1->packet_number = "01";
         $qr1->field_count = "00"; // UPSERT
         $qr1->affected_rows = "00";
-        $qr1->affected_rows = "00";
         $qr1->last_insert_id = "00";
         $qr1->server_status = "0000";
         $qr1->warning_count = "0000";
@@ -256,6 +285,21 @@ class my_mysqli_fake_packet_generator
 
         return [$qr1];
     }
+
+	public function server_upsert_result_response(): my_mysqli_fake_packet
+	{
+		$ur = new my_mysqli_fake_packet();
+		$ur->packet_length = "300000";
+		$ur->packet_number = "01";
+		$ur->field_count = "00"; // UPSERT
+		$ur->affected_rows = "00";
+		$ur->last_insert_id = "00";
+		$ur->server_status = "0002";
+		$ur->warning_count = "0000";
+		$ur->payload = "28526f7773206d6174636865643a203120204368616e6765643a203020205761726e696e67733a2030";
+
+		return $ur;
+	}
 
     public function server_stmt_prepare_response_start($num_field): my_mysqli_fake_packet
     {
@@ -738,6 +782,44 @@ function my_mysqli_test_stmt_response_row_over_read_string(my_mysqli_fake_server
     $conn->read(65536);
 }
 
+function my_mysqli_test_stmt_response_row_short_length(
+    my_mysqli_fake_server_conn $conn,
+    string $field_name
+): void {
+    $rh = $conn->packet_generator->server_stmt_execute_data_response($field_name);
+
+    // The length does not cover the fixed offsets that the field type reads
+    $rh[4]->packet_length = '090000';
+    $rh[4]->row_field2 = '01de';
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send_server_stmt_prepare_data_response($field_name);
+    $conn->read();
+    $conn->send(
+        $conn->packets_to_bytes($rh),
+        "Malicious Stmt Response for data $field_name [length too short]"
+    );
+    $conn->read(65536);
+}
+
+function my_mysqli_test_stmt_response_row_short_length_date(my_mysqli_fake_server_conn $conn): void
+{
+    my_mysqli_test_stmt_response_row_short_length($conn, 'datval');
+}
+
+function my_mysqli_test_stmt_response_row_short_length_time(my_mysqli_fake_server_conn $conn): void
+{
+    my_mysqli_test_stmt_response_row_short_length($conn, 'timval');
+}
+
+function my_mysqli_test_stmt_response_row_short_length_datetime(my_mysqli_fake_server_conn $conn): void
+{
+    my_mysqli_test_stmt_response_row_short_length($conn, 'dtival');
+}
+
 function my_mysqli_test_stmt_response_row_over_read_two_fields(
     my_mysqli_fake_server_conn $conn,
     string $field_name,
@@ -831,6 +913,114 @@ function my_mysqli_test_query_response_row_length_overflow(my_mysqli_fake_server
     $conn->read(65536);
 }
 
+function my_mysqli_test_query_response_row_field_len(my_mysqli_fake_server_conn $conn): void
+{
+    $rh = $conn->packet_generator->server_query_execute_data_response('strval');
+
+    // 2-byte length prefix (0xfc) with the packet ending right after it, so
+    // decoding the length itself would read past the end of the packet
+    $rh[4]->row_field2 = 'fc';
+    $rh[4]->packet_length = '060000';
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($conn->packets_to_bytes($rh), "Malicious Query Response for data strval field [field length over-read]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_query_response_row(my_mysqli_fake_server_conn $conn, string $packet_length,
+                                           string $row_field2, string $message): void
+{
+    $rh = $conn->packet_generator->server_query_execute_data_response('strval');
+    $rh[4]->packet_length = $packet_length;
+    $rh[4]->row_field2 = $row_field2;
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($conn->packets_to_bytes($rh), $message);
+    $conn->read(65536);
+}
+
+function my_mysqli_test_query_response_row_eof_short(my_mysqli_fake_server_conn $conn): void
+{
+    $rh = $conn->packet_generator->server_query_execute_data_response('strval');
+    // EOF row packet that has no space for the warnings and the status
+    $rh[5]->packet_length = '030000';
+    $rh[5]->server_status = '';
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($conn->packets_to_bytes($rh), "Malicious Query Response [short EOF row packet]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_query_response_row_field_null(my_mysqli_fake_server_conn $conn): void
+{
+    // NULL field, which is encoded as a single 0xfb byte
+    my_mysqli_test_query_response_row($conn, "060000", "fb", "Query Response for data strval field [NULL]");
+}
+
+function my_mysqli_test_query_response_row_field_len_2_bytes(my_mysqli_fake_server_conn $conn): void
+{
+    // field length encoded on 2 bytes
+    my_mysqli_test_query_response_row($conn, "0c0000", "fc040074657374",
+        "Query Response for data strval field [length on 2 bytes]");
+}
+
+function my_mysqli_test_query_rset_header_field_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $rh = $conn->packet_generator->server_query_execute_data_response('strval');
+
+    $rh[0]->num_fields = "fd";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($conn->packets_to_bytes($rh), "Malicious Query Response for data strval field [length overflow]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_upsert_rset_header_affected_rows_over_read(my_mysqli_fake_server_conn $conn): void
+{
+	$ur = $conn->packet_generator->server_upsert_result_response();
+
+	$ur->packet_length = "020000";
+	$ur->affected_rows = "fd";
+	$ur->last_insert_id = "";
+	$ur->server_status = "";
+	$ur->warning_count = "";
+	$ur->payload = "";
+
+	$conn->send_server_greetings();
+	$conn->read();
+	$conn->send_server_ok();
+	$conn->read();
+	$conn->send($ur->to_bytes(), "Malicious Upsert Response [affected rows overflow]");
+	$conn->read(65536);
+}
+
+function my_mysqli_test_upsert_rset_header_packet_len_over_read(my_mysqli_fake_server_conn $conn): void
+{
+	$ur = $conn->packet_generator->server_upsert_result_response();
+
+	$ur->affected_rows = "fd";
+
+	$conn->send_server_greetings();
+	$conn->read();
+	$conn->send_server_ok();
+	$conn->read();
+	$conn->send($ur->to_bytes(), "Malicious Upsert Response [affected rows overflow]");
+	$conn->read(65536);
+}
+
+
 function my_mysqli_test_query_response_row_read_two_fields(my_mysqli_fake_server_conn $conn): void
 {
     $conn->send_server_greetings();
@@ -844,7 +1034,401 @@ function my_mysqli_test_query_response_row_read_two_fields(my_mysqli_fake_server
     }
 }
 
-function run_fake_server(string $test_function, int|string $port = 0): int
+function my_mysqli_test_auth_affected_rows_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok();
+    $p->packet_length = "020000";
+    $p->affected_rows = "fe";
+    $p->last_insert_id = "";
+    $p->server_status = "";
+    $p->warning_count = "";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Malicious OK Auth Response");
+    $conn->read();
+}
+
+function my_mysqli_test_auth_last_insert_id_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok();
+    $p->packet_length = "030000";
+    $p->last_insert_id = "fd";
+    $p->server_status = "";
+    $p->warning_count = "";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Malicious OK Auth Response");
+    $conn->read();
+}
+
+function my_mysqli_test_auth_warning_count_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok();
+    $p->packet_length = "060000";
+    $p->warning_count = "00"; // Shrunk 1 byte
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Malicious OK Auth Response");
+    $conn->read();
+}
+
+function my_mysqli_test_cached_sha2_result(my_mysqli_fake_server_conn $conn, string $packet_length, string $payload,
+                                           string $message): void
+{
+    $p = new my_mysqli_fake_packet();
+    $p->packet_length = $packet_length;
+    $p->packet_number = "02";
+    if ($payload !== '') {
+        $p->payload = $payload;
+    }
+
+    $conn->send($conn->packet_generator->server_greetings_caching_sha2()->to_bytes(), "Server Greeting");
+    $conn->read(65536);
+    // sent in one go so that the client cannot interleave its output in between
+    $conn->send($p->to_bytes() . $conn->packet_generator->server_ok("03")->to_bytes(), $message);
+    $conn->read(65536);
+}
+
+function my_mysqli_test_cached_sha2_result_fast_auth(my_mysqli_fake_server_conn $conn): void
+{
+    // What a real server sends for a successful fast auth: CR_OK and the status byte
+    my_mysqli_test_cached_sha2_result($conn, "020000", "0103", "Cached SHA2 Result [fast auth]");
+}
+
+function my_mysqli_test_cached_sha2_result_empty(my_mysqli_fake_server_conn $conn): void
+{
+    // Empty packet, so reading the response code reads past the packet
+    my_mysqli_test_cached_sha2_result($conn, "000000", "", "Malicious Cached SHA2 Result [empty packet]");
+}
+
+function my_mysqli_test_cached_sha2_result_len(my_mysqli_fake_server_conn $conn): void
+{
+    // Only the response code is left, so there is no space for the status byte
+    my_mysqli_test_cached_sha2_result($conn, "010000", "01", "Malicious Cached SHA2 Result [packet too short]");
+}
+
+function my_mysqli_test_sha256_pk_response_empty(my_mysqli_fake_server_conn $conn): void
+{
+    $p = new my_mysqli_fake_packet();
+    // Empty packet, so reading the response code reads past the packet
+    $p->packet_length = "000000";
+    $p->packet_number = "02";
+
+    $conn->send($conn->packet_generator->server_greetings_sha256()->to_bytes(), "Server Greeting");
+    $conn->read(65536);
+    $conn->send($p->to_bytes(), "Malicious SHA256 PK Response [empty packet]");
+    $conn->read(65536);
+    $conn->send($conn->packet_generator->server_ok("04")->to_bytes(), "Server OK");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_sha256_pk_response_len(my_mysqli_fake_server_conn $conn): void
+{
+    $p = new my_mysqli_fake_packet();
+    // Only the response code is left, so there is no space for the public key
+    $p->packet_length = "010000";
+    $p->packet_number = "02";
+    $p->response_code = "00";
+
+    $conn->send($conn->packet_generator->server_greetings_sha256()->to_bytes(), "Server Greeting");
+    $conn->read(65536);
+    $conn->send($p->to_bytes(), "Malicious SHA256 PK Response [packet too short]");
+    $conn->read(65536);
+    $conn->send($conn->packet_generator->server_ok("04")->to_bytes(), "Server OK");
+    $conn->read(65536);
+}
+
+/* An auth switch packet whose plugin name is not NUL terminated. */
+function my_mysqli_auth_switch_packet(string $packet_number): my_mysqli_fake_packet
+{
+    $p = new my_mysqli_fake_packet();
+    $p->packet_length = "160000";
+    $p->packet_number = $packet_number;
+    $p->response_code = "fe";
+    // 21 bytes of plugin name and no terminator
+    $p->auth_plugin_name = bin2hex('mysql_native_password');
+
+    return $p;
+}
+
+function my_mysqli_test_auth_response_switch_unterminated(my_mysqli_fake_server_conn $conn): void
+{
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send(my_mysqli_auth_switch_packet("02")->to_bytes(),
+        "Malicious Auth Switch Response [plugin name not terminated]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_chg_user_switch_unterminated(my_mysqli_fake_server_conn $conn): void
+{
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read(65536);
+    $conn->send(my_mysqli_auth_switch_packet("01")->to_bytes(),
+        "Malicious Change User Response [plugin name not terminated]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_cached_sha2_switch_unterminated(my_mysqli_fake_server_conn $conn): void
+{
+    $conn->send($conn->packet_generator->server_greetings_caching_sha2()->to_bytes(), "Server Greeting");
+    $conn->read(65536);
+    // sent in one go so that the client cannot interleave its output in between
+    $conn->send(my_mysqli_auth_switch_packet("02")->to_bytes()
+        . $conn->packet_generator->server_ok("03")->to_bytes(),
+        "Malicious Cached SHA2 Result [plugin name not terminated]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_chg_user_response_empty(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok("01");
+    // Empty packet, so reading the response code reads past the packet
+    $p->packet_length = "000000";
+    $p->header = "";
+    $p->affected_rows = "";
+    $p->last_insert_id = "";
+    $p->server_status = "";
+    $p->warning_count = "";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read(65536);
+    $conn->send($p->to_bytes(), "Malicious Change User Response [empty packet]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_chg_user_response_len(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok("01");
+    // Only the response code is left, so there is no space for the rest
+    $p->packet_length = "010000";
+    $p->affected_rows = "";
+    $p->last_insert_id = "";
+    $p->server_status = "";
+    $p->warning_count = "";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read(65536);
+    $conn->send($p->to_bytes(), "Malicious Change User Response [packet too short]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_auth_ok(my_mysqli_fake_server_conn $conn, string $packet_length, string $affected_rows,
+                                string $last_insert_id, string $server_status, string $warning_count,
+                                string $message): void
+{
+    $p = $conn->packet_generator->server_ok();
+    $p->packet_length = $packet_length;
+    $p->affected_rows = $affected_rows;
+    $p->last_insert_id = $last_insert_id;
+    $p->server_status = $server_status;
+    $p->warning_count = $warning_count;
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send($p->to_bytes(), $message);
+    $conn->read();
+}
+
+function my_mysqli_test_auth_last_insert_id_no_space(my_mysqli_fake_server_conn $conn): void
+{
+    // affected rows takes the last byte, so there is nothing left for the last insert id
+    my_mysqli_test_auth_ok($conn, "020000", "00", "", "", "",
+        "Malicious OK Auth Response [no space for last insert id]");
+}
+
+function my_mysqli_test_auth_affected_rows_null_length(my_mysqli_fake_server_conn $conn): void
+{
+    // affected rows sent as the NULL length marker
+    my_mysqli_test_auth_ok($conn, "070000", "fb", "00", "0200", "0000",
+        "OK Auth Response [affected rows as NULL length]");
+}
+
+function my_mysqli_test_auth_affected_rows_2_bytes(my_mysqli_fake_server_conn $conn): void
+{
+    // affected rows encoded on 2 bytes
+    my_mysqli_test_auth_ok($conn, "090000", "fc3412", "00", "0200", "0000",
+        "OK Auth Response [affected rows on 2 bytes]");
+}
+
+function my_mysqli_test_auth_affected_rows_8_bytes(my_mysqli_fake_server_conn $conn): void
+{
+    // affected rows encoded on 8 bytes
+    my_mysqli_test_auth_ok($conn, "0f0000", "fe0100000000000000", "00", "0200", "0000",
+        "OK Auth Response [affected rows on 8 bytes]");
+}
+
+function my_mysqli_test_greet_scramble_len_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_greetings();
+    // the scramble length claims more data than the packet holds
+    $p->auth_plugin = "ff";
+
+    $conn->send($p->to_bytes(), "Malicious Server Greeting [scramble length over-read]");
+    $conn->read();
+}
+
+function my_mysqli_test_greet_over_read_string(my_mysqli_fake_server_conn $conn): void
+{
+    $p = new my_mysqli_fake_packet();
+    $p->packet_length = "080000";
+    $p->packet_number = "00";
+    $p->proto_version = "0a";
+    $p->version = my_mysqli_fake_packet_generator::create_packet_item('5.5');
+    $p->thread_id = "03030303";
+    $p->salt = "473e3f6047257c67";
+
+    $conn->send($p->to_bytes(), "Malicious Server Greeting");
+    $conn->read();
+}
+
+function my_mysqli_test_greet_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = new my_mysqli_fake_packet();
+    $p->packet_length = "110000";
+    $p->packet_number = "00";
+    $p->proto_version = "0a";
+    $p->version = my_mysqli_fake_packet_generator::create_packet_item('8.0' . chr(0));
+    $p->thread_id = "03000000";
+    $p->salt = "473e3f6047257c67";
+
+    $conn->send($p->to_bytes(), "Malicious Server Greeting");
+    $conn->read();
+}
+
+function my_mysqli_test_ok_affected_rows_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok("01");
+    $p->packet_length = "020000";
+    $p->affected_rows = "fe";
+    $p->last_insert_id = "";
+    $p->server_status = "";
+    $p->warning_count = "";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Malicious OK Auth Response");
+    $conn->read();
+}
+
+function my_mysqli_test_ok_last_insert_id_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok("01");
+    $p->packet_length = "030000";
+    $p->last_insert_id = "fd";
+    $p->server_status = "";
+    $p->warning_count = "";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Malicious OK Auth Response");
+    $conn->read();
+}
+
+function my_mysqli_test_ok_message_len_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok("01");
+    $p->packet_length = "080000";
+    $p->message_len = "fd";
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Malicious OK Auth Response");
+    $conn->read();
+}
+
+function my_mysqli_test_ok_warning_count_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_ok("01");
+    $p->packet_length = "060000";
+    $p->warning_count = "00"; // Shrunk 1 byte
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Malicious OK Auth Response");
+    $conn->read();
+}
+
+function my_mysqli_test_eof_warning_count_over_read(my_mysqli_fake_server_conn $conn): void
+{
+    $p = $conn->packet_generator->server_eof();
+    $p->packet_length = "040000";
+    $p->warning_count = "00"; // Shrunk 1 byte
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $conn->send($p->to_bytes(), "Malicious EOF Response");
+    $conn->read();
+}
+
+function my_mysqli_test_stmt_response_row_over_read_status(my_mysqli_fake_server_conn $conn): void
+{
+    $rh = $conn->packet_generator->server_stmt_execute_items_response();
+
+    $conn->send_server_greetings();
+    $conn->read();
+    $conn->send_server_ok();
+    $conn->read();
+    $packets = $conn->packet_generator->server_stmt_prepare_items_response();
+    $packets[2]->server_status = '02';
+    $packets[2]->packet_length = '040000';
+    $conn->send($conn->packets_to_bytes($packets), "Stmt prepare items");
+    $conn->read();
+    $conn->send($conn->packets_to_bytes($rh), "Malicious Stmt Response for items [Extract heap through buffer over-read]");
+    $conn->read(65536);
+}
+
+function my_mysqli_test_stmt_response_field_len_faulty(my_mysqli_fake_server_conn $conn): void
+{
+	$rh = $conn->packet_generator->server_stmt_execute_items_response();
+
+	$conn->send_server_greetings();
+	$conn->read();
+	$conn->send_server_ok();
+	$conn->read();
+	$packets = $conn->packet_generator->server_stmt_prepare_items_response();
+	// org_name length exceeds the whole remaining packet
+	$packets[1]->orig_name_len = 'fe';
+	$packets[2]->packet_length = '1f0000';
+	$conn->send($conn->packets_to_bytes($packets), "Stmt prepare items");
+	$conn->read();
+	$conn->send($conn->packets_to_bytes($rh), "Malicious Stmt Response for fields [Extract heap through buffer over-read]");
+	$conn->read(65536);
+}
+
+function my_mysqli_test_stmt_response_field_len_premature(my_mysqli_fake_server_conn $conn): void
+{
+	$conn->send_server_greetings();
+	$conn->read();
+	$conn->send_server_ok();
+	$conn->read();
+	$packets = $conn->packet_generator->server_stmt_prepare_items_response();
+	// org_name length over-reads into the trailing fixed-length metadata block
+	$packets[1]->orig_name_len = '0c';
+	$conn->send($conn->packets_to_bytes($packets), "Malicious Stmt Prepare items [Field length over-read]");
+	$conn->read(65536);
+}
+
+function run_fake_server(string $test_function, int|string $port = 0): void
 {
     $host = '127.0.0.1';
 
@@ -873,9 +1457,12 @@ function run_fake_server(string $test_function, int|string $port = 0): int
     echo "[*] Server finished\n";
 }
 
-
 function run_fake_server_in_background($test_function, $port = 0): my_mysqli_fake_server_process
 {
+    if ($port == 0) {
+        $port = (int) getenv('MYSQLI_TEST_FAKE_SERVER_PORT');
+    }
+
     $command = [PHP_BINARY, '-n', __FILE__, 'mysqli_fake_server', $test_function, $port];
 
     $descriptorspec = array(

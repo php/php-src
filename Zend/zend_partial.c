@@ -1011,10 +1011,9 @@ static zend_op_array *zp_compile(zval *this_ptr, zend_function *function,
 	}
 #endif
 
+	/* Takes ownership of closure_ast */
 	op_array = zend_accel_compile_pfa(closure_ast, declaring_filename,
 			declaring_lineno_ptr, function, pfa_name, flags & ZEND_PARTIAL_CACHEABLE_IN_SHM);
-
-	zend_ast_destroy(closure_ast);
 
 clean:
 	zp_names_dtor(var_names, argc);

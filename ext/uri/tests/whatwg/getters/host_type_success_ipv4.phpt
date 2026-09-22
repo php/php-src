@@ -9,4 +9,4 @@ var_dump($url->getHostType());
 
 ?>
 --EXPECT--
-enum(Uri\WhatWg\UrlHostType::IPv4)
+enum(Uri\WhatWg\UrlHostType::IpV4)

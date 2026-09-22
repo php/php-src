@@ -1,6 +1,15 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0RC1
+?? ??? ????, PHP 8.6.0RC2
+
+- CLI:
+  . Fixed bug GH-23764 (Built-in server leaks a file descriptor on every HEAD
+    request for a static file). (jakubskopal)
+
+- Standard:
+  . Fixed bug GH-23780 (unserialize('') fails silently). (timwolla)
+
+24 Sep 2026, PHP 8.6.0RC1
 
 - Core:
   . Fixed incorrect internal pointer and foreach iterator positions when
@@ -12,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-23752 (Use scoped diagnostic suppression for the global
     register declarations so the caller's -Wvolatile-register-var state is
     restored). (yqtian-se)
+  . Fixed OSS-Fuzz #538730793 (Assertion failure when returning by-ref from
+    closure invoke). (ndossche)
+  . Fixed OSS-Fuzz #540904105 (ASSERT: ast->attr == T_CLASS_C). (ndossche)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
@@ -40,6 +52,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed a crash when converting with a cloned UConverter that uses
     toUCallback/fromUCallback. (Ilia Alshanetsky)
+  . Fixed Collator attribute and strength methods not rejecting an
+    unconstructed Collator. (Ilia Alshanetsky)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
@@ -58,10 +72,14 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-23693 (Tracing JIT produces wrong results for a guard on a
     loop-invariant addition). (Ilia Alshanetsky)
+  . Fixed OSS-Fuzz #545352966 (default value AST of an SHM-persisted partial).
+    (ndossche)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)
+  . Fixed PDOStatement::bindColumn() registering a binding for a column name
+    that is not in the result set. (Ilia Alshanetsky)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
@@ -88,7 +106,10 @@ PHP                                                                        NEWS
   . Fixed three Windows-only proc_open() defects: an uninitialized
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
-  . Fixed bug GH-23780 (unserialize('') fails silently). (timwolla)
+
+- URI:
+  . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
+    and PHP’s naming policy. (timwolla)
 
 - Zlib:
   . Fixed inflate_init() dropping the preset dictionary for raw streams with
@@ -108,6 +129,8 @@ PHP                                                                        NEWS
     when $allow_string is false is now deprecated. (Daniel Scherzer)
   . Fixed bug GH-23232 (lone namespace separator asks the autoloader for an
     empty class name). (spawnia)
+  . Enabled the TAILCALL VM (--disable-gcc-global-regs) when building with GCC >= 16.
+    (henderkes)
 
 - CLI:
   . Fixed bug GH-23242 (PHP development server does not support Expect

@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_uri.stub.php instead.
- * Stub hash: 0dc5793b7dffdb81e477b6f590faf7d0360f3ea9
+ * Stub hash: d96bdceccf7867b022c923bcfaf9f7a1142f0d0b
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -498,11 +498,11 @@ static zend_class_entry *register_class_Uri_Rfc3986_UriHostType(void)
 {
 	zend_class_entry *class_entry = zend_register_internal_enum("Uri\\Rfc3986\\UriHostType", IS_UNDEF, NULL);
 
-	zend_enum_add_case_cstr(class_entry, "IPv4", NULL);
+	zend_enum_add_case_cstr(class_entry, "IpV4", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "IPv6", NULL);
+	zend_enum_add_case_cstr(class_entry, "IpV6", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "IPvFuture", NULL);
+	zend_enum_add_case_cstr(class_entry, "IpVFuture", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "RegisteredName", NULL);
 
@@ -677,9 +677,9 @@ static zend_class_entry *register_class_Uri_WhatWg_UrlHostType(void)
 {
 	zend_class_entry *class_entry = zend_register_internal_enum("Uri\\WhatWg\\UrlHostType", IS_UNDEF, NULL);
 
-	zend_enum_add_case_cstr(class_entry, "IPv4", NULL);
+	zend_enum_add_case_cstr(class_entry, "IpV4", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "IPv6", NULL);
+	zend_enum_add_case_cstr(class_entry, "IpV6", NULL);
 
 	zend_enum_add_case_cstr(class_entry, "Domain", NULL);
 
