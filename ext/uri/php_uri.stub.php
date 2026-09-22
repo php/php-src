@@ -39,9 +39,9 @@ namespace Uri\Rfc3986 {
 
     enum UriHostType
     {
-        case IPv4;
-        case IPv6;
-        case IPvFuture;
+        case IpV4;
+        case IpV6;
+        case IpVFuture;
         case RegisteredName;
     }
 
@@ -204,8 +204,8 @@ namespace Uri\WhatWg {
 
     enum UrlHostType
     {
-        case IPv4;
-        case IPv6;
+        case IpV4;
+        case IpV6;
         case Domain;
         case Opaque;
         case Empty;
