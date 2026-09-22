@@ -1411,10 +1411,6 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 	HashTable *class_hash = NULL, *prev_class_hash;
 	zend_long prev_max_depth, prev_cur_depth;
 
-	if (buf_len == 0) {
-		RETURN_FALSE;
-	}
-
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
