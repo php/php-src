@@ -45,5 +45,4 @@ Stack trace:
 #0 [internal function]: write('%s', '')
 #1 {main}
   thrown in %s on line %d
-
-Warning: PHP Request Shutdown: Cannot call session save handler in a recursive manner in Unknown on line 0
+close: goodbye cruel world
