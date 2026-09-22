@@ -1200,8 +1200,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 		}
 	}
 
-	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, &errors) == FAILURE) {
-		/* The errors zval was already consumed; goto failure would destroy it again. */
+	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, Z_ARRVAL(errors)) == FAILURE) {
+		/* The errors array was already consumed; goto failure would destroy it again. */
 		lxb_url_destroy(lexbor_url);
 		return NULL;
 	}
@@ -1385,8 +1385,8 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 		}
 	}
 
-	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, &errors) == FAILURE) {
-		/* The errors zval was already consumed; goto failure would destroy it again. */
+	if (php_uri_pass_errors_by_ref_and_free(soft_errors_zv, Z_ARRVAL(errors)) == FAILURE) {
+		/* The errors array was already consumed; goto failure would destroy it again. */
 		lxb_url_destroy(lexbor_url);
 		return NULL;
 	}
