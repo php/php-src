@@ -6037,34 +6037,26 @@ static zend_string *php_str_rot13(zend_string *str)
 			gt = _mm_cmpgt_epi8(in, a_minus_1);
 			lt = _mm_cmplt_epi8(in, m_plus_1);
 			cmp = _mm_and_si128(lt, gt);
-			if (_mm_movemask_epi8(cmp)) {
-				cmp = _mm_and_si128(cmp, add);
-				delta = _mm_or_si128(delta, cmp);
-			}
+			cmp = _mm_and_si128(cmp, add);
+			delta = _mm_or_si128(delta, cmp);
 
 			gt = _mm_cmpgt_epi8(in, n_minus_1);
 			lt = _mm_cmplt_epi8(in, z_plus_1);
 			cmp = _mm_and_si128(lt, gt);
-			if (_mm_movemask_epi8(cmp)) {
-				cmp = _mm_and_si128(cmp, sub);
-				delta = _mm_or_si128(delta, cmp);
-			}
+			cmp = _mm_and_si128(cmp, sub);
+			delta = _mm_or_si128(delta, cmp);
 
 			gt = _mm_cmpgt_epi8(in, A_minus_1);
 			lt = _mm_cmplt_epi8(in, M_plus_1);
 			cmp = _mm_and_si128(lt, gt);
-			if (_mm_movemask_epi8(cmp)) {
-				cmp = _mm_and_si128(cmp, add);
-				delta = _mm_or_si128(delta, cmp);
-			}
+			cmp = _mm_and_si128(cmp, add);
+			delta = _mm_or_si128(delta, cmp);
 
 			gt = _mm_cmpgt_epi8(in, N_minus_1);
 			lt = _mm_cmplt_epi8(in, Z_plus_1);
 			cmp = _mm_and_si128(lt, gt);
-			if (_mm_movemask_epi8(cmp)) {
-				cmp = _mm_and_si128(cmp, sub);
-				delta = _mm_or_si128(delta, cmp);
-			}
+			cmp = _mm_and_si128(cmp, sub);
+			delta = _mm_or_si128(delta, cmp);
 
 			in = _mm_add_epi8(in, delta);
 			_mm_storeu_si128((__m128i *)target, in);
