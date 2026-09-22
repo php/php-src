@@ -2185,6 +2185,11 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 	client->content_sender_initialized = true;
 	if (client->request.request_method != PHP_HTTP_HEAD) {
 		client->file_fd = fd;
+	} else {
+		/* Content-Length comes from the stat and no body is sent, so the fd is
+		   not needed; it is still opened so HEAD gets the same 404 as GET on
+		   an unreadable file. */
+		close(fd);
 	}
 
 	{
