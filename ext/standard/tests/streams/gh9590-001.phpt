@@ -1,5 +1,6 @@
 --TEST--
-Bug GH-9590 001 (stream_select does not abort upon exception or empty valid fd set)
+Bug GH-9590 001 (stream_select works correctly, without warning, past the traditional
+FD_SETSIZE descriptor limit on platforms where that limit has been lifted)
 --EXTENSIONS--
 posix
 --SKIPIF--
@@ -21,19 +22,17 @@ for ($i = 0; $i < 1023; $i++) {
 }
 
 list($a, $b) = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+fwrite($b, "x");
 
 $r = [$a];
 $w = $e = [];
-var_dump(stream_select($r, $w, $e, PHP_INT_MAX));
+var_dump(stream_select($r, $w, $e, 30));
+var_dump(fread($a, 1));
 
 ?>
---EXPECTF--
-Warning: stream_select(): You MUST recompile PHP with a larger value of FD_SETSIZE.
-It is set to 1024, but you have descriptors numbered at least as high as %d.
- --enable-fd-setsize=%d is recommended, but you may want to set it
-to equal the maximum number of open files supported by your system,
-in order to avoid seeing this error again at a later date. in %s on line %d
-bool(false)
+--EXPECT--
+int(1)
+string(1) "x"
 --CLEAN--
 <?php
 for ($i = 0; $i < 1023; $i++) {
