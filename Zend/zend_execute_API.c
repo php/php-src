@@ -875,6 +875,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		zend_deprecated_function(func);
 
 		if (UNEXPECTED(EG(exception))) {
+			zend_release_fcall_info_cache(fci_cache);
 			if (pinned_this) {
 				OBJ_RELEASE(pinned_this);
 			}
@@ -1022,6 +1023,7 @@ cleanup_args:
 		if (zend_handle_undef_args(call) == FAILURE) {
 			zend_vm_stack_free_args(call);
 			zend_vm_stack_free_call_frame(call);
+			zend_release_fcall_info_cache(fci_cache);
 			if (pinned_this) {
 				OBJ_RELEASE(pinned_this);
 			}
