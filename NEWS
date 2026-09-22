@@ -68,6 +68,10 @@ PHP                                                                        NEWS
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
     set to an empty string. (Ilia Alshanetsky)
 
+- Session:
+  . Fixed exceptions from user-defined create_sid() handlers being replaced
+    by return-value validation errors. (Ilia Alshanetsky)
+
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)

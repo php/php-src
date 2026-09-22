@@ -36,14 +36,13 @@ try {
     session_create_id();
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
-    $previous = $e->getPrevious();
-    echo $previous::class, ": ", $previous->getMessage(), PHP_EOL;
+    var_dump($e->getPrevious());
 }
 
 var_dump(session_status() === PHP_SESSION_ACTIVE);
 
 ?>
 --EXPECT--
-Error: Session id must be a string
 Exception: create_sid failed
+NULL
 bool(true)
