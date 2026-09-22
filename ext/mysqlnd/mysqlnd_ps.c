@@ -348,6 +348,9 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 	if (FAIL == (ret = PACKET_READ(conn, &fields_eof))) {
 		if (stmt->result) {
 			stmt->result->m.free_result_contents(stmt->result);
+			/* The memset() below resets the statement, so release what it still owns first. */
+			conn->m->free_reference(conn);
+			mnd_efree(stmt->execute_cmd_buffer.buffer);
 			/* XXX: This will crash, because we will null also the methods.
 				But seems it happens in extreme cases or doesn't. Should be fixed by exporting a function
 				(from mysqlnd_driver.c?) to do the reset.

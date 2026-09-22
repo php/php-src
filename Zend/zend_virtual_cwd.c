@@ -1030,6 +1030,19 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	fprintf(stderr,"cwd = %s path = %s\n", state->cwd, path);
 #endif
 
+#ifdef ZEND_WIN32
+	switch (php_win32_ioutil_path_kind_a(path, path_length)) {
+		case PHP_WIN32_IOUTIL_PATH_RESERVED:
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_NAME);
+			return 1;
+		case PHP_WIN32_IOUTIL_PATH_DEVICE:
+			memcpy(resolved_path, path, path_length + 1);
+			goto verify;
+		default:
+			break;
+	}
+#endif
+
 	/* cwd_length can be 0 when getcwd() fails.
 	 * This can happen under solaris when a dir does not have read permissions
 	 * but *does* have execute permissions */
