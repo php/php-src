@@ -307,6 +307,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 			spprintf(&tmp, 0, "Did not find column name '%s' in the defined columns; it will not be bound", ZSTR_VAL(param->name));
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", tmp);
 			efree(tmp);
+			return 0;
 		}
 	}
 
