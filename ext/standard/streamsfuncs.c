@@ -663,11 +663,18 @@ typedef struct {
 static void fd_bigset_double_size(fd_bigset *set);
 
 #define FD_BIGSET_ENSURE_CAPACITY(fd, set) \
-	if (UNEXPECTED(((fd) / 8 >= (set)->size))) { \
+	while (UNEXPECTED(((fd) / 8 >= (set)->size))) { \
 		fd_bigset_double_size(set); \
 	}
+/* select() operates on whole `long`-sized words (see e.g. Linux's FDS_BYTES()/NFDBITS):
+ * it always reads/writes size-rounded-up-to-sizeof(long) bytes for a given nfds, even
+ * though the traditional fd_set is only ever created at that exact alignment (FD_SETSIZE
+ * is a multiple of 8*sizeof(long)). Since our size is derived from an arbitrary fd count,
+ * we must round up to a whole `long` ourselves, or select() will read/write past our
+ * heap allocation into adjacent memory whenever num_fds isn't a multiple of 8*sizeof(long). */
 #define FD_BIGSET_ZERO(set, num_fds) do { \
-	(set)->size = ((num_fds) + 7) / 8; \
+	size_t num_longs = ((size_t) (num_fds) + (8 * sizeof(long)) - 1) / (8 * sizeof(long)); \
+	(set)->size = num_longs * sizeof(long); \
 	(set)->fds_bits = (char *) ecalloc((set)->size, sizeof(char)); \
 } while (0)
 #define FD_BIGSET_SET(fd, set) do { \
