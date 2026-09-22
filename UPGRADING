@@ -120,6 +120,11 @@ PHP 8.6 UPGRADE NOTES
     execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
     This is consistent with other preg_* functions.
 
+- PDO:
+  . PDOStatement::bindColumn() now throws a ValueError when the column name is
+    not present in the result set. It previously reported the condition
+    through PDO::ATTR_ERRMODE and returned false.
+
 - PGSQL:
   . pg_fetch_object() now reports the ValueError for a non-empty
     $constructor_args on a class without a constructor on the

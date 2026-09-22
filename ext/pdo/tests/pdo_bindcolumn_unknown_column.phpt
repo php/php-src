@@ -1,5 +1,5 @@
 --TEST--
-PDO: bindColumn() must fail for a column name that is not in the result set
+PDO: bindColumn() must throw for a column name that is not in the result set
 --EXTENSIONS--
 pdo
 --SKIPIF--
@@ -17,16 +17,20 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->exec('CREATE TABLE pdo_bindcolumn_unknown_column (name varchar(255))');
 
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-$stmt = $db->query('SELECT name FROM pdo_bindcolumn_unknown_column');
-var_dump(@$stmt->bindColumn('nosuchcolumn', $var));
-
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-try {
-    $stmt->bindColumn('nosuchcolumn', $var);
-} catch (PDOException $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+// The error mode must not affect a ValueError.
+foreach ([PDO::ERRMODE_SILENT, PDO::ERRMODE_WARNING, PDO::ERRMODE_EXCEPTION] as $mode) {
+    $db->setAttribute(PDO::ATTR_ERRMODE, $mode);
+    $stmt = $db->query('SELECT name FROM pdo_bindcolumn_unknown_column');
+    try {
+        $stmt->bindColumn('nosuchcolumn', $var);
+    } catch (ValueError $e) {
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    }
 }
+
+// A column that does exist still binds.
+$stmt = $db->query('SELECT name FROM pdo_bindcolumn_unknown_column');
+var_dump($stmt->bindColumn('name', $var));
 ?>
 --CLEAN--
 <?php
@@ -37,5 +41,7 @@ $db = PDOTest::factory();
 $db->exec('DROP TABLE pdo_bindcolumn_unknown_column');
 ?>
 --EXPECT--
-bool(false)
-PDOException: SQLSTATE[HY000]: General error: Did not find column name 'nosuchcolumn' in the defined columns; it will not be bound
+ValueError: PDOStatement::bindColumn(): Argument #1 ($column) must refer to a column present in the result set
+ValueError: PDOStatement::bindColumn(): Argument #1 ($column) must refer to a column present in the result set
+ValueError: PDOStatement::bindColumn(): Argument #1 ($column) must refer to a column present in the result set
+bool(true)
