@@ -40,6 +40,10 @@ PHP_FUNCTION( collator_get_attribute )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
+	if (collator_check_initialized(co) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	value = ucol_getAttribute( co->ucoll, attribute, COLLATOR_ERROR_CODE_P( co ) );
 	COLLATOR_CHECK_STATUS( co, "Error getting attribute value" );
 
@@ -64,6 +68,10 @@ PHP_FUNCTION( collator_set_attribute )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
+	if (collator_check_initialized(co) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	/* Set new value for the given attribute. */
 	ucol_setAttribute( co->ucoll, attribute, value, COLLATOR_ERROR_CODE_P( co ) );
 	COLLATOR_CHECK_STATUS( co, "Error setting attribute value" );
@@ -87,6 +95,10 @@ PHP_FUNCTION( collator_get_strength )
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
+	if (collator_check_initialized(co) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	/* Get current strength and return it. */
 	RETURN_LONG( ucol_getStrength( co->ucoll ) );
 }
@@ -108,6 +120,10 @@ PHP_FUNCTION( collator_set_strength )
 
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
+
+	if (collator_check_initialized(co) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	/* Set given strength. */
 	ucol_setStrength( co->ucoll, strength );
