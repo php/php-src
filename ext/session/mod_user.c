@@ -237,12 +237,16 @@ PS_CREATE_SID_FUNC(user)
 			}
 			zval_ptr_dtor(&retval);
 		} else {
-			zend_throw_error(NULL, "No session id returned by function");
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "No session id returned by function");
+			}
 			return NULL;
 		}
 
 		if (!id) {
-			zend_throw_error(NULL, "Session id must be a string");
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Session id must be a string");
+			}
 			return NULL;
 		}
 
