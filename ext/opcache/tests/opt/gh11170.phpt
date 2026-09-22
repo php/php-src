@@ -39,7 +39,7 @@ test_and();
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=5, args=0, vars=0, tmps=2, ssa_vars=0, no_loops)
+     ; (lines=5, args=0, vars=0, tmps=%d, ssa_vars=0, no_loops)
      ; (after dfa pass)
      ; %s
      ; return  [long] RANGE[1..1]
@@ -53,7 +53,7 @@ BB0:
 0004 RETURN int(1)
 
 test_or:
-     ; (lines=11, args=0, vars=2, tmps=7, ssa_vars=11, no_loops)
+     ; (lines=11, args=0, vars=2, tmps=%d, ssa_vars=11, no_loops)
      ; (after dfa pass)
      ; %s
      ; return  [long] RANGE[-20..-1]
@@ -65,8 +65,8 @@ BB0:
      ; level=0
      ; children=(BB1, BB2, BB3)
 0000 INIT_FCALL 0 %d string("rand")
-0001 #2.V2 [long] = DO_ICALL
-0002 #3.T3 [long] RANGE[MIN..MAX] = MOD #2.V2 [long] int(10)
+0001 #2.T2 [long] = DO_ICALL
+0002 #3.T3 [long] RANGE[MIN..MAX] = MOD #2.T2 [long] int(10)
 0003 JMPZ #3.T3 [long] RANGE[MIN..MAX] BB2
 
 BB1:
@@ -99,7 +99,7 @@ BB3:
 0010 RETURN #10.T8 [long] RANGE[-20..-1]
 
 test_and:
-     ; (lines=11, args=0, vars=2, tmps=7, ssa_vars=11, no_loops)
+     ; (lines=11, args=0, vars=2, tmps=%d, ssa_vars=11, no_loops)
      ; (after dfa pass)
      ; %s
      ; return  [long] RANGE[-28..-25]
@@ -111,8 +111,8 @@ BB0:
      ; level=0
      ; children=(BB1, BB2, BB3)
 0000 INIT_FCALL 0 %d string("rand")
-0001 #2.V2 [long] = DO_ICALL
-0002 #3.T3 [long] RANGE[MIN..MAX] = MOD #2.V2 [long] int(10)
+0001 #2.T2 [long] = DO_ICALL
+0002 #3.T3 [long] RANGE[MIN..MAX] = MOD #2.T2 [long] int(10)
 0003 JMPZ #3.T3 [long] RANGE[MIN..MAX] BB2
 
 BB1:

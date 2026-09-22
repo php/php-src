@@ -10,7 +10,7 @@ if (getenv('SKIP_ONLINE_TESTS')) die('skip Online test');
 --FILE--
 <?php
 
-$sock = fsockopen("tls://google.com", 443);
+$sock = fsockopen("tls://php.net", 443);
 
 var_dump($sock);
 
@@ -24,7 +24,6 @@ curl_setopt_array(
 );
 
 var_dump(curl_exec($handle));
-curl_close($handle);
 
 fwrite($sock, "GET / HTTP/1.0\n\n");
 var_dump(fread($sock, 8));

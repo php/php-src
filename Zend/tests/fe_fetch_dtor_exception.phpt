@@ -1,5 +1,5 @@
 --TEST--
-Dtor may throw exception furing FE_FETCH assignment
+Dtor may throw exception during FE_FETCH assignment
 --FILE--
 <?php
 
@@ -13,10 +13,10 @@ try {
     foreach ([1, 2] as $v) {
         var_dump($v);
     }
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-foo
+Exception: foo

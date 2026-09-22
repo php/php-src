@@ -22,6 +22,9 @@ foreach ($special_forms as $f1) {
     test("1.0$f1", "1.0$f2");
     }
 }
+test("1.2.", "1.2.");
+test("1.2..", "1.2..");
+
 print "TESTING OPERATORS\n";
 foreach ($special_forms as $f1) {
     foreach ($special_forms as $f2) {
@@ -106,6 +109,8 @@ TESTING COMPARE
 1.0pl1 > 1.0rc1
 1.0pl1 > 1.0
 1.0pl1 = 1.0pl1
+1.2. = 1.2.
+1.2.. = 1.2..
 TESTING OPERATORS
 1.0-dev lt 1.0-dev : false
 1.0-dev  < 1.0-dev : false

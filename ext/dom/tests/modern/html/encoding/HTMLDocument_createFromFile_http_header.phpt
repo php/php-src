@@ -46,6 +46,7 @@ $tests = [
         "text/html; ;;   ; ;; Charset=\"ISO-8859-1\"",
         "text/html;Charset=\"ISO-8859-1",
         "tex.t/h#\$%!&'*%2B-.^_`|~tml;Charset=\"ISO-8859-1\"", // Note: have to encode + as 2B because of implementation details of http_server()
+        "text/html; abcd=ef;charset=ISO-8859-1",
     ],
     "Valid input, but invalid encoding name" => [
         "text/html;Charset=\"ISO-8859-1\\",
@@ -88,6 +89,7 @@ foreach ($tests as $name => $headers) {
 ���
 ���
 --- All valid inputs ---
+äöü
 äöü
 äöü
 äöü

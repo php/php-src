@@ -6,4 +6,4 @@ define('myerr', fopen('php://stderr', 'w'));
 debug_zval_dump(myerr);
 ?>
 --EXPECTF--
-resource(5) of type (stream) refcount(%d)
+resource(%d) of type (stream) refcount(%d)

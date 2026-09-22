@@ -67,7 +67,7 @@ foreach ($csv_lists as $csv_list) {
 
     // now file pointer should point to end of the file, try reading again
     var_dump( feof($file_handle) );
-    var_dump( fgetcsv($file_handle) );
+    var_dump( fgetcsv($file_handle, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

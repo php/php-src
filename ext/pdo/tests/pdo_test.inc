@@ -1,6 +1,8 @@
 <?php
 # PDO test framework utilities
 
+require_once dirname(__DIR__, 3) . '/tests/probe_cache.inc';
+
 if (getenv('PDOTEST_DSN') === false) {
     $common = '';
     $append = false;
@@ -18,48 +20,52 @@ if (getenv('PDOTEST_DSN') === false) {
 class PDOTest {
     // create an instance of the PDO driver, based on
     // the current environment
-    static function factory($classname = PDO::class) {
+    static function factory($classname = PDO::class, bool $useConnectMethod = false, ?array $attributes = null) {
         $dsn = getenv('PDOTEST_DSN');
         $user = getenv('PDOTEST_USER');
         $pass = getenv('PDOTEST_PASS');
-        $attr = getenv('PDOTEST_ATTR');
-        if (is_string($attr) && strlen($attr)) {
-            $attr = unserialize($attr);
-        } else {
-            $attr = null;
+        if ($attributes === null) {
+            $attributes = self::getAttributes('PDOTEST_ATTR');
+            if (getenv('TEST_PHP_EVALUATING_SKIPIF') === '1') {
+                $skipAttributes = self::getAttributes('PDOTEST_SKIP_ATTR');
+                if ($skipAttributes !== null) {
+                    $attributes = $skipAttributes + ($attributes ?? []);
+                }
+            }
         }
 
         if ($user === false) $user = NULL;
         if ($pass === false) $pass = NULL;
 
-        $db = new $classname($dsn, $user, $pass, $attr);
+        $configuration = [$classname, $useConnectMethod, $dsn, $user, $pass, $attributes];
 
-        if (!$db) {
-            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+        try {
+            return ProbeCache::getFailure('pdo', $configuration, static function () use ($classname, $useConnectMethod, $dsn, $user, $pass, $attributes): PDO {
+                try {
+                    return self::createConnection($classname, $useConnectMethod, $dsn, $user, $pass, $attributes);
+                } catch (PDOException $e) {
+                    throw new ProbeFailureException($e);
+                }
+            });
+        } catch (ProbeFailureException $e) {
+            throw new PDOException($e->getMessage());
         }
-        // Ignore errors about non-existent tables
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
-        $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-        return $db;
     }
 
     static function skip() {
         try {
-            $db = PDOTest::factory();
+            self::factory();
         } catch (PDOException $e) {
             die("skip " . $e->getMessage());
         }
     }
 
-    static function test_factory($file, $classname = PDO::class) {
+    static function test_factory($file, $classname = PDO::class, bool $useConnectMethod = false) {
         $config = self::get_config($file);
         foreach ($config['ENV'] as $k => $v) {
             putenv("$k=$v");
         }
-        return self::factory($classname);
+        return self::factory($classname, $useConnectMethod);
     }
 
     static function get_config($file) {
@@ -91,5 +97,48 @@ class PDOTest {
             default => $db->exec("DROP TABLE IF EXISTS $tableName"),
         };
     }
+
+    private static function createConnection($classname, bool $useConnectMethod, $dsn, $user, $pass, ?array $attributes) {
+        if ($useConnectMethod) {
+            $db = $classname::connect($dsn, $user, $pass, $attributes);
+        } else {
+            $db = new $classname($dsn, $user, $pass, $attributes);
+        }
+
+        if (!$db) {
+            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+        }
+        // Ignore errors about non-existent tables
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+        $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
+        return $db;
+    }
+
+    private static function getAttributes(string $environmentVariable): ?array {
+        $attributes = getenv($environmentVariable);
+        if (is_string($attributes) && strlen($attributes)) {
+            return unserialize($attributes);
+        }
+        return null;
+    }
 }
-?>
+/** See https://stackoverflow.com/a/3732466 */
+function get_dummy_sql_request(): string
+{
+    $dsn = getenv('PDOTEST_DSN');
+
+    // Firebird: https://www.firebirdfaq.org/faq30/
+    if (str_starts_with($dsn, 'firebird')) {
+        return "SELECT FIRST 0 FROM (VALUES ('Hello world')";
+    }
+
+    // Oracle
+    if (str_starts_with($dsn, 'oci')) {
+        return 'SELECT 1 FROM DUAL';
+    }
+
+    return 'SELECT 1';
+}

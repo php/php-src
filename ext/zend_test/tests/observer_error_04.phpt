@@ -25,7 +25,7 @@ function main()
 try {
     main();
 } catch (SoapFault $e) {
-    echo $e->getMessage() . PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 echo 'Done.' . PHP_EOL;
@@ -45,11 +45,11 @@ echo 'Done.' . PHP_EOL;
     </foo:NULL>
     <!-- Exception: SoapFault -->
   </main:NULL>
-  <!-- init Exception::getMessage() -->
+SoapFault:   <!-- init Exception::getMessage() -->
   <Exception::getMessage>
-  </Exception::getMessage:'SOAP-ERROR: Parsing WSDL: Couldn\'t load from \'foo\' : failed to load external entity "foo"
+  </Exception::getMessage:'SOAP-ERROR: Parsing WSDL: %s
 '>
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'foo' : failed to load external entity "foo"
+SOAP-ERROR: Parsing WSDL: %s
 
 Done.
 </file '%s%eobserver_error_%d.php'>

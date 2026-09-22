@@ -18,9 +18,9 @@ $serverCode = <<<'CODE'
         ]
     ]]);
 
-    $server = stream_socket_server('tls://127.0.0.1:64322', $errno, $errstr, $flags, $ctx);
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
-    phpt_notify();
     @stream_socket_accept($server, 3);
     // if there is a segfault, this won't be called
     fwrite(STDERR, "done\n");
@@ -33,11 +33,9 @@ $clientCode = <<<'CODE'
         'capture_peer_cert' => true
     ];
 
-    phpt_wait();
-
     $ctxArr['peer_name'] = 'domain1.com';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
-    @stream_socket_client("tls://127.0.0.1:64322", $errno, $errstr, 1, $flags, $ctx);
+    @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 1, $flags, $ctx);
 CODE;
 
 include 'ServerClientTestCase.inc';

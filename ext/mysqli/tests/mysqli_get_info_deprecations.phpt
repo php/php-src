@@ -24,7 +24,7 @@ print "done!";
 ?>
 --EXPECTF--
 
-Deprecated: Method mysqli::get_client_info() is deprecated in %s
+Deprecated: Method mysqli::get_client_info() is deprecated since 8.1, use mysqli_get_client_info() instead in %s
 client_info = '%s'
 
 Deprecated: mysqli_get_client_info(): Passing connection object as an argument is deprecated in %s

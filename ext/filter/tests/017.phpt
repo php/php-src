@@ -13,7 +13,7 @@ var_dump(filter_var("data", FILTER_VALIDATE_REGEXP, array("options"=>array("rege
 try {
     filter_var("data", FILTER_VALIDATE_REGEXP);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "Done\n";
@@ -24,5 +24,5 @@ bool(false)
 string(4) "data"
 bool(false)
 bool(false)
-filter_var(): "regexp" option is missing
+ValueError: filter_var(): "regexp" option is missing
 Done

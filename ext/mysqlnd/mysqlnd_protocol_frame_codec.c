@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -355,9 +353,6 @@ MYSQLND_METHOD(mysqlnd_pfc, receive)(MYSQLND_PFC * const pfc, MYSQLND_VIO * cons
 				DBG_RETURN(FAIL);
 			}
 			pfc->data->compressed_envelope_packet_no++;
-#ifdef MYSQLND_DUMP_HEADER_N_BODY
-			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (zend_ulong) net_payload_size);
-#endif
 			/* Now let's read from the wire, decompress it and fill the read buffer */
 			pfc->data->m.read_compressed_packet_from_stream_and_fill_read_buffer(pfc, vio, net_payload_size, conn_stats, error_info);
 

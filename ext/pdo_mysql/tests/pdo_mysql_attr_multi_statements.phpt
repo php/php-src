@@ -1,5 +1,5 @@
 --TEST--
-PDO::MYSQL_ATTR_MULTI_STATEMENTS
+Pdo\Mysql::ATTR_MULTI_STATEMENTS
 --EXTENSIONS--
 pdo_mysql
 --SKIPIF--
@@ -37,7 +37,7 @@ error_reporting=E_ALL
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
     // New connection, does not allow multiple statements.
-    $db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => false));
+    $db = new PDO($dsn, $user, $pass, array(Pdo\Mysql::ATTR_MULTI_STATEMENTS => false));
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
     $stmt = $db->query(sprintf('SELECT * FROM %s; INSERT INTO %s(id) VALUES (3)', $table, $table));

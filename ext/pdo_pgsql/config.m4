@@ -7,22 +7,49 @@ PHP_ARG_WITH([pdo-pgsql],
     the libpq paths.])])
 
 if test "$PHP_PDO_PGSQL" != "no"; then
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
   PHP_SETUP_PGSQL([PDO_PGSQL_SHARED_LIBADD],,, [$PHP_PDO_PGSQL])
   PHP_SUBST([PDO_PGSQL_SHARED_LIBADD])
 
-  AC_DEFINE(HAVE_PDO_PGSQL,1,[Whether to build PostgreSQL for PDO support or not])
+  AC_DEFINE([HAVE_PDO_PGSQL], [1],
+    [Define to 1 if the PHP extension 'pdo_pgsql' is available.])
 
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
-    [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1], [PostgreSQL 12 or later])],,
+    [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1],
+      [Define to 1 if libpq has the 'PQresultMemorySize' function (PostgreSQL 12
+      or later).])],,
     [$PGSQL_LIBS])
+
+  PHP_CHECK_LIBRARY([pq], [PQclosePrepared],
+    [AC_DEFINE([HAVE_PQCLOSEPREPARED], [1],
+      [Define to 1 if libpq has the 'PQclosePrepared' function (PostgreSQL 17
+      or later).])],,
+    [$PGSQL_LIBS])
+
+  PHP_CHECK_LIBRARY([pq], [PQclosePortal],
+    [AC_DEFINE([HAVE_PQCLOSEPORTAL], [1],
+      [Define to 1 if libpq has the 'PQclosePortal' function (PostgreSQL 17
+      or later).])],,
+    [$PGSQL_LIBS])
+
+  old_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $PGSQL_CFLAGS"
+
+  AC_CHECK_DECL([PGRES_TUPLES_CHUNK],
+    PHP_CHECK_LIBRARY([pq], [PQsetChunkedRowsMode],
+      [AC_DEFINE([HAVE_PG_SET_CHUNKED_ROWS_SIZE], [1],
+        [Define to 1 if libpq has the 'PQsetChunkedRowsMode' function (PostgreSQL
+        17 or later).])],,
+      [$PGSQL_LIBS]),,
+      [#include <libpq-fe.h>]
+  )
+
+  CFLAGS=$old_CFLAGS
 
   PHP_CHECK_PDO_INCLUDES
 
-  PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c pgsql_sql_parser.c, $ext_shared)
+  PHP_NEW_EXTENSION([pdo_pgsql],
+    [pdo_pgsql.c pgsql_driver.c pgsql_statement.c pgsql_sql_parser.c],
+    [$ext_shared])
   PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo)
   PHP_ADD_MAKEFILE_FRAGMENT
 fi

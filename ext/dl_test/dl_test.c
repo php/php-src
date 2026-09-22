@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Arnaud Le Blanc <arnaud.lb@gmail.com>                        |
   +----------------------------------------------------------------------+
@@ -76,9 +74,39 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
+PHP_METHOD(DlTest, test)
+{
+	char *var = "World";
+	size_t var_len = sizeof("World") - 1;
+	zend_string *retval;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(var, var_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	retval = strpprintf(0, "Hello %s", var);
+
+	RETURN_STR(retval);
+}
+
+PHP_METHOD(DlTestSuperClass, test)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_NULL();
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(dl_test)
 {
+	zend_class_entry *ce;
+
+	register_class_DlTest();
+	ce = register_class_DlTestSuperClass();
+	register_class_DlTestSubClass(ce);
+	register_class_DlTestAliasedClass();
+
 	/* Test backwards compatibility */
 	if (getenv("PHP_DL_TEST_USE_OLD_REGISTER_INI_ENTRIES")) {
 		zend_register_ini_entries(ini_entries, module_number);
@@ -93,6 +121,8 @@ PHP_MINIT_FUNCTION(dl_test)
 	if (getenv("PHP_DL_TEST_MODULE_DEBUG")) {
 		fprintf(stderr, "DL TEST MINIT\n");
 	}
+
+	register_dl_test_symbols(module_number);
 
 	return SUCCESS;
 }

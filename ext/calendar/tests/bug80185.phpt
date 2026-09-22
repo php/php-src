@@ -13,10 +13,10 @@ var_dump(jdtounix((int)(PHP_INT_MAX / 86400 + 2440588)));
 try {
     var_dump(jdtounix((int)(PHP_INT_MAX / 86400 + 2440589)));
 } catch (ValueError $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 int(2170713600)
 int(9223372036854720000)
-jday must be between 2440588 and 106751993607888
+ValueError: jdtounix(): Argument #1 ($julian_day) jday must be between 2440588 and 106751993607888

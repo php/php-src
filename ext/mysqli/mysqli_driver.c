@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
@@ -26,7 +24,7 @@
 
 
 /* {{{ property driver_report_read */
-static int driver_report_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result driver_report_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, MyG(report_mode));
 	return SUCCESS;
@@ -34,7 +32,7 @@ static int driver_report_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property driver_report_write */
-static int driver_report_write(mysqli_object *obj, zval *value)
+static zend_result driver_report_write(mysqli_object *obj, zval *value)
 {
 	ZEND_ASSERT(Z_TYPE_P(value) == IS_LONG);
 	MyG(report_mode) = Z_LVAL_P(value);
@@ -43,7 +41,7 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 /* }}} */
 
 /* {{{ property driver_client_version_read */
-static int driver_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result driver_client_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_LONG(retval, mysql_get_client_version());
 	return SUCCESS;
@@ -51,7 +49,7 @@ static int driver_client_version_read(mysqli_object *obj, zval *retval, bool qui
 /* }}} */
 
 /* {{{ property driver_client_info_read */
-static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
 	return SUCCESS;
@@ -59,7 +57,7 @@ static int driver_client_info_read(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property driver_driver_version_read */
-static int driver_driver_version_read(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result driver_driver_version_read(mysqli_object *obj, zval *retval, bool quiet)
 {
 	if (quiet) {
 		return FAILURE;

@@ -7,4 +7,4 @@ class foobar {}
 class_alias("foobar", "int");
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'int' as class name as it is reserved in %s on line %d
+Fatal error: Cannot use "int" as a class alias as it is reserved in %s on line %d

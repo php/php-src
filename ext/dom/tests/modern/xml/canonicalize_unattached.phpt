@@ -1,0 +1,20 @@
+--TEST--
+Canonicalize unattached node should fail
+--EXTENSIONS--
+dom
+--FILE--
+<?php
+
+$d = \Dom\XMLDocument::createFromString('<root><child/></root>');
+$child = $d->documentElement->firstChild;
+$child->remove();
+
+try {
+    $child->C14N();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECT--
+DOMException: Canonicalization can only happen on nodes attached to a document.

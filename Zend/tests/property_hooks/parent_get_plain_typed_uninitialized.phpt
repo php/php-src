@@ -1,0 +1,25 @@
+--TEST--
+Using parent::$prop::get() on plain uninitialized typed property
+--FILE--
+<?php
+
+class P {
+    public int $prop;
+}
+
+class C extends P {
+    public int $prop {
+        get => parent::$prop::get();
+    }
+}
+
+$c = new C();
+try {
+    var_dump($c->prop);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECT--
+Error: Typed property C::$prop must not be accessed before initialization

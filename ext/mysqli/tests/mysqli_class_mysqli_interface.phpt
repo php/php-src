@@ -43,6 +43,7 @@ require_once 'skipifconnectfailure.inc';
         'ping'					=> true,
         'prepare'				=> true,
         'query'					=> true,
+        'quote_string'			=> true,
         'real_connect'			=> true,
         'real_escape_string'	=> true,
         'real_query'			=> true,

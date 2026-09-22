@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -282,11 +280,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 
 	DBG_INF("Freeing memory of members");
 
-	mysqlnd_set_persistent_string(&conn->hostname, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->username, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->password, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->connect_or_select_db, NULL, 0, pers);
-	mysqlnd_set_persistent_string(&conn->unix_socket, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
 
@@ -513,6 +506,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 }
 /* }}} */
 
+/* ipv6 addresses have at least two colons, which is how we can differentiate between domain names and addresses */
+static bool mysqlnd_fast_is_ipv6_address(const char *s)
+{
+	const char *first_colon = strchr(s, ':');
+	if (!first_colon) {
+		return false;
+	}
+	return strchr(first_colon + 1, ':') != NULL;
+}
+
 /* {{{ mysqlnd_conn_data::get_scheme */
 static MYSQLND_STRING
 MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_CSTRING hostname, MYSQLND_CSTRING *socket_or_pipe, unsigned int port, bool * unix_socket, bool * named_pipe)
@@ -542,7 +545,31 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 		if (!port) {
 			port = 3306;
 		}
-		transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s:%u", hostname.s, port);
+
+		if (hostname.s[0] != '[' && mysqlnd_fast_is_ipv6_address(hostname.s)) {
+			/* IPv6 without square brackets so without port */
+			transport.l = mnd_sprintf(&transport.s, 0, "tcp://[%s]:%u", hostname.s, port);
+		} else {
+			const char *p;
+
+			/* IPv6 addresses are in the format [address]:port */
+			if (hostname.s[0] == '[') { /* IPv6 */
+				p = strchr(hostname.s, ']');
+				if (p && p[1] != ':') {
+					p = NULL;
+				}
+			} else { /* IPv4 or name */
+				p = strchr(hostname.s, ':');
+			}
+			/* Could already contain a port number, in which case we should not add an extra port.
+			 * See GH-8978. In a port doubling scenario, the first port would be used so we do the same to keep BC. */
+			if (p) {
+				/* TODO: Ideally we should be able to get rid of this workaround in the future. */
+				transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s", hostname.s);
+			} else {
+				transport.l = mnd_sprintf(&transport.s, 0, "tcp://%s:%u", hostname.s, port);
+			}
+		}
 	}
 	DBG_INF_FMT("transport=%s", transport.s? transport.s:"OOM");
 	DBG_RETURN(transport);
@@ -658,22 +685,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		if (transport.s) {
 			mnd_sprintf_free(transport.s);
 			transport.s = NULL;
-		}
-
-		if (!conn->scheme.s) {
+		} else {
 			goto err; /* OOM */
 		}
 
-		mysqlnd_set_persistent_string(&conn->username, username.s, username.l, conn->persistent);
-		mysqlnd_set_persistent_string(&conn->password, username.s, password.l, conn->persistent);
 		conn->port				= port;
-		mysqlnd_set_persistent_string(&conn->connect_or_select_db, database.s, database.l, conn->persistent);
 
 		if (!unix_socket && !named_pipe) {
-			mysqlnd_set_persistent_string(&conn->hostname, hostname.s, hostname.l, conn->persistent);
 			{
 				char *p;
-				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname.s);
+				mnd_sprintf(&p, 0, "%s via TCP/IP", hostname.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -682,12 +703,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 				mnd_sprintf_free(p);
 			}
 		} else {
-			conn->unix_socket.s = mnd_pestrdup(socket_or_pipe.s, conn->persistent);
 			if (unix_socket) {
 				conn->host_info = mnd_pestrdup("Localhost via UNIX socket", conn->persistent);
 			} else if (named_pipe) {
 				char *p;
-				mnd_sprintf(&p, 0, "%s via named pipe", conn->unix_socket.s);
+				mnd_sprintf(&p, 0, "%s via named pipe", socket_or_pipe.s);
 				if (!p) {
 					SET_OOM_ERROR(conn->error_info);
 					goto err; /* OOM */
@@ -697,11 +717,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			} else {
 				php_error_docref(NULL, E_WARNING, "Impossible. Should be either socket or a pipe. Report a bug!");
 			}
-			if (!conn->unix_socket.s || !conn->host_info) {
+			if (!socket_or_pipe.s || !conn->host_info) {
 				SET_OOM_ERROR(conn->error_info);
 				goto err; /* OOM */
 			}
-			conn->unix_socket.l = strlen(conn->unix_socket.s);
 		}
 
 		SET_EMPTY_ERROR(conn->error_info);
@@ -1365,7 +1384,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */
 	ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, strlen(db),
 									 conn->authentication_plugin_data, conn->options->auth_protocol,
-									0 /*charset not used*/, conn->options, conn->server_capabilities, silent, TRUE/*is_change*/);
+									0 /*charset not used*/, conn->server_capabilities, silent, TRUE/*is_change*/);
 
 	/*
 	  Here we should close all statements. Unbuffered queries should not be a
@@ -1444,10 +1463,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		}
 		case MYSQL_READ_DEFAULT_FILE:
 		case MYSQL_READ_DEFAULT_GROUP:
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_SET_CLIENT_IP:
-		case MYSQL_REPORT_DATA_TRUNCATION:
-#endif
 			/* currently not supported. Todo!! */
 			break;
 		case MYSQL_SET_CHARSET_NAME:
@@ -1475,18 +1490,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 				conn->options->protocol = *(unsigned int*) value;
 			}
 			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_SET_CHARSET_DIR:
-		case MYSQL_OPT_RECONNECT:
-			/* we don't need external character sets, all character sets are
-			   compiled in. For compatibility we just ignore this setting.
-			   Same for protocol, we don't support old protocol */
-		case MYSQL_OPT_USE_REMOTE_CONNECTION:
-		case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
-		case MYSQL_OPT_GUESS_CONNECTION:
-			/* todo: throw an error, we don't support embedded */
-			break;
-#endif
 		case MYSQLND_OPT_MAX_ALLOWED_PACKET:
 			if (*(unsigned int*) value > (1<<16)) {
 				conn->options->max_allowed_packet = *(unsigned int*) value;
@@ -1522,12 +1525,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 				DBG_INF_FMT("%d left", zend_hash_num_elements(conn->options->connect_attr));
 			}
 			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_SHARED_MEMORY_BASE_NAME:
-		case MYSQL_OPT_USE_RESULT:
-		case MYSQL_SECURE_AUTH:
-			/* not sure, todo ? */
-#endif
 		default:
 			ret = FAIL;
 	}
@@ -1560,17 +1557,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 				zval attrz;
 				zend_string *str;
 
+				str = zend_string_init(key, strlen(key), conn->persistent);
+				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), conn->persistent));
 				if (conn->persistent) {
-					str = zend_string_init(key, strlen(key), 1);
 					GC_MAKE_PERSISTENT_LOCAL(str);
-					ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 1));
 					GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(attrz));
-				} else {
-					str = zend_string_init(key, strlen(key), 0);
-					ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 0));
 				}
 				zend_hash_update(conn->options->connect_attr, str, &attrz);
-				zend_string_release_ex(str, 1);
+				zend_string_release_ex(str, conn->persistent);
 			}
 			break;
 		default:
@@ -2263,7 +2257,7 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
-		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
+		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=" PHP_SOCKET_FMT ")",
 						errno, strerror(errno), max_fd);
 		DBG_RETURN(FAIL);
 	}

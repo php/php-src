@@ -5,6 +5,12 @@ phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
+?>
 --FILE--
 <?php
 
@@ -35,7 +41,7 @@ try {
     $phar['test']->chmod(0666);
     var_dump($phar['test']->isReadable());
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--

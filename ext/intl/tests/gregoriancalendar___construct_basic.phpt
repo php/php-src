@@ -2,12 +2,11 @@
 IntlGregorianCalendar::__construct(): basic
 --EXTENSIONS--
 intl
+--INI--
+date.timezone=Europe/Amsterdam
+intl.default_locale=nl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
-
-date_default_timezone_set('Europe/Amsterdam');
 
 $intlcal = intlgregcal_create_instance();
 var_dump($intlcal->getTimeZone()->getId());
@@ -32,7 +31,7 @@ var_dump($intlcal->getLocale(1));
 var_dump($intlcal->getType());
 ?>
 --EXPECTF--
-Deprecated: Function intlgregcal_create_instance() is deprecated in %s on line %d
+Deprecated: Function intlgregcal_create_instance() is deprecated since 8.4, use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
 string(16) "Europe/Amsterdam"
 string(5) "nl_NL"
 string(13) "Europe/Lisbon"

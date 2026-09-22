@@ -422,9 +422,8 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 
     public const int PREFIX_RIGHT = 5;
 
-    /** @param RecursiveIterator|IteratorAggregate $iterator */
     public function __construct(
-        $iterator,
+        RecursiveIterator|IteratorAggregate $iterator,
         int $flags = RecursiveTreeIterator::BYPASS_KEY,
         int $cachingIteratorFlags = CachingIterator::CATCH_GET_CHILD,
         int $mode = RecursiveTreeIterator::SELF_FIRST

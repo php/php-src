@@ -12,7 +12,6 @@ require_once 'skipifconnectfailure.inc';
     require 'table.inc';
 
     // do as much as we can do in 5 seconds
-    $start = microtime(true);
     for ($id = 100, $start = microtime(true); (microtime(true) - $start) < 5; $id++) {
         if (!mysqli_query($link, $sql = sprintf("INSERT INTO test(id, label) VALUES (%d, '%s')",
             $id, mysqli_real_escape_string($link, chr(65 + ($id % 26)))))) {
@@ -52,7 +51,7 @@ require_once 'skipifconnectfailure.inc';
         }
         if ($row[0] !== $row['id']) {
             printf("[005] Unexpected result row[0] = '%s', row[id] = '%s', [%d] %s\n",
-                $row[0], $row[id], mysqli_errno($link), mysqli_error($link));
+                $row[0], $row['id'], mysqli_errno($link), mysqli_error($link));
             break;
         }
 

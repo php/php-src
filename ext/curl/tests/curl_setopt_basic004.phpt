@@ -21,7 +21,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_URL, $url);
 
 $curl_content = curl_exec($ch);
-curl_close($ch);
+$ch = null;
 
 var_dump( $curl_content );
 
@@ -34,7 +34,7 @@ curl_setopt($ch, CURLOPT_URL, $url);
 ob_start();
 $curl_content = curl_exec($ch);
 ob_end_clean();
-curl_close($ch);
+$ch = null;
 
 var_dump( $curl_content );
 ?>

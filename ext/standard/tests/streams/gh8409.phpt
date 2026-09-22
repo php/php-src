@@ -3,7 +3,7 @@ GH-8409: Error in socket creation when error handler does not clean persistent c
 --FILE--
 <?php
 set_error_handler(function (int $errno, string $errstring): never {
-    trigger_error($errstring, E_USER_ERROR);
+    throw new Exception($errstring);
 });
 
 register_shutdown_function(function (): void {
@@ -21,5 +21,10 @@ stream_socket_client('tcp://9999.9999.9999.9999:9999', $error_code, $error_messa
 echo "ERROR: this should not be visible\n";
 ?>
 --EXPECTF--
-Fatal error: stream_socket_client(): %s in %sgh8409.php on line %d
+Fatal error: Uncaught Exception: stream_socket_client(): %s in %sgh8409.php:%d
+Stack trace:
+#0 [internal function]: {closure:%s:%d}(2, 'stream_socket_c...', '%s', %d)
+#1 %s(%d): stream_socket_client('tcp://9999.9999...', 0, '', 0.2, 5)
+#2 {main}
+  thrown in %s on line %d
 OK: persistent stream closed

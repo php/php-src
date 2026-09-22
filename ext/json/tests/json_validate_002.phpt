@@ -23,13 +23,13 @@ int(4)
 string(12) "Syntax error"
 bool(false)
 int(4)
-string(12) "Syntax error"
+string(30) "Syntax error near location 1:1"
 bool(false)
 int(4)
 string(12) "Syntax error"
 bool(false)
 int(1)
-string(28) "Maximum stack depth exceeded"
+string(46) "Maximum stack depth exceeded near location 1:1"
 bool(true)
 int(0)
 string(8) "No error"
@@ -44,7 +44,7 @@ int(0)
 string(8) "No error"
 bool(false)
 int(4)
-string(12) "Syntax error"
+string(30) "Syntax error near location 1:1"
 bool(true)
 int(0)
 string(8) "No error"

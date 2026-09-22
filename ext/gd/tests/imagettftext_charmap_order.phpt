@@ -61,7 +61,6 @@ if ($black_pixels >= 10) {
 } else {
   printf("FAIL %d black pixels\n", $black_pixels);
 }
-imagedestroy($im);
 ?>
 --EXPECTF--
 SUCCESS %d black pixels

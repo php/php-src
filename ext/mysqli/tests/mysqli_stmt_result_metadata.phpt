@@ -23,7 +23,7 @@ require_once 'skipifconnectfailure.inc';
         printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     if (!is_object(($res = mysqli_stmt_result_metadata($stmt))))
-        printf("[006] Expecting object, got %s/%s\n", gettype($tmp), $tmp);
+        printf("[006] Expecting object, got %s/%s\n", gettype($res), $res);
 
     if (2 !== ($tmp = mysqli_num_fields($res)))
         printf("[007] Expecting int/2, got %s/%s, [%d] %s\n",
@@ -45,9 +45,7 @@ require_once 'skipifconnectfailure.inc';
 
     var_dump($field0_fetch);
 
-    if (!is_array($tmp = mysqli_fetch_fields($res)))
-        printf("[011] Expecting array, got %s/%s, [%d] %s\n",
-            gettype($tmp), $tmp, mysqli_errno($link), mysqli_error($link));
+    $tmp = mysqli_fetch_fields($res);
 
     if (empty($tmp[0]) || empty($tmp[1]) || $tmp[0] != $field0_direct) {
         printf("[012] mysqli_fetch_fields() return value is suspicious\n");
@@ -88,6 +86,7 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli_stmt object is not fully initialized
 object(stdClass)#%d (13) {
   ["name"]=>

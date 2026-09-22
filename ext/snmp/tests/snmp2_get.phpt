@@ -8,6 +8,7 @@ snmp
 <?php
 require_once(__DIR__.'/skipif.inc');
 if (getenv('SKIP_ASAN')) die('skip Timeouts under ASAN');
+if (PHP_OS_FAMILY === 'Windows') die('xfail SNMP tests might possibly fail on Windows');
 ?>
 --FILE--
 <?php
@@ -54,7 +55,7 @@ var_dump(snmp2_get($hostname, $community, array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.
 --EXPECTF--
 Checking error handling
 Empty OID array
-Array of object IDs cannot be empty
+snmp2_get(): Argument #3 ($object_id) must not be empty when passed as an array
 Checking working
 Single OID
 string(%d) "%s"

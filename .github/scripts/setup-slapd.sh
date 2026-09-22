@@ -72,6 +72,9 @@ olcTLSCertificateKeyFile: /etc/ldap/ssl/server.key
 add: olcTLSVerifyClient
 olcTLSVerifyClient: never
 -
+add: olcTLSProtocolMin
+olcTLSProtocolMin: 3.3
+-
 add: olcAuthzRegexp
 olcAuthzRegexp: uid=usera,cn=digest-md5,cn=auth cn=usera,dc=my-domain,dc=com
 -

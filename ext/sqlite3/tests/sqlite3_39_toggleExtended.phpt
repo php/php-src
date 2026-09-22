@@ -40,4 +40,3 @@ Third (Extended) Error Code: 1555
 Closing database
 bool(true)
 Done
-

@@ -19,8 +19,13 @@ gzclose($h);
 
 var_dump(gzfile( $filename ) );
 
-unlink($filename);
-rmdir($dirname);
+?>
+--CLEAN--
+<?php
+$dirname = 'gzfile_temp';
+$filename = $dirname.'/gzfile_basic.txt.gz';
+@unlink($filename);
+@rmdir($dirname);
 ?>
 --EXPECT--
 array(3) {

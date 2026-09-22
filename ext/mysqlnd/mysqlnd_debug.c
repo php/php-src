@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
@@ -76,22 +74,11 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#ifdef PHP_WIN32
-		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
-		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
-		SYSTEMTIME loc_t;
-		GetLocalTime(&loc_t);
-		snprintf(time_buffer, sizeof(time_buffer) - 1,
-				 /* "%04d-%02d-%02d " */
-				 "%02d:%02d:%02d.%06d ",
-				 /*tm_p->tm_year + 1900, tm_p->tm_mon + 1, tm_p->tm_mday,*/
-				 loc_t.wHour, loc_t.wMinute, loc_t.wSecond, loc_t.wMilliseconds);
-		time_buffer[sizeof(time_buffer) - 1 ] = '\0';
-#else
 		struct timeval tv;
 		struct tm *tm_p;
 		if (gettimeofday(&tv, NULL) != -1) {
-			if ((tm_p= localtime((const time_t *)&tv.tv_sec))) {
+			const time_t sec = tv.tv_sec;
+			if ((tm_p = localtime((const time_t *)&sec))) {
 				snprintf(time_buffer, sizeof(time_buffer) - 1,
 						 /* "%04d-%02d-%02d " */
 						 "%02d:%02d:%02d.%06d ",
@@ -99,9 +86,10 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 						 tm_p->tm_hour, tm_p->tm_min, tm_p->tm_sec,
 						 (int) (tv.tv_usec));
 				time_buffer[sizeof(time_buffer) - 1 ] = '\0';
+			} else {
+				time_buffer[0] = '\0';
 			}
 		}
-#endif
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_FILE) {
 		snprintf(file_buffer, sizeof(file_buffer) - 1, "%14s: ", file);
@@ -173,22 +161,11 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_TIME) {
 		/* The following from FF's DBUG library, which is in the public domain */
-#ifdef PHP_WIN32
-		/* FIXME This doesn't give microseconds as in Unix case, and the resolution is
-		in system ticks, 10 ms intervals. See my_getsystime.c for high res */
-		SYSTEMTIME loc_t;
-		GetLocalTime(&loc_t);
-		snprintf(time_buffer, sizeof(time_buffer) - 1,
-				 /* "%04d-%02d-%02d " */
-				 "%02d:%02d:%02d.%06d ",
-				 /*tm_p->tm_year + 1900, tm_p->tm_mon + 1, tm_p->tm_mday,*/
-				 loc_t.wHour, loc_t.wMinute, loc_t.wSecond, loc_t.wMilliseconds);
-		time_buffer[sizeof(time_buffer) - 1 ] = '\0';
-#else
 		struct timeval tv;
 		struct tm *tm_p;
 		if (gettimeofday(&tv, NULL) != -1) {
-			if ((tm_p= localtime((const time_t *)&tv.tv_sec))) {
+			const time_t sec = tv.tv_sec;
+			if ((tm_p = localtime((const time_t *)&sec))) {
 				snprintf(time_buffer, sizeof(time_buffer) - 1,
 						 /* "%04d-%02d-%02d " */
 						 "%02d:%02d:%02d.%06d ",
@@ -196,9 +173,10 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 						 tm_p->tm_hour, tm_p->tm_min, tm_p->tm_sec,
 						 (int) (tv.tv_usec));
 				time_buffer[sizeof(time_buffer) - 1 ] = '\0';
+			} else {
+				time_buffer[0] = '\0';
 			}
 		}
-#endif
 	}
 	if (flags & MYSQLND_DEBUG_DUMP_FILE) {
 		snprintf(file_buffer, sizeof(file_buffer) - 1, "%14s: ", file);
@@ -762,7 +740,7 @@ static struct st_mysqlnd_plugin_trace_log mysqlnd_plugin_trace_log_plugin =
 		"debug_trace",
 		MYSQLND_VERSION_ID,
 		PHP_MYSQLND_VERSION,
-		"PHP License 3.01",
+		"Modified BSD License (BSD-3-Clause)",
 		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */

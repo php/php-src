@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Dmitry Stogov <dmitry@zend.com>                              |
    +----------------------------------------------------------------------+
@@ -34,6 +32,7 @@
 /* forward declarations */
 static void yy_error(const char *msg);
 static void yy_error_sym(const char *msg, int sym);
+static void yy_error_str(const char *msg, const char *str);
 
 #define YYPOS cpos
 #define YYEND cend
@@ -246,6 +245,63 @@ static const char * sym_name[] = {
 #define YY_IN_SET(sym, set, bitset) \
 	(bitset[sym>>3] & (1 << (sym & 0x7)))
 
+size_t yy_escape(char *buf, unsigned char ch)
+{
+	switch (ch) {
+		case '\\': buf[0] = '\\'; buf[1] = '\\'; return 2;
+		case '\'': buf[0] = '\\'; buf[1] = '\''; return 2;
+		case '\"': buf[0] = '\\'; buf[1] = '\"'; return 2;
+		case '\a': buf[0] = '\\'; buf[1] = '\a'; return 2;
+		case '\b': buf[0] = '\\'; buf[1] = '\b'; return 2;
+		case 27:   buf[0] = '\\'; buf[1] = 27; return 2;
+		case '\f': buf[0] = '\\'; buf[1] = '\f'; return 2;
+		case '\n': buf[0] = '\\'; buf[1] = '\n'; return 2;
+		case '\r': buf[0] = '\\'; buf[1] = '\r'; return 2;
+		case '\t': buf[0] = '\\'; buf[1] = '\t'; return 2;
+		case '\v': buf[0] = '\\'; buf[1] = '\v'; return 2;
+		case '\?': buf[0] = '\\'; buf[1] = 0x3f; return 2;
+		default: break;
+	}
+	if (ch < 32 || ch >= 127) {
+		buf[0] = '\\';
+		buf[1] = '0' + ((ch >> 6) % 8);
+		buf[2] = '0' + ((ch >> 3) % 8);
+		buf[3] = '0' + (ch % 8);
+		return 4;
+	} else {
+		buf[0] = ch;
+		return 1;
+	}
+}
+
+const char *yy_escape_char(char *buf, unsigned char ch)
+{
+	size_t len = yy_escape(buf, ch);
+	buf[len] = 0;
+	return buf;
+}
+
+const char *yy_escape_string(char *buf, size_t size, const unsigned char *str, size_t n)
+{
+	size_t i = 0;
+	size_t pos = 0;
+	size_t len;
+
+	while (i < n) {
+		if (pos + 8 > size) {
+			buf[pos++] = '.';
+			buf[pos++] = '.';
+			buf[pos++] = '.';
+			break;
+		}
+		len = yy_escape(buf + pos, str[i]);
+		i++;
+		pos += len;
+	}
+	buf[pos] = 0;
+	return buf;
+}
+
 static int skip_EOL(int sym);
 static int skip_WS(int sym);
 static int skip_ONE_LINE_COMMENT(int sym);
@@ -310,6 +366,7 @@ static int synpred_5(int sym);
 static int synpred_6(int sym);
 
 static int get_skip_sym(void) {
+	char buf[64];
 	int ch;
 	int ret;
 	int accept = -1;
@@ -1667,9 +1724,9 @@ _yy_state_error:
 	if (YYPOS >= YYEND) {
 		yy_error("unexpected <EOF>");
 	} else if (YYPOS == yy_text) {
-		yy_error("unexpected character 'escape_char(ch)'");
+		yy_error_str("unexpected character",  yy_escape_char(buf, ch));
 	} else {
-		yy_error("unexpected sequence 'escape_string(yy_text, 1 + YYPOS - yy_text))'");
+		yy_error_str("unexpected sequence", yy_escape_string(buf, sizeof(buf), yy_text, 1 + YYPOS - yy_text));
 	}
 	YYPOS++;
 	goto _yy_state_start;
@@ -2056,6 +2113,10 @@ static int parse_declarations(int sym) {
 				}
 				zend_ffi_declare(name, name_len, &dcl);
 			}
+		} else if (sym == YY__SEMICOLON) {
+			if (common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STRUCT | ZEND_FFI_DCL_UNION)) zend_ffi_cleanup_dcl(&common_dcl);
+		} else {
+			yy_error_sym("unexpected", sym);
 		}
 		if (sym != YY__SEMICOLON) {
 			yy_error_sym("';' expected, got", sym);
@@ -2409,14 +2470,16 @@ _yy_state_2:
 
 static int parse_struct_declaration(int sym, zend_ffi_dcl *struct_dcl) {
 	zend_ffi_dcl common_field_dcl = ZEND_FFI_ATTR_INIT;
+	zend_ffi_dcl base_field_dcl = ZEND_FFI_ATTR_INIT;
 	sym = parse_specifier_qualifier_list(sym, &common_field_dcl);
+	base_field_dcl = common_field_dcl;
 	if (sym == YY__SEMICOLON || sym == YY__RBRACE) {
 		zend_ffi_add_anonymous_field(struct_dcl, &common_field_dcl);
 	} else if (sym == YY__STAR || sym == YY_ID || sym == YY__LPAREN || sym == YY__COLON) {
 		sym = parse_struct_declarator(sym, struct_dcl, &common_field_dcl);
 		while (sym == YY__COMMA) {
 			sym = get_sym();
-			zend_ffi_dcl field_dcl = common_field_dcl;
+			zend_ffi_dcl field_dcl = base_field_dcl;
 			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, &field_dcl);
 			}
@@ -2569,7 +2632,7 @@ static int parse_enumerator(int sym, zend_ffi_dcl *enum_dcl, int64_t *min, int64
 
 static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	bool nested = 0;
+	bool nested = false;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2585,7 +2648,7 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 			yy_error_sym("')' expected, got", sym);
 		}
 		sym = get_sym();
-		nested = 1;
+		nested = true;
 	} else {
 		yy_error_sym("unexpected", sym);
 	}
@@ -2598,7 +2661,7 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 
 static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	bool nested = 0;
+	bool nested = false;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2612,7 +2675,7 @@ static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 			yy_error_sym("')' expected, got", sym);
 		}
 		sym = get_sym();
-		nested = 1;
+		nested = true;
 	}
 	if (sym == YY__LBRACK || sym == YY__LPAREN) {
 		sym = parse_array_or_function_declarators(sym, dcl, &nested_dcl);
@@ -2623,7 +2686,7 @@ static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 
 static int parse_parameter_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	bool nested = 0;
+	bool nested = false;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2637,7 +2700,7 @@ static int parse_parameter_declarator(int sym, zend_ffi_dcl *dcl, const char **n
 			yy_error_sym("')' expected, got", sym);
 		}
 		sym = get_sym();
-		nested = 1;
+		nested = true;
 	} else if (sym == YY_ID) {
 		sym = parse_ID(sym, name, name_len);
 	} else if (sym == YY__LBRACK || sym == YY__LPAREN || sym == YY__RPAREN || sym == YY__COMMA) {
@@ -3591,4 +3654,8 @@ static void yy_error(const char *msg) {
 
 static void yy_error_sym(const char *msg, int sym) {
 	zend_ffi_parser_error("%s '%s' at line %d", msg, sym_name[sym], yy_line);
+}
+
+static void yy_error_str(const char *msg, const char *str) {
+	zend_ffi_parser_error("%s '%s' at line %d\n", msg, str, yy_line);
 }

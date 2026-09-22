@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
@@ -42,6 +40,40 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr);
 
 static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type);
+
+static bool node_is_equal_xsd(xmlNodePtr node, const char *name)
+{
+	static const char *ns[] = {
+		XSD_NAMESPACE,
+		XSD_DRAFT_2000_NAMESPACE,
+		XSD_1999_NAMESPACE,
+		NULL
+	};
+
+	return node_is_equal_ex_one_of(node, name, ns);
+}
+
+static int schema_parse_int(const xmlChar *value, const char *name, bool allow_negative)
+{
+	const char *str = (const char *) value;
+	zend_long lval = 0;
+	int oflow_info = 0;
+	uint8_t type = is_numeric_string_ex(str, strlen(str), &lval, NULL, true, &oflow_info, NULL);
+
+	if (type != IS_LONG) {
+		errno = 0;
+		lval = ZEND_STRTOL(str, NULL, 10);
+		if (UNEXPECTED(oflow_info || (errno == ERANGE && lval != 0))) {
+			soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
+		}
+	}
+
+	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(lval) || (!allow_negative && lval < 0))) {
+		soap_error1(E_ERROR, "Parsing Schema: %s value is out of range", name);
+	}
+
+	return (int) lval;
+}
 
 static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *ns, const xmlChar *type)
 {
@@ -98,6 +130,13 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlCh
 	return enc;
 }
 
+/* Necessary for some error paths to avoid leaking persistent memory. */
+static void requestify_string(xmlChar **str) {
+	xmlChar *copy = (xmlChar *) estrdup((const char *) *str);
+	xmlFree(*str);
+	*str = copy;
+}
+
 static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import) {
 	if (location != NULL &&
 	    !zend_hash_str_exists(&ctx->docs, (char*)location, xmlStrlen(location))) {
@@ -110,22 +149,35 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		sdl_restore_uri_credentials(ctx);
 
 		if (doc == NULL) {
+			requestify_string(&location);
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
 		schema = get_node(doc->children, "schema");
 		if (schema == NULL) {
+			requestify_string(&location);
 			xmlFreeDoc(doc);
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
 		new_tns = get_attribute(schema->properties, "targetNamespace");
 		if (import) {
 			if (ns != NULL && (new_tns == NULL || xmlStrcmp(ns->children->content, new_tns->children->content) != 0)) {
-				xmlFreeDoc(doc);
-				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, ns->children->content);
+				requestify_string(&location);
+				if (new_tns == NULL) {
+					xmlFreeDoc(doc);
+					soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', missing 'targetNamespace', expected '%s'", location, ns->children->content);
+				} else {
+					/* Have to make a copy to avoid a UAF after freeing `doc` */
+					const char *target_ns_copy = estrdup((const char *) new_tns->children->content);
+					xmlFreeDoc(doc);
+					soap_error3(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s', expected '%s'", location, target_ns_copy, ns->children->content);
+				}
 			}
 			if (ns == NULL && new_tns != NULL) {
+				requestify_string(&location);
+				/* Have to make a copy to avoid a UAF after freeing `doc` */
+				const char *target_ns_copy = estrdup((const char *) new_tns->children->content);
 				xmlFreeDoc(doc);
-				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, new_tns->children->content);
+				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s', expected no 'targetNamespace'", location, target_ns_copy);
 			}
 		} else {
 			new_tns = get_attribute(schema->properties, "targetNamespace");
@@ -134,6 +186,7 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 					xmlSetProp(schema, BAD_CAST("targetNamespace"), tns->children->content);
 				}
 			} else if (tns != NULL && xmlStrcmp(tns->children->content, new_tns->children->content) != 0) {
+				requestify_string(&location);
 				xmlFreeDoc(doc);
 				soap_error1(E_ERROR, "Parsing Schema: can't include schema from '%s', different 'targetNamespace'", location);
 			}
@@ -141,6 +194,22 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		zend_hash_str_add_ptr(&ctx->docs, (char*)location, xmlStrlen(location), doc);
 		load_schema(ctx, schema);
 	}
+}
+
+/* Returned uri must be freed by the caller. */
+xmlChar *schema_location_construct_uri(const xmlAttr *attribute)
+{
+	xmlChar *uri;
+	xmlChar *base = xmlNodeGetBase(attribute->doc, attribute->parent);
+
+	if (base == NULL) {
+		uri = xmlBuildURI(attribute->children->content, attribute->doc->URL);
+	} else {
+		uri = xmlBuildURI(attribute->children->content, base);
+		xmlFree(base);
+	}
+
+	return uri;
 }
 
 /*
@@ -189,48 +258,32 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 
 	trav = schema->children;
 	while (trav != NULL) {
-		if (node_is_equal(trav,"include")) {
+		if (node_is_equal_xsd(trav,"include")) {
 			xmlAttrPtr location;
 
 			location = get_attribute(trav->properties, "schemaLocation");
 			if (location == NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: include has no 'schemaLocation' attribute");
 			} else {
-				xmlChar *uri;
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				xmlChar *uri = schema_location_construct_uri(location);
 				schema_load_file(ctx, NULL, uri, tns, 0);
 				xmlFree(uri);
 			}
 
-		} else if (node_is_equal(trav,"redefine")) {
+		} else if (node_is_equal_xsd(trav,"redefine")) {
 			xmlAttrPtr location;
 
 			location = get_attribute(trav->properties, "schemaLocation");
 			if (location == NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: redefine has no 'schemaLocation' attribute");
 			} else {
-			  xmlChar *uri;
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				xmlChar *uri = schema_location_construct_uri(location);
 				schema_load_file(ctx, NULL, uri, tns, 0);
 				xmlFree(uri);
 				/* TODO: <redefine> support */
 			}
 
-		} else if (node_is_equal(trav,"import")) {
+		} else if (node_is_equal_xsd(trav,"import")) {
 			xmlAttrPtr ns, location;
 			xmlChar *uri = NULL;
 
@@ -245,18 +298,11 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 				}
 			}
 			if (location) {
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				uri = schema_location_construct_uri(location);
 			}
 			schema_load_file(ctx, ns, uri, tns, 1);
 			if (uri != NULL) {xmlFree(uri);}
-		} else if (node_is_equal(trav,"annotation")) {
+		} else if (node_is_equal_xsd(trav,"annotation")) {
 			/* TODO: <annotation> support */
 /* annotation cleanup
 			xmlNodePtr tmp = trav;
@@ -272,21 +318,21 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 	}
 
 	while (trav != NULL) {
-		if (node_is_equal(trav,"simpleType")) {
+		if (node_is_equal_xsd(trav,"simpleType")) {
 			schema_simpleType(ctx->sdl, tns, trav, NULL);
-		} else if (node_is_equal(trav,"complexType")) {
+		} else if (node_is_equal_xsd(trav,"complexType")) {
 			schema_complexType(ctx->sdl, tns, trav, NULL);
-		} else if (node_is_equal(trav,"group")) {
+		} else if (node_is_equal_xsd(trav,"group")) {
 			schema_group(ctx->sdl, tns, trav, NULL, NULL);
-		} else if (node_is_equal(trav,"attributeGroup")) {
+		} else if (node_is_equal_xsd(trav,"attributeGroup")) {
 			schema_attributeGroup(ctx->sdl, tns, trav, NULL, ctx);
-		} else if (node_is_equal(trav,"element")) {
+		} else if (node_is_equal_xsd(trav,"element")) {
 			schema_element(ctx->sdl, tns, trav, NULL, NULL);
-		} else if (node_is_equal(trav,"attribute")) {
+		} else if (node_is_equal_xsd(trav,"attribute")) {
 			schema_attribute(ctx->sdl, tns, trav, NULL, ctx);
-		} else if (node_is_equal(trav,"notation")) {
+		} else if (node_is_equal_xsd(trav,"notation")) {
 			/* TODO: <notation> support */
-		} else if (node_is_equal(trav,"annotation")) {
+		} else if (node_is_equal_xsd(trav,"annotation")) {
 			/* TODO: <annotation> support */
 		} else {
 			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in schema", trav->name);
@@ -377,19 +423,19 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, 
 	}
 
 	trav = simpleType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav,"restriction")) {
+		if (node_is_equal_xsd(trav,"restriction")) {
 			schema_restriction_simpleContent(sdl, tns, trav, cur_type, 1);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"list")) {
+		} else if (node_is_equal_xsd(trav,"list")) {
 			cur_type->kind = XSD_TYPEKIND_LIST;
 			schema_list(sdl, tns, trav, cur_type);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"union")) {
+		} else if (node_is_equal_xsd(trav,"union")) {
 			cur_type->kind = XSD_TYPEKIND_UNION;
 			schema_union(sdl, tns, trav, cur_type);
 			trav = trav->next;
@@ -421,7 +467,8 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 
 	itemType = get_attribute(listType->properties, "itemType");
 	if (itemType != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(itemType->children->content, &type, &ns);
@@ -443,16 +490,15 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 			}
 			zend_hash_next_index_insert_ptr(cur_type->elements, newType);
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	}
 
 	trav = listType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
-	if (trav != NULL && node_is_equal(trav,"simpleType")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"simpleType")) {
 		sdlTypePtr newType;
 
 		if (itemType != NULL) {
@@ -505,7 +551,8 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 	memberTypes = get_attribute(unionType->properties, "memberTypes");
 	if (memberTypes != NULL) {
 		char *str, *start, *end, *next;
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		str = estrdup((char*)memberTypes->children->content);
@@ -539,7 +586,6 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				}
 				zend_hash_next_index_insert_ptr(cur_type->elements, newType);
 			}
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 
 			start = next;
@@ -548,12 +594,12 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 	}
 
 	trav = unionType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"simpleType")) {
+		if (node_is_equal_xsd(trav,"simpleType")) {
 			sdlTypePtr newType;
 
 			newType = emalloc(sizeof(sdlType));
@@ -601,16 +647,16 @@ static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpCompT
 	xmlNodePtr trav;
 
 	trav = simpCompType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav, "restriction")) {
+		if (node_is_equal_xsd(trav, "restriction")) {
 			cur_type->kind = XSD_TYPEKIND_RESTRICTION;
 			schema_restriction_simpleContent(sdl, tns, trav, cur_type, 0);
 			trav = trav->next;
-		} else if (node_is_equal(trav, "extension")) {
+		} else if (node_is_equal_xsd(trav, "extension")) {
 			cur_type->kind = XSD_TYPEKIND_EXTENSION;
 			schema_extension_simpleContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
@@ -648,7 +694,8 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 
 	base = get_attribute(restType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -656,7 +703,6 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else if (!simpleType) {
 		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
@@ -668,38 +714,38 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 	}
 
 	trav = restType->children;
-	if (trav != NULL && node_is_equal(trav, "annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav, "annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
-	if (trav != NULL && node_is_equal(trav, "simpleType")) {
+	if (trav != NULL && node_is_equal_xsd(trav, "simpleType")) {
 		schema_simpleType(sdl, tns, trav, cur_type);
 		trav = trav->next;
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav, "minExclusive")) {
+		if (node_is_equal_xsd(trav, "minExclusive")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->minExclusive);
-		} else if (node_is_equal(trav, "minInclusive")) {
+		} else if (node_is_equal_xsd(trav, "minInclusive")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->minInclusive);
-		} else if (node_is_equal(trav, "maxExclusive")) {
+		} else if (node_is_equal_xsd(trav, "maxExclusive")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->maxExclusive);
-		} else if (node_is_equal(trav, "maxInclusive")) {
+		} else if (node_is_equal_xsd(trav, "maxInclusive")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->maxInclusive);
-		} else if (node_is_equal(trav, "totalDigits")) {
+		} else if (node_is_equal_xsd(trav, "totalDigits")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->totalDigits);
-		} else if (node_is_equal(trav, "fractionDigits")) {
+		} else if (node_is_equal_xsd(trav, "fractionDigits")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->fractionDigits);
-		} else if (node_is_equal(trav, "length")) {
+		} else if (node_is_equal_xsd(trav, "length")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->length);
-		} else if (node_is_equal(trav, "minLength")) {
+		} else if (node_is_equal_xsd(trav, "minLength")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->minLength);
-		} else if (node_is_equal(trav, "maxLength")) {
+		} else if (node_is_equal_xsd(trav, "maxLength")) {
 			schema_restriction_var_int(trav, &cur_type->restrictions->maxLength);
-		} else if (node_is_equal(trav, "whiteSpace")) {
+		} else if (node_is_equal_xsd(trav, "whiteSpace")) {
 			schema_restriction_var_char(trav, &cur_type->restrictions->whiteSpace);
-		} else if (node_is_equal(trav, "pattern")) {
+		} else if (node_is_equal_xsd(trav, "pattern")) {
 			schema_restriction_var_char(trav, &cur_type->restrictions->pattern);
-		} else if (node_is_equal(trav, "enumeration")) {
+		} else if (node_is_equal_xsd(trav, "enumeration")) {
 			sdlRestrictionCharPtr enumval = NULL;
 
 			schema_restriction_var_char(trav, &enumval);
@@ -717,11 +763,11 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 	}
 	if (!simpleType) {
 		while (trav != NULL) {
-			if (node_is_equal(trav,"attribute")) {
+			if (node_is_equal_xsd(trav,"attribute")) {
 				schema_attribute(sdl, tns, trav, cur_type, NULL);
-			} else if (node_is_equal(trav,"attributeGroup")) {
+			} else if (node_is_equal_xsd(trav,"attributeGroup")) {
 				schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
-			} else if (node_is_equal(trav,"anyAttribute")) {
+			} else if (node_is_equal_xsd(trav,"anyAttribute")) {
 				/* TODO: <anyAttribute> support */
 				trav = trav->next;
 				break;
@@ -753,7 +799,8 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 
 	base = get_attribute(restType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -761,38 +808,37 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
 	}
 
 	trav = restType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav,"group")) {
+		if (node_is_equal_xsd(trav,"group")) {
 			schema_group(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"all")) {
+		} else if (node_is_equal_xsd(trav,"all")) {
 			schema_all(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"choice")) {
+		} else if (node_is_equal_xsd(trav,"choice")) {
 			schema_choice(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"sequence")) {
+		} else if (node_is_equal_xsd(trav,"sequence")) {
 			schema_sequence(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		}
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"attribute")) {
+		if (node_is_equal_xsd(trav,"attribute")) {
 			schema_attribute(sdl, tns, trav, cur_type, NULL);
-		} else if (node_is_equal(trav,"attributeGroup")) {
+		} else if (node_is_equal_xsd(trav,"attributeGroup")) {
 			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
-		} else if (node_is_equal(trav,"anyAttribute")) {
+		} else if (node_is_equal_xsd(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
 			break;
@@ -830,7 +876,7 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 		soap_error0(E_ERROR, "Parsing Schema: missing restriction value");
 	}
 
-	(*valptr)->value = atoi((char*)value->children->content);
+	(*valptr)->value = schema_parse_int(value->children->content, (const char *) val->name, true);
 
 	return TRUE;
 }
@@ -878,7 +924,8 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 
 	base = get_attribute(extType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -886,23 +933,22 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
 	}
 
 	trav = extType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"attribute")) {
+		if (node_is_equal_xsd(trav,"attribute")) {
 			schema_attribute(sdl, tns, trav, cur_type, NULL);
-		} else if (node_is_equal(trav,"attributeGroup")) {
+		} else if (node_is_equal_xsd(trav,"attributeGroup")) {
 			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
-		} else if (node_is_equal(trav,"anyAttribute")) {
+		} else if (node_is_equal_xsd(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
 			break;
@@ -933,7 +979,8 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 
 	base = get_attribute(extType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -941,38 +988,37 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
 	}
 
 	trav = extType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav,"group")) {
+		if (node_is_equal_xsd(trav,"group")) {
 			schema_group(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"all")) {
+		} else if (node_is_equal_xsd(trav,"all")) {
 			schema_all(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"choice")) {
+		} else if (node_is_equal_xsd(trav,"choice")) {
 			schema_choice(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"sequence")) {
+		} else if (node_is_equal_xsd(trav,"sequence")) {
 			schema_sequence(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		}
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"attribute")) {
+		if (node_is_equal_xsd(trav,"attribute")) {
 			schema_attribute(sdl, tns, trav, cur_type, NULL);
-		} else if (node_is_equal(trav,"attributeGroup")) {
+		} else if (node_is_equal_xsd(trav,"attributeGroup")) {
 			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
-		} else if (node_is_equal(trav,"anyAttribute")) {
+		} else if (node_is_equal_xsd(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
 			break;
@@ -992,7 +1038,7 @@ void schema_min_max(xmlNodePtr node, sdlContentModelPtr model)
 	xmlAttrPtr attr = get_attribute(node->properties, "minOccurs");
 
 	if (attr) {
-		model->min_occurs = atoi((char*)attr->children->content);
+		model->min_occurs = schema_parse_int(attr->children->content, "minOccurs", false);
 	} else {
 		model->min_occurs = 1;
 	}
@@ -1002,7 +1048,7 @@ void schema_min_max(xmlNodePtr node, sdlContentModelPtr model)
 		if (!strncmp((char*)attr->children->content, "unbounded", sizeof("unbounded"))) {
 			model->max_occurs = -1;
 		} else {
-			model->max_occurs = atoi((char*)attr->children->content);
+			model->max_occurs = schema_parse_int(attr->children->content, "maxOccurs", false);
 		}
 	} else {
 		model->max_occurs = 1;
@@ -1036,12 +1082,12 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr all, sdlTypePtr cur
 	schema_min_max(all, newModel);
 
 	trav = all->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"element")) {
+		if (node_is_equal_xsd(trav,"element")) {
 			schema_element(sdl, tns, trav, cur_type, newModel);
 		} else {
 			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in all", trav->name);
@@ -1082,7 +1128,8 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 		smart_str key = {0};
 
 		if (ref) {
-			char *type, *ns;
+			const char *type;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &type, &ns);
@@ -1106,7 +1153,6 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			newModel->kind = XSD_CONTENT_GROUP_REF;
 			newModel->u.group_ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
 
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 		} else {
 			newModel = emalloc(sizeof(sdlContentModel));
@@ -1150,26 +1196,26 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 	schema_min_max(groupType, newModel);
 
 	trav = groupType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav,"choice")) {
+		if (node_is_equal_xsd(trav,"choice")) {
 			if (ref != NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
 			newModel->kind = XSD_CONTENT_CHOICE;
 			schema_choice(sdl, tns, trav, cur_type, newModel);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"sequence")) {
+		} else if (node_is_equal_xsd(trav,"sequence")) {
 			if (ref != NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
 			newModel->kind = XSD_CONTENT_SEQUENCE;
 			schema_sequence(sdl, tns, trav, cur_type, newModel);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"all")) {
+		} else if (node_is_equal_xsd(trav,"all")) {
 			if (ref != NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
@@ -1212,20 +1258,20 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType, sdlT
 	schema_min_max(choiceType, newModel);
 
 	trav = choiceType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"element")) {
+		if (node_is_equal_xsd(trav,"element")) {
 			schema_element(sdl, tns, trav, cur_type, newModel);
-		} else if (node_is_equal(trav,"group")) {
+		} else if (node_is_equal_xsd(trav,"group")) {
 			schema_group(sdl, tns, trav, cur_type, newModel);
-		} else if (node_is_equal(trav,"choice")) {
+		} else if (node_is_equal_xsd(trav,"choice")) {
 			schema_choice(sdl, tns, trav, cur_type, newModel);
-		} else if (node_is_equal(trav,"sequence")) {
+		} else if (node_is_equal_xsd(trav,"sequence")) {
 			schema_sequence(sdl, tns, trav, cur_type, newModel);
-		} else if (node_is_equal(trav,"any")) {
+		} else if (node_is_equal_xsd(trav,"any")) {
 			schema_any(sdl, tns, trav, cur_type, newModel);
 		} else {
 			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in choice", trav->name);
@@ -1262,20 +1308,20 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType, sdlTy
 	schema_min_max(seqType, newModel);
 
 	trav = seqType->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"element")) {
+		if (node_is_equal_xsd(trav,"element")) {
 			schema_element(sdl, tns, trav, cur_type, newModel);
-		} else if (node_is_equal(trav,"group")) {
+		} else if (node_is_equal_xsd(trav,"group")) {
 			schema_group(sdl, tns, trav, cur_type, newModel);
-		} else if (node_is_equal(trav,"choice")) {
+		} else if (node_is_equal_xsd(trav,"choice")) {
 			schema_choice(sdl, tns, trav, cur_type, newModel);
-		} else if (node_is_equal(trav,"sequence")) {
+		} else if (node_is_equal_xsd(trav,"sequence")) {
 			schema_sequence(sdl, tns, trav, cur_type, newModel);
-		} else if (node_is_equal(trav,"any")) {
+		} else if (node_is_equal_xsd(trav,"any")) {
 			schema_any(sdl, tns, trav, cur_type, newModel);
 		} else {
 			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in sequence", trav->name);
@@ -1324,16 +1370,16 @@ static int schema_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compCont
 	xmlNodePtr trav;
 
 	trav = compCont->children;
-	if (trav != NULL && node_is_equal(trav,"annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav,"annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav, "restriction")) {
+		if (node_is_equal_xsd(trav, "restriction")) {
 			cur_type->kind = XSD_TYPEKIND_RESTRICTION;
 			schema_restriction_complexContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
-		} else if (node_is_equal(trav, "extension")) {
+		} else if (node_is_equal_xsd(trav, "extension")) {
 			cur_type->kind = XSD_TYPEKIND_EXTENSION;
 			schema_extension_complexContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
@@ -1428,37 +1474,37 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, s
 	}
 
 	trav = compType->children;
-	if (trav != NULL && node_is_equal(trav, "annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav, "annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav,"simpleContent")) {
+		if (node_is_equal_xsd(trav,"simpleContent")) {
 			schema_simpleContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"complexContent")) {
+		} else if (node_is_equal_xsd(trav,"complexContent")) {
 			schema_complexContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else {
-			if (node_is_equal(trav,"group")) {
+			if (node_is_equal_xsd(trav,"group")) {
 				schema_group(sdl, tns, trav, cur_type, NULL);
 				trav = trav->next;
-			} else if (node_is_equal(trav,"all")) {
+			} else if (node_is_equal_xsd(trav,"all")) {
 				schema_all(sdl, tns, trav, cur_type, NULL);
 				trav = trav->next;
-			} else if (node_is_equal(trav,"choice")) {
+			} else if (node_is_equal_xsd(trav,"choice")) {
 				schema_choice(sdl, tns, trav, cur_type, NULL);
 				trav = trav->next;
-			} else if (node_is_equal(trav,"sequence")) {
+			} else if (node_is_equal_xsd(trav,"sequence")) {
 				schema_sequence(sdl, tns, trav, cur_type, NULL);
 				trav = trav->next;
 			}
 			while (trav != NULL) {
-				if (node_is_equal(trav,"attribute")) {
+				if (node_is_equal_xsd(trav,"attribute")) {
 					schema_attribute(sdl, tns, trav, cur_type, NULL);
-				} else if (node_is_equal(trav,"attributeGroup")) {
+				} else if (node_is_equal_xsd(trav,"attributeGroup")) {
 					schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
-				} else if (node_is_equal(trav,"anyAttribute")) {
+				} else if (node_is_equal_xsd(trav,"anyAttribute")) {
 					/* TODO: <anyAttribute> support */
 					trav = trav->next;
 					break;
@@ -1520,7 +1566,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 
 		if (ref) {
 			smart_str nscat = {0};
-			char *type, *ns;
+			const char *type;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &type, &ns);
@@ -1541,7 +1588,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			smart_str_appends(&nscat, type);
 			newType->name = estrdup(type);
 			smart_str_0(&nscat);
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 			newType->ref = estrndup(ZSTR_VAL(nscat.s), ZSTR_LEN(nscat.s));
 			smart_str_free(&nscat);
@@ -1645,7 +1691,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	if (cur_type->form == XSD_FORM_DEFAULT) {
  		xmlNodePtr parent = element->parent;
  		while (parent) {
-			if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
+			if (node_is_equal_xsd(parent, "schema")) {
 				xmlAttrPtr def;
 				def = get_attribute(parent->properties, "elementFormDefault");
 				if(def == NULL || strncmp((char*)def->children->content, "qualified", sizeof("qualified"))) {
@@ -1656,7 +1702,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 				break;
 			}
 			parent = parent->parent;
-  	}
+  		}
 		if (parent == NULL) {
 			cur_type->form = XSD_FORM_UNQUALIFIED;
 		}
@@ -1665,7 +1711,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	/* type = QName */
 	type = get_attribute(attrs, "type");
 	if (type) {
-		char *cptype, *str_ns;
+		const char *cptype;
+		char *str_ns;
 		xmlNsPtr nsptr;
 
 		if (ref != NULL) {
@@ -1677,16 +1724,15 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
 		if (str_ns) {efree(str_ns);}
-		if (cptype) {efree(cptype);}
 	}
 
 	trav = element->children;
-	if (trav != NULL && node_is_equal(trav, "annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav, "annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav,"simpleType")) {
+		if (node_is_equal_xsd(trav,"simpleType")) {
 			if (ref != NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' attribute and subtype");
 			} else if (type != NULL) {
@@ -1694,7 +1740,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			}
 			schema_simpleType(sdl, tns, trav, cur_type);
 			trav = trav->next;
-		} else if (node_is_equal(trav,"complexType")) {
+		} else if (node_is_equal_xsd(trav,"complexType")) {
 			if (ref != NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: element has both 'ref' attribute and subtype");
 			} else if (type != NULL) {
@@ -1705,11 +1751,11 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		}
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"unique")) {
+		if (node_is_equal_xsd(trav,"unique")) {
 			/* TODO: <unique> support */
-		} else if (node_is_equal(trav,"key")) {
+		} else if (node_is_equal_xsd(trav,"key")) {
 			/* TODO: <key> support */
-		} else if (node_is_equal(trav,"keyref")) {
+		} else if (node_is_equal_xsd(trav,"keyref")) {
 			/* TODO: <keyref> support */
 		} else {
 			soap_error1(E_ERROR, "Parsing Schema: unexpected <%s> in element", trav->name);
@@ -1752,7 +1798,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		memset(newAttr, 0, sizeof(sdlAttribute));
 
 		if (ref) {
-			char *attr_name, *ns;
+			const char *attr_name;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &attr_name, &ns);
@@ -1773,7 +1820,6 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			smart_str_appends(&key, attr_name);
 			smart_str_0(&key);
 			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
-			if (attr_name) {efree(attr_name);}
 			if (ns) {efree(ns);}
 		} else {
 			xmlAttrPtr ns;
@@ -1813,7 +1859,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 	/* type = QName */
 	type = get_attribute(attrType->properties, "type");
 	if (type) {
-		char *cptype, *str_ns;
+		const char *cptype;
+		char *str_ns;
 		xmlNsPtr nsptr;
 
 		if (ref != NULL) {
@@ -1825,16 +1872,15 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			newAttr->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
 		if (str_ns) {efree(str_ns);}
-		if (cptype) {efree(cptype);}
 	}
 
 	attr = attrType->properties;
 	while (attr != NULL) {
-		if (attr_is_equal_ex(attr, "default", SCHEMA_NAMESPACE)) {
+		if (attr_is_equal(attr, "default")) {
 			newAttr->def = estrdup((char*)attr->children->content);
-		} else if (attr_is_equal_ex(attr, "fixed", SCHEMA_NAMESPACE)) {
+		} else if (attr_is_equal(attr, "fixed")) {
 			newAttr->fixed = estrdup((char*)attr->children->content);
-		} else if (attr_is_equal_ex(attr, "form", SCHEMA_NAMESPACE)) {
+		} else if (attr_is_equal(attr, "form")) {
 			if (strncmp((char*)attr->children->content, "qualified", sizeof("qualified")) == 0) {
 			  newAttr->form = XSD_FORM_QUALIFIED;
 			} else if (strncmp((char*)attr->children->content, "unqualified", sizeof("unqualified")) == 0) {
@@ -1842,15 +1888,15 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			} else {
 			  newAttr->form = XSD_FORM_DEFAULT;
 			}
-		} else if (attr_is_equal_ex(attr, "id", SCHEMA_NAMESPACE)) {
+		} else if (attr_is_equal(attr, "id")) {
 			/* skip */
-		} else if (attr_is_equal_ex(attr, "name", SCHEMA_NAMESPACE)) {
+		} else if (attr_is_equal(attr, "name")) {
 			newAttr->name = estrdup((char*)attr->children->content);
-		} else if (attr_is_equal_ex(attr, "ref", SCHEMA_NAMESPACE)) {
+		} else if (attr_is_equal(attr, "ref")) {
 			/* already processed */
-		} else if (attr_is_equal_ex(attr, "type", SCHEMA_NAMESPACE)) {
+		} else if (attr_is_equal(attr, "type")) {
 			/* already processed */
-		} else if (attr_is_equal_ex(attr, "use", SCHEMA_NAMESPACE)) {
+		} else if (attr_is_equal(attr, "use")) {
 			if (strncmp((char*)attr->children->content, "prohibited", sizeof("prohibited")) == 0) {
 			  newAttr->use = XSD_USE_PROHIBITED;
 			} else if (strncmp((char*)attr->children->content, "required", sizeof("required")) == 0) {
@@ -1861,13 +1907,14 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			  newAttr->use = XSD_USE_DEFAULT;
 			}
 		} else {
-			xmlNsPtr nsPtr = attr_find_ns(attr);
+			xmlNsPtr nsPtr = attr->ns;
 
-			if (strncmp((char*)nsPtr->href, SCHEMA_NAMESPACE, sizeof(SCHEMA_NAMESPACE))) {
+			if (nsPtr && strncmp((const char*) nsPtr->href, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)) != 0) {
 				smart_str key2 = {0};
 				sdlExtraAttributePtr ext;
 				xmlNsPtr nsptr;
-				char *value, *ns;
+				const char *value;
+				char *ns;
 
 				ext = emalloc(sizeof(sdlExtraAttribute));
 				memset(ext, 0, sizeof(sdlExtraAttribute));
@@ -1880,7 +1927,6 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 					ext->val = estrdup((char*)attr->children->content);
 				}
 				if (ns) {efree(ns);}
-				efree(value);
 
 				if (!newAttr->extraAttributes) {
 					newAttr->extraAttributes = emalloc(sizeof(HashTable));
@@ -1900,7 +1946,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 	if (newAttr->form == XSD_FORM_DEFAULT) {
 		xmlNodePtr parent = attrType->parent;
 		while (parent) {
-			if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
+			if (node_is_equal_xsd(parent, "schema")) {
 				xmlAttrPtr def;
 				def = get_attribute(parent->properties, "attributeFormDefault");
 				if(def == NULL || strncmp((char*)def->children->content, "qualified", sizeof("qualified"))) {
@@ -1917,12 +1963,12 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		}
 	}
 	trav = attrType->children;
-	if (trav != NULL && node_is_equal(trav, "annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav, "annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
-		if (node_is_equal(trav,"simpleType")) {
+		if (node_is_equal_xsd(trav,"simpleType")) {
 			sdlTypePtr dummy_type;
 			zval zv;
 
@@ -1993,7 +2039,8 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_free(&key);
 		} else if (ref) {
 			sdlAttributePtr newAttr;
-			char *group_name, *ns;
+			const char *group_name;
+			char *ns;
 			smart_str key = {0};
 			xmlNsPtr nsptr;
 
@@ -2013,7 +2060,6 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_appends(&key, group_name);
 			smart_str_0(&key);
 			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
-			if (group_name) {efree(group_name);}
 			if (ns) {efree(ns);}
 			smart_str_free(&key);
 
@@ -2025,22 +2071,22 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 	}
 
 	trav = attrGroup->children;
-	if (trav != NULL && node_is_equal(trav, "annotation")) {
+	if (trav != NULL && node_is_equal_xsd(trav, "annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
-		if (node_is_equal(trav,"attribute")) {
+		if (node_is_equal_xsd(trav,"attribute")) {
 			if (ref != NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
 			schema_attribute(sdl, tns, trav, cur_type, NULL);
-		} else if (node_is_equal(trav,"attributeGroup")) {
+		} else if (node_is_equal_xsd(trav,"attributeGroup")) {
 			if (ref != NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
 			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
-		} else if (node_is_equal(trav,"anyAttribute")) {
+		} else if (node_is_equal_xsd(trav,"anyAttribute")) {
 			if (ref != NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
@@ -2147,6 +2193,10 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 		if (ctx->attributeGroups != NULL) {
 			tmp = (sdlTypePtr)schema_find_by_ref(ctx->attributeGroups, attr->ref);
 			if (tmp) {
+				if (zend_hash_index_find_ptr(&ctx->fixupInProgress, (zend_ulong)(uintptr_t)tmp) != NULL) {
+					soap_error1(E_ERROR, "Parsing Schema: recursive attributeGroup 'ref' attribute '%s'", attr->ref);
+				}
+				zend_hash_index_add_ptr(&ctx->fixupInProgress, (zend_ulong)(uintptr_t)tmp, tmp);
 				if (tmp->attributes) {
 					zend_hash_internal_pointer_reset(tmp->attributes);
 					while ((tmp_attr = zend_hash_get_current_data_ptr(tmp->attributes)) != NULL) {
@@ -2182,6 +2232,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 						}
 					}
 				}
+				zend_hash_index_del(&ctx->fixupInProgress, (zend_ulong)(uintptr_t)tmp);
 			}
 		}
 		efree(attr->ref);
@@ -2196,6 +2247,9 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 			sdlTypePtr tmp;
 
 			if (ctx->sdl->groups && (tmp = zend_hash_str_find_ptr(ctx->sdl->groups, model->u.group_ref, strlen(model->u.group_ref))) != NULL) {
+				if (zend_hash_index_find_ptr(&ctx->fixupInProgress, (zend_ulong)(uintptr_t)tmp) != NULL) {
+					soap_error1(E_ERROR, "Parsing Schema: recursive group 'ref' attribute '%s'", model->u.group_ref);
+				}
 				schema_type_fixup(ctx, tmp);
 				efree(model->u.group_ref);
 				model->kind = XSD_CONTENT_GROUP;
@@ -2239,6 +2293,8 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 	sdlTypePtr tmp;
 	sdlAttributePtr attr;
 
+	zend_hash_index_add_ptr(&ctx->fixupInProgress, (zend_ulong)(uintptr_t)type, type);
+
 	if (type->ref != NULL) {
 		if (ctx->sdl->elements != NULL) {
 			tmp = (sdlTypePtr)schema_find_by_ref(ctx->sdl->elements, type->ref);
@@ -2255,7 +2311,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 				  type->def = estrdup(tmp->def);
 				}
 				type->form = tmp->form;
-			} else if (strcmp(type->ref, SCHEMA_NAMESPACE ":schema") == 0) {
+			} else if (strcmp(type->ref, XSD_NAMESPACE ":schema") == 0) {
 				type->encode = get_conversion(XSD_ANYXML);
 			} else {
 				soap_error1(E_ERROR, "Parsing Schema: unresolved element 'ref' attribute '%s'", type->ref);
@@ -2291,6 +2347,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 			}
 		}
 	}
+	zend_hash_index_del(&ctx->fixupInProgress, (zend_ulong)(uintptr_t)type);
 }
 
 void schema_pass2(sdlCtx *ctx)
@@ -2298,6 +2355,8 @@ void schema_pass2(sdlCtx *ctx)
 	sdlPtr sdl = ctx->sdl;
 	sdlAttributePtr attr;
 	sdlTypePtr type;
+
+	zend_hash_init(&ctx->fixupInProgress, 0, NULL, NULL, 0);
 
 	if (ctx->attributes) {
 		ZEND_HASH_FOREACH_PTR(ctx->attributes, attr) {
@@ -2332,6 +2391,8 @@ void schema_pass2(sdlCtx *ctx)
 		zend_hash_destroy(ctx->attributeGroups);
 		efree(ctx->attributeGroups);
 	}
+
+	zend_hash_destroy(&ctx->fixupInProgress);
 }
 
 void delete_model(zval *zv)

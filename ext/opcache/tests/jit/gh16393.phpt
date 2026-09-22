@@ -1,0 +1,21 @@
+--TEST--
+GH-16393 (Assertion failure in ext/opcache/jit/zend_jit.c:2897)
+--EXTENSIONS--
+opcache
+--INI--
+opcache.jit=1215
+opcache.jit_buffer_size=64M
+--FILE--
+<?php
+// Skip when JIT was completely disabled at runtime.
+if (($status = opcache_get_status()) === false || ($status['jit']['enabled'] ?? true)) {
+    ini_set('opcache.jit', 'tracing');
+}
+class Test {
+}
+$appendProp2 = (function() {
+})->bindTo($test, Test::class);
+$appendProp2();
+?>
+--EXPECTF--
+Warning: Undefined variable $test in %sgh16393.php on line 9

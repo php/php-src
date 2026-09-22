@@ -9,13 +9,21 @@
 tar="$(which gtar)"
 tar="${tar:-$(which tar)}"
 
+# Handle GNU vs. BSD checksum utilities
+md5sum="$(which md5sum)"
+md5sum="${md5sum:-$(which md5)}"
+
+# GNU touch is preferred since it handles local TZ in timestamps
+touch="$(which gtouch)"
+touch="${touch:-$(which touch)}"
+
 if [[ $($tar --version) == *"bsdtar"* ]]; then
   echo "Found bsdtar at $tar, but this script needs GNU tar."
   exit 1
 fi
 
 # Go to project root directory.
-cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+cd "$(CDPATH='' cd -- "$(dirname -- "$0")/../../" && pwd -P)" || exit
 
 # Process options and arguments.
 while :; do
@@ -169,8 +177,8 @@ fi
 # Reset the modification and access times of all files to be packaged.
 commitDate="$(git log -1 --format=%cI $treeish)"
 echo "makedist: Resetting the modification and access times of package files to $commitDate"
-touch -c -d"$commitDate" NEWS
-find . -exec touch -r NEWS -c {} \;
+"$touch" -c -d"$commitDate" NEWS
+find . -exec "$touch" -r NEWS -c {} \;
 
 cd ..
 
@@ -181,7 +189,7 @@ rm -rf "$prefix" "$prefix".tar.*
 
 echo "makedist: Creating $prefix.tar.gz archive."
 gzip -9 -k "$prefix".tar || exit 6
-md5sum "$prefix".tar.gz
+"$md5sum" "$prefix".tar.gz
 gzip -t "$prefix".tar.gz
 
 sync
@@ -189,7 +197,7 @@ sleep 2
 
 echo "makedist: Creating $prefix.tar.bz2 archive."
 bzip2 -9 -k $prefix.tar || exit 7
-md5sum $prefix.tar.bz2
+"$md5sum" $prefix.tar.bz2
 bzip2 -t $prefix.tar.bz2
 
 sync
@@ -197,7 +205,7 @@ sleep 2
 
 echo "makedist: Creating $prefix.tar.xz archive."
 xz -9 -k "$prefix".tar || exit 9
-md5sum "$prefix".tar.xz
+"$md5sum" "$prefix".tar.xz
 xz -t "$prefix".tar.xz
 
 echo ""

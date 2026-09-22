@@ -1,6 +1,7 @@
 --TEST--
 Bug #78185: file cache only no longer works
 --INI--
+opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.file_cache={PWD}
@@ -37,4 +38,3 @@ foreach (glob($pattern) as $p) {
 ?>
 --EXPECTF--
 string(%d) "%s78185.php.bin"
-

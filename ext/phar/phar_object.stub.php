@@ -187,16 +187,16 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function offsetUnset($localName): void {}
 
     /** @tentative-return-type */
-    public function setAlias(string $alias): bool {}
+    public function setAlias(string $alias): true {}
 
     /** @tentative-return-type */
-    public function setDefaultStub(?string $index = null, ?string $webIndex = null): bool {}
+    public function setDefaultStub(?string $index = null, ?string $webIndex = null): true {}
 
     /** @tentative-return-type */
     public function setMetadata(mixed $metadata): void {}
 
     /** @tentative-return-type */
-    public function setSignatureAlgorithm(int $algo, ?string $privateKey = null): void {}
+    public function setSignatureAlgorithm(int $algo, #[\SensitiveParameter] ?string $privateKey = null): void {}
 
     /**
      * @param resource|string $stub
@@ -470,7 +470,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @tentative-return-type
      * @implementation-alias Phar::setSignatureAlgorithm
      */
-    public function setSignatureAlgorithm(int $algo, ?string $privateKey = null): void {}
+    public function setSignatureAlgorithm(int $algo, #[\SensitiveParameter] ?string $privateKey = null): void {}
 
     /**
      * @param resource|string $stub

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
@@ -22,6 +20,10 @@
 #include "phpdbg_set.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_io.h"
+
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
@@ -745,17 +747,29 @@ PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
 	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) != PHPDBG_IS_STOPPING) {
 		if (buffered == NULL) {
 #ifdef HAVE_PHPDBG_READLINE
-			char *cmd = readline(phpdbg_get_prompt());
-			PHPDBG_G(last_was_newline) = 1;
+# ifdef HAVE_UNISTD_H
+			/* EOF makes readline write prompt again in local console mode and
+			ignored if compiled without readline integration. */
+			if (!isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd)) {
+				char buf[PHPDBG_MAX_CMD];
+				phpdbg_write("%s", phpdbg_get_prompt());
+				phpdbg_consume_stdin_line(buf);
+				buffer = estrdup(buf);
+			} else
+# endif
+			{
+				char *cmd = readline(phpdbg_get_prompt());
+				PHPDBG_G(last_was_newline) = 1;
 
-			if (!cmd) {
-				PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
-				zend_bailout();
+				if (!cmd) {
+					PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+					zend_bailout();
+				}
+
+				add_history(cmd);
+				buffer = estrdup(cmd);
+				free(cmd);
 			}
-
-			add_history(cmd);
-			buffer = estrdup(cmd);
-			free(cmd);
 #else
 			char buf[PHPDBG_MAX_CMD];
 			phpdbg_write("%s", phpdbg_get_prompt());
@@ -767,9 +781,9 @@ PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
 		}
 	}
 
-	if (buffer && isspace(*buffer)) {
+	if (buffer && isspace((unsigned char)*buffer)) {
 		char *trimmed = buffer;
-		while (isspace(*trimmed))
+		while (isspace((unsigned char)*trimmed))
 			trimmed++;
 
 		trimmed = estrdup(trimmed);

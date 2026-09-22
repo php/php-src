@@ -6,7 +6,6 @@ upload_max_filesize=1024
 session.save_path=
 session.name=PHPSESSID
 session.use_cookies=1
-session.use_only_cookies=0
 session.use_strict_mode=0
 session.auto_start=0
 session.upload_progress.enabled=1

@@ -23,5 +23,5 @@ var_dump($shm_id2);
 object(Shmop)#1 (0) {
 }
 
-Warning: shmop_open(): Unable to attach or create shared memory segment "No error" in %s on line %d
+Warning: shmop_open(): Unable to attach or create shared memory segment "%s" in %s on line %d
 bool(false)

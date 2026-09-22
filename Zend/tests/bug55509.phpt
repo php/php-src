@@ -2,6 +2,7 @@
 Bug #55509 (segfault on x86_64 using more than 2G memory)
 --SKIPIF--
 <?php
+if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 if (PHP_INT_SIZE == 4) {
   die('skip Not for 32-bits OS');
 }
@@ -28,7 +29,7 @@ if (PHP_OS == 'Linux') {
   }
 }
 elseif (PHP_OS == 'FreeBSD') {
-  $lines = explode("\n",`sysctl -a`);
+  $lines = explode("\n", shell_exec("sysctl -a"));
   $infos = array();
   foreach ($lines as $line) {
     if (!$line){
@@ -49,8 +50,11 @@ elseif (PHP_OS == 'FreeBSD') {
     die('skip Not enough memory.');
   }
 } elseif (PHP_OS == "WINNT") {
-  $s = trim(shell_exec("wmic OS get FreeVirtualMemory /Value 2>nul"));
-  $freeMemory = explode('=', $s)[1]*1;
+  $s = shell_exec("wmic OS get FreeVirtualMemory /Value 2>nul");
+  if (!$s) {
+    die('skip wmic not available');
+  }
+  $freeMemory = explode('=', trim($s))[1]*1;
 
   if ($freeMemory < 2.1*1024*1024) {
     die('skip Not enough memory.');

@@ -31,7 +31,7 @@ foreach ($tests as $i => $q) {
     try {
         msg_receive($q, 0, $null, 0, $msg);
     } catch (ValueError $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 
     var_dump(msg_send($q, 1, 'foo', true, true, $errno));
@@ -46,7 +46,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-msg_receive(): Argument #4 ($max_message_size) must be greater than 0
+ValueError: msg_receive(): Argument #4 ($max_message_size) must be greater than 0
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)
@@ -56,7 +56,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-msg_receive(): Argument #4 ($max_message_size) must be greater than 0
+ValueError: msg_receive(): Argument #4 ($max_message_size) must be greater than 0
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)

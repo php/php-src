@@ -1,0 +1,25 @@
+<?php
+
+/** @generate-class-entries */
+
+#if defined(HAVE_OPENSSL_ARGON2)
+const PASSWORD_ARGON2I = "argon2i";
+const PASSWORD_ARGON2ID = "argon2id";
+/**
+ * @var int
+ * @cvalue PHP_OPENSSL_PWHASH_MEMLIMIT
+ */
+const PASSWORD_ARGON2_DEFAULT_MEMORY_COST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OPENSSL_PWHASH_ITERLIMIT
+ */
+const PASSWORD_ARGON2_DEFAULT_TIME_COST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OPENSSL_PWHASH_THREADS
+ */
+const PASSWORD_ARGON2_DEFAULT_THREADS = UNKNOWN;
+const PASSWORD_ARGON2_PROVIDER = "openssl";
+#endif
+

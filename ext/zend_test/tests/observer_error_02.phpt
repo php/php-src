@@ -26,6 +26,8 @@ echo 'You should not see this.';
     <!-- init trigger_error() -->
     <trigger_error>
 
+Deprecated: Passing E_USER_ERROR to trigger_error() is deprecated since 8.4, throw an exception or call exit with a string message instead in %s on line %d
+
 Fatal error: Foo error in %s on line %d
     </trigger_error:NULL>
   </foo:NULL>

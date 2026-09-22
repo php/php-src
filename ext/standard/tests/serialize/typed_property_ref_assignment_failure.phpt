@@ -12,8 +12,8 @@ O:4:"Test":1:{s:4:"prop";O:8:"stdClass":1:{s:1:"y";R:2;}}
 STR;
 try {
     var_dump(unserialize($s));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $s = <<<'STR'
@@ -23,7 +23,7 @@ var_dump(unserialize($s));
 
 ?>
 --EXPECTF--
-Cannot assign stdClass to property Test::$prop of type int
+TypeError: Cannot assign stdClass to property Test::$prop of type int
 
 Warning: unserialize(): Error at offset 38 of 38 bytes in %s on line %d
 bool(false)

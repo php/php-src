@@ -8,7 +8,7 @@ install-fpm: $(SAPI_FPM_PATH)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(sbindir)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/run
-	@$(INSTALL) -m 0755 $(SAPI_FPM_PATH) $(INSTALL_ROOT)$(sbindir)/$(program_prefix)php-fpm$(program_suffix)$(EXEEXT)
+	@$(LIBTOOL) --mode=install $(INSTALL) -m 0755 $(SAPI_FPM_PATH) $(INSTALL_ROOT)$(sbindir)/$(program_prefix)php-fpm$(program_suffix)$(EXEEXT)
 
 	@if test -f "$(INSTALL_ROOT)$(sysconfdir)/php-fpm.conf"; then \
 		echo "Installing PHP FPM defconfig:     skipping"; \

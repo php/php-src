@@ -31,7 +31,6 @@ function curl_read($ch, $fp, $len) {
 }
 
 curl_exec($ch);
-curl_close($ch);
 ?>
 --EXPECTF--
 resource(%d) of type (stream)

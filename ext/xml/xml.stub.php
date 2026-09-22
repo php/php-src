@@ -149,6 +149,7 @@ function xml_parser_create(?string $encoding = null): XMLParser {}
 
 function xml_parser_create_ns(?string $encoding = null, string $separator = ":"): XMLParser {}
 
+#[\Deprecated(since: '8.4', message: 'provide a proper method callable to xml_set_*_handler() functions')]
 function xml_set_object(XMLParser $parser, object $object): true {}
 
 function xml_set_element_handler(XMLParser $parser, callable|string|null $start_handler, callable|string|null $end_handler): true {}
@@ -188,6 +189,7 @@ function xml_get_current_column_number(XMLParser $parser): int {}
 
 function xml_get_current_byte_index(XMLParser $parser): int {}
 
+#[\Deprecated(since: '8.5', message: "as it has no effect since PHP 8.0")]
 function xml_parser_free(XMLParser $parser): bool {}
 
 /** @param string|int|bool $value */

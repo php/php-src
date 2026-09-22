@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -80,7 +79,7 @@ static zend_always_inline void zend_object_release(zend_object *obj)
 	}
 }
 
-static zend_always_inline size_t zend_object_properties_size(zend_class_entry *ce)
+static zend_always_inline size_t zend_object_properties_size(const zend_class_entry *ce)
 {
 	return sizeof(zval) *
 		(ce->default_properties_count -
@@ -90,18 +89,41 @@ static zend_always_inline size_t zend_object_properties_size(zend_class_entry *c
 /* Allocates object type and zeros it, but not the standard zend_object and properties.
  * Standard object MUST be initialized using zend_object_std_init().
  * Properties MUST be initialized using object_properties_init(). */
-static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_entry *ce) {
+static zend_always_inline void *zend_object_alloc(size_t obj_size, const zend_class_entry *ce) {
 	void *obj = emalloc(obj_size + zend_object_properties_size(ce));
 	memset(obj, 0, obj_size - sizeof(zend_object));
 	return obj;
 }
 
-static inline zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
+ZEND_API ZEND_COLD zend_property_info *zend_get_property_info_for_slot_slow(zend_object *obj, zval *slot);
+
+/* Use when 'slot' was obtained directly from obj->properties_table, or when
+ * 'obj' can not be lazy. Otherwise, use zend_get_property_info_for_slot(). */
+static inline zend_property_info *zend_get_property_info_for_slot_self(zend_object *obj, zval *slot)
 {
 	zend_property_info **table = obj->ce->properties_info_table;
 	intptr_t prop_num = slot - obj->properties_table;
 	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);
-	return table[prop_num];
+	if (table[prop_num]) {
+		return table[prop_num];
+	} else {
+		return zend_get_property_info_for_slot_slow(obj, slot);
+	}
+}
+
+static inline zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
+{
+	if (UNEXPECTED(zend_object_is_lazy_proxy(obj))) {
+		return zend_lazy_object_get_property_info_for_slot(obj, slot);
+	}
+	zend_property_info **table = obj->ce->properties_info_table;
+	intptr_t prop_num = slot - obj->properties_table;
+	ZEND_ASSERT(prop_num >= 0 && prop_num < obj->ce->default_properties_count);
+	if (table[prop_num]) {
+		return table[prop_num];
+	} else {
+		return zend_get_property_info_for_slot_slow(obj, slot);
+	}
 }
 
 /* Helper for cases where we're only interested in property info of typed properties. */
@@ -114,5 +136,21 @@ static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_obj
 	return NULL;
 }
 
+static zend_always_inline zend_class_entry *zend_get_function_root_class(const zend_function *fbc)
+{
+	return fbc->common.prototype ? fbc->common.prototype->common.scope : fbc->common.scope;
+}
+
+static zend_always_inline bool zend_check_method_accessible(const zend_function *fn, const zend_class_entry *scope)
+{
+	if (!(fn->common.fn_flags & ZEND_ACC_PUBLIC)
+		&& fn->common.scope != scope
+		&& (UNEXPECTED(fn->common.fn_flags & ZEND_ACC_PRIVATE)
+			|| UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fn), scope)))) {
+		return false;
+	}
+
+	return true;
+}
 
 #endif /* ZEND_OBJECTS_H */

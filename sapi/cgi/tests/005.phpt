@@ -10,8 +10,12 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-var_dump(`$php -n -a -f "wrong"`);
-var_dump(`$php -n -f "wrong" -a`);
+var_dump(shell_exec(<<<SHELL
+$php -n -a -f "wrong"
+SHELL));
+var_dump(shell_exec(<<<SHELL
+$php -n -f "wrong" -a
+SHELL));
 
 echo "Done\n";
 ?>

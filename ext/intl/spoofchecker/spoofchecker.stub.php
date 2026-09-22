@@ -19,7 +19,6 @@ class Spoofchecker
     public const int INVISIBLE = UNKNOWN;
     /** @cvalue USPOOF_CHAR_LIMIT */
     public const int CHAR_LIMIT = UNKNOWN;
-#if U_ICU_VERSION_MAJOR_NUM >= 58
     /** @cvalue USPOOF_ASCII */
     public const int ASCII = UNKNOWN;
     /** @cvalue USPOOF_HIGHLY_RESTRICTIVE */
@@ -34,10 +33,27 @@ class Spoofchecker
     public const int SINGLE_SCRIPT_RESTRICTIVE = UNKNOWN;
     /** @cvalue USPOOF_MIXED_NUMBERS */
     public const int MIXED_NUMBERS = UNKNOWN;
-#endif
 #if U_ICU_VERSION_MAJOR_NUM >= 62
     /** @cvalue USPOOF_HIDDEN_OVERLAY */
     public const int HIDDEN_OVERLAY = UNKNOWN;
+#endif
+
+    /** @cvalue USET_IGNORE_SPACE */
+    public const int IGNORE_SPACE = UNKNOWN;
+    /** @cvalue USET_CASE_INSENSITIVE */
+    public const int CASE_INSENSITIVE = UNKNOWN;
+    /** @cvalue USET_ADD_CASE_MAPPINGS */
+    public const int ADD_CASE_MAPPINGS = UNKNOWN;
+#if U_ICU_VERSION_MAJOR_NUM >= 73
+    /** @cvalue USET_SIMPLE_CASE_INSENSITIVE */
+    public const int SIMPLE_CASE_INSENSITIVE = UNKNOWN;
+#endif
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+    /** @cvalue UBIDI_LTR */
+    public const int LTR = UNKNOWN;
+    /** @cvalue UBIDI_RTL */
+    public const int RTL = UNKNOWN;
 #endif
 
     public function __construct() {}
@@ -60,8 +76,18 @@ class Spoofchecker
     /** @tentative-return-type */
     public function setChecks(int $checks): void {}
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
     /** @tentative-return-type */
     public function setRestrictionLevel(int $level): void {}
+    public function setAllowedChars(string $pattern, int $patternOptions = 0): void {}
+
+    public function getSkeleton(string $string): string|false {}
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+    public function getBidiSkeleton(int $direction, string $string): string|false {}
+
+    /**
+     * @param int $errorCode
+     */
+    public function areBidiConfusable(int $direction, string $string1, string $string2, &$errorCode = null): bool {}
 #endif
 }

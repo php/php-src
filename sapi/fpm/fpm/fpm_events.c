@@ -23,7 +23,6 @@
 #include "events/select.h"
 #include "events/poll.h"
 #include "events/epoll.h"
-#include "events/devpoll.h"
 #include "events/port.h"
 #include "events/kqueue.h"
 
@@ -273,14 +272,6 @@ int fpm_event_pre_init(char *mechanism) /* {{{ */
 
 	/* epoll */
 	module = fpm_event_epoll_module();
-	if (module) {
-		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
-			return 0;
-		}
-	}
-
-	/* /dev/poll */
-	module = fpm_event_devpoll_module();
 	if (module) {
 		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;

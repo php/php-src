@@ -52,7 +52,7 @@ int(-4294967294)
 int(-9223372036854775807)
 --- testing: 9.2233720368548E+18 ---
 
-Deprecated: Implicit conversion from float 9.223372036854776E+18 to int loses precision in %s on line %d
+Warning: The float 9.223372036854776E+18 is not representable as an int, cast occurred in %s on line %d
 int(9223372036854775807)
 --- testing: -9223372036854775807 ---
 int(9223372036854775806)

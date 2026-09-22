@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
@@ -29,7 +27,6 @@
 #ifdef HAVE_XML
 
 #include "php_xml.h"
-# include "ext/standard/head.h"
 #ifdef LIBXML_EXPAT_COMPAT
 #include "ext/libxml/php_libxml.h"
 #endif
@@ -64,11 +61,7 @@ typedef struct {
 	XML_Parser parser;
 	XML_Char *target_encoding;
 
-	/* Reference to the object itself, for convenience.
-	 * It is not owned, do not release it. */
-	zval index;
-
-	zend_object *object;
+	zend_object *object; /* object with handlers */
 	zend_fcall_info_cache startElementHandler;
 	zend_fcall_info_cache endElementHandler;
 	zend_fcall_info_cache characterDataHandler;
@@ -79,14 +72,14 @@ typedef struct {
 	zend_fcall_info_cache externalEntityRefHandler;
 	zend_fcall_info_cache startNamespaceDeclHandler;
 	zend_fcall_info_cache endNamespaceDeclHandler;
-
 	zval data;
 	zval info;
+
 	int level;
 	int toffset;
 	int curtag;
-	zval *ctag;
-	char **ltags;
+	zend_long ctag_index;
+	zend_string **ltags;
 	bool lastwasopen;
 	bool skipwhite;
 	bool isparsing;
@@ -116,8 +109,6 @@ ZEND_GET_MODULE(xml)
 
 #define XML_MAXLEVEL 255 /* XXX this should be dynamic */
 
-#define SKIP_TAGSTART(str) ((str) + (parser->toffset > strlen(str) ? strlen(str) : parser->toffset))
-
 static zend_class_entry *xml_parser_ce;
 static zend_object_handlers xml_parser_object_handlers;
 
@@ -136,22 +127,22 @@ inline static unsigned short xml_encode_iso_8859_1(unsigned char);
 inline static char xml_decode_iso_8859_1(unsigned short);
 inline static unsigned short xml_encode_us_ascii(unsigned char);
 inline static char xml_decode_us_ascii(unsigned short);
-static void _xml_xmlchar_zval(const XML_Char *, int, const XML_Char *, zval *);
-static int _xml_xmlcharlen(const XML_Char *);
-static void _xml_add_to_info(xml_parser *parser, const char *name);
-inline static zend_string *_xml_decode_tag(xml_parser *parser, const XML_Char *tag);
+static void xml_xmlchar_zval(const XML_Char *, int, const XML_Char *, zval *);
+static size_t xml_xmlcharlen(const XML_Char *);
+static void xml_add_to_info(xml_parser *parser, zend_string *name);
+inline static zend_string *xml_decode_tag(xml_parser *parser, const XML_Char *tag);
 
-void _xml_startElementHandler(void *, const XML_Char *, const XML_Char **);
-void _xml_endElementHandler(void *, const XML_Char *);
-void _xml_characterDataHandler(void *, const XML_Char *, int);
-void _xml_processingInstructionHandler(void *, const XML_Char *, const XML_Char *);
-void _xml_defaultHandler(void *, const XML_Char *, int);
-void _xml_unparsedEntityDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
-void _xml_notationDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
-int  _xml_externalEntityRefHandler(XML_Parser, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
+void xml_startElementHandler(void *, const XML_Char *, const XML_Char **);
+void xml_endElementHandler(void *, const XML_Char *);
+void xml_characterDataHandler(void *, const XML_Char *, int);
+void xml_processingInstructionHandler(void *, const XML_Char *, const XML_Char *);
+void xml_defaultHandler(void *, const XML_Char *, int);
+void xml_unparsedEntityDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
+void xml_notationDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
+int  xml_externalEntityRefHandler(XML_Parser, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
 
-void _xml_startNamespaceDeclHandler(void *, const XML_Char *, const XML_Char *);
-void _xml_endNamespaceDeclHandler(void *, const XML_Char *);
+void xml_startNamespaceDeclHandler(void *, const XML_Char *, const XML_Char *);
+void xml_endNamespaceDeclHandler(void *, const XML_Char *);
 /* }}} */
 
 #ifdef LIBXML_EXPAT_COMPAT
@@ -230,7 +221,7 @@ PHP_MINIT_FUNCTION(xml)
 	xml_parser_ce->default_object_handlers = &xml_parser_object_handlers;
 
 	memcpy(&xml_parser_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	xml_parser_object_handlers.offset = XtOffsetOf(xml_parser, std);
+	xml_parser_object_handlers.offset = offsetof(xml_parser, std);
 	xml_parser_object_handlers.free_obj = xml_parser_free_obj;
 	xml_parser_object_handlers.get_gc = xml_parser_get_gc;
 	xml_parser_object_handlers.get_constructor = xml_parser_get_constructor;
@@ -271,6 +262,8 @@ static int xml_parse_helper(xml_parser *parser, const char *data, size_t data_le
 
 	/* libxml2 specific options */
 #ifdef LIBXML_EXPAT_COMPAT
+	/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	/* See xmlInitSAXParserCtxt() and xmlCtxtUseOptions() */
 	if (parser->parsehuge) {
 		parser->parser->parser->options |= XML_PARSE_HUGE;
@@ -279,36 +272,34 @@ static int xml_parse_helper(xml_parser *parser, const char *data, size_t data_le
 		parser->parser->parser->options &= ~XML_PARSE_HUGE;
 		xmlDictSetLimit(parser->parser->parser->dict, XML_MAX_DICTIONARY_LIMIT);
 	}
+	ZEND_DIAGNOSTIC_IGNORED_END
 #endif
 
-	parser->isparsing = 1;
+	parser->isparsing = true;
 	int ret = XML_Parse(parser->parser, (const XML_Char *) data, data_len, is_final);
-	parser->isparsing = 0;
+	parser->isparsing = false;
 	return ret;
 }
 
-static void _xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encoding, zval *ret)
+static void xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encoding, zval *ret)
 {
 	if (s == NULL) {
 		ZVAL_FALSE(ret);
 		return;
 	}
 	if (len == 0) {
-		len = _xml_xmlcharlen(s);
+		len = xml_xmlcharlen(s);
 	}
 	ZVAL_STR(ret, xml_utf8_decode(s, len, encoding));
 }
 /* }}} */
 
-static inline xml_parser *xml_parser_from_obj(zend_object *obj) {
-	return (xml_parser *)((char *)(obj) - XtOffsetOf(xml_parser, std));
-}
+#define xml_parser_from_obj(obj) ZEND_CONTAINER_OF(obj, xml_parser, std)
 
 #define Z_XMLPARSER_P(zv) xml_parser_from_obj(Z_OBJ_P(zv))
 
 static zend_object *xml_parser_create_object(zend_class_entry *class_type) {
 	xml_parser *intern = zend_object_alloc(sizeof(xml_parser), class_type);
-	memset(intern, 0, sizeof(xml_parser) - sizeof(zend_object));
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -320,8 +311,11 @@ static void xml_parser_free_ltags(xml_parser *parser)
 {
 	if (parser->ltags) {
 		int inx;
-		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++)
-			efree(parser->ltags[ inx ]);
+		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++) {
+			if (parser->ltags[inx]) {
+				zend_string_release_ex(parser->ltags[inx], false);
+			}
+		}
 		efree(parser->ltags);
 	}
 }
@@ -330,6 +324,8 @@ static void xml_parser_free_obj(zend_object *object)
 {
 	xml_parser *parser = xml_parser_from_obj(object);
 
+	zval_ptr_dtor(&parser->info);
+	zval_ptr_dtor(&parser->data);
 	if (parser->parser) {
 		XML_ParserFree(parser->parser);
 	}
@@ -422,6 +418,8 @@ static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n)
 	if (ZEND_FCC_INITIALIZED(parser->endNamespaceDeclHandler)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &parser->endNamespaceDeclHandler);
 	}
+	zend_get_gc_buffer_add_zval(gc_buffer, &parser->data);
+	zend_get_gc_buffer_add_zval(gc_buffer, &parser->info);
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 
@@ -521,7 +519,7 @@ static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 			c = '?';
 		}
 
-		ZSTR_VAL(str)[ZSTR_LEN(str)++] = (unsigned int)decoder(c);
+		ZSTR_VAL(str)[ZSTR_LEN(str)++] = decoder(c);
 	}
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	if (ZSTR_LEN(str) < len) {
@@ -532,33 +530,29 @@ static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 }
 /* }}} */
 
-/* {{{ _xml_xmlcharlen() */
-static int _xml_xmlcharlen(const XML_Char *s)
+/* {{{ xml_xmlcharlen() */
+static size_t xml_xmlcharlen(const XML_Char *s)
 {
-	int len = 0;
-
-	while (*s) {
-		len++;
-		s++;
-	}
-	return len;
+	return strlen((const char *) s);
 }
 /* }}} */
 
-/* {{{ _xml_add_to_info() */
-static void _xml_add_to_info(xml_parser *parser, const char *name)
+/* {{{ xml_add_to_info() */
+static void xml_add_to_info(xml_parser *parser, zend_string *name)
 {
 	zval *element;
 
-	if (Z_ISUNDEF(parser->info)) {
+	if (Z_ISUNDEF(parser->info) || UNEXPECTED(Z_TYPE_P(Z_REFVAL(parser->info)) != IS_ARRAY)) {
 		return;
 	}
 
-	size_t name_len = strlen(name);
-	if ((element = zend_hash_str_find(Z_ARRVAL(parser->info), name, name_len)) == NULL) {
-		zval values;
-		array_init(&values);
-		element = zend_hash_str_update(Z_ARRVAL(parser->info), name, name_len, &values);
+	SEPARATE_ARRAY(Z_REFVAL(parser->info));
+	zend_array *arr = Z_ARRVAL_P(Z_REFVAL(parser->info));
+
+	element = zend_hash_lookup(arr, name);
+
+	if (Z_TYPE_P(element) == IS_NULL) {
+		array_init(element);
 	}
 
 	add_next_index_long(element, parser->curtag);
@@ -567,12 +561,12 @@ static void _xml_add_to_info(xml_parser *parser, const char *name)
 }
 /* }}} */
 
-/* {{{ _xml_decode_tag() */
-static zend_string *_xml_decode_tag(xml_parser *parser, const XML_Char *tag)
+/* {{{ xml_decode_tag() */
+static zend_string *xml_decode_tag(xml_parser *parser, const XML_Char *tag)
 {
 	zend_string *str;
 
-	str = xml_utf8_decode(tag, _xml_xmlcharlen(tag), parser->target_encoding);
+	str = xml_utf8_decode(tag, xml_xmlcharlen(tag), parser->target_encoding);
 
 	if (parser->case_folding) {
 		zend_str_toupper(ZSTR_VAL(str), ZSTR_LEN(str));
@@ -582,8 +576,41 @@ static zend_string *_xml_decode_tag(xml_parser *parser, const XML_Char *tag)
 }
 /* }}} */
 
-/* {{{ _xml_startElementHandler() */
-void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Char **attributes)
+static zend_string *xml_stripped_tag(zend_string *tag_name, int offset)
+{
+	if (offset == 0) {
+		return zend_string_copy(tag_name);
+	} else if (offset >= ZSTR_LEN(tag_name)) {
+		return ZSTR_EMPTY_ALLOC();
+	} else {
+		return zend_string_init(ZSTR_VAL(tag_name) + offset, ZSTR_LEN(tag_name) - offset, false);
+	}
+}
+
+static zval *xml_get_separated_data(xml_parser *parser)
+{
+	if (EXPECTED(Z_TYPE_P(Z_REFVAL(parser->data)) == IS_ARRAY)) {
+		SEPARATE_ARRAY(Z_REFVAL(parser->data));
+		return Z_REFVAL(parser->data);
+	}
+	return NULL;
+}
+
+static zval *xml_get_ctag(xml_parser *parser)
+{
+	zval *data = xml_get_separated_data(parser);
+	if (EXPECTED(data)) {
+		zval *zv = zend_hash_index_find_deref(Z_ARRVAL_P(data), parser->ctag_index);
+		if (EXPECTED(zv && Z_TYPE_P(zv) == IS_ARRAY)) {
+			SEPARATE_ARRAY(zv);
+			return zv;
+		}
+	}
+	return NULL;
+}
+
+/* {{{ xml_startElementHandler() */
+void xml_startElementHandler(void *userData, const XML_Char *name, const XML_Char **attributes)
 {
 	xml_parser *parser = (xml_parser *)userData;
 	const char **attrs = (const char **) attributes;
@@ -595,22 +622,22 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 	parser->level++;
 
-	tag_name = _xml_decode_tag(parser, name);
+	tag_name = xml_decode_tag(parser, name);
 
 	if (ZEND_FCC_INITIALIZED(parser->startElementHandler)) {
 		zval args[3];
-		ZVAL_COPY(&args[0], &parser->index);
-		ZVAL_STRING(&args[1], SKIP_TAGSTART(ZSTR_VAL(tag_name)));
+		ZVAL_OBJ(&args[0], &parser->std);
+		ZVAL_STR(&args[1], xml_stripped_tag(tag_name, parser->toffset));
 		array_init(&args[2]);
 
 		while (attributes && *attributes) {
 			zval tmp;
 
-			att = _xml_decode_tag(parser, attributes[0]);
+			att = xml_decode_tag(parser, attributes[0]);
 			val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
 			ZVAL_STR(&tmp, val);
-			zend_symtable_update(Z_ARRVAL(args[2]), att, &tmp);
+			zend_hash_update(Z_ARRVAL(args[2]), att, &tmp);
 
 			attributes += 2;
 
@@ -618,12 +645,11 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 		}
 
 		zend_call_known_fcc(&parser->startElementHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
-		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 		zval_ptr_dtor(&args[2]);
 	}
 
-	if (!Z_ISUNDEF(parser->data)) {
+	if (!Z_ISUNDEF(parser->data) && !EG(exception)) {
 		if (parser->level <= XML_MAXLEVEL)  {
 			zval tag, atr;
 			int atcnt = 0;
@@ -631,25 +657,27 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			array_init(&tag);
 			array_init(&atr);
 
-			_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
+			zend_string *stripped_tag = xml_stripped_tag(tag_name, parser->toffset);
+			xml_add_to_info(parser, stripped_tag);
 
-			add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
+			add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
 			add_assoc_string(&tag, "type", "open");
 			add_assoc_long(&tag, "level", parser->level);
 
-			parser->ltags[parser->level-1] = estrdup(ZSTR_VAL(tag_name));
-			parser->lastwasopen = 1;
+			/* Because toffset may change, we should use the original tag name */
+			parser->ltags[parser->level - 1] = zend_string_copy(tag_name);
+			parser->lastwasopen = true;
 
 			attributes = (const XML_Char **) attrs;
 
 			while (attributes && *attributes) {
 				zval tmp;
 
-				att = _xml_decode_tag(parser, attributes[0]);
+				att = xml_decode_tag(parser, attributes[0]);
 				val = xml_utf8_decode(attributes[1], strlen((char *)attributes[1]), parser->target_encoding);
 
 				ZVAL_STR(&tmp, val);
-				zend_symtable_update(Z_ARRVAL(atr), att, &tmp);
+				zend_hash_update(Z_ARRVAL(atr), att, &tmp);
 
 				atcnt++;
 				attributes += 2;
@@ -663,7 +691,19 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				zval_ptr_dtor(&atr);
 			}
 
-			parser->ctag = zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
+			zval *data = xml_get_separated_data(parser);
+			if (EXPECTED(data)) {
+				/* Note: due to array resizes or user interference,
+				 * we have to store an index instead of a zval into the array's memory. */
+				zend_array *arr = Z_ARRVAL_P(data);
+				if (EXPECTED(zend_hash_next_index_insert(arr, &tag))) {
+					parser->ctag_index = arr->nNextFreeElement - 1;
+				} else {
+					zval_ptr_dtor(&tag);
+				}
+			} else {
+				zval_ptr_dtor(&tag);
+			}
 		} else if (parser->level == (XML_MAXLEVEL + 1)) {
 						php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
 		}
@@ -673,8 +713,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 }
 /* }}} */
 
-/* {{{ _xml_endElementHandler() */
-void _xml_endElementHandler(void *userData, const XML_Char *name)
+/* {{{ xml_endElementHandler() */
+void xml_endElementHandler(void *userData, const XML_Char *name)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -682,50 +722,61 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 		return;
 	}
 
-	zend_string *tag_name = _xml_decode_tag(parser, name);
+	zend_string *tag_name = xml_decode_tag(parser, name);
 
 	if (ZEND_FCC_INITIALIZED(parser->endElementHandler)) {
 		zval args[2];
-		ZVAL_COPY(&args[0], &parser->index);
-		ZVAL_STRING(&args[1], SKIP_TAGSTART(ZSTR_VAL(tag_name)));
+		ZVAL_OBJ(&args[0], &parser->std);
+		ZVAL_STR(&args[1], xml_stripped_tag(tag_name, parser->toffset));
 
 		zend_call_known_fcc(&parser->endElementHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
-		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 	}
 
-	if (!Z_ISUNDEF(parser->data)) {
+	if (!Z_ISUNDEF(parser->data) && !EG(exception)) {
 		zval tag;
 
 		if (parser->lastwasopen) {
-			add_assoc_string(parser->ctag, "type", "complete");
+			zval *zv = xml_get_ctag(parser);
+			if (EXPECTED(zv)) {
+				add_assoc_string(zv, "type", "complete");
+			}
 		} else {
-			array_init(&tag);
+			zend_string *stripped_tag = xml_stripped_tag(tag_name, parser->toffset);
 
-			_xml_add_to_info(parser, ZSTR_VAL(tag_name) + parser->toffset);
+			xml_add_to_info(parser, stripped_tag);
 
-			add_assoc_string(&tag, "tag", SKIP_TAGSTART(ZSTR_VAL(tag_name))); /* cast to avoid gcc-warning */
-			add_assoc_string(&tag, "type", "close");
-			add_assoc_long(&tag, "level", parser->level);
-
-			zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
+			zval *data = xml_get_separated_data(parser);
+			if (EXPECTED(data)) {
+				array_init(&tag);
+				add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
+				add_assoc_string(&tag, "type", "close");
+				add_assoc_long(&tag, "level", parser->level);
+				zend_hash_next_index_insert(Z_ARRVAL_P(data), &tag);
+			} else {
+				zend_string_release_ex(stripped_tag, false);
+			}
 		}
 
-		parser->lastwasopen = 0;
+		parser->lastwasopen = false;
 	}
 
 	zend_string_release_ex(tag_name, 0);
 
 	if ((parser->ltags) && (parser->level <= XML_MAXLEVEL)) {
-		efree(parser->ltags[parser->level-1]);
+		zend_string **str = &parser->ltags[parser->level - 1];
+		if (*str) {
+			zend_string_release_ex(*str, false);
+			*str = NULL;
+		}
 	}
 
 	parser->level--;
 }
 /* }}} */
 
-/* {{{ _xml_characterDataHandler() */
-void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
+/* {{{ xml_characterDataHandler() */
+void xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -735,19 +786,18 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 	if (ZEND_FCC_INITIALIZED(parser->characterDataHandler)) {
 		zval args[2];
-		ZVAL_COPY(&args[0], &parser->index);
-		_xml_xmlchar_zval(s, len, parser->target_encoding, &args[1]);
+		ZVAL_OBJ(&args[0], &parser->std);
+		xml_xmlchar_zval(s, len, parser->target_encoding, &args[1]);
 
 		zend_call_known_fcc(&parser->characterDataHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
-		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor_str(&args[1]);
 	}
 
-	if (Z_ISUNDEF(parser->data)) {
+	if (Z_ISUNDEF(parser->data) || EG(exception)) {
 		return;
 	}
 
-	bool doprint = 0;
+	bool doprint = false;
 	zend_string *decoded_value;
 	decoded_value = xml_utf8_decode(s, len, parser->target_encoding);
 	if (parser->skipwhite) {
@@ -758,7 +808,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 				case '\n':
 					continue;
 				default:
-					doprint = 1;
+					doprint = true;
 					break;
 			}
 			if (doprint) {
@@ -767,33 +817,45 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		}
 	}
 	if (parser->lastwasopen) {
+		zval *ctag = xml_get_ctag(parser);
+		if (UNEXPECTED(!ctag)) {
+			zend_string_release_ex(decoded_value, false);
+			return;
+		}
+
 		zval *myval;
 		/* check if the current tag already has a value - if yes append to that! */
-		if ((myval = zend_hash_find(Z_ARRVAL_P(parser->ctag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
-			size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
-			Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+		if ((myval = zend_hash_find(Z_ARRVAL_P(ctag), ZSTR_KNOWN(ZEND_STR_VALUE))) && Z_TYPE_P(myval) == IS_STRING) {
+			Z_STR_P(myval) = zend_string_safe_realloc(Z_STR_P(myval), 1, Z_STRLEN_P(myval), ZSTR_LEN(decoded_value), false);
 			strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
 					ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
-			zend_string_release_ex(decoded_value, 0);
+			zend_string_release_ex(decoded_value, false);
 		} else {
 			if (doprint || (! parser->skipwhite)) {
-				add_assoc_str(parser->ctag, "value", decoded_value);
+				add_assoc_str(ctag, "value", decoded_value);
 			} else {
-				zend_string_release_ex(decoded_value, 0);
+				zend_string_release_ex(decoded_value, false);
 			}
 		}
 	} else {
 		zval tag;
 		zval *curtag, *mytype, *myval;
-		ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
-			if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
-				if (zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
+
+		zval *data = xml_get_separated_data(parser);
+		if (UNEXPECTED(!data)) {
+			zend_string_release_ex(decoded_value, false);
+			return;
+		}
+
+		ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL_P(data), curtag) {
+			if (EXPECTED(Z_TYPE_P(curtag) == IS_ARRAY) && (mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
+				if (EXPECTED(Z_TYPE_P(mytype) == IS_STRING) && zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
+					SEPARATE_ARRAY(curtag);
 					if ((myval = zend_hash_find(Z_ARRVAL_P(curtag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
-						size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
-						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+						Z_STR_P(myval) = zend_string_safe_realloc(Z_STR_P(myval), 1, Z_STRLEN_P(myval), ZSTR_LEN(decoded_value), false);
 						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
 								ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
-						zend_string_release_ex(decoded_value, 0);
+						zend_string_release_ex(decoded_value, false);
 						return;
 					}
 				}
@@ -802,23 +864,24 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		} ZEND_HASH_FOREACH_END();
 		if (parser->level <= XML_MAXLEVEL && parser->level > 0 && (doprint || (! parser->skipwhite))) {
 			array_init(&tag);
-			_xml_add_to_info(parser,SKIP_TAGSTART(parser->ltags[parser->level-1]));
-			add_assoc_string(&tag, "tag", SKIP_TAGSTART(parser->ltags[parser->level-1]));
+			zend_string *stripped_tag = xml_stripped_tag(parser->ltags[parser->level - 1], parser->toffset);
+			xml_add_to_info(parser, stripped_tag);
+			add_assoc_str(&tag, "tag", stripped_tag); /* transfer lifetime */
 			add_assoc_str(&tag, "value", decoded_value);
 			add_assoc_string(&tag, "type", "cdata");
 			add_assoc_long(&tag, "level", parser->level);
-			zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
+			zend_hash_next_index_insert(Z_ARRVAL_P(data), &tag);
 		} else if (parser->level == (XML_MAXLEVEL + 1)) {
 								php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
 		} else {
-			zend_string_release_ex(decoded_value, 0);
+			zend_string_release_ex(decoded_value, false);
 		}
 	}
 }
 /* }}} */
 
-/* {{{ _xml_processingInstructionHandler() */
-void _xml_processingInstructionHandler(void *userData, const XML_Char *target, const XML_Char *data)
+/* {{{ xml_processingInstructionHandler() */
+void xml_processingInstructionHandler(void *userData, const XML_Char *target, const XML_Char *data)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -828,19 +891,18 @@ void _xml_processingInstructionHandler(void *userData, const XML_Char *target, c
 
 	zval args[3];
 
-	ZVAL_COPY(&args[0], &parser->index);
-	_xml_xmlchar_zval(target, 0, parser->target_encoding, &args[1]);
-	_xml_xmlchar_zval(data, 0, parser->target_encoding, &args[2]);
+	ZVAL_OBJ(&args[0], &parser->std);
+	xml_xmlchar_zval(target, 0, parser->target_encoding, &args[1]);
+	xml_xmlchar_zval(data, 0, parser->target_encoding, &args[2]);
 
 	zend_call_known_fcc(&parser->processingInstructionHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
 }
 /* }}} */
 
-/* {{{ _xml_defaultHandler() */
-void _xml_defaultHandler(void *userData, const XML_Char *s, int len)
+/* {{{ xml_defaultHandler() */
+void xml_defaultHandler(void *userData, const XML_Char *s, int len)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -850,17 +912,16 @@ void _xml_defaultHandler(void *userData, const XML_Char *s, int len)
 
 	zval args[2];
 
-	ZVAL_COPY(&args[0], &parser->index);
-	_xml_xmlchar_zval(s, len, parser->target_encoding, &args[1]);
+	ZVAL_OBJ(&args[0], &parser->std);
+	xml_xmlchar_zval(s, len, parser->target_encoding, &args[1]);
 
 	zend_call_known_fcc(&parser->defaultHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor_str(&args[1]);
 }
 /* }}} */
 
-/* {{{ _xml_unparsedEntityDeclHandler() */
-void _xml_unparsedEntityDeclHandler(void *userData,
+/* {{{ xml_unparsedEntityDeclHandler() */
+void xml_unparsedEntityDeclHandler(void *userData,
 	const XML_Char *entityName, const XML_Char *base, const XML_Char *systemId,
 	const XML_Char *publicId, const XML_Char *notationName)
 {
@@ -872,25 +933,24 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 
 	zval args[6];
 
-	ZVAL_COPY(&args[0], &parser->index);
-	_xml_xmlchar_zval(entityName, 0, parser->target_encoding, &args[1]);
-	_xml_xmlchar_zval(base, 0, parser->target_encoding, &args[2]);
-	_xml_xmlchar_zval(systemId, 0, parser->target_encoding, &args[3]);
-	_xml_xmlchar_zval(publicId, 0, parser->target_encoding, &args[4]);
-	_xml_xmlchar_zval(notationName, 0, parser->target_encoding, &args[5]);
+	ZVAL_OBJ(&args[0], &parser->std);
+	xml_xmlchar_zval(entityName, 0, parser->target_encoding, &args[1]);
+	xml_xmlchar_zval(base, 0, parser->target_encoding, &args[2]);
+	xml_xmlchar_zval(systemId, 0, parser->target_encoding, &args[3]);
+	xml_xmlchar_zval(publicId, 0, parser->target_encoding, &args[4]);
+	xml_xmlchar_zval(notationName, 0, parser->target_encoding, &args[5]);
 
 	zend_call_known_fcc(&parser->unparsedEntityDeclHandler, /* retval */ NULL, /* param_count */ 6, args, /* named_params */ NULL);
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
-	zval_ptr_dtor(&args[5]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
+	zval_ptr_dtor_str(&args[5]);
 }
 /* }}} */
 
-/* {{{ _xml_notationDeclHandler() */
-void _xml_notationDeclHandler(void *userData, const XML_Char *notationName,
+/* {{{ xml_notationDeclHandler() */
+void xml_notationDeclHandler(void *userData, const XML_Char *notationName,
 	const XML_Char *base, const XML_Char *systemId, const XML_Char *publicId)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -901,26 +961,25 @@ void _xml_notationDeclHandler(void *userData, const XML_Char *notationName,
 
 	zval args[5];
 
-	ZVAL_COPY(&args[0], &parser->index);
-	_xml_xmlchar_zval(notationName, 0, parser->target_encoding, &args[1]);
-	_xml_xmlchar_zval(base, 0, parser->target_encoding, &args[2]);
-	_xml_xmlchar_zval(systemId, 0, parser->target_encoding, &args[3]);
-	_xml_xmlchar_zval(publicId, 0, parser->target_encoding, &args[4]);
+	ZVAL_OBJ(&args[0], &parser->std);
+	xml_xmlchar_zval(notationName, 0, parser->target_encoding, &args[1]);
+	xml_xmlchar_zval(base, 0, parser->target_encoding, &args[2]);
+	xml_xmlchar_zval(systemId, 0, parser->target_encoding, &args[3]);
+	xml_xmlchar_zval(publicId, 0, parser->target_encoding, &args[4]);
 
 	zend_call_known_fcc(&parser->notationDeclHandler, /* retval */ NULL, /* param_count */ 5, args, /* named_params */ NULL);
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
 }
 /* }}} */
 
-/* {{{ _xml_externalEntityRefHandler() */
-int _xml_externalEntityRefHandler(XML_Parser parserPtr, const XML_Char *openEntityNames,
+/* {{{ xml_externalEntityRefHandler() */
+int xml_externalEntityRefHandler(XML_Parser userData, const XML_Char *openEntityNames,
 	const XML_Char *base, const XML_Char *systemId, const XML_Char *publicId)
 {
-	xml_parser *parser = XML_GetUserData(parserPtr);
+	xml_parser *parser = XML_GetUserData(userData);
 
 	if (!parser || !ZEND_FCC_INITIALIZED(parser->externalEntityRefHandler)) {
 		return 0;
@@ -930,18 +989,17 @@ int _xml_externalEntityRefHandler(XML_Parser parserPtr, const XML_Char *openEnti
 	zval args[5];
 	zval retval;
 
-	ZVAL_COPY(&args[0], &parser->index);
-	_xml_xmlchar_zval(openEntityNames, 0, parser->target_encoding, &args[1]);
-	_xml_xmlchar_zval(base, 0, parser->target_encoding, &args[2]);
-	_xml_xmlchar_zval(systemId, 0, parser->target_encoding, &args[3]);
-	_xml_xmlchar_zval(publicId, 0, parser->target_encoding, &args[4]);
+	ZVAL_OBJ(&args[0], &parser->std);
+	xml_xmlchar_zval(openEntityNames, 0, parser->target_encoding, &args[1]);
+	xml_xmlchar_zval(base, 0, parser->target_encoding, &args[2]);
+	xml_xmlchar_zval(systemId, 0, parser->target_encoding, &args[3]);
+	xml_xmlchar_zval(publicId, 0, parser->target_encoding, &args[4]);
 
 	zend_call_known_fcc(&parser->externalEntityRefHandler, /* retval */ &retval, /* param_count */ 5, args, /* named_params */ NULL);
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
-	zval_ptr_dtor(&args[3]);
-	zval_ptr_dtor(&args[4]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
+	zval_ptr_dtor_str(&args[3]);
+	zval_ptr_dtor_str(&args[4]);
 
 	/* TODO Better handling from callable return value */
 	if (!Z_ISUNDEF(retval)) {
@@ -954,8 +1012,8 @@ int _xml_externalEntityRefHandler(XML_Parser parserPtr, const XML_Char *openEnti
 }
 /* }}} */
 
-/* {{{ _xml_startNamespaceDeclHandler() */
-void _xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const XML_Char *uri)
+/* {{{ xml_startNamespaceDeclHandler() */
+void xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const XML_Char *uri)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -965,19 +1023,18 @@ void _xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const
 
 	zval args[3];
 
-	ZVAL_COPY(&args[0], &parser->index);
-	_xml_xmlchar_zval(prefix, 0, parser->target_encoding, &args[1]);
-	_xml_xmlchar_zval(uri, 0, parser->target_encoding, &args[2]);
+	ZVAL_OBJ(&args[0], &parser->std);
+	xml_xmlchar_zval(prefix, 0, parser->target_encoding, &args[1]);
+	xml_xmlchar_zval(uri, 0, parser->target_encoding, &args[2]);
 
 	zend_call_known_fcc(&parser->startNamespaceDeclHandler, /* retval */ NULL, /* param_count */ 3, args, /* named_params */ NULL);
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
-	zval_ptr_dtor(&args[2]);
+	zval_ptr_dtor_str(&args[1]);
+	zval_ptr_dtor_str(&args[2]);
 }
 /* }}} */
 
-/* {{{ _xml_endNamespaceDeclHandler() */
-void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
+/* {{{ xml_endNamespaceDeclHandler() */
+void xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -987,12 +1044,11 @@ void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 
 	zval args[2];
 
-	ZVAL_COPY(&args[0], &parser->index);
-	_xml_xmlchar_zval(prefix, 0, parser->target_encoding, &args[1]);
+	ZVAL_OBJ(&args[0], &parser->std);
+	xml_xmlchar_zval(prefix, 0, parser->target_encoding, &args[1]);
 
 	zend_call_known_fcc(&parser->endNamespaceDeclHandler, /* retval */ NULL, /* param_count */ 2, args, /* named_params */ NULL);
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor_str(&args[1]);
 }
 /* }}} */
 
@@ -1045,12 +1101,11 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	                                     &php_xml_mem_hdlrs, (XML_Char*)ns_param);
 
 	parser->target_encoding = encoding;
-	parser->case_folding = 1;
-	parser->isparsing = 0;
+	parser->case_folding = true;
+	parser->isparsing = false;
 	parser->parsehuge = false; /* It's the default for BC & DoS protection */
 
 	XML_SetUserData(parser->parser, parser);
-	ZVAL_COPY_VALUE(&parser->index, return_value);
 }
 /* }}} */
 
@@ -1087,9 +1142,7 @@ static bool php_xml_check_string_method_arg(
 	}
 
 	zend_class_entry *ce = object->ce;
-	zend_string *lc_name = zend_string_tolower(method_name);
-	zend_function *method_ptr = zend_hash_find_ptr(&ce->function_table, lc_name);
-	zend_string_release_ex(lc_name, 0);
+	zend_function *method_ptr = zend_hash_find_ptr_lc(&ce->function_table, method_name);
 	if (!method_ptr) {
 		if (arg_num) {
 			zend_argument_value_error(arg_num, "method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(method_name));
@@ -1184,6 +1237,13 @@ PHP_FUNCTION(xml_set_element_handler)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OF!S", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_method_name) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
+		php_error_docref(NULL, E_DEPRECATED, "Passing non-callable strings is deprecated since 8.4");
+		if (UNEXPECTED(EG(exception))) {
+			zend_release_fcall_info_cache(&start_fcc);
+			zend_release_fcall_info_cache(&end_fcc);
+			RETURN_THROWS();
+		}
+
 		bool status = php_xml_check_string_method_arg(3, parser->object, end_method_name, &end_fcc);
 		if (status == false) {
 			zend_release_fcall_info_cache(&start_fcc);
@@ -1192,6 +1252,13 @@ PHP_FUNCTION(xml_set_element_handler)
 		}
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSF!", &pind, xml_parser_ce, &start_method_name, &end_fci, &end_fcc) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
+
+		php_error_docref(NULL, E_DEPRECATED, "Passing non-callable strings is deprecated since 8.4");
+		if (UNEXPECTED(EG(exception))) {
+			zend_release_fcall_info_cache(&start_fcc);
+			zend_release_fcall_info_cache(&end_fcc);
+			RETURN_THROWS();
+		}
 
 		bool status = php_xml_check_string_method_arg(2, parser->object, start_method_name, &start_fcc);
 		if (status == false) {
@@ -1202,6 +1269,11 @@ PHP_FUNCTION(xml_set_element_handler)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSS", &pind, xml_parser_ce, &start_method_name, &end_method_name) == SUCCESS) {
 		zend_release_fcall_info_cache(&start_fcc);
 		zend_release_fcall_info_cache(&end_fcc);
+
+		php_error_docref(NULL, E_DEPRECATED, "Passing non-callable strings is deprecated since 8.4");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 
 		parser = Z_XMLPARSER_P(pind);
 
@@ -1236,9 +1308,15 @@ PHP_FUNCTION(xml_set_element_handler)
 	}
 
 	set_handlers:
+	if (parser->isparsing) {
+		zend_release_fcall_info_cache(&start_fcc);
+		zend_release_fcall_info_cache(&end_fcc);
+		zend_throw_error(NULL, "Cannot change handlers while parsing");
+		RETURN_THROWS();
+	}
 	xml_set_handler(&parser->startElementHandler, &start_fcc);
 	xml_set_handler(&parser->endElementHandler, &end_fcc);
-	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
+	XML_SetElementHandler(parser->parser, xml_startElementHandler, xml_endElementHandler);
 
 	RETURN_TRUE;
 }
@@ -1257,13 +1335,16 @@ static void php_xml_set_handler_parse_callable(
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OF!", &pind, xml_parser_ce, &handler_fci, &handler_fcc) == SUCCESS) {
 		*parser = Z_XMLPARSER_P(pind);
 		if (!ZEND_FCI_INITIALIZED(handler_fci)) {
-			/* Free handler, so just return and a uninitialized FCC communicates this */
+			/* Free handler, so just return and an uninitialized FCC communicates this */
 			return;
 		}
 		memcpy(parser_handler_fcc, &handler_fcc, sizeof(zend_fcall_info_cache));
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OS", &pind, xml_parser_ce, &method_name) == SUCCESS) {
 		*parser = Z_XMLPARSER_P(pind);
-
+		php_error_docref(NULL, E_DEPRECATED, "Passing non-callable strings is deprecated since 8.4");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 		bool status = php_xml_check_string_method_arg(2, (*parser)->object, method_name, parser_handler_fcc);
 		if (status == false) {
 			RETURN_THROWS();
@@ -1286,19 +1367,24 @@ static void php_xml_set_handler_parse_callable(
 		php_xml_set_handler_parse_callable(INTERNAL_FUNCTION_PARAM_PASSTHRU, &parser, &handler_fcc); \
 		if (EG(exception)) { return; } \
 		ZEND_ASSERT(parser); \
+		if (parser->isparsing) { \
+			zend_release_fcall_info_cache(&handler_fcc); \
+			zend_throw_error(NULL, "Cannot change handlers while parsing"); \
+			RETURN_THROWS(); \
+		} \
 		xml_set_handler(&parser->parser_handler_name, &handler_fcc); \
 		parse_function(parser->parser, c_function); \
 		RETURN_TRUE; \
 	}
 
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_character_data_handler, characterDataHandler, XML_SetCharacterDataHandler, _xml_characterDataHandler);
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_processing_instruction_handler, processingInstructionHandler, XML_SetProcessingInstructionHandler, _xml_processingInstructionHandler);
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_default_handler, defaultHandler, XML_SetDefaultHandler, _xml_defaultHandler);
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_unparsed_entity_decl_handler, unparsedEntityDeclHandler, XML_SetUnparsedEntityDeclHandler, _xml_unparsedEntityDeclHandler);
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_notation_decl_handler, notationDeclHandler, XML_SetNotationDeclHandler, _xml_notationDeclHandler);
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_external_entity_ref_handler, externalEntityRefHandler, XML_SetExternalEntityRefHandler, (void *) _xml_externalEntityRefHandler);
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_start_namespace_decl_handler, startNamespaceDeclHandler, XML_SetStartNamespaceDeclHandler, _xml_startNamespaceDeclHandler);
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_end_namespace_decl_handler, endNamespaceDeclHandler, XML_SetEndNamespaceDeclHandler, _xml_endNamespaceDeclHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_character_data_handler, characterDataHandler, XML_SetCharacterDataHandler, xml_characterDataHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_processing_instruction_handler, processingInstructionHandler, XML_SetProcessingInstructionHandler, xml_processingInstructionHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_default_handler, defaultHandler, XML_SetDefaultHandler, xml_defaultHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_unparsed_entity_decl_handler, unparsedEntityDeclHandler, XML_SetUnparsedEntityDeclHandler, xml_unparsedEntityDeclHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_notation_decl_handler, notationDeclHandler, XML_SetNotationDeclHandler, xml_notationDeclHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_external_entity_ref_handler, externalEntityRefHandler, XML_SetExternalEntityRefHandler, xml_externalEntityRefHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_start_namespace_decl_handler, startNamespaceDeclHandler, XML_SetStartNamespaceDeclHandler, xml_startNamespaceDeclHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_end_namespace_decl_handler, endNamespaceDeclHandler, XML_SetEndNamespaceDeclHandler, xml_endNamespaceDeclHandler);
 
 /* {{{ Start parsing an XML document */
 PHP_FUNCTION(xml_parse)
@@ -1307,7 +1393,7 @@ PHP_FUNCTION(xml_parse)
 	zval *pind;
 	char *data;
 	size_t data_len;
-	bool isFinal = 0;
+	bool isFinal = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &pind, xml_parser_ce, &data, &data_len, &isFinal) == FAILURE) {
 		RETURN_THROWS();
@@ -1343,30 +1429,29 @@ PHP_FUNCTION(xml_parse_into_struct)
 	}
 
 	if (info) {
-		info = zend_try_array_init(info);
-		if (!info) {
+		if (!zend_try_array_init(info)) {
 			RETURN_THROWS();
 		}
 	}
 
-	xdata = zend_try_array_init(xdata);
-	if (!xdata) {
+	if (!zend_try_array_init(xdata)) {
 		RETURN_THROWS();
 	}
 
-	ZVAL_COPY_VALUE(&parser->data, xdata);
+	zval_ptr_dtor(&parser->data);
+	ZVAL_COPY(&parser->data, xdata);
 
 	if (info) {
-		ZVAL_COPY_VALUE(&parser->info, info);
+		zval_ptr_dtor(&parser->info);
+		ZVAL_COPY(&parser->info, info);
 	}
 
 	parser->level = 0;
 	xml_parser_free_ltags(parser);
-	parser->ltags = safe_emalloc(XML_MAXLEVEL, sizeof(char *), 0);
-	memset(parser->ltags, 0, XML_MAXLEVEL * sizeof(char *));
+	parser->ltags = ecalloc(XML_MAXLEVEL, sizeof(zend_string *));
 
-	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
-	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
+	XML_SetElementHandler(parser->parser, xml_startElementHandler, xml_endElementHandler);
+	XML_SetCharacterDataHandler(parser->parser, xml_characterDataHandler);
 
 	RETURN_LONG(xml_parse_helper(parser, data, data_len, true));
 }
@@ -1507,18 +1592,19 @@ PHP_FUNCTION(xml_parser_set_option)
 			parser->parsehuge = zend_is_true(value);
 			break;
 		/* Integer option */
-		case PHP_XML_OPTION_SKIP_TAGSTART:
+		case PHP_XML_OPTION_SKIP_TAGSTART: {
 			/* The tag start offset is stored in an int */
 			/* TODO Improve handling of values? */
-			parser->toffset = zval_get_long(value);
-			if (parser->toffset < 0) {
+			zend_long value_long = zval_get_long(value);
+			if (value_long < 0 || value_long > INT_MAX) {
 				/* TODO Promote to ValueError in PHP 9.0 */
 				php_error_docref(NULL, E_WARNING, "Argument #3 ($value) must be between 0 and %d"
-					" for option XML_OPTION_SKIP_TAGSTART", INT_MAX);
-				parser->toffset = 0;
+												  " for option XML_OPTION_SKIP_TAGSTART", INT_MAX);
 				RETURN_FALSE;
 			}
+			parser->toffset = (int) value_long;
 			break;
+		}
 		/* String option */
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			const xml_encoding *enc;
@@ -1538,7 +1624,6 @@ PHP_FUNCTION(xml_parser_set_option)
 		default:
 			zend_argument_value_error(2, "must be a XML_OPTION_* constant");
 			RETURN_THROWS();
-			break;
 	}
 
 	RETURN_TRUE;
@@ -1560,19 +1645,14 @@ PHP_FUNCTION(xml_parser_get_option)
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
 			RETURN_BOOL(parser->case_folding);
-			break;
 		case PHP_XML_OPTION_SKIP_TAGSTART:
 			RETURN_LONG(parser->toffset);
-			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
 			RETURN_BOOL(parser->skipwhite);
-			break;
 		case PHP_XML_OPTION_PARSE_HUGE:
 			RETURN_BOOL(parser->parsehuge);
-			break;
 		case PHP_XML_OPTION_TARGET_ENCODING:
 			RETURN_STRING((char *)parser->target_encoding);
-			break;
 		default:
 			zend_argument_value_error(2, "must be a XML_OPTION_* constant");
 			RETURN_THROWS();

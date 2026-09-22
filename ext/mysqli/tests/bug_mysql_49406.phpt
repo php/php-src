@@ -58,7 +58,6 @@ require_once 'skipifconnectfailure.inc';
         MYSQLI_TYPE_STRING => "STRING",
         MYSQLI_TYPE_NULL => "NULL",
         MYSQLI_TYPE_NEWDATE => "NEWDATE",
-        MYSQLI_TYPE_INTERVAL => "INTERVAL",
         MYSQLI_TYPE_GEOMETRY => "GEOMETRY",
     );
 

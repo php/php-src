@@ -7,7 +7,7 @@ echo "*** Testing date_isodate_set() : basic functionality ***\n";
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
-// Create a deate object
+// Create a date object
 $datetime = date_create("2009-01-30 17:57:32");
 
 // Which month is week 40 ?

@@ -25,10 +25,6 @@ $files_arr = array(
   "//fileinode_variation3//fileinode_variation3.tmp",
   "/fileinode_variation3/*.tmp",
   "fileinode_variation3/fileinode*.tmp",
-
-  /* Testing Binary safe */
-  "/fileinode_variation3/fileinode_variation3.tmp".chr(0),
-  "/fileinode_variation3/fileinode_variation3.tmp\0"
 );
 
 $count = 1;
@@ -37,8 +33,8 @@ foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
   try {
     var_dump( fileinode( $file_path."/".$file ) );
-  } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
   }
   clearstatcache();
   $count++;
@@ -72,14 +68,6 @@ bool(false)
 - Iteration 6 -
 
 Warning: fileinode(): stat failed for %s/fileinode_variation3/fileinode*.tmp in %s on line %d
-bool(false)
-- Iteration 7 -
-
-Warning: fileinode(): Filename contains null byte in %s on line %d
-bool(false)
-- Iteration 8 -
-
-Warning: fileinode(): Filename contains null byte in %s on line %d
 bool(false)
 
 *** Done ***

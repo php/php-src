@@ -48,5 +48,9 @@ try {
 ?>
 --EXPECT--
 $options not provided
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Server</faultcode><faultstring>SoapServer::__construct(): 'uri' option is required in nonWSDL mode</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
+ValueError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
+ValueError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
+Empty $options array
+ValueError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
+ValueError: SoapServer::__construct(): Argument #2 ($options) "uri" option is required when argument #1 ($wsdl) is null
+$options array only sets "uri" option

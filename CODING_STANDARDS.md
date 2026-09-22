@@ -9,9 +9,10 @@ rewritten to comply with these rules.
 
 1. Document your code in source files and the manual. (tm)
 
-1. PHP is implemented in C99.  The optional fixed-width integers from
+1. PHP is implemented in C11.
+    For instance, the optional fixed-width integers from
     stdint.h (int8_t, int16_t, int32_t, int64_t and their unsigned
-    counterparts) must be available.
+    counterparts) are supposed to be available.
 
 1. Functions that are given pointers to resources should not free them.
 
@@ -77,6 +78,16 @@ rewritten to comply with these rules.
     which return a "yes"/"no" answer.  `zend_result` is an appropriate
     return value for functions that perform some operation that may
     succeed or fail.
+
+1. When throwing a `ValueError` or emitting a warning, use consistent
+    phrasing for error messages. Common patterns are:
+
+    * Type errors: `must be of type int` (use the type name, not e.g. `must be an integer`)
+    * Range/boundary: `must be between X and Y` / `must be greater than [or equal to] X` / `must be less than X` / `must be finite`
+    * String constraints: `must not contain any null bytes` / `must not be empty` / `must be a single character`
+    * Valid value: `must be a valid X` (e.g. `must be a valid encoding`, `must be a valid calendar ID`)
+    * Enum-like: `must be one of X, Y, or Z`
+    * Structural: `must have X` / `must have key X` / `must have N elements`
 
 ## User functions/methods naming conventions
 
@@ -275,7 +286,7 @@ rewritten to comply with these rules.
 
 1. The length of constant string literals should be calculated via ``strlen()``
    instead of using ``sizeof()-1`` as it is clearer and any modern compiler
-   will optimize it away. Legacy usages of the latter style exists within the
+   will optimize it away. Legacy usages of the latter style exist within the
    codebase but should not be refactored, unless larger refactoring around that
    code is taking place.
 
@@ -283,6 +294,22 @@ rewritten to comply with these rules.
 
 1. Extensions should be well tested using `*.phpt` tests. Read more at
     [qa.php.net](https://qa.php.net/write-test.php) documentation.
+
+2. When testing exceptions, assert the error class in the catch block.
+
+```diff
+  try {
+      throw new ValueError('foo');
+-  } catch (ValueError $e) {
++  } catch (Throwable $e) {
+-     echo $e->getMessage(), "\n";
++     echo $e::class, ': ', $e->getMessage(), "\n";
+  }
+
+  --EXPECT--
+- foo
++ ValueError: foo
+```
 
 ## New and experimental functions
 

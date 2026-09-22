@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Andrei Zmievski <andrei@php.net>                             |
    +----------------------------------------------------------------------+
@@ -78,7 +76,6 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	bool jit;
 #endif
-	bool per_request_cache;
 	php_pcre_error_code error_code;
 	/* Used for unmatched subpatterns in OFFSET_CAPTURE mode */
 	zval unmatched_null_pair;

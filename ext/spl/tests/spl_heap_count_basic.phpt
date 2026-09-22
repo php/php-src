@@ -26,7 +26,7 @@ $heap->insert(1);
 try {
     count($heap);// refers to MyHeap->count() method
 } catch (Exception $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>

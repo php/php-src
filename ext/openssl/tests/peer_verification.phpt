@@ -12,14 +12,14 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'peer_verification.pem.tmp';
 $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'peer_verification-ca.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     for ($i = 0; $i < 5; $i++) {
         @stream_socket_accept($server, 1);
@@ -29,11 +29,9 @@ $serverCode = sprintf($serverCode, $certFile);
 
 $peerName = 'peer_verification';
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $caFile = '%s';
-
-    phpt_wait();
 
     // Expected to fail -- untrusted server cert and no CA File present
     var_dump(@stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags));

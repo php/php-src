@@ -5,16 +5,15 @@ mysqli
 posix
 --SKIPIF--
 <?php
-require_once 'skipifconnectfailure.inc';
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die("skip cannot connect");
-
+require_once __DIR__ . '/test_setup/test_helpers.inc';
+$link = mysqli_connect_or_skip();
 if (mysqli_get_server_version($link) < 50012)
     die("skip Test needs SQL function SLEEP() available as of MySQL 5.0.12");
 
 if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_NOFILE, 2048, -1))
     die('skip Failed to set POSIX_RLIMIT_NOFILE');
+if (PHP_OS_FAMILY === 'Solaris')
+    die('skip Solaris LP64 FD_SETSIZE=65536 not practically exceedable here');
 ?>
 --FILE--
 <?php

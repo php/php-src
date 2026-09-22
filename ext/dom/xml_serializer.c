@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -21,6 +19,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "xml_serializer.h"
+#include "private_data.h"
 #include "namespace_compat.h"
 #include "serialize_common.h"
 #include "internal_helpers.h"
@@ -66,9 +65,14 @@ typedef struct {
 	const xmlChar *prefix, *name;
 } dom_qname_pair;
 
+typedef struct dom_xml_serialize_ctx {
+	xmlSaveCtxtPtr ctxt;
+	xmlOutputBufferPtr out;
+	php_dom_private_data *private_data;
+} dom_xml_serialize_ctx;
+
 static int dom_xml_serialization_algorithm(
-	xmlSaveCtxtPtr ctxt,
-	xmlOutputBufferPtr out,
+	dom_xml_serialize_ctx *ctx,
 	dom_xml_ns_prefix_map *namespace_prefix_map,
 	xmlNodePtr node,
 	const xmlChar *namespace,
@@ -594,7 +598,7 @@ static int dom_xml_serialize_attribute_node_value(xmlOutputBufferPtr out, xmlAtt
 /* These steps are from the attribute serialization algorithm's well-formed checks.
  * Note that this does not return a boolean but an int to be compatible with the TRY/TRY_CLEANUP interface
  * that we do for compatibility with libxml's interfaces. */
-static zend_always_inline int dom_xml_check_xmlns_attribute_requirements(const xmlAttr *attr)
+static zend_always_inline int dom_xml_check_xmlns_attribute_requirements(const xmlAttr *attr, const xmlChar *candidate_prefix)
 {
 	const xmlChar *attr_value = dom_get_attribute_value(attr);
 
@@ -603,8 +607,9 @@ static zend_always_inline int dom_xml_check_xmlns_attribute_requirements(const x
 		return -1;
 	}
 
-	/* 3.5.2.3. If the require well-formed flag is set and the value of attr's value attribute is the empty string */
-	if (*attr_value == '\0') {
+	/* 3.5.2.3. If the require well-formed flag is set and the value of attr's value attribute is the empty string.
+	 * Errata: an "xmlns" attribute is allowed but not one with a prefix, so the idea in the spec is right but the description isn't. */
+	if (*attr_value == '\0' && candidate_prefix != NULL) {
 		return -1;
 	}
 
@@ -633,7 +638,11 @@ static int dom_xml_serialize_comment_node(xmlOutputBufferPtr out, xmlNodePtr com
 		const xmlChar *ptr = comment->content;
 		if (ptr != NULL) {
 			TRY(dom_xml_check_char_production(ptr));
-			if (strstr((const char *) ptr, "--") != NULL || ptr[strlen((const char *) ptr) - 1] == '-') {
+			if (strstr((const char *) ptr, "--") != NULL) {
+				return -1;
+			}
+			size_t len = strlen((const char *) ptr);
+			if (len > 0 && ptr[len - 1] == '-') {
 				return -1;
 			}
 		}
@@ -784,14 +793,15 @@ static int dom_xml_serialize_attributes(
 					}
 				}
 
-				if (require_well_formed) {
-					/* 3.5.2.2 and 3.5.2.3 are done by this call. */
-					TRY_OR_CLEANUP(dom_xml_check_xmlns_attribute_requirements(attr));
-				}
-
 				/* 3.5.2.4. the attr's prefix matches the string "xmlns", then let candidate prefix be the string "xmlns". */
 				if (attr->ns->prefix != NULL && strcmp((const char *) attr->ns->prefix, "xmlns") == 0) {
 					candidate_prefix = BAD_CAST "xmlns";
+				}
+
+				/* Errata: step 3.5.2.3 can only really be checked if we already know the candidate prefix. */
+				if (require_well_formed) {
+					/* 3.5.2.2 and 3.5.2.3 are done by this call. */
+					TRY_OR_CLEANUP(dom_xml_check_xmlns_attribute_requirements(attr, candidate_prefix));
 				}
 			}
 			/* 3.5.3. Otherwise, the attribute namespace in not the XMLNS namespace. Run these steps: */
@@ -895,8 +905,7 @@ static int dom_xml_output_indents(xmlOutputBufferPtr out, int indent)
 
 /* https://w3c.github.io/DOM-Parsing/#dfn-xml-serializing-an-element-node */
 static int dom_xml_serialize_element_node(
-	xmlSaveCtxtPtr ctxt,
-	xmlOutputBufferPtr out,
+	dom_xml_serialize_ctx *ctx,
 	const xmlChar *namespace,
 	dom_xml_ns_prefix_map *namespace_prefix_map,
 	xmlNodePtr element,
@@ -916,7 +925,7 @@ static int dom_xml_serialize_element_node(
 	bool should_format = indent >= 0 && element->children != NULL && dom_xml_should_format_element(element);
 
 	/* 2. Let markup be the string "<" (U+003C LESS-THAN SIGN). */
-	TRY(xmlOutputBufferWriteLit(out, "<"));
+	TRY(xmlOutputBufferWriteLit(ctx->out, "<"));
 
 	/* 3. Let qualified name be an empty string.
 	 *    => We're going to do it a bit differently.
@@ -966,7 +975,7 @@ static int dom_xml_serialize_element_node(
 		}
 
 		/* 11.4. Append the value of qualified name to markup. */
-		TRY_OR_CLEANUP(dom_xml_output_qname(out, &qualified_name));
+		TRY_OR_CLEANUP(dom_xml_output_qname(ctx->out, &qualified_name));
 	}
 	/* 12. Otherwise, inherited ns is not equal to ns */
 	else {
@@ -1011,7 +1020,7 @@ static int dom_xml_serialize_element_node(
 			}
 
 			/* 12.4.3. Append the value of qualified name to markup. */
-			TRY_OR_CLEANUP(dom_xml_output_qname(out, &qualified_name));
+			TRY_OR_CLEANUP(dom_xml_output_qname(ctx->out, &qualified_name));
 		}
 		/* 12.5. Otherwise, if prefix is not null, then: */
 		else if (prefix != NULL) {
@@ -1033,14 +1042,14 @@ static int dom_xml_serialize_element_node(
 			qualified_name.name = element->name;
 
 			/* 12.5.4. Append the value of qualified name to markup. */
-			TRY_OR_CLEANUP(dom_xml_output_qname(out, &qualified_name));
+			TRY_OR_CLEANUP(dom_xml_output_qname(ctx->out, &qualified_name));
 
 			/* 12.5.5. Append the following to markup, in the order listed: ... */
-			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, " xmlns:")); /* 12.5.5.1 - 12.5.5.2 */
-			TRY_OR_CLEANUP(xmlOutputBufferWriteString(out, (const char *) prefix));
-			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, "=\""));
-			TRY_OR_CLEANUP(dom_xml_common_text_serialization(out, (const char *) ns, true));
-			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, "\""));
+			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, " xmlns:")); /* 12.5.5.1 - 12.5.5.2 */
+			TRY_OR_CLEANUP(xmlOutputBufferWriteString(ctx->out, (const char *) prefix));
+			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, "=\""));
+			TRY_OR_CLEANUP(dom_xml_common_text_serialization(ctx->out, (const char *) ns, true));
+			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, "\""));
 
 			/* 12.5.6. If local default namespace is not null ... (editorial numbering error: https://github.com/w3c/DOM-Parsing/issues/43) */
 			if (local_default_namespace != NULL) {
@@ -1064,29 +1073,32 @@ static int dom_xml_serialize_element_node(
 			inherited_ns = ns;
 
 			/* 12.6.4. Append the value of qualified name to markup. */
-			TRY_OR_CLEANUP(dom_xml_output_qname(out, &qualified_name));
+			TRY_OR_CLEANUP(dom_xml_output_qname(ctx->out, &qualified_name));
 
 			/* 12.6.5. Append the following to markup, in the order listed: ... */
-			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, " xmlns=\"")); /* 12.6.5.1 - 12.6.5.2 */
-			TRY_OR_CLEANUP(dom_xml_common_text_serialization(out, (const char *) ns, true));
-			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, "\""));
+			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, " xmlns=\"")); /* 12.6.5.1 - 12.6.5.2 */
+			TRY_OR_CLEANUP(dom_xml_common_text_serialization(ctx->out, (const char *) ns, true));
+			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, "\""));
 		}
 		/* 12.7. Otherwise, the node has a local default namespace that matches ns ... */
 		else {
 			qualified_name.name = element->name;
 			inherited_ns = ns;
-			TRY_OR_CLEANUP(dom_xml_output_qname(out, &qualified_name));
+			TRY_OR_CLEANUP(dom_xml_output_qname(ctx->out, &qualified_name));
 		}
 	}
 
 	/* 13. Append to markup the result of the XML serialization of node's attributes given map, prefix index,
 	 *     local prefixes map, ignore namespace definition attribute flag, and require well-formed flag. */
-	TRY_OR_CLEANUP(dom_xml_serialize_attributes(out, element, &map, &local_prefixes_map, prefix_index, ignore_namespace_definition_attribute, require_well_formed));
+	TRY_OR_CLEANUP(dom_xml_serialize_attributes(ctx->out, element, &map, &local_prefixes_map, prefix_index, ignore_namespace_definition_attribute, require_well_formed));
 
 	/* 14. If ns is the HTML namespace, and the node's list of children is empty, and the node's localName matches
 	 *     any one of the following void elements: ... */
 	if (element->children == NULL) {
-		if (xmlSaveNoEmptyTags) {
+		ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
+		int saveNoEmptyTags = xmlSaveNoEmptyTags;
+		ZEND_DIAGNOSTIC_IGNORED_END
+		if (saveNoEmptyTags) {
 			/* Do nothing, use the <x></x> closing style. */
 		} else if (php_dom_ns_is_fast(element, php_dom_ns_is_html_magic_token)) {
 			size_t name_length = strlen((const char *) element->name);
@@ -1109,47 +1121,57 @@ static int dom_xml_serialize_element_node(
 				|| dom_local_name_compare_ex(element, "source", strlen("source"), name_length)
 				|| dom_local_name_compare_ex(element, "track", strlen("track"), name_length)
 				|| dom_local_name_compare_ex(element, "wbr", strlen("wbr"), name_length)) {
-				TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, " /"));
+				TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, " /"));
 				skip_end_tag = true;
 			}
 		} else {
 			/* 15. If ns is not the HTML namespace, and the node's list of children is empty,
 			 *     then append "/" (U+002F SOLIDUS) to markup and set the skip end tag flag to true. */
-			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, "/"));
+			TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, "/"));
 			skip_end_tag = true;
 		}
 	}
 
 	/* 16. Append ">" (U+003E GREATER-THAN SIGN) to markup. */
-	TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, ">"));
+	TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, ">"));
 
 	/* 17. If the value of skip end tag is true, then return the value of markup and skip the remaining steps. */
 	if (!skip_end_tag) {
-		/* Step 18 deals with template elements which we don't support. */
-
 		if (should_format) {
 			indent++;
 		} else {
 			indent = -1;
 		}
 
-		/* 19. Otherwise, append to markup the result of running the XML serialization algorithm on each of node's children. */
-		for (xmlNodePtr child = element->children; child != NULL; child = child->next) {
-			if (should_format) {
-				TRY_OR_CLEANUP(dom_xml_output_indents(out, indent));
+		/* 18. If ns is the HTML namespace, and the node's localName matches the string "template",
+		 *     then this is a template element.
+		 *     Append to markup the result of XML serializing a DocumentFragment node. */
+		xmlNodePtr child = NULL;
+		if (php_dom_ns_is_fast(element, php_dom_ns_is_html_magic_token) && xmlStrEqual(element->name, BAD_CAST "template")) {
+			if (ctx->private_data != NULL) {
+				child = php_dom_retrieve_templated_content(ctx->private_data, element);
 			}
-			TRY_OR_CLEANUP(dom_xml_serialization_algorithm(ctxt, out, &map, child, inherited_ns, prefix_index, indent, require_well_formed));
+		} else {
+			child = element->children;
+		}
+
+		/* 19. Otherwise, append to markup the result of running the XML serialization algorithm on each of node's children. */
+		for (; child != NULL; child = child->next) {
+			if (should_format) {
+				TRY_OR_CLEANUP(dom_xml_output_indents(ctx->out, indent));
+			}
+			TRY_OR_CLEANUP(dom_xml_serialization_algorithm(ctx, &map, child, inherited_ns, prefix_index, indent, require_well_formed));
 		}
 
 		if (should_format) {
 			indent--;
-			TRY_OR_CLEANUP(dom_xml_output_indents(out, indent));
+			TRY_OR_CLEANUP(dom_xml_output_indents(ctx->out, indent));
 		}
 
 		/* 20. Append the following to markup, in the order listed: */
-		TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, "</"));
-		TRY_OR_CLEANUP(dom_xml_output_qname(out, &qualified_name));
-		TRY_OR_CLEANUP(xmlOutputBufferWriteLit(out, ">"));
+		TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, "</"));
+		TRY_OR_CLEANUP(dom_xml_output_qname(ctx->out, &qualified_name));
+		TRY_OR_CLEANUP(xmlOutputBufferWriteLit(ctx->out, ">"));
 	}
 
 	/* 21. Return the value of markup.
@@ -1166,8 +1188,7 @@ cleanup:
 
 /* https://w3c.github.io/DOM-Parsing/#xml-serializing-a-documentfragment-node */
 static int dom_xml_serializing_a_document_fragment_node(
-	xmlSaveCtxtPtr ctxt,
-	xmlOutputBufferPtr out,
+	dom_xml_serialize_ctx *ctx,
 	dom_xml_ns_prefix_map *namespace_prefix_map,
 	xmlNodePtr node,
 	const xmlChar *namespace,
@@ -1182,7 +1203,7 @@ static int dom_xml_serializing_a_document_fragment_node(
 	/* 2. For each child child of node, in tree order, run the XML serialization algorithm on the child ... */
 	xmlNodePtr child = node->children;
 	while (child != NULL) {
-		TRY(dom_xml_serialization_algorithm(ctxt, out, namespace_prefix_map, child, namespace, prefix_index, indent, require_well_formed));
+		TRY(dom_xml_serialization_algorithm(ctx, namespace_prefix_map, child, namespace, prefix_index, indent, require_well_formed));
 		child = child->next;
 	}
 
@@ -1193,8 +1214,7 @@ static int dom_xml_serializing_a_document_fragment_node(
 
 /* https://w3c.github.io/DOM-Parsing/#dfn-xml-serializing-a-document-node */
 static int dom_xml_serializing_a_document_node(
-	xmlSaveCtxtPtr ctxt,
-	xmlOutputBufferPtr out,
+	dom_xml_serialize_ctx *ctx,
 	dom_xml_ns_prefix_map *namespace_prefix_map,
 	xmlNodePtr node,
 	const xmlChar *namespace,
@@ -1210,16 +1230,16 @@ static int dom_xml_serializing_a_document_node(
 	node->children = NULL;
 
 	/* https://github.com/w3c/DOM-Parsing/issues/50 */
-	TRY(xmlOutputBufferFlush(out));
-	TRY(xmlSaveDoc(ctxt, (xmlDocPtr) node));
-	TRY(xmlSaveFlush(ctxt));
+	TRY(xmlOutputBufferFlush(ctx->out));
+	TRY(xmlSaveDoc(ctx->ctxt, (xmlDocPtr) node));
+	TRY(xmlSaveFlush(ctx->ctxt));
 
 	node->children = child;
 
 	/* 2. For each child child of node, in tree order, run the XML serialization algorithm on the child passing along the provided arguments,
 	 *    and append the result to serialized document. */
 	while (child != NULL) {
-		TRY(dom_xml_serialization_algorithm(ctxt, out, namespace_prefix_map, child, namespace, prefix_index, indent, require_well_formed));
+		TRY(dom_xml_serialization_algorithm(ctx, namespace_prefix_map, child, namespace, prefix_index, indent, require_well_formed));
 		child = child->next;
 	}
 
@@ -1228,10 +1248,18 @@ static int dom_xml_serializing_a_document_node(
 	return 0;
 }
 
+static zend_always_inline bool dom_xml_serialize_check_stack_limit(void)
+{
+#ifdef ZEND_CHECK_STACK_LIMIT
+	return zend_call_stack_overflowed(EG(stack_limit));
+#else
+	return false;
+#endif
+}
+
 /* https://w3c.github.io/DOM-Parsing/#dfn-xml-serialization-algorithm */
 static int dom_xml_serialization_algorithm(
-	xmlSaveCtxtPtr ctxt,
-	xmlOutputBufferPtr out,
+	dom_xml_serialize_ctx *ctx,
 	dom_xml_ns_prefix_map *namespace_prefix_map,
 	xmlNodePtr node,
 	const xmlChar *namespace,
@@ -1240,39 +1268,44 @@ static int dom_xml_serialization_algorithm(
 	bool require_well_formed
 )
 {
+	if (UNEXPECTED(dom_xml_serialize_check_stack_limit())) {
+		zend_throw_error(NULL, "Maximum call stack size reached. Infinite recursion?");
+		return -1;
+	}
+
 	/* If node's interface is: */
 	switch (node->type) {
 		case XML_ELEMENT_NODE:
-			return dom_xml_serialize_element_node(ctxt, out, namespace, namespace_prefix_map, node, prefix_index, indent, require_well_formed);
+			return dom_xml_serialize_element_node(ctx, namespace, namespace_prefix_map, node, prefix_index, indent, require_well_formed);
 
 		case XML_DOCUMENT_FRAG_NODE:
-			return dom_xml_serializing_a_document_fragment_node(ctxt, out, namespace_prefix_map, node, namespace, prefix_index, indent, require_well_formed);
+			return dom_xml_serializing_a_document_fragment_node(ctx, namespace_prefix_map, node, namespace, prefix_index, indent, require_well_formed);
 
 		case XML_HTML_DOCUMENT_NODE:
 		case XML_DOCUMENT_NODE:
-			return dom_xml_serializing_a_document_node(ctxt, out, namespace_prefix_map, node, namespace, prefix_index, indent, require_well_formed);
+			return dom_xml_serializing_a_document_node(ctx, namespace_prefix_map, node, namespace, prefix_index, indent, require_well_formed);
 
 		case XML_TEXT_NODE:
-			return dom_xml_serialize_text_node(out, node, require_well_formed);
+			return dom_xml_serialize_text_node(ctx->out, node, require_well_formed);
 
 		case XML_COMMENT_NODE:
-			return dom_xml_serialize_comment_node(out, node, require_well_formed);
+			return dom_xml_serialize_comment_node(ctx->out, node, require_well_formed);
 
 		case XML_PI_NODE:
-			return dom_xml_serialize_processing_instruction(out, node, require_well_formed);
+			return dom_xml_serialize_processing_instruction(ctx->out, node, require_well_formed);
 
 		case XML_CDATA_SECTION_NODE:
-			return dom_xml_serialize_cdata_section_node(out, node);
+			return dom_xml_serialize_cdata_section_node(ctx->out, node);
 
 		case XML_ATTRIBUTE_NODE:
-			return dom_xml_serialize_attribute_node(out, node);
+			return dom_xml_serialize_attribute_node(ctx->out, node);
 
 		default:
-			TRY(xmlOutputBufferFlush(out));
-			TRY(xmlSaveTree(ctxt, node));
-			TRY(xmlSaveFlush(ctxt));
+			TRY(xmlOutputBufferFlush(ctx->out));
+			TRY(xmlSaveTree(ctx->ctxt, node));
+			TRY(xmlSaveFlush(ctx->ctxt));
 			if (node->type == XML_DTD_NODE) {
-				return xmlOutputBufferWriteLit(out, "\n");
+				return xmlOutputBufferWriteLit(ctx->out, "\n");
 			}
 			return 0;
 	}
@@ -1281,7 +1314,7 @@ static int dom_xml_serialization_algorithm(
 }
 
 /* https://w3c.github.io/DOM-Parsing/#dfn-xml-serialization */
-int dom_xml_serialize(xmlSaveCtxtPtr ctxt, xmlOutputBufferPtr out, xmlNodePtr node, bool format, bool require_well_formed)
+int dom_xml_serialize(xmlSaveCtxtPtr ctxt, xmlOutputBufferPtr out, xmlNodePtr node, bool format, bool require_well_formed, php_dom_private_data *private_data)
 {
 	/* 1. Let namespace be a context namespace with value null. */
 	const xmlChar *namespace = NULL;
@@ -1297,8 +1330,12 @@ int dom_xml_serialize(xmlSaveCtxtPtr ctxt, xmlOutputBufferPtr out, xmlNodePtr no
 	unsigned int prefix_index = 1;
 
 	/* 5. Return the result of running the XML serialization algorithm ... */
+	dom_xml_serialize_ctx ctx;
+	ctx.out = out;
+	ctx.ctxt = ctxt;
+	ctx.private_data = private_data;
 	int indent = format ? 0 : -1;
-	int result = dom_xml_serialization_algorithm(ctxt, out, &namespace_prefix_map, node, namespace, &prefix_index, indent, require_well_formed);
+	int result = dom_xml_serialization_algorithm(&ctx, &namespace_prefix_map, node, namespace, &prefix_index, indent, require_well_formed);
 
 	dom_xml_ns_prefix_map_dtor(&namespace_prefix_map);
 

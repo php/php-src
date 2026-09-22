@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -22,23 +20,25 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_html_magic_token = (const php_dom_ns_magic_token *) DOM_XHTML_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_mathml_magic_token = (const php_dom_ns_magic_token *) DOM_MATHML_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_svg_magic_token = (const php_dom_ns_magic_token *) DOM_SVG_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xlink_magic_token = (const php_dom_ns_magic_token *) DOM_XLINK_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xml_magic_token = (const php_dom_ns_magic_token *) DOM_XML_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xmlns_magic_token = (const php_dom_ns_magic_token *) DOM_XMLNS_NS_URI;
-
-struct _php_dom_libxml_ns_mapper {
-	php_libxml_private_data_header header;
-	/* This is used almost all the time for HTML documents, so it makes sense to cache this. */
-	xmlNsPtr html_ns;
-	/* Used for every prefixless namespace declaration in XML, so also very common. */
-	xmlNsPtr prefixless_xmlns_ns;
-	HashTable uri_to_prefix_map;
-};
+/* The actual value of these doesn't matter as long as they serve as a unique ID.
+ * They need to be pointers because the `_private` field is a pointer, however we can choose the contents ourselves.
+ * We need keep these at least 4-byte aligned because the pointer may be tagged (although for now 2 byte alignment works too).
+ * We use a trick: we declare a struct with a double member to force the alignment. */
+#define DECLARE_NS_TOKEN(name, uri)			\
+	static const struct {                   \
+		char val[sizeof(uri)];				\
+		double align;						\
+	} decl_##name = { uri, 0.0 };			\
+	PHP_DOM_EXPORT const php_dom_ns_magic_token *(name) = (const php_dom_ns_magic_token *) &decl_##name;
+DECLARE_NS_TOKEN(php_dom_ns_is_html_magic_token, DOM_XHTML_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_mathml_magic_token, DOM_MATHML_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_svg_magic_token, DOM_SVG_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_xlink_magic_token, DOM_XLINK_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_xml_magic_token, DOM_XML_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_xmlns_magic_token, DOM_XMLNS_NS_URI);
 
 static void php_dom_libxml_ns_mapper_prefix_map_element_dtor(zval *zv)
 {
@@ -59,7 +59,7 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv_prefix_map);
 	} else {
 		/* cast to Bucket* only works if this holds, I would prefer a static assert but we're stuck at C99. */
-		ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0);
+		ZEND_ASSERT(offsetof(Bucket, val) == 0);
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_ARRAY);
 		Bucket *bucket = (Bucket *) zv;
 		/* Make sure we take the value from the key string that lives long enough. */
@@ -67,27 +67,6 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 		prefix_map = Z_ARRVAL_P(zv);
 	}
 	return prefix_map;
-}
-
-static void php_dom_libxml_ns_mapper_header_destroy(php_libxml_private_data_header *header)
-{
-	php_dom_libxml_ns_mapper_destroy((php_dom_libxml_ns_mapper *) header);
-}
-
-PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_libxml_ns_mapper_create(void)
-{
-	php_dom_libxml_ns_mapper *mapper = emalloc(sizeof(*mapper));
-	mapper->header.dtor = php_dom_libxml_ns_mapper_header_destroy;
-	mapper->html_ns = NULL;
-	mapper->prefixless_xmlns_ns = NULL;
-	zend_hash_init(&mapper->uri_to_prefix_map, 0, NULL, ZVAL_PTR_DTOR, false);
-	return mapper;
-}
-
-void php_dom_libxml_ns_mapper_destroy(php_dom_libxml_ns_mapper *mapper)
-{
-	zend_hash_destroy(&mapper->uri_to_prefix_map);
-	efree(mapper);
 }
 
 static xmlNsPtr php_dom_libxml_ns_mapper_ensure_cached_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr *ptr, const char *uri, size_t length, const php_dom_ns_magic_token *token)
@@ -199,7 +178,7 @@ PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(php
 	return php_dom_libxml_ns_mapper_get_ns_raw_strings(mapper, prefix, uri);
 }
 
-static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr ns)
+static void php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr ns)
 {
 	ZEND_ASSERT(ns != NULL);
 
@@ -217,21 +196,9 @@ static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_l
 		prefix_len = xmlStrlen(ns->prefix);
 	}
 
-	zval *zv = zend_hash_str_find_ptr(prefix_map, prefix, prefix_len);
-	if (zv != NULL) {
-		return Z_PTR_P(zv);
-	}
-
 	zval new_zv;
 	DOM_Z_UNOWNED(&new_zv, ns);
-	zend_hash_str_add_new(prefix_map, prefix, prefix_len, &new_zv);
-
-	return ns;
-}
-
-PHP_DOM_EXPORT php_libxml_private_data_header *php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper *mapper)
-{
-	return mapper == NULL ? NULL : &mapper->header;
+	zend_hash_str_add(prefix_map, prefix, prefix_len, &new_zv);
 }
 
 typedef struct {
@@ -242,6 +209,11 @@ typedef struct {
 	xmlNsPtr last_mapped_src, last_mapped_dst;
 	php_dom_libxml_ns_mapper *ns_mapper;
 } dom_libxml_reconcile_ctx;
+
+PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *object)
+{
+	return &php_dom_get_private_data(object)->ns_mapper;
+}
 
 PHP_DOM_EXPORT xmlAttrPtr php_dom_ns_compat_mark_attribute(php_dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns)
 {
@@ -268,32 +240,34 @@ PHP_DOM_EXPORT void php_dom_ns_compat_mark_attribute_list(php_dom_libxml_ns_mapp
 
 	/* We want to prepend at the front, but in order of the namespace definitions.
 	 * So temporarily unlink the existing properties and add them again at the end. */
-	xmlAttrPtr attr = node->properties;
-	node->properties = NULL;
+	xmlAttrPtr first_original = node->properties;
+	xmlAttrPtr first_ns_attr = NULL, last_ns_attr = NULL;
 
 	xmlNsPtr ns = node->nsDef;
-	xmlAttrPtr last_added = NULL;
 	do {
-		last_added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
-		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		xmlNsPtr next = ns->next;
+		node->nsDef = next;
 		ns->next = NULL;
 		php_libxml_set_old_ns(node->doc, ns);
+		xmlAttrPtr added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
+		if (added != NULL) {
+			if (first_ns_attr == NULL) {
+				first_ns_attr = added;
+			}
+			last_ns_attr = added;
+		}
+		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		ns = next;
 	} while (ns != NULL);
 
-	if (last_added != NULL) {
-		/* node->properties now points to the first namespace declaration attribute. */
-		if (attr != NULL) {
-			last_added->next = attr;
-			attr->prev = last_added;
-		}
-	} else {
-		/* Nothing added, so nothing changed. Only really possible on OOM. */
-		node->properties = attr;
+	if (first_ns_attr != NULL && first_original != NULL) {
+		xmlAttrPtr last_original = first_ns_attr->prev;
+		last_original->next = NULL;
+		first_ns_attr->prev = NULL;
+		last_ns_attr->next = first_original;
+		first_original->prev = last_ns_attr;
+		node->properties = first_ns_attr;
 	}
-
-	node->nsDef = NULL;
 }
 
 PHP_DOM_EXPORT bool php_dom_ns_is_fast_ex(xmlNsPtr ns, const php_dom_ns_magic_token *magic_token)
@@ -302,13 +276,16 @@ PHP_DOM_EXPORT bool php_dom_ns_is_fast_ex(xmlNsPtr ns, const php_dom_ns_magic_to
 	/* cached for fast checking */
 	if (ns->_private == magic_token) {
 		return true;
-	} else if (ns->_private != NULL) {
+	} else if (ns->_private != NULL && ((uintptr_t) ns->_private & 1) == 0) {
 		/* Other token stored */
 		return false;
 	}
 	/* Slow path */
 	if (xmlStrEqual(ns->href, BAD_CAST magic_token)) {
-		ns->_private = (void *) magic_token;
+		if (ns->_private == NULL) {
+			/* Only overwrite the private data if there is no other token stored. */
+			ns->_private = (void *) magic_token;
+		}
 		return true;
 	}
 	return false;
@@ -350,14 +327,6 @@ PHP_DOM_EXPORT void php_dom_reconcile_attribute_namespace_after_insertion(xmlAtt
 			}
 		}
 	}
-}
-
-static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
-{
-	zend_ulong value = (zend_ulong) (uintptr_t) ptr;
-	/* Rotate 3/4 bits for better hash distribution because the low 3/4 bits are normally 0. */
-	const size_t rol_amount = (SIZEOF_ZEND_LONG == 8) ? 4 : 3;
-	return (value >> rol_amount) | (value << (sizeof(value) * 8 - rol_amount));
 }
 
 static zend_always_inline void php_dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
@@ -524,5 +493,143 @@ PHP_DOM_EXPORT void php_dom_in_scope_ns_destroy(php_dom_in_scope_ns *in_scope_ns
 		xmlFree(in_scope_ns->list);
 	}
 }
+
+static xmlNsPtr dom_alloc_ns_decl(HashTable *links, xmlNodePtr node)
+{
+	xmlNsPtr ns = xmlMalloc(sizeof(*ns));
+	if (!ns) {
+		return NULL;
+	}
+
+	zval *zv = zend_hash_index_lookup(links, (zend_ulong) node);
+	if (Z_ISNULL_P(zv)) {
+		ZVAL_LONG(zv, 1);
+	} else {
+		Z_LVAL_P(zv)++;
+	}
+
+	memset(ns, 0, sizeof(*ns));
+	ns->type = XML_LOCAL_NAMESPACE;
+	ns->next = node->nsDef;
+	node->nsDef = ns;
+
+	return ns;
+}
+
+/* Mint a temporary nsDef entry so C14N finds namespaces that live on node->ns
+ * but have no matching xmlns attribute (typical for createElementNS). */
+static void dom_add_synthetic_ns_decl(HashTable *links, xmlNodePtr node, xmlNsPtr src_ns)
+{
+	xmlNsPtr ns = dom_alloc_ns_decl(links, node);
+	if (!ns) {
+		return;
+	}
+
+	ns->href = xmlStrdup(src_ns->href);
+	ns->prefix = src_ns->prefix ? xmlStrdup(src_ns->prefix) : NULL;
+}
+
+/* Same, but for attribute namespaces, which may collide by prefix with the
+ * element's own ns or with a sibling attribute's ns. */
+static void dom_add_synthetic_ns_decl_for_attr(HashTable *links, xmlNodePtr node, xmlNsPtr src_ns)
+{
+	for (xmlNsPtr existing = node->nsDef; existing; existing = existing->next) {
+		if (xmlStrEqual(existing->prefix, src_ns->prefix)) {
+			return;
+		}
+	}
+
+	dom_add_synthetic_ns_decl(links, node, src_ns);
+}
+
+static void dom_relink_ns_decls_element(HashTable *links, xmlNodePtr node)
+{
+	if (node->type == XML_ELEMENT_NODE) {
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
+				xmlNsPtr ns = dom_alloc_ns_decl(links, node);
+				if (!ns) {
+					return;
+				}
+
+				bool should_free;
+				xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
+
+				ns->href = should_free ? attr_value : xmlStrdup(attr_value);
+				ns->prefix = attr->ns->prefix ? xmlStrdup(attr->name) : NULL;
+				ns->_private = attr;
+				if (attr->prev) {
+					attr->prev->next = attr->next;
+				} else {
+					node->properties = attr->next;
+				}
+				if (attr->next) {
+					attr->next->prev = attr->prev;
+				}
+			}
+		}
+
+		/* The default namespace is handled separately from the other namespaces in C14N.
+		 * The default namespace is explicitly looked up while the other namespaces are
+		 * deduplicated and compared to a list of visible namespaces. */
+		if (node->ns && !node->ns->prefix) {
+			/* Workaround for the behaviour where the xmlSearchNs() call inside c14n.c
+			 * can return the current namespace. */
+			zend_hash_index_add_new_ptr(links, (zend_ulong) node | 1, node->ns);
+			node->ns = xmlSearchNs(node->doc, node, NULL);
+		} else if (node->ns) {
+			dom_add_synthetic_ns_decl(links, node, node->ns);
+		}
+
+		for (xmlAttrPtr attr = node->properties; attr; attr = attr->next) {
+			if (attr->ns && !php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
+				dom_add_synthetic_ns_decl_for_attr(links, node, attr->ns);
+			}
+		}
+	}
+}
+
+void dom_relink_ns_decls(HashTable *links, xmlNodePtr root)
+{
+	dom_relink_ns_decls_element(links, root);
+
+	xmlNodePtr base = root;
+	xmlNodePtr node = base->children;
+	while (node != NULL) {
+		dom_relink_ns_decls_element(links, node);
+		node = php_dom_next_in_tree_order(node, base);
+	}
+}
+
+void dom_unlink_ns_decls(HashTable *links)
+{
+	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(links, zend_ulong h, zval *data) {
+		if (h & 1) {
+			xmlNodePtr node = (xmlNodePtr) (h ^ 1);
+			node->ns = Z_PTR_P(data);
+		} else {
+			xmlNodePtr node = (xmlNodePtr) h;
+			while (Z_LVAL_P(data)-- > 0) {
+				xmlNsPtr ns = node->nsDef;
+				node->nsDef = ns->next;
+
+				xmlAttrPtr attr = ns->_private;
+				if (attr) {
+					if (attr->prev) {
+						attr->prev->next = attr;
+					} else {
+						node->properties = attr;
+					}
+					if (attr->next) {
+						attr->next->prev = attr;
+					}
+				}
+
+				xmlFreeNs(ns);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

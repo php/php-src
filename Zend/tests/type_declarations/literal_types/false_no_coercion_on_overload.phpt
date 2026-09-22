@@ -1,5 +1,5 @@
 --TEST--
-No coercion should be applied to type false even if it's an overide
+No coercion should be applied to type false even if it's an override
 --FILE--
 <?php
 
@@ -21,11 +21,11 @@ $c = new C();
 var_dump($p->foo(0));
 try {
     var_dump($c->foo(0));
-} catch (\TypeError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 bool(false)
-C::foo(): Return value must be of type array|false, int returned
+TypeError: C::foo(): Return value must be of type array|false, int returned

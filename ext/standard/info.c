@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -51,7 +49,7 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static ZEND_COLD int php_info_print_html_esc(const char *str, size_t len) /* {{{ */
+static ZEND_COLD size_t php_info_print_html_esc(const char *str, size_t len) /* {{{ */
 {
 	size_t written;
 	zend_string *new_str;
@@ -63,7 +61,7 @@ static ZEND_COLD int php_info_print_html_esc(const char *str, size_t len) /* {{{
 }
 /* }}} */
 
-static ZEND_COLD int php_info_printf(const char *fmt, ...) /* {{{ */
+static ZEND_COLD size_t php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
 	size_t len, written;
@@ -79,7 +77,7 @@ static ZEND_COLD int php_info_printf(const char *fmt, ...) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline int php_info_print(const char *str) /* {{{ */
+static zend_always_inline size_t php_info_print(const char *str) /* {{{ */
 {
 	return php_output_write(str, strlen(str));
 }
@@ -164,7 +162,7 @@ PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {
 /* }}} */
 
 /* {{{ php_print_gpcse_array */
-static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
+static ZEND_COLD void php_print_gpcse_array(char *name, size_t name_length)
 {
 	zval *data, *tmp;
 	zend_string *string_key;
@@ -247,22 +245,15 @@ PHPAPI ZEND_COLD void ZEND_COLD php_info_print_style(void)
 }
 /* }}} */
 
-/* {{{ php_info_html_esc */
-PHPAPI ZEND_COLD zend_string *php_info_html_esc(const char *string)
-{
-	return php_escape_html_entities((const unsigned char *) string, strlen(string), 0, ENT_QUOTES, NULL);
-}
-/* }}} */
-
 #ifdef PHP_WIN32
 /* {{{  */
 
-char* php_get_windows_name()
+static char* php_get_windows_name()
 {
 	OSVERSIONINFOEX osvi = EG(windows_version_info);
 	SYSTEM_INFO si;
 	DWORD dwType;
-	char *major = NULL, *sub = NULL, *retval;
+	const char *major = NULL, *sub = NULL;
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
 
@@ -278,7 +269,9 @@ char* php_get_windows_name()
 						major = "Windows 10";
 					}
 				} else {
-					if (osvi.dwBuildNumber >= 20348) {
+					if (osvi.dwBuildNumber >= 26100) {
+						major = "Windows Server 2025";
+					} else if (osvi.dwBuildNumber >= 20348) {
 						major = "Windows Server 2022";
 					} else if (osvi.dwBuildNumber >= 19042) {
 						major = "Windows Server, version 20H2";
@@ -303,19 +296,8 @@ char* php_get_windows_name()
 		}
 	} else if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 6) {
 		if (osvi.dwMajorVersion == 6) {
-			if( osvi.dwMinorVersion == 0 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION ) {
-					major = "Windows Vista";
-				} else {
-					major = "Windows Server 2008";
-				}
-			} else if ( osvi.dwMinorVersion == 1 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION )  {
-					major = "Windows 7";
-				} else {
-					major = "Windows Server 2008 R2";
-				}
-			} else if ( osvi.dwMinorVersion == 2 ) {
+			ZEND_ASSERT(osvi.dwMinorVersion >= 2);
+			if (osvi.dwMinorVersion == 2) {
 				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
 				/* XXX and one more X - the above comment is true if no manifest is used for two cases:
 					- if the PHP build doesn't use the correct manifest
@@ -340,20 +322,20 @@ char* php_get_windows_name()
 					VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR,
 					dwlConditionMask)) {
 					osvi.dwMinorVersion = 3; /* Windows 8.1/Windows Server 2012 R2 */
-					if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					if (osvi.wProductType == VER_NT_WORKSTATION)  {
 						major = "Windows 8.1";
 					} else {
 						major = "Windows Server 2012 R2";
 					}
 				} else {
-					if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					if (osvi.wProductType == VER_NT_WORKSTATION)  {
 						major = "Windows 8";
 					} else {
 						major = "Windows Server 2012";
 					}
 				}
 			} else if (osvi.dwMinorVersion == 3) {
-				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+				if (osvi.wProductType == VER_NT_WORKSTATION)  {
 					major = "Windows 8.1";
 				} else {
 					major = "Windows Server 2012 R2";
@@ -609,22 +591,23 @@ char* php_get_windows_name()
 			}
 		}
 	} else {
-		return NULL;
+		ZEND_UNREACHABLE();
 	}
 
+	char *retval;
 	spprintf(&retval, 0, "%s%s%s%s%s", major, sub?" ":"", sub?sub:"", osvi.szCSDVersion[0] != '\0'?" ":"", osvi.szCSDVersion);
 	return retval;
 }
 /* }}}  */
 
 /* {{{  */
-void php_get_windows_cpu(char *buf, int bufsize)
+static void php_get_windows_cpu(char *buf, size_t bufsize)
 {
 	SYSTEM_INFO SysInfo;
 	GetSystemInfo(&SysInfo);
 	switch (SysInfo.wProcessorArchitecture) {
 		case PROCESSOR_ARCHITECTURE_INTEL :
-			snprintf(buf, bufsize, "i%d", SysInfo.dwProcessorType);
+			snprintf(buf, bufsize, "i%lu", SysInfo.dwProcessorType);
 			break;
 		case PROCESSOR_ARCHITECTURE_MIPS :
 			snprintf(buf, bufsize, "MIPS R%d000", SysInfo.wProcessorLevel);
@@ -662,16 +645,22 @@ void php_get_windows_cpu(char *buf, int bufsize)
 /* }}}  */
 #endif
 
+static inline bool php_is_valid_uname_mode(char mode) {
+	return mode == 'a' || mode == 'm' || mode == 'n' || mode == 'r' || mode == 's' || mode == 'v';
+}
+
 /* {{{ php_get_uname */
 PHPAPI zend_string *php_get_uname(char mode)
 {
 	char *php_uname;
-	char tmp_uname[256];
+
+	ZEND_ASSERT(php_is_valid_uname_mode(mode));
 #ifdef PHP_WIN32
-	DWORD dwBuild=0;
-	DWORD dwVersion = GetVersion();
-	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
-	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
+	char tmp_uname[256];
+	OSVERSIONINFOEX osvi = EG(windows_version_info);
+	DWORD dwWindowsMajorVersion = osvi.dwMajorVersion;
+	DWORD dwWindowsMinorVersion = osvi.dwMinorVersion;
+	DWORD dwBuild = osvi.dwBuildNumber;
 	DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
 	char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
 
@@ -680,22 +669,17 @@ PHPAPI zend_string *php_get_uname(char mode)
 	if (mode == 's') {
 		php_uname = "Windows NT";
 	} else if (mode == 'r') {
-		snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
-		php_uname = tmp_uname;
+		return strpprintf(0, "%lu.%lu", dwWindowsMajorVersion, dwWindowsMinorVersion);
 	} else if (mode == 'n') {
 		php_uname = ComputerName;
 	} else if (mode == 'v') {
 		char *winver = php_get_windows_name();
-		dwBuild = (DWORD)(HIWORD(dwVersion));
-		if(winver == NULL) {
-			snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
-		} else {
-			snprintf(tmp_uname, sizeof(tmp_uname), "build %d (%s)", dwBuild, winver);
-		}
-		php_uname = tmp_uname;
-		if(winver) {
-			efree(winver);
-		}
+
+		ZEND_ASSERT(winver != NULL);
+
+		zend_string *build_with_version = strpprintf(0, "build %lu (%s)", dwBuild, winver);
+		efree(winver);
+		return build_with_version;
 	} else if (mode == 'm') {
 		php_get_windows_cpu(tmp_uname, sizeof(tmp_uname));
 		php_uname = tmp_uname;
@@ -706,22 +690,19 @@ PHPAPI zend_string *php_get_uname(char mode)
 		ZEND_ASSERT(winver != NULL);
 
 		php_get_windows_cpu(wincpu, sizeof(wincpu));
-		dwBuild = (DWORD)(HIWORD(dwVersion));
 
 		/* Windows "version" 6.2 could be Windows 8/Windows Server 2012, but also Windows 8.1/Windows Server 2012 R2 */
 		if (dwWindowsMajorVersion == 6 && dwWindowsMinorVersion == 2) {
-			if (strncmp(winver, "Windows 8.1", 11) == 0 || strncmp(winver, "Windows Server 2012 R2", 22) == 0) {
+			if (strncmp(winver, "Windows 8.1", strlen("Windows 8.1")) == 0 || strncmp(winver, "Windows Server 2012 R2", strlen("Windows Server 2012 R2")) == 0) {
 				dwWindowsMinorVersion = 3;
 			}
 		}
 
-		snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
-				 "Windows NT", ComputerName,
-				 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);
-		if(winver) {
-			efree(winver);
-		}
-		php_uname = tmp_uname;
+		zend_string *build_with_all_info = strpprintf(0, "%s %s %lu.%lu build %lu (%s) %s",
+			"Windows NT", ComputerName, dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild,
+			winver ? winver: "unknown", wincpu);
+		efree(winver);
+		return build_with_all_info;
 	}
 #else
 #ifdef HAVE_SYS_UTSNAME_H
@@ -740,10 +721,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 		} else if (mode == 'm') {
 			php_uname = buf.machine;
 		} else { /* assume mode == 'a' */
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %s %s %s",
-					 buf.sysname, buf.nodename, buf.release, buf.version,
-					 buf.machine);
-			php_uname = tmp_uname;
+			return strpprintf(0, "%s %s %s %s %s", buf.sysname, buf.nodename, buf.release, buf.version, buf.machine);
 		}
 	}
 #else
@@ -755,13 +733,13 @@ PHPAPI zend_string *php_get_uname(char mode)
 /* }}} */
 
 /* {{{ php_print_info_htmlhead */
-PHPAPI ZEND_COLD void php_print_info_htmlhead(void)
+PHPAPI ZEND_COLD void php_print_info_htmlhead(const char *title)
 {
 	php_info_print("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">\n");
 	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
 	php_info_print("<head>\n");
 	php_info_print_style();
-	php_info_printf("<title>PHP %s - phpinfo()</title>", PHP_VERSION);
+	php_info_printf("<title>PHP %s - %s</title>", PHP_VERSION, title);
 	php_info_print("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
 	php_info_print("</head>\n");
 	php_info_print("<body><div class=\"center\">\n");
@@ -783,7 +761,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	zend_string *php_uname;
 
 	if (!sapi_module.phpinfo_as_text) {
-		php_print_info_htmlhead();
+		php_print_info_htmlhead("phpinfo()");
 	} else {
 		php_info_print("phpinfo()\n");
 	}
@@ -821,13 +799,13 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 		php_info_print_box_end();
 		php_info_print_table_start();
 		php_info_print_table_row(2, "System", ZSTR_VAL(php_uname));
-		php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__);
+		php_info_print_table_row(2, "Build Date", php_build_date);
 #ifdef PHP_BUILD_SYSTEM
 		php_info_print_table_row(2, "Build System", PHP_BUILD_SYSTEM);
 #endif
-#ifdef PHP_BUILD_PROVIDER
-		php_info_print_table_row(2, "Build Provider", PHP_BUILD_PROVIDER);
-#endif
+		if (php_build_provider()) {
+			php_info_print_table_row(2, "Build Provider", php_build_provider());
+		}
 #ifdef PHP_BUILD_COMPILER
 		php_info_print_table_row(2, "Compiler", PHP_BUILD_COMPILER);
 #endif
@@ -1041,35 +1019,78 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 
 	if (flag & PHP_INFO_LICENSE) {
 		if (!sapi_module.phpinfo_as_text) {
-			SECTION("PHP License");
+			SECTION("License");
 			php_info_print_box_start(0);
 			php_info_print("<p>\n");
-			php_info_print("This program is free software; you can redistribute it and/or modify ");
-			php_info_print("it under the terms of the PHP License as published by the PHP Group ");
-			php_info_print("and included in the distribution in the file:  LICENSE\n");
+			php_info_print("PHP is free software. You may redistribute it and/or modify it under the ");
+			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause).\n");
 			php_info_print("</p>\n");
-			php_info_print("<p>");
-			php_info_print("This program is distributed in the hope that it will be useful, ");
-			php_info_print("but WITHOUT ANY WARRANTY; without even the implied warranty of ");
-			php_info_print("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
+			php_info_print("<p>\n");
+			php_info_print("Copyright &copy; The PHP Group and Contributors.<br>\n");
+			php_info_print("Copyright &copy; Zend Technologies Ltd., a subsidiary company of Perforce Software, Inc.\n");
 			php_info_print("</p>\n");
-			php_info_print("<p>");
-			php_info_print("If you did not receive a copy of the PHP license, or have any questions about ");
-			php_info_print("PHP licensing, please contact license@php.net.\n");
+			php_info_print("<p>\n");
+			php_info_print("Redistribution and use in source and binary forms, with or without ");
+			php_info_print("modification, are permitted provided that the following conditions are met:\n");
+			php_info_print("</p>\n");
+			php_info_print("<ol>\n");
+			php_info_print("<li>Redistributions of source code must retain the above copyright notice, this ");
+			php_info_print("list of conditions and the following disclaimer.</li>\n");
+			php_info_print("<li>Redistributions in binary form must reproduce the above copyright notice, ");
+			php_info_print("this list of conditions and the following disclaimer in the documentation ");
+			php_info_print("and/or other materials provided with the distribution.</li>\n");
+			php_info_print("<li>Neither the name of the copyright holder nor the names of its ");
+			php_info_print("contributors may be used to endorse or promote products derived from ");
+			php_info_print("this software without specific prior written permission.</li>\n");
+			php_info_print("</ol>\n");
+			php_info_print("<p>\n");
+			php_info_print("THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" ");
+			php_info_print("AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE ");
+			php_info_print("IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE ");
+			php_info_print("DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE ");
+			php_info_print("FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL ");
+			php_info_print("DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR ");
+			php_info_print("SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER ");
+			php_info_print("CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, ");
+			php_info_print("OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE ");
+			php_info_print("OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n");
 			php_info_print("</p>\n");
 			php_info_print_box_end();
 		} else {
-			php_info_print("\nPHP License\n");
-			php_info_print("This program is free software; you can redistribute it and/or modify\n");
-			php_info_print("it under the terms of the PHP License as published by the PHP Group\n");
-			php_info_print("and included in the distribution in the file:  LICENSE\n");
 			php_info_print("\n");
-			php_info_print("This program is distributed in the hope that it will be useful,\n");
-			php_info_print("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
-			php_info_print("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
+			php_info_print("License\n");
 			php_info_print("\n");
-			php_info_print("If you did not receive a copy of the PHP license, or have any\n");
-			php_info_print("questions about PHP licensing, please contact license@php.net.\n");
+			php_info_print("PHP is free software. You may redistribute it and/or modify it under the\n");
+			php_info_print("terms of the Modified BSD License (SPDX-License-Identifier: BSD-3-Clause).\n");
+			php_info_print("\n");
+			php_info_print("Copyright © The PHP Group and Contributors.\n");
+			php_info_print("Copyright © Zend Technologies Ltd., a subsidiary company of\n");
+			php_info_print("    Perforce Software, Inc.\n");
+			php_info_print("\n");
+			php_info_print("Redistribution and use in source and binary forms, with or without\n");
+			php_info_print("modification, are permitted provided that the following conditions are met:\n");
+			php_info_print("\n");
+			php_info_print("1. Redistributions of source code must retain the above copyright notice, this\n");
+			php_info_print("   list of conditions and the following disclaimer.\n");
+			php_info_print("\n");
+			php_info_print("2. Redistributions in binary form must reproduce the above copyright notice,\n");
+			php_info_print("   this list of conditions and the following disclaimer in the documentation\n");
+			php_info_print("   and/or other materials provided with the distribution.\n");
+			php_info_print("\n");
+			php_info_print("3. Neither the name of the copyright holder nor the names of its\n");
+			php_info_print("   contributors may be used to endorse or promote products derived from\n");
+			php_info_print("   this software without specific prior written permission.\n");
+			php_info_print("\n");
+			php_info_print("THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\n");
+			php_info_print("AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n");
+			php_info_print("IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\n");
+			php_info_print("DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE\n");
+			php_info_print("FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n");
+			php_info_print("DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\n");
+			php_info_print("SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\n");
+			php_info_print("CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,\n");
+			php_info_print("OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n");
+			php_info_print("OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n");
 		}
 	}
 
@@ -1328,15 +1349,26 @@ PHP_FUNCTION(php_sapi_name)
 /* {{{ Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
-	char *mode = "a";
+	char *mode_str = "a";
 	size_t modelen = sizeof("a")-1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(mode, modelen)
+		Z_PARAM_STRING(mode_str, modelen)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_get_uname(*mode));
+	if (modelen != 1) {
+		zend_argument_value_error(1, "must be a single character");
+		RETURN_THROWS();
+	}
+
+	char mode = *mode_str;
+	if (!php_is_valid_uname_mode(mode)) {
+		zend_argument_value_error(1, "must be one of \"a\", \"m\", \"n\", \"r\", \"s\", or \"v\"");
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(php_get_uname(mode));
 }
 
 /* }}} */

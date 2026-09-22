@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit com_persist.stub.php instead.
  * Stub hash: d14d30fb232f08da37ba0df0b9186eb8bac5e1a4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_COMPersistHelper___construct, 0, 0, 0)
@@ -56,8 +56,7 @@ static zend_class_entry *register_class_COMPersistHelper(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "COMPersistHelper", class_COMPersistHelper_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
 }

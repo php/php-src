@@ -22,15 +22,15 @@ $foo = new Foo;
 try {
 	$foo[0]++;
 } catch (Throwable $ex) {
-	echo $ex->getMessage() . "\n";
+	echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 $foo = new Foo;
 try {
 	$foo[0]--;
 } catch (Throwable $ex) {
-	echo $ex->getMessage() . "\n";
+	echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Cannot increment array
-Cannot decrement array
+TypeError: Cannot increment array
+TypeError: Cannot decrement array

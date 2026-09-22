@@ -31,17 +31,17 @@ var_dump(shr2(-8));
 try {
     var_dump(shr64(1));
 } catch (Throwable $e) {
-    echo "Exception " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(shr64(-1));
 } catch (Throwable $e) {
-    echo "Exception " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump(shrNEG(1));
 } catch (Throwable $e) {
-    echo "Exception (" . get_class($e) . "): " . $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -51,4 +51,4 @@ int(64)
 int(-2)
 int(0)
 int(-1)
-Exception (ArithmeticError): Bit shift by negative number
+ArithmeticError: Bit shift by negative number

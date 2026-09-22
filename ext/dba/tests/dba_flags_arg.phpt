@@ -7,8 +7,8 @@ dba
 try {
     dba_open('irrelevant', 'c', 'handler', flags: -1);
 } catch (\ValueError $e) {
-    echo $e->getMessage(), \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-dba_open(): Argument #6 ($flags) must be greater than or equal to 0
+ValueError: dba_open(): Argument #6 ($flags) must be greater than or equal to 0

@@ -28,13 +28,13 @@ function bug_42499($db) {
 print "Emulated Prepared Statements...\n";
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
-$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+$db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 1);
 bug_42499($db);
 
 print "Native Prepared Statements...\n";
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
-$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+$db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, 1);
 bug_42499($db);
 
 print "done!";
@@ -55,7 +55,7 @@ array(1) {
   }
 }
 
-Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
+Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the Pdo\Mysql::ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
 Native Prepared Statements...
 array(1) {
   [0]=>
@@ -65,5 +65,5 @@ array(1) {
   }
 }
 
-Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
+Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the Pdo\Mysql::ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d
 done!

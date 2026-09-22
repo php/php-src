@@ -20,14 +20,14 @@ foreach($data_provider as $input) {
     try {
         $s->unserialize($input);
     } catch(UnexpectedValueException $e) {
-        echo $e->getMessage() . PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 
 ?>
 --EXPECTF--
-Error at offset %d of %d bytes
-Error at offset %d of %d bytes
-Error at offset %d of %d bytes
-Error at offset %d of %d bytes
-Error at offset %d of %d bytes
+UnexpectedValueException: Error at offset %d of %d bytes
+UnexpectedValueException: Error at offset %d of %d bytes
+UnexpectedValueException: Error at offset %d of %d bytes
+UnexpectedValueException: Error at offset %d of %d bytes
+UnexpectedValueException: Error at offset %d of %d bytes

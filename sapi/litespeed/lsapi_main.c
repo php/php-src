@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: George Wang <gwang@litespeedtech.com>                        |
    +----------------------------------------------------------------------+
@@ -591,7 +589,7 @@ static int sapi_lsapi_activate(void)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.9",
+    "LiteSpeed V8.3",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -1272,11 +1270,7 @@ static int cli_main( int argc, char * argv[] )
                 break;
             case 'v':
                 if (php_request_startup() != FAILURE) {
-#if ZEND_DEBUG
-                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#endif
+                    php_print_version(&sapi_module);
 #ifdef PHP_OUTPUT_NEWAPI
                     php_output_end_all();
 #else
@@ -1399,6 +1393,8 @@ void start_children( int children )
             switch( pid ) {
             case 0: /* children process */
 
+                php_child_init();
+
                 /* don't catch our signals */
                 sigaction( SIGTERM, &old_term, 0 );
                 sigaction( SIGQUIT, &old_quit, 0 );
@@ -1447,7 +1443,7 @@ void setArgv0( int argc, char * argv[] )
 #include <fcntl.h>
 int main( int argc, char * argv[] )
 {
-    int ret;
+    int ret = 0;
     int bindFd;
 
     char * php_ini_path = NULL;
@@ -1660,9 +1656,7 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
 /* {{{ Fetch all HTTP request headers */
 PHP_FUNCTION(litespeed_request_headers)
 {
-    if (zend_parse_parameters_none() == FAILURE) {
-        RETURN_THROWS();
-    }
+    ZEND_PARSE_PARAMETERS_NONE();
 
     array_init(return_value);
 
@@ -1681,12 +1675,10 @@ PHP_FUNCTION(litespeed_response_headers)
     int          len;
     char         headerBuf[SAPI_LSAPI_MAX_HEADER_LENGTH];
 
-    if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
 
-    if (!&SG(sapi_headers).headers) {
-        RETURN_FALSE;
+    if (!zend_llist_count(&SG(sapi_headers).headers)) {
+	    RETURN_FALSE;
     }
     array_init(return_value);
 
@@ -1697,12 +1689,12 @@ PHP_FUNCTION(litespeed_response_headers)
             len = p - h->header;
             if (p && len > 0 && len < LSAPI_RESP_HTTP_HEADER_MAX) {
                 memmove( headerBuf, h->header, len );
-                while( len > 0 && (isspace( headerBuf[len-1])) ) {
+                while( len > 0 && (isspace((unsigned char)headerBuf[len - 1])) ) {
                     --len;
                 }
                 headerBuf[len] = 0;
                 if ( len ) {
-                    while( isspace(*++p));
+                    while(isspace((unsigned char)*++p));
                     add_assoc_string_ex(return_value, headerBuf, len, p);
                 }
             }
@@ -1723,9 +1715,7 @@ PHP_FUNCTION(apache_get_modules)
     };
     const char **name = mod_names;
 
-    if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
 
     array_init(return_value);
     while( *name )
@@ -1740,9 +1730,7 @@ PHP_FUNCTION(apache_get_modules)
 /* {{{ Flushes all response data to the client */
 PHP_FUNCTION(litespeed_finish_request)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+    ZEND_PARSE_PARAMETERS_NONE();
 
     php_output_end_all();
     php_header();

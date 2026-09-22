@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.157 2023/05/21 15:59:58 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.162 2026/05/17 17:10:25 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -46,6 +46,7 @@ FILE_RCSID("@(#)$File: compress.c,v 1.157 2023/05/21 15:59:58 christos Exp $")
 #ifdef HAVE_SPAWN_H
 #include <spawn.h>
 #endif
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
@@ -118,12 +119,11 @@ static const char *zlib_args[] = { "python", "-c", zlibcode, NULL };
 static int
 zlibcmp(const unsigned char *buf)
 {
-	unsigned short x = 1;
-	unsigned char *s = CAST(unsigned char *, CAST(void *, &x));
+	unsigned short x;
 
 	if ((buf[0] & 0xf) != 8 || (buf[0] & 0x80) != 0)
 		return 0;
-	if (s[0] != 1)	/* endianness test */
+	if (file_bigendian())	/* endianness test */
 		x = buf[0] | (buf[1] << 8);
 	else
 		x = buf[1] | (buf[0] << 8);
@@ -189,6 +189,7 @@ file_private const struct {
 #define METH_BZIP	7
 #define METH_XZ		9
 #define METH_LZIP	8
+#define METH_LRZIP	10
 #define METH_ZSTD	12
 #define METH_LZMA	13
 #define METH_ZLIB	14
@@ -246,6 +247,7 @@ file_private int uncompresszstd(const unsigned char *, unsigned char **, size_t,
 file_private int uncompresslzlib(const unsigned char *, unsigned char **, size_t,
     size_t *, int);
 #endif
+
 
 static int makeerror(unsigned char **, size_t *, const char *, ...)
     __attribute__((__format__(__printf__, 3, 4)));
@@ -833,7 +835,6 @@ err:
 }
 #endif
 
-
 static int
 makeerror(unsigned char **buf, size_t *len, const char *fmt, ...)
 {
@@ -1119,9 +1120,9 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, int nofork,
 
 	posix_spawn_file_actions_destroy(&fa);
 
-	if (status == -1) {
+	if (status != 0) {
 		return makeerror(newch, n, "Cannot posix_spawn `%s', %s",
-		    compr[method].argv[0], strerror(errno));
+		    compr[method].argv[0], strerror(status));
 	}
 #else
 	/* For processes with large mapped virtual sizes, vfork

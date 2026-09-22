@@ -129,8 +129,8 @@ foreach ($tests as $test) {
         $key = call_user_func_array($test[0], array_slice($test, 1));
         var_dump($key);
     }
-    catch (ValueError $e) {
-        echo $e->getMessage() . PHP_EOL;
+    catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 }
 ?>
@@ -142,98 +142,98 @@ $outfile = __DIR__ . '/bug81713.out';
 --EXPECTF--
 object(OpenSSLAsymmetricKey)#1 (0) {
 }
-openssl_pkey_get_public(): Argument #1 ($public_key) must not contain any null bytes
-openssl_pkey_get_private(): Argument #1 ($private_key) must not contain any null bytes
-openssl_pkey_export_to_file(): Argument #1 ($key) must not contain any null bytes
-openssl_pkey_export_to_file(): Argument #2 ($output_filename) must not contain any null bytes
-openssl_pkey_export(): Argument #1 ($key) must not contain any null bytes
-openssl_pkey_derive(): Argument #1 ($public_key) must not contain any null bytes
-openssl_pkey_derive(): Argument #2 ($private_key) must not contain any null bytes
-openssl_private_encrypt(): Argument #3 ($private_key) must not contain any null bytes
-openssl_private_decrypt(): Argument #3 ($private_key) must not contain any null bytes
-openssl_public_encrypt(): Argument #3 ($public_key) must not contain any null bytes
-openssl_public_decrypt(): Argument #3 ($public_key) must not contain any null bytes
-openssl_sign(): Argument #3 ($private_key) must not contain any null bytes
-openssl_verify(): Argument #3 ($public_key) must not contain any null bytes
-openssl_seal(): Argument #4 ($public_key) must not contain any null bytes
-openssl_open(): Argument #4 ($private_key) must not contain any null bytes
-openssl_csr_new(): Argument #2 ($private_key) must not contain any null bytes
-openssl_csr_get_subject(): Argument #1 ($csr) must not contain any null bytes
-openssl_csr_get_public_key(): Argument #1 ($csr) must not contain any null bytes
+ValueError: openssl_pkey_get_public(): Argument #1 ($public_key) must not contain any null bytes
+ValueError: openssl_pkey_get_private(): Argument #1 ($private_key) must not contain any null bytes
+ValueError: openssl_pkey_export_to_file(): Argument #1 ($key) must not contain any null bytes
+ValueError: openssl_pkey_export_to_file(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_pkey_export(): Argument #1 ($key) must not contain any null bytes
+ValueError: openssl_pkey_derive(): Argument #1 ($public_key) must not contain any null bytes
+ValueError: openssl_pkey_derive(): Argument #2 ($private_key) must not contain any null bytes
+ValueError: openssl_private_encrypt(): Argument #3 ($private_key) must not contain any null bytes
+ValueError: openssl_private_decrypt(): Argument #3 ($private_key) must not contain any null bytes
+ValueError: openssl_public_encrypt(): Argument #3 ($public_key) must not contain any null bytes
+ValueError: openssl_public_decrypt(): Argument #3 ($public_key) must not contain any null bytes
+ValueError: openssl_sign(): Argument #3 ($private_key) must not contain any null bytes
+ValueError: openssl_verify(): Argument #3 ($public_key) must not contain any null bytes
+ValueError: openssl_seal(): Argument #4 ($public_key) must not contain any null bytes
+ValueError: openssl_open(): Argument #4 ($private_key) must not contain any null bytes
+ValueError: openssl_csr_new(): Argument #2 ($private_key) must not contain any null bytes
+ValueError: openssl_csr_get_subject(): Argument #1 ($csr) must not contain any null bytes
+ValueError: openssl_csr_get_public_key(): Argument #1 ($csr) must not contain any null bytes
 
 Warning: openssl_x509_fingerprint(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_x509_fingerprint(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_x509_fingerprint(): Argument #1 ($certificate) must not contain any null bytes
 
 Warning: openssl_x509_export_to_file(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_x509_export_to_file(): Argument #1 ($certificate) must not contain any null bytes
-openssl_x509_export_to_file(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_x509_export_to_file(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_x509_export_to_file(): Argument #2 ($output_filename) must not contain any null bytes
 
 Warning: openssl_x509_export(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_x509_export(): Argument #1 ($certificate) must not contain any null bytes
-openssl_x509_checkpurpose(): Argument #1 ($certificate) must not contain any null bytes
-openssl_x509_checkpurpose(): Argument #3 ($ca_info) array item must not contain any null bytes
-openssl_x509_check_private_key(): Argument #1 ($certificate) must not contain any null bytes
-openssl_x509_check_private_key(): Argument #2 ($private_key) must not contain any null bytes
-openssl_x509_verify(): Argument #1 ($certificate) must not contain any null bytes
-openssl_x509_verify(): Argument #2 ($public_key) must not contain any null bytes
-openssl_x509_parse(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_x509_export(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_x509_checkpurpose(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_x509_checkpurpose(): Argument #3 ($ca_info) array item must not contain any null bytes
+ValueError: openssl_x509_check_private_key(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_x509_check_private_key(): Argument #2 ($private_key) must not contain any null bytes
+ValueError: openssl_x509_verify(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_x509_verify(): Argument #2 ($public_key) must not contain any null bytes
+ValueError: openssl_x509_parse(): Argument #1 ($certificate) must not contain any null bytes
 
 Warning: openssl_x509_read(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_x509_read(): Argument #1 ($certificate) must not contain any null bytes
-openssl_cms_encrypt(): Argument #1 ($input_filename) must not contain any null bytes
-openssl_cms_encrypt(): Argument #2 ($output_filename) must not contain any null bytes
-openssl_cms_encrypt(): Argument #3 ($certificate) must not contain any null bytes
-openssl_cms_encrypt(): Argument #3 ($certificate) array item must not contain any null bytes
-openssl_cms_decrypt(): Argument #1 ($input_filename) must not contain any null bytes
-openssl_cms_decrypt(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_x509_read(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_cms_encrypt(): Argument #1 ($input_filename) must not contain any null bytes
+ValueError: openssl_cms_encrypt(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_cms_encrypt(): Argument #3 ($certificate) must not contain any null bytes
+ValueError: openssl_cms_encrypt(): Argument #3 ($certificate) array item must not contain any null bytes
+ValueError: openssl_cms_decrypt(): Argument #1 ($input_filename) must not contain any null bytes
+ValueError: openssl_cms_decrypt(): Argument #2 ($output_filename) must not contain any null bytes
 
 Warning: openssl_cms_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_cms_decrypt(): Argument #3 ($certificate) must not contain any null bytes
-openssl_cms_decrypt(): Argument #4 ($private_key) must not contain any null bytes
-openssl_cms_sign(): Argument #1 ($input_filename) must not contain any null bytes
-openssl_cms_sign(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_cms_decrypt(): Argument #3 ($certificate) must not contain any null bytes
+ValueError: openssl_cms_decrypt(): Argument #4 ($private_key) must not contain any null bytes
+ValueError: openssl_cms_sign(): Argument #1 ($input_filename) must not contain any null bytes
+ValueError: openssl_cms_sign(): Argument #2 ($output_filename) must not contain any null bytes
 
 Warning: openssl_cms_sign(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_cms_sign(): Argument #3 ($certificate) must not contain any null bytes
-openssl_cms_sign(): Argument #4 ($private_key) must not contain any null bytes
-openssl_cms_sign(): Argument #8 ($untrusted_certificates_filename) must not contain any null bytes
-openssl_cms_verify(): Argument #1 ($input_filename) must not contain any null bytes
-openssl_cms_verify(): Argument #3 ($certificates) must not contain any null bytes
-openssl_cms_verify(): Argument #4 ($ca_info) array item must not contain any null bytes
-openssl_cms_verify(): Argument #5 ($untrusted_certificates_filename) must not contain any null bytes
-openssl_cms_verify(): Argument #6 ($content) must not contain any null bytes
-openssl_cms_verify(): Argument #7 ($pk7) must not contain any null bytes
-openssl_pkcs7_encrypt(): Argument #1 ($input_filename) must not contain any null bytes
-openssl_pkcs7_encrypt(): Argument #2 ($output_filename) must not contain any null bytes
-openssl_pkcs7_encrypt(): Argument #3 ($certificate) must not contain any null bytes
-openssl_pkcs7_encrypt(): Argument #3 ($certificate) array item must not contain any null bytes
-openssl_pkcs7_decrypt(): Argument #1 ($input_filename) must not contain any null bytes
-openssl_pkcs7_decrypt(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_cms_sign(): Argument #3 ($certificate) must not contain any null bytes
+ValueError: openssl_cms_sign(): Argument #4 ($private_key) must not contain any null bytes
+ValueError: openssl_cms_sign(): Argument #8 ($untrusted_certificates_filename) must not contain any null bytes
+ValueError: openssl_cms_verify(): Argument #1 ($input_filename) must not contain any null bytes
+ValueError: openssl_cms_verify(): Argument #3 ($certificates) must not contain any null bytes
+ValueError: openssl_cms_verify(): Argument #4 ($ca_info) array item must not contain any null bytes
+ValueError: openssl_cms_verify(): Argument #5 ($untrusted_certificates_filename) must not contain any null bytes
+ValueError: openssl_cms_verify(): Argument #6 ($content) must not contain any null bytes
+ValueError: openssl_cms_verify(): Argument #7 ($pk7) must not contain any null bytes
+ValueError: openssl_pkcs7_encrypt(): Argument #1 ($input_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_encrypt(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_encrypt(): Argument #3 ($certificate) must not contain any null bytes
+ValueError: openssl_pkcs7_encrypt(): Argument #3 ($certificate) array item must not contain any null bytes
+ValueError: openssl_pkcs7_decrypt(): Argument #1 ($input_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_decrypt(): Argument #2 ($output_filename) must not contain any null bytes
 
 Warning: openssl_pkcs7_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_pkcs7_decrypt(): Argument #3 ($certificate) must not contain any null bytes
-openssl_pkcs7_decrypt(): Argument #4 ($private_key) must not contain any null bytes
-openssl_pkcs7_sign(): Argument #1 ($input_filename) must not contain any null bytes
-openssl_pkcs7_sign(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_decrypt(): Argument #3 ($certificate) must not contain any null bytes
+ValueError: openssl_pkcs7_decrypt(): Argument #4 ($private_key) must not contain any null bytes
+ValueError: openssl_pkcs7_sign(): Argument #1 ($input_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_sign(): Argument #2 ($output_filename) must not contain any null bytes
 
 Warning: openssl_pkcs7_sign(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_pkcs7_sign(): Argument #3 ($certificate) must not contain any null bytes
-openssl_pkcs7_sign(): Argument #4 ($private_key) must not contain any null bytes
-openssl_pkcs7_sign(): Argument #7 ($untrusted_certificates_filename) must not contain any null bytes
-openssl_pkcs7_verify(): Argument #1 ($input_filename) must not contain any null bytes
-openssl_pkcs7_verify(): Argument #3 ($signers_certificates_filename) must not contain any null bytes
-openssl_pkcs7_verify(): Argument #4 ($ca_info) array item must not contain any null bytes
-openssl_pkcs7_verify(): Argument #5 ($untrusted_certificates_filename) must not contain any null bytes
-openssl_pkcs7_verify(): Argument #6 ($content) must not contain any null bytes
-openssl_pkcs7_verify(): Argument #7 ($output_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_sign(): Argument #3 ($certificate) must not contain any null bytes
+ValueError: openssl_pkcs7_sign(): Argument #4 ($private_key) must not contain any null bytes
+ValueError: openssl_pkcs7_sign(): Argument #7 ($untrusted_certificates_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_verify(): Argument #1 ($input_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_verify(): Argument #3 ($signers_certificates_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_verify(): Argument #4 ($ca_info) array item must not contain any null bytes
+ValueError: openssl_pkcs7_verify(): Argument #5 ($untrusted_certificates_filename) must not contain any null bytes
+ValueError: openssl_pkcs7_verify(): Argument #6 ($content) must not contain any null bytes
+ValueError: openssl_pkcs7_verify(): Argument #7 ($output_filename) must not contain any null bytes
 
 Warning: openssl_pkcs12_export(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_pkcs12_export(): Argument #1 ($certificate) must not contain any null bytes
-openssl_pkcs12_export(): Argument #3 ($private_key) must not contain any null bytes
-openssl_pkcs12_export(): Argument #5 ($options) option extracerts array item must not contain any null bytes
+ValueError: openssl_pkcs12_export(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_pkcs12_export(): Argument #3 ($private_key) must not contain any null bytes
+ValueError: openssl_pkcs12_export(): Argument #5 ($options) option extracerts array item must not contain any null bytes
 
 Warning: openssl_pkcs12_export_to_file(): X.509 Certificate cannot be retrieved in %s on line %d
-openssl_pkcs12_export_to_file(): Argument #1 ($certificate) must not contain any null bytes
-openssl_pkcs12_export_to_file(): Argument #2 ($output_filename) must not contain any null bytes
-openssl_pkcs12_export_to_file(): Argument #3 ($private_key) must not contain any null bytes
-openssl_pkcs12_export_to_file(): Argument #5 ($options) option extracerts array item must not contain any null bytes
+ValueError: openssl_pkcs12_export_to_file(): Argument #1 ($certificate) must not contain any null bytes
+ValueError: openssl_pkcs12_export_to_file(): Argument #2 ($output_filename) must not contain any null bytes
+ValueError: openssl_pkcs12_export_to_file(): Argument #3 ($private_key) must not contain any null bytes
+ValueError: openssl_pkcs12_export_to_file(): Argument #5 ($options) option extracerts array item must not contain any null bytes

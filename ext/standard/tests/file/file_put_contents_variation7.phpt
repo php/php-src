@@ -2,6 +2,11 @@
 Test file_put_contents() function : usage variation - various absolute and relative paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip Not for Windows");
+?>
 --FILE--
 <?php
 echo "*** Testing file_put_contents() : usage variation ***\n";
@@ -95,12 +100,12 @@ Data written correctly
 
 -- Iteration 5 --
 
-Warning: file_put_contents(%sfilePutContentsVar7.dir/filePutContentsVar7Sub/..///filePutContentsVar7Sub//..//../filePutContentsVar7Sub/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): Failed to open stream: %s in %s on line %d
 No data written
 
 -- Iteration 6 --
 
-Warning: file_put_contents(%sfilePutContentsVar7.dir/filePutContentsVar7Sub/BADDIR/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): Failed to open stream: %s in %s on line %d
 No data written
 
 -- Iteration 7 --
@@ -117,7 +122,7 @@ Data written correctly
 
 -- Iteration 11 --
 
-Warning: file_put_contents(BADDIR/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): Failed to open stream: %s in %s on line %d
 No data written
 
 *** Done ***

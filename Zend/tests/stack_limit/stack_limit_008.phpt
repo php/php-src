@@ -7,7 +7,7 @@ if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_
 --EXTENSIONS--
 zend_test
 --INI--
-zend.max_allowed_stack_size=256K
+zend.max_allowed_stack_size=512K
 --FILE--
 <?php
 
@@ -21,8 +21,8 @@ function replace() {
             echo "Will throw:\n";
             try {
                 return replace2();
-            } catch (Error $e) {
-                echo $e->getMessage();
+            } catch (Throwable $e) {
+                echo $e::class, ': ', $e->getMessage(), "\n";
             }
         }
     }, 'x');
@@ -55,4 +55,4 @@ array(4) {
   string(%d) "0x%x"
 }
 Will throw:
-Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+Error: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?

@@ -81,7 +81,6 @@
 "public"
 "readonly"
 "enum"
-"unset"
 "list"
 "callable"
 "iterable"
@@ -93,3 +92,5 @@
 "__file__"
 "__dir__"
 "__namespace__"
+"get"
+"set"

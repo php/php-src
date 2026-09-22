@@ -52,7 +52,7 @@ class MySession2 extends SessionHandler {
         return pathinfo(__FILE__)['filename'];
     }
 
-    public function validate_sid($id): bool {
+    public function validateId($id): bool {
         return pathinfo(__FILE__)['filename']===$id;
     }
 }

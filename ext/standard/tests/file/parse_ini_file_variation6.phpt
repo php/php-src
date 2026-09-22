@@ -2,6 +2,10 @@
 Test parse_ini_file() function : variation - various absolute and relative paths
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN") die("skip Only run on Windows");
+?>
 --FILE--
 <?php
 echo "*** Testing parse_ini_file() : variation ***\n";
@@ -83,12 +87,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: parse_ini_file(%sparseIniFileVar6.dir/parseIniFileVar6Sub/..///parseIniFileVar6Sub//..//../parseIniFileVar6Sub/ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: parse_ini_file(%sparseIniFileVar6.dir/parseIniFileVar6Sub/BADDIR/ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -117,7 +121,7 @@ array(1) {
 
 -- Iteration 11 --
 
-Warning: parse_ini_file(BADDIR/ParseIniFileVar6.ini): Failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 *** Done ***

@@ -18,6 +18,11 @@ if (!$socket) {
 }
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_REUSEADDR, true));
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_REUSEPORT, true));
+try {
+	socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, []);
+} catch (\Throwable $e) {
+	echo $e::class, ': ', $e->getMessage(), "\n";
+}
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_ATTACH_REUSEPORT_CBPF, SKF_AD_CPU));
 var_dump(socket_bind($socket, '0.0.0.0'));
 socket_listen($socket);
@@ -26,5 +31,6 @@ socket_close($socket);
 --EXPECT--
 bool(true)
 bool(true)
+TypeError: socket_set_option(): Argument #4 ($value) must be of type int when argument #3 ($option) is SO_ATTACH_REUSEPORT_CBPF, array given
 bool(true)
 bool(true)

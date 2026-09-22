@@ -10,17 +10,14 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require 'table.inc';
 
-    if (!$stmt = mysqli_stmt_init($link))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
     if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
         printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!mysqli_query($link, sprintf("CREATE TABLE test(id INT NOT NULL AUTO_INCREMENT, label LONGBLOB, PRIMARY KEY(id)) ENGINE = %s", $engine)))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)"))
-        printf("[004] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    if (!$stmt = mysqli_prepare($link, "INSERT INTO test(id, label) VALUES (?, ?)"))
+        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     $id = null;
     $label = null;
@@ -40,8 +37,6 @@ require_once 'skipifconnectfailure.inc';
 
     // let's ignore upper limits for LONGBLOB (2^32) ...
     // maximum packet size up to which we test is 10M
-    $tmp = '';
-    $blob = '';
     $tmp = str_repeat('a', 1024);
 
     $limit = min(floor($max_allowed_packet / 1024 / 2), 10240);

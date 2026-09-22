@@ -100,5 +100,6 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_insert_id_var"))
 
 mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Method mysqli::ping() is deprecated since 8.4, because the reconnect feature has been removed in PHP 8.2 and this method is now redundant in %s
 DONE

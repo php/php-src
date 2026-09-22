@@ -7,10 +7,10 @@ readonly class C {}
 
 try {
     $readonly = unserialize('O:1:"C":1:{s:1:"x";b:1;}');
-} catch (Error $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot create dynamic property C::$x
+Error: Cannot create dynamic property C::$x

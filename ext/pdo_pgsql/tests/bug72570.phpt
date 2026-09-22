@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #72570 (Segmentation fault when binding parameters on a query without placeholders)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

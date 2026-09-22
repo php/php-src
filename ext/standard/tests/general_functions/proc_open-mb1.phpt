@@ -36,6 +36,10 @@ proc_close($p);
 echo $out;
 
 ?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . "proc_only_mb1.php");
+?>
 --EXPECTF--
 array(4) {
   [0]=>

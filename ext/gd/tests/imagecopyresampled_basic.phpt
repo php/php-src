@@ -47,11 +47,6 @@ imagepng($image_sml, $dest_sml);
 
 list($width, $height) = getimagesize($dest_sml);
 echo "Size of copy: width=". $width . " height=" . $height . "\n";
-
-imagedestroy($image_lge);
-imagedestroy($image_sml);
-
-
 echo "Done\n";
 ?>
 --CLEAN--

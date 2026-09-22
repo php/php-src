@@ -11,4 +11,3 @@ echo "Done\n";
 --EXPECT--
 string(7) "[1,2,3]"
 Done
-

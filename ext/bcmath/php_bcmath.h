@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Andi Gutmans <andi@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -17,9 +15,9 @@
 #ifndef PHP_BCMATH_H
 #define PHP_BCMATH_H
 
+#include "ext/standard/php_math_round_mode.h"
 #include "libbcmath/src/bcmath.h"
 #include "zend_API.h"
-#include "ext/standard/php_math_round_mode.h"
 
 extern zend_module_entry bcmath_module_entry;
 #define phpext_bcmath_ptr &bcmath_module_entry
@@ -44,5 +42,15 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 ZEND_EXTERN_MODULE_GLOBALS(bcmath)
 #define BCG(v) ZEND_MODULE_GLOBALS_ACCESSOR(bcmath, v)
+
+/* Maximum number of digits to extend when scale needs to be extended, such as in undivisible division */
+#define BC_MATH_NUMBER_EXPAND_SCALE 10
+
+typedef struct _bcmath_number_obj_t {
+	zend_string *value;
+	size_t scale;
+	bc_num num;
+	zend_object std;
+} bcmath_number_obj_t;
 
 #endif /* PHP_BCMATH_H */

@@ -14,14 +14,14 @@ try {
     SplFixedArray::fromArray(array("foo"=>"bar"), false);
     echo "No exception\n";
 } catch (Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     echo "From Array with string keys, preserve\n";
     SplFixedArray::fromArray(array("foo"=>"bar"), true);
     echo "No exception\n";
 } catch (Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -33,4 +33,4 @@ bool(true)
 From Array with string keys, no preserve
 No exception
 From Array with string keys, preserve
-Exception: array must contain only positive integer keys
+InvalidArgumentException: array must contain only positive integer keys

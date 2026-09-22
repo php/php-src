@@ -7,15 +7,15 @@ $fiber = new Fiber(fn() => throw new Exception('test'));
 
 try {
     $fiber->start();
-} catch (Exception $exception) {
-    echo $exception->getMessage(), "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 $fiber->getReturn();
 
 ?>
 --EXPECTF--
-test
+Exception: test
 
 Fatal error: Uncaught FiberError: Cannot get fiber return value: The fiber threw an exception in %sget-return-after-throwing.php:%d
 Stack trace:

@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit resourcebundle.stub.php instead.
  * Stub hash: e302e5ca1abcb9b52e3c14abbd38b9e8f1461390 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle___construct, 0, 0, 2)
@@ -59,8 +59,7 @@ static zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ResourceBundle", class_ResourceBundle_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
 	return class_entry;

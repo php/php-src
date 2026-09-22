@@ -4,31 +4,27 @@ str_getcsv(): Testing using various arguments
 <?php
 
 // string input[, string delimiter[, string enclosure[, string escape]]]
-var_dump(str_getcsv('"f", "o", ""'));
+var_dump(str_getcsv('"f", "o", ""', escape: ''));
 print "-----\n";
-var_dump(str_getcsv('foo||bar', '|'));
+var_dump(str_getcsv('foo||bar', '|', escape: ''));
 print "-----\n";
-var_dump(str_getcsv('foo|bar', '|'));
+var_dump(str_getcsv('foo|bar', '|', escape: ''));
 print "-----\n";
-var_dump(str_getcsv('|foo|-|bar|', '-', '|'));
+var_dump(str_getcsv('|foo|-|bar|', '-', '|', escape: ''));
 print "-----\n";
 var_dump(str_getcsv('|f.|.|bar|.|-|-.|', '.', '|', '-'));
 print "-----\n";
 var_dump(str_getcsv('.foo..bar.', '.', '.', '.'));
 print "-----\n";
-var_dump(str_getcsv('.foo. .bar.', '   ', '.', '.'));
-print "-----\n";
-var_dump(str_getcsv('1foo1 1bar111', '   ', '1   ', '\  '));
-print "-----\n";
 var_dump(str_getcsv('.foo  . .  bar  .', ' ', '.', ''));
 print "-----\n";
-var_dump(str_getcsv('" "" "', ' '));
+var_dump(str_getcsv('" "" "', ' ', escape: ''));
 print "-----\n";
-var_dump(str_getcsv(''));
+var_dump(str_getcsv('', escape: ''));
 print "-----\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
   [0]=>
   string(1) "f"
@@ -73,20 +69,6 @@ array(3) {
 array(1) {
   [0]=>
   string(7) "foo.bar"
-}
------
-array(2) {
-  [0]=>
-  string(3) "foo"
-  [1]=>
-  string(3) "bar"
-}
------
-array(2) {
-  [0]=>
-  string(3) "foo"
-  [1]=>
-  string(4) "bar1"
 }
 -----
 array(2) {

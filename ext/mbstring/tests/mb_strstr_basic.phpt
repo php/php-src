@@ -2,11 +2,11 @@
 Test mb_strstr() function : basic functionality
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=UTF-8
 --FILE--
 <?php
 echo "*** Testing mb_strstr() : basic functionality ***\n";
-
-mb_internal_encoding('UTF-8');
 
 $string_ascii = 'abc def';
 //Japanese string in UTF-8

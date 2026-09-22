@@ -1,5 +1,5 @@
 --TEST--
-Bug #42718 - 2 (unsafe_raw filter not applied when configured as default filter)
+Bug #42718 (unsafe_raw filter not applied when configured as default filter)
 --EXTENSIONS--
 filter
 --INI--

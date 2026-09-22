@@ -1,5 +1,11 @@
 --TEST--
 unixtojd()
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris localtime() produces different Julian day");
+}
+?>
 --EXTENSIONS--
 calendar
 --ENV--

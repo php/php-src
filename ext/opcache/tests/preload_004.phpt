@@ -17,9 +17,9 @@ var_dump(class_exists('Foo'));
 try {
    new Foo();
 } catch (Throwable $ex) {
-	echo $ex->getMessage() . "\n";
+	echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 bool(true)
-Undefined constant self::DOES_NOT_EXIST
+Error: Undefined constant self::DOES_NOT_EXIST

@@ -36,54 +36,110 @@ foreach($array as $name => $input) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_key_exists() : usage variations ***
 
 -- Key in $search array is : null --
-Iteration 1:  bool(true)
-Iteration 2:  bool(true)
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Iteration 1:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 2:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 Iteration 3:  bool(true)
 Iteration 4:  bool(true)
-Iteration 5:  bool(true)
-Iteration 6:  bool(true)
+Iteration 5:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 6:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 
 -- Key in $search array is : NULL --
-Iteration 1:  bool(true)
-Iteration 2:  bool(true)
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Iteration 1:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 2:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 Iteration 3:  bool(true)
 Iteration 4:  bool(true)
-Iteration 5:  bool(true)
-Iteration 6:  bool(true)
+Iteration 5:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 6:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 
 -- Key in $search array is : empty single quoted string --
-Iteration 1:  bool(true)
-Iteration 2:  bool(true)
+Iteration 1:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 2:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 Iteration 3:  bool(true)
 Iteration 4:  bool(true)
-Iteration 5:  bool(true)
-Iteration 6:  bool(true)
+Iteration 5:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 6:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 
 -- Key in $search array is : empty double quoted string --
-Iteration 1:  bool(true)
-Iteration 2:  bool(true)
+Iteration 1:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 2:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 Iteration 3:  bool(true)
 Iteration 4:  bool(true)
-Iteration 5:  bool(true)
-Iteration 6:  bool(true)
+Iteration 5:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 6:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 
 -- Key in $search array is : undefined variable --
-Iteration 1:  bool(true)
-Iteration 2:  bool(true)
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Iteration 1:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 2:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 Iteration 3:  bool(true)
 Iteration 4:  bool(true)
-Iteration 5:  bool(true)
-Iteration 6:  bool(true)
+Iteration 5:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 6:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 
 -- Key in $search array is : unset variable --
-Iteration 1:  bool(true)
-Iteration 2:  bool(true)
+
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+Iteration 1:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 2:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 Iteration 3:  bool(true)
 Iteration 4:  bool(true)
-Iteration 5:  bool(true)
-Iteration 6:  bool(true)
+Iteration 5:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
+Iteration 6:  
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
+bool(true)
 Done

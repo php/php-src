@@ -12,8 +12,8 @@ $xml->loadXML('<?xml version="1.0"?><html id="test"></html>');
 
 try {
     var_dump($html->documentElement->toggleAttribute("\0"));
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "--- Selected attribute tests (HTML) ---\n";
@@ -87,18 +87,18 @@ echo "Checking toggled namespace:\n";
 var_dump($dom->documentElement->getAttribute('xmlns:anotheron'));
 
 ?>
---EXPECT--
-Invalid Character Error
+--EXPECTF--
+DOMException: Invalid Character Error
 --- Selected attribute tests (HTML) ---
 bool(false)
 <!DOCTYPE HTML>
 <html id="test"></html>
 bool(true)
 <!DOCTYPE HTML>
-<html id="test" selected></html>
+<html id="test" selected%r(="")?%r></html>
 bool(true)
 <!DOCTYPE HTML>
-<html id="test" selected></html>
+<html id="test" selected%r(="")?%r></html>
 bool(false)
 <!DOCTYPE HTML>
 <html id="test"></html>

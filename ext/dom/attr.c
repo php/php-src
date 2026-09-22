@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -83,7 +81,7 @@ zend_result dom_attr_name_read(dom_object *obj, zval *retval)
 
 	if (php_dom_follow_spec_intern(obj)) {
 		zend_string *str = dom_node_get_node_name_attribute_or_element((xmlNodePtr) attrp, false);
-		ZVAL_NEW_STR(retval, str);
+		ZVAL_STR(retval, str);
 	} else {
 		ZVAL_STRING(retval, (char *) attrp->name);
 	}
@@ -163,12 +161,8 @@ zend_result dom_attr_owner_element_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr nodeparent = nodep->parent;
-	if (!nodeparent) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(nodeparent, retval, obj);
+	php_dom_create_nullable_object(nodeparent, retval, obj);
 	return SUCCESS;
 }
 
@@ -181,7 +175,8 @@ Since: DOM Level 3
 */
 zend_result dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 {
-	/* TODO */
+	/* This was never implemented, and is dropped from the modern-day DOM spec.
+	 * It only exists in old DOM to preserve BC. */
 	ZVAL_NULL(retval);
 	return SUCCESS;
 }
@@ -193,31 +188,21 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMAttr, isId)
 {
-	zval *id;
 	dom_object *intern;
 	xmlAttrPtr attrp;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);
-
-	if (attrp->atype == XML_ATTRIBUTE_ID) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	DOM_GET_OBJ(attrp, ZEND_THIS, xmlAttrPtr, intern);
+	RETURN_BOOL(attrp->atype == XML_ATTRIBUTE_ID);
 }
 /* }}} end dom_attr_is_id */
 
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value)
 {
-	bool free;
-	xmlChar *attr_value = php_libxml_attr_value(attr, &free);
+	bool should_free;
+	xmlChar *attr_value = php_libxml_attr_value(attr, &should_free);
 	bool result = xmlStrEqual(attr_value, value);
-	if (free) {
+	if (should_free) {
 		xmlFree(attr_value);
 	}
 	return result;

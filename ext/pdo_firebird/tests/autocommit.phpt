@@ -4,9 +4,6 @@ PDO_Firebird: auto commit
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---XLEAK--
-A bug in firebird causes a memory leak when calling `isc_attach_database()`.
-See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 /* Part of the error messages probably vary depending on the version of Firebird,
@@ -74,9 +71,9 @@ array(1) {
 ========== not in auto commit mode ==========
 auto commit mode OFF
 insert, expect error
-SQLSTATE[08003]: Connection does not exist: %s
+%r(SQLSTATE\[08003\]: Connection does not exist|SQLSTATE\[HY000\]: General error)%r: %s
 
 select, expect error
-SQLSTATE[08003]: Connection does not exist: %s
+%r(SQLSTATE\[08003\]: Connection does not exist|SQLSTATE\[HY000\]: General error)%r: %s
 
 done!

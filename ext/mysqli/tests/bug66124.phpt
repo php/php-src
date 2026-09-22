@@ -16,7 +16,6 @@ $table_create = "CREATE TABLE `test` (
 
 $table_insert = "INSERT INTO `test` SET `id`=?";
 $table_select = "SELECT * FROM `test`";
-$table_delete = "DELETE FROM `test`";
 $id = '1311200011005001566';
 
 

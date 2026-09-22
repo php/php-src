@@ -118,7 +118,7 @@ $stmt = null;
 // 12. Only list arrays are allowed
 $stmt = $link->prepare('SELECT label, ? AS anon, ? AS num FROM test WHERE id=?');
 try {
-    $stmt->execute(['A'=>'abc', 2=>42, null=>$id]);
+    $stmt->execute(['A'=>'abc', 2=>42, ''=>$id]);
 } catch (ValueError $e) {
     echo '[008] '.$e->getMessage()."\n";
 }

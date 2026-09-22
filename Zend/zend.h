@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -20,7 +19,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.4.0-dev"
+#define ZEND_VERSION "4.6.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -144,19 +143,25 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *traits_and_interfaces[1];
 };
 
+C23_ENUM(zend_class_type, uint8_t) {
+	ZEND_INTERNAL_CLASS = 1,
+	ZEND_USER_CLASS = 2,
+};
+
 struct _zend_class_entry {
-	char type;
+	zend_class_type type;
 	zend_string *name;
 	/* class_entry or string depending on ZEND_ACC_LINKED */
 	union {
 		zend_class_entry *parent;
 		zend_string *parent_name;
 	};
-	int refcount;
+	uint32_t refcount;
 	uint32_t ce_flags;
+	uint32_t ce_flags2;
 
 	int default_properties_count;
-	int default_static_members_count;
+	uint32_t default_static_members_count;
 	zval *default_properties_table;
 	zval *default_static_members_table;
 	ZEND_MAP_PTR_DEF(zval *, static_members_table);
@@ -204,6 +209,8 @@ struct _zend_class_entry {
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
+	uint32_t num_hooked_props;
+	uint32_t num_hooked_prop_variance_checks;
 
 	/* class_entry or string(s) depending on ZEND_ACC_LINKED */
 	union {
@@ -273,7 +280,9 @@ typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 		EG(bailout) = &__bailout;								\
 		if (SETJMP(__bailout)==0) {
 #define zend_catch												\
+			ZEND_ASSERT(EG(bailout) == &__bailout);				\
 		} else {												\
+			ZEND_ASSERT(EG(bailout) == &__bailout);				\
 			EG(bailout) = __orig_bailout;
 #define zend_end_try()											\
 		}														\
@@ -339,7 +348,22 @@ extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PT
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(zend_string *filename, zend_string **opened_path);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
+
+/* Called by the VM in certain places like at the loop header, user function
+ * entry, and after internal function calls, if EG(vm_interrupt) has been set.
+ *
+ * If this is used to switch the EG(current_execute_data), such as implementing
+ * a coroutine scheduler, then it needs to check the top frame to see if it's
+ * an internal function. If an internal function is on top, then the frame
+ * shouldn't be switched away.
+ *
+ * Prior to PHP 8.0, this check was not necessary. In PHP 8.0,
+ * zend_call_function started calling zend_interrupt_function, and in 8.4 the
+ * DO_*CALL* opcodes started calling the zend_interrupt_function while the
+ * internal frame is still on top.
+ */
 extern ZEND_API void (*zend_interrupt_function)(zend_execute_data *execute_data);
+
 extern ZEND_API void (*zend_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
@@ -359,6 +383,8 @@ extern ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
+
+extern ZEND_API void (*zend_accel_schedule_restart_hook)(int reason);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
@@ -420,11 +446,11 @@ typedef struct {
 } zend_error_handling;
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_save_error_handling(zend_error_handling *current);
 ZEND_API void zend_replace_error_handling(zend_error_handling_t error_handling, zend_class_entry *exception_class, zend_error_handling *current);
-ZEND_API void zend_restore_error_handling(zend_error_handling *saved);
+ZEND_API void zend_restore_error_handling(const zend_error_handling *saved);
 ZEND_API void zend_begin_record_errors(void);
 ZEND_API void zend_emit_recorded_errors(void);
+ZEND_API void zend_emit_recorded_errors_ex(uint32_t num_errors, zend_error_info **errors);
 ZEND_API void zend_free_recorded_errors(void);
 END_EXTERN_C()
 

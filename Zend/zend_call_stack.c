@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
    +----------------------------------------------------------------------+
@@ -37,7 +36,8 @@
 #endif /* ZEND_WIN32 */
 #if (defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)) || \
     defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || \
-    defined(__NetBSD__) || defined(__DragonFly__) || defined(__sun)
+    defined(__NetBSD__) || defined(__DragonFly__) || defined(__sun) || \
+    defined(_AIX)
 # include <pthread.h>
 #endif
 #if defined(__FreeBSD__) || defined(__DragonFly__)
@@ -64,11 +64,17 @@ typedef int boolean_t;
 #include <sys/syscall.h>
 #endif
 #ifdef __sun
-#define _STRUCTURED_PROC 1
-#include <sys/lwp.h>
-#include <sys/procfs.h>
-#include <libproc.h>
+# include <sys/lwp.h>
+# ifdef HAVE_LIBPROC_H
+#  define _STRUCTURED_PROC 1
+#  include <sys/procfs.h>
+#  include <libproc.h>
+# endif
 #include <thread.h>
+#endif
+
+#ifdef HAVE_VALGRIND
+# include <valgrind/valgrind.h>
 #endif
 
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -176,7 +182,7 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 {
 	FILE *f;
 	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	uintptr_t start, end, prev_end = 0;
 	size_t max_size;
 	bool found = false;
@@ -237,6 +243,13 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 	}
 
 	max_size = rlim.rlim_cur;
+
+#ifdef HAVE_VALGRIND
+	/* Under Valgrind, the last page is not useable */
+	if (RUNNING_ON_VALGRIND) {
+		max_size -= zend_get_page_size();
+	}
+#endif
 
 	/* Previous mapping may prevent the stack from growing */
 	if (end - max_size < prev_end) {
@@ -367,7 +380,6 @@ static bool zend_call_stack_get_freebsd(zend_call_stack *stack)
 static bool zend_call_stack_get_win32(zend_call_stack *stack)
 {
 	ULONG_PTR low_limit, high_limit;
-	ULONG size;
 	MEMORY_BASIC_INFORMATION guard_region = {0}, uncommitted_region = {0};
 	size_t result_size, page_size;
 
@@ -609,8 +621,7 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack, void **ptr)
 	char *start, *end;
 	struct kinfo_vmentry *entry;
 	size_t len, max_size;
-	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	int mib[5] = { CTL_VM, VM_PROC, VM_PROC_MAP, getpid(), sizeof(struct kinfo_vmentry) };
 	bool found = false;
 	struct rlimit rlim;
@@ -688,10 +699,10 @@ static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 	return true;
 }
 
+#ifdef HAVE_LIBPROC_H
 static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 {
-	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	bool found = false, r = false;
 	struct ps_prochandle *proc;
 	prmap_t *map, *orig;
@@ -760,12 +771,15 @@ end:
 	close(fd);
 	return r;
 }
+#endif
 
 static bool zend_call_stack_get_solaris(zend_call_stack *stack)
 {
+#ifdef HAVE_LIBPROC_H
 	if (_lwp_self() == 1) {
 		return zend_call_stack_get_solaris_proc_maps(stack);
 	}
+#endif
 	return zend_call_stack_get_solaris_pthread(stack);
 }
 #else
@@ -774,6 +788,79 @@ static bool zend_call_stack_get_solaris(zend_call_stack *stack)
 	return false;
 }
 #endif /* defined(__sun) */
+
+#if defined(_AIX)
+static bool zend_call_stack_get_aix_pthread(zend_call_stack *stack)
+{
+#ifdef HAVE_PTHREAD_GETTHRDS_NP
+	pthread_t pt = pthread_self();
+	struct __pthrdsinfo thread_info = {0};
+	/*
+	 * We don't need the register buffer since we only call the function
+	 * on our own thread, and since the register buffer is only used for
+	 * suspended threads...
+	 */
+	int regsz = 0;
+
+	if (pthread_getthrds_np(&pt, PTHRDSINFO_QUERY_ALL, &thread_info,
+				sizeof(thread_info), NULL, &regsz)) {
+		return false;
+	}
+
+	/*
+	 * These can be null in rare situations, allegedly with user-provided
+	 * stacks with pthread (according to OpenJDK)
+	 */
+	if (!(thread_info.__pi_stackend && thread_info.__pi_stackaddr)) {
+		return false;
+	}
+
+	/*
+	 * The top of the stack (stackend) is not page aligned, there's some
+	 * internal stuff above it. Thankfully, we don't need page alignment.
+	 *
+	 * The size is a little weird. The stacksize field for child threads
+	 * is smaller than subtracting the bottom (stackaddr) from the top;
+	 * it's about 0x888 to 0x1888 above stackaddr. I'm assuming it rounds
+	 * the bottom of the stack to page alignment? The main thread size is
+	 * the same as end - addr, but it is variable between systems; also
+	 * assuming there's stuff at the top of the stack that gets taken off,
+	 * regardless of maximum declared size.
+	 *
+	 * A somewhat crude diagram is available here:
+	 * https://www.ibm.com/docs/en/aix/7.2.0?topic=tuning-thread-environment-variables
+	 *
+	 * pthread->pt_stk.st_limit is __pi_stackend,
+	 * above that is internal pthread junk close to the end of page
+	 * pthread->pt_stk.st_base is __pi_stackaddr,
+	 * below that is the red zone
+	 */
+	stack->base = thread_info.__pi_stackend;
+	stack->max_size = thread_info.__pi_stackend - thread_info.__pi_stackaddr;
+	return true;
+#else
+	/* pthread likely not linked in; default NTS build behaviour */
+	return false;
+#endif
+}
+
+static bool zend_call_stack_get_aix(zend_call_stack *stack)
+{
+	/*
+	 * While we could use /proc on AIX (and the implementation basically
+	 * like the Solaris one, as the procfs is similar), it doesn't work on
+	 * PASE. The pthread API works even on the main thread, so we should
+	 * use it when we have pthread linked (always with ZTS, maybe not with
+	 * NTS builds).
+	 */
+	return zend_call_stack_get_aix_pthread(stack);
+}
+#else
+static bool zend_call_stack_get_aix(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(_AIX) */
 
 /** Get the stack information for the calling thread */
 ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
@@ -807,6 +894,10 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 	}
 
 	if (zend_call_stack_get_solaris(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_aix(stack)) {
 		return true;
 	}
 

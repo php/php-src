@@ -52,13 +52,13 @@ var_dump(strlen(fwrite($f, str_repeat('b', 250))));
 echo "\nerror conditions\n";
 try {
     stream_set_chunk_size($f, 0);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 try {
     stream_set_chunk_size($f, -1);
-} catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 ?>
 --EXPECT--
@@ -90,5 +90,5 @@ write with size: 50
 int(3)
 
 error conditions
-stream_set_chunk_size(): Argument #2 ($size) must be greater than 0
-stream_set_chunk_size(): Argument #2 ($size) must be greater than 0
+ValueError: stream_set_chunk_size(): Argument #2 ($size) must be greater than 0
+ValueError: stream_set_chunk_size(): Argument #2 ($size) must be greater than 0

@@ -5,6 +5,12 @@ phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
+--SKIPIF--
+<?php
+if (getenv("GITHUB_ACTIONS") && PHP_OS_FAMILY === "Darwin") {
+    die("flaky Occasionally segfaults on macOS for unknown reasons");
+}
+?>
 --FILE--
 <?php
 
@@ -31,7 +37,7 @@ try {
     $phar['test']->chmod(0666);
     var_dump($phar['test']->isReadable());
 } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -40,4 +46,4 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 ?>
 --EXPECTF--
 bool(false)
-Cannot modify permissions for file "a.php" in phar "%s033a.phar.tar", write operations are prohibited
+PharException: Cannot modify permissions for file "a.php" in phar "%s033a.phar.tar", write operations are prohibited

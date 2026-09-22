@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Rob Richards <rrichards@php.net>                             |
   +----------------------------------------------------------------------+
@@ -81,7 +79,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 			if (hnd->read_int_func) {
 				retint = hnd->read_int_func(obj->ptr);
 				if (retint == -1) {
-					zend_throw_error(NULL, "Failed to read property due to libxml error");
+					zend_throw_error(NULL, "Failed to read property because no XML data has been read yet");
 					return FAILURE;
 				}
 			}
@@ -102,7 +100,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 		case IS_LONG:
 			ZVAL_LONG(rv, retint);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+		default: ZEND_UNREACHABLE();
 	}
 
 	return SUCCESS;
@@ -110,25 +108,76 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* }}} */
 
 /* {{{ xmlreader_get_property_ptr_ptr */
-zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+static zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	zval *retval = NULL;
-	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 
+	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 	if (hnd == NULL) {
 		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
+	} else if (cache_slot) {
+		cache_slot[0] = cache_slot[1] = cache_slot[2] = NULL;
 	}
 
 	return retval;
 }
 /* }}} */
 
+static xmlreader_prop_handler *xmlreader_get_prop_handler(zend_string *name, void **cache_slot)
+{
+	/* We don't store the `ce` as that may match with how the std cache slot code works in the fallback,
+	 * instead use the prop handlers table as `ce`. */
+	if (cache_slot && cache_slot[0] == &xmlreader_prop_handlers) {
+		return cache_slot[1];
+	} else {
+		xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+		if (hnd != NULL && cache_slot) {
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, &xmlreader_prop_handlers, hnd);
+		}
+		return hnd;
+	}
+}
+
+static int xmlreader_has_property(zend_object *object, zend_string *name, int type, void **cache_slot)
+{
+	xmlreader_object *obj = php_xmlreader_fetch_object(object);
+	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
+
+	if (hnd != NULL) {
+		if (type == ZEND_PROPERTY_EXISTS) {
+			return 1;
+		}
+
+		zval rv;
+		if (xmlreader_property_reader(obj, hnd, &rv) == FAILURE) {
+			return 0;
+		}
+
+		bool result;
+
+		if (type == ZEND_PROPERTY_NOT_EMPTY) {
+			result = zend_is_true(&rv);
+		} else if (type == ZEND_PROPERTY_ISSET) {
+			result = (Z_TYPE(rv) != IS_NULL);
+		} else {
+			ZEND_UNREACHABLE();
+		}
+
+		zval_ptr_dtor(&rv);
+
+		return result;
+	}
+
+	return zend_std_has_property(object, name, type, cache_slot);
+}
+
+
 /* {{{ xmlreader_read_property */
-zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
+static zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	zval *retval = NULL;
 	xmlreader_object *obj = php_xmlreader_fetch_object(object);
-	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
 
 	if (hnd != NULL) {
 		if (xmlreader_property_reader(obj, hnd, rv) == FAILURE) {
@@ -145,12 +194,12 @@ zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, 
 /* }}} */
 
 /* {{{ xmlreader_write_property */
-zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
+static zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
+	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
 
 	if (hnd != NULL) {
-		zend_throw_error(NULL, "Cannot modify readonly property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 	} else {
 		value = zend_std_write_property(object, name, value, cache_slot);
 	}
@@ -158,6 +207,18 @@ zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *val
 	return value;
 }
 /* }}} */
+
+void xmlreader_unset_property(zend_object *object, zend_string *name, void **cache_slot)
+{
+	xmlreader_prop_handler *hnd = xmlreader_get_prop_handler(name, cache_slot);
+
+	if (hnd != NULL) {
+		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+		return;
+	}
+
+	zend_std_unset_property(object, name, cache_slot);
+}
 
 /* {{{ */
 static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name, const zval *key)
@@ -174,6 +235,28 @@ static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name,
 	return method;
 }
 /* }}} */
+
+static HashTable* xmlreader_get_debug_info(zend_object *object, int *is_temp)
+{
+	*is_temp = 1;
+
+	xmlreader_object *obj = php_xmlreader_fetch_object(object);
+	HashTable *std_props = zend_std_get_properties(object);
+	HashTable *debug_info = zend_array_dup(std_props);
+
+	zend_string *string_key;
+	xmlreader_prop_handler *entry;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&xmlreader_prop_handlers, string_key, entry) {
+		ZEND_ASSERT(string_key != NULL);
+
+		zval value;
+		if (xmlreader_property_reader(obj, entry, &value) == SUCCESS) {
+			zend_hash_update(debug_info, string_key, &value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return debug_info;
+}
 
 /* {{{ _xmlreader_get_valid_file_path */
 /* _xmlreader_get_valid_file_path and _xmlreader_get_relaxNG should be made a
@@ -360,7 +443,7 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 	}
 
 	if (!name_len) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -386,9 +469,7 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 	int retval;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 
@@ -410,9 +491,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 	char *retchar = NULL;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 
@@ -432,12 +511,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 
 /* {{{ php_xmlreader_set_relaxng_schema */
 static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int type) {
-#ifdef LIBXML_SCHEMAS_ENABLED
-	zval *id;
 	size_t source_len = 0;
-	int retval = -1;
-	xmlreader_object *intern;
-	xmlRelaxNGPtr schema = NULL;
 	char *source;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!", &source, &source_len) == FAILURE) {
@@ -445,14 +519,16 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	}
 
 	if (source != NULL && !source_len) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
-
-	id = ZEND_THIS;
-
-	intern = Z_XMLREADER_P(id);
+	
+#ifdef LIBXML_SCHEMAS_ENABLED
+	xmlreader_object *intern = Z_XMLREADER_P(ZEND_THIS);
 	if (intern->ptr) {
+		int retval = -1;
+		xmlRelaxNGPtr schema = NULL;
+
 		if (source) {
 			schema =  _xmlreader_get_relaxNG(source, source_len, type, NULL, NULL);
 			if (schema) {
@@ -472,6 +548,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 
 			RETURN_TRUE;
 		} else {
+			xmlRelaxNGFree(schema);
 			php_error_docref(NULL, E_WARNING, "Schema contains errors");
 			RETURN_FALSE;
 		}
@@ -492,9 +569,7 @@ PHP_METHOD(XMLReader, close)
 	zval *id;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
@@ -552,12 +627,12 @@ PHP_METHOD(XMLReader, getAttributeNs)
 	}
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
 	if (ns_uri_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -633,7 +708,7 @@ PHP_METHOD(XMLReader, moveToAttribute)
 	}
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -678,7 +753,7 @@ PHP_METHOD(XMLReader, moveToAttributeNo)
 }
 /* }}} */
 
-/* {{{ Positions reader at attribute spcified by name and namespaceURI.
+/* {{{ Positions reader at attribute specified by name and namespaceURI.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(XMLReader, moveToAttributeNs)
 {
@@ -693,12 +768,12 @@ PHP_METHOD(XMLReader, moveToAttributeNs)
 	}
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
 	if (ns_uri_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -744,9 +819,7 @@ PHP_METHOD(XMLReader, read)
 	int retval;
 	xmlreader_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
@@ -838,7 +911,7 @@ static void xml_reader_from_uri(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *
 	}
 
 	if (!source_len) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -993,11 +1066,7 @@ PHP_METHOD(XMLReader, readString)
 /* {{{ Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read(). */
 PHP_METHOD(XMLReader, setSchema)
 {
-#ifdef LIBXML_SCHEMAS_ENABLED
-	zval *id;
 	size_t source_len = 0;
-	int retval = -1;
-	xmlreader_object *intern;
 	char *source;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!", &source, &source_len) == FAILURE) {
@@ -1005,16 +1074,15 @@ PHP_METHOD(XMLReader, setSchema)
 	}
 
 	if (source != NULL && !source_len) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
-
-	id = ZEND_THIS;
-
-	intern = Z_XMLREADER_P(id);
+	
+#ifdef LIBXML_SCHEMAS_ENABLED
+	xmlreader_object *intern = Z_XMLREADER_P(ZEND_THIS);
 	if (intern && intern->ptr) {
 		PHP_LIBXML_SANITIZE_GLOBALS(schema);
-		retval = xmlTextReaderSchemaValidate(intern->ptr, source);
+		int retval = xmlTextReaderSchemaValidate(intern->ptr, source);
 		PHP_LIBXML_RESTORE_GLOBALS(schema);
 
 		if (retval == 0) {
@@ -1110,7 +1178,7 @@ static void xml_reader_from_string(INTERNAL_FUNCTION_PARAMETERS, zend_class_entr
 	}
 
 	if (!source_len) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1211,7 +1279,13 @@ PHP_METHOD(XMLReader, expand)
 	}
 
 	if (basenode != NULL) {
-		NODE_GET_OBJ(node, basenode, xmlNodePtr, domobj);
+		/* Note: cannot use NODE_GET_OBJ here because of the wrong return type */
+		domobj = Z_LIBXML_NODE_P(basenode);
+		if (UNEXPECTED(domobj->node == NULL)) {
+			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(Z_OBJCE_P(basenode)->name));
+			RETURN_FALSE;
+		}
+		node = domobj->node->node;
 		docp = node->doc;
 	}
 
@@ -1254,6 +1328,10 @@ static zend_result xmlreader_fixup_temporaries(void) {
 		++xmlreader_open_fn.T;
 		++xmlreader_xml_fn.T;
 	}
+#ifndef ZTS
+	ZEND_MAP_PTR(xmlreader_open_fn.run_time_cache) = ZEND_MAP_PTR(((zend_internal_function *)zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "open", sizeof("open")-1))->run_time_cache);
+	ZEND_MAP_PTR(xmlreader_xml_fn.run_time_cache) = ZEND_MAP_PTR(((zend_internal_function *)zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "xml", sizeof("xml")-1))->run_time_cache);
+#endif
 	if (prev_zend_post_startup_cb) {
 		return prev_zend_post_startup_cb();
 	}
@@ -1265,13 +1343,16 @@ PHP_MINIT_FUNCTION(xmlreader)
 {
 
 	memcpy(&xmlreader_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	xmlreader_object_handlers.offset = XtOffsetOf(xmlreader_object, std);
+	xmlreader_object_handlers.offset = offsetof(xmlreader_object, std);
 	xmlreader_object_handlers.free_obj = xmlreader_objects_free_storage;
+	xmlreader_object_handlers.has_property = xmlreader_has_property;
 	xmlreader_object_handlers.read_property = xmlreader_read_property;
 	xmlreader_object_handlers.write_property = xmlreader_write_property;
+	xmlreader_object_handlers.unset_property = xmlreader_unset_property;
 	xmlreader_object_handlers.get_property_ptr_ptr = xmlreader_get_property_ptr_ptr;
 	xmlreader_object_handlers.get_method = xmlreader_get_method;
 	xmlreader_object_handlers.clone_obj = NULL;
+	xmlreader_object_handlers.get_debug_info = xmlreader_get_debug_info;
 
 	xmlreader_class_entry = register_class_XMLReader();
 	xmlreader_class_entry->create_object = xmlreader_objects_new;

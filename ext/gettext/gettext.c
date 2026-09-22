@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Alex Plotnick <alex@wgate.com>                               |
    +----------------------------------------------------------------------+
@@ -55,7 +53,7 @@ ZEND_GET_MODULE(php_gettext)
 		zend_argument_value_error(_arg_num, "is too long"); \
 		RETURN_THROWS(); \
 	} else if (domain_len == 0) { \
-		zend_argument_value_error(_arg_num, "cannot be empty"); \
+		zend_argument_must_not_be_empty_error(_arg_num); \
 		RETURN_THROWS(); \
 	}
 
@@ -99,6 +97,11 @@ PHP_FUNCTION(textdomain)
 	}
 
 	retval = textdomain(domain_name);
+
+	if (UNEXPECTED(retval == NULL)) {
+		zend_throw_error(NULL, "Could not set text domain");
+		RETURN_THROWS();
+	}
 
 	RETURN_STRING(retval);
 }
@@ -180,23 +183,27 @@ PHP_FUNCTION(dcgettext)
 PHP_FUNCTION(bindtextdomain)
 {
 	zend_string *domain, *dir = NULL;
-	char *retval, dir_name[MAXPATHLEN];
+	char *retval, dir_name[MAXPATHLEN], *btd_result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(domain)
+		Z_PARAM_PATH_STR(domain)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(dir)
+		Z_PARAM_PATH_STR_OR_NULL(dir)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
 
-	if (!ZSTR_LEN(domain)) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
-
 	if (dir == NULL) {
-		RETURN_STRING(bindtextdomain(ZSTR_VAL(domain), NULL));
+		btd_result = bindtextdomain(ZSTR_VAL(domain), NULL);
+		if (btd_result == NULL) {
+			/* POSIX-compliant implementations can return
+			 * NULL if an error occurred. On musl you will
+			 * also get NULL if the domain is not yet
+			 * bound, because musl has no default directory
+			 * to return in that case. */
+			 RETURN_FALSE;
+		}
+		RETURN_STRING(btd_result);
 	}
 
 	if (ZSTR_LEN(dir) != 0 && !zend_string_equals_literal(dir, "0")) {
@@ -208,6 +215,11 @@ PHP_FUNCTION(bindtextdomain)
 	}
 
 	retval = bindtextdomain(ZSTR_VAL(domain), dir_name);
+
+	if (UNEXPECTED(retval == NULL)) {
+		zend_throw_error(NULL, "Could not bind text domain");
+		RETURN_THROWS();
+	}
 
 	RETURN_STRING(retval);
 }
@@ -311,11 +323,6 @@ PHP_FUNCTION(bind_textdomain_codeset)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
-
-	if (!ZSTR_LEN(domain)) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	retval = bind_textdomain_codeset(ZSTR_VAL(domain), codeset ? ZSTR_VAL(codeset) : NULL);
 

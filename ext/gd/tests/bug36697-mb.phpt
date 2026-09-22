@@ -13,7 +13,7 @@ imagecolortransparent($im, $trans_color);
 imagefilledrectangle($im, 0,0, 192,36, $trans_color);
 $c = imagecolorat($im, 191,35);
 imagegif($im, $dest);
-imagedestroy($im);
+$im = null;
 $im = imagecreatefromgif($dest);
 $c = imagecolorat($im, 191, 35);
 $colors = imagecolorsforindex($im, $c);

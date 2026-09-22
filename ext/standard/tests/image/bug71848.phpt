@@ -6,7 +6,7 @@ var_dump(getimagesize(__DIR__ . '/bug71848.jpg', $info));
 var_dump(array_keys($info));
 ?>
 --EXPECT--
-array(7) {
+array(9) {
   [0]=>
   int(8)
   [1]=>
@@ -21,6 +21,10 @@ array(7) {
   int(3)
   ["mime"]=>
   string(10) "image/jpeg"
+  ["width_unit"]=>
+  string(2) "px"
+  ["height_unit"]=>
+  string(2) "px"
 }
 array(2) {
   [0]=>

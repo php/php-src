@@ -21,7 +21,7 @@ var_dump(ftp_get_option($ftp, FTP_USEPASVADDRESS));
 try {
     ftp_get_option($ftp, FOO_BAR);
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
@@ -29,4 +29,4 @@ try {
 int(%d)
 bool(true)
 bool(true)
-ftp_get_option(): Argument #2 ($option) must be one of FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS
+ValueError: ftp_get_option(): Argument #2 ($option) must be one of FTP_TIMEOUT_SEC, FTP_AUTOSEEK, or FTP_USEPASVADDRESS

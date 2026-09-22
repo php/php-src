@@ -17,4 +17,3 @@ test(false);
 ?>
 --EXPECT--
 float(INF)
-

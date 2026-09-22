@@ -12,14 +12,14 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_verify_peer_name_003.pem.tmp
 $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_verify_peer_name_003-ca.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     @stream_socket_accept($server, 1);
 CODE;
@@ -27,14 +27,13 @@ $serverCode = sprintf($serverCode, $certFile);
 
 $actualPeerName = 'stream_verify_peer_name_003';
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer' => true,
         'cafile' => '%s'
     ]]);
 
-    phpt_wait();
     $client = stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
 
     var_dump($client);
@@ -59,5 +58,5 @@ Warning: stream_socket_client(): Peer certificate CN=`stream_verify_peer_name_00
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
-Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
+Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:%d (Unknown error) in %s on line %d
 bool(false)

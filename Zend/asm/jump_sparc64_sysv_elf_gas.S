@@ -6,12 +6,14 @@
 */
 
 /*
- * typedef struct {
- *	void *handle;
- *	zend_fiber_transfer *transfer;
- * } boost_context_data;
+ * typedef void*	fcontext_t;
  *
- * boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
+ * struct transfer_t {
+ *	fcontext_t	fctx;
+ *	void	*	data;
+ * };
+ *
+ * transfer_t jump_fcontext(fcontext_t const to, void *vp);
  */
 #define CC64FSZ 176
 #define BIAS 2047

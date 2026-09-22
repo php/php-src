@@ -6,7 +6,7 @@
 */
 
 /*
- * void *make_fcontext(void *sp, size_t size, void (*fn)(boost_context_data));
+ * fcontext_t *make_fcontext(void *sp, size_t size, void (*fn)(transfer_t));
  */
 #define CC64FSZ 176
 #define BIAS 2047
@@ -45,7 +45,7 @@ make_fcontext:
 	add	%l0, (trampoline - 1b - 8), %l0
 	stx	%l0, [%i0 + I7]
 
-	# Save framepointer to first stack frame but first substract the BIAS
+	# Save framepointer to first stack frame but first subtract the BIAS
 	add	%i0, CC64FSZ - BIAS, %l0
 	stx	%l0, [%i0 + SP]
 
@@ -56,7 +56,7 @@ make_fcontext:
 trampoline:
 	ldx	[%sp + BIAS + I7], %l0
 
-	# no need to setup boost_context_data, already in %o0 and %o1
+	# no need to setup transfer_t, already in %o0 and %o1
 	jmpl	%l0, %o7
 	 nop
 

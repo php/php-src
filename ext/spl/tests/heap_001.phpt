@@ -8,7 +8,7 @@ $h = new SplMaxHeap();
 try {
     $h->extract();
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 
@@ -37,7 +37,7 @@ echo $h->extract()."\n";
 echo $h2->extract()."\n";
 ?>
 --EXPECT--
-Exception: Can't extract from an empty heap
+RuntimeException: Can't extract from an empty heap
 5
 3
 3

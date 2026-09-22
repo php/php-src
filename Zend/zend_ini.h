@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
@@ -58,8 +57,9 @@ struct _zend_ini_entry {
 
 	uint8_t modifiable;
 	uint8_t orig_modifiable;
-	uint8_t modified;
+	bool modified;
 
+	const zend_ini_entry_def *def;
 };
 
 BEGIN_EXTERN_C()
@@ -81,18 +81,24 @@ ZEND_API void zend_ini_refresh_caches(int stage);
 ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage);
 ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change);
 ZEND_API zend_result zend_alter_ini_entry_chars(zend_string *name, const char *value, size_t value_length, int modify_type, int stage);
-ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, int force_change);
+ZEND_API zend_result zend_alter_ini_entry_chars_ex(zend_string *name, const char *value, size_t value_length, int modify_type, int stage, bool force_change);
 ZEND_API zend_result zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, int orig);
-ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig);
-ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig);
-ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, bool *exists);
+ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, bool orig);
+ZEND_API double zend_ini_double(const char *name, size_t name_length, bool orig);
+ZEND_API const char *zend_ini_string(const char *name, size_t name_length, bool orig);
+ZEND_API const char *zend_ini_string_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig);
 ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool orig, bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
-ZEND_API bool zend_ini_parse_bool(zend_string *str);
+ZEND_API bool zend_ini_parse_bool(const zend_string *str);
+
+#define zend_ini_bool_literal(name) zend_ini_parse_bool(zend_ini_str((name), sizeof("" name) - 1, false))
+#define zend_ini_long_literal(name) zend_ini_long((name), sizeof("" name) - 1, false)
+#define zend_ini_double_literal(name) zend_ini_double((name), sizeof("" name) - 1, false)
+#define zend_ini_str_literal(name) zend_ini_str((name), sizeof("" name) - 1, false)
+#define zend_ini_string_literal(name) zend_ini_string((name), sizeof("" name) - 1, false)
 
 /**
  * Parses an ini quantity
@@ -129,16 +135,16 @@ ZEND_API bool zend_ini_parse_bool(zend_string *str);
  * In any of these cases an error string is stored in *errstr (caller must
  * release it), otherwise *errstr is set to NULL.
  */
-ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr);
+ZEND_API zend_long zend_ini_parse_quantity(const zend_string *value, zend_string **errstr);
 
 /**
  * Unsigned variant of zend_ini_parse_quantity
  */
-ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr);
+ZEND_API zend_ulong zend_ini_parse_uquantity(const zend_string *value, zend_string **errstr);
 
-ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string *setting);
+ZEND_API zend_long zend_ini_parse_quantity_warn(const zend_string *value, zend_string *setting);
 
-ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting);
+ZEND_API zend_ulong zend_ini_parse_uquantity_warn(const zend_string *value, zend_string *setting);
 
 ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
@@ -176,29 +182,19 @@ END_EXTERN_C()
 
 #ifdef ZTS
 #define STD_ZEND_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
-	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id)
+	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr##_id)
 #define STD_ZEND_INI_ENTRY_EX(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr, displayer) \
-	ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id, displayer)
+	ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr##_id, displayer)
 #define STD_ZEND_INI_BOOLEAN(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
-	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id, NULL, zend_ini_boolean_displayer_cb)
+	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr##_id, NULL, zend_ini_boolean_displayer_cb)
 #else
 #define STD_ZEND_INI_ENTRY(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
-	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr)
+	ZEND_INI_ENTRY2(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr)
 #define STD_ZEND_INI_ENTRY_EX(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr, displayer) \
-	ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, displayer)
+	ZEND_INI_ENTRY2_EX(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr, displayer)
 #define STD_ZEND_INI_BOOLEAN(name, default_value, modifiable, on_modify, property_name, struct_type, struct_ptr) \
-	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
+	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) offsetof(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
 #endif
-
-#define INI_INT(name) zend_ini_long((name), strlen(name), 0)
-#define INI_FLT(name) zend_ini_double((name), strlen(name), 0)
-#define INI_STR(name) zend_ini_string_ex((name), strlen(name), 0, NULL)
-#define INI_BOOL(name) ((bool) INI_INT(name))
-
-#define INI_ORIG_INT(name)	zend_ini_long((name), strlen(name), 1)
-#define INI_ORIG_FLT(name)	zend_ini_double((name), strlen(name), 1)
-#define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
-#define INI_ORIG_BOOL(name) ((bool) INI_ORIG_INT(name))
 
 #define REGISTER_INI_ENTRIES() zend_register_ini_entries_ex(ini_entries, module_number, type)
 #define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries_ex(module_number, type)
@@ -256,6 +252,6 @@ typedef struct _zend_ini_parser_param {
 # define ZEND_INI_GET_BASE() ((char *) ts_resource(*((int *) mh_arg2)))
 #endif
 
-#define ZEND_INI_GET_ADDR() (ZEND_INI_GET_BASE() + (size_t) mh_arg1)
+#define ZEND_INI_GET_ADDR() ((void*)(ZEND_INI_GET_BASE() + (size_t) mh_arg1))
 
 #endif /* ZEND_INI_H */

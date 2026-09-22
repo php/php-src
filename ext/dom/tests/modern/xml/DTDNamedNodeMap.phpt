@@ -21,12 +21,11 @@ var_dump($doctype);
 
 var_dump($doctype->entities["test"]);
 var_dump($doctype->entities["myimage"]);
-// TODO: isConnected returning false is a bug
 var_dump($doctype->notations["GIF"]);
 
 ?>
 --EXPECTF--
-object(Dom\DocumentType)#2 (24) {
+object(Dom\DocumentType)#2 (20) {
   ["name"]=>
   string(4) "root"
   ["entities"]=>
@@ -41,12 +40,16 @@ object(Dom\DocumentType)#2 (24) {
   string(105) "<!ENTITY test "entity is only for test purposes">
 <!ENTITY myimage PUBLIC "-" "mypicture.gif" NDATA GIF>
 "
-  ["nodeName"]=>
-  string(4) "root"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(10)
+  ["nodeName"]=>
+  string(4) "root"
+  ["baseURI"]=>
+  string(%d) "%s"
+  ["isConnected"]=>
+  bool(true)
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
   ["parentNode"]=>
   string(22) "(object value omitted)"
   ["parentElement"]=>
@@ -61,20 +64,8 @@ object(Dom\DocumentType)#2 (24) {
   NULL
   ["nextSibling"]=>
   string(22) "(object value omitted)"
-  ["attributes"]=>
+  ["nodeValue"]=>
   NULL
-  ["isConnected"]=>
-  bool(true)
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
-  string(%d) "%s"
   ["textContent"]=>
   NULL
 }
@@ -150,17 +141,19 @@ object(Dom\Entity)#3 (17) {
   ["textContent"]=>
   NULL
 }
-object(Dom\Notation)#4 (13) {
+object(Dom\Notation)#4 (14) {
   ["nodeType"]=>
   int(12)
   ["nodeName"]=>
   string(3) "GIF"
   ["baseURI"]=>
-  NULL
+  string(%d) "%s"
   ["isConnected"]=>
-  bool(false)
+  bool(true)
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
   ["parentNode"]=>
-  NULL
+  string(22) "(object value omitted)"
   ["parentElement"]=>
   NULL
   ["childNodes"]=>
@@ -176,5 +169,5 @@ object(Dom\Notation)#4 (13) {
   ["nodeValue"]=>
   NULL
   ["textContent"]=>
-  string(0) ""
+  NULL
 }

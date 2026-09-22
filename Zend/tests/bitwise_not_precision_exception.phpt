@@ -7,9 +7,9 @@ set_error_handler(function($_, $msg) {
 });
 try {
     var_dump(~INF);
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Implicit conversion from float INF to int loses precision
+Exception: The float INF is not representable as an int, cast occurred

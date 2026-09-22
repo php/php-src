@@ -50,7 +50,7 @@ foreach ($csv_lists as $csv_list) {
     $csv_field = $csv_list[2];
 
 
-    var_dump( fputcsv($file_handle, $csv_field, $delimiter, $enclosure) );
+    var_dump( fputcsv($file_handle, $csv_field, $delimiter, $enclosure, escape: "\\") );
     // check the file pointer position and eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

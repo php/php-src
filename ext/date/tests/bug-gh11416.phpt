@@ -11,14 +11,14 @@ $date = (new ReflectionClass(DateTime::class))->newInstanceWithoutConstructor();
 try {
 	new DatePeriod($date, new DateInterval('P1D'), 2);
 } catch (Error $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $date = (new ReflectionClass(DateTime::class))->newInstanceWithoutConstructor();
 try {
 	new DatePeriod($now, new DateInterval('P1D'), $date);
 } catch (Error $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $date = (new ReflectionClass(DateTime::class))->newInstanceWithoutConstructor();
@@ -27,25 +27,25 @@ $dateinterval = (new ReflectionClass(DateInterval::class))->newInstanceWithoutCo
 try {
 	$dateperiod->__unserialize(['start' => $date]);
 } catch (Error $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
 	$dateperiod->__unserialize(['start' => $now, 'end' => $date]);
 } catch (Error $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
 	$dateperiod->__unserialize(['start' => $now, 'end' => $now, 'current' => $date]);
 } catch (Error $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
 	$dateperiod->__unserialize(['start' => $now, 'end' => $now, 'current' => $now, 'interval' => $dateinterval]);
 } catch (Error $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 try {
@@ -55,7 +55,7 @@ try {
 	]);
 	echo "DatePeriod::__unserialize: SUCCESS\n";
 } catch (Error $e) {
-	echo get_class($e), ': ', $e->getMessage(), "\n";
+	echo $e::class, ': ', $e->getMessage(), "\n";
 }
 echo "OK\n";
 ?>

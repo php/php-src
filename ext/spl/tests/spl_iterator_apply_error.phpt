@@ -16,11 +16,11 @@ $it = new MyArrayIterator(array(1, 21, 22));
 try {
     $res = iterator_apply($it, 'test');
 } catch (Exception $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 
 <?php exit(0); ?>
 --EXPECT--
-Make the iterator break
+Exception: Make the iterator break

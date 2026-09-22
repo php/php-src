@@ -16,8 +16,8 @@ try {
     if (!is_scalar($a)) {
         undefined_function('Null');
     }
-} catch (Exception $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--

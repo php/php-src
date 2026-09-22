@@ -122,7 +122,7 @@ require_once 'skipifconnectfailure.inc';
     var_dump($obj = new mysqli_fetch_object_private_constructor(1, 2));
     This does not fail.
     */
-    $obj = mysqli_fetch_object($res, 'mysqli_fetch_object_private_constructor', array('a', 'b'));
+    mysqli_fetch_object($res, 'mysqli_fetch_object_private_constructor', array('a', 'b'));
     mysqli_free_result($res);
 
     try {
@@ -146,5 +146,5 @@ NULL
 NULL
 mysqli_result object is already closed
 TypeError: mysqli_fetch_object(): Argument #3 ($constructor_args) must be of type array, string given
-TypeError: mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, this_class_does_not_exist given
+TypeError: mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, "this_class_does_not_exist" given
 done!

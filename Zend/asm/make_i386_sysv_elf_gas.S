@@ -24,9 +24,14 @@
  *                                                                                      *
  ****************************************************************************************/
 
+#ifdef __x86_64__
+#include "make_x86_64_sysv_elf_gas.S"
+#else
+
 .file "make_i386_sysv_elf_gas.S"
 .text
 .globl make_fcontext
+.hidden make_fcontext
 .align 2
 .type make_fcontext,@function
 make_fcontext:
@@ -111,3 +116,5 @@ finish:
 
 /* Mark that we don't need executable stack.  */
 .section .note.GNU-stack,"",%progbits
+
+#endif

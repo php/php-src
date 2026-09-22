@@ -50,7 +50,7 @@ try {
     var_dump(strlen($phar->getStub()));
     var_dump($phar->getAlias());
 } catch(Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "================ convertToTar(GZ) ====================\n";
@@ -72,7 +72,7 @@ try {
     var_dump(strlen($phar->getStub()));
     var_dump($phar->getAlias());
 } catch(Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --CLEAN--
@@ -102,7 +102,7 @@ bool(true)
 string(0) ""
 NULL
 ================= convertToPhar() ====================
-Cannot write out executable phar archive, phar is read-only
+UnexpectedValueException: Cannot write out executable phar archive, phar is read-only
 ================ convertToTar(GZ) ====================
 bool(false)
 bool(true)
@@ -110,4 +110,4 @@ bool(false)
 string(0) ""
 NULL
 ================= convertToPhar() ====================
-Cannot write out executable phar archive, phar is read-only
+UnexpectedValueException: Cannot write out executable phar archive, phar is read-only

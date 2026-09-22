@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Anatol Belski <ab@php.net>                                   |
    +----------------------------------------------------------------------+
@@ -35,7 +33,7 @@ ZEND_TLS const struct php_win32_cp *orig_in_cp = NULL;
 
 #include "cp_enc_map.c"
 
-__forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
+zend_always_inline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
 	wchar_t *ret;
 	int ret_len, tmp_len;
@@ -241,7 +239,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 }/*}}}*/
 #undef ASCII_FAIL_RETURN
 
-__forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
+zend_always_inline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/
 	int r;
 	int target_len, tmp_len;
@@ -306,7 +304,7 @@ PW32CP char *php_win32_cp_conv_from_w(DWORD cp, DWORD flags, const wchar_t* in, 
 }/*}}}*/
 
 /* This is only usable after the startup phase*/
-__forceinline static char *php_win32_cp_get_enc(void)
+zend_always_inline static char *php_win32_cp_get_enc(void)
 {/*{{{*/
 	char *enc = NULL;
 	const zend_encoding *zenc;
@@ -610,7 +608,7 @@ PHP_FUNCTION(sapi_windows_cp_set)
 		cp = php_win32_cp_set_by_id((DWORD)id);
 	}
 	if (!cp) {
-		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage %d", id);
+		php_error_docref(NULL, E_WARNING, "Failed to switch to codepage " ZEND_LONG_FMT, id);
 		RETURN_FALSE;
 	}
 
@@ -646,9 +644,7 @@ PHP_FUNCTION(sapi_windows_cp_get)
 /* {{{ Indicates whether the codepage is UTF-8 compatible. */
 PHP_FUNCTION(sapi_windows_cp_is_utf8)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(php_win32_cp_use_unicode());
 }

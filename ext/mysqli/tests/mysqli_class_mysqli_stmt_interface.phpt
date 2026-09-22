@@ -68,12 +68,12 @@ mysqli
     printf("\nClass variables:\n");
     $variables = array_keys(get_class_vars(get_class($stmt)));
     sort($variables);
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
     printf("\nObject variables:\n");
     $variables = array_keys(get_object_vars($stmt));
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
 printf("\nMagic, magic properties:\n");
@@ -132,6 +132,7 @@ printf("stmt->unknown = '%s'\n", @$stmt->unknown);
 print "done!";
 ?>
 --EXPECTF--
+Deprecated: Instantiation of mysqli_stmt without providing the $query parameter is deprecated in %s on line %d
 Parent class:
 bool(false)
 

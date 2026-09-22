@@ -514,7 +514,7 @@ int fpm_sockets_init_main(void)
 		}
 
 	if (wp->listen_address_domain == FPM_AF_INET && fpm_socket_get_listening_queue(wp->listening_socket, NULL, &lq_len) >= 0) {
-			fpm_scoreboard_update(-1, -1, -1, (int)lq_len, -1, -1, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
+			fpm_scoreboard_update(-1, -1, -1, (int)lq_len, -1, -1, 0, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
 		}
 	}
 

@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: buffer.c,v 1.13 2023/07/02 12:48:39 christos Exp $")
+FILE_RCSID("@(#)$File: buffer.c,v 1.14 2025/05/28 19:22:22 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -69,6 +69,10 @@ buffer_fill(const struct buffer *bb)
 
 	if (b->elen != 0)
 		return b->elen == FILE_BADSIZE ? -1 : 0;
+
+	// Nothing to refill, everything is in memory
+	if (b->fd == -1)
+		return 0;
 
 	if (!S_ISREG(b->st.st_mode))
 		goto out;

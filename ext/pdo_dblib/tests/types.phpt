@@ -16,7 +16,7 @@ $db = getDbConnection();
 function get_expected_float_string() {
     global $db;
 
-    switch ($db->getAttribute(PDO::DBLIB_ATTR_TDS_VERSION)) {
+    switch ($db->getAttribute(Pdo\Dblib::ATTR_TDS_VERSION)) {
         case '5.0':
         case '6.0':
         case '7.0':

@@ -1,6 +1,5 @@
 --TEST--
-Un-setting instance properties causes magic methods to be called when trying to access them from outside the magic
-methods themselves.
+Un-setting instance properties causes magic methods to be called when trying to access them from outside the magic methods themselves.
 --FILE--
 <?php
 

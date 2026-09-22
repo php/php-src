@@ -118,7 +118,7 @@ int(2)
 bool(false)
 ===S:-10,C===
 int(-1)
-bool(false)
+int(2)
 bool(false)
 ===S:3,S===
 int(0)

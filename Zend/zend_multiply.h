@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sascha Schumann <sascha@schumann.cx>                        |
    |          Ard Biesheuvel <ard.biesheuvel@linaro.org>                  |
@@ -22,7 +21,7 @@
 #ifndef ZEND_MULTIPLY_H
 #define ZEND_MULTIPLY_H
 
-#if PHP_HAVE_BUILTIN_SMULL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+#if defined(PHP_HAVE_BUILTIN_SMULL_OVERFLOW) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	long __tmpvar;		 											\
@@ -32,7 +31,7 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
-#elif PHP_HAVE_BUILTIN_SMULLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+#elif defined(PHP_HAVE_BUILTIN_SMULLL_OVERFLOW) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	long long __tmpvar; 											\
@@ -79,46 +78,25 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
-#elif defined(ZEND_WIN32)
+#elif defined(ZEND_WIN32) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 
-# ifdef _M_X64
-#  pragma intrinsic(_mul128)
-#  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {       \
-	__int64 __high; \
-	__int64 __low = _mul128((a), (b), &__high); \
-	if ((__low >> 63I64) == __high) { \
-		(usedval) = 0; \
-		(lval) = __low; \
-	} else { \
-		(usedval) = 1; \
-		(dval) = (double)(a) * (double)(b); \
-	} \
-} while (0)
-# elif defined(_M_ARM64)
-#  pragma intrinsic(__mulh)
-#  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {       \
-	__int64 __high = __mulh((a), (b)); \
-	__int64 __low  = (a) * (b); \
-	if ((__low >> 63I64) == __high) { \
-		(usedval) = 0; \
-		(lval) = __low; \
-	} else { \
-		(usedval) = 1; \
-		(dval) = (double)(a) * (double)(b); \
-	} \
-} while (0)
-# else
-#  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long   __lres  = (a) * (b);										\
-	long double __dres  = (long double)(a) * (long double)(b);		\
-	long double __delta = (long double) __lres - __dres;			\
-	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
-		(dval) = __dres;											\
-	} else {														\
-		(lval) = __lres;											\
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long long __tmpvar; 											\
+	if (((usedval) = FAILED(LongLongMult((a), (b), &__tmpvar)))) {	\
+		(dval) = (double) (a) * (double) (b);						\
 	}																\
+	else (lval) = __tmpvar;											\
 } while (0)
-# endif
+
+#elif defined(ZEND_WIN32) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long __tmpvar; 													\
+	if (((usedval) = FAILED(LongMult((a), (b), &__tmpvar)))) {		\
+		(dval) = (double) (a) * (double) (b);						\
+	}																\
+	else (lval) = __tmpvar;											\
+} while (0)
 
 #elif defined(__powerpc64__) && defined(__GNUC__)
 
@@ -176,13 +154,15 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 		__asm__ ("mull %3\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (m_overflow)
 	     : "%0"(res),
-	       "rm"(size));
+	       "rm"(size)
+	     : "cc");
 	} else {
 		__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (m_overflow)
 	     : "%0"(res),
 	       "rm"(size),
-	       "rm"(offset));
+	       "rm"(offset)
+	     : "cc");
 	}
 
 	if (UNEXPECTED(m_overflow)) {
@@ -197,7 +177,7 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)
 {
-	size_t res = nmemb;
+	size_t res;
 	zend_ulong m_overflow = 0;
 
 #ifdef __ILP32__ /* x32 */
@@ -207,19 +187,30 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 #endif
 
 	if (ZEND_CONST_COND(offset == 0, 0)) {
+		res = nmemb;
 		__asm__ ("mul" LP_SUFF  " %3\n\t"
 			"adc $0,%1"
 			: "=&a"(res), "=&d" (m_overflow)
 			: "%0"(res),
-			  "rm"(size));
+			  "rm"(size)
+			: "cc");
+	} else if (ZEND_CONST_COND(nmemb == 1, 0)) {
+		res = size;
+		__asm__ ("add %2, %0\n\t"
+			"adc $0,%1"
+			: "+r"(res), "+r" (m_overflow)
+			: "rm"(offset)
+			: "cc");
 	} else {
+		res = nmemb;
 		__asm__ ("mul" LP_SUFF  " %3\n\t"
 			"add %4,%0\n\t"
 			"adc $0,%1"
 			: "=&a"(res), "=&d" (m_overflow)
 			: "%0"(res),
 			  "rm"(size),
-			  "rm"(offset));
+			  "rm"(offset)
+			: "cc");
 	}
 #undef LP_SUFF
 	if (UNEXPECTED(m_overflow)) {
@@ -263,7 +254,8 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 		: "=&r"(res), "=&r"(m_overflow)
 		: "r"(nmemb),
 		  "r"(size),
-		  "r"(offset));
+		  "r"(offset)
+		: "cc");
 
 	if (UNEXPECTED(m_overflow)) {
 		*overflow = 1;
@@ -287,7 +279,8 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
              : "=&r"(res), "=&r"(m_overflow)
              : "r"(nmemb),
                "r"(size),
-               "r"(offset));
+               "r"(offset)
+             : "xer");
 
         if (UNEXPECTED(m_overflow)) {
                 *overflow = 1;
@@ -309,6 +302,19 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 	}
 	*overflow = 0;
 	return (size_t) res;
+}
+
+#elif defined(_MSC_VER)
+
+static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, bool *overflow)
+{
+	size_t res;
+	if (UNEXPECTED(FAILED(ULongLongMult(nmemb, size, &res)) || FAILED(ULongLongAdd(res, offset, &res)))) {
+		*overflow = 1;
+		return 0;
+	}
+	*overflow = 0;
+	return res;
 }
 
 #else
@@ -335,7 +341,6 @@ static zend_always_inline size_t zend_safe_address_guarded(size_t nmemb, size_t 
 
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-		return 0;
 	}
 	return ret;
 }
@@ -348,7 +353,6 @@ static zend_always_inline size_t zend_safe_addmult(size_t nmemb, size_t size, si
 
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in %s (%zu * %zu + %zu)", message, nmemb, size, offset);
-		return 0;
 	}
 	return ret;
 }

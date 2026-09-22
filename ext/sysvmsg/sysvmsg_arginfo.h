@@ -1,5 +1,7 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit sysvmsg.stub.php instead.
  * Stub hash: ed5b1e4e5dda6a65ce336fc4daa975520c354f17 */
+
+#include "zend_constants.h"
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_msg_get_queue, 0, 1, SysvMessageQueue, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -62,10 +64,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_SysvMessageQueue_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_sysvmsg_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("MSG_IPC_NOWAIT", PHP_MSG_IPC_NOWAIT, CONST_PERSISTENT);
@@ -79,9 +77,8 @@ static zend_class_entry *register_class_SysvMessageQueue(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SysvMessageQueue", class_SysvMessageQueue_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	INIT_CLASS_ENTRY(ce, "SysvMessageQueue", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

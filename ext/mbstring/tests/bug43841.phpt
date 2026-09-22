@@ -19,41 +19,41 @@ foreach ($offsets as $i) {
     try {
         var_dump( mb_strrpos($string_mb, $needle, $i, 'UTF-8') );
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     echo "ASCII String:\n";
     echo "mb_strrpos:\n";
     try {
         var_dump(mb_strrpos('This is na English ta', 'a', $i));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
     echo "strrpos:\n";
     try {
         var_dump(strrpos('This is na English ta', 'a', $i));
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 ?>
 --EXPECT--
 -- Offset is -25 --
 Multibyte String:
-mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 ASCII String:
 mb_strrpos:
-mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos:
-strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is -24 --
 Multibyte String:
-mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 ASCII String:
 mb_strrpos:
-mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos:
-strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+ValueError: strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is -13 --
 Multibyte String:

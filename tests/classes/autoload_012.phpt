@@ -9,9 +9,9 @@ spl_autoload_register(function ($name) {
 try {
     call_user_func("UndefC::test");
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 In autoload: string(6) "UndefC"
-call_user_func(): Argument #1 ($callback) must be a valid callback, class "UndefC" not found
+TypeError: call_user_func(): Argument #1 ($callback) must be a valid callback, class "UndefC" not found

@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Anatol Belski <ab@php.net>                                   |
    +----------------------------------------------------------------------+
@@ -33,6 +31,7 @@ const php_hash_ops php_hash_murmur3a_ops = {
 	4,
 	4,
 	sizeof(PHP_MURMUR3A_CTX),
+	0,
 	0
 };
 
@@ -42,8 +41,13 @@ PHP_HASH_API void PHP_MURMUR3AInit(PHP_MURMUR3A_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			ctx->h = (uint32_t)Z_LVAL_P(seed);
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				ctx->h = (uint32_t) Z_LVAL_P(seed);
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+				ctx->h = 0;
+			}
 		} else {
 			ctx->h = 0;
 		}
@@ -70,7 +74,7 @@ PHP_HASH_API void PHP_MURMUR3AFinal(unsigned char digest[4], PHP_MURMUR3A_CTX *c
 	digest[3] = (unsigned char)(ctx->h & 0xff);
 }
 
-PHP_HASH_API int PHP_MURMUR3ACopy(const php_hash_ops *ops, PHP_MURMUR3A_CTX *orig_context, PHP_MURMUR3A_CTX *copy_context)
+PHP_HASH_API zend_result PHP_MURMUR3ACopy(const php_hash_ops *ops, const PHP_MURMUR3A_CTX *orig_context, PHP_MURMUR3A_CTX *copy_context)
 {
 	copy_context->h = orig_context->h;
 	copy_context->carry = orig_context->carry;
@@ -90,6 +94,7 @@ const php_hash_ops php_hash_murmur3c_ops = {
 	16,
 	4,
 	sizeof(PHP_MURMUR3C_CTX),
+	0,
 	0
 };
 
@@ -99,12 +104,17 @@ PHP_HASH_API void PHP_MURMUR3CInit(PHP_MURMUR3C_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			uint32_t _seed = (uint32_t)Z_LVAL_P(seed);
-			ctx->h[0] = _seed;
-			ctx->h[1] = _seed;
-			ctx->h[2] = _seed;
-			ctx->h[3] = _seed;
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				uint32_t _seed = (uint32_t)Z_LVAL_P(seed);
+				ctx->h[0] = _seed;
+				ctx->h[1] = _seed;
+				ctx->h[2] = _seed;
+				ctx->h[3] = _seed;
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+				memset(&ctx->h, 0, sizeof ctx->h);
+			}
 		} else {
 			memset(&ctx->h, 0, sizeof ctx->h);
 		}
@@ -144,7 +154,7 @@ PHP_HASH_API void PHP_MURMUR3CFinal(unsigned char digest[16], PHP_MURMUR3C_CTX *
 	digest[15] = (unsigned char)(h[3] & 0xff);
 }
 
-PHP_HASH_API int PHP_MURMUR3CCopy(const php_hash_ops *ops, PHP_MURMUR3C_CTX *orig_context, PHP_MURMUR3C_CTX *copy_context)
+PHP_HASH_API zend_result PHP_MURMUR3CCopy(const php_hash_ops *ops, const PHP_MURMUR3C_CTX *orig_context, PHP_MURMUR3C_CTX *copy_context)
 {
 	memcpy(&copy_context->h, &orig_context->h, sizeof orig_context->h);
 	memcpy(&copy_context->carry, &orig_context->carry, sizeof orig_context->carry);
@@ -164,6 +174,7 @@ const php_hash_ops php_hash_murmur3f_ops = {
 	16,
 	8,
 	sizeof(PHP_MURMUR3F_CTX),
+	0,
 	0
 };
 
@@ -173,10 +184,15 @@ PHP_HASH_API void PHP_MURMUR3FInit(PHP_MURMUR3F_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			uint64_t _seed = (uint64_t)Z_LVAL_P(seed);
-			ctx->h[0] = _seed;
-			ctx->h[1] = _seed;
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				uint64_t _seed = (uint64_t) Z_LVAL_P(seed);
+				ctx->h[0] = _seed;
+				ctx->h[1] = _seed;
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+				memset(&ctx->h, 0, sizeof ctx->h);
+			}
 		} else {
 			memset(&ctx->h, 0, sizeof ctx->h);
 		}
@@ -216,7 +232,7 @@ PHP_HASH_API void PHP_MURMUR3FFinal(unsigned char digest[16], PHP_MURMUR3F_CTX *
 	digest[15] = (unsigned char)(h[1] & 0xff);
 }
 
-PHP_HASH_API int PHP_MURMUR3FCopy(const php_hash_ops *ops, PHP_MURMUR3F_CTX *orig_context, PHP_MURMUR3F_CTX *copy_context)
+PHP_HASH_API zend_result PHP_MURMUR3FCopy(const php_hash_ops *ops, const PHP_MURMUR3F_CTX *orig_context, PHP_MURMUR3F_CTX *copy_context)
 {
 	memcpy(&copy_context->h, &orig_context->h, sizeof orig_context->h);
 	memcpy(&copy_context->carry, &orig_context->carry, sizeof orig_context->carry);

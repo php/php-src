@@ -4,8 +4,8 @@ Bug #51056 (fread() on blocking stream will block even if data is available)
 <?php
 
 $serverCode = <<<'CODE'
-$server = stream_socket_server('tcp://127.0.0.1:64324');
-phpt_notify();
+$server = stream_socket_server('tcp://127.0.0.1:0');
+phpt_notify_server_start($server);
 
 $conn = stream_socket_accept($server);
 
@@ -21,9 +21,7 @@ CODE;
 
 $clientCode = <<<'CODE'
 
-phpt_wait();
-
-$fp = fsockopen("tcp://127.0.0.1:64324");
+$fp = fsockopen("tcp://{{ ADDR }}");
 
 while (!feof($fp)) {
     $data = fread($fp, 256);

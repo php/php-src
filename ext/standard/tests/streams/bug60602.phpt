@@ -9,7 +9,7 @@ $descs = array(
     2 => array('pipe', 'w'), // strerr
 );
 
-$environment = array('test' => array(1, 2, 3));
+$environment = array('test' => array(1, 2, 3), 'PATH' => getenv('PATH'));
 
 $cmd = (substr(PHP_OS, 0, 3) == 'WIN') ? 'dir' : 'ls';
 $p = proc_open($cmd, $descs, $pipes, '.', $environment);
@@ -18,8 +18,9 @@ if (is_resource($p)) {
     $data = '';
 
     while (1) {
+        $r = [$pipes[1]];
         $w = $e = NULL;
-        $n = stream_select($pipes, $w, $e, 300);
+        $n = stream_select($r, $w, $e, 300);
 
         if ($n === false) {
             echo "no streams \n";
@@ -29,7 +30,7 @@ if (is_resource($p)) {
             proc_terminate($p, 9);
             break;
         } else if ($n > 0) {
-            $line = fread($pipes[1], 8192);
+            $line = fread($r[0], 8192);
             if (strlen($line) == 0) {
                 /* EOF */
                 break;

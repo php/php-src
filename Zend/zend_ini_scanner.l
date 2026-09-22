@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jani Taskinen <jani@php.net>                                |
@@ -145,10 +144,10 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_TYPED &&            \
 		(YYSTATE == STATE(ST_VALUE) || YYSTATE == STATE(ST_RAW))) {\
 		zend_ini_copy_typed_value(ini_lval, type, str, len);       \
-		Z_EXTRA_P(ini_lval) = 0;                                   \
 	} else {                                                       \
 		zend_ini_copy_value(ini_lval, str, len);                   \
 	}                                                              \
+	Z_EXTRA_P(ini_lval) = 0;                                       \
 	return type;                                                   \
 }
 
@@ -230,7 +229,7 @@ void shutdown_ini_scanner(void)
 /* }}} */
 
 /* {{{ zend_ini_scanner_get_lineno() */
-ZEND_COLD int zend_ini_scanner_get_lineno(void)
+ZEND_COLD uint32_t zend_ini_scanner_get_lineno(void)
 {
 	return SCNG(lineno);
 }
@@ -352,16 +351,16 @@ restart:
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM [0-9]+
-DNUM ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
+DNUM ([0-9]*[.][0-9]+)|([0-9]+[.][0-9]*)
 NUMBER [-]?{LNUM}|{DNUM}
 ANY_CHAR (.|[\n\t])
 NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z_][a-zA-Z0-9_]*
-LABEL_CHAR [^=\n\r\t;&|^$~(){}!"\[\]\x00]
+LABEL_CHAR [^=\n\r\t;&|^$~(){}!"[\]\x00]
 LABEL ({LABEL_CHAR}+)
-TOKENS [:,.\[\]"'()&|^+-/*=%$!~<>?@{}]
+TOKENS [:,.[\]"'()&|^+-/*=%$!~<>?@{}]
 OPERATORS [&|^~()!]
 DOLLAR_CURLY "${"
 

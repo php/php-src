@@ -48,6 +48,14 @@ class MySession2 extends SessionHandler {
         }
         return true;
     }
+
+    private int $id = 0;
+	public function create_sid(): string {
+	    return ++$this->id;
+	}
+	public function validateId(string $id): bool {
+	    return $id > 0 && $id <= $this->id;
+	}
 }
 
 $handler = new MySession2;
@@ -87,7 +95,7 @@ session_unset();
 --EXPECTF--
 *** Testing session_set_save_handler() : full handler implementation ***
 
-Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 string(%d) "%s"
 string(4) "user"
 array(1) {

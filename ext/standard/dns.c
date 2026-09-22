@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: The typical suspects                                        |
    |          Pollita <pollita@php.net>                                   |
@@ -163,7 +161,7 @@ PHP_FUNCTION(gethostbyaddr)
 #endif
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STR(hostname);
+		RETVAL_NEW_STR(hostname);
 	}
 }
 /* }}} */
@@ -236,7 +234,7 @@ PHP_FUNCTION(gethostbyname)
 		php_error_docref(NULL, E_WARNING, "Host name to ip failed %s", hostname);
 		RETURN_STRINGL(hostname, hostname_len);
 	} else {
-		RETURN_STR(ipaddr);
+		RETURN_NEW_STR(ipaddr);
 	}
 }
 /* }}} */
@@ -382,13 +380,13 @@ PHP_FUNCTION(dns_check_record)
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_PATH(hostname, hostname_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(rectype)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -829,7 +827,7 @@ PHP_FUNCTION(dns_get_record)
 	bool raw = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 5)
-		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_PATH(hostname, hostname_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(type_param)
 		Z_PARAM_ZVAL(authns)
@@ -1067,7 +1065,7 @@ PHP_FUNCTION(dns_get_mx)
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(hostname, hostname_len)
+		Z_PARAM_PATH(hostname, hostname_len)
 		Z_PARAM_ZVAL(mx_list)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(weight_list)

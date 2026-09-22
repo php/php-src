@@ -25,7 +25,8 @@ require_once 'skipifconnectfailure.inc';
         mysqli_free_result($res);
         try {
             foreach ($res as $row) {
-                $row;
+                echo "Iterating over a closed result set should not work\n";
+                var_dump($row);
             }
         } catch (Error $exception) {
             echo $exception->getMessage() . "\n";

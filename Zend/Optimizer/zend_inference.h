@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend Engine, e-SSA based Type & Range Inference                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
@@ -217,11 +215,11 @@ static zend_always_inline bool zend_sub_will_overflow(zend_long a, zend_long b) 
 
 BEGIN_EXTERN_C()
 
-ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa);
+ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, const zend_ssa *ssa);
 ZEND_API void zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa);
 ZEND_API zend_result zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
 
-ZEND_API uint32_t zend_array_element_type(uint32_t t1, uint8_t op_type, int write, int insert);
+ZEND_API uint32_t zend_array_element_type(uint32_t t1, uint8_t op_type, bool write, bool insert);
 
 ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
 
@@ -238,7 +236,7 @@ ZEND_API bool zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, c
 
 ZEND_API zend_result zend_update_type_info(
 	const zend_op_array *op_array, zend_ssa *ssa, const zend_script *script,
-	zend_op *opline, zend_ssa_op *ssa_op, const zend_op **ssa_opcodes,
+	const zend_op *opline, zend_ssa_op *ssa_op, const zend_op **ssa_opcodes,
 	zend_long optimization_level);
 
 END_EXTERN_C()

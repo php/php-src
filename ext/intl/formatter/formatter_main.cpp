@@ -1,0 +1,199 @@
+/*
+   +----------------------------------------------------------------------+
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
+   +----------------------------------------------------------------------+
+   | Authors: Stanislav Malyshev <stas@zend.com>                          |
+   +----------------------------------------------------------------------+
+ */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <unicode/locid.h>
+#include <unicode/decimfmt.h>
+#include <unicode/dcfmtsym.h>
+#include <unicode/rbnf.h>
+#include <unicode/compactdecimalformat.h>
+#include "../intl_convertcpp.h"
+#include "formatter_class.h"
+
+extern "C" {
+#include "php_intl.h"
+}
+
+/* {{{ */
+static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
+{
+	char*       locale;
+	char*       pattern = NULL;
+	size_t      locale_len = 0, pattern_len = 0;
+	zend_long   style;
+	UnicodeString upattern;
+	FORMATTER_METHOD_INIT_VARS;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_LONG(style)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(pattern, pattern_len)
+	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
+
+	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
+	object = return_value;
+	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
+	if (FORMATTER_OBJECT(nfo)) {
+		zend_throw_error(NULL, "NumberFormatter object is already constructed");
+		return FAILURE;
+	}
+
+	/* Convert pattern (if specified) to UTF-16. */
+	if(pattern && pattern_len) {
+		intl_stringFromChar(upattern, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
+		INTL_CTOR_CHECK_STATUS(nfo, "error converting pattern to UTF-16");
+	}
+
+	if(locale_len == 0) {
+		locale = (char *)intl_locale_get_default();
+	}
+
+	if (icu::Locale(locale).getISO3Language()[0] == '\0') {
+		zend_argument_value_error(1, "\"%s\" is invalid", locale);
+		return FAILURE;
+	}
+
+	char* canonicalized_locale = canonicalize_locale_string(locale);
+	const char* final_locale = canonicalized_locale ? canonicalized_locale : locale;
+
+	/* Create an ICU number formatter. */
+	icu::Locale loc(final_locale);
+	switch (style) {
+		case UNUM_PATTERN_DECIMAL: {
+			icu::DecimalFormatSymbols *syms = new icu::DecimalFormatSymbols(loc, INTL_DATA_ERROR_CODE(nfo));
+			if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
+				delete syms;
+				break;
+			}
+			FORMATTER_OBJECT(nfo) = new icu::DecimalFormat(upattern, syms, INTL_DATA_ERROR_CODE(nfo));
+			if (FORMATTER_OBJECT(nfo) == nullptr) {
+				delete syms;
+			}
+			break;
+		}
+		case UNUM_PATTERN_RULEBASED: {
+			UParseError parseError;
+			FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(upattern, loc, parseError, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		}
+		case UNUM_SPELLOUT:
+			FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(icu::URBNF_SPELLOUT, loc, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		case UNUM_ORDINAL:
+			FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(icu::URBNF_ORDINAL, loc, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		case UNUM_DURATION:
+			FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(icu::URBNF_DURATION, loc, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		case UNUM_NUMBERING_SYSTEM: {
+			UErrorCode localErr = U_ZERO_ERROR;
+			int32_t keywordLength = loc.getKeywordValue("numbers", nullptr, 0, localErr);
+			if (keywordLength > 0) {
+				FORMATTER_OBJECT(nfo) = NumberFormat::createInstance(loc, UNUM_DEFAULT, INTL_DATA_ERROR_CODE(nfo));
+			} else {
+				FORMATTER_OBJECT(nfo) = new icu::RuleBasedNumberFormat(icu::URBNF_NUMBERING_SYSTEM, loc, INTL_DATA_ERROR_CODE(nfo));
+			}
+			break;
+		}
+		case UNUM_DECIMAL_COMPACT_SHORT:
+			FORMATTER_OBJECT(nfo) = icu::CompactDecimalFormat::createInstance(loc, UNUM_SHORT, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		case UNUM_DECIMAL_COMPACT_LONG:
+			FORMATTER_OBJECT(nfo) = icu::CompactDecimalFormat::createInstance(loc, UNUM_LONG, INTL_DATA_ERROR_CODE(nfo));
+			break;
+		default:
+			FORMATTER_OBJECT(nfo) = NumberFormat::createInstance(loc, static_cast<UNumberFormatStyle>(style), INTL_DATA_ERROR_CODE(nfo));
+			break;
+	}
+
+	if (canonicalized_locale) {
+		efree(canonicalized_locale);
+	}
+
+	INTL_CTOR_CHECK_STATUS(nfo, "number formatter creation failed");
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ Create number formatter. */
+U_CFUNC PHP_FUNCTION( numfmt_create )
+{
+	object_init_ex( return_value, NumberFormatter_ce_ptr );
+	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+		zval_ptr_dtor(return_value);
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
+/* {{{ NumberFormatter object constructor. */
+U_CFUNC PHP_METHOD( NumberFormatter, __construct )
+{
+	const bool old_use_exception = INTL_G(use_exceptions);
+	const zend_long old_error_level = INTL_G(error_level);
+	INTL_G(use_exceptions) = true;
+	INTL_G(error_level) = 0;
+
+	return_value = ZEND_THIS;
+	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+		ZEND_ASSERT(EG(exception));
+	}
+	INTL_G(use_exceptions) = old_use_exception;
+	INTL_G(error_level) = old_error_level;
+}
+/* }}} */
+
+/* {{{ Get formatter's last error code. */
+U_CFUNC PHP_FUNCTION( numfmt_get_error_code )
+{
+	FORMATTER_METHOD_INIT_VARS
+
+	/* Parse parameters. */
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
+		&object, NumberFormatter_ce_ptr ) == FAILURE )
+	{
+		RETURN_THROWS();
+	}
+
+	nfo = Z_INTL_NUMBERFORMATTER_P(object);
+
+	/* Return formatter's last error code. */
+	RETURN_LONG( INTL_DATA_ERROR_CODE(nfo) );
+}
+/* }}} */
+
+/* {{{ Get text description for formatter's last error code. */
+U_CFUNC PHP_FUNCTION( numfmt_get_error_message )
+{
+	zend_string *message = NULL;
+	FORMATTER_METHOD_INIT_VARS
+
+	/* Parse parameters. */
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
+		&object, NumberFormatter_ce_ptr ) == FAILURE )
+	{
+		RETURN_THROWS();
+	}
+
+	nfo = Z_INTL_NUMBERFORMATTER_P(object);
+
+	/* Return last error message. */
+	message = intl_error_get_message( INTL_DATA_ERROR_P(nfo) );
+	RETURN_STR(message);
+}
+/* }}} */

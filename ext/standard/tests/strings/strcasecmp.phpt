@@ -9,7 +9,7 @@ precision = 12
 echo "#### Basic and Possible operations ####";
 /* creating an array of strings to be compared */
 $arrays = array(
-           array("a", 'A', chr(128), chr(255), chr(256)),
+           array("a", 'A', chr(128), chr(255), chr(0)),
            array("acc", "Acc", 'aC', "acCc", 'acd', "?acc", 'Acc!', "$!acc", ";acc"),
            array("1", "0", 0, "-1", -1, "", TRUE, true, FALSE, "string"),
            array(10.5, 1.5, 9.5, 11.5, 100.5, 10.5E1, -10.5, 10, 0.5)

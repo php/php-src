@@ -4,64 +4,64 @@
 
 /**
  * @return resource|int|false
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::open() instead')]
 function zip_open(string $filename) {}
 
 /**
  * @param resource $zip
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::close() instead')]
 function zip_close($zip): void {}
 
 /**
  * @param resource $zip
  * @return resource|false
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_read($zip) {}
 
 /**
  * @param resource $zip_dp
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0')]
 function zip_entry_open($zip_dp, $zip_entry, string $mode = "rb"): bool {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
-function zip_entry_close($zip_entry): bool {}
+#[\Deprecated(since: '8.0')]
+function zip_entry_close($zip_entry): true {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::getFromIndex() instead')]
 function zip_entry_read($zip_entry, int $len = 1024): string|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_name($zip_entry): string|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_compressedsize($zip_entry): int|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_filesize($zip_entry): int|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'use ZipArchive::statIndex() instead')]
 function zip_entry_compressionmethod($zip_entry): string|false {}
 
 class ZipArchive implements Countable
@@ -82,12 +82,10 @@ class ZipArchive implements Countable
      * @cvalue ZIP_OVERWRITE
      */
     public const int OVERWRITE = UNKNOWN;
-#ifdef ZIP_RDONLY
     /**
      * @cvalue ZIP_RDONLY
      */
     public const int RDONLY = UNKNOWN;
-#endif
 
     /**
      * @cvalue ZIP_FL_NOCASE
@@ -109,8 +107,8 @@ class ZipArchive implements Countable
 #ifdef ZIP_FL_RECOMPRESS
     /**
      * @cvalue ZIP_FL_RECOMPRESS
-     * @deprecated
      */
+    #[\Deprecated(since: '8.3')]
     public const int FL_RECOMPRESS = UNKNOWN;
 #endif
     /**
@@ -154,7 +152,7 @@ class ZipArchive implements Countable
     public const int FL_ENC_CP437 = UNKNOWN;
 
     /**
-     * Additionnal flags not from libzip
+     * Additional flags not from libzip
      * @cvalue ZIP_FL_OPEN_FILE_NOW
      */
     public const int FL_OPEN_FILE_NOW = UNKNOWN;
@@ -444,6 +442,13 @@ class ZipArchive implements Countable
      */
     public const int ER_NOT_ALLOWED = UNKNOWN;
 #endif
+#ifdef ZIP_ER_TRUNCATED_ZIP
+    /**
+     * Possibly truncated or corrupted zip archive
+     * @cvalue ZIP_ER_TRUNCATED_ZIP
+     */
+    public const int ER_TRUNCATED_ZIP = UNKNOWN;
+#endif
 #ifdef ZIP_AFL_RDONLY
     /**
      * read only -- cannot be cleared
@@ -641,6 +646,8 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function open(string $filename, int $flags = 0): bool|int {}
 
+    public function openString(string $data = '', int $flags = 0): bool|int {}
+
     /**
      * @tentative-return-type
      */
@@ -649,8 +656,14 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function close(): bool {}
 
+    public function closeString(): string|false {}
+
     /** @tentative-return-type */
     public function count(): int {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
     public function getStatusString(): string {}
@@ -697,13 +710,11 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function setCommentName(string $name, string $comment): bool {}
 
-#ifdef HAVE_SET_MTIME
     /** @tentative-return-type */
     public function setMtimeIndex(int $index, int $timestamp, int $flags = 0): bool {}
 
     /** @tentative-return-type */
     public function setMtimeName(string $name, int $timestamp, int $flags = 0): bool {}
-#endif
 
     /** @tentative-return-type */
     public function getCommentIndex(int $index, int $flags = 0): string|false {}

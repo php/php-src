@@ -19,8 +19,8 @@ $serverCode = <<<'CODE'
         'security_level' => 0,
     ]]);
 
-    $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-    phpt_notify();
+    $server = stream_socket_server('tls://127.0.0.1:0', $errno, $errstr, $flags, $ctx);
+    phpt_notify_server_start($server);
 
     for ($i=0; $i < (phpt_has_sslv3() ? 6 : 5); $i++) {
         @stream_socket_accept($server, 3);
@@ -36,24 +36,22 @@ $clientCode = <<<'CODE'
         'security_level' => 0,
     ]]);
 
-    phpt_wait();
-
-    $client = stream_socket_client("tlsv1.0://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = stream_socket_client("tlsv1.0://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("sslv3://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.1://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("tlsv1.1://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("tlsv1.2://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("ssl://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
+    $client = @stream_socket_client("tls://{{ ADDR }}", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 CODE;
 

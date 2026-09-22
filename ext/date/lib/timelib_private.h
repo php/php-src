@@ -45,19 +45,17 @@
 #include <sys/types.h>
 #endif
 
-#if defined(HAVE_STDINT_H)
-# include <stdint.h>
-#endif
+#include <stdint.h>
 
-#if HAVE_UNISTD_H
+#if defined(HAVE_UNISTD_H)
 # include <unistd.h>
 #endif
 
-#if HAVE_IO_H
+#if defined(HAVE_IO_H)
 # include <io.h>
 #endif
 
-#if HAVE_DIRENT_H
+#if defined(HAVE_DIRENT_H)
 # include <dirent.h>
 #endif
 
@@ -89,6 +87,8 @@
 #define SECS_PER_DAY   86400
 #define SECS_PER_HOUR   3600
 #define USECS_PER_HOUR TIMELIB_LL_CONST(3600000000)
+#define NSECS_PER_SEC  1000000000
+#define MAX_DURATION_SECONDS UINT64_C(9223372035)
 
 #define DAYS_PER_WEEK      7
 #define DAYS_PER_YEAR    365
@@ -126,6 +126,16 @@
 # define TIMELIB_BREAK_INTENTIONALLY_MISSING
 #endif
 
+#if defined(__has_builtin)
+# if __has_builtin(__builtin_saddll_overflow)
+#  define TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW 1
+# endif
+#endif
+
+#ifndef TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW
+# define TIMELIB_HAVE_BUILTIN_SADDLL_OVERFLOW 0
+#endif
+
 struct _ttinfo
 {
 	int32_t      offset;
@@ -156,6 +166,7 @@ extern "C" {
 #endif
 
 /* From unixtime2tm.c */
+void timelib_date_from_epoch_days(timelib_sll epoch_days, timelib_sll *y, timelib_sll *m, timelib_sll *d);
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
 
 /* From parse_posix.c */

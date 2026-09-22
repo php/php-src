@@ -10,9 +10,6 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'connect.inc';
 
-    $tmp    = NULL;
-    $link   = NULL;
-
     if ($socket != "")
         /* mysqli.default_socket requires non-empty string */
         ini_set('mysqli.default_socket', 'socket');

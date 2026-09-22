@@ -23,7 +23,7 @@ domdocumentloadxml_test_method.inc
 --EXPECTF--
 Warning: DOMDocument::loadXML(): AttValue: " or ' expected in Entity, line: 4 in %s on line %d
 
-Warning: DOMDocument::loadXML(): internal error: xmlParseStartTag: problem parsing attributes in Entity, line: 4 in %s on line %d
+Warning: DOMDocument::loadXML():%sattributes%s
 
 Warning: DOMDocument::loadXML(): Couldn't find end of Start Tag book line 4 in Entity, line: 4 in %s on line %d
 

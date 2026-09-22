@@ -19,19 +19,19 @@ class B
 $a = new A();
 try {
     $a->prop = new B();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 $a = new A();
 $a->prop = '';
 try {
     $a->prop = new B();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Object was released while assigning to property A::$prop
-Object was released while assigning to property A::$prop
+Error: Object was released while assigning to property A::$prop
+Error: Object was released while assigning to property A::$prop

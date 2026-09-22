@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: George Schlossnagle <george@omniti.com>                      |
   |         Wez Furlong <wez@php.net>                                    |
@@ -95,9 +93,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	}
 #endif
 
-	if (!S->done && !Z_ISUNDEF(stmt->database_object_handle)
-		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& (!(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED))) {
+	if (!S->done && php_pdo_stmt_valid_db_obj_handle(stmt)) {
 		while (mysql_more_results(S->H->server)) {
 			MYSQL_RES *res;
 			if (mysql_next_result(S->H->server) != 0) {
@@ -715,7 +711,7 @@ static int pdo_mysql_stmt_get_col(
 
 static char *type_to_name_native(int type) /* {{{ */
 {
-#define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
+#define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case MYSQL_TYPE_##x: return #x;
 
 	switch (type) {
 		PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
@@ -748,6 +744,13 @@ static char *type_to_name_native(int type) /* {{{ */
 		PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
 #ifdef FIELD_TYPE_NEWDATE
 		PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
+#endif
+		/* The following 2 don't have BC FIELD_TYPE_* aliases. */
+#if (MYSQL_VERSION_ID >= 90000 && !defined(MARIADB_BASE_VERSION)) || defined(PDO_USE_MYSQLND)
+		PDO_MYSQL_NATIVE_TYPE_NAME(VECTOR)
+#endif
+#if MYSQL_VERSION_ID >= 50708 || defined(PDO_USE_MYSQLND)
+		PDO_MYSQL_NATIVE_TYPE_NAME(JSON)
 #endif
 		PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
 		PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)

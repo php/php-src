@@ -11,9 +11,9 @@ $o1 = new stdClass();
 try {
     $s->offsetGet($o1);
 } catch (UnexpectedValueException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Object not found
+UnexpectedValueException: Object not found

@@ -9,6 +9,7 @@ if (!(str_contains(PHP_OS, 'Linux') || str_contains(PHP_OS, 'FreeBSD'))) {
     die('skip PDEATHSIG is only supported on Linux and FreeBSD');
 }
 if (@file_exists('/.dockerenv')) die("skip Broken in Docker");
+if (!shell_exec("which pgrep")) die("skip Missing pgrep command");
 ?>
 --FILE--
 <?php

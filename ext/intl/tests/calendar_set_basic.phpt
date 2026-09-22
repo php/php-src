@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 intl
 --FILE--
 <?php
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "nl");
 
 $intlcal = IntlCalendar::createInstance();
 var_dump($intlcal->set(IntlCalendar::FIELD_DAY_OF_MONTH, 2));
@@ -20,6 +18,6 @@ var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH));
 bool(true)
 int(2)
 
-Deprecated: Function intlcal_set() is deprecated in %s on line %d
+Deprecated: Function intlcal_set() is deprecated since 8.4, use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead in %s on line %d
 bool(true)
 int(3)

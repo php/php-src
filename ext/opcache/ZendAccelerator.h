@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -50,6 +48,7 @@
 
 #include "zend_extensions.h"
 #include "zend_compile.h"
+#include "zend_API.h"
 
 #include "Optimizer/zend_optimizer.h"
 #include "zend_accelerator_hash.h"
@@ -177,6 +176,7 @@ typedef struct _zend_accel_directives {
 	char          *lockfile_path;
 #endif
 	char          *file_cache;
+	bool      file_cache_read_only;
 	bool      file_cache_only;
 	bool      file_cache_consistency_checks;
 #if ENABLE_FILE_CACHE_FALLBACK
@@ -198,6 +198,9 @@ typedef struct _zend_accel_globals {
 	bool               counted;   /* the process uses shared memory */
 	bool               enabled;
 	bool               locked;    /* thread obtained exclusive lock */
+#ifdef ZTS
+	uint32_t           unprotect_depth;
+#endif
 	bool               accelerator_enabled; /* accelerator enabled for current request */
 	bool               pcre_reseted;
 	zend_accel_directives   accel_directives;
@@ -216,6 +219,9 @@ typedef struct _zend_accel_globals {
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
 #endif
+	void                   *preloaded_internal_run_time_cache;
+	size_t                  preloaded_internal_run_time_cache_size;
+	bool                    preloading;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	zend_persistent_script *current_persistent_script;
@@ -223,8 +229,7 @@ typedef struct _zend_accel_globals {
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
-	zend_string             key;
-	char                    _key[MAXPATHLEN * 8];
+	zend_string            *key;
 } zend_accel_globals;
 
 typedef struct _zend_string_table {
@@ -252,6 +257,7 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_hash hash;             /* hash table for cached scripts */
 
 	size_t map_ptr_last;
+    size_t map_ptr_static_last;
 
 	/* Directives & Maintenance */
 	time_t          start_time;
@@ -280,7 +286,7 @@ typedef struct _zend_accel_shared_globals {
 	const void **jit_exit_groups;
 
 	/* Interned Strings Support (must be the last element) */
-	zend_string_table interned_strings;
+	ZEND_SET_ALIGNED(ZEND_STRING_TABLE_POS_ALIGNMENT, zend_string_table interned_strings);
 } zend_accel_shared_globals;
 
 #ifdef ZEND_WIN32
@@ -296,11 +302,9 @@ extern zend_accel_shared_globals *accel_shared_globals;
 #define ZCSG(element)   (accel_shared_globals->element)
 
 #ifdef ZTS
-# define ZCG(v)	ZEND_TSRMG(accel_globals_id, zend_accel_globals *, v)
+# define ZCG(v)	ZEND_TSRMG_FAST(accel_globals_offset, zend_accel_globals *, v)
 extern int accel_globals_id;
-# ifdef COMPILE_DL_OPCACHE
-ZEND_TSRMLS_CACHE_EXTERN()
-# endif
+extern size_t accel_globals_offset;
 #else
 # define ZCG(v) (accel_globals.v)
 extern zend_accel_globals accel_globals;
@@ -310,8 +314,9 @@ extern const char *zps_api_failure_reason;
 
 BEGIN_EXTERN_C()
 
+void start_accel_extension(void);
 void accel_shutdown(void);
-zend_result  accel_activate(INIT_FUNC_ARGS);
+ZEND_RINIT_FUNCTION(zend_accelerator);
 zend_result accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
@@ -331,6 +336,16 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
+
+const zend_op_array *zend_accel_pfa_cache_get(
+		const uint32_t *declaring_lineno_ptr, const zend_function *called_function, bool cacheable_in_shm);
+
+/* Compiles ast into an op_array, and caches it. Takes ownership of ast. */
+zend_op_array *zend_accel_compile_pfa(zend_ast *ast,
+		zend_string *declaring_filename,
+		const uint32_t *declaring_lineno_ptr,
+		const zend_function *called_function,
+		zend_string *pfa_func_name, bool cacheable_in_shm);
 
 END_EXTERN_C()
 

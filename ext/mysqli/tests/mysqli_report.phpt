@@ -33,6 +33,7 @@ require_once 'skipifconnectfailure.inc';
     */
     mysqli_report(MYSQLI_REPORT_ERROR);
 
+    $stmt = mysqli_prepare($link, "DO 1");
     mysqli_multi_query($link, "BAR; FOO;");
     mysqli_query($link, "FOO");
     try {
@@ -41,7 +42,6 @@ require_once 'skipifconnectfailure.inc';
         echo $e->getMessage() . \PHP_EOL;
     }
 
-    // mysqli_ping() cannot be tested, because one would need to cause an error inside the C function to test it
     mysqli_prepare($link, "FOO");
     mysqli_real_query($link, "FOO");
     if (@mysqli_select_db($link, "Oh lord, let this be an unknown database name"))
@@ -52,21 +52,18 @@ require_once 'skipifconnectfailure.inc';
     mysqli_autocommit($link, true);
     mysqli_commit($link);
     mysqli_rollback($link);
-    $stmt = mysqli_stmt_init($link);
     mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
     while(mysqli_more_results($link)) {
         mysqli_next_result($link);
-        $res = mysqli_store_result($link);
+        mysqli_store_result($link);
     }
     mysqli_next_result($link);
-
-    $stmt = mysqli_prepare($link, "SELECT 1");
-    mysqli_stmt_attr_set($stmt, MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE);
 
     // Check that none of the above would have caused any error messages if MYSQL_REPORT_ERROR would
     // not have been set. If that would be the case, the test would be broken.
     mysqli_report(MYSQLI_REPORT_OFF);
 
+    $stmt = mysqli_prepare($link, "DO 1");
     mysqli_multi_query($link, "BAR; FOO;");
     mysqli_query($link, "FOO");
     try {
@@ -82,16 +79,12 @@ require_once 'skipifconnectfailure.inc';
     mysqli_autocommit($link, true);
     mysqli_commit($link);
     mysqli_rollback($link);
-    $stmt = mysqli_stmt_init($link);
     mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
     while(mysqli_more_results($link)) {
         mysqli_next_result($link);
-        $res = mysqli_store_result($link);
+        mysqli_store_result($link);
     }
     mysqli_next_result($link);
-
-    $stmt = mysqli_prepare($link, "SELECT 1");
-    mysqli_stmt_attr_set($stmt, MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE);
 
     /*
     Internal macro MYSQL_REPORT_STMT_ERROR
@@ -99,11 +92,10 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_report(MYSQLI_REPORT_ERROR);
 
-    $stmt = mysqli_stmt_init($link);
+    $stmt = mysqli_prepare($link, "DO 1");
     mysqli_stmt_prepare($stmt, "FOO");
 
-    $stmt = mysqli_stmt_init($link);
-    mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
+    $stmt = mysqli_prepare($link, "SELECT id FROM test WHERE id > ?");
     $id = 1;
     mysqli_kill($link, mysqli_thread_id($link));
     mysqli_stmt_bind_param($stmt, "i", $id);
@@ -113,11 +105,10 @@ require_once 'skipifconnectfailure.inc';
     /* mysqli_stmt_execute() = mysql_stmt_execute cannot be tested from PHP */
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
             printf("[008] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-    $stmt = mysqli_stmt_init($link);
-    mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
+    $stmt = mysqli_prepare($link, "SELECT id FROM test WHERE id > ?");
     $id = 1;
     mysqli_stmt_bind_param($stmt, "i", $id);
-    // mysqli_kill($link, mysqli_thread_id($link));
+    mysqli_kill($link, mysqli_thread_id($link));
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
     mysqli_close($link);
@@ -133,11 +124,10 @@ require_once 'skipifconnectfailure.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[010] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-    $stmt = mysqli_stmt_init($link);
+    $stmt = mysqli_prepare($link, "DO 1");
     mysqli_stmt_prepare($stmt, "FOO");
 
-    $stmt = mysqli_stmt_init($link);
-    mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
+    $stmt = mysqli_prepare($link, "SELECT id FROM test WHERE id > ?");
     $id = 1;
     mysqli_kill($link, mysqli_thread_id($link));
     mysqli_stmt_bind_param($stmt, "i", $id);
@@ -146,8 +136,7 @@ require_once 'skipifconnectfailure.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[011] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-    $stmt = mysqli_stmt_init($link);
-    mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
+    $stmt = mysqli_prepare($link, "SELECT id FROM test WHERE id > ?");
     $id = 1;
     mysqli_stmt_bind_param($stmt, "i", $id);
     mysqli_kill($link, mysqli_thread_id($link));
@@ -212,8 +201,6 @@ require_once 'skipifconnectfailure.inc';
 
     TODO:
     */
-    $log_slow_queries = false;
-    $log_queries_not_using_indexes = false;
     mysqli_report(MYSQLI_REPORT_OFF);
     mysqli_report(MYSQLI_REPORT_INDEX);
 
@@ -228,7 +215,7 @@ require_once 'skipifconnectfailure.inc';
         if (!$row = mysqli_fetch_assoc($res))
             printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-        $log_slow_query = ('ON' == $row['Value']);
+        $log_slow_queries = ('ON' == $row['Value']);
 
         if (mysqli_get_server_version($link) >= 50111) {
             // this might cause a warning - no index used
@@ -266,7 +253,7 @@ require_once 'skipifconnectfailure.inc';
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[024] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-    if (!$stmt = mysqli_stmt_init($link))
+    if (!$stmt = mysqli_prepare($link, 'SELECT id * 3 FROM test'))
         printf("[025] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!mysqli_stmt_prepare($stmt, 'SELECT id, label FROM test'))
@@ -293,16 +280,9 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_free_result($res);
 
-    if (!$stmt = mysqli_prepare($link, 'SELECT id * 3 FROM test'))
-        printf("[032] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    else
-        mysqli_stmt_close($stmt);
-
     if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'z')", MYSQLI_USE_RESULT) ||
             !mysqli_query($link, 'DELETE FROM test WHERE id > 50', MYSQLI_USE_RESULT))
         printf("[033] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    $tmp = mysqli_thread_id($link);
 
     mysqli_close($link);
     print "done!";
@@ -315,6 +295,8 @@ require_once 'clean_table.inc';
 Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
 
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
 Warning: mysqli_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
@@ -333,10 +315,20 @@ Warning: mysqli_next_result(): (%s/%d): You have an error in your SQL syntax; ch
 
 Warning: mysqli_store_result(): (%s/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
-Warning: mysqli_stmt_attr_set(): (%s/%d): Not implemented in %s on line %d
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
 Warning: mysqli_stmt_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
+
+Warning: mysqli_stmt_execute(): (HY000/2006): MySQL server has gone away in %s on line %d
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 [013] Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
 [016] Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
 done!

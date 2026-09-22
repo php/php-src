@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Anatol Belski <ab@php.net>                                   |
    +----------------------------------------------------------------------+
@@ -67,9 +65,174 @@
 #include <winnls.h>
 */
 
-typedef HRESULT (__stdcall *MyPathCchCanonicalizeEx)(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags);
+typedef ULONG (WINAPI *php_win32_ioutil_rtl_is_dos_device_name_u_t)(PCWSTR);
 
-static MyPathCchCanonicalizeEx canonicalize_path_w = NULL;
+/* Resolved on first use as there is no ioutil init hook on this branch. */
+static php_win32_ioutil_rtl_is_dos_device_name_u_t php_win32_ioutil_get_rtl_is_dos_device_name_u(void)
+{/*{{{*/
+	static php_win32_ioutil_rtl_is_dos_device_name_u_t fn = NULL;
+	static BOOL resolved = FALSE;
+
+	if (!resolved) {
+		HMODULE hMod = GetModuleHandleW(L"ntdll.dll");
+		if (hMod) {
+			fn = (php_win32_ioutil_rtl_is_dos_device_name_u_t)GetProcAddress(hMod, "RtlIsDosDeviceName_U");
+		}
+		resolved = TRUE;
+	}
+
+	return fn;
+}/*}}}*/
+
+static BOOL php_win32_ioutil_is_reserved_name_w(const wchar_t *name, size_t len)
+{/*{{{*/
+	if (len == 3) {
+		return _wcsnicmp(name, L"CON", 3) == 0
+			|| _wcsnicmp(name, L"PRN", 3) == 0
+			|| _wcsnicmp(name, L"AUX", 3) == 0
+			|| _wcsnicmp(name, L"NUL", 3) == 0;
+	}
+
+	if (len == 4 && (_wcsnicmp(name, L"COM", 3) == 0 || _wcsnicmp(name, L"LPT", 3) == 0)) {
+		return (name[3] >= L'1' && name[3] <= L'9')
+			|| name[3] == L'\u00B2'
+			|| name[3] == L'\u00B3'
+			|| name[3] == L'\u00B9';
+	}
+
+	return (len == 6 && _wcsnicmp(name, L"CONIN$", 6) == 0)
+		|| (len == 7 && _wcsnicmp(name, L"CONOUT$", 7) == 0);
+}/*}}}*/
+
+/* Also catches variants like NUL.txt, NUL:stream or "NUL ", as far as the OS treats them as devices. */
+static BOOL php_win32_ioutil_is_reserved_component_w(const wchar_t *name, size_t len)
+{/*{{{*/
+	size_t base_len = len;
+	wchar_t *tmp;
+	BOOL ret;
+	ALLOCA_FLAG(use_heap)
+
+	if (php_win32_ioutil_is_reserved_name_w(name, len)) {
+		return TRUE;
+	}
+
+	for (size_t i = 0; i < len; i++) {
+		if (name[i] == L'.' || name[i] == L':') {
+			base_len = i;
+			break;
+		}
+	}
+	while (base_len > 0 && name[base_len - 1] == L' ') {
+		base_len--;
+	}
+
+	if (base_len == len || !php_win32_ioutil_is_reserved_name_w(name, base_len)) {
+		return FALSE;
+	}
+
+	php_win32_ioutil_rtl_is_dos_device_name_u_t rtl_is_dos_device_name_u = php_win32_ioutil_get_rtl_is_dos_device_name_u();
+	if (!rtl_is_dos_device_name_u) {
+		return TRUE;
+	}
+
+	tmp = do_alloca((len + 1) * sizeof(wchar_t), use_heap);
+	memcpy(tmp, name, len * sizeof(wchar_t));
+	tmp[len] = L'\0';
+	ret = rtl_is_dos_device_name_u(tmp) > 0;
+	free_alloca(tmp, use_heap);
+
+	return ret;
+}/*}}}*/
+
+PW32IO php_win32_ioutil_path_kind php_win32_ioutil_path_kind_w(const wchar_t *path, size_t path_len)
+{/*{{{*/
+	size_t i = 0;
+
+	while (i < path_len && !PHP_WIN32_IOUTIL_IS_SLASHW(path[i])) {
+		i++;
+	}
+
+	if (i == path_len && !(path_len > 2 && PHP_WIN32_IOUTIL_IS_LETTERW(path[0]) && path[1] == L':')) {
+		if (path_len == 0) {
+			return PHP_WIN32_IOUTIL_PATH_OK;
+		}
+		/* Bare device names like NUL or NUL: are kept working for BC. */
+		if (php_win32_ioutil_is_reserved_name_w(path, path_len - (path[path_len - 1] == L':'))) {
+			return PHP_WIN32_IOUTIL_PATH_DEVICE;
+		}
+		return php_win32_ioutil_is_reserved_component_w(path, path_len)
+			? PHP_WIN32_IOUTIL_PATH_RESERVED : PHP_WIN32_IOUTIL_PATH_OK;
+	}
+
+	/* Windows does not map device names within DOS device paths (\\.\, \\?\ and \??\). */
+	if (path_len >= 4 && PHP_WIN32_IOUTIL_IS_SLASHW(path[3])
+		&& ((PHP_WIN32_IOUTIL_IS_SLASHW(path[0]) && PHP_WIN32_IOUTIL_IS_SLASHW(path[1]) && (path[2] == L'.' || path[2] == L'?'))
+			|| (path[0] == L'\\' && path[1] == L'?' && path[2] == L'?'))) {
+		return PHP_WIN32_IOUTIL_PATH_OK;
+	}
+
+	i = 0;
+	if (path_len >= 2 && PHP_WIN32_IOUTIL_IS_SLASHW(path[0]) && PHP_WIN32_IOUTIL_IS_SLASHW(path[1])) {
+		/* UNC, skip server and share. */
+		for (int n = 0; n < 2; n++) {
+			while (i < path_len && PHP_WIN32_IOUTIL_IS_SLASHW(path[i])) {
+				i++;
+			}
+			while (i < path_len && !PHP_WIN32_IOUTIL_IS_SLASHW(path[i])) {
+				i++;
+			}
+		}
+	} else if (path_len >= 2 && PHP_WIN32_IOUTIL_IS_LETTERW(path[0]) && path[1] == L':') {
+		i = 2;
+	}
+
+	while (i < path_len) {
+		size_t start;
+
+		while (i < path_len && PHP_WIN32_IOUTIL_IS_SLASHW(path[i])) {
+			i++;
+		}
+		start = i;
+		while (i < path_len && !PHP_WIN32_IOUTIL_IS_SLASHW(path[i])) {
+			i++;
+		}
+		if (i > start && php_win32_ioutil_is_reserved_component_w(path + start, i - start)) {
+			return PHP_WIN32_IOUTIL_PATH_RESERVED;
+		}
+	}
+
+	return PHP_WIN32_IOUTIL_PATH_OK;
+}/*}}}*/
+
+PW32IO php_win32_ioutil_path_kind php_win32_ioutil_path_kind_a(const char *path, size_t path_len)
+{/*{{{*/
+	wchar_t *pathw;
+	size_t i, pathw_len;
+	php_win32_ioutil_path_kind ret;
+	ALLOCA_FLAG(use_heap)
+
+	for (i = 0; i < path_len && !(path[i] & 0x80); i++);
+
+	if (i < path_len) {
+		pathw = php_win32_cp_conv_any_to_w(path, path_len, &pathw_len);
+		if (!pathw) {
+			return PHP_WIN32_IOUTIL_PATH_OK;
+		}
+		ret = php_win32_ioutil_path_kind_w(pathw, pathw_len);
+		free(pathw);
+		return ret;
+	}
+
+	/* ASCII only, widen on the stack instead of a full conversion. */
+	pathw = do_alloca((path_len + 1) * sizeof(wchar_t), use_heap);
+	for (i = 0; i < path_len; i++) {
+		pathw[i] = (wchar_t) path[i];
+	}
+	ret = php_win32_ioutil_path_kind_w(pathw, path_len);
+	free_alloca(pathw, use_heap);
+
+	return ret;
+}/*}}}*/
 
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts)
 {/*{{{*/
@@ -286,6 +449,7 @@ PW32IO int php_win32_ioutil_close(int fd)
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
 	size_t path_len;
+	DWORD dir_len = 0;
 	const wchar_t *my_path;
 
 	if (!path) {
@@ -296,7 +460,16 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	path_len = wcslen(path);
-	if (path_len < _MAX_PATH && path_len >= _MAX_PATH - 12) {
+#ifndef ZTS
+	if (!PHP_WIN32_IOUTIL_IS_ABSOLUTEW(path, path_len) && !PHP_WIN32_IOUTIL_IS_JUNCTION_PATHW(path, path_len) && !PHP_WIN32_IOUTIL_IS_UNC_PATHW(path, path_len)) {
+		dir_len = GetCurrentDirectoryW(0, NULL);
+		if (dir_len == 0) {
+			return -1;
+		}
+	}
+#endif
+
+	if (dir_len + path_len < _MAX_PATH && dir_len + path_len >= _MAX_PATH - 12) {
 		/* Special case here. From the doc:
 
 		 "When using an API to create a directory, the specified path cannot be
@@ -311,7 +484,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 			return -1;
 		}
-		memmove(tmp, path, (path_len + 1) * sizeof(wchar_t));
+		memcpy(tmp, path, (path_len + 1) * sizeof(wchar_t));
 
 		if (PHP_WIN32_IOUTIL_NORM_FAIL == php_win32_ioutil_normalize_path_w(&tmp, path_len, &path_len)) {
 			free(tmp);
@@ -319,16 +492,28 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 		}
 
 		if (!PHP_WIN32_IOUTIL_IS_LONG_PATHW(tmp, path_len)) {
-			wchar_t *_tmp = (wchar_t *) malloc((path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+			wchar_t *_tmp = (wchar_t *) malloc((dir_len + path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
 			wchar_t *src, *dst;
 			if (!_tmp) {
 				SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 				free(tmp);
 				return -1;
 			}
-			memmove(_tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+			memcpy(_tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
 			src = tmp;
 			dst = _tmp + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+#ifndef ZTS
+			if (dir_len > 0) {
+				DWORD len = GetCurrentDirectoryW(dir_len, dst);
+				if (len == 0 || len + 1 != dir_len) {
+					free(tmp);
+					free(_tmp);
+					return -1;
+				}
+				dst += len;
+				*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+			}
+#endif
 			while (src < tmp + path_len) {
 				if (*src == PHP_WIN32_IOUTIL_FW_SLASHW) {
 					*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
@@ -337,7 +522,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 					*dst++ = *src++;
 				}
 			}
-			path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+			path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + dir_len;
 			_tmp[path_len] = L'\0';
 			free(tmp);
 			tmp = _tmp;
@@ -619,7 +804,7 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 		}
 	}
 
-	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, _tmp, PATHCCH_ALLOW_LONG_PATHS)) {
+	if (S_OK != PathCchCanonicalizeEx(canonicalw, MAXPATHLEN, _tmp, PATHCCH_ALLOW_LONG_PATHS)) {
 		/* Length unchanged. */
 		*new_len = len;
 		return PHP_WIN32_IOUTIL_NORM_PARTIAL;
@@ -643,30 +828,11 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 	return PHP_WIN32_IOUTIL_NORM_OK;
 }/*}}}*/
 
-static HRESULT __stdcall MyPathCchCanonicalizeExFallback(wchar_t *pszPathOut, size_t cchPathOut, const wchar_t *pszPathIn, unsigned long dwFlags)
-{/*{{{*/
-	return -42;
-}/*}}}*/
-
-BOOL php_win32_ioutil_init(void)
-{/*{{{*/
-	HMODULE hMod = GetModuleHandle("api-ms-win-core-path-l1-1-0");
-
-	if (hMod) {
-		canonicalize_path_w = (MyPathCchCanonicalizeEx)GetProcAddress(hMod, "PathCchCanonicalizeEx");
-		if (!canonicalize_path_w) {
-			canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
-		}
-	} else {
-		canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
-	}
-
-	return TRUE;
-}/*}}}*/
-
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
 	DWORD attr;
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	if ((mode & X_OK) == X_OK) {
 		DWORD type;
@@ -976,6 +1142,8 @@ PW32IO int php_win32_ioutil_stat_ex_w(const wchar_t *path, size_t path_len, php_
 	DWORD flags_and_attrs = lstat ? FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT : FILE_FLAG_BACKUP_SEMANTICS;
 	int ret;
 	ALLOCA_FLAG(use_heap_large)
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	hLink = CreateFileW(path,
 			FILE_READ_ATTRIBUTES,

@@ -21,6 +21,7 @@ TMPFILE
 
 $command = sprintf("%s -n %s", getenv('TEST_PHP_EXECUTABLE_ESCAPED'), escapeshellarg($file));
 
+/* PATH is needed to find ASan DLLs (and maybe others) on Windows */
 $process = proc_open(
     $command,
     [
@@ -30,7 +31,7 @@ $process = proc_open(
     ],
     $pipes,
     getcwd(),
-    [],
+    ['PATH' => getenv('PATH')],
     [
         'suppress_errors' => true,
         'bypass_shell' => false

@@ -67,7 +67,7 @@ require_once 'skipifconnectfailure.inc';
     if (false !== @mysqli_ping($link))
         printf("[010] Reconnect should not have happened");
 
-    if ($res = @mysqli_query($link, "SELECT DATABASE() as _dbname"))
+    if (@mysqli_query($link, "SELECT DATABASE() as _dbname"))
         printf("[011] Executing a query should not be possible, connection should be closed, [%d] %s\n",
             mysqli_errno($link), mysqli_error($link));
 
@@ -111,7 +111,7 @@ require_once 'skipifconnectfailure.inc';
     if (false !== ($tmp = @mysqli_ping($link)))
         printf("[016] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
 
-    if ($res = @mysqli_query($link, "SELECT DATABASE() as _dbname"))
+    if (@mysqli_query($link, "SELECT DATABASE() as _dbname"))
         printf("[017] Running a query should not be possible, connection should be gone, [%d] %s\n",
             mysqli_errno($link), mysqli_error($link));
 

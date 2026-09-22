@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
    +----------------------------------------------------------------------+
@@ -34,21 +32,21 @@ PHPAPI PHP_FUNCTION(ftell);
 PHPAPI PHP_FUNCTION(fseek);
 PHPAPI PHP_FUNCTION(fpassthru);
 
+PHP_MINIT_FUNCTION(stream_errors);
 PHP_MINIT_FUNCTION(user_streams);
 
-PHPAPI int php_le_stream_context(void);
-PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
-PHPAPI int php_copy_file(const char *src, const char *dest);
-PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk);
-PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx);
-PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options);
-PHPAPI int php_mkdir(const char *dir, zend_long mode);
+PHPAPI zend_result php_copy_file(const char *src, const char *dest);
+PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags);
+PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx);
 PHPAPI void php_fstat(php_stream *stream, zval *return_value);
 PHPAPI void php_flock_common(php_stream *stream, zend_long operation, uint32_t operation_arg_num,
 	zval *wouldblock, zval *return_value);
 
 #define PHP_CSV_NO_ESCAPE EOF
+#define PHP_CSV_ESCAPE_ERROR -500
+
 PHPAPI HashTable *php_bc_fgetcsv_empty_line(void);
+PHPAPI int php_csv_handle_escape_argument(const zend_string *escape_str, uint32_t arg_num);
 PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf);
 PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char, zend_string *eol_str);
 
@@ -59,6 +57,12 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 #define PHP_FILE_SKIP_EMPTY_LINES (1 << 2)
 #define PHP_FILE_APPEND (1 << 3)
 #define PHP_FILE_NO_DEFAULT_CONTEXT (1 << 4)
+
+#ifndef _WIN32
+#define PHP_TIMEOUT_ULL_MAX ULLONG_MAX
+#else
+#define PHP_TIMEOUT_ULL_MAX UINT64_MAX
+#endif
 
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,
@@ -89,13 +93,14 @@ typedef struct {
 	size_t def_chunk_size;
 	bool auto_detect_line_endings;
 	zend_long default_socket_timeout;
-	char *user_agent; /* for the http wrapper */
-	char *from_address; /* for the ftp and http wrappers */
+	zend_string *user_agent; /* for the http wrapper */
+	zend_string *from_address; /* for the ftp and http wrappers */
 	const char *user_stream_current_filename; /* for simple recursion protection */
 	php_stream_context *default_context;
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
-	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
+	HashTable *wrapper_logged_errors;	/* key: wrapper address; value: linked list of error entries */
+	php_stream_error_state stream_error_state;
 	int pclose_wait;
 #ifdef HAVE_GETHOSTBYNAME_R
 	struct hostent tmp_host_info;

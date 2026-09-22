@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Shane Caraveo <shane@php.net>                               |
    |          Wez Furlong <wez@thebrainroom.com>                          |
@@ -39,6 +37,8 @@ extern zend_module_entry libxml_module_entry;
 
 #define LIBXML_SAVE_NOEMPTYTAG 1<<2
 
+#define LIBXML_NS_TAG_HOOK 1
+
 ZEND_BEGIN_MODULE_GLOBALS(libxml)
 	zval stream_context;
 	smart_str error_buffer;
@@ -65,8 +65,9 @@ typedef struct {
 	size_t modification_nr;
 } php_libxml_cache_tag;
 
-typedef struct _php_libxml_private_data_header {
-	void (*dtor)(struct _php_libxml_private_data_header *);
+typedef struct php_libxml_private_data_header {
+	void (*dtor)(struct php_libxml_private_data_header *);
+	void (*ns_hook)(struct php_libxml_private_data_header *, xmlNodePtr);
 	/* extra fields */
 } php_libxml_private_data_header;
 
@@ -110,14 +111,14 @@ typedef struct _php_libxml_ref_obj {
 	php_libxml_cache_tag cache_tag;
 	php_libxml_private_data_header *private_data;
 	const php_libxml_document_handlers *handlers;
-	int refcount;
+	unsigned int refcount;
 	php_libxml_class_type class_type : 8;
 	php_libxml_quirks_mode quirks_mode : 8;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
 	xmlNodePtr node;
-	int	refcount;
+	unsigned int refcount;
 	void *_private;
 } php_libxml_node_ptr;
 
@@ -186,14 +187,14 @@ typedef enum {
 	PHP_LIBXML_CTX_WARNING = 2,
 } php_libxml_error_level;
 
-PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data);
-PHP_LIBXML_API int php_libxml_decrement_node_ptr(php_libxml_node_object *object);
-PHP_LIBXML_API int php_libxml_decrement_node_ptr_ref(php_libxml_node_ptr *ptr);
-PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp);
-PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document);
-PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
+PHP_LIBXML_API unsigned int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data);
+PHP_LIBXML_API unsigned int php_libxml_decrement_node_ptr(php_libxml_node_object *object);
+PHP_LIBXML_API unsigned int php_libxml_decrement_node_ptr_ref(php_libxml_node_ptr *ptr);
+PHP_LIBXML_API unsigned int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp);
+PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document);
+PHP_LIBXML_API unsigned int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object);
-PHP_LIBXML_API zval *php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function);
+PHP_LIBXML_API zval *php_libxml_register_export(const zend_class_entry *ce, php_libxml_export_node export_function);
 /* When an explicit freeing of node and children is required */
 PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node);
 PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node);
@@ -204,8 +205,7 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...);
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_error_handler_va(php_libxml_error_level error_type, void *ctx, const char *msg, va_list args);
-PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
-PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext);
+PHP_LIBXML_API void php_libxml_switch_context(const zval *context, zval *oldcontext);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg);
 PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable);
 PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns);
@@ -258,6 +258,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
  * Generally faster because no locking is involved, and this has the advantage that it sets the options to a known good value. */
 static zend_always_inline void php_libxml_sanitize_parse_ctxt_options(xmlParserCtxtPtr ctxt)
 {
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations") \
 	ctxt->loadsubset = 0;
 	ctxt->validate = 0;
 	ctxt->pedantic = 0;
@@ -265,10 +266,8 @@ static zend_always_inline void php_libxml_sanitize_parse_ctxt_options(xmlParserC
 	ctxt->linenumbers = 0;
 	ctxt->keepBlanks = 1;
 	ctxt->options = 0;
+	ZEND_DIAGNOSTIC_IGNORED_END
 }
-
-#else /* HAVE_LIBXML */
-#define libxml_module_ptr NULL
 #endif
 
 #define phpext_libxml_ptr libxml_module_ptr

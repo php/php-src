@@ -9,9 +9,9 @@ include "skipif.inc";
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`$php -n --rc unknown`);
-var_dump(`$php -n --rc stdclass`);
-var_dump(`$php -n --rc exception`);
+var_dump(shell_exec("$php -n --rc unknown"));
+var_dump(shell_exec("$php -n --rc stdclass"));
+var_dump(shell_exec("$php -n --rc exception"));
 
 echo "Done\n";
 ?>

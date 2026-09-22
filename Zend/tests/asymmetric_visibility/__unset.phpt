@@ -1,0 +1,47 @@
+--TEST--
+Asymmetric visibility __unset
+--FILE--
+<?php
+
+class Foo {
+    public private(set) string $bar;
+
+    public function setBar($bar) {
+        $this->bar = $bar;
+    }
+
+    public function unsetBar() {
+        unset($this->bar);
+    }
+
+    public function __unset($name) {
+        echo __METHOD__, "\n";
+    }
+}
+
+function test($foo) {
+    try {
+        unset($foo->bar);
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
+    }
+}
+
+$foo = new Foo();
+test($foo);
+
+$foo->unsetBar();
+test($foo);
+
+$foo->setBar('bar');
+test($foo);
+
+$foo->unsetBar();
+test($foo);
+
+?>
+--EXPECT--
+Error: Cannot unset private(set) property Foo::$bar from global scope
+Foo::__unset
+Error: Cannot unset private(set) property Foo::$bar from global scope
+Foo::__unset

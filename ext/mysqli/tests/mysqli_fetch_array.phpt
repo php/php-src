@@ -31,7 +31,7 @@ require_once 'skipifconnectfailure.inc';
     mysqli_free_result($res);
 
     if (!$res = mysqli_query($link, "SELECT 1 AS a, 2 AS a, 3 AS c, 4 AS C, NULL AS d, true AS e")) {
-        printf("[010] Cannot run query, [%d] %s\n", mysqli_errno($link), $mysqli_error($link));
+        printf("[010] Cannot run query, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     print "[011]\n";
     var_dump(mysqli_fetch_array($res, MYSQLI_BOTH));
@@ -39,7 +39,7 @@ require_once 'skipifconnectfailure.inc';
     mysqli_free_result($res);
     if (!$res = mysqli_query($link, "SELECT 1 AS a, 2 AS b, 3 AS c, 4 AS C")) {
         printf("[012] Cannot run query, [%d] %s\n",
-            mysqli_errno($link), $mysqli_error($link));
+            mysqli_errno($link), mysqli_error($link));
         exit(1);
     }
 
@@ -61,7 +61,7 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_free_result($res);
 
-    function func_mysqli_fetch_array($link, $engine, $sql_type, $sql_value, $php_value, $offset, $regexp_comparison = NULL, $binary_type = false) {
+    function func_mysqli_fetch_array($link, $engine, $sql_type, $sql_value, $php_value, $offset, $regexp_comparison = NULL) {
 
         if (!mysqli_query($link, "DROP TABLE IF EXISTS test")) {
             printf("[%04d] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
@@ -107,22 +107,6 @@ require_once 'skipifconnectfailure.inc';
                     gettype($php_value), $php_value, $regexp_comparison,
                     gettype($row[1]), $row[1],
                     gettype($row['label']), $row['label'], mysqli_errno($link), mysqli_error($link));
-                return false;
-            }
-        } else if ((gettype($php_value) == 'unicode') && $binary_type) {
-            // Unicode is on and we are told that the MySQL column type is a binary type.
-            // Don't expect a unicode value from the database, you'll get binary string
-            if (($row['label'] != $php_value) || ($row[1] != $php_value)) {
-                printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 5,
-                    gettype($php_value), $php_value,
-                    gettype($row[1]), $row[1],
-                    gettype($row['label']), $row['label'], mysqli_errno($link), mysqli_error($link));
-                return false;
-            }
-            if (gettype($row['label']) == 'unicode') {
-                var_dump(mysqli_fetch_field_direct($res, 1), $row['label']);
-                printf("[%04d] SQL Type: '%s', binary columns are supposed to return binary string and not unicode\n",
-                    $offset + 6, $sql_type);
                 return false;
             }
         } else {

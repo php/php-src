@@ -1,22 +1,16 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Author: Keyur Govande (kgovande@gmail.com)                           |
   +----------------------------------------------------------------------+
 */
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #include "php.h"
 #include "php_cli_process_title.h"
@@ -27,13 +21,12 @@ PHP_FUNCTION(cli_set_process_title)
 {
 	char *title = NULL;
 	size_t title_len;
-	int rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &title, &title_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	rc = set_ps_title(title);
+	ps_title_status rc = set_ps_title(title, title_len);
 	if (rc == PS_TITLE_SUCCESS) {
 		RETURN_TRUE;
 	}
@@ -48,13 +41,10 @@ PHP_FUNCTION(cli_get_process_title)
 {
 	size_t length = 0;
 	const char* title = NULL;
-	int rc;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	rc = get_ps_title(&length, &title);
+	ps_title_status rc = get_ps_title(&length, &title);
 	if (rc != PS_TITLE_SUCCESS) {
 			php_error_docref(NULL, E_WARNING, "cli_get_process_title had an error: %s", ps_title_errno(rc));
 			RETURN_NULL();

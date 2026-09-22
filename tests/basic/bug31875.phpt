@@ -22,6 +22,8 @@ var_dump(in_array($disabled_function, $functions['internal']));
 --EXPECTF--
 bool(false)
 
-Deprecated: get_defined_functions(): Setting $exclude_disabled to false has no effect in %s on line %d
+Deprecated: get_defined_functions(): The $exclude_disabled parameter has no effect since PHP 8.0 in %s on line %d
 bool(false)
+
+Deprecated: get_defined_functions(): The $exclude_disabled parameter has no effect since PHP 8.0 in %s on line %d
 bool(false)

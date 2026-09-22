@@ -6,7 +6,11 @@ Andrew van der Stock, vanderaj @ owasp.org
 <?php
 
 $filename = __FILE__ . chr(0). ".ridiculous";
-var_dump(file_exists($filename));
+try {
+    var_dump(file_exists($filename));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
 --EXPECT--
-bool(false)
+ValueError: file_exists(): Argument #1 ($filename) must not contain any null bytes

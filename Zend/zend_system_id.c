@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Sammy Kaye Powers <sammyk@php.net>                          |
    |          Dmitry Stogov <dmitry@php.net>                              |
@@ -19,7 +17,6 @@
 #include "zend_system_id.h"
 #include "zend_extensions.h"
 #include "ext/standard/md5.h"
-#include "ext/hash/php_hash.h"
 
 ZEND_API char zend_system_id[32];
 
@@ -55,10 +52,11 @@ void zend_startup_system_id(void)
 	zend_system_id[0] = '\0';
 }
 
-#define ZEND_HOOK_AST_PROCESS      (1 << 0)
-#define ZEND_HOOK_COMPILE_FILE     (1 << 1)
-#define ZEND_HOOK_EXECUTE_EX       (1 << 2)
-#define ZEND_HOOK_EXECUTE_INTERNAL (1 << 3)
+#define ZEND_HOOK_AST_PROCESS        (1 << 0)
+#define ZEND_HOOK_COMPILE_FILE       (1 << 1)
+#define ZEND_HOOK_EXECUTE_EX         (1 << 2)
+#define ZEND_HOOK_EXECUTE_INTERNAL   (1 << 3)
+#define ZEND_HOOK_INTERRUPT_FUNCTION (1 << 4)
 
 void zend_finalize_system_id(void)
 {
@@ -77,6 +75,9 @@ void zend_finalize_system_id(void)
 	if (zend_execute_internal) {
 		hooks |= ZEND_HOOK_EXECUTE_INTERNAL;
 	}
+	if (zend_interrupt_function) {
+		hooks |= ZEND_HOOK_INTERRUPT_FUNCTION;
+	}
 	PHP_MD5Update(&context, &hooks, sizeof hooks);
 
 	for (int16_t i = 0; i < 256; i++) {
@@ -86,6 +87,6 @@ void zend_finalize_system_id(void)
 	}
 
 	PHP_MD5Final(digest, &context);
-	php_hash_bin2hex(zend_system_id, digest, sizeof digest);
+	zend_bin2hex(zend_system_id, digest, sizeof digest);
 	finalized = 1;
 }

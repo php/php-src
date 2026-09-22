@@ -49,6 +49,5 @@ Array
     [HTTPS_PROXY] => bool
     [MULTI_SSL] => bool
     [BROTLI] => bool
-%A
-)
+%A)
 Complete

@@ -7,17 +7,17 @@ function foo($foo, int ...$bar) {}
 
 try {
     foo(1, []);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 try {
     foo(1, 1, 1, []);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-foo(): Argument #2 must be of type int, array given, called in %s on line %d
-foo(): Argument #4 must be of type int, array given, called in %s on line %d
+TypeError: foo(): Argument #2 must be of type int, array given, called in %s on line %d
+TypeError: foo(): Argument #4 must be of type int, array given, called in %s on line %d

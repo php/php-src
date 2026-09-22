@@ -1,4 +1,4 @@
-/* This is a generated file, edit the .stub.php file instead.
+/* This is a generated file, edit fiber.stub.php instead.
  * Stub hash: 8cd7626122b050585503ccebe370a61781ff83f2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class__ZendTestFiber___construct, 0, 0, 1)
@@ -39,8 +39,7 @@ static zend_class_entry *register_class__ZendTestFiber(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "_ZendTestFiber", class__ZendTestFiber_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
 }

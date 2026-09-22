@@ -14,12 +14,12 @@ foreach ($tests as $t) {
 echo "Done.\n";
 ?>
 --EXPECTF--
-Deprecated: Function utf8_decode() is deprecated in %s on line %d
+Deprecated: Function utf8_decode() is deprecated since 8.2, visit the php.net documentation for various alternatives in %s on line %d
 413f3e42
 
-Deprecated: Function utf8_decode() is deprecated in %s on line %d
+Deprecated: Function utf8_decode() is deprecated since 8.2, visit the php.net documentation for various alternatives in %s on line %d
 3f22
 
-Deprecated: Function utf8_decode() is deprecated in %s on line %d
+Deprecated: Function utf8_decode() is deprecated since 8.2, visit the php.net documentation for various alternatives in %s on line %d
 413f3f423f433f3f
 Done.

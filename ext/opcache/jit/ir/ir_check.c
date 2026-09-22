@@ -36,17 +36,47 @@ void ir_consistency_check(void)
 	IR_ASSERT((IR_UGT ^ 3) == IR_ULT);
 	IR_ASSERT((IR_ULE ^ 3) == IR_UGE);
 	IR_ASSERT((IR_UGE ^ 3) == IR_ULE);
+	IR_ASSERT((IR_ORDERED ^ 1) == IR_UNORDERED);
 
 	IR_ASSERT(IR_ADD + 1 == IR_SUB);
 }
 
-static bool ir_check_use_list(const ir_ctx *ctx, ir_ref from, ir_ref to)
+typedef struct {
+	ir_arena  *arena;
+	ir_bitset *use_set;
+	ir_bitset *input_set;
+} ir_check_ctx;
+
+static bool ir_check_use_list(ir_check_ctx *check_ctx, const ir_ctx *ctx, ir_ref from, ir_ref to)
 {
-	ir_ref n, j, *p;
+	ir_ref n, *p;
 	ir_use_list *use_list = &ctx->use_lists[from];
 
 	n = use_list->count;
-	for (j = 0, p = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
+	if (n > 16) {
+		/* Avoid quadratic complexity by maintaining a temporary bit-set */
+		ir_bitset set;
+
+		if (!check_ctx->use_set || !(set = check_ctx->use_set[from])) {
+			if (!check_ctx->arena) {
+				check_ctx->arena = ir_arena_create(sizeof(ir_arena) +
+					ctx->insns_count * sizeof(ir_bitset) +
+					ir_bitset_len(ctx->insns_count) * sizeof(ir_bitset_base_t));
+			}
+			if (!check_ctx->use_set) {
+				check_ctx->use_set = ir_arena_alloc(&check_ctx->arena, ctx->insns_count * sizeof(ir_bitset));
+				memset(check_ctx->use_set, 0, ctx->insns_count * sizeof(ir_bitset));
+			}
+			check_ctx->use_set[from] = set = (ir_bitset)ir_arena_alloc(&check_ctx->arena,
+				ir_bitset_len(ctx->insns_count) * sizeof(ir_bitset_base_t));
+			memset(set, 0, ir_bitset_len(ctx->insns_count) * sizeof(ir_bitset_base_t));
+			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+				ir_bitset_incl(set, *p);
+			}
+		}
+		return ir_bitset_in(set, to);
+	}
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 		if (*p == to) {
 			return 1;
 		}
@@ -54,12 +84,35 @@ static bool ir_check_use_list(const ir_ctx *ctx, ir_ref from, ir_ref to)
 	return 0;
 }
 
-static bool ir_check_input_list(const ir_ctx *ctx, ir_ref from, ir_ref to)
+static bool ir_check_input_list(ir_check_ctx *check_ctx, const ir_ctx *ctx, ir_ref from, ir_ref to)
 {
 	ir_insn *insn = &ctx->ir_base[to];
 	ir_ref n, j, *p;
 
 	n = ir_input_edges_count(ctx, insn);
+	if (n > 16) {
+		/* Avoid quadratic complexity by maintaining a temporary bit-set */
+		ir_bitset set;
+
+		if (!check_ctx->input_set || !(set = check_ctx->input_set[to])) {
+			if (!check_ctx->arena) {
+				check_ctx->arena = ir_arena_create(sizeof(ir_arena) +
+					ctx->insns_count * sizeof(ir_bitset) +
+					ir_bitset_len(ctx->insns_count) * sizeof(ir_bitset_base_t));
+			}
+			if (!check_ctx->input_set) {
+				check_ctx->input_set = ir_arena_alloc(&check_ctx->arena, ctx->insns_count * sizeof(ir_bitset));
+				memset(check_ctx->input_set, 0, ctx->insns_count * sizeof(ir_bitset));
+			}
+			check_ctx->input_set[to] = set = (ir_bitset)ir_arena_alloc(&check_ctx->arena,
+				ir_bitset_len(ctx->insns_count) * sizeof(ir_bitset_base_t));
+			memset(set, 0, ir_bitset_len(ctx->insns_count) * sizeof(ir_bitset_base_t));
+			for (j = 1, p = insn->ops + 1; j <= n; j++, p++) {
+				if (*p > 0) ir_bitset_incl(set, *p);
+			}
+		}
+		return ir_bitset_in(set, from);
+	}
 	for (j = 1, p = insn->ops + 1; j <= n; j++, p++) {
 		if (*p == from) {
 			return 1;
@@ -93,6 +146,17 @@ bool ir_check(const ir_ctx *ctx)
 	ir_type type;
 	uint32_t flags;
 	bool ok = 1;
+	ir_check_ctx check_ctx;
+
+	if (ctx->insns_count < 1 || ctx->ir_base[1].op != IR_START) {
+		fprintf(stderr, "ir_base[1].op invalid opcode (%d)\n",
+			(ctx->insns_count < 1) ? IR_NOP : ctx->ir_base[0].op);
+		ok = 0;
+	}
+
+	check_ctx.arena = NULL;
+	check_ctx.use_set = NULL;
+	check_ctx.input_set = NULL;
 
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base + i; i < ctx->insns_count;) {
 		if (insn->op >= IR_LAST_OP) {
@@ -106,7 +170,10 @@ bool ir_check(const ir_ctx *ctx)
 			use = *p;
 			if (use != IR_UNUSED) {
 				if (IR_IS_CONST_REF(use)) {
-					if (use >= ctx->consts_count) {
+					if (IR_OPND_KIND(flags, j) != IR_OPND_DATA) {
+						fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) must not be constant\n", i, j, use);
+						ok = 0;
+					} else if (use >= ctx->consts_count) {
 						fprintf(stderr, "ir_base[%d].ops[%d] constant reference (%d) is out of range\n", i, j, use);
 						ok = 0;
 					}
@@ -210,11 +277,16 @@ bool ir_check(const ir_ctx *ctx)
 									ok = 0;
 								}
 							}
-							break;
-						case IR_OPND_CONTROL_DEP:
 							if ((ctx->flags2 & IR_LINEAR)
 							 && use >= i
 							 && !(insn->op == IR_LOOP_BEGIN)) {
+								fprintf(stderr, "ir_base[%d].ops[%d] invalid forward reference (%d)\n", i, j, use);
+								ok = 0;
+							}
+							break;
+						case IR_OPND_CONTROL_DEP:
+							if ((ctx->flags2 & IR_LINEAR)
+							 && use >= i) {
 								fprintf(stderr, "ir_base[%d].ops[%d] invalid forward reference (%d)\n", i, j, use);
 								ok = 0;
 							} else if (insn->op == IR_PHI) {
@@ -231,6 +303,14 @@ bool ir_check(const ir_ctx *ctx)
 								ok = 0;
 							}
 							break;
+						case IR_OPND_CONTROL_GUARD:
+							if (!(ir_op_flags[use_insn->op] & IR_OP_FLAG_BB_START)
+							 && use_insn->op != IR_GUARD
+							 && use_insn->op != IR_GUARD_NOT) {
+								fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) must be BB_START or GUARD\n", i, j, use);
+								ok = 0;
+							}
+							break;
 						default:
 							fprintf(stderr, "ir_base[%d].ops[%d] reference (%d) of unsupported kind\n", i, j, use);
 							ok = 0;
@@ -240,6 +320,8 @@ bool ir_check(const ir_ctx *ctx)
 				/* pass (function returns void) */
 			} else if (insn->op == IR_BEGIN && j == 1) {
 				/* pass (start of unreachable basic block) */
+			} else if (IR_OPND_KIND(flags, j) == IR_OPND_CONTROL_GUARD) {
+				/* reference to control guard is optional */
 			} else if (IR_OPND_KIND(flags, j) != IR_OPND_CONTROL_REF
 					&& (insn->op != IR_SNAPSHOT || j == 1)) {
 				fprintf(stderr, "ir_base[%d].ops[%d] missing reference (%d)\n", i, j, use);
@@ -247,7 +329,7 @@ bool ir_check(const ir_ctx *ctx)
 			}
 			if (ctx->use_lists
 			 && use > 0
-			 && !ir_check_use_list(ctx, use, i)) {
+			 && !ir_check_use_list(&check_ctx, ctx, use, i)) {
 				fprintf(stderr, "ir_base[%d].ops[%d] is not in use list (%d)\n", i, j, use);
 				ok = 0;
 			}
@@ -262,7 +344,9 @@ bool ir_check(const ir_ctx *ctx)
 				}
 				break;
 			case IR_LOAD:
+			case IR_LOAD_v:
 			case IR_STORE:
+			case IR_STORE_v:
 				type = ctx->ir_base[insn->op2].type;
 				if (type != IR_ADDR
 				 && (!IR_IS_TYPE_INT(type) || ir_type_size[type] != ir_type_size[IR_ADDR])) {
@@ -272,7 +356,9 @@ bool ir_check(const ir_ctx *ctx)
 				}
 				break;
 			case IR_VLOAD:
+			case IR_VLOAD_v:
 			case IR_VSTORE:
+			case IR_VSTORE_v:
 				if (ctx->ir_base[insn->op2].op != IR_VAR) {
 					fprintf(stderr, "ir_base[%d].op2 must be 'VAR' (%s)\n",
 						i, ir_op_name[ctx->ir_base[insn->op2].op]);
@@ -291,15 +377,21 @@ bool ir_check(const ir_ctx *ctx)
 					ok = 0;
 				}
 				break;
+			case IR_PARAM:
+				if (i > 2 && ctx->ir_base[i - 1].op != IR_PARAM) {
+					fprintf(stderr, "ir_base[%d].op PARAMs must be used only right after START\n", i);
+					ok = 0;
+				}
+				break;
 		}
 
 		if (ctx->use_lists) {
 			ir_use_list *use_list = &ctx->use_lists[i];
-			ir_ref count;
+			ir_ref count, n = use_list->count;
 
-			for (j = 0, p = &ctx->use_edges[use_list->refs]; j < use_list->count; j++, p++) {
+			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 				use = *p;
-				if (!ir_check_input_list(ctx, i, use)) {
+				if (!ir_check_input_list(&check_ctx, ctx, i, use)) {
 					fprintf(stderr, "ir_base[%d] is in use list of ir_base[%d]\n", use, i);
 					ok = 0;
 				}
@@ -336,10 +428,13 @@ bool ir_check(const ir_ctx *ctx)
 							ok = 0;
 						}
 						break;
+					case IR_IGOTO:
+					case IR_ASM_GOTO:
+						break;
 					default:
 						/* skip data references */
-						count = use_list->count;
-						for (j = 0, p = &ctx->use_edges[use_list->refs]; j < use_list->count; j++, p++) {
+						count = n = use_list->count;
+						for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 							use = *p;
 							if (!(ir_op_flags[ctx->ir_base[use].op] & IR_OP_FLAG_CONTROL)) {
 								count--;
@@ -362,6 +457,10 @@ bool ir_check(const ir_ctx *ctx)
 									break;
 								}
 							}
+							if (count == 0 && (insn->op == IR_END || insn->op == IR_LOOP_END)) {
+								/* Dead block */
+								break;
+							}
 							fprintf(stderr, "ir_base[%d].op (%s) must have 1 successor (%d)\n",
 								i, ir_op_name[insn->op], count);
 							ok = 0;
@@ -375,9 +474,17 @@ bool ir_check(const ir_ctx *ctx)
 		insn += n;
 	}
 
+	if (check_ctx.arena) {
+		ir_arena_free(check_ctx.arena);
+	}
+
 //	if (!ok) {
 //		ir_dump_codegen(ctx, stderr);
 //	}
+
+#ifndef IR_CHECK_NO_ABORT
 	IR_ASSERT(ok);
+#endif
+
 	return ok;
 }

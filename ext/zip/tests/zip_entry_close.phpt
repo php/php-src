@@ -11,24 +11,24 @@ echo "entry_close: "; var_dump(zip_entry_close($entry));
 try {
     echo "entry_close: "; var_dump(zip_entry_close($entry));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 zip_close($zip);
 ?>
 Done
 --EXPECTF--
-Deprecated: Function zip_open() is deprecated in %s on line %d
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
 
-Deprecated: Function zip_read() is deprecated in %s on line %d
+Deprecated: Function zip_read() is deprecated since 8.0, use ZipArchive::statIndex() instead in %s on line %d
 entry_open:  
-Deprecated: Function zip_entry_open() is deprecated in %s on line %d
+Deprecated: Function zip_entry_open() is deprecated since 8.0 in %s on line %d
 bool(true)
 entry_close: 
-Deprecated: Function zip_entry_close() is deprecated in %s on line %d
+Deprecated: Function zip_entry_close() is deprecated since 8.0 in %s on line %d
 bool(true)
 entry_close: 
-Deprecated: Function zip_entry_close() is deprecated in %s on line %d
-zip_entry_close(): supplied resource is not a valid Zip Entry resource
+Deprecated: Function zip_entry_close() is deprecated since 8.0 in %s on line %d
+TypeError: zip_entry_close(): supplied resource is not a valid Zip Entry resource
 
-Deprecated: Function zip_close() is deprecated in %s on line %d
+Deprecated: Function zip_close() is deprecated since 8.0, use ZipArchive::close() instead in %s on line %d
 Done

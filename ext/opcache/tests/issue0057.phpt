@@ -15,9 +15,9 @@ class ZException extends Exception {
 function dummy($query) {
     try {
         switch ($query) {
-            case 1;
+            case 1:
             break;
-            case 2;
+            case 2:
             break;
         default:
             throw new Exception('exception');
@@ -29,10 +29,10 @@ function dummy($query) {
 
 try {
     dummy(0);
-} catch (Exception $e) {
-    echo $e->getMessage();
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-exception
+Exception: exception

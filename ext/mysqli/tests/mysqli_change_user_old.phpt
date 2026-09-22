@@ -4,21 +4,14 @@ mysqli_change_user(), MySQL < 5.6
 mysqli
 --SKIPIF--
 <?php
-require_once 'skipifconnectfailure.inc';
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-        $host, $user, $db, $port, $socket));
-
+require_once __DIR__ . '/test_setup/test_helpers.inc';
+$link = mysqli_connect_or_skip();
 if (mysqli_get_server_version($link) >= 50600 && mysqli_get_server_version($link) < 10_00_00)
     die("SKIP For MySQL < 5.6.0");
 ?>
 --FILE--
 <?php
     require_once 'connect.inc';
-
-    $tmp	= NULL;
-    $link	= NULL;
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[006] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",

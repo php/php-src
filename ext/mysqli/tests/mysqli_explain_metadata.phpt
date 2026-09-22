@@ -26,7 +26,7 @@ require_once 'skipifconnectfailure.inc';
             $field_names[$name] = gettype($value);
     }
 
-    while ($row = mysqli_fetch_assoc($res))
+    while (mysqli_fetch_assoc($res))
         $num_rows++;
 
     if (($tmp = mysqli_num_rows($res)) !== $num_rows) {
@@ -43,12 +43,12 @@ require_once 'skipifconnectfailure.inc';
             $num_fields, gettype($tmp), $tmp);
     }
 
-    foreach ($fields as $k => $field) {
+    foreach ($fields as $field) {
         $field->max_length = 0;// change it or we will get diff error
         if (isset($field_names[$field->name])) {
             unset($field_names[$field->name]);
         } else {
-            printf("[006] Unexpected field '%s', dumping info\n");
+            printf("[006] Unexpected field '%s', dumping info\n", $field->name);
             var_dump($field);
         }
     }
@@ -59,9 +59,8 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_free_result($res);
 
-    $stmt = mysqli_stmt_init($link);
-    /* Depending on your version, the MySQL server migit not support this */
-    if ($stmt->prepare('EXPLAIN SELECT t1.*, t2.* FROM test AS t1, test AS t2') && $stmt->execute()) {
+    /* Depending on your version, the MySQL server might not support this */
+    if (($stmt = $link->prepare('EXPLAIN SELECT t1.*, t2.* FROM test AS t1, test AS t2')) && $stmt->execute()) {
         if (!mysqli_stmt_store_result($stmt))
             printf("[008] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 

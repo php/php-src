@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL Bug #64953 (Postgres prepared statement positional parameter casting)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

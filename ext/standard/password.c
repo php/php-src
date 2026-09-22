@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Anthony Ferrara <ircmaxell@php.net>                         |
    |          Charles R. Portwood II <charlesportwoodii@erianna.com>      |
@@ -86,18 +84,18 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	buffer = zend_string_alloc(length * 3 / 4 + 1, 0);
 	if (FAILURE == php_random_bytes_throw(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
 		zend_value_error("Unable to generate salt");
-		zend_string_release_ex(buffer, 0);
+		zend_string_efree(buffer);
 		return NULL;
 	}
 
 	ret = zend_string_alloc(length, 0);
 	if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), length, ZSTR_VAL(ret)) == FAILURE) {
 		zend_value_error("Generated salt too short");
-		zend_string_release_ex(buffer, 0);
-		zend_string_release_ex(ret, 0);
+		zend_string_efree(buffer);
+		zend_string_efree(ret);
 		return NULL;
 	}
-	zend_string_release_ex(buffer, 0);
+	zend_string_efree(buffer);
 	ZSTR_VAL(ret)[length] = 0;
 	return ret;
 }
@@ -140,7 +138,7 @@ static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array
 
 	if (!php_password_bcrypt_valid(hash)) {
 		/* Should never get called this way. */
-		return 1;
+		return true;
 	}
 
 	sscanf(ZSTR_VAL(hash), "$2y$" ZEND_LONG_FMT "$", &old_cost);
@@ -156,12 +154,12 @@ static bool php_password_bcrypt_verify(const zend_string *password, const zend_s
 	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
 
 	if (!ret) {
-		return 0;
+		return false;
 	}
 
 	if (ZSTR_LEN(hash) < 13) {
 		zend_string_free(ret);
-		return 0;
+		return false;
 	}
 
 	/* We're using this method instead of == in order to provide

@@ -222,6 +222,9 @@ var_dump(session_destroy());
 ob_end_flush();
 ?>
 --EXPECT--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 *** Testing basic session functionality : variation3 use_trans_sid ***
 *** Test trans sid ***
 

@@ -25,6 +25,11 @@ require_once 'skipifconnectfailure.inc';
     if (true !== ($tmp = mysqli_stmt_execute($stmt)))
         printf("[006] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
+    try {
+        mysqli_stmt_data_seek($stmt, 1);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     $id = null;
     if (!mysqli_stmt_bind_result($stmt, $id))
@@ -33,24 +38,21 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_stmt_store_result($stmt))
         printf("[008] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    if (!is_null($tmp = mysqli_stmt_data_seek($stmt, 2)))
-        printf("[009] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_data_seek($stmt, 2);
 
     if (!mysqli_stmt_fetch($stmt))
         printf("[010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     var_dump($id);
 
-    if (!is_null($tmp = mysqli_stmt_data_seek($stmt, 0)))
-        printf("[011] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_data_seek($stmt, 0);
 
     if (!mysqli_stmt_fetch($stmt))
         printf("[012] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
     var_dump($id);
 
-    if (!is_null($tmp = mysqli_stmt_data_seek($stmt, mysqli_stmt_num_rows($stmt) + 100)))
-        printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_stmt_data_seek($stmt, mysqli_stmt_num_rows($stmt) + 100);
 
     if (mysqli_stmt_fetch($stmt))
         printf("[014] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -83,8 +85,10 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'clean_table.inc';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli_stmt object is not fully initialized
+mysqli_stmt_data_seek(): No result set associated with the statement
 int(3)
 int(1)
 int(1)

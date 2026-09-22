@@ -31,7 +31,7 @@ require_once 'skipifconnectfailure.inc';
     if ('' !== ($tmp = mysqli_stmt_error($stmt)))
         printf("[008] Expecting empty string, got %s/%s\n", gettype($tmp), $tmp);
 
-    mysqli_kill($link, mysqli_thread_id($link));
+    $link->query('KILL '.mysqli_thread_id($link));
 
     if (true === ($tmp = mysqli_stmt_execute($stmt)))
         printf("[009] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
@@ -55,6 +55,7 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require_once 'clean_table.inc';
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mysqli_stmt_init() is deprecated since 8.6, use mysqli_prepare() instead in %s on line %d
 mysqli_stmt object is already closed
 done!

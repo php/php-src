@@ -1,21 +1,18 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Rasmus Lerdorf <rasmus@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
 #include "php.h"
-#include "basic_functions.h"
 #include "crc32.h"
 #include "crc32_x86.h"
 
@@ -28,7 +25,7 @@
 #  include <asm/hwcap.h>
 # elif defined(__APPLE__)
 #  include <sys/sysctl.h>
-# elif defined(__FreeBSD__)
+# elif defined(HAVE_ELF_AUX_INFO)
 #  include <sys/auxv.h>
 
 static unsigned long getauxval(unsigned long key) {
@@ -129,7 +126,7 @@ PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 	return crc;
 }
 
-PHPAPI int php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
+PHPAPI zend_result php_crc32_stream_bulk_update(uint32_t *crc, php_stream *fp, size_t nr)
 {
 	size_t handled = 0, n;
 	char buf[1024];

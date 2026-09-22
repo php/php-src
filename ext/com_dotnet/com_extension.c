@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
@@ -118,11 +116,11 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		}
 
 		/* Remove leading/training white spaces on search_string */
-		while (isspace(*typelib_name)) {/* Ends on '\0' in worst case */
+		while (isspace((unsigned char)*typelib_name)) {/* Ends on '\0' in worst case */
 			typelib_name ++;
 		}
 		ptr = typelib_name + strlen(typelib_name) - 1;
-		while ((ptr != typelib_name) && isspace(*ptr)) {
+		while ((ptr != typelib_name) && isspace((unsigned char)*ptr)) {
 			*ptr = '\0';
 			ptr--;
 		}
@@ -175,7 +173,6 @@ PHP_MINIT_FUNCTION(com_dotnet)
 {
 	zend_class_entry *tmp;
 
-	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);
 	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	php_com_exception_class_entry = register_class_com_exception(zend_ce_exception);
@@ -183,6 +180,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	php_com_saproxy_class_entry = register_class_com_safearray_proxy();
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
+	php_com_saproxy_class_entry->create_object = php_com_saproxy_create_object;
 	php_com_saproxy_class_entry->default_object_handlers = &php_com_saproxy_handlers;
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 
@@ -196,7 +194,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
 
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	tmp = register_class_dotnet(php_com_variant_class_entry);
 	tmp->default_object_handlers = &php_com_object_handlers;
 	tmp->create_object = php_com_object_new;
@@ -217,7 +215,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 {
 	UNREGISTER_INI_ENTRIES();
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	if (COMG(dotnet_runtime_stuff)) {
 		php_com_dotnet_mshutdown();
 	}
@@ -240,7 +238,7 @@ PHP_RINIT_FUNCTION(com_dotnet)
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 {
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	if (COMG(dotnet_runtime_stuff)) {
 		php_com_dotnet_rshutdown();
 	}
@@ -258,7 +256,7 @@ PHP_MINFO_FUNCTION(com_dotnet)
 	php_info_print_table_row(2, "COM support", "enabled");
 	php_info_print_table_row(2, "DCOM support", COMG(allow_dcom) ? "enabled" : "disabled");
 
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	php_info_print_table_row(2, ".Net support", "enabled");
 #else
 	php_info_print_table_row(2, ".Net support", "not present in this build");

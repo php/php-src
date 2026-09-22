@@ -1,5 +1,5 @@
 --TEST--
-bug 50632, filter_input() does not return default value if the variable does not exist
+Bug #50632 (filter_input() does not return default value if the variable does not exist)
 --EXTENSIONS--
 filter
 --FILE--

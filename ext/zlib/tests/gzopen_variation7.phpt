@@ -5,7 +5,7 @@ zlib
 --FILE--
 <?php
 
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h1 = gzopen($f, 'r');
 $h2 = gzopen($f, 'r');
 

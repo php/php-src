@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -19,11 +17,11 @@
    +----------------------------------------------------------------------+
 */
 
-#if defined(__linux__) && defined(HAVE_MEMFD_CREATE)
-# ifndef _GNU_SOURCE
-#  define _GNU_SOURCE
+#if defined(__linux__)
+# include <php_config.h>
+# if defined(HAVE_MEMFD_CREATE)
+#  include <sys/mman.h>
 # endif
-# include <sys/mman.h>
 #endif
 
 #include <errno.h>
@@ -53,7 +51,12 @@
 static const zend_shared_memory_handlers *g_shared_alloc_handler = NULL;
 static const char *g_shared_model;
 /* pointer to globals allocated in SHM and shared across processes */
-zend_smm_shared_globals *smm_shared_globals;
+ZEND_EXT_API zend_smm_shared_globals *smm_shared_globals;
+
+#ifdef ZTS
+static MUTEX_T zts_protect_lock;
+static uint32_t zts_unprotected_threads;
+#endif
 
 #ifndef ZEND_WIN32
 #ifdef ZTS
@@ -115,7 +118,9 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create opcache lock file in %s: %s (%d)", lockfile_path, strerror(errno), errno);
 	}
 
-	fchmod(lock_file, 0666);
+	if (fchmod(lock_file, 0666) == -1) {
+		zend_accel_error(ACCEL_LOG_WARNING, "Unable to change opcache lock file permissions in %s: %s (%d)", lockfile_path, strerror(errno), errno);
+	}
 
 	val = fcntl(lock_file, F_GETFD, 0);
 	val |= FD_CLOEXEC;
@@ -184,6 +189,11 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	int res = ALLOC_FAILURE;
 	int i;
 
+#ifdef ZTS
+	zts_protect_lock = tsrm_mutex_alloc();
+	zts_unprotected_threads = 0;
+#endif
+
 	/* shared_free must be valid before we call zend_shared_alloc()
 	 * - make it temporarily point to a local variable
 	 */
@@ -227,6 +237,9 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 
 	if (!g_shared_alloc_handler) {
 		/* try memory handlers in order */
+		if (handler_table->name == NULL) {
+			return NO_SHM_BACKEND;
+		}
 		for (he = handler_table; he->name; he++) {
 			res = zend_shared_alloc_try(he, requested_size, &ZSMMG(shared_segments), &ZSMMG(shared_segments_count), &error_in);
 			if (res) {
@@ -338,6 +351,9 @@ void zend_shared_alloc_shutdown(void)
 	tsrm_mutex_free(zts_lock);
 # endif
 #endif
+#ifdef ZTS
+	tsrm_mutex_free(zts_protect_lock);
+#endif
 }
 
 static size_t zend_shared_alloc_get_largest_free_block(void)
@@ -366,11 +382,15 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 
 void *zend_shared_alloc(size_t size)
 {
-	ZEND_ASSERT(ZCG(locked));
-
 	int i;
 	size_t block_size = ZEND_ALIGNED_SIZE(size);
 
+#if 1
+	if (!ZCG(locked)) {
+		ZEND_ASSERT(0 && "Shared memory lock not obtained");
+		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Shared memory lock not obtained");
+	}
+#endif
 	if (block_size > ZSMMG(shared_free)) { /* No hope to find a big-enough block */
 		SHARED_ALLOC_FAILED();
 		return NULL;
@@ -621,25 +641,37 @@ const char *zend_accel_get_shared_model(void)
 
 void zend_accel_shared_protect(bool protected)
 {
-#ifdef HAVE_MPROTECT
+#if defined(HAVE_MPROTECT) || defined(ZEND_WIN32)
 	int i;
 
 	if (!smm_shared_globals) {
 		return;
 	}
 
+# ifdef ZTS
+	/* Memory protection is process-wide, so overlapping writers must be tracked across threads. */
+	tsrm_mutex_lock(zts_protect_lock);
+	if (protected) {
+		if (ZCG(unprotect_depth) && --ZCG(unprotect_depth) == 0) {
+			ZEND_ASSERT(zts_unprotected_threads > 0);
+			zts_unprotected_threads--;
+		}
+		if (zts_unprotected_threads) {
+			tsrm_mutex_unlock(zts_protect_lock);
+			return;
+		}
+	} else if (ZCG(unprotect_depth)++ == 0) {
+		zts_unprotected_threads++;
+	}
+# endif
+
+# ifdef HAVE_MPROTECT
 	const int mode = protected ? PROT_READ : PROT_READ|PROT_WRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode);
 	}
-#elif defined(ZEND_WIN32)
-	int i;
-
-	if (!smm_shared_globals) {
-		return;
-	}
-
+# elif defined(ZEND_WIN32)
 	const int mode = protected ? PAGE_READONLY : PAGE_READWRITE;
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
@@ -648,6 +680,11 @@ void zend_accel_shared_protect(bool protected)
 			zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Failed to protect memory");
 		}
 	}
+# endif
+
+# ifdef ZTS
+	tsrm_mutex_unlock(zts_protect_lock);
+# endif
 #endif
 }
 

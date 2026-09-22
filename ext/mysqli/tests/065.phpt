@@ -16,8 +16,6 @@ require_once 'skipifconnectfailure.inc';
         printf("[002] Cannot set SQL-Mode, [%d] %s\n", mysqli_errno($mysql), mysqli_error($mysql));
 
     $esc_str = chr(0xbf) . chr(0x5c);
-    $len = $charset = array();
-    $tmp = null;
 
     if ($mysql->set_charset("latin1")) {
         /* 5C should be escaped */

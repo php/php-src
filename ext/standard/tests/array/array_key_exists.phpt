@@ -44,7 +44,7 @@ $search_arrays_v = array (
                      array(),
                      array(NULL),
                      array(array(), 1, 2),
-                     array(1,2,3, "" => "value", NULL => "value", true => "value" ),
+                     array(1,2,3, "" => "value", true => "value" ),
                      array( array(2,4,5), array ("a","b","d") )
                    );
 // search for $key_variations in each sub array of $search_arrays_v
@@ -63,8 +63,8 @@ echo "\n*** Testing error conditions ***\n";
 // first args as array
 try {
     array_key_exists(array(), array());
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 echo "\n*** Testing operation on objects ***\n";
@@ -76,13 +76,13 @@ class key_check
 $key_check_obj = new key_check; //new object
 try {
     var_dump(array_key_exists("public_var", $key_check_obj));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing basic functionalities ***
 -- Iteration 1 --
 bool(true)
@@ -104,7 +104,11 @@ bool(true)
 ** Variation loop 1 **
 -- Iteration 1 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -112,7 +116,11 @@ bool(false)
 bool(true)
 -- Iteration 2 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -120,7 +128,11 @@ bool(false)
 bool(true)
 -- Iteration 3 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -128,7 +140,11 @@ bool(false)
 bool(true)
 -- Iteration 4 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -136,7 +152,11 @@ bool(false)
 bool(true)
 -- Iteration 5 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -144,7 +164,11 @@ bool(false)
 bool(false)
 -- Iteration 6 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -152,7 +176,11 @@ bool(false)
 bool(false)
 -- Iteration 7 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -162,7 +190,11 @@ bool(true)
 ** Variation loop 2 **
 -- Iteration 1 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -170,7 +202,11 @@ bool(false)
 bool(false)
 -- Iteration 2 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -178,7 +214,11 @@ bool(false)
 bool(false)
 -- Iteration 3 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -186,7 +226,11 @@ bool(false)
 bool(true)
 -- Iteration 4 --
 bool(true)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(true)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(true)
 bool(false)
 bool(true)
@@ -194,7 +238,11 @@ bool(false)
 bool(true)
 -- Iteration 5 --
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
+
+Deprecated: Using null as the key parameter for array_key_exists() is deprecated, use an empty string instead in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -202,8 +250,8 @@ bool(false)
 bool(true)
 
 *** Testing error conditions ***
-Cannot access offset of type array on array
+TypeError: Cannot access offset of type array on array
 
 *** Testing operation on objects ***
-array_key_exists(): Argument #2 ($array) must be of type array, key_check given
+TypeError: array_key_exists(): Argument #2 ($array) must be of type array, key_check given
 Done

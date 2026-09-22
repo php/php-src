@@ -15,7 +15,7 @@ var_dump(session_set_cookie_params(3600));
 var_dump(session_start());
 var_dump(session_set_cookie_params(1800));
 var_dump(session_destroy());
-var_dump(session_set_cookie_params(1234567890));
+var_dump(session_set_cookie_params(1000000000));
 
 echo "Done";
 ob_end_flush();
@@ -25,7 +25,7 @@ ob_end_flush();
 bool(true)
 bool(true)
 
-Warning: session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active in %s on line %d
+Warning: session_set_cookie_params(): Session cookie parameters cannot be changed when a session is active (started from %s on line %d) in %s on line %d
 bool(false)
 bool(true)
 bool(true)

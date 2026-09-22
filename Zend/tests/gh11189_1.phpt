@@ -2,6 +2,9 @@
 GH-11189: Exceeding memory limit in zend_hash_do_resize leaves the array in an invalid state (not packed array)
 --SKIPIF--
 <?php
+if (PHP_OS_FAMILY === 'Windows') {
+    die("xfail fails on Windows Server 2022 and newer.");
+}
 if (getenv("USE_ZEND_ALLOC") === "0") die("skip ZMM is disabled");
 ?>
 --INI--
@@ -15,6 +18,7 @@ ob_start(function() {
         $a[] = 2;
     }
     fwrite(STDOUT, "Success");
+    return '';
 });
 
 $a = ["not packed" => 1];

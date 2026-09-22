@@ -5,10 +5,27 @@ xsl
 --FILE--
 <?php
 
+class TrampolineClass {
+    public function __call($name, $args) {
+    }
+}
+
 require __DIR__ . '/xpath_callables.inc';
 
 try {
     createProcessor([])->registerPhpFunctionNS('http://php.net/xsl', 'strtolower', strtolower(...));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    createProcessor([])->registerPhpFunctionNS('http://php.net/xsl', 'test', [new TrampolineClass, 'test']);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    createProcessor([])->registerPhpFunctionNS('urn:foo', '$$$', [new TrampolineClass, 'test']);
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -34,6 +51,8 @@ try {
 ?>
 --EXPECT--
 XSLTProcessor::registerPHPFunctionNS(): Argument #1 ($namespaceURI) must not be "http://php.net/xsl" because it is reserved by PHP
+XSLTProcessor::registerPHPFunctionNS(): Argument #1 ($namespaceURI) must not be "http://php.net/xsl" because it is reserved by PHP
+XSLTProcessor::registerPHPFunctionNS(): Argument #2 ($name) must be a valid callback name
 XSLTProcessor::registerPHPFunctionNS(): Argument #2 ($name) must be a valid callback name
 XSLTProcessor::registerPHPFunctionNS(): Argument #2 ($name) must not contain any null bytes
 XSLTProcessor::registerPHPFunctionNS(): Argument #1 ($namespaceURI) must not contain any null bytes

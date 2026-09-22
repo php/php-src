@@ -4,6 +4,19 @@ iconv_mime_encode()
 iconv
 --INI--
 iconv.internal_charset=iso-8859-1
+--SKIPIF--
+<?php
+// ISO-2022-JP is a stateful encoding, so the right answer is not
+// unique. In particular, musl (type "unknown") is known to have an
+// inefficient encoding for it that does not agree with the expected
+// output below.
+if (ICONV_IMPL == "unknown") {
+    die("skip byte-comparison of stateful encoding with unknown iconv");
+}
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris native iconv does not support MIME encoding");
+}
+?>
 --FILE--
 <?php
 function my_error_handler($errno, $errmsg, $filename, $linenum)

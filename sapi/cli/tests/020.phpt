@@ -13,8 +13,8 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 
-echo `$php -n --ri this_extension_does_not_exist_568537753423`;
-echo `$php -n --ri standard`;
+echo shell_exec("$php -n --ri this_extension_does_not_exist_568537753423");
+echo shell_exec("$php -n --ri standard");
 
 echo "\nDone\n";
 ?>

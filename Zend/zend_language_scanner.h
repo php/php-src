@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -20,6 +19,7 @@
 #ifndef ZEND_SCANNER_H
 #define ZEND_SCANNER_H
 
+/* The zend_php_scanner_event enum is declared in zend_globals and we don't want everything to include zend_language_scanner.h */
 #include "zend_globals.h"
 
 typedef struct _zend_lex_state {
@@ -71,7 +71,7 @@ typedef struct _zend_heredoc_label {
 /* Track locations of unclosed {, [, (, etc. for better syntax error reporting */
 typedef struct _zend_nest_location {
 	char text;
-	int  lineno;
+	uint32_t lineno;
 } zend_nest_location;
 
 BEGIN_EXTERN_C()

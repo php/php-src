@@ -5,18 +5,39 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
 <?php
 $standard = new ReflectionExtension('standard');
-var_dump($standard->getClassNames());
+$classNames = $standard->getClassNames();
+sort($classNames);
+foreach ($classNames as $className) {
+    echo $className, PHP_EOL;
+}
 ?>
 --EXPECT--
-array(5) {
-  [0]=>
-  string(22) "__PHP_Incomplete_Class"
-  [1]=>
-  string(14) "AssertionError"
-  [2]=>
-  string(15) "php_user_filter"
-  [3]=>
-  string(12) "StreamBucket"
-  [4]=>
-  string(9) "Directory"
-}
+AssertionError
+Directory
+Io\IoException
+Io\Poll\Backend
+Io\Poll\BackendUnavailableException
+Io\Poll\Context
+Io\Poll\Event
+Io\Poll\FailedContextInitializationException
+Io\Poll\FailedHandleAddException
+Io\Poll\FailedPollOperationException
+Io\Poll\FailedPollWaitException
+Io\Poll\FailedWatcherModificationException
+Io\Poll\Handle
+Io\Poll\HandleAlreadyWatchedException
+Io\Poll\InactiveWatcherException
+Io\Poll\InvalidHandleException
+Io\Poll\PollException
+Io\Poll\Watcher
+RoundingMode
+SortDirection
+StreamBucket
+StreamError
+StreamErrorCode
+StreamErrorMode
+StreamErrorStore
+StreamException
+StreamPollHandle
+__PHP_Incomplete_Class
+php_user_filter

@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -22,6 +20,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "xml_serializer.h"
 #include <libxml/xmlsave.h>
 
@@ -29,13 +28,15 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
 	const zend_long VALID_OPTIONS = XML_PARSE_RECOVER
 								  | XML_PARSE_NOENT
+#if LIBXML_VERSION >= 21300
+								  | XML_PARSE_NO_XXE
+#endif
 								  | XML_PARSE_DTDLOAD
 								  | XML_PARSE_DTDATTR
 								  | XML_PARSE_DTDVALID
 								  | XML_PARSE_NOERROR
 								  | XML_PARSE_NOWARNING
 								  | XML_PARSE_NOBLANKS
-								  | XML_PARSE_XINCLUDE
 								  | XML_PARSE_NSCLEAN
 								  | XML_PARSE_NOCDATA
 								  | XML_PARSE_NONET
@@ -47,13 +48,15 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 		zend_argument_value_error(arg_num, "contains invalid flags (allowed flags: "
 										   "LIBXML_RECOVER, "
 										   "LIBXML_NOENT, "
+#if LIBXML_VERSION >= 21300
+										   "LIBXML_NO_XXE, "
+#endif
 										   "LIBXML_DTDLOAD, "
 										   "LIBXML_DTDATTR, "
 										   "LIBXML_DTDVALID, "
 										   "LIBXML_NOERROR, "
 										   "LIBXML_NOWARNING, "
 										   "LIBXML_NOBLANKS, "
-										   "LIBXML_XINCLUDE, "
 										   "LIBXML_NSCLEAN, "
 										   "LIBXML_NOCDATA, "
 										   "LIBXML_NONET, "
@@ -116,7 +119,7 @@ PHP_METHOD(Dom_XMLDocument, createEmpty)
 		NULL
 	);
 	dom_set_xml_class(intern->document);
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
+	intern->document->private_data = php_dom_libxml_private_data_header(php_dom_private_data_create());
 	return;
 
 oom:
@@ -142,7 +145,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (!source_len) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -230,8 +233,9 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc)
 {
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
-	document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	php_dom_private_data *private_data = php_dom_private_data_create();
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
+	document->private_data = php_dom_libxml_private_data_header(private_data);
 	dom_mark_namespaces_as_attributes_too(ns_mapper, lxml_doc);
 }
 
@@ -252,6 +256,12 @@ static int php_new_dom_write_smart_str(void *context, const char *buffer, int le
 	return len;
 }
 
+static php_dom_private_data *get_private_data_from_node(xmlNodePtr node)
+{
+	dom_object *intern = php_dom_object_get_data(node);
+	return intern != NULL ? php_dom_get_private_data(intern) : NULL;
+}
+
 static zend_string *php_new_dom_dump_node_to_str_ex(xmlNodePtr node, int options, bool format, const char *encoding)
 {
 	smart_str str = {0};
@@ -262,13 +272,13 @@ static zend_string *php_new_dom_dump_node_to_str_ex(xmlNodePtr node, int options
 		xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding);
 		xmlOutputBufferPtr out = xmlOutputBufferCreateIO(php_new_dom_write_smart_str, NULL, &str, handler);
 		if (EXPECTED(out != NULL)) {
-			status = dom_xml_serialize(ctxt, out, node, format, false);
+			status = dom_xml_serialize(ctxt, out, node, format, false, get_private_data_from_node(node));
 			status |= xmlOutputBufferFlush(out);
 			status |= xmlOutputBufferClose(out);
 		} else {
 			xmlCharEncCloseFunc(handler);
 		}
-		(void) xmlSaveClose(ctxt);
+		status |= xmlSaveClose(ctxt);
 	}
 
 	if (UNEXPECTED(status < 0)) {
@@ -303,9 +313,9 @@ zend_long php_new_dom_dump_node_to_file(const char *filename, xmlDocPtr doc, xml
 	int status = -1;
 	xmlSaveCtxtPtr ctxt = xmlSaveToIO(out->writecallback, NULL, stream, encoding, XML_SAVE_AS_XML);
 	if (EXPECTED(ctxt != NULL)) {
-		status = dom_xml_serialize(ctxt, out, node, format, false);
+		status = dom_xml_serialize(ctxt, out, node, format, false, get_private_data_from_node(node));
 		status |= xmlOutputBufferFlush(out);
-		(void) xmlSaveClose(ctxt);
+		status |= xmlSaveClose(ctxt);
 	}
 
 	size_t offset = php_stream_tell(stream);

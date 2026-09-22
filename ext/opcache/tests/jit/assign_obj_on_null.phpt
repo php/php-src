@@ -22,15 +22,15 @@ function test2() {
 }
 try {
     test();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     test2();
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-Attempt to assign property "y" on null
-Attempt to assign property "y" on null
+Error: Attempt to assign property "y" on null
+Error: Attempt to assign property "y" on null

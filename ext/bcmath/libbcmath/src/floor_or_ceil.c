@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Saki Takamachi <saki@php.net>                               |
    +----------------------------------------------------------------------+
@@ -30,7 +28,7 @@ bc_num bc_floor_or_ceil(bc_num num, bool is_floor)
 	/* If the number is positive and we are flooring, then nothing else needs to be done.
 	 * Similarly, if the number is negative and we are ceiling, then nothing else needs to be done. */
 	if (num->n_scale == 0 || result->n_sign == (is_floor ? PLUS : MINUS)) {
-		return result;
+		goto check_zero;
 	}
 
 	/* check fractional part. */
@@ -43,12 +41,19 @@ bc_num bc_floor_or_ceil(bc_num num, bool is_floor)
 
 	/* If all digits past the decimal point are 0 */
 	if (count == 0) {
-		return result;
+		goto check_zero;
 	}
 
 	/* Increment the absolute value of the result by 1 and add sign information */
 	bc_num tmp = _bc_do_add(result, BCG(_one_));
 	tmp->n_sign = result->n_sign;
 	bc_free_num(&result);
-	return tmp;
+	result = tmp;
+
+check_zero:
+	if (bc_is_zero(result)) {
+		result->n_sign = PLUS;
+	}
+
+	return result;
 }

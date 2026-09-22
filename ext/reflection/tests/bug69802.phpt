@@ -13,7 +13,7 @@ echo $r,"\n";
 --EXPECTF--
 string(1) "x"
 
-Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::getClass() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 object(ReflectionClass)#4 (1) {
   ["name"]=>
   string(8) "stdClass"

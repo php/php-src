@@ -25,7 +25,8 @@ const char *fpm_request_get_stage_name(int stage);
 int fpm_request_last_activity(struct fpm_child_s *child, struct timeval *tv);
 
 enum fpm_request_stage_e {
-	FPM_REQUEST_ACCEPTING = 1,
+	FPM_REQUEST_CREATING,
+	FPM_REQUEST_ACCEPTING,
 	FPM_REQUEST_READING_HEADERS,
 	FPM_REQUEST_INFO,
 	FPM_REQUEST_EXECUTING,

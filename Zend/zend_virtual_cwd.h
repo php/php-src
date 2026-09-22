@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Sascha Schumann <sascha@schumann.cx>                        |
@@ -75,8 +73,11 @@ typedef unsigned short mode_t;
 #define DEFAULT_SLASH '\\'
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
+// IS_SLASH_P() may read the previous char on Windows, which may be OOB; use IS_SLASH_P_EX() instead
 #define IS_SLASH_P(c)	(*(c) == '/' || \
         (*(c) == '\\' && !IsDBCSLeadByte(*(c-1))))
+#define IS_SLASH_P_EX(c, first_byte)	(*(c) == '/' || \
+        (*(c) == '\\' && ((first_byte) || !IsDBCSLeadByte(*(c-1)))))
 
 /* COPY_WHEN_ABSOLUTE is 2 under Win32 because by chance both regular absolute paths
    in the file system and UNC paths need copying of two characters */
@@ -84,7 +85,7 @@ typedef unsigned short mode_t;
 #define IS_UNC_PATH(path, len) \
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
 #define IS_ABSOLUTE_PATH(path, len) \
-	(len >= 2 && (/* is local */isalpha(path[0]) && path[1] == ':' || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
+	(len >= 2 && (/* is local */isalpha((unsigned char)(path)[0]) && path[1] == ':' || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
 
 #else
 #ifdef HAVE_DIRENT_H
@@ -110,7 +111,9 @@ typedef unsigned short mode_t;
 #endif
 
 #define IS_SLASH(c)	((c) == '/')
+// IS_SLASH_P() may read the previous char on Windows, which may be OOB; use IS_SLASH_P_EX() instead
 #define IS_SLASH_P(c)	(*(c) == '/')
+#define IS_SLASH_P_EX(c, first_byte) IS_SLASH_P(c)
 
 #endif
 
@@ -168,8 +171,8 @@ typedef int (*verify_path_func)(const cwd_state *);
 
 CWD_API void virtual_cwd_startup(void);
 CWD_API void virtual_cwd_shutdown(void);
-CWD_API int virtual_cwd_activate(void);
-CWD_API int virtual_cwd_deactivate(void);
+CWD_API void virtual_cwd_activate(void);
+CWD_API void virtual_cwd_deactivate(void);
 CWD_API char *virtual_getcwd_ex(size_t *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API zend_result virtual_chdir(const char *path);

@@ -6,8 +6,8 @@ pcntl
 <?php
 if (!function_exists("pcntl_getcpu")) die("skip pcntl_getcpu() is not available");
 if (!function_exists("pcntl_setcpuaffinity")) die("skip pcntl_setcpuaffinity() is not available");
-if (getenv('TRAVIS')) die('skip Currently fails on Travis');
 if (getenv('SKIP_REPEAT')) die("skip Not repeatable");
+if (PHP_OS_FAMILY === 'Solaris') die("skip doesn't work on Solaris");
 ?>
 --FILE--
 <?php

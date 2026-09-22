@@ -20,14 +20,17 @@ $message = 'A Message';
 $additional_headers = 'KHeaders';
 $additional_parameters = "-n";
 $outFile = "/tmp/php_test_mailBasic2.out";
-@unlink($outFile);
 
 echo "-- extra parameters --\n";
 // Calling mail() with all possible arguments
 var_dump( mail($to, $subject, $message, $additional_headers, $additional_parameters) );
 
 echo file_get_contents($outFile);
-unlink($outFile);
+
+?>
+--CLEAN--
+<?php
+@unlink("/tmp/php_test_mailBasic2.out");
 ?>
 --EXPECTF--
 *** Testing mail() : basic functionality ***

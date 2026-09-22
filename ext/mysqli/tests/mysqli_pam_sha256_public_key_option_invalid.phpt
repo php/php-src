@@ -101,9 +101,10 @@ echo "nocache";
             return false;
         }
 
-        if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
+        if (!$res = $link->query("SELECT id FROM test WHERE id = 1")) {
             printf("[%03d + 003] [%d] %s\n", $offset, $link->errno, $link->error);
             return false;
+        }
 
         if (!$row = mysqli_fetch_assoc($res)) {
             printf("[%03d + 004] [%d] %s\n", $offset, $link->errno, $link->error);
@@ -178,7 +179,7 @@ Warning: mysqli::real_connect(): (HY000/1045): %s in %s on line %d
 Warning: mysqli::real_connect(): (HY000/1045): %s in %s on line %d
 [300 + 002] [1045] %s
 
-Warning: mysqli::real_connect(%sest_sha256_wrong_%d): Failed to open stream: No such file or directory in %s on line %d
+Warning: mysqli::real_connect(): Failed to open stream: No such file or directory in %s on line %d
 
 Warning: mysqli::real_connect(): (HY000/1045): %s in %s on line %d
 [400 + 002] [1045] %s

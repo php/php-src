@@ -26,8 +26,8 @@ echo test::$var;
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -l $filename_escaped`);
-var_dump(`$php -n -l some.unknown`);
+var_dump(shell_exec("$php -n -l $filename_escaped"));
+var_dump(shell_exec("$php -n -l some.unknown"));
 
 $code = '
 <?php
@@ -41,7 +41,7 @@ class test
 
 file_put_contents($filename, $code);
 
-var_dump(`$php -n -l $filename_escaped`);
+var_dump(shell_exec("$php -n -l $filename_escaped"));
 
 @unlink($filename);
 

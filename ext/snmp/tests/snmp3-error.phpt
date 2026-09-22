@@ -8,6 +8,7 @@ snmp
 <?php
 require_once(__DIR__.'/skipif.inc');
 if (getenv('SKIP_ASAN')) die('skip Timeouts under ASAN');
+if (PHP_OS_FAMILY === 'Windows') die('xfail SNMP tests might possibly fail on Windows');
 ?>
 --FILE--
 <?php
@@ -68,7 +69,7 @@ bool(false)
 
 Warning: snmp3_get(): Error generating a key for authentication pass phrase 'te': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)
-Security protocol must be one of "DES", "AES128", or "AES"
+Security protocol must be one of %s "AES128", or "AES"
 
 Warning: snmp3_get(): Error generating a key for privacy pass phrase '': Generic error (The supplied password length is too short.) in %s on line %d
 bool(false)

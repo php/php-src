@@ -26,6 +26,8 @@ var_dump($a[$fp]);
 fclose($fp);
 ?>
 --EXPECTF--
+Deprecated: Using null as an array offset is deprecated, use an empty string instead in %s on line %d
+
 Warning: Undefined array key "epic_magic" in %s on line %d
 NULL
 

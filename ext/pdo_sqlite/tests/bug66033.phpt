@@ -24,8 +24,8 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
 try {
     $pdoStatement = $pdo->query("select * from messages");
 } catch (Exception $e) {
-    var_dump($e->getMessage());
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-string(4) "Blah"
+Exception: Blah

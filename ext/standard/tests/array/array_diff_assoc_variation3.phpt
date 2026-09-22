@@ -10,10 +10,6 @@ echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array = array(1, 2, 3);
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -21,11 +17,6 @@ class classA
     return "Class A object";
   }
 }
-
-// heredoc string
-$heredoc = <<<EOT
-hello world
-EOT;
 
 //array of different data types to be passed to $arr1 argument
 $inputs = array(
@@ -50,50 +41,28 @@ $inputs = array(
        // null data
 /*3*/
 'null' => array(
-       NULL,
        null),
 
        // boolean data
 /*4*/
 'bool' => array(
        true,
-       false,
-       TRUE,
-       FALSE),
+       false),
 
        // empty data
 /*5*/
 'empty' => array(
-       "",
        ''),
 
        // string data
 /*6*/
 'string' => array(
-       "string",
-       'string',
-       $heredoc),
-
-       // binary data
-/*7*/
-'binary' => array(
-       b"binary",
-       (binary)"binary"),
+       'string'),
 
        // object data
 /*8*/
 'object' => array(
       new classA()),
-
-       // undefined data
-/*9*/
-'undefined' => array(
-       @$undefined_var),
-
-       // unset data
-/*10*/
-'unset' => array(
-      @$unset_var),
 );
 
 // loop through each element of $inputs to check the behavior of array_diff_assoc
@@ -135,65 +104,33 @@ array(5) {
 }
 
 -- Iteration 3 --
-array(2) {
+array(1) {
   [0]=>
-  NULL
-  [1]=>
   NULL
 }
 
 -- Iteration 4 --
-array(3) {
+array(1) {
   [1]=>
-  bool(false)
-  [2]=>
-  bool(true)
-  [3]=>
   bool(false)
 }
 
 -- Iteration 5 --
-array(2) {
+array(1) {
   [0]=>
-  string(0) ""
-  [1]=>
   string(0) ""
 }
 
 -- Iteration 6 --
-array(3) {
+array(1) {
   [0]=>
   string(6) "string"
-  [1]=>
-  string(6) "string"
-  [2]=>
-  string(11) "hello world"
 }
 
 -- Iteration 7 --
-array(2) {
-  [0]=>
-  string(6) "binary"
-  [1]=>
-  string(6) "binary"
-}
-
--- Iteration 8 --
 array(1) {
   [0]=>
   object(classA)#%d (0) {
   }
-}
-
--- Iteration 9 --
-array(1) {
-  [0]=>
-  NULL
-}
-
--- Iteration 10 --
-array(1) {
-  [0]=>
-  NULL
 }
 Done

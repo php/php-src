@@ -67,7 +67,7 @@ echo "[", implode(', ', array_map('bin2hex', $array)), "]\n";
 try {
 	mb_str_split("abc", 1234567890, "UTF-8");
 } catch (ValueError $e) {
-	echo $e->getMessage() . \PHP_EOL;
+	echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>
@@ -124,4 +124,4 @@ try {
 == Regression tests ==
 [1b28494a4a1b2842, 1b28494a4a1b2842]
 [5a]
-mb_str_split(): Argument #2 ($length) is too large
+ValueError: mb_str_split(): Argument #2 ($length) is too large

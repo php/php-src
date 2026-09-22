@@ -89,6 +89,7 @@
 .file	"make_x86_64_ms_pe_gas.asm"
 .text
 .p2align 4,,15
+.globl	make_fcontext
 .def	make_fcontext;	.scl	2;	.type	32;	.endef
 .seh_proc	make_fcontext
 make_fcontext:
@@ -112,7 +113,7 @@ make_fcontext:
     /* save top address of context stack as 'base' */
     movq  %rcx, 0xc8(%rax)
     /* second arg of make_fcontext() == size of context-stack */
-    /* negate stack size for LEA instruction (== substraction) */
+    /* negate stack size for LEA instruction (== subtraction) */
     negq  %rdx
     /* compute bottom address of context stack (limit) */
     leaq  (%rcx,%rdx), %rcx
@@ -150,7 +151,7 @@ make_fcontext:
 
 trampoline:
     /* store return address on stack */
-    /* fix stack alignment */ 
+    /* fix stack alignment */
     pushq %rbp
     /* jump to context-function */
     jmp *%rbx
@@ -168,3 +169,6 @@ finish:
 .seh_endproc
 
 .def	_exit;	.scl	2;	.type	32;	.endef  /* standard C library function */
+
+.section .drectve
+.ascii " -export:\"make_fcontext\""

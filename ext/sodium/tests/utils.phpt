@@ -102,7 +102,7 @@ function sodium_foo()
 try {
     sodium_foo();
 } catch (SodiumException $ex) {
-    var_dump($ex->getMessage());
+    echo $ex::class, ': ', $ex->getMessage(), "\n";
 }
 
 ?>
@@ -126,4 +126,4 @@ string(25) "base64("O1R") case passed"
 string(24) "base64("O1") case passed"
 string(23) "base64("O") case passed"
 string(4) "abcd"
-string(4) "test"
+SodiumException: test

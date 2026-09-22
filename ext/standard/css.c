@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Colin Viebrock <colin@viebrock.ca>                          |
    +----------------------------------------------------------------------+
@@ -21,8 +19,8 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 {
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
-	PUTS("a:link {color: #009; text-decoration: none; background-color: #fff;}\n");
-	PUTS("a:hover {text-decoration: underline;}\n");
+	PUTS("a {color: inherit;}\n");
+	PUTS("a:hover {text-decoration: none;}\n");
 	PUTS("table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);}\n");
 	PUTS(".center {text-align: center;}\n");
 	PUTS(".center table {margin: 1em auto; text-align: left;}\n");
@@ -31,7 +29,8 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS("th {position: sticky; top: 0; background: inherit;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
-	PUTS("h2 a:link, h2 a:visited{color: inherit; background: inherit;}\n");
+	PUTS("h2 > a {text-decoration: none;}\n");
+	PUTS("h2 > a:hover {text-decoration: underline;}\n");
 	PUTS(".p {text-align: left;}\n");
 	PUTS(".e {background-color: #ccf; width: 300px; font-weight: bold;}\n");
 	PUTS(".h {background-color: #99c; font-weight: bold;}\n");

@@ -16,13 +16,9 @@
     $db        = getenv("MYSQL_TEST_DB")       ?: "test";
     $engine    = getenv("MYSQL_TEST_ENGINE")   ?: "InnoDB";
     $socket    = getenv("MYSQL_TEST_SOCKET")   ?: null;
-    $skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ?: true;
     if ($socket) {
         ini_set('mysqli.default_socket', $socket);
     }
-
-    /* Development setting: test experimental features and/or feature requests that never worked before? */
-    $TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 
     function get_environment_connection_flags(): int {
         static $connect_flags = null;

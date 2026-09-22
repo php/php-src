@@ -3,7 +3,6 @@ gmp_setbit() with large index
 --EXTENSIONS--
 gmp
 --SKIPIF--
-<?php if (getenv("TRAVIS") === "true") die("skip not suitable for Travis-CI"); ?>
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 <?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow test"); ?>
 <?php
@@ -31,7 +30,7 @@ for($a = 1<<30; $a > 0 && $a < 0x8000000000; $a <<= 2) {
     try {
         gmp_setbit($n, $i, 1);
     } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 echo "Done\n";
@@ -42,5 +41,5 @@ FFFFFFFF
 3FFFFFFFF
 FFFFFFFFF
 3FFFFFFFFF
-gmp_setbit(): Argument #2 ($index) must be less than %d * %d
+ValueError: gmp_setbit(): Argument #2 ($index) must be between 0 and %d * %d
 Done

@@ -87,7 +87,8 @@ output_add_rewrite_var('<name2>', '<value2>');
 echo "\nURL-Rewriting with output_add_rewrite_var() without transparent session id support\n";
 echo $testTags;
 
---EXPECT--
+--EXPECTF--
+Deprecated: ini_set(): Usage of session.trans_sid_hosts INI setting is deprecated in %s on line 44
 URL-Rewriting with output_add_rewrite_var() without transparent session id support
 
 <a href="?%3Cname%3E=%3Cvalue%3E"></a>
@@ -125,6 +126,10 @@ URL-Rewriting with output_add_rewrite_var() without transparent session id suppo
 <form action="http://url-rewriter.com/bar.php" method="get"><input type="hidden" name="&lt;name&gt;" value="&lt;value&gt;" /></form>
 <form action="bad://url-rewriter.com/bar.php" method="get"></form>
 <form action="//www.url-rewriter.com/bar.php" method="get"></form>
+
+Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 61
+
+Deprecated: ini_set(): Enabling session.use_trans_sid INI setting is deprecated in %s on line 64
 
 URL-Rewriting with transparent session id support without output_add_rewrite_var()
 

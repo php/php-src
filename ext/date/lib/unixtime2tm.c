@@ -26,20 +26,16 @@
 #include "timelib.h"
 #include "timelib_private.h"
 
-void timelib_unixtime2date(timelib_sll ts, timelib_sll *y, timelib_sll *m, timelib_sll *d)
+/* Converts Unix epoch days (days since 1970-01-01) to a date. Algorithm from:
+ * http://howardhinnant.github.io/date_algorithms.html#civil_from_days */
+void timelib_date_from_epoch_days(timelib_sll epoch_days, timelib_sll *y, timelib_sll *m, timelib_sll *d)
 {
-	timelib_sll days, era, t;
+	timelib_sll days, era;
 	timelib_ull day_of_era, year_of_era, day_of_year, month_portion;
 
 	/* Calculate days since algorithm's epoch (0000-03-01) */
-	days = ts / SECS_PER_DAY + HINNANT_EPOCH_SHIFT;
+	days = epoch_days + HINNANT_EPOCH_SHIFT;
 
-	/* Adjustment for a negative time portion */
-	t = ts % SECS_PER_DAY;
-	days += (t < 0) ? -1 : 0;
-
-	/* Calculate year, month, and day. Algorithm from:
-	 * http://howardhinnant.github.io/date_algorithms.html#civil_from_days */
 	era = (days >= 0 ? days : days - DAYS_PER_ERA + 1) / DAYS_PER_ERA;
 	day_of_era = days - era * DAYS_PER_ERA;
 	year_of_era = (day_of_era - day_of_era / 1460 + day_of_era / 36524 - day_of_era / 146096) / DAYS_PER_YEAR;
@@ -49,6 +45,19 @@ void timelib_unixtime2date(timelib_sll ts, timelib_sll *y, timelib_sll *m, timel
 	*d = day_of_year - (153 * month_portion + 2) / 5 + 1;
 	*m = month_portion + (month_portion < 10 ? 3 : -9);
 	*y += (*m <= 2);
+}
+
+void timelib_unixtime2date(timelib_sll ts, timelib_sll *y, timelib_sll *m, timelib_sll *d)
+{
+	timelib_sll epoch_days, t;
+
+	epoch_days = ts / SECS_PER_DAY;
+
+	/* Adjustment for a negative time portion */
+	t = ts % SECS_PER_DAY;
+	epoch_days += (t < 0) ? -1 : 0;
+
+	timelib_date_from_epoch_days(epoch_days, y, m, d);
 
 	TIMELIB_DEBUG(printf("A: ts=%lld, year=%lld, month=%lld, day=%lld,", ts, *y, *m, *d););
 }

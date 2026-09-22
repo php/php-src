@@ -1,7 +1,6 @@
 --TEST--
 PDO::exec() returns 0 when the statement is a SELECT.
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php

@@ -2,6 +2,8 @@
 Test mb_substitute_character() function : usage variation
 --EXTENSIONS--
 mbstring
+--INI--
+internal_encoding=utf-8
 --FILE--
 <?php
 declare(strict_types=1);
@@ -93,13 +95,12 @@ $inputs = array(
 
 // loop through each element of the array for substchar
 
-mb_internal_encoding('utf-8');
 foreach($inputs as $key =>$value) {
       echo "--$key--\n";
       try {
           var_dump( mb_substitute_character($value) );
       } catch (\ValueError|\TypeError $e) {
-          echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+          echo $e::class, ': ', $e->getMessage(), PHP_EOL;
       }
 }
 

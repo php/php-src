@@ -26,4 +26,7 @@ session_start();
 session_destroy();
 ?>
 --EXPECT--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 <form accept-charset="ISO-8859-15, ISO-8859-1" action=url.php><input type="hidden" name="PHPSESSID" value="test018" />

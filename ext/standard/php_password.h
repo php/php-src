@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Anthony Ferrara <ircmaxell@php.net>                         |
    |          Charles R. Portwood II <charlesportwoodii@erianna.com>      |
@@ -26,8 +24,10 @@ PHP_MSHUTDOWN_FUNCTION(password);
 
 #ifdef HAVE_ARGON2LIB
 /**
- * When updating these values, synchronize ext/sodium/sodium_pwhash.c values.
- * Note that libargon expresses memlimit in KB, while libsoidum uses bytes.
+ * When updating these values, synchronize values in
+ *     ext/sodium/php_libsodium.h
+ *     ext/openssl/php_openssl.h
+ * Note that libargon/openssl express memlimit in KB, while libsodium uses bytes.
  */
 #define PHP_PASSWORD_ARGON2_MEMORY_COST (64 << 10)
 #define PHP_PASSWORD_ARGON2_TIME_COST 4

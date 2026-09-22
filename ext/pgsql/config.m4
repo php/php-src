@@ -10,23 +10,42 @@ if test "$PHP_PGSQL" != "no"; then
   PHP_SETUP_PGSQL([PGSQL_SHARED_LIBADD],,, [$PHP_PGSQL])
   PHP_SUBST([PGSQL_SHARED_LIBADD])
 
-  AC_DEFINE(HAVE_PGSQL,1,[Whether to build PostgreSQL support or not])
+  AC_DEFINE([HAVE_PGSQL], [1],
+    [Define to 1 if the PHP extension 'pgsql' is available.])
 
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
-    [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1], [PostgreSQL 12 or later])],,
+    [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1],
+      [Define to 1 if libpq has the 'PQresultMemorySize' function (PostgreSQL 12
+      or later).])],,
     [$PGSQL_LIBS])
   PHP_CHECK_LIBRARY([pq], [PQchangePassword],
-    [AC_DEFINE([HAVE_PG_CHANGE_PASSWORD], [1], [PostgreSQL 17 or later])],,
+    [AC_DEFINE([HAVE_PG_CHANGE_PASSWORD], [1],
+      [Define to 1 if libpq has the 'PQchangePassword' function (PostgreSQL 17
+      or later).])],,
     [$PGSQL_LIBS])
   PHP_CHECK_LIBRARY([pq], [PQsocketPoll],
-    [AC_DEFINE([HAVE_PG_SOCKET_POLL], [1], [PostgreSQL 17 or later])],,
+    [AC_DEFINE([HAVE_PG_SOCKET_POLL], [1],
+      [Define to 1 if libpq has the 'PQsocketPoll' function (PostgreSQL 17 or
+      later).])],,
     [$PGSQL_LIBS])
-  PHP_CHECK_LIBRARY([pq], [PQsetChunkedRowsMode],
-    [AC_DEFINE([HAVE_PG_SET_CHUNKED_ROWS_SIZE], [1], [PostgreSQL 17 or later])],,
+  PHP_CHECK_LIBRARY([pq], [PQclosePrepared],
+    [AC_DEFINE([HAVE_PG_CLOSE_STMT], [1], [PostgreSQL 17 or later])],,
+    [$PGSQL_LIBS])
+  PHP_CHECK_LIBRARY([pq], [PQservice],
+    [AC_DEFINE([HAVE_PG_SERVICE], [1], [PostgreSQL 18 or later])],,
     [$PGSQL_LIBS])
 
   old_CFLAGS=$CFLAGS
   CFLAGS="$CFLAGS $PGSQL_CFLAGS"
+
+  AC_CHECK_DECL([PGRES_TUPLES_CHUNK],
+    PHP_CHECK_LIBRARY([pq], [PQsetChunkedRowsMode],
+      [AC_DEFINE([HAVE_PG_SET_CHUNKED_ROWS_SIZE], [1],
+        [Define to 1 if libpq has the 'PQsetChunkedRowsMode' function (PostgreSQL
+        17 or later).])],,
+      [$PGSQL_LIBS]),,
+      [#include <libpq-fe.h>]
+  )
 
   dnl Available since PostgreSQL 12.
   AC_CACHE_CHECK([if PGVerbosity enum has PQERRORS_SQLSTATE],
@@ -41,6 +60,9 @@ if test "$PHP_PGSQL" != "no"; then
 
   CFLAGS=$old_CFLAGS
 
-  PHP_NEW_EXTENSION(pgsql, pgsql.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([pgsql],
+    [pgsql.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_ADD_EXTENSION_DEP(pgsql, pcre)
 fi

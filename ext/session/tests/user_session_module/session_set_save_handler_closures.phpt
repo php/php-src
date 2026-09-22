@@ -15,7 +15,7 @@ echo "*** Testing session_set_save_handler() : using closures as callbacks ***\n
 
 require_once "save_handler_closures.inc";
 var_dump(session_module_name());
-var_dump(session_module_name(FALSE));
+var_dump(session_module_name(''));
 var_dump(session_module_name("blah"));
 var_dump(session_module_name("foo"));
 
@@ -62,7 +62,7 @@ bool(false)
 Warning: session_module_name(): Session handler module "foo" cannot be found in %s on line %d
 bool(false)
 
-Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 Open [%s,PHPSESSID]
 Read [%s,%s]
 array(3) {
@@ -85,7 +85,7 @@ array(3) {
 }
 Starting session again..!
 
-Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 Open [%s,PHPSESSID]
 Read [%s,%s]
 array(4) {

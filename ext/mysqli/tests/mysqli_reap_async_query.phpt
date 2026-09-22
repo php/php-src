@@ -18,10 +18,6 @@ require_once 'skipifconnectfailure.inc';
         return $link;
     }
 
-    if (!$link = get_connection())
-        printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-
-
     function poll_async($offset, $link, $links, $errors, $reject, $exp_ready, $use_oo_syntax) {
 
         if ($exp_ready !== ($tmp = mysqli_poll($links, $errors, $reject, 0, 50 * 1000)))

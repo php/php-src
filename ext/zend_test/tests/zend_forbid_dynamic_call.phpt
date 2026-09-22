@@ -13,17 +13,17 @@ try {
     $call = [$object, 'call'];
     $call();
 } catch (Error $error) {
-    echo $error->getMessage(), "\n";
+    echo $error::class, ': ', $error->getMessage(), "\n";
 }
 
 try {
     $callStatic = [ZendTestForbidDynamicCall::class, 'callStatic'];
     $callStatic();
 } catch (Error $error) {
-    echo $error->getMessage(), "\n";
+    echo $error::class, ': ', $error->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Cannot call ZendTestForbidDynamicCall::call() dynamically
-Cannot call ZendTestForbidDynamicCall::callStatic() dynamically
+Error: Cannot call ZendTestForbidDynamicCall::call() dynamically
+Error: Cannot call ZendTestForbidDynamicCall::callStatic() dynamically

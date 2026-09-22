@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -20,6 +18,9 @@
 */
 
 #include "zend_shared_alloc.h"
+#ifdef HAVE_JIT
+# include "jit/zend_jit.h"
+#endif
 
 #ifdef USE_MMAP
 
@@ -48,8 +49,8 @@
 # define MAP_HUGETLB MAP_ALIGNED_SUPER
 #endif
 
-#if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
-static void *find_prefered_mmap_base(size_t requested_size)
+#if defined(HAVE_JIT) && (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
+static void *find_preferred_mmap_base(size_t requested_size)
 {
 	size_t huge_page_size = 2 * 1024 * 1024;
 	uintptr_t last_free_addr = huge_page_size;
@@ -197,8 +198,17 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 #ifdef PROT_MAX
 	flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
 #endif
-#if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
-	void *hint = find_prefered_mmap_base(requested_size);
+#if defined(HAVE_JIT) && (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
+	void *hint;
+	if (JIT_G(enabled) && JIT_G(buffer_size)
+			&& zend_jit_check_support() == SUCCESS) {
+		hint = find_preferred_mmap_base(requested_size);
+	} else {
+		/* Do not use a hint if JIT is not enabled, as this profits only JIT and
+		 * this is potentially unsafe when the only suitable candidate is just
+		 * after the heap (e.g. in non-PIE builds) (GH-13775). */
+		hint = MAP_FAILED;
+	}
 	if (hint != MAP_FAILED) {
 # ifdef MAP_HUGETLB
 		size_t huge_page_size = 2 * 1024 * 1024;
@@ -233,9 +243,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		/* to got HUGE PAGES in low 32-bit address we have to reserve address
 		   space and then remap it using MAP_HUGETLB */
 
-		p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
+		p = mmap(NULL, requested_size + huge_page_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 		if (p != MAP_FAILED) {
-			munmap(p, requested_size);
+			munmap(p, requested_size + huge_page_size);
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
 			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {

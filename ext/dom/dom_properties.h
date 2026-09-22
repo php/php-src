@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -37,6 +35,7 @@ zend_result dom_document_implementation_read(dom_object *obj, zval *retval);
 zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval);
 zend_result dom_document_document_element_read(dom_object *obj, zval *retval);
 zend_result dom_document_encoding_read(dom_object *obj, zval *retval);
+zend_result dom_document_actual_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_document_encoding_write(dom_object *obj, zval *newval);
 zend_result dom_document_standalone_read(dom_object *obj, zval *retval);
 zend_result dom_document_standalone_write(dom_object *obj, zval *newval);
@@ -57,8 +56,8 @@ zend_result dom_document_preserve_whitespace_read(dom_object *obj, zval *retval)
 zend_result dom_document_preserve_whitespace_write(dom_object *obj, zval *newval);
 zend_result dom_document_recover_read(dom_object *obj, zval *retval);
 zend_result dom_document_recover_write(dom_object *obj, zval *newval);
-zend_result dom_document_substitue_entities_read(dom_object *obj, zval *retval);
-zend_result dom_document_substitue_entities_write(dom_object *obj, zval *newval);
+zend_result dom_document_substitute_entities_read(dom_object *obj, zval *retval);
+zend_result dom_document_substitute_entities_write(dom_object *obj, zval *newval);
 
 /* html5 document properties */
 zend_result dom_html_document_encoding_write(dom_object *obj, zval *retval);
@@ -85,7 +84,11 @@ zend_result dom_element_id_write(dom_object *obj, zval *newval);
 zend_result dom_element_schema_type_info_read(dom_object *obj, zval *retval);
 zend_result dom_element_inner_html_read(dom_object *obj, zval *retval);
 zend_result dom_element_inner_html_write(dom_object *obj, zval *newval);
+zend_result dom_element_outer_html_read(dom_object *obj, zval *retval);
+zend_result dom_element_outer_html_write(dom_object *obj, zval *newval);
 zend_result dom_element_class_list_read(dom_object *obj, zval *retval);
+zend_result dom_modern_element_substituted_node_value_read(dom_object *obj, zval *retval);
+zend_result dom_modern_element_substituted_node_value_write(dom_object *obj, zval *newval);
 
 /* entity properties */
 zend_result dom_entity_public_id_read(dom_object *obj, zval *retval);
@@ -99,11 +102,13 @@ zend_result dom_entity_version_read(dom_object *obj, zval *retval);
 zend_result dom_entity_reference_child_read(dom_object *obj, zval *retval);
 zend_result dom_entity_reference_text_content_read(dom_object *obj, zval *retval);
 zend_result dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval);
+zend_result dom_modern_entity_reference_child_nodes_read(dom_object *obj, zval *retval);
 
 /* namednodemap properties */
 zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval);
 
 /* parent node properties */
+zend_result dom_parent_node_children_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retval);
 zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval);
@@ -116,6 +121,7 @@ zend_result dom_node_node_type_read(dom_object *obj, zval *retval);
 zend_result dom_node_parent_node_read(dom_object *obj, zval *retval);
 zend_result dom_node_parent_element_read(dom_object *obj, zval *retval);
 zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval);
+zend_result dom_modern_node_child_nodes_read(dom_object *obj, zval *retval);
 zend_result dom_node_first_child_read(dom_object *obj, zval *retval);
 zend_result dom_node_last_child_read(dom_object *obj, zval *retval);
 zend_result dom_node_previous_sibling_read(dom_object *obj, zval *retval);
@@ -131,6 +137,7 @@ zend_result dom_modern_node_prefix_read(dom_object *obj, zval *retval);
 zend_result dom_node_prefix_write(dom_object *obj, zval *newval);
 zend_result dom_node_local_name_read(dom_object *obj, zval *retval);
 zend_result dom_node_base_uri_read(dom_object *obj, zval *retval);
+zend_result dom_modern_node_base_uri_read(dom_object *obj, zval *retval);
 zend_result dom_node_text_content_read(dom_object *obj, zval *retval);
 zend_result dom_node_text_content_write(dom_object *obj, zval *newval);
 
@@ -162,8 +169,8 @@ zend_result dom_xpath_register_node_ns_write(dom_object *obj, zval *newval);
 #endif
 
 #define DOM_PROP_NODE(type, name, obj) \
-	type name = (type) dom_object_get_node(obj); \
-	if (UNEXPECTED(name == NULL)) { \
+	type (name) = (type) dom_object_get_node(obj); \
+	if (UNEXPECTED((name) == NULL)) { \
 		php_dom_throw_error(INVALID_STATE_ERR, true); \
 		return FAILURE; \
 	}

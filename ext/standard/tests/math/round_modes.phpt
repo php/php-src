@@ -7,10 +7,10 @@ $modes = [
     "PHP_ROUND_HALF_DOWN" => PHP_ROUND_HALF_DOWN,
     "PHP_ROUND_HALF_EVEN" => PHP_ROUND_HALF_EVEN,
     "PHP_ROUND_HALF_ODD" => PHP_ROUND_HALF_ODD,
-    "PHP_ROUND_CEILING" => PHP_ROUND_CEILING,
-    "PHP_ROUND_FLOOR" => PHP_ROUND_FLOOR,
-    "PHP_ROUND_TOWARD_ZERO" => PHP_ROUND_TOWARD_ZERO,
-    "PHP_ROUND_AWAY_FROM_ZERO" => PHP_ROUND_AWAY_FROM_ZERO,
+    "PositiveInfinity" => RoundingMode::PositiveInfinity,
+    "NegativeInfinity" => RoundingMode::NegativeInfinity,
+    "TowardsZero" => RoundingMode::TowardsZero,
+    "AwayFromZero" => RoundingMode::AwayFromZero,
 ];
 
 $numbers = [
@@ -455,7 +455,7 @@ mode: PHP_ROUND_HALF_ODD
 		 0.0001 => 0.0001
 		-0.0001 => -0.0001
 
-mode: PHP_ROUND_CEILING
+mode: PositiveInfinity
 	precision: -1
 		    2.5 => 10
 		   -2.5 => -0
@@ -556,7 +556,7 @@ mode: PHP_ROUND_CEILING
 		 0.0001 => 0.0001
 		-0.0001 => -0.0001
 
-mode: PHP_ROUND_FLOOR
+mode: NegativeInfinity
 	precision: -1
 		    2.5 => 0
 		   -2.5 => -10
@@ -657,7 +657,7 @@ mode: PHP_ROUND_FLOOR
 		 0.0001 => 0.0001
 		-0.0001 => -0.0001
 
-mode: PHP_ROUND_TOWARD_ZERO
+mode: TowardsZero
 	precision: -1
 		    2.5 => 0
 		   -2.5 => -0
@@ -758,7 +758,7 @@ mode: PHP_ROUND_TOWARD_ZERO
 		 0.0001 => 0.0001
 		-0.0001 => -0.0001
 
-mode: PHP_ROUND_AWAY_FROM_ZERO
+mode: AwayFromZero
 	precision: -1
 		    2.5 => 10
 		   -2.5 => -10

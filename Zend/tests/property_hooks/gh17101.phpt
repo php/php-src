@@ -1,0 +1,22 @@
+--TEST--
+GH-17101 (AST->string does not reproduce constructor property promotion correctly)
+--FILE--
+<?php
+
+try {
+    assert(false && new class {
+        public function __construct( #[Foo] public private(set) bool $boolVal = false { final set => $this->boolVal = 1;} ) {}
+    });
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECT--
+AssertionError: assert(false && new class {
+    public function __construct(#[Foo] public private(set) bool $boolVal = false {
+        final set => $this->boolVal = 1;
+    }) {
+    }
+
+})

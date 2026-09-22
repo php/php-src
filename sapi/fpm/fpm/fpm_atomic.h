@@ -156,6 +156,25 @@ static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 }
 /* }}} */
 
+static inline int fpm_spinlock_with_max_retries(atomic_t *lock, unsigned int max_retries)
+{
+    unsigned int retries = 0;
+
+    for (;;) {
+        if (atomic_cmp_set(lock, 0, 1)) {
+            return 1;
+        }
+
+        sched_yield();
+
+        if (++retries > max_retries) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 #define fpm_unlock(lock) lock = 0
 
 #endif

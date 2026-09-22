@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -51,9 +49,10 @@ static int create_segments(size_t requested_size, zend_shared_segment_posix ***s
 	 * only then amd64/i386/arm64 and perharps risc64*
 	 * archs are on interest here.
 	 */
-	size_t i, shared_segment_sizes = 0, shared_segment_lg_index = 0;
+	size_t shared_segment_lg_index = 0;
 	size_t shared_segment_sindexes[3] = {0};
 	const size_t entries = sizeof(shared_segment_sindexes) / sizeof(shared_segment_sindexes[0]);
+	int i, shared_segment_sizes;
 
 	shared_segment_sizes = getpagesizes(shared_segment_sindexes, entries);
 

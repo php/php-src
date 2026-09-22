@@ -19,7 +19,7 @@ var_dump(filter_has_var(INPUT_GET, "cc"));
 try {
     filter_has_var(-1, "cc");
 } catch (ValueError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 
 var_dump(filter_has_var(0, "cc"));
@@ -34,6 +34,6 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-filter_has_var(): Argument #1 ($input_type) must be an INPUT_* constant
+ValueError: filter_has_var(): Argument #1 ($input_type) must be an INPUT_* constant
 bool(false)
 Done

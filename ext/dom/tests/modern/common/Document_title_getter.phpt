@@ -43,6 +43,10 @@ var_dump($dom->title);
 $dom = Dom\XMLDocument::createFromString("<root xmlns=\"http://www.w3.org/1999/xhtml\"><title>title\nhere</title></root>");
 var_dump($dom->title);
 
+$dom = Dom\XMLDocument::createFromString("<root xmlns=\"http://www.w3.org/1999/xhtml\"><title/></root>");
+$dom->getElementsByTagName('title')[0]->appendChild($dom->importLegacyNode(new DOMText));
+var_dump($dom->title);
+
 echo "=== SVG namespaced root ===\n";
 
 $dom = Dom\XMLDocument::createFromString("<root xmlns=\"http://www.w3.org/1999/xhtml\"><title>title</title></root>");
@@ -72,6 +76,7 @@ string(0) ""
 string(2) "xz"
 string(2) "yw"
 string(10) "title here"
+string(0) ""
 === SVG namespaced root ===
 string(5) "title"
 string(5) "title"

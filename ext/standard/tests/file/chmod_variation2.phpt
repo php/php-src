@@ -34,7 +34,7 @@ clearstatcache();
 printf("%o\n", fileperms($filepath) & PERMISSIONS_MASK);
 
 echo "\nchmod() on a linked file\n";
-$linkname = "somelink";
+$linkname = "somelink2";
 var_dump(symlink($filepath, $linkname));
 var_dump(chmod($filepath, 0777));
 var_dump(chmod($linkname, 0755));

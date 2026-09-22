@@ -5,6 +5,9 @@ gd
 --SKIPIF--
 <?php
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.3.4', '>=')) die("skip test requires GD 2.3.4 or older");
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
 ?>
 --FILE--
 <?php

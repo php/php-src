@@ -97,6 +97,12 @@ void bc_init_numbers(void)
 	BCG(_two_)->n_value[0] = 2;
 }
 
+void bc_force_free_number(bc_num *num)
+{
+	pefree(*num, 1);
+	*num = NULL;
+}
+
 
 /* Initialize a number NUM by making it a copy of zero. */
 void bc_init_num(bc_num *num)

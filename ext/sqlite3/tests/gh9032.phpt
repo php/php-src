@@ -18,9 +18,9 @@ try {
     $st->execute();
     var_dump($db->exec('create table db2.r (id int)'));
 } catch (SQLite3Exception $ex) {
-    echo $ex->getMessage(), PHP_EOL;
+    echo $ex::class, ': ', $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 bool(true)
-Unable to prepare statement: not authorized
+SQLite3Exception: Unable to prepare statement: not authorized

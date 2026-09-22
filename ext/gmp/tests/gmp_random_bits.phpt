@@ -8,12 +8,12 @@ gmp
 try {
     var_dump(gmp_random_bits(0));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     var_dump(gmp_random_bits(-1));
 } catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 // If these error the test fails.
@@ -40,7 +40,7 @@ while (1) {
 
 echo "Done\n";
 ?>
---EXPECT--
-gmp_random_bits(): Argument #1 ($bits) must be greater than or equal to 1
-gmp_random_bits(): Argument #1 ($bits) must be greater than or equal to 1
+--EXPECTF--
+ValueError: gmp_random_bits(): Argument #1 ($bits) must be between 1 and %d
+ValueError: gmp_random_bits(): Argument #1 ($bits) must be between 1 and %d
 Done

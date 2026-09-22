@@ -373,7 +373,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			}
 		}
 
-		fpm_scoreboard_update_commit(idle, active, cur_lq, -1, -1, -1, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
+		fpm_scoreboard_update_commit(idle, active, cur_lq, -1, -1, -1, 0, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
 
 		/* this is specific to PM_STYLE_ONDEMAND */
 		if (wp->config->pm == PM_STYLE_ONDEMAND) {
@@ -406,7 +406,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		if (idle < wp->config->pm_min_spare_servers) {
 			if (wp->running_children >= wp->config->pm_max_children) {
 				if (!wp->warn_max_children && !wp->shared) {
-					fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
+					fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
 					zlog(ZLOG_WARNING, "[pool %s] server reached pm.max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
 				}
@@ -425,7 +425,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			children_to_fork = MIN(children_to_fork, wp->config->pm_max_children - wp->running_children);
 			if (children_to_fork <= 0) {
 				if (!wp->warn_max_children && !wp->shared) {
-					fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
+					fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
 					zlog(ZLOG_WARNING, "[pool %s] server reached pm.max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 					wp->warn_max_children = 1;
 				}
@@ -529,7 +529,7 @@ void fpm_pctl_on_socket_accept(struct fpm_event_s *ev, short which, void *arg) /
 
 	if (wp->running_children >= wp->config->pm_max_children) {
 		if (!wp->warn_max_children && !wp->shared) {
-			fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
+			fpm_scoreboard_update(0, 0, 0, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, wp->scoreboard);
 			zlog(ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm_max_children);
 			wp->warn_max_children = 1;
 		}

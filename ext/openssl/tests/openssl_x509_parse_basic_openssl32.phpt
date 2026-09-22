@@ -8,12 +8,28 @@ if (OPENSSL_VERSION_NUMBER < 0x30200000) die('skip For OpenSSL >= 3.2');
 ?>
 --FILE--
 <?php
+function normalize_openssl4_x509_parse_output(array $cert): array {
+    if (OPENSSL_VERSION_NUMBER < 0x40000000 || !isset($cert['serialNumberHex'], $cert['extensions']['authorityKeyIdentifier'])) {
+        return $cert;
+    }
+
+    $serial = strtoupper($cert['serialNumberHex']);
+    if (strlen($serial) % 2) {
+        $serial = '0' . $serial;
+    }
+    $serial = implode(':', str_split($serial, 2));
+    $cert['extensions']['authorityKeyIdentifier'] = preg_replace('/^serial:\d+$/m', 'serial:' . $serial, $cert['extensions']['authorityKeyIdentifier']);
+
+    return $cert;
+}
+
 $cert = "file://" . __DIR__ . "/cert.crt";
 
 $parsedCert = openssl_x509_parse($cert);
-var_dump($parsedCert === openssl_x509_parse(openssl_x509_read($cert)));
+$parsedCert = normalize_openssl4_x509_parse_output($parsedCert);
+var_dump($parsedCert === normalize_openssl4_x509_parse_output(openssl_x509_parse(openssl_x509_read($cert))));
 var_dump($parsedCert);
-var_dump(openssl_x509_parse($cert, false));
+var_dump(normalize_openssl4_x509_parse_output(openssl_x509_parse($cert, false)));
 ?>
 --EXPECTF--
 bool(true)

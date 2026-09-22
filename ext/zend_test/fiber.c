@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Aaron Piotrowski <aaron@trowski.com>                         |
   +----------------------------------------------------------------------+
@@ -91,6 +89,7 @@ static ZEND_STACK_ALIGNED void zend_test_fiber_execute(zend_fiber_transfer *tran
 		execute_data = (zend_execute_data *) stack->top;
 
 		memset(execute_data, 0, sizeof(zend_execute_data));
+		execute_data->func = (zend_function *) &zend_pass_function;
 
 		EG(current_execute_data) = execute_data;
 		EG(jit_trace_num) = 0;
@@ -352,4 +351,5 @@ void zend_test_fiber_init(void)
 	zend_test_fiber_handlers = std_object_handlers;
 	zend_test_fiber_handlers.dtor_obj = zend_test_fiber_object_destroy;
 	zend_test_fiber_handlers.free_obj = zend_test_fiber_object_free;
+	zend_test_fiber_handlers.clone_obj = NULL;
 }

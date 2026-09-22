@@ -7,7 +7,7 @@ pdo_sqlite
 
 $db = new PDO('sqlite::memory:');
 $db->query('CREATE TABLE test_pdo_sqlite_lastinsertid (id INT AUTO INCREMENT, name TEXT)');
-$db->query('INSERT INTO test_pdo_sqlite_lastinsertid VALUES (NULL, "PHP"), (NULL, "PHP6")');
+$db->query("INSERT INTO test_pdo_sqlite_lastinsertid VALUES (NULL, 'PHP'), (NULL, 'PHP6')");
 var_dump($db->query('SELECT * FROM test_pdo_sqlite_lastinsertid'));
 var_dump($db->errorInfo());
 var_dump($db->lastInsertId());

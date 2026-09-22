@@ -43,7 +43,7 @@ $it->setMaxDepth(4);
 try {
     $it->setMaxDepth(-2);
 } catch(\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 var_dump($it->getMaxDepth());
 ?>
@@ -102,5 +102,5 @@ int(0)
 0: 4
 ===-1===
 bool(false)
-RecursiveIteratorIterator::setMaxDepth(): Argument #1 ($maxDepth) must be greater than or equal to -1
+ValueError: RecursiveIteratorIterator::setMaxDepth(): Argument #1 ($maxDepth) must be greater than or equal to -1
 int(4)

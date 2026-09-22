@@ -10,7 +10,7 @@ $s = new SplObjectStorage();
 try {
     $s->unserialize('');
 } catch(UnexpectedValueException $e) {
-    echo $e->getMessage();
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 
 ?>

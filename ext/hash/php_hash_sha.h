@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | SHA1 Author: Stefan Esser <sesser@php.net>                           |
    | SHA256 Author: Sara Golemon <pollita@php.net>                        |
@@ -19,7 +17,6 @@
 #define PHP_HASH_SHA_H
 
 #include "ext/standard/sha1.h"
-#include "ext/standard/basic_functions.h"
 
 /* SHA224 context. */
 typedef struct {
@@ -45,6 +42,29 @@ typedef struct {
 #define PHP_SHA256Init(ctx) PHP_SHA256InitArgs(ctx, NULL)
 PHP_HASH_API void PHP_SHA256InitArgs(PHP_SHA256_CTX *, ZEND_ATTRIBUTE_UNUSED HashTable *);
 PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, size_t);
+
+#if defined(__cplusplus) || defined(_MSC_VER)
+# define PHP_STATIC_RESTRICT
+#else
+# define PHP_STATIC_RESTRICT static restrict
+#endif
+
+#if defined(__SSE2__)
+void SHA256_Transform_sse2(uint32_t state[PHP_STATIC_RESTRICT 8], const uint8_t block[PHP_STATIC_RESTRICT 64], uint32_t W[PHP_STATIC_RESTRICT 64], uint32_t S[PHP_STATIC_RESTRICT 8]);
+#endif
+
+#if ((defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IMMINTRIN_H)) || defined(_M_X64) || defined(_M_IX86)
+# if defined(__SSSE3__) && defined(__SHA__)
+#  define PHP_HASH_INTRIN_SHA_NATIVE 1
+# elif defined(HAVE_FUNC_ATTRIBUTE_TARGET) || defined(_M_X64) || defined(_M_IX86)
+#  define PHP_HASH_INTRIN_SHA_RESOLVER 1
+# endif
+#endif
+
+#if defined(PHP_HASH_INTRIN_SHA_NATIVE) || defined(PHP_HASH_INTRIN_SHA_RESOLVER)
+void SHA256_Transform_shani(uint32_t state[PHP_STATIC_RESTRICT 8], const uint8_t block[PHP_STATIC_RESTRICT 64]);
+#endif
+
 PHP_HASH_API void PHP_SHA256Final(unsigned char[32], PHP_SHA256_CTX *);
 
 /* SHA384 context */

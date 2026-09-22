@@ -8,7 +8,7 @@ namespace Pdo;
  * @strict-properties
  * @not-serializable
  */
-class Sqlite extends PDO
+class Sqlite extends \PDO
 {
 #ifdef SQLITE_DETERMINISTIC
     /** @cvalue SQLITE_DETERMINISTIC */
@@ -33,6 +33,35 @@ class Sqlite extends PDO
     /** @cvalue PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES */
     public const int ATTR_EXTENDED_RESULT_CODES = UNKNOWN;
 
+    /** @cvalue PDO_SQLITE_ATTR_BUSY_STATEMENT */
+    public const int ATTR_BUSY_STATEMENT = UNKNOWN;
+
+    /** @cvalue PDO_SQLITE_ATTR_EXPLAIN_STATEMENT */
+    public const int ATTR_EXPLAIN_STATEMENT = UNKNOWN;
+
+    /** @cvalue PDO_SQLITE_ATTR_TRANSACTION_MODE */
+    public const int ATTR_TRANSACTION_MODE = UNKNOWN;
+
+    public const int TRANSACTION_MODE_DEFERRED = 0;
+    public const int TRANSACTION_MODE_IMMEDIATE = 1;
+    public const int TRANSACTION_MODE_EXCLUSIVE = 2;
+
+#if SQLITE_VERSION_NUMBER >= 3043000
+    public const int EXPLAIN_MODE_PREPARED = 0;
+    public const int EXPLAIN_MODE_EXPLAIN = 1;
+    public const int EXPLAIN_MODE_EXPLAIN_QUERY_PLAN = 2;
+#endif
+
+    /** @cvalue SQLITE_OK */
+    public const int OK = UNKNOWN;
+
+    /* Constants for authorizer return */
+
+    /** @cvalue SQLITE_DENY */
+    public const int DENY = UNKNOWN;
+    /** @cvalue SQLITE_IGNORE */
+    public const int IGNORE = UNKNOWN;
+
     // Registers an aggregating User Defined Function for use in SQL statements
     public function createAggregate(
         string $name,
@@ -51,9 +80,6 @@ class Sqlite extends PDO
         int $flags = 0
     ): bool {}
 
-// PDO_SQLITE_OMIT_LOAD_EXTENSION might be defined by ext/pdo_sqlite/config.m4
-// if Sqlite3 did not have the sqlite3_load_extension function present
-// which can depend on how SQLite was compiled: https://www.sqlite.org/compile.html
 #ifndef PDO_SQLITE_OMIT_LOAD_EXTENSION
     public function loadExtension(string $name): void {}
 #endif
@@ -66,4 +92,6 @@ class Sqlite extends PDO
         ?string $dbname = "main",
         int $flags = \Pdo\Sqlite::OPEN_READONLY
     ) {}
+
+    public function setAuthorizer(?callable $callback): void {}
 }

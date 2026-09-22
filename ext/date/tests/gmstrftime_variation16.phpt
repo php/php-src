@@ -5,6 +5,9 @@ Test gmstrftime() function : usage variation - Checking time related formats whi
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     die("skip Test is not valid for Windows");
 }
+if (PHP_OS_FAMILY === 'Solaris') {
+    die("skip Solaris uses ' 8:08:08 AM' for %r (time format differs)");
+}
 ?>
 --FILE--
 <?php
@@ -36,24 +39,24 @@ foreach($inputs as $key =>$value) {
 
 --Time in a.m/p.m notation--
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d:%d:%d %s"
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(11) "02:08:08 PM"
 
 --Time in 24 hour notation--
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d:%d"
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(5) "14:08"
 
 --Current time %H:%M:%S format--
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(%d) "%d:%d:%d"
 
-Deprecated: Function gmstrftime() is deprecated in %s on line %d
+Deprecated: Function gmstrftime() is deprecated since 8.1, use IntlDateFormatter::format() instead in %s on line %d
 string(8) "14:08:08"

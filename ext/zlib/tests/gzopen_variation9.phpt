@@ -8,7 +8,7 @@ echo "*** Testing gzopen() : variation ***\n";
 
 $modes = array('r+', 'rf', 'w+' , 'e');
 
-$file = __DIR__."/004.txt.gz";
+$file = __DIR__."/data/test.txt.gz";
 
 foreach ($modes as $mode) {
     echo "mode=$mode\n";
@@ -38,6 +38,5 @@ gzopen=bool(false)
 
 mode=e
 
-Warning: gzopen(%s/004.txt.gz): Failed to open stream: %s in %s on line %d
+Warning: gzopen(): Failed to open stream: %s in %s on line %d
 gzopen=bool(false)
-

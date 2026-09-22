@@ -10,7 +10,7 @@ ob_start();
 echo "*** Testing session_set_save_handler() : variation ***\n";
 
 var_dump(session_module_name());
-var_dump(session_module_name(FALSE));
+var_dump(session_module_name(''));
 var_dump(session_module_name());
 var_dump(session_module_name("blah"));
 var_dump(session_module_name());

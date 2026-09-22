@@ -13,12 +13,12 @@ var_dump($dom->importNode($dom));
 $dom = Dom\HTMLDocument::createEmpty();
 try {
     $dom->importNode($dom);
-} catch (DOMException $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
 Warning: DOMDocument::importNode(): Cannot import: Node Type Not Supported in %s on line %d
 bool(false)
-Not Supported Error
+DOMException: Not Supported Error

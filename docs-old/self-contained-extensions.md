@@ -13,7 +13,6 @@ We will describe now how to create these and how to put things together.
 While the result will run on any system, a developer's setup needs these tools:
 
 * GNU autoconf
-* GNU libtool
 * GNU m4
 
 All of these are available from
@@ -84,7 +83,7 @@ PHP_ARG_ENABLE([foobar],
     [Enable foobar])])
 
 if test "$PHP_FOOBAR" != "no"; then
-  PHP_NEW_EXTENSION(foobar, foo.c bar.c, $ext_shared)
+  PHP_NEW_EXTENSION([foobar], [foo.c bar.c], [$ext_shared])
 fi
 ```
 
@@ -145,7 +144,7 @@ an existing module called `foo`.
    automatically be able to use `--with-foo=shared[,..]` or
    `--enable-foo=shared[,..]`.
 
-2. In `config.m4`, use `PHP_NEW_EXTENSION(foo,.., $ext_shared)` to enable
+2. In `config.m4`, use `PHP_NEW_EXTENSION([foo],.., [$ext_shared])` to enable
    building the extension.
 
 3. Add the following lines to your C source file:

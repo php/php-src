@@ -9,7 +9,7 @@ $a = new SplFixedArray($b);
 try {
     $a[1] = $a;
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 foreach ($a as $c) {

@@ -34,7 +34,7 @@ foreach($inputs as $input) {
     try {
         $_SESSION[$input] = "Hello World!";
     } catch (Error $e) {
-        echo $e->getMessage(), "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
     var_dump(session_encode());
     var_dump(session_destroy());
@@ -51,28 +51,28 @@ ob_end_flush();
 bool(true)
 
 Warning: session_encode(): Skipping numeric key 0 in %s on line %d
-bool(false)
+string(0) ""
 bool(true)
 
 -- Iteration 2 --
 bool(true)
 
 Warning: session_encode(): Skipping numeric key 1 in %s on line %d
-bool(false)
+string(0) ""
 bool(true)
 
 -- Iteration 3 --
 bool(true)
 
 Warning: session_encode(): Skipping numeric key 12345 in %s on line %d
-bool(false)
+string(0) ""
 bool(true)
 
 -- Iteration 4 --
 bool(true)
 
 Warning: session_encode(): Skipping numeric key -2345 in %s on line %d
-bool(false)
+string(0) ""
 bool(true)
 
 -- Iteration 5 --

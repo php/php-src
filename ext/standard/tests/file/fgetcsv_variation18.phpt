@@ -70,7 +70,7 @@ foreach ($csv_lists as $csv_list) {
     // use different delimiter than existing in file
     fseek($file_handle, 0, SEEK_SET);
     $del = "+";
-    var_dump( fgetcsv($file_handle, 1024, $del) );
+    var_dump( fgetcsv($file_handle, 1024, $del, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

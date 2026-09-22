@@ -27,7 +27,6 @@ foreach( $options as $option ) {
     foreach( $buffers as $string ) {
         var_dump( finfo_buffer( $finfo, $string, $option ) );
     }
-    finfo_close( $finfo );
 }
 
 ?>
@@ -37,11 +36,11 @@ string(36) "ASCII text, with no line terminators"
 string(3) "ELF"
 string(22) "old ACE/gr binary file"
 string(12) "xo65 object,"
-string(15) "MIFF image data"
+string(10) "ASCII text"
 string(25) "RIFF (little-endian) data"
 string(28) "text/plain; charset=us-ascii"
 string(26) "text/plain; charset=ebcdic"
 string(40) "application/octet-stream; charset=binary"
 string(28) "text/plain; charset=us-ascii"
-string(28) "image/x-miff; charset=binary"
+string(28) "text/plain; charset=us-ascii"
 string(25) "text/plain; charset=utf-8"

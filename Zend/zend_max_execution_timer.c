@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Kévin Dunglas <kevin@dunglas.dev>                            |
    +----------------------------------------------------------------------+
@@ -29,6 +27,11 @@
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_portability.h"
+
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
 
 // Musl Libc defines this macro, glibc does not
 // According to "man 2 timer_create" this field should always be available, but it's not: https://sourceware.org/bugzilla/show_bug.cgi?id=27417
@@ -60,6 +63,12 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 # else
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 # endif
+
+#if __has_feature(memory_sanitizer)
+	/* MSan does not intercept timer_create() */
+	__msan_unpoison(&EG(max_execution_timer_timer),
+					sizeof(EG(max_execution_timer_timer)));
+#endif
 
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
 	if (timer_create(ZEND_MAX_EXECUTION_TIMERS_CLOCK, &sev, &EG(max_execution_timer_timer)) != 0) {

@@ -16,7 +16,7 @@ var_dump(filter_input(INPUT_GET, "a", FILTER_SANITIZE_SPECIAL_CHARS, array(1,2,3
 try {
     filter_input(INPUT_GET, "b", FILTER_VALIDATE_FLOAT, new stdClass);
 } catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
+    echo $exception::class, ': ', $exception->getMessage(), "\n";
 }
 var_dump(filter_input(INPUT_POST, "d", FILTER_VALIDATE_FLOAT));
 var_dump(filter_input(INPUT_POST, "c", FILTER_SANITIZE_SPECIAL_CHARS));
@@ -27,7 +27,7 @@ echo "Done\n";
 --EXPECT--
 string(18) "http://example.com"
 string(27) "&#60;b&#62;test&#60;/b&#62;"
-filter_input(): Argument #4 ($options) must be of type array|int, stdClass given
+TypeError: filter_input(): Argument #4 ($options) must be of type array|int, stdClass given
 float(12345.7)
 string(29) "&#60;p&#62;string&#60;/p&#62;"
 bool(false)

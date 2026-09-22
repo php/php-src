@@ -42,7 +42,7 @@ shmop
     try {
         shmop_write($shm_id, $write_d1, $written);
     } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
+        echo $exception::class, ': ', $exception->getMessage(), "\n";
     }
 
     echo "shm open for read only: ";
@@ -77,7 +77,7 @@ shm write test #1: ok
 data in memory is: test #1 of the shmop() extension
 shm open for read only: ok
 data in memory is: test #1 of the shmop() extension
-Read-only segment cannot be written
+Error: Read-only segment cannot be written
 shm open for read only: ok
 shm write test #2: ok
 data in memory is: test #1 of the shmop() extensiontest #2 append data to shared memory segment

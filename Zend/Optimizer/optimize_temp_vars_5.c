@@ -2,15 +2,13 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -26,6 +24,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 #include "zend_bitset.h"
+#include "zend_observer.h"
 
 #define INVALID_VAR ((uint32_t)-1)
 #define GET_AVAILABLE_T()					\
@@ -109,7 +108,7 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 					     opline->opcode == ZEND_RETURN_BY_REF ||
 					     opline->opcode == ZEND_FREE ||
 					     opline->opcode == ZEND_FE_FREE)) {
-						zend_op *curr = opline;
+						const zend_op *curr = opline;
 
 						while (--curr >= end) {
 							if (curr->opcode == ZEND_FAST_CALL) {
@@ -173,5 +172,5 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 	}
 
 	zend_arena_release(&ctx->arena, checkpoint);
-	op_array->T = max + 1;
+	op_array->T = max + 1 + ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
 }

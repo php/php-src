@@ -861,6 +861,7 @@ function tidy_get_head(tidy $tidy): ?tidyNode {}
 
 function tidy_get_body(tidy $tidy): ?tidyNode {}
 
+/** @not-serializable */
 class tidy
 {
     public ?string $errorBuffer = null;
@@ -973,6 +974,7 @@ class tidy
     public function body(): ?tidyNode {}
 }
 
+/** @not-serializable */
 final class tidyNode
 {
     public readonly string $value;
@@ -1004,4 +1006,8 @@ final class tidyNode
     public function isPhp(): bool {}
 
     public function getParent(): ?tidyNode {}
+
+    public function getPreviousSibling(): ?tidyNode {}
+
+    public function getNextSibling(): ?tidyNode {}
 }

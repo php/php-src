@@ -42,59 +42,101 @@ foreach ($entities as $entity) {
     echo "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 Entity name: sampleExternalPublicWithNotationName1
 publicId: string(9) "public id"
 systemId: string(14) "external.stuff"
 notationName: string(5) "stuff"
-actualEncoding: NULL
-encoding: NULL
-version: NULL
+actualEncoding: 
+Deprecated: Property DOMEntity::$actualEncoding is deprecated in %s on line %d
+NULL
+encoding: 
+Deprecated: Property DOMEntity::$encoding is deprecated in %s on line %d
+NULL
+version: 
+Deprecated: Property DOMEntity::$version is deprecated in %s on line %d
+NULL
 
 Entity name: sampleExternalPublicWithNotationName2
 publicId: string(0) ""
 systemId: string(14) "external.stuff"
 notationName: string(5) "stuff"
-actualEncoding: NULL
-encoding: NULL
-version: NULL
+actualEncoding: 
+Deprecated: Property DOMEntity::$actualEncoding is deprecated in %s on line %d
+NULL
+encoding: 
+Deprecated: Property DOMEntity::$encoding is deprecated in %s on line %d
+NULL
+version: 
+Deprecated: Property DOMEntity::$version is deprecated in %s on line %d
+NULL
 
 Entity name: sampleExternalPublicWithoutNotationName1
 publicId: string(9) "public id"
 systemId: string(14) "external.stuff"
 notationName: string(0) ""
-actualEncoding: NULL
-encoding: NULL
-version: NULL
+actualEncoding: 
+Deprecated: Property DOMEntity::$actualEncoding is deprecated in %s on line %d
+NULL
+encoding: 
+Deprecated: Property DOMEntity::$encoding is deprecated in %s on line %d
+NULL
+version: 
+Deprecated: Property DOMEntity::$version is deprecated in %s on line %d
+NULL
 
 Entity name: sampleExternalPublicWithoutNotationName2
 publicId: string(0) ""
 systemId: string(14) "external.stuff"
 notationName: string(0) ""
-actualEncoding: NULL
-encoding: NULL
-version: NULL
+actualEncoding: 
+Deprecated: Property DOMEntity::$actualEncoding is deprecated in %s on line %d
+NULL
+encoding: 
+Deprecated: Property DOMEntity::$encoding is deprecated in %s on line %d
+NULL
+version: 
+Deprecated: Property DOMEntity::$version is deprecated in %s on line %d
+NULL
 
 Entity name: sampleExternalSystemWithNotationName
 publicId: NULL
 systemId: string(14) "external.stuff"
 notationName: string(5) "stuff"
-actualEncoding: NULL
-encoding: NULL
-version: NULL
+actualEncoding: 
+Deprecated: Property DOMEntity::$actualEncoding is deprecated in %s on line %d
+NULL
+encoding: 
+Deprecated: Property DOMEntity::$encoding is deprecated in %s on line %d
+NULL
+version: 
+Deprecated: Property DOMEntity::$version is deprecated in %s on line %d
+NULL
 
 Entity name: sampleExternalSystemWithoutNotationName
 publicId: NULL
 systemId: string(14) "external.stuff"
 notationName: string(0) ""
-actualEncoding: NULL
-encoding: NULL
-version: NULL
+actualEncoding: 
+Deprecated: Property DOMEntity::$actualEncoding is deprecated in %s on line %d
+NULL
+encoding: 
+Deprecated: Property DOMEntity::$encoding is deprecated in %s on line %d
+NULL
+version: 
+Deprecated: Property DOMEntity::$version is deprecated in %s on line %d
+NULL
 
 Entity name: sampleInternalEntity
 publicId: NULL
 systemId: NULL
 notationName: NULL
-actualEncoding: NULL
-encoding: NULL
-version: NULL
+actualEncoding: 
+Deprecated: Property DOMEntity::$actualEncoding is deprecated in %s on line %d
+NULL
+encoding: 
+Deprecated: Property DOMEntity::$encoding is deprecated in %s on line %d
+NULL
+version: 
+Deprecated: Property DOMEntity::$version is deprecated in %s on line %d
+NULL

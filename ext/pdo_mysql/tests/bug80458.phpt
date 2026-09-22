@@ -97,7 +97,7 @@ var_dump($stmt5->fetchAll());
 $db->exec("DROP PROCEDURE IF EXISTS {$procedure_ret}");
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-$db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+$db->setAttribute(Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, false);
 
 $stmt = $db->prepare('DELETE FROM test_80458 WHERE first=15');
 $stmt->execute();

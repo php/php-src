@@ -45,7 +45,7 @@ $loop_counter = 1;
 
     // read the line which is without csv fields, provide delimiter and see the working of fgetcsv
     $fp_pos = ftell($file_handle);
-    var_dump( fgetcsv($file_handle) );
+    var_dump( fgetcsv($file_handle, escape: "\\") );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );

@@ -1,16 +1,14 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
-   | Authors: Niels Dossche <nielsdos@php.net>                            |
+   | Authors: Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -43,14 +41,14 @@ typedef void (*lexbor_libxml2_bridge_tree_error_reporter)(
     size_t len
 );
 
-typedef struct _lexbor_libxml2_bridge_extracted_observations {
+typedef struct lexbor_libxml2_bridge_extracted_observations {
     bool has_explicit_html_tag;
     bool has_explicit_head_tag;
     bool has_explicit_body_tag;
     php_libxml_quirks_mode quirks_mode;
 } lexbor_libxml2_bridge_extracted_observations;
 
-typedef struct _lexbor_libxml2_bridge_parse_context {
+typedef struct lexbor_libxml2_bridge_parse_context {
     /* Private fields */
     lexbor_libxml2_bridge_tokenizer_error_reporter tokenizer_error_reporter;
     lexbor_libxml2_bridge_tree_error_reporter tree_error_reporter;
@@ -71,7 +69,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     xmlDocPtr *doc_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_libxml_ns_mapper *ns_mapper
+    php_dom_private_data *private_data
 );
 lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
     lxb_dom_node_t *start_node,
@@ -79,7 +77,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
     xmlNodePtr *fragment_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_libxml_ns_mapper *ns_mapper
+    php_dom_private_data *private_data
 );
 void lexbor_libxml2_bridge_report_errors(
     const lexbor_libxml2_bridge_parse_context *ctx,

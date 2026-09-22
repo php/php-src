@@ -18,7 +18,8 @@ print $doc->saveXml($elt) . "\n";
 $attr->removeChild($attr->firstChild);
 print $doc->saveXml($elt) . "\n";
 
-$attr->nodeValue = '&';
+// Note: since libxml2 commit aca16fb3d45e0b2c45364ffc1cea8eb4abaca87d this no longer explicitly warns. This seems intentional.
+@$attr->nodeValue = '&';
 print "$attr->nodeValue\n";
 print $doc->saveXml($elt) . "\n";
 
@@ -40,8 +41,6 @@ print $doc->saveXml($elt) . "\n";
 &
 <elt a="&amp;"/>
 <elt a=""/>
-
-Warning: main(): unterminated entity reference                 in %s on line %d
 
 <elt a=""/>
 &

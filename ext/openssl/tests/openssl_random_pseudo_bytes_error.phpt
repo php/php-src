@@ -6,9 +6,9 @@ openssl
 <?php
 try {
     openssl_random_pseudo_bytes(0);
-} catch (Error $e) {
-    echo $e->getMessage().PHP_EOL;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
-openssl_random_pseudo_bytes(): Argument #1 ($length) must be greater than 0
+ValueError: openssl_random_pseudo_bytes(): Argument #1 ($length) must be greater than 0

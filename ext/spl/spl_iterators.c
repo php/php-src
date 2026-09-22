@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
@@ -138,16 +136,11 @@ typedef struct _spl_dual_it_object {
 static zend_object_handlers spl_handlers_rec_it_it;
 static zend_object_handlers spl_handlers_dual_it;
 
-static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_recursive_it_object*)((char*)(obj) - XtOffsetOf(spl_recursive_it_object, std));
-}
-/* }}} */
+#define spl_recursive_it_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_recursive_it_object, std)
 
 #define Z_SPLRECURSIVE_IT_P(zv)  spl_recursive_it_from_obj(Z_OBJ_P((zv)))
 
-static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_dual_it_object*)((char*)(obj) - XtOffsetOf(spl_dual_it_object, std));
-} /* }}} */
+#define spl_dual_it_from_obj(obj) ZEND_CONTAINER_OF(obj, spl_dual_it_object, std)
 
 #define Z_SPLDUAL_IT_P(zv)  spl_dual_it_from_obj(Z_OBJ_P((zv)))
 
@@ -220,9 +213,9 @@ static zend_result spl_recursive_it_valid_ex(spl_recursive_it_object *object, zv
 		level--;
 	}
 	if (object->endIteration && object->in_iteration) {
-		zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->endIteration, "endIteration", NULL);
+		zend_call_known_function(object->endIteration, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 	}
-	object->in_iteration = 0;
+	object->in_iteration = false;
 	return FAILURE;
 }
 
@@ -257,6 +250,10 @@ static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object, zv
 	zend_class_entry          *ce;
 	zval                      retval, child;
 	zend_object_iterator      *sub_iter;
+	zend_object               *sub_object;
+	uint32_t                  prev_level;
+	zend_result               valid_result;
+	bool                      reentered;
 
 	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
@@ -273,9 +270,20 @@ next_step:
 						zend_clear_exception();
 					}
 				}
+				iterator = object->iterators[object->level].iterator;
 				ZEND_FALLTHROUGH;
 			case RS_START:
-				if (iterator->funcs->valid(iterator) == FAILURE) {
+				sub_object = Z_OBJ(object->iterators[object->level].zobject);
+				prev_level = object->level;
+				GC_ADDREF(sub_object);
+				valid_result = iterator->funcs->valid(iterator);
+				reentered = object->level != prev_level
+					|| object->iterators[object->level].iterator != iterator;
+				OBJ_RELEASE(sub_object);
+				if (reentered) {
+					return;
+				}
+				if (valid_result == FAILURE) {
 					break;
 				}
 				object->iterators[object->level].state = RS_TEST;
@@ -284,7 +292,7 @@ next_step:
 				ZEND_FALLTHROUGH;
 			case RS_TEST:
 				if (object->callHasChildren) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callHasChildren, "callHasChildren", &retval);
+					zend_call_known_function(object->callHasChildren, Z_OBJ_P(zthis), object->ce, &retval, 0, NULL, NULL);
 				} else {
 					zend_class_entry *ce = object->iterators[object->level].ce;
 					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
@@ -325,7 +333,7 @@ next_step:
 					}
 				}
 				if (object->nextElement) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->nextElement, "nextelement", NULL);
+					zend_call_known_function(object->nextElement, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 				}
 				object->iterators[object->level].state = RS_NEXT;
 				if (EG(exception)) {
@@ -338,7 +346,7 @@ next_step:
 				return /* self */;
 			case RS_SELF:
 				if (object->nextElement && (object->mode == RIT_SELF_FIRST || object->mode == RIT_CHILD_FIRST)) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->nextElement, "nextelement", NULL);
+					zend_call_known_function(object->nextElement, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 				}
 				if (object->mode == RIT_SELF_FIRST) {
 					object->iterators[object->level].state = RS_CHILD;
@@ -348,7 +356,7 @@ next_step:
 				return /* self */;
 			case RS_CHILD:
 				if (object->callGetChildren) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->callGetChildren, "callGetChildren", &child);
+					zend_call_known_function(object->callGetChildren, Z_OBJ_P(zthis), object->ce, &child, 0, NULL, NULL);
 				} else {
 					zend_class_entry *ce = object->iterators[object->level].ce;
 					zend_object *obj = Z_OBJ(object->iterators[object->level].zobject);
@@ -400,7 +408,7 @@ next_step:
 					sub_iter->funcs->rewind(sub_iter);
 				}
 				if (object->beginChildren) {
-					zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->beginChildren, "beginchildren", NULL);
+					zend_call_known_function(object->beginChildren, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 					if (EG(exception)) {
 						if (!(object->flags & RIT_CATCH_GET_CHILD)) {
 							return;
@@ -414,7 +422,7 @@ next_step:
 		/* no more elements */
 		if (object->level > 0) {
 			if (object->endChildren) {
-				zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->endChildren, "endchildren", NULL);
+				zend_call_known_function(object->endChildren, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 				if (EG(exception)) {
 					if (!(object->flags & RIT_CATCH_GET_CHILD)) {
 						return;
@@ -423,7 +431,7 @@ next_step:
 					}
 				}
 			}
-			if (object->level > 0) {
+			if (object->level > 0 && object->iterators[object->level].iterator == iterator) {
 				zval garbage;
 				ZVAL_COPY_VALUE(&garbage, &object->iterators[object->level].zobject);
 				ZVAL_UNDEF(&object->iterators[object->level].zobject);
@@ -458,9 +466,9 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 		sub_iter->funcs->rewind(sub_iter);
 	}
 	if (!EG(exception) && object->beginIteration && !object->in_iteration) {
-		zend_call_method_with_0_params(Z_OBJ_P(zthis), object->ce, &object->beginIteration, "beginIteration", NULL);
+		zend_call_known_function(object->beginIteration, Z_OBJ_P(zthis), object->ce, NULL, 0, NULL, NULL);
 	}
-	object->in_iteration = 1;
+	object->in_iteration = true;
 	spl_recursive_it_move_forward_ex(object, zthis);
 }
 
@@ -522,6 +530,20 @@ static zend_result spl_get_iterator_from_aggregate(zval *retval, zend_class_entr
 		return FAILURE;
 	}
 	return SUCCESS;
+}
+
+static void spl_RecursiveIteratorIterator_free_iterators(spl_recursive_it_object *object)
+{
+	if (object->iterators) {
+		while (object->level >= 0) {
+			zend_object_iterator *sub_iter = object->iterators[object->level].iterator;
+			zend_iterator_dtor(sub_iter);
+			zval_ptr_dtor(&object->iterators[object->level].zobject);
+			object->level--;
+		}
+		efree(object->iterators);
+		object->iterators = NULL;
+	}
 }
 
 static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, recursive_it_it_type rit_type)
@@ -594,12 +616,13 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	}
 
 	intern = Z_SPLRECURSIVE_IT_P(object);
+	spl_RecursiveIteratorIterator_free_iterators(intern);
 	intern->iterators = emalloc(sizeof(spl_sub_iterator));
 	intern->level = 0;
 	intern->mode = mode;
 	intern->flags = (int)flags;
 	intern->max_depth = -1;
-	intern->in_iteration = 0;
+	intern->in_iteration = false;
 	intern->ce = Z_OBJCE_P(object);
 
 	intern->beginIteration = zend_hash_str_find_ptr(&intern->ce->function_table, "beginiteration", sizeof("beginiteration") - 1);
@@ -640,15 +663,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->iterators[0].getchildren = NULL;
 
 	if (EG(exception)) {
-		zend_object_iterator *sub_iter;
-
-		while (intern->level >= 0) {
-			sub_iter = intern->iterators[intern->level].iterator;
-			zend_iterator_dtor(sub_iter);
-			zval_ptr_dtor(&intern->iterators[intern->level--].zobject);
-		}
-		efree(intern->iterators);
-		intern->iterators = NULL;
+		spl_RecursiveIteratorIterator_free_iterators(intern);
 	}
 }
 
@@ -733,7 +748,7 @@ PHP_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(ZEND_THIS);
 	zend_long level;
-	bool level_is_null = 1;
+	bool level_is_null = true;
 	zval *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &level, &level_is_null) == FAILURE) {
@@ -912,16 +927,7 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object)
 {
 	spl_recursive_it_object *object = spl_recursive_it_from_obj(_object);
 
-	if (object->iterators) {
-		while (object->level >= 0) {
-			zend_object_iterator *sub_iter = object->iterators[object->level].iterator;
-			zend_iterator_dtor(sub_iter);
-			zval_ptr_dtor(&object->iterators[object->level].zobject);
-			object->level--;
-		}
-		efree(object->iterators);
-		object->iterators = NULL;
-	}
+	spl_RecursiveIteratorIterator_free_iterators(object);
 
 	zend_object_std_dtor(&object->std);
 	for (size_t i = 0; i < 6; i++) {
@@ -1343,15 +1349,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			}
 			break;
 		}
-		case DIT_AppendIterator:
-			if (zend_parse_parameters_none() == FAILURE) {
-				return NULL;
-			}
-			intern->dit_type = DIT_AppendIterator;
-			object_init_ex(&intern->u.append.zarrayit, spl_ce_ArrayIterator);
-			zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
-			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
-			return intern;
 		case DIT_RegexIterator:
 		case DIT_RecursiveRegexIterator: {
 			zend_string *regex;
@@ -2117,14 +2114,27 @@ static zend_object *spl_dual_it_new(zend_class_entry *class_type)
 }
 /* }}} */
 
+/* Returns the relative position for the current iterator position. */
+static zend_long spl_limit_it_relative_pos(spl_dual_it_object *intern)
+{
+	return intern->current.pos - intern->u.limit.offset;
+}
+
+/* Returns the relative position for an arbitrary position. */
+static zend_long spl_limit_it_relative_pos_for(spl_dual_it_object *intern, zend_long pos)
+{
+	return pos - intern->u.limit.offset;
+}
+
 static inline zend_result spl_limit_it_valid(spl_dual_it_object *intern)
 {
 	/* FAILURE / SUCCESS */
-	if (intern->u.limit.count != -1 && intern->current.pos >= intern->u.limit.offset + intern->u.limit.count) {
+	if (intern->u.limit.count != -1 &&
+		spl_limit_it_relative_pos(intern) >= intern->u.limit.count) {
 		return FAILURE;
-	} else {
-		return spl_dual_it_valid(intern);
 	}
+
+	return spl_dual_it_valid(intern);
 }
 
 static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
@@ -2136,7 +2146,7 @@ static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is below the offset " ZEND_LONG_FMT, pos, intern->u.limit.offset);
 		return;
 	}
-	if (pos >= intern->u.limit.offset + intern->u.limit.count && intern->u.limit.count != -1) {
+	if (spl_limit_it_relative_pos_for(intern, pos) >= intern->u.limit.count && intern->u.limit.count != -1) {
 		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Cannot seek to " ZEND_LONG_FMT " which is behind offset " ZEND_LONG_FMT " plus count " ZEND_LONG_FMT, pos, intern->u.limit.offset, intern->u.limit.count);
 		return;
 	}
@@ -2193,7 +2203,7 @@ PHP_METHOD(LimitIterator, valid)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 /*	RETURN_BOOL(spl_limit_it_valid(intern) == SUCCESS);*/
-	RETURN_BOOL((intern->u.limit.count == -1 || intern->current.pos < intern->u.limit.offset + intern->u.limit.count) && Z_TYPE(intern->current.data) != IS_UNDEF);
+	RETURN_BOOL((intern->u.limit.count == -1 || spl_limit_it_relative_pos(intern) < intern->u.limit.count) && Z_TYPE(intern->current.data) != IS_UNDEF);
 } /* }}} */
 
 /* {{{ Move the iterator forward */
@@ -2206,7 +2216,7 @@ PHP_METHOD(LimitIterator, next)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	spl_dual_it_next(intern, 1);
-	if (intern->u.limit.count == -1 || intern->current.pos < intern->u.limit.offset + intern->u.limit.count) {
+	if (intern->u.limit.count == -1 || spl_limit_it_relative_pos(intern) < intern->u.limit.count) {
 		spl_dual_it_fetch(intern, 1);
 	}
 } /* }}} */
@@ -2803,7 +2813,20 @@ static void spl_append_it_next(spl_dual_it_object *intern) /* {{{ */
 /* {{{ Create an AppendIterator */
 PHP_METHOD(AppendIterator, __construct)
 {
-	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_AppendIterator, zend_ce_iterator, DIT_AppendIterator);
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	spl_dual_it_object *intern = Z_SPLDUAL_IT_P(ZEND_THIS);
+
+	/* TODO: This should be converted to a normal Error as this is triggered when calling the constructor twice */
+	if (intern->dit_type != DIT_Unknown) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s::getIterator() must be called exactly once per instance", ZSTR_VAL(spl_ce_AppendIterator->name));
+		RETURN_THROWS();
+	}
+
+	intern->dit_type = DIT_AppendIterator;
+	object_init_with_constructor(&intern->u.append.zarrayit, spl_ce_ArrayIterator, 0, NULL, NULL);
+	intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
+
 } /* }}} */
 
 /* {{{ Append an iterator */
@@ -3061,10 +3084,9 @@ PHP_FUNCTION(iterator_count)
 /* }}} */
 
 typedef struct {
-	zval                   *obj;
-	zend_long              count;
-	zend_fcall_info        fci;
-	zend_fcall_info_cache  fcc;
+	zend_long count;
+	HashTable *params_ht;
+	zend_fcall_info_cache fcc;
 } spl_iterator_apply_info;
 
 static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -3074,7 +3096,7 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 	int result;
 
 	apply_info->count++;
-	zend_call_function_with_return_value(&apply_info->fci, &apply_info->fcc, &retval);
+	zend_call_known_fcc(&apply_info->fcc, &retval, 0, NULL, apply_info->params_ht);
 	result = zend_is_true(&retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
 	zval_ptr_dtor(&retval);
 	return result;
@@ -3084,18 +3106,26 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser) /* {
 /* {{{ Calls a function for every element in an iterator */
 PHP_FUNCTION(iterator_apply)
 {
-	spl_iterator_apply_info  apply_info;
+	zval *traversable;
+	zend_fcall_info dummy_fci;
+	spl_iterator_apply_info apply_info = {
+		.count = 0,
+		.params_ht = NULL,
+		.fcc = { 0 },
+	};
 
 	/* The HashTable is used to determine positional arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Of|h!", &apply_info.obj, zend_ce_traversable,
-			&apply_info.fci, &apply_info.fcc, &apply_info.fci.named_params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OF|h!", &traversable, zend_ce_traversable,
+			&dummy_fci, &apply_info.fcc, &apply_info.params_ht) == FAILURE) {
+		zend_release_fcall_info_cache(&apply_info.fcc);
 		RETURN_THROWS();
 	}
 
-	apply_info.count = 0;
-	if (spl_iterator_apply(apply_info.obj, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
-		return;
+	if (spl_iterator_apply(traversable, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
+		zend_release_fcall_info_cache(&apply_info.fcc);
+		RETURN_THROWS();
 	}
+	zend_release_fcall_info_cache(&apply_info.fcc);
 	RETURN_LONG(apply_info.count);
 }
 /* }}} */
@@ -3113,14 +3143,14 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
 
 	memcpy(&spl_handlers_rec_it_it, &std_object_handlers, sizeof(zend_object_handlers));
-	spl_handlers_rec_it_it.offset = XtOffsetOf(spl_recursive_it_object, std);
+	spl_handlers_rec_it_it.offset = offsetof(spl_recursive_it_object, std);
 	spl_handlers_rec_it_it.get_method = spl_recursive_it_get_method;
 	spl_handlers_rec_it_it.clone_obj = NULL;
 	spl_handlers_rec_it_it.free_obj = spl_RecursiveIteratorIterator_free_storage;
 	spl_handlers_rec_it_it.get_gc = spl_RecursiveIteratorIterator_get_gc;
 
 	memcpy(&spl_handlers_dual_it, &std_object_handlers, sizeof(zend_object_handlers));
-	spl_handlers_dual_it.offset = XtOffsetOf(spl_dual_it_object, std);
+	spl_handlers_dual_it.offset = offsetof(spl_dual_it_object, std);
 	spl_handlers_dual_it.get_method = spl_dual_it_get_method;
 	spl_handlers_dual_it.clone_obj = NULL;
 	spl_handlers_dual_it.free_obj = spl_dual_it_free_storage;

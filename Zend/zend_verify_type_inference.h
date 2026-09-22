@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
 */
 
@@ -46,7 +45,7 @@ static void zend_verify_type_inference(zval *value, uint32_t type_mask, uint8_t 
 
 	if (Z_TYPE_P(value) == IS_INDIRECT) {
 		if (!(type_mask & MAY_BE_INDIRECT)) {
-			ZEND_VERIFY_TYPE_INFERENCE_ERROR("mask 0x%x mising MAY_BE_INDIRECT", type_mask);
+			ZEND_VERIFY_TYPE_INFERENCE_ERROR("mask 0x%x missing MAY_BE_INDIRECT", type_mask);
 		}
 		value = Z_INDIRECT_P(value);
 	}
@@ -156,7 +155,7 @@ static void zend_verify_inference_def(zend_execute_data *execute_data, const zen
 	}
 	if (opline->op1_def_type
 	 && (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))
-	 // array is actually changed by the the following instruction(s)
+	 // array is actually changed by the following instruction(s)
 	 && opline->opcode != ZEND_FETCH_DIM_W
 	 && opline->opcode != ZEND_FETCH_DIM_RW
 	 && opline->opcode != ZEND_FETCH_DIM_FUNC_ARG

@@ -41,39 +41,12 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 			ini_entry->modifiable = mode;
 		}
 	} else {
+		/* The string wasn't installed and won't be shared, it's safe to drop. */
+		GC_MAKE_PERSISTENT_LOCAL(duplicate);
 		zend_string_release_ex(duplicate, 1);
 	}
 
 	return SUCCESS;
-}
-/* }}} */
-
-static void fpm_php_disable(char *value, int (*zend_disable)(const char *, size_t)) /* {{{ */
-{
-	char *s = 0, *e = value;
-
-	while (*e) {
-		switch (*e) {
-			case ' ':
-			case ',':
-				if (s) {
-					*e = '\0';
-					zend_disable(s, e - s);
-					s = 0;
-				}
-				break;
-			default:
-				if (!s) {
-					s = e;
-				}
-				break;
-		}
-		e++;
-	}
-
-	if (s) {
-		zend_disable(s, e - s);
-	}
 }
 /* }}} */
 
@@ -93,7 +66,21 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 	if (!strcmp(name, "extension") && *value) {
 		zval zv;
 		zend_interned_strings_switch_storage(0);
+
+#if ZEND_RC_DEBUG
+		bool orig_rc_debug = zend_rc_debug;
+		/* Loading extensions after php_module_startup() breaks some invariants.
+		 * For instance, it will update the refcount of persistent strings,
+		 * which is normally not allowed at this stage. */
+		zend_rc_debug = false;
+#endif
+
 		php_dl(value, MODULE_PERSISTENT, &zv, 1);
+
+#if ZEND_RC_DEBUG
+		zend_rc_debug = orig_rc_debug;
+#endif
+
 		zend_interned_strings_switch_storage(1);
 		return Z_TYPE(zv) == IS_TRUE ? FPM_PHP_INI_EXTENSION_LOADED : FPM_PHP_INI_EXTENSION_FAILED;
 	}
@@ -104,13 +91,6 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 
 	if (!strcmp(name, "disable_functions") && *value) {
 		zend_disable_functions(value);
-		return FPM_PHP_INI_APPLIED;
-	}
-
-	if (!strcmp(name, "disable_classes") && *value) {
-		char *v = strdup(value);
-		PG(disable_classes) = v;
-		fpm_php_disable(v, zend_disable_class);
 		return FPM_PHP_INI_APPLIED;
 	}
 
@@ -239,6 +219,9 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		limit_extensions = wp->limit_extensions;
 		wp->limit_extensions = NULL;
 	}
+
+	php_child_init();
+
 	return 0;
 }
 /* }}} */

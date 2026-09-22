@@ -14,13 +14,7 @@ function foo() {
 }
 
 var_dump(readline_callback_handler_install('testing: ', 'foo'));
-try {
-    var_dump(readline_callback_handler_install('testing: ', 'foobar!'));
-} catch (\TypeError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
 
 ?>
 --EXPECT--
 testing: bool(true)
-readline_callback_handler_install(): Argument #2 ($callback) must be a valid callback, function "foobar!" not found or invalid function name

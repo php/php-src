@@ -14,7 +14,7 @@ var_dump(zip_close($zip));
 try {
     var_dump(zip_close($zip));
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 echo "Object\n";
@@ -27,7 +27,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
     try {
         $zip->close();
     } catch (ValueError $err) {
-        echo $err->getMessage(), PHP_EOL;
+        echo $err::class, ': ', $err->getMessage(), PHP_EOL;
     }
 } else {
     die("Failure");
@@ -38,14 +38,14 @@ Done
 --EXPECTF--
 Procedural
 
-Deprecated: Function zip_open() is deprecated in %s on line %d
+Deprecated: Function zip_open() is deprecated since 8.0, use ZipArchive::open() instead in %s on line %d
 
-Deprecated: Function zip_close() is deprecated in %s on line %d
+Deprecated: Function zip_close() is deprecated since 8.0, use ZipArchive::close() instead in %s on line %d
 NULL
 
-Deprecated: Function zip_close() is deprecated in %s on line %d
-zip_close(): supplied resource is not a valid Zip Directory resource
+Deprecated: Function zip_close() is deprecated since 8.0, use ZipArchive::close() instead in %s on line %d
+TypeError: zip_close(): supplied resource is not a valid Zip Directory resource
 Object
 bool(true)
-Invalid or uninitialized Zip object
+ValueError: Invalid or uninitialized Zip object
 Done

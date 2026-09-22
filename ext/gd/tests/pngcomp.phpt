@@ -18,12 +18,12 @@ gd
 	try {
 		imagepng($im, $cwd . '/test_pngcomp.png', -2);
 	} catch (\ValueError $e) {
-		echo $e->getMessage() . PHP_EOL;
+		echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 	}
 	try {
 		imagepng($im, $cwd . '/test_pngcomp.png', 10);
 	} catch (\ValueError $e) {
-		echo $e->getMessage() . PHP_EOL;
+		echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 	}
     	echo "PNG compression test: ";
         imagepng($im, $cwd . '/test_pngcomp.png', 9);
@@ -37,6 +37,6 @@ gd
     @unlink($cwd . "/test_pngcomp.png");
 ?>
 --EXPECT--
-imagepng(): Argument #3 ($quality) must be between -1 and 9
-imagepng(): Argument #3 ($quality) must be between -1 and 9
+ValueError: imagepng(): Argument #3 ($quality) must be between -1 and 9
+ValueError: imagepng(): Argument #3 ($quality) must be between -1 and 9
 PNG compression test: ok

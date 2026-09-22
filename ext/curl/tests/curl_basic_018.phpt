@@ -4,6 +4,13 @@ Test curl_setopt() with curl_multi function with basic functionality
 TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (curl_version()['version_number'] === 0x080a00) {
+    // https://github.com/php/php-src/issues/15997
+    die('xfail due to a libcurl bug');
+}
+?>
 --FILE--
 <?php
   include 'server.inc';

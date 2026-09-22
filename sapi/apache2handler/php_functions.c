@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
@@ -29,7 +27,6 @@
 #include "php_ini.h"
 #include "SAPI.h"
 
-#define CORE_PRIVATE
 #include "apr_strings.h"
 #include "apr_time.h"
 #include "ap_config.h"
@@ -42,7 +39,6 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"
 #include "ap_mpm.h"
 #ifndef PHP_WIN32
 #include "unixd.h"
@@ -141,9 +137,6 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_STRING(method);
 		ADD_TIME(mtime);
 		ADD_LONG(clength);
-#if MODULE_MAGIC_NUMBER < 20020506
-		ADD_STRING(boundary);
-#endif
 		ADD_STRING(range);
 		ADD_LONG(chunked);
 		ADD_STRING(content_type);
@@ -177,19 +170,17 @@ PHP_FUNCTION(apache_request_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->r->headers_in);
 
-	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 		if (!val) val = "";
 		add_assoc_string(return_value, key, val);
-	APR_ARRAY_FOREACH_CLOSE()
+	} APR_ARRAY_FOREACH_CLOSE();
 }
 /* }}} */
 
@@ -200,19 +191,17 @@ PHP_FUNCTION(apache_response_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->r->headers_out);
 
-	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+	APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 		if (!val) val = "";
 		add_assoc_string(return_value, key, val);
-	APR_ARRAY_FOREACH_CLOSE()
+	} APR_ARRAY_FOREACH_CLOSE();
 }
 /* }}} */
 
@@ -253,22 +242,19 @@ PHP_FUNCTION(apache_setenv)
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
 	size_t variable_len, string_val_len;
-	bool walk_to_top = 0;
-	int arg_count = ZEND_NUM_ARGS();
+	bool walk_to_top = false;
 	request_rec *r;
 
-	if (zend_parse_parameters(arg_count, "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
 
 	r = ctx->r;
-	if (arg_count == 3) {
-		if (walk_to_top) {
-			while(r->prev) {
-				r = r->prev;
-			}
+	if (walk_to_top) {
+		while(r->prev) {
+			r = r->prev;
 		}
 	}
 
@@ -288,22 +274,19 @@ PHP_FUNCTION(apache_getenv)
 	char *variable;
 	size_t variable_len;
 	bool walk_to_top = 0;
-	int arg_count = ZEND_NUM_ARGS();
 	char *env_val=NULL;
 	request_rec *r;
 
-	if (zend_parse_parameters(arg_count, "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
 
 	r = ctx->r;
-	if (arg_count == 2) {
-		if (walk_to_top) {
-			while(r->prev) {
-				r = r->prev;
-			}
+	if (walk_to_top) {
+		while(r->prev) {
+			r = r->prev;
 		}
 	}
 
@@ -317,19 +300,17 @@ PHP_FUNCTION(apache_getenv)
 }
 /* }}} */
 
-static char *php_apache_get_version(void)
+static const char *php_apache_get_version(void)
 {
-#if MODULE_MAGIC_NUMBER_MAJOR >= 20060905
-	return (char *) ap_get_server_banner();
-#else
-	return (char *) ap_get_server_version();
-#endif
+	return ap_get_server_banner();
 }
 
 /* {{{ Fetch Apache version */
 PHP_FUNCTION(apache_get_version)
 {
-	char *apv = php_apache_get_version();
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	const char *apv = php_apache_get_version();
 
 	if (apv && *apv) {
 		RETURN_STRING(apv);
@@ -345,10 +326,12 @@ PHP_FUNCTION(apache_get_modules)
 	int n;
 	char *p;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	array_init(return_value);
 
 	for (n = 0; ap_loaded_modules[n]; ++n) {
-		char *s = (char *) ap_loaded_modules[n]->name;
+		const char *s = ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
 			add_next_index_stringl(return_value, s, (p - s));
 		} else {
@@ -360,42 +343,37 @@ PHP_FUNCTION(apache_get_modules)
 
 PHP_MINFO_FUNCTION(apache)
 {
-	char *apv = php_apache_get_version();
+	const char *apv = php_apache_get_version();
 	smart_str tmp1 = {0};
 	char tmp[1024];
 	int n, max_requests;
 	char *p;
 	server_rec *serv = ((php_struct *) SG(server_context))->r->server;
 #ifndef PHP_WIN32
-# if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	AP_DECLARE_DATA extern unixd_config_rec ap_unixd_config;
-# else
-	AP_DECLARE_DATA extern unixd_config_rec unixd_config;
-# endif
 #endif
 
 	for (n = 0; ap_loaded_modules[n]; ++n) {
-		char *s = (char *) ap_loaded_modules[n]->name;
+		const char *s = ap_loaded_modules[n]->name;
+		if (n > 0) {
+			smart_str_appendc(&tmp1, ' ');
+		}
 		if ((p = strchr(s, '.'))) {
 			smart_str_appendl(&tmp1, s, (p - s));
 		} else {
 			smart_str_appends(&tmp1, s);
 		}
-		smart_str_appendc(&tmp1, ' ');
 	}
-	if (tmp1.s) {
-		if (tmp1.s->len > 0) {
-			tmp1.s->val[tmp1.s->len - 1] = '\0';
-		} else {
-			tmp1.s->val[0] = '\0';
-		}
+	if (!tmp1.s) {
+		smart_str_appendc(&tmp1, '/');
 	}
+	smart_str_0(&tmp1);
 
 	php_info_print_table_start();
 	if (apv && *apv) {
 		php_info_print_table_row(2, "Apache Version", apv);
 	}
-	snprintf(tmp, sizeof(tmp), "%d", MODULE_MAGIC_NUMBER);
+	snprintf(tmp, sizeof(tmp), "%d", MODULE_MAGIC_NUMBER_MAJOR);
 	php_info_print_table_row(2, "Apache API Version", tmp);
 
 	if (serv->server_admin && *(serv->server_admin)) {
@@ -406,11 +384,7 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(2, "Hostname:Port", tmp);
 
 #ifndef PHP_WIN32
-#if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", ap_unixd_config.user_name, ap_unixd_config.user_id, ap_unixd_config.group_id);
-#else
-	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
-#endif
 	php_info_print_table_row(2, "User/Group", tmp);
 #endif
 
@@ -425,7 +399,7 @@ PHP_MINFO_FUNCTION(apache)
 
 	php_info_print_table_row(2, "Virtual Server", (serv->is_virtual ? "Yes" : "No"));
 	php_info_print_table_row(2, "Server Root", ap_server_root);
-	php_info_print_table_row(2, "Loaded Modules", tmp1.s->val);
+	php_info_print_table_row(2, "Loaded Modules", ZSTR_VAL(tmp1.s));
 
 	smart_str_free(&tmp1);
 	php_info_print_table_end();
@@ -439,12 +413,12 @@ PHP_MINFO_FUNCTION(apache)
 		SECTION("Apache Environment");
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 			php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_end();
 
@@ -454,21 +428,21 @@ PHP_MINFO_FUNCTION(apache)
 		php_info_print_table_row(2, "HTTP Request", ((php_struct *) SG(server_context))->r->the_request);
 
 		arr = apr_table_elts(((php_struct *) SG(server_context))->r->headers_in);
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 		        php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_colspan_header(2, "HTTP Response Headers");
 		arr = apr_table_elts(((php_struct *) SG(server_context))->r->headers_out);
-		APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		APR_ARRAY_FOREACH_OPEN(arr, key, val) {
 			if (!val) {
 				val = "";
 			}
 		        php_info_print_table_row(2, key, val);
-		APR_ARRAY_FOREACH_CLOSE()
+		} APR_ARRAY_FOREACH_CLOSE();
 
 		php_info_print_table_end();
 	}

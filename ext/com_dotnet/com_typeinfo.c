@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    |         Harald Radi <h.radi@nme.at>                                  |
@@ -20,8 +18,6 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 
@@ -331,7 +327,7 @@ ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_ob
 			if (obj->typeinfo) {
 				ITypeInfo_AddRef(obj->typeinfo);
 				return obj->typeinfo;
-			} else {
+			} else if (V_VT(&obj->v) == VT_DISPATCH) {
 				IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &typeinfo);
 				if (typeinfo) {
 					return typeinfo;
@@ -543,7 +539,7 @@ bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool p
 					/* first element is the function name */
 					SysFreeString(names[0]);
 
-					php_printf("\t/* DISPID=%d */\n", func->memid);
+					php_printf("\t/* DISPID=%ld */\n", func->memid);
 
 					if (func->elemdescFunc.tdesc.vt != VT_VOID) {
 						php_printf("\t/* %s [%d] */\n",

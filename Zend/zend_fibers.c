@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Aaron Piotrowski <aaron@trowski.com>                        |
    |          Martin Schröder <m.schroeder2007@gmail.com>                 |
@@ -19,6 +18,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_gc.h"
 #include "zend_ini.h"
 #include "zend_variables.h"
 #include "zend_vm.h"
@@ -28,6 +28,7 @@
 #include "zend_mmap.h"
 #include "zend_compile.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -205,7 +206,12 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 {
 	void *pointer;
 	const size_t page_size = zend_fiber_get_page_size();
-	const size_t minimum_stack_size = page_size + ZEND_FIBER_GUARD_PAGES * page_size;
+	const size_t minimum_stack_size = page_size + ZEND_FIBER_GUARD_PAGES * page_size
+#ifdef __SANITIZE_ADDRESS__
+	// necessary correction due to ASAN redzones
+	* 6
+#endif
+	;
 
 	if (size < minimum_stack_size) {
 		zend_throw_exception_ex(NULL, 0, "Fiber stack size is too small, it needs to be at least %zu bytes", minimum_stack_size);
@@ -565,9 +571,9 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 	zend_fiber *fiber = EG(active_fiber);
 
 	/* Determine the current error_reporting ini setting. */
-	zend_long error_reporting = INI_INT("error_reporting");
-	/* If error_reporting is 0 and not explicitly set to 0, INI_STR returns a null pointer. */
-	if (!error_reporting && !INI_STR("error_reporting")) {
+	zend_long error_reporting = zend_ini_long_literal("error_reporting");
+	/* If error_reporting is 0 and not explicitly set to 0, zend_ini_str returns a null pointer. */
+	if (!error_reporting && !zend_ini_str_literal("error_reporting")) {
 		error_reporting = E_ALL;
 	}
 
@@ -824,7 +830,25 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	HashTable *lastSymTable = NULL;
 	zend_execute_data *ex = fiber->execute_data;
 	for (; ex; ex = ex->prev_execute_data) {
-		HashTable *symTable = zend_unfinished_execution_gc_ex(ex, ex->func && ZEND_USER_CODE(ex->func->type) ? ex->call : NULL, buf, false);
+		HashTable *symTable;
+		if (ZEND_CALL_INFO(ex) & ZEND_CALL_GENERATOR) {
+			/* The generator object is stored in ex->return_value */
+			zend_generator *generator = (zend_generator*)ex->return_value;
+			/* There are two cases to consider:
+			 * - If the generator is currently running, the Generator's GC
+			 *   handler will ignore it because it is not collectable. However,
+			 *   in this context the generator is suspended in Fiber::suspend()
+			 *   and may be collectable, so we can inspect it.
+			 * - If the generator is not running, the Generator's GC handler
+			 *   will inspect it. In this case we have to skip the frame.
+			 */
+			if (!(generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
+				continue;
+			}
+			symTable = zend_generator_frame_gc(buf, generator);
+		} else {
+			symTable = zend_unfinished_execution_gc_ex(ex, ex->func && ZEND_USER_CODE(ex->func->type) ? ex->call : NULL, buf, false);
+		}
 		if (symTable) {
 			if (lastSymTable) {
 				zval *val;

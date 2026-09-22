@@ -15,11 +15,7 @@ $peerName = 'gh10495';
 $clientCode = <<<'CODE'
     $context = stream_context_create(['ssl' => ['verify_peer' => false, 'peer_name' => '%s']]);
 
-    phpt_wait('server');
-    phpt_notify('proxy');
-
-    phpt_wait('proxy');
-    $fp = stream_socket_client("tlsv1.2://127.0.0.1:10012", $errornum, $errorstr, 1, STREAM_CLIENT_CONNECT, $context);
+    $fp = stream_socket_client("tlsv1.2://{{ ADDR }}", $errornum, $errorstr, 1, STREAM_CLIENT_CONNECT, $context);
 
     phpt_wait('proxy');
 
@@ -38,8 +34,8 @@ $serverCode = <<<'CODE'
     $context = stream_context_create(['ssl' => ['local_cert' => '%s']]);
 
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
-    $fp = stream_socket_server("tlsv1.2://127.0.0.1:10011", $errornum, $errorstr, $flags, $context);
-    phpt_notify();
+    $fp = stream_socket_server("tlsv1.2://127.0.0.1:0", $errornum, $errorstr, $flags, $context);
+    phpt_notify_server_start($fp);
 
     $conn = stream_socket_accept($fp);
     fwrite($conn, 'warmup');
@@ -50,14 +46,12 @@ CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $proxyCode = <<<'CODE'
-    phpt_wait();
-
-    $upstream = stream_socket_client("tcp://127.0.0.1:10011", $errornum, $errorstr, 3000, STREAM_CLIENT_CONNECT);
+    $upstream = stream_socket_client("tcp://{{ ADDR }}", $errornum, $errorstr, 3000, STREAM_CLIENT_CONNECT);
     stream_set_blocking($upstream, false);
 
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
-    $server = stream_socket_server("tcp://127.0.0.1:10012", $errornum, $errorstr, $flags);
-    phpt_notify();
+    $server = stream_socket_server("tcp://127.0.0.1:0", $errornum, $errorstr, $flags);
+    phpt_notify_server_start($server);
     $conn = stream_socket_accept($server);
     stream_set_blocking($conn, false);
 

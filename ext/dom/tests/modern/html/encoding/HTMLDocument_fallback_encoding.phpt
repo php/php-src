@@ -10,10 +10,6 @@ var_dump($dom->inputEncoding);
 echo $dom->saveHtml();
 
 ?>
---CLEAN--
-<?php
-@unlink(__DIR__ . "/windows1251_output.tmp");
-?>
 --EXPECT--
 string(5) "UTF-8"
 <!DOCTYPE html><html><head>

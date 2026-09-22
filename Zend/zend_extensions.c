@@ -2,15 +2,14 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
+   | Copyright © Zend Technologies Ltd., a subsidiary company of          |
+   |     Perforce Software, Inc., and Contributors.                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
@@ -45,7 +44,7 @@ zend_result zend_load_extension(const char *path)
 #ifdef ZEND_WIN32
 	char *err;
 	if (!php_win32_image_compatible(handle, &err)) {
-		zend_error(E_CORE_WARNING, err);
+		zend_error(E_CORE_WARNING, "%s", err);
 		return FAILURE;
 	}
 #endif
@@ -331,24 +330,33 @@ ZEND_API void zend_init_internal_run_time_cache(void) {
 			functions += zend_hash_num_elements(&ce->function_table);
 		} ZEND_HASH_FOREACH_END();
 
-		char *ptr = zend_arena_calloc(&CG(arena), functions, rt_size);
+		size_t alloc_size = functions * rt_size;
+		char *ptr = pemalloc(alloc_size, 1);
+
+		CG(internal_run_time_cache) = ptr;
+		CG(internal_run_time_cache_size) = alloc_size;
+
 		zend_internal_function *zif;
 		ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), zif) {
-			if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL)
-			{
+			if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL) {
 				ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
 				ptr += rt_size;
 			}
 		} ZEND_HASH_FOREACH_END();
 		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, zif) {
-				if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL)
-				{
+				if (!ZEND_USER_CODE(zif->type) && ZEND_MAP_PTR_GET(zif->run_time_cache) == NULL) {
 					ZEND_MAP_PTR_SET(zif->run_time_cache, (void *)ptr);
 					ptr += rt_size;
 				}
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
+	}
+}
+
+ZEND_API void zend_reset_internal_run_time_cache(void) {
+	if (CG(internal_run_time_cache)) {
+		memset(CG(internal_run_time_cache), 0, CG(internal_run_time_cache_size));
 	}
 }
 

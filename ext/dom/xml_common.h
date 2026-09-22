@@ -1,14 +1,12 @@
 /*
   +----------------------------------------------------------------------+
-  | Copyright (c) The PHP Group                                          |
+  | Copyright © The PHP Group and Contributors.                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | https://www.php.net/license/3_01.txt                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to the Modified BSD License that is      |
+  | bundled with this package in the file LICENSE, and is available      |
+  | through the World Wide Web at <https://www.php.net/license/>.        |
+  |                                                                      |
+  | SPDX-License-Identifier: BSD-3-Clause                                |
   +----------------------------------------------------------------------+
   | Authors: Christian Stocker <chregu@php.net>                          |
   |          Rob Richards <rrichards@php.net>                            |
@@ -29,9 +27,7 @@ typedef struct _dom_object {
 	zend_object std;
 } dom_object;
 
-static inline dom_object *php_dom_obj_from_obj(zend_object *obj) {
-	return (dom_object*)((char*)(obj) - XtOffsetOf(dom_object, std));
-}
+#define php_dom_obj_from_obj(obj) ZEND_CONTAINER_OF(obj, dom_object, std)
 
 #define Z_DOMOBJ_P(zv)  php_dom_obj_from_obj(Z_OBJ_P((zv)))
 
@@ -60,7 +56,7 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	__intern = Z_LIBXML_NODE_P(__id); \
 	if (UNEXPECTED(__intern->node == NULL)) { \
 		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", \
-			ZSTR_VAL(__intern->std.ce->name));\
+			ZSTR_VAL(Z_OBJCE_P(__zv)->name));\
 		RETURN_NULL();\
 	} \
 	__ptr = (__prtype)__intern->node->node; \
@@ -80,13 +76,13 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	__id = ZEND_THIS; \
 	DOM_GET_OBJ(__ptr, __id, __prtype, __intern);
 
-struct _php_dom_libxml_ns_mapper;
-typedef struct _php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
+struct php_dom_private_data;
+typedef struct php_dom_private_data php_dom_private_data;
 
-static zend_always_inline php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *intern)
+static zend_always_inline php_dom_private_data *php_dom_get_private_data(dom_object *intern)
 {
 	ZEND_ASSERT(intern->document != NULL);
-	return (php_dom_libxml_ns_mapper *) intern->document->private_data;
+	return (php_dom_private_data *) intern->document->private_data;
 }
 
 static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(const xmlNode *nodep, const xmlNode *basep)

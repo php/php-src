@@ -39,7 +39,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
                 mysqli_error($link));
             return false;
         }
-        while ($row = mysqli_fetch_assoc($res))
+        while (mysqli_fetch_assoc($res))
             ;
         mysqli_free_result($res);
 
@@ -73,7 +73,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 
     $lines_trace = explode("\n", $trace);
     $functions_trace = array();
-    foreach ($lines_trace as $k => $line) {
+    foreach ($lines_trace as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>([\w:]+)@ism", $line, $matches)) {
             $functions_trace[$matches[1]] = $matches[1];
@@ -81,7 +81,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     }
 
     $found = 0;
-    foreach ($memory_funcs as $k => $name)
+    foreach ($memory_funcs as $name)
         if (isset($functions_trace[$name]))
             $found++;
 
@@ -97,7 +97,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 
     $lines_trace = explode("\n", $trace);
     $functions_trace = array();
-    foreach ($lines_trace as $k => $line) {
+    foreach ($lines_trace as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>([\w:]+)@ism", $line, $matches)) {
             $functions_trace[$matches[1]] = $matches[1];
@@ -105,7 +105,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     }
 
     $found = 0;
-    foreach ($memory_funcs as $k => $name)
+    foreach ($memory_funcs as $name)
         if (isset($functions_trace[$name]))
             $found++;
 

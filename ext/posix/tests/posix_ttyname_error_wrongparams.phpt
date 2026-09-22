@@ -22,9 +22,9 @@ $process = proc_open('echo "foo";', $descriptors, $pipes);
 try {
     var_dump(posix_ttyname($process)); // wrong resource type
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECT--
 bool(false)
-posix_ttyname(): supplied resource is not a valid stream resource
+TypeError: posix_ttyname(): supplied resource is not a valid stream resource

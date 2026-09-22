@@ -10,4 +10,4 @@ var_dump(json_last_error_msg());
 --EXPECT--
 NULL
 bool(true)
-string(50) "Single unpaired UTF-16 surrogate in unicode escape"
+string(68) "Single unpaired UTF-16 surrogate in unicode escape near location 1:1"

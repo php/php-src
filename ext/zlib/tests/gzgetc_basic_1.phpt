@@ -4,9 +4,7 @@ Test function gzgetc() by calling it with its expected arguments zlib 1.2.7
 zlib
 --SKIPIF--
 <?php
-
-include 'func.inc';
-if (version_compare(get_zlib_version(), '1.2.7') < 0) {
+if (version_compare(ZLIB_VERSION, '1.2.7') < 0) {
     die('skip - only for zlib >= 1.2.7');
 }
 ?>
@@ -16,7 +14,7 @@ if (version_compare(get_zlib_version(), '1.2.7') < 0) {
 // note that gzgets is an alias to fgets. parameter checking tests will be
 // the same as gzgets
 
-$f = __DIR__."/004.txt.gz";
+$f = __DIR__."/data/test.txt.gz";
 $h = gzopen($f, 'r');
 if ($h) {
     $count = 0;

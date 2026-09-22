@@ -31,21 +31,21 @@ class IntlDateFormatter
     /** @cvalue UCAL_TRADITIONAL */
     public const int TRADITIONAL = UNKNOWN;
 
+    public const int PROLEPTIC_GREGORIAN = -16;
+
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @param IntlCalendar|int|null $calendar
      */
     public function __construct(
         ?string $locale,
         int $dateType = IntlDateFormatter::FULL,
         int $timeType = IntlDateFormatter::FULL,
-        $timezone = null,
+        IntlTimeZone|DateTimeZone|string|null $timezone = null,
         $calendar = null,
         ?string $pattern = null
     ) {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @tentative-return-type
      * @alias datefmt_create
      */
@@ -53,7 +53,7 @@ class IntlDateFormatter
         ?string $locale,
         int $dateType = IntlDateFormatter::FULL,
         int $timeType = IntlDateFormatter::FULL,
-        $timezone = null,
+        IntlTimeZone|DateTimeZone|string|null $timezone = null,
         IntlCalendar|int|null $calendar = null,
         ?string $pattern = null
     ): ?IntlDateFormatter {}
@@ -101,11 +101,9 @@ class IntlDateFormatter
     public function getTimeZone(): IntlTimeZone|false {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @tentative-return-type
-     * @alias datefmt_set_timezone
      */
-    public function setTimeZone($timezone): bool {}
+    public function setTimeZone(IntlTimeZone|DateTimeZone|string|null $timezone): bool {}
 
     /**
      * @tentative-return-type

@@ -1,10 +1,7 @@
 --TEST--
-round() with modes PHP_ROUND_CEILING and PHP_ROUND_FLOOR
+round() with modes PositiveInfinity and NegativeInfinity
 --FILE--
 <?php
-$modes = [
-    PHP_ROUND_CEILING, PHP_ROUND_FLOOR,
-];
 
 $numbers = [
     2.5,
@@ -23,20 +20,20 @@ $numbers = [
     -0.0001,
 ];
 
-echo "mode PHP_ROUND_CEILING\n";
+echo "mode PositiveInfinity\n";
 foreach($numbers as $number) {
-    var_dump(ceil($number) === round($number, 0, PHP_ROUND_CEILING));
+    var_dump(ceil($number) === round($number, 0, RoundingMode::PositiveInfinity));
 }
 
 echo "\n";
-echo "mode PHP_ROUND_FLOOR\n";
+echo "mode NegativeInfinity\n";
 foreach($numbers as $number) {
-    var_dump(floor($number) === round($number, 0, PHP_ROUND_FLOOR));
+    var_dump(floor($number) === round($number, 0, RoundingMode::NegativeInfinity));
 }
 
 ?>
 --EXPECT--
-mode PHP_ROUND_CEILING
+mode PositiveInfinity
 bool(true)
 bool(true)
 bool(true)
@@ -52,7 +49,7 @@ bool(true)
 bool(true)
 bool(true)
 
-mode PHP_ROUND_FLOOR
+mode NegativeInfinity
 bool(true)
 bool(true)
 bool(true)

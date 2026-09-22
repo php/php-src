@@ -12,7 +12,7 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_crypto_flags_004.pem.tmp';
 $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_crypto_flags_004-ca.pem.tmp';
 
 $serverCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://127.0.0.1:0";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
@@ -21,7 +21,7 @@ $serverCode = <<<'CODE'
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-    phpt_notify();
+    phpt_notify_server_start($server);
 
     @stream_socket_accept($server, 1);
     @stream_socket_accept($server, 1);
@@ -32,7 +32,7 @@ $serverCode = sprintf($serverCode, $certFile);
 
 $peerName = 'stream_crypto_flags_004';
 $clientCode = <<<'CODE'
-    $serverUri = "ssl://127.0.0.1:64321";
+    $serverUri = "ssl://{{ ADDR }}";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer' => true,
@@ -40,8 +40,6 @@ $clientCode = <<<'CODE'
         'peer_name' => '%s',
         'security_level' => 0,
     ]]);
-
-    phpt_wait();
 
     // Should succeed because the SSLv23 handshake here is compatible with the
     // TLSv1 hello method employed in the server

@@ -1,17 +1,15 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Benjamin Eberlei <beberlei@php.net>                         |
-   |          Niels Dossche <nielsdos@php.net>                            |
+   |          Nora Dossche  <ndossche@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -22,8 +20,33 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "../php_dom.h"
+#include "../obj_map.h"
 #include "../internal_helpers.h"
 #include "../dom_properties.h"
+
+zval *dom_parent_node_children(dom_object *obj)
+{
+	return dom_get_prop_checked_offset(obj, 0, "children");
+}
+
+zend_result dom_parent_node_children_read(dom_object *obj, zval *retval)
+{
+	zval *cached_children = dom_parent_node_children(obj);
+	if (Z_ISUNDEF_P(cached_children)) {
+		object_init_ex(cached_children, dom_html_collection_class_entry);
+		php_dom_create_obj_map(obj, Z_DOMOBJ_P(cached_children), NULL, NULL, NULL, &php_dom_obj_map_child_elements);
+
+		/* Handle cycles for potential TMPVARs (could also be CV but we can't differentiate).
+		 * RC == 2 because of 1 TMPVAR and 1 in HTMLCollection. */
+		if (GC_REFCOUNT(&obj->std) == 2) {
+			gc_possible_root(Z_COUNTED_P(cached_children));
+		}
+	}
+
+	ZVAL_OBJ_COPY(retval, Z_OBJ_P(cached_children));
+
+	return SUCCESS;
+}
 
 /* {{{ firstElementChild DomParentNode
 readonly=yes
@@ -39,12 +62,7 @@ zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retv
 		first = first->next;
 	}
 
-	if (!first) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(first, retval, obj);
+	php_dom_create_nullable_object(first, retval, obj);
 	return SUCCESS;
 }
 /* }}} */
@@ -63,12 +81,7 @@ zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retva
 		last = last->prev;
 	}
 
-	if (!last) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(last, retval, obj);
+	php_dom_create_nullable_object(last, retval, obj);
 	return SUCCESS;
 }
 /* }}} */
@@ -97,6 +110,11 @@ zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 /* }}} */
+
+static ZEND_COLD void dom_cannot_create_temp_nodes(void)
+{
+	php_dom_throw_error_with_message(INVALID_MODIFICATION_ERR, "Unable to allocate temporary nodes", /* strict */ true);
+}
 
 static bool dom_is_node_in_list(const zval *nodes, uint32_t nodesc, const xmlNode *node_to_find)
 {
@@ -244,8 +262,11 @@ static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document,
 	ZEND_ASSERT(parentNode != NULL);
 
 	/* 1. If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException.
-	 *    => Impossible */
-	ZEND_ASSERT(!php_dom_pre_insert_is_parent_invalid(parentNode));
+	 *    => This is possible because we can grab children of attributes etc... (see e.g. GH-16594) */
+	if (php_dom_pre_insert_is_parent_invalid(parentNode)) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(document));
+		return false;
+	}
 
 	if (node->doc != documentNode) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(document));
@@ -363,12 +384,17 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 			return dom_object_get_node(Z_DOMOBJ_P(nodes));
 		} else {
 			ZEND_ASSERT(Z_TYPE_P(nodes) == IS_STRING);
-			return xmlNewDocTextLen(documentNode, BAD_CAST Z_STRVAL_P(nodes), Z_STRLEN_P(nodes));
+			node = xmlNewDocTextLen(documentNode, BAD_CAST Z_STRVAL_P(nodes), Z_STRLEN_P(nodes));
+			if (UNEXPECTED(node == NULL)) {
+				dom_cannot_create_temp_nodes();
+			}
+			return node;
 		}
 	}
 
 	node = xmlNewDocFragment(documentNode);
 	if (UNEXPECTED(!node)) {
+		dom_cannot_create_temp_nodes();
 		return NULL;
 	}
 
@@ -379,6 +405,11 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 			newNodeObj = Z_DOMOBJ_P(&nodes[i]);
 			newNode = dom_object_get_node(newNodeObj);
 
+			if (UNEXPECTED(!newNode)) {
+				php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+				goto err;
+			}
+
 			if (!dom_is_pre_insert_valid_without_step_1(document, node, newNode, NULL, documentNode)) {
 				goto err;
 			}
@@ -387,8 +418,7 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 				xmlUnlinkNode(newNode);
 			}
 
-			newNodeObj->document = document;
-			xmlSetTreeDoc(newNode, documentNode);
+			ZEND_ASSERT(newNodeObj->document == document);
 
 			if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
 				/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
@@ -408,6 +438,10 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 
 			/* Text nodes can't violate the hierarchy at this point. */
 			newNode = xmlNewDocTextLen(documentNode, BAD_CAST Z_STRVAL(nodes[i]), Z_STRLEN(nodes[i]));
+			if (UNEXPECTED(newNode == NULL)) {
+				dom_cannot_create_temp_nodes();
+				goto err;
+			}
 			dom_add_child_without_merging(node, newNode);
 		}
 	}
@@ -434,7 +468,12 @@ static zend_result dom_sanity_check_node_list_types(zval *nodes, uint32_t nodesc
 				zend_argument_type_error(i + 1, "must be of type %s|string, %s given", ZSTR_VAL(node_ce->name), zend_zval_type_name(&nodes[i]));
 				return FAILURE;
 			}
-		} else if (type != IS_STRING) {
+		} else if (type == IS_STRING) {
+			if (Z_STRLEN(nodes[i]) > INT_MAX) {
+				zend_argument_value_error(i + 1, "must be less than or equal to %d bytes long", INT_MAX);
+				return FAILURE;
+			}
+		} else {
 			zend_argument_type_error(i + 1, "must be of type %s|string, %s given", ZSTR_VAL(node_ce->name), zend_zval_type_name(&nodes[i]));
 			return FAILURE;
 		}
@@ -484,7 +523,7 @@ static void dom_insert_node_list_cleanup(xmlNodePtr node)
 		xmlFreeNode(node);
 	} else {
 		/* Must have been a directly-passed node. */
-		ZEND_ASSERT(node->_private != NULL);
+		ZEND_UNREACHABLE();
 	}
 }
 
@@ -681,22 +720,16 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	php_dom_pre_insert(context->document, fragment, parentNode, viable_previous_sibling);
 }
 
-static zend_result dom_child_removal_preconditions(const xmlNode *child, int stricterror)
+static zend_result dom_child_removal_preconditions(const xmlNode *child, const dom_object *context)
 {
-	if (dom_node_is_read_only(child) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+	if (dom_node_is_read_only(child) ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent))) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(context->document));
 		return FAILURE;
 	}
 
 	if (!child->parent) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		return FAILURE;
-	}
-
-	xmlNodePtr children = child->parent->children;
-	if (!children) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(context->document));
 		return FAILURE;
 	}
 
@@ -706,9 +739,8 @@ static zend_result dom_child_removal_preconditions(const xmlNode *child, int str
 void dom_child_node_remove(dom_object *context)
 {
 	xmlNode *child = dom_object_get_node(context);
-	bool stricterror = dom_get_strict_error(context->document);
 
-	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
+	if (UNEXPECTED(dom_child_removal_preconditions(child, context) != SUCCESS)) {
 		return;
 	}
 
@@ -740,8 +772,7 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		viable_next_sibling = viable_next_sibling->next;
 	}
 
-	bool stricterror = dom_get_strict_error(context->document);
-	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
+	if (UNEXPECTED(dom_child_removal_preconditions(child, context) != SUCCESS)) {
 		return;
 	}
 

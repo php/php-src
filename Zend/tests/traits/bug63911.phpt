@@ -1,5 +1,5 @@
 --TEST--
-Bug #63911 (Ignore conflicting trait methods originationg from identical sub traits)
+Bug #63911 (Ignore conflicting trait methods originating from identical sub traits)
 --FILE--
 <?php
 trait A

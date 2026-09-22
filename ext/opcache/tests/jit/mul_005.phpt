@@ -16,9 +16,9 @@ function test($a) {
     
 try {
     test('foo');
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }   
 ?>
 --EXPECT--
-Unsupported operand types: string * int
+TypeError: Unsupported operand types: string * int

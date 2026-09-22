@@ -32,16 +32,16 @@ ob_end_flush();
 bool(true)
 
 Warning: session_encode(): Skipping numeric key 0 in %s on line %d
-bool(false)
+string(0) ""
 bool(true)
 bool(true)
 
 Warning: session_encode(): Skipping numeric key 1234567890 in %s on line %d
-bool(false)
+string(0) ""
 bool(true)
 bool(true)
 
 Warning: session_encode(): Skipping numeric key -1234567890 in %s on line %d
-bool(false)
+string(0) ""
 bool(true)
 Done

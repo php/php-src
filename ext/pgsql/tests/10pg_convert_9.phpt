@@ -24,6 +24,8 @@ $converted = pg_convert($db, $table_name, $fields);
 
 var_dump($converted);
 
+var_dump(pg_convert($db, $table_name, ['str' => "\\' OR 1=1"]));
+
 /* Invalid values */
 try {
     $converted = pg_convert($db, $table_name, [5 => 'AAA']);
@@ -51,6 +53,10 @@ try {
 } catch (\TypeError $e) {
     echo $e->getMessage(), \PHP_EOL;
 }
+
+/* standard_conforming_strings = 1 */
+pg_query($db, "SET standard_conforming_strings = 1");
+var_dump(pg_convert($db, $table_name, ['str' => "\\' OR 1=1"]));
 ?>
 --CLEAN--
 <?php
@@ -65,12 +71,20 @@ array(3) {
   [""num""]=>
   string(4) "1234"
   [""str""]=>
-  string(6) "E'AAA'"
+  string(5) "'AAA'"
   [""bin""]=>
-  string(12) "E'\\x424242'"
+  string(11) "'\\x424242'"
+}
+array(1) {
+  [""str""]=>
+  string(13) "'\\'' OR 1=1'"
 }
 Array of values must be an associative array with string keys
 Array of values must be an associative array with string keys
 Values must be of type string|int|float|bool|null, array given
 Values must be of type string|int|float|bool|null, stdClass given
 Values must be of type string|int|float|bool|null, PgSql\Connection given
+array(1) {
+  [""str""]=>
+  string(12) "'\'' OR 1=1'"
+}

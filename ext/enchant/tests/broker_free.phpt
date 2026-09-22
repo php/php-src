@@ -4,10 +4,6 @@ enchant_broker_free() function
 marcosptf - <marcosptf@yahoo.com.br>
 --EXTENSIONS--
 enchant
---SKIPIF--
-<?php
-if (!is_object(enchant_broker_init())) {die("skip, resource dont load\n");}
-?>
 --FILE--
 <?php
 $broker = enchant_broker_init();
@@ -23,5 +19,5 @@ echo "OK\n";
 --EXPECTF--
 OK
 
-Deprecated: Function enchant_broker_free() is deprecated in %s
+Deprecated: Function enchant_broker_free() is deprecated since 8.0, as EnchantBroker objects are freed automatically in %s
 OK

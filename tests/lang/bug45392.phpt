@@ -2,6 +2,9 @@
 Bug #45392 (ob_start()/ob_end_clean() and memory_limit)
 --SKIPIF--
 <?php
+if (PHP_OS_FAMILY === 'Windows' && version_compare(PHP_VERSION, '8.4', '<')) {
+    die("xfail fails on Windows Server 2022 and newer.");
+}
 if (getenv("USE_ZEND_ALLOC") === "0") {
     die("skip Zend MM disabled");
 }

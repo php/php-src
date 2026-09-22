@@ -1,14 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) The PHP Group                                          |
+   | Copyright © The PHP Group and Contributors.                          |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
    |          Rob Richards <rrichards@php.net>                            |
@@ -68,7 +66,7 @@ zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlNodePtr, node, obj);
 
-	xmlChar *wholetext = NULL;
+	smart_str str = {0};
 
 	/* Find starting text node */
 	while (node->prev && ((node->prev->type == XML_TEXT_NODE) || (node->prev->type == XML_CDATA_SECTION_NODE))) {
@@ -77,16 +75,13 @@ zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 
 	/* concatenate all adjacent text and cdata nodes */
 	while (node && ((node->type == XML_TEXT_NODE) || (node->type == XML_CDATA_SECTION_NODE))) {
-		wholetext = xmlStrcat(wholetext, node->content);
+		if (node->content) {
+			smart_str_appends(&str, (const char *) node->content);
+		}
 		node = node->next;
 	}
 
-	if (wholetext != NULL) {
-		ZVAL_STRING(retval, (char *) wholetext);
-		xmlFree(wholetext);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
+	ZVAL_STR(retval, smart_str_extract(&str));
 
 	return SUCCESS;
 }
@@ -99,8 +94,6 @@ Since:
 */
 PHP_METHOD(DOMText, splitText)
 {
-	zval       *id;
-	xmlChar    *cur;
 	xmlChar    *first;
 	xmlChar    *second;
 	xmlNodePtr  node;
@@ -109,22 +102,17 @@ PHP_METHOD(DOMText, splitText)
 	int         length;
 	dom_object	*intern;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
 		RETURN_THROWS();
 	}
-	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(node, ZEND_THIS, xmlNodePtr, intern);
 
 	if (offset < 0) {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 	length = xmlUTF8Strlen(cur);
 
 	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {
@@ -137,16 +125,17 @@ PHP_METHOD(DOMText, splitText)
 	first = xmlUTF8Strndup(cur, (int)offset);
 	second = xmlUTF8Strsub(cur, (int)offset, (int)(length - offset));
 
-	xmlNodeSetContent(node, first);
-	nnode = xmlNewDocText(node->doc, second);
-
-	xmlFree(first);
-	xmlFree(second);
+	xmlNodeSetContent(node, NULL);
+	node->content = first;
+	nnode = xmlNewDocText(node->doc, NULL);
 
 	if (nnode == NULL) {
+		xmlFree(second);
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
+
+	nnode->content = second;
 
 	if (node->parent != NULL) {
 		nnode->type = XML_ELEMENT_NODE;
@@ -163,21 +152,11 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMText, isWhitespaceInElementContent)
 {
-	zval       *id;
 	xmlNodePtr  node;
 	dom_object	*intern;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
-
-	if (xmlIsBlankNode(node)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	DOM_GET_OBJ(node, ZEND_THIS, xmlNodePtr, intern);
+	RETURN_BOOL(xmlIsBlankNode(node));
 }
 /* }}} end dom_text_is_whitespace_in_element_content */
 

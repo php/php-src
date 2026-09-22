@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | https://www.php.net/license/3_01.txt                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | Copyright © The PHP Group and Contributors.                          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Modified BSD License that is      |
+   | bundled with this package in the file LICENSE, and is available      |
+   | through the World Wide Web at <https://www.php.net/license/>.        |
+   |                                                                      |
+   | SPDX-License-Identifier: BSD-3-Clause                                |
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
@@ -43,7 +43,7 @@ inline BreakIterator *_breakiter_prolog(zend_object_iterator *iter)
 	if (bio->biter == NULL) {
 		intl_errors_set(BREAKITER_ERROR_P(bio), U_INVALID_STATE_ERROR,
 			"The BreakIterator object backing the PHP iterator is not "
-			"properly constructed", 0);
+			"properly constructed");
 	}
 	return bio->biter;
 }
@@ -51,6 +51,7 @@ inline BreakIterator *_breakiter_prolog(zend_object_iterator *iter)
 static void _breakiterator_destroy_it(zend_object_iterator *iter)
 {
 	zval_ptr_dtor(&iter->data);
+	/* Don't free iter here because it is allocated as an object on its own, not embedded. */
 }
 
 static void _breakiterator_move_forward(zend_object_iterator *iter)
@@ -64,7 +65,7 @@ static void _breakiterator_move_forward(zend_object_iterator *iter)
 		return;
 	}
 
-	int32_t pos = biter->next();
+	const int32_t pos = biter->next();
 	if (pos != BreakIterator::DONE) {
 		ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 	} //else we've reached the end of the enum, nothing more is required
@@ -75,12 +76,22 @@ static void _breakiterator_rewind(zend_object_iterator *iter)
 	BreakIterator *biter = _breakiter_prolog(iter);
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
 
-	int32_t pos = biter->first();
+	const int32_t pos = biter->first();
 	ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 }
 
+static void zoi_with_current_dtor_self(zend_object_iterator *iter)
+{
+	// Note: wrapping_obj is unused, call to zoi_with_current_dtor() not necessary
+	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
+	ZEND_ASSERT(Z_ISUNDEF(zoi_iter->wrapping_obj));
+
+	// Unlike the other iterators, this iterator is a new, standalone instance
+	zoi_iter->destroy_it(iter);
+}
+
 static const zend_object_iterator_funcs breakiterator_iterator_funcs = {
-	zoi_with_current_dtor,
+	zoi_with_current_dtor_self,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,
 	NULL,
@@ -211,7 +222,7 @@ static const zend_object_iterator_funcs breakiterator_parts_it_funcs = {
 	_breakiterator_parts_move_forward,
 	_breakiterator_parts_rewind,
 	zoi_with_current_invalidate_current,
-	NULL, /* get_gc */
+	zoi_with_current_get_gc,
 };
 
 void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
@@ -231,7 +242,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	ii->iterator->index = 0;
 
 	((zoi_with_current*)ii->iterator)->destroy_it = _breakiterator_parts_destroy_it;
-	ZVAL_OBJ(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
+	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->wrapping_obj);
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 
 	((zoi_break_iter_parts*)ii->iterator)->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);

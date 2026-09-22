@@ -162,13 +162,13 @@ class SQLite3
 #endif
 
     /** @implementation-alias SQLite3::open */
-    public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = "") {}
+    public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, #[\SensitiveParameter] string $encryptionKey = "") {}
 
     /**
      * @tentative-return-type
      * @todo SQLite3::open should really be static
      */
-    public function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = ""): void {}
+    public function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, #[\SensitiveParameter] string $encryptionKey = ""): void {}
 
     /** @tentative-return-type */
     public function close(): bool {}
@@ -199,10 +199,8 @@ class SQLite3
     public function loadExtension(string $name): bool {}
 #endif
 
-#if SQLITE_VERSION_NUMBER >= 3006011
     /** @tentative-return-type */
     public function backup(SQLite3 $destination, string $sourceDatabase = "main", string $destinationDatabase = "main"): bool {}
-#endif
 
     /** @tentative-return-type */
     public static function escapeString(string $string): string {}
@@ -272,6 +270,17 @@ class SQLite3Stmt
 
     /** @tentative-return-type */
     public function reset(): bool {}
+
+    public function busy(): bool {}
+
+#if SQLITE_VERSION_NUMBER >= 3043000
+    public const int EXPLAIN_MODE_PREPARED = 0;
+    public const int EXPLAIN_MODE_EXPLAIN = 1;
+    public const int EXPLAIN_MODE_EXPLAIN_QUERY_PLAN = 2;
+
+    public function explain(): int {}
+    public function setExplain(int $mode): bool {}
+#endif
 }
 
 /** @not-serializable */
@@ -290,6 +299,8 @@ class SQLite3Result
 
     /** @tentative-return-type */
     public function fetchArray(int $mode = SQLITE3_BOTH): array|false {}
+
+    public function fetchAll(int $mode = SQLITE3_BOTH): array|false {}
 
     /** @tentative-return-type */
     public function reset(): bool {}

@@ -4,7 +4,7 @@ Test compress.zlib:// scheme with the unlink function
 zlib
 --FILE--
 <?php
-$inputFileName = __DIR__."/004.txt.gz";
+$inputFileName = __DIR__."/data/test.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 unlink($srcFile);
 var_dump(file_exists($inputFileName));

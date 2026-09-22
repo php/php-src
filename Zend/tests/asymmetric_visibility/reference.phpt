@@ -1,0 +1,32 @@
+--TEST--
+Asymmetric visibility reference
+--FILE--
+<?php
+
+class Foo {
+    public private(set) int $bar = 0;
+
+    public function test() {
+        $bar = &$this->bar;
+        $bar++;
+    }
+}
+
+$foo = new Foo();
+
+try {
+    $bar = &$foo->bar;
+    $bar++;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+var_dump($foo->bar);
+
+$foo->test();
+var_dump($foo->bar);
+
+?>
+--EXPECT--
+Error: Cannot indirectly modify private(set) property Foo::$bar from global scope
+int(0)
+int(1)

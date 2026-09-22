@@ -48,7 +48,7 @@ foreach (['to' => $to, 'cc' => $cc, 'bcc' => $bcc] as $recipient => $mailAddress
         echo "Found the email. {$recipient} received.\n";
     }
 
-    if ($mail->getHeader('Return-Path') === $from) {
+    if ($mail->getHeader('Return-Path') === "<{$from}>") {
         echo "Return-Path is as expected.\n";
     }
 
