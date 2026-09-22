@@ -11,7 +11,15 @@ if (PHP_OS_FAMILY === "Windows") die("skip SO_LINGER reset behaviour differs on 
 include "php_cli_server.inc";
 $server = php_cli_server_start('echo "Hello world";', 'index.php', ['-d', 'ignore_user_abort=1']);
 
-$fp = fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT);
+$fp = php_cli_server_connect();
+
+$probe = php_cli_server_connect();
+fwrite($probe, "GET / HTTP/1.1\r\nConnection: close\r\n\r\n");
+while (!feof($probe)) {
+    fgets($probe);
+}
+fclose($probe);
+
 socket_set_option(socket_import_stream($fp), SOL_SOCKET, SO_LINGER, ['l_onoff' => 1, 'l_linger' => 0]);
 fwrite($fp, "POST / HTTP/1.1\r\nExpect: 100-continue\r\nContent-Length: 4\r\n\r\n");
 fclose($fp);
