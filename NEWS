@@ -64,6 +64,10 @@ PHP                                                                        NEWS
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
     set to an empty string. (Ilia Alshanetsky)
 
+- Reflection:
+  . Fixed bug GH-23842 (ReflectionProperty::skipLazyInitialization() copies an
+    unresolved constant default with opcache). (Lazizbek Ergashev)
+
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)
