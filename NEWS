@@ -43,6 +43,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed a crash when converting with a cloned UConverter that uses
     toUCallback/fromUCallback. (Ilia Alshanetsky)
+  . Fixed Collator attribute and strength methods not rejecting an
+    unconstructed Collator. (Ilia Alshanetsky)
 
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
