@@ -6587,12 +6587,15 @@ static void ir_stack_alloca(ir_ctx *ctx, int32_t size)
 			|	call aword &addr
 			|	sub Ra(IR_REG_RSP), Ra(IR_REG_RAX)
 		} else {
+			uint32_t addr_hi = (uintptr_t)addr >> 32;
+			uint32_t addr_lo = (uintptr_t)addr & 0xffffffff;
+
 			if (!data->chkstk_addr) {
 				data->chkstk_addr = 1;
 				ir_rodata(ctx);
 				|.align 8
 				|->chkstk_addr:
-				|	.aword addr
+				|	.dword addr_lo, addr_hi
 				|.code
 			}
 			|	mov Ra(IR_REG_RAX), size
