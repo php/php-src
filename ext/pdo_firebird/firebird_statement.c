@@ -316,6 +316,7 @@ static int pdo_firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	col->precision = -var->sqlscale;
 	col->maxlen = var->sqllen;
 	col->name = zend_string_alloc(colname_len, 0);
+	col->table = zend_string_init(var->relname, var->relname_length, 0);
 	cp = ZSTR_VAL(col->name);
 	if (colname_len > var->aliasname_length) {
 		memmove(cp, var->relname, var->relname_length);
