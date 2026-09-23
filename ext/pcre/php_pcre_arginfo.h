@@ -1,5 +1,5 @@
 /* This is a generated file, edit php_pcre.stub.php instead.
- * Stub hash: 63de1d37ab303e1d6af7c96eaeeba09d7f35d116 */
+ * Stub hash: c8e7b098ccb22a31cd650a9ef0f027c412207b49 */
 
 #include "zend_constants.h"
 
