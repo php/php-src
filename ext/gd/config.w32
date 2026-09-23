@@ -25,6 +25,7 @@ if (PHP_GD != "no") {
 		CHECK_HEADER("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
 		) {
 			AC_DEFINE('HAVE_ICONV_H', 1, 'Define to 1 if you have the <iconv.h> header');
+			AC_DEFINE('HAVE_FT2BUILD_H', 1, 'Define to 1 if you have the <ft2build.h> header');
 
 		if (CHECK_LIB("libXpm_a.lib", "gd", PHP_GD) &&
 			CHECK_HEADER("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
