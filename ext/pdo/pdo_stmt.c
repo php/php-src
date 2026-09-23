@@ -1598,6 +1598,9 @@ PHP_METHOD(PDOStatement, getColumnMeta)
 	/* add stock items */
 	col = &stmt->columns[colno];
 	add_assoc_str(return_value, "name", zend_string_copy(col->name));
+	if (col->table && ZSTR_LEN(col->table)) {
+		add_assoc_str(return_value, "table", zend_string_copy(col->table));
+	}
 	add_assoc_long(return_value, "len", col->maxlen);
 	add_assoc_long(return_value, "precision", col->precision);
 }
