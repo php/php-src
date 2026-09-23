@@ -174,6 +174,9 @@ static void pdo_stmt_reset_columns(pdo_stmt_t *stmt) {
 			if (cols[i].name) {
 				zend_string_release_ex(cols[i].name, 0);
 			}
+			if (cols[i].table) {
+				zend_string_release_ex(cols[i].table, 0);
+			}
 		}
 		efree(stmt->columns);
 	}
