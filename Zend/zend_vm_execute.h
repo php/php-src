@@ -440,7 +440,7 @@ static zend_vm_opcode_handler_func_t zend_vm_get_opcode_handler_func(uint8_t opc
 # define ZEND_VM_ENTER()           opline = EG(current_execute_data)->opline; ZEND_VM_ENTER_EX()
 # define ZEND_VM_LEAVE()           return  2
 #else
-# define ZEND_VM_ENTER_BIT         1ULL
+# define ZEND_VM_ENTER_BIT         ((uintptr_t) 1)
 # define ZEND_VM_ENTER_EX()        return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)
 # define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()
 # define ZEND_VM_LEAVE()           return (zend_op*)((uintptr_t)opline | ZEND_VM_ENTER_BIT)
