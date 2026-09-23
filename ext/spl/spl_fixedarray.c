@@ -77,6 +77,14 @@ static bool spl_fixedarray_empty(spl_fixedarray *array)
 	return true;
 }
 
+/* True while spl_fixedarray_resize() runs. A clear empties the array before
+ * destroying its elements, so emptiness alone cannot tell "never constructed"
+ * from "clear in progress"; re-initialising in that window leaks. */
+static bool spl_fixedarray_resize_in_progress(const spl_fixedarray *array)
+{
+	return array->cached_resize >= 0;
+}
+
 static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 {
 	array->size = 0;
@@ -188,9 +196,9 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 
 	/* clearing the array */
 	if (size == 0) {
+		/* Clears elements and size; resetting them afterwards would leak
+		 * anything a destructor re-installed. */
 		spl_fixedarray_dtor(array);
-		array->elements = NULL;
-		array->size = 0;
 	} else if (size > array->size) {
 		array->elements = safe_erealloc(array->elements, size, sizeof(zval), 0);
 		spl_fixedarray_init_elems(array, array->size, size);
@@ -201,8 +209,12 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 		array->elements = erealloc(array->elements, sizeof(zval) * size);
 	}
 
-	/* If resized within the destructor, take the last resize command and perform it */
+	/* If resized within the destructor, take the last resize command and
+	 * perform it. The sentinel is still set: re-initialising during a
+	 * resize is refused. */
 	zend_long cached_resize = array->cached_resize;
+	ZEND_ASSERT(cached_resize >= 0);
+
 	array->cached_resize = -1;
 	if (cached_resize != size) {
 		spl_fixedarray_resize(array, cached_resize);
@@ -287,6 +299,9 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	if (orig && clone_orig) {
 		spl_fixedarray_object *other = spl_fixed_array_from_obj(orig);
 		spl_fixedarray_copy_ctor(&intern->array, &other->array);
+	} else {
+		/* The zeroed struct would mean "resizing"; set the sentinel. */
+		spl_fixedarray_default_ctor(&intern->array);
 	}
 
 	if (UNEXPECTED(class_type != spl_ce_SplFixedArray)) {
@@ -548,7 +563,7 @@ PHP_METHOD(SplFixedArray, __construct)
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 
-	if (!spl_fixedarray_empty(&intern->array)) {
+	if (UNEXPECTED(!spl_fixedarray_empty(&intern->array) || spl_fixedarray_resize_in_progress(&intern->array))) {
 		/* called __construct() twice, bail out */
 		return;
 	}
@@ -566,7 +581,7 @@ PHP_METHOD(SplFixedArray, __wakeup)
 		RETURN_THROWS();
 	}
 
-	if (intern->array.size == 0) {
+	if (EXPECTED(intern->array.size == 0 && !spl_fixedarray_resize_in_progress(&intern->array))) {
 		int index = 0;
 		int size = zend_hash_num_elements(intern_ht);
 
@@ -628,7 +643,7 @@ PHP_METHOD(SplFixedArray, __unserialize)
 		RETURN_THROWS();
 	}
 
-	if (intern->array.size == 0) {
+	if (EXPECTED(intern->array.size == 0 && !spl_fixedarray_resize_in_progress(&intern->array))) {
 		size = zend_hash_num_elements(data);
 		spl_fixedarray_init_non_empty_struct(&intern->array, size);
 		if (!size) {
