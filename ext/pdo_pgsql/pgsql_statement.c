@@ -58,6 +58,8 @@
 #define FIN_CLOSE   0x2
 #define FIN_ABORT   0x4
 
+static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGconn *conn);
+
 static bool pgsql_result_status_ok(ExecStatusType status)
 {
 	switch (status) {
@@ -720,6 +722,13 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno)
 		return 0;
 	}
 
+	/* XXX: Performance implication from doing a query for relname? */
+	Oid table_oid = PQftable(S->result, colno);
+	str = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
+	if (str) {
+		cols[colno].table = zend_string_init(str, strlen(str), 0);
+		efree(str);
+	}
 	str = PQfname(S->result, colno);
 	cols[colno].name = zend_string_init(str, strlen(str), 0);
 	cols[colno].maxlen = PQfsize(S->result, colno);
