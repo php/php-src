@@ -128,6 +128,12 @@ static zend_always_inline zend_string *ZSTR_KNOWN(size_t idx) {
 
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
 
+/* ALIGN(n * m + header + l + 1). The "+ ALIGNMENT - 1" of the rounding is
+ * done inside the overflow check, so the final "& MASK" can only shrink
+ * the value and can not wrap. */
+#define _ZSTR_SAFE_STRUCT_SIZE(n, m, l) \
+	(zend_safe_address_guarded(n, m, _ZSTR_STRUCT_SIZE(l) + ZEND_MM_ALIGNMENT - 1) & ZEND_MM_ALIGNMENT_MASK)
+
 #define ZSTR_MAX_OVERHEAD (ZEND_MM_ALIGNED_SIZE(_ZSTR_HEADER_SIZE + 1))
 #define ZSTR_MAX_LEN (SIZE_MAX - ZSTR_MAX_OVERHEAD)
 
@@ -209,7 +215,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, bool persis
 /* Fallible variant of zend_string_safe_alloc */
 static zend_always_inline zend_string *zend_string_safe_falloc(size_t n, size_t m, size_t l, bool persistent, bool fallible)
 {
-	zend_string *ret = (zend_string *)safe_fpemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent, fallible);
+	zend_string *ret = (zend_string *)fpemalloc(_ZSTR_SAFE_STRUCT_SIZE(n, m, l), persistent, fallible);
 	if (ZEND_CONST_COND(fallible, true) && UNEXPECTED(ret == NULL)) {
 		return ret;
 	}
@@ -394,7 +400,7 @@ static zend_always_inline zend_string *zend_string_safe_frealloc(zend_string *s,
 
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (GC_REFCOUNT(s) == 1) {
-			ret = (zend_string *)safe_fperealloc(s, n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent, fallible);
+			ret = (zend_string *)fperealloc(s, _ZSTR_SAFE_STRUCT_SIZE(n, m, l), persistent, fallible);
 			if (ZEND_CONST_COND(fallible, true) && !ret) {
 				return NULL;
 			}
