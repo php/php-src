@@ -2553,7 +2553,7 @@ PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 		}
 
 		/* Only lookup the real file path and add it to the included_files list if already opened
-		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
+		 * otherwise it will get opened and added to the included_files list in zend_execute_script
 		 */
 		if (primary_file->filename &&
 			!zend_string_equals_literal(primary_file->filename, "Standard input code") &&
@@ -2654,7 +2654,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 			php_ignore_value(VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1));
 			VCWD_CHDIR_FILE(ZSTR_VAL(primary_file->filename));
 		}
-		zend_execute_scripts(ZEND_REQUIRE, ret, 1, primary_file);
+		zend_execute_script(ZEND_REQUIRE, ret, primary_file);
 	} zend_end_try();
 
 	if (old_cwd[0] != '\0') {

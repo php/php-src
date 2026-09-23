@@ -714,7 +714,7 @@ zend_first_try {
 		if (!parent_req) {
 			php_execute_script(&zfd);
 		} else {
-			zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &zfd);
+			zend_execute_script(ZEND_INCLUDE, NULL, &zfd);
 		}
 		zend_destroy_file_handle(&zfd);
 
