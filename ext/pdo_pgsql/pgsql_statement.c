@@ -858,7 +858,6 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 	char *q=NULL;
 	ExecStatusType status;
 	Oid table_oid;
-	char *table_name=NULL;
 
 	if (!S->result) {
 		return FAILURE;
@@ -873,11 +872,6 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
 	table_oid = PQftable(S->result, colno);
 	add_assoc_long(return_value, "pgsql:table_oid", table_oid);
-	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
-	if (table_name) {
-		add_assoc_string(return_value, "table", table_name);
-		efree(table_name);
-	}
 
 	switch (S->cols[colno].pgsql_type) {
 		case BOOLOID:
