@@ -222,7 +222,7 @@ extern const zend_op *zend_jit_interrupt_op;
 # define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU    EXECUTE_DATA_C OPLINE_CC
 # define ZEND_OPCODE_HANDLER_ARGS_EX          EXECUTE_DATA_D OPLINE_DC,
 # define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_EX EXECUTE_DATA_C OPLINE_CC,
-# define ZEND_VM_ENTER_BIT 1ULL
+# define ZEND_VM_ENTER_BIT ((uintptr_t) 1)
 #endif
 
 /* VM helpers */
