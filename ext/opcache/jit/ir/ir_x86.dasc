@@ -4284,7 +4284,8 @@ binop_fp:
 				} else if (op2_insn->val.u64 == 0xffff) {
 #endif
 					/* AND(X, 0xff) => MOVZX */
-					if ((1ULL << (ir_type_size[insn->type] * 8)) - 1 == op2_insn->val.u64) {
+					if (ir_type_size[insn->type] < 8
+					 && (1ULL << (ir_type_size[insn->type] * 8)) - 1 == op2_insn->val.u64) {
 						return IR_COPY_INT | IR_MAY_REUSE;
 					} else {
 						return IR_AND_ZEXT;
