@@ -10,7 +10,7 @@ if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
 if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 if (PHP_OS === 'FreeBSD') die('skip Worker does not handle OOM gracefully');
 if (PHP_OS_FAMILY === 'Darwin') die('skip Too slow');
-if (PHP_INT_SIZE !== 8) die('skip Only for 64-bit systems');
+if (PHP_SYS_SIZE !== 8) die('skip Only for 64-bit systems');
 if (getenv('SKIP_ASAN')) die('skip ASAN makes this test too slow');
 // The decompressed output needs more than 12 GiB of memory at its peak, which
 // takes down smaller machines (e.g. 7 GB CI runners) with the OOM killer.
