@@ -187,13 +187,13 @@ int fpm_status_handle_request(void) /* {{{ */
 		}
 
 		if (scoreboard_p->idle < 0 || scoreboard_p->active < 0) {
-			fpm_scoreboard_free_copy(scoreboard_p);
 			zlog(ZLOG_ERROR, "[pool %s] invalid status values", scoreboard_p->pool);
 			SG(sapi_headers).http_response_code = 500;
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
+			fpm_scoreboard_free_copy(scoreboard_p);
 			return 1;
 		}
 
