@@ -14,6 +14,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Removed:
+  . The sapi_terminate_process() function was removed.
+
 ========================
 2. Build system changes
 ========================
@@ -29,3 +32,5 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+- The terminate_process method has been removed.
