@@ -146,3 +146,46 @@ namespace {
 
 	function preg_last_error_msg(): string {}
 }
+
+/* TODO: by default will be PCRE2_UTF;
+  In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
+  characters, even in UTF-8 mode. However, this can be changed by setting
+  the PCRE2_UCP option.
+  #ifdef PCRE2_UCP
+  						coptions |= PCRE2_UCP;
+  #endif
+  // The \C escape sequence is unsafe in PCRE2_UTF mode
+  coptions |= PCRE2_NEVER_BACKSLASH_C;
+*/
+namespace Regex {
+	class CompilationError extends Exception {}
+
+	/**
+	 * @strict-properties
+	 * @not-serializable
+	 */
+	final class CompiledRegex {
+		/** @cvalue PCRE2_NO_AUTO_CAPTURE */
+		public const int NO_AUTO_CAPTURE = UNKNOWN;
+		/** @cvalue PCRE2_ANCHORED */
+		public const int ANCHORED = UNKNOWN;
+		/** @cvalue PCRE2_DUPNAMES */
+		public const int DUPNAMES = UNKNOWN;
+#ifdef PCRE2_EXTRA_CASELESS_RESTRICT
+		/** @cvalue PCRE2_EXTRA_CASELESS_RESTRICT */
+		public const int EXTRA_CASELESS_RESTRICT = UNKNOWN;
+#endif
+
+		public function __construct(
+			string $pattern,
+			bool $caseSensitive = true,
+			bool $greedy = true,
+			bool $anchor = false,
+			bool $multiLine = false, // TODO Better name?
+			bool $dotMatchesNewLine = false, // TODO Better name?
+			bool $ignoreWhitespace = false,
+			bool $captureOnlyNamedGroups = false,
+			bool $allowDuplicateSubPatternNames = false,
+		) {}
+	}
+}

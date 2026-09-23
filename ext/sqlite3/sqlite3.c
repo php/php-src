@@ -2462,18 +2462,18 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 }
 /* }}} */
 
-static zend_object *php_sqlite3_object_new(zend_class_entry *class_type) /* {{{ */
+static zend_object *php_sqlite3_object_new(zend_class_entry *ce) /* {{{ */
 {
 	php_sqlite3_db_object *intern;
 
 	/* Allocate memory for it */
-	intern = zend_object_alloc(sizeof(php_sqlite3_db_object), class_type);
+	intern = zend_object_alloc(sizeof(php_sqlite3_db_object), ce);
 
 	/* Need to keep track of things to free */
 	zend_llist_init(&(intern->free_list),  sizeof(php_sqlite3_stmt *), (llist_dtor_func_t)php_sqlite3_free_list_dtor, 0);
 
-	zend_object_std_init(&intern->zo, class_type);
-	object_properties_init(&intern->zo, class_type);
+	zend_object_std_init(&intern->zo, ce);
+	object_properties_init(&intern->zo, ce);
 
 	return &intern->zo;
 }

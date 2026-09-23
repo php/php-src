@@ -19,6 +19,7 @@
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
 #include "SAPI.h"
+#include "zend_exceptions.h"
 
 #define PREG_PATTERN_ORDER			1
 #define PREG_SET_ORDER				2
@@ -45,6 +46,10 @@ char *php_pcre_version;
 
 #include "php_pcre_arginfo.h"
 
+static zend_class_entry *regex_compilation_error_ce;
+static zend_class_entry *regex_compiled_regex_ce;
+static zend_object_handlers regex_compiled_regex_object_handlers;
+
 struct _pcre_cache_entry {
 	pcre2_code *re;
 	/* Pointer is not NULL (during request) when there are named captures.
@@ -59,6 +64,52 @@ struct _pcre_cache_entry {
 	uint32_t compile_options;
 	uint32_t refcount;
 };
+
+typedef struct {
+	pcre_cache_entry regex;
+	zend_object std;
+} php_compiled_regex_object;
+
+#define php_compiled_regex_from_obj(obj) ZEND_CONTAINER_OF(obj, php_compiled_regex_object, std)
+
+static zend_object *php_compiled_regex_object_new(zend_class_entry *ce) /* {{{ */
+{
+	php_compiled_regex_object *intern = zend_object_alloc(sizeof(php_compiled_regex_object), ce);
+
+	intern->regex.re = NULL;
+	intern->regex.subpats_table = NULL;
+	intern->regex.preg_options = 0;
+	intern->regex.name_count = 0;
+	intern->regex.capture_count = 0;
+	intern->regex.compile_options = 0;
+	intern->regex.refcount = 0;
+
+	zend_object_std_init(&intern->std, ce);
+	object_properties_init(&intern->std, ce); // TODO is this needed?
+
+	return &intern->std;
+}
+
+static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats);
+
+static void php_compiled_regex_object_free(zend_object *object) /* {{{ */
+{
+	php_compiled_regex_object *intern = php_compiled_regex_from_obj(object);
+
+	pcre2_code_free(intern->regex.re);
+	intern->regex.re = NULL;
+	if (intern->regex.subpats_table) {
+		free_subpats_table(intern->regex.subpats_table, intern->regex.capture_count + 1);
+		intern->regex.subpats_table = NULL;
+	}
+	intern->regex.preg_options = 0;
+	intern->regex.name_count = 0;
+	intern->regex.capture_count = 0;
+	intern->regex.compile_options = 0;
+	intern->regex.refcount = 0;
+
+	zend_object_std_dtor(&intern->std);
+}
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 
@@ -93,8 +144,6 @@ static MUTEX_T pcre_mt = NULL;
 #endif
 
 ZEND_TLS HashTable char_tables;
-
-static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats);
 
 static void php_pcre_free_char_table(zval *data)
 {/*{{{*/
@@ -425,6 +474,18 @@ static PHP_MINIT_FUNCTION(pcre)
 	php_pcre_version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
 
 	register_php_pcre_symbols(module_number);
+
+	regex_compilation_error_ce = register_class_Regex_CompilationError(zend_ce_exception);
+
+	regex_compiled_regex_ce = register_class_Regex_CompiledRegex();
+	regex_compiled_regex_ce->create_object = php_compiled_regex_object_new;
+	regex_compiled_regex_ce->default_object_handlers = &regex_compiled_regex_object_handlers;
+
+	memcpy(&regex_compiled_regex_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	regex_compiled_regex_object_handlers.free_obj = php_compiled_regex_object_free;
+	regex_compiled_regex_object_handlers.offset = offsetof(php_compiled_regex_object, std);
+	regex_compiled_regex_object_handlers.clone_obj = NULL;
+	regex_compiled_regex_object_handlers.compare = zend_objects_not_comparable;
 
 	return SUCCESS;
 }
@@ -3027,6 +3088,152 @@ PHP_FUNCTION(preg_last_error_msg)
 	RETURN_STRING(php_pcre_get_error_msg(PCRE_G(error_code)));
 }
 /* }}} */
+
+PHP_METHOD(Regex_CompiledRegex, __construct) {
+	zend_string *pattern;
+	bool case_insensitive = true;
+	bool greedy = true;
+	bool anchor = false;
+	bool multiline = false;
+	bool dot_all = false;
+	bool ignore_whitespace = false;
+	bool capture_only_named_groups = false;
+	bool allow_duplicate_sub_pattern_names = false;
+
+	/* By default use UTF-8 mode and PCRE2_DOLLAR_ENDONLY */
+	uint32_t compilation_options = PCRE2_UTF
+	/* In PCRE, by default, \d, \D, \s, \S, \w, and \W recognize only ASCII
+	   characters, even in UTF-8 mode. However, this can be changed by setting
+	   the PCRE2_UCP option. */
+#ifdef PCRE2_UCP
+		| PCRE2_UCP
+#endif
+		/* The \C escape sequence is unsafe in PCRE2_UTF mode */
+		| PCRE2_NEVER_BACKSLASH_C
+		/* Set PCRE2_DOLLAR_ENDONLY as this seems the most intuitive and is ignored if PCRE2_MULTILINE is set */
+		| PCRE2_DOLLAR_ENDONLY;
+	uint32_t extra_compilation_options = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 9)
+		Z_PARAM_STR(pattern)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(case_insensitive)
+		Z_PARAM_BOOL(greedy)
+		Z_PARAM_BOOL(anchor)
+		Z_PARAM_BOOL(multiline)
+		Z_PARAM_BOOL(dot_all)
+		Z_PARAM_BOOL(ignore_whitespace)
+		Z_PARAM_BOOL(capture_only_named_groups)
+		Z_PARAM_BOOL(allow_duplicate_sub_pattern_names)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (UNEXPECTED(ZSTR_LEN(pattern) == 0)) {
+		zend_argument_must_not_be_empty_error(1);
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_IS_VALID_UTF8(pattern)) {
+		/* No need for pcre to check if the pattern is valid UTF-8 */
+		compilation_options |= PCRE2_NO_UTF_CHECK;
+	}
+
+	if (!case_insensitive) {
+		compilation_options |= PCRE2_CASELESS;
+#ifdef PCRE2_EXTRA_CASELESS_RESTRICT
+		extra_compilation_options = PCRE2_EXTRA_CASELESS_RESTRICT;
+#endif
+	}
+	if (!greedy) {
+		compilation_options |= PCRE2_UNGREEDY;
+	}
+	if (anchor) {
+		compilation_options |= PCRE2_ANCHORED;
+	}
+	if (multiline) {
+		compilation_options |= PCRE2_MULTILINE;
+	}
+	if (dot_all) {
+		compilation_options |= PCRE2_DOTALL;
+	}
+	// TODO Should we even allow this? Or should only the "(?# I'm a comment)" syntax be allowed?
+	if (ignore_whitespace) {
+		compilation_options |= PCRE2_EXTENDED;
+	}
+	if (capture_only_named_groups) {
+		compilation_options |= PCRE2_NO_AUTO_CAPTURE;
+	}
+	if (allow_duplicate_sub_pattern_names) {
+		compilation_options |= PCRE2_DUPNAMES;
+	}
+
+	pcre2_compile_context *patern_compile_context = pcre2_compile_context_create(gctx);
+	if (UNEXPECTED(patern_compile_context == NULL)) {
+		zend_throw_error(regex_compilation_error_ce, "Could not allocate a compilation context");
+		RETURN_THROWS();
+	}
+	pcre2_set_compile_extra_options(patern_compile_context, extra_compilation_options);
+
+	PCRE2_SIZE error_at_offset = 0;
+	int error_code = 0;
+	pcre2_code *compiled_pattern = pcre2_compile((PCRE2_SPTR)ZSTR_VAL(pattern), ZSTR_LEN(pattern), compilation_options, &error_code, &error_at_offset, patern_compile_context);
+	pcre2_compile_context_free(patern_compile_context);
+
+	if (UNEXPECTED(compiled_pattern == NULL)) {
+		PCRE2_UCHAR buffer[256];
+		if (error_code == PCRE2_ERROR_BACKSLASH_C_CALLER_DISABLED) {
+			zend_throw_error(regex_compilation_error_ce, "The escape sequence \"\\C\" is not permitted");
+		} else {
+			pcre2_get_error_message(error_code, buffer, sizeof(buffer));
+			zend_throw_error(regex_compilation_error_ce, "%s at offset %zu", (const char*)buffer, error_at_offset);
+		}
+		RETURN_THROWS();
+	}
+
+	bool compiled_with_jit = false;
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (PCRE_G(jit)) {
+		/* Enable PCRE JIT compiler */
+		int jit_status_code = pcre2_jit_compile(compiled_pattern, PCRE2_JIT_COMPLETE);
+		if (EXPECTED(jit_status_code >= 0)) {
+			size_t jit_size = 0;
+			if (!pcre2_pattern_info(compiled_pattern, PCRE2_INFO_JITSIZE, &jit_size) && jit_size > 0) {
+				compiled_with_jit = true;
+			}
+		} else if (jit_status_code == PCRE2_ERROR_NOMEMORY) {
+			// TODO: How to communicate this? Always throw?
+			//php_error_docref(NULL, E_WARNING,
+			//	"Allocation of JIT memory failed, PCRE JIT will be disabled. "
+			//	"This is likely caused by security restrictions. "
+			//	"Either grant PHP permission to allocate executable memory, or set pcre.jit=0");
+			PCRE_G(jit) = false;
+		} else {
+			pcre2_code_free(compiled_pattern);
+
+			PCRE2_UCHAR buffer[256];
+			pcre2_get_error_message(jit_status_code, buffer, sizeof(buffer));
+			zend_throw_error(regex_compilation_error_ce, "JIT compilation failed: %s", (const char*)buffer);
+			RETURN_THROWS();
+		}
+	}
+#endif
+
+	uint32_t capture_count;
+	uint32_t name_count;
+	int status;
+	if ((status = pcre2_pattern_info(compiled_pattern, PCRE2_INFO_CAPTURECOUNT, &capture_count)) < 0 ||
+		(status = pcre2_pattern_info(compiled_pattern, PCRE2_INFO_NAMECOUNT, &name_count)) < 0) {
+		pcre2_code_free(compiled_pattern);
+		zend_throw_error(regex_compilation_error_ce, "Internal pcre_pattern_info() error %d", status);
+		RETURN_THROWS();
+	}
+
+	php_compiled_regex_object *compiled_regex = php_compiled_regex_from_obj(Z_OBJ_P(ZEND_THIS));
+	compiled_regex->regex.re = compiled_pattern;
+	compiled_regex->regex.capture_count = capture_count;
+	compiled_regex->regex.name_count = name_count;
+	compiled_regex->regex.preg_options = compiled_with_jit ? PREG_JIT : 0;
+	compiled_regex->regex.compile_options = PCRE2_UTF;
+}
 
 /* {{{ module definition structures */
 
