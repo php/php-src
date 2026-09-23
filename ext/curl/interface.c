@@ -1635,14 +1635,8 @@ PHP_FUNCTION(curl_copy_handle)
 }
 /* }}} */
 
-static bool php_curl_set_callable_handler(php_curl *ch, zend_fcall_info_cache *const handler_fcc, zval *callable, bool is_array_config, const char *option_name)
+static bool php_curl_set_callable_handler(zend_fcall_info_cache *const handler_fcc, zval *callable, bool is_array_config, const char *option_name)
 {
-	/* Replacing a callback would free the fcc that is still executing on the stack. */
-	if (ch->in_callback) {
-		zend_throw_error(NULL, "%s(): Attempt to set the %s option from a callback", get_active_function_name(), option_name);
-		return false;
-	}
-
 	if (ZEND_FCC_INITIALIZED(*handler_fcc)) {
 		zend_fcc_dtor(handler_fcc);
 	}
@@ -1666,7 +1660,7 @@ static bool php_curl_set_callable_handler(php_curl *ch, zend_fcall_info_cache *c
 
 #define HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(curl_ptr, constant_no_function, handler_type, default_method) \
 	case constant_no_function##FUNCTION: { \
-		bool result = php_curl_set_callable_handler(curl_ptr, &curl_ptr->handlers.handler_type->fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
+		bool result = php_curl_set_callable_handler(&curl_ptr->handlers.handler_type->fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
 		if (!result) { \
 			curl_ptr->handlers.handler_type->method = default_method; \
 			return FAILURE; \
@@ -1681,7 +1675,7 @@ static bool php_curl_set_callable_handler(php_curl *ch, zend_fcall_info_cache *c
 
 #define HANDLE_CURL_OPTION_CALLABLE(curl_ptr, constant_no_function, handler_fcc, c_callback) \
 	case constant_no_function##FUNCTION: { \
-		bool result = php_curl_set_callable_handler(curl_ptr, &curl_ptr->handler_fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
+		bool result = php_curl_set_callable_handler(&curl_ptr->handler_fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
 		if (!result) { \
 			return FAILURE; \
 		} \
