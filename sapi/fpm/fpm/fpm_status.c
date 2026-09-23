@@ -183,6 +183,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
+			zend_string_release_ex(_GET_str, 0);
 			return 1;
 		}
 
@@ -193,6 +194,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
+			zend_string_release_ex(_GET_str, 0);
 			fpm_scoreboard_free_copy(scoreboard_p);
 			return 1;
 		}
@@ -204,6 +206,7 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		/* handle HEAD */
 		if (SG(request_info).headers_only) {
+			zend_string_release_ex(_GET_str, 0);
 			fpm_scoreboard_free_copy(scoreboard_p);
 			return 1;
 		}
