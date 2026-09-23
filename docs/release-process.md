@@ -949,9 +949,9 @@ feature development that cannot go into the new version.
 
    * clear the `NEWS`, `UPGRADING`, and `UPGRADING.INTERNALS` files;
    * update the version numbers in `configure.ac`, `main/php_version.h`,
-     `Zend/zend.h`, and `win32/build/confutils.js`;
+     `Zend/zend.h`, and `win32/build/confutils.js`; and
    * update the API version numbers in `Zend/zend_extensions.h`,
-     `Zend/zend_modules.h`, and `main/php.h`; and
+     `Zend/zend_modules.h`, and `main/php.h`.
 
    See [Prepare for PHP 8.2][] and [Prepare for PHP 8.2 (bis)][] for an example
    of what this commit should include.
