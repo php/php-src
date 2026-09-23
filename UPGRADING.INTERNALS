@@ -14,6 +14,9 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
+  instead.
+
 ========================
 2. Build system changes
 ========================
