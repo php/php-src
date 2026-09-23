@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.6.0RC2
+?? ??? ????, PHP 8.6.0RC3
+
+
+24 Sep 2026, PHP 8.6.0RC2
 
 - Core:
   . Fixed incorrect internal pointer and foreach iterator positions when
