@@ -44,6 +44,6 @@ var_dump(defined('SID'));
 
 ?>
 --EXPECT--
-Error: Session id must be a string
+RuntimeException: create_sid failed
 bool(false)
 bool(false)
