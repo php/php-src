@@ -1094,13 +1094,6 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 			}
 			return true;
 
-		case PDO_ATTR_FETCH_TABLE_NAMES:
-			if (!pdo_get_bool_param(&bval, val)) {
-				return false;
-			}
-			H->fetch_table_names = bval;
-			return true;
-
 		case PDO_FB_ATTR_DATE_FORMAT:
 			{
 				zend_string *str = zval_try_get_string(val);
@@ -1257,10 +1250,6 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				return 1;
 			}
 			return -1;
-
-		case PDO_ATTR_FETCH_TABLE_NAMES:
-			ZVAL_BOOL(val, H->fetch_table_names);
-			return 1;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
 			ZVAL_STRING(val, H->date_format ? H->date_format : PDO_FB_DEF_DATE_FMT);

@@ -150,6 +150,15 @@ bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 			}
 		}
 
+		/* prepend the table name if the attribute is set */
+		if (stmt->dbh->fetch_table_names && stmt->columns[col].table && ZSTR_LEN(stmt->columns[col].table)) {
+			/* XXX: Apply case to table as well? */
+			zend_string *table_name = stmt->columns[col].table;
+			zend_string *orig_name = stmt->columns[col].name;
+			stmt->columns[col].name = strpprintf(0, "%pS.%pS", table_name, orig_name);
+			zend_string_release(orig_name);
+		}
+
 		/* update the column index on named bound parameters */
 		if (stmt->bound_columns) {
 			struct pdo_bound_param_data *param;

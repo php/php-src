@@ -77,10 +77,7 @@ typedef struct {
 
 	unsigned sql_dialect:2;
 
-	/* prepend table names on column names in fetch */
-	unsigned fetch_table_names:1;
-
-	unsigned _reserved:29;
+	unsigned _reserved:30;
 
 	pdo_firebird_error_info einfo;
 } pdo_firebird_db_handle;

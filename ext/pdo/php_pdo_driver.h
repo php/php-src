@@ -458,6 +458,9 @@ struct _pdo_dbh_t {
 	/* when set, convert int/floats to strings */
 	bool stringify:1;
 
+	/* fetch table names; prepends to returned col name */
+	bool fetch_table_names:1;
+
 	/* bitmap for pdo_param_event(s) to skip in dispatch_param_event */
 	uint8_t skip_param_evt;
 
