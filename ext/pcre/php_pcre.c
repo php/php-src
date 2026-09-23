@@ -2586,7 +2586,8 @@ PHP_FUNCTION(preg_filter)
 /* {{{ Split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
 {
-	zend_string			*regex;			/* Regular expression */
+	zend_object			*compiled_regex = NULL;
+	zend_string			*regex = NULL;			/* Regular expression */
 	zend_string			*subject;		/* String to match against */
 	zend_long			 limit_val = -1;/* Integer value of limit */
 	zend_long			 flags = 0;		/* Match control flags */
@@ -2594,16 +2595,22 @@ PHP_FUNCTION(preg_split)
 
 	/* Get function parameters and do error checking */
 	ZEND_PARSE_PARAMETERS_START(2, 4)
-		Z_PARAM_STR(regex)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(compiled_regex, regex_compiled_regex_ce, regex)
 		Z_PARAM_STR(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit_val)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Compile regex or get it from cache. */
-	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
-		RETURN_FALSE;
+	if (compiled_regex) {
+		php_compiled_regex_object *intern = php_compiled_regex_from_obj(compiled_regex);
+		pce = &intern->regex;
+	} else {
+		/* Compile regex or get it from cache. */
+		pce = pcre_get_compiled_regex_cache(regex);
+		if (UNEXPECTED(!pce)) {
+			RETURN_FALSE;
+		}
 	}
 
 	pce->refcount++;
@@ -2950,22 +2957,29 @@ PHP_FUNCTION(preg_quote)
 /* {{{ Searches array and returns entries which match regex */
 PHP_FUNCTION(preg_grep)
 {
-	zend_string			*regex;			/* Regular expression */
+	zend_object			*compiled_regex = NULL;
+	zend_string			*regex = NULL;	/* Regular expression */
 	zval				*input;			/* Input array */
 	zend_long			 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get arguments and do error checking */
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR(regex)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(compiled_regex, regex_compiled_regex_ce, regex)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Compile regex or get it from cache. */
-	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
-		RETURN_FALSE;
+	if (compiled_regex) {
+		php_compiled_regex_object *intern = php_compiled_regex_from_obj(compiled_regex);
+		pce = &intern->regex;
+	} else {
+		/* Compile regex or get it from cache. */
+		pce = pcre_get_compiled_regex_cache(regex);
+		if (UNEXPECTED(!pce)) {
+			RETURN_FALSE;
+		}
 	}
 
 	pce->refcount++;

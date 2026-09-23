@@ -134,13 +134,13 @@ namespace {
 	 * @return array<int|string, string|array>|false
 	 * @refcount 1
 	 */
-	function preg_split(string $pattern, string $subject, int $limit = -1, int $flags = 0): array|false {}
+	function preg_split(string|\Regex\CompiledRegex $pattern, string $subject, int $limit = -1, int $flags = 0): array|false {}
 
 	/** @compile-time-eval */
 	function preg_quote(string $str, ?string $delimiter = null): string {}
 
 	/** @refcount 1 */
-	function preg_grep(string $pattern, array $array, int $flags = 0): array|false {}
+	function preg_grep(string|\Regex\CompiledRegex $pattern, array $array, int $flags = 0): array|false {}
 
 	function preg_last_error(): int {}
 
