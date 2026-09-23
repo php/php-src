@@ -73,6 +73,10 @@ PHP                                                                        NEWS
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
     set to an empty string. (Ilia Alshanetsky)
 
+- Session:
+  . Fixed session_start() continuing after a failed create_sid() when
+    session.use_strict_mode rejects the supplied ID. (Ilia Alshanetsky)
+
 - SQLite:
   . Fixed a crash when SQLite3::close() is called from a userland callback.
     (Ilia Alshanetsky)
