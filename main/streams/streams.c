@@ -586,6 +586,14 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			/* read a chunk into a bucket */
 			justread = stream->ops->read(stream, chunk_buf, stream->chunk_size);
 			if (justread < 0 && stream->writepos == stream->readpos) {
+				while ((bucket = brig_in.head)) {
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				}
+				while ((bucket = brig_out.head)) {
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				}
 				efree(chunk_buf);
 				retval = FAILURE;
 				goto out_check_eof;
@@ -678,6 +686,16 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			if (justread <= 0) {
 				break;
 			}
+		}
+
+		php_stream_bucket *bucket;
+		while ((bucket = brig_in.head)) {
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
+		}
+		while ((bucket = brig_out.head)) {
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
 		}
 
 		efree(chunk_buf);
@@ -1294,6 +1312,14 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 
 		case PSFS_FEED_ME:
 			/* need more data before we can push data through to the stream */
+			while ((bucket = brig_in.head)) {
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
+			while ((bucket = brig_out.head)) {
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
 			break;
 	}
 

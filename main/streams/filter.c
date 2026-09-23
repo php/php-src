@@ -355,6 +355,14 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 				   Reset stream's internal read buffer since the filter is "holding" it. */
 				stream->readpos = 0;
 				stream->writepos = 0;
+				while ((bucket = brig_in.head)) {
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				}
+				while ((bucket = brig_out.head)) {
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				}
 				break;
 			case PSFS_PASS_ON:
 				/* If any data is consumed, we cannot rely upon the existing read buffer,
@@ -420,6 +428,14 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish)
 		status = current->fops->filter(stream, current, inp, outp, NULL, flags);
 		if (status == PSFS_FEED_ME) {
 			/* We've flushed the data far enough */
+			while ((bucket = (*inp).head)) {
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
+			while ((bucket = (*outp).head)) {
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
 			return SUCCESS;
 		}
 		if (status == PSFS_ERR_FATAL) {
