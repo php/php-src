@@ -234,7 +234,9 @@ PS_CREATE_SID_FUNC(user)
 
 		if (UNEXPECTED(Z_TYPE(retval) != IS_STRING)) {
 			/* Will no longer be needed in PHP 9 as the interface return type will be in effect */
-			zend_throw_error(zend_ce_type_error, "Session id must be of type string, %s given", zend_zval_type_name(&retval));
+			if (!EG(exception)) {
+				zend_throw_error(zend_ce_type_error, "Session id must be of type string, %s given", zend_zval_type_name(&retval));
+			}
 			zval_ptr_dtor(&retval);
 			return NULL;
 		}
