@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     proxy objects instead of forwarding to the real instance). (lisachenko)
   . Fixed bug GH-23882 (array_map() optimization is incorrect for
     strict_types=1). (timwolla)
+  . Fixed OSS-Fuzz #565486253 (coerced arg with '...' on non-variadic
+    function). (ndossche)
 
 - Opcache:
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
