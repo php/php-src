@@ -1089,7 +1089,7 @@ ZEND_FRAMELESS_FUNCTION(property_exists, 2)
 	zend_string *property;
 
 	Z_FLF_PARAM_ZVAL(1, object);
-	Z_FLF_PARAM_STR(2, property, property_tmp);
+	Z_FLF_PARAM_STR_EX(2, property, property_tmp, Z_TYPE_P(arg1) == IS_STRING);
 
 	_property_exists(return_value, object, property);
 

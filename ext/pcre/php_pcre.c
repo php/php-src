@@ -1487,7 +1487,7 @@ ZEND_FRAMELESS_FUNCTION(preg_match, 2)
 	zval regex_tmp, subject_tmp;
 	zend_string *regex, *subject;
 
-	Z_FLF_PARAM_STR(1, regex, regex_tmp);
+	Z_FLF_PARAM_STR_EX(1, regex, regex_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, subject, subject_tmp);
 
 	/* Compile regex or get it from cache. */
@@ -2369,8 +2369,18 @@ PHP_FUNCTION(preg_replace)
 ZEND_FRAMELESS_FUNCTION(preg_replace, 3)
 {
 	zend_string *regex_str, *replace_str, *subject_str;
-	HashTable *regex_ht, *replace_ht, *subject_ht;
+	HashTable *regex_ht = NULL, *replace_ht = NULL, *subject_ht = NULL;
 	zval regex_tmp, replace_tmp, subject_tmp;
+
+	if (EXPECTED(Z_TYPE_P(arg1) == IS_STRING && Z_TYPE_P(arg2) == IS_STRING && Z_TYPE_P(arg3) == IS_STRING)) {
+		_preg_replace_common(
+			return_value,
+			NULL, Z_STR_P(arg1),
+			NULL, Z_STR_P(arg2),
+			NULL, Z_STR_P(arg3),
+			-1, NULL, false);
+		return;
+	}
 
 	Z_FLF_PARAM_ARRAY_HT_OR_STR(1, regex_ht, regex_str, regex_tmp);
 	Z_FLF_PARAM_ARRAY_HT_OR_STR(2, replace_ht, replace_str, replace_tmp);
@@ -2384,9 +2394,9 @@ ZEND_FRAMELESS_FUNCTION(preg_replace, 3)
 		/* limit */ -1, /* zcount */ NULL, /* is_filter */ false);
 
 flf_clean:;
-	Z_FLF_PARAM_FREE_STR(1, regex_tmp);
-	Z_FLF_PARAM_FREE_STR(2, replace_tmp);
-	Z_FLF_PARAM_FREE_STR(3, subject_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(1, regex_ht, regex_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(2, replace_ht, replace_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(3, subject_ht, subject_tmp);
 }
 
 /* {{{ Perform Perl-style regular expression replacement using replacement callback. */

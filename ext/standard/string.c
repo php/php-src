@@ -651,7 +651,7 @@ ZEND_FRAMELESS_FUNCTION(trim, 2)
 	zval str_tmp, what_tmp;
 	zend_string *str, *what;
 
-	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR_EX(1, str, str_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, what, what_tmp);
 
 	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 3));
@@ -686,7 +686,7 @@ ZEND_FRAMELESS_FUNCTION(rtrim, 2)
 	zval str_tmp, what_tmp;
 	zend_string *str, *what;
 
-	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR_EX(1, str, str_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, what, what_tmp);
 
 	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 2));
@@ -721,7 +721,7 @@ ZEND_FRAMELESS_FUNCTION(ltrim, 2)
 	zval str_tmp, what_tmp;
 	zend_string *str, *what;
 
-	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR_EX(1, str, str_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, what, what_tmp);
 
 	ZVAL_STR(return_value, php_trim_int(str, ZSTR_VAL(what), ZSTR_LEN(what), /* mode */ 1));
@@ -993,6 +993,7 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 	zval         *tmp;
 	uint32_t      numelems;
 	zend_string  *str;
+	zend_string  *held_glue = NULL;
 	char         *cptr;
 	size_t        len = 0;
 	struct {
@@ -1016,9 +1017,6 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 
 	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(glue);
 
-	/* Converting an element may call __toString(), which can destroy pieces. */
-	GC_TRY_ADDREF(pieces);
-
 	ZEND_HASH_FOREACH_VAL(pieces, tmp) {
 		if (EXPECTED(Z_TYPE_P(tmp) == IS_STRING)) {
 			ptr->str = Z_STR_P(tmp);
@@ -1040,6 +1038,9 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 				len++;
 			}
 		} else {
+			if (!held_glue) {
+				held_glue = zend_string_copy((zend_string *) glue);
+			}
 			ptr->str = zval_get_string_func(tmp);
 			len += ZSTR_LEN(ptr->str);
 			ptr->lval = 1;
@@ -1082,7 +1083,9 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 	}
 
 	free_alloca(strings, use_heap);
-	GC_TRY_DTOR_NO_REF(pieces);
+	if (held_glue) {
+		zend_string_release_ex(held_glue, 0);
+	}
 	RETURN_NEW_STR(str);
 }
 /* }}} */
@@ -1138,8 +1141,11 @@ ZEND_FRAMELESS_FUNCTION(implode, 1)
 	}
 
 	zend_string *str = ZSTR_EMPTY_ALLOC();
+	HashTable *ht = Z_ARR_P(pieces);
 
-	php_implode(str, Z_ARR_P(pieces), return_value);
+	GC_TRY_ADDREF(ht);
+	php_implode(str, ht, return_value);
+	GC_TRY_DTOR_NO_REF(ht);
 
 flf_clean:;
 }
@@ -1148,7 +1154,7 @@ ZEND_FRAMELESS_FUNCTION(implode, 2)
 {
 	zval str_tmp;
 	zend_string *str;
-	zval *pieces;
+	HashTable *pieces = NULL;
 
 	Z_FLF_PARAM_STR(1, str, str_tmp);
 	Z_FLF_PARAM_ARRAY_OR_NULL(2, pieces);
@@ -1162,10 +1168,11 @@ ZEND_FRAMELESS_FUNCTION(implode, 2)
 		goto flf_clean;
 	}
 
-	php_implode(str, Z_ARR_P(pieces), return_value);
+	php_implode(str, pieces, return_value);
 
 flf_clean:;
 	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_ARRAY(pieces);
 }
 
 #define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]
@@ -1642,7 +1649,7 @@ ZEND_FRAMELESS_FUNCTION(dirname, 2)
 	zend_string *str;
 	zend_long levels;
 
-	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR_EX(1, str, str_tmp, Z_TYPE_P(arg2) != IS_LONG);
 	Z_FLF_PARAM_LONG(2, levels);
 
 	_zend_dirname(return_value, str, levels);
@@ -1850,7 +1857,7 @@ ZEND_FRAMELESS_FUNCTION(strstr, 2)
 	zval haystack_tmp, needle_tmp;
 	zend_string *haystack, *needle;
 
-	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
+	Z_FLF_PARAM_STR_EX(1, haystack, haystack_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, needle, needle_tmp);
 
 	_zend_strstr(return_value, haystack, needle, /* part */ false);
@@ -1866,8 +1873,8 @@ ZEND_FRAMELESS_FUNCTION(strstr, 3)
 	zend_string *haystack, *needle;
 	bool part;
 
-	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
-	Z_FLF_PARAM_STR(2, needle, needle_tmp);
+	Z_FLF_PARAM_STR_EX(1, haystack, haystack_tmp, Z_TYPE_P(arg2) != IS_STRING || (Z_TYPE_P(arg3) != IS_FALSE && Z_TYPE_P(arg3) != IS_TRUE));
+	Z_FLF_PARAM_STR_EX(2, needle, needle_tmp, Z_TYPE_P(arg3) != IS_FALSE && Z_TYPE_P(arg3) != IS_TRUE);
 	Z_FLF_PARAM_BOOL(3, part);
 
 	_zend_strstr(return_value, haystack, needle, part);
@@ -1896,7 +1903,7 @@ ZEND_FRAMELESS_FUNCTION(str_contains, 2)
 	zval haystack_tmp, needle_tmp;
 	zend_string *haystack, *needle;
 
-	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
+	Z_FLF_PARAM_STR_EX(1, haystack, haystack_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, needle, needle_tmp);
 
 	RETVAL_BOOL(php_memnstr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack)));
@@ -1925,7 +1932,7 @@ ZEND_FRAMELESS_FUNCTION(str_starts_with, 2)
 	zval haystack_tmp, needle_tmp;
 	zend_string *haystack, *needle;
 
-	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
+	Z_FLF_PARAM_STR_EX(1, haystack, haystack_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, needle, needle_tmp);
 
 	RETVAL_BOOL(zend_string_starts_with(haystack, needle));
@@ -1954,7 +1961,7 @@ ZEND_FRAMELESS_FUNCTION(str_ends_with, 2)
 	zval haystack_tmp, needle_tmp;
 	zend_string *haystack, *needle;
 
-	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
+	Z_FLF_PARAM_STR_EX(1, haystack, haystack_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, needle, needle_tmp);
 
 	RETVAL_BOOL(zend_string_ends_with(haystack, needle));
@@ -2008,7 +2015,7 @@ ZEND_FRAMELESS_FUNCTION(strpos, 2)
 	zval haystack_tmp, needle_tmp;
 	zend_string *haystack, *needle;
 
-	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
+	Z_FLF_PARAM_STR_EX(1, haystack, haystack_tmp, Z_TYPE_P(arg2) != IS_STRING);
 	Z_FLF_PARAM_STR(2, needle, needle_tmp);
 
 	_zend_strpos(return_value, haystack, needle, 0);
@@ -2024,8 +2031,8 @@ ZEND_FRAMELESS_FUNCTION(strpos, 3)
 	zend_string *haystack, *needle;
 	zend_long offset;
 
-	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
-	Z_FLF_PARAM_STR(2, needle, needle_tmp);
+	Z_FLF_PARAM_STR_EX(1, haystack, haystack_tmp, Z_TYPE_P(arg2) != IS_STRING || Z_TYPE_P(arg3) != IS_LONG);
+	Z_FLF_PARAM_STR_EX(2, needle, needle_tmp, Z_TYPE_P(arg3) != IS_LONG);
 	Z_FLF_PARAM_LONG(3, offset);
 
 	_zend_strpos(return_value, haystack, needle, offset);
@@ -2359,7 +2366,7 @@ ZEND_FRAMELESS_FUNCTION(substr, 2)
 	zend_string *str;
 	zend_long f;
 
-	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR_EX(1, str, str_tmp, Z_TYPE_P(arg2) != IS_LONG);
 	Z_FLF_PARAM_LONG(2, f);
 
 	_zend_substr(return_value, str, f, /* len_is_null */ true, 0);
@@ -2375,7 +2382,7 @@ ZEND_FRAMELESS_FUNCTION(substr, 3)
 	zend_long f, l;
 	bool len_is_null;
 
-	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR_EX(1, str, str_tmp, Z_TYPE_P(arg2) != IS_LONG || (Z_TYPE_P(arg3) != IS_LONG && Z_TYPE_P(arg3) != IS_NULL));
 	Z_FLF_PARAM_LONG(2, f);
 	Z_FLF_PARAM_LONG_OR_NULL(3, len_is_null, l);
 
@@ -3474,9 +3481,6 @@ static void php_strtr_array(zval *return_value, zend_string *str, HashTable *fro
 		RETURN_STR_COPY(str);
 	}
 
-	/* Converting a replacement may call __toString(), which can destroy from_ht. */
-	GC_TRY_ADDREF(from_ht);
-
 	if (zend_hash_num_elements(from_ht) == 1) {
 		zend_long num_key;
 		zend_string *str_key, *tmp_str, *replace, *tmp_replace;
@@ -3511,8 +3515,6 @@ static void php_strtr_array(zval *return_value, zend_string *str, HashTable *fro
 	} else {
 		php_strtr_array_ex(return_value, str, from_ht);
 	}
-
-	GC_TRY_DTOR_NO_REF(from_ht);
 }
 
 /* {{{ Translates characters in str using given translation tables */
@@ -3556,9 +3558,9 @@ ZEND_FRAMELESS_FUNCTION(strtr, 2)
 {
 	zval str_tmp;
 	zend_string *str;
-	zval *from;
+	HashTable *from = NULL;
 
-	Z_FLF_PARAM_STR(1, str, str_tmp);
+	Z_FLF_PARAM_STR_EX(1, str, str_tmp, true);
 	Z_FLF_PARAM_ARRAY(2, from);
 
 	if (ZSTR_LEN(str) == 0) {
@@ -3566,10 +3568,11 @@ ZEND_FRAMELESS_FUNCTION(strtr, 2)
 		goto flf_clean;
 	}
 
-	php_strtr_array(return_value, str, Z_ARR_P(from));
+	php_strtr_array(return_value, str, from);
 
 flf_clean:
 	Z_FLF_PARAM_FREE_STR(1, str_tmp);
+	Z_FLF_PARAM_FREE_ARRAY(from);
 }
 
 ZEND_FRAMELESS_FUNCTION(strtr, 3)
@@ -3577,8 +3580,8 @@ ZEND_FRAMELESS_FUNCTION(strtr, 3)
 	zval str_tmp, from_tmp, to_tmp;
 	zend_string *str, *from, *to;
 
-	Z_FLF_PARAM_STR(1, str, str_tmp);
-	Z_FLF_PARAM_STR(2, from, from_tmp);
+	Z_FLF_PARAM_STR_EX(1, str, str_tmp, Z_TYPE_P(arg2) != IS_STRING || Z_TYPE_P(arg3) != IS_STRING);
+	Z_FLF_PARAM_STR_EX(2, from, from_tmp, Z_TYPE_P(arg3) != IS_STRING);
 	Z_FLF_PARAM_STR(3, to, to_tmp);
 
 	if (ZSTR_LEN(str) == 0) {
@@ -4576,16 +4579,6 @@ static void _php_str_replace_common(
 		RETURN_THROWS();
 	}
 
-	/* Converting an element may call __toString(), which can destroy the arrays. */
-	if (search_ht) {
-		GC_TRY_ADDREF(search_ht);
-	}
-	if (replace_ht) {
-		GC_TRY_ADDREF(replace_ht);
-	}
-	if (subject_ht) {
-		GC_TRY_ADDREF(subject_ht);
-	}
 
 	/* if subject is an array */
 	if (subject_ht) {
@@ -4612,16 +4605,6 @@ static void _php_str_replace_common(
 	}
 	if (zcount) {
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, count);
-	}
-
-	if (search_ht) {
-		GC_TRY_DTOR_NO_REF(search_ht);
-	}
-	if (replace_ht) {
-		GC_TRY_DTOR_NO_REF(replace_ht);
-	}
-	if (subject_ht) {
-		GC_TRY_DTOR_NO_REF(subject_ht);
 	}
 }
 
@@ -4658,8 +4641,13 @@ PHP_FUNCTION(str_replace)
 ZEND_FRAMELESS_FUNCTION(str_replace, 3)
 {
 	zend_string *search_str, *replace_str, *subject_str;
-	HashTable *search_ht, *replace_ht, *subject_ht;
+	HashTable *search_ht = NULL, *replace_ht = NULL, *subject_ht = NULL;
 	zval search_tmp, replace_tmp, subject_tmp;
+
+	if (EXPECTED(Z_TYPE_P(arg1) == IS_STRING && Z_TYPE_P(arg2) == IS_STRING && Z_TYPE_P(arg3) == IS_STRING)) {
+		_php_str_replace_common(return_value, NULL, Z_STR_P(arg1), NULL, Z_STR_P(arg2), NULL, Z_STR_P(arg3), NULL, true);
+		return;
+	}
 
 	Z_FLF_PARAM_ARRAY_HT_OR_STR(1, search_ht, search_str, search_tmp);
 	Z_FLF_PARAM_ARRAY_HT_OR_STR(2, replace_ht, replace_str, replace_tmp);
@@ -4668,9 +4656,9 @@ ZEND_FRAMELESS_FUNCTION(str_replace, 3)
 	_php_str_replace_common(return_value, search_ht, search_str, replace_ht, replace_str, subject_ht, subject_str, /* zcount */ NULL, /* case_sensitivity */ true);
 
 flf_clean:;
-	Z_FLF_PARAM_FREE_STR(1, search_tmp);
-	Z_FLF_PARAM_FREE_STR(2, replace_tmp);
-	Z_FLF_PARAM_FREE_STR(3, subject_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(1, search_ht, search_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(2, replace_ht, replace_tmp);
+	Z_FLF_PARAM_FREE_ARRAY_HT_OR_STR(3, subject_ht, subject_tmp);
 }
 
 /* {{{ Replaces all occurrences of search in haystack with replace / case-insensitive */
