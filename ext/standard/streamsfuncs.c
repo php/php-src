@@ -314,11 +314,13 @@ PHP_FUNCTION(stream_socket_accept)
 
 	php_stream_error_operation_begin();
 
-	if (0 == php_stream_xport_accept(stream, &clistream,
+	int ret = php_stream_xport_accept(stream, &clistream,
 				zpeername ? &peername : NULL,
 				NULL, NULL,
 				tv_pointer, &errstr
-				) && clistream) {
+				);
+
+	if (0 == ret && clistream) {
 
 		if (peername) {
 			ZEND_TRY_ASSIGN_REF_STR(zpeername, peername);
@@ -328,7 +330,9 @@ PHP_FUNCTION(stream_socket_accept)
 		if (peername) {
 			zend_string_release(peername);
 		}
-		php_stream_warn(stream, AcceptFailed, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
+		if (0 != ret) {
+			php_stream_warn(stream, AcceptFailed, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
+		}
 		RETVAL_FALSE;
 	}
 

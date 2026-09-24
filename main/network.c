@@ -69,7 +69,6 @@
 # include "win32/time.h"
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
-# define PHP_TIMEOUT_ERROR_VALUE		WSAETIMEDOUT
 
 #ifdef HAVE_IPV6
 const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
@@ -78,7 +77,6 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 #else
 # define SOCK_ERR -1
 # define SOCK_CONN_ERR -1
-# define PHP_TIMEOUT_ERROR_VALUE		ETIMEDOUT
 #endif
 
 #ifdef HAVE_GETADDRINFO

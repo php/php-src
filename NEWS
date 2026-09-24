@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC3
 
+- Streams:
+  . Fixed bug GH-23879 (stream_socket_accept() reports AcceptFailed when a
+    non-blocking listener has no pending connection). (Lazizbek Ergashev)
 
 24 Sep 2026, PHP 8.6.0RC2
 
