@@ -12721,7 +12721,10 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 				}
 			}
 			str_ref = jit_Z_PTR(jit, op1_addr);
+
+			/* Inlined offset read for integer offsets into strings. */
 			if (opline->opcode != ZEND_FETCH_DIM_IS
+			 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING
 			 && (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_LONG) {
 				ir_ref offset_ref = jit_Z_LVAL(jit, op2_addr);
 				ir_ref len_ref = ir_LOAD_L(ir_ADD_OFFSET(str_ref, offsetof(zend_string, len)));
