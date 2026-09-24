@@ -333,18 +333,22 @@ static PHP_INI_MH(OnSetSerializePrecision)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
-	size_t value;
+	zend_ulong value;
 	if (new_value) {
 		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
+		/* -1 means no limit; zend_ulong may be wider than size_t */
+		if (value == (zend_ulong) -1) {
+			value = SIZE_MAX;
+		}
 	} else {
 		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
 
 	/* If memory_limit exceeds max_memory_limit, warn and set to max_memory_limit instead. */
 	if (value > PG(max_memory_limit)) {
-		if (value != -1) {
+		if (value != SIZE_MAX) {
 			zend_error(E_WARNING,
-				"Failed to set memory_limit to %zd bytes. Setting to max_memory_limit instead (currently: " ZEND_LONG_FMT " bytes)",
+				"Failed to set memory_limit to " ZEND_ULONG_FMT " bytes. Setting to max_memory_limit instead (currently: " ZEND_LONG_FMT " bytes)",
 				value, PG(max_memory_limit));
 		}
 
@@ -356,13 +360,13 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 		return SUCCESS;
 	}
 
-	if (zend_set_memory_limit(value) == FAILURE) {
+	if (zend_set_memory_limit((size_t) value) == FAILURE) {
 		/* When the memory limit is reset to the original level during deactivation, we may be
 		 * using more memory than the original limit while shutdown is still in progress.
 		 * Ignore a failure for now, and set the memory limit when the memory manager has been
 		 * shut down and the minimal amount of memory is used. */
 		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
-			zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", value, zend_memory_usage(true));
+			zend_error(E_WARNING, "Failed to set memory limit to %zd bytes (Current memory usage is %zd bytes)", (size_t) value, zend_memory_usage(true));
 			return FAILURE;
 		}
 	}
@@ -375,7 +379,17 @@ static PHP_INI_MH(OnChangeMaxMemoryLimit)
 {
 	size_t value;
 	if (new_value) {
-		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
+		zend_ulong uvalue = zend_ini_parse_uquantity_warn(new_value, entry->name);
+		if (uvalue == (zend_ulong) -1) {
+			/* -1 means no limit; zend_ulong may be wider than size_t */
+			value = SIZE_MAX;
+		} else if (ZEND_ULONG_GT_SIZE_T(uvalue, SIZE_MAX)) {
+			/* OnChangeMemoryLimit relies on max_memory_limit not exceeding size_t */
+			zend_error(E_WARNING, "Failed to set max_memory_limit to " ZEND_ULONG_FMT " bytes, exceeds the maximum of %zu bytes", uvalue, SIZE_MAX);
+			return FAILURE;
+		} else {
+			value = (size_t) uvalue;
+		}
 	} else {
 		value = Z_L(1) << 30; /* effectively, no limit */
 	}
