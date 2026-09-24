@@ -8,7 +8,6 @@ ffi.enable=1
 --SKIPIF--
 <?php
 if (!function_exists('ftok')) die('skip needs ftok');
-if (PHP_INT_SIZE !== 8) die('skip only for 64-bit');
 if (PHP_OS_FAMILY !== 'Linux') die('skip only for decent operating systems');
 ?>
 --FILE--
@@ -25,7 +24,9 @@ char *shmat(int, const void *, int);
 CODE);
 $ptr = $ffi->shmat($ffi->shmget($key, 0, 0), $ffi->new('void *'), 0);
 
-$ptr[0x40 + 13] = 0; // Corrupt first byte of second element of serialized data
+// Locate the serialized data, its offset depends on the zend_long and size_t widths
+$offset = strpos(FFI::string($ptr, 128), 'a:2:{');
+$ptr[$offset + 13] = 0; // Corrupt first byte of second element of serialized data
 
 var_dump(shm_get_var($s, 0));
 
