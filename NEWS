@@ -6,4 +6,8 @@ PHP                                                                        NEWS
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
 
+- Standard:
+  . Improved performance of array_splice() when inserting without removing
+    elements. (mehmetcansahin)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

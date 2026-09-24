@@ -3280,8 +3280,13 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 		length = num_in - offset;
 	}
 
+	/* Number of entries in the output hash: the input entries that are kept
+	 * plus the replacement entries. After clamping, a non-positive length
+	 * removes nothing, so all input entries are kept. */
+	uint32_t num_out = num_in - MAX(length, 0) + (replace ? zend_hash_num_elements(replace) : 0);
+
 	/* Create and initialize output hash */
-	zend_hash_init(&out_hash, (length > 0 ? num_in - length : 0) + (replace ? zend_hash_num_elements(replace) : 0), NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&out_hash, num_out, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (HT_IS_PACKED(in_hash)) {
 		/* Start at the beginning of the input hash and copy entries to output hash until offset is reached */
