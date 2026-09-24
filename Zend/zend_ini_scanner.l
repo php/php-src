@@ -192,7 +192,7 @@ static void yy_scan_buffer(const char *str, unsigned int len)
 
 #define ini_filename SCNG(filename)
 
-static zend_result init_ini_scanner(zend_ini_scanner_mode scanner_mode, zend_file_handle *fh)
+static void init_ini_scanner(zend_ini_scanner_mode scanner_mode, zend_file_handle *fh)
 {
 	SCNG(lineno) = 1;
 	SCNG(scanner_mode) = scanner_mode;
@@ -206,8 +206,6 @@ static zend_result init_ini_scanner(zend_ini_scanner_mode scanner_mode, zend_fil
 
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
 	BEGIN(INITIAL);
-
-	return SUCCESS;
 }
 
 /* {{{ shutdown_ini_scanner() */
@@ -234,7 +232,6 @@ ZEND_COLD const char *zend_ini_scanner_get_filename(void)
 }
 /* }}} */
 
-/* {{{ zend_ini_open_file_for_scanning() */
 zend_result zend_ini_open_file_for_scanning(zend_file_handle *fh, zend_ini_scanner_mode scanner_mode)
 {
 	char *buf;
@@ -244,27 +241,20 @@ zend_result zend_ini_open_file_for_scanning(zend_file_handle *fh, zend_ini_scann
 		return FAILURE;
 	}
 
-	if (init_ini_scanner(scanner_mode, fh) == FAILURE) {
-		return FAILURE;
-	}
+	init_ini_scanner(scanner_mode, fh);
 
 	yy_scan_buffer(buf, (unsigned int)size);
 
 	return SUCCESS;
 }
-/* }}} */
 
-zend_result zend_ini_prepare_string_for_scanning(const char *str, zend_ini_scanner_mode scanner_mode)
+void zend_ini_prepare_string_for_scanning(const char *str, zend_ini_scanner_mode scanner_mode)
 {
 	int len = (int)strlen(str);
 
-	if (init_ini_scanner(scanner_mode, NULL) == FAILURE) {
-		return FAILURE;
-	}
+	init_ini_scanner(scanner_mode, NULL);
 
 	yy_scan_buffer(str, len);
-
-	return SUCCESS;
 }
 
 /* {{{ zend_ini_escape_string() */

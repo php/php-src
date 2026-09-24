@@ -255,9 +255,7 @@ ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_erro
 	ini_parser_param.arg = arg;
 	CG(ini_parser_param) = &ini_parser_param;
 
-	if (zend_ini_prepare_string_for_scanning(str, scanner_mode) == FAILURE) {
-		return FAILURE;
-	}
+	zend_ini_prepare_string_for_scanning(str, scanner_mode);
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse();
