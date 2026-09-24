@@ -779,6 +779,7 @@ static void emit_live_range(
 			break;
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+		case ZEND_JMP_NULL:
 			/* These opcodes only write their result on the branch they take.
 			 * The live range must therefore start at the jump target, not
 			 * behind the definition, or it would also cover the fall-through
