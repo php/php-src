@@ -379,18 +379,18 @@ struct _zend_php_scanner_globals {
 	zend_file_handle *yy_out;
 
 	unsigned int yy_leng;
+	int yy_state;
 	unsigned char *yy_start;
 	unsigned char *yy_text;
 	unsigned char *yy_cursor;
 	unsigned char *yy_marker;
 	unsigned char *yy_limit;
-	int yy_state;
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
 	zend_stack nest_location_stack; /* for syntax error reporting */
 	bool heredoc_scan_ahead;
-	int heredoc_indentation;
 	bool heredoc_indentation_uses_spaces;
+	int heredoc_indentation;
 
 	/* original (unfiltered) script */
 	unsigned char *script_org;
