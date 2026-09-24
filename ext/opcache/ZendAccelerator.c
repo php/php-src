@@ -2296,6 +2296,15 @@ static zend_always_inline zend_inheritance_cache_entry* zend_accel_inheritance_c
 	return NULL;
 }
 
+/* Sync local map_ptr with SHM high-water mark. Same condition as
+ * zend_accel_load_script / inheritance cache / persist / PFA. */
+static void accel_map_ptr_extend_from_shm(void)
+{
+	if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
+		zend_map_ptr_extend(ZCSG(map_ptr_last));
+	}
+}
+
 static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces)
 {
 	uint32_t i;
@@ -3385,6 +3394,7 @@ file_cache_fallback:
 		accelerator_orig_inheritance_cache_add = zend_inheritance_cache_add;
 		zend_inheritance_cache_get = zend_accel_inheritance_cache_get;
 		zend_inheritance_cache_add = zend_accel_inheritance_cache_add;
+		zend_map_ptr_extend_from_shm = accel_map_ptr_extend_from_shm;
 	}
 
 	return SUCCESS;
@@ -3440,6 +3450,7 @@ void accel_shutdown(void)
 	zend_compile_file = accelerator_orig_compile_file;
 	zend_inheritance_cache_get = accelerator_orig_inheritance_cache_get;
 	zend_inheritance_cache_add = accelerator_orig_inheritance_cache_add;
+	zend_map_ptr_extend_from_shm = NULL;
 
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
 		ini_entry->on_modify = orig_include_path_on_modify;
