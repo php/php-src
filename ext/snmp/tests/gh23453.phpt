@@ -1,5 +1,7 @@
 --TEST--
 GH-23453 (SNMP::setSecurity() frees a non-malloced address with a context engine ID longer than 32 bytes)
+--CREDITS--
+TristanInSec
 --EXTENSIONS--
 snmp
 --FILE--
