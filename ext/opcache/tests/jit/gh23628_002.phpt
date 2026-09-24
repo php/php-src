@@ -34,7 +34,13 @@ var_dump((new Table())->parse(100));
 // and has to be forwarded to the real instance during deoptimization.
 $proxy = (new ReflectionClass(Table::class))->newLazyProxy(fn () => new Table());
 var_dump($proxy->parse(100));
+
+// ... and for an uninitialized lazy ghost, which is initialized on the first
+// property access.
+$ghost = (new ReflectionClass(Table::class))->newLazyGhost(function (Table $table) {});
+var_dump($ghost->parse(100));
 ?>
 --EXPECT--
+int(100)
 int(100)
 int(100)
