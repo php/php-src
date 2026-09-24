@@ -23,7 +23,7 @@ class Callback {
         foreach (['curl_reset', 'curl_close'] as $function) {
             try {
                 // curl_close() is deprecated in PHP 8.5.
-                @$function($this->handle);
+                $function($this->handle);
             } catch (Error $e) {
                 echo $e->getMessage(), "\n";
             }
