@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.6.0RC3
 
+- Core:
+  . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
+    (ndossche)
 
 24 Sep 2026, PHP 8.6.0RC2
 
