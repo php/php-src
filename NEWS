@@ -52,6 +52,9 @@ PHP                                                                        NEWS
   . Fix GH-22854: Fixed failed assertion when accessing mysqli property after
     failed reconnection. (Kamil Tekiela)
 
+- MySQLnd:
+  . Fixed field_count not resetting on OK packet. (Kamil Tekiela)
+
 - Opcache:
   . Fixed OSS-Fuzz #546798343 (Heap-buffer-overflow in optimizer with
     FCCs and inlining). (ndossche)
