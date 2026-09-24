@@ -77,6 +77,10 @@ PHP                                                                        NEWS
   . Fixed grapheme_strrpos() and grapheme_strripos() skipping overlapping matches
     when using a negative offset. (Weilin Du)
 
+- JSON:
+  . Fixed json_encode() continuing to encode after an array or object key
+    failed to encode. (Ilia Alshanetsky)
+
 - Lexbor:
   . Merge patches lexbor/lexbor@8a14bc0 and lexbor/lexbor@f67ce4b, fixing a
     heap buffer overflow in :lexbor-contains() parsing and buffer overflows
