@@ -14,8 +14,11 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-- Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
+. Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
   instead.
+. The INIT_CLASS_ENTRY_INIT_METHODS() macro, which was previously used as
+  part of handling disabled classes, was removed following the removal of
+  the `disable_classes` INI setting in PHP 8.5.
 
 ========================
 2. Build system changes
