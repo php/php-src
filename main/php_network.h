@@ -109,10 +109,12 @@ typedef int php_socket_t;
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
 # define SOCK_RECV_ERR SOCKET_ERROR
+# define PHP_TIMEOUT_ERROR_VALUE WSAETIMEDOUT
 #else
 # define SOCK_ERR -1
 # define SOCK_CONN_ERR -1
 # define SOCK_RECV_ERR -1
+# define PHP_TIMEOUT_ERROR_VALUE ETIMEDOUT
 #endif
 
 #define STREAM_SOCKOP_NONE                (1 << 0)
