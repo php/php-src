@@ -42,7 +42,7 @@ PHPAPI extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_
 #define mysqlnd_plugin_get_plugin_stmt_data(stmt, p_id)					mysqlnd_plugin_area_getters.get_stmt_area((stmt), (p_id))
 #define mysqlnd_plugin_get_plugin_protocol_data(proto, p_id)			mysqlnd_plugin_area_getters.get_protocol_decoder_area((proto), (p_id))
 #define mysqlnd_plugin_get_plugin_pfc_data(pfc, p_id)					mysqlnd_plugin_area_getters.get_pfc_area((pfc), (p_id))
-#define mysqlnd_plugin_get_plugin_vio_data(vio, p_id)					mysqlnd_plugin_area_getters.get_pfc_area((vio), (p_id))
+#define mysqlnd_plugin_get_plugin_vio_data(vio, p_id)					mysqlnd_plugin_area_getters.get_vio_area((vio), (p_id))
 
 
 struct st_mysqlnd_plugin_methods_xetters
