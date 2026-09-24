@@ -633,11 +633,11 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 			char *colon_offset = strchr(sapi_header->header, ':');
 
 			if (colon_offset) {
-				char sav = *colon_offset;
+				char saved_char = *colon_offset;
 
 				*colon_offset = 0;
 				sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header), 0);
-				*colon_offset = sav;
+				*colon_offset = saved_char;
 			}
 		}
 		zend_llist_add_element(&SG(sapi_headers).headers, (void *) sapi_header);

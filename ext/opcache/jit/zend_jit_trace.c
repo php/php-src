@@ -938,7 +938,7 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array  *op_array,
 			return 0;
 		}
 		if (opline) {
-			/* Try to find a difinition in SSA dominators tree */
+			/* Try to find a definition in SSA dominators tree */
 			var = tssa->vars[ssa_var].var;
 			uint32_t op_num = opline - op_array->opcodes;
 			uint32_t b = ssa->cfg.map[op_num];

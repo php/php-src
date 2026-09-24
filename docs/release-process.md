@@ -1094,7 +1094,7 @@ volunteers to begin the selection process for the next release managers.
 
 4. File a [ticket in the infrastructure](https://github.com/php/infrastructure/issues/new?template=request-release-manager-access.yml)
    project and provide an SSH key, your @php.net email address, your GitHub
-   account name, and your preferred system account name. Preferrably they're
+   account name, and your preferred system account name. Preferably they're
    all the same!
 
 5. Read [Logging into Servers](https://github.com/php/infrastructure/blob/main/docs/ServerAccess.rst#logging-into-servers) to set up

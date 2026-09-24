@@ -302,7 +302,7 @@ static void dom_lexbor_libxml2_bridge_tree_error_reporter(
 	dom_lexbor_libxml2_bridge_application_data *application_data = application_data_voidptr;
 
 	if (line == 1 && application_data->html_no_implied && error->id == LXB_HTML_RULES_ERROR_UNTOININMO) {
-		/* For no implied mode, we want to mimick libxml's behaviour of not reporting an error for a lacking doctype. */
+		/* For no implied mode, we want to mimic libxml's behaviour of not reporting an error for a lacking doctype. */
 		return;
 	}
 
