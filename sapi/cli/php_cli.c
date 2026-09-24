@@ -1333,12 +1333,16 @@ exit_loop:
 #if defined(PHP_WIN32)
 	php_win32_cp_cli_setup();
 	orig_cp = (php_win32_cp_get_orig())->id;
-	/* Ignore the delivered argv and argc, read from W API. This place
-		might be too late though, but this is the earliest place ATW
-		we can access the internal charset information from PHP. */
-	argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
-	PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
-	using_wide_argv = 1;
+	/* Embedders supply their own arguments, we mustn't replace them with
+	 * the ones by the host process command line. */
+	if (argv_save == __argv) {
+		/* Ignore the delivered argv and argc, read from W API. This place
+			might be too late though, but this is the earliest place ATW
+			we can access the internal charset information from PHP. */
+		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
+		PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
+		using_wide_argv = 1;
+	}
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
 #endif
