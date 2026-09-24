@@ -7,4 +7,4 @@ Bug #61087 (Memory leak in parse_ini_file when specifying invalid scanner mode)
 parse_ini_file(__FILE__, false, 100);
 ?>
 --EXPECTF--
-Warning: Invalid scanner mode in %s on line %d
+Warning: parse_ini_file(): Invalid scanner mode in %s on line %d

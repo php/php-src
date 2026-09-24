@@ -221,8 +221,7 @@ static ZEND_COLD void ini_error(const char *msg)
 }
 /* }}} */
 
-/* {{{ zend_parse_ini_file() */
-ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_errors, zend_ini_scanner_mode scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;
@@ -246,10 +245,8 @@ ZEND_API zend_result zend_parse_ini_file(zend_file_handle *fh, bool unbuffered_e
 		return FAILURE;
 	}
 }
-/* }}} */
 
-/* {{{ zend_parse_ini_string() */
-ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_errors, int scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_errors, zend_ini_scanner_mode scanner_mode, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	int retval;
 	zend_ini_parser_param ini_parser_param;
@@ -273,7 +270,6 @@ ZEND_API zend_result zend_parse_ini_string(const char *str, bool unbuffered_erro
 		return FAILURE;
 	}
 }
-/* }}} */
 
 /* {{{ zval_ini_dtor() */
 static void zval_ini_dtor(zval *zv)

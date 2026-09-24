@@ -2504,6 +2504,12 @@ PHP_FUNCTION(parse_ini_file)
 		RETURN_THROWS();
 	}
 
+	/* Sanity check */
+	if (UNEXPECTED(scanner_mode != ZEND_INI_SCANNER_NORMAL && scanner_mode != ZEND_INI_SCANNER_RAW && scanner_mode != ZEND_INI_SCANNER_TYPED)) {
+		php_error_docref(NULL, E_WARNING, "Invalid scanner mode");
+		RETURN_FALSE;
+	}
+
 	/* Set callback function */
 	if (process_sections) {
 		ZVAL_UNDEF(&BG(active_ini_file_section));
@@ -2516,7 +2522,7 @@ PHP_FUNCTION(parse_ini_file)
 	zend_stream_init_filename_ex(&fh, filename);
 
 	array_init(return_value);
-	if (zend_parse_ini_file(&fh, 0, (int)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
+	if (zend_parse_ini_file(&fh, 0, (zend_ini_scanner_mode)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
 		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	}
@@ -2540,6 +2546,12 @@ PHP_FUNCTION(parse_ini_string)
 		Z_PARAM_LONG(scanner_mode)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* Sanity check */
+	if (UNEXPECTED(scanner_mode != ZEND_INI_SCANNER_NORMAL && scanner_mode != ZEND_INI_SCANNER_RAW && scanner_mode != ZEND_INI_SCANNER_TYPED)) {
+		php_error_docref(NULL, E_WARNING, "Invalid scanner mode");
+		RETURN_FALSE;
+	}
+
 	if (INT_MAX - str_len < ZEND_MMAP_AHEAD) {
 		RETVAL_FALSE;
 	}
@@ -2558,7 +2570,7 @@ PHP_FUNCTION(parse_ini_string)
 	memset(string + str_len, 0, ZEND_MMAP_AHEAD);
 
 	array_init(return_value);
-	if (zend_parse_ini_string(string, 0, (int)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
+	if (zend_parse_ini_string(string, 0, (zend_ini_scanner_mode)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
 		zend_array_destroy(Z_ARR_P(return_value));
 		RETVAL_FALSE;
 	}
