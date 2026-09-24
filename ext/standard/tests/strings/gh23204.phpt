@@ -16,6 +16,10 @@ $a = [new Unset_, 2, 3, 4];
 echo "destroyed: ", implode(",", $a), "\n";
 var_dump($a);
 
+$a = [new Unset_, 2, 3, 4];
+echo "destroyed single arg: ", implode($a), "\n";
+var_dump($a);
+
 class Append implements Stringable {
     public function __toString(): string {
         global $b;
@@ -93,6 +97,8 @@ var_dump(str_replace("a", "z", $h));
 ?>
 --EXPECT--
 destroyed: X,2,3,4
+NULL
+destroyed single arg: X234
 NULL
 appended: X,2,3,4
 count: 5
