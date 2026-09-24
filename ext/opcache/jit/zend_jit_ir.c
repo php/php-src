@@ -14248,9 +14248,6 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), on_this, op_array->filename);
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && prop_type == IS_UNDEF) {
-		/* The slot was IS_UNDEF when the trace was recorded (lazy object,
-		 * uninitialized or unset() property). The known-offset fast path
-		 * would deoptimize on every execution, so use the generic code path. */
 		prop_info = NULL;
 		trace_ce = NULL;
 	}

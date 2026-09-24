@@ -8717,13 +8717,8 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 					ZVAL_NULL(EX_VAR_NUM(i));
 				} else if (op->opcode == ZEND_FETCH_OBJ_IS
 				 && (Z_PROP_FLAG_P(val) & (IS_PROP_LAZY|IS_PROP_UNINIT)) == IS_PROP_UNINIT) {
-					/* Uninitialized declared property: no magic methods are called */
 					ZVAL_NULL(EX_VAR_NUM(i));
 				} else {
-					/* Re-execute the opcode in the VM: undefined index/property
-					 * warning, unset() property that may be served by
-					 * __isset()/__get(), or a lazy object property that has to
-					 * be forwarded to the real instance. */
 					ZEND_ASSERT(op->opcode == ZEND_FETCH_DIM_R || op->opcode == ZEND_FETCH_LIST_R || op->opcode == ZEND_FETCH_OBJ_R || op->opcode == ZEND_FETCH_OBJ_IS || op->opcode == ZEND_FETCH_DIM_FUNC_ARG || op->opcode == ZEND_FETCH_OBJ_FUNC_ARG);
 					repeat_last_opline = 1;
 				}
