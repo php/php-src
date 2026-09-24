@@ -157,14 +157,14 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 		if (read_chain) {
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream)))) {
 				php_stream_filter_append(&stream->readfilters, temp_filter);
-			} else {
+			} else if (!EG(exception)) {
 				php_error_docref(NULL, E_WARNING, "Unable to create filter (%s)", p);
 			}
 		}
 		if (write_chain) {
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream)))) {
 				php_stream_filter_append(&stream->writefilters, temp_filter);
-			} else {
+			} else if (!EG(exception)) {
 				php_error_docref(NULL, E_WARNING, "Unable to create filter (%s)", p);
 			}
 		}

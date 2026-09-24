@@ -329,9 +329,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	zend_call_method_if_exists(Z_OBJ(obj), func_name, &retval, 0, NULL);
 	zend_string_release(func_name);
 
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		if (Z_TYPE(retval) == IS_FALSE) {
-			/* User reported filter creation error "return false;" */
+	if (Z_TYPE(retval) != IS_UNDEF || UNEXPECTED(EG(exception))) {
+		if (Z_TYPE(retval) == IS_FALSE || UNEXPECTED(EG(exception))) {
 			zval_ptr_dtor(&retval);
 
 			/* Kill the filter (safely) */

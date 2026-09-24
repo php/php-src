@@ -13,7 +13,4 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: main(): Unable to create or locate filter "sample.filter" in %s on line %d
-
-Warning: main(): Unable to create filter (sample.filter) in %s on line %d
 Undefined constant "FOO"
