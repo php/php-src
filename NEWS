@@ -191,6 +191,9 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fixed bug GH-23747 (ZipArchive::close() use-after-free from a progress or
     cancel callback). (David Carlier)
+  . Fixed a use-after-free when a ZipArchive method that modifies the archive
+    is called from a progress or cancel callback during close().
+    (Ilia Alshanetsky)
 
 
 24 Sep 2026, PHP 8.4.26
