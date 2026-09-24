@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fix GH-23662 (Avoid NAN warning in print_r()). (CodedByManish)
   . Fix GH-21999: GC inconsistency with lazy object, var_dump(), and object
     comparison. (Arnaud)
+  . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
+    (ndossche)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
