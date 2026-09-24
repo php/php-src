@@ -1086,6 +1086,10 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 				GC_ADDREF(stream->ctx);
 			}
 		}
+	} else if (!sock->is_blocked && (xparam->outputs.error_code == PHP_TIMEOUT_ERROR_VALUE
+			|| PHP_IS_TRANSIENT_ERROR(xparam->outputs.error_code))) {
+		/* No pending connection is not an error for a non-blocking listener. */
+		return 0;
 	}
 
 	return xparam->outputs.client == NULL ? -1 : 0;

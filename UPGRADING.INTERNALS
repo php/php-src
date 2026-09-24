@@ -184,6 +184,9 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     zval* that is IS_UNDEF when the closure is unbound.
   . object_properties_load() now verifies that the given value is assignable
     to typed properties. The check is performed in strict mode.
+  . php_stream_xport_accept() now returns 0 with a NULL client when a
+    non-blocking listener has no pending connection. Callers must check the
+    client, not only the return value.
 
 - Added:
   . New zend_class_entry.ce_flags2 and zend_function.fn_flags2 fields were
