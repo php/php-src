@@ -311,9 +311,7 @@ static void dom_map_get_elements_item(dom_nnodemap_object *map, zend_long index,
 
 static void dom_map_collection_named_item_elements_iter(dom_nnodemap_object *map, php_dom_obj_map_collection_iter *iter)
 {
-	if (iter->candidate != iter->basep->children) {
-		iter->candidate = iter->candidate->next;
-	}
+	iter->candidate = iter->candidate ? iter->candidate->next : iter->basep->children;
 	while (iter->candidate && iter->candidate->type != XML_ELEMENT_NODE) {
 		iter->candidate = iter->candidate->next;
 	}
@@ -369,7 +367,8 @@ static void dom_map_get_by_class_name_item(dom_nnodemap_object *map, zend_long i
 
 static void dom_map_collection_named_item_by_tag_name_iter(dom_nnodemap_object *map, php_dom_obj_map_collection_iter *iter)
 {
-	iter->candidate = dom_get_elements_by_tag_name_ns_raw(iter->basep, iter->candidate, map->ns, map->local, map->local_lower, &iter->cur, iter->next);
+	xmlNodePtr nodep = iter->candidate ? iter->candidate : iter->basep->children;
+	iter->candidate = dom_get_elements_by_tag_name_ns_raw(iter->basep, nodep, map->ns, map->local, map->local_lower, &iter->cur, iter->next);
 	iter->next = iter->cur + 1;
 }
 
