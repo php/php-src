@@ -17,5 +17,5 @@ var_dump($o->b);
 
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion from float 3.4028236692093845E+32 to int loses precision in %s on line %d
+Warning: The float 3.4028236692093845E+32 is not representable as an int, cast occurred in %s on line %d
 int(%s)
