@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed chown() and lchown() failing to resolve user names in ZTS builds
     when getpwnam_r() needs a larger buffer. (Ilia Alshanetsky)
+  . Fixed password_get_info() and password_needs_rehash() accepting malformed
+    bcrypt costs. (Ilia Alshanetsky)
 
 - Zip:
   . Fixed use-after-free when re-entering ZipArchive during destruction or
