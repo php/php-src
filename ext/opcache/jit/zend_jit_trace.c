@@ -8716,7 +8716,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				if (op->opcode == ZEND_FETCH_DIM_IS) {
 					ZVAL_NULL(EX_VAR_NUM(i));
 				} else if (op->opcode == ZEND_FETCH_OBJ_IS
-				 && !(Z_PROP_FLAG_P(val) & IS_PROP_LAZY)) {
+				 && (Z_PROP_FLAG_P(val) & (IS_PROP_LAZY|IS_PROP_UNINIT)) == IS_PROP_UNINIT) {
 					ZVAL_NULL(EX_VAR_NUM(i));
 				} else {
 					/* Undefined array index or property that has to emit a warning,
