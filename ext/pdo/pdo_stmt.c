@@ -1790,7 +1790,10 @@ static bool pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 		return false;
 	}
 
-	pdo_stmt_describe_columns(stmt);
+	if (!pdo_stmt_describe_columns(stmt)) {
+		pdo_stmt_reset_columns(stmt);
+		return false;
+	}
 
 	return true;
 }
