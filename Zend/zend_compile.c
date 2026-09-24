@@ -5324,6 +5324,12 @@ static zend_result zend_compile_func_clone(znode *result, const zend_ast_list *a
 
 static zend_result zend_compile_func_array_map(znode *result, zend_ast_list *args, zend_string *lcname, uint32_t lineno) /* {{{ */
 {
+	/* array_map() as an internal function calls the callback as if strict_types=0,
+	 * this optimization is therefore not legal if strict_types=1. */
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES) {
+		return FAILURE;
+	}
+
 	/* Bail out if we do not have exactly two parameters. */
 	if (args->children != 2) {
 		return FAILURE;
