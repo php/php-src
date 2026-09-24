@@ -270,9 +270,6 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 
 	/* (re)bind the parameters */
 	if (mysql_stmt_bind_param(S->stmt, S->params) || mysql_stmt_execute(S->stmt)) {
-		if (S->params) {
-			memset(S->params, 0, S->num_params * sizeof(MYSQL_BIND));
-		}
 		pdo_mysql_error_stmt(stmt);
 		if (mysql_stmt_errno(S->stmt) == 2057) {
 			/* CR_NEW_STMT_METADATA makes the statement unusable */
