@@ -353,12 +353,12 @@ struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_out;
 
 	unsigned int yy_leng;
+	int yy_state;
 	const unsigned char *yy_start;
 	const unsigned char *yy_text;
 	const unsigned char *yy_cursor;
 	const unsigned char *yy_marker;
 	const unsigned char *yy_limit;
-	int yy_state;
 	zend_stack state_stack;
 
 	zend_string *filename;
