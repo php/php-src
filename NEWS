@@ -108,6 +108,9 @@ PHP                                                                        NEWS
     values. (Marcel Hernandez)
   . Fixed null pointer dereference in fpm_get_status() when the scoreboard
     copy fails. (Marcel Hernandez)
+  . Fixed master process crash when a worker exits with
+    catch_workers_output enabled and events.mechanism set to select or poll.
+    (Ilia Alshanetsky)
 
 - Fileinfo:
   . Fixed bug GH-24289 (finfo::file() reports the wrong argument number for
