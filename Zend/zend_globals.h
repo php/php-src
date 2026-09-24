@@ -39,6 +39,7 @@
 #include "zend_multiply.h"
 #include "zend_arena.h"
 #include "zend_call_stack.h"
+#include "zend_ini_scanner.h"
 #include "zend_max_execution_timer.h"
 #include "zend_strtod.h"
 #include "zend_lazy_objects.h"
@@ -364,8 +365,7 @@ struct _zend_ini_scanner_globals {
 	zend_string *filename;
 	uint32_t lineno;
 
-	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
-	int scanner_mode;
+	zend_ini_scanner_mode scanner_mode;
 };
 
 typedef enum {
