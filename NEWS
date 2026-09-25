@@ -116,6 +116,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-23747 (ZipArchive::close() use-after-free from a progress or
     cancel callback). (David Carlier)
 
+- PDO:
+  . Reused persistent connections no longer keep stale fetch-related
+    attributes (case conversion, null handling, stringify, default fetch
+    mode) from the previous request. (Ilia Alshanetsky)
+
+
 
 24 Sep 2026, PHP 8.4.26
 
