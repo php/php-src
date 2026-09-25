@@ -298,6 +298,8 @@ namespace {
 
     function zend_test_crash(?string $message = null): void {}
 
+    function zend_test_raise_and_throw(int $signal): void {}
+
     function zend_test_fill_packed_array(array &$array): void {}
 
     /** @return resource */

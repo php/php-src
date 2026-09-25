@@ -37,6 +37,7 @@
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
 #include "zend_mm_custom_handlers.h"
+#include <signal.h>
 
 // `php.h` sets `NDEBUG` when not `PHP_DEBUG` which will make `assert()` from
 // assert.h a no-op. In order to have `assert()` working on NDEBUG builds, we
@@ -670,6 +671,22 @@ static ZEND_FUNCTION(zend_test_crash)
 
 	char *invalid = (char *) 1;
 	php_printf("%s", invalid);
+}
+
+static ZEND_FUNCTION(zend_test_raise_and_throw)
+{
+	zend_long signo;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(signo)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (raise((int) signo) != 0) {
+		zend_throw_error(NULL, "raise() failed");
+		RETURN_THROWS();
+	}
+
+	zend_throw_exception(NULL, "Exception after raise()", 0);
 }
 
 static bool has_opline(zend_execute_data *execute_data)
