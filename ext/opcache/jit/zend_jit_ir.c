@@ -478,7 +478,7 @@ static bool zend_jit_prefer_const_addr_load(zend_jit_ctx *jit, uintptr_t addr)
 #if defined(IR_TARGET_X86)
 	return false; /* always use immediate value */
 #elif defined(IR_TARGET_X64)
-	return addr > 0xffffffff; /* prefer loading long constant from memery */
+	return addr > 0xffffffff; /* prefer loading long constant from memory */
 #elif defined(IR_TARGET_AARCH64)
 	return addr > 0xffff;
 #else
@@ -4581,7 +4581,7 @@ static int zend_jit_load_var(zend_jit_ctx *jit, uint32_t info, int var, int ssa_
 static int zend_jit_invalidate_var_if_necessary(zend_jit_ctx *jit, uint8_t op_type, zend_jit_addr addr, znode_op op)
 {
 	if ((op_type & (IS_TMP_VAR|IS_VAR)) && Z_MODE(addr) == IS_REG && !Z_LOAD(addr) && !Z_STORE(addr)) {
-		/* Invalidate operand type to prevent incorrect destuction by exception_handler_free_op1_op2() */
+		/* Invalidate operand type to prevent incorrect destruction by exception_handler_free_op1_op2() */
 		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
 		jit_set_Z_TYPE_INFO(jit, dst, IS_UNDEF);
 	}
@@ -8610,7 +8610,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 	rx = jit_IP(jit);
 #if !OPTIMIZE_FOR_SIZE
 	/* JIT: EG(vm_stack_top) = (zval*)((char*)call + used_stack);
-	 * This vesions is longer but faster
+	 * This version is longer but faster
 	 *    mov EG(vm_stack_top), %CALL
 	 *    lea size(%call), %tmp
 	 *    mov %tmp, EG(vm_stack_top)
@@ -11174,7 +11174,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 		if (fast_path) {
 			ir_MERGE_WITH(fast_path);
 		}
-		// TODO: avoid EG(excption) check for $this->foo() calls
+		// TODO: avoid EG(exception) check for $this->foo() calls
 		may_throw = 1;
 	}
 
@@ -12052,7 +12052,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 #if SIZEOF_ZEND_LONG == 8
 				if ((Z_MODE(op2_addr) == IS_CONST_ZVAL && val >= 0 && val <= UINT32_MAX)
 				 || (op2_range && op2_range->min >= 0 && op2_range->max <= UINT32_MAX)) {
-					/* comapre only the lower 32-bits to allow load fusion on x86_64 */
+					/* compare only the lower 32-bits to allow load fusion on x86_64 */
 					cond = ir_ULT(ir_TRUNC_U32(h), ref);
 				} else {
 					cond = ir_ULT(h, ir_ZEXT_L(ref));
@@ -14297,6 +14297,11 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), on_this, op_array->filename);
+
+	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && prop_type == IS_UNDEF) {
+		prop_info = NULL;
+		trace_ce = NULL;
+	}
 
 	if (on_this) {
 		zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));

@@ -513,7 +513,7 @@ uintptr_t __attribute__((preserve_none,noinline,used)) fun(uintptr_t a, uintptr_
 	return (uintptr_t)const3;
 }
 
-uintptr_t __attribute__((preserve_none)) test(void) {
+uintptr_t __attribute__((preserve_none,noinline)) test(void) {
 	uintptr_t ret;
 
 #if defined(__x86_64__)
@@ -531,7 +531,7 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 #endif
 		: "=a" (ret)
 		: "r" (const1), "r" (const2), "r" (key)
-		: "r12", "r13"
+		: "r12", "r13", "memory", "cc"
 	);
 #elif defined(__aarch64__)
 	__asm__ __volatile__(
@@ -547,7 +547,7 @@ uintptr_t __attribute__((preserve_none)) test(void) {
 		"mov    %0, x0\n"
 		: "=r" (ret)
 		: "r" (const1), "r" (const2), "r" (key)
-		: "x0", "x21", "x22", "x30"
+		: "x0", "x20", "x21", "x30", "memory", "cc"
 	);
 #else
 # error

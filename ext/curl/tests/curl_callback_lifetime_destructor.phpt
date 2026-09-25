@@ -23,7 +23,7 @@ class Callback {
         foreach (['curl_reset', 'curl_close'] as $function) {
             try {
                 // curl_close() is deprecated in PHP 8.5.
-                @$function($this->handle);
+                $function($this->handle);
             } catch (Error $e) {
                 echo $e->getMessage(), "\n";
             }
@@ -43,9 +43,11 @@ var_dump(curl_exec($handle));
 curl_reset($handle);
 echo "Reset outside callback succeeded\n";
 ?>
---EXPECT--
+--EXPECTF--
 Callback returning
 curl_reset(): Attempt to reset cURL handle from a callback
+
+Deprecated: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in %s on line %d
 curl_close(): Attempt to close cURL handle from a callback
 bool(true)
 Callback installed by destructor
