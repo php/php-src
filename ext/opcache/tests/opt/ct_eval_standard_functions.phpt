@@ -24,11 +24,12 @@ function test() {
     ];
 }
 var_dump(test());
+?>
 --EXPECTF--
 $_main:
      ; (lines=6, args=0, vars=0, tmps=1)
      ; (after optimizer)
-     ; %sct_eval_standard_functions.php:1-16
+     ; %sct_eval_standard_functions.php:1-17
 0000 INIT_FCALL 1 %d string("var_dump")
 0001 INIT_FCALL 0 %d string("test")
 0002 T0 = DO_UCALL
