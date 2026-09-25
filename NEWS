@@ -87,6 +87,10 @@ PHP                                                                        NEWS
   . Fixed exceptions from user-defined create_sid() handlers being replaced
     by return-value validation errors. (Ilia Alshanetsky)
 
+- PDO_Firebird:
+  . Fixed bug GH-23758 (PDO_Firebird returns null for non-null empty BLOBs).
+    (Lazizbek Ergashev)
+
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)
