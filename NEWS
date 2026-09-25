@@ -43,6 +43,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-25037 (Function JIT ENTRY live var assertion).
     (Ilia Alshanetsky)
 
+- PDO_Firebird:
+  . Fixed stack buffer overflow with long connection user names, passwords,
+    charsets, or roles. (Ilia Alshanetsky)
+
 - SOAP:
   . Fixed bug GH-25267 (NULL dereference in to_xml_any() with integer key).
     (lazerg)
