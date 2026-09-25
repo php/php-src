@@ -123,7 +123,12 @@ static void zend_weakref_register(zend_object *object, void *payload) {
 static void zend_weakref_unregister(zend_object *object, void *payload, bool weakref_free) {
 	zend_ulong obj_key = zend_object_to_weakref_key(object);
 	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
-	ZEND_ASSERT(tagged_ptr && "Weakref not registered?");
+	if (UNEXPECTED(!tagged_ptr)) {
+		/* The referent may already have been unregistered while unwinding from
+		 * a stack overflow. There is nothing left to detach in that case. */
+		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
+		return;
+	}
 
 	void *ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
 	uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
