@@ -3,7 +3,7 @@ session GC accumulates correct total count across multiple subdirs, including em
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include(__DIR__ . '/../skipif.inc'); ?>
+<?php include __DIR__ . '/../skipif.inc'; ?>
 --INI--
 session.gc_probability=0
 session.gc_maxlifetime=10

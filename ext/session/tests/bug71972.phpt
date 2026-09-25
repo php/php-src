@@ -3,7 +3,7 @@ Bug #71972 (Cyclic references causing session_start(): Failed to decode session 
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.save_handler=files
 --FILE--

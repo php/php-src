@@ -3,7 +3,7 @@ Test session_cache_limiter() function : variation
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.cache_limiter=nocache
 --FILE--

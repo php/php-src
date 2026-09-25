@@ -3,7 +3,7 @@ Bug #70013 (Reference to $_SESSION is lost after a call to session_regenerate_id
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.save_handler=files
 --FILE--

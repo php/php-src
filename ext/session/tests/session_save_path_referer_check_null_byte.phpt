@@ -3,7 +3,7 @@ session.save_path and session.referer_check must not contain null bytes
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

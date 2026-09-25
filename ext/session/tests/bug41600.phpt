@@ -3,7 +3,7 @@ Bug #41600 (url rewriter tags doesn't work with namespaced tags)
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.use_cookies=0
 session.use_only_cookies=0

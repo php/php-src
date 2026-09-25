@@ -8,7 +8,7 @@ session.trans_sid_hosts=php.net
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 // We *must* set it here because the bug only triggers on a runtime edit

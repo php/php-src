@@ -3,7 +3,7 @@ Test session_save_path() function : variation
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc');
+<?php include 'skipif.inc';
 if(substr(PHP_OS, 0, 3) == "WIN")
     die("skip Not for Windows");
 ?>

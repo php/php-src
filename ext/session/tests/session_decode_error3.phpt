@@ -3,7 +3,7 @@ Test session_decode() function : error functionality
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.serialize_handler = wrong_handler
 --FILE--

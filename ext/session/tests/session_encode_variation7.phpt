@@ -3,7 +3,7 @@ Test session_encode() function : variation
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.serialize_handler=php_binary
 --FILE--

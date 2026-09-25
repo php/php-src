@@ -3,7 +3,7 @@ GH-16372: Mention where headers were already sent if session_start fails
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

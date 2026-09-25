@@ -3,7 +3,7 @@ Test session_abort() function : basic functionality
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --INI--
 session.save_path=
 session.name=PHPSESSID

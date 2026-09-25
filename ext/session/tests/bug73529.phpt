@@ -3,7 +3,7 @@ Bug #73529 session_decode() silently fails on wrong input
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 ob_start();

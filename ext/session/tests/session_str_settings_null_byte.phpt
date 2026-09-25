@@ -3,7 +3,7 @@ session.cookie_path, session.cookie_domain, and session.cache_limiter must not c
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

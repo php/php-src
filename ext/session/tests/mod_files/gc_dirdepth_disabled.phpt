@@ -3,7 +3,7 @@ session GC correctly cleans expired sessions when save_path dirdepth > 0
 --EXTENSIONS--
 session
 --SKIPIF--
-<?php include(__DIR__ . '/../skipif.inc'); ?>
+<?php include __DIR__ . '/../skipif.inc'; ?>
 --INI--
 session.gc_probability=0
 session.gc_maxlifetime=1
