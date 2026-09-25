@@ -32,6 +32,11 @@ PHP 8.7 UPGRADE NOTES
     to 16 by default. Set the stream context option max_filter_count to change
     this.
 
+- Streams:
+  . A failed fseek() on php://memory and php://temp streams now leaves the
+    stream position unchanged. Previously, ftell() returned false afterwards
+    and the stream was moved to its start.
+
 ========================================
 2. New Features
 ========================================
