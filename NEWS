@@ -84,6 +84,10 @@ PHP                                                                        NEWS
     column index. (Ilia Alshanetsky)
   . Fixed PDOStatement::bindColumn() registering a binding for a column name
     that is not in the result set. (Ilia Alshanetsky)
+  . Fixed PDO::setAttribute() installing a PDO::ATTR_STATEMENT_CLASS class
+    whose constructor arguments it rejects. (Ilia Alshanetsky)
+  . Fixed PDO::ATTR_STATEMENT_CLASS constructor_args type errors reporting
+    "array given" regardless of the value passed. (Ilia Alshanetsky)
 
 - Readline:
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
