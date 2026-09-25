@@ -41,6 +41,9 @@ static AvifInfoStatus AvifInfoInternalConvertStatus(AvifInfoInternalStatus s) {
 // Maximum number of stored associations. Past that, they are skipped.
 #define AVIFINFO_MAX_TILES 16
 #define AVIFINFO_MAX_PROPS 32
+// Among AVIFINFO_MAX_PROPS, reserve this many for the primary item so its
+// associations are still recorded after many tile items fill the rest.
+#define AVIFINFO_MAX_PROPS_PRIMARY 8
 #define AVIFINFO_MAX_FEATURES 8
 #define AVIFINFO_UNDEFINED 0
 
@@ -550,8 +553,7 @@ static AvifInfoInternalStatus ParseIprp(int nesting_level,
       const uint32_t essential_bit_mask = (box.flags & 1) ? 0x8000 : 0x80;
 
       for (uint32_t entry = 0; entry < entry_count; ++entry) {
-        if (entry >= AVIFINFO_MAX_PROPS ||
-            features->num_props >= AVIFINFO_MAX_PROPS) {
+        if (entry > AVIFINFO_MAX_VALUE) {
           features->data_was_skipped = 1;
           break;
         }
@@ -563,14 +565,16 @@ static AvifInfoInternalStatus ParseIprp(int nesting_level,
             AvifInfoInternalReadBigEndian(data, id_num_bytes);
         const uint32_t association_count =
             AvifInfoInternalReadBigEndian(data + id_num_bytes, 1);
+        // Reserve AVIFINFO_MAX_PROPS_PRIMARY slots so the primary item's
+        // associations are recorded even when many tile items precede it in
+        // the "ipma" box and would otherwise fill the array.
+        const uint32_t store_limit =
+            (features->has_primary_item &&
+             item_id == features->primary_item_id)
+                ? AVIFINFO_MAX_PROPS
+                : AVIFINFO_MAX_PROPS - AVIFINFO_MAX_PROPS_PRIMARY;
 
-        uint32_t property;
-        for (property = 0; property < association_count; ++property) {
-          if (property >= AVIFINFO_MAX_PROPS ||
-              features->num_props >= AVIFINFO_MAX_PROPS) {
-            features->data_was_skipped = 1;
-            break;
-          }
+        for (uint32_t property = 0; property < association_count; ++property) {
           num_read_bytes += index_num_bytes;
           AVIFINFO_CHECK(box.content_size >= num_read_bytes, kInvalid);
           AVIFINFO_CHECK_FOUND(
@@ -580,7 +584,8 @@ static AvifInfoInternalStatus ParseIprp(int nesting_level,
           // const int essential = (value & essential_bit_mask);  // Unused.
           const uint32_t property_index = (value & ~essential_bit_mask);
           if (property_index <= AVIFINFO_MAX_VALUE &&
-              item_id <= AVIFINFO_MAX_VALUE) {
+              item_id <= AVIFINFO_MAX_VALUE &&
+              features->num_props < store_limit) {
             features->props[features->num_props].property_index =
                 property_index;
             features->props[features->num_props].item_id = item_id;
@@ -589,7 +594,6 @@ static AvifInfoInternalStatus ParseIprp(int nesting_level,
             features->data_was_skipped = 1;
           }
         }
-        if (property < association_count) break;  // Do not read garbage.
       }
 
       // If all features are available now, do not look further.
