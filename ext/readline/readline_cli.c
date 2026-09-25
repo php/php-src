@@ -634,6 +634,8 @@ static int readline_shell_run(void) /* {{{ */
 #endif
 	read_history(history_file);
 
+	zend_reset_lc_ctype_locale();
+
 	EG(exit_status) = 0;
 	while ((line = readline(ZSTR_VAL(prompt))) != NULL) {
 		if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
