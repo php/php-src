@@ -1887,12 +1887,16 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 				if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
 					if (HT_IS_WITHOUT_HOLES(ht)) {
 						do {
-							ht->pDestructor(zv);
+							zval val = *zv;
+							ZVAL_UNDEF(zv);
+							ht->pDestructor(&val);
 						} while (++zv != end);
 					} else {
 						do {
 							if (EXPECTED(Z_TYPE_P(zv) != IS_UNDEF)) {
-								ht->pDestructor(zv);
+								zval val = *zv;
+								ZVAL_UNDEF(zv);
+								ht->pDestructor(&val);
 							}
 						} while (++zv != end);
 					}
@@ -1906,29 +1910,37 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 				if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
 					if (HT_IS_WITHOUT_HOLES(ht)) {
 						do {
-							ht->pDestructor(&p->val);
+							zval val = p->val;
+							ZVAL_UNDEF(&p->val);
+							ht->pDestructor(&val);
 						} while (++p != end);
 					} else {
 						do {
 							if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-								ht->pDestructor(&p->val);
+								zval val = p->val;
+								ZVAL_UNDEF(&p->val);
+								ht->pDestructor(&val);
 							}
 						} while (++p != end);
 					}
 				} else if (HT_IS_WITHOUT_HOLES(ht)) {
 					do {
-						ht->pDestructor(&p->val);
+						zval val = p->val;
+						ZVAL_UNDEF(&p->val);
 						if (EXPECTED(p->key)) {
 							zend_string_release(p->key);
 						}
+						ht->pDestructor(&val);
 					} while (++p != end);
 				} else {
 					do {
 						if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-							ht->pDestructor(&p->val);
+							zval val = p->val;
+							ZVAL_UNDEF(&p->val);
 							if (EXPECTED(p->key)) {
 								zend_string_release(p->key);
 							}
+							ht->pDestructor(&val);
 						}
 					} while (++p != end);
 				}
