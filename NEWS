@@ -28,6 +28,8 @@ PHP                                                                        NEWS
     throwing deprecation). (lazerg)
   . Fixed use-after-free when a dl()-loaded extension declares a frameless
     function and a later request calls it. (Ilia Alshanetsky)
+  . Fixed System V shared memory emulation for Windows attaching segments past
+    the end of their mapping. (Ilia Alshanetsky)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
