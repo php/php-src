@@ -2338,7 +2338,10 @@ function trim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
  */
 function rtrim(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
-/** @alias rtrim */
+/**
+ * @alias rtrim
+ * @compile-time-eval
+ */
 function chop(string $string, string $characters = " \f\n\r\t\v\0"): string {}
 
 /**
@@ -2368,7 +2371,10 @@ function explode(string $separator, string $string, int $limit = PHP_INT_MAX): a
  */
 function implode(string|array $separator, ?array $array = null): string {}
 
-/** @alias implode */
+/**
+ * @alias implode
+ * @compile-time-eval
+ */
 function join(string|array $separator, ?array $array = null): string {}
 
 /**
@@ -2388,8 +2394,10 @@ function strtoupper(string $string): string {}
  */
 function strtolower(string $string): string {}
 
+/** @compile-time-eval */
 function str_increment(string $string): string {}
 
+/** @compile-time-eval */
 function str_decrement(string $string): string {}
 
 /** @refcount 1 */
@@ -2422,7 +2430,10 @@ function stristr(string $haystack, string $needle, bool $before_needle = false):
  */
 function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @alias strstr */
+/**
+ * @alias strstr
+ * @compile-time-eval
+ */
 function strchr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /**
