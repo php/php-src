@@ -367,11 +367,23 @@ zend.enable_gc = On
 
 ; Allows to include or exclude arguments from stack traces generated for exceptions.
 ; In production, it is recommended to turn this setting on to prohibit the output
-; of sensitive information in stack traces
+; of sensitive information in stack traces.
+; Note: This increases the refcount of the objects in arguments, and therefore delays
+; object destruction until all references have been destroyed.
 ; Default Value: Off
 ; Development Value: Off
 ; Production Value: On
 zend.exception_ignore_args = On
+
+; Allows to include or exclude called object from stack traces generated for exceptions.
+; In production, it is recommended to turn this setting off to prohibit the output
+; of sensitive information in stack traces.
+; Note: This increases the refcount of the objects, and therefore delays object
+; destruction until all references have been destroyed.
+; Default Value: Off
+; Development Value: On
+; Production Value: Off
+zend.exception_provide_object = Off
 
 ; Allows setting the maximum string length in an argument of a stringified stack trace
 ; to a value between 0 and 1000000.
