@@ -2,6 +2,12 @@
 GHSA-rgrp-mwpx-f6rm: Stack overflow on an array element referencing its own array
 --EXTENSIONS--
 soap
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN')) {
+    die('skip ASAN needs different stack limit setting due to more stack space usage');
+}
+?>
 --FILE--
 <?php
 
