@@ -320,6 +320,11 @@ PHP 8.6 UPGRADE NOTES
     when a repeater precedes it, as in "s1<value".
     RFC: https://wiki.php.net/rfc/pack-unpack-endianness-signed-integers-support
 
+- Streams:
+  . A failed fseek() on php://memory and php://temp streams now leaves the
+    stream position unchanged. Previously, ftell() returned false afterwards
+    and the stream was moved to its start.
+
 - Sysvshm:
   . shm_attach() now raises a ValueError when the $key argument is outside the
     platform's key_t range instead of passing a truncated key to the operating
