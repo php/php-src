@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-24218 (Invalid opcode for count() of a literal array when
     SCCP is disabled). (Lazizbek Ergashev)
 
+- PDO:
+  . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
+    persistent connection. (Ilia Alshanetsky)
+
 - Phpdbg:
   . Fix wrong command names. (ndossche, Weilin Du)
 
