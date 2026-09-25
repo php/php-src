@@ -6,13 +6,10 @@ if(PHP_OS_FAMILY === "Windows") {
     die('skip no symlinks on Windows');
 }
 ?>
---XFAIL--
-BUG: open_basedir cannot delete symlink to prohibited file. See also
-bugs 48111 and 52176.
+--INI--
+open_basedir=.
 --FILE--
 <?php
-chdir(__DIR__);
-ini_set("open_basedir", ".");
 require_once "open_basedir.inc";
 $initdir = getcwd();
 test_open_basedir_before("linkinfo", FALSE);
@@ -41,7 +38,6 @@ test_open_basedir_after("linkinfo");
 ?>
 --CLEAN--
 <?php
-chdir(__DIR__);
 require_once "open_basedir.inc";
 delete_directories();
 ?>
@@ -61,5 +57,7 @@ int(%d)
 Warning: symlink(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
 int(%d)
-bool(true)
+
+Warning: unlink(): open_basedir restriction in effect. File(%s/test/ok/symlink.txt) is not within the allowed path(s): (.) in %s on line %d
+bool(false)
 *** Finished testing open_basedir configuration [linkinfo] ***
