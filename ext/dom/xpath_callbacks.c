@@ -407,7 +407,7 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 {
     zval callback_retval;
 
-	if (UNEXPECTED(ns == NULL)) {
+	if (UNEXPECTED(ns == NULL || ns->mode == PHP_DOM_REG_FUNC_MODE_NONE)) {
 		zend_throw_error(NULL, "No callbacks were registered");
 		return FAILURE;
 	}
