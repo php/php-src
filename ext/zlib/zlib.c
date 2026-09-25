@@ -600,10 +600,11 @@ PHP_FUNCTION(gzfile)
 	char *filename;
 	size_t filename_len;
 	int flags = REPORT_ERRORS;
-	char buf[8192] = {0};
 	int i = 0;
 	bool use_include_path = false;
 	php_stream *stream;
+	char *line;
+	size_t line_len;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &filename, &filename_len, &use_include_path)) {
 		RETURN_THROWS();
@@ -625,11 +626,10 @@ PHP_FUNCTION(gzfile)
 	array_init(return_value);
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
-	/* Now loop through the file and do the magic quotes thing if needed */
-	memset(buf, 0, sizeof(buf));
-
-	while (php_stream_gets(stream, buf, sizeof(buf) - 1) != NULL) {
-		add_index_string(return_value, i++, buf);
+	/* Use php_stream_get_line to preserve NUL bytes and handle arbitrarily long lines */
+	while ((line = php_stream_get_line(stream, NULL, 0, &line_len)) != NULL) {
+		add_index_stringl(return_value, i++, line, line_len);
+		efree(line);
 	}
 	php_stream_close(stream);
 }
