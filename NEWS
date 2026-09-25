@@ -106,6 +106,10 @@ PHP                                                                        NEWS
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
     and PHP’s naming policy. (timwolla)
 
+- XML:
+  . Fixed xml_get_current_byte_index() returning negative values for byte
+    indexes beyond 2 GiB on Windows x64. (Marc Bennewitz)
+
 - Zlib:
   . Fixed inflate_init() dropping the preset dictionary for raw streams with
     a non-default window. (Ilia Alshanetsky)
