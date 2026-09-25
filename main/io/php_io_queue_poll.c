@@ -10,18 +10,12 @@
    +----------------------------------------------------------------------+
 */
 
-/* The poll queue: a Poll context and its timers. Poll ops complete as
- * Done with the triggered events, any other op with a pollable descriptor
- * completes as Ready for its ready_events. Timer ops and op deadlines are
- * timers of the context. Ops without a descriptor complete as Unsupported.
+/* The poll queue: a Poll context and its timers. Poll ops complete as Done with the triggered
+ * events, other ops with a descriptor as Ready, ops without one as Unsupported.
  *
- * The context keeps at most one registration per descriptor and the queue
- * multiplexes interest over it: its armed events are the union of the
- * submitted ops' events, re-armed at submit and withdrawn at completion or
- * cancel. A registration nobody is waiting on is taken out of the context,
- * since epoll reports hangups and errors even with no events armed. A
- * persistent op's add() and remove() bracket the queue's record of the
- * descriptor; between runs it is not in the context. */
+ * One registration per descriptor carries the union of the submitted ops' events. A registration
+ * nobody waits on is taken out of the context, since epoll reports hangups with no events armed.
+ * A persistent op's add() and remove() bracket the record of its descriptor. */
 
 #include "php.h"
 #include "main/php_io_hooks.h"
@@ -37,39 +31,39 @@ typedef struct _php_io_poll_fdreg php_io_poll_fdreg;
 /* One descriptor in the context */
 struct _php_io_poll_fdreg {
 	int fd;
-	uint32_t armed;             /* events registered in the context */
+	uint32_t armed; /* events registered in the context */
 	bool in_ctx;
-	bool stale;                 /* a removal from the context failed, see fdreg_leave() */
-	bool dead;                  /* dropped while stale */
-	uint32_t n_retained;        /* persistent registrations, add() minus remove() */
-	php_io_poll_req *reqs;      /* submitted ops on the descriptor */
+	bool stale; /* removal from the context failed */
+	bool dead; /* dropped while stale */
+	uint32_t n_retained; /* add() minus remove() */
+	php_io_poll_req *reqs; /* submitted ops on the descriptor */
 };
 
 struct _php_io_poll_req {
 	php_io_op *op;
 	void *data;
 	php_io_op_result result;
-	php_io_poll_req *group;     /* member: the Any's request */
-	uint32_t index;             /* member: position in the Any */
-	php_poll_timer *timer;      /* the op's deadline, or the Timer op itself */
-	php_io_poll_fdreg *fdreg;   /* the descriptor the op waits on */
-	uint32_t events;            /* the interest on fdreg */
-	php_io_poll_req *fd_next;   /* fdreg->reqs */
-	bool done;                  /* member: result recorded */
-	bool ready;                 /* top-level: in the ready list */
-	bool fired;                 /* group: in the fired list */
-	php_io_poll_req **members;  /* group */
-	uint32_t n_members;         /* group */
-	php_io_poll_req *prev;      /* outstanding list, top-level only */
+	php_io_poll_req *group; /* member: the Any's request */
+	uint32_t index; /* member: position in the Any */
+	php_poll_timer *timer; /* the deadline, or the Timer op itself */
+	php_io_poll_fdreg *fdreg; /* the descriptor the op waits on */
+	uint32_t events; /* the interest on fdreg */
+	php_io_poll_req *fd_next; /* fdreg->reqs */
+	bool done; /* member: result recorded */
+	bool ready; /* top-level: in the ready list */
+	bool fired; /* group: in the fired list */
+	php_io_poll_req **members; /* group */
+	uint32_t n_members; /* group */
+	php_io_poll_req *prev; /* outstanding list, top-level only */
 	php_io_poll_req *next;
 };
 
 typedef struct {
 	php_io_queue base;
 	php_poll_ctx *ctx;
-	HashTable fdregs;           /* fd -> php_io_poll_fdreg */
-	HashTable dead;             /* registrations the context may still report */
-	uint32_t n_armed;           /* registrations with events armed */
+	HashTable fdregs; /* fd -> php_io_poll_fdreg */
+	HashTable dead; /* registrations the context may still report */
+	uint32_t n_armed; /* registrations with events armed */
 	php_io_poll_req *outstanding;
 	uint32_t pending;
 	php_io_poll_req **ready;

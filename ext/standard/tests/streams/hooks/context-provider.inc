@@ -1,6 +1,6 @@
 <?php
 
-/* The provider of section 6.3: one Poll context, every operation awaited
+/* A provider on one Poll context, every operation awaited
  * through its handle, a timer pair for the deadline. */
 class ContextProvider implements \Io\Hooks\Hooks
 {

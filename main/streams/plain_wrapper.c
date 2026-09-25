@@ -136,20 +136,20 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 typedef struct {
 	FILE *file;
 	int fd;					/* underlying file descriptor */
-	int child_pid;			/* php_stream_popen(): the child to wait for at close, else 0 */
+	int child_pid;			/* php_stream_popen() child, else 0 */
 	unsigned is_process_pipe:1;	/* use pclose instead of fclose */
 	unsigned is_pipe:1;		/* stream is an actual pipe, currently Windows only*/
 	unsigned cached_fstat:1;	/* sb is valid */
 	unsigned is_pipe_blocking:1; /* allow blocking read() on pipes, currently Windows only */
 	unsigned no_forced_fstat:1;  /* Use fstat cache even if forced */
 	unsigned is_seekable:1;		/* don't try and seek, if not set */
-	unsigned is_overlapped:1;	/* Windows: opened FILE_FLAG_OVERLAPPED, read and written at 'position' */
-	unsigned nonblock_ours:1;	/* O_NONBLOCK set by the stream for the IO hooks, still a blocking stream */
+	unsigned is_overlapped:1;	/* Windows: FILE_FLAG_OVERLAPPED, uses position */
+	unsigned nonblock_ours:1;	/* O_NONBLOCK set for the IO hooks */
 	unsigned _reserved:24;
 #ifdef PHP_WIN32
-	zend_off_t position;	/* the offset the next read or write of an overlapped file uses */
+	zend_off_t position;	/* of the next overlapped read or write */
 #else
-	pid_t nonblock_pid;		/* the process that set it, the only one to restore it */
+	pid_t nonblock_pid;		/* the process that set nonblock_ours */
 #endif
 
 	int lock_flag;			/* stores the lock state */
@@ -1442,12 +1442,9 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 		}
 	}
 #ifdef PHP_WIN32
-	/* While hooks are installed a file is opened overlapped, so that a
-	 * completion provider can perform its reads and writes (IOCP completes
-	 * nothing on a synchronous handle). Append mode keeps the CRT path: an
-	 * overlapped write has no current position to append at. Text mode
-	 * needs the CRT's newline translation. Only disk files: anything that
-	 * refuses the flag or is not one is opened the usual way. */
+	/* While hooks are installed a disk file is opened overlapped, since IOCP completes nothing on
+	 * a synchronous handle. Append mode has no position to write at and text mode needs the CRT's
+	 * newline translation, so both keep the CRT path. */
 	bool overlapped = FG(io_hooks) != NULL && php_stdiop_win32_may_overlap(realpath, open_flags);
 	fd = -1;
 	if (overlapped) {

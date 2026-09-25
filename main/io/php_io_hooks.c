@@ -75,7 +75,7 @@ static zend_always_inline void php_io_set_errno(int err)
 typedef struct {
 	php_io_queue *queue;
 	php_stream *stream;
-	bool freeing;               /* php_stream_free() is draining it: the resource is closing under us */
+	bool freeing; /* php_stream_free() is draining it */
 } php_io_orphan;
 
 /* Operation constructors */
@@ -206,9 +206,9 @@ PHPAPI void php_io_op_any(php_io_op *op, php_io_op **members, uint32_t n, php_io
 
 struct _php_io_persistent_op {
 	php_io_op op;
-	bool registered;                    /* the provider's add hook ran */
+	bool registered; /* the provider's add hook ran */
 	php_io_persistent_op *next_on_handle;
-	php_io_persistent_op *prev;         /* FG(io_persistent_ops) */
+	php_io_persistent_op *prev; /* FG(io_persistent_ops) */
 	php_io_persistent_op *next;
 };
 
@@ -1207,11 +1207,8 @@ PHPAPI ssize_t php_io_send(php_stream *stream, php_socket_t fd, const void *buf,
 	return php_io_descriptor_op(stream, dl, php_io_send_syscall, php_io_send_prep, &c);
 }
 
-/* The readiness form of the ladder, for calls without a data op: the
- * syscall first and a Poll op on EAGAIN, retried once the descriptor is
- * ready. The op carries the caller's deadline, so the whole call is bounded
- * by it, and a non-blocking deadline gets one readiness check. A NULL
- * deadline is the plain syscall. */
+/* The readiness form of the ladder, for calls without a data op: a Poll op on EAGAIN, bounded by
+ * the caller's deadline; a non-blocking deadline gets one readiness check. */
 static zend_always_inline ssize_t php_io_readiness_op(php_stream *stream, uint32_t events,
 		php_deadline *dl, php_io_sock_syscall syscall_fn, const php_io_sock_call *c)
 {
@@ -1304,7 +1301,7 @@ PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sock
 	php_io_op_result result;
 	int ret = 0;
 	bool direct = (php_io_hook_flags() & PHP_IO_HOOKS_F_DIRECT) != 0;
-	bool started = false;   /* our own connect() is in progress */
+	bool started = false; /* our own connect() is in progress */
 
 	if (php_io_frame_begin(&f, stream) == FAILURE) {
 		return -1;
@@ -1392,11 +1389,8 @@ out:
 	return ret;
 }
 
-/* Regular files have no readiness form: without F_FILES the call is
- * synchronous. Other descriptors follow the deadline: a non-blocking one is
- * the plain syscall, else they wait for readiness unless the provider
- * performs the op, and wait again on EAGAIN from a descriptor the stream
- * made non-blocking. */
+/* Regular files have no readiness form: without F_FILES the call is synchronous. Other descriptors
+ * wait for readiness unless the provider performs the op or the deadline is non-blocking. */
 static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool regular,
 		ssize_t (*syscall_fn)(int, void *, size_t, int64_t), void *buf, size_t len, int64_t offset,
 		void (*prep)(php_io_op *, zend_object *, php_socket_t, void *, size_t, int64_t, php_deadline))
@@ -1625,11 +1619,9 @@ PHPAPI int php_io_getnameinfo(const struct sockaddr *addr, socklen_t addrlen, in
 }
 
 #ifndef PHP_WIN32
-/* The wait is the provider's; after Ready the core takes what a handle
- * recorded or asks the kernel without waiting, and waits again when
- * nothing changed yet. The op's descriptor is the platform's process or
- * signal source (php_poll_process_source_open), so the C poll queue
- * completes it Ready without any handle object. */
+/* The wait is the provider's; after Ready the core takes what a handle recorded or asks the kernel
+ * without waiting, and waits again when nothing changed yet. The op's descriptor is the process or
+ * signal source, so the poll queue completes it Ready without a handle object. */
 PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int options, php_deadline *dl)
 {
 	int recorded;

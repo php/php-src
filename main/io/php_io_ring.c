@@ -29,13 +29,10 @@
 ZEND_STATIC_ASSERT(sizeof(php_sigset_t) == sizeof(ior_sigset_t), "php_sigset_t must match ior_sigset_t");
 ZEND_STATIC_ASSERT(sizeof(php_siginfo_t) == sizeof(ior_siginfo_t), "php_siginfo_t must match ior_siginfo_t");
 
-/* One submitted op. The main submission and its linked timeout each
- * produce a cqe, and the record lives until both were reaped, however the
- * op ended: a buffer stays in use until the main cqe arrived. What the
- * backend reads or writes besides a stream's read buffer lives in the
- * record and reaches the op only when its completion is delivered. The
- * record outlives the request when the backend cannot be stopped, so what
- * the backend sees is malloc'ed. */
+/* One submitted op, alive until the main cqe and its linked timeout's were reaped. What the backend
+ * reads or writes, apart from a stream's read buffer, lives in the record and reaches the op only
+ * at delivery; it is malloc'ed, since the record outlives the request when the backend cannot be
+ * stopped. */
 typedef struct _php_io_ring_req php_io_ring_req;
 
 struct _php_io_ring_req {
@@ -44,27 +41,27 @@ struct _php_io_ring_req {
 	php_io_op_type type;
 	php_deadline deadline;
 	php_io_op_result result;
-	int32_t main_res;               /* the main cqe's result, -1 until then */
-	ior_timespec ts;                /* the timer's or the linked timeout's */
-	php_io_ring_req *group;         /* member: the Any's request */
-	uint32_t index;                 /* member: position in the Any */
-	bool has_lt;                    /* a linked timeout was submitted */
-	bool main_done;                 /* the main cqe was reaped */
-	bool lt_done;                   /* the linked timeout's cqe was reaped */
-	bool cancelled;                 /* cancel() was called */
-	bool cancel_pending;            /* the cancel still needs an entry */
-	bool backlogged;                /* waiting for room in the ring */
-	bool orphaned;                  /* nobody wants the completion */
-	bool delivered;                 /* the output went to the op */
-	php_stream *orphan_stream;      /* frozen until the record settled */
-	bool ready;                     /* top-level: completion to deliver */
-	bool fired;                     /* group: in the fired list */
-	bool group_done;                /* member: the group folded already */
-	php_io_ring_req **members;      /* group */
+	int32_t main_res; /* the main cqe's result, -1 until then */
+	ior_timespec ts; /* the timer's or the linked timeout's */
+	php_io_ring_req *group; /* member: the Any's request */
+	uint32_t index; /* member: position in the Any */
+	bool has_lt; /* a linked timeout was submitted */
+	bool main_done; /* the main cqe was reaped */
+	bool lt_done; /* the linked timeout's cqe was reaped */
+	bool cancelled; /* cancel() was called */
+	bool cancel_pending; /* the cancel still needs an entry */
+	bool backlogged; /* waiting for room in the ring */
+	bool orphaned; /* nobody wants the completion */
+	bool delivered; /* the output went to the op */
+	php_stream *orphan_stream; /* frozen until the record settled */
+	bool ready; /* top-level: completion to deliver */
+	bool fired; /* group: in the fired list */
+	bool group_done; /* member: the group folded already */
+	php_io_ring_req **members; /* group */
 	uint32_t n_members;
-	php_io_ring_req *prev;          /* live list */
+	php_io_ring_req *prev; /* live list */
 	php_io_ring_req *next;
-	php_io_ring_req *bl_prev;       /* backlog */
+	php_io_ring_req *bl_prev; /* backlog */
 	php_io_ring_req *bl_next;
 	union {
 		struct { char *node; char *service; struct addrinfo hints; bool has_hints;
@@ -75,7 +72,7 @@ struct _php_io_ring_req {
 		struct { php_socket_t fd; bool data_only; } fsync;
 		struct { int status; } waitpid;
 		struct { php_sigset_t set; php_siginfo_t info; } sigwait;
-		struct { char *buf; } io;       /* bounce buffer, NULL on a stream's read buffer */
+		struct { char *buf; } io; /* bounce buffer, or NULL */
 	} u;
 };
 
@@ -88,20 +85,20 @@ struct php_io_ring {
 	ior_ctx *ctx;
 	uint32_t features;
 	bool fd_nonblock;
-	pid_t owner_pid;                /* a child inherits the ring but must not touch it */
-	int *fds;                       /* descriptors ior opened, closed in such a child */
+	pid_t owner_pid; /* a forked child must not touch the ring */
+	int *fds; /* closed in such a child */
 	uint32_t n_fds;
 	bool fds_closed;
-	bool work_started;              /* ior set up its worker pool */
-	php_io_ring *prev_ring;         /* the rings of this thread */
+	bool work_started; /* ior set up its worker pool */
+	php_io_ring *prev_ring; /* the rings of this thread */
 	php_io_ring *next_ring;
-	uint32_t cap;                   /* completion queue size */
-	uint32_t in_ring;               /* entries taken whose cqe was not reaped yet */
-	uint32_t unsubmitted;           /* entries taken but not accepted by a submit yet */
-	php_io_ring_req *live;          /* every record with a cqe outstanding or a completion to deliver */
-	uint32_t pending;               /* submitted ops not yet delivered, orphans excluded */
+	uint32_t cap; /* completion queue size */
+	uint32_t in_ring; /* taken, cqe not reaped yet */
+	uint32_t unsubmitted; /* taken, not submitted yet */
+	php_io_ring_req *live; /* records with a cqe or a completion pending */
+	uint32_t pending; /* not delivered yet, orphans excluded */
 	uint32_t n_cancel_pending;
-	php_io_ring_req *bl_head;       /* ops waiting for room, oldest first */
+	php_io_ring_req *bl_head; /* ops waiting for room, oldest first */
 	php_io_ring_req *bl_tail;
 	php_io_ring_req **ready;
 	uint32_t n_ready;
@@ -805,7 +802,7 @@ static zend_result php_io_ring_submit_one(php_io_ring *ring, php_io_ring_req *re
 	php_io_op *op = req->op;
 	ior_ctx *ctx = ring->ctx;
 	bool link_deadline = !php_deadline_is_infinite(&req->deadline) && req->type != PHP_IO_OP_TIMER;
-	bool uses_caller = false;       /* the backend references the op's buffer or descriptor */
+	bool uses_caller = false; /* the backend references buf or fd */
 	ior_sqe *sqes[2];
 	int err = 0;
 
@@ -1020,7 +1017,7 @@ PHPAPI zend_result php_io_ring_submit_op(php_io_ring *ring, php_io_op *op, void 
 		op->u.any.n_results = 0;
 		req->n_members = n;
 		req->members = n ? safe_emalloc(n, sizeof(*req->members), 0) : NULL;
-		req->main_done = true;              /* the Any itself has no cqe */
+		req->main_done = true; /* the Any itself has no cqe */
 		for (uint32_t i = 0; i < n; i++) {
 			php_io_ring_req *m = php_io_ring_req_create(ring, op->u.any.ops[i], NULL);
 			m->group = req;

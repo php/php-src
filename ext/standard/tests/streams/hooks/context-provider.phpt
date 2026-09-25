@@ -1,5 +1,5 @@
 --TEST--
-IO hooks: a provider on its own Poll context, timers included (section 6.3)
+IO hooks: a provider on its own Poll context, timers included
 --FILE--
 <?php
 include __DIR__ . '/context-provider.inc';

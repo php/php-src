@@ -12,22 +12,15 @@
    +----------------------------------------------------------------------+
 */
 
-/* Native sources for process and signal handles: a descriptor that becomes
- * readable when the child exited or a signal of the set is pending, so every
- * descriptor backend can watch it.
+/* Native sources for process and signal handles: a descriptor readable when the child exited or a
+ * signal of the set is pending, so every descriptor backend can watch it.
  *
- * Linux: a pidfd and a signalfd. A signalfd is level: readable while a
- * signal of its set is pending, and reading it consumes the signal.
+ * Linux: a pidfd and a signalfd, which is readable while a signal of its set is pending.
  *
- * kqueue (macOS, BSD): a private kqueue per source with EVFILT_PROC
- * (NOTE_EXIT) or one EVFILT_SIGNAL per signal, watched as a descriptor by
- * the context's own kqueue or poll(). Both filters record events, not
- * state: EVFILT_PROC does not attach to a child that exited already (ESRCH)
- * and EVFILT_SIGNAL reports deliveries after the registration only, so a
- * child found waitable by waitid(WNOWAIT) and a signal found pending by
- * sigpending() are announced by a triggered EVFILT_USER note. Neither
- * filter consumes anything: the child is reaped by the fired handle, and a
- * pending signal is taken with sigwait() on it alone. */
+ * kqueue: a private kqueue per source with EVFILT_PROC or one EVFILT_SIGNAL per signal. Both
+ * filters record events, not state, so a child already waitable and a signal already pending are
+ * announced by a triggered EVFILT_USER note. Neither consumes: the fired handle reaps the child,
+ * and a pending signal is taken with sigwait() on it alone. */
 
 #include "php_poll_internal.h"
 
