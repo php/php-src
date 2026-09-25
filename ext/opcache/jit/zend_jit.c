@@ -650,6 +650,11 @@ static zend_property_info* zend_get_known_property_info(const zend_op_array *op_
 	}
 
 	if (info->flags & ZEND_ACC_PUBLIC) {
+		if ((info->flags & ZEND_ACC_CHANGED)
+		 && op_array->scope
+		 && op_array->scope != ce) {
+			return NULL;
+		}
 		return info;
 	} else if (on_this) {
 		if (ce == info->ce) {
