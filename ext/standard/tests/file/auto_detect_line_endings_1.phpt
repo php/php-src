@@ -16,7 +16,7 @@ var_dump(fgets(STDIN));
 echo "Done\n";
 ?>
 --EXPECT--
-Deprecated: auto_detect_line_endings is deprecated in Unknown on line 0
+Deprecated: PHP Startup: auto_detect_line_endings is deprecated in Unknown on line 0
 string(1) "1"
 string(8) "fooBar1"
 string(8) "fooBar2"

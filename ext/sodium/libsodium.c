@@ -1461,7 +1461,7 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
+		php_error_docref(NULL, E_WARNING, "empty password");
 	}
 	if (salt_len != crypto_pwhash_SALTBYTES) {
 		zend_argument_value_error(3, "must be SODIUM_CRYPTO_PWHASH_SALTBYTES bytes long");
@@ -1535,7 +1535,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
+		php_error_docref(NULL, E_WARNING, "empty password");
 	}
 	if (opslimit < crypto_pwhash_OPSLIMIT_MIN) {
 		zend_argument_value_error(2, "must be greater than or equal to %d", crypto_pwhash_OPSLIMIT_MIN);
@@ -1600,7 +1600,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_str_verify)
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
+		php_error_docref(NULL, E_WARNING, "empty password");
 	}
 	if (crypto_pwhash_str_verify
 		(hash_str, passwd, (unsigned long long) passwd_len) == 0) {
@@ -1646,7 +1646,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
+		php_error_docref(NULL, E_WARNING, "empty password");
 	}
 	if (salt_len != crypto_pwhash_scryptsalsa208sha256_SALTBYTES) {
 		zend_argument_value_error(3, "must be SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES bytes long");
@@ -1702,7 +1702,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
+		php_error_docref(NULL, E_WARNING, "empty password");
 	}
 	if (opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE) {
 		zend_argument_value_error(2, "must be greater than or equal to %d", crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
@@ -1742,10 +1742,10 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify)
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
-		zend_error(E_WARNING, "empty password");
+		php_error_docref(NULL, E_WARNING, "empty password");
 	}
 	if (hash_str_len != crypto_pwhash_scryptsalsa208sha256_STRBYTES - 1) {
-		zend_error(E_WARNING, "wrong size for the hashed password");
+		php_error_docref(NULL, E_WARNING, "wrong size for the hashed password");
 		RETURN_FALSE;
 	}
 	if (crypto_pwhash_scryptsalsa208sha256_str_verify
