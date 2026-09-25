@@ -605,6 +605,11 @@ PHP_FUNCTION(stream_filter_register)
 		RETURN_THROWS();
 	}
 
+	/* The map is already destroyed while resources are released on shutdown. */
+	if (UNEXPECTED(EG(flags) & EG_FLAGS_IN_RESOURCE_SHUTDOWN)) {
+		RETURN_FALSE;
+	}
+
 	/* Register the factory first; if that fails, don't (re)create the map,
 	 * which would leak during shutdown re-registration. */
 	if (php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == FAILURE) {
