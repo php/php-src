@@ -5763,16 +5763,8 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 		goto clean_exit;
 	}
 	if (datafilename) {
-		dataout = php_openssl_bio_new_file(
-				datafilename, datafilename_len, 6, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+		dataout = BIO_new(BIO_s_mem());
 		if (dataout == NULL) {
-			goto clean_exit;
-		}
-	}
-	if (p7bfilename) {
-		p7bout = php_openssl_bio_new_file(
-				p7bfilename, p7bfilename_len, 7, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
-		if (p7bout == NULL) {
 			goto clean_exit;
 		}
 	}
@@ -5783,6 +5775,24 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	if (PKCS7_verify(p7, others, store, datain, dataout, (int)flags)) {
 
 		RETVAL_TRUE;
+
+		if (datafilename) {
+			BIO *fileout = php_openssl_bio_new_file(
+					datafilename, datafilename_len, 6, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+			if (fileout) {
+				char *buf;
+				long buf_len = BIO_get_mem_data(dataout, &buf);
+				if (buf_len > 0 && BIO_write(fileout, buf, (int)buf_len) != buf_len) {
+					php_openssl_store_errors();
+					RETVAL_LONG(-1);
+					php_error_docref(NULL, E_WARNING, "Failed to write verified data to %s", datafilename);
+				}
+				BIO_free(fileout);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Signature OK, but cannot open %s for writing", datafilename);
+				RETVAL_LONG(-1);
+			}
+		}
 
 		if (signersfilename) {
 			BIO *certout;
@@ -5814,11 +5824,18 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 				RETVAL_LONG(-1);
 			}
 
-			if (p7bout) {
-				if (PEM_write_bio_PKCS7(p7bout, p7) == 0) {
-					php_error_docref(NULL, E_WARNING, "Failed to write PKCS7 to file");
-					php_openssl_store_errors();
-					RETVAL_FALSE;
+			if (p7bfilename) {
+				p7bout = php_openssl_bio_new_file(
+						p7bfilename, p7bfilename_len, 7, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+				if (p7bout) {
+					if (PEM_write_bio_PKCS7(p7bout, p7) == 0) {
+						php_error_docref(NULL, E_WARNING, "Failed to write PKCS7 to file");
+						php_openssl_store_errors();
+						RETVAL_FALSE;
+					}
+				} else {
+					php_error_docref(NULL, E_WARNING, "Signature OK, but cannot open %s for writing", p7bfilename);
+					RETVAL_LONG(-1);
 				}
 			}
 		}
@@ -6375,17 +6392,8 @@ PHP_FUNCTION(openssl_cms_verify)
 	}
 
 	if (datafilename) {
-		dataout = php_openssl_bio_new_file(
-				datafilename, datafilename_len, 6, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
+		dataout = BIO_new(BIO_s_mem());
 		if (dataout == NULL) {
-			goto clean_exit;
-		}
-	}
-
-	if (p7bfilename) {
-		p7bout = php_openssl_bio_new_file(
-				p7bfilename, p7bfilename_len, 7, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
-		if (p7bout == NULL) {
 			goto clean_exit;
 		}
 	}
@@ -6394,6 +6402,24 @@ PHP_FUNCTION(openssl_cms_verify)
 #endif
 	if (CMS_verify(cms, others, store, datain, dataout, (unsigned int)flags)) {
 		RETVAL_TRUE;
+
+		if (datafilename) {
+			BIO *fileout = php_openssl_bio_new_file(
+					datafilename, datafilename_len, 6, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
+			if (fileout) {
+				char *buf;
+				long buf_len = BIO_get_mem_data(dataout, &buf);
+				if (buf_len > 0 && BIO_write(fileout, buf, (int)buf_len) != buf_len) {
+					php_openssl_store_errors();
+					RETVAL_FALSE;
+					php_error_docref(NULL, E_WARNING, "Failed to write verified data to %s", datafilename);
+				}
+				BIO_free(fileout);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Signature OK, but cannot open %s for writing", datafilename);
+				RETVAL_FALSE;
+			}
+		}
 
 		if (signersfilename) {
 			certout = php_openssl_bio_new_file(
@@ -6421,10 +6447,17 @@ PHP_FUNCTION(openssl_cms_verify)
 				RETVAL_FALSE;
 			}
 
-			if (p7bout) {
-				if (PEM_write_bio_CMS(p7bout, cms) == 0) {
-					php_error_docref(NULL, E_WARNING, "Failed to write CMS to file");
-					php_openssl_store_errors();
+			if (p7bfilename) {
+				p7bout = php_openssl_bio_new_file(
+						p7bfilename, p7bfilename_len, 7, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
+				if (p7bout) {
+					if (PEM_write_bio_CMS(p7bout, cms) == 0) {
+						php_error_docref(NULL, E_WARNING, "Failed to write CMS to file");
+						php_openssl_store_errors();
+						RETVAL_FALSE;
+					}
+				} else {
+					php_error_docref(NULL, E_WARNING, "Signature OK, but cannot open %s for writing", p7bfilename);
 					RETVAL_FALSE;
 				}
 			}

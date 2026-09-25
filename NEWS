@@ -116,6 +116,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23747 (ZipArchive::close() use-after-free from a progress or
     cancel callback). (David Carlier)
 
+- OpenSSL:
+  . Fixed openssl_pkcs7_verify() and openssl_cms_verify() truncating output
+    files when verification fails. (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.4.26
 
