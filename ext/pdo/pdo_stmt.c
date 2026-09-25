@@ -331,6 +331,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 			zend_string_release_ex(param->name, 0);
 			param->name = NULL;
 		}
+		zval_ptr_dtor(&param->driver_params);
 		return 0;
 	}
 
@@ -345,6 +346,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 				zend_string_release_ex(param->name, 0);
 				param->name = NULL;
 			}
+			zval_ptr_dtor(&param->driver_params);
 			return 0;
 		}
 	}
@@ -1462,9 +1464,11 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
 		}
+		zval_ptr_dtor(&param.driver_params);
 
 		RETURN_FALSE;
 	}
+	zval_ptr_dtor(&param.driver_params);
 
 	RETURN_TRUE;
 } /* }}} */
