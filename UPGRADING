@@ -120,6 +120,13 @@ PHP 8.6 UPGRADE NOTES
     execution error occurs (e.g. malformed UTF-8 input with the /u modifier).
     This is consistent with other preg_* functions.
 
+- PDO_SQLite:
+  . A failed fseek() on a blob stream opened by Pdo\Sqlite::openBlob() now
+    leaves the stream position unchanged. Previously, ftell() returned false
+    afterwards and the stream was moved to the start or the end of the blob.
+    As a result, an fwrite() after a failed seek past the end now writes at
+    the unchanged position instead of failing.
+
 - PGSQL:
   . pg_fetch_object() now reports the ValueError for a non-empty
     $constructor_args on a class without a constructor on the
