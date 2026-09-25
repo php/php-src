@@ -176,7 +176,7 @@ static void zend_ini_get_var(zval *result, zval *name, zval *fallback)
 	char *envvar;
 
 	/* Fetch configuration option value */
-	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL) {
+	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL && Z_TYPE_P(curval) == IS_STRING) {
 		ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(curval), Z_STRLEN_P(curval), ZEND_SYSTEM_INI));
 	/* ..or if not found, try ENV */
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL) {

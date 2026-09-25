@@ -248,6 +248,7 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 			return FAILURE;
 		}
 		if (((default_value = zend_get_configuration_directive(p->name)) != NULL) &&
+		    Z_TYPE_P(default_value) == IS_STRING &&
 		    (!p->on_modify || p->on_modify(p, Z_STR_P(default_value), p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP) == SUCCESS)) {
 
 			p->value = zend_new_interned_string(zend_string_copy(Z_STR_P(default_value)));
