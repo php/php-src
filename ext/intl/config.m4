@@ -73,6 +73,7 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/codepointiterator_internal.cpp \
     breakiterator/codepointiterator_methods.cpp \
     listformatter/listformatter_class.cpp \
+    reldateformatter/reldateformatter_class.cpp \
     transliterator/transliterator_class.cpp \
     transliterator/transliterator_methods.cpp \
     idn/idn.cpp \
@@ -123,6 +124,7 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/idn
     $ext_builddir/locale
     $ext_builddir/listformatter
+    $ext_builddir/reldateformatter
     $ext_builddir/msgformat
     $ext_builddir/normalizer
     $ext_builddir/rangeformatter
