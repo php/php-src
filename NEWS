@@ -282,6 +282,10 @@ PHP                                                                        NEWS
   . Fixed GHSA-9f67-6fw4-hpfp (Reserved device names are not rejected before
     file and stream I/O). (CVE-2026-17545) (Shivam Mathur, Jakub Zelenka)
 
+- Sysvshm:
+  . Fixed out-of-bounds reads and writes when a shared memory segment carries
+    a corrupted header or chunk length. (iliaal)
+
 - Zip:
   . Fixed bug GH-23276 (ZipArchive subclass storing its own stream cannot be
     garbage collected). (Weilin Du, ndossche)
