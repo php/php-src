@@ -29,4 +29,32 @@
 #define _MSC_STDINT_H_ 1
 #endif
 
+#include <type_traits>
+
+template<typename T, typename S = std::size_t, typename std::enable_if<std::is_integral<S>::value && std::is_unsigned<S>::value, int>::type = 0>
+T zend_mm_fast_alloc(S len) {
+	return static_cast<T>(emalloc(len));
+}
+
+// we try to provide enough flexibility for nm and size types as long they re unsigned together
+template<typename T, typename N, typename S,
+         typename std::enable_if<std::is_integral<N>::value && std::is_unsigned<N>::value && std::is_integral<S>::value && std::is_unsigned<S>::value, int>::type = 0>
+T zend_mm_safe_alloc(N num, S len, S offset = 0) {
+    return static_cast<T>(safe_emalloc(num, len, offset));
+}
+
+template<typename T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
+void zend_mm_destructor(T *inst) {
+	if (inst) {
+		inst->~T();
+		efree(inst);
+	}
+}
+
+template<typename T, typename std::enable_if<!std::is_class<T>::value, int>::type = 0>
+void zend_mm_destructor(T *ptr) {
+	if (ptr) {
+		efree(ptr);
+	}
+}
 #endif
