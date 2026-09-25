@@ -116,6 +116,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23747 (ZipArchive::close() use-after-free from a progress or
     cancel callback). (David Carlier)
 
+- Session:
+  . Fixed session data loss in the files save handler when writing the session
+    file fails after it was already truncated. (Ilia Alshanetsky)
+
 
 24 Sep 2026, PHP 8.4.26
 
