@@ -5944,7 +5944,7 @@ static void zend_compile_static_var_common(zend_string *var_name, zval *value, u
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(var_name);
 
-	ZEND_STATIC_ASSERT(sizeof(Bucket) % 8 == 0, "Bucket size not compatible with storing flags in lower three bits");
+	static_assert(sizeof(Bucket) % 8 == 0, "Bucket size not compatible with storing flags in lower three bits");
 	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | mode;
 }
 /* }}} */
