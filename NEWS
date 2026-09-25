@@ -102,6 +102,10 @@ PHP                                                                        NEWS
     that is not in the result set. (Ilia Alshanetsky)
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
+  . Fixed PDO::setAttribute() installing a PDO::ATTR_STATEMENT_CLASS class
+    whose constructor arguments it rejects. (Ilia Alshanetsky)
+  . Fixed PDO::ATTR_STATEMENT_CLASS constructor_args type errors reporting
+    "array given" regardless of the value passed. (Ilia Alshanetsky)
 
 - PDO_Firebird:
   . Fixed bug GH-23758 (PDO_Firebird returns null for non-null empty BLOBs).
