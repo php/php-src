@@ -23,11 +23,11 @@ try {
     echo "{$ex->getMessage()}\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 2000-04-23
 2001-04-15
 2002-03-31
 2045-04-09
 2046-03-25
 2047-04-14
-easter_date(): Argument #1 ($year) must be between 1970 and 2000000000
+easter_date(): Argument #1 ($year) must be between 1970 and %d

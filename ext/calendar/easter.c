@@ -40,8 +40,13 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 		/* Timestamps only start after 1970 and are calculated by mktime() */
 		min_year = 1970;
 #ifdef ZEND_ENABLE_ZVAL_LONG64
+# ifdef PHP_WIN32
+		/* mktime() on Windows only goes up to the year 3000 */
+		max_year = 3000;
+# else
 		/* Timestamps only go up to the year 2.000.000.000 */
 		max_year = 2000000000;
+# endif
 #else
 		max_year = 2037;
 #endif
