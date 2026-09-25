@@ -49,5 +49,5 @@ typedef struct _php_process_handle {
 #endif
 } php_process_handle;
 
-/* The pid of a proc_open() resource; false with an exception when it is not one */
+/* Throws and returns false when zproc is not a proc_open() resource */
 PHPAPI bool php_proc_open_get_pid(zval *zproc, php_process_id_t *pid);

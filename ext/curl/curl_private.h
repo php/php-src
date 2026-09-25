@@ -111,19 +111,20 @@ typedef struct {
 	struct _php_curl_send_headers header;
 	struct _php_curl_error        err;
 	bool                     in_callback;
-	bool                     in_exec;  /* curl_exec() is waiting, outside libcurl */
+	bool                     in_exec;
 	uint32_t*                     clone;
 	zval                          postfields;
 	/* For CURLOPT_PRIVATE */
 	zval private_data;
 	/* CurlShareHandle object set using CURLOPT_SHARE. */
 	struct _php_curlsh *share;
-	/* The sockets libcurl wants watched, kept by the socket callback */
-	HashTable *io_sockets;        /* curl_socket_t -> php_curl_socket_entry */
-	struct _php_curl_socket_entry *io_removed; /* entries libcurl removed, released by the reconcile step */
-	php_deadline io_timer;   /* deadline from TIMERFUNCTION, infinite = disabled */
-	CURLM *multi;            /* private multi handle driving curl_exec(), created on first use */
-	long maxconnects;        /* CURLOPT_MAXCONNECTS, copied to the private multi */
+	/* Sockets libcurl wants watched, keyed by curl_socket_t */
+	HashTable *io_sockets;
+	struct _php_curl_socket_entry *io_removed;
+	php_deadline io_timer;
+	/* Private multi handle driving curl_exec() */
+	CURLM *multi;
+	long maxconnects;
 	zend_object                   std;
 } php_curl;
 

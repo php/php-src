@@ -17,17 +17,14 @@
 
 BEGIN_EXTERN_C()
 
-/* The Io\Operation wrapper of an op, created on first use. No reference is
- * added: the op holds the one that keeps it alive. */
+/* Borrowed: no reference is added */
 PHPAPI zend_object *php_io_operation_get_zobj(php_io_op *op);
 
-/* A userland queue object over a C queue: Io\Poll\OperationQueue and
- * Io\Ring\Engine share the implementation of Io\OperationQueue */
 typedef struct _php_io_opqueue_sub php_io_opqueue_sub;
 
 typedef struct {
 	php_io_queue *queue;
-	php_io_opqueue_sub *subs;   /* submissions not delivered yet */
+	php_io_opqueue_sub *subs;
 	zend_object std;
 } php_io_opqueue_obj;
 

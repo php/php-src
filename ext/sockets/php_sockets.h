@@ -69,8 +69,7 @@ typedef struct {
 	int			type;
 	int			error;
 	int			blocking;
-	/* kept non-blocking by the stream sharing it, blocking is emulated */
-	bool		nonblocking_fd;
+	bool		nonblocking_fd; /* blocking is emulated */
 	zval		zstream;
 	zend_object std;
 } php_socket;

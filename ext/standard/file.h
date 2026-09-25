@@ -102,16 +102,16 @@ typedef struct {
 	HashTable *wrapper_logged_errors;	/* key: wrapper address; value: linked list of error entries */
 	php_stream_error_state stream_error_state;
 	int pclose_wait;
-	struct _php_io_hooks_state *io_hooks; /* main/php_io_hooks.h, NULL when no provider is installed */
-	struct _php_io_queue *io_queue;       /* the core's queue for the no-hooks path, created lazily */
-	pid_t io_queue_pid;                   /* the process that created it: a forked child gets a fresh one */
-	struct _php_io_persistent_op *io_persistent_ops; /* every persistent op of the request */
-	uint32_t io_ops_in_flight;            /* active php_io_run() frames */
-	HashTable *io_orphans;                /* stream pointer key -> php_io_queue, ops kept by a queue past their frame */
-	HashTable *io_reaped;                 /* pid -> wait status of children reaped through a ProcessHandle */
-	HashTable *io_addrinfo;               /* address lists built by a provider, freed by php_io_freeaddrinfo() */
-	uint32_t io_hooks_locked;             /* provider callbacks on the stack that forbid replacing the provider */
-	bool io_shut_down;                    /* php_io_hooks_request_shutdown() ran: no core queue any more */
+	struct _php_io_hooks_state *io_hooks; /* NULL without a provider */
+	struct _php_io_queue *io_queue; /* core queue, created lazily */
+	pid_t io_queue_pid;
+	struct _php_io_persistent_op *io_persistent_ops;
+	uint32_t io_ops_in_flight;
+	HashTable *io_orphans; /* stream -> queue keeping its ops */
+	HashTable *io_reaped; /* pid -> wait status */
+	HashTable *io_addrinfo;
+	uint32_t io_hooks_locked;
+	bool io_shut_down;
 #ifdef HAVE_GETHOSTBYNAME_R
 	struct hostent tmp_host_info;
 	char *tmp_host_buf;

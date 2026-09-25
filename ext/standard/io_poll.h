@@ -34,37 +34,29 @@ PHPAPI uint32_t php_io_poll_event_enums_to_events(zval *event_enums);
 
 PHPAPI void php_stream_poll_handle_from_stream(zval *dest, php_stream *stream);
 
-/* Io\Poll\TimerHandle with the given timeout */
 PHPAPI void php_io_poll_timer_handle_create(zval *dest, zend_hrtime_t timeout_ns, bool periodic);
-
-/* Io\Poll\ProcessHandle for a child pid, Io\Poll\SignalHandle for a set */
 PHPAPI void php_io_poll_process_handle_create(zval *dest, pid_t pid);
 PHPAPI void php_io_poll_signal_handle_create(zval *dest, const php_sigset_t *set);
-/* The wait status a ProcessHandle recorded when it reaped the child */
 PHPAPI bool php_io_poll_process_handle_status(zend_object *handle, int *status);
-/* Take the first recorded delivery of a signal in the set; 0 when none */
-PHPAPI int php_io_poll_signal_handle_take(zend_object *handle, const php_sigset_t *set, php_siginfo_t *info);
+/* Returns 0 when no signal in the set was recorded */
+PHPAPI int php_io_poll_signal_handle_take(zend_object *handle, const php_sigset_t *set,
+	php_siginfo_t *info);
 
-/* Raise an Io\Poll\NotifyHandle. Thread safe and async-signal safe. */
+/* Thread safe and async-signal safe */
 PHPAPI void php_poll_notify(zend_object *handle);
 
-/* An Io\Poll\NotifyHandle over a descriptor someone else owns and clears,
- * such as a ring's notification descriptor. notify() is unavailable on it.
- * The handle keeps a reference on owner, the object whose descriptor it is. */
+/* A NotifyHandle over a descriptor owned and cleared by owner; notify() is unavailable on it */
 PHPAPI void php_io_poll_notify_handle_create_external(zval *dest, php_socket_t fd,
-		void (*clear)(void *arg), void *arg, zend_object *owner);
+	void (*clear)(void *arg), void *arg, zend_object *owner);
 
 #ifndef PHP_WIN32
-/* The signal mask for a child about to exec: the current one without the
- * signals that live SignalHandle objects blocked */
+/* The current mask without the signals blocked by live SignalHandle objects */
 PHPAPI void php_io_poll_signal_child_mask(sigset_t *mask);
 #endif
 PHPAPI void php_stream_poll_weak_handle_from_stream(zval *dest, php_stream *stream);
 PHPAPI void php_stream_poll_weak_handle_notify(zend_object *handle_obj);
 PHPAPI void php_io_poll_handle_remove_from_all_contexts(zend_object *handle_obj);
-/* The handle's resource is going away: every watcher on it is retired
- * while the descriptor is still open. Persistent ops are released
- * separately by php_io_handle_release_ops(). */
+/* Retires every watcher on the handle while its descriptor is still open */
 PHPAPI void php_poll_handle_invalidate(zend_object *handle_obj);
 
 END_EXTERN_C()
