@@ -22,9 +22,8 @@ const ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
 };
 
-static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
+static void ps_call_handler(zval *func, uint32_t argc, zval *argv, zval *retval)
 {
-	int i;
 	if (PS(in_save_handler)) {
 		PS(in_save_handler) = false;
 		ZVAL_UNDEF(retval);
@@ -34,12 +33,10 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 		if (call_user_function(NULL, NULL, func, retval, argc, argv) == FAILURE) {
 			zval_ptr_dtor(retval);
 			ZVAL_UNDEF(retval);
-		} else if (Z_ISUNDEF_P(retval)) {
-			ZVAL_NULL(retval);
 		}
 		PS(in_save_handler) = false;
 	}
-	for (i = 0; i < argc; i++) {
+	for (uint32_t i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
 	}
 }
@@ -48,34 +45,27 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 
 static zend_result verify_bool_return_type_userland_calls(const zval *value)
 {
-	/* Exit or exception in userland call */
-	if (Z_TYPE_P(value) == IS_UNDEF) {
-		return FAILURE;
+	switch (Z_TYPE_P(value)) {
+		case IS_TRUE:
+			return SUCCESS;
+		case IS_FALSE:
+		/* Exit or exception in userland call */
+		case IS_UNDEF:
+			return FAILURE;
+		case IS_LONG:
+			/* Deprecated cases */
+			if (Z_LVAL_P(value) == 0) {
+				php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value));
+				return SUCCESS;
+			} else if (Z_LVAL_P(value) == -1) {
+				php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value));
+				return FAILURE;
+			}
+			ZEND_FALLTHROUGH;
+		default:
+			zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value));
+			return FAILURE;
 	}
-	if (Z_TYPE_P(value) == IS_TRUE) {
-		return SUCCESS;
-	}
-	if (Z_TYPE_P(value) == IS_FALSE) {
-		return FAILURE;
-	}
-	if ((Z_TYPE_P(value) == IS_LONG) && (Z_LVAL_P(value) == -1)) {
-		/* TODO Why are exceptions checked? */
-		if (!EG(exception)) {
-			php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value));
-		}
-		return FAILURE;
-	}
-	if ((Z_TYPE_P(value) == IS_LONG) && (Z_LVAL_P(value) == 0)) {
-		/* TODO Why are exceptions checked? */
-		if (!EG(exception)) {
-			php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value));
-		}
-		return SUCCESS;
-	}
-	if (!EG(exception)) {
-		zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value)); \
-	}
-	return FAILURE;
 }
 
 PS_OPEN_FUNC(user)
@@ -92,9 +82,7 @@ PS_OPEN_FUNC(user)
 		ps_call_handler(&PSF(open), 2, args, &retval);
 	} zend_catch {
 		PS(session_status) = php_session_none;
-		if (!Z_ISUNDEF(retval)) {
-			zval_ptr_dtor(&retval);
-		}
+		zval_ptr_dtor(&retval);
 		zend_bailout();
 	} zend_end_try();
 
@@ -107,7 +95,6 @@ PS_OPEN_FUNC(user)
 
 PS_CLOSE_FUNC(user)
 {
-	bool bailout = false;
 	zval retval;
 	zend_result ret = FAILURE;
 
@@ -121,17 +108,12 @@ PS_CLOSE_FUNC(user)
 	zend_try {
 		ps_call_handler(&PSF(close), 0, NULL, &retval);
 	} zend_catch {
-		bailout = true;
+		PS(mod_user_implemented) = false;
+		zval_ptr_dtor(&retval);
+		zend_bailout();
 	} zend_end_try();
 
 	PS(mod_user_implemented) = false;
-
-	if (bailout) {
-		if (!Z_ISUNDEF(retval)) {
-			zval_ptr_dtor(&retval);
-		}
-		zend_bailout();
-	}
 
 	ret = verify_bool_return_type_userland_calls(&retval);
 	zval_ptr_dtor(&retval);
