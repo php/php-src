@@ -17,6 +17,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
   instead.
 - Removed ZEND_STATIC_ASSERT(). Use C11 static_assert() directly instead.
+- Removed HAVE_NORETURN and HAVE_NORETURN_ALIAS. ZEND_NORETURN is guaranteed to
+  work.
 
 ========================
 2. Build system changes

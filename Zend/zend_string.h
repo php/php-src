@@ -26,7 +26,7 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 #include "zend_multiply.h"
 
