@@ -247,6 +247,19 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 		S->computed_column_name_count++;
 	}
 
+	/*
+	 * dbtabsource isn't implemented by FreeTDS, must use this function
+	 * instead (which is also implemented by SQL Server?)
+	 *
+	 * XXX: SQL Server only returns table names with FOR BROWSE
+	 */
+	DBCOL dbcol;
+	/* XXX: Expensive? Use the other data from this call? */
+	RETCODE rc = dbcolinfo(H->link, CI_REGULAR, colno+1, 0, &dbcol);
+	if (rc == SUCCEED && dbcol.TableName[0]) {
+		col->table = zend_string_init(dbcol.TableName, strlen(dbcol.TableName), 0);
+	}
+
 	col->maxlen = dbcollen(H->link, colno+1);
 
 	return 1;

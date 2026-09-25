@@ -849,6 +849,13 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value, u
 			}
 			return false;
 
+		case PDO_ATTR_FETCH_TABLE_NAMES:
+			if (!pdo_get_bool_param(&bval, value)) {
+				return false;
+			}
+			dbh->fetch_table_names = bval;
+			return true;
+
 		case PDO_ATTR_ORACLE_NULLS:
 			if (!pdo_get_long_param(&lval, value)) {
 				return false;
@@ -1001,6 +1008,9 @@ PHP_METHOD(PDO, getAttribute)
 
 		case PDO_ATTR_CASE:
 			RETURN_LONG(dbh->desired_case);
+
+		case PDO_ATTR_FETCH_TABLE_NAMES:
+			RETURN_BOOL(dbh->fetch_table_names);
 
 		case PDO_ATTR_ORACLE_NULLS:
 			RETURN_LONG(dbh->oracle_nulls);

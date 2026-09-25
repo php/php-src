@@ -460,13 +460,6 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = bval;
 			PDO_DBG_RETURN(true);
 
-		case PDO_ATTR_FETCH_TABLE_NAMES:
-			if (!pdo_get_bool_param(&bval, val)) {
-				PDO_DBG_RETURN(false);
-			}
-			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = bval;
-			PDO_DBG_RETURN(true);
-
 #ifdef PDO_USE_MYSQLND
 		case PDO_ATTR_STRINGIFY_FETCHES:
 			if (!pdo_get_bool_param(&bval, val)) {
@@ -582,10 +575,6 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 		}
 #endif
-
-		case PDO_ATTR_FETCH_TABLE_NAMES:
-			ZVAL_BOOL(return_value, H->fetch_table_names);
-			break;
 
 		default:
 			PDO_DBG_RETURN(0);
