@@ -19,6 +19,11 @@ PHP 8.7 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Standard:
+  . sscanf() and fscanf() %c conversions now correctly read whitespace
+    characters, restoring ANSI C behavior. Previously, they stopped at
+    whitespace.
+
 ========================================
 2. New Features
 ========================================
