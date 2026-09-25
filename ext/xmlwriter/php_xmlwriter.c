@@ -44,15 +44,6 @@ typedef int (*xmlwriter_read_int_t)(xmlTextWriterPtr writer);
 	}
 /* }}} */
 
-/* The output callbacks can suspend the fiber or run user code, which must not
- * free or re-enter the writer under the running call */
-#define XMLWRITER_WRITE(object, call) \
-	do { \
-		Z_XMLWRITER_P(object)->in_use = true; \
-		call; \
-		Z_XMLWRITER_P(object)->in_use = false; \
-	} while (0)
-
 static zend_object_handlers xmlwriter_object_handlers;
 
 static bool xmlwriter_check_not_in_use(const ze_xmlwriter_object *intern)
@@ -62,6 +53,18 @@ static bool xmlwriter_check_not_in_use(const ze_xmlwriter_object *intern)
 		return false;
 	}
 	return true;
+}
+
+/* The output callbacks can suspend the fiber or run user code, which must not
+ * free or re-enter the writer under the running call */
+static zend_always_inline void xmlwriter_write_begin(zval *object)
+{
+	Z_XMLWRITER_P(object)->in_use = true;
+}
+
+static zend_always_inline void xmlwriter_write_end(zval *object)
+{
+	Z_XMLWRITER_P(object)->in_use = false;
 }
 
 static zend_always_inline void xmlwriter_destroy_libxml_objects(ze_xmlwriter_object *intern)
@@ -250,7 +253,9 @@ static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_rea
 		XMLW_NAME_CHK(2, subject_name);
 	}
 
-	XMLWRITER_WRITE(self, retval = internal_function(ptr, (xmlChar *) name));
+	xmlwriter_write_begin(self);
+	retval = internal_function(ptr, (xmlChar *) name);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -266,7 +271,9 @@ static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_int_t
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLWRITER_WRITE(self, retval = internal_function(ptr));
+	xmlwriter_write_begin(self);
+	retval = internal_function(ptr);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -328,7 +335,9 @@ PHP_FUNCTION(xmlwriter_start_attribute_ns)
 
 	XMLW_NAME_CHK(3, "attribute name");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterStartAttributeNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterStartAttributeNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -351,7 +360,9 @@ PHP_FUNCTION(xmlwriter_write_attribute)
 
 	XMLW_NAME_CHK(2, "attribute name");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterWriteAttribute(ptr, (xmlChar *)name, (xmlChar *)content));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterWriteAttribute(ptr, (xmlChar *)name, (xmlChar *)content);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -374,7 +385,9 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 
 	XMLW_NAME_CHK(3, "attribute name");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterWriteAttributeNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterWriteAttributeNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -404,7 +417,9 @@ PHP_FUNCTION(xmlwriter_start_element_ns)
 
 	XMLW_NAME_CHK(3, "element name");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterStartElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterStartElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -442,13 +457,19 @@ PHP_FUNCTION(xmlwriter_write_element)
 	XMLW_NAME_CHK(2, "element name");
 
 	if (!content) {
-		XMLWRITER_WRITE(self, retval = xmlTextWriterStartElement(ptr, (xmlChar *)name));
+		xmlwriter_write_begin(self);
+		retval = xmlTextWriterStartElement(ptr, (xmlChar *)name);
+		xmlwriter_write_end(self);
 		if (retval == -1) {
 			RETURN_FALSE;
 		}
-		XMLWRITER_WRITE(self, retval = xmlTextWriterEndElement(ptr));
+		xmlwriter_write_begin(self);
+		retval = xmlTextWriterEndElement(ptr);
+		xmlwriter_write_end(self);
 	} else {
-		XMLWRITER_WRITE(self, retval = xmlTextWriterWriteElement(ptr, (xmlChar *)name, (xmlChar *)content));
+		xmlwriter_write_begin(self);
+		retval = xmlTextWriterWriteElement(ptr, (xmlChar *)name, (xmlChar *)content);
+		xmlwriter_write_end(self);
 	}
 
 	RETURN_BOOL(retval != -1);
@@ -473,13 +494,19 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 	XMLW_NAME_CHK(3, "element name");
 
 	if (!content) {
-		XMLWRITER_WRITE(self, retval = xmlTextWriterStartElementNS(ptr,(xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri));
+		xmlwriter_write_begin(self);
+		retval = xmlTextWriterStartElementNS(ptr,(xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri);
+		xmlwriter_write_end(self);
 		if (retval == -1) {
 			RETURN_FALSE;
 		}
-		XMLWRITER_WRITE(self, retval = xmlTextWriterEndElement(ptr));
+		xmlwriter_write_begin(self);
+		retval = xmlTextWriterEndElement(ptr);
+		xmlwriter_write_end(self);
 	} else {
-		XMLWRITER_WRITE(self, retval = xmlTextWriterWriteElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content));
+		xmlwriter_write_begin(self);
+		retval = xmlTextWriterWriteElementNS(ptr, (xmlChar *)prefix, (xmlChar *)name, (xmlChar *)uri, (xmlChar *)content);
+		xmlwriter_write_end(self);
 	}
 
 	RETURN_BOOL(retval != -1);
@@ -517,7 +544,9 @@ PHP_FUNCTION(xmlwriter_write_pi)
 
 	XMLW_NAME_CHK(2, "PI target");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterWritePI(ptr, (xmlChar *)name, (xmlChar *)content));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterWritePI(ptr, (xmlChar *)name, (xmlChar *)content);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -535,7 +564,9 @@ PHP_FUNCTION(xmlwriter_start_cdata)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterStartCDATA(ptr));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterStartCDATA(ptr);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -581,7 +612,9 @@ PHP_FUNCTION(xmlwriter_start_comment)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterStartComment(ptr));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterStartComment(ptr);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -615,7 +648,9 @@ PHP_FUNCTION(xmlwriter_start_document)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterStartDocument(ptr, version, enc, alone));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterStartDocument(ptr, version, enc, alone);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -642,7 +677,9 @@ PHP_FUNCTION(xmlwriter_start_dtd)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterStartDTD(ptr, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterStartDTD(ptr, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -669,7 +706,9 @@ PHP_FUNCTION(xmlwriter_write_dtd)
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterWriteDTD(ptr, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid, (xmlChar *)subset));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterWriteDTD(ptr, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid, (xmlChar *)subset);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -706,7 +745,9 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 
 	XMLW_NAME_CHK(2, "element name");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterWriteDTDElement(ptr, (xmlChar *)name, (xmlChar *)content));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterWriteDTDElement(ptr, (xmlChar *)name, (xmlChar *)content);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -743,7 +784,9 @@ PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 
 	XMLW_NAME_CHK(2, "element name");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterWriteDTDAttlist(ptr, (xmlChar *)name, (xmlChar *)content));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterWriteDTDAttlist(ptr, (xmlChar *)name, (xmlChar *)content);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -766,7 +809,9 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 
 	XMLW_NAME_CHK(2, "attribute name");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterStartDTDEntity(ptr, isparm, (xmlChar *)name));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterStartDTDEntity(ptr, isparm, (xmlChar *)name);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -801,7 +846,9 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 
 	XMLW_NAME_CHK(2, "element name");
 
-	XMLWRITER_WRITE(self, retval = xmlTextWriterWriteDTDEntity(ptr, pe, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid, (xmlChar *)ndataid, (xmlChar *)content));
+	xmlwriter_write_begin(self);
+	retval = xmlTextWriterWriteDTDEntity(ptr, pe, (xmlChar *)name, (xmlChar *)pubid, (xmlChar *)sysid, (xmlChar *)ndataid, (xmlChar *)content);
+	xmlwriter_write_end(self);
 
 	RETURN_BOOL(retval != -1);
 }
@@ -1052,7 +1099,9 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 	if (force_string == 1 && output == NULL) {
 		RETURN_EMPTY_STRING();
 	}
-	XMLWRITER_WRITE(self, output_bytes = xmlTextWriterFlush(ptr));
+	xmlwriter_write_begin(self);
+	output_bytes = xmlTextWriterFlush(ptr);
+	xmlwriter_write_end(self);
 	if (output) {
 		if (empty) {
 			RETURN_STR(smart_str_extract(output));

@@ -58,22 +58,51 @@ static zend_result php_io_ring_engine_check(zval *zv)
 	return SUCCESS;
 }
 
-#define PHP_IO_RING_ENGINE_QUEUE_METHOD(name) \
-	PHP_METHOD(Io_Ring_Engine, name) \
-	{ \
-		if (php_io_ring_engine_check(ZEND_THIS) == FAILURE) { \
-			RETURN_THROWS(); \
-		} \
-		ZEND_MN(Io_Poll_OperationQueue_##name)(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+static void php_io_ring_engine_forward(INTERNAL_FUNCTION_PARAMETERS, zif_handler handler)
+{
+	if (php_io_ring_engine_check(ZEND_THIS) == FAILURE) {
+		RETURN_THROWS();
 	}
+	handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 
-PHP_IO_RING_ENGINE_QUEUE_METHOD(submit)
-PHP_IO_RING_ENGINE_QUEUE_METHOD(cancel)
-PHP_IO_RING_ENGINE_QUEUE_METHOD(add)
-PHP_IO_RING_ENGINE_QUEUE_METHOD(remove)
-PHP_IO_RING_ENGINE_QUEUE_METHOD(waitCompletions)
-PHP_IO_RING_ENGINE_QUEUE_METHOD(countPending)
-PHP_IO_RING_ENGINE_QUEUE_METHOD(getHookCapabilities)
+PHP_METHOD(Io_Ring_Engine, submit)
+{
+	php_io_ring_engine_forward(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_MN(Io_Poll_OperationQueue_submit));
+}
+
+PHP_METHOD(Io_Ring_Engine, cancel)
+{
+	php_io_ring_engine_forward(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_MN(Io_Poll_OperationQueue_cancel));
+}
+
+PHP_METHOD(Io_Ring_Engine, add)
+{
+	php_io_ring_engine_forward(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_MN(Io_Poll_OperationQueue_add));
+}
+
+PHP_METHOD(Io_Ring_Engine, remove)
+{
+	php_io_ring_engine_forward(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_MN(Io_Poll_OperationQueue_remove));
+}
+
+PHP_METHOD(Io_Ring_Engine, waitCompletions)
+{
+	php_io_ring_engine_forward(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_MN(Io_Poll_OperationQueue_waitCompletions));
+}
+
+PHP_METHOD(Io_Ring_Engine, countPending)
+{
+	php_io_ring_engine_forward(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_MN(Io_Poll_OperationQueue_countPending));
+}
+
+PHP_METHOD(Io_Ring_Engine, getHookCapabilities)
+{
+	php_io_ring_engine_forward(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+		ZEND_MN(Io_Poll_OperationQueue_getHookCapabilities));
+}
 
 PHP_METHOD(Io_Ring_Engine, __construct)
 {
