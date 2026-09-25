@@ -79,17 +79,14 @@ static int forget_persistent_resource_id_numbers(zval *el)
 fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 #endif
 
+	/* Request resources have been destroyed; clear their stale pointers. */
 	stream->res = NULL;
-
-	if (stream->ctx) {
-		zend_list_delete(stream->ctx);
-		stream->ctx = NULL;
-	}
+	stream->ctx = NULL;
 
 	return 0;
 }
 
-PHP_RSHUTDOWN_FUNCTION(streams)
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(streams)
 {
 	zval *el;
 
