@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23628 (Tracing JIT reads undefined property slots of lazy
     proxy objects instead of forwarding to the real instance). (lisachenko)
 
+- XML:
+  . Fixed xml_get_current_byte_index() returning negative values for byte
+    indexes beyond 2 GiB on Windows x64. (Marc Bennewitz)
+
 24 Sep 2026, PHP 8.6.0RC2
 
 - Core:

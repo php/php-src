@@ -344,6 +344,8 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     as it was unused.
   . Removed the XML_GetCurrentByteCount() libxml compatibility wrapper,
     as it was unused and could return the wrong result.
+  . The XML_GetCurrentByteIndex() libxml compatibility wrapper now returns
+    zend_long instead of long, as long is 32-bit on Windows x64.
 
 ========================
 4. OpCode changes
