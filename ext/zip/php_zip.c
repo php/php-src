@@ -3244,8 +3244,13 @@ static int php_zip_cancel_callback(zip_t *arch, void *ptr)
 	bool failed;
 	zend_long retval = zval_try_get_long(&cb_retval, &failed);
 	if (failed) {
-		zend_type_error("Return value of callback provided to ZipArchive::registerCancelCallback()"
-			" must be of type int, %s returned", zend_zval_value_name(&cb_retval));
+		/* Reporting the invalid return type can also bail out during shutdown. */
+		zend_try {
+			zend_type_error("Return value of callback provided to ZipArchive::registerCancelCallback()"
+				" must be of type int, %s returned", zend_zval_value_name(&cb_retval));
+		} zend_catch {
+			archive->bailout_callback = true;
+		} zend_end_try();
 		zval_ptr_dtor(&cb_retval);
 		return -1;
 	}
