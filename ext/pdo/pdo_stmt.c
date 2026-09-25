@@ -287,10 +287,6 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	param->stmt = stmt;
 	param->is_param = is_param;
 
-	if (Z_REFCOUNTED(param->driver_params)) {
-		Z_ADDREF(param->driver_params);
-	}
-
 	if (!is_param && param->name && stmt->columns) {
 		/* try to map the name to the column */
 		int i;
@@ -376,6 +372,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 			}
 			/* param->parameter is freed by hash dtor */
 			ZVAL_UNDEF(&param->parameter);
+			ZVAL_UNDEF(&param->driver_params);
 			return 0;
 		}
 	}
@@ -1462,6 +1459,9 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
 		}
+		if (!Z_ISUNDEF(param.driver_params)) {
+			zval_ptr_dtor(&(param.driver_params));
+		}
 
 		RETURN_FALSE;
 	}
@@ -2108,6 +2108,22 @@ static HashTable *dbstmt_get_gc(zend_object *object, zval **gc_data, int *gc_cou
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->database_object_handle);
 	zend_get_gc_buffer_add_zval(gc_buffer, &stmt->fetch.into);
+	if (stmt->bound_params) {
+		zval *val;
+		ZEND_HASH_FOREACH_VAL(stmt->bound_params, val) {
+			struct pdo_bound_param_data *param = Z_PTR_P(val);
+			zend_get_gc_buffer_add_zval(gc_buffer, &param->parameter);
+			zend_get_gc_buffer_add_zval(gc_buffer, &param->driver_params);
+		} ZEND_HASH_FOREACH_END();
+	}
+	if (stmt->bound_columns) {
+		zval *val;
+		ZEND_HASH_FOREACH_VAL(stmt->bound_columns, val) {
+			struct pdo_bound_param_data *param = Z_PTR_P(val);
+			zend_get_gc_buffer_add_zval(gc_buffer, &param->parameter);
+			zend_get_gc_buffer_add_zval(gc_buffer, &param->driver_params);
+		} ZEND_HASH_FOREACH_END();
+	}
 	zend_get_gc_buffer_use(gc_buffer, gc_data, gc_count);
 
 	/**
