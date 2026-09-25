@@ -76,6 +76,40 @@ void inifile_line_free(line_type *ln)
 }
 /* }}} */
 
+static void inifile_line_release(line_type *ln, bool persistent)
+{
+	if (ln->key.group) {
+		pefree(ln->key.group, persistent);
+	}
+	if (ln->key.name) {
+		pefree(ln->key.name, persistent);
+	}
+	if (ln->val.value) {
+		pefree(ln->val.value, persistent);
+	}
+	memset(ln, 0, sizeof(line_type));
+}
+
+static void inifile_line_store(line_type *dst, line_type *src, bool persistent)
+{
+	inifile_line_release(dst, persistent);
+	if (!persistent) {
+		*dst = *src;
+		return;
+	}
+	if (src->key.group) {
+		dst->key.group = pestrdup(src->key.group, true);
+	}
+	if (src->key.name) {
+		dst->key.name = pestrdup(src->key.name, true);
+	}
+	if (src->val.value) {
+		dst->val.value = pestrdup(src->val.value, true);
+	}
+	dst->pos = src->pos;
+	inifile_line_free(src);
+}
+
 /* {{{ inifile_alloc */
 inifile * inifile_alloc(php_stream *fp, int readonly, int persistent)
 {
@@ -100,8 +134,8 @@ inifile * inifile_alloc(php_stream *fp, int readonly, int persistent)
 void inifile_free(inifile *dba, int persistent)
 {
 	if (dba) {
-		inifile_line_free(&dba->curr);
-		inifile_line_free(&dba->next);
+		inifile_line_release(&dba->curr, persistent);
+		inifile_line_release(&dba->next, persistent);
 		pefree(dba, persistent);
 	}
 }
@@ -251,7 +285,7 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip) {
 		/* specific instance or not same key -> restart search */
 		/* the slow way: restart and seacrch */
 		php_stream_rewind(dba->fp);
-		inifile_line_free(&dba->next);
+		inifile_line_release(&dba->next, php_stream_is_persistent(dba->fp));
 	}
 	if (skip == -1) {
 		skip = 0;
@@ -261,9 +295,8 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip) {
 			if (!skip) {
 				val.value = estrdup(ln.val.value ? ln.val.value : "");
 				/* allow faster access by updating key read into next */
-				inifile_line_free(&dba->next);
-				dba->next = ln;
-				dba->next.pos = php_stream_tell(dba->fp);
+				ln.pos = php_stream_tell(dba->fp);
+				inifile_line_store(&dba->next, &ln, php_stream_is_persistent(dba->fp));
 				return val;
 			}
 			skip--;
@@ -282,7 +315,7 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip) {
 
 /* {{{ inifile_firstkey */
 int inifile_firstkey(inifile *dba) {
-	inifile_line_free(&dba->curr);
+	inifile_line_release(&dba->curr, php_stream_is_persistent(dba->fp));
 	dba->curr.pos = 0;
 	return inifile_nextkey(dba);
 }
@@ -296,9 +329,8 @@ int inifile_nextkey(inifile *dba) {
 	php_stream_seek(dba->fp, dba->curr.pos, SEEK_SET);
 	ln.key.group = estrdup(dba->curr.key.group ? dba->curr.key.group : "");
 	inifile_read(dba, &ln);
-	inifile_line_free(&dba->curr);
-	dba->curr = ln;
-	return ln.key.group || ln.key.name;
+	inifile_line_store(&dba->curr, &ln, php_stream_is_persistent(dba->fp));
+	return dba->curr.key.group || dba->curr.key.name;
 }
 /* }}} */
 
@@ -325,8 +357,8 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
 
 	php_stream_flush(dba->fp);
 	php_stream_seek(dba->fp, 0, SEEK_SET);
-	inifile_line_free(&dba->curr);
-	inifile_line_free(&dba->next);
+	inifile_line_release(&dba->curr, php_stream_is_persistent(dba->fp));
+	inifile_line_release(&dba->next, php_stream_is_persistent(dba->fp));
 
 	if (key->group && strlen(key->group)) {
 		int res;

@@ -226,6 +226,7 @@ datum flatfile_firstkey(flatfile *dba) {
 		num = php_stream_read(dba->fp, buf, num);
 	}
 	efree(buf);
+	dba->CurrentFlatFilePos = 0;
 	res.dptr = NULL;
 	res.dsize = 0;
 	return res;
@@ -265,6 +266,7 @@ datum flatfile_nextkey(flatfile *dba) {
 		}
 	}
 	efree(buf);
+	dba->CurrentFlatFilePos = 0;
 	res.dptr = NULL;
 	res.dsize = 0;
 	return res;

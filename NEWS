@@ -70,6 +70,8 @@ PHP                                                                        NEWS
 - DBA:
   . Fixed bug GH-24641 (ndbm backend never checks dbm_open() return value,
     NULL deref on first use after a failed open). (Girgias)
+  . Fixed a crash with persistent flatfile, inifile, and cdb_make handles.
+    (Ilia Alshanetsky)
 
 - DOM:
   . Fixed a use-after-free when reflected attribute setters replace an
