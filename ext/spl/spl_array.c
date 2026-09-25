@@ -346,14 +346,14 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 				if (Z_TYPE_P(retval) == IS_UNDEF) {
 					switch (type) {
 						case BP_VAR_R:
-							zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(key.key));
+							zend_error(E_WARNING, "Undefined array key \"%pS\"", key.key);
 							ZEND_FALLTHROUGH;
 						case BP_VAR_UNSET:
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
-							zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
+							zend_error(E_WARNING,"Undefined array key \"%pS\"", key.key);
 							ZEND_FALLTHROUGH;
 						case BP_VAR_W: {
 							ZVAL_NULL(retval);
@@ -364,14 +364,14 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 		} else {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_WARNING, "Undefined array key \"%s\"", ZSTR_VAL(key.key));
+					zend_error(E_WARNING, "Undefined array key \"%pS\"", key.key);
 					ZEND_FALLTHROUGH;
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
+					zend_error(E_WARNING,"Undefined array key \"%pS\"", key.key);
 					ZEND_FALLTHROUGH;
 				case BP_VAR_W: {
 				    zval value;
@@ -677,7 +677,7 @@ void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (spl_array_is_object(intern)) {
-		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(Z_OBJCE_P(object)->name));
+		zend_throw_error(NULL, "Cannot append properties to objects, use %pS::offsetSet() instead", Z_OBJCE_P(object)->name);
 		return;
 	}
 
@@ -959,15 +959,15 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
 			if (handler != zend_std_get_properties || Z_OBJ_HANDLER_P(array, get_properties_for)) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-					"Overloaded object of type %s is not compatible with %s",
-					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+					"Overloaded object of type %pS is not compatible with %pS",
+					Z_OBJCE_P(array)->name, intern->std.ce->name);
 				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
 				return;
 			}
 			if (UNEXPECTED(Z_OBJCE_P(array)->ce_flags & ZEND_ACC_ENUM)) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-					"Enums are not compatible with %s",
-					ZSTR_VAL(intern->std.ce->name));
+					"Enums are not compatible with %pS",
+					intern->std.ce->name);
 				ZEND_ASSERT(Z_TYPE(garbage) == IS_UNDEF);
 				return;
 			}
@@ -1489,15 +1489,15 @@ PHP_METHOD(ArrayObject, __unserialize)
 
 		if (!ce) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Cannot deserialize ArrayObject with iterator class '%s'; no such class exists",
-				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
+				"Cannot deserialize ArrayObject with iterator class '%pS'; no such class exists",
+				Z_STR_P(iterator_class_zv));
 			RETURN_THROWS();
 		}
 
 		if (!instanceof_function(ce, spl_ce_ArrayIterator)) {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
-				"Cannot deserialize ArrayObject with iterator class '%s'; this class is not derived from ArrayIterator",
-				ZSTR_VAL(Z_STR_P(iterator_class_zv)));
+				"Cannot deserialize ArrayObject with iterator class '%pS'; this class is not derived from ArrayIterator",
+				Z_STR_P(iterator_class_zv));
 			RETURN_THROWS();
 		}
 
@@ -1577,8 +1577,8 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 		if (EXPECTED(prop_info != NULL) && ZEND_TYPE_IS_SET(prop_info->type)) {
 			if (prop_info->flags & ZEND_ACC_READONLY) {
 				zend_throw_error(NULL,
-					"Cannot acquire reference to readonly property %s::$%s",
-					ZSTR_VAL(prop_info->ce->name), ZSTR_VAL(key));
+					"Cannot acquire reference to readonly property %pS::$%pS",
+					prop_info->ce->name, key);
 				return NULL;
 			}
 			ZVAL_NEW_REF(data, data);

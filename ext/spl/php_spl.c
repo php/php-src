@@ -42,7 +42,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
 {
 	zend_class_entry *ce = zend_lookup_class_ex(name, NULL, autoload ? 0 : ZEND_FETCH_CLASS_NO_AUTOLOAD);
 	if (ce == NULL) {
-		php_error_docref(NULL, E_WARNING, "Class %s does not exist%s", ZSTR_VAL(name), autoload ? " and could not be loaded" : "");
+		php_error_docref(NULL, E_WARNING, "Class %pS does not exist%s", name, autoload ? " and could not be loaded" : "");
 		return NULL;
 	}
 
@@ -502,7 +502,7 @@ static void spl_build_class_list_string(zval *entry, char **list) /* {{{ */
 {
 	char *res;
 
-	spprintf(&res, 0, "%s, %s", *list, Z_STRVAL_P(entry));
+	spprintf(&res, 0, "%s, %pS", *list, Z_STR_P(entry));
 	efree(*list);
 	*list = res;
 } /* }}} */
