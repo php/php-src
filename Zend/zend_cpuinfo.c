@@ -135,7 +135,7 @@ void zend_cpu_startup(void)
 		}
 
 		if (!is_avx_supported()) {
-			cpuinfo.edx &= ~ZEND_CPU_FEATURE_AVX;
+			cpuinfo.ecx &= ~ZEND_CPU_FEATURE_AVX;
 			cpuinfo.ebx &= ~(ZEND_CPU_FEATURE_AVX2 & ~ZEND_CPU_EBX_MASK);
 		}
 	}
