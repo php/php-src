@@ -84,7 +84,7 @@ typedef struct php_io_poll_watcher_object {
 	php_io_poll_context_object *context; /* Back reference to Context object */
 	php_socket_t fd; /* Registered fd, SOCK_ERR when inactive */
 	php_stream *stream; /* Watched stream, NULL when not registered in its watcher list */
-	php_poll_timer *timer; /* TimerHandle watcher: the context's timer */
+	php_poll_timer *timer; /* TimerHandle watchers only */
 	zend_object std;
 } php_io_poll_watcher_object;
 
@@ -93,7 +93,7 @@ struct php_io_poll_context_object {
 	php_poll_ctx *ctx;
 	HashTable *watchers; /* Maps fd -> watcher object */
 	HashTable *timer_watchers; /* Maps watcher pointer key -> watcher object */
-	HashTable *removed; /* Watchers retired for onWatcherRemoved(), delivered by the next wait() */
+	HashTable *removed; /* Watchers awaiting onWatcherRemoved() */
 	zend_fcall_info_cache on_watcher_removed_fcc;
 	zend_object std;
 };
@@ -312,7 +312,7 @@ PHPAPI void php_stream_poll_handle_from_stream(zval *dest, php_stream *stream)
 static zend_class_entry *php_stream_poll_weak_handle_class_entry;
 
 typedef struct {
-	php_stream *stream; /* NULL when stream has been closed; no refcount held */
+	php_stream *stream; /* Not referenced, NULL once closed */
 } php_stream_poll_weak_handle_data;
 
 static php_socket_t php_stream_poll_weak_handle_get_fd(php_poll_handle_object *handle)
@@ -615,11 +615,12 @@ typedef int php_io_poll_notify_fd;
 
 typedef struct {
 	php_io_poll_notify_fd read_fd;
-	php_io_poll_notify_fd write_fd;   /* same as read_fd on eventfd; -1 when external */
+	php_io_poll_notify_fd write_fd; /* -1 when external */
 	bool owned;
-	void (*clear)(void *arg);   /* external: how to clear it */
+	/* External descriptors only */
+	void (*clear)(void *arg);
 	void *clear_arg;
-	zend_object *owner;         /* external: whose descriptor it is */
+	zend_object *owner;
 } php_io_poll_notify_handle_data;
 
 static php_socket_t php_io_poll_notify_handle_get_fd(php_poll_handle_object *handle)
@@ -734,7 +735,7 @@ typedef struct {
 	pid_t pid;
 	int fd;
 	bool reaped;
-	bool exited;    /* reaped here or elsewhere: nothing more to report */
+	bool exited; /* reaped here or elsewhere */
 	int status;
 } php_io_poll_process_handle_data;
 

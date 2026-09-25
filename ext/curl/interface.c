@@ -2437,7 +2437,7 @@ PHP_FUNCTION(curl_setopt_array)
  * owned: the handle only answers the descriptor while libcurl is interested. */
 
 typedef struct {
-	curl_socket_t socket;           /* CURL_SOCKET_BAD once libcurl removed it */
+	curl_socket_t socket; /* CURL_SOCKET_BAD once removed */
 } php_curl_socket_handle_data;
 
 static php_socket_t php_curl_socket_handle_get_fd(php_poll_handle_object *handle)
@@ -2482,9 +2482,9 @@ ZEND_METHOD(Io_Curl_SocketWeakHandle, __construct)
 /* One socket libcurl wants watched, attached to it with curl_multi_assign() */
 typedef struct _php_curl_socket_entry {
 	curl_socket_t socket;
-	int what;                       /* CURL_POLL_IN, OUT or INOUT */
-	zend_object *handle;            /* SocketWeakHandle, referenced */
-	php_io_op *op;                  /* persistent Poll op for op_events, from the reconcile step */
+	int what;
+	zend_object *handle; /* SocketWeakHandle, referenced */
+	php_io_op *op; /* persistent Poll op for op_events */
 	uint32_t op_events;
 	struct _php_curl_socket_entry *next_removed;
 } php_curl_socket_entry;
@@ -2622,9 +2622,8 @@ static void php_curl_socket_table_free(php_curl *ch)
 	}
 }
 
-/* curl_exec() under a provider, on the multi socket API: every iteration
- * waits with one Any op, a persistent Poll member per socket plus a Timer member for libcurl's
- * timeout, and acts on what was reported. */
+/* curl_exec() under a provider, on the multi socket API: every iteration waits with one Any op,
+ * a persistent Poll member per socket plus a Timer member for libcurl's timeout. */
 static CURLcode php_curl_exec_multi(php_curl *ch)
 {
 	CURLcode result = CURLE_OK;

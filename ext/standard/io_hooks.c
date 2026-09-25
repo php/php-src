@@ -61,8 +61,8 @@ static zend_object_handlers php_io_completion_handlers;
 PHPAPI zend_object_handlers php_io_opqueue_handlers;
 
 typedef struct {
-	php_io_op *op;              /* NULL once the operation ended */
-	zend_object *lazy_handle;   /* the TimerHandle, ProcessHandle or SignalHandle of getHandle(), created on first call */
+	php_io_op *op; /* NULL once ended */
+	zend_object *lazy_handle; /* created by getHandle() */
 	zend_object std;
 } php_io_operation_obj;
 
@@ -71,10 +71,10 @@ typedef struct {
 	php_io_status status;
 	int64_t res;
 	int error;
-	uint32_t events;            /* readiness mask, for Poll operations and Ready completions */
-	bool produced;              /* from a queue or a completeWith*() method: its result carries real data */
+	uint32_t events;
+	bool produced; /* the result carries real data */
 	zval data;
-	zval completions;           /* array for an Any, undef otherwise */
+	zval completions; /* Any only */
 	zend_object std;
 } php_io_completion_obj;
 
@@ -82,7 +82,7 @@ typedef struct {
 struct _php_io_opqueue_sub {
 	zend_object *operation;
 	zval data;
-	php_io_opqueue_obj *owner;   /* the queue it is linked in */
+	php_io_opqueue_obj *owner;
 	php_io_opqueue_sub *prev;
 	php_io_opqueue_sub *next;
 };
