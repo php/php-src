@@ -26,7 +26,7 @@
 #endif
 
 #include "php.h"
-#include "main/php_io_hooks.h"
+#include "php_io.h"
 #include "ext/standard/io_poll.h"
 #include "ext/standard/info.h"
 #include "php_signal.h"

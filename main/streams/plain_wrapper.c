@@ -17,7 +17,6 @@
 #include "php_network.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
-#include "main/php_io_hooks.h"
 #include "ext/standard/io_poll.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/php_filestat.h"

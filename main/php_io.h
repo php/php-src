@@ -19,6 +19,8 @@
 
 #include "php.h"
 #include "php_network.h"
+#include "php_io_hooks.h"
+#include "php_io_ring.h"
 
 #define PHP_IO_COPY_ALL SIZE_MAX
 

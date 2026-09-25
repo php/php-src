@@ -148,7 +148,7 @@ fail:
 #endif
 
 #include "proc_open.h"
-#include "main/php_io_hooks.h"
+#include "php_io.h"
 #include "ext/standard/io_poll.h"
 
 static int le_proc_open; /* Resource number for `proc` resources */

@@ -13,7 +13,7 @@
 #ifndef PHP_STANDARD_IO_HOOKS_H
 #define PHP_STANDARD_IO_HOOKS_H
 
-#include "main/php_io_hooks.h"
+#include "main/php_io.h"
 
 BEGIN_EXTERN_C()
 

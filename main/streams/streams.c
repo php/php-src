@@ -29,7 +29,6 @@
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include "ext/uri/php_uri.h"
 #include "ext/standard/io_poll.h"
-#include "main/php_io_hooks.h"
 #include <stddef.h>
 #include <fcntl.h>
 #include "php_streams_int.h"

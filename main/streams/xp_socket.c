@@ -14,7 +14,6 @@
 
 #include "php.h"
 #include "ext/standard/file.h"
-#include "main/php_io_hooks.h"
 #include "php_streams.h"
 #include "php_io.h"
 

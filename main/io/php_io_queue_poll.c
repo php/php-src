@@ -18,7 +18,7 @@
  * A persistent op's add() and remove() bracket the record of its descriptor. */
 
 #include "php.h"
-#include "main/php_io_hooks.h"
+#include "php_io.h"
 #include "main/php_poll.h"
 
 #include <errno.h>

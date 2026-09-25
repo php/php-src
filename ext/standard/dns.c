@@ -17,7 +17,7 @@
 /* {{{ includes */
 #include "php.h"
 #include "php_network.h"
-#include "main/php_io_hooks.h"
+#include "php_io.h"
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

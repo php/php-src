@@ -13,7 +13,7 @@
 */
 
 #include "php_poll_internal.h"
-#include "main/php_io_hooks.h"
+#include "php_io.h"
 #ifndef PHP_WIN32
 # include <unistd.h>
 #endif

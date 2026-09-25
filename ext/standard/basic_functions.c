@@ -112,7 +112,7 @@ PHPAPI php_basic_globals basic_globals;
 #include "zend_frameless_function.h"
 #include "basic_functions_arginfo.h"
 #include "io_hooks.h"
-#include "main/php_io_hooks.h"
+#include "php_io.h"
 
 #if __has_feature(memory_sanitizer)
 # include <sanitizer/msan_interface.h>

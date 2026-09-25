@@ -12,7 +12,7 @@
 
 #include "php.h"
 #include "php_network.h"
-#include "main/php_io_ring.h"
+#include "php_io.h"
 
 #ifdef HAVE_IOR
 
