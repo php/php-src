@@ -67,6 +67,9 @@ PHP                                                                        NEWS
     (DanielEScherzer, vapier)
 
 - Intl:
+  . Fixed IntlDateFormatter::parse(), localtime() and parseToCalendar()
+    treating the offset as UTF-16 code units instead of bytes.
+    (Ilia Alshanetsky)
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
     such as dateType, timeType, calendar and the message pattern.
     (Ilia Alshanetsky)
