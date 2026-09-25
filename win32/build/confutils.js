@@ -1825,12 +1825,20 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 			} else {
 				/* TODO create a response file at least for the source files to work around the cmd line length limit. */
 				var src_line = "";
+				var src_lines = ["", ""];
 				for (var j in srcs_by_dir[k]) {
-					src_line += dir + "\\" + file_list[srcs_by_dir[k][j]] + " ";
+					var source = file_list[srcs_by_dir[k][j]];
+					var source_path = dir + "\\" + source + " ";
+					src_line += source_path;
+					src_lines[VS_TOOLSET && /\.c$/i.test(source) ? 0 : 1] += source_path;
 				}
 
-				var c11_flag = VS_TOOLSET && !cxx_mode_targets[target] && /\.c\s/i.test(src_line) && !/\.cpp\s/i.test(src_line) ? " /std:c11" : "";
-				MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
+				for (var language = 0; language < src_lines.length; language++) {
+					if (src_lines[language]) {
+						var c11_flag = language == 0 && !cxx_mode_targets[target] ? " /std:c11" : "";
+						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
+					}
+				}
 
 				if ("clang" == PHP_ANALYZER) {
 					MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
