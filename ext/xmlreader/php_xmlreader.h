@@ -41,6 +41,8 @@ typedef struct _xmlreader_object {
 	/* strings must be set in input buffer as copy is required */
 	xmlParserInputBufferPtr input;
 	void *schema;
+	/* a method is running a libxml call that can read input */
+	bool in_use;
 	zend_object  std;
 } xmlreader_object;
 

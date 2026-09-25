@@ -388,6 +388,8 @@ ZEND_GET_MODULE(xmlreader)
 
 /* {{{ xmlreader_free_resources */
 static void xmlreader_free_resources(xmlreader_object *intern) {
+	/* Closing the input can wait too */
+	intern->in_use = true;
 	if (intern->input) {
 		xmlFreeParserInputBuffer(intern->input);
 		intern->input = NULL;
@@ -403,6 +405,7 @@ static void xmlreader_free_resources(xmlreader_object *intern) {
 		intern->schema = NULL;
 	}
 #endif
+	intern->in_use = false;
 }
 /* }}} */
 
@@ -429,6 +432,18 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type)
 	return &intern->std;
 }
 /* }}} */
+
+/* The libxml IO callbacks can suspend the fiber or run user code, which must
+ * not free, reset or re-enter the reader under the running call. The caller's
+ * frame keeps the object alive. */
+static bool xmlreader_check_not_in_use(const xmlreader_object *intern)
+{
+	if (UNEXPECTED(intern->in_use)) {
+		zend_throw_error(NULL, "Attempt to use XMLReader while it is reading");
+		return false;
+	}
+	return true;
+}
 
 /* {{{ php_xmlreader_string_arg */
 static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_one_char_t internal_function) {
@@ -496,8 +511,13 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 	if (intern->ptr) {
+		intern->in_use = true;
 		retchar = (char *)internal_function(intern->ptr);
+		intern->in_use = false;
 	}
 	if (retchar) {
 		RETVAL_STRING(retchar);
@@ -525,12 +545,17 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	
 #ifdef LIBXML_SCHEMAS_ENABLED
 	xmlreader_object *intern = Z_XMLREADER_P(ZEND_THIS);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 	if (intern->ptr) {
 		int retval = -1;
 		xmlRelaxNGPtr schema = NULL;
 
 		if (source) {
+			intern->in_use = true;
 			schema =  _xmlreader_get_relaxNG(source, source_len, type, NULL, NULL);
+			intern->in_use = false;
 			if (schema) {
 				retval = xmlTextReaderRelaxNGSetSchema(intern->ptr, schema);
 			}
@@ -573,6 +598,9 @@ PHP_METHOD(XMLReader, close)
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 	/* libxml is segfaulting in versions up to 2.6.8 using xmlTextReaderClose so for
 	now we will free the whole reader when close is called as it would get rebuilt on
 	a new load anyways */
@@ -715,6 +743,9 @@ PHP_METHOD(XMLReader, moveToAttribute)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 	if (intern->ptr) {
 		retval = xmlTextReaderMoveToAttribute(intern->ptr, (xmlChar *)name);
 		if (retval == 1) {
@@ -742,6 +773,9 @@ PHP_METHOD(XMLReader, moveToAttributeNo)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 	if (intern->ptr) {
 		retval = xmlTextReaderMoveToAttributeNo(intern->ptr, attr_pos);
 		if (retval == 1) {
@@ -780,6 +814,9 @@ PHP_METHOD(XMLReader, moveToAttributeNs)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 	if (intern->ptr) {
 		retval = xmlTextReaderMoveToAttributeNs(intern->ptr, (xmlChar *)name, (xmlChar *)ns_uri);
 		if (retval == 1) {
@@ -794,6 +831,9 @@ PHP_METHOD(XMLReader, moveToAttributeNs)
 /* {{{ Moves the position of the current instance to the node that contains the current Attribute node. */
 PHP_METHOD(XMLReader, moveToElement)
 {
+	if (!xmlreader_check_not_in_use(Z_XMLREADER_P(ZEND_THIS))) {
+		RETURN_THROWS();
+	}
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToElement);
 }
 /* }}} */
@@ -801,6 +841,9 @@ PHP_METHOD(XMLReader, moveToElement)
 /* {{{ Moves the position of the current instance to the first attribute associated with the current node. */
 PHP_METHOD(XMLReader, moveToFirstAttribute)
 {
+	if (!xmlreader_check_not_in_use(Z_XMLREADER_P(ZEND_THIS))) {
+		RETURN_THROWS();
+	}
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToFirstAttribute);
 }
 /* }}} */
@@ -808,6 +851,9 @@ PHP_METHOD(XMLReader, moveToFirstAttribute)
 /* {{{ Moves the position of the current instance to the next attribute associated with the current node. */
 PHP_METHOD(XMLReader, moveToNextAttribute)
 {
+	if (!xmlreader_check_not_in_use(Z_XMLREADER_P(ZEND_THIS))) {
+		RETURN_THROWS();
+	}
 	php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlTextReaderMoveToNextAttribute);
 }
 /* }}} */
@@ -823,12 +869,17 @@ PHP_METHOD(XMLReader, read)
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 	if (!intern->ptr) {
 		zend_throw_error(NULL, "Data must be loaded before reading");
 		RETURN_THROWS();
 	}
 
+	intern->in_use = true;
 	retval = xmlTextReaderRead(intern->ptr);
+	intern->in_use = false;
 	if (retval == -1) {
 		RETURN_FALSE;
 	} else {
@@ -852,14 +903,20 @@ PHP_METHOD(XMLReader, next)
 
 	id = ZEND_THIS;
 	intern = Z_XMLREADER_P(id);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 	if (intern->ptr) {
+		intern->in_use = true;
 		retval = xmlTextReaderNext(intern->ptr);
 		while (name != NULL && retval == 1) {
 			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), (xmlChar *)name)) {
+				intern->in_use = false;
 				RETURN_TRUE;
 			}
 			retval = xmlTextReaderNext(intern->ptr);
 		}
+		intern->in_use = false;
 		if (retval == -1) {
 			RETURN_FALSE;
 		} else {
@@ -907,6 +964,9 @@ static void xml_reader_from_uri(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *
 	if (id != NULL) {
 		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry));
 		intern = Z_XMLREADER_P(id);
+		if (!xmlreader_check_not_in_use(intern)) {
+			RETURN_THROWS();
+		}
 		xmlreader_free_resources(intern);
 	}
 
@@ -923,9 +983,15 @@ static void xml_reader_from_uri(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *
 	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN );
 
 	if (valid_file) {
+		if (intern) {
+			intern->in_use = true;
+		}
 		PHP_LIBXML_SANITIZE_GLOBALS(reader_for_file);
 		reader = xmlReaderForFile(valid_file, encoding, options);
 		PHP_LIBXML_RESTORE_GLOBALS(reader_for_file);
+		if (intern) {
+			intern->in_use = false;
+		}
 	}
 
 	if (reader == NULL) {
@@ -968,7 +1034,8 @@ PHP_METHOD(XMLReader, fromUri)
 static int xml_reader_stream_read(void *context, char *buffer, int len)
 {
 	zend_resource *resource = context;
-	if (EXPECTED(resource->ptr)) {
+	/* libxml retries a failed read, which must not run on an unwinding fiber */
+	if (EXPECTED(resource->ptr) && !EG(exception)) {
 		php_stream *stream = resource->ptr;
 		return php_stream_read(stream, buffer, len);
 	}
@@ -1080,9 +1147,14 @@ PHP_METHOD(XMLReader, setSchema)
 	
 #ifdef LIBXML_SCHEMAS_ENABLED
 	xmlreader_object *intern = Z_XMLREADER_P(ZEND_THIS);
-	if (intern && intern->ptr) {
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
+	if (intern->ptr) {
 		PHP_LIBXML_SANITIZE_GLOBALS(schema);
+		intern->in_use = true;
 		int retval = xmlTextReaderSchemaValidate(intern->ptr, source);
+		intern->in_use = false;
 		PHP_LIBXML_RESTORE_GLOBALS(schema);
 
 		if (retval == 0) {
@@ -1118,7 +1190,10 @@ PHP_METHOD(XMLReader, setParserProperty)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (!intern || !intern->ptr) {
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
+	if (!intern->ptr) {
 		zend_throw_error(NULL, "Cannot access parser properties before loading data");
 		RETURN_THROWS();
 	}
@@ -1174,6 +1249,9 @@ static void xml_reader_from_string(INTERNAL_FUNCTION_PARAMETERS, zend_class_entr
 	if (id != NULL) {
 		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry));
 		intern = Z_XMLREADER_P(id);
+		if (!xmlreader_check_not_in_use(intern)) {
+			RETURN_THROWS();
+		}
 		xmlreader_free_resources(intern);
 	}
 
@@ -1290,9 +1368,14 @@ PHP_METHOD(XMLReader, expand)
 	}
 
 	intern = Z_XMLREADER_P(id);
+	if (!xmlreader_check_not_in_use(intern)) {
+		RETURN_THROWS();
+	}
 
 	if (intern->ptr) {
+		intern->in_use = true;
 		node = xmlTextReaderExpand(intern->ptr);
+		intern->in_use = false;
 
 		if (node == NULL) {
 			php_error_docref(NULL, E_WARNING, "An Error Occurred while expanding");
