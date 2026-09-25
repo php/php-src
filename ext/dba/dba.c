@@ -563,7 +563,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 		zend_argument_must_not_be_empty_error(3);
 		RETURN_THROWS();
 	}
-	// TODO Check Value for permission
+	if (permission < 0 || (permission & ~07777) != 0) {
+		zend_argument_value_error(4, "Invalid file permission value (must be between 0 and 07777)");
+		RETURN_THROWS();
+	}
 	if (map_size < 0) {
 		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
