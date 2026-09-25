@@ -525,7 +525,7 @@ PHP 8.6 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/uri_followup#host_type_detection
   . Added Uri\Rfc3986\UriBuilder and Uri\WhatWg\UrlBuilder.
     RFC: https://wiki.php.net/rfc/uri_followup#uri_building
-  . Added Uri\url_percent_encode().
+  . Added Uri\WhatWg\url_percent_encode().
     RFC: https://wiki.php.net/rfc/uri_followup#percent-encoding_support
 
 ========================================
@@ -1132,7 +1132,7 @@ PHP 8.6 UPGRADE NOTES
 - JSON:
   . Improve performance of encoding arrays and objects.
   . Improved performance of indentation generation in json_encode()
-    when using PHP_JSON_PRETTY_PRINT.
+    when using JSON_PRETTY_PRINT.
 
 - Mbstring:
   . Improved performance of mb_str_pad().
