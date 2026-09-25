@@ -2392,7 +2392,8 @@ PHP_FUNCTION(mb_substr)
 	/* if "from" position is negative, count start position from the end
 	 * of the string */
 	if (from >= 0) {
-		real_from = (size_t) from;
+		/* zend_long may be wider than size_t (64-bit integers on 32-bit platforms) */
+		real_from = ZEND_LONG_SIZE_T_OVFL(from) ? SIZE_MAX : (size_t) from;
 	} else if (-from < mblen) {
 		real_from = mblen + from;
 	} else {
@@ -2404,7 +2405,7 @@ PHP_FUNCTION(mb_substr)
 	if (len_is_null) {
 		real_len = MBFL_SUBSTR_UNTIL_END;
 	} else if (len >= 0) {
-		real_len = (size_t) len;
+		real_len = ZEND_LONG_SIZE_T_OVFL(len) ? SIZE_MAX : (size_t) len;
 	} else if (real_from < mblen && -len < mblen - real_from) {
 		real_len = (mblen - real_from) + len;
 	} else {
@@ -2460,7 +2461,7 @@ PHP_FUNCTION(mb_strcut)
 		if (len < 0) {
 			len = 0;
 		}
-	} else if (len > string.len) {
+	} else if (ZEND_LONG_GT_SIZE_T(len, string.len)) {
 		len = string.len;
 	}
 
