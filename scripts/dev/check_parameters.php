@@ -16,32 +16,31 @@
 
 define('REPORT_LEVEL', 1); // 0 reports less false-positives. up to level 5.
 define('VERSION', '7.0');  // minimum is 7.0
-define('PHPDIR', realpath(dirname(__FILE__) . '/../..'));
+define('PHPDIR', realpath(dirname(__FILE__, 3)));
 
 // be sure you have enough memory and stack for PHP. pcre will push the limits!
 ini_set('pcre.backtrack_limit', 10000000);
 
 // ------------------------ end of config ----------------------------
 
-$API_params = array(
-    'a' => array('zval**'), // array
-    'A' => array('zval**'), // array or object
-    'b' => array('bool*'), // boolean
-    'd' => array('double*'), // double
-    'f' => array('zend_fcall_info*', 'zend_fcall_info_cache*'), // function
-    'h' => array('HashTable**'), // array as an HashTable*
-    'H' => array('HashTable**'), // array or HASH_OF(object)
-    'l' => array('zend_long*'), // long
-    //TODO 'L' => array('zend_long*, '), // long
-    'o' => array('zval**'), //object
-    'O' => array('zval**', 'zend_class_entry*'), // object of given type
-    'P' => array('zend_string**'), // valid path
-    'r' => array('zval**'), // resource
-    'S' => array('zend_string**'), // string
-    'z' => array('zval**'), // zval*
-    'Z' => array('zval***') // zval**
+const ZPP_SPECIFIER_PARAMS = [
+    'a' => ['zval**'], // array
+    'A' => ['zval**'], // array or object
+    'b' => ['bool*'], // boolean
+    'd' => ['double*'], // double
+    'f' => ['zend_fcall_info*', 'zend_fcall_info_cache*'], // function
+    'F' => ['zend_fcall_info*', 'zend_fcall_info_cache*'], // function
+    'h' => ['HashTable**'], // array as an HashTable*
+    'H' => ['HashTable**'], // array or HASH_OF(object)
+    'l' => ['zend_long*'], // long
+    'o' => ['zval**'], //object
+    'O' => ['zval**', 'zend_class_entry*'], // object of given type
+    'P' => ['zend_string**'], // valid path
+    'r' => ['zval**'], // resource
+    'S' => ['zend_string**'], // string
+    'z' => ['zval**'], // zval*
     // 's', 'p', 'C' handled separately
-);
+];
 
 /** reports an error, according to its level */
 function error($str, $level = 0)
@@ -118,7 +117,7 @@ function get_vars($txt)
 }
 
 /** run diagnostic checks against one var. */
-function check_param($db, $idx, $exp, $optional, $allow_uninit = false)
+function check_param($db, $idx, string|array $exp, bool $optional, bool $allow_uninit = false)
 {
     global $error_few_vars_given;
 
@@ -132,8 +131,19 @@ function check_param($db, $idx, $exp, $optional, $allow_uninit = false)
         return;
     }
 
-    if ($db[$idx][1] != $exp) {
-        error("{$db[$idx][0]}: expected '$exp' but got '{$db[$idx][1]}' [".($idx+1).']');
+    $c_type = $db[$idx][1];
+    if (is_array($exp)) {
+        if (!in_array($c_type, $exp)) {
+            $str = "{$db[$idx][0]}: expected ";
+            foreach ($exp as $expected_type) {
+                $str .= "'$expected_type' or ";
+            }
+            rtrim($str, 'or ');
+            $str .= "but got '{$c_type}' [".($idx+1).']';
+            error($str);
+        }
+    } elseif ($c_type != $exp) {
+        error("{$db[$idx][0]}: expected '$exp' but got '{$c_type}' [".($idx+1).']');
     }
 
     if (!$optional && $db[$idx][2]) {
@@ -179,10 +189,8 @@ function get_params($vars, $str)
 /** run tests on a function. the code is passed in $txt */
 function check_function($name, $txt, $offset)
 {
-    global $API_params;
-
     $regex = '/
-        (?: zend_parse_parameters(?:_throw)?               \s*\([^,]+
+        (?: zend_parse_parameters                          \s*\([^,]+
         |   zend_parse_(?:parameters_ex|method_parameters) \s*\([^,]+,[^,]+
         |   zend_parse_method_parameters_ex                \s*\([^,]+,[^,]+,[^,+]
         )
@@ -222,14 +230,14 @@ function check_function($name, $txt, $offset)
 
                     // separate_zval_if_not_ref
                     case '/':
-                        if (in_array($last_char, array('l', 'L', 'd', 'b'))) {
+                        if (in_array($last_char, array('l', 'd', 'b'))) {
                             error("the '/' specifier should not be applied to '$last_char'");
                         }
                     break;
 
                     // nullable arguments
                     case '!':
-                        if (in_array($last_char, array('l', 'L', 'd', 'b'))) {
+                        if (in_array($last_char, array('l', 'd', 'b'))) {
                             check_param($params, ++$j, 'bool*', $optional);
                         }
                     break;
@@ -241,14 +249,14 @@ function check_function($name, $txt, $offset)
                             error("A varargs specifier can only be used once. repeated char at column $i");
                         } else {
                             check_param($params, ++$j, 'zval**', $optional);
-                            check_param($params, ++$j, 'int*', $optional);
+                            check_param($params, ++$j, 'uint32_t*', $optional);
                             $varargs = true;
                         }
                     break;
 
                     case 's':
                     case 'p':
-                        check_param($params, ++$j, 'char**', $optional, $allow_uninit=true);
+                        check_param($params, ++$j, ['char**', 'unsigned char**'], $optional, $allow_uninit=true);
                         check_param($params, ++$j, 'size_t*', $optional, $allow_uninit=true);
                         if ($optional && !$params[$j-1][2] && !$params[$j][2]
                                 && $params[$j-1][0] !== '**dummy**' && $params[$j][0] !== '**dummy**') {
@@ -261,17 +269,22 @@ function check_function($name, $txt, $offset)
                         check_param($params, ++$j, 'zend_class_entry**', false);
                     break;
 
+                    case 'L':
+                    case 'Z':
+                        error("'$char' specifier is no longer allowed");
+                        break;
+
                     default:
-                        if (!isset($API_params[$char])) {
+                        if (!isset(ZPP_SPECIFIER_PARAMS[$char])) {
                             error("unknown char ('$char') at column $i");
                         }
 
                         // If an is_null flag is in use, only that flag is required to be
                         // initialized
                         $allow_uninit = $i+1 < $len && $spec[$i+1] === '!'
-                                && in_array($char, array('l', 'L', 'd', 'b'));
+                                && in_array($char, array('l', 'd', 'b'));
 
-                        foreach ($API_params[$char] as $exp) {
+                        foreach (ZPP_SPECIFIER_PARAMS[$char] as $exp) {
                             check_param($params, ++$j, $exp, $optional, $allow_uninit);
                         }
                 }

@@ -1268,9 +1268,10 @@ PHP_METHOD(SplFileInfo, setFileClass)
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	zend_class_entry *ce = spl_ce_SplFileObject;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_DERIVED_CLASS_NAME(ce, spl_ce_SplFileObject)
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern->file_class = ce;
 }
@@ -1282,9 +1283,10 @@ PHP_METHOD(SplFileInfo, setInfoClass)
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	zend_class_entry *ce = spl_ce_SplFileInfo;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_DERIVED_CLASS_NAME(ce, spl_ce_SplFileInfo)
+	ZEND_PARSE_PARAMETERS_END();
 
 	intern->info_class = ce;
 }
@@ -1296,9 +1298,10 @@ PHP_METHOD(SplFileInfo, getFileInfo)
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	zend_class_entry *ce = intern->info_class;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C!", &ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_DERIVED_CLASS_NAME_OR_NULL(ce, intern->info_class)
+	ZEND_PARSE_PARAMETERS_END();
 
 	spl_filesystem_object_create_type(ZEND_NUM_ARGS(), intern, SPL_FS_INFO, ce, return_value);
 }
@@ -1311,15 +1314,13 @@ PHP_METHOD(SplFileInfo, getPathInfo)
 	zend_class_entry *ce = NULL;
 	zend_string *path;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C!", &ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_DERIVED_CLASS_NAME_OR_NULL(ce, spl_ce_SplFileInfo)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ce == NULL) {
 		ce = intern->info_class;
-	} else if (!instanceof_function(ce, spl_ce_SplFileInfo)) {
-		zend_argument_type_error(1, "must be a class name derived from %s or null, %s given", ZSTR_VAL(spl_ce_SplFileInfo->name), ZSTR_VAL(ce->name));
-		RETURN_THROWS();
 	}
 
 	path = spl_filesystem_object_get_pathname(intern);
