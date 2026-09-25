@@ -8,9 +8,9 @@ After=network.target
 
 [Service]
 Type=@php_fpm_systemd@
-PIDFile=@EXPANDED_LOCALSTATEDIR@/run/php-fpm.pid
 ExecStart=@EXPANDED_SBINDIR@/php-fpm --nodaemonize --fpm-config @EXPANDED_SYSCONFDIR@/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
+KillMode=mixed
 
 # Set up a new file system namespace and mounts private /tmp and /var/tmp directories
 # so this service cannot access the global directories and other processes cannot
