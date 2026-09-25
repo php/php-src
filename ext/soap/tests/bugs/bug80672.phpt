@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-SoapFault: SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <>
+SoapFault: SoapClient::__construct(): Parsing WSDL: Unexpected WSDL element <>
