@@ -552,6 +552,8 @@ struct _zend_op_array {
 	uint32_t cache_size; /* number of run_time_cache_slots * sizeof(void*) */
 	int last_var;        /* number of CV variables */
 	uint32_t last;       /* number of opcodes */
+	/* Number of leading CV slots that have to be destroyed when the call frame is left. */
+	uint32_t last_var_to_free;
 
 	zend_op *opcodes;
 	ZEND_MAP_PTR_DEF(HashTable *, static_variables_ptr);

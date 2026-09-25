@@ -57,6 +57,7 @@ void init_op_array(zend_op_array *op_array, zend_function_type type, int initial
 	op_array->opcodes = emalloc(initial_ops_size * sizeof(zend_op));
 
 	op_array->last_var = 0;
+	op_array->last_var_to_free = 0;
 	op_array->vars = NULL;
 
 	op_array->T = 0;
@@ -1119,6 +1120,9 @@ ZEND_API void pass_two(zend_op_array *op_array)
 		op_array->vars = (zend_string**) erealloc(op_array->vars, sizeof(zend_string*)*op_array->last_var);
 		CG(context).vars_size = op_array->last_var;
 	}
+
+	/* Without type inference every CV has to be assumed refcounted; this can be lowered via the optimizer. */
+	op_array->last_var_to_free = op_array->last_var;
 
 #if ZEND_USE_ABS_CONST_ADDR
 	if (CG(context).opcodes_size != op_array->last) {

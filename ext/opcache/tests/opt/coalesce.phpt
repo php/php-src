@@ -30,14 +30,14 @@ $_main:
 0000 RETURN int(1)
 
 a:
-     ; (lines=2, args=0, vars=1, tmps=1)
+     ; (lines=2, args=0, vars=1, tmps=1, vars_to_free=0)
      ; (after optimizer)
      ; %s
 0000 T1 = COALESCE CV0($test) 0001
 0001 RETURN bool(true)
 
 b:
-     ; (lines=2, args=0, vars=1, tmps=1)
+     ; (lines=2, args=0, vars=1, tmps=1, vars_to_free=0)
      ; (after optimizer)
      ; %s
 0000 T1 = COALESCE CV0($test) 0001
