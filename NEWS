@@ -106,6 +106,10 @@ PHP                                                                        NEWS
     PROCESS_INFORMATION, an indeterminate comspec pointer after a failed
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
 
+- Streams:
+  . Fixed unbounded recursion when a userland stream wrapper opens a different
+    path at every nesting level. (Ilia Alshanetsky)
+
 - XSL:
   . Fixed bug GH-23730 (use-after-free when XSLTProcessor::importStylesheet()
     is called during a transformation). (David Carlier)

@@ -35,6 +35,8 @@
 
 static int le_protocols;
 
+#define USER_STREAM_MAX_RECURSION_DEPTH 64
+
 struct php_user_stream_wrapper {
 	php_stream_wrapper wrapper;
 	char * protoname;
@@ -302,12 +304,13 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	php_stream *stream = NULL;
 	bool old_in_user_include;
 
-	/* Try to catch bad usage without preventing flexibility */
-	if (FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0) {
+	if ((FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0)
+		|| FG(user_stream_recursion_depth) >= USER_STREAM_MAX_RECURSION_DEPTH) {
 		php_stream_wrapper_log_error(wrapper, options, "infinite recursion prevented");
 		return NULL;
 	}
 	FG(user_stream_current_filename) = filename;
+	FG(user_stream_recursion_depth)++;
 
 	/* if the user stream was registered as local and we are in include context,
 		we add allow_url_include restrictions to allow_url_fopen ones */
@@ -328,6 +331,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	user_stream_create_object(uwrap, context, &us->object);
 	if (Z_TYPE(us->object) == IS_UNDEF) {
 		FG(user_stream_current_filename) = NULL;
+		FG(user_stream_recursion_depth)--;
 		PG(in_user_include) = old_in_user_include;
 		efree(us);
 		return NULL;
@@ -345,6 +349,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		call_result = call_method_if_exists(&us->object, &zfuncname, &zretval, 4, args);
 	} zend_catch {
 		FG(user_stream_current_filename) = NULL;
+		FG(user_stream_recursion_depth)--;
 		zend_bailout();
 	} zend_end_try();
 
@@ -379,6 +384,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	zval_ptr_dtor(&args[0]);
 
 	FG(user_stream_current_filename) = NULL;
+	FG(user_stream_recursion_depth)--;
 
 	PG(in_user_include) = old_in_user_include;
 	return stream;
@@ -402,12 +408,13 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	int call_result;
 	php_stream *stream = NULL;
 
-	/* Try to catch bad usage without preventing flexibility */
-	if (FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0) {
+	if ((FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0)
+		|| FG(user_stream_recursion_depth) >= USER_STREAM_MAX_RECURSION_DEPTH) {
 		php_stream_wrapper_log_error(wrapper, options, "infinite recursion prevented");
 		return NULL;
 	}
 	FG(user_stream_current_filename) = filename;
+	FG(user_stream_recursion_depth)++;
 
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;
@@ -417,6 +424,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	user_stream_create_object(uwrap, context, &us->object);
 	if (Z_TYPE(us->object) == IS_UNDEF) {
 		FG(user_stream_current_filename) = NULL;
+		FG(user_stream_recursion_depth)--;
 		efree(us);
 		return NULL;
 	}
@@ -454,6 +462,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	zval_ptr_dtor(&args[0]);
 
 	FG(user_stream_current_filename) = NULL;
+	FG(user_stream_recursion_depth)--;
 
 	return stream;
 }
