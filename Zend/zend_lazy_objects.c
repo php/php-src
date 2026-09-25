@@ -179,6 +179,7 @@ bool zend_lazy_object_decr_lazy_props(zend_object *obj)
 	return info->lazy_properties_count == 0;
 }
 
+#if ZEND_DEBUG
 /* See zend_update_class_constants(). */
 static zend_always_inline bool zend_class_constants_are_updated(const zend_class_entry *ce) {
 	if (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) {
@@ -190,6 +191,7 @@ static zend_always_inline bool zend_class_constants_are_updated(const zend_class
 	}
 	return false;
 }
+#endif
 
 /**
  * Making objects lazy
