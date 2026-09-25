@@ -805,7 +805,7 @@ slightly different steps. We'll call attention where the steps differ.
    * Make sure the tarballs are available from, e.g.,
      `https://www.php.net/distributions/php-X.Y.Z.tar.gz`
    * Check the "downloads" page to make sure the new version appears:
-     https://www.php.net/downloads
+     https://www.php.net/downloads.php?source=Y
    * Does the news entry show up on the home page? https://www.php.net
    * Do the updates to the ChangeLog appear?
      e.g., https://www.php.net/ChangeLog-8.php
