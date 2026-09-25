@@ -27,6 +27,13 @@ PHP 8.7 UPGRADE NOTES
     not present in the result set. It previously reported the condition
     through PDO::ATTR_ERRMODE and returned false.
 
+- SQLite3:
+  . A failed fseek() on a blob stream opened by SQLite3::openBlob() now leaves
+    the stream position unchanged. Previously, ftell() returned false
+    afterwards and the stream was moved to the start or the end of the blob.
+    As a result, an fwrite() after a failed seek past the end now writes at
+    the unchanged position instead of failing.
+
 - Standard:
   . The number of filters that can be chained in a php://filter URL is limited
     to 16 by default. Set the stream context option max_filter_count to change

@@ -101,6 +101,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed bug GH-22051 (Inconsistent error reporting in SQLite3Result::reset()
     and SQLite3Result::finalize()). (Ilia Alshanetsky)
+  . Fixed bug GH-23905 (Failed seek on SQLite3 blob streams sets the stream
+    position to -1). (Marc Bennewitz)
 
 - Streams:
   . Applied the so_linger, so_rcvbuf and so_sndbuf context options to unix
