@@ -17,6 +17,12 @@ PHP                                                                        NEWS
   . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
     child's shadowing public property). (Ilia Alshanetsky)
 
+- PCNTL:
+  . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
+    an exception is pending. (nicolas-grekas)
+  . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
+    that throws. (nicolas-grekas)
+
 24 Sep 2026, PHP 8.6.0RC2
 
 - Core:
