@@ -1777,6 +1777,9 @@ ldap.max_links = -1
 ; SHM reset. The default "" disables file based caching.
 ;opcache.file_cache=
 
+; The permissions of the files cached.
+;opcache.file_cache_permissions=0600
+
 ; Enables or disables read-only mode for the second level cache directory.
 ; It should improve performance for read-only containers,
 ; when the cache is pre-warmed and packaged alongside the application.
