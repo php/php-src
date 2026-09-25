@@ -549,6 +549,7 @@ AC_CHECK_FUNCS([
   funopen
   gai_strerror
   getcwd
+  getdtablesize
   getgrnam_r
   gethostname
   getloadavg
