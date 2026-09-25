@@ -824,7 +824,10 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 		}
 
 		if (!zend_is_callable_ex(&fci->function_name, fci->object, 0, NULL, fci_cache, &error)) {
-			ZEND_ASSERT(error && "Should have error if not callable");
+			if (!error) {
+				ZEND_ASSERT(EG(exception) && "Should have error if not callable");
+				return SUCCESS;
+			}
 			zend_string *callable_name
 				= zend_get_callable_name_ex(&fci->function_name, fci->object);
 			zend_throw_error(NULL, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
