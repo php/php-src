@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fix too wide type inference for ASSIGN_DIM_OP. (ndossche)
   . Fix OSS-Fuzz #568005340 (FETCH_DIM_FUNC_ARG partial conversion). (ndossche)
 
+- PDO:
+  . Fixed a duplicate warning when ATTR_STATEMENT_CLASS is rejected on a
+    persistent connection. (Ilia Alshanetsky)
+
 - SOAP:
   . Fixed use of uninitialized func in do_request() on OOM bailout.
     (David Carlier)
