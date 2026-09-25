@@ -71,7 +71,6 @@ static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 	php_stream_bucket *bucket = (php_stream_bucket *)res->ptr;
 	if (bucket) {
 		php_stream_bucket_delref(bucket);
-		bucket = NULL;
 	}
 }
 

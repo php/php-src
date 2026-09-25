@@ -44,9 +44,7 @@
 /* {{{ php_statpage */
 PHPAPI void php_statpage(void)
 {
-	zend_stat_t *pstat = NULL;
-
-	pstat = sapi_get_stat();
+	zend_stat_t *pstat = sapi_get_stat();
 
 	if (BG(page_uid)==-1 || BG(page_gid)==-1) {
 		if(pstat) {
