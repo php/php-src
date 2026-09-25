@@ -104,7 +104,7 @@ static zend_always_inline int zend_atomic_int_exchange_ex(zend_atomic_int *obj, 
 }
 
 static zend_always_inline bool zend_atomic_bool_compare_exchange_ex(zend_atomic_bool *obj, bool *expected, bool desired) {
-	bool prev = (bool) InterlockedCompareExchange8(&obj->value, *expected, desired);
+	bool prev = (bool) InterlockedCompareExchange8(&obj->value, desired, *expected);
 	if (prev == *expected) {
 		return true;
 	} else {
@@ -114,7 +114,7 @@ static zend_always_inline bool zend_atomic_bool_compare_exchange_ex(zend_atomic_
 }
 
 static zend_always_inline bool zend_atomic_int_compare_exchange_ex(zend_atomic_int *obj, int *expected, int desired) {
-	int prev = (int) InterlockedCompareExchange(&obj->value, *expected, desired);
+	int prev = (int) InterlockedCompareExchange(&obj->value, desired, *expected);
 	if (prev == *expected) {
 		return true;
 	} else {
