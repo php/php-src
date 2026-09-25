@@ -187,7 +187,8 @@ static void zend_verify_inference_def(zend_execute_data *execute_data, const zen
 	 && opline->opcode != ZEND_DO_FCALL_BY_NAME
 	 /* ZEND_FE_FETCH_R[W] does not define a result in the last iteration. */
 	 && opline->opcode != ZEND_FE_FETCH_R
-	 && opline->opcode != ZEND_FE_FETCH_RW) {
+	 && opline->opcode != ZEND_FE_FETCH_RW
+	 && (opline->opcode != ZEND_FETCH_OBJ_R || EG(current_execute_data) == execute_data)) {
 		zend_verify_type_inference(EX_VAR(opline->result.var), opline->result_def_type, opline->result_type, execute_data, opline, "result_def");
 
 		/* Verify return value in the context of caller. */
