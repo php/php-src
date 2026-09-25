@@ -1,5 +1,5 @@
 --TEST--
-curl_exec() under IO hooks: a large upload to a slow reader completes (section 5.12)
+curl_exec() under IO hooks: a large upload to a slow reader completes
 --EXTENSIONS--
 curl
 --FILE--
