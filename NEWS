@@ -87,6 +87,10 @@ PHP                                                                        NEWS
   . Fixed exceptions from user-defined create_sid() handlers being replaced
     by return-value validation errors. (Ilia Alshanetsky)
 
+- PDO Sqlite:
+  . Fixed bug GH-23756 (crash when a callback closes the cursor of or
+    re-executes the statement being executed). (Lazizbek Ergashev)
+
 - Sockets:
   . Fixed socket_select() silently truncating sets larger than FD_SETSIZE on
     Windows. (David Carlier)
