@@ -203,6 +203,9 @@ PHP                                                                        NEWS
   . Fixed a tracing JIT crash when compiling a side trace for a method of a
     class that could not be stored in the inheritance cache. (GH-21710)
     (Arnaud, iliaal)
+  . Fixed bug GH-17626 (JIT corrupts an opline handler when blacklisting a
+    root trace at the opcache.jit_max_root_traces limit, causing spurious
+    "Too few arguments" errors and crashes). (RV7PR)
 
 - OpenSSL:
   . Fixed GHSA-vvx9-73fr-5jjx (TLS hostname verification falls back to CN after
