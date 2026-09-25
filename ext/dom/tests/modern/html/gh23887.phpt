@@ -1,5 +1,7 @@
 --TEST--
 GH-23887 (Dom\HTMLCollection::namedItem() assertion failure, hang, or missed first element)
+--CREDITS--
+Lu Maltsis (lmaltsis)
 --EXTENSIONS--
 dom
 --FILE--
