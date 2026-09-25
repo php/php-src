@@ -1,0 +1,10 @@
+ARG_ENABLE('isapi', 'Build ISAPI version of PHP', 'no');
+
+if (PHP_ISAPI == "yes") {
+	if (PHP_ZTS == "no") {
+		WARNING("ISAPI module requires an --enable-zts build of PHP");
+	} else {
+		SAPI('isapi', 'php_isapi.c', 'php' + PHP_VERSION + 'isapi.dll', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+		ADD_FLAG('LDFLAGS_ISAPI', '/DEF:sapi\\isapi\\php_isapi.def');
+	}
+}
