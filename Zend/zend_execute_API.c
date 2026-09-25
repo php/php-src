@@ -825,7 +825,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 
 		if (!zend_is_callable_ex(&fci->function_name, fci->object, 0, NULL, fci_cache, &error)) {
 			if (!error) {
-				ZEND_ASSERT(EG(exception) && "Should have error if not callable");
+				ZEND_ASSERT(EG(exception));
 				return SUCCESS;
 			}
 			zend_string *callable_name
