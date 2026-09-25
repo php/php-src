@@ -2,6 +2,9 @@
 	Build Configuration Template for Win32.
 */
 
+#ifndef PHP_WIN32_CONFIG_W32_H
+#define PHP_WIN32_CONFIG_W32_H
+
 /* Define the minimum supported version */
 #undef _WIN32_WINNT
 #undef NTDDI_VERSION
@@ -141,3 +144,5 @@
 #endif
 
 #define HAVE_GETADDRINFO 1
+
+#endif /* PHP_WIN32_CONFIG_W32_H */
