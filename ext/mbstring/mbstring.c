@@ -18,7 +18,7 @@
 /* {{{ includes */
 #include <limits.h>
 
-#include "libmbfl/config.h"
+#include <libmbfl/config.h>
 #include "php.h"
 #include "php_ini.h"
 #include "php_variables.h"
