@@ -2859,6 +2859,13 @@ static void curl_free_obj(zend_object *object)
 		efree(ch->clone);
 	}
 
+	_php_curl_free_instance(ch);
+
+	zend_object_std_dtor(&ch->std);
+}
+
+void _php_curl_free_instance(php_curl *ch)
+{
 	smart_str_free(&ch->handlers.write->buf);
 	if (ZEND_FCC_INITIALIZED(ch->handlers.write->fcc)) {
 		zend_fcc_dtor(&ch->handlers.write->fcc);
@@ -2911,8 +2918,6 @@ static void curl_free_obj(zend_object *object)
 	if (ch->share) {
 		OBJ_RELEASE(&ch->share->std);
 	}
-
-	zend_object_std_dtor(&ch->std);
 }
 /* }}} */
 
