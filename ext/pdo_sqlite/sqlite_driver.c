@@ -514,8 +514,8 @@ static int php_sqlite3_collation_callback(void *context, int string1_len, const 
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			zend_string *func_name = get_active_function_or_method_name();
-			zend_type_error("%s(): Return value of the collation callback must be of type int, %s returned",
-				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
+			zend_type_error("%pS(): Return value of the collation callback must be of type int, %s returned",
+				func_name, zend_zval_value_name(&retval));
 			zend_string_release(func_name);
 			zval_ptr_dtor(&retval);
 			return FAILURE;
@@ -865,16 +865,16 @@ static int authorizer(void *autharg, int access_type, const char *arg1, const ch
 	} else {
 		if (Z_TYPE(retval) != IS_LONG) {
 			zend_string *func_name = get_active_function_or_method_name();
-			zend_type_error("%s(): Return value of the authorizer callback must be of type int, %s returned",
-				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
+			zend_type_error("%pS(): Return value of the authorizer callback must be of type int, %s returned",
+				func_name, zend_zval_value_name(&retval));
 			zend_string_release(func_name);
 		} else {
 			authreturn = Z_LVAL(retval);
 
 			if (authreturn != SQLITE_OK && authreturn != SQLITE_IGNORE && authreturn != SQLITE_DENY) {
 				zend_string *func_name = get_active_function_or_method_name();
-				zend_value_error("%s(): Return value of the authorizer callback must be one of Pdo\\Sqlite::OK, Pdo\\Sqlite::DENY, or Pdo\\Sqlite::IGNORE",
-					ZSTR_VAL(func_name));
+				zend_value_error("%pS(): Return value of the authorizer callback must be one of Pdo\\Sqlite::OK, Pdo\\Sqlite::DENY, or Pdo\\Sqlite::IGNORE",
+					func_name);
 				zend_string_release(func_name);
 				authreturn = SQLITE_DENY;
 			}
