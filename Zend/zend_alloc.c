@@ -380,7 +380,7 @@ static const uint32_t bin_pages[] = {
 	ZEND_MM_BINS_INFO(_BIN_DATA_PAGES, x, y)
 };
 
-static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
+ZEND_NORETURN static ZEND_COLD void zend_mm_panic(const char *message)
 {
 	fprintf(stderr, "%s\n", message);
 /* See http://support.microsoft.com/kb/190351 */
@@ -393,7 +393,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
 	abort();
 }
 
-static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
+ZEND_NORETURN static ZEND_COLD void zend_mm_safe_error(zend_mm_heap *heap,
 	const char *format,
 	size_t limit,
 #if ZEND_DEBUG
@@ -2995,7 +2995,7 @@ ZEND_API char* ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LI
 	return p;
 }
 
-static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void);
+ZEND_NORETURN static ZEND_COLD void zend_out_of_memory(void);
 
 ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 {
@@ -3091,7 +3091,7 @@ ZEND_API void refresh_memory_manager(void)
 	zend_mm_refresh_key_child(AG(mm_heap));
 }
 
-static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
+ZEND_NORETURN static ZEND_COLD void zend_out_of_memory(void)
 {
 	fprintf(stderr, "Out of memory\n");
 	abort();

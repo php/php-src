@@ -1295,7 +1295,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 }
 /* }}} */
 
-static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(const zend_string *lcname, const zend_op_array *op_array, bool compile_time) /* {{{ */
+ZEND_NORETURN static zend_never_inline ZEND_COLD void do_bind_function_error(const zend_string *lcname, const zend_op_array *op_array, bool compile_time) /* {{{ */
 {
 	const zval *zv = zend_hash_find_known_hash(compile_time ? CG(function_table) : EG(function_table), lcname);
 	int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;

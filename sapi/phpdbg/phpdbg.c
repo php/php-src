@@ -1060,7 +1060,7 @@ static void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{
 } /* }}} */
 
 
-static ZEND_NORETURN void phpdbg_sighup_handler(int sig) /* {{{ */
+ZEND_NORETURN static void phpdbg_sighup_handler(int sig) /* {{{ */
 {
 	exit(0);
 } /* }}} */

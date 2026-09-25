@@ -298,7 +298,7 @@ zend_result zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 void zend_unload_modules(void);
 
-ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno);
+ZEND_NORETURN ZEND_API ZEND_COLD void _zend_bailout(const char *filename, uint32_t lineno);
 ZEND_API size_t zend_get_page_size(void);
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap);
@@ -387,13 +387,13 @@ extern ZEND_API void (*zend_post_shutdown_cb)(void);
 extern ZEND_API void (*zend_accel_schedule_restart_hook)(int reason);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...);
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_noreturn_unchecked(int type, const char *format, ...);
 /* For custom format specifiers like H */
 ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...);
 /* If filename is NULL the default filename is used. */
 ZEND_API ZEND_COLD void zend_error_at(int type, zend_string *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(int type, zend_string *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_error_at_noreturn(int type, zend_string *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);
 ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message);
 ZEND_API ZEND_COLD void zend_error_zstr_at(int type, zend_string *filename, uint32_t lineno, zend_string *message);
 
@@ -407,7 +407,7 @@ ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *contain
 ZEND_COLD void zenderror(const char *error);
 
 /* For internal C errors */
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message);
+ZEND_NORETURN ZEND_API ZEND_COLD void zend_strerror_noreturn(int type, int errn, const char *message);
 
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
