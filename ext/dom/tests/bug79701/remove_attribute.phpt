@@ -4,7 +4,8 @@ Bug #79701 (getElementById does not correctly work with duplicate definitions) -
 dom
 --FILE--
 <?php
-$dom = Dom\XMLDocument::createFromString(<<<XML
+$dom = new DOMDocument;
+$dom->loadXML(<<<XML
 <root>
     <test1 xml:id="x"/>
     <test2 xml:id="x"/>
@@ -16,6 +17,6 @@ $dom->getElementById('x')->removeAttribute('xml:id');
 var_dump($dom->getElementById('x')?->nodeName);
 ?>
 --EXPECTF--
-Warning: Dom\XMLDocument::createFromString(): ID x already defined in Entity, line: 3 in %s on line %d
+Warning: DOMDocument::loadXML(): ID x already defined in Entity, line: 3 in %s on line %d
 string(5) "test1"
 NULL
