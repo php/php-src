@@ -55,6 +55,8 @@ runs:
             openldap-dev \
             unixodbc-dev \
             postgresql-dev \
+            apache2 \
+            apache2-dev \
             tzdata \
             musl-locales \
             musl-locales-lang \
