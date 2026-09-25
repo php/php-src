@@ -58,8 +58,8 @@ Array
             [0] => not_null
         )
 
-    [table] => test_33689
     [name] => bar
+    [table] => test_33689
     [len] => 11
     [precision] => 0
 )
