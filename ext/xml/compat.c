@@ -635,11 +635,13 @@ XML_GetCurrentColumnNumber(XML_Parser parser)
 	return parser->parser->input->col;
 }
 
-PHP_XML_API long
+PHP_XML_API zend_long
 XML_GetCurrentByteIndex(XML_Parser parser)
 {
-	return parser->parser->input->consumed +
-			(parser->parser->input->cur - parser->parser->input->base);
+	/* consumed is unsigned long; widen before adding so it does not wrap
+	 * or turn negative where long is narrower than zend_long */
+	return (zend_long) parser->parser->input->consumed +
+			(zend_long) (parser->parser->input->cur - parser->parser->input->base);
 }
 
 PHP_XML_API void
