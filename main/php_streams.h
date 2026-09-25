@@ -586,7 +586,7 @@ END_EXTERN_C()
 int php_init_stream_wrappers(int module_number);
 void php_shutdown_stream_wrappers(int module_number);
 void php_shutdown_stream_hashes(void);
-PHP_RSHUTDOWN_FUNCTION(streams);
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(streams);
 
 BEGIN_EXTERN_C()
 PHPAPI zend_result php_register_url_stream_wrapper(const char *protocol, const php_stream_wrapper *wrapper);
