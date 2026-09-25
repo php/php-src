@@ -33,8 +33,8 @@ $stmt->execute();
 
 function stuffingErrorHandler(int $errno, string $errstr, string $errfile, int $errline) {
     global $stmt;
-    $stmt->setFetchMode(PDO::FETCH_CLASS, 'B', [$errstr]);
     echo $errstr, PHP_EOL;
+    $stmt->setFetchMode(PDO::FETCH_CLASS, 'B', [$errstr]);
 }
 set_error_handler(stuffingErrorHandler(...));
 
@@ -53,4 +53,4 @@ PDOTest::dropTableIfExists($db, "pdo_fetch_class_change_ctor_five");
 ?>
 --EXPECT--
 PDOStatement::fetchAll(): The PDO::FETCH_SERIALIZE mode is deprecated
-Error: Cannot change default fetch mode while fetching
+Error: Cannot perform another operation on this PDOStatement while an operation is in progress
