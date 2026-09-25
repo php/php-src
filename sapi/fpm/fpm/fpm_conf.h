@@ -107,6 +107,9 @@ struct fpm_worker_pool_config_s {
 #ifdef SO_SETFIB
 	int listen_setfib;
 #endif
+#ifdef SO_RTABLE
+	int listen_rtable;
+#endif
 };
 
 struct ini_value_parser_s {
