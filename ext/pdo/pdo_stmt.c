@@ -123,6 +123,29 @@ iterate:
 }
 /* }}} */
 
+static zend_string *pdo_stmt_change_case(zend_string *str, enum pdo_case_conversion desired_case) /* {{{ */
+{
+	/*
+	 * Note that input string may be freed; treat this like realloc() and
+	 * reassign the string.
+	 */
+	zend_string *orig = str;
+	switch (desired_case) {
+		case PDO_CASE_LOWER:
+			str = zend_string_tolower(orig);
+			zend_string_release(orig);
+			break;
+		case PDO_CASE_UPPER:
+			str = zend_string_toupper(orig);
+			zend_string_release(orig);
+			break;
+		default:
+			break;
+	}
+	return str;
+}
+/* }}} */
+
 bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 {
 	int col;
@@ -136,26 +159,17 @@ bool pdo_stmt_describe_columns(pdo_stmt_t *stmt) /* {{{ */
 
 		/* if we are applying case conversions on column names, do so now */
 		if (stmt->dbh->native_case != stmt->dbh->desired_case && stmt->dbh->desired_case != PDO_CASE_NATURAL) {
-			zend_string *orig_name = stmt->columns[col].name;
-			switch (stmt->dbh->desired_case) {
-				case PDO_CASE_LOWER:
-					stmt->columns[col].name = zend_string_tolower(orig_name);
-					zend_string_release(orig_name);
-					break;
-				case PDO_CASE_UPPER:
-					stmt->columns[col].name = zend_string_toupper(orig_name);
-					zend_string_release(orig_name);
-					break;
-				default: ZEND_UNREACHABLE();
+			stmt->columns[col].name = pdo_stmt_change_case(stmt->columns[col].name, stmt->dbh->desired_case);
+			if (stmt->columns[col].table) {
+				stmt->columns[col].table = pdo_stmt_change_case(stmt->columns[col].table, stmt->dbh->desired_case);
 			}
 		}
 
 		/* prepend the table name if the attribute is set */
 		if (stmt->dbh->fetch_table_names && stmt->columns[col].table && ZSTR_LEN(stmt->columns[col].table)) {
-			/* XXX: Apply case to table as well? */
-			zend_string *table_name = stmt->columns[col].table;
 			zend_string *orig_name = stmt->columns[col].name;
-			stmt->columns[col].name = strpprintf(0, "%pS.%pS", table_name, orig_name);
+			stmt->columns[col].name = strpprintf(0, "%pS.%pS",
+					stmt->columns[col].table, orig_name);
 			zend_string_release(orig_name);
 		}
 

@@ -21,6 +21,9 @@ PDOTest::skip();
     $db->exec("CREATE TABLE {$table} (id INT, label CHAR(1), PRIMARY KEY(id))");
     $db->exec("INSERT INTO {$table} (id, label) VALUES (1, 'a')");
 
+    // Firebird returns tables in upcase, force lowering
+    $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+
     $db->setAttribute(PDO::ATTR_FETCH_TABLE_NAMES, true);
     var_dump($db->getAttribute(PDO::ATTR_FETCH_TABLE_NAMES));
     $stmt = $db->query("SELECT label FROM {$table}");
