@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.7.0alpha1
 
+- FPM:
+  . Use recommended TYPE, HELP order for OpenMetrics metadata.
+    (Marcel Hernandez)
+
 - Intl:
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
