@@ -100,7 +100,7 @@ static int parent = 1;
 static int request_body_fd;
 static int fpm_is_running = 0;
 
-static char *sapi_cgibin_getenv(const char *name, size_t name_len);
+static zend_string *sapi_cgibin_getenv(const char *name, size_t name_len);
 static void fastcgi_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg);
 
 #define PHP_MODE_STANDARD	1
@@ -461,16 +461,19 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes) /* {{{ */
 }
 /* }}} */
 
-static char *sapi_cgibin_getenv(const char *name, size_t name_len) /* {{{ */
+static zend_string *sapi_cgibin_getenv(const char *name, size_t name_len) /* {{{ */
 {
+	char *var = NULL;
 	/* if fpm has started, use fcgi env */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
-		return fcgi_getenv(request, name, name_len);
+		var = fcgi_getenv(request, name, name_len);
 	}
-
-	/* if fpm has not started yet, use std env */
-	return getenv(name);
+	if (!var) {
+		/* if fpm has not started yet, use std env */
+		var = getenv(name); /* XXX: should we? */
+	}
+	return var ? zend_string_init(var, strlen(var), 0) : NULL;
 }
 /* }}} */
 
@@ -564,20 +567,27 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 	if (CGIG(fix_pathinfo)) {
 		char *script_name = SG(request_info).request_uri;
 		unsigned int script_name_len = script_name ? strlen(script_name) : 0;
-		char *path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO") - 1);
-		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
+		zend_string *path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO") - 1);
 
-		php_self_len = script_name_len + path_info_len;
-		/* Concat script_name and path_info into php_self */
-		php_self = zend_cstr_concat(
-			script_name, script_name_len,
-			path_info, path_info_len);
+		if (path_info) {
+			php_self_len = script_name_len + ZSTR_LEN(path_info);
+			/* Concat script_name and path_info into php_self */
+			php_self = zend_cstr_concat(
+				script_name, script_name_len,
+				ZSTR_VAL(path_info), ZSTR_LEN(path_info));
+		} else {
+			php_self_len = script_name_len;
+			php_self = estrdup(script_name ? script_name : "");
+		}
 
 		/* Build the special-case PHP_SELF variable for the CGI version */
 		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len)) {
 			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array);
 		}
 		efree(php_self);
+		if (path_info) {
+			zend_string_release(path_info);
+		}
 	} else {
 		php_self = SG(request_info).request_uri ? SG(request_info).request_uri : "";
 		php_self_len = strlen(php_self);

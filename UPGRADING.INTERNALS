@@ -36,3 +36,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+- sapi_getenv now returns a zend_string* that must be freed by the caller.
+  Previously, it returned a char* that was allocated on Windows and pointed
+  to an OS-provided buffer on Unix.
