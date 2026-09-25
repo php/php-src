@@ -1,7 +1,10 @@
 --TEST--
 Test easter_date() on 64bit systems checks the upper year limit
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
+<?php
+if (PHP_INT_SIZE != 8) die("skip 64-bit only");
+if (PHP_OS_FAMILY === "Windows") die("skip not for Windows, see gh23915_windows.phpt");
+?>
 --INI--
 date.timezone=UTC
 --ENV--

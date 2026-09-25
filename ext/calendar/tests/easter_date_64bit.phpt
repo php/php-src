@@ -19,15 +19,15 @@ echo date("Y-m-d", easter_date(2046))."\n";
 echo date("Y-m-d", easter_date(2047))."\n";
 try {
     easter_date(1492);
-} catch (ValueError $ex) {
-    echo "{$ex->getMessage()}\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 2000-04-23
 2001-04-15
 2002-03-31
 2045-04-09
 2046-03-25
 2047-04-14
-easter_date(): Argument #1 ($year) must be between 1970 and 2000000000
+ValueError: easter_date(): Argument #1 ($year) must be between 1970 and %d
