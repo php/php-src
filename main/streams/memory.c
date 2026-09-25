@@ -127,8 +127,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 		case SEEK_CUR:
 			if (offset < 0) {
 				if (ms->fpos < -(size_t)offset) {
-					ms->fpos = 0;
-					*newoffs = -1;
+					*newoffs = ms->fpos;
 					return -1;
 				} else {
 					ms->fpos = ms->fpos + offset;
@@ -146,8 +145,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 			}
 		case SEEK_SET:
 			if (offset < 0) {
-				ms->fpos = 0;
-				*newoffs = -1;
+				*newoffs = ms->fpos;
 				return -1;
 			} else {
 				ms->fpos = offset;
@@ -164,8 +162,7 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				stream->fatal_error = 0;
 				return 0;
 			} else if (ZSTR_LEN(ms->data) < -(size_t)offset) {
-				ms->fpos = 0;
-				*newoffs = -1;
+				*newoffs = ms->fpos;
 				return -1;
 			} else {
 				ms->fpos = ZSTR_LEN(ms->data) + offset;
