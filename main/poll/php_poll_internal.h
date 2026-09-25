@@ -66,7 +66,7 @@ struct php_poll_timer {
 	zend_hrtime_t deadline;
 	zend_hrtime_t period;
 	void *data;
-	uint32_t heap_idx;          /* UINT32_MAX while disarmed */
+	uint32_t heap_idx; /* UINT32_MAX while disarmed */
 };
 
 /* Main poll context */
@@ -86,8 +86,7 @@ struct php_poll_ctx {
 	/* Backend-specific data */
 	void *backend_data;
 
-	/* The process that created it: a child inherits a context it must not
-	 * touch, since the backend instance is shared with the parent */
+	/* A forked child must not touch the backend it shares with the parent */
 	pid_t owner_pid;
 
 	/* Deadline heap of the armed timers */

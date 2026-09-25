@@ -191,9 +191,7 @@ struct _php_stream_wrapper	{
 
 #define PHP_STREAM_FLAG_NO_IO						0x400
 
-/* Set while an operation on the stream is in flight (main/php_io_hooks.h).
- * Any attempt to use the stream as a parameter during this window is a
- * concurrent-access bug and throws an Error. */
+/* An operation on the stream is in flight: passing it to a function throws */
 #define PHP_STREAM_FLAG_IN_USE						0x800
 
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
@@ -254,9 +252,7 @@ struct _php_stream  {
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
 
-	/* StreamPollWeakHandle singleton for this stream. Not refcounted; zeroed when the
-	 * WeakHandle is freed. streams.c calls weak_ops->notify() through this pointer
-	 * when the stream is freed (see php_poll_weak_handle_ops in php_poll.h). */
+	/* StreamPollWeakHandle singleton, not refcounted, zeroed when it is freed */
 	zend_object *weak_poll_handle;
 
 	zend_llist *error_list;
@@ -657,7 +653,6 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
 PHPAPI HashTable *php_get_stream_filters_hash(void);
 PHPAPI HashTable *php_get_stream_filters_hash_global(void);
 extern const php_stream_wrapper_ops *php_stream_user_wrapper_ops;
-
 
 static inline bool php_is_stream_path(const char *filename)
 {

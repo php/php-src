@@ -297,9 +297,8 @@ PHPAPI php_socket_t php_network_connect_socket_to_host_ex(const char *host, unsi
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts, php_sockvals *sockvals
 		);
 
-/* The *_stream variants take the stream the socket belongs to (NULL for none)
- * for the IO hooks. current, if not NULL, holds the socket being connected
- * while the connect waits, so the stream's handle can resolve it. */
+/* The *_stream variants take the socket's stream, or NULL, for the IO hooks. current, if not NULL,
+ * holds the socket while the connect waits. */
 PHPAPI php_socket_t php_network_connect_socket_to_host_stream(php_stream *stream, php_socket_t *current,
 		const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,

@@ -40,10 +40,10 @@
 #define PHP_POLL_ONESHOT 0x20
 #define PHP_POLL_ET      0x40 /* Edge-triggered */
 #define PHP_POLL_PRI     0x80 /* Priority data, backend dependent */
-#define PHP_POLL_TIMER   0x100 /* A timer of the context fired */
-#define PHP_POLL_NOTIFY  0x200 /* A notification handle is raised */
-#define PHP_POLL_SIGNAL  0x400 /* A signal handle delivered */
-#define PHP_POLL_PROCESS 0x800 /* A process handle: the child exited */
+#define PHP_POLL_TIMER   0x100
+#define PHP_POLL_NOTIFY  0x200
+#define PHP_POLL_SIGNAL  0x400
+#define PHP_POLL_PROCESS 0x800 /* The child exited */
 
 /* Poll flags */
 #define PHP_POLL_FLAG_PERSISTENT 0x01
@@ -107,8 +107,7 @@ typedef struct php_poll_event php_poll_event;
 PHPAPI bool php_poll_is_backend_available(php_poll_backend_type backend);
 PHPAPI bool php_poll_backend_supports_edge_triggering(php_poll_backend_type backend);
 PHPAPI bool php_poll_backend_supports_priority(php_poll_backend_type backend);
-/* Whether ProcessHandle and SignalHandle have a source: a pidfd or signalfd
- * on Linux, EVFILT_PROC and EVFILT_SIGNAL on kqueue */
+/* Whether ProcessHandle and SignalHandle have a native source */
 PHPAPI bool php_poll_backend_supports_process_handles(php_poll_backend_type backend);
 PHPAPI bool php_poll_backend_supports_signal_handles(php_poll_backend_type backend);
 
@@ -126,23 +125,20 @@ PHPAPI zend_result php_poll_remove(php_poll_ctx *ctx, int fd);
 PHPAPI int php_poll_wait(php_poll_ctx *ctx, php_poll_event *events, int max_events,
 		const struct timespec *timeout);
 
-/* Timers: deadline heap entries of the context, reported by php_poll_wait()
- * as events with fd -1 and PHP_POLL_TIMER in revents, before descriptor
- * events. Deadlines are zend_hrtime() values. A period of 0 is a one-shot
- * timer, which stays registered but disarmed after it fired until it is
- * modified or removed; a periodic timer re-arms from its previous deadline. */
+/* Timers are reported by php_poll_wait() as events with fd -1 and PHP_POLL_TIMER, before the
+ * descriptor events. Deadlines are zend_hrtime() values. A one-shot timer (period 0) stays
+ * registered but disarmed after it fired; a periodic one re-arms from its previous deadline. */
 typedef struct php_poll_timer php_poll_timer;
 
-PHPAPI php_poll_timer *php_poll_timer_add(php_poll_ctx *ctx, zend_hrtime_t deadline, zend_hrtime_t period, void *data);
-PHPAPI zend_result php_poll_timer_modify(php_poll_ctx *ctx, php_poll_timer *timer, zend_hrtime_t deadline, zend_hrtime_t period, void *data);
+PHPAPI php_poll_timer *php_poll_timer_add(php_poll_ctx *ctx, zend_hrtime_t deadline,
+		zend_hrtime_t period, void *data);
+PHPAPI zend_result php_poll_timer_modify(php_poll_ctx *ctx, php_poll_timer *timer,
+		zend_hrtime_t deadline, zend_hrtime_t period, void *data);
 PHPAPI void php_poll_timer_remove(php_poll_ctx *ctx, php_poll_timer *timer);
 /* Armed timers */
 PHPAPI uint32_t php_poll_timer_count(php_poll_ctx *ctx);
 
-/* Signal sets and signal information for process and signal handles and
- * the op layer: sigset_t and siginfo_t on POSIX, small structs on Windows,
- * where a set is a bit per CRT signal number (the same shape as ior's
- * ior_sigset_t and ior_siginfo_t) */
+/* On Windows a set is a bit per CRT signal number, like ior_sigset_t */
 #ifdef PHP_WIN32
 typedef struct { uint32_t bits; } php_sigset_t;
 typedef struct { int si_signo; int si_code; } php_siginfo_t;
@@ -189,21 +185,16 @@ typedef siginfo_t php_siginfo_t;
 #endif
 
 #ifndef PHP_WIN32
-/* Native sources for process and signal handles: a descriptor readable when
- * the child exited or a signal of the set is pending. A pidfd and a signalfd
- * on Linux, a private kqueue with EVFILT_PROC or EVFILT_SIGNAL on kqueue
- * platforms; -1 with ENOSYS where there is none, ESRCH for a process that
- * is neither running nor a waitable child. Neither source reaps or
- * consumes: the child is reaped with waitpid() by whoever watches it, and a
- * pending signal is taken with php_poll_signal_source_take(). */
+/* A descriptor readable when the child exited or a signal of the set is pending: a pidfd or a
+ * signalfd, or a private kqueue. -1 with ENOSYS where there is none, ESRCH for a process that is
+ * not a waitable child. It neither reaps the child nor consumes the signal. */
 PHPAPI bool php_poll_has_process_source(void);
 PHPAPI bool php_poll_has_signal_source(void);
 PHPAPI int php_poll_process_source_open(pid_t pid);
 PHPAPI int php_poll_signal_source_open(const sigset_t *set);
-/* Consume the next delivered signal of the set through the source, or from
- * the pending set when fd is -1; 0 when nothing is pending. Never waits. */
+/* Never waits, 0 when nothing is pending; fd -1 takes from the pending set */
 PHPAPI int php_poll_signal_source_take(int fd, const sigset_t *set, siginfo_t *info);
-/* Consume one pending signal of the set without waiting; 0 when none */
+/* Never waits, 0 when nothing is pending */
 PHPAPI int php_poll_signal_take_pending(const sigset_t *set, siginfo_t *info);
 #endif
 
@@ -247,17 +238,14 @@ struct php_poll_handle_ops {
 	void (*cleanup)(php_poll_handle_object *handle);
 
 	/**
-	 * A handle standing for something other than descriptor readiness: the
-	 * one PHP_POLL_* event it reports (NOTIFY, SIGNAL or PROCESS), watched
-	 * as READ on its descriptor. Zero for descriptor handles.
+	 * The event a NOTIFY, SIGNAL or PROCESS handle reports, watched as READ on its descriptor.
+	 * Zero for descriptor handles.
 	 */
 	uint32_t event;
 
 	/**
-	 * Called when the descriptor of such a handle was reported readable,
-	 * before the event is delivered, to consume the source and record what
-	 * it found. Returns whether it took something; the event is reported
-	 * only then. May be NULL.
+	 * Consumes the source of such a handle once it is readable. May be NULL.
+	 * @return whether the event is reported
 	 */
 	bool (*fired)(php_poll_handle_object *handle);
 };
@@ -266,8 +254,8 @@ struct php_poll_handle_ops {
 struct php_poll_handle_object {
 	php_poll_handle_ops *ops;
 	void *handle_data;
-	HashTable *watching; /* context_ptr_key -> php_io_poll_watcher_object* (IS_PTR, no refcount) */
-	struct _php_io_persistent_op *persistent; /* persistent ops keyed by events mask, main/php_io_hooks.h */
+	HashTable *watching; /* context key -> watcher, not refcounted */
+	struct _php_io_persistent_op *persistent;
 	zend_object std;
 };
 

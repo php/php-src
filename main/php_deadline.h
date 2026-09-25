@@ -28,19 +28,17 @@ static inline bool php_deadline_is_infinite(php_deadline *deadline)
 	return deadline->hrtime == (zend_hrtime_t)-1;
 }
 
-/* Initialize an infinite deadline. */
 static inline void php_deadline_init_infinite(php_deadline *deadline)
 {
 	deadline->hrtime = (zend_hrtime_t)-1;
 }
 
-/* Initialize an non-blocking deadline. */
 static inline void php_deadline_init_nonblock(php_deadline *deadline)
 {
 	deadline->hrtime = 0;
 }
 
-/* Initialize deadline from a timeout relative to now. */
+/* timeout is relative to now */
 static inline void php_deadline_init(php_deadline *deadline, struct timeval *timeout)
 {
 	if (timeout == NULL || timeout->tv_sec == -1) {
@@ -62,10 +60,7 @@ static inline void php_deadline_init(php_deadline *deadline, struct timeval *tim
 	deadline->hrtime += timeout->tv_sec * ZEND_NANO_IN_SEC + timeout->tv_usec * 1000;
 }
 
-/* Compute the remaining time until the deadline, in milliseconds, suitable
- * for passing directly to poll(2).
- * Returns -1 for an infinite deadline or if the remaining time overflows int.
- * Returns 0 if the deadline has already passed (non-blocking poll). */
+/* For poll(2): -1 when infinite or beyond an int, 0 when passed */
 static inline int php_deadline_to_timeout_ms(php_deadline *deadline)
 {
 	if (deadline == NULL || php_deadline_is_infinite(deadline)) {
@@ -75,7 +70,6 @@ static inline int php_deadline_to_timeout_ms(php_deadline *deadline)
 	zend_hrtime_t now = zend_hrtime();
 
 	if (deadline->hrtime <= now) {
-		/* Deadline expired */
 		return 0;
 	}
 
