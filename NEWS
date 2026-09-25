@@ -23,6 +23,10 @@ PHP                                                                        NEWS
     or never terminates). (Ilia Alshanetsky)
   . Fixed memory leak in JIT ASSIGN_DIM when the assignment fails. (Jorg Sowa)
 
+- PDO_Firebird:
+  . Fixed stack buffer overflow with long connection user names, passwords,
+    charsets, or roles. (Ilia Alshanetsky)
+
 - Streams:
   . Fixed bug GH-22063 (Stream filter chain UAF on self-removal during
     callback). (Ilia Alshanetsky)
