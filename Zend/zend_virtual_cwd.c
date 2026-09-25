@@ -166,6 +166,9 @@ static void realpath_cache_clean_helper(uint32_t max_entries, realpath_cache_buc
 
 static void cwd_globals_dtor(virtual_cwd_globals *cwd_g) /* {{{ */
 {
+	if (cwd_g->cwd.cwd) {
+		CWD_STATE_FREE(&cwd_g->cwd);
+	}
 	realpath_cache_clean_helper(sizeof(cwd_g->realpath_cache)/sizeof(cwd_g->realpath_cache[0]), cwd_g->realpath_cache, &cwd_g->realpath_cache_size);
 }
 /* }}} */
