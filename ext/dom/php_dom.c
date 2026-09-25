@@ -2403,7 +2403,7 @@ static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int t
 	zend_long lval;
 	if (dom_nodemap_or_nodelist_process_offset_as_named(offset, &lval)) {
 		/* exceptional case, switch to named lookup */
-		php_dom_obj_map_get_ns_named_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_STR_P(offset), NULL, rv);
+		php_dom_obj_map_get_ns_named_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_STR_P(offset), NULL, false, rv);
 		return rv;
 	}
 
@@ -2429,7 +2429,7 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 	if (dom_nodemap_or_nodelist_process_offset_as_named(member, &offset)) {
 		/* exceptional case, switch to named lookup */
 		dom_nnodemap_object *map = php_dom_obj_from_obj(object)->ptr;
-		return map->handler->has_ns_named_item(map, Z_STR_P(member), NULL);
+		return map->handler->has_ns_named_item(map, Z_STR_P(member), NULL, false);
 	}
 
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
@@ -2450,7 +2450,7 @@ static zval *dom_modern_nodemap_read_dimension(zend_object *object, zval *offset
 		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
 			map->handler->get_item(map, (zend_long) lval, rv);
 		} else {
-			php_dom_obj_map_get_ns_named_item_into_zval(map, Z_STR_P(offset), NULL, rv);
+			php_dom_obj_map_get_ns_named_item_into_zval(map, Z_STR_P(offset), NULL, false, rv);
 		}
 	} else if (Z_TYPE_P(offset) == IS_LONG) {
 		map->handler->get_item(map, Z_LVAL_P(offset), rv);
@@ -2478,7 +2478,7 @@ static int dom_modern_nodemap_has_dimension(zend_object *object, zval *member, i
 		if (ZEND_HANDLE_NUMERIC(Z_STR_P(member), lval)) {
 			return (zend_long) lval >= 0 && (zend_long) lval < php_dom_get_namednodemap_length(obj);
 		} else {
-			return map->handler->has_ns_named_item(map, Z_STR_P(member), NULL);
+			return map->handler->has_ns_named_item(map, Z_STR_P(member), NULL, false);
 		}
 	} else if (Z_TYPE_P(member) == IS_LONG) {
 		zend_long offset = Z_LVAL_P(member);
