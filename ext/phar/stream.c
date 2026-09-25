@@ -203,7 +203,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				efree(error);
 			} else {
 				php_stream_wrapper_log_warn(wrapper, context, options, CreateFailed,
-					"phar error: file \"%s\" could not be created in phar \"%s\"", internal_file, ZSTR_VAL(resource->host));
+					"phar error: file \"%s\" could not be created in phar \"%pS\"", internal_file, resource->host);
 			}
 			efree(internal_file);
 			php_url_free(resource);
@@ -234,7 +234,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			}
 		}
 		if (opened_path) {
-			*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%S/%S", idata->phar->fname, idata->internal_file->filename);
+			*opened_path = zend_strpprintf(MAXPATHLEN, "phar://%pS/%pS", idata->phar->fname, idata->internal_file->filename);
 		}
 		return fpf;
 	} else {
@@ -243,7 +243,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			phar = phar_get_archive(ZSTR_VAL(resource->host), ZSTR_LEN(resource->host), NULL, 0, NULL);
 			if (!phar) {
 				php_stream_wrapper_log_warn(wrapper, context, options, InvalidFormat,
-					"file %s is not a valid phar archive", ZSTR_VAL(resource->host));
+					"file %pS is not a valid phar archive", resource->host);
 				efree(internal_file);
 				php_url_free(resource);
 				return NULL;
@@ -264,7 +264,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 					stream = phar_open_archive_fp(phar);
 					if (UNEXPECTED(!stream)) {
 						php_stream_wrapper_log_warn(wrapper, context, options, OpenFailed,
-							"phar error: could not reopen phar \"%s\"", ZSTR_VAL(resource->host));
+							"phar error: could not reopen phar \"%pS\"", resource->host);
 						efree(internal_file);
 						php_url_free(resource);
 						return NULL;
@@ -305,7 +305,7 @@ idata_error:
 				efree(error);
 			} else {
 				php_stream_wrapper_log_warn(wrapper, context, options, NotFound,
-					"phar error: \"%s\" is not a file in phar \"%s\"", internal_file, ZSTR_VAL(resource->host));
+					"phar error: \"%s\" is not a file in phar \"%pS\"", internal_file, resource->host);
 			}
 			efree(internal_file);
 			php_url_free(resource);
@@ -347,7 +347,7 @@ idata_error:
 		}
 	}
 	if (opened_path) {
-		*opened_path = zend_strpprintf_unchecked(MAXPATHLEN, "phar://%S/%S", idata->phar->fname, idata->internal_file->filename);
+		*opened_path = zend_strpprintf(MAXPATHLEN, "phar://%pS/%pS", idata->phar->fname, idata->internal_file->filename);
 	}
 	efree(internal_file);
 phar_stub:
@@ -455,8 +455,8 @@ static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t cou
 	php_stream_seek(data->fp, data->position + data->zero, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
 		php_stream_warn(stream, WriteFailed,
-			"phar error: Could not write %zu characters to \"%s\" in phar \"%s\"",
-			count, ZSTR_VAL(data->internal_file->filename),  ZSTR_VAL(data->phar->fname));
+			"phar error: Could not write %zu characters to \"%pS\" in phar \"%pS\"",
+			count, data->internal_file->filename, data->phar->fname);
 		return -1;
 	}
 	data->position = php_stream_tell(data->fp) - data->zero;
@@ -727,8 +727,8 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	if (idata->internal_file->fp_refcount > 1) {
 		/* more than just our fp resource is open for this file */
 		php_stream_wrapper_log_warn(wrapper, context, options, UnlinkFailed,
-			"phar error: \"%s\" in phar \"%s\", has open file pointers, cannot unlink",
-			internal_file, ZSTR_VAL(resource->host));
+			"phar error: \"%s\" in phar \"%pS\", has open file pointers, cannot unlink",
+			internal_file, resource->host);
 		efree(internal_file);
 		php_url_free(resource);
 		phar_entry_delref(idata);

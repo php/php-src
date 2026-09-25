@@ -350,7 +350,7 @@ splitted:;
 			}
 		} else {
 			if (zend_hash_exists(&(phar->manifest), test)) {
-				ret = strpprintf(0, "phar://%s/%s", ZSTR_VAL(arch), ZSTR_VAL(test));
+				ret = strpprintf(0, "phar://%pS/%pS", arch, test);
 				zend_string_release_ex(test, false);
 				zend_string_release_ex(arch, false);
 				return ret;
@@ -359,7 +359,7 @@ splitted:;
 		zend_string_release_ex(test, false);
 	}
 
-	spprintf(&path, MAXPATHLEN + 1 + strlen(PG(include_path)), "phar://%s/%s%c%s", ZSTR_VAL(arch), PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
+	spprintf(&path, MAXPATHLEN + 1 + strlen(PG(include_path)), "phar://%pS/%s%c%s", arch, PHAR_G(cwd), DEFAULT_DIR_SEPARATOR, PG(include_path));
 	zend_string_release_ex(arch, false);
 	ret = php_resolve_path(ZSTR_VAL(filename), ZSTR_LEN(filename), path);
 	efree(path);

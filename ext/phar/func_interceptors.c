@@ -57,9 +57,9 @@ PHP_FUNCTION(phar_opendir) /* {{{ */
 			zend_string *entry = phar_fix_filepath(filename, filename_len, true);
 
 			if (ZSTR_VAL(entry)[0] == '/') {
-				spprintf(&name, 4096, "phar://%s%s", ZSTR_VAL(arch), ZSTR_VAL(entry));
+				spprintf(&name, 4096, "phar://%pS%pS", arch, entry);
 			} else {
-				spprintf(&name, 4096, "phar://%s/%s", ZSTR_VAL(arch), ZSTR_VAL(entry));
+				spprintf(&name, 4096, "phar://%pS/%pS", arch, entry);
 			}
 			zend_string_release_ex(entry, false);
 			zend_string_release_ex(arch, false);
@@ -135,7 +135,7 @@ static zend_string* phar_get_name_for_relative_paths(zend_string *filename, bool
 				ZSTR_VAL(entry), ZSTR_LEN(entry)
 			);
 		} else {
-			name = strpprintf(4096, "phar://%s/%s", ZSTR_VAL(arch), ZSTR_VAL(entry));
+			name = strpprintf(4096, "phar://%pS/%pS", arch, entry);
 		}
 		zend_string_release_ex(entry, false);
 	}
