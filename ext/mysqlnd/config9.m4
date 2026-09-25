@@ -54,7 +54,6 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
     mysqlnd_read_buffer.c
     mysqlnd_result_meta.c
     mysqlnd_result.c
-    mysqlnd_reverse_api.c
     mysqlnd_statistics.c
     mysqlnd_vio.c
     mysqlnd_wireprotocol.c
