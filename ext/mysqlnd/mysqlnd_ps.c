@@ -515,6 +515,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s, enum_mysqlnd_parse_e
 
 		stmt->state = MYSQLND_STMT_EXECUTED;
 		if (conn->last_query_type == QUERY_UPSERT || conn->last_query_type == QUERY_LOAD_LOCAL) {
+			stmt->field_count = conn->field_count;
 			DBG_INF("PASS");
 			DBG_RETURN(PASS);
 		}
