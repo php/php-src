@@ -18,4 +18,4 @@ try {
 }
 ?>
 --EXPECT--
-easter_date(): Argument #1 ($year) must be between 1970 and 2037 (inclusive)
+easter_date(): Argument #1 ($year) must be between 1970 and 2037
