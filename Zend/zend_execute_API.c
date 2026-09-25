@@ -1170,6 +1170,16 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		ce_cache = GC_REFCOUNT(name);
 		ce = GET_CE_CACHE(ce_cache);
 		if (EXPECTED(ce)) {
+			/*
+			 * Immutable SHM classes may carry method run_time_cache offsets
+			 * past this process's CG(map_ptr_last). Script load, inheritance
+			 * cache, persist and PFA already call zend_map_ptr_extend in that
+			 * situation; the CE cache fast path must too (GH-23637).
+			 */
+			if ((ce->ce_flags & ZEND_ACC_IMMUTABLE)
+					&& UNEXPECTED(zend_map_ptr_extend_from_shm)) {
+				zend_map_ptr_extend_from_shm();
+			}
 			return ce;
 		}
 	}
