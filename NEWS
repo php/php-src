@@ -29,6 +29,8 @@ PHP                                                                        NEWS
     (Ilia Alshanetsky)
   . Fixed bug GH-23729 (DOMXPath::__construct() use-after-free during an
     evaluation). (David Carlier)
+  . Fixed bug GH-23897 (php:function() assertion failure after a failed
+    registerPHPFunctions()). (David Carlier)
 
 - FTP:
   . Fixed bug GH-23619 (cryptic error on servers that don't support TLS
