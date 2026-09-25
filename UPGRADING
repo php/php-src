@@ -72,5 +72,7 @@ PHP 8.7 UPGRADE NOTES
 ========================================
 
 - Standard:
+  . Improved performance of array_diff() for integer-only arrays with densely
+    distributed values.
   . Improved performance of array_splice() when inserting without removing
     elements.
