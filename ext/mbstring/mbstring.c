@@ -2173,7 +2173,8 @@ static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, c
 	if (flag) {
 		/* The value of the flag is 2 if each codepoint takes 2 bytes, or 4 if 4 bytes */
 		from *= flag;
-		len *= flag;
+		/* len * flag can overflow size_t for large lengths on any platform */
+		len = (len > in_len / flag) ? in_len : len * flag;
 		if (from >= in_len) {
 			return zend_empty_string;
 		}
@@ -2459,6 +2460,8 @@ PHP_FUNCTION(mb_strcut)
 		if (len < 0) {
 			len = 0;
 		}
+	} else if (len > string.len) {
+		len = string.len;
 	}
 
 	if (from > string.len || len == 0) {
