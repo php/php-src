@@ -102,6 +102,9 @@ bool bc_raise(bc_num base, long exponent, bc_num *result, size_t scale) {
 		bc_free_num (result);
 		*result = temp;
 		(*result)->n_scale = MIN(scale, (*result)->n_scale);
+		if (bc_is_zero(*result)) {
+			(*result)->n_sign = PLUS;
+		}
 	}
 	bc_free_num (&power);
 	return true;

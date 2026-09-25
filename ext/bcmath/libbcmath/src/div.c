@@ -349,8 +349,12 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 		*quot = bc_new_num_nonzeroed(numerator->n_len, quot_scale);
 		char *qptr = (*quot)->n_value;
 		memcpy(qptr, numerator->n_value, numerator->n_len + quot_scale);
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 		_bc_rm_leading_zeros(*quot);
+		if (bc_is_zero(*quot)) {
+			(*quot)->n_sign = PLUS;
+		} else {
+			(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+		}
 		return true;
 	}
 
@@ -475,7 +479,11 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 		for (size_t i = 0; i < numerator_bottom_extension; i++) {
 			*qptr++ = 0;
 		}
-		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+		if (bc_is_zero(*quot)) {
+			(*quot)->n_sign = PLUS;
+		} else {
+			(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+		}
 		return true;
 	}
 
