@@ -58,6 +58,7 @@ var MINRE2C = "1.0.3";
 
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
+var cxx_mode_targets = {};
 
 /* Store the SAPI enabled (summary + QA check) */
 var sapi_enabled = new Array();
@@ -1460,12 +1461,16 @@ function ZEND_EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	extensions_enabled[extensions_enabled.length - 1][2] = true;
 }
 
-function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
+function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir, cxx_mode)
 {
 	var objs = null;
 	var EXT = extname.toUpperCase();
 	var extname_for_printing;
 	var ldflags;
+
+	if (cxx_mode) {
+		cxx_mode_targets[extname] = true;
+	}
 
 	if (shared == null) {
 		if (force_all_shared()) {
@@ -1804,8 +1809,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 					var _tmp = src.split("\\");
 					var filename = _tmp.pop();
 					obj = filename.replace(re, ".obj");
+					var c11_flag = VS_TOOLSET && !cxx_mode_targets[target] && /\.c$/i.test(src) ? " /std:c11" : "";
 
-					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 					if ("clang" == PHP_ANALYZER) {
 						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
@@ -1819,11 +1825,20 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 			} else {
 				/* TODO create a response file at least for the source files to work around the cmd line length limit. */
 				var src_line = "";
+				var src_lines = ["", ""];
 				for (var j in srcs_by_dir[k]) {
-					src_line += dir + "\\" + file_list[srcs_by_dir[k][j]] + " ";
+					var source = file_list[srcs_by_dir[k][j]];
+					var source_path = dir + "\\" + source + " ";
+					src_line += source_path;
+					src_lines[VS_TOOLSET && /\.c$/i.test(source) ? 0 : 1] += source_path;
 				}
 
-				MFO.WriteLine("\t" + CMD_MOD1 + "$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_line);
+				for (var language = 0; language < src_lines.length; language++) {
+					if (src_lines[language]) {
+						var c11_flag = language == 0 && !cxx_mode_targets[target] ? " /std:c11" : "";
+						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
+					}
+				}
 
 				if ("clang" == PHP_ANALYZER) {
 					MFO.WriteLine("\t\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER)  $(" + bd_flags_name + "_ANALYZER) " + src_line);
