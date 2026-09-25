@@ -33,8 +33,23 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 	struct tm te;
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
-	const zend_long max_year = (zend_long)(ZEND_LONG_MAX / 5) * 4;
+	zend_long min_year, max_year;
 	bool year_is_null = 1;
+
+	if (gm) {
+		/* Timestamps only start after 1970 and are calculated by mktime() */
+		min_year = 1970;
+#ifdef ZEND_ENABLE_ZVAL_LONG64
+		/* Timestamps only go up to the year 2.000.000.000 */
+		max_year = 2000000000;
+#else
+		max_year = 2037;
+#endif
+	} else {
+		/* Keep the calculations below from overflowing */
+		min_year = 1;
+		max_year = (ZEND_LONG_MAX / 5) * 4;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|l!l", &year, &year_is_null, &method) == FAILURE) {
@@ -54,31 +69,10 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 		}
 	}
 
-	if (year <= 0 || year > max_year) {
-		zend_argument_value_error(1, "must be between 1 and " ZEND_LONG_FMT, max_year);
+	if (year < min_year || year > max_year) {
+		zend_argument_value_error(1, "must be between " ZEND_LONG_FMT " and " ZEND_LONG_FMT, min_year, max_year);
 		RETURN_THROWS();
 	}
-
-	#ifdef ZEND_ENABLE_ZVAL_LONG64
-	/* Compiling for 64bit, allow years between 1970 and 2.000.000.000 */
-	if (gm && year < 1970) {
-		/* timestamps only start after 1970 */
-		zend_argument_value_error(1, "must be a year after 1970 (inclusive)");
-		RETURN_THROWS();
-	}
-
-	if (gm && year > 2000000000) {
-		/* timestamps only go up to the year 2.000.000.000 */
-		zend_argument_value_error(1, "must be a year before 2.000.000.000 (inclusive)");
-		RETURN_THROWS();
-	}
-	#else
-	/* Compiling for 32bit, allow years between 1970 and 2037 */
-	if (gm && (year < 1970 || year > 2037)) {
-		zend_argument_value_error(1, "must be between 1970 and 2037 (inclusive)");
-		RETURN_THROWS();
-	}
-	#endif
 
 
 	golden = (year % 19) + 1;					/* the Golden number */
