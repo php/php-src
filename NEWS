@@ -116,6 +116,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-23747 (ZipArchive::close() use-after-free from a progress or
     cancel callback). (David Carlier)
 
+- Session:
+  . Fixed session_destroy() not removing the session file when the files
+    save handler holds no open descriptor for it. (Ilia Alshanetsky)
+
+
 
 24 Sep 2026, PHP 8.4.26
 
