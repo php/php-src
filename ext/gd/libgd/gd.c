@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
+#include "gd_intern.h"
 #include "gdhelpers.h"
 #include "gd_errors.h"
 
@@ -2321,7 +2322,9 @@ void gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, 
 	int tox, toy;
 	int i;
 	int colorMap[gdMaxColors];
-
+	if (!gdImageClipCopy(dst, &dstX, &dstY, &srcX, &srcY, &w, &h)) {
+		return;
+	}
 	if (dst->trueColor) {
 		/* 2.0: much easier when the destination is truecolor. */
 		/* 2.0.10: needs a transparent-index check that is still valid if
@@ -2401,6 +2404,9 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
 	int x, y;
 	int tox, toy;
 	int ncR, ncG, ncB;
+    if (!gdImageClipCopy(dst, &dstX, &dstY, &srcX, &srcY, &w, &h)) {
+		return;
+	}
 	toy = dstY;
 
 	for (y = srcY; y < (srcY + h); y++) {
@@ -2442,6 +2448,11 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 	int tox, toy;
 	int ncR, ncG, ncB;
 	float g;
+
+	if (!gdImageClipCopy(dst, &dstX, &dstY, &srcX, &srcY, &w, &h)) {
+		return;
+	}
+
 	toy = dstY;
 
 	for (y = srcY; (y < (srcY + h)); y++) {
@@ -2506,7 +2517,9 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 	if (overflow2(sizeof(int), srcH)) {
 		return;
 	}
-
+	if (!gdImageClipCopyResized(dst, &dstX, &dstY, &dstW, &dstH, &srcX, &srcY, &srcW, &srcH)) {
+		return;
+	}
 	stx = (int *) gdMalloc (sizeof (int) * srcW);
 	sty = (int *) gdMalloc (sizeof (int) * srcH);
 
@@ -2606,6 +2619,9 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 
 	if (!dst->trueColor) {
 		gdImageCopyResized (dst, src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
+		return;
+	}
+	if (!gdImageClipCopyResized(dst, &dstX, &dstY, &dstW, &dstH, &srcX, &srcY, &srcW, &srcH)) {
 		return;
 	}
 	for (y = dstY; (y < dstY + dstH); y++) {
