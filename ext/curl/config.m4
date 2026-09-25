@@ -24,6 +24,7 @@ if test "$PHP_CURL" != "no"; then
 
       AC_RUN_IFELSE([AC_LANG_PROGRAM([
 #include <stdio.h>
+#include <string.h>
 #include <strings.h>
 #include <curl/curl.h>
 ], [
