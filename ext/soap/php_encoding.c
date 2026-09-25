@@ -380,6 +380,16 @@ static void soap_add_xml_ref(zval *data, xmlNodePtr node)
 	}
 }
 
+static void soap_add_xml_ref_holder(zval *data, xmlNodePtr node)
+{
+	if (SOAP_GLOBAL(ref_map)) {
+		zval holder;
+
+		array_init(&holder);
+		zend_hash_index_update(SOAP_GLOBAL(ref_map), (zend_ulong)node, &holder);
+	}
+}
+
 static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xmlNodePtr parent, int check_class_map)
 {
 	xmlNodePtr node = NULL;
@@ -2541,6 +2551,9 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 
 	ZVAL_NULL(ret);
 	FIND_XML_NULL(data, ret);
+	if (soap_check_xml_ref(ret, data)) {
+		return ret;
+	}
 
 	if (data &&
 	    (attr = get_attribute(data->properties,"arrayType")) &&
@@ -2677,6 +2690,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	}
 
 	array_init(ret);
+	soap_add_xml_ref_holder(ret, data);
 	trav = data->children;
 	while (trav) {
 		if (trav->type == XML_ELEMENT_NODE) {
@@ -2734,6 +2748,7 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	}
 	efree(dims);
 	efree(pos);
+	soap_add_xml_ref(ret, data);
 	return ret;
 }
 
@@ -2803,9 +2818,13 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 
 	ZVAL_NULL(ret);
 	FIND_XML_NULL(data, ret);
+	if (soap_check_xml_ref(ret, data)) {
+		return ret;
+	}
 
 	if (data && data->children) {
 		array_init(ret);
+		soap_add_xml_ref_holder(ret, data);
 		trav = data->children;
 
 		trav = data->children;
@@ -2835,6 +2854,7 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			zval_ptr_dtor(&key);
 		}
 		ENDFOREACH(trav);
+		soap_add_xml_ref(ret, data);
 	} else {
 		ZVAL_NULL(ret);
 	}
