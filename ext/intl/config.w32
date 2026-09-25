@@ -9,7 +9,7 @@ if (PHP_INTL != "no") {
 					CHECK_HEADER("unicode/utf.h", "CFLAGS_INTL")) {
 		// always build as shared - zend_strtod.c/ICU type conflict
 		EXTENSION("intl", "php_intl.c intl_convert.c intl_icu_compat.c intl_convertcpp.cpp intl_error.c ", true,
-								"/I \"" + configure_module_dirname + "\" /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+								"/I \"" + configure_module_dirname + "\" /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1", null, undefined, true);
 		ADD_EXTENSION_DEP('intl', 'date');
 		ADD_SOURCES(configure_module_dirname + "/collator", "\
 				collator_attr.cpp \
