@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.27
 
+- BCMath:
+  . Fixed BcMath\Number results that truncate to zero keeping a negative sign
+    and comparing less than zero. (Ilia Alshanetsky)
+
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
     request activation). (matyhtf)
