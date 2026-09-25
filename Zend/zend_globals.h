@@ -39,6 +39,7 @@
 #include "zend_multiply.h"
 #include "zend_arena.h"
 #include "zend_call_stack.h"
+#include "zend_ini_scanner.h"
 #include "zend_max_execution_timer.h"
 #include "zend_strtod.h"
 #include "zend_lazy_objects.h"
@@ -353,19 +354,18 @@ struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_out;
 
 	unsigned int yy_leng;
+	int yy_state;
 	const unsigned char *yy_start;
 	const unsigned char *yy_text;
 	const unsigned char *yy_cursor;
 	const unsigned char *yy_marker;
 	const unsigned char *yy_limit;
-	int yy_state;
 	zend_stack state_stack;
 
 	zend_string *filename;
 	uint32_t lineno;
 
-	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */
-	int scanner_mode;
+	zend_ini_scanner_mode scanner_mode;
 };
 
 typedef enum {
@@ -379,18 +379,18 @@ struct _zend_php_scanner_globals {
 	zend_file_handle *yy_out;
 
 	unsigned int yy_leng;
+	int yy_state;
 	unsigned char *yy_start;
 	unsigned char *yy_text;
 	unsigned char *yy_cursor;
 	unsigned char *yy_marker;
 	unsigned char *yy_limit;
-	int yy_state;
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
 	zend_stack nest_location_stack; /* for syntax error reporting */
 	bool heredoc_scan_ahead;
-	int heredoc_indentation;
 	bool heredoc_indentation_uses_spaces;
+	int heredoc_indentation;
 
 	/* original (unfiltered) script */
 	unsigned char *script_org;
