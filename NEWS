@@ -63,6 +63,7 @@ PHP                                                                        NEWS
     loop-invariant addition). (Ilia Alshanetsky)
   . Fixed OSS-Fuzz #5674034779193344 (Read of uninitialized memory in
     is_cacheable_stream_path()). (ndossche)
+  . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
