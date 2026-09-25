@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
 
+- Standard:
+  . Fixed bug GH-23898 (stream_filter_register() during shutdown resource
+    release leads to assertion failure). (Lazizbek Ergashev)
+
 24 Sep 2026, PHP 8.6.0RC2
 
 - Core:
