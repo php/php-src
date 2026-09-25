@@ -1092,53 +1092,69 @@ static bool php_io_data_result(const php_io_op_result *result, ssize_t *ret)
 	}
 }
 
-/* The descriptor ladder of section 5.5: the syscall first and the op on
- * EAGAIN, or the op first with F_DIRECT; Ready means retry the syscall,
- * Unsupported means syscall first from now on. */
-#define PHP_IO_DESCRIPTOR_OP(stream, fd, dl, SYSCALL, PREP) \
-	do { \
-		php_io_frame f; \
-		php_io_op op; \
-		php_io_op_result result; \
-		ssize_t ret; \
-		bool direct = (php_io_hook_flags() & PHP_IO_HOOKS_F_DIRECT) != 0; \
-		bool waited = false; \
-		if (php_io_frame_begin(&f, stream) == FAILURE) { \
-			return -1; \
-		} \
-		memset(&op, 0, sizeof(op)); \
-		for (;;) { \
-			if (!direct) { \
-				ret = (SYSCALL); \
-				if (ret >= 0 || !PHP_IS_TRANSIENT_ERROR(php_socket_errno())) { \
-					break; \
-				} \
-				if (waited && (dl)->hrtime == 0) { \
-					/* A non-blocking deadline gets one readiness check */ \
-					break; \
-				} \
-			} \
-			PREP; \
-			op.stream = (stream); \
-			if (php_io_run(&op, &result) == FAILURE) { \
-				php_io_set_errno(ECANCELED); \
-				ret = -1; \
-				break; \
-			} \
-			if (php_io_data_result(&result, &ret)) { \
-				break; \
-			} \
-			waited = true; \
-			if (result.status == PHP_IO_UNSUPPORTED && !direct) { \
-				php_io_set_errno(ENOTSUP); \
-				ret = -1; \
-				break; \
-			} \
-			direct = false; \
-		} \
-		php_io_frame_end(&f, &op); \
-		return ret; \
-	} while (0)
+/* The arguments of a socket call made through the ladders below */
+typedef struct {
+	php_socket_t fd;
+	void *buf;
+	size_t len;
+	int flags;
+	struct sockaddr *addr;
+	socklen_t *addrlen;
+	socklen_t addrlen_in;
+} php_io_sock_call;
+
+typedef ssize_t (*php_io_sock_syscall)(const php_io_sock_call *c);
+typedef void (*php_io_sock_prep)(php_io_op *op, zend_object *handle, php_stream *stream,
+		const php_io_sock_call *c, php_deadline dl);
+
+/* The descriptor ladder: the syscall first and the op on EAGAIN, or the op first with
+ * F_DIRECT; Ready means retry the syscall, Unsupported means syscall first from now on. */
+static zend_always_inline ssize_t php_io_descriptor_op(php_stream *stream, php_deadline *dl,
+		php_io_sock_syscall syscall_fn, php_io_sock_prep prep, const php_io_sock_call *c)
+{
+	php_io_frame f;
+	php_io_op op;
+	php_io_op_result result;
+	ssize_t ret;
+	bool direct = (php_io_hook_flags() & PHP_IO_HOOKS_F_DIRECT) != 0;
+	bool waited = false;
+
+	if (php_io_frame_begin(&f, stream) == FAILURE) {
+		return -1;
+	}
+	memset(&op, 0, sizeof(op));
+	for (;;) {
+		if (!direct) {
+			ret = syscall_fn(c);
+			if (ret >= 0 || !PHP_IS_TRANSIENT_ERROR(php_socket_errno())) {
+				break;
+			}
+			if (waited && dl->hrtime == 0) {
+				/* A non-blocking deadline gets one readiness check */
+				break;
+			}
+		}
+		prep(&op, f.handle, stream, c, *dl);
+		op.stream = stream;
+		if (php_io_run(&op, &result) == FAILURE) {
+			php_io_set_errno(ECANCELED);
+			ret = -1;
+			break;
+		}
+		if (php_io_data_result(&result, &ret)) {
+			break;
+		}
+		waited = true;
+		if (result.status == PHP_IO_UNSUPPORTED && !direct) {
+			php_io_set_errno(ENOTSUP);
+			ret = -1;
+			break;
+		}
+		direct = false;
+	}
+	php_io_frame_end(&f, &op);
+	return ret;
+}
 
 /* Where _php_stream_fill_read_buffer() reads: memory the stream owns and
  * frees only after its orphans were drained. A queue may leave an op on it
@@ -1148,18 +1164,47 @@ static zend_always_inline uint32_t php_io_stream_buf_flag(php_stream *stream, co
 	return stream && stream->readbuf && buf == stream->readbuf + stream->writepos ? PHP_IO_OP_F_STREAM_BUF : 0;
 }
 
-PHPAPI ssize_t php_io_recv(php_stream *stream, php_socket_t fd, void *buf, size_t len, int flags, php_deadline *dl)
+#ifdef PHP_WIN32
+# define PHP_IO_SOCKLEN(n) ((int) (n))
+#else
+# define PHP_IO_SOCKLEN(n) (n)
+#endif
+
+static ssize_t php_io_recv_syscall(const php_io_sock_call *c)
 {
-	PHP_IO_DESCRIPTOR_OP(stream, fd, dl,
-			recv(fd, buf, len, flags),
-			(php_io_op_recv(&op, f.handle, fd, buf, len, flags, *dl), op.flags |= php_io_stream_buf_flag(stream, buf)));
+	return recv(c->fd, c->buf, c->len, c->flags);
 }
 
-PHPAPI ssize_t php_io_send(php_stream *stream, php_socket_t fd, const void *buf, size_t len, int flags, php_deadline *dl)
+static void php_io_recv_prep(php_io_op *op, zend_object *handle, php_stream *stream,
+		const php_io_sock_call *c, php_deadline dl)
 {
-	PHP_IO_DESCRIPTOR_OP(stream, fd, dl,
-			send(fd, buf, len, flags),
-			php_io_op_send(&op, f.handle, fd, buf, len, flags, *dl));
+	php_io_op_recv(op, handle, c->fd, c->buf, c->len, c->flags, dl);
+	op->flags |= php_io_stream_buf_flag(stream, c->buf);
+}
+
+PHPAPI ssize_t php_io_recv(php_stream *stream, php_socket_t fd, void *buf, size_t len, int flags,
+		php_deadline *dl)
+{
+	php_io_sock_call c = { .fd = fd, .buf = buf, .len = len, .flags = flags };
+	return php_io_descriptor_op(stream, dl, php_io_recv_syscall, php_io_recv_prep, &c);
+}
+
+static ssize_t php_io_send_syscall(const php_io_sock_call *c)
+{
+	return send(c->fd, c->buf, c->len, c->flags);
+}
+
+static void php_io_send_prep(php_io_op *op, zend_object *handle, php_stream *stream,
+		const php_io_sock_call *c, php_deadline dl)
+{
+	php_io_op_send(op, handle, c->fd, c->buf, c->len, c->flags, dl);
+}
+
+PHPAPI ssize_t php_io_send(php_stream *stream, php_socket_t fd, const void *buf, size_t len, int flags,
+		php_deadline *dl)
+{
+	php_io_sock_call c = { .fd = fd, .buf = (void *) buf, .len = len, .flags = flags };
+	return php_io_descriptor_op(stream, dl, php_io_send_syscall, php_io_send_prep, &c);
 }
 
 /* The readiness form of the ladder, for calls without a data op: the
@@ -1167,53 +1212,77 @@ PHPAPI ssize_t php_io_send(php_stream *stream, php_socket_t fd, const void *buf,
  * ready. The op carries the caller's deadline, so the whole call is bounded
  * by it, and a non-blocking deadline gets one readiness check. A NULL
  * deadline is the plain syscall. */
-#define PHP_IO_READINESS_OP(stream, fd, events, dl, SYSCALL) \
-	do { \
-		ssize_t ret; \
-		bool waited = false; \
-		for (;;) { \
-			ret = (SYSCALL); \
-			if (ret >= 0 || !(dl) || !PHP_IS_TRANSIENT_ERROR(php_socket_errno())) { \
-				break; \
-			} \
-			if (waited && (dl)->hrtime == 0) { \
-				break; \
-			} \
-			if (php_io_poll((stream), (fd), (events), (dl)) <= 0) { \
-				/* errno: ETIMEDOUT, ECANCELED or the failure */ \
-				ret = -1; \
-				break; \
-			} \
-			waited = true; \
-		} \
-		return ret; \
-	} while (0)
-
-#ifdef PHP_WIN32
-# define PHP_IO_SOCKLEN(n) ((int) (n))
-#else
-# define PHP_IO_SOCKLEN(n) (n)
-#endif
-
-PHPAPI ssize_t php_io_sendto(php_stream *stream, php_socket_t fd, const void *buf, size_t len, int flags, const struct sockaddr *addr, socklen_t addrlen, php_deadline *dl)
+static zend_always_inline ssize_t php_io_readiness_op(php_stream *stream, uint32_t events,
+		php_deadline *dl, php_io_sock_syscall syscall_fn, const php_io_sock_call *c)
 {
-	PHP_IO_READINESS_OP(stream, fd, PHP_POLL_WRITE, dl,
-			addr ? sendto(fd, buf, PHP_IO_SOCKLEN(len), flags, addr, PHP_IO_SOCKLEN(addrlen))
-			     : send(fd, buf, PHP_IO_SOCKLEN(len), flags));
+	ssize_t ret;
+	bool waited = false;
+
+	for (;;) {
+		ret = syscall_fn(c);
+		if (ret >= 0 || !dl || !PHP_IS_TRANSIENT_ERROR(php_socket_errno())) {
+			break;
+		}
+		if (waited && dl->hrtime == 0) {
+			break;
+		}
+		if (php_io_poll(stream, c->fd, events, dl) <= 0) {
+			/* errno: ETIMEDOUT, ECANCELED or the failure */
+			ret = -1;
+			break;
+		}
+		waited = true;
+	}
+	return ret;
 }
 
-PHPAPI ssize_t php_io_recvfrom(php_stream *stream, php_socket_t fd, void *buf, size_t len, int flags, struct sockaddr *addr, socklen_t *addrlen, php_deadline *dl)
+static ssize_t php_io_sendto_syscall(const php_io_sock_call *c)
 {
-	PHP_IO_READINESS_OP(stream, fd, PHP_POLL_READ, dl,
-			addr ? recvfrom(fd, buf, PHP_IO_SOCKLEN(len), flags, addr, addrlen)
-			     : recv(fd, buf, PHP_IO_SOCKLEN(len), flags));
+	if (c->addr) {
+		return sendto(c->fd, c->buf, PHP_IO_SOCKLEN(c->len), c->flags, c->addr, PHP_IO_SOCKLEN(c->addrlen_in));
+	}
+	return send(c->fd, c->buf, PHP_IO_SOCKLEN(c->len), c->flags);
 }
 
-PHPAPI php_socket_t php_io_accept(php_stream *stream, php_socket_t fd, struct sockaddr *addr, socklen_t *addrlen, php_deadline *dl)
+PHPAPI ssize_t php_io_sendto(php_stream *stream, php_socket_t fd, const void *buf, size_t len, int flags,
+		const struct sockaddr *addr, socklen_t addrlen, php_deadline *dl)
 {
-	PHP_IO_DESCRIPTOR_OP(stream, fd, dl,
-			(ssize_t) accept(fd, addr, addrlen),
-			php_io_op_accept(&op, f.handle, fd, addr, addrlen, *dl));
+	php_io_sock_call c = { .fd = fd, .buf = (void *) buf, .len = len, .flags = flags,
+		.addr = (struct sockaddr *) addr, .addrlen_in = addrlen };
+	return php_io_readiness_op(stream, PHP_POLL_WRITE, dl, php_io_sendto_syscall, &c);
+}
+
+static ssize_t php_io_recvfrom_syscall(const php_io_sock_call *c)
+{
+	if (c->addr) {
+		return recvfrom(c->fd, c->buf, PHP_IO_SOCKLEN(c->len), c->flags, c->addr, c->addrlen);
+	}
+	return recv(c->fd, c->buf, PHP_IO_SOCKLEN(c->len), c->flags);
+}
+
+PHPAPI ssize_t php_io_recvfrom(php_stream *stream, php_socket_t fd, void *buf, size_t len, int flags,
+		struct sockaddr *addr, socklen_t *addrlen, php_deadline *dl)
+{
+	php_io_sock_call c = { .fd = fd, .buf = buf, .len = len, .flags = flags, .addr = addr, .addrlen = addrlen };
+	return php_io_readiness_op(stream, PHP_POLL_READ, dl, php_io_recvfrom_syscall, &c);
+}
+
+static ssize_t php_io_accept_syscall(const php_io_sock_call *c)
+{
+	return (ssize_t) accept(c->fd, c->addr, c->addrlen);
+}
+
+static void php_io_accept_prep(php_io_op *op, zend_object *handle, php_stream *stream,
+		const php_io_sock_call *c, php_deadline dl)
+{
+	php_io_op_accept(op, handle, c->fd, c->addr, c->addrlen, dl);
+}
+
+PHPAPI php_socket_t php_io_accept(php_stream *stream, php_socket_t fd, struct sockaddr *addr,
+		socklen_t *addrlen, php_deadline *dl)
+{
+	php_io_sock_call c = { .fd = fd, .addr = addr, .addrlen = addrlen };
+	return php_io_descriptor_op(stream, dl, php_io_accept_syscall, php_io_accept_prep, &c);
 }
 
 /* A non-blocking connect that is under way: EINPROGRESS, EAGAIN on some
