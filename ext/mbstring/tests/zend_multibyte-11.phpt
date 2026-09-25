@@ -12,4 +12,4 @@ declare(encoding="ISO-8859-15") {
 }
 ?>
 --EXPECTF--
-Fatal error: Encoding declaration pragma must be the very first statement in the script in %s on line %d
+Fatal error: Encoding declaration pragma must not use block mode in %s on line %d
