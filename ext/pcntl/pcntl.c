@@ -1365,6 +1365,8 @@ void pcntl_signal_dispatch(void)
 
 	/* Allocate */
 	while (queue) {
+		bool handler_threw = false;
+
 		if ((handle = zend_hash_index_find(&PCNTL_G(php_signal_table), queue->signo)) != NULL) {
 			if (Z_TYPE_P(handle) != IS_LONG) {
 				ZVAL_NULL(&retval);
@@ -1383,9 +1385,7 @@ void pcntl_signal_dispatch(void)
 #ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
 #endif
-				if (EG(exception)) {
-					break;
-				}
+				handler_threw = NULL != EG(exception);
 			}
 		}
 
@@ -1393,14 +1393,11 @@ void pcntl_signal_dispatch(void)
 		queue->next = PCNTL_G(spares);
 		PCNTL_G(spares) = queue;
 		queue = next;
-	}
 
-	/* drain the remaining in case of exception thrown */
-	while (queue) {
-		next = queue->next;
-		queue->next = PCNTL_G(spares);
-		PCNTL_G(spares) = queue;
-		queue = next;
+		/* No other handler can be called while the exception propagates */
+		if (handler_threw) {
+			break;
+		}
 	}
 
 	if (old_exception) {
@@ -1415,7 +1412,25 @@ void pcntl_signal_dispatch(void)
 		}
 	}
 
-	PCNTL_G(pending_signals) = 0;
+	if (UNEXPECTED(queue)) {
+		/* Put back what the throwing handler did not get to, instead of dropping it, and ask
+		 * the engine to come back once the exception has been handled. Signals are still
+		 * blocked here, so PCNTL_G(head) cannot have been repopulated in the meantime. */
+		next = queue;
+
+		while (next->next) {
+			next = next->next;
+		}
+
+		PCNTL_G(head) = queue;
+		PCNTL_G(tail) = next;
+
+		if (PCNTL_G(async_signals)) {
+			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		}
+	} else {
+		PCNTL_G(pending_signals) = 0;
+	}
 
 	/* Re-enable queue */
 	PCNTL_G(processing_signal_queue) = 0;

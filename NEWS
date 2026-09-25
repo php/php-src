@@ -68,6 +68,8 @@ PHP                                                                        NEWS
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
     an exception is pending. (nicolas-grekas)
+  . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
+    that throws. (nicolas-grekas)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
