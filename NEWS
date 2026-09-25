@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-23882 (array_map() optimization is incorrect for
     strict_types=1). (timwolla)
 
+- Opcache:
+  . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
+
 24 Sep 2026, PHP 8.6.0RC2
 
 - Core:
