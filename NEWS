@@ -65,6 +65,10 @@ PHP                                                                        NEWS
     is_cacheable_stream_path()). (ndossche)
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
 
+- PCNTL:
+  . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
+    an exception is pending. (nicolas-grekas)
+
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
     column index. (Ilia Alshanetsky)

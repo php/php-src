@@ -31,6 +31,7 @@
 #include "ext/standard/info.h"
 #include "php_signal.h"
 #include "php_ticks.h"
+#include "zend_exceptions.h"
 #include "zend_fibers.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
@@ -1318,6 +1319,9 @@ void pcntl_signal_dispatch(void)
 {
 	zval params[2], *handle, retval;
 	struct php_pcntl_pending_signal *queue, *next;
+	zend_object *old_exception;
+	const zend_op *old_opline_before_exception = NULL;
+	const zend_op *old_opline = NULL;
 	sigset_t mask;
 	sigset_t old_mask;
 
@@ -1344,6 +1348,20 @@ void pcntl_signal_dispatch(void)
 	queue = PCNTL_G(head);
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
 	PCNTL_G(tail) = NULL;
+
+	/* Dispatching can happen with an exception pending, e.g. from the interrupt check that runs
+	 * right after an internal function threw. call_user_function() does nothing in that state,
+	 * so set the exception aside while the handlers run. The frame is left as found: depending
+	 * on the caller, the exception may not be registered on it yet, or may already be on its
+	 * way to a catch block, and the caller takes it from there once we return. */
+	old_exception = EG(exception);
+	if (old_exception) {
+		if (EG(current_execute_data)) {
+			old_opline = EG(current_execute_data)->opline;
+		}
+		old_opline_before_exception = EG(opline_before_exception);
+		EG(exception) = NULL;
+	}
 
 	/* Allocate */
 	while (queue) {
@@ -1383,6 +1401,18 @@ void pcntl_signal_dispatch(void)
 		queue->next = PCNTL_G(spares);
 		PCNTL_G(spares) = queue;
 		queue = next;
+	}
+
+	if (old_exception) {
+		if (EG(current_execute_data)) {
+			EG(current_execute_data)->opline = old_opline;
+		}
+		EG(opline_before_exception) = old_opline_before_exception;
+		if (EG(exception)) {
+			zend_exception_set_previous(EG(exception), old_exception);
+		} else {
+			EG(exception) = old_exception;
+		}
 	}
 
 	PCNTL_G(pending_signals) = 0;
