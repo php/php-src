@@ -1200,7 +1200,7 @@ static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int wh
 	switch(whence) {
 		case SEEK_CUR:
 			if (offset < 0) {
-				if (sqlite3_stream->position < -(size_t)offset) {
+				if (offset < -(zend_off_t) sqlite3_stream->position) {
 					*newoffs = sqlite3_stream->position;
 					return -1;
 				} else {
@@ -1211,7 +1211,7 @@ static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int wh
 					return 0;
 				}
 			} else {
-				if (sqlite3_stream->position + (size_t)(offset) > sqlite3_stream->size) {
+				if (offset > (zend_off_t) (sqlite3_stream->size - sqlite3_stream->position)) {
 					*newoffs = sqlite3_stream->position;
 					return -1;
 				} else {
@@ -1223,7 +1223,7 @@ static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int wh
 				}
 			}
 		case SEEK_SET:
-			if (sqlite3_stream->size < (size_t)(offset)) {
+			if (offset < 0 || offset > (zend_off_t) sqlite3_stream->size) {
 				*newoffs = sqlite3_stream->position;
 				return -1;
 			} else {
@@ -1237,7 +1237,7 @@ static int php_sqlite3_stream_seek(php_stream *stream, zend_off_t offset, int wh
 			if (offset > 0) {
 				*newoffs = sqlite3_stream->position;
 				return -1;
-			} else if (sqlite3_stream->size < -(size_t)offset) {
+			} else if (offset < -(zend_off_t) sqlite3_stream->size) {
 				*newoffs = sqlite3_stream->position;
 				return -1;
 			} else {
