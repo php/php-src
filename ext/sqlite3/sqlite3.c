@@ -113,7 +113,7 @@ PHP_METHOD(SQLite3, open)
 		RETURN_THROWS();
 	}
 
-	if (filename_len != 0 && (filename_len != sizeof(":memory:")-1 ||
+	if (filename_len != 0 && (filename_len < sizeof(":memory:")-1 ||
 			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0)) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
 			zend_throw_exception(zend_ce_exception, "Unable to expand filepath", 0);
@@ -126,7 +126,7 @@ PHP_METHOD(SQLite3, open)
 			RETURN_THROWS();
 		}
 	} else {
-		/* filename equals "" or ":memory:" */
+		/* filename equals "" or starts with ":memory:" */
 		fullpath = filename;
 	}
 
