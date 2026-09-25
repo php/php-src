@@ -67,6 +67,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
     transaction still in use by another instance). (Lazizbek Ergashev)
 
+- PDO_SQLite:
+  . Fixed bug GH-23905 (Failed seek on PDO SQLite blob streams sets the stream
+    position to -1). (Marc Bennewitz)
+
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
 
