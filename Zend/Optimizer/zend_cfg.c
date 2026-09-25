@@ -370,9 +370,14 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
+			case ZEND_JMP_NULL:
+				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
+				if (i + 1 < op_array->last) {
+					BB_START(i + 1);
+				}
+				break;
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
-			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
@@ -524,9 +529,17 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 			case ZEND_JMP_SET:
+			case ZEND_JMP_NULL:
+				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
+				if (j + 1 < blocks_count) {
+					block->successors_count = 2;
+					block->successors[1] = j + 1;
+				} else {
+					block->successors_count = 1;
+				}
+				break;
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
-			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				block->successors_count = 2;
 				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
