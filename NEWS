@@ -15,6 +15,9 @@ PHP                                                                        NEWS
     comparison. (Arnaud)
   . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
     (ndossche)
+  . Fixed bug GH-23896 (Assertion failure in zend_call_function() when the
+    error handler throws while resolving a self::/parent::/static::
+    callable). (Lazizbek Ergashev)
 
 - DOM:
   . Fixed use-after-free when re-constructing a DOMXPath whose php:function
