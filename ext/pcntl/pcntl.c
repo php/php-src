@@ -1839,7 +1839,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		}
 
 		if (cpu < 0 || cpu >= maxcpus) {
-			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_LONG_FMT " (" ZEND_LONG_FMT ")", maxcpus - 1, cpu);
 			PCNTL_CPU_DESTROY(mask);
 			RETURN_THROWS();
 		}
@@ -1946,13 +1946,14 @@ PHP_FUNCTION(pcntl_getqos_class)
 
 PHP_FUNCTION(pcntl_setqos_class)
 {
-	zval *qos_obj;
+	zval *qos_obj = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJECT_OF_CLASS(qos_obj, QosClass_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	qos_class_t qos_class = qos_zval_to_lval(qos_obj);
+	qos_class_t qos_class = qos_obj ? qos_zval_to_lval(qos_obj) : QOS_CLASS_DEFAULT;
 
 	if (UNEXPECTED(pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0))
 	{
