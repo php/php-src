@@ -1,5 +1,11 @@
 --TEST--
 PCRE2 callout feature is not supported.
+--SKIPIF--
+<?php
+if (PCRE_VERSION_MAJOR >= 10 && PCRE_VERSION_MINOR >= 45) {
+	die("skip callout feature is disable in PCRE2 10.45 and above");
+}
+?>
 --FILE--
 <?php
 

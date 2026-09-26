@@ -577,7 +577,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 #else
 	uint32_t			 coptions = 0;
 #endif
+#if PCRE2_MAJOR >= 10 && PCRE2_MINOR >= 45
+	uint32_t			 eoptions = PCRE2_EXTRA_NEVER_CALLOUT;
+#else
 	uint32_t			 eoptions = 0;
+#endif
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
