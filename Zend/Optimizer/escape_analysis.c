@@ -300,8 +300,10 @@ static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int v
 			case ZEND_ASSIGN_STATIC_PROP_OP:
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
-			case ZEND_ASSIGN_OBJ_REF:
 				break;
+			case ZEND_ASSIGN_OBJ_REF:
+				/* The property may now alias a variable outside of the object. */
+				return true;
 			case ZEND_PRE_INC_OBJ:
 			case ZEND_PRE_DEC_OBJ:
 			case ZEND_POST_INC_OBJ:
