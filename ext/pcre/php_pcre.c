@@ -369,10 +369,6 @@ static char *_pcre2_config_str(uint32_t what)
 /* {{{ PHP_MINFO_FUNCTION(pcre) */
 static PHP_MINFO_FUNCTION(pcre)
 {
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	uint32_t flag = 0;
-	char *jit_target = _pcre2_config_str(PCRE2_CONFIG_JITTARGET);
-#endif
 	char *version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
 	char *unicode = _pcre2_config_str(PCRE2_CONFIG_UNICODE_VERSION);
 
@@ -384,6 +380,8 @@ static PHP_MINFO_FUNCTION(pcre)
 	free(unicode);
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
+	uint32_t flag = 0;
+	char *jit_target = _pcre2_config_str(PCRE2_CONFIG_JITTARGET);
 	if (!pcre2_config(PCRE2_CONFIG_JIT, &flag)) {
 		php_info_print_table_row(2, "PCRE JIT Support", flag ? "enabled" : "disabled");
 	} else {
