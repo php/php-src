@@ -95,8 +95,6 @@ typedef struct _php_stream_error_stack {
 } php_stream_error_stack;
 
 typedef struct {
-	/* Stack of the running fiber, NULL until its first operation */
-	php_stream_error_stack *stack;
 	php_stream_error_stack main_stack;
 	php_stream_error_stack *fiber_stacks;
 	php_stream_stored_error *stored_errors;

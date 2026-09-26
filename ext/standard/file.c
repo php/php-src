@@ -122,7 +122,6 @@ static void file_globals_ctor(php_file_globals *file_globals_p)
 {
 	memset(file_globals_p, 0, sizeof(php_file_globals));
 	file_globals_p->def_chunk_size = PHP_SOCK_CHUNK_SIZE;
-	file_globals_p->stream_error_state.stack = &file_globals_p->stream_error_state.main_stack;
 }
 
 static void file_globals_dtor(php_file_globals *file_globals_p)

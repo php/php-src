@@ -284,9 +284,19 @@ static php_stream_error_stack *php_stream_error_fiber_stack_create(void)
 
 	ZEND_ASSERT(EG(current_fiber_context) != EG(main_fiber_context));
 	EG(current_fiber_context)->reserved[php_stream_error_fiber_slot] = stack;
-	state->stack = stack;
 
 	return stack;
+}
+
+/* NULL for a fiber without an operation yet */
+static zend_always_inline php_stream_error_stack *php_stream_error_current_stack(void)
+{
+	zend_fiber_context *context = EG(current_fiber_context);
+
+	if (context == EG(main_fiber_context) || php_stream_error_fiber_slot < 0) {
+		return &FG(stream_error_state).main_stack;
+	}
+	return context->reserved[php_stream_error_fiber_slot];
 }
 
 static void php_stream_error_fiber_init(zend_fiber_context *context)
@@ -294,20 +304,11 @@ static void php_stream_error_fiber_init(zend_fiber_context *context)
 	context->reserved[php_stream_error_fiber_slot] = NULL;
 }
 
-static void php_stream_error_fiber_switch(zend_fiber_context *from, zend_fiber_context *to)
-{
-	php_stream_error_state *state = &FG(stream_error_state);
-
-	state->stack = to == EG(main_fiber_context)
-			? &state->main_stack : to->reserved[php_stream_error_fiber_slot];
-}
-
 static void php_stream_error_fiber_destroy(zend_fiber_context *context)
 {
 	php_stream_error_stack *stack = context->reserved[php_stream_error_fiber_slot];
 
 	if (stack) {
-		ZEND_ASSERT(FG(stream_error_state).stack != stack);
 		context->reserved[php_stream_error_fiber_slot] = NULL;
 		php_stream_error_fiber_stack_free(stack);
 	}
@@ -321,7 +322,6 @@ PHPAPI void php_stream_error_state_cleanup(void)
 		php_stream_error_fiber_stack_free(state->fiber_stacks);
 	}
 	php_stream_error_stack_clear(&state->main_stack);
-	state->stack = &state->main_stack;
 
 	php_stream_error_clear_stored();
 }
@@ -358,7 +358,7 @@ PHPAPI void php_stream_error_clear_stored(void)
 
 PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 {
-	php_stream_error_stack *stack = FG(stream_error_state).stack;
+	php_stream_error_stack *stack = php_stream_error_current_stack();
 
 	if (UNEXPECTED(!stack)) {
 		stack = php_stream_error_fiber_stack_create();
@@ -404,7 +404,7 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wrapper_name,
 		zend_string *message, const char *docref, int severity, bool terminating)
 {
-	const php_stream_error_stack *stack = FG(stream_error_state).stack;
+	const php_stream_error_stack *stack = php_stream_error_current_stack();
 	php_stream_error_operation *op = stack ? stack->current_operation : NULL;
 	if (!op) {
 		zend_string_release(message);
@@ -516,7 +516,7 @@ static void php_stream_report_errors(const php_stream_context *context, const ph
 PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
-	php_stream_error_stack *stack = state->stack;
+	php_stream_error_stack *stack = php_stream_error_current_stack();
 
 	if (!stack) {
 		return;
@@ -631,7 +631,7 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 
 PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream)
 {
-	php_stream_error_stack *stack = FG(stream_error_state).stack;
+	php_stream_error_stack *stack = php_stream_error_current_stack();
 
 	if (!stack) {
 		return;
@@ -662,7 +662,7 @@ PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream)
 
 PHPAPI void php_stream_error_operation_abort(void)
 {
-	php_stream_error_stack *stack = FG(stream_error_state).stack;
+	php_stream_error_stack *stack = php_stream_error_current_stack();
 
 	if (!stack) {
 		return;
@@ -693,7 +693,7 @@ static void php_stream_wrapper_error_internal(const char *wrapper_name, const ph
 		const char *docref, int severity, bool terminating,
 		zend_enum_StreamErrorCode code, zend_string *message)
 {
-	const php_stream_error_stack *stack = FG(stream_error_state).stack;
+	const php_stream_error_stack *stack = php_stream_error_current_stack();
 	bool implicit_operation = !stack || !stack->current_operation;
 	if (implicit_operation) {
 		php_stream_error_operation_begin();
@@ -959,7 +959,6 @@ PHP_MINIT_FUNCTION(stream_errors)
 	php_stream_error_fiber_slot = zend_get_resource_handle("Stream errors");
 	if (php_stream_error_fiber_slot >= 0) {
 		zend_observer_fiber_init_register(php_stream_error_fiber_init);
-		zend_observer_fiber_switch_register(php_stream_error_fiber_switch);
 		zend_observer_fiber_destroy_register(php_stream_error_fiber_destroy);
 	}
 
