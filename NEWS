@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
     that throws. (nicolas-grekas)
 
+- PDO_PGSQL:
+  . Fixed crash when a persistent connection fails. (KentarouTakeda)
+
 24 Sep 2026, PHP 8.6.0RC2
 
 - Core:
