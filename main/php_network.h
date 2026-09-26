@@ -248,6 +248,75 @@ static inline bool _php_check_fd_setsize(php_socket_t *max_fd, int setsize)
 # define PHP_SAFE_MAX_FD(m, n)		_php_check_fd_setsize(&m, n)
 #endif
 
+#ifdef PHP_WIN32
+/* {{{ Growable winsock fd_set.
+ *
+ * On Windows fd_set is a *packed array* of SOCKETs ({ u_int fd_count; SOCKET
+ * fd_array[FD_SETSIZE]; }), not a bitset, so the traditional FD_SETSIZE ceiling
+ * caps the *number* of sockets rather than their descriptor value.
+ * php_growable_fd_set lifts that limit by keeping the winsock fd_set on the heap
+ * and doubling fd_array on demand. Because select()/FD_ISSET/FD_ZERO only ever
+ * read fd_count, `set` can be handed to them directly at any size. Windows only;
+ * the POSIX build grows a bitset (fd_bigset) instead - see
+ * ext/standard/streamsfuncs.c. */
+typedef struct {
+	u_int   capacity;   /* number of SOCKET slots backing set->fd_array */
+	fd_set *set;        /* heap block laid out as a winsock fd_set of `capacity` slots */
+} php_growable_fd_set;
+
+# define PHP_GROWABLE_FD_SET_ALLOC_SIZE(cap) \
+	(offsetof(fd_set, fd_array) + (size_t)(cap) * sizeof(SOCKET))
+
+static zend_always_inline void php_growable_fd_set_init(php_growable_fd_set *s, u_int capacity)
+{
+	if (capacity < FD_SETSIZE) {
+		capacity = FD_SETSIZE;
+	}
+	s->capacity = capacity;
+	s->set = (fd_set *) pemalloc(PHP_GROWABLE_FD_SET_ALLOC_SIZE(capacity), 1);
+	s->set->fd_count = 0;
+}
+
+static zend_always_inline void php_growable_fd_set_destroy(php_growable_fd_set *s)
+{
+	if (s->set) {
+		pefree(s->set, 1);
+		s->set = NULL;
+	}
+	s->capacity = 0;
+}
+
+static zend_always_inline void php_growable_fd_set_zero(php_growable_fd_set *s)
+{
+	s->set->fd_count = 0;
+}
+
+static zend_always_inline void php_growable_fd_set_reserve(php_growable_fd_set *s, u_int needed)
+{
+	if (needed > s->capacity) {
+		do {
+			s->capacity *= 2;
+		} while (needed > s->capacity);
+		s->set = (fd_set *) perealloc(s->set, PHP_GROWABLE_FD_SET_ALLOC_SIZE(s->capacity), 1);
+	}
+}
+
+static zend_always_inline void php_growable_fd_set_add(php_growable_fd_set *s, SOCKET fd)
+{
+	/* fds within a single stream_select() array are already unique, so we skip
+	 * the O(n) duplicate scan that winsock's FD_SET macro performs. */
+	php_growable_fd_set_reserve(s, s->set->fd_count + 1);
+	s->set->fd_array[s->set->fd_count++] = fd;
+}
+
+static zend_always_inline void php_growable_fd_set_copy(php_growable_fd_set *dst, const php_growable_fd_set *src)
+{
+	php_growable_fd_set_reserve(dst, src->set->fd_count);
+	memcpy(dst->set, src->set, PHP_GROWABLE_FD_SET_ALLOC_SIZE(src->set->fd_count));
+}
+/* }}} */
+#endif
+
 
 #define PHP_SOCK_CHUNK_SIZE	8192
 

@@ -11,6 +11,15 @@ PHP                                                                        NEWS
     unconstructed Collator. (Ilia Alshanetsky)
 
 - Standard:
+  . Fixed stream_select() aborting the whole call once any watched stream's
+    descriptor exceeded FD_SETSIZE; it no longer imposes that limit, so watching
+    many descriptors no longer requires rebuilding with --enable-fd-setsize.
+    (Frode Børli)
+  . Fixed stream_select() on Windows capping the number of watched sockets at
+    FD_SETSIZE; the winsock fd_set now grows on demand. (Frode Børli)
+  . Fixed stream_select() on Windows overflowing a fixed 64-entry stack array
+    (crashing with a stack buffer overrun) when passed more than 64 pipe or file
+    handles; it now fails gracefully instead. (Frode Børli)
   . Improved performance of array_splice() when inserting without removing
     elements. (mehmetcansahin)
 

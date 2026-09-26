@@ -647,8 +647,159 @@ PHP_FUNCTION(stream_clear_errors)
 	php_stream_error_clear_stored();
 }
 
-/* {{{ stream_select related functions */
-static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, php_socket_t *max_fd)
+#ifndef PHP_WIN32
+/* {{{ fd_bigset related macros and typedefs to remove the FD_SETSIZE limitation from stream_select() on
+ * POSIX-like systems. select() itself has no such limit there; only the fixed-size fd_set imposes the
+ * traditional 1024 descriptor ceiling, so we build a bitset that grows on demand instead.
+ *
+ * Windows keeps using the native fd_set (see stream_array_to_fd_set() below): there, fd_set is an array of
+ * SOCKET handles capped at FD_SETSIZE rather than a bitset indexed by descriptor number, and growing it
+ * requires a different approach that is left for a follow-up. */
+typedef struct {
+	char *fds_bits;
+	size_t size;
+} fd_bigset;
+
+static void fd_bigset_double_size(fd_bigset *set);
+
+#define FD_BIGSET_ENSURE_CAPACITY(fd, set) \
+	while (UNEXPECTED(((fd) / 8 >= (set)->size))) { \
+		fd_bigset_double_size(set); \
+	}
+/* select() operates on whole `long`-sized words (see e.g. Linux's FDS_BYTES()/NFDBITS):
+ * it always reads/writes size-rounded-up-to-sizeof(long) bytes for a given nfds, even
+ * though the traditional fd_set is only ever created at that exact alignment (FD_SETSIZE
+ * is a multiple of 8*sizeof(long)). Since our size is derived from an arbitrary fd count,
+ * we must round up to a whole `long` ourselves, or select() will read/write past our
+ * heap allocation into adjacent memory whenever num_fds isn't a multiple of 8*sizeof(long). */
+#define FD_BIGSET_ZERO(set, num_fds) do { \
+	size_t num_longs = ((size_t) (num_fds) + (8 * sizeof(long)) - 1) / (8 * sizeof(long)); \
+	(set)->size = num_longs * sizeof(long); \
+	(set)->fds_bits = (char *) ecalloc((set)->size, sizeof(char)); \
+} while (0)
+#define FD_BIGSET_SET(fd, set) do { \
+	FD_BIGSET_ENSURE_CAPACITY(fd, set) \
+	(set)->fds_bits[(fd) / 8] |= (1 << ((fd) % 8)); \
+} while (0)
+#define FD_BIGSET_ISSET(fd, set) (((fd) / 8 < (set)->size) ? ((set)->fds_bits[(fd) / 8] & (1 << ((fd) % 8))) : 0)
+#define FD_BIGSET_CLR(fd, set) do { \
+	if ((fd) / 8 < (set)->size) { \
+		(set)->fds_bits[(fd) / 8] &= ~(1 << ((fd) % 8)); \
+	} \
+} while (0)
+#define FD_BIGSET_FREE(set) do { \
+	if ((set)->fds_bits) { \
+		efree((set)->fds_bits); \
+		(set)->fds_bits = NULL; \
+	} \
+	(set)->size = 0; \
+} while (0)
+
+/* {{{ Doubles the backing storage of an fd_bigset */
+static void fd_bigset_double_size(fd_bigset *set)
+{
+	size_t old_size, new_size;
+
+	ZEND_ASSERT(set && set->fds_bits);
+
+	old_size = set->size;
+	new_size = old_size * 2;
+
+	/* Reallocate memory block with twice the size of the original */
+	set->fds_bits = erealloc(set->fds_bits, new_size);
+
+	/* Zero out the extra capacity */
+	memset(set->fds_bits + old_size, 0, new_size - old_size);
+
+	set->size = new_size;
+}
+/* }}} */
+
+static int stream_array_to_fd_bigset(const HashTable *stream_array, fd_bigset *set, php_socket_t *max_fd)
+{
+	zval *elem;
+	php_stream *stream;
+	int cnt = 0;
+
+	ZEND_HASH_FOREACH_VAL(stream_array, elem) {
+		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
+			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
+			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
+		php_socket_t this_fd;
+
+		ZVAL_DEREF(elem);
+		php_stream_from_zval_no_verify(stream, elem);
+		if (stream == NULL) {
+			continue;
+		}
+		/* get the fd.
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 * */
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
+			FD_BIGSET_SET(this_fd, set);
+			if (this_fd > *max_fd) {
+				*max_fd = this_fd;
+			}
+			cnt++;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return cnt ? 1 : 0;
+}
+
+static int stream_array_from_fd_bigset(zval *stream_array, const fd_bigset *fds)
+{
+	zval *elem, *dest_elem;
+	HashTable *ht;
+	php_stream *stream;
+	int ret = 0;
+	zend_string *key;
+	zend_ulong num_ind;
+
+	ZEND_ASSERT(Z_TYPE_P(stream_array) == IS_ARRAY);
+	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
+
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
+		php_socket_t this_fd;
+
+		ZVAL_DEREF(elem);
+		php_stream_from_zval_no_verify(stream, elem);
+		if (stream == NULL) {
+			continue;
+		}
+
+		/* get the fd.
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 */
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
+			if (FD_BIGSET_ISSET(this_fd, fds)) {
+				if (!key) {
+					dest_elem = zend_hash_index_update(ht, num_ind, elem);
+				} else {
+					dest_elem = zend_hash_update(ht, key, elem);
+				}
+
+				zval_add_ref(dest_elem);
+				ret++;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	/* destroy old array and add new one */
+	zval_ptr_dtor(stream_array);
+	ZVAL_ARR(stream_array, ht);
+
+	return ret;
+}
+/* }}} */
+#else /* PHP_WIN32 */
+/* {{{ Windows keeps the original native fd_set based implementation for now (capped at FD_SETSIZE); see the
+ * comment above the fd_bigset typedef for why. */
+static int stream_array_to_fd_set(const HashTable *stream_array, php_growable_fd_set *fds, php_socket_t *max_fd)
 {
 	zval *elem;
 	php_stream *stream;
@@ -672,7 +823,7 @@ static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, ph
 		 * */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
 
-			PHP_SAFE_FD_SET(this_fd, fds);
+			php_growable_fd_set_add(fds, (SOCKET)this_fd);
 
 			if (this_fd > *max_fd) {
 				*max_fd = this_fd;
@@ -683,7 +834,7 @@ static int stream_array_to_fd_set(const HashTable *stream_array, fd_set *fds, ph
 	return cnt ? 1 : 0;
 }
 
-static int stream_array_from_fd_set(zval *stream_array, const fd_set *fds)
+static int stream_array_from_fd_set(zval *stream_array, const php_growable_fd_set *fds)
 {
 	zval *elem, *dest_elem;
 	HashTable *ht;
@@ -709,7 +860,7 @@ static int stream_array_from_fd_set(zval *stream_array, const fd_set *fds)
 		 * is not displayed.
 		 */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
-			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
+			if (FD_ISSET(this_fd, fds->set)) {
 				if (!key) {
 					dest_elem = zend_hash_index_update(ht, num_ind, elem);
 				} else {
@@ -728,6 +879,8 @@ static int stream_array_from_fd_set(zval *stream_array, const fd_set *fds)
 
 	return ret;
 }
+/* }}} */
+#endif /* PHP_WIN32 */
 
 static int stream_array_emulate_read_fd_set(zval *stream_array)
 {
@@ -776,12 +929,30 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 }
 /* }}} */
 
+#ifndef PHP_WIN32
+# define STREAM_SELECT_FREE_SETS() do { \
+	FD_BIGSET_FREE(&rfds); \
+	FD_BIGSET_FREE(&wfds); \
+	FD_BIGSET_FREE(&efds); \
+} while (0)
+#else
+# define STREAM_SELECT_FREE_SETS() do { \
+	php_growable_fd_set_destroy(&rfds); \
+	php_growable_fd_set_destroy(&wfds); \
+	php_growable_fd_set_destroy(&efds); \
+} while (0)
+#endif
+
 /* {{{ Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(stream_select)
 {
 	zval *r_array, *w_array, *e_array, *zcontext = NULL;
 	struct timeval tv, *tv_p = NULL;
-	fd_set rfds, wfds, efds;
+#ifndef PHP_WIN32
+	fd_bigset rfds, wfds, efds;
+#else
+	php_growable_fd_set rfds, wfds, efds;
+#endif
 	php_socket_t max_fd = 0;
 	int retval, sets = 0;
 	zend_long sec, usec = 0;
@@ -800,61 +971,115 @@ PHP_FUNCTION(stream_select)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
-	FD_ZERO(&rfds);
-	FD_ZERO(&wfds);
-	FD_ZERO(&efds);
-
 	php_stream_error_operation_begin();
 	context = php_stream_context_from_zval(zcontext, 0);
 
+#ifndef PHP_WIN32
+	/* Get max possible descriptor count for the initial allocation; the fd_bigset grows on
+	 * demand regardless, so this is only sizing a starting guess, not a hard limit. */
+	long max_fds = sysconf(_SC_OPEN_MAX);
+	if (max_fds <= 0) {
+		max_fds = 131072;
+	}
+
+	/* Cap the initial allocation at 131072; fd_bigset will be dynamically resized if needed. */
+	if (max_fds > 131072) {
+		max_fds = 131072;
+	}
+
+	FD_BIGSET_ZERO(&rfds, max_fds);
+	FD_BIGSET_ZERO(&wfds, max_fds);
+	FD_BIGSET_ZERO(&efds, max_fds);
+
+	if (r_array != NULL) {
+		set_count = stream_array_to_fd_bigset(Z_ARR_P(r_array), &rfds, &max_fd);
+		if (set_count > max_set_count) {
+			max_set_count = set_count;
+		}
+		sets += set_count;
+	}
+
+	if (w_array != NULL) {
+		set_count = stream_array_to_fd_bigset(Z_ARR_P(w_array), &wfds, &max_fd);
+		if (set_count > max_set_count) {
+			max_set_count = set_count;
+		}
+		sets += set_count;
+	}
+
+	if (e_array != NULL) {
+		set_count = stream_array_to_fd_bigset(Z_ARR_P(e_array), &efds, &max_fd);
+		if (set_count > max_set_count) {
+			max_set_count = set_count;
+		}
+		sets += set_count;
+	}
+#else
+	/* Size the growable sets to each array's element count (clamped to at least
+	 * FD_SETSIZE); they still grow on demand, so this is only a starting guess. */
+	php_growable_fd_set_init(&rfds, r_array != NULL ? zend_hash_num_elements(Z_ARR_P(r_array)) : 0);
+	php_growable_fd_set_init(&wfds, w_array != NULL ? zend_hash_num_elements(Z_ARR_P(w_array)) : 0);
+	php_growable_fd_set_init(&efds, e_array != NULL ? zend_hash_num_elements(Z_ARR_P(e_array)) : 0);
+
 	if (r_array != NULL) {
 		set_count = stream_array_to_fd_set(Z_ARR_P(r_array), &rfds, &max_fd);
-		if (set_count > max_set_count)
+		if (set_count > max_set_count) {
 			max_set_count = set_count;
+		}
 		sets += set_count;
 	}
 
 	if (w_array != NULL) {
 		set_count = stream_array_to_fd_set(Z_ARR_P(w_array), &wfds, &max_fd);
-		if (set_count > max_set_count)
+		if (set_count > max_set_count) {
 			max_set_count = set_count;
+		}
 		sets += set_count;
 	}
 
 	if (e_array != NULL) {
 		set_count = stream_array_to_fd_set(Z_ARR_P(e_array), &efds, &max_fd);
-		if (set_count > max_set_count)
+		if (set_count > max_set_count) {
 			max_set_count = set_count;
+		}
 		sets += set_count;
 	}
+#endif
 
 	if (!sets) {
 		php_stream_error_operation_end(context);
 		zend_value_error("No stream arrays were passed");
+		STREAM_SELECT_FREE_SETS();
 		RETURN_THROWS();
 	}
 
+#ifndef PHP_WIN32
+	if (max_set_count == 0) {
+		RETURN_FALSE;
+	}
+#else
 	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
 		RETURN_FALSE;
 	}
+#endif
 
-	if (secnull && !usecnull) {
-		if (usec != 0) {
-			php_stream_error_operation_end(context);
-			zend_argument_value_error(5, "must be null when argument #4 ($seconds) is null");
-			RETURN_THROWS();
-		}
+	if (secnull && !usecnull && usec != 0) {
+		php_stream_error_operation_end(context);
+		zend_argument_value_error(5, "must be null when argument #4 ($seconds) is null");
+		STREAM_SELECT_FREE_SETS();
+		RETURN_THROWS();
 	}
 
-	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (!secnull) {
 		if (sec < 0) {
 			php_stream_error_operation_end(context);
 			zend_argument_value_error(4, "must be greater than or equal to 0");
+			STREAM_SELECT_FREE_SETS();
 			RETURN_THROWS();
 		} else if (usec < 0) {
 			php_stream_error_operation_end(context);
 			zend_argument_value_error(5, "must be greater than or equal to 0");
+			STREAM_SELECT_FREE_SETS();
 			RETURN_THROWS();
 		}
 
@@ -879,25 +1104,50 @@ PHP_FUNCTION(stream_select)
 				zval_ptr_dtor(e_array);
 				ZVAL_EMPTY_ARRAY(e_array);
 			}
+			STREAM_SELECT_FREE_SETS();
 			RETURN_LONG(retval);
 		}
 	}
 
-	retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+#ifndef PHP_WIN32
+	/* Ensure all bitmaps are the same size (one or more may have been dynamically resized) */
+	{
+		size_t largest = rfds.size;
+		if (largest < wfds.size) largest = wfds.size;
+		if (largest < efds.size) largest = efds.size;
+		while (rfds.size < largest) fd_bigset_double_size(&rfds);
+		while (wfds.size < largest) fd_bigset_double_size(&wfds);
+		while (efds.size < largest) fd_bigset_double_size(&efds);
+	}
+
+	retval = php_select(max_fd + 1, (fd_set *) rfds.fds_bits, (fd_set *) wfds.fds_bits, (fd_set *) efds.fds_bits, tv_p);
+#else
+	retval = php_select(max_fd + 1, rfds.set, wfds.set, efds.set, tv_p);
+#endif
 	php_stream_error_operation_end(context);
 
 	if (retval == -1) {
 		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=" PHP_SOCKET_FMT ")",
-				errno, strerror(errno), max_fd);
+			errno, strerror(errno), max_fd);
+		STREAM_SELECT_FREE_SETS();
 		RETURN_FALSE;
 	}
 
+#ifndef PHP_WIN32
+	if (r_array != NULL) stream_array_from_fd_bigset(r_array, &rfds);
+	if (w_array != NULL) stream_array_from_fd_bigset(w_array, &wfds);
+	if (e_array != NULL) stream_array_from_fd_bigset(e_array, &efds);
+#else
 	if (r_array != NULL) stream_array_from_fd_set(r_array, &rfds);
 	if (w_array != NULL) stream_array_from_fd_set(w_array, &wfds);
 	if (e_array != NULL) stream_array_from_fd_set(e_array, &efds);
+#endif
+
+	STREAM_SELECT_FREE_SETS();
 
 	RETURN_LONG(retval);
 }
+#undef STREAM_SELECT_FREE_SETS
 /* }}} */
 
 /* {{{ stream_context related functions */

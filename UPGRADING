@@ -35,6 +35,14 @@ PHP 8.7 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Standard:
+  . stream_select() no longer fails once a watched descriptor exceeds
+    FD_SETSIZE. The descriptor set now grows on demand on both POSIX (bitset)
+    and Windows (winsock fd_set), so code watching many streams works without
+    rebuilding PHP with --enable-fd-setsize. On Windows, selecting on more than
+    64 pipe or file handles no longer crashes; it fails with a warning, as that
+    path remains bounded by WaitForMultipleObjects().
+
 ========================================
 6. New Functions
 ========================================
