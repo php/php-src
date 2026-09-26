@@ -2302,6 +2302,10 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 	bool needs_autoload;
 	zend_inheritance_cache_entry *entry = ce->inheritance_cache;
 
+	if (entry) {
+		ZEND_ATOMIC_FENCE_ACQUIRE();
+	}
+
 	while (entry) {
 		entry = zend_accel_inheritance_cache_find(entry, ce, parent, traits_and_interfaces, &needs_autoload);
 		if (entry) {
@@ -2458,12 +2462,13 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	entry->num_warnings = EG(num_errors);
 	entry->warnings = zend_persist_warnings(EG(num_errors), EG(errors));
 	entry->next = proto->inheritance_cache;
-	proto->inheritance_cache = entry;
 
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 
 	ZCSG(map_ptr_last) = CG(map_ptr_last);
+	ZEND_ATOMIC_FENCE_RELEASE();
+	proto->inheritance_cache = entry;
 
 	zend_shared_alloc_destroy_xlat_table();
 
