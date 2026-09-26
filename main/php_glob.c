@@ -73,14 +73,6 @@
 # ifndef PATH_MAX
 #  define PATH_MAX MAXPATHLEN
 # endif
-/* Windows defines SIZE_MAX but not SSIZE_MAX */
-# ifndef SSIZE_MAX
-#  ifdef _WIN64
-#   define SSIZE_MAX _I64_MAX
-#  else
-#   define SSIZE_MAX INT_MAX
-#  endif
-# endif
 #endif
 
 #ifndef _PW_BUF_LEN

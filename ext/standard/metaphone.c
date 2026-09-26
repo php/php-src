@@ -33,10 +33,20 @@ PHP_FUNCTION(metaphone)
 		Z_PARAM_LONG(phones)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (phones < 0) {
+	if (UNEXPECTED(phones < 0)) {
 		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
+#if SIZEOF_SIZE_T < SIZEOF_ZEND_LONG
+	/* metaphone() below allocates max_phonemes + 1 bytes, so the usable limit
+	 * is one below ZSTR_MAX_LEN. Guarded inline rather than through
+	 * ZEND_LONG_ZSTR_LEN_OVFL() because (zend_long) (ZSTR_MAX_LEN - 1) is
+	 * negative where size_t is at least as wide as zend_long. */
+	if (UNEXPECTED(phones > (zend_long) (ZSTR_MAX_LEN - 1))) {
+		zend_argument_value_error(2, "must be less than or equal to %zu", ZSTR_MAX_LEN - 1);
+		RETURN_THROWS();
+	}
+#endif
 
 	metaphone((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str), phones, &result, 1);
 	RETVAL_STR(result);

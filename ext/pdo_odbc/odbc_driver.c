@@ -106,7 +106,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 /* printf("@@ SQLSTATE[%s] %s\n", *pdo_err, einfo->last_err_msg); */
 	if (!dbh->methods) {
 		zend_throw_exception_ex(php_pdo_get_exception(), einfo->last_error, "SQLSTATE[%s] %s: %d %s",
-				*pdo_err, what, einfo->last_error, einfo->last_err_msg);
+				*pdo_err, what, (int) einfo->last_error, einfo->last_err_msg);
 	}
 
 	/* just like a cursor, once you start pulling, you need to keep
@@ -496,7 +496,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 #ifdef SQL_ATTR_CONNECTION_POOLING
 	if (pdo_odbc_pool_on != SQL_CP_OFF) {
-		rc = SQLSetEnvAttr(H->env, SQL_ATTR_CP_MATCH, (void*)pdo_odbc_pool_mode, 0);
+		rc = SQLSetEnvAttr(H->env, SQL_ATTR_CP_MATCH, (void*)(uintptr_t)pdo_odbc_pool_mode, 0);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetEnvAttr: SQL_ATTR_CP_MATCH");
 			goto fail;
@@ -519,7 +519,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 	/* set up the cursor library, if needed, or if configured explicitly */
 	cursor_lib = pdo_attr_lval(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED);
-	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, SQL_IS_INTEGER);
+	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)(uintptr_t)cursor_lib, SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS && cursor_lib != SQL_CUR_USE_IF_NEEDED) {
 		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");
 		goto fail;

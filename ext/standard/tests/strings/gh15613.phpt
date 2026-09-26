@@ -3,7 +3,7 @@ GH-15613 overflow on hex strings repeater value
 --SKIPIF--
 <?php
 if (!getenv('RUN_RESOURCE_HEAVY_TESTS')) die('skip resource-heavy test');
-if (PHP_INT_SIZE != 8) die("skip this test is for 64 bit platform only");
+if (PHP_SYS_SIZE != 8) die("skip this test is for 64 bit platform only");
 ?>
 --INI--
 memory_limit=-1

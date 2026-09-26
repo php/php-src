@@ -12,42 +12,42 @@ namespace
 #ifdef WNOHANG
 /**
  * @var int
- * @cvalue LONG_CONST(WNOHANG)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(WNOHANG)
  */
 const WNOHANG = UNKNOWN;
 #endif
 #ifdef WUNTRACED
 /**
  * @var int
- * @cvalue LONG_CONST(WUNTRACED)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(WUNTRACED)
  */
 const WUNTRACED = UNKNOWN;
 #endif
 #ifdef HAVE_WCONTINUED
 /**
  * @var int
- * @cvalue LONG_CONST(WCONTINUED)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(WCONTINUED)
  */
 const WCONTINUED = UNKNOWN;
 #endif
 #if defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
 /**
  * @var int
- * @cvalue LONG_CONST(WEXITED)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(WEXITED)
  */
 const WEXITED = UNKNOWN;
 #endif
 #if defined (HAVE_DECL_WSTOPPED) && HAVE_DECL_WSTOPPED == 1
 /**
  * @var int
- * @cvalue LONG_CONST(WSTOPPED)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(WSTOPPED)
  */
 const WSTOPPED = UNKNOWN;
 #endif
 #if defined (HAVE_DECL_WNOWAIT) && HAVE_DECL_WNOWAIT== 1
 /**
  * @var int
- * @cvalue LONG_CONST(WNOWAIT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(WNOWAIT)
  */
 const WNOWAIT = UNKNOWN;
 #endif
@@ -57,17 +57,17 @@ const WNOWAIT = UNKNOWN;
 #ifdef HAVE_POSIX_IDTYPES
 /**
  * @var int
- * @cvalue LONG_CONST(P_ALL)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(P_ALL)
  */
 const P_ALL = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(P_PID)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(P_PID)
  */
 const P_PID = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(P_PGID)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(P_PGID)
  */
 const P_PGID = UNKNOWN;
 #endif
@@ -75,7 +75,7 @@ const P_PGID = UNKNOWN;
 #ifdef HAVE_LINUX_IDTYPES
 /**
  * @var int
- * @cvalue LONG_CONST(P_PIDFD)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(P_PIDFD)
  */
 const P_PIDFD = UNKNOWN;
 #endif
@@ -83,17 +83,17 @@ const P_PIDFD = UNKNOWN;
 #ifdef HAVE_NETBSD_IDTYPES
 /**
  * @var int
- * @cvalue LONG_CONST(P_UID)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(P_UID)
  */
 const P_UID = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(P_GID)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(P_GID)
  */
 const P_GID = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(P_SID)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(P_SID)
  */
 const P_SID = UNKNOWN;
 #endif
@@ -101,7 +101,7 @@ const P_SID = UNKNOWN;
 #ifdef HAVE_FREEBSD_IDTYPES
 /**
  * @var int
- * @cvalue LONG_CONST(P_JAILID)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(P_JAILID)
  */
 const P_JAILID = UNKNOWN;
 #endif
@@ -111,244 +111,244 @@ const P_JAILID = UNKNOWN;
 
 /**
  * @var int
- * @cvalue LONG_CONST(SIG_IGN)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIG_IGN)
  */
 const SIG_IGN = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIG_DFL)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIG_DFL)
  */
 const SIG_DFL = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIG_ERR)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIG_ERR)
  */
 const SIG_ERR = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGHUP)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGHUP)
  */
 const SIGHUP = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGINT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGINT)
  */
 const SIGINT = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGQUIT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGQUIT)
  */
 const SIGQUIT = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGILL)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGILL)
  */
 const SIGILL = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGTRAP)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGTRAP)
  */
 const SIGTRAP = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGABRT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGABRT)
  */
 const SIGABRT = UNKNOWN;
 #ifdef SIGIOT
 /**
  * @var int
- * @cvalue LONG_CONST(SIGIOT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGIOT)
  */
 const SIGIOT = UNKNOWN;
 #endif
 
 /**
  * @var int
- * @cvalue LONG_CONST(SIGBUS)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGBUS)
  */
 const SIGBUS = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGFPE)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGFPE)
  */
 const SIGFPE = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGKILL)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGKILL)
  */
 const SIGKILL = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGUSR1)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGUSR1)
  */
 const SIGUSR1 = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGSEGV)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGSEGV)
  */
 const SIGSEGV = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGUSR2)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGUSR2)
  */
 const SIGUSR2 = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGPIPE)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGPIPE)
  */
 const SIGPIPE = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGALRM)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGALRM)
  */
 const SIGALRM = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGTERM)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGTERM)
  */
 const SIGTERM = UNKNOWN;
 #ifdef SIGSTKFLT
 /**
  * @var int
- * @cvalue LONG_CONST(SIGSTKFLT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGSTKFLT)
  */
 const SIGSTKFLT = UNKNOWN;
 #endif
 #ifdef SIGCLD
 /**
  * @var int
- * @cvalue LONG_CONST(SIGCLD)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGCLD)
  */
 const SIGCLD = UNKNOWN;
 #endif
 #ifdef SIGCHLD
 /**
  * @var int
- * @cvalue LONG_CONST(SIGCHLD)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGCHLD)
  */
 const SIGCHLD = UNKNOWN;
 #endif
 
 /**
  * @var int
- * @cvalue LONG_CONST(SIGCONT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGCONT)
  */
 const SIGCONT = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGSTOP)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGSTOP)
  */
 const SIGSTOP = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGTSTP)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGTSTP)
  */
 const SIGTSTP = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGTTIN)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGTTIN)
  */
 const SIGTTIN = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGTTOU)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGTTOU)
  */
 const SIGTTOU = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGURG)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGURG)
  */
 const SIGURG = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGXCPU)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGXCPU)
  */
 const SIGXCPU = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGXFSZ)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGXFSZ)
  */
 const SIGXFSZ = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGVTALRM)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGVTALRM)
  */
 const SIGVTALRM = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGPROF)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGPROF)
  */
 const SIGPROF = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGWINCH)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGWINCH)
  */
 const SIGWINCH = UNKNOWN;
 #ifdef SIGPOLL
 /**
  * @var int
- * @cvalue LONG_CONST(SIGPOLL)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGPOLL)
  */
 const SIGPOLL = UNKNOWN;
 #endif
 #ifdef SIGIO
 /**
  * @var int
- * @cvalue LONG_CONST(SIGIO)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGIO)
  */
 const SIGIO = UNKNOWN;
 #endif
 #ifdef SIGPWR
 /**
  * @var int
- * @cvalue LONG_CONST(SIGPWR)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGPWR)
  */
 const SIGPWR = UNKNOWN;
 #endif
 #ifdef SIGINFO
 /**
  * @var int
- * @cvalue LONG_CONST(SIGINFO)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGINFO)
  */
 const SIGINFO = UNKNOWN;
 #endif
 #ifdef SIGSYS
 /**
  * @var int
- * @cvalue LONG_CONST(SIGSYS)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGSYS)
  */
 const SIGSYS = UNKNOWN;
 /**
  * @var int
- * @cvalue LONG_CONST(SIGSYS)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGSYS)
  */
 const SIGBABY = UNKNOWN;
 #endif
 #ifdef SIGCKPT
 /**
  * @var int
- * @cvalue LONG_CONST(SIGCKPT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGCKPT)
  */
 const SIGCKPT = UNKNOWN;
 #endif
 #ifdef SIGCKPTEXIT
 /**
  * @var int
- * @cvalue LONG_CONST(SIGCKPTEXIT)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGCKPTEXIT)
  */
 const SIGCKPTEXIT = UNKNOWN;
 #endif
 #ifdef SIGRTMIN
 /**
  * @var int
- * @cvalue LONG_CONST(SIGRTMIN)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGRTMIN)
  */
 const SIGRTMIN = UNKNOWN;
 #endif
 #ifdef SIGRTMAX
 /**
  * @var int
- * @cvalue LONG_CONST(SIGRTMAX)
+ * @cvalue ZEND_PTR_TO_ZEND_LONG(SIGRTMAX)
  */
 const SIGRTMAX = UNKNOWN;
 #endif

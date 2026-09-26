@@ -16,8 +16,17 @@ var_dump(fseek($stream, PHP_INT_MIN, SEEK_END));
 rewind($stream);
 var_dump(fseek($stream, PHP_INT_MIN, SEEK_CUR));
 
+// Offsets beyond 32 bits must not be truncated where size_t is narrower than int
+$beyond = PHP_INT_SIZE == 8 ? 0x100000000 : PHP_INT_MAX;
+rewind($stream);
+var_dump(fseek($stream, $beyond, SEEK_SET));
+rewind($stream);
+var_dump(fseek($stream, $beyond, SEEK_CUR));
+
 fclose($stream);
 ?>
 --EXPECT--
+int(-1)
+int(-1)
 int(-1)
 int(-1)
