@@ -1,5 +1,11 @@
 --TEST--
 Bug #75457 (heap-use-after-free in php7.0.25)
+--SKIPIF--
+<?php
+if (PCRE_VERSION_MAJOR >= 10 && PCRE_VERSION_MINOR >= 45) {
+	die("skip callout feature is disable in PCRE2 10.45 and above");
+}
+?>
 --FILE--
 <?php
 $pattern = "/(((?(?C)0?=))(?!()0|.(?0)0)())/";
