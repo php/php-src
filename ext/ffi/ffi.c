@@ -923,9 +923,7 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 	zend_ffi_callback_data *callback_data = Z_PTR_P(zv);
 
 	ffi_closure_free(callback_data->callback);
-	if (callback_data->fcc.function_handler->common.fn_flags & ZEND_ACC_CLOSURE) {
-		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(callback_data->fcc.function_handler));
-	}
+	zend_fcc_dtor(&callback_data->fcc);
 	for (int i = 0; i < callback_data->arg_count; ++i) {
 		if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
 			efree(callback_data->arg_types[i]);
@@ -941,18 +939,12 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, void* data) /* {{{ */
 {
 	zend_ffi_callback_data *callback_data = (zend_ffi_callback_data*)data;
-	zend_fcall_info fci;
+	zval *params;
 	zend_ffi_type *ret_type;
 	zval retval;
 	ALLOCA_FLAG(use_heap)
 
-	fci.size = sizeof(zend_fcall_info);
-	ZVAL_UNDEF(&fci.function_name);
-	fci.retval = &retval;
-	fci.params = do_alloca(sizeof(zval) *callback_data->arg_count, use_heap);
-	fci.object = NULL;
-	fci.param_count = callback_data->arg_count;
-	fci.named_params = NULL;
+	params = do_alloca(sizeof(zval) *callback_data->arg_count, use_heap);
 
 	if (callback_data->type->func.args) {
 		int n = 0;
@@ -960,24 +952,21 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 
 		ZEND_HASH_PACKED_FOREACH_PTR(callback_data->type->func.args, arg_type) {
 			arg_type = ZEND_FFI_TYPE(arg_type);
-			zend_ffi_cdata_to_zval(NULL, args[n], arg_type, BP_VAR_R, &fci.params[n], (zend_ffi_flags)(arg_type->attr & ZEND_FFI_ATTR_CONST), 0, 0);
+			zend_ffi_cdata_to_zval(NULL, args[n], arg_type, BP_VAR_R, &params[n], (zend_ffi_flags)(arg_type->attr & ZEND_FFI_ATTR_CONST), 0, 0);
 			n++;
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	ZVAL_UNDEF(&retval);
-	if (zend_call_function(&fci, &callback_data->fcc) != SUCCESS) {
-		zend_throw_error(zend_ffi_exception_ce, "Cannot call callback");
-	}
+	zend_call_known_fcc(&callback_data->fcc, &retval, callback_data->arg_count, params, NULL);
 
 	if (callback_data->arg_count) {
 		int n = 0;
 
 		for (n = 0; n < callback_data->arg_count; n++) {
-			zval_ptr_dtor(&fci.params[n]);
+			zval_ptr_dtor(&params[n]);
 		}
 	}
-	free_alloca(fci.params, use_heap);
+	free_alloca(params, use_heap);
 
 	if (EG(exception)) {
 		zend_error_noreturn(E_ERROR, "Throwing from FFI callbacks is not allowed");
@@ -1035,12 +1024,14 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 	arg_count = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
 	if (arg_count < fcc.function_handler->common.required_num_args) {
 		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, insufficient number of arguments");
+		zend_release_fcall_info_cache(&fcc);
 		return NULL;
 	}
 
 	callback = ffi_closure_alloc(sizeof(ffi_closure), &code);
 	if (!callback) {
 		zend_throw_error(zend_ffi_exception_ce, "Cannot allocate callback");
+		zend_release_fcall_info_cache(&fcc);
 		return NULL;
 	}
 
@@ -1067,6 +1058,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 				}
 				efree(callback_data);
 				ffi_closure_free(callback);
+				zend_release_fcall_info_cache(&fcc);
 				return NULL;
 			}
 			n++;
@@ -1082,6 +1074,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 		}
 		efree(callback_data);
 		ffi_closure_free(callback);
+		zend_release_fcall_info_cache(&fcc);
 		return NULL;
 	}
 
@@ -1103,6 +1096,7 @@ free_on_failure: ;
 		}
 		efree(callback_data);
 		ffi_closure_free(callback);
+		zend_release_fcall_info_cache(&fcc);
 		return NULL;
 	}
 
@@ -1112,9 +1106,7 @@ free_on_failure: ;
 	}
 	zend_hash_next_index_insert_ptr(FFI_G(callbacks), callback_data);
 
-	if (fcc.function_handler->common.fn_flags & ZEND_ACC_CLOSURE) {
-		GC_ADDREF(ZEND_CLOSURE_OBJECT(fcc.function_handler));
-	}
+	zend_fcc_addref(&callback_data->fcc);
 
 	return code;
 }
