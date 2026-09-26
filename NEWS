@@ -15,6 +15,8 @@ PHP                                                                        NEWS
     state. (Ilia Alshanetsky)
   . Fixed OSS-Fuzz #552682112 (assertion failure wrt
     zp_arg_must_be_sent_by_ref()). (ndossche)
+  . Fixed GH-23921 (Fibers start with error_reporting = 0 when the
+    error_reporting INI directive is not set). (Girgias)
 
 - FFI:
   . Fixed crashes with FFI callbacks created from __call() trampolines
