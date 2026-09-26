@@ -76,6 +76,11 @@
 	}	\
 	obj = Z_TIDY_P(object);	\
 
+#define TIDY_FETCH_VALID_NODE	\
+	TIDY_FETCH_ONLY_OBJECT; \
+	if (tidy_node_validate(obj) != SUCCESS) { \
+		RETURN_THROWS(); \
+	}
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
 	if (TG(default_config) && TG(default_config)[0]) { \
 		php_tidy_load_config(_doc, TG(default_config)); \
@@ -102,12 +107,14 @@ struct _PHPTidyDoc {
 	TidyDoc			doc;
 	TidyBuffer		*errbuf;
 	unsigned int	ref_count;
+	size_t			parse_generation;
 	unsigned int    initialized:1;
 };
 
 struct _PHPTidyObj {
 	TidyNode		node;
 	tidy_obj_type	type;
+	size_t			node_generation;
 	PHPTidyDoc		*ptdoc;
 	zend_object		std;
 };
@@ -302,12 +309,28 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, const char *optname, zval *value)
 	return FAILURE;
 }
 
+static zend_result tidy_node_validate(const PHPTidyObj *obj)
+{
+	if (!obj->ptdoc) {
+		zend_throw_error(NULL, "tidyNode object is not initialized");
+		return FAILURE;
+	}
+
+	if (obj->node_generation != obj->ptdoc->parse_generation) {
+		zend_throw_error(NULL, "tidyNode object is no longer valid after its document was reparsed");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static void tidy_create_node_object(zval *zv, PHPTidyDoc *ptdoc, TidyNode node)
 {
 	tidy_instantiate(tidy_ce_node, zv);
 	PHPTidyObj *newobj = Z_TIDY_P(zv);
 	newobj->node = node;
 	newobj->type = is_node;
+	newobj->node_generation = ptdoc->parse_generation;
 	newobj->ptdoc = ptdoc;
 	newobj->ptdoc->ref_count++;
 	tidy_add_node_default_properties(newobj);
@@ -465,6 +488,7 @@ static zend_object *tidy_object_new(zend_class_entry *class_type, zend_object_ha
 			intern->ptdoc = emalloc(sizeof(PHPTidyDoc));
 			intern->ptdoc->doc = tidyCreate();
 			intern->ptdoc->ref_count = 1;
+			intern->ptdoc->parse_generation = 0;
 			intern->ptdoc->initialized = 0;
 			intern->ptdoc->errbuf = emalloc(sizeof(TidyBuffer));
 			tidyBufInit(intern->ptdoc->errbuf);
@@ -565,6 +589,9 @@ static zend_result tidy_node_cast_handler(zend_object *in, zval *out, int type)
 
 		case IS_STRING:
 			obj = php_tidy_fetch_object(in);
+			if (tidy_node_validate(obj) != SUCCESS) {
+				return FAILURE;
+			}
 			tidyBufInit(&buf);
 			if (obj->ptdoc && tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf)) {
 				ZVAL_STRINGL(out, (const char *) buf.bp, buf.size-1);
@@ -620,6 +647,10 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 	TidyNode	tempnode;
 	zval attribute, children, temp;
 	const char *name;
+
+	if (tidy_node_validate(obj) != SUCCESS) {
+		return;
+	}
 
 	tidyBufInit(&buf);
 	(void) tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
@@ -845,6 +876,7 @@ static int php_tidy_parse_string(PHPTidyObj *obj, const char *string, uint32_t l
 	obj->ptdoc->initialized = 1;
 
 	tidyBufInit(&buf);
+	obj->ptdoc->parse_generation++;
 	tidyBufAttach(&buf, (byte *) string, len);
 	if (tidyParseBuffer(obj->ptdoc->doc, &buf) < 0) {
 		php_error_docref(NULL, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
@@ -1522,7 +1554,7 @@ PHP_FUNCTION(tidy_get_body)
 /* {{{ Returns true if this node has children */
 PHP_METHOD(tidyNode, hasChildren)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	if (tidyGetChild(obj->node)) {
 		RETURN_TRUE;
@@ -1535,7 +1567,7 @@ PHP_METHOD(tidyNode, hasChildren)
 /* {{{ Returns true if this node has siblings */
 PHP_METHOD(tidyNode, hasSiblings)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	if (obj->node && tidyGetNext(obj->node)) {
 		RETURN_TRUE;
@@ -1548,7 +1580,7 @@ PHP_METHOD(tidyNode, hasSiblings)
 /* {{{ Returns true if this node represents a comment */
 PHP_METHOD(tidyNode, isComment)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	if (tidyNodeGetType(obj->node) == TidyNode_Comment) {
 		RETURN_TRUE;
@@ -1561,7 +1593,7 @@ PHP_METHOD(tidyNode, isComment)
 /* {{{ Returns true if this node is part of a HTML document */
 PHP_METHOD(tidyNode, isHtml)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	switch (tidyNodeGetType(obj->node)) {
 		case TidyNode_Start:
@@ -1577,7 +1609,7 @@ PHP_METHOD(tidyNode, isHtml)
 /* {{{ Returns true if this node represents text (no markup) */
 PHP_METHOD(tidyNode, isText)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	if (tidyNodeGetType(obj->node) == TidyNode_Text) {
 		RETURN_TRUE;
@@ -1590,7 +1622,7 @@ PHP_METHOD(tidyNode, isText)
 /* {{{ Returns true if this node is JSTE */
 PHP_METHOD(tidyNode, isJste)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	if (tidyNodeGetType(obj->node) == TidyNode_Jste) {
 		RETURN_TRUE;
@@ -1603,7 +1635,7 @@ PHP_METHOD(tidyNode, isJste)
 /* {{{ Returns true if this node is ASP */
 PHP_METHOD(tidyNode, isAsp)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	if (tidyNodeGetType(obj->node) == TidyNode_Asp) {
 		RETURN_TRUE;
@@ -1616,7 +1648,7 @@ PHP_METHOD(tidyNode, isAsp)
 /* {{{ Returns true if this node is PHP */
 PHP_METHOD(tidyNode, isPhp)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	if (tidyNodeGetType(obj->node) == TidyNode_Php) {
 		RETURN_TRUE;
@@ -1629,7 +1661,7 @@ PHP_METHOD(tidyNode, isPhp)
 /* {{{ Returns the parent node if available or NULL */
 PHP_METHOD(tidyNode, getParent)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	TidyNode parent_node = tidyGetParent(obj->node);
 	if (parent_node) {
@@ -1640,7 +1672,7 @@ PHP_METHOD(tidyNode, getParent)
 
 PHP_METHOD(tidyNode, getPreviousSibling)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	TidyNode previous_node = tidyGetPrev(obj->node);
 	if (previous_node) {
@@ -1650,7 +1682,7 @@ PHP_METHOD(tidyNode, getPreviousSibling)
 
 PHP_METHOD(tidyNode, getNextSibling)
 {
-	TIDY_FETCH_ONLY_OBJECT;
+	TIDY_FETCH_VALID_NODE;
 
 	TidyNode next_node = tidyGetNext(obj->node);
 	if (next_node) {
