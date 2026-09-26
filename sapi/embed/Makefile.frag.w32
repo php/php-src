@@ -1,0 +1,8 @@
+test_helpers: $(BUILD_DIR)\php_embed_cli_test.exe
+
+$(BUILD_DIR)\sapi\embed\cli_argv.obj: $(PHP_SRC_DIR)\sapi\embed\tests\cli_argv.c
+	cd $(PHP_SRC_DIR)
+	$(CC) $(CFLAGS_EMBED_OBJ) $(CFLAGS) $(CFLAGS_BD_SAPI_EMBED) /Fo$@ /c $(PHP_SRC_DIR)\sapi\embed\tests\cli_argv.c
+
+$(BUILD_DIR)\php_embed_cli_test.exe: $(BUILD_DIR)\sapi\embed\cli_argv.obj $(BUILD_DIR)\$(EMBED_LIB)
+	"$(LINK)" /nologo $(BUILD_DIR)\sapi\embed\cli_argv.obj $(BUILD_DIR)\$(EMBED_LIB) /out:$@ $(LDFLAGS) $(LDFLAGS_EMBED) /stack:67108864

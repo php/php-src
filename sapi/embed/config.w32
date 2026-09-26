@@ -10,4 +10,6 @@ if (PHP_EMBED != "no") {
 	ADD_FLAG("LIBS_EMBED", "ws2_32.lib");
 	ADD_FLAG("LIBS_EMBED", "shell32.lib");
 	PHP_INSTALL_HEADERS("sapi/embed", "php_embed.h");
+	DEFINE('EMBED_LIB', 'php' + PHP_VERSION + 'embed.lib');
+	ADD_MAKEFILE_FRAGMENT();
 }
