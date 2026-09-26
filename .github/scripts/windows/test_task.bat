@@ -159,6 +159,10 @@ if "%IOR_PREFIX%" neq "" (
 	set IO_HOOKS_QUEUE=ring
 	nmake test TESTS="-g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL% ext\standard\tests\streams\hooks ext\standard\tests\poll ext\openssl\tests\stream_io_hooks.phpt ext\curl\tests"
 	if errorlevel 1 set EXIT_CODE=3
+	set IO_HOOKS_CAPS=files,direct
+	nmake test TESTS="-g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL% ext\standard\tests\streams\hooks ext\openssl\tests\stream_io_hooks.phpt ext\curl\tests"
+	if errorlevel 1 set EXIT_CODE=3
+	set IO_HOOKS_CAPS=
 	set IO_HOOKS_QUEUE=
 )
 
