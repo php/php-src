@@ -380,6 +380,29 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 }
 /* }}} */
 
+static bool pdo_stmt_do_next_rowset(pdo_stmt_t *stmt);
+
+static void pdo_stmt_invalidate_result(pdo_stmt_t *stmt)
+{
+	if (stmt->methods->cursor_closer) {
+		stmt->methods->cursor_closer(stmt);
+	} else {
+		do {
+			while (stmt->methods->fetcher(stmt, PDO_FETCH_ORI_NEXT, 0))
+				;
+			if (!stmt->methods->next_rowset) {
+				break;
+			}
+
+			if (!pdo_stmt_do_next_rowset(stmt)) {
+				break;
+			}
+		} while (1);
+	}
+
+	stmt->executed = 0;
+}
+
 /* {{{ Execute a prepared statement, optionally binding parameters */
 PHP_METHOD(PDOStatement, execute)
 {
@@ -392,6 +415,10 @@ PHP_METHOD(PDOStatement, execute)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STMT_GET_OBJ;
+
+	if (stmt->executed) {
+		pdo_stmt_invalidate_result(stmt);
+	}
 	PDO_STMT_CLEAR_ERR();
 
 	if (input_params) {
