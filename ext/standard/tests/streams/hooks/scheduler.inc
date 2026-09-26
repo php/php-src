@@ -11,10 +11,12 @@ class Scheduler implements \Io\Hooks\Hooks
     /** Submitted operations whose fiber is suspended in run(). */
     private int $inFlight = 0;
     private \Io\OperationQueue $queue;
+    private array $capabilities;
 
-    public function __construct(?\Io\OperationQueue $queue = null)
+    public function __construct(?\Io\OperationQueue $queue = null, ?array $capabilities = null)
     {
         $this->queue = $queue ?? self::defaultQueue();
+        $this->capabilities = self::capabilities($this->queue, $capabilities);
     }
 
     /* IO_HOOKS_QUEUE=ring runs the same tests on Io\Ring\Engine */
@@ -29,6 +31,24 @@ class Scheduler implements \Io\Hooks\Hooks
         return new \Io\Poll\OperationQueue();
     }
 
+    /* IO_HOOKS_CAPS=files,direct opts in to what the queue supports, default is its own set */
+    public static function capabilities(\Io\OperationQueue $queue, ?array $wanted = null): array
+    {
+        if ($wanted === null) {
+            $env = (string) getenv('IO_HOOKS_CAPS');
+            if ($env === '') {
+                return $queue->getHookCapabilities();
+            }
+            $wanted = array_map(
+                fn ($name) => constant(\Io\Hooks\Capability::class . '::' . ucfirst(trim($name))),
+                explode(',', $env));
+        }
+        $supported = $queue instanceof \Io\Ring\Engine
+            ? $queue->getSupportedHookCapabilities()
+            : $queue->getHookCapabilities();
+        return array_values(array_filter($supported, fn ($c) => in_array($c, $wanted, true)));
+    }
+
     /** Schedule a task; it starts on the next pass of loop(). */
     public function spawn(callable $fn): void
     {
@@ -39,7 +59,7 @@ class Scheduler implements \Io\Hooks\Hooks
 
     public function getCapabilities(): array
     {
-        return $this->queue->getHookCapabilities();
+        return $this->capabilities;
     }
 
     public function run(\Io\Operation $op): \Io\Completion

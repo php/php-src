@@ -51,9 +51,16 @@ namespace Io\Ring {
         public function countPending(): int {}
 
         /**
+         * Capabilities worth reporting by default: none; see getSupportedHookCapabilities().
          * @return list<\Io\Hooks\Capability>
          */
         public function getHookCapabilities(): array {}
+
+        /**
+         * Capabilities this backend can serve, for a provider that opts in.
+         * @return list<\Io\Hooks\Capability>
+         */
+        public function getSupportedHookCapabilities(): array {}
     }
 
     class RingException extends \Io\IoException {}

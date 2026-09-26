@@ -1178,7 +1178,7 @@ PHP_METHOD(Io_Poll_OperationQueue, countPending)
 	RETURN_LONG(intern->queue->ops->count_pending(intern->queue));
 }
 
-static void php_io_hook_flags_to_capabilities(uint32_t flags, zval *rv)
+PHPAPI void php_io_hook_flags_to_capabilities(uint32_t flags, zval *rv)
 {
 	array_init(rv);
 	if (flags & PHP_IO_HOOKS_F_FILES) {

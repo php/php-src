@@ -29,7 +29,7 @@ final class Tracing extends Scheduler
     }
 }
 
-$scheduler = new Tracing();
+$scheduler = new Tracing(null, [Io\Hooks\Capability::Files]);
 Io\Hooks\set_hooks($scheduler);
 $files = in_array(Io\Hooks\Capability::Files, $scheduler->getCapabilities(), true);
 

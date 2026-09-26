@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_ring.stub.php instead.
- * Stub hash: 5a976bb52207481ab52ce4ae35c140a72adaacad
+ * Stub hash: d7f7fd3ba5a5e0573a078d7dbf752b1a60b1ce00
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -38,6 +38,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Ring_Engine_getHookCapabilities, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_Io_Ring_Engine_getSupportedHookCapabilities arginfo_class_Io_Ring_Engine_getHookCapabilities
+
 ZEND_METHOD(Io_Ring_Engine, __construct);
 ZEND_METHOD(Io_Ring_Engine, getBackend);
 ZEND_METHOD(Io_Ring_Engine, getHandle);
@@ -48,6 +50,7 @@ ZEND_METHOD(Io_Ring_Engine, remove);
 ZEND_METHOD(Io_Ring_Engine, waitCompletions);
 ZEND_METHOD(Io_Ring_Engine, countPending);
 ZEND_METHOD(Io_Ring_Engine, getHookCapabilities);
+ZEND_METHOD(Io_Ring_Engine, getSupportedHookCapabilities);
 
 static const zend_function_entry class_Io_Ring_Engine_methods[] = {
 	ZEND_ME(Io_Ring_Engine, __construct, arginfo_class_Io_Ring_Engine___construct, ZEND_ACC_PUBLIC)
@@ -60,6 +63,7 @@ static const zend_function_entry class_Io_Ring_Engine_methods[] = {
 	ZEND_ME(Io_Ring_Engine, waitCompletions, arginfo_class_Io_Ring_Engine_waitCompletions, ZEND_ACC_PUBLIC)
 	ZEND_ME(Io_Ring_Engine, countPending, arginfo_class_Io_Ring_Engine_countPending, ZEND_ACC_PUBLIC)
 	ZEND_ME(Io_Ring_Engine, getHookCapabilities, arginfo_class_Io_Ring_Engine_getHookCapabilities, ZEND_ACC_PUBLIC)
+	ZEND_ME(Io_Ring_Engine, getSupportedHookCapabilities, arginfo_class_Io_Ring_Engine_getSupportedHookCapabilities, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

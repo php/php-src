@@ -18,7 +18,7 @@ include 'CertificateGenerator.inc';
 final class GiveUp implements Io\Hooks\Hooks
 {
     public function __construct(private Io\Ring\Engine $ring) {}
-    public function getCapabilities(): array { return $this->ring->getHookCapabilities(); }
+    public function getCapabilities(): array { return Scheduler::capabilities($this->ring); }
     public function add(Io\Operation $op): void {}
     public function remove(Io\Operation $op): void {}
     public function run(Io\Operation $op): Io\Completion

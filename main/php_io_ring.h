@@ -55,8 +55,10 @@ PHPAPI void php_io_ring_notify_clear(php_io_ring *ring);
 PHPAPI uint32_t php_io_ring_features(php_io_ring *ring);
 PHPAPI php_io_ring_backend_type php_io_ring_get_backend_type(php_io_ring *ring);
 PHPAPI const char *php_io_ring_backend_name(php_io_ring *ring);
-/* PHP_IO_HOOKS_F_* a provider on this ring should register with */
+/* PHP_IO_HOOKS_F_* a provider on this ring should register with by default */
 PHPAPI uint32_t php_io_ring_hook_flags(php_io_ring *ring);
+/* PHP_IO_HOOKS_F_* this ring can serve, for a provider that opts in */
+PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring);
 
 /* Created by another process: every operation fails */
 PHPAPI bool php_io_ring_inherited(php_io_ring *ring);

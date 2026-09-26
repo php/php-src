@@ -337,6 +337,11 @@ PHPAPI const char *php_io_ring_backend_name(php_io_ring *ring)
 
 PHPAPI uint32_t php_io_ring_hook_flags(php_io_ring *ring)
 {
+	return 0;
+}
+
+PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring)
+{
 	uint32_t flags = PHP_IO_HOOKS_F_FILES;
 	if (ring->features & IOR_FEAT_NATIVE_ASYNC) {
 		flags |= PHP_IO_HOOKS_F_DIRECT;

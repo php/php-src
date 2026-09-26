@@ -35,7 +35,7 @@ final class Dropping implements Io\Hooks\Hooks
     public ?int $victim = null;
 
     public function __construct(private Io\OperationQueue $queue) {}
-    public function getCapabilities(): array { return $this->queue->getHookCapabilities(); }
+    public function getCapabilities(): array { return Scheduler::capabilities($this->queue); }
     public function add(Io\Operation $op): void {}
     public function remove(Io\Operation $op): void {}
 

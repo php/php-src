@@ -104,6 +104,22 @@ PHP_METHOD(Io_Ring_Engine, getHookCapabilities)
 		ZEND_MN(Io_Poll_OperationQueue_getHookCapabilities));
 }
 
+PHP_METHOD(Io_Ring_Engine, getSupportedHookCapabilities)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_io_opqueue_obj *intern = PHP_IO_OPQUEUE_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS));
+	if (!intern->queue) {
+		zend_throw_error(NULL, "Io\\Ring\\Engine object is not constructed");
+		RETURN_THROWS();
+	}
+	if (php_io_ring_engine_check(ZEND_THIS) == FAILURE) {
+		RETURN_THROWS();
+	}
+	php_io_hook_flags_to_capabilities(
+		php_io_ring_supported_hook_flags(php_io_ring_engine_ring(intern)), return_value);
+}
+
 PHP_METHOD(Io_Ring_Engine, __construct)
 {
 	zend_long entries = 0;

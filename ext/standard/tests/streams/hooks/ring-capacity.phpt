@@ -35,7 +35,7 @@ print_r($counts);
 $ring = new Io\Ring\Engine(1);
 Io\Hooks\set_hooks(new class($ring) implements Io\Hooks\Hooks {
     public function __construct(private Io\Ring\Engine $ring) {}
-    public function getCapabilities(): array { return $this->ring->getHookCapabilities(); }
+    public function getCapabilities(): array { return Scheduler::capabilities($this->ring); }
     public function add(Io\Operation $op): void {}
     public function remove(Io\Operation $op): void {}
     public function run(Io\Operation $op): Io\Completion {

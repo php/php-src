@@ -33,6 +33,7 @@ typedef struct {
 PHPAPI extern zend_class_entry *php_io_operation_queue_ce;
 PHPAPI extern zend_object_handlers php_io_opqueue_handlers;
 PHPAPI zend_object *php_io_opqueue_create_object(zend_class_entry *ce);
+PHPAPI void php_io_hook_flags_to_capabilities(uint32_t flags, zval *rv);
 
 PHP_MINIT_FUNCTION(io_hooks);
 

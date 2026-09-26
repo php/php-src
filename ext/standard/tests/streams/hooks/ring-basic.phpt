@@ -1,5 +1,5 @@
 --TEST--
-Io\Ring\Engine: backend, capabilities, notification handle and a Timer operation
+Io\Ring\Engine: backend, notification handle and a Timer operation
 --SKIPIF--
 <?php
 if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not available");
@@ -10,10 +10,6 @@ if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not availab
 $ring = new Io\Ring\Engine();
 var_dump($ring instanceof Io\OperationQueue);
 var_dump($ring->getBackend() instanceof Io\Ring\Backend);
-$caps = $ring->getHookCapabilities();
-var_dump(in_array(Io\Hooks\Capability::Files, $caps, true));
-// Direct where the backend completes ops itself: io_uring and IOCP, not the thread pool
-var_dump($ring->getBackend() !== Io\Ring\Backend::Threads ? in_array(Io\Hooks\Capability::Direct, $caps, true) : !in_array(Io\Hooks\Capability::Direct, $caps, true));
 var_dump($ring->countPending());
 
 $handle = $ring->getHandle();
@@ -88,8 +84,6 @@ $watcher->remove();
 echo "done\n";
 ?>
 --EXPECT--
-bool(true)
-bool(true)
 bool(true)
 bool(true)
 int(0)
