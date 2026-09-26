@@ -3280,8 +3280,13 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 		length = num_in - offset;
 	}
 
+	/* Number of entries in the output hash: the input entries that are kept
+	 * plus the replacement entries. After clamping, a non-positive length
+	 * removes nothing, so all input entries are kept. */
+	uint32_t num_out = num_in - MAX(length, 0) + (replace ? zend_hash_num_elements(replace) : 0);
+
 	/* Create and initialize output hash */
-	zend_hash_init(&out_hash, (length > 0 ? num_in - length : 0) + (replace ? zend_hash_num_elements(replace) : 0), NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&out_hash, num_out, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (HT_IS_PACKED(in_hash)) {
 		/* Start at the beginning of the input hash and copy entries to output hash until offset is reached */
@@ -7125,114 +7130,127 @@ PHP_FUNCTION(array_map)
 			}
 		}
 
-		array_init_size(return_value, maxlen);
-
-		if (!ZEND_FCI_INITIALIZED(fci)) {
-			uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
-			zval zv;
-
-			/* We iterate through all the arrays at once. */
-			for (k = 0; k < maxlen; k++) {
-
-				/* If no callback, the result will be an array, consisting of current
-				 * entries from all arrays. */
-				array_init_size(&result, n_arrays);
-
-				for (i = 0; i < n_arrays; i++) {
-					/* If this array still has elements, add the current one to the
-					 * parameter list, otherwise use null value. */
-					uint32_t pos = array_pos[i];
-					if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
-						while (1) {
-							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-								ZVAL_NULL(&zv);
-								break;
-							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
-								ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arPacked[pos]);
-								array_pos[i] = pos + 1;
-								break;
-							}
-							pos++;
-						}
-					} else {
-						while (1) {
-							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-								ZVAL_NULL(&zv);
-								break;
-							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-								ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arData[pos].val);
-								array_pos[i] = pos + 1;
-								break;
-							}
-							pos++;
-						}
-					}
-					zend_hash_next_index_insert_new(Z_ARRVAL(result), &zv);
-				}
-
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
-			}
-
-			efree(array_pos);
-		} else {
-			zval *params = (zval *)safe_emalloc(n_arrays, sizeof(zval), 0);
-
-			/* Remember next starting point in the array, initialize those as zeros. */
-			for (i = 0; i < n_arrays; i++) {
-				Z_EXTRA(params[i]) = 0;
-			}
-
-			fci.retval = &result;
-			fci.param_count = n_arrays;
-			fci.params = params;
-
-			/* We iterate through all the arrays at once. */
-			for (k = 0; k < maxlen; k++) {
-				for (i = 0; i < n_arrays; i++) {
-					/* If this array still has elements, add the current one to the
-					 * parameter list, otherwise use null value. */
-					uint32_t pos = Z_EXTRA(params[i]);
-					if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
-						while (1) {
-							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-								ZVAL_NULL(&params[i]);
-								break;
-							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
-								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
-								Z_EXTRA(params[i]) = pos + 1;
-								break;
-							}
-							pos++;
-						}
-					} else {
-						while (1) {
-							if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
-								ZVAL_NULL(&params[i]);
-								break;
-							} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-								ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
-								Z_EXTRA(params[i]) = pos + 1;
-								break;
-							}
-							pos++;
-						}
-					}
-				}
-
-				zend_result ret = zend_call_function(&fci, &fci_cache);
-				ZEND_ASSERT(ret == SUCCESS);
-				ZEND_IGNORE_VALUE(ret);
-
-				if (Z_TYPE(result) == IS_UNDEF) {
-					efree(params);
-					RETURN_THROWS();
-				}
-
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &result);
-			}
-
-			efree(params);
+		if (!maxlen) {
+			RETURN_EMPTY_ARRAY();
 		}
+
+		array_init_size(return_value, maxlen);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			if (!ZEND_FCI_INITIALIZED(fci)) {
+				uint32_t *array_pos = ecalloc(n_arrays, sizeof(HashPosition));
+				zval zv;
+
+				/* We iterate through all the arrays at once. */
+				for (k = 0; k < maxlen; k++) {
+
+					/* If no callback, the result will be an array, consisting of current
+					 * entries from all arrays. */
+					array_init_size(&result, n_arrays);
+
+					zend_hash_real_init_packed(Z_ARRVAL(result));
+					ZEND_HASH_FILL_PACKED(Z_ARRVAL(result)) {
+						for (i = 0; i < n_arrays; i++) {
+							/* If this array still has elements, add the current one to the
+							 * parameter list, otherwise use null value. */
+							uint32_t pos = array_pos[i];
+							if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
+								while (1) {
+									if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
+										ZEND_HASH_FILL_SET_NULL();
+										break;
+									} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
+										ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arPacked[pos]);
+										ZEND_HASH_FILL_SET(&zv);
+										array_pos[i] = pos + 1;
+										break;
+									}
+									pos++;
+								}
+							} else {
+								while (1) {
+									if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
+										ZEND_HASH_FILL_SET_NULL();
+										break;
+									} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
+										ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arData[pos].val);
+										ZEND_HASH_FILL_SET(&zv);
+										array_pos[i] = pos + 1;
+										break;
+									}
+									pos++;
+								}
+							}
+							ZEND_HASH_FILL_NEXT();
+						}
+					} ZEND_HASH_FILL_END();
+
+					ZEND_HASH_FILL_ADD(&result);
+				}
+
+				efree(array_pos);
+			} else {
+				zval *params = (zval *)safe_emalloc(n_arrays, sizeof(zval), 0);
+
+				/* Remember next starting point in the array, initialize those as zeros. */
+				for (i = 0; i < n_arrays; i++) {
+					Z_EXTRA(params[i]) = 0;
+				}
+
+				fci.retval = &result;
+				fci.param_count = n_arrays;
+				fci.params = params;
+
+				/* We iterate through all the arrays at once. */
+				for (k = 0; k < maxlen; k++) {
+					for (i = 0; i < n_arrays; i++) {
+						/* If this array still has elements, add the current one to the
+						 * parameter list, otherwise use null value. */
+						uint32_t pos = Z_EXTRA(params[i]);
+						if (HT_IS_PACKED(Z_ARRVAL(arrays[i]))) {
+							while (1) {
+								if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
+									ZVAL_NULL(&params[i]);
+									break;
+								} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arPacked[pos]) != IS_UNDEF) {
+									ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arPacked[pos]);
+									Z_EXTRA(params[i]) = pos + 1;
+									break;
+								}
+								pos++;
+							}
+						} else {
+							while (1) {
+								if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
+									ZVAL_NULL(&params[i]);
+									break;
+								} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
+									ZVAL_COPY_VALUE(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
+									Z_EXTRA(params[i]) = pos + 1;
+									break;
+								}
+								pos++;
+							}
+						}
+					}
+
+					zend_result ret = zend_call_function(&fci, &fci_cache);
+					ZEND_ASSERT(ret == SUCCESS);
+					ZEND_IGNORE_VALUE(ret);
+
+					if (Z_TYPE(result) == IS_UNDEF) {
+						ZEND_HASH_FILL_FINISH();
+						efree(params);
+						RETURN_THROWS();
+					}
+
+					ZEND_HASH_FILL_ADD(&result);
+				}
+
+				efree(params);
+			}
+		} ZEND_HASH_FILL_END();
 	}
 }
 /* }}} */

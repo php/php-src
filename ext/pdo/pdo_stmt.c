@@ -648,7 +648,7 @@ static bool pdo_call_fetch_object_constructor(zend_function *constructor, HashTa
 }
 
 /* Performs a row fetch, the value is stored into return_value according to HOW.
- * retun_value MUST be safely destroyable as it will be freed if an error occurs. */
+ * return_value MUST be safely destroyable as it will be freed if an error occurs. */
 static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *group_key) /* {{{ */
 {
 	int flags;

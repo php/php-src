@@ -14,13 +14,24 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+- Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
+  instead.
+- Removed ZEND_STATIC_ASSERT(). Use C11 static_assert() directly instead.
+
 ========================
 2. Build system changes
 ========================
 
+- Unix build system changes:
+  . Autoconf minimum required version upgraded to 2.71.
+
 ========================
 3. Module changes
 ========================
+
+- Standard:
+  . php_explode() now takes a HashTable* instead of a zval* to store the
+    resulting parts. It already expected the zval* to be IS_ARRAY.
 
 ========================
 4. OpCode changes

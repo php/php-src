@@ -1707,7 +1707,7 @@ PHP_FUNCTION(stream_set_blocking)
 
 /* }}} */
 
-/* {{{ Set timeout on stream read to seconds + microseonds */
+/* {{{ Set timeout on stream read to seconds + microseconds */
 #if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 PHP_FUNCTION(stream_set_timeout)
 {

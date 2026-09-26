@@ -392,10 +392,10 @@ ZEND_ATTRIBUTE_NONNULL void php_uri_parser_whatwg_host_type_read(const lxb_url_t
 {
 	switch (lexbor_uri->host.type) {
 		case LXB_URL_HOST_TYPE_IPV4:
-			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "IPv4"));
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "IpV4"));
 			return;
 		case LXB_URL_HOST_TYPE_IPV6:
-			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "IPv6"));
+			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "IpV6"));
 			return;
 		case LXB_URL_HOST_TYPE_DOMAIN:
 			ZVAL_OBJ_COPY(retval, zend_enum_get_case_cstr(php_uri_ce_whatwg_url_host_type, "Domain"));

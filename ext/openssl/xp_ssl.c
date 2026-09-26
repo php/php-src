@@ -2480,7 +2480,7 @@ static zend_result php_openssl_setup_server_session(php_stream *stream,
 			SSL_CTX_sess_set_remove_cb(sslsock->ctx, php_openssl_session_remove_cb);
 		}
 
-		// Disable tickets (they won't work anyway) and warn if explicity enabled
+		// Disable tickets (they won't work anyway) and warn if explicitly enabled
 		SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_TICKET);
 		if (GET_VER_OPT("no_ticket") && !zend_is_true(val)) {
 			zend_value_error("Session tickets cannot be enabled when session_get_cb is set");

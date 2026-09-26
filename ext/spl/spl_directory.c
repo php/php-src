@@ -38,7 +38,7 @@ static zend_object_handlers spl_filesystem_object_handlers;
 /* includes handler to validate object state when retrieving methods */
 static zend_object_handlers spl_filesystem_object_check_handlers;
 
-/* decalre the class entry */
+/* declare the class entry */
 PHPAPI zend_class_entry *spl_ce_SplFileInfo;
 PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
 PHPAPI zend_class_entry *spl_ce_FilesystemIterator;

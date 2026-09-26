@@ -223,7 +223,7 @@ function process_args($argv, $argc) {
     // Validate vendor
     if (!preg_match('/^[a-z][a-z0-9_-]+$/i', $options['vendor'])) {
         error('Invalid vendor name. Valid names start with a letter,'
-            .' followed by any number of letters, numbers, hypens, or underscores.');
+            .' followed by any number of letters, numbers, hyphens, or underscores.');
     }
 
     $options['ext'] = str_replace(['\\', '/'], '', strtolower($options['ext']));

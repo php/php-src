@@ -46,7 +46,6 @@ static dom_named_item dom_html_collection_named_item(zend_string *key, zend_obje
 	xmlNodePtr basep = dom_object_get_node(objmap->baseobj);
 	if (basep != NULL && basep->children != NULL) {
 		php_dom_obj_map_collection_iter iter = {0};
-		iter.candidate = basep->children;
 		iter.basep = basep;
 
 		while (true) {

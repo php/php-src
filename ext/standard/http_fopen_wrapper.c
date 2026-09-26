@@ -75,34 +75,68 @@
 #define HTTP_WRAPPER_KEEP_METHOD    4
 #define HTTP_WRAPPER_STRIP_AUTH     8
 
-/* Removes every line whose header name matches. Neither a repeated header nor an
- * occurrence of the name inside another header's value may leave the real header
- * behind, as that would defeat HTTP_WRAPPER_STRIP_AUTH. */
+static char *next_header_line(char *line)
+{
+	while (*line != '\0' && *line != '\r' && *line != '\n') {
+		line++;
+	}
+	if (*line == '\r') {
+		line++;
+	}
+	if (*line == '\n') {
+		line++;
+	}
+
+	return line;
+}
+
+/* Removes every line whose header name matches, along with the folded
+ * continuation lines carrying the rest of its value. Neither a repeated header
+ * nor an occurrence of the name inside another header's value may leave the real
+ * header behind, as that would defeat HTTP_WRAPPER_STRIP_AUTH. */
 static inline void strip_header(char *header_bag, char *lc_header_bag,
 		const char *lc_header_name)
 {
-	char *lc_header_start = lc_header_bag;
+	size_t name_len = strlen(lc_header_name);
+	char *lc_line = lc_header_bag;
 
-	while ((lc_header_start = strstr(lc_header_start, lc_header_name))) {
-		if (lc_header_start != lc_header_bag && *(lc_header_start-1) != '\n') {
-			lc_header_start += strlen(lc_header_name);
+	while (*lc_line != '\0') {
+		if (strncmp(lc_line, lc_header_name, name_len) != 0) {
+			lc_line = next_header_line(lc_line);
 			continue;
 		}
 
-		char *header_start = header_bag + (lc_header_start - lc_header_bag);
-		char *lc_eol = strchr(lc_header_start, '\n');
-
-		if (!lc_eol) {
-			*lc_header_start = '\0';
-			*header_start = '\0';
-			return;
+		/* the whitespace RFC 7230 forbids before the colon is tolerated by some
+		 * servers, so it must not hide the header from us either */
+		const char *lc_colon = lc_line + name_len;
+		while (*lc_colon == ' ' || *lc_colon == '\t') {
+			lc_colon++;
 		}
 
-		char *eol = header_start + (lc_eol - lc_header_start);
-		size_t eollen = strlen(lc_eol);
+		if (*lc_colon != ':') {
+			lc_line = next_header_line(lc_line);
+			continue;
+		}
 
-		memmove(lc_header_start, lc_eol+1, eollen);
-		memmove(header_start, eol+1, eollen);
+		char *lc_next = next_header_line(lc_line);
+		while (*lc_next == ' ' || *lc_next == '\t') {
+			lc_next = next_header_line(lc_next);
+		}
+
+		if (*lc_next == '\0') {
+			/* drop the preceding line break too, or the one appended after the bag
+			 * would close the header block early */
+			while (lc_line > lc_header_bag
+					&& (*(lc_line - 1) == '\r' || *(lc_line - 1) == '\n')) {
+				--lc_line;
+			}
+		}
+
+		size_t tail_len = strlen(lc_next) + 1;
+		char *line = header_bag + (lc_line - lc_header_bag);
+
+		memmove(line, header_bag + (lc_next - lc_header_bag), tail_len);
+		memmove(lc_line, lc_next, tail_len);
 	}
 }
 
@@ -719,15 +753,15 @@ finish:
 
 			if (!header_init && !redirect_keep_method) {
 				/* strip POST headers on redirect */
-				strip_header(user_headers, t, "content-length:");
-				strip_header(user_headers, t, "content-type:");
+				strip_header(user_headers, t, "content-length");
+				strip_header(user_headers, t, "content-type");
 			}
 
 			if (flags & HTTP_WRAPPER_STRIP_AUTH) {
-				strip_header(user_headers, t, "authorization:");
-				strip_header(user_headers, t, "cookie:");
+				strip_header(user_headers, t, "authorization");
+				strip_header(user_headers, t, "cookie");
 				if (!use_proxy) {
-					strip_header(user_headers, t, "proxy-authorization:");
+					strip_header(user_headers, t, "proxy-authorization");
 				}
 			}
 

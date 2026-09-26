@@ -650,6 +650,11 @@ static zend_property_info* zend_get_known_property_info(const zend_op_array *op_
 	}
 
 	if (info->flags & ZEND_ACC_PUBLIC) {
+		if ((info->flags & ZEND_ACC_CHANGED)
+		 && op_array->scope
+		 && op_array->scope != ce) {
+			return NULL;
+		}
 		return info;
 	} else if (on_this) {
 		if (ce == info->ce) {
@@ -2032,7 +2037,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						op1_info = OP1_INFO();
 						if (ra && ssa->vars[ssa_op->op1_use].no_val) {
-							op1_info |= MAY_BE_UNDEF; // requres type assignment
+							op1_info |= MAY_BE_UNDEF; // requires type assignment
 						}
 						if (opline->result_type == IS_UNUSED) {
 							res_addr = 0;

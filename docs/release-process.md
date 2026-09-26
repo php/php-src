@@ -949,9 +949,9 @@ feature development that cannot go into the new version.
 
    * clear the `NEWS`, `UPGRADING`, and `UPGRADING.INTERNALS` files;
    * update the version numbers in `configure.ac`, `main/php_version.h`,
-     `Zend/zend.h`, and `win32/build/confutils.js`;
+     `Zend/zend.h`, and `win32/build/confutils.js`; and
    * update the API version numbers in `Zend/zend_extensions.h`,
-     `Zend/zend_modules.h`, and `main/php.h`; and
+     `Zend/zend_modules.h`, and `main/php.h`.
 
    See [Prepare for PHP 8.2][] and [Prepare for PHP 8.2 (bis)][] for an example
    of what this commit should include.
@@ -1094,7 +1094,7 @@ volunteers to begin the selection process for the next release managers.
 
 4. File a [ticket in the infrastructure](https://github.com/php/infrastructure/issues/new?template=request-release-manager-access.yml)
    project and provide an SSH key, your @php.net email address, your GitHub
-   account name, and your preferred system account name. Preferrably they're
+   account name, and your preferred system account name. Preferably they're
    all the same!
 
 5. Read [Logging into Servers](https://github.com/php/infrastructure/blob/main/docs/ServerAccess.rst#logging-into-servers) to set up

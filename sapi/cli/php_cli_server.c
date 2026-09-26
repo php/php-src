@@ -1995,9 +1995,13 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	// Create a new php_network_populate_name_from_sockaddr_ex() API with a persistent flag?
 	zend_string *tmp_addr = NULL;
 	php_network_populate_name_from_sockaddr(addr, addr_len, &tmp_addr, NULL, 0);
-	client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
+	if (EXPECTED(tmp_addr != NULL)) {
+		client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
+		zend_string_release_ex(tmp_addr, /* persistent */ false);
+	} else {
+		client->addr_str = zend_string_init(ZEND_STRL("-"), /* persistent */ true);
+	}
 	GC_MAKE_PERSISTENT_LOCAL(client->addr_str);
-	zend_string_release_ex(tmp_addr, /* persistent */ false);
 
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = false;
@@ -2227,6 +2231,11 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 	client->content_sender_initialized = true;
 	if (client->request.request_method != PHP_HTTP_HEAD) {
 		client->file_fd = fd;
+	} else {
+		/* Content-Length comes from the stat and no body is sent, so the fd is
+		   not needed; it is still opened so HEAD gets the same 404 as GET on
+		   an unreadable file. */
+		close(fd);
 	}
 
 	{
@@ -2758,7 +2767,7 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 		php_cli_server_client *client = NULL;
 		php_socket_t client_sock;
 		socklen_t socklen = server->socklen;
-		struct sockaddr *sa = pemalloc(server->socklen, 1);
+		struct sockaddr *sa = pecalloc(1, server->socklen, 1);
 		client_sock = accept(server->server_sock, sa, &socklen);
 		if (!ZEND_VALID_SOCKET(client_sock)) {
 			pefree(sa, 1);

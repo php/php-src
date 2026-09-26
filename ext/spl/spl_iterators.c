@@ -1676,14 +1676,14 @@ PHP_METHOD(RecursiveFilterIterator, getChildren)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	zval childrens;
-	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &childrens);
-	if (Z_TYPE(childrens) == IS_UNDEF) {
+	zval children;
+	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &children);
+	if (Z_TYPE(children) == IS_UNDEF) {
 		RETURN_THROWS();
 	}
 
-	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 1, &childrens, NULL);
-	zval_ptr_dtor(&childrens);
+	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 1, &children, NULL);
+	zval_ptr_dtor(&children);
 	if (is_initialized == FAILURE) {
 		RETURN_THROWS();
 	}

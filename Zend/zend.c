@@ -1996,30 +1996,6 @@ ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handl
 	return ret;
 }
 
-ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */
-{
-	va_list files;
-	int i;
-	zend_file_handle *file_handle;
-	zend_result ret = SUCCESS;
-
-	va_start(files, file_count);
-	for (i = 0; i < file_count; i++) {
-		file_handle = va_arg(files, zend_file_handle *);
-		if (!file_handle) {
-			continue;
-		}
-		if (ret == FAILURE) {
-			continue;
-		}
-		ret = zend_execute_script(type, retval, file_handle);
-	}
-	va_end(files);
-
-	return ret;
-}
-/* }}} */
-
 #define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%d) : %s"
 
 ZEND_API char *zend_make_compiled_string_description(const char *name) /* {{{ */

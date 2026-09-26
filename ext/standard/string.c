@@ -19,6 +19,9 @@
 #include "php_string.h"
 #include "php_variables.h"
 #include <locale.h>
+#ifdef HAVE_NL_LANGINFO
+# include <langinfo.h>
+#endif
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
@@ -87,6 +90,20 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 	return str;
 }
 /* }}} */
+
+#ifdef ZTS
+/* read the decimal point through nl_langinfo() (thread-safe), instead of taking the lock. */
+PHPAPI char localeconv_decimal_point(void)
+{
+#if defined(HAVE_NL_LANGINFO) && (defined(__GLIBC__) || defined(__MUSL__))
+	return *nl_langinfo(RADIXCHAR);
+#else
+	struct lconv lc;
+	localeconv_r(&lc);
+	return *lc.decimal_point;
+#endif
+}
+#endif
 
 /* {{{ localeconv_r
  * glibc's localeconv is not reentrant, so lets make it so ... sorta */
@@ -858,7 +875,7 @@ PHP_FUNCTION(wordwrap)
 /* }}} */
 
 /* {{{ php_explode */
-PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
+PHPAPI void php_explode(const zend_string *delim, zend_string *str, HashTable *parts, zend_long limit)
 {
 	const char *p1 = ZSTR_VAL(str);
 	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
@@ -867,10 +884,10 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 
 	if (p2 == NULL) {
 		ZVAL_STR_COPY(&tmp, str);
-		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+		zend_hash_next_index_insert_new(parts, &tmp);
 	} else {
-		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+		zend_hash_real_init_packed(parts);
+		ZEND_HASH_FILL_PACKED(parts) {
 			do {
 				ZEND_HASH_FILL_GROW();
 				ZEND_HASH_FILL_SET_STR(zend_string_init_fast(p1, p2 - p1));
@@ -890,7 +907,7 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 /* }}} */
 
 /* {{{ php_explode_negative_limit */
-PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
+static void php_explode_negative_limit(const zend_string *delim, zend_string *str, HashTable *parts, zend_long limit)
 {
 #define EXPLODE_ALLOC_STEP 64
 	const char *p1 = ZSTR_VAL(str);
@@ -922,7 +939,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
 		for (i = 0; i < to_return; i++) { /* this checks also for to_return > 0 */
 			ZVAL_STRINGL_FAST(&tmp, positions[i], (positions[i+1] - ZSTR_LEN(delim)) - positions[i]);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+			zend_hash_next_index_insert_new(parts, &tmp);
 		}
 		efree((void *)positions);
 	}
@@ -960,9 +977,9 @@ PHP_FUNCTION(explode)
 	}
 
 	if (limit > 1) {
-		php_explode(delim, str, return_value, limit);
+		php_explode(delim, str, Z_ARRVAL_P(return_value), limit);
 	} else if (limit < 0) {
-		php_explode_negative_limit(delim, str, return_value, limit);
+		php_explode_negative_limit(delim, str, Z_ARRVAL_P(return_value), limit);
 	} else {
 		ZVAL_STR_COPY(&tmp, str);
 		zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);

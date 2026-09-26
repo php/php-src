@@ -293,11 +293,11 @@ ZEND_ATTRIBUTE_NONNULL void php_uri_parser_rfc3986_host_type_read(php_uri_parser
 	zend_object *value;
 
 	if (uriparser_uri->hostData.ip4 != NULL) {
-		value = zend_enum_get_case_by_id(php_uri_ce_rfc3986_uri_host_type, ZEND_ENUM_Uri_Rfc3986_UriHostType_IPv4);
+		value = zend_enum_get_case_by_id(php_uri_ce_rfc3986_uri_host_type, ZEND_ENUM_Uri_Rfc3986_UriHostType_IpV4);
 	} else if (uriparser_uri->hostData.ip6 != NULL) {
-		value = zend_enum_get_case_by_id(php_uri_ce_rfc3986_uri_host_type, ZEND_ENUM_Uri_Rfc3986_UriHostType_IPv6);
+		value = zend_enum_get_case_by_id(php_uri_ce_rfc3986_uri_host_type, ZEND_ENUM_Uri_Rfc3986_UriHostType_IpV6);
 	} else if (has_text_range(&uriparser_uri->hostData.ipFuture)) {
-		value = zend_enum_get_case_by_id(php_uri_ce_rfc3986_uri_host_type, ZEND_ENUM_Uri_Rfc3986_UriHostType_IPvFuture);
+		value = zend_enum_get_case_by_id(php_uri_ce_rfc3986_uri_host_type, ZEND_ENUM_Uri_Rfc3986_UriHostType_IpVFuture);
 	} else {
 		value = zend_enum_get_case_by_id(php_uri_ce_rfc3986_uri_host_type, ZEND_ENUM_Uri_Rfc3986_UriHostType_RegisteredName);
 	}
