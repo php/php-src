@@ -166,6 +166,10 @@ PHP                                                                        NEWS
     lookup, and an unchecked CreateFileA() failure. (Ilia Alshanetsky)
   . Fix persistent stream context lifetime during shutdown (Levi Morrison)
 
+- Tidy:
+  . Fixed a use-after-free when a tidyNode is used after its document is
+    reparsed. (Ilia Alshanetsky)
+
 - XSL:
   . Fixed bug GH-23730 (use-after-free when XSLTProcessor::importStylesheet()
     is called during a transformation). (David Carlier)
