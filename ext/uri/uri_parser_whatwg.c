@@ -976,18 +976,26 @@ ZEND_ATTRIBUTE_NONNULL static lxb_url_scheme_type_t php_uri_parser_whatwg_get_sp
 
 ZEND_ATTRIBUTE_NONNULL static const char *php_uri_parser_whatwg_build_errors(zval *errors)
 {
+	ZEND_ASSERT(Z_TYPE_P(errors) == IS_ARRAY);
+
 	size_t log_len;
 
 	if (lexbor_parser.log == NULL || (log_len = lexbor_plog_length(lexbor_parser.log)) == 0) {
 		return NULL;
 	}
 
-	if (Z_TYPE_P(errors) != IS_ARRAY) {
-		zval_ptr_dtor(errors);
-		array_init_size(errors, log_len);
-	}
+	zval previous_errors;
+	ZVAL_COPY_VALUE(&previous_errors, errors);
+	array_init_size(errors, log_len + zend_hash_num_elements(Z_ARRVAL(previous_errors)));
 
-	return fill_errors_inner(Z_ARRVAL_P(errors));
+	const char *reason = fill_errors_inner(Z_ARRVAL_P(errors));
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(previous_errors), zval *error) {
+		Z_TRY_ADDREF_P(error);
+		zend_hash_next_index_insert(Z_ARRVAL_P(errors), error);
+	} ZEND_HASH_FOREACH_END();
+	zval_ptr_dtor(&previous_errors);
+
+	return reason;
 }
 
 ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_into_exception(zval *errors)
@@ -999,15 +1007,13 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_into_excep
 		zval *exception_errors = zend_read_property(php_uri_ce_whatwg_invalid_url_exception,
 			EG(exception), ZEND_STRL("errors"), true, &rv);
 		ZEND_ASSERT(Z_TYPE_P(exception_errors) == IS_ARRAY);
+		SEPARATE_ARRAY(exception_errors);
 
 		zval *error;
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(exception_errors), error) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(errors), error) {
 			Z_TRY_ADDREF_P(error);
-			zend_hash_next_index_insert(Z_ARRVAL_P(errors), error);
+			zend_hash_next_index_insert(Z_ARRVAL_P(exception_errors), error);
 		} ZEND_HASH_FOREACH_END();
-
-		zval_ptr_dtor(exception_errors);
-		ZVAL_COPY(exception_errors, errors);
 	}
 }
 
@@ -1049,6 +1055,12 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_fragment_set_null(lxb_u
 		(void) lexbor_str_destroy(&url->fragment, url->mraw, false);
 	}
 }
+
+ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_build_from_zval(
+	lxb_url_t *lexbor_base_url, const zval *scheme, const zval *username, const zval *password,
+	const zval *host, const zval *port, const zval *path, const zval *query, const zval *fragment,
+	zval *soft_errors_zv
+);
 
 ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_whatwg_resolve_reference_from_zval(
 	lxb_url_t *lexbor_base_url, const zval *scheme, const zval *username, const zval *password,
