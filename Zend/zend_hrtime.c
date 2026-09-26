@@ -70,13 +70,6 @@ void zend_startup_hrtime(void)
 
 	struct timespec ts;
 
-#ifdef CLOCK_MONOTONIC_RAW
-	if (EXPECTED(0 == clock_gettime(CLOCK_MONOTONIC_RAW, &ts))) {
-		zend_hrtime_posix_clock_id = CLOCK_MONOTONIC_RAW;
-		return;
-	}
-#endif
-
 	if (EXPECTED(0 == clock_gettime(zend_hrtime_posix_clock_id, &ts))) {
 		return;
 	}
