@@ -435,10 +435,10 @@ END_EXTERN_C()
 #define ZMSG_LOG_SCRIPT_NAME			6L
 #define ZMSG_MEMORY_LEAKS_GRAND_TOTAL	7L
 
-typedef enum {
+C23_ENUM(zend_error_handling_t, uint8_t) {
 	EH_NORMAL = 0,
 	EH_THROW
-} zend_error_handling_t;
+};
 
 typedef struct {
 	zend_error_handling_t  handling;

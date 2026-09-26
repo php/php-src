@@ -202,13 +202,13 @@ typedef struct _zend_oparray_context {
 	uint32_t   try_catch_offset;
 	int        current_brk_cont;
 	int        last_brk_cont;
-	zend_brk_cont_element *brk_cont_array;
-	HashTable *labels;
-	zend_string *active_property_info_name;
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
 	bool       in_finally;
 	bool has_assigned_to_http_response_header;
+	zend_brk_cont_element *brk_cont_array;
+	HashTable *labels;
+	zend_string *active_property_info_name;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/

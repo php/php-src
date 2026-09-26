@@ -75,11 +75,11 @@ typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
 typedef struct _zend_error_info zend_error_info;
 
-typedef enum {
+C23_ENUM(zend_memoize_mode, uint8_t) {
 	ZEND_MEMOIZE_NONE,
 	ZEND_MEMOIZE_COMPILE,
 	ZEND_MEMOIZE_FETCH,
-} zend_memoize_mode;
+};
 
 typedef struct zend_err_buf {
 	uint32_t size;
@@ -119,7 +119,6 @@ struct _zend_compiler_globals {
 	bool skip_shebang;
 	bool increment_lineno;
 
-	bool variable_width_locale;   /* UTF-8, Shift-JIS, Big5, ISO 2022, EUC, etc */
 	bool ascii_compatible_locale; /* locale uses ASCII characters as singletons */
 	                              /* and don't use them as lead/trail units     */
 
