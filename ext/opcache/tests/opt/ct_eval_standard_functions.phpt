@@ -1,5 +1,5 @@
 --TEST--
-Compile-time evaluation of str_increment(), str_decrement(), chop(), join() and strchr()
+Compile-time evaluation of str_increment() and str_decrement()
 --EXTENSIONS--
 opcache
 --INI--
@@ -14,13 +14,6 @@ function test() {
     return [
         str_increment('Z9'),
         str_decrement('AA0'),
-        chop('hello '),
-        chop('hello...', '.'),
-        join(['a', 'b']),
-        join('-', ['a', 'b']),
-        strchr('abc', 'b'),
-        strchr('abc', 'b', true),
-        strchr('abc', 'x'),
     ];
 }
 var_dump(test());
@@ -29,7 +22,7 @@ var_dump(test());
 $_main:
      ; (lines=6, args=0, vars=0, tmps=1)
      ; (after optimizer)
-     ; %sct_eval_standard_functions.php:1-17
+     ; %sct_eval_standard_functions.php:1-10
 0000 INIT_FCALL 1 %d string("var_dump")
 0001 INIT_FCALL 0 %d string("test")
 0002 T0 = DO_UCALL
@@ -40,25 +33,11 @@ $_main:
 test:
      ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
-     ; %sct_eval_standard_functions.php:2-14
+     ; %sct_eval_standard_functions.php:2-7
 0000 RETURN array(...)
-array(9) {
+array(2) {
   [0]=>
   string(3) "AA0"
   [1]=>
   string(2) "Z9"
-  [2]=>
-  string(5) "hello"
-  [3]=>
-  string(5) "hello"
-  [4]=>
-  string(2) "ab"
-  [5]=>
-  string(3) "a-b"
-  [6]=>
-  string(2) "bc"
-  [7]=>
-  string(1) "a"
-  [8]=>
-  bool(false)
 }

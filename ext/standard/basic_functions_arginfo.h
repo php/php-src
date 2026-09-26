@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: ddb210e4574a2a82c59ca4458c48a2f4f85f48d1
+ * Stub hash: 9e08e1c2517576dbce825322fe93cbce3054f23e
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -3199,12 +3199,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("strcoll", zif_strcoll, arginfo_strcoll, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("trim", zif_trim, arginfo_trim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_trim, NULL)
 	ZEND_RAW_FENTRY("rtrim", zif_rtrim, arginfo_rtrim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_rtrim, NULL)
-	ZEND_RAW_FENTRY("chop", zif_rtrim, arginfo_chop, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("chop", zif_rtrim, arginfo_chop, 0, NULL, NULL)
 	ZEND_RAW_FENTRY("ltrim", zif_ltrim, arginfo_ltrim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_ltrim, NULL)
 	ZEND_RAW_FENTRY("wordwrap", zif_wordwrap, arginfo_wordwrap, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("explode", zif_explode, arginfo_explode, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("implode", zif_implode, arginfo_implode, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_implode, NULL)
-	ZEND_RAW_FENTRY("join", zif_implode, arginfo_join, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("join", zif_implode, arginfo_join, 0, NULL, NULL)
 	ZEND_FE(strtok, arginfo_strtok)
 	ZEND_RAW_FENTRY("strtoupper", zif_strtoupper, arginfo_strtoupper, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtoupper, NULL)
 	ZEND_RAW_FENTRY("strtolower", zif_strtolower, arginfo_strtolower, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtolower, NULL)
@@ -3215,7 +3215,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pathinfo, arginfo_pathinfo)
 	ZEND_RAW_FENTRY("stristr", zif_stristr, arginfo_stristr, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("strstr", zif_strstr, arginfo_strstr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strstr, NULL)
-	ZEND_RAW_FENTRY("strchr", zif_strstr, arginfo_strchr, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("strchr", zif_strstr, arginfo_strchr, 0, NULL, NULL)
 	ZEND_RAW_FENTRY("strpos", zif_strpos, arginfo_strpos, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strpos, NULL)
 	ZEND_RAW_FENTRY("stripos", zif_stripos, arginfo_stripos, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("strrpos", zif_strrpos, arginfo_strrpos, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
