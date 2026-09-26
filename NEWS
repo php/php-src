@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
     that throws. (nicolas-grekas)
 
+- Zip:
+  . Fixed bug GH-23899 (Assertion failure when a cancel callback returns an
+    invalid type during shutdown). (Weilin Du)
+
 24 Sep 2026, PHP 8.6.0RC2
 
 - Core:
