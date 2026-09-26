@@ -1166,26 +1166,30 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 
 	if (Z_TYPE_P(query) == IS_STRING) {
 		php_uri_parser_whatwg_query_set_null(lexbor_url);
-		lxb_url_parser_clean(&lexbor_parser);
-		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
-			(lxb_char_t *) Z_STRVAL_P(query), Z_STRLEN_P(query),
-			LXB_URL_STATE_QUERY_STATE, LXB_ENCODING_AUTO
-		);
-		php_uri_parser_whatwg_build_errors_and_throw(status, "query", &errors);
-		if (status != LXB_STATUS_OK) {
+		zend_result result;
+		if (Z_STRLEN_P(query) == 0) {
+			lexbor_str_init(&lexbor_url->query, lexbor_url->mraw, 1);
+			result = SUCCESS;
+		} else {
+			result = php_uri_parser_whatwg_query_write(lexbor_url, query, NULL);
+		}
+		php_uri_parser_whatwg_build_errors(&errors);
+		if (result == FAILURE) {
 			goto failure;
 		}
 	}
 
 	if (Z_TYPE_P(fragment) == IS_STRING) {
 		php_uri_parser_whatwg_fragment_set_null(lexbor_url);
-		lxb_url_parser_clean(&lexbor_parser);
-		status = lxb_url_parse_basic(&lexbor_parser, lexbor_url, lexbor_base_url,
-			(lxb_char_t *) Z_STRVAL_P(fragment), Z_STRLEN_P(fragment),
-			LXB_URL_STATE_FRAGMENT_STATE, LXB_ENCODING_AUTO
-		);
-		php_uri_parser_whatwg_build_errors_and_throw(status, "fragment", &errors);
-		if (status != LXB_STATUS_OK) {
+		zend_result result;
+		if (Z_STRLEN_P(fragment) == 0) {
+			lexbor_str_init(&lexbor_url->fragment, lexbor_url->mraw, 1);
+			result = SUCCESS;
+		} else {
+			result = php_uri_parser_whatwg_fragment_write(lexbor_url, fragment, NULL);
+		}
+		php_uri_parser_whatwg_build_errors(&errors);
+		if (result == FAILURE) {
 			goto failure;
 		}
 	}
