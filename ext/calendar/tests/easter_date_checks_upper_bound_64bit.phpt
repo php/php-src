@@ -1,7 +1,10 @@
 --TEST--
 Test easter_date() on 64bit systems checks the upper year limit
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
+<?php
+if (PHP_INT_SIZE != 8) die("skip 64-bit only");
+if (PHP_OS_FAMILY === "Windows") die("skip not for Windows, see gh23915_windows.phpt");
+?>
 --INI--
 date.timezone=UTC
 --ENV--
@@ -18,4 +21,4 @@ try {
 }
 ?>
 --EXPECT--
-easter_date(): Argument #1 ($year) must be a year before 2.000.000.000 (inclusive)
+easter_date(): Argument #1 ($year) must be between 1970 and 2000000000
