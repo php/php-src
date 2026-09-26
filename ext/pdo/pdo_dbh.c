@@ -1597,7 +1597,7 @@ static void pdo_dbh_free_storage(zend_object *std)
 		dbh->in_txn = false;
 	}
 
-	if (dbh->is_persistent && dbh->methods && dbh->methods->persistent_shutdown) {
+	if (dbh->is_persistent && dbh->driver_data && dbh->methods && dbh->methods->persistent_shutdown) {
 		dbh->methods->persistent_shutdown(dbh);
 	}
 	zend_object_std_dtor(std);
