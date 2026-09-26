@@ -287,10 +287,6 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 	param->stmt = stmt;
 	param->is_param = is_param;
 
-	if (Z_REFCOUNTED(param->driver_params)) {
-		Z_ADDREF(param->driver_params);
-	}
-
 	if (!is_param && param->name && stmt->columns) {
 		/* try to map the name to the column */
 		int i;
@@ -374,6 +370,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 			} else {
 				zend_hash_index_del(hash, pparam->paramno);
 			}
+			ZVAL_UNDEF(&param->driver_params);
 			/* param->parameter is freed by hash dtor */
 			ZVAL_UNDEF(&param->parameter);
 			return 0;
@@ -1461,6 +1458,9 @@ static void register_bound_param(INTERNAL_FUNCTION_PARAMETERS, int is_param) /* 
 	if (!really_register_bound_param(&param, stmt, is_param)) {
 		if (!Z_ISUNDEF(param.parameter)) {
 			zval_ptr_dtor(&(param.parameter));
+		}
+		if (!Z_ISUNDEF(param.driver_params)) {
+			zval_ptr_dtor(&param.driver_params);
 		}
 
 		RETURN_FALSE;
