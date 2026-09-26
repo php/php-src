@@ -586,6 +586,14 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			/* read a chunk into a bucket */
 			justread = stream->ops->read(stream, chunk_buf, stream->chunk_size);
 			if (justread < 0 && stream->writepos == stream->readpos) {
+				while ((bucket = brig_in.head)) {
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				}
+				while ((bucket = brig_out.head)) {
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				}
 				efree(chunk_buf);
 				retval = FAILURE;
 				goto out_check_eof;
@@ -652,12 +660,6 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* when a filter needs feeding, there is no brig_out to deal with.
 					 * we simply continue the loop; if the caller needs more data,
 					 * we will read again, otherwise out job is done here */
-
-					/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
-					while ((bucket = brig_outp->head)) {
-						php_stream_bucket_unlink(bucket);
-						php_stream_bucket_delref(bucket);
-					}
 					break;
 
 				case PSFS_ERR_FATAL:
@@ -684,6 +686,16 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			if (justread <= 0) {
 				break;
 			}
+		}
+
+		php_stream_bucket *bucket;
+		while ((bucket = brig_in.head)) {
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
+		}
+		while ((bucket = brig_out.head)) {
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
 		}
 
 		efree(chunk_buf);
@@ -1296,13 +1308,15 @@ static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, s
 			/* some fatal error.  Theoretically, the stream is borked, so all
 			 * further writes should fail. */
 			consumed = (ssize_t) -1;
-			ZEND_FALLTHROUGH;
+			break;
 
 		case PSFS_FEED_ME:
 			/* need more data before we can push data through to the stream */
-			/* Filter could have added buckets anyway, but signalled that it did not return any. Discard them. */
-			while (brig_inp->head) {
-				bucket = brig_inp->head;
+			while ((bucket = brig_in.head)) {
+				php_stream_bucket_unlink(bucket);
+				php_stream_bucket_delref(bucket);
+			}
+			while ((bucket = brig_out.head)) {
 				php_stream_bucket_unlink(bucket);
 				php_stream_bucket_delref(bucket);
 			}
