@@ -22,6 +22,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
+- Windows build system changes:
+  . C11 atomics are now required. MSVC builds require Visual Studio 2022 17.5 or
+    later and enable /experimental:c11atomics.
+
 - Unix build system changes:
   . Autoconf minimum required version upgraded to 2.71.
 

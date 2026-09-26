@@ -1625,6 +1625,10 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
 	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
+	var c11_flags = ICC_TOOLSET ? " /Qstd=c11" : " /std:c11";
+	if (VS_TOOLSET) {
+		c11_flags += " /experimental:c11atomics";
+	}
 
 	var bd = get_define('BUILD_DIR');
 	var respd = bd + '\\resp';
@@ -1790,7 +1794,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 						"--library=win32\\build\\cppcheck.cfg " +
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
-						" --std=c89 --std=c++11 " +
+						" --std=c11 --std=c++11 " +
 						"--quiet --inconclusive --template=vs -j 4 " +
 						"--suppress=unmatchedSuppression " +
 						"--suppressions-list=win32\\build\\cppcheck_suppress.txt ";
@@ -1809,7 +1813,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 					var _tmp = src.split("\\");
 					var filename = _tmp.pop();
 					obj = filename.replace(re, ".obj");
-					var c11_flag = VS_TOOLSET && !cxx_mode_targets[target] && /\.c$/i.test(src) ? " /std:c11" : "";
+					var c11_flag = !cxx_mode_targets[target] && /\.c$/i.test(src) ? c11_flags : "";
 
 					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
@@ -1830,12 +1834,12 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 					var source = file_list[srcs_by_dir[k][j]];
 					var source_path = dir + "\\" + source + " ";
 					src_line += source_path;
-					src_lines[VS_TOOLSET && /\.c$/i.test(source) ? 0 : 1] += source_path;
+					src_lines[/\.c$/i.test(source) ? 0 : 1] += source_path;
 				}
 
 				for (var language = 0; language < src_lines.length; language++) {
 					if (src_lines[language]) {
-						var c11_flag = language == 0 && !cxx_mode_targets[target] ? " /std:c11" : "";
+						var c11_flag = language == 0 && !cxx_mode_targets[target] ? c11_flags : "";
 						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
 					}
 				}
@@ -3149,7 +3153,7 @@ function toolset_get_compiler_version()
 
 	if (VS_TOOLSET) {
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-		if (version < 1920) {
+		if (version < 1935) {
 			ERROR("Building with MSC_VER " + version + " is no longer supported");
 		}
 		return version;
