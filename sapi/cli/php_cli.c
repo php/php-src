@@ -1207,6 +1207,18 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 	 */
 	argv = save_ps_args(argc, argv);
 
+#ifdef PHP_WIN32
+	if (argv_save != __argv) {
+		for (int i = 0; i < argc; i++) {
+			if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, argv[i], -1, NULL, 0)) {
+				fprintf(stderr, "Invalid UTF-8 in command line argument %d.\n", i);
+				cleanup_ps_args(argv);
+				return 1;
+			}
+		}
+	}
+#endif
+
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
 	php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
 	php_win32_console_fileno_set_vt100(STDERR_FILENO, TRUE);
