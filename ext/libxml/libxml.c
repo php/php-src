@@ -1501,6 +1501,7 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 				obj_node->_private = NULL;
 			}
 		}
+		object->node = NULL;
 	}
 	if (object != NULL && object->document != NULL) {
 		/* Safe to call as if the resource were freed then doc pointer is NULL */
