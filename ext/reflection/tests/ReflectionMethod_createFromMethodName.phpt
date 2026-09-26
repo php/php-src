@@ -15,8 +15,8 @@ var_dump($m);
 
 try {
     $m = MyReflectionMethod::createFromMethodName("Foo::baz");
-} catch (Exception $e) {
-    echo $e->getMessage() . "\n";
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -27,4 +27,4 @@ object(MyReflectionMethod)#%d (%d) {
   ["class"]=>
   string(3) "Foo"
 }
-Method Foo::baz() does not exist
+ReflectionException: Method Foo::baz() does not exist

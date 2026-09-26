@@ -29,8 +29,8 @@ foreach ([new TrampolineTest(), TrampolineTest::class] as $target) {
     foreach (['trampoline', 'trampolineThrow', 'trampoline'] as $method) {
         try {
             var_dump(IntlChar::enumCharTypes([$target, $method]));
-        } catch (Exception $e) {
-            echo $e->getMessage(), "\n";
+        } catch (Throwable $e) {
+            echo $e::class, ': ', $e->getMessage(), "\n";
         }
     }
 }
@@ -42,7 +42,7 @@ trampoline: 32, 33, 12
 NULL
 trampolineThrow: 0, 32, 15
 trampolineThrow: 32, 33, 12
-Stop enumeration
+Exception: Stop enumeration
 trampoline: 0, 32, 15
 trampoline: 32, 33, 12
 NULL
@@ -52,7 +52,7 @@ trampoline: 32, 33, 12
 NULL
 trampolineThrow: 0, 32, 15
 trampolineThrow: 32, 33, 12
-Stop enumeration
+Exception: Stop enumeration
 trampoline: 0, 32, 15
 trampoline: 32, 33, 12
 NULL

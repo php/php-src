@@ -12,8 +12,8 @@ var_dump($c->newInstanceArgs(array()));
 
 try {
     var_dump($c->newInstanceArgs(array(1)));
-} catch(ReflectionException $e) {
-    echo $e->getMessage()."\n";
+} catch(Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 ?>
 --EXPECTF--
@@ -25,4 +25,4 @@ object(Test)#%d (0) {
 }
 object(Test)#%d (0) {
 }
-Class Test does not have a constructor, so you cannot pass any constructor arguments
+ReflectionException: Class Test does not have a constructor, so you cannot pass any constructor arguments
