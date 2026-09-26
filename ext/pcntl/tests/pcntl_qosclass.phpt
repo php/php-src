@@ -13,7 +13,12 @@ pcntl_setqos_class(Pcntl\QosClass::Default);
 var_dump(Pcntl\QosClass::Default === pcntl_getqos_class());
 pcntl_setqos_class(Pcntl\QosClass::Background);
 var_dump(Pcntl\QosClass::Background == pcntl_getqos_class());
+
+/* the parameter is optional, and omitting it applies the declared default */
+pcntl_setqos_class();
+var_dump(Pcntl\QosClass::Default === pcntl_getqos_class());
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)

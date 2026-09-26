@@ -70,6 +70,10 @@ PHP                                                                        NEWS
     an exception is pending. (nicolas-grekas)
   . Fixed pcntl_signal_dispatch() dropping the signals queued behind a handler
     that throws. (nicolas-grekas)
+  . Fixed pcntl_setcpuaffinity() error message advertising the cpu count as
+    the inclusive upper bound. (lacatoire)
+  . Fixed pcntl_setqos_class() requiring its optional $qos_class argument.
+    (lacatoire)
 
 - PDO:
   . Fixed PDOStatement::getColumnMeta() reading out of bounds for an invalid
