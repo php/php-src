@@ -29,9 +29,16 @@ ZEND_TLS uint8_t lexbor_custom_url_map[256] = {0};
 
 static const size_t lexbor_mraw_byte_size = 8192;
 
+ZEND_ATTRIBUTE_NONNULL static zend_always_inline bool zval_string_or_null_is_non_empty(const zval *value)
+{
+	ZEND_ASSERT(Z_ISNULL_P(value) || Z_TYPE_P(value) == IS_STRING);
+
+	return Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0;
+}
+
 ZEND_ATTRIBUTE_NONNULL static zend_always_inline void zval_string_or_null_to_lexbor_str(const zval *value, lexbor_str_t *lexbor_str)
 {
-	if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) > 0) {
+	if (zval_string_or_null_is_non_empty(value)) {
 		lexbor_str->data = (lxb_char_t *) Z_STRVAL_P(value);
 		lexbor_str->length = Z_STRLEN_P(value);
 	} else {
@@ -1020,6 +1027,84 @@ ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_build_errors_and_throw(
 	}
 }
 
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_whatwg_append_userinfo(
+	smart_str *reference, const zval *value
+)
+{
+	lexbor_str_t encoded = {0};
+	const lxb_status_t status = lxb_url_percent_encode_utf_8(
+		(const lxb_char_t *) Z_STRVAL_P(value), Z_STRLEN_P(value),
+		&encoded, lexbor_parser.mraw, lxb_url_get_percent_encoding_map(),
+		LXB_URL_MAP_USERINFO, false
+	);
+	if (status != LXB_STATUS_OK) {
+		lexbor_str_destroy(&encoded, lexbor_parser.mraw, false);
+		php_uri_parser_whatwg_throw_exception("Memory allocation error");
+		return FAILURE;
+	}
+
+	smart_str_appendl(reference, (const char *) encoded.data, encoded.length);
+	lexbor_str_destroy(&encoded, lexbor_parser.mraw, false);
+
+	return SUCCESS;
+}
+
+ZEND_ATTRIBUTE_NONNULL static zend_result php_uri_parser_whatwg_validate_file_authority(
+	lxb_url_t *base_url, const zval *username, const zval *password,
+	const zval *host, const zval *port
+)
+{
+	smart_str reference = {0};
+	smart_str_appends(&reference, "//");
+
+	const bool has_username = zval_string_or_null_is_non_empty(username);
+	const bool has_password = zval_string_or_null_is_non_empty(password);
+	if (has_username || has_password) {
+		if (has_username && php_uri_parser_whatwg_append_userinfo(&reference, username) == FAILURE) {
+			goto failure;
+		}
+		if (has_password) {
+			smart_str_appendc(&reference, ':');
+			if (php_uri_parser_whatwg_append_userinfo(&reference, password) == FAILURE) {
+				goto failure;
+			}
+		}
+		smart_str_appendc(&reference, '@');
+	}
+
+	smart_str_appendl(&reference, Z_STRVAL_P(host), Z_STRLEN_P(host));
+	if (Z_TYPE_P(port) == IS_LONG) {
+		smart_str_appendc(&reference, ':');
+		smart_str_append_long(&reference, Z_LVAL_P(port));
+	}
+	smart_str_0(&reference);
+
+	lxb_url_parser_clean(&lexbor_parser);
+	lxb_url_t *url = lxb_url_parse(
+		&lexbor_parser, base_url,
+		(const lxb_char_t *) ZSTR_VAL(reference.s), ZSTR_LEN(reference.s)
+	);
+	if (url != NULL) {
+		lxb_url_destroy(url);
+		smart_str_free(&reference);
+		return SUCCESS;
+	}
+
+	zval errors;
+	const char *reason = fill_errors(&errors);
+	const char *component = has_username
+		? "username"
+		: (has_password ? "password" : "port");
+	smart_str_free(&reference);
+	throw_invalid_url_exception_with_reason(NULL, component, reason, &errors);
+
+	return FAILURE;
+
+failure:
+	smart_str_free(&reference);
+	return FAILURE;
+}
+
 /* TODO: Replace with lxb_url_path_set_null() once https://github.com/lexbor/lexbor/pull/415 is available. */
 ZEND_ATTRIBUTE_NONNULL static void php_uri_parser_whatwg_path_set_null(lxb_url_t *url)
 {
@@ -1061,6 +1146,17 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 			return NULL;
 		}
 
+		if (lexbor_base_url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE
+			&& (zval_string_or_null_is_non_empty(username)
+				|| zval_string_or_null_is_non_empty(password)
+				|| Z_TYPE_P(port) == IS_LONG)
+			&& php_uri_parser_whatwg_validate_file_authority(
+				lexbor_base_url, username, password, host, port
+			) == FAILURE
+		) {
+			return NULL;
+		}
+
 		/* A new authority inherits only the scheme, not the base URL's other components. */
 		zval base_scheme;
 		php_uri_parser_whatwg_scheme_read(lexbor_base_url, PHP_URI_COMPONENT_READ_MODE_NORMALIZED_ASCII, &base_scheme);
@@ -1071,12 +1167,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(1, 2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser
 	}
 
 	/* Credentials and ports require an authority in the reference itself. */
-	if (Z_TYPE_P(username) == IS_STRING) {
+	if (zval_string_or_null_is_non_empty(username)) {
 		php_uri_parser_whatwg_throw_exception("The specified URL cannot have username");
 		return NULL;
 	}
 
-	if (Z_TYPE_P(password) == IS_STRING) {
+	if (zval_string_or_null_is_non_empty(password)) {
 		php_uri_parser_whatwg_throw_exception("The specified URL cannot have password");
 		return NULL;
 	}
@@ -1306,12 +1402,12 @@ ZEND_ATTRIBUTE_NONNULL_ARGS(2, 3, 4, 5, 6, 7, 8, 9) lxb_url_t *php_uri_parser_wh
 	if (lexbor_url->host.type == LXB_URL_HOST_TYPE__UNDEF
 		|| lexbor_url->host.type == LXB_URL_HOST_TYPE_EMPTY
 		|| lexbor_url->scheme.type == LXB_URL_SCHEMEL_TYPE_FILE) {
-		if (Z_TYPE_P(username) != IS_NULL) {
+		if (zval_string_or_null_is_non_empty(username)) {
 			php_uri_parser_whatwg_throw_exception("The specified URL cannot have username");
 			goto failure;
 		}
 
-		if (Z_TYPE_P(password) != IS_NULL) {
+		if (zval_string_or_null_is_non_empty(password)) {
 			php_uri_parser_whatwg_throw_exception("The specified URL cannot have password");
 			goto failure;
 		}
