@@ -45,8 +45,8 @@ function showInfo($name) {
     echo "--- (Reflecting on $name) ---\n";
     try {
         $rp = $rc->getProperty($name);
-    } catch (Exception $e) {
-        echo $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
         return;
     }
 
@@ -108,7 +108,7 @@ object(ReflectionProperty)#%d (2) {
 }
 string(10) "protA in A"
 --- (Reflecting on privA) ---
-Property C::$privA does not exist
+ReflectionException: Property C::$privA does not exist
 --- (Reflecting on pubB) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -126,7 +126,7 @@ object(ReflectionProperty)#%d (2) {
 }
 string(10) "protB in B"
 --- (Reflecting on privB) ---
-Property C::$privB does not exist
+ReflectionException: Property C::$privB does not exist
 --- (Reflecting on pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -152,7 +152,7 @@ object(ReflectionProperty)#%d (2) {
 }
 string(10) "privC in C"
 --- (Reflecting on doesNotExist) ---
-Property C::$doesNotExist does not exist
+ReflectionException: Property C::$doesNotExist does not exist
 --- (Reflecting on A::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -210,7 +210,7 @@ object(ReflectionProperty)#%d (2) {
 }
 string(9) "pubC in C"
 --- (Reflecting on c::PUBC) ---
-Property C::$PUBC does not exist
+ReflectionException: Property C::$PUBC does not exist
 --- (Reflecting on C::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -236,12 +236,12 @@ object(ReflectionProperty)#%d (2) {
 }
 string(10) "privC in C"
 --- (Reflecting on X::pubC) ---
-Fully qualified property name X::$pubC does not specify a base class of C
+ReflectionException: Fully qualified property name X::$pubC does not specify a base class of C
 --- (Reflecting on X::protC) ---
-Fully qualified property name X::$protC does not specify a base class of C
+ReflectionException: Fully qualified property name X::$protC does not specify a base class of C
 --- (Reflecting on X::privC) ---
-Fully qualified property name X::$privC does not specify a base class of C
+ReflectionException: Fully qualified property name X::$privC does not specify a base class of C
 --- (Reflecting on X::doesNotExist) ---
-Fully qualified property name X::$doesNotExist does not specify a base class of C
+ReflectionException: Fully qualified property name X::$doesNotExist does not specify a base class of C
 --- (Reflecting on doesNotexist::doesNotExist) ---
-Class "doesNotexist" does not exist
+ReflectionException: Class "doesNotexist" does not exist

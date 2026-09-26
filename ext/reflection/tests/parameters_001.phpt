@@ -22,14 +22,14 @@ var_dump($p->isOptional());
 try {
     $p = new ReflectionParameter(array('Test', 'func'), 'z');
     var_dump($p->isOptional());
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     $p = new ReflectionParameter(array('Test', 'func'), -1);
     var_dump($p->isOptional());
-} catch (\ValueError $e) {
-    var_dump($e->getMessage());
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 
 ?>
@@ -38,5 +38,5 @@ int(2)
 int(1)
 bool(false)
 bool(true)
-string(54) "The parameter specified by its name could not be found"
-string(91) "ReflectionParameter::__construct(): Argument #2 ($param) must be greater than or equal to 0"
+ReflectionException: The parameter specified by its name could not be found
+ValueError: ReflectionParameter::__construct(): Argument #2 ($param) must be greater than or equal to 0
