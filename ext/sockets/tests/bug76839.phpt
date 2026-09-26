@@ -7,6 +7,7 @@ sockets
 if (strtolower(substr(PHP_OS, 0, 3)) === 'win') {
     die('skip not valid for Windows.');
 }
+require __DIR__ . '/unix_dgram_skipif.inc';
 ?>
 --FILE--
 <?php
@@ -16,11 +17,11 @@ if (strtolower(substr(PHP_OS, 0, 3)) === 'win') {
 // best way I could manage to reproduce this problem without modifying php itself :-/
 
 for ($i = 0; $i < 10; $i++) {
-    $senderSocketPath = '/tmp/' . substr(md5(rand()), 0, rand(8, 16)) . '.sock';
+    $senderSocketPath = sys_get_temp_dir() . '/' . substr(md5(rand()), 0, rand(8, 16)) . '.sock';
     $senderSocket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
     socket_bind($senderSocket, $senderSocketPath);
 
-    $receiverSocketPath = '/tmp/' . substr(md5(rand()), 0, rand(8, 16)) . '.sock';
+    $receiverSocketPath = sys_get_temp_dir() . '/' . substr(md5(rand()), 0, rand(8, 16)) . '.sock';
     $receiverSocket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
     socket_bind($receiverSocket, $receiverSocketPath);
 
