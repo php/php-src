@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="0; url={{ redirect_url }}">
+    <link rel="canonical" href="{{ redirect_url }}">
+    <title>Redirecting&hellip;</title>
+    <script>
+      window.location.replace({{ redirect_url | tojson }} + window.location.hash);
+    </script>
+  </head>
+  <body>
+    <p>This page has moved to <a href="{{ redirect_url }}">its new location</a>.</p>
+  </body>
+</html>
