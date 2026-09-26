@@ -29,6 +29,10 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+- Standard:
+  . php_explode() now takes a HashTable* instead of a zval* to store the
+    resulting parts. It already expected the zval* to be IS_ARRAY.
+
 ========================
 4. OpCode changes
 ========================
