@@ -17,8 +17,15 @@ $pipes = array();
 $process = proc_open('/bin/sleep 120', $descriptors, $pipes);
 
 proc_terminate($process, 9);
-sleep(1); // wait a bit to let the process finish
-var_dump(proc_get_status($process));
+$deadline = microtime(true) + 5;
+do {
+    $status = proc_get_status($process);
+    if (!$status['running']) {
+        break;
+    }
+    usleep(1000);
+} while (microtime(true) < $deadline);
+var_dump($status);
 
 echo "Done!\n";
 

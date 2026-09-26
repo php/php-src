@@ -13,12 +13,14 @@ $cmd = [
 ];
 
 $spec = [
-    ['null'],
+    ['pipe', 'r'],
     ['socket'],
     ['socket']
 ];
 
 $proc = proc_open($cmd, $spec, $pipes);
+$control = $pipes[0];
+unset($pipes[0]);
 
 foreach ($pipes as $pipe) {
     var_dump(stream_set_blocking($pipe, false));
@@ -47,9 +49,13 @@ while ($pipes) {
 
         if ($chunk !== '') {
             echo "PIPE {$i} << {$chunk}\n";
+            // Let the child emit the next chunk.
+            fwrite($control, "\n");
         }
     }
 }
+
+fclose($control);
 
 ?>
 --EXPECT--
