@@ -21,5 +21,5 @@ bool(false)
 Warning: preg_match(): Compilation failed: using \C is incompatible with the 'u' modifier at offset 2 in %s on line %d
 bool(false)
 
-Warning: preg_match(): Compilation failed: \K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) at offset 8 in %s on line %d
+Warning: preg_match(): Compilation failed: \K is not allowed in lookarounds at offset 8 in %s on line %d
 bool(false)
