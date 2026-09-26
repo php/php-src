@@ -18,6 +18,7 @@
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_multiply.h"
+#include "zend_simd.h"
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
@@ -63,6 +64,35 @@ static zend_always_inline void zend_bin2hex_impl(char *out, const unsigned char 
 	}
 }
 
+#ifdef XSSE2
+static zend_never_inline void zend_bin2hex_simd(char *out, const unsigned char *in, size_t in_len)
+{
+	const __m128i nibble_mask = _mm_set1_epi8(0x0f);
+	const __m128i nine = _mm_set1_epi8(9);
+	const __m128i zero_digit = _mm_set1_epi8('0');
+	const __m128i alpha_offset = _mm_set1_epi8('a' - '0' - 10);
+	size_t i = 0;
+
+	for (; i + sizeof(__m128i) <= in_len; i += sizeof(__m128i)) {
+		__m128i v = _mm_loadu_si128((const __m128i *) (in + i));
+		__m128i hi_nib = _mm_and_si128(_mm_srli_epi16(v, 4), nibble_mask);
+		__m128i lo_nib = _mm_and_si128(v, nibble_mask);
+
+		/* Signed cmpgt is safe here: every threshold is < 0x80, so bytes >= 0x80
+		   compare as negative and correctly fail every range test. */
+		__m128i hi_hex = _mm_add_epi8(_mm_add_epi8(hi_nib, zero_digit),
+			_mm_and_si128(_mm_cmpgt_epi8(hi_nib, nine), alpha_offset));
+		__m128i lo_hex = _mm_add_epi8(_mm_add_epi8(lo_nib, zero_digit),
+			_mm_and_si128(_mm_cmpgt_epi8(lo_nib, nine), alpha_offset));
+
+		_mm_storeu_si128((__m128i *) (out + i * 2), _mm_unpacklo_epi8(hi_hex, lo_hex));
+		_mm_storeu_si128((__m128i *) (out + i * 2 + sizeof(__m128i)), _mm_unpackhi_epi8(hi_hex, lo_hex));
+	}
+
+	zend_bin2hex_impl(out + i * 2, in + i, in_len - i, zend_hexconvtab);
+}
+#endif
+
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str)
 {
 	return ZSTR_H(str) = zend_hash_func(ZSTR_VAL(str), ZSTR_LEN(str));
@@ -75,6 +105,12 @@ ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len)
 
 ZEND_API void ZEND_FASTCALL zend_bin2hex(char *out, const unsigned char *in, size_t in_len)
 {
+#ifdef XSSE2
+	if (in_len >= sizeof(__m128i)) {
+		zend_bin2hex_simd(out, in, in_len);
+		return;
+	}
+#endif
 	zend_bin2hex_impl(out, in, in_len, zend_hexconvtab);
 }
 
