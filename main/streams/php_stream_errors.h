@@ -81,16 +81,26 @@ typedef struct _php_stream_stored_error {
 	struct _php_stream_stored_error *next;
 } php_stream_stored_error;
 
-typedef struct {
+/* Operation stack of the main flow or of one fiber */
+typedef struct _php_stream_error_stack {
 	php_stream_error_operation *current_operation;
 	uint32_t operation_depth;
 	uint32_t operation_floor;
 	uint32_t refused_operations;
+	uint32_t overflow_capacity;
+	php_stream_error_operation *overflow_operations;
+	struct _php_stream_error_stack *prev;
+	struct _php_stream_error_stack *next;
+	php_stream_error_operation operation_pool[PHP_STREAM_ERROR_OPERATION_POOL_SIZE];
+} php_stream_error_stack;
+
+typedef struct {
+	/* Stack of the running fiber, NULL until its first operation */
+	php_stream_error_stack *stack;
+	php_stream_error_stack main_stack;
+	php_stream_error_stack *fiber_stacks;
 	php_stream_stored_error *stored_errors;
 	uint32_t stored_count;
-	php_stream_error_operation operation_pool[PHP_STREAM_ERROR_OPERATION_POOL_SIZE];
-	php_stream_error_operation *overflow_operations;
-	uint32_t overflow_capacity;
 } php_stream_error_state;
 
 /* Error operation management */

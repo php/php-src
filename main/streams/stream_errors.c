@@ -19,6 +19,9 @@
 #include "php_stream_errors.h"
 #include "zend_enum.h"
 #include "zend_exceptions.h"
+#include "zend_extensions.h"
+#include "zend_fibers.h"
+#include "zend_observer.h"
 #include "ext/standard/file.h"
 #include "stream_errors_arginfo.h"
 
@@ -28,6 +31,9 @@ static zend_class_entry *php_ce_stream_error_mode;
 static zend_class_entry *php_ce_stream_error_store;
 static zend_class_entry *php_ce_stream_error;
 static zend_class_entry *php_ce_stream_exception;
+
+/* Fiber context reserved slot holding the fiber's operation stack */
+static int php_stream_error_fiber_slot = -1;
 
 /* Forward declarations */
 static void php_stream_error_entry_free(php_stream_error_entry *entry);
@@ -189,28 +195,26 @@ static bool php_stream_has_terminating_error(const php_stream_error_entry *entry
 	return false;
 }
 
-static inline php_stream_error_operation *php_stream_get_operation_at_depth(uint32_t depth)
+static inline php_stream_error_operation *php_stream_get_operation_at_depth(
+		php_stream_error_stack *stack, uint32_t depth)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
-
 	if (depth < PHP_STREAM_ERROR_OPERATION_POOL_SIZE) {
-		return &state->operation_pool[depth];
+		return &stack->operation_pool[depth];
 	} else {
 		uint32_t overflow_index = depth - PHP_STREAM_ERROR_OPERATION_POOL_SIZE;
-		ZEND_ASSERT(overflow_index < state->overflow_capacity);
-		return &state->overflow_operations[overflow_index];
+		ZEND_ASSERT(overflow_index < stack->overflow_capacity);
+		return &stack->overflow_operations[overflow_index];
 	}
 }
 
-static inline php_stream_error_operation *php_stream_get_parent_operation(void)
+static inline php_stream_error_operation *php_stream_get_parent_operation(
+		php_stream_error_stack *stack)
 {
-	const php_stream_error_state *state = &FG(stream_error_state);
-
-	if (state->operation_depth <= state->operation_floor) {
+	if (stack->operation_depth <= stack->operation_floor) {
 		return NULL;
 	}
 
-	return php_stream_get_operation_at_depth(state->operation_depth - 1);
+	return php_stream_get_operation_at_depth(stack, stack->operation_depth - 1);
 }
 
 /* Clean up functions */
@@ -227,41 +231,99 @@ static void php_stream_error_entry_free(php_stream_error_entry *entry)
 	}
 }
 
-PHPAPI void php_stream_error_state_cleanup(void)
+/* Drops the open operations and their errors without reporting them */
+static void php_stream_error_stack_clear(php_stream_error_stack *stack)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
-
-	state->operation_floor = 0;
-	state->refused_operations = 0;
-	while (state->current_operation) {
-		php_stream_error_operation *op = state->current_operation;
-		state->operation_depth--;
-		state->current_operation = php_stream_get_parent_operation();
-
+	for (uint32_t depth = 0; depth < stack->operation_depth; depth++) {
+		php_stream_error_operation *op = php_stream_get_operation_at_depth(stack, depth);
 		php_stream_error_entry_free(op->first_error);
-
 		op->first_error = NULL;
 		op->last_error = NULL;
 		op->error_count = 0;
 	}
 
-	php_stream_stored_error *stored = state->stored_errors;
-	while (stored) {
-		php_stream_stored_error *next = stored->next;
-		php_stream_error_entry_free(stored->first_error);
-		efree(stored);
-		stored = next;
-	}
+	stack->current_operation = NULL;
+	stack->operation_depth = 0;
+	stack->operation_floor = 0;
+	stack->refused_operations = 0;
 
-	state->stored_errors = NULL;
-	state->stored_count = 0;
-	state->operation_depth = 0;
-
-	if (state->overflow_operations) {
-		efree(state->overflow_operations);
-		state->overflow_operations = NULL;
-		state->overflow_capacity = 0;
+	if (stack->overflow_operations) {
+		efree(stack->overflow_operations);
+		stack->overflow_operations = NULL;
+		stack->overflow_capacity = 0;
 	}
+}
+
+static void php_stream_error_fiber_stack_free(php_stream_error_stack *stack)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+
+	php_stream_error_stack_clear(stack);
+
+	if (stack->prev) {
+		stack->prev->next = stack->next;
+	} else {
+		state->fiber_stacks = stack->next;
+	}
+	if (stack->next) {
+		stack->next->prev = stack->prev;
+	}
+	efree(stack);
+}
+
+static php_stream_error_stack *php_stream_error_fiber_stack_create(void)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_stack *stack = ecalloc(1, sizeof(php_stream_error_stack));
+
+	stack->next = state->fiber_stacks;
+	if (stack->next) {
+		stack->next->prev = stack;
+	}
+	state->fiber_stacks = stack;
+
+	ZEND_ASSERT(EG(current_fiber_context) != EG(main_fiber_context));
+	EG(current_fiber_context)->reserved[php_stream_error_fiber_slot] = stack;
+	state->stack = stack;
+
+	return stack;
+}
+
+static void php_stream_error_fiber_init(zend_fiber_context *context)
+{
+	context->reserved[php_stream_error_fiber_slot] = NULL;
+}
+
+static void php_stream_error_fiber_switch(zend_fiber_context *from, zend_fiber_context *to)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+
+	state->stack = to == EG(main_fiber_context)
+			? &state->main_stack : to->reserved[php_stream_error_fiber_slot];
+}
+
+static void php_stream_error_fiber_destroy(zend_fiber_context *context)
+{
+	php_stream_error_stack *stack = context->reserved[php_stream_error_fiber_slot];
+
+	if (stack) {
+		ZEND_ASSERT(FG(stream_error_state).stack != stack);
+		context->reserved[php_stream_error_fiber_slot] = NULL;
+		php_stream_error_fiber_stack_free(stack);
+	}
+}
+
+PHPAPI void php_stream_error_state_cleanup(void)
+{
+	php_stream_error_state *state = &FG(stream_error_state);
+
+	while (state->fiber_stacks) {
+		php_stream_error_fiber_stack_free(state->fiber_stacks);
+	}
+	php_stream_error_stack_clear(&state->main_stack);
+	state->stack = &state->main_stack;
+
+	php_stream_error_clear_stored();
 }
 
 PHPAPI void php_stream_error_get_last(zval *return_value)
@@ -296,41 +358,45 @@ PHPAPI void php_stream_error_clear_stored(void)
 
 PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
+	php_stream_error_stack *stack = FG(stream_error_state).stack;
 
-	if (state->operation_depth >= PHP_STREAM_ERROR_MAX_DEPTH) {
+	if (UNEXPECTED(!stack)) {
+		stack = php_stream_error_fiber_stack_create();
+	}
+
+	if (stack->operation_depth >= PHP_STREAM_ERROR_MAX_DEPTH) {
 		php_error_docref(NULL, E_WARNING,
 				"Stream error operation depth exceeded (%"PRIu32"), possible infinite recursion",
-				state->operation_depth);
-		state->refused_operations++;
+				stack->operation_depth);
+		stack->refused_operations++;
 		return NULL;
 	}
 
 	php_stream_error_operation *op;
 
-	if (state->operation_depth < PHP_STREAM_ERROR_OPERATION_POOL_SIZE) {
-		op = &state->operation_pool[state->operation_depth];
+	if (stack->operation_depth < PHP_STREAM_ERROR_OPERATION_POOL_SIZE) {
+		op = &stack->operation_pool[stack->operation_depth];
 	} else {
-		uint32_t overflow_index = state->operation_depth - PHP_STREAM_ERROR_OPERATION_POOL_SIZE;
+		uint32_t overflow_index = stack->operation_depth - PHP_STREAM_ERROR_OPERATION_POOL_SIZE;
 
-		if (overflow_index >= state->overflow_capacity) {
+		if (overflow_index >= stack->overflow_capacity) {
 			uint32_t new_capacity
-					= state->overflow_capacity == 0 ? 8 : state->overflow_capacity * 2;
+					= stack->overflow_capacity == 0 ? 8 : stack->overflow_capacity * 2;
 			php_stream_error_operation *new_overflow = erealloc(
-					state->overflow_operations, sizeof(php_stream_error_operation) * new_capacity);
-			state->overflow_operations = new_overflow;
-			state->overflow_capacity = new_capacity;
+					stack->overflow_operations, sizeof(php_stream_error_operation) * new_capacity);
+			stack->overflow_operations = new_overflow;
+			stack->overflow_capacity = new_capacity;
 		}
 
-		op = &state->overflow_operations[overflow_index];
+		op = &stack->overflow_operations[overflow_index];
 	}
 
 	op->first_error = NULL;
 	op->last_error = NULL;
 	op->error_count = 0;
 
-	state->current_operation = op;
-	state->operation_depth++;
+	stack->current_operation = op;
+	stack->operation_depth++;
 
 	return op;
 }
@@ -338,7 +404,8 @@ PHPAPI php_stream_error_operation *php_stream_error_operation_begin(void)
 static void php_stream_error_add(zend_enum_StreamErrorCode code, const char *wrapper_name,
 		zend_string *message, const char *docref, int severity, bool terminating)
 {
-	php_stream_error_operation *op = FG(stream_error_state).current_operation;
+	const php_stream_error_stack *stack = FG(stream_error_state).stack;
+	php_stream_error_operation *op = stack ? stack->current_operation : NULL;
 	if (!op) {
 		zend_string_release(message);
 		return;
@@ -449,13 +516,18 @@ static void php_stream_report_errors(const php_stream_context *context, const ph
 PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 {
 	php_stream_error_state *state = &FG(stream_error_state);
-	php_stream_error_operation *op = state->current_operation;
+	php_stream_error_stack *stack = state->stack;
 
-	if (state->refused_operations > 0) {
-		state->refused_operations--;
+	if (!stack) {
 		return;
 	}
 
+	if (stack->refused_operations > 0) {
+		stack->refused_operations--;
+		return;
+	}
+
+	php_stream_error_operation *op = stack->current_operation;
 	if (!op) {
 		return;
 	}
@@ -465,8 +537,8 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 	op->last_error = NULL;
 	op->error_count = 0;
 
-	state->operation_depth--;
-	state->current_operation = php_stream_get_parent_operation();
+	stack->operation_depth--;
+	stack->current_operation = php_stream_get_parent_operation(stack);
 
 	if (!first_error) {
 		return;
@@ -485,12 +557,12 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 		GC_ADDREF(context->res);
 	}
 
-	uint32_t saved_floor = state->operation_floor;
-	state->operation_floor = state->operation_depth;
-	state->current_operation = NULL;
+	uint32_t saved_floor = stack->operation_floor;
+	stack->operation_floor = stack->operation_depth;
+	stack->current_operation = NULL;
 	php_stream_report_errors(context, first_error, error_mode, is_terminating);
-	state->operation_floor = saved_floor;
-	state->current_operation = php_stream_get_parent_operation();
+	stack->operation_floor = saved_floor;
+	stack->current_operation = php_stream_get_parent_operation(stack);
 
 	if (context) {
 		zend_list_delete(context->res);
@@ -559,21 +631,25 @@ PHPAPI void php_stream_error_operation_end(const php_stream_context *context)
 
 PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
-	php_stream_error_operation *op = state->current_operation;
+	php_stream_error_stack *stack = FG(stream_error_state).stack;
 
-	if (state->refused_operations > 0) {
-		state->refused_operations--;
+	if (!stack) {
 		return;
 	}
 
+	if (stack->refused_operations > 0) {
+		stack->refused_operations--;
+		return;
+	}
+
+	php_stream_error_operation *op = stack->current_operation;
 	if (!op) {
 		return;
 	}
 
 	if (op->error_count == 0) {
-		state->operation_depth--;
-		state->current_operation = php_stream_get_parent_operation();
+		stack->operation_depth--;
+		stack->current_operation = php_stream_get_parent_operation(stack);
 
 		op->first_error = NULL;
 		op->last_error = NULL;
@@ -586,20 +662,24 @@ PHPAPI void php_stream_error_operation_end_for_stream(const php_stream *stream)
 
 PHPAPI void php_stream_error_operation_abort(void)
 {
-	php_stream_error_state *state = &FG(stream_error_state);
-	php_stream_error_operation *op = state->current_operation;
+	php_stream_error_stack *stack = FG(stream_error_state).stack;
 
-	if (state->refused_operations > 0) {
-		state->refused_operations--;
+	if (!stack) {
 		return;
 	}
 
+	if (stack->refused_operations > 0) {
+		stack->refused_operations--;
+		return;
+	}
+
+	php_stream_error_operation *op = stack->current_operation;
 	if (!op) {
 		return;
 	}
 
-	state->operation_depth--;
-	state->current_operation = php_stream_get_parent_operation();
+	stack->operation_depth--;
+	stack->current_operation = php_stream_get_parent_operation(stack);
 
 	php_stream_error_entry_free(op->first_error);
 	op->first_error = NULL;
@@ -613,7 +693,8 @@ static void php_stream_wrapper_error_internal(const char *wrapper_name, const ph
 		const char *docref, int severity, bool terminating,
 		zend_enum_StreamErrorCode code, zend_string *message)
 {
-	bool implicit_operation = (FG(stream_error_state).current_operation == NULL);
+	const php_stream_error_stack *stack = FG(stream_error_state).stack;
+	bool implicit_operation = !stack || !stack->current_operation;
 	if (implicit_operation) {
 		php_stream_error_operation_begin();
 	}
@@ -874,6 +955,13 @@ PHP_MINIT_FUNCTION(stream_errors)
 
 	php_ce_stream_error = register_class_StreamError();
 	php_ce_stream_exception = register_class_StreamException(zend_ce_exception);
+
+	php_stream_error_fiber_slot = zend_get_resource_handle("Stream errors");
+	if (php_stream_error_fiber_slot >= 0) {
+		zend_observer_fiber_init_register(php_stream_error_fiber_init);
+		zend_observer_fiber_switch_register(php_stream_error_fiber_switch);
+		zend_observer_fiber_destroy_register(php_stream_error_fiber_destroy);
+	}
 
 	return SUCCESS;
 }
