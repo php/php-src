@@ -775,10 +775,14 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			 * changed from 256 byte to LONG_COLUMN_BUFFER_SIZE.
 			 */
 			ssize_t to_fetch_len;
-			if (orig_fetched_len == SQL_NO_TOTAL) {
-				to_fetch_len = C->datalen > (LONG_COLUMN_BUFFER_SIZE - 1) ? (LONG_COLUMN_BUFFER_SIZE - 1) : C->datalen;
-			} else {
+			if (orig_fetched_len == SQL_NO_TOTAL && C->datalen > (LONG_COLUMN_BUFFER_SIZE - 1)) {
+				to_fetch_len = C->datalen;
+			} else if (orig_fetched_len > 0) {
+				/* implicitly not SQL_NO_TOTAL, should be OK */
 				to_fetch_len = orig_fetched_len;
+			} else {
+				/* size must be > 0 to actually get data */
+				to_fetch_len = (LONG_COLUMN_BUFFER_SIZE - 1);
 			}
 			ssize_t to_fetch_byte = to_fetch_len + 1;
 			char *buf2 = emalloc(to_fetch_byte);
