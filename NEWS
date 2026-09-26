@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
 
+- SOAP:
+  . Fixed the SOAP client accepting a response body shorter than its
+    Content-Length and reusing the connection. (Ilia Alshanetsky)
+
 - Standard:
   . Improved performance of array_splice() when inserting without removing
     elements. (mehmetcansahin)
