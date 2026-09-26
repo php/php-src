@@ -188,7 +188,7 @@ static inline const php_uri_property_handler *php_uri_parser_property_handler_by
 	}
 }
 
-zend_result php_uri_pass_errors_by_ref_and_free(zval *errors_zv, zval *errors);
+ZEND_ATTRIBUTE_NONNULL_ARGS(2) zend_result php_uri_pass_errors_by_ref_and_free(zval *errors_zv, HashTable *errors);
 void php_uri_property_read_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name, php_uri_component_read_mode component_read_mode);
 void php_uri_property_write_str_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
 void php_uri_property_write_str_or_null_helper(INTERNAL_FUNCTION_PARAMETERS, php_uri_property_name property_name);
