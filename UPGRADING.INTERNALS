@@ -366,4 +366,4 @@ PHP 8.6 INTERNALS UPGRADE NOTES
   __thread storage on ZTS builds.
 
 - php-cli functionality is now available in embed builds via the do_php_cli()
-  function.
+  function. On Windows, custom argv must use UTF-8.

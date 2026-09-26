@@ -55,6 +55,7 @@ typedef struct php_cli_server_context {
 } php_cli_server_context;
 
 /* this performs full cli-SAPI boot, loads modules, sets up TSRM and co. */
+/* On Windows, custom argv strings must be UTF-8. */
 extern PHP_CLI_API int do_php_cli(int argc, char *argv[]);
 
 #endif /* CLI_H */

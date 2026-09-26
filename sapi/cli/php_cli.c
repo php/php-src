@@ -1187,9 +1187,8 @@ PHP_CLI_API int do_php_cli(int argc, char *argv[])
 {
 #if defined(PHP_WIN32)
 	int num_args;
-	wchar_t **argv_wide;
+	wchar_t **argv_wide = NULL;
 	char **argv_save = argv;
-	BOOL using_wide_argv = 0;
 #endif
 
 	int c;
@@ -1341,7 +1340,26 @@ exit_loop:
 			we can access the internal charset information from PHP. */
 		argv_wide = CommandLineToArgvW(GetCommandLineW(), &num_args);
 		PHP_WIN32_CP_W_TO_ANY_ARRAY(argv_wide, num_args, argv, argc)
-		using_wide_argv = 1;
+	} else if (!php_win32_cp_use_unicode()) {
+		/* Custom arguments are UTF-8, regardless of PHP's configured encoding. */
+		char **converted_argv = calloc((size_t) argc + 1, sizeof(char *));
+		if (!converted_argv) {
+			exit_status = 1;
+			goto out;
+		}
+		argv = converted_argv;
+		for (int i = 0; i < argc; i++) {
+			wchar_t *arg = php_win32_cp_utf8_to_w(argv_save[i]);
+			if (arg) {
+				argv[i] = php_win32_cp_w_to_any(arg);
+				free(arg);
+			}
+			if (!argv[i]) {
+				fprintf(stderr, "Could not convert command line argument %d.\n", i);
+				exit_status = 1;
+				goto out;
+			}
+		}
 	}
 
 	SetConsoleCtrlHandler(php_cli_win32_ctrl_handler, TRUE);
@@ -1381,8 +1399,10 @@ out:
 #if defined(PHP_WIN32)
 	(void)php_win32_cp_cli_restore();
 
-	if (using_wide_argv) {
+	if (argv != argv_save) {
 		PHP_WIN32_CP_FREE_ARRAY(argv, argc);
+	}
+	if (argv_wide) {
 		LocalFree(argv_wide);
 	}
 	argv = argv_save;
