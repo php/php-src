@@ -27,8 +27,8 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 
 - Windows build system changes:
-  . C sources are now compiled as C17. MSVC builds require Visual Studio
-    2026 or later and enable /experimental:c11atomics.
+  . C sources are now compiled as C17 and require C11 atomics. MSVC builds require
+    Visual Studio 2026 or later and enable /experimental:c11atomics.
   . C++-only extension compiler flags can be added to CXXFLAGS_<EXTENSION>.
 
 - Unix build system changes:
