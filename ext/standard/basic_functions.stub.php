@@ -2388,8 +2388,10 @@ function strtoupper(string $string): string {}
  */
 function strtolower(string $string): string {}
 
+/** @compile-time-eval */
 function str_increment(string $string): string {}
 
+/** @compile-time-eval */
 function str_decrement(string $string): string {}
 
 /** @refcount 1 */
