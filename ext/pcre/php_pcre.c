@@ -722,9 +722,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	/* In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
 	   characters, even in UTF-8 mode. However, this can be changed by setting
 	   the PCRE2_UCP option. */
-#ifdef PCRE2_UCP
 						coptions |= PCRE2_UCP;
-#endif
 						/* The \C escape sequence is unsafe in PCRE2_UTF mode */
 						coptions |= PCRE2_NEVER_BACKSLASH_C;
 				break;
