@@ -708,7 +708,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 			/* PCRE specific options */
 			case 'A':	coptions |= PCRE2_ANCHORED;		break;
 			case 'D':	coptions |= PCRE2_DOLLAR_ENDONLY;break;
-#ifdef PCRE2_EXTRA_CASELESS_RESTRICT
+#ifdef PCRE2_EXTRA_CASELESS_RESTRICT /* Added in 10.43 (16-February-2024) */
 			case 'r':	eoptions |= PCRE2_EXTRA_CASELESS_RESTRICT; break;
 #endif
 			case 'S':	/* Pass. */					break;
