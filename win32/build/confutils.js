@@ -58,7 +58,6 @@ var MINRE2C = "1.0.3";
 
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
-var cxx_mode_targets = {};
 
 /* Store the SAPI enabled (summary + QA check) */
 var sapi_enabled = new Array();
@@ -1468,10 +1467,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir, cxx_mod
 	var extname_for_printing;
 	var ldflags;
 
-	if (cxx_mode) {
-		cxx_mode_targets[extname] = true;
-	}
-
 	if (shared == null) {
 		if (force_all_shared()) {
 			shared = true;
@@ -1625,10 +1620,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
 	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
-	var c11_flags = ICC_TOOLSET ? " /Qstd=c11" : " /std:c11";
+	var c_flags = ICC_TOOLSET ? " /Qstd=c17" : " /std:c17";
 	if (VS_TOOLSET) {
-		c11_flags += " /experimental:c11atomics";
+		c_flags += " /experimental:c11atomics";
 	}
+	var cxx_flags = " $(CXXFLAGS_" + target.toUpperCase() + ")";
 
 	var bd = get_define('BUILD_DIR');
 	var respd = bd + '\\resp';
@@ -1794,7 +1790,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 						"--library=win32\\build\\cppcheck.cfg " +
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
-						" --std=c11 --std=c++11 " +
+						" --std=c17 --std=c++11 " +
 						"--quiet --inconclusive --template=vs -j 4 " +
 						"--suppress=unmatchedSuppression " +
 						"--suppressions-list=win32\\build\\cppcheck_suppress.txt ";
@@ -1813,9 +1809,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 					var _tmp = src.split("\\");
 					var filename = _tmp.pop();
 					obj = filename.replace(re, ".obj");
-					var c11_flag = !cxx_mode_targets[target] && /\.c$/i.test(src) ? c11_flags : "";
+					var language_flags = /\.c$/i.test(src) ? c_flags : cxx_flags;
 
-					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
+					MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + language_flags + " $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + d + obj);
 
 					if ("clang" == PHP_ANALYZER) {
 						MFO.WriteLine("\t" + CMD_MOD1 + "\"$(CLANG_CL)\" " + analyzer_base_args + " $(" + flags + "_ANALYZER) $(CFLAGS_ANALYZER) $(" + bd_flags_name + "_ANALYZER) " + dir + "\\" + src);
@@ -1839,8 +1835,8 @@ function ADD_SOURCES(dir, file_list, target, obj_dir, duplicate_sources)
 
 				for (var language = 0; language < src_lines.length; language++) {
 					if (src_lines[language]) {
-						var c11_flag = language == 0 && !cxx_mode_targets[target] ? c11_flags : "";
-						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + c11_flag + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
+						var language_flags = language == 0 ? c_flags : cxx_flags;
+						MFO.WriteLine("\t" + CMD_MOD1 + "$(CC)" + language_flags + " $(" + flags + ") $(CFLAGS) /Fo" + sub_build + d + " $(" + bd_flags_name + ") /c " + src_lines[language]);
 					}
 				}
 
