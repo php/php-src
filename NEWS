@@ -80,6 +80,8 @@ PHP                                                                        NEWS
     column index. (Ilia Alshanetsky)
   . Fixed PDOStatement::bindColumn() registering a binding for a column name
     that is not in the result set. (Ilia Alshanetsky)
+  . Fixed PDOStatement::execute() leaving the previous result available
+    after a failed execution. (Ilia Alshanetsky)
 
 - Readline:
   . Fixed a heap over-read in the interactive shell prompt when cli.prompt is
