@@ -32,6 +32,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-23897 (php:function() assertion failure after a failed
     registerPHPFunctions()). (David Carlier)
 
+- Exif:
+  . Fixed exif_thumbnail() exhausting memory when a TIFF thumbnail size
+    extends past the end of the file. (Ilia Alshanetsky)
+
+
 - FTP:
   . Fixed bug GH-23619 (cryptic error on servers that don't support TLS
     session resumption on data connection). (ndossche)
