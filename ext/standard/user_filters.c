@@ -166,6 +166,12 @@ static php_stream_filter_status_t userfilter_filter(
 		if (EG(exception)) {
 			EG(fake_scope) = old_scope;
 			if (buckets_in->head) {
+				php_stream_bucket *bucket;
+				do {
+					bucket = buckets_in->head;
+					php_stream_bucket_unlink(bucket);
+					php_stream_bucket_delref(bucket);
+				} while (buckets_in->head);
 				php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 			}
 			zend_string_release(stream_name);
