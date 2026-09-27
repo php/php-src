@@ -37,6 +37,8 @@ final class RingProvider implements Io\Hooks\Hooks
     }
 }
 
+pcntl_sigprocmask(SIG_BLOCK, [SIGUSR2]);
+$pair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 $before = fds();
 $ring = new Io\Ring\Engine();
 $handle = $ring->getHandle();
@@ -49,6 +51,14 @@ try {
     usleep(200000);
 } catch (RuntimeException $e) {
     echo $e->getMessage(), "\n";
+}
+// What ior opens on demand: the thread backend's poller, io_uring's signalfd
+foreach ([fn() => fread($pair[0], 1), fn() => pcntl_sigwaitinfo([SIGUSR2])] as $call) {
+    try {
+        @$call();
+    } catch (RuntimeException $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 $provider->giveUp = false;
 Io\Hooks\set_hooks(null);
@@ -88,6 +98,8 @@ var_dump((hrtime(true) - $start) / 1e6 >= 15);
 Io\Hooks\set_hooks(null);
 ?>
 --EXPECT--
+gave up
+gave up
 gave up
 bool(true)
 getBackend: The ring was created in another process

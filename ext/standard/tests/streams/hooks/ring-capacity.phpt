@@ -1,5 +1,5 @@
 --TEST--
-Io\Ring\Engine: more operations than the ring holds wait for room and keep their deadlines
+Io\Ring\Engine: the smallest ring takes more operations than it has entries and keeps their deadlines
 --SKIPIF--
 <?php
 if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not available");
@@ -31,7 +31,7 @@ $counts = array_count_values($results);
 ksort($counts);
 print_r($counts);
 
-// Operations the ring could not take yet when the script ends
+// Operations still pending when the script ends
 $ring = new Io\Ring\Engine(1);
 Io\Hooks\set_hooks(new class($ring) implements Io\Hooks\Hooks {
     public function __construct(private Io\Ring\Engine $ring) {}
