@@ -33,6 +33,7 @@ Io\Poll\Watcher
 Io\Terminal\Key
 Io\Terminal\ModeToken
 Io\Terminal\Terminal
+Io\Terminal\TerminalException
 Io\Terminal\TerminalSize
 RoundingMode
 SortDirection
