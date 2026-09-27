@@ -1528,14 +1528,18 @@ PHP_METHOD(Io_Terminal_Terminal, fromStreams)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!php_io_terminal_stream_target_init(input_arg, true, &target) || target.php_stream == NULL) {
-		zend_argument_value_error(1, "must be a valid stream resource");
+		if (!EG(exception)) {
+			zend_argument_value_error(1, "must be a valid stream resource");
+		}
 		RETURN_THROWS();
 	}
 
 	if (output_arg != NULL && !Z_ISNULL_P(output_arg)) {
 		php_io_terminal_stream_target out_target;
 		if (!php_io_terminal_stream_target_init(output_arg, false, &out_target) || out_target.php_stream == NULL) {
-			zend_argument_value_error(2, "must be a valid stream resource or null");
+			if (!EG(exception)) {
+				zend_argument_value_error(2, "must be a valid stream resource or null");
+			}
 			RETURN_THROWS();
 		}
 	}
