@@ -58,15 +58,15 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)
 TypeError: Io\Terminal\Terminal::fromStreams(): Argument #1 ($input) must be of type resource, string given
 TypeError: Io\Terminal\Terminal::fromStreams(): Argument #2 ($output) must be of type resource or null, int given
-Error: %s
-Error: %s
-Error: %s
+Error: Call to private Io\Terminal\Terminal::__construct() from global scope
+Error: Call to private Io\Terminal\TerminalSize::__construct() from global scope
+Error: Call to private Io\Terminal\ModeToken::__construct() from global scope
 Error: Trying to clone an uncloneable object of class Io\Terminal\Terminal
 Error: Trying to clone an uncloneable object of class Io\Terminal\Terminal
 Exception: Serialization of 'Io\Terminal\Terminal' is not allowed

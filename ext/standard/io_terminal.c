@@ -21,7 +21,6 @@
 #include "php_streams.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/date/php_time.h"
-#include "io_poll.h"
 #include "io_terminal.h"
 #include "io_terminal_decl.h"
 #include "io_terminal_arginfo.h"
@@ -759,12 +758,6 @@ static zend_string *php_io_terminal_read_stream_secret(
 {
 	HANDLE handle = input;
 	DWORD mode;
-	WCHAR high_surrogate = 0;
-	DWORD raw_mode;
-	smart_str secret = {0};
-	bool success = false;
-	bool failed = false;
-	bool mode_changed = false;
 
 	if (handle == INVALID_HANDLE_VALUE || handle == NULL
 		|| (stream != NULL && stream->writepos > stream->readpos)
@@ -772,11 +765,16 @@ static zend_string *php_io_terminal_read_stream_secret(
 		return NULL;
 	}
 
-	raw_mode = php_io_terminal_make_raw_mode(mode);
+	DWORD raw_mode = php_io_terminal_make_raw_mode(mode);
 	if (raw_mode != mode && !SetConsoleMode(handle, raw_mode)) {
 		return NULL;
 	}
-	mode_changed = raw_mode != mode;
+
+	bool mode_changed = raw_mode != mode;
+	WCHAR high_surrogate = 0;
+	smart_str secret = {0};
+	bool success = false;
+	bool failed = false;
 
 	for (;;) {
 		INPUT_RECORD record;
@@ -1110,7 +1108,7 @@ static zend_string *php_io_terminal_key_from_utf8_sequence(
 	size_t sequence_len = php_io_terminal_utf8_sequence_len(key);
 
 	if (sequence_len == 1) {
-		return zend_string_init((const char *) &key, 1, false);
+		return ZSTR_CHAR(key);
 	}
 
 	memset(pending, 0, sizeof(*pending));
@@ -1801,9 +1799,15 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 
 PHP_MINIT_FUNCTION(terminal)
 {
-	ZEND_ASSERT(php_io_exception_class_entry != NULL);
+	zend_class_entry *io_exception_ce = zend_hash_str_find_ptr(
+		CG(class_table),
+		"io\\ioexception",
+		sizeof("io\\ioexception") - 1
+	);
+	ZEND_ASSERT(io_exception_ce != NULL);
+
 	php_io_terminal_exception_ce
-		= register_class_Io_Terminal_TerminalException(php_io_exception_class_entry);
+		= register_class_Io_Terminal_TerminalException(io_exception_ce);
 
 	php_io_terminal_key_ce = register_class_Io_Terminal_Key();
 
