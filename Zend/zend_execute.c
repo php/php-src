@@ -4339,8 +4339,8 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *call)
 {
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	atomic_store(&EG(vm_interrupt), false);
+	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(call);
@@ -4348,7 +4348,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 }
 
 #define ZEND_VM_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			ZEND_VM_INTERRUPT(); \
 		} \
 	} while (0)
@@ -4360,14 +4360,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *ca
 #endif
 
 #define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			ZEND_VM_KIND_TAILCALL_SAVE_OPLINE(); \
 			ZEND_VM_LOOP_INTERRUPT(); \
 		} \
 	} while (0)
 
 #define ZEND_VM_FCALL_INTERRUPT_CHECK(call) do { \
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+		if (UNEXPECTED(atomic_load(&EG(vm_interrupt)))) { \
 			zend_fcall_interrupt(call); \
 		} \
 	} while (0)

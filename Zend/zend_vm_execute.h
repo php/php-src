@@ -4032,14 +4032,14 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV ZEND_J
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_FUNC_CCONV  zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
+	atomic_store(&EG(vm_interrupt), false);
 #if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	/* opline is &call_interrupt_op. Load orig opline. */
 	LOAD_OPLINE();
 #else
 	SAVE_OPLINE();
 #endif
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
@@ -56877,14 +56877,14 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV ZEND_JMP_FO
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_OPCODE_HANDLER_CCONV  zend_interrupt_helper_SPEC_TAILCALL(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
+	atomic_store(&EG(vm_interrupt), false);
 #if ZEND_VM_KIND == ZEND_VM_KIND_TAILCALL
 	/* opline is &call_interrupt_op. Load orig opline. */
 	LOAD_OPLINE();
 #else
 	SAVE_OPLINE();
 #endif
-	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+	if (atomic_load(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
