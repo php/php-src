@@ -17,17 +17,15 @@ $res2 = $t->readKey(Duration::fromMilliseconds(1));
 var_dump($res2 === false || is_string($res2) || is_object($res2));
 
 // Negative duration for timeout must throw ValueError
-$neg = Duration::fromSeconds(1)->sub(Duration::fromSeconds(5));
-
 try {
-    $t->readKey($neg);
+    $t->readKey(Duration::fromSeconds(1)->negate());
     echo "FAIL: accepted negative timeout\n";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
 try {
-    $t->readKey(Duration::fromSeconds(0), $neg);
+    $t->readKey(Duration::fromSeconds(0), Duration::fromSeconds(1)->negate());
     echo "FAIL: accepted negative sequence timeout\n";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
