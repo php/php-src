@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #565486253 (coerced arg with '...' on non-variadic
     function). (ndossche)
 
+- FFI:
+  . Fixed crashes with FFI callbacks created from __call() trampolines
+    and array callables whose object is released. (Ilia Alshanetsky)
+
 - Opcache:
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
   . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
