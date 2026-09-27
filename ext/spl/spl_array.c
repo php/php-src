@@ -39,9 +39,11 @@ PHPAPI zend_class_entry  *spl_ce_ArrayObject;
 typedef struct _spl_array_object {
 	zval              array;
 	HashTable         *sentinel_array;
+	HashTable         *ht_iter_ht; /* The table the position was last looked up for */
 	uint32_t          ht_iter;
 	int               ar_flags;
 	unsigned char	  nApplyCount;
+	HashPosition      empty_pos; /* The position in an empty immutable storage */
 	zend_function     *fptr_offset_get;
 	zend_function     *fptr_offset_set;
 	zend_function     *fptr_offset_has;
@@ -56,7 +58,6 @@ typedef struct _spl_array_object {
 #define Z_SPLARRAY_P(zv)  spl_array_from_obj(Z_OBJ_P((zv)))
 
 static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern) { /* {{{ */
-	//??? TODO: Delay duplication for arrays; only duplicate for write operations
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
 		/* rebuild properties */
 		zend_std_get_properties_ex(&intern->std);
@@ -108,20 +109,118 @@ static inline bool spl_array_is_object(spl_array_object *intern) /* {{{ */
 }
 /* }}} */
 
+/* Arrays are shared with their other holders when doing so is indistinguishable
+ * from zend_array_dup(), which unwraps references with refcount 1. */
+static bool spl_array_can_share(const HashTable *ht) /* {{{ */
+{
+	const zval *zv;
+
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		/* Immutable arrays hold no references */
+		return true;
+	}
+
+	ZEND_HASH_FOREACH_VAL(ht, zv) {
+		if (Z_ISREF_P(zv)) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
+}
+/* }}} */
+
+/* Returns the storage, separated from its other holders so that it can be written to. */
+static HashTable *spl_array_get_hash_table_for_write(spl_array_object *intern) /* {{{ */
+{
+	while (intern->ar_flags & SPL_ARRAY_USE_OTHER) {
+		intern = Z_SPLARRAY_P(&intern->array);
+	}
+	if (!(intern->ar_flags & SPL_ARRAY_IS_SELF) && Z_TYPE(intern->array) == IS_ARRAY) {
+		SEPARATE_ARRAY(&intern->array);
+		return Z_ARRVAL(intern->array);
+	}
+	return spl_array_get_hash_table(intern);
+}
+/* }}} */
+
+/* Copies the storage into zv, sharing it when possible. */
+static void spl_array_copy_storage(zval *zv, spl_array_object *intern) /* {{{ */
+{
+	spl_array_object *owner = intern;
+
+	while (owner->ar_flags & SPL_ARRAY_USE_OTHER) {
+		owner = Z_SPLARRAY_P(&owner->array);
+	}
+	if (!(owner->ar_flags & SPL_ARRAY_IS_SELF) && Z_TYPE(owner->array) == IS_ARRAY
+	 && spl_array_can_share(Z_ARRVAL(owner->array))) {
+		ZVAL_COPY(zv, &owner->array);
+	} else {
+		ZVAL_ARR(zv, zend_array_dup(spl_array_get_hash_table(intern)));
+	}
+}
+/* }}} */
+
 static zend_result spl_array_skip_protected(spl_array_object *intern, HashTable *aht);
 
-static zend_never_inline void spl_array_create_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
+static void spl_array_create_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
+	ZEND_ASSERT(!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE));
 	intern->ht_iter = zend_hash_iterator_add(ht, zend_hash_get_current_pos(ht));
+	intern->ht_iter_ht = ht;
 	zend_hash_internal_pointer_reset_ex(ht, &EG(ht_iterators)[intern->ht_iter].pos);
 	spl_array_skip_protected(intern, ht);
 }
 /* }}} */
 
+static void spl_array_update_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
+{
+	uint32_t idx = intern->ht_iter;
+
+	ZEND_ASSERT(!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE));
+	intern->ht_iter_ht = ht;
+
+	/* When the storage is separated, zend_array_dup() registers a copy of the
+	 * iterator on the new table, with its position adjusted to it. */
+	for (uint32_t i = EG(ht_iterators)[idx].next_copy; i != idx; i = EG(ht_iterators)[i].next_copy) {
+		if (EG(ht_iterators)[i].ht == ht) {
+			zend_hash_iterator_pos(idx, ht);
+			return;
+		}
+	}
+}
+/* }}} */
+
+static zend_never_inline uint32_t *spl_array_get_pos_ptr_slow(HashTable *ht, spl_array_object* intern) /* {{{ */
+{
+	if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
+		if (!ht->nNumUsed) {
+			/* No iterator is needed as anything added to the storage separates it first */
+			intern->empty_pos = 0;
+			return &intern->empty_pos;
+		}
+		/* Iterators cannot be registered on immutable arrays, so the storage is separated.
+		 * zend_array_dup() copies immutable arrays as is: positions are the same in both
+		 * and callers can complete their read on the immutable array. */
+		ht = spl_array_get_hash_table_for_write(intern);
+		if (ht == intern->ht_iter_ht) {
+			return &EG(ht_iterators)[intern->ht_iter].pos;
+		}
+	}
+
+	if (intern->ht_iter == (uint32_t)-1) {
+		spl_array_create_ht_iter(ht, intern);
+	} else {
+		spl_array_update_ht_iter(ht, intern);
+	}
+	return &EG(ht_iterators)[intern->ht_iter].pos;
+}
+/* }}} */
+
 static zend_always_inline uint32_t *spl_array_get_pos_ptr(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
-	if (UNEXPECTED(intern->ht_iter == (uint32_t)-1)) {
-		spl_array_create_ht_iter(ht, intern);
+	if (UNEXPECTED(intern->ht_iter_ht != ht)) {
+		return spl_array_get_pos_ptr_slow(ht, intern);
 	}
 	return &EG(ht_iterators)[intern->ht_iter].pos;
 }
@@ -170,8 +269,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 			if (other->ar_flags & SPL_ARRAY_IS_SELF) {
 				ZVAL_UNDEF(&intern->array);
 			} else if (instanceof_function(class_type, spl_ce_ArrayObject)) {
-				ZVAL_ARR(&intern->array,
-					zend_array_dup(spl_array_get_hash_table(other)));
+				spl_array_copy_storage(&intern->array, other);
 			} else {
 				#if ZEND_DEBUG
 				/* This is because the call to instanceof_function will remain because
@@ -338,6 +436,11 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 			&EG(error_zval) : &EG(uninitialized_zval);
 	}
 
+	if (type != BP_VAR_R && type != BP_VAR_IS) {
+		/* The returned zval may be turned into a reference or written to */
+		ht = spl_array_get_hash_table_for_write(intern);
+	}
+
 	if (key.key) {
 		retval = zend_hash_find(ht, key.key);
 		if (retval) {
@@ -372,6 +475,8 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 					break;
 				case BP_VAR_RW:
 					zend_error(E_WARNING,"Undefined array key \"%s\"", ZSTR_VAL(key.key));
+					/* The error handler may have shared or replaced the storage */
+					ht = spl_array_get_hash_table_for_write(intern);
 					ZEND_FALLTHROUGH;
 				case BP_VAR_W: {
 				    zval value;
@@ -393,6 +498,8 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 					break;
 				case BP_VAR_RW:
 					zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, key.h);
+					/* The error handler may have shared or replaced the storage */
+					ht = spl_array_get_hash_table_for_write(intern);
 					ZEND_FALLTHROUGH;
 				case BP_VAR_W: {
 				    zval value;
@@ -480,7 +587,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 
 	Z_TRY_ADDREF_P(value);
 	if (!offset || Z_TYPE_P(offset) == IS_NULL) {
-		ht = spl_array_get_hash_table(intern);
+		ht = spl_array_get_hash_table_for_write(intern);
 		if (UNEXPECTED(ht == intern->sentinel_array)) {
 			return;
 		}
@@ -494,7 +601,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
-	ht = spl_array_get_hash_table(intern);
+	ht = spl_array_get_hash_table_for_write(intern);
 	if (UNEXPECTED(ht == intern->sentinel_array)) {
 		spl_hash_key_release(&key);
 		return;
@@ -534,7 +641,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
-	ht = spl_array_get_hash_table(intern);
+	ht = spl_array_get_hash_table_for_write(intern);
 	if (key.key) {
 		zval *data = zend_hash_find(ht, key.key);
 		if (data) {
@@ -714,7 +821,7 @@ PHP_METHOD(ArrayObject, getArrayCopy)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
+	spl_array_copy_storage(return_value, intern);
 } /* }}} */
 
 static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_purpose purpose) /* {{{ */
@@ -727,9 +834,8 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 		return zend_std_get_properties_for(object, purpose);
 	}
 
-	/* We are supposed to be the only owner of the internal hashtable.
-	 * The "dup" flag decides whether this is a "long-term" use where
-	 * we need to duplicate, or a "temporary" one, where we can expect
+	/* The "dup" flag decides whether this is a "long-term" use where
+	 * we need a copy, or a "temporary" one, where we can expect
 	 * that no operations on the ArrayObject will be performed in the
 	 * meantime. */
 	switch (purpose) {
@@ -744,12 +850,14 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 			return zend_std_get_properties_for(object, purpose);
 	}
 
-	ht = spl_array_get_hash_table(intern);
 	if (dup) {
-		ht = zend_array_dup(ht);
-	} else {
-		GC_ADDREF(ht);
+		zval copy;
+		spl_array_copy_storage(&copy, intern);
+		return Z_ARR(copy);
 	}
+
+	ht = spl_array_get_hash_table(intern);
+	GC_TRY_ADDREF(ht);
 	return ht;
 } /* }}} */
 
@@ -930,10 +1038,9 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 	ZVAL_UNDEF(&garbage);
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		ZVAL_COPY_VALUE(&garbage, &intern->array);
-		if (Z_REFCOUNT_P(array) == 1) {
+		if (Z_REFCOUNT_P(array) == 1 || spl_array_can_share(Z_ARR_P(array))) {
 			ZVAL_COPY(&intern->array, array);
 		} else {
-			//??? TODO: try to avoid array duplication
 			ZVAL_ARR(&intern->array, zend_array_dup(Z_ARR_P(array)));
 		}
 	} else {
@@ -982,6 +1089,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 	if (intern->ht_iter != (uint32_t)-1) {
 		zend_hash_iterator_del(intern->ht_iter);
 		intern->ht_iter = (uint32_t)-1;
+		intern->ht_iter_ht = NULL;
 	}
 
 	zval_ptr_dtor(&garbage);
@@ -1090,7 +1198,13 @@ PHP_METHOD(ArrayObject, exchangeArray)
 		RETURN_THROWS();
 	}
 
-	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
+	HashTable *ht = spl_array_get_hash_table(intern);
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		/* Iterators of the storage would keep following the returned array */
+		RETVAL_ARR(zend_array_dup(ht));
+	} else {
+		spl_array_copy_storage(return_value, intern);
+	}
 	spl_array_set_array(object, intern, array, 0L, true);
 }
 /* }}} */
@@ -1159,6 +1273,11 @@ PHP_METHOD(ArrayObject, count)
 
 static void spl_array_method(zval *return_value, spl_array_object *intern, const char *fname, size_t fname_len, const zval *extra_arg) /* {{{ */
 {
+	/* The sorted array replaces the storage, which cannot be done for immutable arrays */
+	if (GC_FLAGS(spl_array_get_hash_table(intern)) & IS_ARRAY_IMMUTABLE) {
+		spl_array_get_hash_table_for_write(intern);
+	}
+
 	HashTable **ht_ptr = spl_array_get_hash_table_ptr(intern);
 	HashTable *aht = *ht_ptr;
 	zval params[2];
@@ -1562,7 +1681,9 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
 	spl_array_iterator *array_iter = (spl_array_iterator*)iter;
 	spl_array_object *object = Z_SPLARRAY_P(&iter->data);
-	HashTable *aht = spl_array_get_hash_table(object);
+	HashTable *aht = array_iter->by_ref
+		? spl_array_get_hash_table_for_write(object)
+		: spl_array_get_hash_table(object);
 	zval *data = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, object));
 	if (data && Z_TYPE_P(data) == IS_INDIRECT) {
 		data = Z_INDIRECT_P(data);
