@@ -19,6 +19,8 @@
 
 BEGIN_EXTERN_C()
 
+PHPAPI extern zend_class_entry *php_io_exception_class_entry;
+
 PHPAPI void php_io_poll_stream_notify_close(php_stream *stream);
 
 END_EXTERN_C()

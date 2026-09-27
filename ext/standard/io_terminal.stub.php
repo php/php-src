@@ -7,6 +7,8 @@
 
 namespace Io\Terminal {
 
+    class TerminalException extends \Io\IoException {}
+
     enum Key
     {
         case Up;

@@ -24,19 +24,19 @@ if (method_exists($d1, 'sub')) {
     try {
         $t->readKey($neg);
         echo "FAIL: accepted negative timeout\n";
-    } catch (ValueError $e) {
-        echo "Negative timeout: " . $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ": ", $e->getMessage(), PHP_EOL;
     }
 
     try {
         $t->readKey(Duration::fromSeconds(0), $neg);
         echo "FAIL: accepted negative sequence timeout\n";
-    } catch (ValueError $e) {
-        echo "Negative sequenceTimeout: " . $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ": ", $e->getMessage(), PHP_EOL;
     }
 } else {
-    echo "Negative timeout: Io\Terminal\Terminal::readKey(): Argument #1 (\$timeout) must not be negative\n";
-    echo "Negative sequenceTimeout: Io\Terminal\Terminal::readKey(): Argument #2 (\$sequenceTimeout) must not be negative\n";
+    echo "ValueError: Io\Terminal\Terminal::readKey(): Argument #1 (\$timeout) must not be negative\n";
+    echo "ValueError: Io\Terminal\Terminal::readKey(): Argument #2 (\$sequenceTimeout) must not be negative\n";
 }
 
 // Non-terminal stream returns false immediately
@@ -48,6 +48,6 @@ var_dump($nonTty->readKey(Duration::fromSeconds(0)));
 --EXPECTF--
 bool(true)
 bool(true)
-Negative timeout: Io\Terminal\Terminal::readKey(): Argument #1 ($timeout) must not be negative
-Negative sequenceTimeout: Io\Terminal\Terminal::readKey(): Argument #2 ($sequenceTimeout) must not be negative
+ValueError: Io\Terminal\Terminal::readKey(): Argument #1 ($timeout) must not be negative
+ValueError: Io\Terminal\Terminal::readKey(): Argument #2 ($sequenceTimeout) must not be negative
 bool(false)
