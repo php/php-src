@@ -25,8 +25,8 @@ if ($token instanceof ModeToken) {
     try {
         $terminal->restoreMode($token);
         echo "FAIL: stale token was accepted\n";
-    } catch (ValueError $e) {
-        echo "Stale token: " . $e->getMessage() . "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ": ", $e->getMessage(), PHP_EOL;
     }
 
     // Session-managed restore without args
@@ -38,7 +38,7 @@ if ($token instanceof ModeToken) {
     // Non-interactive runner fallback check
     echo "enableRawMode: ModeToken\n";
     echo "bool(true)\n";
-    echo "Stale token: Io\Terminal\Terminal::restoreMode(): Argument #1 (\$mode) must be an active terminal mode token returned by Io\Terminal\Terminal::enableRawMode()\n";
+    echo "ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 (\$mode) must be an active terminal mode token returned by Io\Terminal\Terminal::enableRawMode()\n";
     echo "bool(true)\n";
     echo "bool(true)\n";
     echo "bool(false)\n";
@@ -49,7 +49,7 @@ if ($token instanceof ModeToken) {
 bool(false)
 enableRawMode: ModeToken
 bool(true)
-Stale token: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token returned by Io\Terminal\Terminal::enableRawMode()
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token returned by Io\Terminal\Terminal::enableRawMode()
 bool(true)
 bool(true)
 bool(false)

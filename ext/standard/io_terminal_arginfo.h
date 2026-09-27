@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: 5f5105fa50433e16d7a863f58002ad62916fc35e
+ * Stub hash: 44e9f2d5b2b59a43ad0c56c0cff90b796f40eea0
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -69,6 +69,16 @@ static const zend_function_entry class_Io_Terminal_Terminal_methods[] = {
 	ZEND_ME(Io_Terminal_Terminal, readSecret, arginfo_class_Io_Terminal_Terminal_readSecret, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_Io_Terminal_TerminalException(zend_class_entry *class_entry_Io_IoException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "TerminalException", NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_IoException, 0);
+
+	return class_entry;
+}
 
 static zend_class_entry *register_class_Io_Terminal_Key(void)
 {
