@@ -591,7 +591,8 @@ static ir_ref jit_CONST_OPCODE_HANDLER_FUNC(zend_jit_ctx *jit, zend_vm_opcode_ha
 static ir_ref jit_ADD_OFFSET(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset)
 {
 	if (offset) {
-		addr = ir_ADD_A(addr, ir_CONST_ADDR(offset));
+		/* Use the same constant as IR's folding of nested offsets, to allow CSE and load forwarding */
+		addr = ir_ADD_A(addr, ir_const_addr(&jit->ctx, offset));
 	}
 	return addr;
 }
