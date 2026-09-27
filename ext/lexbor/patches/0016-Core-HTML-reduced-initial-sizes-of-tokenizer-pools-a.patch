@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Nicolas Grekas <nicolas.grekas@gmail.com>
+Date: Sun, 27 Sep 2026 18:47:48 +0200
+Subject: [PATCH 16/16] Core, HTML: reduced initial sizes of tokenizer pools
+ and mraw cache.
+
+The HTML tokenizer preallocated 4096 tokens and 4096 token attributes,
+and each lexbor_mraw_t preallocated 512 entries for its cache of freed
+blocks. That is about 1 MB allocated before parsing even a few bytes.
+
+The tree builder uses a single token, and these pools grow on demand,
+so start with 16 tokens, 256 attributes and 64 cache entries.
+---
+ source/lexbor/core/mraw.c      | 2 +-
+ source/lexbor/html/tokenizer.c | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/source/lexbor/core/mraw.c b/source/lexbor/core/mraw.c
+index c990405..9376ba4 100644
+--- a/source/lexbor/core/mraw.c
++++ b/source/lexbor/core/mraw.c
+@@ -62,7 +62,7 @@ lexbor_mraw_init(lexbor_mraw_t *mraw, size_t chunk_size)
+     /* Cache */
+     mraw->cache = lexbor_bst_create();
+ 
+-    status = lexbor_bst_init(mraw->cache, 512);
++    status = lexbor_bst_init(mraw->cache, 64);
+     if (status) {
+         return status;
+     }
+diff --git a/source/lexbor/html/tokenizer.c b/source/lexbor/html/tokenizer.c
+index 1d9f378..16e000e 100644
+--- a/source/lexbor/html/tokenizer.c
++++ b/source/lexbor/html/tokenizer.c
+@@ -63,14 +63,14 @@ lxb_html_tokenizer_init(lxb_html_tokenizer_t *tkz)
+ 
+     tkz->dobj_token = lexbor_dobject_create();
+     status = lexbor_dobject_init(tkz->dobj_token,
+-                                 4096, sizeof(lxb_html_token_t));
++                                 16, sizeof(lxb_html_token_t));
+     if (status != LXB_STATUS_OK) {
+         return status;
+     }
+ 
+     /* Init Token Attributes */
+     tkz->dobj_token_attr = lexbor_dobject_create();
+-    status = lexbor_dobject_init(tkz->dobj_token_attr, 4096,
++    status = lexbor_dobject_init(tkz->dobj_token_attr, 256,
+                                  sizeof(lxb_html_token_attr_t));
+     if (status != LXB_STATUS_OK) {
+         return status;

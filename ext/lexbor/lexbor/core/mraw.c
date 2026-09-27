@@ -62,7 +62,7 @@ lexbor_mraw_init(lexbor_mraw_t *mraw, size_t chunk_size)
     /* Cache */
     mraw->cache = lexbor_bst_create();
 
-    status = lexbor_bst_init(mraw->cache, 512);
+    status = lexbor_bst_init(mraw->cache, 64);
     if (status) {
         return status;
     }
