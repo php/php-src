@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
 
+- Hash:
+  . Fixed mhash_keygen_s2k() truncating a $length above INT_MAX instead of
+    throwing a ValueError. (Marc Bennewitz)
+
 - Intl:
   . Fixed Collator attribute and strength methods not rejecting an
     unconstructed Collator. (Ilia Alshanetsky)
