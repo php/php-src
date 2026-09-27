@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23887 (Dom\HTMLCollection::namedItem() assertion failure,
     hang, or missed first element). (Lazizbek Ergashev)
 
+- FFI:
+  . Fixed crashes with FFI callbacks created from __call() trampolines
+    and array callables whose object is released. (Ilia Alshanetsky)
+
 - FTP:
   . Fixed bug GH-23619 (cryptic error on servers that don't support TLS
     session resumption on data connection). (ndossche)
