@@ -34,4 +34,4 @@ try {
 }
 ?>
 --EXPECT--
-SOAP-ERROR: Encoding: Type 'hexBinary' value must contain an even number of hexadecimal digits
+SoapClient::__call(): Encoding: Type 'hexBinary' value must contain an even number of hexadecimal digits

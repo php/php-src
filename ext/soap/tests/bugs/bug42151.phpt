@@ -26,7 +26,7 @@ try {
 echo "ok\n";
 ?>
 --EXPECTF--
-SoapFault: SOAP-ERROR: Parsing WSDL: Couldn't load from 'httpx://' : failed to load %s
+SoapFault: SoapClient::__construct(): Parsing WSDL: Couldn't load from 'httpx://' : failed to load %s
 
 ok
 I don't get executed either.
