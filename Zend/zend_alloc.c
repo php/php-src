@@ -1300,7 +1300,7 @@ static zend_always_inline int zend_mm_small_size_to_bit(int size)
 # define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
+static zend_always_inline uint32_t zend_mm_small_size_to_bin(size_t size)
 {
 #if 0
 	int n;
@@ -1323,7 +1323,7 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 		t1 = t1 >> t2;
 		t2 = t2 - 3;
 		t2 = t2 << 2;
-		return (int)(t1 + t2);
+		return t1 + t2;
 	}
 #endif
 }
@@ -1457,7 +1457,7 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 	return bin;
 }
 
-static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, int bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, uint32_t bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_USEABLE_BIN_SIZE);
 
@@ -1479,7 +1479,7 @@ static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, int bin_
 	}
 }
 
-static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, void *ptr, int bin_num)
+static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, void *ptr, uint32_t bin_num)
 {
 	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_USEABLE_BIN_SIZE);
 
@@ -1779,7 +1779,7 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 		if (info & ZEND_MM_IS_SRUN) {
-			int old_bin_num = ZEND_MM_SRUN_BIN_NUM(info);
+			uint32_t old_bin_num = ZEND_MM_SRUN_BIN_NUM(info);
 
 			do {
 				old_size = bin_data_size[old_bin_num];
