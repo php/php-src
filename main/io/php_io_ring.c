@@ -1506,6 +1506,7 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring)
 			break;
 		}
 		php_io_ring_retry_cancels(ring);
+		php_io_ring_flush(ring);
 		ior_cqe *cqe;
 		int rc = ior_wait_cqe(ring->ctx, &cqe);
 		if (rc < 0 && rc != -EINTR) {
