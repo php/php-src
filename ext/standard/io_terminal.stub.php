@@ -7,6 +7,7 @@
 
 namespace Io\Terminal {
 
+    /** @strict-properties */
     class TerminalException extends \Io\IoException {}
 
     enum Key
@@ -39,6 +40,7 @@ namespace Io\Terminal {
         case F12;
     }
 
+    /** @strict-properties */
     final readonly class TerminalSize
     {
         public readonly int $cols;
@@ -48,6 +50,7 @@ namespace Io\Terminal {
     }
 
     /**
+     * @strict-properties
      * @not-serializable
      */
     final class ModeToken
@@ -56,6 +59,7 @@ namespace Io\Terminal {
     }
 
     /**
+     * @strict-properties
      * @not-serializable
      */
     final class Terminal
