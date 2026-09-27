@@ -336,10 +336,7 @@ static void php_io_terminal_mode_token_free_obj(zend_object *object)
 	}
 	php_io_terminal_untrack_mode_token(intern);
 
-	if (!Z_ISUNDEF(intern->stream_resource)) {
-		zval_ptr_dtor(&intern->stream_resource);
-		ZVAL_UNDEF(&intern->stream_resource);
-	}
+	zval_ptr_dtor(&intern->stream_resource);
 
 	memset(&intern->saved, 0, sizeof(intern->saved));
 	intern->valid = false;
@@ -392,15 +389,8 @@ static void php_io_terminal_free_obj(zend_object *object)
 		intern->active_mode_token = NULL;
 	}
 
-	if (!Z_ISUNDEF(intern->input_stream_val)) {
-		zval_ptr_dtor(&intern->input_stream_val);
-		ZVAL_UNDEF(&intern->input_stream_val);
-	}
-
-	if (!Z_ISUNDEF(intern->output_stream_val)) {
-		zval_ptr_dtor(&intern->output_stream_val);
-		ZVAL_UNDEF(&intern->output_stream_val);
-	}
+	zval_ptr_dtor(&intern->input_stream_val);
+	zval_ptr_dtor(&intern->output_stream_val);
 
 	zend_object_std_dtor(&intern->std);
 }
@@ -1607,10 +1597,8 @@ PHP_METHOD(Io_Terminal_Terminal, enableRawMode)
 
 	php_io_terminal_create_mode_token(return_value, &saved, stream.stream_resource);
 
-	if (Z_TYPE_P(return_value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(return_value), php_io_terminal_mode_token_ce)) {
-		intern->active_mode_token = Z_OBJ_P(return_value);
-		GC_ADDREF(intern->active_mode_token);
-	}
+	intern->active_mode_token = Z_OBJ_P(return_value);
+	GC_ADDREF(intern->active_mode_token);
 }
 
 PHP_METHOD(Io_Terminal_Terminal, restoreMode)

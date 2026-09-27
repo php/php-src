@@ -19,7 +19,6 @@
 
 BEGIN_EXTERN_C()
 
-
 PHPAPI void php_io_poll_stream_notify_close(php_stream *stream);
 
 END_EXTERN_C()

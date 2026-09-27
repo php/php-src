@@ -9,15 +9,15 @@ use Io\Terminal\ModeToken;
 
 // Named constructors
 $t1 = Terminal::create();
-var_dump($t1 instanceof Terminal);
+var_dump($t1);
 
 $fp = fopen('php://temp', 'r+');
 $t2 = Terminal::fromStreams($fp);
-var_dump($t2 instanceof Terminal);
+var_dump($t2);
 
 $fpOut = fopen('php://temp', 'r+');
 $t3 = Terminal::fromStreams($fp, $fpOut);
-var_dump($t3 instanceof Terminal);
+var_dump($t3);
 
 // Invalid stream arguments
 try {
@@ -59,9 +59,12 @@ try {
 
 ?>
 --EXPECT--
-bool(true)
-bool(true)
-bool(true)
+object(Io\Terminal\Terminal)#1 (0) {
+}
+object(Io\Terminal\Terminal)#2 (0) {
+}
+object(Io\Terminal\Terminal)#3 (0) {
+}
 TypeError: Io\Terminal\Terminal::fromStreams(): Argument #1 ($input) must be of type resource, string given
 TypeError: Io\Terminal\Terminal::fromStreams(): Argument #2 ($output) must be of type resource or null, int given
 Error: Call to private Io\Terminal\Terminal::__construct() from global scope
