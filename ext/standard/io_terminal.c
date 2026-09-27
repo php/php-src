@@ -1182,11 +1182,10 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 		if (PHP_IO_TERMINAL_CSI_IS("\x1b[3~")) return zend_string_init("delete", sizeof("delete") - 1, false);
 		if (PHP_IO_TERMINAL_CSI_IS("\x1b[5~")) return zend_string_init("pageup", sizeof("pageup") - 1, false);
 		if (PHP_IO_TERMINAL_CSI_IS("\x1b[6~")) return zend_string_init("pagedown", sizeof("pagedown") - 1, false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[Z")) return zend_string_init("tab", sizeof("tab") - 1, false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[P") || PHP_IO_TERMINAL_CSI_IS("\x1b[11~")) return zend_string_init("f1", sizeof("f1") - 1, false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[Q") || PHP_IO_TERMINAL_CSI_IS("\x1b[12~")) return zend_string_init("f2", sizeof("f2") - 1, false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[R") || PHP_IO_TERMINAL_CSI_IS("\x1b[13~")) return zend_string_init("f3", sizeof("f3") - 1, false);
-		if (PHP_IO_TERMINAL_CSI_IS("\x1b[S") || PHP_IO_TERMINAL_CSI_IS("\x1b[14~")) return zend_string_init("f4", sizeof("f4") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[11~")) return zend_string_init("f1", sizeof("f1") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[12~")) return zend_string_init("f2", sizeof("f2") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[13~")) return zend_string_init("f3", sizeof("f3") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[14~")) return zend_string_init("f4", sizeof("f4") - 1, false);
 		if (PHP_IO_TERMINAL_CSI_IS("\x1b[15~")) return zend_string_init("f5", sizeof("f5") - 1, false);
 		if (PHP_IO_TERMINAL_CSI_IS("\x1b[17~")) return zend_string_init("f6", sizeof("f6") - 1, false);
 		if (PHP_IO_TERMINAL_CSI_IS("\x1b[18~")) return zend_string_init("f7", sizeof("f7") - 1, false);
