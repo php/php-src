@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Nicolas Grekas <nicolas.grekas@gmail.com>
 Date: Sun, 27 Sep 2026 18:47:48 +0200
-Subject: [PATCH 16/16] Core, HTML: reduced initial sizes of tokenizer pools
+Subject: [PATCH 16/17] Core, HTML: reduced initial sizes of tokenizer pools
  and mraw cache.
 
 The HTML tokenizer preallocated 4096 tokens and 4096 token attributes,
