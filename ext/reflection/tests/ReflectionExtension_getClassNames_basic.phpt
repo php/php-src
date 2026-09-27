@@ -30,6 +30,10 @@ Io\Poll\InactiveWatcherException
 Io\Poll\InvalidHandleException
 Io\Poll\PollException
 Io\Poll\Watcher
+Io\Terminal\Key
+Io\Terminal\ModeToken
+Io\Terminal\Terminal
+Io\Terminal\TerminalSize
 RoundingMode
 SortDirection
 StreamBucket
