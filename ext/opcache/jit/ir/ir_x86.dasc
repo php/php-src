@@ -1938,6 +1938,15 @@ static bool ir_match_has_flags_deps(ir_ctx *ctx, ir_ref ref, ir_ref root)
 	return pos != ref;
 }
 
+static uint32_t ir_match_fuse_load_const_addr(ir_ctx *ctx, ir_ref ref, const ir_insn *addr_insn)
+{
+	if (ir_may_fuse_addr(ctx, addr_insn)) {
+		return IR_FUSED | IR_SIMPLE | IR_LOAD;
+	}
+	/* The address doesn't fit into the displacement. Load it into a temporary register. */
+	return IR_FUSED | (IR_IS_TYPE_INT(ctx->ir_base[ref].type) ? IR_LOAD_INT : IR_LOAD_FP);
+}
+
 static void ir_match_fuse_load(ir_ctx *ctx, ir_ref ref, ir_ref root)
 {
 	if (ir_in_same_block(ctx, ref) &&
@@ -1949,10 +1958,8 @@ static void ir_match_fuse_load(ir_ctx *ctx, ir_ref ref, ir_ref root)
 			ir_insn *addr_insn = &ctx->ir_base[addr_ref];
 
 			if (IR_IS_CONST_REF(addr_ref)) {
-				if (ir_may_fuse_addr(ctx, addr_insn)) {
-					ctx->rules[ref] = IR_FUSED | IR_SIMPLE | IR_LOAD;
-					return;
-				}
+				ctx->rules[ref] = ir_match_fuse_load_const_addr(ctx, ref, addr_insn);
+				return;
 			} else {
 				ctx->rules[ref] = IR_FUSED | IR_SIMPLE | IR_LOAD;
 				ir_match_fuse_addr(ctx, addr_ref);
@@ -1974,10 +1981,8 @@ static bool ir_match_try_fuse_load(ir_ctx *ctx, ir_ref ref, ir_ref root)
 			ir_insn *addr_insn = &ctx->ir_base[addr_ref];
 
 			if (IR_IS_CONST_REF(addr_ref)) {
-				if (ir_may_fuse_addr(ctx, addr_insn)) {
-					ctx->rules[ref] = IR_FUSED | IR_SIMPLE | IR_LOAD;
-					return 1;
-				}
+				ctx->rules[ref] = ir_match_fuse_load_const_addr(ctx, ref, addr_insn);
+				return 1;
 			} else {
 				ctx->rules[ref] = IR_FUSED | IR_SIMPLE | IR_LOAD;
 				ir_match_fuse_addr(ctx, addr_ref);
