@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alexander Borisov <lex.borisov@gmail.com>
 Date: Fri, 5 Jun 2026 21:46:26 +0300
-Subject: [PATCH 16/25] URL: fixed tail pointer in URLSearchParams for
+Subject: [PATCH 16/26] URL: fixed tail pointer in URLSearchParams for
  delimiter-free query.
 
 When a query had a single token without '=' or '&' (e.g. "?abc"), the

@@ -92,6 +92,10 @@ PHP 8.7 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- DOM:
+  . Parsing HTML with Dom\HTMLDocument or innerHTML uses much less memory for
+    small inputs.
+
 - Standard:
   . Improved performance of strcspn() and strpbrk() when searching longer strings
     with a single-byte character mask.
