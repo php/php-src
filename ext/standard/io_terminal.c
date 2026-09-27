@@ -1764,6 +1764,8 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 	intern = PHP_IO_TERMINAL_OBJ_FROM_ZV(ZEND_THIS);
 
 #ifdef PHP_WIN32
+	memset(&intern->pending_key, 0, sizeof(intern->pending_key));
+	intern->pending_key_high_surrogate = 0;
 	intern->pending_high_surrogate = 0;
 #else
 	memset(&intern->pending_utf8, 0, sizeof(intern->pending_utf8));
