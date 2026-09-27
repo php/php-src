@@ -42,7 +42,7 @@ use Io\Terminal\Key;
 use Io\Terminal\Terminal;
 use Time\Duration;
 
-$payload = "\x1b[1;5A\x1b[2~\x1b[P\x1b[Z";
+$payload = "\x1b[1;5A\x1b[2~\x1bOP\x1b[A";
 $code = 'fwrite(STDOUT, ' . var_export($payload, true) . ');';
 
 $proc = proc_open(
@@ -82,4 +82,4 @@ proc_close($proc);
 1b5b313b3541
 1b5b327e
 F1
-Tab
+Up
