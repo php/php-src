@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: 44e9f2d5b2b59a43ad0c56c0cff90b796f40eea0
+ * Stub hash: d469eb6a85a1b785b0f9df0657696de108706101
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -75,7 +75,7 @@ static zend_class_entry *register_class_Io_Terminal_TerminalException(zend_class
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "TerminalException", NULL);
-	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_IoException, 0);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Io_IoException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -144,7 +144,7 @@ static zend_class_entry *register_class_Io_Terminal_TerminalSize(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "TerminalSize", class_Io_Terminal_TerminalSize_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_READONLY_CLASS);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS);
 
 	zval property_cols_default_value;
 	ZVAL_UNDEF(&property_cols_default_value);
@@ -166,7 +166,7 @@ static zend_class_entry *register_class_Io_Terminal_ModeToken(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "ModeToken", class_Io_Terminal_ModeToken_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -176,7 +176,7 @@ static zend_class_entry *register_class_Io_Terminal_Terminal(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Io\\Terminal", "Terminal", class_Io_Terminal_Terminal_methods);
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

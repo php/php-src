@@ -1811,8 +1811,6 @@ PHP_MINIT_FUNCTION(terminal)
 
 	php_io_terminal_mode_token_ce = register_class_Io_Terminal_ModeToken();
 	php_io_terminal_mode_token_ce->create_object = php_io_terminal_mode_token_create_object;
-	php_io_terminal_mode_token_ce->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
-
 	memcpy(&php_io_terminal_mode_token_handlers, zend_get_std_object_handlers(), sizeof(php_io_terminal_mode_token_handlers));
 	php_io_terminal_mode_token_handlers.offset = offsetof(php_io_terminal_mode_token_object, std);
 	php_io_terminal_mode_token_handlers.free_obj = php_io_terminal_mode_token_free_obj;
@@ -1820,8 +1818,6 @@ PHP_MINIT_FUNCTION(terminal)
 
 	php_io_terminal_terminal_ce = register_class_Io_Terminal_Terminal();
 	php_io_terminal_terminal_ce->create_object = php_io_terminal_create_object;
-	php_io_terminal_terminal_ce->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
-
 	memcpy(&php_io_terminal_object_handlers, zend_get_std_object_handlers(), sizeof(php_io_terminal_object_handlers));
 	php_io_terminal_object_handlers.offset = offsetof(php_io_terminal_object, std);
 	php_io_terminal_object_handlers.free_obj = php_io_terminal_free_obj;
