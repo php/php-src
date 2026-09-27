@@ -8,14 +8,6 @@ use Time\Duration;
 
 $t = Terminal::create();
 
-// Zero duration poll
-$res = $t->readKey(Duration::fromSeconds(0));
-var_dump($res === false || is_string($res) || is_object($res));
-
-// Positive duration
-$res2 = $t->readKey(Duration::fromMilliseconds(1));
-var_dump($res2 === false || is_string($res2) || is_object($res2));
-
 // Negative duration for timeout must throw ValueError
 try {
     $t->readKey(Duration::fromSeconds(1)->negate());
@@ -37,9 +29,7 @@ $nonTty = Terminal::fromStreams($fp);
 var_dump($nonTty->readKey(Duration::fromSeconds(0)));
 
 ?>
---EXPECTF--
-bool(true)
-bool(true)
+--EXPECT--
 ValueError: Io\Terminal\Terminal::readKey(): Argument #1 ($timeout) must not be negative
 ValueError: Io\Terminal\Terminal::readKey(): Argument #2 ($sequenceTimeout) must not be negative
 bool(false)

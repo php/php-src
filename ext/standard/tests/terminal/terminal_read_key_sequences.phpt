@@ -56,6 +56,7 @@ $proc = proc_open(
 );
 
 $terminal = Terminal::fromStreams($pipes[0]);
+$terminal->enableRawMode();
 $timeout = Duration::fromSeconds(1);
 
 foreach (range(1, 4) as $_) {
