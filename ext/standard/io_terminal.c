@@ -51,8 +51,6 @@
 
 #ifdef PHP_WIN32
 typedef HANDLE php_io_terminal_native_stream;
-ZEND_TLS INPUT_RECORD php_io_terminal_pending_key;
-ZEND_TLS WCHAR php_io_terminal_pending_high_surrogate;
 #else
 typedef int php_io_terminal_native_stream;
 
@@ -88,6 +86,8 @@ typedef struct php_io_terminal_object {
 	zval output_stream_val;
 	zend_object *active_mode_token;
 #ifdef PHP_WIN32
+	INPUT_RECORD pending_key;
+	WCHAR pending_key_high_surrogate;
 	WCHAR pending_high_surrogate;
 #else
 	php_io_terminal_utf8_pending pending_utf8;
@@ -198,6 +198,8 @@ static void php_io_terminal_restore_resize_handler(void)
 #define PHP_IO_TERMINAL_OBJ_FROM_ZV(_zv) \
 	PHP_IO_TERMINAL_OBJ_FROM_ZOBJ(Z_OBJ_P(_zv))
 
+static php_io_terminal_native_stream php_io_terminal_native_stream_from_php_stream(php_stream *stream);
+
 static bool php_io_terminal_native_stream_is_valid(php_io_terminal_native_stream stream)
 {
 #ifdef PHP_WIN32
@@ -215,7 +217,26 @@ static bool php_io_terminal_mode_streams_match(php_io_terminal_native_stream fir
 static bool php_io_terminal_mode_token_stream_is_valid(const php_io_terminal_mode_token_object *mode)
 {
 	if (!Z_ISUNDEF(mode->stream_resource)) {
-		if (Z_TYPE(mode->stream_resource) != IS_RESOURCE || Z_RES(mode->stream_resource) == NULL) {
+		php_stream *stream;
+		php_io_terminal_native_stream native_stream;
+
+		if (Z_TYPE(mode->stream_resource) != IS_RESOURCE) {
+			return false;
+		}
+
+		stream = (php_stream *) zend_fetch_resource2(
+			Z_RES(mode->stream_resource),
+			NULL,
+			php_file_le_stream(),
+			php_file_le_pstream()
+		);
+		if (stream == NULL) {
+			return false;
+		}
+
+		native_stream = php_io_terminal_native_stream_from_php_stream(stream);
+		if (!php_io_terminal_native_stream_is_valid(native_stream)
+			|| !php_io_terminal_mode_streams_match(native_stream, mode->saved.stream)) {
 			return false;
 		}
 	}
@@ -393,6 +414,8 @@ static zend_object *php_io_terminal_create_object(zend_class_entry *ce)
 	ZVAL_UNDEF(&intern->output_stream_val);
 	intern->active_mode_token = NULL;
 #ifdef PHP_WIN32
+	memset(&intern->pending_key, 0, sizeof(intern->pending_key));
+	intern->pending_key_high_surrogate = 0;
 	intern->pending_high_surrogate = 0;
 #else
 	memset(&intern->pending_utf8, 0, sizeof(intern->pending_utf8));
@@ -619,14 +642,21 @@ static zend_string *php_io_terminal_key_from_input_record(const KEY_EVENT_RECORD
 	return php_io_terminal_key_from_wchar(key->uChar.UnicodeChar, high_surrogate);
 }
 
-static bool php_io_terminal_read_console_record(HANDLE handle, DWORD wait_ms, INPUT_RECORD *record, WCHAR *high_surrogate)
+static bool php_io_terminal_read_console_record(
+	HANDLE handle,
+	DWORD wait_ms,
+	INPUT_RECORD *record,
+	WCHAR *high_surrogate,
+	INPUT_RECORD *pending_key,
+	WCHAR *pending_key_high_surrogate
+)
 {
 	DWORD records_read;
 
-	if (php_io_terminal_pending_key.Event.KeyEvent.wRepeatCount > 0) {
-		*record = php_io_terminal_pending_key;
-		*high_surrogate = php_io_terminal_pending_high_surrogate;
-		php_io_terminal_pending_key.Event.KeyEvent.wRepeatCount = 0;
+	if (pending_key->Event.KeyEvent.wRepeatCount > 0) {
+		*record = *pending_key;
+		*high_surrogate = *pending_key_high_surrogate;
+		pending_key->Event.KeyEvent.wRepeatCount = 0;
 		return true;
 	}
 
@@ -634,7 +664,14 @@ static bool php_io_terminal_read_console_record(HANDLE handle, DWORD wait_ms, IN
 		&& ReadConsoleInputW(handle, record, 1, &records_read) && records_read == 1;
 }
 
-static zend_string *php_io_terminal_read_stream_key(php_io_terminal_native_stream input, php_stream *stream, DWORD wait_ms, WCHAR *pending_high_surrogate)
+static zend_string *php_io_terminal_read_stream_key(
+	php_io_terminal_native_stream input,
+	php_stream *stream,
+	DWORD wait_ms,
+	WCHAR *pending_high_surrogate,
+	INPUT_RECORD *pending_key,
+	WCHAR *pending_key_high_surrogate
+)
 {
 	HANDLE handle = input;
 	DWORD mode = 0;
@@ -653,7 +690,7 @@ static zend_string *php_io_terminal_read_stream_key(php_io_terminal_native_strea
 		return NULL;
 	}
 
-	raw_mode = php_io_terminal_make_raw_mode(mode);
+	raw_mode = php_io_terminal_make_raw_mode(mode) | ENABLE_WINDOW_INPUT;
 	if (raw_mode != mode && !SetConsoleMode(handle, raw_mode)) {
 		return NULL;
 	}
@@ -665,13 +702,16 @@ static zend_string *php_io_terminal_read_stream_key(php_io_terminal_native_strea
 
 		if (wait_ms != INFINITE) {
 			ULONGLONG now = GetTickCount64();
-			if (now >= deadline_ms) {
-				break;
-			}
-			remaining_ms = (DWORD) (deadline_ms - now);
+			remaining_ms = now >= deadline_ms ? 0 : (DWORD) (deadline_ms - now);
 		}
 
-		if (!php_io_terminal_read_console_record(handle, remaining_ms, &record, &high_surrogate)) {
+		if (!php_io_terminal_read_console_record(
+				handle,
+				remaining_ms,
+				&record,
+				&high_surrogate,
+				pending_key,
+				pending_key_high_surrogate)) {
 			break;
 		}
 
@@ -690,8 +730,8 @@ static zend_string *php_io_terminal_read_stream_key(php_io_terminal_native_strea
 			if (result != NULL) {
 				if (key->wRepeatCount > 1) {
 					key->wRepeatCount--;
-					php_io_terminal_pending_key = record;
-					php_io_terminal_pending_high_surrogate = high_surrogate;
+					*pending_key = record;
+					*pending_key_high_surrogate = high_surrogate;
 				}
 				break;
 			}
@@ -700,14 +740,22 @@ static zend_string *php_io_terminal_read_stream_key(php_io_terminal_native_strea
 
 	*pending_high_surrogate = high_surrogate;
 
-	if (mode_changed) {
-		SetConsoleMode(handle, mode);
+	if (mode_changed && !SetConsoleMode(handle, mode)) {
+		if (result != NULL) {
+			zend_string_release(result);
+		}
+		return NULL;
 	}
 
 	return result;
 }
 
-static zend_string *php_io_terminal_read_stream_secret(php_io_terminal_native_stream input, php_stream *stream)
+static zend_string *php_io_terminal_read_stream_secret(
+	php_io_terminal_native_stream input,
+	php_stream *stream,
+	INPUT_RECORD *pending_key,
+	WCHAR *pending_key_high_surrogate
+)
 {
 	HANDLE handle = input;
 	DWORD mode;
@@ -735,7 +783,13 @@ static zend_string *php_io_terminal_read_stream_secret(php_io_terminal_native_st
 		KEY_EVENT_RECORD *key;
 		WORD repeats;
 
-		if (!php_io_terminal_read_console_record(handle, INFINITE, &record, &high_surrogate)) {
+		if (!php_io_terminal_read_console_record(
+				handle,
+				INFINITE,
+				&record,
+				&high_surrogate,
+				pending_key,
+				pending_key_high_surrogate)) {
 			failed = true;
 			break;
 		}
@@ -755,7 +809,8 @@ static zend_string *php_io_terminal_read_stream_secret(php_io_terminal_native_st
 		}
 
 		if (key->wVirtualKeyCode == VK_ESCAPE
-			|| (key->wVirtualKeyCode == 'C' && (key->dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0)) {
+			|| ((key->wVirtualKeyCode == 'C' || key->wVirtualKeyCode == 'D')
+				&& (key->dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0)) {
 			failed = true;
 			break;
 		}
@@ -787,8 +842,8 @@ static zend_string *php_io_terminal_read_stream_secret(php_io_terminal_native_st
 		}
 	}
 
-	if (mode_changed) {
-		SetConsoleMode(handle, mode);
+	if (mode_changed && !SetConsoleMode(handle, mode)) {
+		failed = true;
 	}
 
 	if (success && !failed) {
@@ -914,6 +969,34 @@ static void php_io_terminal_duration_to_timeval(const php_date_time_duration *du
 	}
 }
 
+static bool php_io_terminal_timeval_subtract_elapsed(struct timeval *remaining, zend_hrtime_t elapsed_ns)
+{
+	uint64_t elapsed_seconds = elapsed_ns / ZEND_NANO_IN_SEC;
+	uint64_t elapsed_microseconds = (elapsed_ns % ZEND_NANO_IN_SEC + 999) / 1000;
+
+	if (elapsed_microseconds >= 1000000) {
+		elapsed_seconds++;
+		elapsed_microseconds -= 1000000;
+	}
+
+	if (elapsed_seconds > (uint64_t) remaining->tv_sec
+		|| (elapsed_seconds == (uint64_t) remaining->tv_sec
+			&& elapsed_microseconds >= (uint64_t) remaining->tv_usec)) {
+		remaining->tv_sec = 0;
+		remaining->tv_usec = 0;
+		return false;
+	}
+
+	remaining->tv_sec -= (long) elapsed_seconds;
+	if ((uint64_t) remaining->tv_usec < elapsed_microseconds) {
+		remaining->tv_sec--;
+		remaining->tv_usec += 1000000;
+	}
+	remaining->tv_usec -= (long) elapsed_microseconds;
+
+	return true;
+}
+
 static int php_io_terminal_read_byte(
 	int fd,
 	php_stream *stream,
@@ -924,8 +1007,7 @@ static int php_io_terminal_read_byte(
 )
 {
 	fd_set read_fds;
-	struct timeval tv;
-	struct timeval *tv_ptr = NULL;
+	struct timeval remaining;
 	int select_result;
 	ssize_t bytes_read;
 
@@ -933,7 +1015,20 @@ static int php_io_terminal_read_byte(
 		return php_stream_read(stream, (char *) byte, 1) == 1 ? 1 : -1;
 	}
 
+	if (fd < 0 || fd >= FD_SETSIZE) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (timeout != NULL) {
+		remaining = *timeout;
+	}
+
 	for (;;) {
+		struct timeval wait_time;
+		struct timeval *wait_time_ptr = NULL;
+		zend_hrtime_t start_ns = 0;
+
 #if defined(SIGWINCH)
 		if (allow_resize && generation != NULL && *generation != php_io_terminal_resize_generation) {
 			return PHP_IO_TERMINAL_READ_RESIZE;
@@ -944,13 +1039,12 @@ static int php_io_terminal_read_byte(
 		FD_SET(fd, &read_fds);
 
 		if (timeout != NULL) {
-			tv = *timeout;
-			tv_ptr = &tv;
-		} else {
-			tv_ptr = NULL;
+			wait_time = remaining;
+			wait_time_ptr = &wait_time;
+			start_ns = zend_hrtime();
 		}
 
-		select_result = select(fd + 1, &read_fds, NULL, NULL, tv_ptr);
+		select_result = select(fd + 1, &read_fds, NULL, NULL, wait_time_ptr);
 		if (select_result > 0) {
 			break;
 		}
@@ -965,6 +1059,13 @@ static int php_io_terminal_read_byte(
 				return PHP_IO_TERMINAL_READ_RESIZE;
 			}
 #endif
+			if (timeout != NULL) {
+				zend_hrtime_t elapsed_ns = zend_hrtime() - start_ns;
+				if (UNEXPECTED(elapsed_ns == 0)
+					|| !php_io_terminal_timeval_subtract_elapsed(&remaining, elapsed_ns)) {
+					return 0;
+				}
+			}
 			continue;
 		}
 
@@ -1042,7 +1143,7 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 	const struct timeval *sequence_timeout
 )
 {
-	unsigned char seq[16];
+	unsigned char seq[32];
 	size_t seq_len = 0;
 	int read_result;
 
@@ -1055,70 +1156,48 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 	seq_len++;
 
 	if (seq[1] == '[') {
-		read_result = php_io_terminal_read_byte(fd, stream, &seq[seq_len], sequence_timeout, false, NULL);
-		if (read_result != 1) {
-			return zend_string_init((const char *) seq, seq_len, false);
-		}
-		seq_len++;
+		while (seq_len < sizeof(seq)) {
+			unsigned char next;
 
-		switch (seq[2]) {
-			case 'A': return zend_string_init("up", sizeof("up") - 1, false);
-			case 'B': return zend_string_init("down", sizeof("down") - 1, false);
-			case 'C': return zend_string_init("right", sizeof("right") - 1, false);
-			case 'D': return zend_string_init("left", sizeof("left") - 1, false);
-			case 'H': return zend_string_init("home", sizeof("home") - 1, false);
-			case 'F': return zend_string_init("end", sizeof("end") - 1, false);
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			{
-				unsigned char next;
-				read_result = php_io_terminal_read_byte(fd, stream, &next, sequence_timeout, false, NULL);
-				if (read_result == 1) {
-					seq[seq_len++] = next;
-					if (next == '~') {
-						switch (seq[2]) {
-							case '1': return zend_string_init("home", sizeof("home") - 1, false);
-							case '2': return zend_string_init("insert", sizeof("insert") - 1, false);
-							case '3': return zend_string_init("delete", sizeof("delete") - 1, false);
-							case '4': return zend_string_init("end", sizeof("end") - 1, false);
-							case '5': return zend_string_init("pageup", sizeof("pageup") - 1, false);
-							case '6': return zend_string_init("pagedown", sizeof("pagedown") - 1, false);
-						}
-					} else if (seq[2] == '1' || seq[2] == '2') {
-						unsigned char terminator;
-						read_result = php_io_terminal_read_byte(fd, stream, &terminator, sequence_timeout, false, NULL);
-						if (read_result == 1 && terminator == '~') {
-							seq[seq_len++] = terminator;
-							if (seq[2] == '1') {
-								switch (next) {
-									case '1': return zend_string_init("f1", sizeof("f1") - 1, false);
-									case '2': return zend_string_init("f2", sizeof("f2") - 1, false);
-									case '3': return zend_string_init("f3", sizeof("f3") - 1, false);
-									case '4': return zend_string_init("f4", sizeof("f4") - 1, false);
-									case '5': return zend_string_init("f5", sizeof("f5") - 1, false);
-									case '7': return zend_string_init("f6", sizeof("f6") - 1, false);
-									case '8': return zend_string_init("f7", sizeof("f7") - 1, false);
-									case '9': return zend_string_init("f8", sizeof("f8") - 1, false);
-								}
-							} else if (seq[2] == '2') {
-								switch (next) {
-									case '0': return zend_string_init("f9", sizeof("f9") - 1, false);
-									case '1': return zend_string_init("f10", sizeof("f10") - 1, false);
-									case '3': return zend_string_init("f11", sizeof("f11") - 1, false);
-									case '4': return zend_string_init("f12", sizeof("f12") - 1, false);
-								}
-							}
-						}
-					}
-				}
+			read_result = php_io_terminal_read_byte(fd, stream, &next, sequence_timeout, false, NULL);
+			if (read_result != 1) {
+				break;
+			}
+
+			seq[seq_len++] = next;
+			if (next >= 0x40 && next <= 0x7e) {
 				break;
 			}
 		}
-	} else if (seq[1] == 'O') {
+
+#define PHP_IO_TERMINAL_CSI_IS(literal) \
+	(seq_len == sizeof(literal) - 1 && memcmp(seq, literal, sizeof(literal) - 1) == 0)
+
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[A")) return zend_string_init("up", sizeof("up") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[B")) return zend_string_init("down", sizeof("down") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[C")) return zend_string_init("right", sizeof("right") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[D")) return zend_string_init("left", sizeof("left") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[H") || PHP_IO_TERMINAL_CSI_IS("\x1b[1~")) return zend_string_init("home", sizeof("home") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[F") || PHP_IO_TERMINAL_CSI_IS("\x1b[4~")) return zend_string_init("end", sizeof("end") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[3~")) return zend_string_init("delete", sizeof("delete") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[5~")) return zend_string_init("pageup", sizeof("pageup") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[6~")) return zend_string_init("pagedown", sizeof("pagedown") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[Z")) return zend_string_init("tab", sizeof("tab") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[P") || PHP_IO_TERMINAL_CSI_IS("\x1b[11~")) return zend_string_init("f1", sizeof("f1") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[Q") || PHP_IO_TERMINAL_CSI_IS("\x1b[12~")) return zend_string_init("f2", sizeof("f2") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[R") || PHP_IO_TERMINAL_CSI_IS("\x1b[13~")) return zend_string_init("f3", sizeof("f3") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[S") || PHP_IO_TERMINAL_CSI_IS("\x1b[14~")) return zend_string_init("f4", sizeof("f4") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[15~")) return zend_string_init("f5", sizeof("f5") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[17~")) return zend_string_init("f6", sizeof("f6") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[18~")) return zend_string_init("f7", sizeof("f7") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[19~")) return zend_string_init("f8", sizeof("f8") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[20~")) return zend_string_init("f9", sizeof("f9") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[21~")) return zend_string_init("f10", sizeof("f10") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[23~")) return zend_string_init("f11", sizeof("f11") - 1, false);
+		if (PHP_IO_TERMINAL_CSI_IS("\x1b[24~")) return zend_string_init("f12", sizeof("f12") - 1, false);
+
+#undef PHP_IO_TERMINAL_CSI_IS
+	} else if (seq[1] == 'O' && seq_len < sizeof(seq)) {
 		read_result = php_io_terminal_read_byte(fd, stream, &seq[seq_len], sequence_timeout, false, NULL);
 		if (read_result == 1) {
 			seq_len++;
@@ -1307,8 +1386,8 @@ static zend_string *php_io_terminal_read_stream_secret(php_io_terminal_native_st
 	}
 
 restore:
-	if (mode_changed) {
-		tcsetattr(fd, TCSANOW, &mode);
+	if (mode_changed && tcsetattr(fd, TCSANOW, &mode) != 0) {
+		success = false;
 	}
 
 	if (success) {
@@ -1627,7 +1706,14 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 		}
 	}
 
-	key = php_io_terminal_read_stream_key(stream.native_stream, stream.php_stream, wait_ms, &intern->pending_high_surrogate);
+	key = php_io_terminal_read_stream_key(
+		stream.native_stream,
+		stream.php_stream,
+		wait_ms,
+		&intern->pending_high_surrogate,
+		&intern->pending_key,
+		&intern->pending_key_high_surrogate
+	);
 #else
 	struct timeval timeout;
 	struct timeval sequence_timeout = {0, PHP_IO_TERMINAL_SEQUENCE_TIMEOUT_MS * 1000};
@@ -1684,7 +1770,16 @@ PHP_METHOD(Io_Terminal_Terminal, readSecret)
 		RETURN_THROWS();
 	}
 
+#ifdef PHP_WIN32
+	secret = php_io_terminal_read_stream_secret(
+		stream.native_stream,
+		stream.php_stream,
+		&intern->pending_key,
+		&intern->pending_key_high_surrogate
+	);
+#else
 	secret = php_io_terminal_read_stream_secret(stream.native_stream, stream.php_stream);
+#endif
 	if (secret != NULL) {
 		RETURN_STR(secret);
 	}
@@ -1739,10 +1834,6 @@ PHP_MSHUTDOWN_FUNCTION(terminal)
 PHP_RINIT_FUNCTION(terminal)
 {
 	php_io_terminal_active_mode_tokens = NULL;
-#ifdef PHP_WIN32
-	memset(&php_io_terminal_pending_key, 0, sizeof(php_io_terminal_pending_key));
-	php_io_terminal_pending_high_surrogate = 0;
-#endif
 	return SUCCESS;
 }
 
@@ -1751,7 +1842,11 @@ PHP_RSHUTDOWN_FUNCTION(terminal)
 	while (php_io_terminal_active_mode_tokens != NULL) {
 		php_io_terminal_mode_token_object *mode = php_io_terminal_active_mode_tokens;
 		if (mode->valid && memcmp(mode->saved.magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN) == 0) {
-			php_io_terminal_release_mode_token(mode);
+			if (!php_io_terminal_release_mode_token(mode)) {
+				php_io_terminal_untrack_mode_token(mode);
+				memset(&mode->saved, 0, sizeof(mode->saved));
+				mode->valid = false;
+			}
 		} else {
 			php_io_terminal_untrack_mode_token(mode);
 		}
