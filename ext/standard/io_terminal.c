@@ -1348,32 +1348,6 @@ static zend_object *terminal_key_enum_from_string(zend_string *key)
 	return NULL;
 }
 
-static bool terminal_size_from_environment(zend_long *columns, zend_long *rows)
-{
-	zend_string *lines = php_getenv("LINES", sizeof("LINES") - 1);
-	zend_string *cols = php_getenv("COLUMNS", sizeof("COLUMNS") - 1);
-	bool success = false;
-
-	if (lines != NULL && cols != NULL) {
-		zend_long r = ZEND_STRTOL(ZSTR_VAL(lines), NULL, 10);
-		zend_long c = ZEND_STRTOL(ZSTR_VAL(cols), NULL, 10);
-		if (r > 0 && c > 0) {
-			*rows = r;
-			*columns = c;
-			success = true;
-		}
-	}
-
-	if (lines != NULL) {
-		zend_string_release(lines);
-	}
-	if (cols != NULL) {
-		zend_string_release(cols);
-	}
-
-	return success;
-}
-
 static void terminal_create_terminal_size(zval *return_value, zend_long cols, zend_long rows)
 {
 	object_init_ex(return_value, terminal_terminal_size_ce);
@@ -1458,8 +1432,7 @@ PHP_METHOD(Io_Terminal_Terminal, getSize)
 		RETURN_THROWS();
 	}
 
-	if (!terminal_stream_size(stream.native_stream, &columns, &rows)
-		&& !terminal_size_from_environment(&columns, &rows)) {
+	if (!terminal_stream_size(stream.native_stream, &columns, &rows)) {
 		RETURN_FALSE;
 	}
 
