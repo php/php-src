@@ -1,5 +1,5 @@
 /* This is a generated file, edit basic_functions.stub.php instead.
- * Stub hash: b67e9418e158d5726b6a54d446b816264c747116
+ * Stub hash: 9e08e1c2517576dbce825322fe93cbce3054f23e
  * Has decl header: yes */
 
 #include "zend_attributes.h"
@@ -3208,8 +3208,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(strtok, arginfo_strtok)
 	ZEND_RAW_FENTRY("strtoupper", zif_strtoupper, arginfo_strtoupper, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtoupper, NULL)
 	ZEND_RAW_FENTRY("strtolower", zif_strtolower, arginfo_strtolower, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtolower, NULL)
-	ZEND_FE(str_increment, arginfo_str_increment)
-	ZEND_FE(str_decrement, arginfo_str_decrement)
+	ZEND_RAW_FENTRY("str_increment", zif_str_increment, arginfo_str_increment, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("str_decrement", zif_str_decrement, arginfo_str_decrement, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(basename, arginfo_basename)
 	ZEND_RAW_FENTRY("dirname", zif_dirname, arginfo_dirname, 0, frameless_function_infos_dirname, NULL)
 	ZEND_FE(pathinfo, arginfo_pathinfo)
