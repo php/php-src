@@ -273,6 +273,7 @@ struct _zend_executor_globals {
 
 	uint32_t           ht_iterators_count;     /* number of allocated slots */
 	uint32_t           ht_iterators_used;      /* number of used slots */
+	uint32_t           ht_iterators_free_hint; /* no free slot below this one */
 	HashTableIterator *ht_iterators;
 	HashTableIterator  ht_iterators_slots[16];
 
