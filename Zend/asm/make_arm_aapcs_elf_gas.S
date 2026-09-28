@@ -48,7 +48,7 @@
 make_fcontext:
     @ shift address in A1 to lower 16 byte boundary
 
-    #if __ARM_ARCH >= 7
+    #if !defined(__ARM_ARCH_6M__)
     bic  a1, a1, #15
     #else
     lsrs	a1, a1, #4
@@ -56,7 +56,7 @@ make_fcontext:
     #endif
 
     @ reserve space for context-data on context-stack
-    #if __ARM_ARCH >= 7
+    #if !defined(__ARM_ARCH_6M__)
     sub  a1, a1, #124
     #else
     subs  a1, #124
@@ -66,7 +66,7 @@ make_fcontext:
     str  a3, [a1, #104]
 
     @ compute address of returned transfer_t
-    #if __ARM_ARCH >= 7
+    #if !defined(__ARM_ARCH_6M__)
     add  a2, a1, #108
     #else
     mov  a2, a1
@@ -77,7 +77,7 @@ make_fcontext:
 
 
     @ compute abs address of label finish
-    #if __ARM_ARCH >= 7
+    #if !defined(__ARM_ARCH_6M__)
     adr  a2, finish
     #else
     ldr  a2, =finish
@@ -93,7 +93,7 @@ make_fcontext:
 
 finish:
     @ exit code is zero
-    #if __ARM_ARCH >=7
+    #if !defined(__ARM_ARCH_6M__)
     mov  a1, #0
     #else
     movs	r3, #0
