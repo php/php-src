@@ -79,13 +79,18 @@ try {
 }
 var_dump($t1->restoreMode($m1));
 
-// Test 4: Stale token after terminal destruction
+// Test 4: Token survives Terminal destruction when held externally
 $tTemp = Terminal::fromStreams($pipes[0]);
 $mTemp = $tTemp->enableRawMode();
-unset($tTemp); // releases active mode token
+unset($tTemp); // Drops Terminal reference, but $mTemp remains active
+
+// $mTemp is still active and can be restored through another Terminal on the same device
+var_dump($t1->restoreMode($mTemp));
+
+// After restoration, the token is consumed; reusing it throws ValueError
 try {
     $t1->restoreMode($mTemp);
-    echo "FAIL: stale token after destruction accepted\n";
+    echo "FAIL: stale token after restoration accepted\n";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
@@ -110,9 +115,19 @@ $m2 = $t2->enableRawMode();
 var_dump($t2->restoreMode($m2));
 var_dump($t1->restoreMode($m1));
 
+// Test 7: Destroying the final externally-held token restores canonical mode
+$tLive = Terminal::fromStreams($pipes[0]);
+$mHeld = $tLive->enableRawMode();
+unset($tLive); // Terminal dropped; $mHeld keeps raw mode active
+unset($mHeld); // Final token destroyed; ModeToken destructor restores canonical mode
+
+// Terminal is back in canonical mode; further restore returns false
+$tVerify = Terminal::fromStreams($pipes[0]);
+var_dump($tVerify->restoreMode());
+
 fwrite($pipes[0], "exit\n");
 fwrite($pipes2[0], "exit\n");
-unset($t1, $t2, $tUnrelated);
+unset($t1, $t2, $tUnrelated, $tVerify);
 foreach ($pipes as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
 }
@@ -128,10 +143,12 @@ bool(true)
 bool(true)
 ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
 bool(true)
-ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token returned by Io\Terminal\Terminal::enableRawMode()
+bool(true)
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(false)

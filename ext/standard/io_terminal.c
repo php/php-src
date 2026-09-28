@@ -44,8 +44,6 @@
 # include <sys/ioctl.h>
 #endif
 
-#define PHP_IO_TERMINAL_MODE_TOKEN_MAGIC "PHPTTY1"
-#define PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN (sizeof(PHP_IO_TERMINAL_MODE_TOKEN_MAGIC) - 1)
 #define PHP_IO_TERMINAL_SEQUENCE_TIMEOUT_MS 25
 #if SIZEOF_TIME_T < 8
 # define PHP_IO_TERMINAL_TIME_T_MAX INT32_MAX
@@ -55,8 +53,10 @@
 
 #ifdef PHP_WIN32
 typedef HANDLE php_io_terminal_native_stream;
+# define PHP_IO_TERMINAL_INVALID_NATIVE_STREAM INVALID_HANDLE_VALUE
 #else
 typedef int php_io_terminal_native_stream;
+# define PHP_IO_TERMINAL_INVALID_NATIVE_STREAM (-1)
 
 typedef struct php_io_terminal_utf8_pending {
 	unsigned char bytes[4];
@@ -79,30 +79,30 @@ typedef struct php_io_terminal_identity {
 } php_io_terminal_identity;
 #endif
 
-typedef struct php_io_terminal_saved_mode {
-	char magic[PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN];
-	php_io_terminal_native_stream stream;
-#ifdef PHP_WIN32
-	DWORD mode;
-#else
-	struct termios mode;
-#endif
+typedef struct php_io_terminal_shared_mode {
 	php_io_terminal_identity identity;
-} php_io_terminal_saved_mode;
+	php_io_terminal_native_stream restore_stream;
+#ifdef PHP_WIN32
+	DWORD saved_mode;
+#else
+	struct termios saved_mode;
+#endif
+	uint32_t lease_count;
+	struct php_io_terminal_shared_mode *prev;
+	struct php_io_terminal_shared_mode *next;
+} php_io_terminal_shared_mode;
 
 typedef struct php_io_terminal_mode_token_object {
-	php_io_terminal_saved_mode saved;
-	zval stream_resource;
-	struct php_io_terminal_mode_token_object *active_prev;
-	struct php_io_terminal_mode_token_object *active_next;
+	php_io_terminal_shared_mode *shared;
 	bool valid;
-	bool tracked;
 	zend_object std;
 } php_io_terminal_mode_token_object;
 
 typedef struct php_io_terminal_object {
 	zval input_stream_val;
 	zval output_stream_val;
+	php_io_terminal_identity identity;
+	bool has_identity;
 	zend_object *active_mode_token;
 	zend_long last_cols;
 	zend_long last_rows;
@@ -131,7 +131,7 @@ static zend_class_entry *php_io_terminal_mode_token_ce;
 static zend_class_entry *php_io_terminal_terminal_ce;
 static zend_object_handlers php_io_terminal_mode_token_handlers;
 static zend_object_handlers php_io_terminal_object_handlers;
-ZEND_TLS php_io_terminal_mode_token_object *php_io_terminal_active_mode_tokens;
+ZEND_TLS php_io_terminal_shared_mode *php_io_terminal_active_shared_modes;
 
 #if !defined(PHP_WIN32)
 # if defined(HAVE_PTSNAME_R) || defined(_GNU_SOURCE) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
@@ -267,6 +267,19 @@ static bool php_io_terminal_native_stream_is_valid(php_io_terminal_native_stream
 #endif
 }
 
+static bool php_io_terminal_native_stream_is_tty(php_io_terminal_native_stream stream)
+{
+	if (!php_io_terminal_native_stream_is_valid(stream)) {
+		return false;
+	}
+#ifdef PHP_WIN32
+	DWORD mode;
+	return GetConsoleMode(stream, &mode) != 0;
+#else
+	return isatty(stream) == 1;
+#endif
+}
+
 #ifdef PHP_WIN32
 static bool php_io_terminal_get_identity(php_io_terminal_native_stream handle, php_io_terminal_identity *identity)
 {
@@ -397,160 +410,164 @@ static bool php_io_terminal_identities_match(const php_io_terminal_identity *fir
 }
 #endif
 
-static bool php_io_terminal_mode_streams_match(const php_io_terminal_saved_mode *first, const php_io_terminal_saved_mode *second)
+#ifdef PHP_WIN32
+static php_io_terminal_native_stream php_io_terminal_dup_stream(php_io_terminal_native_stream handle)
 {
-	return php_io_terminal_identities_match(&first->identity, &second->identity);
+	HANDLE current_process = GetCurrentProcess();
+	HANDLE new_handle = INVALID_HANDLE_VALUE;
+
+	if (DuplicateHandle(current_process, handle, current_process, &new_handle, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
+		return new_handle;
+	}
+
+	new_handle = CreateFileW(
+		L"CONIN$",
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL,
+		OPEN_EXISTING,
+		0,
+		NULL
+	);
+
+	if (new_handle != INVALID_HANDLE_VALUE) {
+		return new_handle;
+	}
+
+	return INVALID_HANDLE_VALUE;
 }
 
-static bool php_io_terminal_mode_token_stream_is_valid(const php_io_terminal_mode_token_object *mode)
+static void php_io_terminal_close_native_stream(php_io_terminal_native_stream stream)
 {
-	php_io_terminal_identity current_identity;
+	if (stream != INVALID_HANDLE_VALUE && stream != NULL) {
+		CloseHandle(stream);
+	}
+}
+#else
+static php_io_terminal_native_stream php_io_terminal_dup_stream(php_io_terminal_native_stream fd)
+{
+	int new_fd = -1;
 
-	if (!php_io_terminal_native_stream_is_valid(mode->saved.stream)) {
-		return false;
+#if defined(F_DUPFD_CLOEXEC)
+	new_fd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
+	if (new_fd >= 0) {
+		return new_fd;
+	}
+#endif
+
+	new_fd = dup(fd);
+	if (new_fd >= 0) {
+#if defined(FD_CLOEXEC)
+		int flags = fcntl(new_fd, F_GETFD);
+		if (flags >= 0) {
+			fcntl(new_fd, F_SETFD, flags | FD_CLOEXEC);
+		}
+#endif
+		return new_fd;
 	}
 
-	if (!php_io_terminal_get_identity(mode->saved.stream, &current_identity)) {
-		return false;
-	}
-
-	if (!php_io_terminal_identities_match(&mode->saved.identity, &current_identity)) {
-		return false;
-	}
-
-	if (!Z_ISUNDEF(mode->stream_resource)) {
-		php_stream *stream;
-		php_io_terminal_native_stream native_stream;
-		php_io_terminal_identity res_identity;
-
-		if (Z_TYPE(mode->stream_resource) != IS_RESOURCE) {
-			return false;
-		}
-
-		stream = (php_stream *) zend_fetch_resource2(
-			Z_RES(mode->stream_resource),
-			NULL,
-			php_file_le_stream(),
-			php_file_le_pstream()
-		);
-		if (stream == NULL) {
-			return false;
-		}
-
-		native_stream = php_io_terminal_native_stream_from_php_stream(stream);
-		if (!php_io_terminal_native_stream_is_valid(native_stream)) {
-			return false;
-		}
-
-		if (!php_io_terminal_get_identity(native_stream, &res_identity)) {
-			return false;
-		}
-
-		if (!php_io_terminal_identities_match(&mode->saved.identity, &res_identity)) {
-			return false;
-		}
-	}
-
-	return true;
+	return -1;
 }
 
-static bool php_io_terminal_restore_stream_mode(const php_io_terminal_saved_mode *saved)
+static void php_io_terminal_close_native_stream(php_io_terminal_native_stream stream)
 {
-	if (!php_io_terminal_native_stream_is_valid(saved->stream)) {
+	if (stream >= 0) {
+		close(stream);
+	}
+}
+#endif
+
+static php_io_terminal_shared_mode *php_io_terminal_find_shared_mode(const php_io_terminal_identity *identity)
+{
+	php_io_terminal_shared_mode *curr = php_io_terminal_active_shared_modes;
+	while (curr != NULL) {
+		if (php_io_terminal_identities_match(&curr->identity, identity)) {
+			return curr;
+		}
+		curr = curr->next;
+	}
+	return NULL;
+}
+
+static bool php_io_terminal_restore_shared_mode(const php_io_terminal_shared_mode *shared)
+{
+	if (!php_io_terminal_native_stream_is_valid(shared->restore_stream)) {
 		return false;
 	}
 
 #ifdef PHP_WIN32
-	return SetConsoleMode(saved->stream, saved->mode) != 0;
+	return SetConsoleMode(shared->restore_stream, shared->saved_mode) != 0;
 #else
-	return tcsetattr(saved->stream, TCSANOW, &saved->mode) == 0;
+	return tcsetattr(shared->restore_stream, TCSANOW, &shared->saved_mode) == 0;
 #endif
 }
 
-static void php_io_terminal_untrack_mode_token(php_io_terminal_mode_token_object *mode)
+static void php_io_terminal_destroy_shared_mode(php_io_terminal_shared_mode *shared)
 {
-	if (!mode->tracked) {
-		return;
-	}
-
-	if (mode->active_prev != NULL) {
-		mode->active_prev->active_next = mode->active_next;
+	if (shared->prev != NULL) {
+		shared->prev->next = shared->next;
 	} else {
-		php_io_terminal_active_mode_tokens = mode->active_next;
+		php_io_terminal_active_shared_modes = shared->next;
 	}
 
-	if (mode->active_next != NULL) {
-		mode->active_next->active_prev = mode->active_prev;
+	if (shared->next != NULL) {
+		shared->next->prev = shared->prev;
 	}
 
-	mode->active_prev = NULL;
-	mode->active_next = NULL;
-	mode->tracked = false;
+	shared->prev = NULL;
+	shared->next = NULL;
+
+	if (php_io_terminal_native_stream_is_valid(shared->restore_stream)) {
+		php_io_terminal_close_native_stream(shared->restore_stream);
+		shared->restore_stream = PHP_IO_TERMINAL_INVALID_NATIVE_STREAM;
+	}
+
+	efree(shared);
 }
 
-static void php_io_terminal_track_mode_token(php_io_terminal_mode_token_object *mode)
+static bool php_io_terminal_release_token_lease(php_io_terminal_mode_token_object *token_obj, const char **error_msg)
 {
-	mode->active_prev = NULL;
-	mode->active_next = php_io_terminal_active_mode_tokens;
-	if (php_io_terminal_active_mode_tokens != NULL) {
-		php_io_terminal_active_mode_tokens->active_prev = mode;
-	}
-	php_io_terminal_active_mode_tokens = mode;
-	mode->tracked = true;
-}
+	php_io_terminal_shared_mode *shared = token_obj->shared;
 
-static bool php_io_terminal_release_mode_token(php_io_terminal_mode_token_object *mode)
-{
-	php_io_terminal_mode_token_object *candidate = php_io_terminal_active_mode_tokens;
-	php_io_terminal_mode_token_object *newer = NULL;
-	bool restored;
-
-	while (candidate != NULL && candidate != mode) {
-		if (candidate->valid && php_io_terminal_mode_streams_match(&candidate->saved, &mode->saved)) {
-			newer = candidate;
+	if (!token_obj->valid || shared == NULL) {
+		if (error_msg != NULL) {
+			*error_msg = "Terminal mode token is not active";
 		}
-		candidate = candidate->active_next;
-	}
-
-	if (candidate != mode) {
-		newer = NULL;
-	}
-
-	if (newer != NULL) {
-		newer->saved.mode = mode->saved.mode;
-		php_io_terminal_untrack_mode_token(mode);
-		memset(&mode->saved, 0, sizeof(mode->saved));
-		mode->valid = false;
-		return true;
-	}
-
-	if (!php_io_terminal_mode_token_stream_is_valid(mode)) {
 		return false;
 	}
 
-	restored = php_io_terminal_restore_stream_mode(&mode->saved);
-	if (restored) {
-		php_io_terminal_untrack_mode_token(mode);
-		memset(&mode->saved, 0, sizeof(mode->saved));
-		mode->valid = false;
+	if (shared->lease_count > 1) {
+		shared->lease_count--;
+		token_obj->valid = false;
+		token_obj->shared = NULL;
+		return true;
 	}
 
-	return restored;
+	if (!php_io_terminal_restore_shared_mode(shared)) {
+		if (error_msg != NULL) {
+			*error_msg = "Failed to restore terminal mode";
+		}
+		return false;
+	}
+
+	token_obj->valid = false;
+	token_obj->shared = NULL;
+
+	php_io_terminal_destroy_shared_mode(shared);
+	return true;
 }
 
 static void php_io_terminal_mode_token_free_obj(zend_object *object)
 {
 	php_io_terminal_mode_token_object *intern = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZOBJ(object);
 
-	if (intern->valid && memcmp(intern->saved.magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN) == 0) {
-		php_io_terminal_release_mode_token(intern);
+	if (intern->valid && intern->shared != NULL) {
+		const char *err = NULL;
+		if (!php_io_terminal_release_token_lease(intern, &err)) {
+			intern->valid = false;
+			intern->shared = NULL;
+		}
 	}
-	php_io_terminal_untrack_mode_token(intern);
-
-	zval_ptr_dtor(&intern->stream_resource);
-
-	memset(&intern->saved, 0, sizeof(intern->saved));
-	intern->valid = false;
 
 	zend_object_std_dtor(&intern->std);
 }
@@ -559,12 +576,8 @@ static zend_object *php_io_terminal_mode_token_create_object(zend_class_entry *c
 {
 	php_io_terminal_mode_token_object *intern = zend_object_alloc(sizeof(*intern), ce);
 
-	memset(&intern->saved, 0, sizeof(intern->saved));
-	ZVAL_UNDEF(&intern->stream_resource);
-	intern->active_prev = NULL;
-	intern->active_next = NULL;
+	intern->shared = NULL;
 	intern->valid = false;
-	intern->tracked = false;
 
 	zend_object_std_init(&intern->std, ce);
 	object_properties_init(&intern->std, ce);
@@ -573,18 +586,14 @@ static zend_object *php_io_terminal_mode_token_create_object(zend_class_entry *c
 	return &intern->std;
 }
 
-static void php_io_terminal_create_mode_token(zval *return_value, const php_io_terminal_saved_mode *saved, zval *stream_resource)
+static void php_io_terminal_create_mode_token(zval *return_value, php_io_terminal_shared_mode *shared)
 {
 	php_io_terminal_mode_token_object *intern;
 
 	object_init_ex(return_value, php_io_terminal_mode_token_ce);
 	intern = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZV(return_value);
-	intern->saved = *saved;
-	if (stream_resource != NULL && !Z_ISUNDEF_P(stream_resource)) {
-		ZVAL_COPY(&intern->stream_resource, stream_resource);
-	}
+	intern->shared = shared;
 	intern->valid = true;
-	php_io_terminal_track_mode_token(intern);
 }
 
 static void php_io_terminal_free_obj(zend_object *object)
@@ -592,10 +601,6 @@ static void php_io_terminal_free_obj(zend_object *object)
 	php_io_terminal_object *intern = PHP_IO_TERMINAL_OBJ_FROM_ZOBJ(object);
 
 	if (intern->active_mode_token != NULL) {
-		php_io_terminal_mode_token_object *mode = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZOBJ(intern->active_mode_token);
-		if (mode->valid && memcmp(mode->saved.magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN) == 0) {
-			php_io_terminal_release_mode_token(mode);
-		}
 		OBJ_RELEASE(intern->active_mode_token);
 		intern->active_mode_token = NULL;
 	}
@@ -612,10 +617,13 @@ static zend_object *php_io_terminal_create_object(zend_class_entry *ce)
 
 	ZVAL_UNDEF(&intern->input_stream_val);
 	ZVAL_UNDEF(&intern->output_stream_val);
+	memset(&intern->identity, 0, sizeof(intern->identity));
+	intern->has_identity = false;
 	intern->active_mode_token = NULL;
 	intern->last_cols = 0;
 	intern->last_rows = 0;
 	intern->has_last_size = false;
+
 #ifdef PHP_WIN32
 	memset(&intern->pending_key, 0, sizeof(intern->pending_key));
 	intern->pending_key_high_surrogate = 0;
@@ -630,6 +638,7 @@ static zend_object *php_io_terminal_create_object(zend_class_entry *ce)
 
 	return &intern->std;
 }
+
 
 static php_io_terminal_native_stream php_io_terminal_native_stream_from_php_stream(php_stream *stream)
 {
@@ -662,9 +671,10 @@ static php_io_terminal_native_stream php_io_terminal_native_stream_from_php_stre
 #endif
 }
 
-static bool php_io_terminal_stream_target_init(
+static bool php_io_terminal_stream_target_init_ex(
 	zval *stream_arg,
 	bool is_input,
+	bool quiet,
 	php_io_terminal_stream_target *target
 )
 {
@@ -683,7 +693,7 @@ static bool php_io_terminal_stream_target_init(
 	if (Z_TYPE_P(stream_arg) == IS_RESOURCE) {
 		target->php_stream = (php_stream *) zend_fetch_resource2(
 			Z_RES_P(stream_arg),
-			"stream",
+			quiet ? NULL : "stream",
 			php_file_le_stream(),
 			php_file_le_pstream()
 		);
@@ -700,77 +710,61 @@ static bool php_io_terminal_stream_target_init(
 	return false;
 }
 
-typedef enum php_io_terminal_match_result {
-	PHP_IO_TERMINAL_MATCH_OK,
-	PHP_IO_TERMINAL_MATCH_MISMATCH,
-	PHP_IO_TERMINAL_MATCH_ERROR,
-} php_io_terminal_match_result;
-
-static php_io_terminal_match_result php_io_terminal_terminal_matches_saved_mode(
-	php_io_terminal_object *intern,
-	const php_io_terminal_saved_mode *saved
+static zend_always_inline bool php_io_terminal_stream_target_init(
+	zval *stream_arg,
+	bool is_input,
+	php_io_terminal_stream_target *target
 )
 {
-	php_io_terminal_stream_target stream;
-	php_io_terminal_identity current_identity;
-
-	if (!php_io_terminal_stream_target_init(&intern->input_stream_val, true, &stream)) {
-		if (!EG(exception)) {
-			zend_throw_exception(php_io_terminal_exception_ce, "Cannot restore terminal mode: terminal stream is closed or invalid", 0);
-		}
-		return PHP_IO_TERMINAL_MATCH_ERROR;
-	}
-
-	if (!php_io_terminal_native_stream_is_valid(stream.native_stream)) {
-		if (!EG(exception)) {
-			zend_throw_exception(php_io_terminal_exception_ce, "Cannot restore terminal mode: terminal stream is invalid", 0);
-		}
-		return PHP_IO_TERMINAL_MATCH_ERROR;
-	}
-
-	if (!php_io_terminal_get_identity(stream.native_stream, &current_identity)) {
-		if (!EG(exception)) {
-			zend_throw_exception(php_io_terminal_exception_ce, "Failed to inspect terminal device", 0);
-		}
-		return PHP_IO_TERMINAL_MATCH_ERROR;
-	}
-
-	if (php_io_terminal_identities_match(&current_identity, &saved->identity)) {
-		return PHP_IO_TERMINAL_MATCH_OK;
-	}
-
-	return PHP_IO_TERMINAL_MATCH_MISMATCH;
+	return php_io_terminal_stream_target_init_ex(stream_arg, is_input, false, target);
 }
 
 #ifdef PHP_WIN32
 static DWORD php_io_terminal_make_raw_mode(DWORD mode)
 {
-	return (mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT));
+	return (mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT)) | ENABLE_WINDOW_INPUT;
 }
 
-static bool php_io_terminal_enable_stream_raw_mode(php_io_terminal_native_stream handle, php_io_terminal_saved_mode *saved)
+static php_io_terminal_shared_mode *php_io_terminal_acquire_raw_mode(
+	php_io_terminal_native_stream handle,
+	const php_io_terminal_identity *identity
+)
 {
+	php_io_terminal_shared_mode *shared = php_io_terminal_find_shared_mode(identity);
+	if (shared != NULL) {
+		shared->lease_count++;
+		return shared;
+	}
+
 	DWORD mode;
-	DWORD raw_mode;
-
 	if (!php_io_terminal_native_stream_is_valid(handle) || !GetConsoleMode(handle, &mode)) {
-		return false;
+		return NULL;
 	}
 
-	if (!php_io_terminal_get_identity(handle, &saved->identity)) {
-		return false;
+	php_io_terminal_native_stream restore_stream = php_io_terminal_dup_stream(handle);
+	if (!php_io_terminal_native_stream_is_valid(restore_stream)) {
+		return NULL;
 	}
 
-	memcpy(saved->magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN);
-	saved->stream = handle;
-	saved->mode = mode;
-
-	raw_mode = php_io_terminal_make_raw_mode(mode) | ENABLE_WINDOW_INPUT;
+	DWORD raw_mode = php_io_terminal_make_raw_mode(mode);
 	if (!SetConsoleMode(handle, raw_mode)) {
-		return false;
+		php_io_terminal_close_native_stream(restore_stream);
+		return NULL;
 	}
 
-	return true;
+	shared = emalloc(sizeof(*shared));
+	shared->identity = *identity;
+	shared->restore_stream = restore_stream;
+	shared->saved_mode = mode;
+	shared->lease_count = 1;
+	shared->prev = NULL;
+	shared->next = php_io_terminal_active_shared_modes;
+	if (php_io_terminal_active_shared_modes != NULL) {
+		php_io_terminal_active_shared_modes->prev = shared;
+	}
+	php_io_terminal_active_shared_modes = shared;
+
+	return shared;
 }
 
 static bool php_io_terminal_stream_size(php_io_terminal_native_stream handle, zend_long *columns, zend_long *rows)
@@ -1135,31 +1129,48 @@ static void php_io_terminal_make_raw_mode(struct termios *mode)
 	mode->c_cc[VTIME] = 0;
 }
 
-static bool php_io_terminal_enable_stream_raw_mode(php_io_terminal_native_stream fd, php_io_terminal_saved_mode *saved)
+static php_io_terminal_shared_mode *php_io_terminal_acquire_raw_mode(
+	php_io_terminal_native_stream fd,
+	const php_io_terminal_identity *identity
+)
 {
+	php_io_terminal_shared_mode *shared = php_io_terminal_find_shared_mode(identity);
+	if (shared != NULL) {
+		shared->lease_count++;
+		return shared;
+	}
+
 	struct termios mode;
-	struct termios raw_mode;
-
 	if (!php_io_terminal_native_stream_is_valid(fd) || isatty(fd) != 1 || tcgetattr(fd, &mode) != 0) {
-		return false;
+		return NULL;
 	}
 
-	if (!php_io_terminal_get_identity(fd, &saved->identity)) {
-		return false;
+	php_io_terminal_native_stream restore_stream = php_io_terminal_dup_stream(fd);
+	if (!php_io_terminal_native_stream_is_valid(restore_stream)) {
+		return NULL;
 	}
 
-	memcpy(saved->magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN);
-	saved->stream = fd;
-	saved->mode = mode;
-
-	raw_mode = mode;
+	struct termios raw_mode = mode;
 	php_io_terminal_make_raw_mode(&raw_mode);
 
 	if (tcsetattr(fd, TCSANOW, &raw_mode) != 0) {
-		return false;
+		php_io_terminal_close_native_stream(restore_stream);
+		return NULL;
 	}
 
-	return true;
+	shared = emalloc(sizeof(*shared));
+	shared->identity = *identity;
+	shared->restore_stream = restore_stream;
+	shared->saved_mode = mode;
+	shared->lease_count = 1;
+	shared->prev = NULL;
+	shared->next = php_io_terminal_active_shared_modes;
+	if (php_io_terminal_active_shared_modes != NULL) {
+		php_io_terminal_active_shared_modes->prev = shared;
+	}
+	php_io_terminal_active_shared_modes = shared;
+
+	return shared;
 }
 
 static bool php_io_terminal_stream_size(php_io_terminal_native_stream fd, zend_long *columns, zend_long *rows)
@@ -1861,9 +1872,18 @@ PHP_METHOD(Io_Terminal_Terminal, __construct)
 
 PHP_METHOD(Io_Terminal_Terminal, fromStdio)
 {
+	php_io_terminal_object *intern;
+	php_io_terminal_stream_target target;
+
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	object_init_ex(return_value, php_io_terminal_terminal_ce);
+	intern = PHP_IO_TERMINAL_OBJ_FROM_ZV(return_value);
+
+	if (php_io_terminal_stream_target_init(NULL, true, &target)
+		&& php_io_terminal_native_stream_is_valid(target.native_stream)) {
+		intern->has_identity = php_io_terminal_get_identity(target.native_stream, &intern->identity);
+	}
 }
 
 PHP_METHOD(Io_Terminal_Terminal, fromStreams)
@@ -1905,6 +1925,10 @@ PHP_METHOD(Io_Terminal_Terminal, fromStreams)
 	} else {
 		ZVAL_COPY(&intern->output_stream_val, input_arg);
 	}
+
+	if (php_io_terminal_native_stream_is_valid(target.native_stream)) {
+		intern->has_identity = php_io_terminal_get_identity(target.native_stream, &intern->identity);
+	}
 }
 
 PHP_METHOD(Io_Terminal_Terminal, getSize)
@@ -1937,32 +1961,41 @@ PHP_METHOD(Io_Terminal_Terminal, enableRawMode)
 {
 	php_io_terminal_object *intern;
 	php_io_terminal_stream_target stream;
-	php_io_terminal_saved_mode saved;
+	php_io_terminal_identity identity;
+	php_io_terminal_shared_mode *shared;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = PHP_IO_TERMINAL_OBJ_FROM_ZV(ZEND_THIS);
 
-	if (intern->active_mode_token != NULL) {
-		php_io_terminal_mode_token_object *mode = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZOBJ(intern->active_mode_token);
-		if (mode->valid) {
-			RETURN_OBJ_COPY(intern->active_mode_token);
-		}
-		OBJ_RELEASE(intern->active_mode_token);
-		intern->active_mode_token = NULL;
-	}
-
 	if (!php_io_terminal_stream_target_init(&intern->input_stream_val, true, &stream)) {
 		RETURN_THROWS();
 	}
 
-	if (!php_io_terminal_enable_stream_raw_mode(stream.native_stream, &saved)) {
+	if (!php_io_terminal_native_stream_is_valid(stream.native_stream) || !php_io_terminal_native_stream_is_tty(stream.native_stream)) {
 		zend_throw_exception(php_io_terminal_exception_ce, "Failed to enable terminal raw mode", 0);
 		RETURN_THROWS();
 	}
 
-	php_io_terminal_create_mode_token(return_value, &saved, stream.stream_resource);
+	if (!php_io_terminal_get_identity(stream.native_stream, &identity)) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to enable terminal raw mode", 0);
+		RETURN_THROWS();
+	}
 
+	intern->identity = identity;
+	intern->has_identity = true;
+
+	shared = php_io_terminal_acquire_raw_mode(stream.native_stream, &identity);
+	if (shared == NULL) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to enable terminal raw mode", 0);
+		RETURN_THROWS();
+	}
+
+	php_io_terminal_create_mode_token(return_value, shared);
+
+	if (intern->active_mode_token != NULL) {
+		OBJ_RELEASE(intern->active_mode_token);
+	}
 	intern->active_mode_token = Z_OBJ_P(return_value);
 	GC_ADDREF(intern->active_mode_token);
 }
@@ -1981,25 +2014,36 @@ PHP_METHOD(Io_Terminal_Terminal, restoreMode)
 
 	if (mode_token != NULL && !Z_ISNULL_P(mode_token)) {
 		php_io_terminal_mode_token_object *mode = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZV(mode_token);
-		bool restored;
 
-		if (!mode->valid || memcmp(mode->saved.magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN) != 0) {
-			zend_argument_value_error(1, "must be an active terminal mode token returned by Io\\Terminal\\Terminal::enableRawMode()");
-			RETURN_THROWS();
-		}
-
-		php_io_terminal_match_result match = php_io_terminal_terminal_matches_saved_mode(intern, &mode->saved);
-		if (match == PHP_IO_TERMINAL_MATCH_ERROR) {
-			RETURN_THROWS();
-		}
-		if (match == PHP_IO_TERMINAL_MATCH_MISMATCH) {
+		if (!mode->valid || mode->shared == NULL) {
 			zend_argument_value_error(1, "must be an active terminal mode token belonging to this terminal");
 			RETURN_THROWS();
 		}
 
-		restored = php_io_terminal_release_mode_token(mode);
-		if (!restored) {
-			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore terminal mode", 0);
+		bool matches = false;
+		if (intern->active_mode_token != NULL && intern->active_mode_token == Z_OBJ_P(mode_token)) {
+			matches = true;
+		} else {
+			php_io_terminal_stream_target stream;
+			php_io_terminal_identity current_identity;
+
+			if (php_io_terminal_stream_target_init_ex(&intern->input_stream_val, true, true, &stream)
+				&& php_io_terminal_native_stream_is_valid(stream.native_stream)
+				&& php_io_terminal_get_identity(stream.native_stream, &current_identity)) {
+				matches = php_io_terminal_identities_match(&current_identity, &mode->shared->identity);
+			} else if (intern->has_identity) {
+				matches = php_io_terminal_identities_match(&intern->identity, &mode->shared->identity);
+			}
+		}
+
+		if (!matches) {
+			zend_argument_value_error(1, "must be an active terminal mode token belonging to this terminal");
+			RETURN_THROWS();
+		}
+
+		const char *err = NULL;
+		if (!php_io_terminal_release_token_lease(mode, &err)) {
+			zend_throw_exception(php_io_terminal_exception_ce, err != NULL ? err : "Failed to restore terminal mode", 0);
 			RETURN_THROWS();
 		}
 
@@ -2013,17 +2057,16 @@ PHP_METHOD(Io_Terminal_Terminal, restoreMode)
 
 	if (intern->active_mode_token != NULL) {
 		php_io_terminal_mode_token_object *mode = PHP_IO_TERMINAL_MODE_TOKEN_OBJ_FROM_ZOBJ(intern->active_mode_token);
-		bool restored;
 
-		if (!mode->valid || memcmp(mode->saved.magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN) != 0) {
+		if (!mode->valid || mode->shared == NULL) {
 			OBJ_RELEASE(intern->active_mode_token);
 			intern->active_mode_token = NULL;
 			RETURN_FALSE;
 		}
 
-		restored = php_io_terminal_release_mode_token(mode);
-		if (!restored) {
-			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore terminal mode", 0);
+		const char *err = NULL;
+		if (!php_io_terminal_release_token_lease(mode, &err)) {
+			zend_throw_exception(php_io_terminal_exception_ce, err != NULL ? err : "Failed to restore terminal mode", 0);
 			RETURN_THROWS();
 		}
 
@@ -2283,23 +2326,16 @@ PHP_MSHUTDOWN_FUNCTION(terminal)
 
 PHP_RINIT_FUNCTION(terminal)
 {
-	php_io_terminal_active_mode_tokens = NULL;
+	php_io_terminal_active_shared_modes = NULL;
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(terminal)
 {
-	while (php_io_terminal_active_mode_tokens != NULL) {
-		php_io_terminal_mode_token_object *mode = php_io_terminal_active_mode_tokens;
-		if (mode->valid && memcmp(mode->saved.magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN) == 0) {
-			if (!php_io_terminal_release_mode_token(mode)) {
-				php_io_terminal_untrack_mode_token(mode);
-				memset(&mode->saved, 0, sizeof(mode->saved));
-				mode->valid = false;
-			}
-		} else {
-			php_io_terminal_untrack_mode_token(mode);
-		}
+	while (php_io_terminal_active_shared_modes != NULL) {
+		php_io_terminal_shared_mode *shared = php_io_terminal_active_shared_modes;
+		php_io_terminal_restore_shared_mode(shared);
+		php_io_terminal_destroy_shared_mode(shared);
 	}
 	return SUCCESS;
 }

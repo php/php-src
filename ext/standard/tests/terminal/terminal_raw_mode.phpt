@@ -68,21 +68,30 @@ var_dump($token2 instanceof ModeToken);
 var_dump($terminal->restoreMode()); // Restores active token
 var_dump($terminal->restoreMode()); // Already restored -> returns false
 
-// Auto-restoration on Terminal object destruction
+// Auto-restoration on Terminal object destruction when token is unreferenced
 $terminal2 = Terminal::fromStreams($pipes[0]);
-$token3 = $terminal2->enableRawMode();
-var_dump($token3 instanceof ModeToken);
-unset($terminal2); // Terminal destructor releases active mode token
+$terminal2->enableRawMode();
+unset($terminal2); // Terminal destructor drops reference; ModeToken destructor restores mode
 
-// Restoring with the token from the destroyed terminal must throw ValueError
+// Token survives Terminal object destruction when held externally
+$terminal3 = Terminal::fromStreams($pipes[0]);
+$token3 = $terminal3->enableRawMode();
+var_dump($token3 instanceof ModeToken);
+unset($terminal3); // Drops Terminal reference, but $token3 is held externally
+
+// Restoring the externally held token through another Terminal on the same terminal succeeds
+var_dump($terminal->restoreMode($token3));
+
+// Once restored, reusing the token throws ValueError
 try {
     $terminal->restoreMode($token3);
-    echo "FAIL: token from destroyed terminal was accepted\n";
+    echo "FAIL: consumed token was accepted\n";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
-// Regression test: Failed no-argument restoreMode must not discard active token ownership
+// Closing the original PHP stream after enableRawMode() does NOT prevent successful restoration
+// because the shared record owns its own duplicated restoration descriptor
 $proc2 = proc_open(
     [PHP_BINARY, '-r', 'fgets(STDIN);'],
     [
@@ -92,36 +101,26 @@ $proc2 = proc_open(
     ],
     $pipes2,
 );
-$terminalFail = Terminal::fromStreams($pipes2[0]);
-$tokenFail = $terminalFail->enableRawMode();
-var_dump($tokenFail instanceof ModeToken);
+$terminalClosed = Terminal::fromStreams($pipes2[0]);
+$tokenClosed = $terminalClosed->enableRawMode();
+var_dump($tokenClosed instanceof ModeToken);
 
-// Close the underlying stream to force release_mode_token to fail
+// Close the underlying stream
 fclose($pipes2[0]);
 
+// Restoration succeeds via the record's owned descriptor
+var_dump($terminalClosed->restoreMode($tokenClosed));
+
+// Token is now consumed; reusing it throws ValueError
 try {
-    $terminalFail->restoreMode();
-    echo "FAIL: restoreMode on closed stream did not throw\n";
+    $terminalClosed->restoreMode($tokenClosed);
+    echo "FAIL: consumed token was accepted\n";
 } catch (Throwable $e) {
     echo $e::class, ": ", $e->getMessage(), PHP_EOL;
 }
 
-// A second call must attempt restoration again and throw TerminalException,
-// rather than returning false due to discarded token ownership.
-try {
-    $terminalFail->restoreMode();
-    echo "FAIL: second restoreMode did not throw\n";
-} catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
-}
-
-// Operational stream failure with explicit token must not be misreported as ValueError
-try {
-    $terminalFail->restoreMode($tokenFail);
-    echo "FAIL: restoreMode with token on closed stream did not throw\n";
-} catch (Throwable $e) {
-    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
-}
+// Further restoreMode() returns false
+var_dump($terminalClosed->restoreMode());
 
 proc_terminate($proc2);
 foreach ($pipes2 as $pipe) {
@@ -130,22 +129,23 @@ foreach ($pipes2 as $pipe) {
 proc_close($proc2);
 
 fwrite($pipes[0], "exit\n");
-unset($terminal, $token3, $terminalFail, $tokenFail);
+unset($terminal, $token3, $terminalClosed, $tokenClosed);
 foreach ($pipes as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
 }
 proc_close($proc);
 ?>
---EXPECTF--
+--EXPECT--
 enableRawMode: ModeToken
 bool(true)
-ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token returned by Io\Terminal\Terminal::enableRawMode()
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
 bool(true)
 bool(true)
 bool(false)
 bool(true)
-ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token returned by Io\Terminal\Terminal::enableRawMode()
 bool(true)
-Io\Terminal\TerminalException: Failed to restore terminal mode
-Io\Terminal\TerminalException: Failed to restore terminal mode
-TypeError: Io\Terminal\Terminal::restoreMode(): supplied resource is not a valid stream resource
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+bool(true)
+bool(true)
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+bool(false)
