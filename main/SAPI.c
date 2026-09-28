@@ -1089,12 +1089,6 @@ SAPI_API double sapi_get_request_time(void)
 	return SG(global_request_time);
 }
 
-SAPI_API void sapi_terminate_process(void) {
-	if (sapi_module.terminate_process) {
-		sapi_module.terminate_process();
-	}
-}
-
 SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg) /* {{{ */
 {
 	zval *return_value = (zval*)arg;

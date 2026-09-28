@@ -17,6 +17,7 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 - Removed zend_execute_scripts(). Manually call zend_execute_script() in a loop
   instead.
 - Removed ZEND_STATIC_ASSERT(). Use C11 static_assert() directly instead.
+- The sapi_terminate_process() function was removed.
 
 ========================
 2. Build system changes
@@ -40,3 +41,5 @@ PHP 8.7 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+- The terminate_process method has been removed.

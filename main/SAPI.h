@@ -230,7 +230,6 @@ SAPI_API int sapi_force_http_10(void);
 SAPI_API int sapi_get_target_uid(uid_t *);
 SAPI_API int sapi_get_target_gid(gid_t *);
 SAPI_API double sapi_get_request_time(void);
-SAPI_API void sapi_terminate_process(void);
 END_EXTERN_C()
 
 struct _sapi_module_struct {
@@ -260,7 +259,6 @@ struct _sapi_module_struct {
 	void (*register_server_variables)(zval *track_vars_array);
 	void (*log_message)(const char *message, int syslog_type_int);
 	zend_result (*get_request_time)(double *request_time);
-	void (*terminate_process)(void);
 
 	char *php_ini_path_override;
 
