@@ -148,6 +148,20 @@ static void php_io_terminal_resize_unlock(void)
 #endif
 }
 
+static zend_always_inline bool php_io_terminal_is_callable_handler(void (*handler)(int))
+{
+	if (handler == NULL) {
+		return false;
+	}
+	if (handler == SIG_DFL) {
+		return false;
+	}
+	if (handler == SIG_IGN) {
+		return false;
+	}
+	return true;
+}
+
 static void php_io_terminal_sigwinch_handler(int signo, siginfo_t *info, void *context)
 {
 	(void) signo;
@@ -157,12 +171,11 @@ static void php_io_terminal_sigwinch_handler(int signo, siginfo_t *info, void *c
 		: php_io_terminal_resize_generation + 1;
 
 	/* Forward to existing handler if present and not default/ignored */
-	void (*handler)(int) = php_io_terminal_previous_resize_action.sa_handler;
-	if (handler != NULL && handler != SIG_DFL && handler != SIG_IGN) {
+	if (php_io_terminal_is_callable_handler(php_io_terminal_previous_resize_action.sa_handler)) {
 		if (php_io_terminal_previous_resize_action.sa_flags & SA_SIGINFO) {
 			php_io_terminal_previous_resize_action.sa_sigaction(signo, info, context);
 		} else {
-			handler(signo);
+			php_io_terminal_previous_resize_action.sa_handler(signo);
 		}
 	}
 }
