@@ -479,8 +479,15 @@ static void address_info_free_obj(zend_object *object)
 
 /* Module registration */
 
+/* The poll handle interfaces are ext/standard's, so it starts first */
+static const zend_module_dep sockets_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	ZEND_MOD_END
+};
+
 zend_module_entry sockets_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	sockets_deps,
 	"sockets",
 	ext_functions,
 	PHP_MINIT(sockets),
