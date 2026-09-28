@@ -108,6 +108,7 @@ typedef struct {
 	char *tmp_host_buf;
 	size_t tmp_host_buf_len;
 #endif
+	int user_stream_recursion_depth;
 } php_file_globals;
 
 #ifdef ZTS
