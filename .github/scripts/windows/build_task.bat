@@ -29,11 +29,6 @@ if "%ASAN%" equ "1" set ADD_CONF=%ADD_CONF% --enable-sanitizer --enable-debug-pa
 if "%CLANG_TOOLSET%" equ "1" set ADD_CONF=%ADD_CONF% --with-toolset=clang
 if "%IOR_PREFIX%" neq "" set ADD_CONF=%ADD_CONF% --with-ior=%IOR_PREFIX%
 
-rem Temporary for the IO hooks proof of concept, see build_ior.bat
-call %~dp0build_ior.bat
-if %errorlevel% neq 0 exit /b 3
-set ADD_CONF=%ADD_CONF% --with-ior=%IOR_PREFIX%
-
 rem C4018: comparison: signed/unsigned mismatch
 rem C4146: unary minus operator applied to unsigned type
 rem C4244: type conversion, possible loss of data
