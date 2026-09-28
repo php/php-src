@@ -57,8 +57,8 @@ function context(string $name): mixed
 $scheduler = new Scheduler();
 Io\Hooks\set_hooks($scheduler);
 
-[$a, $feedA] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
-[$b, $feedB] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+[$a, $feedA] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+[$b, $feedB] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
 $sockets = ['a' => $a, 'b' => $b];
 
 $scheduler->spawn(function () use ($feedB) {

@@ -4,7 +4,7 @@ SocketPollHandle and SocketPollWeakHandle: polling a Socket, retired when it clo
 sockets
 --FILE--
 <?php
-socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $pair);
+socket_create_pair(PHP_OS_FAMILY === 'Windows' ? AF_INET : AF_UNIX, SOCK_STREAM, 0, $pair);
 [$a, $b] = $pair;
 
 $h = new SocketPollHandle($a);

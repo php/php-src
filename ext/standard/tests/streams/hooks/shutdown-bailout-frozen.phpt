@@ -25,6 +25,4 @@ eval('function strlen() {}');
 --EXPECTF--
 suspended
 
-Fatal error: Cannot redeclare function strlen() in %s : eval()'d code on line %d
-
-Warning: PHP Request Shutdown: Send of %d bytes failed with errno=%d %s in Unknown on line 0
+Fatal error: Cannot redeclare function strlen() in %s : eval()'d code on line %d%A

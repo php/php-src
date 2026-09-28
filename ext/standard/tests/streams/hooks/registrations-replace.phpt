@@ -37,7 +37,7 @@ final class Tracing extends Scheduler
     }
 }
 
-[$a, $b] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$a, $b] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 
 $first = new Tracing('first');
 Io\Hooks\set_hooks($first);
@@ -82,7 +82,7 @@ $second->loop();
 Io\Hooks\set_hooks(null);
 
 // A provider installed a second time sees add() again
-[$c, $d] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$c, $d] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 Io\Hooks\set_hooks($first);
 $first->spawn(function () use ($c) {
     stream_set_timeout($c, 0, 10000);

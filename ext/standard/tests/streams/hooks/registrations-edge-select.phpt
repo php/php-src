@@ -25,7 +25,7 @@ final class Tracing extends Scheduler
     }
 }
 
-[$a, $b] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$a, $b] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 $scheduler = new Tracing(new Io\Poll\OperationQueue(), [Io\Hooks\Capability::EdgeRegistrations]);
 Io\Hooks\set_hooks($scheduler);
 
@@ -59,7 +59,11 @@ $scheduler->spawn(function () use ($b) {
 });
 $scheduler->loop();
 Io\Hooks\set_hooks(null);
-print_r($scheduler->log);
+// A backend that observes edges records the bytes that arrived while nothing waited, so one wait
+// is answered from the record (one spurious wakeup); a level backend re-arms per wait and sees none
+$spurious = (new Io\Poll\Context())->getBackend()->supportsEdgeTriggering() ? 1 : 0;
+$ready = count(array_filter($scheduler->log, fn ($l) => $l === 'Recv on Edge Ready'));
+var_dump($scheduler->log[0], $ready === 3 + $spurious, count($scheduler->log) === $ready + 1);
 ?>
 --EXPECT--
 string(8) "01234567"
@@ -69,11 +73,6 @@ string(4) "more"
 string(4) "late"
 string(0) ""
 bool(true)
-Array
-(
-    [0] => add Read Edge
-    [1] => Recv on Edge Ready
-    [2] => Recv on Edge Ready
-    [3] => Recv on Edge Ready
-    [4] => Recv on Edge Ready
-)
+string(13) "add Read Edge"
+bool(true)
+bool(true)

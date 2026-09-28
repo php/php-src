@@ -25,8 +25,8 @@ final class Tracing extends Scheduler
 $scheduler = new Tracing();
 Io\Hooks\set_hooks($scheduler);
 
-socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $p1);
-socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $p2);
+socket_create_pair(PHP_OS_FAMILY === 'Windows' ? AF_INET : AF_UNIX, SOCK_STREAM, 0, $p1);
+socket_create_pair(PHP_OS_FAMILY === 'Windows' ? AF_INET : AF_UNIX, SOCK_STREAM, 0, $p2);
 [$a, $b] = $p1;
 [$c, $d] = $p2;
 
@@ -53,6 +53,8 @@ $scheduler->spawn(function () use ($b, $d) {
     socket_write($b, "one");
     socket_write($d, "two");
     socket_read($b, 2);
+    // Let the select block before the wakeup: a direct queue sends without a fiber switch
+    usleep(20000);
     socket_write($b, "three");
 });
 $scheduler->loop();

@@ -49,7 +49,7 @@ attempt('write', fn () => @fwrite($f, "0123456789"), Io\Operation\Write::class,
 attempt('write short', fn () => @fwrite($f, "0123456789"), Io\Operation\Write::class,
     fn ($op) => $op->complete(Io\CompletionStatus::Done, -1), $files);
 
-[$a, $b] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$a, $b] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 attempt('recv', fn () => @fread($a, 100), Io\Operation\Recv::class,
     fn ($op) => $op->complete(Io\CompletionStatus::Done, 5), $direct);
 

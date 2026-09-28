@@ -151,7 +151,7 @@ static zend_always_inline int php_sigemptyset(php_sigset_t *set)
 static zend_always_inline int php_sigaddset(php_sigset_t *set, int signo)
 {
 	if (signo < 1 || signo >= 32) {
-		errno = EINVAL;
+		_set_errno(EINVAL);
 		return -1;
 	}
 	set->bits |= 1u << signo;
@@ -160,7 +160,7 @@ static zend_always_inline int php_sigaddset(php_sigset_t *set, int signo)
 static zend_always_inline int php_sigdelset(php_sigset_t *set, int signo)
 {
 	if (signo < 1 || signo >= 32) {
-		errno = EINVAL;
+		_set_errno(EINVAL);
 		return -1;
 	}
 	set->bits &= ~(1u << signo);
@@ -169,7 +169,7 @@ static zend_always_inline int php_sigdelset(php_sigset_t *set, int signo)
 static zend_always_inline int php_sigismember(const php_sigset_t *set, int signo)
 {
 	if (signo < 1 || signo >= 32) {
-		errno = EINVAL;
+		_set_errno(EINVAL);
 		return -1;
 	}
 	return (set->bits >> signo) & 1;

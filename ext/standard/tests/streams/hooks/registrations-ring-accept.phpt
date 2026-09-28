@@ -6,6 +6,9 @@ if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not availab
 if (!in_array(Io\Hooks\Capability::DirectAccept, (new Io\Ring\Engine())->getSupportedHookCapabilities(), true)) {
     die("skip the backend does not support DirectAccept");
 }
+if (!in_array(Io\Hooks\Capability::EdgeRegistrations, (new Io\Ring\Engine())->getSupportedHookCapabilities(), true)) {
+    die("skip the listener's pair needs EdgeRegistrations");
+}
 ?>
 --FILE--
 <?php

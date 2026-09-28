@@ -50,6 +50,8 @@ $scheduler->spawn(function () use ($b, $d) {
     fwrite($b, "one");
     fwrite($d, "two");
     fread($b, 2);
+    // Let the select block before the wakeup: a direct queue sends without a fiber switch
+    usleep(20000);
     fwrite($b, "three");
 });
 $scheduler->loop();

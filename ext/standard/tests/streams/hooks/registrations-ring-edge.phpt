@@ -3,6 +3,9 @@ Io\Ring\Engine: waits after a drain on an Edge pair are served from one multisho
 --SKIPIF--
 <?php
 if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not available");
+if (!in_array(Io\Hooks\Capability::EdgeRegistrations, (new Io\Ring\Engine())->getSupportedHookCapabilities(), true)) {
+    die("skip the backend's multishot poll does not report edges");
+}
 ?>
 --FILE--
 <?php
@@ -36,7 +39,7 @@ final class Tracing extends Scheduler
     }
 }
 
-[$a, $b] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$a, $b] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 $ring = new Io\Ring\Engine();
 $scheduler = new Tracing($ring, [Io\Hooks\Capability::EdgeRegistrations]);
 Io\Hooks\set_hooks($scheduler);

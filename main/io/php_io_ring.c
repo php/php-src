@@ -266,14 +266,21 @@ PHPAPI const char *php_io_ring_backend_name(php_io_ring *ring)
  * stay opt-in. */
 PHPAPI uint32_t php_io_ring_hook_flags(php_io_ring *ring)
 {
-	return PHP_IO_HOOKS_F_EDGE_REGISTRATIONS | PHP_IO_HOOKS_F_DIRECT_ACCEPT;
+	return php_io_ring_supported_hook_flags(ring)
+			& (PHP_IO_HOOKS_F_EDGE_REGISTRATIONS | PHP_IO_HOOKS_F_DIRECT_ACCEPT);
 }
 
 PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring)
 {
 	/* Every ior backend keeps a multishot accept, which is what makes a direct
 	 * accept serve a burst in order of arrival rather than one per pass */
-	uint32_t flags = PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_EDGE_REGISTRATIONS | PHP_IO_HOOKS_F_DIRECT_ACCEPT;
+	uint32_t flags = PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_DIRECT_ACCEPT;
+#ifndef PHP_WIN32
+	/* Edge registrations need a multishot poll that reports edges. IOCP's
+	 * re-reports readiness that persists (ior_prep_poll_multishot), so the
+	 * ring's Edge records would keep completing; not offered there. */
+	flags |= PHP_IO_HOOKS_F_EDGE_REGISTRATIONS;
+#endif
 	if (ring->features & IOR_FEAT_NATIVE_ASYNC) {
 		flags |= PHP_IO_HOOKS_F_DIRECT_DATA;
 	}

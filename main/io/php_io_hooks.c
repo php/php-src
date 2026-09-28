@@ -1172,7 +1172,9 @@ static zend_always_inline ssize_t php_io_descriptor_op(php_stream *stream, zend_
 	php_io_op op;
 	php_io_op_result result;
 	ssize_t ret;
-	bool direct = (php_io_hook_flags() & direct_flag) != 0;
+	/* A stream at EOF gets the syscall first, as without the flag: recv() reports the end again
+	 * and no op reaches the provider for a handle that already answers invalid */
+	bool direct = (php_io_hook_flags() & direct_flag) != 0 && !(stream && stream->eof);
 	bool waited = false;
 
 	if (php_io_frame_begin(&f, stream) == FAILURE) {

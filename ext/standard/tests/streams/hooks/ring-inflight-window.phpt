@@ -12,7 +12,7 @@ include __DIR__ . '/scheduler.inc';
 $n = 300;
 $pairs = [];
 for ($i = 0; $i < $n; $i++) {
-    $pairs[$i] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+    $pairs[$i] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
     stream_set_timeout($pairs[$i][0], 10);
 }
 

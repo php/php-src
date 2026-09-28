@@ -10,7 +10,7 @@ include __DIR__ . '/../../standard/tests/streams/hooks/scheduler.inc';
 $scheduler = new Scheduler();
 Io\Hooks\set_hooks($scheduler);
 
-[$ctl_server, $ctl_checker] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+[$ctl_server, $ctl_checker] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
 $server = stream_socket_server('tcp://127.0.0.1:0');
 $addr = stream_socket_get_name($server, false);
 $ch = curl_init("http://$addr/");

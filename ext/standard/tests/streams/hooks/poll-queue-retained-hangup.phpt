@@ -3,7 +3,7 @@ IO hooks: a retained registration nobody waits on does not report the peer's han
 --FILE--
 <?php
 $q = new Io\Poll\OperationQueue();
-[$a, $b] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$a, $b] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 $h = new class($q, $b) implements Io\Hooks\Hooks {
     public int $runs = 0;
     public array $added = [];

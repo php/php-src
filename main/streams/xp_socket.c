@@ -196,8 +196,9 @@ static int php_sockop_close(php_stream *stream, int close_handle)
 			 * We use a small timeout which should encourage the OS to send the data,
 			 * but at the same time avoid hanging indefinitely.
 			 * */
-			php_deadline deadline = php_io_deadline_from_ms(500);
-			php_io_poll(NULL, sock->socket, PHP_POLL_WRITE, &deadline);
+			/* A plain poll, not an op: fclose() may run outside any fiber a
+			 * suspending provider could park it on */
+			php_pollfd_for_ms(sock->socket, POLLOUT, 500);
 #endif
 			php_netstream_restore_blocking(sock);
 			closesocket(sock->socket);

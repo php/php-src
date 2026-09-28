@@ -18,7 +18,7 @@ Io\Hooks\set_hooks(new class implements Io\Hooks\Hooks {
     }
 });
 
-[$a, $b] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
+[$a, $b] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 $f = new Fiber(function () use ($a) {
     try {
         fread($a, 10);

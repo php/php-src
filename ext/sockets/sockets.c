@@ -701,12 +701,19 @@ static ssize_t php_socket_recv(php_socket *sock, char *buf, size_t len, int flag
 	php_socket_waiter w = PHP_SOCKET_WAITER(SO_RCVTIMEO);
 	size_t got = 0;
 	ssize_t n;
+#ifdef PHP_WIN32
+	/* Winsock refuses MSG_WAITALL on a non-blocking socket (WSAEOPNOTSUPP);
+	 * the loop below provides it for a Socket that emulates blocking mode */
+	int call_flags = sock->nonblocking_fd ? flags & ~MSG_WAITALL : flags;
+#else
+	int call_flags = flags;
+#endif
 
 	if (!php_socket_op_begin(sock, &w.op)) {
 		return -1;
 	}
 	for (;;) {
-		n = php_socket_recv_once(sock, &w.op, buf + got, len - got, flags);
+		n = php_socket_recv_once(sock, &w.op, buf + got, len - got, call_flags);
 		if (n > 0) {
 			got += n;
 			if (got < len && (flags & MSG_WAITALL) && !(flags & MSG_PEEK) && PHP_SOCKET_EMULATES_BLOCKING(sock)) {

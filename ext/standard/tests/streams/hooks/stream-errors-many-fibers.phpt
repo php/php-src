@@ -26,7 +26,7 @@ $n = 1500;
 $pairs = [];
 $results = [];
 for ($i = 0; $i < $n; $i++) {
-    $pairs[$i] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
+    $pairs[$i] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
     $scheduler->spawn(function () use ($i, &$pairs, &$results) {
         $results[$i] = fread($pairs[$i][0], 16);
     });
