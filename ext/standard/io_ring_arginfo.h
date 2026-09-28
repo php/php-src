@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_ring.stub.php instead.
- * Stub hash: 1f4e386a0d072ebbf29f008975226917645fa36d
+ * Stub hash: d81d1867e46bccd4bfa2bb6490002e53cf751873
  * Has decl header: yes */
 
 #include "zend_enum.h"

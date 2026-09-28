@@ -258,12 +258,12 @@ PHPAPI const char *php_io_ring_backend_name(php_io_ring *ring)
 }
 
 /* What a provider on a ring registers with unless it chooses: Edge registrations cost nothing and
- * let the ring keep its multishots, and a direct accept served from a multishot accept beats the
- * accept() tried first, which finds the connections already taken. Direct data ops and file ops
- * lose when data is usually ready and files are in the page cache, so they stay opt-in. */
+ * let the ring keep its multishot poll. Direct data ops and file ops lose when data is usually
+ * ready and files are in the page cache, and a direct accept through a provider that suspends per
+ * op takes one connection per pass whatever serves it, so those stay opt-in. */
 PHPAPI uint32_t php_io_ring_hook_flags(php_io_ring *ring)
 {
-	return PHP_IO_HOOKS_F_EDGE_REGISTRATIONS | PHP_IO_HOOKS_F_DIRECT_ACCEPT;
+	return PHP_IO_HOOKS_F_EDGE_REGISTRATIONS;
 }
 
 PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring)
