@@ -81,6 +81,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-23780 (unserialize('') fails silently). (timwolla)
   . Improved performance of array_splice() when inserting without removing
     elements. (mehmetcansahin)
+  . Enforce max_filter_count: limit the number of filters that can be chained
+    in a php://filter URL. (Sjoerd Langkemper)
 
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
