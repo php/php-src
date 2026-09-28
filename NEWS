@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.27
 
+- BZ2:
+  . Fixed double close of the descriptor and use-after-free of the inner
+    stream when bzopen() is given a stream resource. (Jakub Zelenka)
+
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
     request activation). (matyhtf)
