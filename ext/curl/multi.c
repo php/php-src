@@ -409,15 +409,16 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	zend_call_known_fcc(&mh->handlers.server_push, &retval, /* param_count */ 3, call_args, /* named_params */ NULL);
 	zval_ptr_dtor_nogc(&headers);
 
-	if (!Z_ISUNDEF(retval)) {
-		if (CURL_PUSH_DENY != php_curl_get_long(&retval)) {
-		    rval = CURL_PUSH_OK;
-			zend_llist_add_element(&mh->easyh, &pz_ch);
-		} else {
-			/* libcurl will free this easy handle, avoid double free */
-			ch->cp = NULL;
-		}
+	if (!Z_ISUNDEF(retval) && CURL_PUSH_DENY != php_curl_get_long(&retval)) {
+		rval = CURL_PUSH_OK;
+		zend_llist_add_element(&mh->easyh, &pz_ch);
+		return rval;
 	}
+
+	ch->cp = NULL;
+	--(*ch->clone);
+	_php_curl_free_instance(ch);
+	zval_ptr_dtor(&pz_ch);
 
 	return rval;
 }
