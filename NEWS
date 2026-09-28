@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     comparison. (Arnaud)
   . Fixed OSS-Fuzz #536440507 (Immutable class incorrect assertion).
     (ndossche)
+  . Fixed AVX being reported as supported when the OS has not enabled AVX
+    state. (Ilia Alshanetsky)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
