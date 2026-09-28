@@ -84,6 +84,10 @@ PHP                                                                        NEWS
     child's shadowing public property). (Ilia Alshanetsky)
   . Fix incorrect DCE due to unsound escape analysis. (ndossche)
 
+- OpenSSL:
+  . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
+    after a handshake timeout. (Ilia Alshanetsky)
+
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
     an exception is pending. (nicolas-grekas)
