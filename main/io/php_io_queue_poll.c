@@ -335,9 +335,11 @@ static void php_io_poll_req_arm(php_io_poll_queue *q, php_io_poll_req *req)
 	reg->reqs = req;
 	q->n_waiting++;
 
-	/* A Poll op or a Level wait on an edge-triggered entry checks readiness now */
+	/* A Poll op or a Level wait on an edge-triggered entry checks readiness now, unless its
+	 * caller just did: an edge since then is queued for the wait either way */
 	php_poll_error err;
-	if (php_io_poll_fdreg_sync(q, reg, &err, !edge_wait && reg->edge) != SUCCESS) {
+	bool force = !edge_wait && reg->edge && !(op->flags & PHP_IO_OP_F_CHECKED);
+	if (php_io_poll_fdreg_sync(q, reg, &err, force) != SUCCESS) {
 		php_poll_error ignored;
 		php_io_poll_fdreg_unlink(req);
 		req->fdreg = NULL;

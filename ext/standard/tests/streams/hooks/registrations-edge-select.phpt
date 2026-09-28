@@ -34,7 +34,8 @@ $scheduler->spawn(function () use ($a) {
     stream_set_read_buffer($a, 0);
     // The first wait registers the read pair; the writer's bytes complete it
     var_dump(fread($a, 8));
-    // No new edge comes for the rest: the select member checks at arm time
+    // No new edge comes for the rest: the select checks at arm time, with the zero-timeout
+    // poll that precedes its Any, so nothing reaches the provider
     $r = [$a]; $w = null; $e = null;
     var_dump(stream_select($r, $w, $e, 0));
     var_dump(fread($a, 100));
@@ -72,8 +73,7 @@ Array
 (
     [0] => add Read Edge
     [1] => Recv on Edge Ready
-    [2] => Any Done
+    [2] => Recv on Edge Ready
     [3] => Recv on Edge Ready
     [4] => Recv on Edge Ready
-    [5] => Recv on Edge Ready
 )

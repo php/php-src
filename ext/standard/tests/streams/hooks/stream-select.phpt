@@ -1,5 +1,5 @@
 --TEST--
-IO hooks: stream_select() waits with one Any operation and reports every ready stream
+IO hooks: stream_select() polls first and waits with one Any operation, reporting every ready stream
 --FILE--
 <?php
 include __DIR__ . '/scheduler.inc';
@@ -33,7 +33,8 @@ $scheduler->spawn(function () use ($a, $c) {
     var_dump((hrtime(true) - $start) / 1e6 >= 40);
 
     // Both readable by now (the writer's sends are ops of their own on a
-    // direct queue, so leave it a wide margin): both reported, the writable side too
+    // direct queue, so leave it a wide margin): both reported, the writable side too,
+    // by the zero-timeout poll that precedes the Any, so no op reaches the provider
     usleep(150000);
     $r = [$a, $c]; $w = [$a]; $e = null;
     var_dump(stream_select($r, $w, $e, 1), count($r), $w === [$a]);
@@ -68,11 +69,9 @@ string(3) "two"
 int(1)
 bool(true)
 string(5) "three"
-array(3) {
+array(2) {
   [0]=>
   string(3) "2+1"
   [1]=>
-  string(3) "2+1"
-  [2]=>
   string(3) "1+0"
 }

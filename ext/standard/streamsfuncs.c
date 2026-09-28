@@ -809,6 +809,55 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 		stream_array_collect_members(Z_ARRVAL_P(e_array), priority ? PHP_POLL_PRI : 0, &members, &n, &cap);
 	}
 
+	/* Syscall first, as for a read: a zero-timeout poll() over the sets answers a select
+	 * with a stream ready now, or one with a zero timeout, without an op, and is the arm-time
+	 * check of members on registered pairs; only a select that really waits builds the Any */
+	bool checked = false;
+	if (n > 0) {
+		php_pollfd stack[16];
+		php_pollfd *fds = n > sizeof(stack) / sizeof(stack[0]) ? safe_emalloc(n, sizeof(*fds), 0) : stack;
+		for (uint32_t i = 0; i < n; i++) {
+			fds[i].fd = members[i].fd;
+			fds[i].events = ((members[i].events & PHP_POLL_READ) ? POLLIN : 0)
+					| ((members[i].events & PHP_POLL_WRITE) ? POLLOUT : 0)
+					| ((members[i].events & PHP_POLL_PRI) ? POLLPRI : 0);
+			fds[i].revents = 0;
+		}
+		int ready = php_poll2(fds, n, 0);
+		int found = 0;
+		if (ready > 0) {
+			for (uint32_t i = 0; i < n; i++) {
+				short revents = fds[i].revents;
+				if (revents & POLLNVAL) {
+					/* The Any reports the descriptor's failure */
+					found = 0;
+					break;
+				}
+				if ((revents & (POLLIN | POLLHUP | POLLERR)) && (members[i].events & PHP_POLL_READ)) {
+					PHP_SAFE_FD_SET(members[i].fd, rfds);
+					found++;
+				}
+				if ((revents & (POLLOUT | POLLERR)) && (members[i].events & PHP_POLL_WRITE)) {
+					PHP_SAFE_FD_SET(members[i].fd, wfds);
+					found++;
+				}
+				if ((revents & POLLPRI) && (members[i].events & PHP_POLL_PRI)) {
+					PHP_SAFE_FD_SET(members[i].fd, efds);
+					found++;
+				}
+			}
+		}
+		if (fds != stack) {
+			efree(fds);
+		}
+		if (found > 0 || (ready == 0 && tv && tv->tv_sec == 0 && tv->tv_usec == 0)) {
+			efree(members);
+			stream_select_unfreeze(frozen, n_frozen);
+			return found;
+		}
+		checked = ready == 0;
+	}
+
 	php_io_op *ops = safe_emalloc(n + 1, sizeof(php_io_op), 0);
 	php_io_op **op_ptrs = safe_emalloc(n + 1, sizeof(php_io_op *), 0);
 	php_io_op_result *results = safe_emalloc(n + 1, sizeof(php_io_op_result), 0);
@@ -825,6 +874,9 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 		php_stream_poll_weak_handle_from_stream(&handle_zv, members[i].stream);
 		handles[n_members] = Z_OBJ(handle_zv);
 		php_io_op_poll(&ops[n_members], handles[n_members], members[i].fd, members[i].events, php_io_deadline_infinite());
+		if (checked) {
+			ops[n_members].flags |= PHP_IO_OP_F_CHECKED;
+		}
 		op_ptrs[n_members] = &ops[n_members];
 		n_members++;
 	}
