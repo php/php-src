@@ -90,8 +90,11 @@ static zend_always_inline size_t zend_object_properties_size(const zend_class_en
  * Standard object MUST be initialized using zend_object_std_init().
  * Properties MUST be initialized using object_properties_init(). */
 static zend_always_inline void *zend_object_alloc(size_t obj_size, const zend_class_entry *ce) {
+	const size_t extra_data = obj_size - sizeof(zend_object);
+	ZEND_ASSERT(ce->default_object_handlers->offset == extra_data);
+
 	void *obj = emalloc(obj_size + zend_object_properties_size(ce));
-	memset(obj, 0, obj_size - sizeof(zend_object));
+	memset(obj, 0, extra_data);
 	return obj;
 }
 
