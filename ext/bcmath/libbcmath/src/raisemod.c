@@ -74,13 +74,23 @@ raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *resul
 
 	/* Do the calculation. */
 	while (!bc_is_zero(exponent)) {
-		(void) bc_divmod(exponent, BCG(_two_), &exponent, &parity, 0);
+		bc_num temp_quot = bc_copy_num(exponent);
+		(void) bc_divmod(exponent, BCG(_two_), &temp_quot, &parity, 0);
+		bc_free_num(&exponent);
+		exponent = temp_quot;
+
 		if (!bc_is_zero(parity)) {
 			bc_multiply_ex(temp, power, &temp, scale);
-			(void) bc_modulo(temp, modulus, &temp, scale);
+			bc_num temp_rem = bc_copy_num(temp);
+			(void) bc_modulo(temp, modulus, &temp_rem, scale);
+			bc_free_num(&temp);
+			temp = temp_rem;
 		}
 		bc_multiply_ex(power, power, &power, scale);
-		(void) bc_modulo(power, modulus, &power, scale);
+		bc_num temp_rem = bc_copy_num(power);
+		(void) bc_modulo(power, modulus, &temp_rem, scale);
+		bc_free_num(&power);
+		power = temp_rem;
 	}
 
 	/* Assign the value. */
