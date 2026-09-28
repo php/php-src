@@ -378,6 +378,15 @@ PHPAPI zend_object *php_io_op_get_handle(php_io_op *op)
 	return op->handle;
 }
 
+/* Queues */
+
+ZEND_TLS uint64_t php_io_queue_ids = 0;
+
+PHPAPI uint64_t php_io_queue_new_id(void)
+{
+	return ++php_io_queue_ids;
+}
+
 /* Hooks */
 
 PHPAPI zend_result php_io_hooks_register(php_io_hooks *hooks)

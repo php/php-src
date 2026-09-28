@@ -113,6 +113,7 @@ typedef struct {
 
 struct php_io_ring {
 	ior_ctx *ctx;
+	uint64_t id; /* tells this ring's records on a registration from another's */
 	uint32_t features;
 	bool fd_nonblock;
 	pid_t owner_pid; /* a forked child must not touch the ring */
@@ -222,6 +223,7 @@ PHPAPI php_io_ring *php_io_ring_create(uint32_t entries, bool fd_nonblock)
 	}
 
 	php_io_ring *ring = ecalloc(1, sizeof(*ring));
+	ring->id = php_io_queue_new_id();
 	ring->next_ring = php_io_rings;
 	if (php_io_rings) {
 		php_io_rings->prev_ring = ring;
@@ -288,6 +290,17 @@ static php_io_ring_reg *php_io_ring_reg_get(php_io_ring *ring, php_socket_t fd, 
 	return rec;
 }
 
+/* The record through the registration, which php_io_ring_add() pointed at it; one another ring
+ * left there is told by the id and looked up by descriptor. A registered pair keeps its record. */
+static zend_always_inline php_io_ring_reg *php_io_ring_reg_of(php_io_ring *ring,
+		php_io_registration *registration, php_socket_t fd)
+{
+	if (registration && registration->queue_id == ring->id && registration->queue_data) {
+		return registration->queue_data;
+	}
+	return php_io_ring_reg_get(ring, fd, false);
+}
+
 static void php_io_ring_reg_disarm(php_io_ring *ring, php_io_ring_reg *rec);
 static void php_io_ring_reg_disarm_accept(php_io_ring *ring, php_io_ring_reg *rec, bool keep);
 
@@ -305,9 +318,7 @@ static void php_io_ring_reg_close_fds(php_io_ring_reg *rec)
 	}
 }
 
-/* The record is found by descriptor, never through the registration, so one a replaced provider
- * left behind is never dereferenced through a stale pointer. Nothing is armed here: the first wait
- * after a drain does that, when it knows what to keep. */
+/* Nothing is armed here: the first wait after a drain does that, when it knows what to keep */
 PHPAPI zend_result php_io_ring_add(php_io_ring *ring, php_io_registration *reg)
 {
 	if (php_io_ring_foreign(ring)) {
@@ -324,12 +335,15 @@ PHPAPI zend_result php_io_ring_add(php_io_ring *ring, php_io_registration *reg)
 	}
 	php_io_ring_reg *rec = php_io_ring_reg_get(ring, reg->fd, true);
 	rec->edge |= reg->event;
+	reg->queue_data = rec;
+	reg->queue_id = ring->id;
 	return SUCCESS;
 }
 
 PHPAPI void php_io_ring_remove(php_io_ring *ring, php_io_registration *reg)
 {
-	php_io_ring_reg *rec = php_io_ring_reg_get(ring, reg->fd, false);
+	php_io_ring_reg *rec = php_io_ring_reg_of(ring, reg, reg->fd);
+	reg->queue_data = NULL;
 	if (!rec) {
 		return;
 	}
@@ -1183,7 +1197,7 @@ static bool php_io_ring_accept_wait(php_io_ring *ring, php_io_ring_req *req)
 	if (!op->registration || op->registration->trigger != PHP_IO_TRIGGER_EDGE) {
 		return false;
 	}
-	php_io_ring_reg *rec = php_io_ring_reg_get(ring, op->fd, false);
+	php_io_ring_reg *rec = php_io_ring_reg_of(ring, op->registration, op->fd);
 	if (!rec || !(rec->edge & PHP_POLL_READ) || rec->accept_failed) {
 		return false;
 	}
@@ -1211,7 +1225,7 @@ static bool php_io_ring_edge_wait(php_io_ring *ring, php_io_ring_req *req)
 		return false;
 	}
 	uint32_t events = op->u.poll.events & (PHP_POLL_READ | PHP_POLL_WRITE);
-	php_io_ring_reg *rec = php_io_ring_reg_get(ring, op->fd, false);
+	php_io_ring_reg *rec = php_io_ring_reg_of(ring, op->registration, op->fd);
 	if (!events || !rec || (rec->edge & events) != events) {
 		return false;
 	}

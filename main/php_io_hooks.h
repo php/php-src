@@ -171,7 +171,8 @@ struct _php_io_registration {
 	php_poll_handle_object *handle; /* referenced; for a stream NULL until asked */
 	zend_object *zobj; /* Io\Registration wrapper, created lazily, detached at unregister */
 	void *provider_data; /* never read by the core */
-	void *queue_data; /* never read by the core */
+	void *queue_data; /* the queue's record of the pair, never read by the core */
+	uint64_t queue_id; /* the queue that set queue_data, never read by the core */
 	uint32_t generation; /* the provider it was added to */
 	bool in_add; /* the provider's add() is running */
 	bool dead; /* unregistered inside add(), freed when it returns */
@@ -400,6 +401,9 @@ struct _php_io_queue {
 };
 
 PHPAPI php_io_queue *php_io_queue_create_poll(php_poll_backend_type backend);
+/* Never repeats within a thread: a queue tells its own record on a registration from one a queue
+ * before it left there */
+PHPAPI uint64_t php_io_queue_new_id(void);
 
 static inline php_deadline php_io_deadline_from_ms(zend_long ms)
 {
