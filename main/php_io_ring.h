@@ -45,9 +45,10 @@ PHPAPI zend_result php_io_ring_cancel(php_io_ring *ring, php_io_op *op);
 PHPAPI bool php_io_ring_orphan(php_io_ring *ring, php_io_op *op);
 PHPAPI void php_io_ring_drain(php_io_ring *ring, php_stream *stream);
 
-/* With a zero timeout it first clears the notification descriptor */
+/* dl NULL waits for good; with the non-blocking deadline it first clears the notification
+ * descriptor and reaps once */
 PHPAPI int php_io_ring_wait(php_io_ring *ring, php_io_queue_completion *out, uint32_t max,
-		const struct timespec *timeout);
+		const php_deadline *dl);
 PHPAPI uint32_t php_io_ring_count_pending(php_io_ring *ring);
 
 PHPAPI php_socket_t php_io_ring_notify_fd(php_io_ring *ring);
@@ -59,6 +60,10 @@ PHPAPI const char *php_io_ring_backend_name(php_io_ring *ring);
 PHPAPI uint32_t php_io_ring_hook_flags(php_io_ring *ring);
 /* PHP_IO_HOOKS_F_* this ring can serve, for a provider that opts in */
 PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring);
+
+/* Edge registrations; Level ones never reach the ring */
+PHPAPI zend_result php_io_ring_add(php_io_ring *ring, php_io_registration *reg);
+PHPAPI void php_io_ring_remove(php_io_ring *ring, php_io_registration *reg);
 
 /* Created by another process: every operation fails */
 PHPAPI bool php_io_ring_inherited(php_io_ring *ring);

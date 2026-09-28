@@ -7,10 +7,10 @@ curl
 
 class Base implements Io\Hooks\Hooks
 {
-    public function getCapabilities(): array { return []; }
+    public function getCapabilities(): array { return [Io\Hooks\Capability::LevelRegistrations]; }
     public function run(Io\Operation $op): Io\Completion { return $op->complete(Io\CompletionStatus::Unsupported); }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 final class Installed extends Base
@@ -48,7 +48,7 @@ final class RunDrops extends Base
 
 final class AddReplaces extends Base
 {
-    public function add(Io\Operation $op): void
+    public function add(Io\Registration $registration): void
     {
         try {
             Io\Hooks\set_hooks(new Base());

@@ -19,8 +19,8 @@ final class MemberProvider implements Io\Hooks\Hooks
         $this->queue->submit($op);
         return $this->queue->waitCompletions()[0];
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 $family = PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX;

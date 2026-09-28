@@ -231,11 +231,25 @@ PHPAPI uint32_t php_io_ring_hook_flags(php_io_ring *ring)
 
 PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring)
 {
-	uint32_t flags = PHP_IO_HOOKS_F_FILES;
+	uint32_t flags = PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_EDGE_REGISTRATIONS;
 	if (ring->features & IOR_FEAT_NATIVE_ASYNC) {
-		flags |= PHP_IO_HOOKS_F_DIRECT;
+		flags |= PHP_IO_HOOKS_F_DIRECT_DATA;
 	}
 	return flags;
+}
+
+/* Every wait is a single-shot poll so far: nothing is kept for an Edge pair yet */
+PHPAPI zend_result php_io_ring_add(php_io_ring *ring, php_io_registration *reg)
+{
+	if (php_io_ring_foreign(ring)) {
+		errno = EPERM;
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+PHPAPI void php_io_ring_remove(php_io_ring *ring, php_io_registration *reg)
+{
 }
 
 PHPAPI php_socket_t php_io_ring_notify_fd(php_io_ring *ring)
@@ -1387,13 +1401,13 @@ static uint32_t php_io_ring_deliver(php_io_ring *ring, php_io_queue_completion *
 	return n;
 }
 
-PHPAPI int php_io_ring_wait(php_io_ring *ring, php_io_queue_completion *out, uint32_t max, const struct timespec *timeout)
+PHPAPI int php_io_ring_wait(php_io_ring *ring, php_io_queue_completion *out, uint32_t max, const php_deadline *dl)
 {
 	if (php_io_ring_foreign(ring)) {
 		errno = EPERM;
 		return -1;
 	}
-	zend_hrtime_t limit = ZEND_HRTIME_T_MAX;
+	zend_hrtime_t limit = dl ? dl->hrtime : ZEND_HRTIME_T_MAX;
 	/* Only orphans: once they settled there is nothing to report, as
 	 * count_pending() told */
 	bool orphans_only = ring->pending == 0 && ring->live;
@@ -1401,14 +1415,9 @@ PHPAPI int php_io_ring_wait(php_io_ring *ring, php_io_queue_completion *out, uin
 	if (max == 0) {
 		return 0;
 	}
-	if (timeout) {
-		zend_hrtime_t now = zend_hrtime();
-		zend_hrtime_t rel = (zend_hrtime_t) timeout->tv_sec * ZEND_NANO_IN_SEC + timeout->tv_nsec;
-		limit = rel < ZEND_HRTIME_T_MAX - now ? now + rel : ZEND_HRTIME_T_MAX;
-		if (rel == 0) {
-			/* A loop woken by the notification descriptor: clear, then reap until empty */
-			php_io_ring_notify_clear(ring);
-		}
+	if (limit == 0) {
+		/* A loop woken by the notification descriptor: clear, then reap until empty */
+		php_io_ring_notify_clear(ring);
 	}
 
 	for (;;) {
@@ -1576,19 +1585,19 @@ static zend_result php_io_ring_queue_cancel(php_io_queue *base, php_io_op *op)
 	return php_io_ring_cancel(q->ring, op);
 }
 
-static zend_result php_io_ring_queue_add(php_io_queue *base, php_io_op *op)
+static zend_result php_io_ring_queue_add(php_io_queue *base, php_io_registration *reg)
 {
-	/* Each run is a fresh single-shot poll; nothing to retain yet */
-	return SUCCESS;
+	return php_io_ring_add(((php_io_ring_queue *) base)->ring, reg);
 }
 
-static void php_io_ring_queue_remove(php_io_queue *base, php_io_op *op)
+static void php_io_ring_queue_remove(php_io_queue *base, php_io_registration *reg)
 {
+	php_io_ring_remove(((php_io_ring_queue *) base)->ring, reg);
 }
 
-static int php_io_ring_queue_wait(php_io_queue *base, php_io_queue_completion *out, uint32_t max, const struct timespec *timeout)
+static int php_io_ring_queue_wait(php_io_queue *base, php_io_queue_completion *out, uint32_t max, const php_deadline *dl)
 {
-	return php_io_ring_wait(((php_io_ring_queue *) base)->ring, out, max, timeout);
+	return php_io_ring_wait(((php_io_ring_queue *) base)->ring, out, max, dl);
 }
 
 static void php_io_ring_queue_orphan(php_io_queue *base, php_io_op *op)

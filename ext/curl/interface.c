@@ -2483,11 +2483,20 @@ ZEND_METHOD(Io_Curl_SocketWeakHandle, __construct)
 typedef struct _php_curl_socket_entry {
 	curl_socket_t socket;
 	int what;
-	zend_object *handle; /* SocketWeakHandle, referenced */
-	php_io_op *op; /* persistent Poll op for op_events */
-	uint32_t op_events;
+	zend_object *handle; /* SocketWeakHandle, referenced; its registrations are the directions */
 	struct _php_curl_socket_entry *next_removed;
 } php_curl_socket_entry;
+
+static php_io_registration *php_curl_socket_registration(php_curl_socket_entry *e, uint32_t event)
+{
+	php_poll_handle_object *h = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(e->handle);
+	for (php_io_registration *reg = h->registrations; reg; reg = reg->next) {
+		if (reg->event == event) {
+			return reg;
+		}
+	}
+	return NULL;
+}
 
 static void php_curl_socket_entry_invalidate(php_curl_socket_entry *e)
 {
@@ -2498,8 +2507,8 @@ static void php_curl_socket_entry_invalidate(php_curl_socket_entry *e)
 
 static void php_curl_socket_entry_free(php_curl_socket_entry *e)
 {
-	/* Releasing the op calls the provider's remove hook, which may throw */
-	php_io_handle_release_ops(e->handle);
+	/* Ending the registrations calls the provider's remove hook, which may throw */
+	php_io_unregister_all(&PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(e->handle)->registrations);
 	OBJ_RELEASE(e->handle);
 	efree(e);
 }
@@ -2559,9 +2568,9 @@ static uint32_t php_curl_what_to_events(int what)
 }
 
 /* The reconcile step: after libcurl returned, turn the table into provider
- * calls. Entries libcurl removed release their ops, new or changed
- * directions get a persistent op for the new mask. Runs outside libcurl so
- * a provider's add() or remove() may throw. */
+ * calls. Entries libcurl removed end their registrations, a direction newly
+ * wanted is registered as Level and one dropped is unregistered. Runs outside
+ * libcurl so a provider's add() or remove() may throw. */
 static zend_result php_curl_socket_reconcile(php_curl *ch)
 {
 	/* An exception a curl callback left pending does not stop the transfer */
@@ -2580,16 +2589,17 @@ static zend_result php_curl_socket_reconcile(php_curl *ch)
 		php_curl_socket_entry *e;
 		ZEND_HASH_FOREACH_PTR(ch->io_sockets, e) {
 			uint32_t events = php_curl_what_to_events(e->what);
-			if (e->op && e->op_events != events) {
-				php_io_op_persistent_release(e->handle, e->op_events);
-				e->op = NULL;
-				if (EG(exception) != pending) {
-					return FAILURE;
+			php_poll_handle_object *h = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(e->handle);
+			for (uint32_t event = PHP_POLL_READ; event <= PHP_POLL_WRITE; event <<= 1) {
+				if (events & event) {
+					/* Idempotent: a provider installed meanwhile sees add() here */
+					php_io_register_handle(h, event, PHP_IO_TRIGGER_LEVEL);
+				} else {
+					php_io_registration *reg = php_curl_socket_registration(e, event);
+					if (reg) {
+						php_io_unregister(reg);
+					}
 				}
-			}
-			if (!e->op) {
-				e->op = php_io_op_persistent(e->handle, events);
-				e->op_events = events;
 				if (EG(exception) != pending) {
 					return FAILURE;
 				}
@@ -2623,7 +2633,7 @@ static void php_curl_socket_table_free(php_curl *ch)
 }
 
 /* curl_exec() under a provider, on the multi socket API: every iteration waits with one Any op,
- * a persistent Poll member per socket plus a Timer member for libcurl's timeout. */
+ * a Poll member per socket and direction plus a Timer member for libcurl's timeout. */
 static CURLcode php_curl_exec_multi(php_curl *ch)
 {
 	CURLcode result = CURLE_OK;
@@ -2679,14 +2689,24 @@ static CURLcode php_curl_exec_multi(php_curl *ch)
 		}
 
 		uint32_t n_sockets = ch->io_sockets ? zend_hash_num_elements(ch->io_sockets) : 0;
-		php_io_op **members = safe_emalloc(n_sockets + 1, sizeof(php_io_op *), 0);
-		php_io_op_result *results = safe_emalloc(n_sockets + 1, sizeof(php_io_op_result), 0);
+		uint32_t cap = n_sockets * 2 + 1;
+		php_io_op *ops = safe_emalloc(cap, sizeof(php_io_op), 0);
+		php_io_op **members = safe_emalloc(cap, sizeof(php_io_op *), 0);
+		php_io_op_result *results = safe_emalloc(cap, sizeof(php_io_op_result), 0);
 		uint32_t n_members = 0;
 
 		if (n_sockets > 0) {
 			php_curl_socket_entry *e;
 			ZEND_HASH_FOREACH_PTR(ch->io_sockets, e) {
-				members[n_members++] = e->op;
+				uint32_t events = php_curl_what_to_events(e->what);
+				for (uint32_t event = PHP_POLL_READ; event <= PHP_POLL_WRITE; event <<= 1) {
+					if (events & event) {
+						php_io_op *op = &ops[n_members];
+						php_io_op_poll(op, e->handle, (php_socket_t) e->socket, event, php_io_deadline_infinite());
+						op->registration = php_curl_socket_registration(e, event);
+						members[n_members++] = op;
+					}
+				}
 			} ZEND_HASH_FOREACH_END();
 		}
 
@@ -2695,12 +2715,12 @@ static CURLcode php_curl_exec_multi(php_curl *ch)
 		if (php_deadline_is_infinite(&timer) && n_sockets == 0) {
 			timer = php_io_deadline_from_ms(1000);
 		}
-		php_io_op timer_op;
 		uint32_t timer_index = UINT32_MAX;
 		if (!php_deadline_is_infinite(&timer)) {
-			php_io_op_timer(&timer_op, timer);
+			php_io_op_timer(&ops[n_members], timer);
 			timer_index = n_members;
-			members[n_members++] = &timer_op;
+			members[n_members] = &ops[n_members];
+			n_members++;
 		}
 
 		php_io_op any;
@@ -2712,6 +2732,7 @@ static CURLcode php_curl_exec_multi(php_curl *ch)
 		if (rc == FAILURE) {
 			/* Cancelled or the provider threw: the transfer did not finish */
 			result = CURLE_ABORTED_BY_CALLBACK;
+			efree(ops);
 			efree(members);
 			efree(results);
 			break;
@@ -2730,7 +2751,7 @@ static CURLcode php_curl_exec_multi(php_curl *ch)
 			curl_socket_t s = (curl_socket_t)members[index]->fd;
 			/* An earlier action in this iteration may have removed it */
 			php_curl_socket_entry *e = ch->io_sockets ? zend_hash_index_find_ptr(ch->io_sockets, (zend_ulong)s) : NULL;
-			if (!e || e->op != members[index]) {
+			if (!e || e->handle != members[index]->handle) {
 				continue;
 			}
 			uint32_t revents = (uint32_t)results[i].res;
@@ -2743,6 +2764,7 @@ static CURLcode php_curl_exec_multi(php_curl *ch)
 			curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &still_running);
 		}
 
+		efree(ops);
 		efree(members);
 		efree(results);
 	}

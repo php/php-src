@@ -1,10 +1,10 @@
 --TEST--
-Io\Ring\Engine: with Direct a read or write reaches the ring even when the socket is ready
+Io\Ring\Engine: with DirectData a read or write reaches the ring even when the socket is ready
 --SKIPIF--
 <?php
 if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not available");
-if (!in_array(Io\Hooks\Capability::Direct, (new Io\Ring\Engine())->getSupportedHookCapabilities(), true)) {
-    die("skip the backend does not support Direct");
+if (!in_array(Io\Hooks\Capability::DirectData, (new Io\Ring\Engine())->getSupportedHookCapabilities(), true)) {
+    die("skip the backend does not support DirectData");
 }
 ?>
 --FILE--
@@ -22,7 +22,7 @@ final class Tracing extends Scheduler
     }
 }
 
-foreach ([[], [Io\Hooks\Capability::Direct]] as $caps) {
+foreach ([[], [Io\Hooks\Capability::DirectData]] as $caps) {
     [$a, $b] = stream_socket_pair(PHP_OS_FAMILY === 'Windows' ? STREAM_PF_INET : STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
     $scheduler = new Tracing(new Io\Ring\Engine(), $caps);
     Io\Hooks\set_hooks($scheduler);

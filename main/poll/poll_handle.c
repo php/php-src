@@ -67,7 +67,7 @@ PHPAPI php_poll_handle_object *php_poll_handle_object_create(
 	intern->ops = ops ? ops : &php_poll_handle_default_ops;
 	intern->handle_data = NULL;
 	intern->watching = NULL;
-	intern->persistent = NULL;
+	intern->registrations = NULL;
 
 	return intern;
 }
@@ -89,8 +89,8 @@ PHPAPI void php_poll_handle_object_free(zend_object *obj)
 		intern->watching = NULL;
 	}
 
-	/* Persistent ops hold a reference on the handle, so none can be left */
-	ZEND_ASSERT(intern->persistent == NULL);
+	/* Registrations hold a reference on the handle, so none can be left */
+	ZEND_ASSERT(intern->registrations == NULL);
 
 	zend_object_std_dtor(&intern->std);
 }

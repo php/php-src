@@ -201,17 +201,9 @@ PHPAPI void php_io_op_any(php_io_op *op, php_io_op **members, uint32_t n, php_io
 	op->u.any.n_results = 0;
 }
 
-/* Persistent operations */
+/* Registrations */
 
-struct _php_io_persistent_op {
-	php_io_op op;
-	bool registered; /* the provider's add hook ran */
-	php_io_persistent_op *next_on_handle;
-	php_io_persistent_op *prev; /* FG(io_persistent_ops) */
-	php_io_persistent_op *next;
-};
-
-static void php_io_op_detach_zobj(php_io_op *op);
+PHPAPI void (*php_io_registration_zobj_detach)(zend_object *zobj) = NULL;
 
 PHPAPI void php_io_hooks_lock(void)
 {
@@ -225,107 +217,164 @@ PHPAPI void php_io_hooks_unlock(void)
 	FG(io_hooks_locked)--;
 }
 
-static void php_io_persistent_register(php_io_persistent_op *p)
+static void php_io_registration_detach_zobj(php_io_registration *reg)
 {
-	php_io_hooks_state *state = FG(io_hooks);
-	if (!p->registered && state) {
-		p->registered = true;
-		if (state->hooks.add) {
-			php_io_hooks_lock();
-			state->hooks.add(state->data, &p->op);
-			php_io_hooks_unlock();
+	if (reg->zobj) {
+		zend_object *zobj = reg->zobj;
+		reg->zobj = NULL;
+		if (php_io_registration_zobj_detach) {
+			php_io_registration_zobj_detach(zobj);
 		}
+		OBJ_RELEASE(zobj);
 	}
 }
 
-PHPAPI php_io_op *php_io_op_persistent(zend_object *handle_obj, uint32_t events)
+static zend_always_inline bool php_io_hooks_take_trigger(const php_io_hooks *hooks, php_io_trigger trigger)
 {
-	php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(handle_obj);
-	php_io_persistent_op *p;
-
-	for (p = handle->persistent; p; p = p->next_on_handle) {
-		if (p->op.u.poll.events == events) {
-			php_io_persistent_register(p);
-			return &p->op;
-		}
-	}
-
-	p = ecalloc(1, sizeof(*p));
-	php_io_op_poll(&p->op, handle_obj, php_poll_handle_get_fd(handle), events, php_io_deadline_infinite());
-	p->op.flags |= PHP_IO_OP_F_PERSISTENT;
-	GC_ADDREF(handle_obj);
-
-	p->next_on_handle = handle->persistent;
-	handle->persistent = p;
-	p->next = FG(io_persistent_ops);
-	if (p->next) {
-		p->next->prev = p;
-	}
-	FG(io_persistent_ops) = p;
-
-	php_io_persistent_register(p);
-	return &p->op;
+	uint32_t flag = trigger == PHP_IO_TRIGGER_EDGE
+			? PHP_IO_HOOKS_F_EDGE_REGISTRATIONS : PHP_IO_HOOKS_F_LEVEL_REGISTRATIONS;
+	return (hooks->flags & flag) != 0;
 }
 
-static void php_io_persistent_free(php_io_persistent_op *p)
+static void php_io_registration_free(php_io_registration *reg)
 {
-	php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(p->op.handle);
-	php_io_hooks_state *state = FG(io_hooks);
+	if (reg->handle) {
+		OBJ_RELEASE(&reg->handle->std);
+	}
+	efree(reg);
+}
 
-	if (p->registered && state && state->hooks.remove) {
+static void php_io_registration_unlink(php_io_registration *reg)
+{
+	php_io_registration **link = reg->stream ? &reg->stream->io_registrations : &reg->handle->registrations;
+	while (*link != reg) {
+		link = &(*link)->next;
+	}
+	*link = reg->next;
+	if (reg->gprev) {
+		reg->gprev->gnext = reg->gnext;
+	} else {
+		FG(io_registrations) = reg->gnext;
+	}
+	if (reg->gnext) {
+		reg->gnext->gprev = reg->gprev;
+	}
+}
+
+/* The record of the pair on the registrant's list, created on the first call, and added to the
+ * current provider when it has not seen it: on its first wait, and again after a replacement.
+ * The trigger is settled when the record is added, as what the caller wants or Level when that
+ * is all the provider takes. */
+static php_io_registration *php_io_register(php_io_registration **list, php_stream *stream,
+		php_poll_handle_object *handle, php_socket_t fd, uint32_t event, php_io_trigger trigger)
+{
+	php_io_hooks *hooks = FG(io_hooks);
+
+	if (!hooks || fd == SOCK_ERR) {
+		return NULL;
+	}
+	if (!php_io_hooks_take_trigger(hooks, trigger)) {
+		if (trigger != PHP_IO_TRIGGER_EDGE || !php_io_hooks_take_trigger(hooks, PHP_IO_TRIGGER_LEVEL)) {
+			return NULL;
+		}
+		trigger = PHP_IO_TRIGGER_LEVEL;
+	}
+
+	php_io_registration *reg;
+	for (reg = *list; reg; reg = reg->next) {
+		if (reg->event == event) {
+			break;
+		}
+	}
+	if (!reg) {
+		reg = ecalloc(1, sizeof(*reg));
+		reg->fd = fd;
+		reg->event = event;
+		reg->stream = stream;
+		reg->handle = handle;
+		if (handle) {
+			GC_ADDREF(&handle->std);
+		}
+		reg->next = *list;
+		*list = reg;
+		reg->gnext = FG(io_registrations);
+		if (reg->gnext) {
+			reg->gnext->gprev = reg;
+		}
+		FG(io_registrations) = reg;
+	}
+	if (reg->generation == FG(io_hooks_generation)) {
+		return reg;
+	}
+
+	reg->trigger = trigger;
+	reg->generation = FG(io_hooks_generation);
+	if (hooks->ops->add) {
+		/* An add() that unregisters the pair (closes the stream) leaves the record to this frame */
+		reg->in_add = true;
 		php_io_hooks_lock();
-		state->hooks.remove(state->data, &p->op);
+		hooks->ops->add(hooks, reg);
+		php_io_hooks_unlock();
+		reg->in_add = false;
+		if (reg->dead) {
+			php_io_registration_free(reg);
+			return NULL;
+		}
+	}
+	return reg;
+}
+
+PHPAPI php_io_registration *php_io_register_stream(php_stream *stream, php_socket_t fd, uint32_t event,
+		php_io_trigger trigger)
+{
+	return php_io_register(&stream->io_registrations, stream, NULL, fd, event, trigger);
+}
+
+PHPAPI php_io_registration *php_io_register_handle(php_poll_handle_object *handle, uint32_t event, php_io_trigger trigger)
+{
+	return php_io_register(&handle->registrations, NULL, handle, php_poll_handle_get_fd(handle), event, trigger);
+}
+
+PHPAPI void php_io_unregister(php_io_registration *reg)
+{
+	php_io_hooks *hooks = FG(io_hooks);
+
+	php_io_registration_unlink(reg);
+	if (hooks && reg->generation == FG(io_hooks_generation) && hooks->ops->remove) {
+		php_io_hooks_lock();
+		hooks->ops->remove(hooks, reg);
 		php_io_hooks_unlock();
 	}
-	p->registered = false;
-	if (p->op.queue) {
-		p->op.queue->ops->orphan(p->op.queue, &p->op);
+	php_io_registration_detach_zobj(reg);
+	if (reg->in_add) {
+		reg->dead = true;
+		return;
 	}
-	php_io_op_detach_zobj(&p->op);
-
-	php_io_persistent_op **link = &handle->persistent;
-	while (*link != p) {
-		link = &(*link)->next_on_handle;
-	}
-	*link = p->next_on_handle;
-
-	if (p->prev) {
-		p->prev->next = p->next;
-	} else {
-		FG(io_persistent_ops) = p->next;
-	}
-	if (p->next) {
-		p->next->prev = p->prev;
-	}
-
-	OBJ_RELEASE(&handle->std);
-	efree(p);
+	php_io_registration_free(reg);
 }
 
-PHPAPI void php_io_op_persistent_release(zend_object *handle_obj, uint32_t events)
+PHPAPI void php_io_unregister_all(php_io_registration **list)
 {
-	php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(handle_obj);
-	for (php_io_persistent_op *p = handle->persistent; p; p = p->next_on_handle) {
-		if (p->op.u.poll.events == events) {
-			php_io_persistent_free(p);
-			return;
-		}
+	while (*list) {
+		php_io_unregister(*list);
 	}
 }
 
-PHPAPI void php_io_handle_release_ops(zend_object *handle_obj)
+PHPAPI php_poll_handle_object *php_io_registration_get_handle(php_io_registration *reg)
 {
-	php_poll_handle_object *handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(handle_obj);
-	while (handle->persistent) {
-		php_io_persistent_free(handle->persistent);
+	if (!reg->handle && reg->stream) {
+		zval handle_zv;
+		php_stream_poll_weak_handle_from_stream(&handle_zv, reg->stream);
+		reg->handle = PHP_POLL_HANDLE_OBJ_FROM_ZV(&handle_zv);
 	}
+	return reg->handle;
 }
 
-/* Registration */
+/* Hooks */
 
-PHPAPI zend_result php_io_hooks_register(const php_io_hooks *hooks, size_t size, void *data)
+PHPAPI zend_result php_io_hooks_register(php_io_hooks *hooks)
 {
-	php_io_hooks_state *state = FG(io_hooks);
+	php_io_hooks *current = FG(io_hooks);
 
 	/* Not from add, remove or a dtor of the provider being replaced */
 	if (FG(io_hooks_locked)) {
@@ -333,46 +382,33 @@ PHPAPI zend_result php_io_hooks_register(const php_io_hooks *hooks, size_t size,
 	}
 
 	if (hooks == NULL) {
-		if (state) {
+		if (current) {
 			FG(io_hooks) = NULL;
-			/* The outgoing provider dropped its registrations; the next one
-			 * sees every persistent op as new */
-			for (php_io_persistent_op *p = FG(io_persistent_ops); p; p = p->next) {
-				p->registered = false;
+			/* Its registrations end without remove(): the next provider sees add() again */
+			for (php_io_registration *reg = FG(io_registrations); reg; reg = reg->gnext) {
+				php_io_registration_detach_zobj(reg);
 			}
-			if (state->hooks.dtor) {
+			if (current->ops->dtor) {
 				php_io_hooks_lock();
-				state->hooks.dtor(state->data);
+				current->ops->dtor(current);
 				php_io_hooks_unlock();
 			}
-			efree(state);
 		}
 		return SUCCESS;
 	}
 
-	if (state) {
+	if (current) {
 		return FAILURE;
 	}
 
-	ZEND_ASSERT(size <= sizeof(php_io_hooks));
-	state = ecalloc(1, sizeof(*state));
-	memcpy(&state->hooks, hooks, size);
-	state->data = data;
-	FG(io_hooks) = state;
-
+	FG(io_hooks_generation)++;
+	FG(io_hooks) = hooks;
 	return SUCCESS;
 }
 
-PHPAPI const php_io_hooks *php_io_hooks_current(void **data)
+PHPAPI php_io_hooks *php_io_hooks_current(void)
 {
-	php_io_hooks_state *state = FG(io_hooks);
-	if (!state) {
-		return NULL;
-	}
-	if (data) {
-		*data = state->data;
-	}
-	return &state->hooks;
+	return FG(io_hooks);
 }
 
 PHPAPI bool php_io_hooks_active(void)
@@ -394,7 +430,7 @@ static void php_io_unfreeze_list(HashTable *list)
 PHPAPI void php_io_hooks_request_shutdown(void)
 {
 	FG(io_hooks_locked) = 0;
-	php_io_hooks_register(NULL, 0, NULL);
+	php_io_hooks_register(NULL);
 	FG(io_shut_down) = true;
 	if (FG(io_queue)) {
 		php_io_queue *q = FG(io_queue);
@@ -654,29 +690,10 @@ static void php_io_op_finish(php_io_op *op)
 			if (m->queue) {
 				m->queue->ops->orphan(m->queue, m);
 			}
-			if (!(m->flags & PHP_IO_OP_F_PERSISTENT)) {
-				php_io_op_detach_zobj(m);
-			}
+			php_io_op_detach_zobj(m);
 		}
 	}
-	if (!(op->flags & PHP_IO_OP_F_PERSISTENT)) {
-		php_io_op_detach_zobj(op);
-	}
-}
-
-/* A provider installed after a persistent op was created has not seen it */
-static void php_io_op_register_persistent(php_io_op *op)
-{
-	if (op->flags & PHP_IO_OP_F_PERSISTENT) {
-		php_io_persistent_register((php_io_persistent_op *) op);
-	}
-	if (op->type == PHP_IO_OP_ANY) {
-		for (uint32_t i = 0; i < op->u.any.n; i++) {
-			if (op->u.any.ops[i]->flags & PHP_IO_OP_F_PERSISTENT) {
-				php_io_persistent_register((php_io_persistent_op *) op->u.any.ops[i]);
-			}
-		}
-	}
+	php_io_op_detach_zobj(op);
 }
 
 static php_io_queue *php_io_core_queue(void)
@@ -906,26 +923,14 @@ static bool php_io_result_valid(const php_io_op *op, const php_io_op_result *res
 
 static zend_result php_io_run_ex(php_io_op *op, php_io_op_result *result)
 {
-	if (FG(io_hooks)) {
-		zend_object *pending = EG(exception);
-		php_io_op_register_persistent(op);
-		if (EG(exception) != pending) {
-			result->status = PHP_IO_CANCELLED;
-			result->res = -1;
-			result->error = ECANCELED;
-			return FAILURE;
-		}
-	}
-
-	/* add() may have replaced the provider */
-	php_io_hooks_state *state = FG(io_hooks);
-	if (state) {
+	php_io_hooks *hooks = FG(io_hooks);
+	if (hooks) {
 		php_io_op_clear_outputs(op);
 		result->status = PHP_IO_UNSUPPORTED;
 		result->index = 0;
 		result->res = 0;
 		result->error = 0;
-		zend_result rc = state->hooks.run(state->data, op, result);
+		zend_result rc = hooks->ops->run(hooks, op, result);
 		php_io_op_finish(op);
 
 		if (rc == SUCCESS && !php_io_result_valid(op, result)) {
@@ -1035,8 +1040,23 @@ static void php_io_frame_end(php_io_frame *f, php_io_op *op)
 
 static zend_always_inline uint32_t php_io_hook_flags(void)
 {
-	php_io_hooks_state *state = FG(io_hooks);
-	return state ? state->hooks.flags : 0;
+	return FG(io_hooks) ? FG(io_hooks)->flags : 0;
+}
+
+/* A wait on a stream's pair that reaches the provider registers the pair, as Edge or as Level when
+ * that is all the provider takes; an add() that threw cancels the wait */
+static zend_result php_io_op_register_wait(php_io_op *op, php_stream *stream, uint32_t event)
+{
+	if (!stream || !FG(io_hooks) || !(event == PHP_POLL_READ || event == PHP_POLL_WRITE)) {
+		return SUCCESS;
+	}
+	zend_object *pending = EG(exception);
+	op->registration = php_io_register_stream(stream, op->fd, event, PHP_IO_TRIGGER_EDGE);
+	if (EG(exception) != pending) {
+		php_io_set_errno(ECANCELED);
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 
 PHPAPI int php_io_poll(php_stream *stream, php_socket_t fd, uint32_t events, php_deadline *dl)
@@ -1050,7 +1070,10 @@ PHPAPI int php_io_poll(php_stream *stream, php_socket_t fd, uint32_t events, php
 	}
 	php_io_op_poll(&op, f.handle, fd, events, *dl);
 	op.stream = stream;
-	zend_result rc = php_io_run(&op, &result);
+	zend_result rc = php_io_op_register_wait(&op, stream, events);
+	if (rc == SUCCESS) {
+		rc = php_io_run(&op, &result);
+	}
 	php_io_frame_end(&f, &op);
 
 	if (rc == FAILURE) {
@@ -1106,16 +1129,17 @@ typedef ssize_t (*php_io_sock_syscall)(const php_io_sock_call *c);
 typedef void (*php_io_sock_prep)(php_io_op *op, zend_object *handle, php_stream *stream,
 		const php_io_sock_call *c, php_deadline dl);
 
-/* The descriptor ladder: the syscall first and the op on EAGAIN, or the op first with
- * F_DIRECT; Ready means retry the syscall, Unsupported means syscall first from now on. */
+/* The descriptor ladder: the syscall first and the op on EAGAIN, or the op first with the direct
+ * flag; Ready means retry the syscall, Unsupported means syscall first from now on. */
 static zend_always_inline ssize_t php_io_descriptor_op(php_stream *stream, php_deadline *dl,
-		php_io_sock_syscall syscall_fn, php_io_sock_prep prep, const php_io_sock_call *c)
+		uint32_t direct_flag, php_io_sock_syscall syscall_fn, php_io_sock_prep prep,
+		const php_io_sock_call *c)
 {
 	php_io_frame f;
 	php_io_op op;
 	php_io_op_result result;
 	ssize_t ret;
-	bool direct = (php_io_hook_flags() & PHP_IO_HOOKS_F_DIRECT) != 0;
+	bool direct = (php_io_hook_flags() & direct_flag) != 0;
 	bool waited = false;
 
 	if (php_io_frame_begin(&f, stream) == FAILURE) {
@@ -1135,7 +1159,8 @@ static zend_always_inline ssize_t php_io_descriptor_op(php_stream *stream, php_d
 		}
 		prep(&op, f.handle, stream, c, *dl);
 		op.stream = stream;
-		if (php_io_run(&op, &result) == FAILURE) {
+		if (php_io_op_register_wait(&op, stream, op.ready_events) == FAILURE
+				|| php_io_run(&op, &result) == FAILURE) {
 			php_io_set_errno(ECANCELED);
 			ret = -1;
 			break;
@@ -1185,7 +1210,7 @@ PHPAPI ssize_t php_io_recv(php_stream *stream, php_socket_t fd, void *buf, size_
 		php_deadline *dl)
 {
 	php_io_sock_call c = { .fd = fd, .buf = buf, .len = len, .flags = flags };
-	return php_io_descriptor_op(stream, dl, php_io_recv_syscall, php_io_recv_prep, &c);
+	return php_io_descriptor_op(stream, dl, PHP_IO_HOOKS_F_DIRECT_DATA, php_io_recv_syscall, php_io_recv_prep, &c);
 }
 
 static ssize_t php_io_send_syscall(const php_io_sock_call *c)
@@ -1203,7 +1228,7 @@ PHPAPI ssize_t php_io_send(php_stream *stream, php_socket_t fd, const void *buf,
 		php_deadline *dl)
 {
 	php_io_sock_call c = { .fd = fd, .buf = (void *) buf, .len = len, .flags = flags };
-	return php_io_descriptor_op(stream, dl, php_io_send_syscall, php_io_send_prep, &c);
+	return php_io_descriptor_op(stream, dl, PHP_IO_HOOKS_F_DIRECT_DATA, php_io_send_syscall, php_io_send_prep, &c);
 }
 
 /* The readiness form of the ladder, for calls without a data op: a Poll op on EAGAIN, bounded by
@@ -1278,7 +1303,7 @@ PHPAPI php_socket_t php_io_accept(php_stream *stream, php_socket_t fd, struct so
 		socklen_t *addrlen, php_deadline *dl)
 {
 	php_io_sock_call c = { .fd = fd, .addr = addr, .addrlen = addrlen };
-	return php_io_descriptor_op(stream, dl, php_io_accept_syscall, php_io_accept_prep, &c);
+	return php_io_descriptor_op(stream, dl, PHP_IO_HOOKS_F_DIRECT_ACCEPT, php_io_accept_syscall, php_io_accept_prep, &c);
 }
 
 /* A non-blocking connect that is under way: EINPROGRESS, EAGAIN on some
@@ -1299,7 +1324,7 @@ PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sock
 	php_io_op op;
 	php_io_op_result result;
 	int ret = 0;
-	bool direct = (php_io_hook_flags() & PHP_IO_HOOKS_F_DIRECT) != 0;
+	bool direct = (php_io_hook_flags() & PHP_IO_HOOKS_F_DIRECT_DATA) != 0;
 	bool started = false; /* our own connect() is in progress */
 
 	if (php_io_frame_begin(&f, stream) == FAILURE) {
@@ -1321,7 +1346,8 @@ PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sock
 	for (;;) {
 		php_io_op_connect(&op, f.handle, fd, addr, addrlen, *dl);
 		op.stream = stream;
-		if (php_io_run(&op, &result) == FAILURE) {
+		if (php_io_op_register_wait(&op, stream, PHP_POLL_WRITE) == FAILURE
+				|| php_io_run(&op, &result) == FAILURE) {
 			php_io_set_errno(ECANCELED);
 			ret = -1;
 			break;
@@ -1346,7 +1372,8 @@ PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sock
 			 * way: wait for its outcome like after a readiness report */
 			php_io_op_poll(&op, f.handle, fd, PHP_POLL_WRITE, *dl);
 			op.stream = stream;
-			if (php_io_run(&op, &result) == FAILURE) {
+			if (php_io_op_register_wait(&op, stream, PHP_POLL_WRITE) == FAILURE
+					|| php_io_run(&op, &result) == FAILURE) {
 				php_io_set_errno(ECANCELED);
 				ret = -1;
 				break;
@@ -1407,7 +1434,7 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 
 	bool nonblock = !regular && dl->hrtime == 0;
 	bool offload = FG(io_hooks) && !nonblock
-			&& (regular ? (flags & PHP_IO_HOOKS_F_FILES) : (flags & (PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_DIRECT)));
+			&& (regular ? (flags & PHP_IO_HOOKS_F_FILES) : (flags & (PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_DIRECT_DATA)));
 	bool ready = nonblock || !FG(io_hooks);
 	for (;;) {
 		if (offload) {
@@ -1416,7 +1443,8 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 				op.flags |= php_io_stream_buf_flag(stream, buf);
 			}
 			op.stream = stream;
-			if (php_io_run(&op, &result) == FAILURE) {
+			if ((!regular && php_io_op_register_wait(&op, stream, op.ready_events) == FAILURE)
+					|| php_io_run(&op, &result) == FAILURE) {
 				php_io_set_errno(ECANCELED);
 				ret = -1;
 				break;
@@ -1438,7 +1466,8 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 			uint32_t events = prep == php_io_op_read ? PHP_POLL_READ : PHP_POLL_WRITE;
 			php_io_op_poll(&op, f.handle, fd, events, *dl);
 			op.stream = stream;
-			if (php_io_run(&op, &result) == FAILURE) {
+			if (php_io_op_register_wait(&op, stream, events) == FAILURE
+					|| php_io_run(&op, &result) == FAILURE) {
 				php_io_set_errno(ECANCELED);
 				ret = -1;
 				break;

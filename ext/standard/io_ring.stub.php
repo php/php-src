@@ -39,9 +39,9 @@ namespace Io\Ring {
 
         public function cancel(\Io\Operation $op): void {}
 
-        public function add(\Io\Operation $op): void {}
+        public function add(\Io\Registration $registration): void {}
 
-        public function remove(\Io\Operation $op): void {}
+        public function remove(\Io\Registration $registration): void {}
 
         /**
          * @return list<\Io\Completion>

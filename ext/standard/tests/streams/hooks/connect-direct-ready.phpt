@@ -9,7 +9,7 @@ if (PHP_OS_FAMILY === 'Windows') die('skip unix sockets');
 final class ReadyOnly implements Io\Hooks\Hooks
 {
     public array $ops = [];
-    public function getCapabilities(): array { return [Io\Hooks\Capability::Direct]; }
+    public function getCapabilities(): array { return [Io\Hooks\Capability::DirectData]; }
     public function run(Io\Operation $op): Io\Completion
     {
         $this->ops[] = $op::class;
@@ -17,8 +17,8 @@ final class ReadyOnly implements Io\Hooks\Hooks
             ? $op->completeReady($op->getEvents())
             : $op->complete(Io\CompletionStatus::Unsupported);
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 $path = sys_get_temp_dir() . '/connect-direct-ready-' . getmypid() . '.sock';

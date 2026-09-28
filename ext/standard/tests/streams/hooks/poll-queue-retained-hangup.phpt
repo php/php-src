@@ -6,15 +6,18 @@ $q = new Io\Poll\OperationQueue();
 [$a, $b] = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 $h = new class($q, $b) implements Io\Hooks\Hooks {
     public int $runs = 0;
+    public array $added = [];
     public function __construct(public $q, public $b) {}
-    public function getCapabilities(): array { return []; }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function getCapabilities(): array { return [Io\Hooks\Capability::LevelRegistrations]; }
+    public function add(Io\Registration $registration): void {
+        $this->added[] = [$registration->getEvent(), $registration->getTrigger()];
+        $this->q->add($registration);
+    }
+    public function remove(Io\Registration $registration): void { $this->q->remove($registration); }
     public function run(Io\Operation $op): Io\Completion {
         if ($this->runs++ == 0) {
             fwrite($this->b, "x");
         }
-        $this->q->add($op);
         $this->q->submit($op);
         foreach ($this->q->waitCompletions() as $c) {}
         return $c;
@@ -22,8 +25,9 @@ $h = new class($q, $b) implements Io\Hooks\Hooks {
 };
 Io\Hooks\set_hooks($h);
 var_dump(fread($a, 10));
+// Uninstalling ends the registration without remove(): the queue keeps the record
 Io\Hooks\set_hooks(null);
-var_dump($h->runs > 0);
+var_dump($h->runs > 0, $h->added);
 fclose($b);
 
 $cpu = function () {
@@ -38,5 +42,14 @@ var_dump($cpu() - $before < 0.25);
 --EXPECT--
 string(1) "x"
 bool(true)
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    enum(Io\Poll\Event::Read)
+    [1]=>
+    enum(Io\Poll\Trigger::Level)
+  }
+}
 int(0)
 bool(true)

@@ -429,7 +429,8 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	FG(io_hooks) = NULL;
 	FG(io_queue) = NULL;
 	FG(io_queue_pid) = 0;
-	FG(io_persistent_ops) = NULL;
+	FG(io_hooks_generation) = 0;
+	FG(io_registrations) = NULL;
 	FG(io_ops_in_flight) = 0;
 	FG(io_orphans) = NULL;
 	FG(io_reaped) = NULL;

@@ -69,14 +69,14 @@ class Scheduler implements \Io\Hooks\Hooks
         return \Fiber::suspend();
     }
 
-    public function add(\Io\Operation $op): void
+    public function add(\Io\Registration $registration): void
     {
-        $this->queue->add($op);
+        $this->queue->add($registration);
     }
 
-    public function remove(\Io\Operation $op): void
+    public function remove(\Io\Registration $registration): void
     {
-        $this->queue->remove($op);
+        $this->queue->remove($registration);
     }
 
     /* The event loop, called by the script on the main fiber. */

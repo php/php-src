@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_ring.stub.php instead.
- * Stub hash: d7f7fd3ba5a5e0573a078d7dbf752b1a60b1ce00
+ * Stub hash: e1e062a1753daca76bddf8e0411fc77c8a5c038e
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -23,9 +23,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Ring_Engine_cancel, 0, 
 	ZEND_ARG_OBJ_INFO(0, op, Io\\Operation, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Io_Ring_Engine_add arginfo_class_Io_Ring_Engine_cancel
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Ring_Engine_add, 0, 1, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, registration, Io\\Registration, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Io_Ring_Engine_remove arginfo_class_Io_Ring_Engine_cancel
+#define arginfo_class_Io_Ring_Engine_remove arginfo_class_Io_Ring_Engine_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Ring_Engine_waitCompletions, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timeout, Time\\Duration, 1, "null")

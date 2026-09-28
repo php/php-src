@@ -32,6 +32,9 @@ namespace Io {
          */
         public function getHandle(): ?Poll\Handle {}
 
+        /** The registration of the pair a wait is on; null when the pair is not registered. */
+        public function getRegistration(): ?Registration {}
+
         /** @return list<Poll\Event> the events that let the op proceed; empty when there is no handle */
         public function getEvents(): array {}
 
@@ -81,17 +84,43 @@ namespace Io {
 
     class InvalidOperationException extends IoException {}
 
+    /**
+     * A registered (handle, event) pair: waits on it repeat until it is removed. The core
+     * creates it and hands the same object to Hooks::add(), Hooks::remove() and every wait's
+     * Operation::getRegistration(). Valid from add() until remove() returned or the provider
+     * was replaced.
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Registration
+    {
+        private function __construct() {}
+
+        /** The pair's handle, created on the first call. */
+        public function getHandle(): Poll\WeakHandle {}
+
+        /** Read or Write */
+        public function getEvent(): Poll\Event {}
+
+        public function getTrigger(): Poll\Trigger {}
+
+        /** False once the registration ended. */
+        public function isValid(): bool {}
+    }
+
+    class InvalidRegistrationException extends IoException {}
+
     interface OperationQueue
     {
         public function submit(Operation $op, mixed $data = null): void;
 
         public function cancel(Operation $op): void;
 
-        /** Persistent op: set up its registration once, before the first submit. */
-        public function add(Operation $op): void;
+        /** Waits on the pair will repeat until remove(); a trigger the queue cannot keep is served one-shot. */
+        public function add(Registration $registration): void;
 
-        /** Persistent op: drop its registration. */
-        public function remove(Operation $op): void;
+        /** Before the descriptor closes; no wait on the pair is in flight. */
+        public function remove(Registration $registration): void;
 
         /** @return list<Completion> */
         public function waitCompletions(?\Time\Duration $timeout = null, ?int $max = null): array;
@@ -106,10 +135,7 @@ namespace Io {
 
 namespace Io\Operation {
 
-    final class Poll extends \Io\Operation
-    {
-        public function isPersistent(): bool {}
-    }
+    final class Poll extends \Io\Operation {}
 
     final class Timer extends \Io\Operation {}
 
@@ -210,6 +236,14 @@ namespace Io\Operation {
 
 namespace Io\Poll {
 
+    /** What the waits on a registered pair tolerate. */
+    enum Trigger {
+        /** Every readiness wait follows a drain: recorded readiness may answer it. */
+        case Edge;
+        /** Readiness must be current at arm time. */
+        case Level;
+    }
+
     /**
      * @strict-properties
      * @not-serializable
@@ -225,9 +259,9 @@ namespace Io\Poll {
 
         public function cancel(\Io\Operation $op): void {}
 
-        public function add(\Io\Operation $op): void {}
+        public function add(\Io\Registration $registration): void {}
 
-        public function remove(\Io\Operation $op): void {}
+        public function remove(\Io\Registration $registration): void {}
 
         /** @return list<\Io\Completion> */
         public function waitCompletions(?\Time\Duration $timeout = null, ?int $max = null): array {}
@@ -252,18 +286,27 @@ namespace Io\Hooks {
          */
         public function run(\Io\Operation $op): \Io\Completion;
 
-        /** A persistent operation was created. */
-        public function add(\Io\Operation $op): void;
+        /**
+         * Waits on the pair will repeat until remove(). Called only with the capability for
+         * the pair's trigger, at most once per pair.
+         */
+        public function add(\Io\Registration $registration): void;
 
-        /** A persistent operation is going away. */
-        public function remove(\Io\Operation $op): void;
+        /** The pair is done, before its descriptor closes; no wait on it is in flight. */
+        public function remove(\Io\Registration $registration): void;
     }
 
     enum Capability {
         /** Regular file ops and Fsync reach the provider, which performs them itself. */
         case Files;
-        /** Descriptor ops are submitted before the core's syscall-first attempt. */
-        case Direct;
+        /** Read, Write, Recv, Send and Connect are submitted before the core's syscall-first attempt. */
+        case DirectData;
+        /** Accept is submitted before accept(). */
+        case DirectAccept;
+        /** add() and remove() with Trigger::Edge. */
+        case EdgeRegistrations;
+        /** add() and remove() with Trigger::Level. */
+        case LevelRegistrations;
     }
 
     /** Installs the provider, returns the previous userland one. Throws if a C provider is active. */

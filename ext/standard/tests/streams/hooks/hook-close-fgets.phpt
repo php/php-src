@@ -13,8 +13,8 @@ class CloseOnceHooks implements Io\Hooks\Hooks {
         fclose($op->getHandle()->getStream());
         return $op->completeReady($op->getEvents());
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 Io\Hooks\set_hooks(new CloseOnceHooks());

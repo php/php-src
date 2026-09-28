@@ -9,8 +9,8 @@ if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not availab
 $GLOBALS['ring'] = new Io\Ring\Engine();
 Io\Hooks\set_hooks(new class implements Io\Hooks\Hooks {
     public function getCapabilities(): array { return $GLOBALS['ring']->getHookCapabilities(); }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
     public function run(Io\Operation $op): Io\Completion {
         $GLOBALS['ring']->submit($op, "data");
         $GLOBALS['kept'] = $op;

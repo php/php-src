@@ -49,8 +49,8 @@ final class Recorder implements Io\Hooks\Hooks
         return $op->completeReady($op->getEvents());
     }
 
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 $recorder = new Recorder();
@@ -76,8 +76,8 @@ Io\Hooks\set_hooks(new class($last) implements Io\Hooks\Hooks {
         $this->last = $op;
         return $op->complete(Io\CompletionStatus::Done);
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 });
 usleep(1);
 var_dump($last instanceof Io\Operation\Timer, $last->isValid());

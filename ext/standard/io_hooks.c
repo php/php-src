@@ -25,6 +25,7 @@
 #include "io_hooks_arginfo.h"
 #include <signal.h>
 #include "io_hooks_decl.h"
+#include "io_poll_decl.h"
 
 #include <errno.h>
 #ifndef PHP_WIN32
@@ -50,6 +51,9 @@ static zend_class_entry *php_io_operation_getaddrinfo_ce;
 static zend_class_entry *php_io_operation_getnameinfo_ce;
 static zend_class_entry *php_io_completion_ce;
 static zend_class_entry *php_io_invalid_operation_exception_ce;
+static zend_class_entry *php_io_registration_ce;
+static zend_class_entry *php_io_invalid_registration_exception_ce;
+static zend_class_entry *php_io_poll_trigger_ce;
 PHPAPI zend_class_entry *php_io_operation_queue_ce;
 static zend_class_entry *php_io_poll_operation_queue_ce;
 static zend_class_entry *php_io_hooks_ce;
@@ -57,6 +61,7 @@ static zend_class_entry *php_io_hooks_capability_ce;
 static zend_class_entry *php_io_poll_context_ce;
 
 static zend_object_handlers php_io_operation_handlers;
+static zend_object_handlers php_io_registration_handlers;
 static zend_object_handlers php_io_completion_handlers;
 PHPAPI zend_object_handlers php_io_opqueue_handlers;
 
@@ -65,6 +70,11 @@ typedef struct {
 	zend_object *lazy_handle; /* created by getHandle() */
 	zend_object std;
 } php_io_operation_obj;
+
+typedef struct {
+	php_io_registration *reg; /* NULL once ended */
+	zend_object std;
+} php_io_registration_obj;
 
 typedef struct {
 	zend_object *operation;
@@ -88,6 +98,7 @@ struct _php_io_opqueue_sub {
 };
 
 #define PHP_IO_OPERATION_FROM_ZOBJ(o) ZEND_CONTAINER_OF(o, php_io_operation_obj, std)
+#define PHP_IO_REGISTRATION_FROM_ZOBJ(o) ZEND_CONTAINER_OF(o, php_io_registration_obj, std)
 #define PHP_IO_COMPLETION_FROM_ZOBJ(o) ZEND_CONTAINER_OF(o, php_io_completion_obj, std)
 
 /* Completion status enum */
@@ -201,6 +212,90 @@ static uint32_t php_io_op_events(php_io_op *op)
 	return op->type == PHP_IO_OP_POLL ? op->u.poll.events : op->ready_events;
 }
 
+/* Registration objects */
+
+static zend_object *php_io_registration_create_object(zend_class_entry *ce)
+{
+	php_io_registration_obj *intern = zend_object_alloc(sizeof(php_io_registration_obj), ce);
+	zend_object_std_init(&intern->std, ce);
+	object_properties_init(&intern->std, ce);
+	intern->reg = NULL;
+	return &intern->std;
+}
+
+/* The same object for the record's life: created at the first userland add() or
+ * getRegistration(), released by the core when the record ends */
+static zend_object *php_io_registration_get_zobj(php_io_registration *reg)
+{
+	if (!reg->zobj) {
+		zend_object *zobj = php_io_registration_create_object(php_io_registration_ce);
+		PHP_IO_REGISTRATION_FROM_ZOBJ(zobj)->reg = reg;
+		reg->zobj = zobj;
+	}
+	return reg->zobj;
+}
+
+static void php_io_registration_detach(zend_object *zobj)
+{
+	PHP_IO_REGISTRATION_FROM_ZOBJ(zobj)->reg = NULL;
+}
+
+static php_io_registration *php_io_registration_fetch(zval *zv)
+{
+	php_io_registration_obj *intern = PHP_IO_REGISTRATION_FROM_ZOBJ(Z_OBJ_P(zv));
+	if (!intern->reg) {
+		zend_throw_exception(php_io_invalid_registration_exception_ce, "The registration has ended", 0);
+	}
+	return intern->reg;
+}
+
+PHP_METHOD(Io_Registration, __construct)
+{
+	zend_throw_error(NULL, "Registrations are created by the engine");
+}
+
+PHP_METHOD(Io_Registration, getHandle)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_io_registration *reg = php_io_registration_fetch(ZEND_THIS);
+	if (!reg) {
+		RETURN_THROWS();
+	}
+	RETURN_OBJ_COPY(&php_io_registration_get_handle(reg)->std);
+}
+
+PHP_METHOD(Io_Registration, getEvent)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_io_registration *reg = php_io_registration_fetch(ZEND_THIS);
+	if (!reg) {
+		RETURN_THROWS();
+	}
+	RETURN_OBJ_COPY(zend_enum_get_case_by_id(php_io_poll_event_class_entry,
+			reg->event == PHP_POLL_READ ? ZEND_ENUM_Io_Poll_Event_Read : ZEND_ENUM_Io_Poll_Event_Write));
+}
+
+PHP_METHOD(Io_Registration, getTrigger)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_io_registration *reg = php_io_registration_fetch(ZEND_THIS);
+	if (!reg) {
+		RETURN_THROWS();
+	}
+	RETURN_OBJ_COPY(zend_enum_get_case_by_id(php_io_poll_trigger_ce,
+			reg->trigger == PHP_IO_TRIGGER_EDGE ? ZEND_ENUM_Io_Poll_Trigger_Edge : ZEND_ENUM_Io_Poll_Trigger_Level));
+}
+
+PHP_METHOD(Io_Registration, isValid)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_BOOL(PHP_IO_REGISTRATION_FROM_ZOBJ(Z_OBJ_P(ZEND_THIS))->reg != NULL);
+}
+
 /* Completion objects */
 
 static zend_object *php_io_completion_create_object(zend_class_entry *ce)
@@ -309,6 +404,20 @@ PHP_METHOD(Io_Operation, getHandle)
 	RETURN_OBJ_COPY(intern->lazy_handle);
 }
 
+PHP_METHOD(Io_Operation, getRegistration)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_io_op *op = php_io_operation_fetch(ZEND_THIS);
+	if (!op) {
+		RETURN_THROWS();
+	}
+	if (!op->registration) {
+		RETURN_NULL();
+	}
+	RETURN_OBJ_COPY(php_io_registration_get_zobj(op->registration));
+}
+
 PHP_METHOD(Io_Operation, getEvents)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -391,19 +500,6 @@ PHP_METHOD(Io_Operation, completeReady)
 	php_io_status status = (op->type == PHP_IO_OP_POLL || op->type == PHP_IO_OP_TIMER)
 			? PHP_IO_DONE : PHP_IO_READY;
 	php_io_completion_create(return_value, op, Z_OBJ_P(ZEND_THIS), status, events, 0, NULL, NULL);
-}
-
-/* Io\Operation\Poll */
-
-PHP_METHOD(Io_Operation_Poll, isPersistent)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	php_io_op *op = php_io_operation_fetch(ZEND_THIS);
-	if (!op) {
-		RETURN_THROWS();
-	}
-	RETURN_BOOL(op->flags & PHP_IO_OP_F_PERSISTENT);
 }
 
 /* Data operations */
@@ -1038,40 +1134,44 @@ PHP_METHOD(Io_Poll_OperationQueue, cancel)
 
 PHP_METHOD(Io_Poll_OperationQueue, add)
 {
-	zval *op_zv;
+	zval *reg_zv;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(op_zv, php_io_operation_ce)
+		Z_PARAM_OBJECT_OF_CLASS(reg_zv, php_io_registration_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
 	if (!intern) {
 		RETURN_THROWS();
 	}
-	php_io_op *op = php_io_operation_fetch(op_zv);
-	if (!op) {
+	php_io_registration *reg = php_io_registration_fetch(reg_zv);
+	if (!reg) {
 		RETURN_THROWS();
 	}
-	intern->queue->ops->add(intern->queue, op);
+	if (intern->queue->ops->add(intern->queue, reg) == FAILURE) {
+		zend_throw_exception_ex(php_io_exception_class_entry, errno,
+				"Failed to add the registration: %s", strerror(errno));
+		RETURN_THROWS();
+	}
 }
 
 PHP_METHOD(Io_Poll_OperationQueue, remove)
 {
-	zval *op_zv;
+	zval *reg_zv;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(op_zv, php_io_operation_ce)
+		Z_PARAM_OBJECT_OF_CLASS(reg_zv, php_io_registration_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_io_opqueue_obj *intern = php_io_opqueue_fetch(ZEND_THIS);
 	if (!intern) {
 		RETURN_THROWS();
 	}
-	php_io_op *op = php_io_operation_fetch(op_zv);
-	if (!op) {
+	php_io_registration *reg = php_io_registration_fetch(reg_zv);
+	if (!reg) {
 		RETURN_THROWS();
 	}
-	intern->queue->ops->remove(intern->queue, op);
+	intern->queue->ops->remove(intern->queue, reg);
 }
 
 /* Build the Completion for one delivered completion, members of an Any included */
@@ -1117,14 +1217,21 @@ PHP_METHOD(Io_Poll_OperationQueue, waitCompletions)
 		RETURN_THROWS();
 	}
 
-	struct timespec timeout_ts;
+	/* A zero duration is one reap that never blocks: the non-blocking deadline */
+	php_deadline dl;
 	if (timeout) {
 		if (timeout->duration.negative) {
 			zend_argument_value_error(1, "must not be negative");
 			RETURN_THROWS();
 		}
-		timeout_ts.tv_sec = timeout->duration.seconds;
-		timeout_ts.tv_nsec = timeout->duration.nanoseconds;
+		if (timeout->duration.seconds == 0 && timeout->duration.nanoseconds == 0) {
+			php_deadline_init_nonblock(&dl);
+		} else if ((zend_hrtime_t) timeout->duration.seconds >= ZEND_HRTIME_T_MAX / ZEND_NANO_IN_SEC) {
+			php_deadline_init_infinite(&dl);
+		} else {
+			dl = php_io_deadline_from_ns((zend_hrtime_t) timeout->duration.seconds * ZEND_NANO_IN_SEC
+					+ (zend_hrtime_t) timeout->duration.nanoseconds);
+		}
 	}
 
 	if (max_is_null) {
@@ -1137,7 +1244,7 @@ PHP_METHOD(Io_Poll_OperationQueue, waitCompletions)
 	}
 
 	php_io_queue_completion *completions = safe_emalloc((size_t) max, sizeof(*completions), 0);
-	int n = intern->queue->ops->wait(intern->queue, completions, (uint32_t) max, timeout ? &timeout_ts : NULL);
+	int n = intern->queue->ops->wait(intern->queue, completions, (uint32_t) max, timeout ? &dl : NULL);
 	if (n < 0) {
 		int err = errno;
 		efree(completions);
@@ -1178,18 +1285,26 @@ PHP_METHOD(Io_Poll_OperationQueue, countPending)
 	RETURN_LONG(intern->queue->ops->count_pending(intern->queue));
 }
 
+static const struct {
+	uint32_t flag;
+	zend_long case_id;
+} php_io_hooks_capabilities[] = {
+	{ PHP_IO_HOOKS_F_FILES, ZEND_ENUM_Io_Hooks_Capability_Files },
+	{ PHP_IO_HOOKS_F_DIRECT_DATA, ZEND_ENUM_Io_Hooks_Capability_DirectData },
+	{ PHP_IO_HOOKS_F_DIRECT_ACCEPT, ZEND_ENUM_Io_Hooks_Capability_DirectAccept },
+	{ PHP_IO_HOOKS_F_EDGE_REGISTRATIONS, ZEND_ENUM_Io_Hooks_Capability_EdgeRegistrations },
+	{ PHP_IO_HOOKS_F_LEVEL_REGISTRATIONS, ZEND_ENUM_Io_Hooks_Capability_LevelRegistrations },
+};
+
 PHPAPI void php_io_hook_flags_to_capabilities(uint32_t flags, zval *rv)
 {
 	array_init(rv);
-	if (flags & PHP_IO_HOOKS_F_FILES) {
-		zval c;
-		ZVAL_OBJ_COPY(&c, zend_enum_get_case_by_id(php_io_hooks_capability_ce, ZEND_ENUM_Io_Hooks_Capability_Files));
-		zend_hash_next_index_insert_new(Z_ARRVAL_P(rv), &c);
-	}
-	if (flags & PHP_IO_HOOKS_F_DIRECT) {
-		zval c;
-		ZVAL_OBJ_COPY(&c, zend_enum_get_case_by_id(php_io_hooks_capability_ce, ZEND_ENUM_Io_Hooks_Capability_Direct));
-		zend_hash_next_index_insert_new(Z_ARRVAL_P(rv), &c);
+	for (size_t i = 0; i < sizeof(php_io_hooks_capabilities) / sizeof(php_io_hooks_capabilities[0]); i++) {
+		if (flags & php_io_hooks_capabilities[i].flag) {
+			zval c;
+			ZVAL_OBJ_COPY(&c, zend_enum_get_case_by_id(php_io_hooks_capability_ce, php_io_hooks_capabilities[i].case_id));
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(rv), &c);
+		}
 	}
 }
 
@@ -1207,11 +1322,14 @@ PHP_METHOD(Io_Poll_OperationQueue, getHookCapabilities)
 /* The userland provider adapter, installed as the C provider by set_hooks() */
 
 typedef struct {
+	php_io_hooks hooks;
 	zend_object *obj;
 	zend_fcall_info_cache run_fcc;
 	zend_fcall_info_cache add_fcc;
 	zend_fcall_info_cache remove_fcc;
-} php_io_hooks_php_data;
+} php_io_hooks_php;
+
+#define PHP_IO_HOOKS_PHP(h) ZEND_CONTAINER_OF(h, php_io_hooks_php, hooks)
 
 static void php_io_hooks_method_fcc(zend_object *obj, const char *name, zend_fcall_info_cache *fcc)
 {
@@ -1229,14 +1347,14 @@ static void php_io_hooks_method_fcc(zend_object *obj, const char *name, zend_fca
 }
 
 /* The provider may be replaced from inside run(): the call keeps its own
- * reference, and nothing of data is read after it */
-static void php_io_hooks_php_call(zend_fcall_info_cache *fcc, zval *retval, php_io_op *op)
+ * reference, and nothing of the provider is read after it */
+static void php_io_hooks_php_call(zend_fcall_info_cache *fcc, zval *retval, zend_object *arg_obj)
 {
 	zend_fcall_info_cache held = *fcc;
 	zval arg;
 
 	GC_ADDREF(held.object);
-	ZVAL_OBJ_COPY(&arg, php_io_operation_get_zobj(op));
+	ZVAL_OBJ_COPY(&arg, arg_obj);
 	zend_call_known_fcc(&held, retval, 1, &arg, NULL);
 	zval_ptr_dtor(&arg);
 	OBJ_RELEASE(held.object);
@@ -1264,14 +1382,13 @@ static bool php_io_op_result_is_data(php_io_op *op, const php_io_completion_obj 
 	}
 }
 
-static zend_result php_io_hooks_php_run(void *data, php_io_op *op, php_io_op_result *result)
+static zend_result php_io_hooks_php_run(php_io_hooks *hooks, php_io_op *op, php_io_op_result *result)
 {
-	php_io_hooks_php_data *php_data = data;
 	zend_object *zobj = php_io_operation_get_zobj(op);
 	zval retval;
 
 	ZVAL_UNDEF(&retval);
-	php_io_hooks_php_call(&php_data->run_fcc, &retval, op);
+	php_io_hooks_php_call(&PHP_IO_HOOKS_PHP(hooks)->run_fcc, &retval, zobj);
 
 	if (EG(exception)) {
 		zval_ptr_dtor(&retval);
@@ -1338,27 +1455,27 @@ static zend_result php_io_hooks_php_run(void *data, php_io_op *op, php_io_op_res
 	return SUCCESS;
 }
 
-static void php_io_hooks_php_add(void *data, php_io_op *op)
+static void php_io_hooks_php_add(php_io_hooks *hooks, php_io_registration *reg)
 {
-	php_io_hooks_php_call(&((php_io_hooks_php_data *) data)->add_fcc, NULL, op);
+	php_io_hooks_php_call(&PHP_IO_HOOKS_PHP(hooks)->add_fcc, NULL, php_io_registration_get_zobj(reg));
 }
 
-static void php_io_hooks_php_remove(void *data, php_io_op *op)
+static void php_io_hooks_php_remove(php_io_hooks *hooks, php_io_registration *reg)
 {
-	php_io_hooks_php_call(&((php_io_hooks_php_data *) data)->remove_fcc, NULL, op);
+	php_io_hooks_php_call(&PHP_IO_HOOKS_PHP(hooks)->remove_fcc, NULL, php_io_registration_get_zobj(reg));
 }
 
-static void php_io_hooks_php_dtor(void *data)
+static void php_io_hooks_php_dtor(php_io_hooks *hooks)
 {
-	php_io_hooks_php_data *php_data = data;
-	zend_fcc_dtor(&php_data->run_fcc);
-	zend_fcc_dtor(&php_data->add_fcc);
-	zend_fcc_dtor(&php_data->remove_fcc);
-	OBJ_RELEASE(php_data->obj);
-	efree(php_data);
+	php_io_hooks_php *php_hooks = PHP_IO_HOOKS_PHP(hooks);
+	zend_fcc_dtor(&php_hooks->run_fcc);
+	zend_fcc_dtor(&php_hooks->add_fcc);
+	zend_fcc_dtor(&php_hooks->remove_fcc);
+	OBJ_RELEASE(php_hooks->obj);
+	efree(php_hooks);
 }
 
-static const php_io_hooks php_io_hooks_php_adapter = {
+static const php_io_hooks_ops php_io_hooks_php_ops = {
 	.run = php_io_hooks_php_run,
 	.add = php_io_hooks_php_add,
 	.remove = php_io_hooks_php_remove,
@@ -1368,12 +1485,11 @@ static const php_io_hooks php_io_hooks_php_adapter = {
 /* The installed userland provider object, NULL for none or a C provider */
 static zend_object *php_io_hooks_php_current(void)
 {
-	void *data;
-	const php_io_hooks *hooks = php_io_hooks_current(&data);
-	if (!hooks || hooks->run != php_io_hooks_php_run) {
+	php_io_hooks *hooks = php_io_hooks_current();
+	if (!hooks || hooks->ops != &php_io_hooks_php_ops) {
 		return NULL;
 	}
-	return ((php_io_hooks_php_data *) data)->obj;
+	return PHP_IO_HOOKS_PHP(hooks)->obj;
 }
 
 static uint32_t php_io_hooks_capabilities_to_flags(zval *capabilities)
@@ -1386,13 +1502,11 @@ static uint32_t php_io_hooks_capabilities_to_flags(zval *capabilities)
 			zend_throw_error(NULL, "Io\\Hooks\\Hooks::getCapabilities() must return a list of Io\\Hooks\\Capability");
 			return 0;
 		}
-		switch (zend_enum_fetch_case_id(Z_OBJ_P(entry))) {
-			case ZEND_ENUM_Io_Hooks_Capability_Files:
-				flags |= PHP_IO_HOOKS_F_FILES;
-				break;
-			case ZEND_ENUM_Io_Hooks_Capability_Direct:
-				flags |= PHP_IO_HOOKS_F_DIRECT;
-				break;
+		zend_long case_id = zend_enum_fetch_case_id(Z_OBJ_P(entry));
+		for (size_t i = 0; i < sizeof(php_io_hooks_capabilities) / sizeof(php_io_hooks_capabilities[0]); i++) {
+			if (php_io_hooks_capabilities[i].case_id == case_id) {
+				flags |= php_io_hooks_capabilities[i].flag;
+			}
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1417,8 +1531,7 @@ PHP_FUNCTION(Io_Hooks_set_hooks)
 		RETURN_THROWS();
 	}
 
-	php_io_hooks hooks = php_io_hooks_php_adapter;
-	php_io_hooks_php_data *php_data = NULL;
+	php_io_hooks_php *php_hooks = NULL;
 
 	if (hooks_obj) {
 		zval capabilities;
@@ -1438,28 +1551,30 @@ PHP_FUNCTION(Io_Hooks_set_hooks)
 			zend_throw_error(NULL, "Io\\Hooks\\Hooks::getCapabilities() must return an array");
 			RETURN_THROWS();
 		}
-		hooks.flags = php_io_hooks_capabilities_to_flags(&capabilities);
+		uint32_t flags = php_io_hooks_capabilities_to_flags(&capabilities);
 		zval_ptr_dtor(&capabilities);
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
 
-		php_data = emalloc(sizeof(*php_data));
-		php_data->obj = hooks_obj;
+		php_hooks = emalloc(sizeof(*php_hooks));
+		php_hooks->hooks.ops = &php_io_hooks_php_ops;
+		php_hooks->hooks.flags = flags;
+		php_hooks->obj = hooks_obj;
 		GC_ADDREF(hooks_obj);
-		php_io_hooks_method_fcc(hooks_obj, "run", &php_data->run_fcc);
-		php_io_hooks_method_fcc(hooks_obj, "add", &php_data->add_fcc);
-		php_io_hooks_method_fcc(hooks_obj, "remove", &php_data->remove_fcc);
+		php_io_hooks_method_fcc(hooks_obj, "run", &php_hooks->run_fcc);
+		php_io_hooks_method_fcc(hooks_obj, "add", &php_hooks->add_fcc);
+		php_io_hooks_method_fcc(hooks_obj, "remove", &php_hooks->remove_fcc);
 	}
 
 	/* The previous provider is returned, so it survives its dtor */
 	if (previous) {
 		GC_ADDREF(previous);
 	}
-	php_io_hooks_register(NULL, 0, NULL);
+	php_io_hooks_register(NULL);
 
-	if (php_data) {
-		zend_result rc = php_io_hooks_register(&hooks, sizeof(hooks), php_data);
+	if (php_hooks) {
+		zend_result rc = php_io_hooks_register(&php_hooks->hooks);
 		ZEND_ASSERT(rc == SUCCESS);
 	}
 
@@ -1548,6 +1663,16 @@ PHP_MINIT_FUNCTION(io_hooks)
 	php_io_invalid_operation_exception_ce
 			= register_class_Io_InvalidOperationException(php_io_exception_class_entry);
 
+	php_io_registration_ce = register_class_Io_Registration();
+	php_io_registration_ce->create_object = php_io_registration_create_object;
+	memcpy(&php_io_registration_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	php_io_registration_handlers.offset = offsetof(php_io_registration_obj, std);
+	php_io_registration_handlers.clone_obj = NULL;
+	php_io_registration_ce->default_object_handlers = &php_io_registration_handlers;
+	php_io_invalid_registration_exception_ce
+			= register_class_Io_InvalidRegistrationException(php_io_exception_class_entry);
+	php_io_poll_trigger_ce = register_class_Io_Poll_Trigger();
+
 	php_io_operation_queue_ce = register_class_Io_OperationQueue();
 
 	php_io_poll_operation_queue_ce = register_class_Io_Poll_OperationQueue(php_io_operation_queue_ce);
@@ -1568,6 +1693,7 @@ PHP_MINIT_FUNCTION(io_hooks)
 	zend_register_functions(NULL, ext_functions, NULL, type);
 
 	php_io_op_zobj_detach = php_io_operation_detach;
+	php_io_registration_zobj_detach = php_io_registration_detach;
 
 	return SUCCESS;
 }

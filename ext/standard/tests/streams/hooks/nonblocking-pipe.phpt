@@ -15,8 +15,8 @@ final class Recording implements Io\Hooks\Hooks
         $this->ops[] = $op::class;
         return $op->complete(Io\CompletionStatus::Timeout);
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 $proc = proc_open([PHP_BINARY, '-n', '-r', 'fgets(STDIN);'], [0 => ['pipe', 'r'], 1 => ['pipe', 'w']], $pipes);

@@ -40,10 +40,8 @@ typedef enum {
 	PHP_IO_OP_ANY,
 } php_io_op_type;
 
-/* POLL only: a registration that outlives one run */
-#define PHP_IO_OP_F_PERSISTENT 0x01
 /* READ/RECV: buf is the stream's read buffer, valid until the stream is drained */
-#define PHP_IO_OP_F_STREAM_BUF 0x02
+#define PHP_IO_OP_F_STREAM_BUF 0x01
 
 typedef enum {
 	PHP_IO_DONE,
@@ -63,6 +61,7 @@ typedef struct _php_io_op_result {
 
 typedef struct _php_io_op php_io_op;
 typedef struct _php_io_queue php_io_queue;
+typedef struct _php_io_registration php_io_registration;
 
 /* getaddrinfo() codes Windows lacks */
 #ifndef EAI_SYSTEM
@@ -112,6 +111,7 @@ struct _php_io_op {
 		} any;
 	} u;
 	php_stream *stream; /* frozen for the op */
+	php_io_registration *registration; /* the pair's record for a wait on a registered pair */
 	zend_object *zobj; /* Io\Operation wrapper */
 	void *provider_data;
 	php_io_queue *queue; /* set while submitted */
@@ -145,38 +145,82 @@ PHPAPI void php_io_op_sigwait(php_io_op *op, zend_object *handle, const php_sigs
 		php_siginfo_t *info, php_deadline dl);
 PHPAPI void php_io_op_any(php_io_op *op, php_io_op **members, uint32_t n, php_io_op_result *results);
 
-/* Persistent Poll ops: one per (handle, events) pair, kept on the handle. The provider's add hook
- * runs at creation and its remove hook at release. */
-typedef struct _php_io_persistent_op php_io_persistent_op;
-PHPAPI php_io_op *php_io_op_persistent(zend_object *handle, uint32_t events);
-PHPAPI void php_io_op_persistent_release(zend_object *handle, uint32_t events);
-PHPAPI void php_io_handle_release_ops(zend_object *handle);
+/* Registrations: a (descriptor, event) pair whose waits repeat until the pair is removed */
+
+typedef enum {
+	PHP_IO_TRIGGER_LEVEL, /* waits need readiness current at arm time */
+	PHP_IO_TRIGGER_EDGE, /* waits follow a drain; recorded readiness may answer them */
+} php_io_trigger;
+
+/* Owned by the core, kept on the registrant (a stream, or the handle of a registrant without one),
+ * stable between the provider's add() and remove(). */
+struct _php_io_registration {
+	php_socket_t fd;
+	uint32_t event; /* PHP_POLL_READ or PHP_POLL_WRITE */
+	php_io_trigger trigger;
+	php_stream *stream; /* the registrant, for a stream; NULL otherwise */
+	php_poll_handle_object *handle; /* referenced; for a stream NULL until asked */
+	zend_object *zobj; /* Io\Registration wrapper, created lazily, detached at unregister */
+	void *provider_data; /* never read by the core */
+	void *queue_data; /* never read by the core */
+	uint32_t generation; /* the provider it was added to */
+	bool in_add; /* the provider's add() is running */
+	bool dead; /* unregistered inside add(), freed when it returns */
+	php_io_registration *next; /* the registrant's list */
+	php_io_registration *gprev; /* FG(io_registrations) */
+	php_io_registration *gnext;
+};
+
+/* Idempotent per pair: the provider's add() runs at most once per pair and provider, and only
+ * when its flags carry the trigger's capability; an Edge pair a provider takes as Level only is
+ * registered as Level. NULL when the pair is not registered. The stream form takes the descriptor
+ * the wait is on, since a cast may touch the buffers, and creates no handle. */
+PHPAPI php_io_registration *php_io_register_stream(php_stream *stream, php_socket_t fd, uint32_t event,
+		php_io_trigger trigger);
+PHPAPI php_io_registration *php_io_register_handle(php_poll_handle_object *handle, uint32_t event,
+		php_io_trigger trigger);
+PHPAPI void php_io_unregister(php_io_registration *reg);
+/* Every record of a registrant's list; before the descriptor closes */
+PHPAPI void php_io_unregister_all(php_io_registration **list);
+/* The registrant's handle, created for a stream on the first call; borrowed */
+PHPAPI php_poll_handle_object *php_io_registration_get_handle(php_io_registration *reg);
+
+/* Invalidates the Io\Registration wrapper of a record that ended */
+PHPAPI extern void (*php_io_registration_zobj_detach)(zend_object *zobj);
 
 /* Hooks */
 
 /* Regular file ops and Fsync go to the provider */
-#define PHP_IO_HOOKS_F_FILES  0x01
-/* Descriptor ops are submitted without trying the syscall first */
-#define PHP_IO_HOOKS_F_DIRECT 0x02
+#define PHP_IO_HOOKS_F_FILES               0x01
+/* Read, Write, Recv, Send and Connect are submitted without trying the syscall first */
+#define PHP_IO_HOOKS_F_DIRECT_DATA         0x02
+/* Accept is submitted without trying accept() first */
+#define PHP_IO_HOOKS_F_DIRECT_ACCEPT       0x04
+/* add() and remove() for Edge and for Level registrations */
+#define PHP_IO_HOOKS_F_EDGE_REGISTRATIONS  0x08
+#define PHP_IO_HOOKS_F_LEVEL_REGISTRATIONS 0x10
 
-typedef struct _php_io_hooks {
-	uint32_t flags;
+typedef struct _php_io_hooks php_io_hooks;
+
+typedef struct _php_io_hooks_ops {
 	/* May suspend; FAILURE means EG(exception) is set */
-	zend_result (*run)(void *data, php_io_op *op, php_io_op_result *result);
-	/* add and remove may be NULL */
-	void (*add)(void *data, php_io_op *op);
-	void (*remove)(void *data, php_io_op *op);
-	void (*dtor)(void *data);
-} php_io_hooks;
+	zend_result (*run)(php_io_hooks *hooks, php_io_op *op, php_io_op_result *result);
+	/* Called only with the capability for the trigger; may be NULL without either */
+	void (*add)(php_io_hooks *hooks, php_io_registration *reg);
+	void (*remove)(php_io_hooks *hooks, php_io_registration *reg);
+	/* Unregistered or replaced: its registrations end without remove() */
+	void (*dtor)(php_io_hooks *hooks);
+} php_io_hooks_ops;
 
-typedef struct _php_io_hooks_state {
-	php_io_hooks hooks;
-	void *data;
-} php_io_hooks_state;
+/* Embedded in the provider's own struct, which finds itself with ZEND_CONTAINER_OF */
+struct _php_io_hooks {
+	const php_io_hooks_ops *ops;
+	uint32_t flags; /* PHP_IO_HOOKS_F_* */
+};
 
 /* NULL uninstalls. Fails if a provider is installed, and while its add, remove or dtor runs. */
-PHPAPI zend_result php_io_hooks_register(const php_io_hooks *hooks, size_t size, void *data);
-PHPAPI const php_io_hooks *php_io_hooks_current(void **data);
+PHPAPI zend_result php_io_hooks_register(php_io_hooks *hooks);
+PHPAPI php_io_hooks *php_io_hooks_current(void);
 PHPAPI bool php_io_hooks_active(void);
 PHPAPI void php_io_hooks_request_shutdown(void);
 /* No set_hooks() and no fiber switch until unlocked */
@@ -312,10 +356,11 @@ typedef struct _php_io_queue_completion {
 typedef struct _php_io_queue_ops {
 	zend_result (*submit)(php_io_queue *q, php_io_op *op, void *data);
 	zend_result (*cancel)(php_io_queue *q, php_io_op *op);
-	zend_result (*add)(php_io_queue *q, php_io_op *op);
-	void (*remove)(php_io_queue *q, php_io_op *op);
-	int (*wait)(php_io_queue *q, php_io_queue_completion *out, uint32_t max,
-			const struct timespec *timeout);
+	/* Bracket a registration; what the queue retains for the pair goes to reg->queue_data */
+	zend_result (*add)(php_io_queue *q, php_io_registration *reg);
+	void (*remove)(php_io_queue *q, php_io_registration *reg);
+	/* NULL waits for good; the non-blocking deadline is one reap that never blocks */
+	int (*wait)(php_io_queue *q, php_io_queue_completion *out, uint32_t max, const php_deadline *dl);
 	void (*orphan)(php_io_queue *q, php_io_op *op);
 	/* May be NULL when orphan() never keeps an op in flight */
 	void (*drain)(php_io_queue *q, php_stream *stream);

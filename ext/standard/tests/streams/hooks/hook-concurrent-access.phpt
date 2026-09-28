@@ -18,8 +18,8 @@ class ConcurrentHook implements Io\Hooks\Hooks {
         var_dump($op instanceof Io\Operation\Recv, $op->getEvents(), $op->getTimeout());
         return $op->complete(Io\CompletionStatus::Timeout);
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 Io\Hooks\set_hooks(new ConcurrentHook());

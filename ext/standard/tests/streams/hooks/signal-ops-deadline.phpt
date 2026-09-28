@@ -18,8 +18,8 @@ final class Again implements Io\Hooks\Hooks
         }
         return $op->complete(Io\CompletionStatus::Unsupported);
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 pcntl_sigprocmask(SIG_BLOCK, [SIGUSR1]);

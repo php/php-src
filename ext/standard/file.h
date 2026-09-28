@@ -102,10 +102,11 @@ typedef struct {
 	HashTable *wrapper_logged_errors;	/* key: wrapper address; value: linked list of error entries */
 	php_stream_error_state stream_error_state;
 	int pclose_wait;
-	struct _php_io_hooks_state *io_hooks; /* NULL without a provider */
+	struct _php_io_hooks *io_hooks; /* NULL without a provider */
+	uint32_t io_hooks_generation; /* bumped per installed provider */
 	struct _php_io_queue *io_queue; /* core queue, created lazily */
 	pid_t io_queue_pid;
-	struct _php_io_persistent_op *io_persistent_ops;
+	struct _php_io_registration *io_registrations;
 	uint32_t io_ops_in_flight;
 	HashTable *io_orphans; /* stream -> queue keeping its ops */
 	HashTable *io_reaped; /* pid -> wait status */

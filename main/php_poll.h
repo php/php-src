@@ -255,7 +255,7 @@ struct php_poll_handle_object {
 	php_poll_handle_ops *ops;
 	void *handle_data;
 	HashTable *watching; /* context key -> watcher, not refcounted */
-	struct _php_io_persistent_op *persistent;
+	struct _php_io_registration *registrations; /* IO hooks registrations on this handle */
 	zend_object std;
 };
 

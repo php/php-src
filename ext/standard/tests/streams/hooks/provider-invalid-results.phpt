@@ -17,8 +17,8 @@ final class Fake implements Io\Hooks\Hooks
     {
         return ($this->complete)($op) ?? $op->complete(Io\CompletionStatus::Unsupported);
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 function attempt(string $label, Closure $call, string $type, Closure $complete, array $caps = []): void
@@ -37,7 +37,8 @@ $file = __DIR__ . '/provider-invalid-results.txt';
 file_put_contents($file, "hello");
 $f = fopen($file, 'r+');
 $files = [Io\Hooks\Capability::Files];
-$direct = [Io\Hooks\Capability::Direct];
+$direct = [Io\Hooks\Capability::DirectData];
+$accept = [Io\Hooks\Capability::DirectAccept];
 
 attempt('read', fn () => @fread($f, 100), Io\Operation\Read::class,
     fn ($op) => $op->complete(Io\CompletionStatus::Done, 1 << 20), $files);
@@ -54,7 +55,7 @@ attempt('recv', fn () => @fread($a, 100), Io\Operation\Recv::class,
 
 $server = stream_socket_server('tcp://127.0.0.1:0');
 attempt('accept', fn () => @stream_socket_accept($server, 5), Io\Operation\Accept::class,
-    fn ($op) => $op->complete(Io\CompletionStatus::Done, 1), $direct);
+    fn ($op) => $op->complete(Io\CompletionStatus::Done, 1), $accept);
 
 $pid = pcntl_fork();
 if ($pid === 0) {

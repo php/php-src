@@ -13,9 +13,13 @@
 /* The poll queue: a Poll context and its timers. Poll ops complete as Done with the triggered
  * events, other ops with a descriptor as Ready, ops without one as Unsupported.
  *
- * One registration per descriptor carries the union of the submitted ops' events. A registration
- * nobody waits on is taken out of the context, since epoll reports hangups with no events armed.
- * A persistent op's add() and remove() bracket the record of its descriptor. */
+ * One record per descriptor carries the union of the submitted ops' events. A record nobody waits
+ * on is taken out of the context, since epoll reports hangups with no events armed. A registration
+ * retains the record between waits. An Edge pair also stays in the context edge-triggered for the
+ * pair's life, its reports recorded as ready bits when no wait consumes them, so a readiness wait
+ * on it is answered from the record and costs no syscall; a Poll op or a Level wait on such a
+ * descriptor re-checks readiness through a modify. Without edge-triggering in the backend an Edge
+ * pair is served as Level. */
 
 #include "php.h"
 #include "php_io.h"
@@ -35,7 +39,10 @@ struct _php_io_poll_fdreg {
 	bool in_ctx;
 	bool stale; /* removal from the context failed */
 	bool dead; /* dropped while stale */
-	uint32_t n_retained; /* add() minus remove() */
+	bool hup; /* a hangup or error was reported: every edge wait completes at once */
+	uint32_t edge; /* events of the Edge registrations, kept armed edge-triggered */
+	uint32_t level; /* events of the Level registrations, the record only */
+	uint32_t ready; /* edge events reported and consumed by no wait */
 	php_io_poll_req *reqs; /* submitted ops on the descriptor */
 };
 
@@ -62,8 +69,9 @@ typedef struct {
 	php_io_queue base;
 	php_poll_ctx *ctx;
 	HashTable fdregs; /* fd -> php_io_poll_fdreg */
-	HashTable dead; /* registrations the context may still report */
-	uint32_t n_armed; /* registrations with events armed */
+	HashTable dead; /* records the context may still report */
+	bool et; /* the backend keeps edge-triggered entries */
+	uint32_t n_waiting; /* submitted ops armed on a descriptor */
 	php_io_poll_req *outstanding;
 	uint32_t pending;
 	php_io_poll_req **ready;
@@ -128,16 +136,6 @@ static php_io_poll_fdreg *php_io_poll_fdreg_get(php_io_poll_queue *q, int fd, bo
 	return reg;
 }
 
-static void php_io_poll_fdreg_set_armed(php_io_poll_queue *q, php_io_poll_fdreg *reg, uint32_t armed)
-{
-	if (!reg->armed && armed) {
-		q->n_armed++;
-	} else if (reg->armed && !armed) {
-		q->n_armed--;
-	}
-	reg->armed = armed;
-}
-
 /* Out of the context. The removal fails when the descriptor was closed
  * while registered, or its number reused: epoll keeps the entry as long as
  * another descriptor refers to the old file, and may still report it. */
@@ -149,7 +147,7 @@ static void php_io_poll_fdreg_leave(php_io_poll_queue *q, php_io_poll_fdreg *reg
 		}
 		reg->in_ctx = false;
 	}
-	php_io_poll_fdreg_set_armed(q, reg, 0);
+	reg->armed = 0;
 }
 
 static void php_io_poll_fdreg_drop(php_io_poll_queue *q, php_io_poll_fdreg *reg)
@@ -165,16 +163,21 @@ static void php_io_poll_fdreg_drop(php_io_poll_queue *q, php_io_poll_fdreg *reg)
 	}
 }
 
-/* Bring the context's interest in line with the submitted ops. On failure
- * *err says why and the registration is out of the context. */
-static zend_result php_io_poll_fdreg_sync(php_io_poll_queue *q, php_io_poll_fdreg *reg, php_poll_error *err)
+/* Bring the context's interest in line with the submitted ops and the Edge pairs. A modify with
+ * an unchanged mask is skipped unless forced, which re-checks readiness of an edge-triggered
+ * entry. On failure *err says why and the record is out of the context. */
+static zend_result php_io_poll_fdreg_sync(php_io_poll_queue *q, php_io_poll_fdreg *reg, php_poll_error *err,
+		bool force)
 {
-	uint32_t wanted = 0;
+	uint32_t wanted = reg->edge;
 	for (php_io_poll_req *r = reg->reqs; r; r = r->fd_next) {
 		wanted |= r->events;
 	}
+	if (reg->edge) {
+		wanted |= PHP_POLL_ET;
+	}
 
-	if (!reg->reqs && !reg->n_retained) {
+	if (!reg->reqs && !reg->edge && !reg->level) {
 		php_io_poll_fdreg_drop(q, reg);
 		return SUCCESS;
 	}
@@ -182,7 +185,7 @@ static zend_result php_io_poll_fdreg_sync(php_io_poll_queue *q, php_io_poll_fdre
 		php_io_poll_fdreg_leave(q, reg);
 		return SUCCESS;
 	}
-	if (reg->in_ctx && wanted == reg->armed) {
+	if (reg->in_ctx && wanted == reg->armed && !force) {
 		return SUCCESS;
 	}
 	if (reg->in_ctx && php_poll_modify(q->ctx, reg->fd, wanted, reg) != SUCCESS) {
@@ -197,7 +200,7 @@ static zend_result php_io_poll_fdreg_sync(php_io_poll_queue *q, php_io_poll_fdre
 		}
 		reg->in_ctx = true;
 	}
-	php_io_poll_fdreg_set_armed(q, reg, wanted);
+	reg->armed = wanted;
 	return SUCCESS;
 }
 
@@ -230,10 +233,11 @@ static void php_io_poll_req_unregister(php_io_poll_queue *q, php_io_poll_req *re
 		php_io_poll_fdreg *reg = req->fdreg;
 		php_io_poll_fdreg_unlink(req);
 		req->fdreg = NULL;
-		/* On failure the registration is left out of the context, which
-		 * the remaining ops re-arm on their next submit */
+		q->n_waiting--;
+		/* On failure the record is left out of the context, which the
+		 * remaining ops re-arm on their next submit */
 		php_poll_error err;
-		php_io_poll_fdreg_sync(q, reg, &err);
+		php_io_poll_fdreg_sync(q, reg, &err, false);
 	}
 	if (req->timer) {
 		php_poll_timer_remove(q->ctx, req->timer);
@@ -314,17 +318,30 @@ static void php_io_poll_req_arm(php_io_poll_queue *q, php_io_poll_req *req)
 	}
 
 	php_io_poll_fdreg *reg = php_io_poll_fdreg_get(q, (int) op->fd, true);
+
+	/* A readiness wait on an Edge pair: answered from the record when it can be */
+	bool edge_wait = op->type != PHP_IO_OP_POLL && op->registration && (reg->edge & events) == events;
+	if (edge_wait && (reg->hup || (reg->ready & events))) {
+		uint32_t revents = reg->hup ? (events | PHP_POLL_HUP) : (reg->ready & events);
+		reg->ready &= ~events;
+		php_io_poll_req_complete(q, req, PHP_IO_READY, revents, 0);
+		return;
+	}
+
 	req->fdreg = reg;
 	req->events = events;
 	req->fd_next = reg->reqs;
 	reg->reqs = req;
+	q->n_waiting++;
 
+	/* A Poll op or a Level wait on an edge-triggered entry checks readiness now */
 	php_poll_error err;
-	if (php_io_poll_fdreg_sync(q, reg, &err) != SUCCESS) {
+	if (php_io_poll_fdreg_sync(q, reg, &err, !edge_wait && reg->edge) != SUCCESS) {
 		php_poll_error ignored;
 		php_io_poll_fdreg_unlink(req);
 		req->fdreg = NULL;
-		php_io_poll_fdreg_sync(q, reg, &ignored);
+		q->n_waiting--;
+		php_io_poll_fdreg_sync(q, reg, &ignored, false);
 		if (err == PHP_POLL_ERR_NOSUPPORT) {
 			php_io_poll_req_complete(q, req, PHP_IO_UNSUPPORTED, 0, 0);
 		} else {
@@ -339,21 +356,30 @@ static void php_io_poll_req_arm(php_io_poll_queue *q, php_io_poll_req *req)
 }
 
 /* A descriptor reported ready: every op whose interest it meets completes;
- * an error or hangup completes all of them. */
+ * an error or hangup completes all of them. What no wait consumed is kept
+ * for the Edge pairs, whose next edge only comes after a drain. */
 static void php_io_poll_fdreg_fire(php_io_poll_queue *q, php_io_poll_fdreg *reg, uint32_t revents)
 {
 	if (reg->dead) {
 		return;
 	}
 	bool failure = (revents & (PHP_POLL_ERROR | PHP_POLL_HUP)) != 0;
+	uint32_t consumed = 0;
 	php_io_poll_req *r = reg->reqs;
 	while (r) {
 		php_io_poll_req *next = r->fd_next;
 		if (failure || (r->events & revents)) {
 			php_io_status status = r->op->type == PHP_IO_OP_POLL ? PHP_IO_DONE : PHP_IO_READY;
+			consumed |= r->events;
 			php_io_poll_req_complete(q, r, status, revents, 0);
 		}
 		r = next;
+	}
+	if (reg->edge) {
+		if (failure) {
+			reg->hup = true;
+		}
+		reg->ready |= revents & reg->edge & ~consumed;
 	}
 }
 
@@ -485,32 +511,53 @@ static zend_result php_io_poll_queue_cancel(php_io_queue *base, php_io_op *op)
 	return SUCCESS;
 }
 
-/* A persistent op: retain the descriptor's registration across runs */
-static zend_result php_io_poll_queue_add(php_io_queue *base, php_io_op *op)
+/* A registration retains the descriptor's record between waits, and an Edge pair arms it
+ * edge-triggered for good. The record is found by descriptor, never through the registration,
+ * so a record a replaced provider left behind costs nothing more than its memory. */
+static zend_result php_io_poll_queue_add(php_io_queue *base, php_io_registration *registration)
 {
 	php_io_poll_queue *q = (php_io_poll_queue *) base;
+	uint32_t event = registration->event;
 
-	if (op->fd == SOCK_ERR) {
+	if (registration->fd == SOCK_ERR || !(event == PHP_POLL_READ || event == PHP_POLL_WRITE)) {
 		errno = EBADF;
 		return FAILURE;
 	}
-	php_io_poll_fdreg *reg = php_io_poll_fdreg_get(q, (int) op->fd, true);
-	reg->n_retained++;
+	php_io_poll_fdreg *reg = php_io_poll_fdreg_get(q, (int) registration->fd, true);
+	if (registration->trigger == PHP_IO_TRIGGER_EDGE && q->et) {
+		php_poll_error err;
+		reg->edge |= event;
+		reg->level &= ~event;
+		if (php_io_poll_fdreg_sync(q, reg, &err, false) != SUCCESS) {
+			/* A descriptor the backend refuses edge-triggered: served as Level */
+			reg->edge &= ~event;
+			reg->level |= event;
+			php_io_poll_fdreg_sync(q, reg, &err, false);
+		}
+	} else {
+		reg->level |= event;
+	}
 	return SUCCESS;
 }
 
-static void php_io_poll_queue_remove(php_io_queue *base, php_io_op *op)
+static void php_io_poll_queue_remove(php_io_queue *base, php_io_registration *registration)
 {
 	php_io_poll_queue *q = (php_io_poll_queue *) base;
+	uint32_t event = registration->event;
 
-	if (op->fd == SOCK_ERR) {
+	if (registration->fd == SOCK_ERR) {
 		return;
 	}
-	php_io_poll_fdreg *reg = php_io_poll_fdreg_get(q, (int) op->fd, false);
-	if (reg && reg->n_retained) {
+	php_io_poll_fdreg *reg = php_io_poll_fdreg_get(q, (int) registration->fd, false);
+	if (reg && ((reg->edge | reg->level) & event)) {
 		php_poll_error err;
-		reg->n_retained--;
-		php_io_poll_fdreg_sync(q, reg, &err);
+		reg->edge &= ~event;
+		reg->level &= ~event;
+		reg->ready &= ~event;
+		if (!reg->edge) {
+			reg->hup = false;
+		}
+		php_io_poll_fdreg_sync(q, reg, &err, false);
 	}
 }
 
@@ -531,19 +578,13 @@ static uint32_t php_io_poll_queue_deliver(php_io_poll_queue *q, php_io_queue_com
 }
 
 static int php_io_poll_queue_wait(php_io_queue *base, php_io_queue_completion *out, uint32_t max,
-		const struct timespec *timeout)
+		const php_deadline *dl)
 {
 	php_io_poll_queue *q = (php_io_poll_queue *) base;
-	zend_hrtime_t limit = ZEND_HRTIME_T_MAX;
+	zend_hrtime_t limit = dl ? dl->hrtime : ZEND_HRTIME_T_MAX;
 
 	if (max == 0) {
 		return 0;
-	}
-
-	if (timeout) {
-		zend_hrtime_t now = zend_hrtime();
-		zend_hrtime_t rel = (zend_hrtime_t) timeout->tv_sec * ZEND_NANO_IN_SEC + timeout->tv_nsec;
-		limit = rel < ZEND_HRTIME_T_MAX - now ? now + rel : ZEND_HRTIME_T_MAX;
 	}
 
 	if (q->events_cap < max) {
@@ -557,7 +598,7 @@ static int php_io_poll_queue_wait(php_io_queue *base, php_io_queue_completion *o
 			return (int) php_io_poll_queue_deliver(q, out, max);
 		}
 
-		if (limit == ZEND_HRTIME_T_MAX && q->n_armed == 0 && php_poll_timer_count(q->ctx) == 0) {
+		if (limit == ZEND_HRTIME_T_MAX && q->n_waiting == 0 && php_poll_timer_count(q->ctx) == 0) {
 			/* Nothing can ever complete: an infinite timer, or nothing at all */
 			errno = EDEADLK;
 			return -1;
@@ -632,7 +673,7 @@ static uint32_t php_io_poll_queue_count_pending(php_io_queue *base)
 
 static uint32_t php_io_poll_queue_hook_flags(php_io_queue *base)
 {
-	return 0;
+	return PHP_IO_HOOKS_F_EDGE_REGISTRATIONS | PHP_IO_HOOKS_F_LEVEL_REGISTRATIONS;
 }
 
 static void php_io_poll_queue_destroy(php_io_queue *base)
@@ -644,7 +685,7 @@ static void php_io_poll_queue_destroy(php_io_queue *base)
 	}
 	ZEND_ASSERT(q->pending == 0 && q->n_ready == 0 && q->n_fired == 0);
 
-	/* Retained registrations of persistent ops nobody removed */
+	/* Records of registrations nobody removed */
 	php_io_poll_fdreg *reg;
 	ZEND_HASH_FOREACH_PTR(&q->fdregs, reg) {
 		if (reg->in_ctx) {
@@ -698,6 +739,7 @@ PHPAPI php_io_queue *php_io_queue_create_poll(php_poll_backend_type backend)
 	php_io_poll_queue *q = ecalloc(1, sizeof(*q));
 	q->base.ops = &php_io_poll_queue_ops;
 	q->ctx = ctx;
+	q->et = php_poll_supports_et(ctx);
 	zend_hash_init(&q->fdregs, 8, NULL, NULL, 0);
 	zend_hash_init(&q->dead, 0, NULL, NULL, 0);
 	q->events_cap = PHP_IO_POLL_MIN_EVENTS;

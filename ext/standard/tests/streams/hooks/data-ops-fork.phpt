@@ -8,8 +8,8 @@ pcntl
 
 Io\Hooks\set_hooks(new class implements Io\Hooks\Hooks {
     public function getCapabilities(): array { return []; }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
     public function run(Io\Operation $op): Io\Completion {
         try {
             pcntl_fork();

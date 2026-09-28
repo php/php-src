@@ -394,8 +394,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			/* Retiring the watchers may drop the last reference to the handle */
 			GC_ADDREF(handle_obj);
 			php_stream_poll_weak_handle_notify(handle_obj);
-			php_io_handle_release_ops(handle_obj);
 			OBJ_RELEASE(handle_obj);
+		}
+		/* Before the descriptor closes, with the provider's remove() per pair */
+		if (stream->io_registrations) {
+			php_io_unregister_all(&stream->io_registrations);
 		}
 
 		ret = stream->ops->close(stream, preserve_handle ? 0 : 1);
@@ -423,8 +426,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			/* Retiring the watchers may drop the last reference to the handle */
 			GC_ADDREF(handle_obj);
 			php_stream_poll_weak_handle_notify(handle_obj);
-			php_io_handle_release_ops(handle_obj);
 			OBJ_RELEASE(handle_obj);
+		}
+		/* Before the descriptor closes, with the provider's remove() per pair */
+		if (stream->io_registrations) {
+			php_io_unregister_all(&stream->io_registrations);
 		}
 
 		while (stream->readfilters.head) {

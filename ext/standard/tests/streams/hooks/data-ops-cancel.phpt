@@ -9,8 +9,8 @@ include __DIR__ . '/scheduler.inc';
 // 1. Throwing from run() surfaces from the blocking function
 Io\Hooks\set_hooks(new class implements Io\Hooks\Hooks {
     public function getCapabilities(): array { return []; }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
     public function run(Io\Operation $op): Io\Completion {
         throw new RuntimeException("cancelled " . $op::class);
     }
@@ -36,8 +36,8 @@ final class Dropping implements Io\Hooks\Hooks
 
     public function __construct(private Io\OperationQueue $queue) {}
     public function getCapabilities(): array { return Scheduler::capabilities($this->queue); }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 
     public function run(Io\Operation $op): Io\Completion
     {

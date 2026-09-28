@@ -55,8 +55,8 @@ final class Checks implements Io\Hooks\Hooks
         }
         return $op->complete(Io\CompletionStatus::Unsupported);
     }
-    public function add(Io\Operation $op): void {}
-    public function remove(Io\Operation $op): void {}
+    public function add(Io\Registration $registration): void {}
+    public function remove(Io\Registration $registration): void {}
 }
 
 $checks = new Checks();
