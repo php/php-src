@@ -73,8 +73,24 @@ if ($process === false) {
     die('failed to start server');
 }
 try {
-    // Give the server time to start
-    sleep(1);
+    // Wait until OpenSSL is actually listening before making the first request.
+    $ready = false;
+    for ($i = 0; $i < 100; $i++) {
+        $connection = @stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 0.05);
+        if ($connection !== false) {
+            fclose($connection);
+            $ready = true;
+            break;
+        }
+        if (!proc_get_status($process)['running']) {
+            break;
+        }
+        usleep(50000);
+    }
+    if (!$ready) {
+        stream_set_blocking($pipes[2], false);
+        throw new RuntimeException('OpenSSL server did not start: ' . trim(stream_get_contents($pipes[2])));
+    }
 
     echo "case 1: client cert and key from string\n";
     $ch = curl_init("https://127.0.0.1:$port/");
