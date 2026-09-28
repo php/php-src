@@ -275,7 +275,7 @@ static const mbfl_encoding *php_mb_get_encoding(zend_string *encoding_name, uint
 }
 
 static const mbfl_encoding *php_mb_get_encoding_or_pass(const char *encoding_name, size_t encoding_name_len) {
-	if (strncmp(encoding_name, "pass", encoding_name_len) == 0) {
+	if (encoding_name_len == strlen("pass") && strncmp(encoding_name, "pass", encoding_name_len) == 0) {
 		return &mbfl_encoding_pass;
 	}
 
