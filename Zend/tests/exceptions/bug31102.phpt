@@ -43,7 +43,7 @@ Caught: Test1::__construct
 Caught: {closure:%s:%d}
 {closure:%s:%d}(Test3,3)
 
-Fatal error: Uncaught Error: Class "Test3" not found in %s:%d
+Fatal error: Uncaught Error: Class "Test3" not found (did you mean Test1?) in %s:%d
 Stack trace:
 #0 %s(%d): eval()
 #1 {main}

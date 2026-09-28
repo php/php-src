@@ -1000,7 +1000,7 @@ ZEND_VM_COLD_HELPER(zend_undefined_function_helper, ANY, ANY)
 
 	SAVE_OPLINE();
 	function_name = RT_CONSTANT(opline, opline->op2);
-	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
+	zend_undefined_function_error(function_name);
 	HANDLE_EXCEPTION();
 }
 
