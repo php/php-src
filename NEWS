@@ -22,6 +22,7 @@ PHP                                                                        NEWS
   . Fix zend_analyze_calls() call_stack buffer overrun. (Mrmaxmeier)
   . Fixed bug GH-23679 (Tracing JIT writes a parent private property into a
     child's shadowing public property). (Ilia Alshanetsky)
+  . Fix incorrect DCE due to unsound escape analysis. (ndossche)
 
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
