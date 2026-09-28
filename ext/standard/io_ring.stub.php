@@ -31,7 +31,7 @@ namespace Io\Ring {
          * Raised for every posted completion, so a loop that keeps its own
          * Poll context can embed a ring: add it with Event::Notify and, when it
          * fires, call waitCompletions() with a zero timeout until it returns an
-         * empty array.
+         * empty array. The ring's to signal: notify() throws on it.
          */
         public function getHandle(): \Io\Poll\NotifyHandle {}
 
