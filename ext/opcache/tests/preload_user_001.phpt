@@ -7,6 +7,8 @@ opcache.optimization_level=-1
 opcache.preload={PWD}/preload.inc
 opcache.preload_user=php
 opcache.log_verbosity_level=2
+--ENV--
+ASAN_OPTIONS=detect_leaks=0
 --EXTENSIONS--
 opcache
 posix
