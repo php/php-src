@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: overlapping raw-mode sessions and out-of-order restoration
+Io\Terminal\Terminal: overlapping raw-mode sessions, ownership validation, and out-of-order restoration
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -45,11 +45,52 @@ $proc = proc_open(
     $pipes,
 );
 
+$proc2 = proc_open(
+    [PHP_BINARY, '-r', 'fgets(STDIN);'],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes2,
+);
+
 // Two separate Terminal instances referencing descriptors on the same PTY
 $t1 = Terminal::fromStreams($pipes[0]);
 $t2 = Terminal::fromStreams($pipes[1]);
+$tUnrelated = Terminal::fromStreams($pipes2[0]);
 
-// Test 1: Out-of-order restore (m1 then m2)
+// Test 1: Same Terminal + token
+$m = $t1->enableRawMode();
+var_dump($m instanceof ModeToken);
+var_dump($t1->restoreMode($m));
+
+// Test 2: Different Terminal on same device
+$m1 = $t1->enableRawMode();
+var_dump($t2->restoreMode($m1));
+
+// Test 3: Unrelated terminal rejection (ValueError)
+$m1 = $t1->enableRawMode();
+try {
+    $tUnrelated->restoreMode($m1);
+    echo "FAIL: unrelated terminal accepted token\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+var_dump($t1->restoreMode($m1));
+
+// Test 4: Stale token after terminal destruction
+$tTemp = Terminal::fromStreams($pipes[0]);
+$mTemp = $tTemp->enableRawMode();
+unset($tTemp); // releases active mode token
+try {
+    $t1->restoreMode($mTemp);
+    echo "FAIL: stale token after destruction accepted\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
+// Test 5: Out-of-order restore (m1 then m2)
 $m1 = $t1->enableRawMode();
 $m2 = $t2->enableRawMode();
 
@@ -62,7 +103,7 @@ var_dump($t1->restoreMode($m1));
 // Now restore m2
 var_dump($t2->restoreMode($m2));
 
-// Test 2: In-order restore (m2 then m1)
+// Test 6: In-order restore (m2 then m1)
 $m1 = $t1->enableRawMode();
 $m2 = $t2->enableRawMode();
 
@@ -70,13 +111,24 @@ var_dump($t2->restoreMode($m2));
 var_dump($t1->restoreMode($m1));
 
 fwrite($pipes[0], "exit\n");
-unset($t1, $t2);
+fwrite($pipes2[0], "exit\n");
+unset($t1, $t2, $tUnrelated);
 foreach ($pipes as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
 }
+foreach ($pipes2 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
 proc_close($proc);
+proc_close($proc2);
 ?>
 --EXPECT--
+bool(true)
+bool(true)
+bool(true)
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
+bool(true)
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token returned by Io\Terminal\Terminal::enableRawMode()
 bool(true)
 bool(true)
 bool(true)

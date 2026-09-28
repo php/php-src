@@ -35,6 +35,7 @@
 # include <io.h>
 # include <windows.h>
 #else
+# include <limits.h>
 # include <signal.h>
 # include <sys/stat.h>
 # include <termios.h>
@@ -64,6 +65,20 @@ typedef struct php_io_terminal_utf8_pending {
 } php_io_terminal_utf8_pending;
 #endif
 
+#ifdef PHP_WIN32
+typedef struct php_io_terminal_identity {
+	php_io_terminal_native_stream stream;
+} php_io_terminal_identity;
+#else
+typedef struct php_io_terminal_identity {
+	php_io_terminal_native_stream stream;
+	dev_t dev;
+	bool has_dev;
+	pid_t sid;
+	bool has_sid;
+} php_io_terminal_identity;
+#endif
+
 typedef struct php_io_terminal_saved_mode {
 	char magic[PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN];
 	php_io_terminal_native_stream stream;
@@ -71,9 +86,8 @@ typedef struct php_io_terminal_saved_mode {
 	DWORD mode;
 #else
 	struct termios mode;
-	dev_t tty_dev;
-	ino_t tty_ino;
 #endif
+	php_io_terminal_identity identity;
 } php_io_terminal_saved_mode;
 
 typedef struct php_io_terminal_mode_token_object {
@@ -120,7 +134,18 @@ static zend_object_handlers php_io_terminal_object_handlers;
 ZEND_TLS php_io_terminal_mode_token_object *php_io_terminal_active_mode_tokens;
 
 #if !defined(PHP_WIN32)
-#define PHP_IO_TERMINAL_READ_RESIZE 2
+# if defined(HAVE_PTSNAME_R) || defined(_GNU_SOURCE) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+#  define PHP_IO_TERMINAL_HAVE_PTSNAME_R 1
+# endif
+# if !defined(PHP_IO_TERMINAL_HAVE_PTSNAME_R) && defined(ZTS)
+static MUTEX_T php_io_terminal_ptsname_mutex = NULL;
+# endif
+
+#define PHP_IO_TERMINAL_READ_EOF      (-2)
+#define PHP_IO_TERMINAL_READ_ERROR    (-1)
+#define PHP_IO_TERMINAL_READ_TIMEOUT    0
+#define PHP_IO_TERMINAL_READ_SUCCESS    1
+#define PHP_IO_TERMINAL_READ_RESIZE     2
 
 #ifdef SIGWINCH
 static volatile sig_atomic_t php_io_terminal_resize_generation = 0;
@@ -242,49 +267,161 @@ static bool php_io_terminal_native_stream_is_valid(php_io_terminal_native_stream
 #endif
 }
 
-static bool php_io_terminal_mode_streams_match(const php_io_terminal_saved_mode *first, const php_io_terminal_saved_mode *second)
-{
 #ifdef PHP_WIN32
+static bool php_io_terminal_get_identity(php_io_terminal_native_stream handle, php_io_terminal_identity *identity)
+{
+	identity->stream = handle;
+	if (!php_io_terminal_native_stream_is_valid(handle)) {
+		return false;
+	}
+	DWORD mode;
+	return GetConsoleMode(handle, &mode);
+}
+
+static bool php_io_terminal_identities_match(const php_io_terminal_identity *first, const php_io_terminal_identity *second)
+{
 	if (first->stream == second->stream) {
 		return true;
 	}
 	DWORD m1, m2;
 	return GetConsoleMode(first->stream, &m1) && GetConsoleMode(second->stream, &m2);
+}
 #else
+#ifndef PATH_MAX
+# define PATH_MAX 1024
+#endif
+
+static bool php_io_terminal_get_slave_dev_from_pty_master(int fd, dev_t *slave_dev)
+{
+	char slave_path[PATH_MAX];
+	bool got_slave_name = false;
+
+#if defined(PHP_IO_TERMINAL_HAVE_PTSNAME_R)
+	if (ptsname_r(fd, slave_path, sizeof(slave_path)) == 0) {
+		got_slave_name = true;
+	}
+#else
+# if defined(ZTS)
+	if (php_io_terminal_ptsname_mutex != NULL) {
+		tsrm_mutex_lock(php_io_terminal_ptsname_mutex);
+	}
+# endif
+	const char *pts = ptsname(fd);
+	if (pts != NULL) {
+		size_t len = strlen(pts);
+		if (len < sizeof(slave_path)) {
+			memcpy(slave_path, pts, len + 1);
+			got_slave_name = true;
+		}
+	}
+# if defined(ZTS)
+	if (php_io_terminal_ptsname_mutex != NULL) {
+		tsrm_mutex_unlock(php_io_terminal_ptsname_mutex);
+	}
+# endif
+#endif
+
+	if (got_slave_name && slave_path[0] != '\0') {
+		struct stat st;
+		if (stat(slave_path, &st) == 0 && S_ISCHR(st.st_mode) && st.st_rdev != 0) {
+			*slave_dev = st.st_rdev;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool php_io_terminal_get_identity(php_io_terminal_native_stream fd, php_io_terminal_identity *identity)
+{
+	memset(identity, 0, sizeof(*identity));
+	identity->stream = fd;
+	identity->sid = -1;
+
+	if (!php_io_terminal_native_stream_is_valid(fd) || isatty(fd) != 1) {
+		return false;
+	}
+
+	pid_t sid = tcgetsid(fd);
+	if (sid > 0) {
+		identity->sid = sid;
+		identity->has_sid = true;
+	}
+
+	dev_t slave_dev = 0;
+	if (php_io_terminal_get_slave_dev_from_pty_master(fd, &slave_dev)) {
+		identity->dev = slave_dev;
+		identity->has_dev = true;
+		return true;
+	}
+
+#if defined(TIOCGDEV)
+	unsigned int kdev = 0;
+	if (ioctl(fd, TIOCGDEV, &kdev) == 0 && kdev != 0) {
+		identity->dev = (dev_t) kdev;
+		identity->has_dev = true;
+		return true;
+	}
+#endif
+
+	struct stat st;
+	if (fstat(fd, &st) == 0 && S_ISCHR(st.st_mode) && st.st_rdev != 0) {
+		struct stat st_tty;
+		if (stat("/dev/tty", &st_tty) == 0 && S_ISCHR(st_tty.st_mode) && st.st_rdev == st_tty.st_rdev) {
+			/* /dev/tty is an indirect alias identified by its controlling terminal session */
+		} else {
+			identity->dev = st.st_rdev;
+			identity->has_dev = true;
+			return true;
+		}
+	}
+
+	return identity->has_dev || identity->has_sid;
+}
+
+static bool php_io_terminal_identities_match(const php_io_terminal_identity *first, const php_io_terminal_identity *second)
+{
 	if (first->stream == second->stream) {
 		return true;
 	}
-	if (first->tty_dev != 0 && second->tty_dev != 0 && first->tty_dev == second->tty_dev) {
+
+	if (first->has_dev && second->has_dev) {
+		return first->dev == second->dev;
+	}
+
+	if (first->has_sid && second->has_sid && first->sid == second->sid) {
 		return true;
 	}
+
 	return false;
+}
 #endif
+
+static bool php_io_terminal_mode_streams_match(const php_io_terminal_saved_mode *first, const php_io_terminal_saved_mode *second)
+{
+	return php_io_terminal_identities_match(&first->identity, &second->identity);
 }
 
 static bool php_io_terminal_mode_token_stream_is_valid(const php_io_terminal_mode_token_object *mode)
 {
+	php_io_terminal_identity current_identity;
+
 	if (!php_io_terminal_native_stream_is_valid(mode->saved.stream)) {
 		return false;
 	}
 
-#ifdef PHP_WIN32
-	DWORD m;
-	if (!GetConsoleMode(mode->saved.stream, &m)) {
+	if (!php_io_terminal_get_identity(mode->saved.stream, &current_identity)) {
 		return false;
 	}
-#else
-	struct stat st;
-	if (fstat(mode->saved.stream, &st) != 0 || !S_ISCHR(st.st_mode)) {
+
+	if (!php_io_terminal_identities_match(&mode->saved.identity, &current_identity)) {
 		return false;
 	}
-	if (mode->saved.tty_dev != 0 && st.st_rdev != mode->saved.tty_dev) {
-		return false;
-	}
-#endif
 
 	if (!Z_ISUNDEF(mode->stream_resource)) {
 		php_stream *stream;
 		php_io_terminal_native_stream native_stream;
+		php_io_terminal_identity res_identity;
 
 		if (Z_TYPE(mode->stream_resource) != IS_RESOURCE) {
 			return false;
@@ -304,22 +441,14 @@ static bool php_io_terminal_mode_token_stream_is_valid(const php_io_terminal_mod
 		if (!php_io_terminal_native_stream_is_valid(native_stream)) {
 			return false;
 		}
-#ifdef PHP_WIN32
-		if (native_stream != mode->saved.stream) {
-			DWORD m1, m2;
-			if (!GetConsoleMode(native_stream, &m1) || !GetConsoleMode(mode->saved.stream, &m2)) {
-				return false;
-			}
+
+		if (!php_io_terminal_get_identity(native_stream, &res_identity)) {
+			return false;
 		}
-#else
-		if (native_stream != mode->saved.stream) {
-			struct stat st_cur;
-			if (fstat(native_stream, &st_cur) != 0 || !S_ISCHR(st_cur.st_mode)
-				|| mode->saved.tty_dev == 0 || st_cur.st_rdev != mode->saved.tty_dev) {
-				return false;
-			}
+
+		if (!php_io_terminal_identities_match(&mode->saved.identity, &res_identity)) {
+			return false;
 		}
-#endif
 	}
 
 	return true;
@@ -571,6 +700,48 @@ static bool php_io_terminal_stream_target_init(
 	return false;
 }
 
+typedef enum php_io_terminal_match_result {
+	PHP_IO_TERMINAL_MATCH_OK,
+	PHP_IO_TERMINAL_MATCH_MISMATCH,
+	PHP_IO_TERMINAL_MATCH_ERROR,
+} php_io_terminal_match_result;
+
+static php_io_terminal_match_result php_io_terminal_terminal_matches_saved_mode(
+	php_io_terminal_object *intern,
+	const php_io_terminal_saved_mode *saved
+)
+{
+	php_io_terminal_stream_target stream;
+	php_io_terminal_identity current_identity;
+
+	if (!php_io_terminal_stream_target_init(&intern->input_stream_val, true, &stream)) {
+		if (!EG(exception)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Cannot restore terminal mode: terminal stream is closed or invalid", 0);
+		}
+		return PHP_IO_TERMINAL_MATCH_ERROR;
+	}
+
+	if (!php_io_terminal_native_stream_is_valid(stream.native_stream)) {
+		if (!EG(exception)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Cannot restore terminal mode: terminal stream is invalid", 0);
+		}
+		return PHP_IO_TERMINAL_MATCH_ERROR;
+	}
+
+	if (!php_io_terminal_get_identity(stream.native_stream, &current_identity)) {
+		if (!EG(exception)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to inspect terminal device", 0);
+		}
+		return PHP_IO_TERMINAL_MATCH_ERROR;
+	}
+
+	if (php_io_terminal_identities_match(&current_identity, &saved->identity)) {
+		return PHP_IO_TERMINAL_MATCH_OK;
+	}
+
+	return PHP_IO_TERMINAL_MATCH_MISMATCH;
+}
+
 #ifdef PHP_WIN32
 static DWORD php_io_terminal_make_raw_mode(DWORD mode)
 {
@@ -583,6 +754,10 @@ static bool php_io_terminal_enable_stream_raw_mode(php_io_terminal_native_stream
 	DWORD raw_mode;
 
 	if (!php_io_terminal_native_stream_is_valid(handle) || !GetConsoleMode(handle, &mode)) {
+		return false;
+	}
+
+	if (!php_io_terminal_get_identity(handle, &saved->identity)) {
 		return false;
 	}
 
@@ -734,8 +909,21 @@ static bool php_io_terminal_read_console_record(
 		return true;
 	}
 
-	return WaitForSingleObject(handle, wait_ms) == WAIT_OBJECT_0
-		&& ReadConsoleInputW(handle, record, 1, &records_read) && records_read == 1;
+	DWORD wait_res = WaitForSingleObject(handle, wait_ms);
+	if (wait_res == WAIT_TIMEOUT) {
+		return false;
+	}
+	if (wait_res != WAIT_OBJECT_0) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to wait on console input", 0);
+		return false;
+	}
+
+	if (!ReadConsoleInputW(handle, record, 1, &records_read) || records_read != 1) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read console input", 0);
+		return false;
+	}
+
+	return true;
 }
 
 static zend_string *php_io_terminal_read_stream_key(
@@ -757,15 +945,18 @@ static zend_string *php_io_terminal_read_stream_key(
 
 	if (handle == INVALID_HANDLE_VALUE || handle == NULL
 		|| (stream != NULL && stream->writepos > stream->readpos)) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read key: input stream is not a terminal", 0);
 		return NULL;
 	}
 
 	if (!GetConsoleMode(handle, &mode)) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read key: input stream is not a terminal", 0);
 		return NULL;
 	}
 
 	raw_mode = php_io_terminal_make_raw_mode(mode) | ENABLE_WINDOW_INPUT;
 	if (raw_mode != mode && !SetConsoleMode(handle, raw_mode)) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to set console mode", 0);
 		return NULL;
 	}
 	mode_changed = raw_mode != mode;
@@ -818,6 +1009,9 @@ static zend_string *php_io_terminal_read_stream_key(
 	if (mode_changed && !SetConsoleMode(handle, mode)) {
 		if (result != NULL) {
 			zend_string_release(result);
+		}
+		if (!EG(exception)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore console mode", 0);
 		}
 		return NULL;
 	}
@@ -945,21 +1139,18 @@ static bool php_io_terminal_enable_stream_raw_mode(php_io_terminal_native_stream
 {
 	struct termios mode;
 	struct termios raw_mode;
-	struct stat st;
 
 	if (!php_io_terminal_native_stream_is_valid(fd) || isatty(fd) != 1 || tcgetattr(fd, &mode) != 0) {
 		return false;
 	}
 
-	if (fstat(fd, &st) != 0 || !S_ISCHR(st.st_mode)) {
+	if (!php_io_terminal_get_identity(fd, &saved->identity)) {
 		return false;
 	}
 
 	memcpy(saved->magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN);
 	saved->stream = fd;
 	saved->mode = mode;
-	saved->tty_dev = st.st_rdev;
-	saved->tty_ino = st.st_ino;
 
 	raw_mode = mode;
 	php_io_terminal_make_raw_mode(&raw_mode);
@@ -1081,11 +1272,15 @@ static int php_io_terminal_read_byte(
 	ssize_t bytes_read;
 
 	if (stream != NULL && stream->writepos > stream->readpos) {
-		return php_stream_read(stream, (char *) byte, 1) == 1 ? 1 : -1;
+		size_t read_bytes = php_stream_read(stream, (char *) byte, 1);
+		if (read_bytes == 1) {
+			return PHP_IO_TERMINAL_READ_SUCCESS;
+		}
+		return php_stream_eof(stream) ? PHP_IO_TERMINAL_READ_EOF : PHP_IO_TERMINAL_READ_ERROR;
 	}
 
 	if (poll_ctx == NULL) {
-		return -1;
+		return PHP_IO_TERMINAL_READ_ERROR;
 	}
 
 	if (timeout != NULL) {
@@ -1113,7 +1308,7 @@ static int php_io_terminal_read_byte(
 			break;
 		}
 		if (poll_result == 0) {
-			return 0;
+			return PHP_IO_TERMINAL_READ_TIMEOUT;
 		}
 
 		if (php_poll_get_error(poll_ctx) == PHP_POLL_ERR_INTERRUPTED) {
@@ -1126,24 +1321,24 @@ static int php_io_terminal_read_byte(
 				zend_hrtime_t elapsed_ns = zend_hrtime() - start_ns;
 				if (UNEXPECTED(elapsed_ns == 0)
 					|| !php_io_terminal_timespec_subtract_elapsed(&remaining, elapsed_ns)) {
-					return 0;
+					return PHP_IO_TERMINAL_READ_TIMEOUT;
 				}
 			}
 			continue;
 		}
 
-		return -1;
+		return PHP_IO_TERMINAL_READ_ERROR;
 	}
 
 	bytes_read = read(fd, byte, 1);
 	if (bytes_read == 0) {
-		return 0;
+		return PHP_IO_TERMINAL_READ_EOF;
 	}
 	if (bytes_read < 0) {
-		return -1;
+		return PHP_IO_TERMINAL_READ_ERROR;
 	}
 
-	return 1;
+	return PHP_IO_TERMINAL_READ_SUCCESS;
 }
 
 static zend_string *php_io_terminal_finish_utf8_sequence(
@@ -1162,7 +1357,15 @@ static zend_string *php_io_terminal_finish_utf8_sequence(
 		const struct timespec *timeout = pending->length == initial_length ? first_timeout : sequence_timeout;
 		int result = php_io_terminal_read_byte(fd, stream, poll_ctx, &key, timeout, false, NULL);
 
-		if (result != 1) {
+		if (result == PHP_IO_TERMINAL_READ_TIMEOUT) {
+			return NULL;
+		}
+		if (result == PHP_IO_TERMINAL_READ_EOF) {
+			zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
+			return NULL;
+		}
+		if (result != PHP_IO_TERMINAL_READ_SUCCESS) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to read from terminal input stream", 0);
 			return NULL;
 		}
 
@@ -1216,8 +1419,16 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 	seq[seq_len++] = 0x1b;
 
 	read_result = php_io_terminal_read_byte(fd, stream, poll_ctx, &seq[seq_len], sequence_timeout, false, NULL);
-	if (read_result != 1) {
+	if (read_result == PHP_IO_TERMINAL_READ_TIMEOUT) {
 		return ZSTR_INIT_LITERAL("escape", false);
+	}
+	if (read_result == PHP_IO_TERMINAL_READ_EOF) {
+		zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
+		return NULL;
+	}
+	if (read_result != PHP_IO_TERMINAL_READ_SUCCESS) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read from terminal input stream", 0);
+		return NULL;
 	}
 	seq_len++;
 
@@ -1226,7 +1437,15 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 			unsigned char next;
 
 			read_result = php_io_terminal_read_byte(fd, stream, poll_ctx, &next, sequence_timeout, false, NULL);
-			if (read_result != 1) {
+			if (read_result != PHP_IO_TERMINAL_READ_SUCCESS) {
+				if (read_result == PHP_IO_TERMINAL_READ_EOF) {
+					zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
+					return NULL;
+				}
+				if (read_result == PHP_IO_TERMINAL_READ_ERROR) {
+					zend_throw_exception(php_io_terminal_exception_ce, "Failed to read from terminal input stream", 0);
+					return NULL;
+				}
 				break;
 			}
 
@@ -1264,7 +1483,7 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 #undef PHP_IO_TERMINAL_CSI_IS
 	} else if (seq[1] == 'O' && seq_len < sizeof(seq)) {
 		read_result = php_io_terminal_read_byte(fd, stream, poll_ctx, &seq[seq_len], sequence_timeout, false, NULL);
-		if (read_result == 1) {
+		if (read_result == PHP_IO_TERMINAL_READ_SUCCESS) {
 			seq_len++;
 			switch (seq[2]) {
 				case 'P': return ZSTR_INIT_LITERAL("f1", false);
@@ -1274,6 +1493,12 @@ static zend_string *php_io_terminal_key_from_escape_sequence(
 				case 'H': return ZSTR_INIT_LITERAL("home", false);
 				case 'F': return ZSTR_INIT_LITERAL("end", false);
 			}
+		} else if (read_result == PHP_IO_TERMINAL_READ_EOF) {
+			zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
+			return NULL;
+		} else if (read_result == PHP_IO_TERMINAL_READ_ERROR) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to read from terminal input stream", 0);
+			return NULL;
 		}
 	}
 
@@ -1325,11 +1550,13 @@ static zend_string *php_io_terminal_read_stream_key(
 	php_poll_ctx *poll_ctx;
 
 	if (fd < 0 || isatty(fd) != 1 || tcgetattr(fd, &mode) != 0) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to read key: input stream is not a terminal", 0);
 		return NULL;
 	}
 
 	poll_ctx = php_io_terminal_create_poll_context(fd);
 	if (poll_ctx == NULL) {
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to initialize terminal poll context", 0);
 		return NULL;
 	}
 
@@ -1350,6 +1577,7 @@ static zend_string *php_io_terminal_read_stream_key(
 		}
 #endif
 		php_poll_destroy(poll_ctx);
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to set terminal raw mode", 0);
 		return NULL;
 	}
 
@@ -1360,8 +1588,12 @@ static zend_string *php_io_terminal_read_stream_key(
 			resize_handler_installed ? &resize_generation : NULL);
 		if (read_result == PHP_IO_TERMINAL_READ_RESIZE) {
 			result = ZSTR_INIT_LITERAL("resize", false);
-		} else if (read_result == 1) {
+		} else if (read_result == PHP_IO_TERMINAL_READ_SUCCESS) {
 			result = php_io_terminal_key_from_byte(fd, stream, poll_ctx, key, sequence_timeout, pending);
+		} else if (read_result == PHP_IO_TERMINAL_READ_EOF) {
+			zend_throw_exception(php_io_terminal_exception_ce, "End of file reached on terminal input stream", 0);
+		} else if (read_result == PHP_IO_TERMINAL_READ_ERROR) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to read from terminal input stream", 0);
 		}
 	}
 
@@ -1375,6 +1607,9 @@ static zend_string *php_io_terminal_read_stream_key(
 			zend_string_release(result);
 		}
 		php_poll_destroy(poll_ctx);
+		if (!EG(exception)) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore terminal mode", 0);
+		}
 		return NULL;
 	}
 
@@ -1591,7 +1826,25 @@ static void php_io_terminal_create_terminal_size(zval *return_value, zend_long c
 /* Io\Terminal\TerminalSize methods */
 PHP_METHOD(Io_Terminal_TerminalSize, __construct)
 {
-	zend_throw_error(NULL, "Cannot directly construct Io\\Terminal\\TerminalSize");
+	zend_long cols, rows;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(cols)
+		Z_PARAM_LONG(rows)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (cols <= 0) {
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (rows <= 0) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	zend_update_property_long(php_io_terminal_terminal_size_ce, Z_OBJ_P(ZEND_THIS), "cols", sizeof("cols") - 1, cols);
+	zend_update_property_long(php_io_terminal_terminal_size_ce, Z_OBJ_P(ZEND_THIS), "rows", sizeof("rows") - 1, rows);
 }
 
 /* Io\Terminal\ModeToken methods */
@@ -1606,7 +1859,7 @@ PHP_METHOD(Io_Terminal_Terminal, __construct)
 	zend_throw_error(NULL, "Cannot directly construct Io\\Terminal\\Terminal");
 }
 
-PHP_METHOD(Io_Terminal_Terminal, create)
+PHP_METHOD(Io_Terminal_Terminal, fromStdio)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1704,7 +1957,8 @@ PHP_METHOD(Io_Terminal_Terminal, enableRawMode)
 	}
 
 	if (!php_io_terminal_enable_stream_raw_mode(stream.native_stream, &saved)) {
-		RETURN_FALSE;
+		zend_throw_exception(php_io_terminal_exception_ce, "Failed to enable terminal raw mode", 0);
+		RETURN_THROWS();
 	}
 
 	php_io_terminal_create_mode_token(return_value, &saved, stream.stream_resource);
@@ -1734,13 +1988,27 @@ PHP_METHOD(Io_Terminal_Terminal, restoreMode)
 			RETURN_THROWS();
 		}
 
+		php_io_terminal_match_result match = php_io_terminal_terminal_matches_saved_mode(intern, &mode->saved);
+		if (match == PHP_IO_TERMINAL_MATCH_ERROR) {
+			RETURN_THROWS();
+		}
+		if (match == PHP_IO_TERMINAL_MATCH_MISMATCH) {
+			zend_argument_value_error(1, "must be an active terminal mode token belonging to this terminal");
+			RETURN_THROWS();
+		}
+
 		restored = php_io_terminal_release_mode_token(mode);
-		if (restored && intern->active_mode_token != NULL && intern->active_mode_token == Z_OBJ_P(mode_token)) {
+		if (!restored) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore terminal mode", 0);
+			RETURN_THROWS();
+		}
+
+		if (intern->active_mode_token != NULL && intern->active_mode_token == Z_OBJ_P(mode_token)) {
 			OBJ_RELEASE(intern->active_mode_token);
 			intern->active_mode_token = NULL;
 		}
 
-		RETURN_BOOL(restored);
+		RETURN_TRUE;
 	}
 
 	if (intern->active_mode_token != NULL) {
@@ -1754,12 +2022,15 @@ PHP_METHOD(Io_Terminal_Terminal, restoreMode)
 		}
 
 		restored = php_io_terminal_release_mode_token(mode);
-		if (restored) {
-			OBJ_RELEASE(intern->active_mode_token);
-			intern->active_mode_token = NULL;
+		if (!restored) {
+			zend_throw_exception(php_io_terminal_exception_ce, "Failed to restore terminal mode", 0);
+			RETURN_THROWS();
 		}
 
-		RETURN_BOOL(restored);
+		OBJ_RELEASE(intern->active_mode_token);
+		intern->active_mode_token = NULL;
+
+		RETURN_TRUE;
 	}
 
 	RETURN_FALSE;
@@ -1881,6 +2152,13 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 	);
 #endif
 
+	if (EG(exception)) {
+		if (key != NULL) {
+			zend_string_release(key);
+		}
+		RETURN_THROWS();
+	}
+
 	if (key == NULL) {
 		RETURN_FALSE;
 	}
@@ -1978,6 +2256,9 @@ PHP_MINIT_FUNCTION(terminal)
 #if !defined(PHP_WIN32) && defined(SIGWINCH) && defined(ZTS)
 	php_io_terminal_resize_mutex = tsrm_mutex_alloc();
 #endif
+#if !defined(PHP_WIN32) && !defined(PHP_IO_TERMINAL_HAVE_PTSNAME_R) && defined(ZTS)
+	php_io_terminal_ptsname_mutex = tsrm_mutex_alloc();
+#endif
 
 	return SUCCESS;
 }
@@ -1988,6 +2269,12 @@ PHP_MSHUTDOWN_FUNCTION(terminal)
 	if (php_io_terminal_resize_mutex != NULL) {
 		tsrm_mutex_free(php_io_terminal_resize_mutex);
 		php_io_terminal_resize_mutex = NULL;
+	}
+#endif
+#if !defined(PHP_WIN32) && !defined(PHP_IO_TERMINAL_HAVE_PTSNAME_R) && defined(ZTS)
+	if (php_io_terminal_ptsname_mutex != NULL) {
+		tsrm_mutex_free(php_io_terminal_ptsname_mutex);
+		php_io_terminal_ptsname_mutex = NULL;
 	}
 #endif
 

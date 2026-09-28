@@ -46,7 +46,7 @@ namespace Io\Terminal {
         public readonly int $cols;
         public readonly int $rows;
 
-        private function __construct() {}
+        public function __construct(int $cols, int $rows) {}
     }
 
     /**
@@ -66,7 +66,7 @@ namespace Io\Terminal {
     {
         private function __construct() {}
 
-        public static function create(): Terminal {}
+        public static function fromStdio(): Terminal {}
 
         /**
          * @param resource $input
@@ -76,7 +76,7 @@ namespace Io\Terminal {
 
         public function getSize(): TerminalSize|false {}
 
-        public function enableRawMode(): ModeToken|false {}
+        public function enableRawMode(): ModeToken {}
 
         public function restoreMode(?ModeToken $mode = null): bool {}
 

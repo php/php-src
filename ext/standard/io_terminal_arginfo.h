@@ -1,17 +1,20 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: d469eb6a85a1b785b0f9df0657696de108706101
+ * Stub hash: 919125ad09816c09ee488556d37f36f42818be80
  * Has decl header: yes */
 
 #include "zend_enum.h"
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Terminal_TerminalSize___construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Terminal_TerminalSize___construct, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, cols, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, rows, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Io_Terminal_ModeToken___construct arginfo_class_Io_Terminal_TerminalSize___construct
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Io_Terminal_ModeToken___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Io_Terminal_Terminal___construct arginfo_class_Io_Terminal_TerminalSize___construct
+#define arginfo_class_Io_Terminal_Terminal___construct arginfo_class_Io_Terminal_ModeToken___construct
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Terminal_Terminal_create, 0, 0, Io\\Terminal\\Terminal, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Terminal_Terminal_fromStdio, 0, 0, Io\\Terminal\\Terminal, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Terminal_Terminal_fromStreams, 0, 1, Io\\Terminal\\Terminal, 0)
@@ -22,7 +25,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Io_Terminal_Terminal_getSize, 0, 0, Io\\Terminal\\TerminalSize, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Io_Terminal_Terminal_enableRawMode, 0, 0, Io\\Terminal\\ModeToken, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Terminal_Terminal_enableRawMode, 0, 0, Io\\Terminal\\ModeToken, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Terminal_Terminal_restoreMode, 0, 0, _IS_BOOL, 0)
@@ -40,7 +43,7 @@ ZEND_END_ARG_INFO()
 ZEND_METHOD(Io_Terminal_TerminalSize, __construct);
 ZEND_METHOD(Io_Terminal_ModeToken, __construct);
 ZEND_METHOD(Io_Terminal_Terminal, __construct);
-ZEND_METHOD(Io_Terminal_Terminal, create);
+ZEND_METHOD(Io_Terminal_Terminal, fromStdio);
 ZEND_METHOD(Io_Terminal_Terminal, fromStreams);
 ZEND_METHOD(Io_Terminal_Terminal, getSize);
 ZEND_METHOD(Io_Terminal_Terminal, enableRawMode);
@@ -49,7 +52,7 @@ ZEND_METHOD(Io_Terminal_Terminal, readKey);
 ZEND_METHOD(Io_Terminal_Terminal, readSecret);
 
 static const zend_function_entry class_Io_Terminal_TerminalSize_methods[] = {
-	ZEND_ME(Io_Terminal_TerminalSize, __construct, arginfo_class_Io_Terminal_TerminalSize___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(Io_Terminal_TerminalSize, __construct, arginfo_class_Io_Terminal_TerminalSize___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -60,7 +63,7 @@ static const zend_function_entry class_Io_Terminal_ModeToken_methods[] = {
 
 static const zend_function_entry class_Io_Terminal_Terminal_methods[] = {
 	ZEND_ME(Io_Terminal_Terminal, __construct, arginfo_class_Io_Terminal_Terminal___construct, ZEND_ACC_PRIVATE)
-	ZEND_ME(Io_Terminal_Terminal, create, arginfo_class_Io_Terminal_Terminal_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Io_Terminal_Terminal, fromStdio, arginfo_class_Io_Terminal_Terminal_fromStdio, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Io_Terminal_Terminal, fromStreams, arginfo_class_Io_Terminal_Terminal_fromStreams, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Io_Terminal_Terminal, getSize, arginfo_class_Io_Terminal_Terminal_getSize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Io_Terminal_Terminal, enableRawMode, arginfo_class_Io_Terminal_Terminal_enableRawMode, ZEND_ACC_PUBLIC)
