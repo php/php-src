@@ -74,17 +74,43 @@ try {
 var_dump($t1->restoreMode($m1));
 var_dump($t1->restoreMode());
 
+// Descriptor reuse: hold an active token, close the PTY, and open a new PTY that reuses the fd number
+$m_reuse = $t1->enableRawMode();
 fwrite($pipes1[0], "exit\n");
-fwrite($pipes2[0], "exit\n");
-unset($t1, $t1_dup, $t2);
+unset($t1, $t1_dup);
 foreach ($pipes1 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
 }
+proc_close($proc1);
+
+$proc3 = proc_open(
+    [PHP_BINARY, '-r', 'fgets(STDIN);'],
+    [
+        0 => ['pty'],
+        1 => ['pty'],
+        2 => ['pipe', 'w'],
+    ],
+    $pipes3,
+);
+$t3 = Terminal::fromStreams($pipes3[0]);
+try {
+    $t3->restoreMode($m_reuse);
+    echo "FAIL: reused fd accepted token\n";
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
+fwrite($pipes2[0], "exit\n");
+fwrite($pipes3[0], "exit\n");
+unset($t2, $t3);
 foreach ($pipes2 as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
 }
-proc_close($proc1);
+foreach ($pipes3 as $pipe) {
+    if (is_resource($pipe)) fclose($pipe);
+}
 proc_close($proc2);
+proc_close($proc3);
 ?>
 --EXPECT--
 bool(true)
@@ -92,3 +118,4 @@ bool(true)
 ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal
 bool(true)
 bool(false)
+ValueError: Io\Terminal\Terminal::restoreMode(): Argument #1 ($mode) must be an active terminal mode token belonging to this terminal

@@ -58,6 +58,13 @@ foreach ([
     }
 }
 
+// Repeated TerminalSize construction must produce only the first error ($cols)
+try {
+    $size->__construct(100, 50);
+} catch (Throwable $e) {
+    echo $e::class, ": ", $e->getMessage(), PHP_EOL;
+}
+
 // TerminalSize serialization
 $serialized = serialize($size);
 $unserialized = unserialize($serialized);
@@ -97,6 +104,7 @@ ValueError: Io\Terminal\TerminalSize::__construct(): Argument #1 ($cols) must be
 ValueError: Io\Terminal\TerminalSize::__construct(): Argument #2 ($rows) must be greater than 0
 ValueError: Io\Terminal\TerminalSize::__construct(): Argument #1 ($cols) must be greater than 0
 ValueError: Io\Terminal\TerminalSize::__construct(): Argument #2 ($rows) must be greater than 0
+Error: Cannot modify readonly property Io\Terminal\TerminalSize::$cols
 bool(true)
 int(80)
 int(24)
