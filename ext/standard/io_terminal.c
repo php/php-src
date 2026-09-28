@@ -46,6 +46,11 @@
 #define PHP_IO_TERMINAL_MODE_TOKEN_MAGIC "PHPTTY1"
 #define PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN (sizeof(PHP_IO_TERMINAL_MODE_TOKEN_MAGIC) - 1)
 #define PHP_IO_TERMINAL_SEQUENCE_TIMEOUT_MS 25
+#if SIZEOF_TIME_T < 8
+# define PHP_IO_TERMINAL_TIME_T_MAX INT32_MAX
+#else
+# define PHP_IO_TERMINAL_TIME_T_MAX INT64_MAX
+#endif
 
 #ifdef PHP_WIN32
 typedef HANDLE php_io_terminal_native_stream;
@@ -66,6 +71,8 @@ typedef struct php_io_terminal_saved_mode {
 	DWORD mode;
 #else
 	struct termios mode;
+	dev_t tty_dev;
+	ino_t tty_ino;
 #endif
 } php_io_terminal_saved_mode;
 
@@ -83,6 +90,9 @@ typedef struct php_io_terminal_object {
 	zval input_stream_val;
 	zval output_stream_val;
 	zend_object *active_mode_token;
+	zend_long last_cols;
+	zend_long last_rows;
+	bool has_last_size;
 #ifdef PHP_WIN32
 	INPUT_RECORD pending_key;
 	WCHAR pending_key_high_surrogate;
@@ -138,13 +148,28 @@ static void php_io_terminal_resize_unlock(void)
 #endif
 }
 
-static void php_io_terminal_sigwinch_handler(int signo)
+static void php_io_terminal_sigwinch_handler(int signo, siginfo_t *info, void *context)
 {
 	(void) signo;
 
 	php_io_terminal_resize_generation = php_io_terminal_resize_generation == SIG_ATOMIC_MAX
 		? 0
 		: php_io_terminal_resize_generation + 1;
+
+	/* Forward to existing handler if present and not default/ignored */
+	if (php_io_terminal_previous_resize_action.sa_flags & SA_SIGINFO) {
+		if (php_io_terminal_previous_resize_action.sa_sigaction != NULL
+			&& php_io_terminal_previous_resize_action.sa_sigaction != (void *) SIG_DFL
+			&& php_io_terminal_previous_resize_action.sa_sigaction != (void *) SIG_IGN) {
+			php_io_terminal_previous_resize_action.sa_sigaction(signo, info, context);
+		}
+	} else {
+		if (php_io_terminal_previous_resize_action.sa_handler != NULL
+			&& php_io_terminal_previous_resize_action.sa_handler != SIG_DFL
+			&& php_io_terminal_previous_resize_action.sa_handler != SIG_IGN) {
+			php_io_terminal_previous_resize_action.sa_handler(signo);
+		}
+	}
 }
 
 static bool php_io_terminal_install_resize_handler(sig_atomic_t *generation)
@@ -158,7 +183,8 @@ static bool php_io_terminal_install_resize_handler(sig_atomic_t *generation)
 
 	if (php_io_terminal_resize_readers == 0) {
 		memset(&action, 0, sizeof(action));
-		action.sa_handler = php_io_terminal_sigwinch_handler;
+		action.sa_sigaction = php_io_terminal_sigwinch_handler;
+		action.sa_flags = SA_SIGINFO;
 		sigemptyset(&action.sa_mask);
 
 		installed = sigaction(SIGWINCH, &action, &php_io_terminal_previous_resize_action) == 0;
@@ -208,13 +234,46 @@ static bool php_io_terminal_native_stream_is_valid(php_io_terminal_native_stream
 #endif
 }
 
-static bool php_io_terminal_mode_streams_match(php_io_terminal_native_stream first, php_io_terminal_native_stream second)
+static bool php_io_terminal_mode_streams_match(const php_io_terminal_saved_mode *first, const php_io_terminal_saved_mode *second)
 {
-	return first == second;
+#ifdef PHP_WIN32
+	if (first->stream == second->stream) {
+		return true;
+	}
+	DWORD m1, m2;
+	return GetConsoleMode(first->stream, &m1) && GetConsoleMode(second->stream, &m2);
+#else
+	if (first->stream == second->stream) {
+		return true;
+	}
+	if (first->tty_dev != 0 && second->tty_dev != 0 && first->tty_dev == second->tty_dev) {
+		return true;
+	}
+	return false;
+#endif
 }
 
 static bool php_io_terminal_mode_token_stream_is_valid(const php_io_terminal_mode_token_object *mode)
 {
+	if (!php_io_terminal_native_stream_is_valid(mode->saved.stream)) {
+		return false;
+	}
+
+#ifdef PHP_WIN32
+	DWORD m;
+	if (!GetConsoleMode(mode->saved.stream, &m)) {
+		return false;
+	}
+#else
+	struct stat st;
+	if (fstat(mode->saved.stream, &st) != 0 || !S_ISCHR(st.st_mode)) {
+		return false;
+	}
+	if (mode->saved.tty_dev != 0 && st.st_rdev != mode->saved.tty_dev) {
+		return false;
+	}
+#endif
+
 	if (!Z_ISUNDEF(mode->stream_resource)) {
 		php_stream *stream;
 		php_io_terminal_native_stream native_stream;
@@ -234,13 +293,28 @@ static bool php_io_terminal_mode_token_stream_is_valid(const php_io_terminal_mod
 		}
 
 		native_stream = php_io_terminal_native_stream_from_php_stream(stream);
-		if (!php_io_terminal_native_stream_is_valid(native_stream)
-			|| !php_io_terminal_mode_streams_match(native_stream, mode->saved.stream)) {
+		if (!php_io_terminal_native_stream_is_valid(native_stream)) {
 			return false;
 		}
+#ifdef PHP_WIN32
+		if (native_stream != mode->saved.stream) {
+			DWORD m1, m2;
+			if (!GetConsoleMode(native_stream, &m1) || !GetConsoleMode(mode->saved.stream, &m2)) {
+				return false;
+			}
+		}
+#else
+		if (native_stream != mode->saved.stream) {
+			struct stat st_cur;
+			if (fstat(native_stream, &st_cur) != 0 || !S_ISCHR(st_cur.st_mode)
+				|| mode->saved.tty_dev == 0 || st_cur.st_rdev != mode->saved.tty_dev) {
+				return false;
+			}
+		}
+#endif
 	}
 
-	return php_io_terminal_native_stream_is_valid(mode->saved.stream);
+	return true;
 }
 
 static bool php_io_terminal_restore_stream_mode(const php_io_terminal_saved_mode *saved)
@@ -295,7 +369,7 @@ static bool php_io_terminal_release_mode_token(php_io_terminal_mode_token_object
 	bool restored;
 
 	while (candidate != NULL && candidate != mode) {
-		if (candidate->valid && php_io_terminal_mode_streams_match(candidate->saved.stream, mode->saved.stream)) {
+		if (candidate->valid && php_io_terminal_mode_streams_match(&candidate->saved, &mode->saved)) {
 			newer = candidate;
 		}
 		candidate = candidate->active_next;
@@ -402,6 +476,9 @@ static zend_object *php_io_terminal_create_object(zend_class_entry *ce)
 	ZVAL_UNDEF(&intern->input_stream_val);
 	ZVAL_UNDEF(&intern->output_stream_val);
 	intern->active_mode_token = NULL;
+	intern->last_cols = 0;
+	intern->last_rows = 0;
+	intern->has_last_size = false;
 #ifdef PHP_WIN32
 	memset(&intern->pending_key, 0, sizeof(intern->pending_key));
 	intern->pending_key_high_surrogate = 0;
@@ -715,12 +792,13 @@ static zend_string *php_io_terminal_read_stream_key(
 				continue;
 			}
 
+			WCHAR prev_high = high_surrogate;
 			result = php_io_terminal_key_from_input_record(key, &high_surrogate);
 			if (result != NULL) {
 				if (key->wRepeatCount > 1) {
 					key->wRepeatCount--;
 					*pending_key = record;
-					*pending_key_high_surrogate = high_surrogate;
+					*pending_key_high_surrogate = prev_high;
 				}
 				break;
 			}
@@ -859,14 +937,21 @@ static bool php_io_terminal_enable_stream_raw_mode(php_io_terminal_native_stream
 {
 	struct termios mode;
 	struct termios raw_mode;
+	struct stat st;
 
 	if (!php_io_terminal_native_stream_is_valid(fd) || isatty(fd) != 1 || tcgetattr(fd, &mode) != 0) {
+		return false;
+	}
+
+	if (fstat(fd, &st) != 0 || !S_ISCHR(st.st_mode)) {
 		return false;
 	}
 
 	memcpy(saved->magic, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC, PHP_IO_TERMINAL_MODE_TOKEN_MAGIC_LEN);
 	saved->stream = fd;
 	saved->mode = mode;
+	saved->tty_dev = st.st_rdev;
+	saved->tty_ino = st.st_ino;
 
 	raw_mode = mode;
 	php_io_terminal_make_raw_mode(&raw_mode);
@@ -1331,6 +1416,7 @@ static zend_string *php_io_terminal_read_stream_secret(php_io_terminal_native_st
 			break;
 		}
 
+process_key:
 		switch (key) {
 			case '\r':
 			case '\n':
@@ -1361,13 +1447,27 @@ static zend_string *php_io_terminal_read_stream_secret(php_io_terminal_native_st
 				} else {
 					unsigned char seq[4];
 					size_t i;
+					bool invalid_continuation = false;
+					unsigned char invalid_byte = 0;
+
 					seq[0] = key;
 					for (i = 1; i < seq_len; i++) {
 						if (php_io_terminal_read_byte(fd, stream, poll_ctx, &seq[i], &sequence_timeout, false, NULL) != 1) {
 							break;
 						}
+						if ((seq[i] & 0xc0) != 0x80) {
+							invalid_continuation = true;
+							invalid_byte = seq[i];
+							break;
+						}
 					}
-					smart_str_appendl(&secret, (const char *) seq, i);
+					if (invalid_continuation) {
+						key = invalid_byte;
+						goto process_key;
+					}
+					if (i == seq_len) {
+						smart_str_appendl(&secret, (const char *) seq, i);
+					}
 				}
 				break;
 			}
@@ -1565,6 +1665,10 @@ PHP_METHOD(Io_Terminal_Terminal, getSize)
 		RETURN_FALSE;
 	}
 
+	intern->last_cols = columns;
+	intern->last_rows = rows;
+	intern->has_last_size = true;
+
 	php_io_terminal_create_terminal_size(return_value, columns, rows);
 }
 
@@ -1659,6 +1763,7 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 	php_date_time_duration *seq_timeout_duration = NULL;
 	php_io_terminal_object *intern;
 	php_io_terminal_stream_target stream;
+	php_io_terminal_stream_target out_stream;
 	zend_string *key;
 	zend_object *key_case;
 
@@ -1680,22 +1785,37 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 
 	intern = PHP_IO_TERMINAL_OBJ_FROM_ZV(ZEND_THIS);
 
+	if (php_io_terminal_stream_target_init(&intern->output_stream_val, false, &out_stream)) {
+		zend_long cur_cols = 0, cur_rows = 0;
+		if (php_io_terminal_stream_size(out_stream.native_stream, &cur_cols, &cur_rows)) {
+			if (intern->has_last_size && (cur_cols != intern->last_cols || cur_rows != intern->last_rows)) {
+				intern->last_cols = cur_cols;
+				intern->last_rows = cur_rows;
+				RETURN_OBJ_COPY(zend_enum_get_case_cstr(php_io_terminal_key_ce, "Resize"));
+			}
+			intern->last_cols = cur_cols;
+			intern->last_rows = cur_rows;
+			intern->has_last_size = true;
+		}
+	}
+
 	if (!php_io_terminal_stream_target_init(&intern->input_stream_val, true, &stream)) {
 		RETURN_THROWS();
 	}
 
 #ifdef PHP_WIN32
+# define PHP_IO_TERMINAL_MAX_WAIT_MS (INFINITE - 1)
 	DWORD wait_ms = INFINITE;
 	if (timeout_duration != NULL) {
 		uint64_t sec = timeout_duration->duration.seconds;
 		uint32_t nsec = timeout_duration->duration.nanoseconds;
 		if (sec == 0 && nsec == 0) {
 			wait_ms = 0;
-		} else if (sec >= (DWORD) INFINITE / 1000) {
-			wait_ms = INFINITE;
+		} else if (sec >= (DWORD) PHP_IO_TERMINAL_MAX_WAIT_MS / 1000) {
+			wait_ms = PHP_IO_TERMINAL_MAX_WAIT_MS;
 		} else {
 			uint64_t ms = sec * 1000 + (nsec + 999999) / 1000000;
-			wait_ms = ms >= (DWORD) INFINITE ? INFINITE : (DWORD) ms;
+			wait_ms = ms >= (DWORD) PHP_IO_TERMINAL_MAX_WAIT_MS ? PHP_IO_TERMINAL_MAX_WAIT_MS : (DWORD) ms;
 		}
 	}
 
@@ -1711,16 +1831,37 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 	struct timespec timeout;
 	struct timespec sequence_timeout = {0, PHP_IO_TERMINAL_SEQUENCE_TIMEOUT_MS * 1000000L};
 	const struct timespec *timeout_ptr = NULL;
+	bool is_non_blocking = false;
 
 	if (timeout_duration != NULL) {
-		timeout.tv_sec = timeout_duration->duration.seconds;
+		is_non_blocking = (timeout_duration->duration.seconds == 0 && timeout_duration->duration.nanoseconds == 0);
+#if SIZEOF_TIME_T < 8
+		if (timeout_duration->duration.seconds > PHP_IO_TERMINAL_TIME_T_MAX) {
+			timeout.tv_sec = PHP_IO_TERMINAL_TIME_T_MAX;
+		} else {
+			timeout.tv_sec = (time_t) timeout_duration->duration.seconds;
+		}
+#else
+		timeout.tv_sec = (time_t) timeout_duration->duration.seconds;
+#endif
 		timeout.tv_nsec = timeout_duration->duration.nanoseconds;
 		timeout_ptr = &timeout;
 	}
 
 	if (seq_timeout_duration != NULL) {
-		sequence_timeout.tv_sec = seq_timeout_duration->duration.seconds;
+#if SIZEOF_TIME_T < 8
+		if (seq_timeout_duration->duration.seconds > PHP_IO_TERMINAL_TIME_T_MAX) {
+			sequence_timeout.tv_sec = PHP_IO_TERMINAL_TIME_T_MAX;
+		} else {
+			sequence_timeout.tv_sec = (time_t) seq_timeout_duration->duration.seconds;
+		}
+#else
+		sequence_timeout.tv_sec = (time_t) seq_timeout_duration->duration.seconds;
+#endif
 		sequence_timeout.tv_nsec = seq_timeout_duration->duration.nanoseconds;
+	} else if (is_non_blocking) {
+		sequence_timeout.tv_sec = 0;
+		sequence_timeout.tv_nsec = 0;
 	}
 
 	key = php_io_terminal_read_stream_key(
@@ -1738,6 +1879,17 @@ PHP_METHOD(Io_Terminal_Terminal, readKey)
 
 	key_case = php_io_terminal_key_enum_from_string(key);
 	if (key_case != NULL) {
+		if (key_case == zend_enum_get_case_cstr(php_io_terminal_key_ce, "Resize")) {
+			php_io_terminal_stream_target out_s;
+			if (php_io_terminal_stream_target_init(&intern->output_stream_val, false, &out_s)) {
+				zend_long c = 0, r = 0;
+				if (php_io_terminal_stream_size(out_s.native_stream, &c, &r)) {
+					intern->last_cols = c;
+					intern->last_rows = r;
+					intern->has_last_size = true;
+				}
+			}
+		}
 		zend_string_release(key);
 		RETURN_OBJ_COPY(key_case);
 	}
