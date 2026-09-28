@@ -1,5 +1,5 @@
 --TEST--
-Io\Terminal\Terminal: overlapping raw-mode sessions and out-of-order restoration
+Io\Terminal\Terminal: readKey zero timeout returns Escape immediately without sequence delay
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY === 'Windows') {
@@ -32,11 +32,13 @@ proc_close($proc);
 --FILE--
 <?php
 
+use Io\Terminal\Key;
 use Io\Terminal\Terminal;
-use Io\Terminal\ModeToken;
+use Time\Duration;
 
+$code = 'fgets(STDIN); fwrite(STDOUT, "\x1b"); fflush(STDOUT); fwrite(STDERR, "READY\n"); fflush(STDERR); fgets(STDIN);';
 $proc = proc_open(
-    [PHP_BINARY, '-r', 'fgets(STDIN);'],
+    [PHP_BINARY, '-r', $code],
     [
         0 => ['pty'],
         1 => ['pty'],
@@ -45,41 +47,29 @@ $proc = proc_open(
     $pipes,
 );
 
-// Two separate Terminal instances referencing descriptors on the same PTY
-$t1 = Terminal::fromStreams($pipes[0]);
-$t2 = Terminal::fromStreams($pipes[1]);
+$terminal = Terminal::fromStreams($pipes[0]);
+$terminal->enableRawMode();
 
-// Test 1: Out-of-order restore (m1 then m2)
-$m1 = $t1->enableRawMode();
-$m2 = $t2->enableRawMode();
+// Signal child to write lone escape
+fwrite($pipes[0], "GO\n");
+$ready = fgets($pipes[2]);
 
-var_dump($m1 instanceof ModeToken);
-var_dump($m2 instanceof ModeToken);
+// Read with zero timeout (non-blocking)
+$start = hrtime(true);
+$key = $terminal->readKey(Duration::fromSeconds(0));
+$elapsed_ms = (hrtime(true) - $start) / 1e6;
 
-// Out-of-order: restore older token m1 first
-var_dump($t1->restoreMode($m1));
+var_dump($key === Key::Escape);
+// Verify it did not block for 25ms sequence timeout (should be < 15ms)
+var_dump($elapsed_ms < 15.0);
 
-// Now restore m2
-var_dump($t2->restoreMode($m2));
-
-// Test 2: In-order restore (m2 then m1)
-$m1 = $t1->enableRawMode();
-$m2 = $t2->enableRawMode();
-
-var_dump($t2->restoreMode($m2));
-var_dump($t1->restoreMode($m1));
-
-fwrite($pipes[0], "exit\n");
-unset($t1, $t2);
+fwrite($pipes[0], "DONE\n");
+unset($terminal);
 foreach ($pipes as $pipe) {
     if (is_resource($pipe)) fclose($pipe);
 }
 proc_close($proc);
 ?>
 --EXPECT--
-bool(true)
-bool(true)
-bool(true)
-bool(true)
 bool(true)
 bool(true)
