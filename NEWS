@@ -96,6 +96,8 @@ PHP                                                                        NEWS
     elements. (mehmetcansahin)
   . Enforce max_filter_count: limit the number of filters that can be chained
     in a php://filter URL. (Sjoerd Langkemper)
+  . Improved performance of resolving the charset of HTML functions,
+    especially UTF-8. (Nicolas Grekas)
 
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
