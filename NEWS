@@ -49,6 +49,10 @@ PHP                                                                        NEWS
   . Fixed OSS-Fuzz #538730793 (Assertion failure when returning by-ref from
     closure invoke). (ndossche)
   . Fixed OSS-Fuzz #540904105 (ASSERT: ast->attr == T_CLASS_C). (ndossche)
+  . Deprecated using "let" or "is" as the name of a class, function, or
+    constant, and as an alias in class_alias() and use declarations. (Girgias)
+  . Deprecated using "_" as a constant name and as an alias for a class or
+    constant in use declarations. (Girgias)
 
 - CLI
   . Fix GH-22567 (Windows ZTS CLI SAPI should refresh its TSRMLS cache during
