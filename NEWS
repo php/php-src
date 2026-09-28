@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.7.0alpha1
 
-- Core:
-  . Enforce max_filter_count: limit the number of filters that can be chained
-    in a php://filter URL. (Sjoerd Langkemper)
-
 - FPM:
   . Use recommended TYPE, HELP order for OpenMetrics metadata.
     (Marcel Hernandez)
@@ -25,5 +21,7 @@ PHP                                                                        NEWS
 - Standard:
   . Improved performance of array_splice() when inserting without removing
     elements. (mehmetcansahin)
+  . Enforce max_filter_count: limit the number of filters that can be chained
+    in a php://filter URL. (Sjoerd Langkemper)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
