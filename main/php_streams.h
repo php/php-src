@@ -258,6 +258,8 @@ struct _php_stream  {
 	zend_llist *error_list;
 
 	HashTable *poll_watchers; /* Io\Poll watchers notified before the stream is closed */
+
+	struct _php_io_registration *io_registrations; /* IO hooks registrations, ended before the close */
 }; /* php_stream */
 
 #define PHP_STREAM_CONTEXT(stream) \
@@ -546,6 +548,8 @@ END_EXTERN_C()
 #define PHP_STREAM_AS_FD_FOR_SELECT 3
 /* cast as fd/socket for copy purposes */
 #define PHP_STREAM_AS_FD_FOR_COPY   4
+/* cast as fd/socket to watch for readiness: the descriptor and nothing else, buffers untouched */
+#define PHP_STREAM_AS_FD_FOR_POLL   5
 
 /* try really, really hard to make sure the cast happens (avoid using this flag if possible) */
 #define PHP_STREAM_CAST_TRY_HARD	0x80000000

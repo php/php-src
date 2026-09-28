@@ -259,7 +259,7 @@ static php_socket_t php_stream_poll_handle_get_fd(php_poll_handle_object *handle
 		return SOCK_ERR;
 	}
 
-	if (php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+	if (php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_POLL | PHP_STREAM_CAST_INTERNAL,
 				(void *) &fd, 1)
 					!= SUCCESS
 			|| fd == -1) {
@@ -322,7 +322,7 @@ static php_socket_t php_stream_poll_weak_handle_get_fd(php_poll_handle_object *h
 		return SOCK_ERR;
 	}
 	php_socket_t fd;
-	if (php_stream_cast(data->stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+	if (php_stream_cast(data->stream, PHP_STREAM_AS_FD_FOR_POLL | PHP_STREAM_CAST_INTERNAL,
 				(void *) &fd, 1) != SUCCESS || fd == -1) {
 		return SOCK_ERR;
 	}
