@@ -1477,6 +1477,49 @@ static void php_cli_server_request_translate_vpath(const php_cli_server *server,
 					return;
 				}
 			}
+			/* Regular file; check that it doesn't escape the docroot via a
+			 * symlink */
+			char *resolved = realpath(buf, NULL);
+			if (resolved == NULL) {
+				if (prev_path) {
+					pefree(prev_path, 1);
+				}
+				pefree(buf, 1);
+				return;
+			}
+			bool outside_docroot = strncmp(resolved, document_root, document_root_len) != 0;
+			// If the document root is `/` (or `\` on windows) then everything
+			// is in the docroot and we don't need to check that the document
+			// root is followed by a directory separator
+			if (!outside_docroot
+				&& !(
+					document_root_len == 1
+#ifdef PHP_WIN32
+					&& document_root[0] == '\\'
+#else
+					&& document_root[0] == '/'
+#endif
+				)
+			) {
+				// We know that the resolved path has at least the document_root
+				// as a prefix, and then a null terminating character, so reading
+				// at offset document_root_len is safe. We need to make sure
+				// that the file is actually *in* the document root, not just
+				// next to it with that name as a prefix
+#ifdef PHP_WIN32
+				outside_docroot = resolved[document_root_len] != '\\';
+#else
+				outside_docroot = resolved[document_root_len] != '/';
+#endif
+			}
+			free(resolved);
+			if (outside_docroot) {
+				if (prev_path) {
+					pefree(prev_path, 1);
+				}
+				pefree(buf, 1);
+				return;
+			}
 			break; /* regular file */
 		}
 		if (prev_path) {
