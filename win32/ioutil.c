@@ -1401,10 +1401,15 @@ static ssize_t php_win32_ioutil_overlapped_io(int fd, void *buf, size_t len, int
 		ov.OffsetHigh = (DWORD) ((uint64_t) offset >> 32);
 	}
 
-	HANDLE event = CreateEventW(NULL, TRUE, FALSE, NULL);
+	/* One event per thread, the call blocks until the operation completes; the system resets it
+	 * as each operation starts. Kept for the thread's lifetime, it is not worth a syscall per op. */
+	static __declspec(thread) HANDLE event = NULL;
 	if (!event) {
-		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
-		return -1;
+		event = CreateEventW(NULL, TRUE, FALSE, NULL);
+		if (!event) {
+			SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+			return -1;
+		}
 	}
 	/* The low bit keeps the completion off a port the handle is bound to */
 	ov.hEvent = (HANDLE) ((ULONG_PTR) event | 1);
@@ -1419,7 +1424,6 @@ static ssize_t php_win32_ioutil_overlapped_io(int fd, void *buf, size_t len, int
 		ok = GetOverlappedResult(h, &ov, &done, TRUE);
 		err = ok ? ERROR_SUCCESS : GetLastError();
 	}
-	CloseHandle(event);
 
 	if (ok) {
 		return (ssize_t) done;

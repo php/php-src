@@ -1714,7 +1714,7 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 			src->writepos == src->readpos && dest->writepos == dest->readpos &&
 			!php_stream_is_filtered(src) && !php_stream_is_filtered(dest) &&
 			!php_stream_has_notifier(src) && !php_stream_has_notifier(dest)) {
-		php_io_fd src_copy_fd, dest_copy_fd;
+		php_io_fd src_copy_fd = {0}, dest_copy_fd = {0};
 
 		if (php_stream_cast(src, PHP_STREAM_AS_FD_FOR_COPY, (void *) &src_copy_fd, 0) == SUCCESS &&
 				php_stream_cast(dest, PHP_STREAM_AS_FD_FOR_COPY, (void *) &dest_copy_fd, 0) == SUCCESS) {

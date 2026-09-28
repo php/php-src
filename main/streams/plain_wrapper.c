@@ -949,12 +949,6 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 			if (data->file) {
 				return FAILURE;
 			}
-#ifdef PHP_WIN32
-			if (data->is_overlapped) {
-				/* The copy helper reads and writes the CRT way */
-				return FAILURE;
-			}
-#endif
 			PHP_STDIOP_GET_FD(fd, data);
 			if (SOCK_ERR == fd) {
 				return FAILURE;
@@ -966,6 +960,11 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 				copy_fd->timeout.tv_sec = 0;
 				copy_fd->timeout.tv_usec = 0;
 				copy_fd->is_blocked = 0;
+#ifdef PHP_WIN32
+				copy_fd->position = data->is_overlapped ? &data->position : NULL;
+#else
+				copy_fd->position = NULL;
+#endif
 			}
 			return SUCCESS;
 
