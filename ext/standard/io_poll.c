@@ -330,10 +330,11 @@ static php_socket_t php_stream_poll_weak_handle_get_fd(php_poll_handle_object *h
 	return fd;
 }
 
+/* No liveness check: that is IO, and the handle is asked from inside the stream's operations */
 static int php_stream_poll_weak_handle_is_valid(php_poll_handle_object *handle)
 {
 	php_stream_poll_weak_handle_data *data = handle->handle_data;
-	return data && data->stream && !php_stream_eof(data->stream);
+	return data && data->stream && !data->stream->eof;
 }
 
 static void php_stream_poll_weak_handle_cleanup(php_poll_handle_object *handle)

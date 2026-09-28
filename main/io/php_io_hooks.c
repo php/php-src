@@ -1354,7 +1354,11 @@ PHPAPI php_socket_t php_io_accept_ex(php_stream *stream, zend_object *handle, ph
 		struct sockaddr *addr, socklen_t *addrlen, php_deadline *dl)
 {
 	php_io_sock_call c = { .fd = fd, .addr = addr, .addrlen = addrlen };
-	return php_io_descriptor_op(stream, handle, dl, PHP_IO_HOOKS_F_DIRECT_ACCEPT, php_io_accept_syscall,
+	/* A listener kept unregistered gets no multishot accept, so a direct accept on it would take
+	 * one connection per pass: accept() first instead */
+	uint32_t direct_flag = stream && (stream->flags & PHP_STREAM_FLAG_NO_IO_REGISTRATION)
+			? 0 : PHP_IO_HOOKS_F_DIRECT_ACCEPT;
+	return php_io_descriptor_op(stream, handle, dl, direct_flag, php_io_accept_syscall,
 			php_io_accept_prep, &c);
 }
 
