@@ -1,5 +1,5 @@
 --TEST--
-namespace\int is not a valid type hint
+namespace\int is not a valid type declaration
 --FILE--
 <?php
 

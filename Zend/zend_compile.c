@@ -199,44 +199,46 @@ static bool zend_get_unqualified_name(const zend_string *name, const char **resu
 }
 /* }}} */
 
-struct reserved_class_name {
-	const char *name;
-	size_t len;
-};
-static const struct reserved_class_name reserved_class_names[] = {
-	{ZEND_STRL("bool")},
-	{ZEND_STRL("false")},
-	{ZEND_STRL("float")},
-	{ZEND_STRL("int")},
-	{ZEND_STRL("null")},
-	{ZEND_STRL("parent")},
-	{ZEND_STRL("self")},
-	{ZEND_STRL("static")},
-	{ZEND_STRL("string")},
-	{ZEND_STRL("true")},
-	{ZEND_STRL("void")},
-	{ZEND_STRL("never")},
-	{ZEND_STRL("iterable")},
-	{ZEND_STRL("object")},
-	{ZEND_STRL("mixed")},
-	/* These are not usable as class names because they're proper tokens,
-	 * but they are here for class aliases. */
-	{ZEND_STRL("array")},
-	{ZEND_STRL("callable")},
-	{NULL, 0}
+typedef struct _builtin_type_info {
+	const char* name;
+	const size_t name_len;
+	const uint8_t type;
+} builtin_type_info;
+
+static const builtin_type_info builtin_types[] = {
+	{ZEND_STRL("null"), IS_NULL},
+	{ZEND_STRL("true"), IS_TRUE},
+	{ZEND_STRL("false"), IS_FALSE},
+	{ZEND_STRL("int"), IS_LONG},
+	{ZEND_STRL("float"), IS_DOUBLE},
+	{ZEND_STRL("string"), IS_STRING},
+	{ZEND_STRL("bool"), _IS_BOOL},
+	{ZEND_STRL("void"), IS_VOID},
+	{ZEND_STRL("never"), IS_NEVER},
+	{ZEND_STRL("iterable"), IS_ITERABLE},
+	{ZEND_STRL("object"), IS_OBJECT},
+	{ZEND_STRL("mixed"), IS_MIXED},
+	/* Should be handled as ZEND_TYPE_ASTs but it may have a namespace component */
+	{ZEND_STRL("array"), IS_ARRAY},
+	{ZEND_STRL("callable"), IS_CALLABLE},
+	{ZEND_STRL("static"), IS_STATIC},
+	/* self and parent are effectively built-in types (and thus reserved), but they allow namespace components */
+	{ZEND_STRL("self"), 0},
+	{ZEND_STRL("parent"), 0},
+	{NULL, 0, IS_UNDEF}
 };
 
 static bool zend_is_reserved_class_name(const zend_string *name) /* {{{ */
 {
-	const struct reserved_class_name *reserved = reserved_class_names;
+	const builtin_type_info *reserved = builtin_types;
 
 	const char *uqname = ZSTR_VAL(name);
 	size_t uqname_len = ZSTR_LEN(name);
 	zend_get_unqualified_name(name, &uqname, &uqname_len);
 
 	for (; reserved->name; ++reserved) {
-		if (uqname_len == reserved->len
-			&& zend_binary_strcasecmp(uqname, uqname_len, reserved->name, reserved->len) == 0
+		if (uqname_len == reserved->name_len
+			&& zend_binary_strcasecmp(uqname, uqname_len, reserved->name, reserved->name_len) == 0
 		) {
 			return true;
 		}
@@ -261,29 +263,6 @@ void zend_assert_valid_class_name(const zend_string *name, const char *type) /* 
 	}
 }
 /* }}} */
-
-typedef struct _builtin_type_info {
-	const char* name;
-	const size_t name_len;
-	const uint8_t type;
-} builtin_type_info;
-
-static const builtin_type_info builtin_types[] = {
-	{ZEND_STRL("null"), IS_NULL},
-	{ZEND_STRL("true"), IS_TRUE},
-	{ZEND_STRL("false"), IS_FALSE},
-	{ZEND_STRL("int"), IS_LONG},
-	{ZEND_STRL("float"), IS_DOUBLE},
-	{ZEND_STRL("string"), IS_STRING},
-	{ZEND_STRL("bool"), _IS_BOOL},
-	{ZEND_STRL("void"), IS_VOID},
-	{ZEND_STRL("never"), IS_NEVER},
-	{ZEND_STRL("iterable"), IS_ITERABLE},
-	{ZEND_STRL("object"), IS_OBJECT},
-	{ZEND_STRL("mixed"), IS_MIXED},
-	{ZEND_STRL("static"), IS_STATIC},
-	{NULL, 0, IS_UNDEF}
-};
 
 typedef struct {
 	const char *name;
@@ -7648,7 +7627,8 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 					ZSTR_VAL(zend_string_tolower(type_name)));
 			}
 
-			ZEND_ASSERT(type_code != IS_STATIC && "unqualified static type should have been handled by ZEND_AST_TYPE branch");
+			ZEND_ASSERT(type_code != IS_STATIC && type_code != IS_ARRAY && type_code != IS_CALLABLE
+				&& "unqualified array/callable/static type should have been handled by ZEND_AST_TYPE branch");
 
 			/* Transform iterable into a type union alias */
 			if (type_code == IS_ITERABLE) {
