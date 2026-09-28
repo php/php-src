@@ -74,6 +74,8 @@ $scheduler->loop();
 
 var_dump(count($order), $order === range(0, $n - 1), $peers);
 var_dump($scheduler->accepts, $scheduler->registered, $scheduler->regs);
+// Accepts served from the buffer complete at submit: the accepting fiber takes them without a pass
+var_dump($scheduler->inline >= 20);
 
 // A parked accept keeps its deadline without an entry of its own
 $scheduler->spawn(function () use ($server) {
@@ -118,6 +120,7 @@ array(1) {
   [0]=>
   string(9) "Read Edge"
 }
+bool(true)
 bool(false)
 bool(true)
 int(0)

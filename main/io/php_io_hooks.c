@@ -852,6 +852,10 @@ static zend_result php_io_run_sync(php_io_op *op, php_io_op_result *result)
 
 	php_io_queue_completion c;
 	int n;
+	if (q->ops->take_inline(q, op, &c)) {
+		*result = c.result;
+		return SUCCESS;
+	}
 	/* Without a provider a blocking op keeps waiting through signals, as
 	 * the poll loops it replaced did; the handler runs when it returns */
 	do {

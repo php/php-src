@@ -338,7 +338,7 @@ static void php_io_poll_req_arm(php_io_poll_queue *q, php_io_poll_req *req)
 	if (edge_wait && (reg->hup || (reg->ready & events))) {
 		uint32_t revents = reg->hup ? (events | PHP_POLL_HUP) : (reg->ready & events);
 		reg->ready &= ~events;
-		php_io_poll_req_complete(q, req, PHP_IO_READY, revents, 0);
+		php_io_poll_req_complete(q, req, op->type == PHP_IO_OP_POLL ? PHP_IO_DONE : PHP_IO_READY, revents, 0);
 		return;
 	}
 
@@ -580,6 +580,22 @@ static void php_io_poll_queue_remove(php_io_queue *base, php_io_registration *re
 	}
 }
 
+static bool php_io_poll_queue_take_inline(php_io_queue *base, php_io_op *op, php_io_queue_completion *out)
+{
+	php_io_poll_queue *q = (php_io_poll_queue *) base;
+	php_io_poll_req *req = op->queue_data;
+
+	if (!req || !req->ready || op->type == PHP_IO_OP_ANY) {
+		return false;
+	}
+	php_io_poll_list_remove(q->ready, &q->n_ready, req);
+	out->op = op;
+	out->data = req->data;
+	out->result = req->result;
+	php_io_poll_req_free_top(q, req);
+	return true;
+}
+
 static uint32_t php_io_poll_queue_deliver(php_io_poll_queue *q, php_io_queue_completion *out, uint32_t max)
 {
 	uint32_t n = MIN(max, q->n_ready);
@@ -733,6 +749,7 @@ static void php_io_poll_queue_destroy(php_io_queue *base)
 
 static const php_io_queue_ops php_io_poll_queue_ops = {
 	.submit = php_io_poll_queue_submit,
+	.take_inline = php_io_poll_queue_take_inline,
 	.cancel = php_io_poll_queue_cancel,
 	.add = php_io_poll_queue_add,
 	.remove = php_io_poll_queue_remove,

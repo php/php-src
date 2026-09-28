@@ -174,6 +174,7 @@ PHPAPI zend_object *php_io_operation_get_zobj(php_io_op *op)
 
 static void php_io_opqueue_sub_unlink(php_io_opqueue_obj *q, php_io_opqueue_sub *sub);
 static void php_io_opqueue_sub_free(php_io_opqueue_sub *sub);
+static void php_io_opqueue_completion_to_zval(zval *rv, php_io_queue_completion *c);
 
 static void php_io_operation_detach(zend_object *zobj)
 {
@@ -1097,6 +1098,16 @@ PHP_METHOD(Io_Poll_OperationQueue, submit)
 				"Failed to submit the operation: %s", strerror(errno));
 		RETURN_THROWS();
 	}
+
+	/* Completed at submit: the caller gets it here and never from waitCompletions() */
+	php_io_queue_completion c;
+	if (intern->queue->ops->take_inline(intern->queue, op, &c)) {
+		php_io_opqueue_completion_to_zval(return_value, &c);
+		php_io_opqueue_sub_unlink(intern, sub);
+		php_io_opqueue_sub_free(sub);
+		return;
+	}
+	RETURN_NULL();
 }
 
 PHP_METHOD(Io_Poll_OperationQueue, cancel)

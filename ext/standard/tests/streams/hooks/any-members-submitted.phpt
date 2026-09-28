@@ -11,13 +11,16 @@ final class MemberProvider implements Io\Hooks\Hooks
     public function run(Io\Operation $op): Io\Completion
     {
         if ($op instanceof Io\Operation\Any) {
+            $done = [];
             foreach ($op->getOperations() as $member) {
-                $this->queue->submit($member);
+                $c = $this->queue->submit($member);
+                if ($c !== null) {
+                    $done[] = $c;
+                }
             }
-            return $op->completeWith($this->queue->waitCompletions());
+            return $op->completeWith($done ?: $this->queue->waitCompletions());
         }
-        $this->queue->submit($op);
-        return $this->queue->waitCompletions()[0];
+        return $this->queue->submit($op) ?? $this->queue->waitCompletions()[0];
     }
     public function add(Io\Registration $registration): void {}
     public function remove(Io\Registration $registration): void {}

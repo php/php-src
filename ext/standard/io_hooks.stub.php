@@ -112,7 +112,12 @@ namespace Io {
 
     interface OperationQueue
     {
-        public function submit(Operation $op, mixed $data = null): void;
+        /**
+         * The completion of an operation the queue completed at submit (a wait answered
+         * from recorded readiness, an accept from a buffered connection), which
+         * waitCompletions() then never delivers; null while the operation is in flight.
+         */
+        public function submit(Operation $op, mixed $data = null): ?Completion;
 
         public function cancel(Operation $op): void;
 
@@ -255,7 +260,7 @@ namespace Io\Poll {
         /** The loop may still add its own watchers to it. */
         public function getContext(): Context {}
 
-        public function submit(\Io\Operation $op, mixed $data = null): void {}
+        public function submit(\Io\Operation $op, mixed $data = null): ?\Io\Completion {}
 
         public function cancel(\Io\Operation $op): void {}
 

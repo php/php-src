@@ -18,8 +18,11 @@ $h = new class($q, $b) implements Io\Hooks\Hooks {
         if ($this->runs++ == 0) {
             fwrite($this->b, "x");
         }
-        $this->q->submit($op);
-        foreach ($this->q->waitCompletions() as $c) {}
+        // Answered from the record at submit, or by the wait
+        $c = $this->q->submit($op);
+        if ($c === null) {
+            foreach ($this->q->waitCompletions() as $c) {}
+        }
         return $c;
     }
 };

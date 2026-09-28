@@ -47,7 +47,10 @@ final class Dropping implements Io\Hooks\Hooks
         if ($op instanceof Io\Operation\Recv && $this->victim === null) {
             $this->victim = $id;
         }
-        $this->queue->submit($op, $id);
+        $c = $this->queue->submit($op, $id);
+        if ($c !== null) {
+            return $c;
+        }
         $this->inFlight++;
         unset($fiber);
         return Fiber::suspend();

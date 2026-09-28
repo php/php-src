@@ -35,7 +35,7 @@ namespace Io\Ring {
          */
         public function getHandle(): \Io\Poll\NotifyHandle {}
 
-        public function submit(\Io\Operation $op, mixed $data = null): void {}
+        public function submit(\Io\Operation $op, mixed $data = null): ?\Io\Completion {}
 
         public function cancel(\Io\Operation $op): void {}
 

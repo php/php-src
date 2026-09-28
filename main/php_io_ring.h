@@ -40,6 +40,8 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring);
 
 /* After it returns the op is completed or cancellable */
 PHPAPI zend_result php_io_ring_submit_op(php_io_ring *ring, php_io_op *op, void *data);
+/* An op completed at submit (an accept from the buffer, a wait answered from the ready bits) */
+PHPAPI bool php_io_ring_take_inline(php_io_ring *ring, php_io_op *op, php_io_queue_completion *out);
 PHPAPI zend_result php_io_ring_cancel(php_io_ring *ring, php_io_op *op);
 /* Cancels the op silently; true when it stays in flight and its stream must stay frozen */
 PHPAPI bool php_io_ring_orphan(php_io_ring *ring, php_io_op *op);

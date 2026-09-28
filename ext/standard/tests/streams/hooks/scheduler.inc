@@ -9,7 +9,9 @@ class Scheduler implements \Io\Hooks\Hooks
     /** Fibers to resume, with the value: null to start, a Completion to continue. */
     private array $ready = [];
     /** Submitted operations whose fiber is suspended in run(). */
-    private int $inFlight = 0;
+    protected int $inFlight = 0;
+    /** Operations the queue completed at submit, returned from run() without a suspend. */
+    public int $inline = 0;
     private \Io\OperationQueue $queue;
     private array $capabilities;
 
@@ -64,7 +66,12 @@ class Scheduler implements \Io\Hooks\Hooks
 
     public function run(\Io\Operation $op): \Io\Completion
     {
-        $this->queue->submit($op, \Fiber::getCurrent());
+        $c = $this->queue->submit($op, \Fiber::getCurrent());
+        if ($c !== null) {
+            /* Completed at submit: no suspend, no pass of the loop */
+            $this->inline++;
+            return $c;
+        }
         $this->inFlight++;
         return \Fiber::suspend();
     }

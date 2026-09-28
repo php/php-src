@@ -39,8 +39,7 @@ Io\Hooks\set_hooks(new class($ring) implements Io\Hooks\Hooks {
     public function add(Io\Registration $registration): void {}
     public function remove(Io\Registration $registration): void {}
     public function run(Io\Operation $op): Io\Completion {
-        $this->ring->submit($op);
-        return Fiber::suspend();
+        return $this->ring->submit($op) ?? Fiber::suspend();
     }
 });
 $fibers = [];

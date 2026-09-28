@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_ring.stub.php instead.
- * Stub hash: 45f2478864f85549c4075b95c746c80aea3d552b
+ * Stub hash: 1ecfc1795f2538621ef24608152464bfad6be887
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -14,7 +14,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Ring_Engine_getHandle, 0, 0, Io\\Poll\\\116otifyHandle, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_Ring_Engine_submit, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_Ring_Engine_submit, 0, 1, Io\\Completion, 1)
 	ZEND_ARG_OBJ_INFO(0, op, Io\\Operation, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()

@@ -26,9 +26,12 @@ final class RingProvider implements Io\Hooks\Hooks
     public function remove(Io\Registration $registration): void {}
     public function run(Io\Operation $op): Io\Completion
     {
-        $this->ring->submit($op);
+        $c = $this->ring->submit($op);
         if ($this->giveUp) {
             throw new RuntimeException("gave up");
+        }
+        if ($c !== null) {
+            return $c;
         }
         do {
             $completions = $this->ring->waitCompletions();

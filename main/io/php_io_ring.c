@@ -1850,36 +1850,53 @@ PHPAPI void php_io_ring_drain(php_io_ring *ring, php_stream *stream)
 	}
 }
 
+/* A ready record becomes the caller's completion and lets go of the op */
+static void php_io_ring_deliver_one(php_io_ring *ring, php_io_ring_req *req, php_io_queue_completion *out)
+{
+	if (req->type != PHP_IO_OP_ANY) {
+		php_io_ring_req_output(req, req->op);
+		if (!req->main_done && req->op->in_flight && req->op->stream) {
+			/* The backend still uses the stream: it stays frozen until the record settled */
+			req->orphan_stream = req->op->stream;
+			php_io_stream_orphan(req->op->stream, ring->queue);
+		}
+	}
+	out->op = req->op;
+	out->data = req->data;
+	out->result = req->result;
+	req->ready = false;
+	ring->pending--;
+	req->op->queue_data = NULL;
+	req->op->queue = NULL;
+	req->op = NULL;
+	req->orphaned = true;
+	if (php_io_ring_req_settled(req)) {
+		php_io_ring_req_free(ring, req);
+	}
+}
+
 static uint32_t php_io_ring_deliver(php_io_ring *ring, php_io_queue_completion *out, uint32_t max)
 {
 	uint32_t n = MIN(max, ring->n_ready);
 
 	for (uint32_t i = 0; i < n; i++) {
-		php_io_ring_req *req = ring->ready[i];
-		if (req->type != PHP_IO_OP_ANY) {
-			php_io_ring_req_output(req, req->op);
-			if (!req->main_done && req->op->in_flight && req->op->stream) {
-				/* The backend still uses the stream: it stays frozen until the record settled */
-				req->orphan_stream = req->op->stream;
-				php_io_stream_orphan(req->op->stream, ring->queue);
-			}
-		}
-		out[i].op = req->op;
-		out[i].data = req->data;
-		out[i].result = req->result;
-		req->ready = false;
-		ring->pending--;
-		req->op->queue_data = NULL;
-		req->op->queue = NULL;
-		req->op = NULL;
-		req->orphaned = true;
-		if (php_io_ring_req_settled(req)) {
-			php_io_ring_req_free(ring, req);
-		}
+		php_io_ring_deliver_one(ring, ring->ready[i], &out[i]);
 	}
 	memmove(ring->ready, &ring->ready[n], (ring->n_ready - n) * sizeof(*ring->ready));
 	ring->n_ready -= n;
 	return n;
+}
+
+PHPAPI bool php_io_ring_take_inline(php_io_ring *ring, php_io_op *op, php_io_queue_completion *out)
+{
+	php_io_ring_req *req = op->queue_data;
+
+	if (!req || !req->ready || op->type == PHP_IO_OP_ANY || php_io_ring_foreign(ring)) {
+		return false;
+	}
+	php_io_ring_list_remove(ring->ready, &ring->n_ready, req);
+	php_io_ring_deliver_one(ring, req, out);
+	return true;
 }
 
 PHPAPI int php_io_ring_wait(php_io_ring *ring, php_io_queue_completion *out, uint32_t max, const php_deadline *dl)
@@ -2095,6 +2112,11 @@ static void php_io_ring_queue_remove(php_io_queue *base, php_io_registration *re
 	php_io_ring_remove(((php_io_ring_queue *) base)->ring, reg);
 }
 
+static bool php_io_ring_queue_take_inline(php_io_queue *base, php_io_op *op, php_io_queue_completion *out)
+{
+	return php_io_ring_take_inline(((php_io_ring_queue *) base)->ring, op, out);
+}
+
 static int php_io_ring_queue_wait(php_io_queue *base, php_io_queue_completion *out, uint32_t max, const php_deadline *dl)
 {
 	return php_io_ring_wait(((php_io_ring_queue *) base)->ring, out, max, dl);
@@ -2131,6 +2153,7 @@ static void php_io_ring_queue_destroy(php_io_queue *base)
 
 static const php_io_queue_ops php_io_ring_queue_ops = {
 	.submit = php_io_ring_queue_submit,
+	.take_inline = php_io_ring_queue_take_inline,
 	.cancel = php_io_ring_queue_cancel,
 	.add = php_io_ring_queue_add,
 	.remove = php_io_ring_queue_remove,

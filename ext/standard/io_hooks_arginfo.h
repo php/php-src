@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_hooks.stub.php instead.
- * Stub hash: 7fdd8e3ac6f1ef25d6613d10042947e939ac494f
+ * Stub hash: 50d263a9ea9ac42721b53d6348ea137e40f5776f
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -74,7 +74,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Io_Registration_isValid arginfo_Io_Hooks_is_active
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Io_OperationQueue_submit, 0, 1, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Io_OperationQueue_submit, 0, 1, Io\\Completion, 1)
 	ZEND_ARG_OBJ_INFO(0, op, Io\\Operation, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, data, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()

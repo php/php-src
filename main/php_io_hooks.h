@@ -382,6 +382,9 @@ typedef struct _php_io_queue_completion {
 
 typedef struct _php_io_queue_ops {
 	zend_result (*submit)(php_io_queue *q, php_io_op *op, void *data);
+	/* An op (not an Any) the queue completed at submit: taken out of the completions to deliver,
+	 * so the caller needs no wait for it. False when the op is in flight. */
+	bool (*take_inline)(php_io_queue *q, php_io_op *op, php_io_queue_completion *out);
 	zend_result (*cancel)(php_io_queue *q, php_io_op *op);
 	/* Bracket a registration; what the queue retains for the pair goes to reg->queue_data */
 	zend_result (*add)(php_io_queue *q, php_io_registration *reg);
