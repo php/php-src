@@ -432,6 +432,9 @@ static int php_openssl_stream_bio_io(BIO *bio, char *buf, int len, bool read)
 	}
 	if (sslsock->io_dead) {
 		errno = ECANCELED;
+#ifdef PHP_WIN32
+		WSASetLastError(PHP_IO_SOCK_ECANCELED);
+#endif
 		return -1;
 	}
 
@@ -439,7 +442,7 @@ static int php_openssl_stream_bio_io(BIO *bio, char *buf, int len, bool read)
 		n = read
 			? php_io_recv(stream, sslsock->s.socket, buf, len, 0, sslsock->deadline)
 			: php_io_send(stream, sslsock->s.socket, buf, len, 0, sslsock->deadline);
-		if (n < 0 && php_socket_errno() == ECANCELED) {
+		if (n < 0 && php_socket_errno() == PHP_IO_SOCK_ECANCELED) {
 			sslsock->io_cancelled = 1;
 			/* Still frozen: the op outlived the call and owns the socket's data */
 			if (stream->flags & PHP_STREAM_FLAG_IN_USE) {
@@ -465,7 +468,10 @@ static int php_openssl_stream_bio_io(BIO *bio, char *buf, int len, bool read)
 	}
 
 	int err = php_socket_errno();
-	if (PHP_IS_TRANSIENT_ERROR(err) || err == PHP_IO_SOCK_EINTR || err == PHP_IO_SOCK_ETIMEDOUT) {
+	/* A cancelled op is a retry too: OpenSSL keeps its record state and the
+	 * read or write loop ends the call on io_cancelled */
+	if (PHP_IS_TRANSIENT_ERROR(err) || err == PHP_IO_SOCK_EINTR || err == PHP_IO_SOCK_ETIMEDOUT
+			|| err == PHP_IO_SOCK_ECANCELED) {
 		if (read) {
 			BIO_set_retry_read(bio);
 		} else {
@@ -3304,6 +3310,15 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 			}
 
 			retry = php_openssl_handle_ssl_error(stream, nr_bytes, blocked);
+			if (sslsock->io_cancelled) {
+				/* The wait was cancelled behind a retry: OpenSSL kept its state, the call ends */
+				retry = 0;
+				nr_bytes = -1;
+				errno = ECANCELED;
+#ifdef PHP_WIN32
+				WSASetLastError(PHP_IO_SOCK_ECANCELED);
+#endif
+			}
 			/* A cancelled Recv says nothing about the connection */
 			if (read && !sslsock->io_cancelled) {
 				stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));

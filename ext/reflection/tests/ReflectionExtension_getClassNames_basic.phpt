@@ -23,6 +23,7 @@ Io\CompletionStatus
 Io\Hooks\Capability
 Io\Hooks\Hooks
 Io\InvalidOperationException
+Io\InvalidRegistrationException
 Io\IoException
 Io\Operation
 Io\OperationQueue
@@ -59,8 +60,10 @@ Io\Poll\PollException
 Io\Poll\ProcessHandle
 Io\Poll\SignalHandle
 Io\Poll\TimerHandle
+Io\Poll\Trigger
 Io\Poll\Watcher
 Io\Poll\WeakHandle
+Io\Registration
 RoundingMode
 SortDirection
 StreamBucket

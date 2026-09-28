@@ -802,7 +802,7 @@ static zend_result php_io_run_sync_direct(php_io_op *op, php_io_op_result *resul
 			timeout = ms > INT_MAX ? INT_MAX : (int) ms;
 		}
 		n = php_pollfd_for_ms(op->fd, pevents, timeout);
-		if (n >= 0 || php_socket_errno() != EINTR) {
+		if (n >= 0 || php_socket_errno() != PHP_IO_SOCK_EINTR) {
 			break;
 		}
 	}
