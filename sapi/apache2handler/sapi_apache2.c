@@ -244,7 +244,7 @@ php_apache_sapi_read_cookies(void)
 	return (char *) http_cookie;
 }
 
-static char *
+static zend_string *
 php_apache_sapi_getenv(const char *name, size_t name_len)
 {
 	php_struct *ctx = SG(server_context);
@@ -256,7 +256,7 @@ php_apache_sapi_getenv(const char *name, size_t name_len)
 
 	env_var = apr_table_get(ctx->r->subprocess_env, name);
 
-	return (char *) env_var;
+	return env_var ? zend_string_init(env_var, strlen(env_var), 0) : NULL;
 }
 
 static void

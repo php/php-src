@@ -525,10 +525,10 @@ static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes)
 }
 
 #ifdef PHP_WIN32
-/* The result needs to be freed! See sapi_getenv(). */
-static char *cgi_getenv_win32(const char *name, size_t name_len)
+static zend_string *cgi_getenv_win32(const char *name, size_t name_len)
 {
-	char *ret = NULL;
+	zend_string *ret = NULL;
+	char *tmp = NULL;
 	wchar_t *keyw, *valw;
 	size_t size;
 	int rc;
@@ -548,9 +548,13 @@ static char *cgi_getenv_win32(const char *name, size_t name_len)
 
 	rc = _wgetenv_s(&size, valw, size, keyw);
 	if (!rc) {
-		ret = php_win32_cp_w_to_any(valw);
+		tmp = php_win32_cp_w_to_any(valw);
+	}
+	if (tmp) {
+		ret = zend_string_init(tmp, strlen(tmp), 0);
 	}
 
+	free(tmp);
 	free(keyw);
 	efree(valw);
 
@@ -558,16 +562,17 @@ static char *cgi_getenv_win32(const char *name, size_t name_len)
 }
 #endif
 
-static char *sapi_cgi_getenv(const char *name, size_t name_len)
+static zend_string *sapi_cgi_getenv(const char *name, size_t name_len)
 {
 #ifndef PHP_WIN32
-	return getenv(name);
+	char *ret = getenv(name);
+	return ret ? zend_string_init(ret, strlen(ret), 0) : NULL;
 #else
 	return cgi_getenv_win32(name, name_len);
 #endif
 }
 
-static char *sapi_fcgi_getenv(const char *name, size_t name_len)
+static zend_string *sapi_fcgi_getenv(const char *name, size_t name_len)
 {
 	/* when php is started by mod_fastcgi, no regular environment
 	 * is provided to PHP.  It is always sent to PHP at the start
@@ -577,16 +582,15 @@ static char *sapi_fcgi_getenv(const char *name, size_t name_len)
 	char *ret = fcgi_getenv(request, name, (int)name_len);
 
 #ifndef PHP_WIN32
-	if (ret) return ret;
-	/*  if cgi, or fastcgi and not found in fcgi env
-		check the regular environment */
-	return getenv(name);
+	if (!ret) {
+		/*  if cgi, or fastcgi and not found in fcgi env
+			check the regular environment */
+		ret = getenv(name);
+	}
+	return ret ? zend_string_init(ret, strlen(ret), 0) : NULL;
 #else
 	if (ret) {
-		/* The functions outside here don't know, where does it come
-			from. They'll need to free the returned memory as it's
-			not necessary from the fcgi env. */
-		return strdup(ret);
+		return zend_string_init(ret, strlen(ret), 0);
 	}
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment */

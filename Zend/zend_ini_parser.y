@@ -172,15 +172,17 @@ static void zend_ini_get_constant(zval *result, zval *name)
 static void zend_ini_get_var(zval *result, zval *name, zval *fallback)
 {
 	zval *curval;
+	zend_string *sapi_envvar;
 	char *envvar;
 
 	/* Fetch configuration option value */
 	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL) {
 		ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(curval), Z_STRLEN_P(curval), ZEND_SYSTEM_INI));
 	/* ..or if not found, try ENV */
-	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL) {
-		ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
-		efree(envvar);
+	} else if ((sapi_envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL) {
+		/* dup because persistent value may not be the same */
+		ZVAL_NEW_STR(result, zend_string_dup(sapi_envvar, ZEND_SYSTEM_INI));
+		zend_string_release(sapi_envvar);
 	} else if ((envvar = getenv(Z_STRVAL_P(name))) != NULL) {
 		ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
 	/* ..or if not defined, try fallback value */

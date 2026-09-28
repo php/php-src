@@ -184,13 +184,15 @@ static int sapi_lsapi_deactivate(void)
 
 
 /* {{{ sapi_lsapi_getenv */
-static char *sapi_lsapi_getenv(const char * name, size_t name_len )
+static zend_string *sapi_lsapi_getenv(const char * name, size_t name_len )
 {
+    char *var = NULL;
     if ( lsapi_mode ) {
-        return LSAPI_GetEnv( name );
+        var = LSAPI_GetEnv( name );
     } else {
-        return getenv( name );
+        var = getenv( name ); /* XXX: Should a SAPI just reflect getenv? */
     }
+    return var ? zend_string_init( var, strlen( var ), 0 ) : NULL;
 }
 /* }}} */
 
@@ -538,7 +540,8 @@ static int lsapi_activate_user_ini(void);
 
 static int sapi_lsapi_activate(void)
 {
-    char *path, *server_name;
+    char *path;
+    zend_string *server_name;
     size_t path_len, server_name_len;
 
     /* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
@@ -550,11 +553,10 @@ static int sapi_lsapi_activate(void)
         server_name = sapi_lsapi_getenv("SERVER_NAME", 0);
         /* SERVER_NAME should also be defined at this stage..but better check it anyway */
         if (server_name) {
-                server_name_len = strlen(server_name);
-                server_name = estrndup(server_name, server_name_len);
-                zend_str_tolower(server_name, server_name_len);
-                php_ini_activate_per_host_config(server_name, server_name_len);
-                efree(server_name);
+                zend_string *lowered = zend_string_tolower(server_name);
+                php_ini_activate_per_host_config(ZSTR_VAL(lowered), ZSTR_LEN(lowered));
+                zend_string_release(lowered);
+                zend_string_release(server_name);
         }
     }
 
