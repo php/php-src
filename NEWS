@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-23619 (cryptic error on servers that don't support TLS
     session resumption on data connection). (ndossche)
 
+- GD:
+  . Fixed undefined behavior with GD2 images with `INT_MAX`-sized chunks.
+    (DanielEScherzer, cmb)
+
 - Intl:
   . Fixed cloning IntlDateFormatter and MessageFormatter losing PHP-side state
     such as dateType, timeType, calendar and the message pattern.
