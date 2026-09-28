@@ -147,6 +147,8 @@ typedef struct {
 	unsigned _reserved:24;
 #ifdef PHP_WIN32
 	zend_off_t position;	/* of the next overlapped read or write */
+	int sync_fd;			/* a synchronous descriptor on the same file, for the casts; -1 until asked */
+	int open_flags;			/* the open()-style flags, for the synchronous reopen */
 #else
 	pid_t nonblock_pid;		/* the process that set nonblock_ours */
 #endif
@@ -170,6 +172,48 @@ typedef struct {
 	zend_stat_t sb;
 } php_stdio_stream_data;
 #define PHP_STDIOP_GET_FD(anfd, data)	anfd = (data)->file ? fileno((data)->file) : (data)->fd
+
+#ifdef PHP_WIN32
+/* A synchronous descriptor on the same file object, for the FILE* and descriptor casts of an
+ * overlapped stream: the CRT cannot drive an overlapped handle, so the consumer gets one reopened
+ * without the flag, at the stream's position each time it is handed out. */
+static int php_stdiop_sync_fd(php_stdio_stream_data *data)
+{
+	if (data->sync_fd < 0) {
+		php_ioutil_open_opts opts;
+		int flags = data->open_flags & ~(_O_CREAT | _O_TRUNC | _O_EXCL | _O_TEMPORARY);
+		if (!php_win32_ioutil_posix_to_open_opts(flags, 0, &opts)) {
+			return -1;
+		}
+		HANDLE reopened = ReOpenFile((HANDLE) _get_osfhandle(data->fd), opts.access, opts.share, 0);
+		if (reopened == INVALID_HANDLE_VALUE) {
+			SET_ERRNO_FROM_WIN32_CODE(GetLastError());
+			return -1;
+		}
+		int fd = _open_osfhandle((intptr_t) reopened, flags & (_O_RDONLY | _O_WRONLY | _O_RDWR | _O_APPEND | _O_BINARY | _O_TEXT));
+		if (fd < 0) {
+			CloseHandle(reopened);
+			return -1;
+		}
+		data->sync_fd = fd;
+	}
+	zend_lseek(data->sync_fd, data->position, SEEK_SET);
+	return data->sync_fd;
+}
+#endif
+
+/* The descriptor a cast hands out */
+static php_socket_t php_stdiop_cast_fd(php_stdio_stream_data *data)
+{
+	php_socket_t fd;
+#ifdef PHP_WIN32
+	if (data->is_overlapped) {
+		return php_stdiop_sync_fd(data) < 0 ? SOCK_ERR : (php_socket_t) data->sync_fd;
+	}
+#endif
+	PHP_STDIOP_GET_FD(fd, data);
+	return fd;
+}
 
 #ifdef PHP_WIN32
 static ZEND_COLD void php_win32_stream_wrapper_warn_error(
@@ -728,6 +772,12 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 				data->file = NULL;
 			}
 		} else if (data->fd != -1) {
+#ifdef PHP_WIN32
+			if (data->is_overlapped && data->sync_fd >= 0) {
+				close(data->sync_fd);
+				data->sync_fd = -1;
+			}
+#endif
 			ret = close(data->fd);
 			data->fd = -1;
 		} else {
@@ -745,6 +795,13 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 		}
 	} else {
 		ret = 0;
+#ifdef PHP_WIN32
+		if (data->is_overlapped && data->fd != -1 && data->sync_fd >= 0) {
+			/* A released cast: the synchronous descriptor is the caller's now, the overlapped one goes */
+			close(data->fd);
+			data->sync_fd = -1;
+		}
+#endif
 		data->file = NULL;
 		data->fd = -1;
 	}
@@ -853,13 +910,29 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 
 	switch (castas)	{
 		case PHP_STREAM_AS_STDIO:
-#ifdef PHP_WIN32
-			if (data->is_overlapped) {
-				/* The CRT's FILE* reads and writes cannot drive an overlapped handle */
-				return FAILURE;
-			}
-#endif
 			if (ret) {
+#ifdef PHP_WIN32
+				if (data->is_overlapped) {
+					/* The FILE* wraps a synchronous descriptor on the same file, and the stream
+					 * is a FILE* stream from here: the overlapped descriptor goes */
+					char fixed_mode[5];
+					int sync_fd = php_stdiop_sync_fd(data);
+					if (sync_fd < 0) {
+						return FAILURE;
+					}
+					php_stream_mode_sanitize_fdopen_fopencookie(stream, fixed_mode);
+					data->file = fdopen(sync_fd, fixed_mode);
+					if (data->file == NULL) {
+						return FAILURE;
+					}
+					data->sync_fd = -1;
+					close(data->fd);
+					data->fd = SOCK_ERR;
+					data->is_overlapped = 0;
+					*(FILE**)ret = data->file;
+					return SUCCESS;
+				}
+#endif
 
 				if (data->file == NULL) {
 					/* we were opened as a plain file descriptor, so we
@@ -879,7 +952,7 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 		case PHP_STREAM_AS_FD_FOR_POLL:
-			PHP_STDIOP_GET_FD(fd, data);
+			fd = php_stdiop_cast_fd(data);
 			if (SOCK_ERR == fd) {
 				return FAILURE;
 			}
@@ -889,7 +962,7 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD:
-			PHP_STDIOP_GET_FD(fd, data);
+			fd = php_stdiop_cast_fd(data);
 			if (SOCK_ERR == fd) {
 				return FAILURE;
 			}
@@ -1385,6 +1458,18 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 #ifdef PHP_WIN32
 /* The device namespace (named pipes, consoles, serial ports) holds no disk
  * files, and opening a pipe twice to test it would take a second instance */
+/* PHP_IO_OVERLAPPED_FILES=1 in the environment opens every eligible file overlapped, hooks or
+ * not: the test suite run that decides whether that becomes the default */
+static bool php_stdiop_win32_overlapped_forced(void)
+{
+	static int forced = -1;
+	if (forced < 0) {
+		const char *env = getenv("PHP_IO_OVERLAPPED_FILES");
+		forced = env != NULL && *env != '\0' && *env != '0';
+	}
+	return forced == 1;
+}
+
 static bool php_stdiop_win32_may_overlap(const char *path, int open_flags)
 {
 	if (open_flags & (O_APPEND | _O_TEXT)) {
@@ -1445,7 +1530,10 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 	/* While hooks are installed a disk file is opened overlapped, since IOCP completes nothing on
 	 * a synchronous handle. Append mode has no position to write at and text mode needs the CRT's
 	 * newline translation, so both keep the CRT path. */
-	bool overlapped = FG(io_hooks) != NULL && php_stdiop_win32_may_overlap(realpath, open_flags);
+	php_io_hooks *hooks = php_io_hooks_current();
+	bool overlapped = (php_stdiop_win32_overlapped_forced()
+			|| (hooks != NULL && (hooks->flags & PHP_IO_HOOKS_F_FILES)))
+			&& php_stdiop_win32_may_overlap(realpath, open_flags);
 	fd = -1;
 	if (overlapped) {
 		fd = php_win32_ioutil_open(realpath, open_flags | PHP_WIN32_IOUTIL_O_OVERLAPPED, 0666);
@@ -1478,6 +1566,8 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 			php_stdio_stream_data *self = (php_stdio_stream_data*)ret->abstract;
 			self->is_overlapped = 1;
 			self->position = 0;
+			self->sync_fd = -1;
+			self->open_flags = open_flags;
 		}
 #endif
 
