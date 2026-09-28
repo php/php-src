@@ -1,5 +1,7 @@
 --TEST--
 GH-23962 (Destroying a persistent PDO instance rolls back a transaction still in use by another instance)
+--CREDITS--
+BoyeMagnus
 --EXTENSIONS--
 pdo_sqlite
 --FILE--
