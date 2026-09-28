@@ -91,6 +91,8 @@ PHP                                                                        NEWS
     column index. (Ilia Alshanetsky)
   . Fixed PDOStatement::bindColumn() registering a binding for a column name
     that is not in the result set. (Ilia Alshanetsky)
+  . Fixed bug GH-23962 (Destroying a persistent PDO instance rolls back a
+    transaction still in use by another instance). (Lazizbek Ergashev)
 
 - PGSQL:
   . Fixed pg_lo_write() rejecting data containing null bytes. (Ilia Alshanetsky)
