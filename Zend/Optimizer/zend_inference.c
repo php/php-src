@@ -3716,7 +3716,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 							break;
 						}
 					}
-					if (opline->opcode != ZEND_FETCH_DIM_FUNC_ARG) {
+					if (opline->opcode != ZEND_FETCH_DIM_FUNC_ARG
+					 && (opline->op2_type == IS_UNUSED
+					  || !(t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT)))) {
 						tmp &= ~MAY_BE_ARRAY_EMPTY;
 					}
 				}
