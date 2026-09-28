@@ -125,6 +125,8 @@ PHP                                                                        NEWS
     in a php://filter URL. (Sjoerd Langkemper)
   . Improved performance of array_chunk() when not preserving keys.
     (mehmetcansahin)
+  . Improved performance of htmlspecialchars() when nothing needs encoding.
+    (Nicolas Grekas)
 
 - URI:
   . Fix casing of enum cases in UriHostType and UrlHostType to match the RFC
