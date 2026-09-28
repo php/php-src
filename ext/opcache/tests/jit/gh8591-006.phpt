@@ -10,10 +10,6 @@ opcache.file_update_protection=0
 opcache.revalidate_freq=0
 opcache.protect_memory=1
 opcache.preload={PWD}/gh8591-006.inc
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-?>
 --FILE--
 <?php
 
