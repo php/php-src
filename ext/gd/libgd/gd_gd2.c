@@ -164,7 +164,7 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 				gdFree(cidx);
 				goto fail1;
 			}
-			if (cidx[i].offset < 0 || cidx[i].size < 0) {
+			if (cidx[i].offset < 0 || cidx[i].size < 0 || cidx[i].size == INT_MAX) {
 				gdFree(cidx);
 				goto fail1;
 			}
