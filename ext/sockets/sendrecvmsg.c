@@ -204,12 +204,19 @@ PHP_FUNCTION(socket_sendmsg)
 	}
 
 	php_socket_waiter w = PHP_SOCKET_WAITER(SO_SNDTIMEO);
+	if (!php_socket_op_begin(php_sock, &w.op)) {
+		allocations_dispose(&allocations);
+		RETURN_THROWS();
+	}
 	do {
 		res = sendmsg(php_sock->bsd_socket, msghdr, (int)flags);
 	} while (res == -1 && php_socket_wait_retry(php_sock, &w, POLLOUT, (int)flags));
+	php_socket_op_end(php_sock, &w.op);
 
 	if (res != -1) {
 		RETVAL_LONG((zend_long)res);
+	} else if (EG(exception)) {
+		RETVAL_FALSE;
 	} else {
 		PHP_SOCKET_ERROR(php_sock, "Error in sendmsg", errno);
 		RETVAL_FALSE;
@@ -248,9 +255,14 @@ PHP_FUNCTION(socket_recvmsg)
 	}
 
 	php_socket_waiter w = PHP_SOCKET_WAITER(SO_RCVTIMEO);
+	if (!php_socket_op_begin(php_sock, &w.op)) {
+		allocations_dispose(&allocations);
+		RETURN_THROWS();
+	}
 	do {
 		res = recvmsg(php_sock->bsd_socket, msghdr, (int)flags);
 	} while (res == -1 && php_socket_wait_retry(php_sock, &w, PHP_POLLREADABLE, (int)flags));
+	php_socket_op_end(php_sock, &w.op);
 
 	if (res != -1) {
 		zval *zres, tmp;
@@ -276,6 +288,8 @@ PHP_FUNCTION(socket_recvmsg)
 			assert(zres == NULL);
 		}
 		RETVAL_LONG((zend_long)res);
+	} else if (EG(exception)) {
+		RETVAL_FALSE;
 	} else {
 		SOCKETS_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error in recvmsg [%d]: %s",

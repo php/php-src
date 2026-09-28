@@ -2220,6 +2220,38 @@ final class AddressInfo
 {
 }
 
+/**
+ * A handle that keeps its Socket, for polling it from userland.
+ * @strict-properties
+ * @not-serializable
+ */
+final class SocketPollHandle implements Io\Poll\Handle
+{
+    public function __construct(Socket $socket) {}
+
+    public function getSocket(): Socket {}
+
+    public function isValid(): bool {}
+}
+
+/**
+ * The Socket's one handle, created by its operations and registrations or by
+ * create() and kept by the Socket while it is open.
+ * @strict-properties
+ * @not-serializable
+ */
+final class SocketPollWeakHandle implements Io\Poll\WeakHandle
+{
+    private function __construct() {}
+
+    public static function create(Socket $socket): static {}
+
+    /** The socket, or null: closed or in an operation. */
+    public function getSocket(): ?Socket {}
+
+    public function isValid(): bool {}
+}
+
 function socket_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
 
 function socket_create_listen(int $port, int $backlog = SOMAXCONN): Socket|false {}

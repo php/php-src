@@ -266,6 +266,23 @@ PHPAPI ssize_t php_io_recv(php_stream *stream, php_socket_t fd, void *buf, size_
 		php_deadline *dl);
 PHPAPI ssize_t php_io_send(php_stream *stream, php_socket_t fd, const void *buf, size_t len, int flags,
 		php_deadline *dl);
+/* The _ex forms take the handle of a registrant that is not a stream (ext/sockets' Socket): the op
+ * carries it and a wait registers the pair on it. A stream call passes NULL. */
+PHPAPI int php_io_poll_ex(php_stream *stream, zend_object *handle, php_socket_t fd, uint32_t events,
+		php_deadline *dl, uint32_t op_flags);
+PHPAPI ssize_t php_io_recv_ex(php_stream *stream, zend_object *handle, php_socket_t fd, void *buf,
+		size_t len, int flags, php_deadline *dl);
+PHPAPI ssize_t php_io_send_ex(php_stream *stream, zend_object *handle, php_socket_t fd, const void *buf,
+		size_t len, int flags, php_deadline *dl);
+PHPAPI php_socket_t php_io_accept_ex(php_stream *stream, zend_object *handle, php_socket_t fd,
+		struct sockaddr *addr, socklen_t *addrlen, php_deadline *dl);
+PHPAPI int php_io_connect_ex(php_stream *stream, zend_object *handle, php_socket_t fd,
+		const struct sockaddr *addr, socklen_t addrlen, php_deadline *dl);
+PHPAPI ssize_t php_io_sendto_ex(php_stream *stream, zend_object *handle, php_socket_t fd,
+		const void *buf, size_t len, int flags, const struct sockaddr *addr, socklen_t addrlen,
+		php_deadline *dl);
+PHPAPI ssize_t php_io_recvfrom_ex(php_stream *stream, zend_object *handle, php_socket_t fd, void *buf,
+		size_t len, int flags, struct sockaddr *addr, socklen_t *addrlen, php_deadline *dl);
 PHPAPI ssize_t php_io_read(php_stream *stream, int fd, void *buf, size_t len, php_deadline *dl);
 PHPAPI ssize_t php_io_write(php_stream *stream, int fd, const void *buf, size_t len, php_deadline *dl);
 /* At an explicit offset, for a Windows overlapped file; -1 is the current position */
