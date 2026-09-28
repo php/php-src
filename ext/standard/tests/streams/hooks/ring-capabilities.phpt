@@ -1,5 +1,5 @@
 --TEST--
-Io\Ring\Engine: EdgeRegistrations by default, Files, DirectData and DirectAccept on request
+Io\Ring\Engine: EdgeRegistrations and DirectAccept by default, Files and DirectData on request
 --SKIPIF--
 <?php
 if (!class_exists(Io\Ring\Engine::class)) die("skip Io\\Ring\\Engine not available");
@@ -19,8 +19,10 @@ $expected = $ring->getBackend() === Io\Ring\Backend::Threads
 var_dump($ring->getSupportedHookCapabilities() === $expected);
 ?>
 --EXPECT--
-array(1) {
+array(2) {
   [0]=>
+  enum(Io\Hooks\Capability::DirectAccept)
+  [1]=>
   enum(Io\Hooks\Capability::EdgeRegistrations)
 }
 array(2) {

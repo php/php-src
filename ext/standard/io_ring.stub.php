@@ -51,8 +51,8 @@ namespace Io\Ring {
         public function countPending(): int {}
 
         /**
-         * Capabilities worth reporting by default: EdgeRegistrations; see
-         * getSupportedHookCapabilities() for the rest.
+         * Capabilities worth reporting by default: EdgeRegistrations and DirectAccept, which the
+         * ring serves from a multishot accept; see getSupportedHookCapabilities() for the rest.
          * @return list<\Io\Hooks\Capability>
          */
         public function getHookCapabilities(): array {}
