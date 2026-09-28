@@ -1,0 +1,6 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <message name="reportHealthViewOut">
+    <part name="date" type="xs:date"/>
+  </message>
+</definitions>
