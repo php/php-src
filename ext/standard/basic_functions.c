@@ -157,7 +157,9 @@ zend_module_entry basic_functions_module = { /* {{{ */
 	PHP_RSHUTDOWN(basic),		/* request shutdown */
 	PHP_MINFO(basic),			/* extension info */
 	PHP_STANDARD_VERSION,		/* extension version */
-	STANDARD_MODULE_PROPERTIES
+	NO_MODULE_GLOBALS,
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(streams),
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -463,7 +465,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 #endif
 	BASIC_RSHUTDOWN_SUBMODULE(assert)
 	BASIC_RSHUTDOWN_SUBMODULE(url_scanner_ex)
-	BASIC_RSHUTDOWN_SUBMODULE(streams)
 #ifdef PHP_WIN32
 	BASIC_RSHUTDOWN_SUBMODULE(win32_core_globals)
 #endif
