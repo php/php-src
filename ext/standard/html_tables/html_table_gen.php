@@ -60,7 +60,6 @@ static const struct {
 	{ "ISO8859-1",		sizeof("ISO8859-1")-1,		cs_8859_1 },
 	{ "ISO-8859-15",	sizeof("ISO-8859-15")-1,	cs_8859_15 },
 	{ "ISO8859-15",		sizeof("ISO8859-15")-1,		cs_8859_15 },
-	{ "utf-8",			sizeof("utf-8")-1,			cs_utf_8 },
 	{ "cp1252", 		sizeof("cp1252")-1, 		cs_cp1252 },
 	{ "Windows-1252",	sizeof("Windows-1252")-1,	cs_cp1252 },
 	{ "1252",			sizeof("1252")-1,			cs_cp1252 },
