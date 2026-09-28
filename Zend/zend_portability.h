@@ -56,6 +56,7 @@
 # include <unix.h>
 #endif
 
+#include <stdalign.h>
 #include <stdarg.h>
 #include <stddef.h>
 
