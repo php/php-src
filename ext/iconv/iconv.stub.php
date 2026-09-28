@@ -47,10 +47,12 @@ function iconv_mime_decode_headers(string $headers, int $mode = 0, ?string $enco
 /** @refcount 1 */
 function iconv(string $from_encoding, string $to_encoding, string $string): string|false {}
 
+#[\Deprecated(since: '8.5', message: 'use internal_encoding, input_encoding, and output_encoding INI settings instead')]
 function iconv_set_encoding(string $type, string $encoding): bool {}
 
 /**
  * @return array<string, string>|string|false
  * @refcount 1
  */
+#[\Deprecated(since: '8.5', message: 'use internal_encoding, input_encoding, and output_encoding INI settings instead')]
 function iconv_get_encoding(string $type = "all"): array|string|false {}
