@@ -363,11 +363,19 @@ PHPAPI void php_io_unregister_all(php_io_registration **list)
 PHPAPI php_poll_handle_object *php_io_registration_get_handle(php_io_registration *reg)
 {
 	if (!reg->handle && reg->stream) {
-		zval handle_zv;
-		php_stream_poll_weak_handle_from_stream(&handle_zv, reg->stream);
-		reg->handle = PHP_POLL_HANDLE_OBJ_FROM_ZV(&handle_zv);
+		zend_object *handle = php_stream_get_poll_handle(reg->stream, reg->stream->userland);
+		GC_ADDREF(handle);
+		reg->handle = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(handle);
 	}
 	return reg->handle;
+}
+
+PHPAPI zend_object *php_io_op_get_handle(php_io_op *op)
+{
+	if (!op->handle && op->stream) {
+		op->handle = php_stream_get_poll_handle(op->stream, op->stream->userland);
+	}
+	return op->handle;
 }
 
 /* Hooks */
@@ -431,6 +439,10 @@ PHPAPI void php_io_hooks_request_shutdown(void)
 {
 	FG(io_hooks_locked) = 0;
 	php_io_hooks_register(NULL);
+	/* A persistent stream outlives the request; its records must not */
+	while (FG(io_registrations)) {
+		php_io_unregister(FG(io_registrations));
+	}
 	FG(io_shut_down) = true;
 	if (FG(io_queue)) {
 		php_io_queue *q = FG(io_queue);
@@ -991,7 +1003,6 @@ static int php_io_poll_result_to_revents(const php_io_op_result *result, uint32_
 typedef struct {
 	php_stream *stream;
 	zend_resource *res;
-	zend_object *handle;
 } php_io_frame;
 
 /* Fails with the Error of argument parsing when the stream is frozen by an
@@ -1000,7 +1011,6 @@ static zend_result php_io_frame_begin(php_io_frame *f, php_stream *stream)
 {
 	f->stream = stream;
 	f->res = NULL;
-	f->handle = NULL;
 	if (stream) {
 		if (UNEXPECTED(stream->flags & PHP_STREAM_FLAG_IN_USE)) {
 			f->stream = NULL;
@@ -1013,11 +1023,6 @@ static zend_result php_io_frame_begin(php_io_frame *f, php_stream *stream)
 			f->res = stream->res;
 			GC_ADDREF(f->res);
 		}
-		if (FG(io_hooks)) {
-			zval handle_zv;
-			php_stream_poll_weak_handle_from_stream(&handle_zv, stream);
-			f->handle = Z_OBJ(handle_zv);
-		}
 		stream->flags |= PHP_STREAM_FLAG_IN_USE;
 	}
 	return SUCCESS;
@@ -1027,9 +1032,6 @@ static void php_io_frame_end(php_io_frame *f, php_io_op *op)
 {
 	if (f->stream && !(op && op->in_flight)) {
 		f->stream->flags &= ~PHP_STREAM_FLAG_IN_USE;
-	}
-	if (f->handle) {
-		OBJ_RELEASE(f->handle);
 	}
 	/* A last reference dropped meanwhile leaves the stream to the request
 	 * shutdown: the stream layer above still uses it */
@@ -1070,7 +1072,7 @@ static int php_io_poll_ex(php_stream *stream, php_socket_t fd, uint32_t events, 
 	if (php_io_frame_begin(&f, stream) == FAILURE) {
 		return -1;
 	}
-	php_io_op_poll(&op, f.handle, fd, events, *dl);
+	php_io_op_poll(&op, NULL, fd, events, *dl);
 	op.flags |= op_flags;
 	op.stream = stream;
 	zend_result rc = php_io_op_register_wait(&op, stream, events);
@@ -1134,8 +1136,8 @@ typedef struct {
 } php_io_sock_call;
 
 typedef ssize_t (*php_io_sock_syscall)(const php_io_sock_call *c);
-typedef void (*php_io_sock_prep)(php_io_op *op, zend_object *handle, php_stream *stream,
-		const php_io_sock_call *c, php_deadline dl);
+typedef void (*php_io_sock_prep)(php_io_op *op, php_stream *stream, const php_io_sock_call *c,
+		php_deadline dl);
 
 /* The descriptor ladder: the syscall first and the op on EAGAIN, or the op first with the direct
  * flag; Ready means retry the syscall, Unsupported means syscall first from now on. */
@@ -1165,7 +1167,7 @@ static zend_always_inline ssize_t php_io_descriptor_op(php_stream *stream, php_d
 				break;
 			}
 		}
-		prep(&op, f.handle, stream, c, *dl);
+		prep(&op, stream, c, *dl);
 		op.stream = stream;
 		if (!direct) {
 			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
@@ -1210,10 +1212,10 @@ static ssize_t php_io_recv_syscall(const php_io_sock_call *c)
 	return recv(c->fd, c->buf, c->len, c->flags);
 }
 
-static void php_io_recv_prep(php_io_op *op, zend_object *handle, php_stream *stream,
-		const php_io_sock_call *c, php_deadline dl)
+static void php_io_recv_prep(php_io_op *op, php_stream *stream, const php_io_sock_call *c,
+		php_deadline dl)
 {
-	php_io_op_recv(op, handle, c->fd, c->buf, c->len, c->flags, dl);
+	php_io_op_recv(op, NULL, c->fd, c->buf, c->len, c->flags, dl);
 	op->flags |= php_io_stream_buf_flag(stream, c->buf);
 }
 
@@ -1229,10 +1231,10 @@ static ssize_t php_io_send_syscall(const php_io_sock_call *c)
 	return send(c->fd, c->buf, c->len, c->flags);
 }
 
-static void php_io_send_prep(php_io_op *op, zend_object *handle, php_stream *stream,
-		const php_io_sock_call *c, php_deadline dl)
+static void php_io_send_prep(php_io_op *op, php_stream *stream, const php_io_sock_call *c,
+		php_deadline dl)
 {
-	php_io_op_send(op, handle, c->fd, c->buf, c->len, c->flags, dl);
+	php_io_op_send(op, NULL, c->fd, c->buf, c->len, c->flags, dl);
 }
 
 PHPAPI ssize_t php_io_send(php_stream *stream, php_socket_t fd, const void *buf, size_t len, int flags,
@@ -1304,10 +1306,10 @@ static ssize_t php_io_accept_syscall(const php_io_sock_call *c)
 	return (ssize_t) accept(c->fd, c->addr, c->addrlen);
 }
 
-static void php_io_accept_prep(php_io_op *op, zend_object *handle, php_stream *stream,
-		const php_io_sock_call *c, php_deadline dl)
+static void php_io_accept_prep(php_io_op *op, php_stream *stream, const php_io_sock_call *c,
+		php_deadline dl)
 {
-	php_io_op_accept(op, handle, c->fd, c->addr, c->addrlen, dl);
+	php_io_op_accept(op, NULL, c->fd, c->addr, c->addrlen, dl);
 }
 
 PHPAPI php_socket_t php_io_accept(php_stream *stream, php_socket_t fd, struct sockaddr *addr,
@@ -1355,7 +1357,7 @@ PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sock
 	}
 
 	for (;;) {
-		php_io_op_connect(&op, f.handle, fd, addr, addrlen, *dl);
+		php_io_op_connect(&op, NULL, fd, addr, addrlen, *dl);
 		op.stream = stream;
 		if (started) {
 			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
@@ -1384,7 +1386,7 @@ PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sock
 		if (started && result.status == PHP_IO_DONE && result.res < 0 && PHP_IO_IS_EALREADY(result.error)) {
 			/* A provider that performs the op found our connect still under
 			 * way: wait for its outcome like after a readiness report */
-			php_io_op_poll(&op, f.handle, fd, PHP_POLL_WRITE, *dl);
+			php_io_op_poll(&op, NULL, fd, PHP_POLL_WRITE, *dl);
 			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
 			op.stream = stream;
 			if (php_io_op_register_wait(&op, stream, PHP_POLL_WRITE) == FAILURE
@@ -1454,7 +1456,7 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 	bool drained = false; /* the syscall returned EAGAIN: the next wait follows a drain */
 	for (;;) {
 		if (offload) {
-			prep(&op, f.handle, fd, buf, len, offset, *dl);
+			prep(&op, NULL, fd, buf, len, offset, *dl);
 			if (prep == php_io_op_read) {
 				op.flags |= php_io_stream_buf_flag(stream, buf);
 			}
@@ -1478,10 +1480,9 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 			ready = result.status == PHP_IO_READY;
 		}
 		if (!regular && !ready) {
-			/* Wait for readiness before the syscall, with the stream's
-			 * identity so a handle keyed provider can */
+			/* Wait for readiness before the syscall */
 			uint32_t events = prep == php_io_op_read ? PHP_POLL_READ : PHP_POLL_WRITE;
-			php_io_op_poll(&op, f.handle, fd, events, *dl);
+			php_io_op_poll(&op, NULL, fd, events, *dl);
 			if (drained) {
 				op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
 			}
@@ -1580,7 +1581,7 @@ PHPAPI int php_io_fsync(php_stream *stream, int fd, bool data_only)
 		if (php_io_frame_begin(&f, stream) == FAILURE) {
 			return -1;
 		}
-		php_io_op_fsync(&op, f.handle, fd, data_only);
+		php_io_op_fsync(&op, NULL, fd, data_only);
 		op.stream = stream;
 		zend_result rc = php_io_run(&op, &result);
 		php_io_frame_end(&f, &op);

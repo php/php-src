@@ -371,8 +371,9 @@ PHP_METHOD(Io_Operation, getHandle)
 	if (!op) {
 		RETURN_THROWS();
 	}
-	if (op->handle) {
-		RETURN_OBJ_COPY(op->handle);
+	zend_object *handle = php_io_op_get_handle(op);
+	if (handle) {
+		RETURN_OBJ_COPY(handle);
 	}
 
 	/* The generic handles are created on demand, so a provider on a

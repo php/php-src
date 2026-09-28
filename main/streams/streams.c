@@ -252,6 +252,27 @@ static int _php_stream_free_persistent(zval *zv, void *pStream)
 
 static int php_stream_flush_ex(php_stream *stream, bool closing);
 
+/* While the descriptor is still open: the watchers and the handle stop reporting, the
+ * registrations end with the provider's remove() per pair, then the stream drops its handle */
+static void php_stream_release_io(php_stream *stream)
+{
+	zend_object *handle_obj = stream->weak_poll_handle;
+
+	if (stream->poll_watchers) {
+		php_io_poll_stream_notify_close(stream);
+	}
+	if (handle_obj) {
+		php_stream_poll_weak_handle_notify(handle_obj);
+	}
+	if (stream->io_registrations) {
+		php_io_unregister_all(&stream->io_registrations);
+	}
+	if (handle_obj) {
+		stream->weak_poll_handle = NULL;
+		OBJ_RELEASE(handle_obj);
+	}
+}
+
 PHPAPI int php_stream_free(php_stream *stream, int close_options) /* {{{ */
 {
 	int ret = 1;
@@ -383,23 +404,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			return ret;
 		}
 
-		/* Watchers must unregister while the fd is still open */
-		if (stream->poll_watchers) {
-			php_io_poll_stream_notify_close(stream);
-		}
-
-		if (stream->weak_poll_handle) {
-			zend_object *handle_obj = stream->weak_poll_handle;
-			stream->weak_poll_handle = NULL;
-			/* Retiring the watchers may drop the last reference to the handle */
-			GC_ADDREF(handle_obj);
-			php_stream_poll_weak_handle_notify(handle_obj);
-			OBJ_RELEASE(handle_obj);
-		}
-		/* Before the descriptor closes, with the provider's remove() per pair */
-		if (stream->io_registrations) {
-			php_io_unregister_all(&stream->io_registrations);
-		}
+		php_stream_release_io(stream);
 
 		ret = stream->ops->close(stream, preserve_handle ? 0 : 1);
 		if (!ret) {
@@ -416,22 +421,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 	}
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
-		if (stream->poll_watchers) {
-			php_io_poll_stream_notify_close(stream);
-		}
-
-		if (stream->weak_poll_handle) {
-			zend_object *handle_obj = stream->weak_poll_handle;
-			stream->weak_poll_handle = NULL;
-			/* Retiring the watchers may drop the last reference to the handle */
-			GC_ADDREF(handle_obj);
-			php_stream_poll_weak_handle_notify(handle_obj);
-			OBJ_RELEASE(handle_obj);
-		}
-		/* Before the descriptor closes, with the provider's remove() per pair */
-		if (stream->io_registrations) {
-			php_io_unregister_all(&stream->io_registrations);
-		}
+		php_stream_release_io(stream);
 
 		while (stream->readfilters.head) {
 			if (stream->readfilters.head->res != NULL) {

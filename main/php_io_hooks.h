@@ -80,7 +80,7 @@ typedef struct _php_io_registration php_io_registration;
 struct _php_io_op {
 	php_io_op_type type;
 	uint32_t flags;
-	zend_object *handle; /* NULL for TIMER, DNS and ANY */
+	zend_object *handle; /* NULL for TIMER, DNS, ANY and a stream op until php_io_op_get_handle() */
 	uint32_t ready_events;
 	php_socket_t fd;
 	php_deadline deadline;
@@ -150,6 +150,9 @@ PHPAPI void php_io_op_waitpid(php_io_op *op, zend_object *handle, pid_t pid, int
 PHPAPI void php_io_op_sigwait(php_io_op *op, zend_object *handle, const php_sigset_t *set,
 		php_siginfo_t *info, php_deadline dl);
 PHPAPI void php_io_op_any(php_io_op *op, php_io_op **members, uint32_t n, php_io_op_result *results);
+
+/* The op's handle, created for a stream op on the first call and kept by the stream: borrowed */
+PHPAPI zend_object *php_io_op_get_handle(php_io_op *op);
 
 /* Registrations: a (descriptor, event) pair whose waits repeat until the pair is removed */
 

@@ -213,6 +213,7 @@ struct _php_stream  {
 	uint16_t in_free:2;			/* to prevent recursion during free */
 	uint16_t eof:1;
 	uint16_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
+	uint16_t userland:1;	/* handed to a script as a resource (php_stream_to_zval) */
 
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
@@ -255,7 +256,7 @@ struct _php_stream  {
 
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
 
-	/* StreamPollWeakHandle singleton, not refcounted, zeroed when it is freed */
+	/* StreamPollWeakHandle singleton, referenced by the stream until php_stream_free() */
 	zend_object *weak_poll_handle;
 
 	zend_llist *error_list;
@@ -286,7 +287,9 @@ END_EXTERN_C()
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed = 1; }
+/* the stream is in a script's hands: a StreamPollWeakHandle may hand it back */
+#define php_stream_expose(stream)	{ (stream)->__exposed = 1; (stream)->userland = 1; }
+#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); php_stream_expose(stream); }
 
 #define php_stream_from_zval(xstr, pzval)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), \

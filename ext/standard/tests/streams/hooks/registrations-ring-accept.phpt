@@ -31,8 +31,9 @@ final class Tracing extends Scheduler
 
     public function add(\Io\Registration $registration): void
     {
-        // Only the listener's pairs; the clients register theirs too
-        if ($registration->getHandle()->getStream() === $this->listener) {
+        // Only the listener's pairs; the clients register theirs too. The handle is the
+        // stream's one object, and the stream is frozen by the accept, so getStream() is null
+        if ($registration->getHandle() === StreamPollWeakHandle::create($this->listener)) {
             $this->regs[] = $registration->getEvent()->name . " " . $registration->getTrigger()->name;
         }
         parent::add($registration);

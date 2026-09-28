@@ -1,5 +1,5 @@
 --TEST--
-Io\Curl\SocketWeakHandle cannot be constructed or cloned, and is invalid once libcurl drops the socket
+CurlSocketPollWeakHandle cannot be constructed or cloned, and is invalid once libcurl drops the socket
 --EXTENSIONS--
 curl
 --FILE--
@@ -9,14 +9,16 @@ include __DIR__ . '/../../standard/tests/streams/hooks/scheduler.inc';
 
 class CapturingScheduler extends Scheduler
 {
-    public ?Io\Curl\SocketWeakHandle $handle = null;
+    public ?CurlSocketPollWeakHandle $handle = null;
+    public bool $validInRun = false;
 
     public function run(\Io\Operation $op): \Io\Completion
     {
         $ops = $op instanceof Io\Operation\Any ? $op->getOperations() : [$op];
         foreach ($ops as $member) {
-            if ($member->getHandle() instanceof Io\Curl\SocketWeakHandle) {
+            if ($member->getHandle() instanceof CurlSocketPollWeakHandle) {
                 $this->handle = $member->getHandle();
+                $this->validInRun = $this->handle->isValid();
             }
         }
         return parent::run($op);
@@ -24,7 +26,7 @@ class CapturingScheduler extends Scheduler
 }
 
 try {
-    new Io\Curl\SocketWeakHandle();
+    new CurlSocketPollWeakHandle();
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -57,7 +59,7 @@ $scheduler->loop();
 Io\Hooks\set_hooks(null);
 
 $handle = $scheduler->handle;
-var_dump($handle instanceof Io\Curl\SocketWeakHandle);
+var_dump($handle instanceof CurlSocketPollWeakHandle, $scheduler->validInRun, $handle->isValid());
 try {
     clone $handle;
 } catch (Error $e) {
@@ -70,8 +72,10 @@ try {
 }
 ?>
 --EXPECT--
-Call to private Io\Curl\SocketWeakHandle::__construct() from global scope
+Call to private CurlSocketPollWeakHandle::__construct() from global scope
 string(2) "hi"
 bool(true)
-Trying to clone an uncloneable object of class Io\Curl\SocketWeakHandle
+bool(true)
+bool(false)
+Trying to clone an uncloneable object of class CurlSocketPollWeakHandle
 Invalid handle for polling

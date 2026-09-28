@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_poll.stub.php instead.
- * Stub hash: 140359436db0272de2443af78b4a64c80a338535
+ * Stub hash: 1a271997cf6af0eeac5391b283a04b3c7225301b
  * Has decl header: yes */
 
 #include "zend_enum.h"
@@ -121,6 +121,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_StreamPollWeakHandle_getStream arginfo_class_Io_Poll_Watcher_getData
 
+#define arginfo_class_StreamPollWeakHandle_isExposed arginfo_class_Io_Poll_Backend_isAvailable
+
+#define arginfo_class_StreamPollWeakHandle_isValid arginfo_class_Io_Poll_Backend_isAvailable
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_StreamPollHandle___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
@@ -167,6 +171,8 @@ ZEND_METHOD(Io_Poll_Context, onWatcherRemoved);
 ZEND_METHOD(StreamPollWeakHandle, __construct);
 ZEND_METHOD(StreamPollWeakHandle, create);
 ZEND_METHOD(StreamPollWeakHandle, getStream);
+ZEND_METHOD(StreamPollWeakHandle, isExposed);
+ZEND_METHOD(StreamPollWeakHandle, isValid);
 ZEND_METHOD(StreamPollHandle, __construct);
 ZEND_METHOD(StreamPollHandle, getStream);
 ZEND_METHOD(StreamPollHandle, isValid);
@@ -238,6 +244,8 @@ static const zend_function_entry class_StreamPollWeakHandle_methods[] = {
 	ZEND_ME(StreamPollWeakHandle, __construct, arginfo_class_StreamPollWeakHandle___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(StreamPollWeakHandle, create, arginfo_class_StreamPollWeakHandle_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(StreamPollWeakHandle, getStream, arginfo_class_StreamPollWeakHandle_getStream, ZEND_ACC_PUBLIC)
+	ZEND_ME(StreamPollWeakHandle, isExposed, arginfo_class_StreamPollWeakHandle_isExposed, ZEND_ACC_PUBLIC)
+	ZEND_ME(StreamPollWeakHandle, isValid, arginfo_class_StreamPollWeakHandle_isValid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

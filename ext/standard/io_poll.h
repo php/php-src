@@ -53,7 +53,9 @@ PHPAPI void php_io_poll_notify_handle_create_external(zval *dest, php_socket_t f
 /* The current mask without the signals blocked by live SignalHandle objects */
 PHPAPI void php_io_poll_signal_child_mask(sigset_t *mask);
 #endif
-PHPAPI void php_stream_poll_weak_handle_from_stream(zval *dest, php_stream *stream);
+/* The stream's StreamPollWeakHandle, created on the first call and kept by the stream: borrowed.
+ * expose lets getStream() hand the stream out, and stays set once it was. */
+PHPAPI zend_object *php_stream_get_poll_handle(php_stream *stream, bool expose);
 PHPAPI void php_stream_poll_weak_handle_notify(zend_object *handle_obj);
 PHPAPI void php_io_poll_handle_remove_from_all_contexts(zend_object *handle_obj);
 /* Retires every watcher on the handle while its descriptor is still open */

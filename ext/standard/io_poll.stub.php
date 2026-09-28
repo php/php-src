@@ -257,6 +257,8 @@ namespace Io\Poll {
 
 namespace {
     /**
+     * One per stream, created by the core for its operations and registrations
+     * or by create(); the stream keeps it while it is open.
      * @strict-properties
      * @not-serializable
      */
@@ -267,8 +269,19 @@ namespace {
         /** @param resource $stream */
         public static function create($stream): static {}
 
-        /** @return resource|null */
+        /**
+         * The stream, or null: closed, not exposed, or in an operation.
+         * @return resource|null
+         */
         public function getStream(): mixed {}
+
+        /**
+         * Whether getStream() may hand the stream out: created through create(),
+         * or by the core for a stream a script holds
+         */
+        public function isExposed(): bool {}
+
+        public function isValid(): bool {}
     }
 
     /**

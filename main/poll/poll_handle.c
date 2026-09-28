@@ -67,6 +67,7 @@ PHPAPI php_poll_handle_object *php_poll_handle_object_create(
 	intern->ops = ops ? ops : &php_poll_handle_default_ops;
 	intern->handle_data = NULL;
 	intern->watching = NULL;
+	intern->flags = 0;
 	intern->registrations = NULL;
 
 	return intern;

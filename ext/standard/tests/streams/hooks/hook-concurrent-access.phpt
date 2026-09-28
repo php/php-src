@@ -8,10 +8,12 @@ $addr = stream_socket_get_name($server, false);
 $client = stream_socket_client("tcp://$addr");
 
 class ConcurrentHook implements Io\Hooks\Hooks {
+    public function __construct(private $stream) {}
     public function getCapabilities(): array { return []; }
     public function run(Io\Operation $op): Io\Completion {
+        var_dump($op->getHandle()->getStream());
         try {
-            fgets($op->getHandle()->getStream());
+            fgets($this->stream);
         } catch (Error $e) {
             echo $e->getMessage() . "\n";
         }
@@ -22,12 +24,13 @@ class ConcurrentHook implements Io\Hooks\Hooks {
     public function remove(Io\Registration $registration): void {}
 }
 
-Io\Hooks\set_hooks(new ConcurrentHook());
+Io\Hooks\set_hooks(new ConcurrentHook($client));
 stream_set_timeout($client, 3);
 var_dump(fgets($client));
 var_dump(stream_get_meta_data($client)['timed_out']);
 ?>
 --EXPECTF--
+NULL
 Concurrent access to a stream
 bool(true)
 array(1) {

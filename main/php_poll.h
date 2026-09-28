@@ -250,11 +250,16 @@ struct php_poll_handle_ops {
 	bool (*fired)(php_poll_handle_object *handle);
 };
 
+/* A script may reach the resource through the handle: set by the userland factory, or by the core
+ * for a stream a script holds; sticky */
+#define PHP_POLL_HANDLE_F_EXPOSED 0x01
+
 /* Base poll handle object structure */
 struct php_poll_handle_object {
 	php_poll_handle_ops *ops;
 	void *handle_data;
 	HashTable *watching; /* context key -> watcher, not refcounted */
+	uint32_t flags; /* PHP_POLL_HANDLE_F_* */
 	struct _php_io_registration *registrations; /* IO hooks registrations on this handle */
 	zend_object std;
 };

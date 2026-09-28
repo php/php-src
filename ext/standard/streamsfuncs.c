@@ -91,10 +91,9 @@ PHP_FUNCTION(stream_socket_pair)
 
     array_init(return_value);
 
-	/* set the __exposed flag.
-	 * php_stream_to_zval() does, add_next_index_resource() does not */
-	php_stream_auto_cleanup(s1);
-	php_stream_auto_cleanup(s2);
+	/* What php_stream_to_zval() marks, add_next_index_resource() does not */
+	php_stream_expose(s1);
+	php_stream_expose(s2);
 
 	add_next_index_resource(return_value, s1->res);
 	add_next_index_resource(return_value, s2->res);
@@ -861,26 +860,23 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 	php_io_op *ops = safe_emalloc(n + 1, sizeof(php_io_op), 0);
 	php_io_op **op_ptrs = safe_emalloc(n + 1, sizeof(php_io_op *), 0);
 	php_io_op_result *results = safe_emalloc(n + 1, sizeof(php_io_op_result), 0);
-	zend_object **handles = safe_emalloc(n + 1, sizeof(zend_object *), 0);
 	uint32_t n_members = 0;
 
 	for (uint32_t i = 0; i < n; i++) {
 		if (members[i].events == 0) {
 			/* Only in the except set on a backend without priority events */
-			handles[n_members] = NULL;
 			continue;
 		}
-		zval handle_zv;
-		php_stream_poll_weak_handle_from_stream(&handle_zv, members[i].stream);
-		handles[n_members] = Z_OBJ(handle_zv);
-		php_io_op_poll(&ops[n_members], handles[n_members], members[i].fd, members[i].events, php_io_deadline_infinite());
+		php_io_op_poll(&ops[n_members], NULL, members[i].fd, members[i].events,
+				php_io_deadline_infinite());
+		/* Frozen by this call, for the handle a provider may ask for */
+		ops[n_members].stream = members[i].stream;
 		if (checked) {
 			ops[n_members].flags |= PHP_IO_OP_F_CHECKED;
 		}
 		op_ptrs[n_members] = &ops[n_members];
 		n_members++;
 	}
-	uint32_t n_polls = n_members;
 	uint32_t timer_index = UINT32_MAX;
 	if (tv) {
 		php_io_op_timer(&ops[n_members], php_io_deadline_from_timeval(tv));
@@ -929,10 +925,6 @@ static int stream_select_any(zval *r_array, zval *w_array, zval *e_array, struct
 		}
 	}
 
-	for (uint32_t i = 0; i < n_polls; i++) {
-		OBJ_RELEASE(handles[i]);
-	}
-	efree(handles);
 	efree(results);
 	efree(op_ptrs);
 	efree(ops);

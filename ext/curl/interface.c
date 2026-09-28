@@ -414,7 +414,8 @@ PHP_MINIT_FUNCTION(curl)
 
 	curlfile_register_class();
 
-	php_curl_socket_weak_handle_ce = register_class_Io_Curl_SocketWeakHandle(php_io_poll_weak_handle_class_entry);
+	php_curl_socket_weak_handle_ce = register_class_CurlSocketPollWeakHandle(
+		php_io_poll_weak_handle_class_entry);
 	php_curl_socket_weak_handle_ce->create_object = php_curl_socket_handle_create_object;
 	memcpy(&php_curl_socket_handle_object_handlers, &std_object_handlers,
 		sizeof(zend_object_handlers));
@@ -2432,7 +2433,7 @@ PHP_FUNCTION(curl_setopt_array)
 }
 /* }}} */
 
-/* Io\Curl\SocketWeakHandle: identity of one socket in the multi handle's
+/* CurlSocketPollWeakHandle: identity of one socket in the multi handle's
  * connection pool, from the first report to CURL_POLL_REMOVE. Nothing is
  * owned: the handle only answers the descriptor while libcurl is interested. */
 
@@ -2474,16 +2475,24 @@ static zend_object *php_curl_socket_handle_create_object(zend_class_entry *ce)
 	return &intern->std;
 }
 
-ZEND_METHOD(Io_Curl_SocketWeakHandle, __construct)
+ZEND_METHOD(CurlSocketPollWeakHandle, __construct)
 {
-	zend_throw_error(NULL, "Cannot directly construct Io\\Curl\\SocketWeakHandle");
+	zend_throw_error(NULL, "Cannot directly construct CurlSocketPollWeakHandle");
+}
+
+ZEND_METHOD(CurlSocketPollWeakHandle, isValid)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(ZEND_THIS);
+	RETURN_BOOL(intern->ops->is_valid(intern));
 }
 
 /* One socket libcurl wants watched, attached to it with curl_multi_assign() */
 typedef struct _php_curl_socket_entry {
 	curl_socket_t socket;
 	int what;
-	zend_object *handle; /* SocketWeakHandle, referenced; its registrations are the directions */
+	zend_object *handle; /* CurlSocketPollWeakHandle, referenced; its registrations are its directions */
 	struct _php_curl_socket_entry *next_removed;
 } php_curl_socket_entry;
 

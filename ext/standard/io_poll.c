@@ -306,8 +306,9 @@ PHPAPI void php_stream_poll_handle_from_stream(zval *dest, php_stream *stream)
 }
 
 /* StreamPollWeakHandle: like StreamPollHandle but does not hold a refcount on the stream.
- * When the stream is freed, the stream pointer is zeroed and the Handle is
- * removed from any Context (php_stream_poll_weak_handle_notify). */
+ * The stream holds the one reference the core needs and releases it in php_stream_free(),
+ * after the stream pointer is zeroed and the handle is removed from every Context
+ * (php_stream_poll_weak_handle_notify); userland references keep it as an invalid handle. */
 
 static zend_class_entry *php_stream_poll_weak_handle_class_entry;
 
@@ -372,21 +373,28 @@ static zend_object *php_stream_poll_weak_handle_create_object(zend_class_entry *
 	return &intern->std;
 }
 
-PHPAPI void php_stream_poll_weak_handle_from_stream(zval *dest, php_stream *stream)
+PHPAPI zend_object *php_stream_get_poll_handle(php_stream *stream, bool expose)
 {
+	php_poll_handle_object *intern;
+
 	if (stream->weak_poll_handle) {
-		ZVAL_OBJ_COPY(dest, stream->weak_poll_handle);
-		return;
+		intern = PHP_POLL_HANDLE_OBJ_FROM_ZOBJ(stream->weak_poll_handle);
+	} else {
+		zval handle_zv;
+		object_init_ex(&handle_zv, php_stream_poll_weak_handle_class_entry);
+		intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(&handle_zv);
+
+		php_stream_poll_weak_handle_data *data = emalloc(sizeof(php_stream_poll_weak_handle_data));
+		data->stream = stream;
+		intern->handle_data = data;
+
+		/* The reference is the stream's */
+		stream->weak_poll_handle = Z_OBJ(handle_zv);
 	}
-
-	object_init_ex(dest, php_stream_poll_weak_handle_class_entry);
-	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(dest);
-
-	php_stream_poll_weak_handle_data *data = emalloc(sizeof(php_stream_poll_weak_handle_data));
-	data->stream = stream;
-	intern->handle_data = data;
-
-	stream->weak_poll_handle = Z_OBJ_P(dest);
+	if (expose) {
+		intern->flags |= PHP_POLL_HANDLE_F_EXPOSED;
+	}
+	return &intern->std;
 }
 
 PHP_METHOD(StreamPollWeakHandle, __construct)
@@ -408,9 +416,10 @@ PHP_METHOD(StreamPollWeakHandle, create)
 		RETURN_THROWS();
 	}
 
-	php_stream_poll_weak_handle_from_stream(return_value, stream);
+	RETURN_OBJ_COPY(php_stream_get_poll_handle(stream, true));
 }
 
+/* Not for an internal stream (never handed to a script) or a frozen one (in an operation) */
 PHP_METHOD(StreamPollWeakHandle, getStream)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -418,12 +427,29 @@ PHP_METHOD(StreamPollWeakHandle, getStream)
 	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
 	php_stream_poll_weak_handle_data *data = intern->handle_data;
 
-	if (!data || !data->stream) {
+	if (!data || !data->stream || !(intern->flags & PHP_POLL_HANDLE_F_EXPOSED)
+			|| (data->stream->flags & PHP_STREAM_FLAG_IN_USE)) {
 		RETURN_NULL();
 	}
 
 	GC_ADDREF(data->stream->res);
 	php_stream_to_zval(data->stream, return_value);
+}
+
+PHP_METHOD(StreamPollWeakHandle, isExposed)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
+	RETURN_BOOL(intern->flags & PHP_POLL_HANDLE_F_EXPOSED);
+}
+
+PHP_METHOD(StreamPollWeakHandle, isValid)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	php_poll_handle_object *intern = PHP_POLL_HANDLE_OBJ_FROM_ZV(getThis());
+	RETURN_BOOL(intern->ops->is_valid(intern));
 }
 
 /* TimerHandle: a deadline in the context, no descriptor anywhere */

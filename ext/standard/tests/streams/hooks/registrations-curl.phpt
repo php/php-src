@@ -48,13 +48,13 @@ final class Tracing extends Scheduler
     {
         $this->added[spl_object_id($registration)] = $registration;
         $handle = $registration->getHandle();
-        if ($handle instanceof \Io\Curl\SocketWeakHandle) {
+        if ($handle instanceof \CurlSocketPollWeakHandle) {
             $this->curl[spl_object_id($registration)] = true;
         }
         // The stream pairs want Edge and get Level, all this provider takes
         $this->addsOk = $this->addsOk && $registration->isValid()
             && $registration->getTrigger() === \Io\Poll\Trigger::Level
-            && ($handle instanceof \Io\Curl\SocketWeakHandle || $handle instanceof \StreamPollWeakHandle)
+            && ($handle instanceof \CurlSocketPollWeakHandle || $handle instanceof \StreamPollWeakHandle)
             && in_array($registration->getEvent(), [\Io\Poll\Event::Read, \Io\Poll\Event::Write], true);
         parent::add($registration);
     }
