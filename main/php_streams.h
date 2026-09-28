@@ -194,6 +194,9 @@ struct _php_stream_wrapper	{
 /* An operation on the stream is in flight: passing it to a function throws */
 #define PHP_STREAM_FLAG_IN_USE						0x800
 
+/* the IO hooks register no pair for it: every wait stays one-shot */
+#define PHP_STREAM_FLAG_NO_IO_REGISTRATION				0x1000
+
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {

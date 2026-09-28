@@ -819,6 +819,18 @@ PHPAPI php_socket_t php_network_accept_incoming_stream_ex(php_stream *stream,
 		php_deadline deadline;
 		deadline = php_io_deadline_from_timeval(timeout);
 		sl = sizeof(sa);
+		if (stream) {
+			/* A listener shared with other processes: a provider's multishot accept would
+			 * pull connections into this one, so the pair stays unregistered and its
+			 * accepts one-shot. Read here, under both the plain and the TLS transport. */
+			zval *opt = PHP_STREAM_CONTEXT(stream)
+					? php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "accept_multishot") : NULL;
+			if (opt && !zend_is_true(opt)) {
+				stream->flags |= PHP_STREAM_FLAG_NO_IO_REGISTRATION;
+			} else {
+				stream->flags &= ~PHP_STREAM_FLAG_NO_IO_REGISTRATION;
+			}
+		}
 		clisock = php_io_accept(stream, srvsock, (struct sockaddr*)&sa, &sl, &deadline);
 
 		if (clisock == SOCK_ERR) {

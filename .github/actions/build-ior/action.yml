@@ -6,7 +6,7 @@ name: Build ior
 inputs:
   ref:
     description: The ior commit to build, a full SHA
-    default: d310b660afe7620f0f4786854ab6670d29f6cbe9
+    default: 2fb12e8ce012b8753258034de008266152742c13
     required: false
 runs:
   using: composite

@@ -1047,7 +1047,8 @@ static zend_always_inline uint32_t php_io_hook_flags(void)
  * that is all the provider takes; an add() that threw cancels the wait */
 static zend_result php_io_op_register_wait(php_io_op *op, php_stream *stream, uint32_t event)
 {
-	if (!stream || !FG(io_hooks) || !(event == PHP_POLL_READ || event == PHP_POLL_WRITE)) {
+	if (!stream || !FG(io_hooks) || (stream->flags & PHP_STREAM_FLAG_NO_IO_REGISTRATION)
+			|| !(event == PHP_POLL_READ || event == PHP_POLL_WRITE)) {
 		return SUCCESS;
 	}
 	zend_object *pending = EG(exception);

@@ -45,7 +45,17 @@ struct _php_io_ring_reg {
 	bool hup; /* a hangup or error was reported: every wait completes at once */
 	php_io_ring_req *poll; /* the armed multishot poll, NULL when none */
 	uint32_t poll_mask; /* what it watches */
+	php_io_ring_req *accept; /* the armed multishot accept of a listener, NULL when none */
+	bool accept_failed; /* the backend refused it: accepts take their own entry */
+	int *fds; /* connections accepted with no wait to take them, oldest first */
+	uint32_t n_fds;
+	uint32_t fds_cap;
 };
+
+/* Buffered connections past which the multishot accept is let go, until a take brings the buffer
+ * below half: the listen backlog keeps the rest, where a process sharing the listener can still
+ * take them */
+#define PHP_IO_RING_ACCEPT_CAP 32
 
 struct _php_io_ring_req {
 	php_io_op *op;
@@ -254,7 +264,9 @@ PHPAPI uint32_t php_io_ring_hook_flags(php_io_ring *ring)
 
 PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring)
 {
-	uint32_t flags = PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_EDGE_REGISTRATIONS;
+	/* Every ior backend keeps a multishot accept, which is what makes a direct
+	 * accept serve a burst in order of arrival rather than one per pass */
+	uint32_t flags = PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_EDGE_REGISTRATIONS | PHP_IO_HOOKS_F_DIRECT_ACCEPT;
 	if (ring->features & IOR_FEAT_NATIVE_ASYNC) {
 		flags |= PHP_IO_HOOKS_F_DIRECT_DATA;
 	}
@@ -273,6 +285,21 @@ static php_io_ring_reg *php_io_ring_reg_get(php_io_ring *ring, php_socket_t fd, 
 }
 
 static void php_io_ring_reg_disarm(php_io_ring *ring, php_io_ring_reg *rec);
+static void php_io_ring_reg_disarm_accept(php_io_ring *ring, php_io_ring_reg *rec, bool keep);
+
+/* The connections nobody took: their clients see a reset, as with a listener closed with a backlog */
+static void php_io_ring_reg_close_fds(php_io_ring_reg *rec)
+{
+	for (uint32_t i = 0; i < rec->n_fds; i++) {
+		closesocket(rec->fds[i]);
+	}
+	rec->n_fds = 0;
+	if (rec->fds) {
+		efree(rec->fds);
+		rec->fds = NULL;
+		rec->fds_cap = 0;
+	}
+}
 
 /* The record is found by descriptor, never through the registration, so one a replaced provider
  * left behind is never dereferenced through a stale pointer. Nothing is armed here: the first wait
@@ -306,6 +333,12 @@ PHPAPI void php_io_ring_remove(php_io_ring *ring, php_io_registration *reg)
 	if (rec->poll) {
 		/* Cancelled before the descriptor closes; a remaining direction re-arms at its next wait */
 		php_io_ring_reg_disarm(ring, rec);
+	}
+	if (!(rec->edge & PHP_POLL_READ)) {
+		if (rec->accept) {
+			php_io_ring_reg_disarm_accept(ring, rec, false);
+		}
+		php_io_ring_reg_close_fds(rec);
 	}
 	if (!rec->edge) {
 		zend_hash_index_del(&ring->regs, (zend_ulong) rec->fd);
@@ -650,7 +683,13 @@ static void php_io_ring_req_free(php_io_ring *ring, php_io_ring_req *req)
 		php_io_ring_waiter_settle(ring, req);
 	}
 	if (req->reg) {
-		req->reg->poll = NULL;
+		if (req->type == PHP_IO_OP_ACCEPT) {
+			if (req->reg->accept == req) {
+				req->reg->accept = NULL;
+			}
+		} else if (req->reg->poll == req) {
+			req->reg->poll = NULL;
+		}
 		req->reg = NULL;
 	}
 	if (req->cancel_pending) {
@@ -1036,11 +1075,133 @@ static void php_io_ring_reg_edge(php_io_ring *ring, php_io_ring_reg *rec, uint32
 	rec->ready |= res & rec->poll_mask & ~consumed;
 }
 
+/* The multishot accept of a registered listener: one entry, its connections come back with
+ * IOR_CQE_F_MORE and the accepted socket as the result */
+static bool php_io_ring_reg_arm_accept(php_io_ring *ring, php_io_ring_reg *rec)
+{
+	ior_sqe *sqe;
+	if (!php_io_ring_get_sqes(ring, &sqe, 1)) {
+		return false;
+	}
+	php_io_ring_req *req = php_io_ring_req_alloc(ring);
+	req->type = PHP_IO_OP_ACCEPT;
+	req->multishot = true;
+	req->reg = rec;
+	php_deadline_init_infinite(&req->deadline);
+	ior_prep_accept_multishot(ring->ctx, sqe, (ior_fd_t) rec->fd,
+			IOR_ACCEPT_CLOEXEC | (ring->fd_nonblock ? IOR_ACCEPT_NONBLOCK : 0));
+	ior_sqe_set_data(ring->ctx, sqe, req);
+	rec->accept = req;
+	php_io_ring_flush(ring);
+	return true;
+}
+
+/* Let go for the cap, keeping the record so the connections it still posts are buffered, or for
+ * good, when they are closed */
+static void php_io_ring_reg_disarm_accept(php_io_ring *ring, php_io_ring_reg *rec, bool keep)
+{
+	php_io_ring_req *req = rec->accept;
+	rec->accept = NULL;
+	if (!keep) {
+		req->reg = NULL;
+	}
+	if (php_io_ring_foreign(ring)) {
+		req->main_done = true;
+	} else if (!req->main_done && !req->cancelled) {
+		req->cancelled = true;
+		if (!php_io_ring_submit_cancel(ring, req)) {
+			req->cancel_pending = true;
+			ring->n_cancel_pending++;
+		}
+	}
+	req->orphaned = true;
+	if (php_io_ring_req_settled(req)) {
+		php_io_ring_req_free(ring, req);
+	}
+}
+
+/* An Accept completes with a connection: the peer name, which a multishot accept does not report,
+ * is asked of the socket when the caller wants it */
+static void php_io_ring_accept_complete(php_io_ring *ring, php_io_ring_req *req, int fd)
+{
+	if (req->u.sock.addr) {
+		req->u.sock.addrlen = req->u.sock.cap;
+		if (getpeername((php_socket_t) fd, req->u.sock.addr, &req->u.sock.addrlen) != 0) {
+			req->u.sock.addrlen = 0;
+		}
+	}
+	php_io_ring_req_main_cqe(ring, req, (int32_t) fd);
+}
+
+/* The oldest buffered connection; the multishot comes back once the buffer is half empty, or at
+ * the first take after it ended on its own */
+static int php_io_ring_reg_take(php_io_ring *ring, php_io_ring_reg *rec)
+{
+	int fd = rec->fds[0];
+	rec->n_fds--;
+	memmove(rec->fds, &rec->fds[1], rec->n_fds * sizeof(*rec->fds));
+	if (!rec->accept && !rec->accept_failed && rec->n_fds < PHP_IO_RING_ACCEPT_CAP / 2) {
+		php_io_ring_reg_arm_accept(ring, rec);
+	}
+	return fd;
+}
+
+/* A connection the multishot accepted: the oldest parked accept takes it, or it is buffered */
+static void php_io_ring_reg_connection(php_io_ring *ring, php_io_ring_reg *rec, int fd)
+{
+	php_io_ring_req *w = ring->waiting, *oldest = NULL;
+	while (w) {
+		if (w->waiting == rec && w->type == PHP_IO_OP_ACCEPT) {
+			oldest = w;
+		}
+		w = w->w_next;
+	}
+	if (oldest) {
+		php_io_ring_waiter_settle(ring, oldest);
+		php_io_ring_accept_complete(ring, oldest, fd);
+		return;
+	}
+	if (rec->n_fds == rec->fds_cap) {
+		rec->fds_cap = rec->fds_cap ? rec->fds_cap * 2 : 8;
+		rec->fds = safe_erealloc(rec->fds, rec->fds_cap, sizeof(*rec->fds), 0);
+	}
+	rec->fds[rec->n_fds++] = fd;
+	if (rec->accept && rec->n_fds >= PHP_IO_RING_ACCEPT_CAP) {
+		php_io_ring_reg_disarm_accept(ring, rec, true);
+	}
+}
+
+/* An Accept on a registered listener: served from the buffer, or parked behind the multishot
+ * accept armed at the first one. False when the accept takes its own entry. */
+static bool php_io_ring_accept_wait(php_io_ring *ring, php_io_ring_req *req)
+{
+	php_io_op *op = req->op;
+	if (!op->registration || op->registration->trigger != PHP_IO_TRIGGER_EDGE) {
+		return false;
+	}
+	php_io_ring_reg *rec = php_io_ring_reg_get(ring, op->fd, false);
+	if (!rec || !(rec->edge & PHP_POLL_READ) || rec->accept_failed) {
+		return false;
+	}
+	if (rec->n_fds) {
+		php_io_ring_accept_complete(ring, req, php_io_ring_reg_take(ring, rec));
+		return true;
+	}
+	if (!rec->accept && !php_io_ring_reg_arm_accept(ring, rec)) {
+		return false;
+	}
+	php_io_ring_waiter_park(ring, req, rec, IOR_POLL_IN);
+	return true;
+}
+
 /* A wait after a drain on an Edge pair: answered from the record, or parked on it behind the
  * multishot poll armed at the first such wait. False when the wait takes its own entry. */
 static bool php_io_ring_edge_wait(php_io_ring *ring, php_io_ring_req *req)
 {
 	php_io_op *op = req->op;
+	if (op->type == PHP_IO_OP_ACCEPT) {
+		return php_io_ring_accept_wait(ring, req);
+	}
 	if (op->type != PHP_IO_OP_POLL || !(op->flags & PHP_IO_OP_F_AFTER_DRAIN) || !op->registration
 			|| op->registration->trigger != PHP_IO_TRIGGER_EDGE) {
 		return false;
@@ -1497,21 +1658,52 @@ static void php_io_ring_fold_all(php_io_ring *ring)
 static void php_io_ring_multishot_cqe(php_io_ring *ring, php_io_ring_req *req, int32_t res, bool more)
 {
 	php_io_ring_reg *rec = req->reg;
-	if (more) {
+	if (req->type == PHP_IO_OP_ACCEPT) {
+		/* A connection, buffered or taken; one posted after the record let go is closed */
+		if (res >= 0) {
+			if (rec) {
+				php_io_ring_reg_connection(ring, rec, (int) res);
+			} else {
+				closesocket((php_socket_t) res);
+			}
+		}
+		if (more) {
+			return;
+		}
+		if (rec) {
+			if (rec->accept == req) {
+				rec->accept = NULL;
+			}
+			req->reg = NULL;
+			if (res < 0 && res != -ECANCELED) {
+				/* Refused (an old kernel, -EMFILE): the parked accepts get the error, later
+				 * ones take their own entry */
+				rec->accept_failed = true;
+				php_io_ring_req *w = ring->waiting;
+				while (w) {
+					php_io_ring_req *next = w->w_next;
+					if (w->waiting == rec && w->type == PHP_IO_OP_ACCEPT) {
+						php_io_ring_waiter_settle(ring, w);
+						php_io_ring_req_main_cqe(ring, w, res);
+					}
+					w = next;
+				}
+			}
+		}
+	} else if (more) {
 		if (rec && res > 0) {
 			php_io_ring_reg_edge(ring, rec, (uint32_t) res);
 		}
 		return;
+	} else if (rec) {
+		rec->poll = NULL;
+		req->reg = NULL;
+		php_io_ring_reg_edge(ring, rec, res > 0 ? (uint32_t) res : rec->poll_mask);
 	}
 	req->main_done = true;
 	if (req->cancel_pending) {
 		req->cancel_pending = false;
 		ring->n_cancel_pending--;
-	}
-	if (rec) {
-		rec->poll = NULL;
-		req->reg = NULL;
-		php_io_ring_reg_edge(ring, rec, res > 0 ? (uint32_t) res : rec->poll_mask);
 	}
 	req->orphaned = true;
 	if (php_io_ring_req_settled(req)) {
@@ -1749,6 +1941,11 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring)
 		if (rec->poll) {
 			rec->poll->reg = NULL;
 		}
+		if (rec->accept) {
+			rec->accept->reg = NULL;
+		}
+		/* In a forked child these are its copies */
+		php_io_ring_reg_close_fds(rec);
 		efree(rec);
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&ring->regs);
