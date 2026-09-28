@@ -58,6 +58,10 @@ There is a set of common parameters used within the callable APIs which are:
          the key is numeric (in which case the positional argument is pushed as the next argument
          regardless of its index)
 
+   -  -  ``consumed_args``
+      -  ``uint32_t``
+      -  Parameters consumed by the call. See ``zend_fcall_info``.
+
 There are some functions that do not require the use of either the FCI or the FCC structs:
 
 .. list-table:: Basic callable API
@@ -129,7 +133,8 @@ There are some functions that do not require the use of either the FCI or the FC
                 uint32_t consumed_args
             )
 
-      -  Same as ``zend_call_known_function()``. TODO explain consumed_args uint32_t arg.
+      -  Same as ``zend_call_known_function()``, with an additional ``consumed_args`` parameter (see
+         ``zend_fcall_info``).
 
    -  -  .. code:: c
 
@@ -404,7 +409,11 @@ The FCC API is defined in ``Zend/zend_API.h``.
    Mandatory field, the number of arguments that will be provided to this call to the function.
 
 ``consumed_args``:
-   TBD new since PHP 8.6. and needs docs
+   Specifies positional argument whose ownership is transfered to the function being called. This
+   is used as an optimization to avoid an unnecessary ``Z_ADDREF_P()``/``zval_ptr_dtor()`` when the
+   value is not used after the call. Only one argument can be specified at once with
+   ``zend_fci_consumed_arg(n)`` (zero-based), and the value must not be a reference.
+   Must be set to ``0`` when no parameter applies. New since PHP 8.6.
 
 ``params``:
    contains positional arguments that will be provided to this call to the function. If
