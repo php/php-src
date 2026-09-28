@@ -463,8 +463,6 @@ static const func_info_t func_infos[] = {
 	F1("inet_pton", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("metaphone", MAY_BE_STRING),
 	F1("headers_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
-	F1("htmlspecialchars", MAY_BE_STRING),
-	F1("htmlentities", MAY_BE_STRING),
 	F1("get_html_translation_table", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
 	F1("bin2hex", MAY_BE_STRING),
 	F1("hex2bin", MAY_BE_STRING|MAY_BE_FALSE),
