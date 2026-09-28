@@ -169,7 +169,7 @@ ZEND_FUNCTION(gc_collect_cycles)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_LONG(gc_collect_cycles());
+	RETURN_LONG(gc_collect_cycles(0));
 }
 /* }}} */
 
