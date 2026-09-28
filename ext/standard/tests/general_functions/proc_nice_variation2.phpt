@@ -8,6 +8,10 @@ Simone Gentili (sensorario@gmail.com)
 --SKIPIF--
 <?php
 if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
+
+if (PHP_OS == "OS400") {
+	die("skip: IBM i requires special authority to set niceness");
+}
 ?>
 --FILE--
 <?php
