@@ -1427,6 +1427,11 @@ static ssize_t php_win32_ioutil_overlapped_io(int fd, void *buf, size_t len, int
 	if (err == ERROR_HANDLE_EOF || err == ERROR_BROKEN_PIPE) {
 		return 0;
 	}
+	if (err == ERROR_ACCESS_DENIED) {
+		/* The handle was not opened for this direction: EBADF, as the CRT reports it */
+		_set_errno(EBADF);
+		return -1;
+	}
 	SET_ERRNO_FROM_WIN32_CODE(err);
 	return -1;
 }/*}}}*/
