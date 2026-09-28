@@ -262,46 +262,56 @@ bool(false)
 -- iteration 10 --
 array(1) {
   [0]=>
-  string(1) "a"
+  string(2) "a
+"
 }
 array(1) {
   [0]=>
-  string(1) "a"
+  string(2) "a
+"
 }
 array(1) {
   [0]=>
-  string(2) "67"
+  string(3) "67
+"
 }
 array(1) {
   [0]=>
-  string(3) "-67"
+  string(4) "-67
+"
 }
 array(1) {
   [0]=>
-  string(2) "99"
+  string(3) "99
+"
 }
 bool(false)
 
 -- iteration 11 --
 array(1) {
   [0]=>
-  string(1) "a"
+  string(2) "a
+"
 }
 array(1) {
   [0]=>
-  string(1) "a"
+  string(2) "a
+"
 }
 array(1) {
   [0]=>
-  string(2) "67"
+  string(3) "67
+"
 }
 array(1) {
   [0]=>
-  string(3) "-67"
+  string(4) "-67
+"
 }
 array(1) {
   [0]=>
-  string(2) "99"
+  string(3) "99
+"
 }
 bool(false)
 

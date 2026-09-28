@@ -710,15 +710,18 @@ bool(false)
 -- iteration 10 --
 array(1) {
   [0]=>
-  string(1) "0"
+  string(2) "0
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(2) "-1"
+  string(3) "-1
+"
 }
 array(1) {
   [0]=>
@@ -750,7 +753,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(3) "250"
+  string(4) "250
+"
 }
 array(1) {
   [0]=>
@@ -766,11 +770,13 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(2) "83"
+  string(3) "83
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
@@ -785,75 +791,93 @@ bool(false)
 -- iteration 11 --
 array(1) {
   [0]=>
-  string(1) "0"
+  string(2) "0
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(2) "-1"
+  string(3) "-1
+"
 }
 array(1) {
   [0]=>
-  string(11) "-2147483648"
+  string(12) "-2147483648
+"
 }
 array(1) {
   [0]=>
-  string(11) "-2147483647"
+  string(12) "-2147483647
+"
 }
 array(1) {
   [0]=>
-  string(10) "2147483647"
+  string(11) "2147483647
+"
 }
 array(1) {
   [0]=>
-  string(10) "2147483640"
+  string(11) "2147483640
+"
 }
 array(1) {
   [0]=>
-  string(4) "4667"
+  string(5) "4667
+"
 }
 array(1) {
   [0]=>
-  string(4) "4779"
+  string(5) "4779
+"
 }
 array(1) {
   [0]=>
-  string(4) "4095"
+  string(5) "4095
+"
 }
 array(1) {
   [0]=>
-  string(3) "250"
+  string(4) "250
+"
 }
 array(1) {
   [0]=>
-  string(11) "-2147483648"
+  string(12) "-2147483648
+"
 }
 array(1) {
   [0]=>
-  string(10) "2147483647"
+  string(11) "2147483647
+"
 }
 array(1) {
   [0]=>
-  string(10) "2147483647"
+  string(11) "2147483647
+"
 }
 array(1) {
   [0]=>
-  string(2) "83"
+  string(3) "83
+"
 }
 array(1) {
   [0]=>
-  string(1) "1"
+  string(2) "1
+"
 }
 array(1) {
   [0]=>
-  string(11) "-2147483648"
+  string(12) "-2147483648
+"
 }
 array(1) {
   [0]=>
-  string(10) "2147483647"
+  string(11) "2147483647
+"
 }
 bool(false)
 
