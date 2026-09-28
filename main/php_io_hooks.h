@@ -42,6 +42,9 @@ typedef enum {
 
 /* READ/RECV: buf is the stream's read buffer, valid until the stream is drained */
 #define PHP_IO_OP_F_STREAM_BUF 0x01
+/* The wait follows a drain (EAGAIN, a short write): readiness recorded for an Edge pair since
+ * then may answer it. Set by the wrappers; a Poll op without it checks readiness at arm time. */
+#define PHP_IO_OP_F_AFTER_DRAIN 0x02
 
 typedef enum {
 	PHP_IO_DONE,

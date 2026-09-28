@@ -1059,7 +1059,8 @@ static zend_result php_io_op_register_wait(php_io_op *op, php_stream *stream, ui
 	return SUCCESS;
 }
 
-PHPAPI int php_io_poll(php_stream *stream, php_socket_t fd, uint32_t events, php_deadline *dl)
+static int php_io_poll_ex(php_stream *stream, php_socket_t fd, uint32_t events, php_deadline *dl,
+		uint32_t op_flags)
 {
 	php_io_op op;
 	php_io_op_result result;
@@ -1069,6 +1070,7 @@ PHPAPI int php_io_poll(php_stream *stream, php_socket_t fd, uint32_t events, php
 		return -1;
 	}
 	php_io_op_poll(&op, f.handle, fd, events, *dl);
+	op.flags |= op_flags;
 	op.stream = stream;
 	zend_result rc = php_io_op_register_wait(&op, stream, events);
 	if (rc == SUCCESS) {
@@ -1081,6 +1083,11 @@ PHPAPI int php_io_poll(php_stream *stream, php_socket_t fd, uint32_t events, php
 		return -1;
 	}
 	return php_io_poll_result_to_revents(&result, events);
+}
+
+PHPAPI int php_io_poll(php_stream *stream, php_socket_t fd, uint32_t events, php_deadline *dl)
+{
+	return php_io_poll_ex(stream, fd, events, dl, 0);
 }
 
 /* Status to a syscall-like return for a data op; true when the caller is done */
@@ -1159,6 +1166,9 @@ static zend_always_inline ssize_t php_io_descriptor_op(php_stream *stream, php_d
 		}
 		prep(&op, f.handle, stream, c, *dl);
 		op.stream = stream;
+		if (!direct) {
+			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
+		}
 		if (php_io_op_register_wait(&op, stream, op.ready_events) == FAILURE
 				|| php_io_run(&op, &result) == FAILURE) {
 			php_io_set_errno(ECANCELED);
@@ -1247,7 +1257,7 @@ static zend_always_inline ssize_t php_io_readiness_op(php_stream *stream, uint32
 		if (waited && dl->hrtime == 0) {
 			break;
 		}
-		if (php_io_poll(stream, c->fd, events, dl) <= 0) {
+		if (php_io_poll_ex(stream, c->fd, events, dl, PHP_IO_OP_F_AFTER_DRAIN) <= 0) {
 			/* errno: ETIMEDOUT, ECANCELED or the failure */
 			ret = -1;
 			break;
@@ -1346,6 +1356,9 @@ PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sock
 	for (;;) {
 		php_io_op_connect(&op, f.handle, fd, addr, addrlen, *dl);
 		op.stream = stream;
+		if (started) {
+			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
+		}
 		if (php_io_op_register_wait(&op, stream, PHP_POLL_WRITE) == FAILURE
 				|| php_io_run(&op, &result) == FAILURE) {
 			php_io_set_errno(ECANCELED);
@@ -1371,6 +1384,7 @@ PHPAPI int php_io_connect(php_stream *stream, php_socket_t fd, const struct sock
 			/* A provider that performs the op found our connect still under
 			 * way: wait for its outcome like after a readiness report */
 			php_io_op_poll(&op, f.handle, fd, PHP_POLL_WRITE, *dl);
+			op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
 			op.stream = stream;
 			if (php_io_op_register_wait(&op, stream, PHP_POLL_WRITE) == FAILURE
 					|| php_io_run(&op, &result) == FAILURE) {
@@ -1436,6 +1450,7 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 	bool offload = FG(io_hooks) && !nonblock
 			&& (regular ? (flags & PHP_IO_HOOKS_F_FILES) : (flags & (PHP_IO_HOOKS_F_FILES | PHP_IO_HOOKS_F_DIRECT_DATA)));
 	bool ready = nonblock || !FG(io_hooks);
+	bool drained = false; /* the syscall returned EAGAIN: the next wait follows a drain */
 	for (;;) {
 		if (offload) {
 			prep(&op, f.handle, fd, buf, len, offset, *dl);
@@ -1453,6 +1468,7 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 			if (php_io_data_result(&result, &ret)) {
 				if (ret < 0 && !regular && PHP_IS_TRANSIENT_ERROR(errno)) {
 					ready = false;
+					drained = true;
 					continue;
 				}
 				break;
@@ -1465,6 +1481,9 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 			 * identity so a handle keyed provider can */
 			uint32_t events = prep == php_io_op_read ? PHP_POLL_READ : PHP_POLL_WRITE;
 			php_io_op_poll(&op, f.handle, fd, events, *dl);
+			if (drained) {
+				op.flags |= PHP_IO_OP_F_AFTER_DRAIN;
+			}
 			op.stream = stream;
 			if (php_io_op_register_wait(&op, stream, events) == FAILURE
 					|| php_io_run(&op, &result) == FAILURE) {
@@ -1490,6 +1509,7 @@ static ssize_t php_io_file_op(php_stream *stream, int fd, php_deadline *dl, bool
 		}
 		if (ret < 0 && !regular && !nonblock && PHP_IS_TRANSIENT_ERROR(errno)) {
 			ready = false;
+			drained = true;
 			continue;
 		}
 		break;

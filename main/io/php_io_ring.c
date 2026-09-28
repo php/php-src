@@ -33,6 +33,19 @@ ZEND_STATIC_ASSERT(sizeof(php_siginfo_t) == sizeof(ior_siginfo_t), "php_siginfo_
  * at delivery; it is malloc'ed, since the record outlives the request when the backend cannot be
  * stopped. */
 typedef struct _php_io_ring_req php_io_ring_req;
+typedef struct _php_io_ring_reg php_io_ring_reg;
+
+/* An Edge-registered descriptor: what the ring keeps between the waits on it. The first wait after
+ * a drain arms a multishot poll whose edges answer the waits parked on the record, or are kept as
+ * ready bits for the next one; a Poll op that checks readiness at arm time stays single-shot. */
+struct _php_io_ring_reg {
+	php_socket_t fd;
+	uint32_t edge; /* PHP_POLL_* events registered Edge */
+	uint32_t ready; /* IOR_POLL_* reported by the multishot and consumed by no wait */
+	bool hup; /* a hangup or error was reported: every wait completes at once */
+	php_io_ring_req *poll; /* the armed multishot poll, NULL when none */
+	uint32_t poll_mask; /* what it watches */
+};
 
 struct _php_io_ring_req {
 	php_io_op *op;
@@ -57,6 +70,12 @@ struct _php_io_ring_req {
 	bool ready; /* top-level: completion to deliver */
 	bool fired; /* group: in the fired list */
 	bool group_done; /* member: the group folded already */
+	bool multishot; /* an Edge record's multishot poll, without an op */
+	php_io_ring_reg *reg; /* multishot: its record, NULL once removed */
+	php_io_ring_reg *waiting; /* a wait parked on an Edge record, without an entry */
+	uint32_t w_mask; /* IOR_POLL_* the parked wait wants */
+	php_io_ring_req *w_prev; /* the parked waits */
+	php_io_ring_req *w_next;
 	php_io_ring_req **members; /* group */
 	uint32_t n_members;
 	php_io_ring_req *prev; /* live list */
@@ -79,6 +98,7 @@ struct _php_io_ring_req {
 typedef struct {
 	uintptr_t data;
 	int32_t res;
+	bool more; /* IOR_CQE_F_MORE: a multishot's edge, not its last completion */
 } php_io_ring_cqe;
 
 struct php_io_ring {
@@ -95,6 +115,8 @@ struct php_io_ring {
 	uint32_t n_cancel_pending;
 	php_io_ring_req *bl_head; /* ops waiting for room, oldest first */
 	php_io_ring_req *bl_tail;
+	HashTable regs; /* fd -> php_io_ring_reg */
+	php_io_ring_req *waiting; /* waits parked on Edge records */
 	php_io_ring_req **ready;
 	uint32_t n_ready;
 	uint32_t ready_cap;
@@ -202,6 +224,7 @@ PHPAPI php_io_ring *php_io_ring_create(uint32_t entries, bool fd_nonblock)
 	ring->cqes_cap = 64;
 	ring->cqes = safe_emalloc(ring->cqes_cap, sizeof(*ring->cqes), 0);
 	ring->batch = safe_emalloc(ring->cqes_cap, sizeof(*ring->batch), 0);
+	zend_hash_init(&ring->regs, 8, NULL, NULL, 0);
 	return ring;
 }
 
@@ -238,18 +261,56 @@ PHPAPI uint32_t php_io_ring_supported_hook_flags(php_io_ring *ring)
 	return flags;
 }
 
-/* Every wait is a single-shot poll so far: nothing is kept for an Edge pair yet */
+static php_io_ring_reg *php_io_ring_reg_get(php_io_ring *ring, php_socket_t fd, bool create)
+{
+	php_io_ring_reg *rec = zend_hash_index_find_ptr(&ring->regs, (zend_ulong) fd);
+	if (!rec && create) {
+		rec = ecalloc(1, sizeof(*rec));
+		rec->fd = fd;
+		zend_hash_index_add_new_ptr(&ring->regs, (zend_ulong) fd, rec);
+	}
+	return rec;
+}
+
+static void php_io_ring_reg_disarm(php_io_ring *ring, php_io_ring_reg *rec);
+
+/* The record is found by descriptor, never through the registration, so one a replaced provider
+ * left behind is never dereferenced through a stale pointer. Nothing is armed here: the first wait
+ * after a drain does that, when it knows what to keep. */
 PHPAPI zend_result php_io_ring_add(php_io_ring *ring, php_io_registration *reg)
 {
 	if (php_io_ring_foreign(ring)) {
 		errno = EPERM;
 		return FAILURE;
 	}
+	if (reg->fd == SOCK_ERR || !(reg->event == PHP_POLL_READ || reg->event == PHP_POLL_WRITE)) {
+		errno = EBADF;
+		return FAILURE;
+	}
+	if (!(ring->features & IOR_FEAT_POLL_ADD)) {
+		/* Served as one-shot waits */
+		return SUCCESS;
+	}
+	php_io_ring_reg *rec = php_io_ring_reg_get(ring, reg->fd, true);
+	rec->edge |= reg->event;
 	return SUCCESS;
 }
 
 PHPAPI void php_io_ring_remove(php_io_ring *ring, php_io_registration *reg)
 {
+	php_io_ring_reg *rec = php_io_ring_reg_get(ring, reg->fd, false);
+	if (!rec) {
+		return;
+	}
+	rec->edge &= ~reg->event;
+	if (rec->poll) {
+		/* Cancelled before the descriptor closes; a remaining direction re-arms at its next wait */
+		php_io_ring_reg_disarm(ring, rec);
+	}
+	if (!rec->edge) {
+		zend_hash_index_del(&ring->regs, (zend_ulong) rec->fd);
+		efree(rec);
+	}
 }
 
 PHPAPI php_socket_t php_io_ring_notify_fd(php_io_ring *ring)
@@ -278,10 +339,11 @@ PHPAPI uint32_t php_io_ring_count_pending(php_io_ring *ring)
 	if (php_io_ring_foreign(ring)) {
 		return 0;
 	}
-	/* Orphans included: a loop must keep reaping until they settled */
+	/* Orphans included: a loop must keep reaping until they settled. A
+	 * multishot poll owns nothing of a caller's and settles when it can. */
 	uint32_t n = ring->pending;
 	for (php_io_ring_req *r = ring->live; r; r = r->next) {
-		if (r->orphaned && !r->ready && !php_io_ring_req_settled(r)) {
+		if (r->orphaned && !r->ready && !r->multishot && !php_io_ring_req_settled(r)) {
 			n++;
 		}
 	}
@@ -483,21 +545,67 @@ static void php_io_ring_req_discard(php_io_ring_req *req)
 	}
 }
 
-static php_io_ring_req *php_io_ring_req_create(php_io_ring *ring, php_io_op *op, void *data)
+static php_io_ring_req *php_io_ring_req_alloc(php_io_ring *ring)
 {
 	php_io_ring_req *req = pecalloc(1, sizeof(*req), 1);
-	req->op = op;
-	req->data = data;
-	req->type = op->type;
-	req->deadline = op->deadline;
 	req->main_res = -1;
-	php_io_ring_req_capture(req, op);
 	req->next = ring->live;
 	if (ring->live) {
 		ring->live->prev = req;
 	}
 	ring->live = req;
 	return req;
+}
+
+static php_io_ring_req *php_io_ring_req_create(php_io_ring *ring, php_io_op *op, void *data)
+{
+	php_io_ring_req *req = php_io_ring_req_alloc(ring);
+	req->op = op;
+	req->data = data;
+	req->type = op->type;
+	req->deadline = op->deadline;
+	php_io_ring_req_capture(req, op);
+	return req;
+}
+
+/* Records with a completion still to come, the armed multishots aside: what a wait with nothing
+ * pending has to see settled before it returns */
+static bool php_io_ring_settling(php_io_ring *ring)
+{
+	for (php_io_ring_req *r = ring->live; r; r = r->next) {
+		if (!r->multishot) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/* Parked waits */
+
+static void php_io_ring_waiter_park(php_io_ring *ring, php_io_ring_req *req, php_io_ring_reg *rec, uint32_t mask)
+{
+	req->waiting = rec;
+	req->w_mask = mask;
+	req->w_prev = NULL;
+	req->w_next = ring->waiting;
+	if (ring->waiting) {
+		ring->waiting->w_prev = req;
+	}
+	ring->waiting = req;
+}
+
+static void php_io_ring_waiter_settle(php_io_ring *ring, php_io_ring_req *req)
+{
+	if (req->w_prev) {
+		req->w_prev->w_next = req->w_next;
+	} else {
+		ring->waiting = req->w_next;
+	}
+	if (req->w_next) {
+		req->w_next->w_prev = req->w_prev;
+	}
+	req->w_prev = req->w_next = NULL;
+	req->waiting = NULL;
 }
 
 static void php_io_ring_backlog_push(php_io_ring *ring, php_io_ring_req *req)
@@ -537,6 +645,13 @@ static void php_io_ring_req_free(php_io_ring *ring, php_io_ring_req *req)
 	}
 	if (req->backlogged) {
 		php_io_ring_backlog_remove(ring, req);
+	}
+	if (req->waiting) {
+		php_io_ring_waiter_settle(ring, req);
+	}
+	if (req->reg) {
+		req->reg->poll = NULL;
+		req->reg = NULL;
 	}
 	if (req->cancel_pending) {
 		ring->n_cancel_pending--;
@@ -855,10 +970,111 @@ static void php_io_ring_req_fail(php_io_ring *ring, php_io_ring_req *req, int er
 	php_io_ring_req_complete(ring, req);
 }
 
+static void php_io_ring_req_main_cqe(php_io_ring *ring, php_io_ring_req *req, int32_t res);
+
+/* The multishot poll of a record: one entry, its edges come back with IOR_CQE_F_MORE */
+static bool php_io_ring_reg_arm(php_io_ring *ring, php_io_ring_reg *rec)
+{
+	ior_sqe *sqe;
+	uint32_t mask = php_io_ring_poll_mask_to_ior(rec->edge);
+	if (!php_io_ring_get_sqes(ring, &sqe, 1)) {
+		return false;
+	}
+	php_io_ring_req *req = php_io_ring_req_alloc(ring);
+	req->type = PHP_IO_OP_POLL;
+	req->multishot = true;
+	req->reg = rec;
+	php_deadline_init_infinite(&req->deadline);
+	ior_prep_poll_multishot(ring->ctx, sqe, (ior_fd_t) rec->fd, mask);
+	ior_sqe_set_data(ring->ctx, sqe, req);
+	rec->poll = req;
+	rec->poll_mask = mask;
+	php_io_ring_flush(ring);
+	return true;
+}
+
+/* The multishot is let go: its last completion frees the entry, the record forgets it */
+static void php_io_ring_reg_disarm(php_io_ring *ring, php_io_ring_reg *rec)
+{
+	php_io_ring_req *req = rec->poll;
+	rec->poll = NULL;
+	req->reg = NULL;
+	if (php_io_ring_foreign(ring)) {
+		req->main_done = true;
+	} else if (!req->main_done && !req->cancelled) {
+		req->cancelled = true;
+		if (!php_io_ring_submit_cancel(ring, req)) {
+			req->cancel_pending = true;
+			ring->n_cancel_pending++;
+		}
+	}
+	req->orphaned = true;
+	if (php_io_ring_req_settled(req)) {
+		php_io_ring_req_free(ring, req);
+	}
+}
+
+/* An edge of the record: the parked waits it answers complete, the rest is kept for the next one;
+ * a hangup or error answers every wait from now on */
+static void php_io_ring_reg_edge(php_io_ring *ring, php_io_ring_reg *rec, uint32_t res)
+{
+	bool failure = (res & (IOR_POLL_ERR | IOR_POLL_HUP | IOR_POLL_NVAL)) != 0;
+	uint32_t consumed = 0;
+	if (failure) {
+		rec->hup = true;
+	}
+	php_io_ring_req *w = ring->waiting;
+	while (w) {
+		php_io_ring_req *next = w->w_next;
+		if (w->waiting == rec && (failure || (w->w_mask & res))) {
+			consumed |= w->w_mask;
+			php_io_ring_waiter_settle(ring, w);
+			php_io_ring_req_main_cqe(ring, w, (int32_t) res);
+		}
+		w = next;
+	}
+	rec->ready |= res & rec->poll_mask & ~consumed;
+}
+
+/* A wait after a drain on an Edge pair: answered from the record, or parked on it behind the
+ * multishot poll armed at the first such wait. False when the wait takes its own entry. */
+static bool php_io_ring_edge_wait(php_io_ring *ring, php_io_ring_req *req)
+{
+	php_io_op *op = req->op;
+	if (op->type != PHP_IO_OP_POLL || !(op->flags & PHP_IO_OP_F_AFTER_DRAIN) || !op->registration
+			|| op->registration->trigger != PHP_IO_TRIGGER_EDGE) {
+		return false;
+	}
+	uint32_t events = op->u.poll.events & (PHP_POLL_READ | PHP_POLL_WRITE);
+	php_io_ring_reg *rec = php_io_ring_reg_get(ring, op->fd, false);
+	if (!events || !rec || (rec->edge & events) != events) {
+		return false;
+	}
+	uint32_t mask = php_io_ring_poll_mask_to_ior(events);
+	if (rec->hup || (rec->ready & mask)) {
+		uint32_t res = (rec->ready & mask) | (rec->hup ? IOR_POLL_HUP : 0);
+		rec->ready &= ~mask;
+		php_io_ring_req_main_cqe(ring, req, (int32_t) res);
+		return true;
+	}
+	if (rec->poll && rec->poll_mask != php_io_ring_poll_mask_to_ior(rec->edge)) {
+		/* A direction registered since: the new poll reports what is ready now */
+		php_io_ring_reg_disarm(ring, rec);
+	}
+	if (!rec->poll && !php_io_ring_reg_arm(ring, rec)) {
+		return false;
+	}
+	php_io_ring_waiter_park(ring, req, rec, mask);
+	return true;
+}
+
 /* Submitted, or kept in the backlog until the ring has room; false when
  * the op failed, errno set */
 static bool php_io_ring_start(php_io_ring *ring, php_io_ring_req *req)
 {
+	if (php_io_ring_edge_wait(ring, req)) {
+		return true;
+	}
 	if (!ring->bl_head && php_io_ring_submit_one(ring, req) == SUCCESS) {
 		return true;
 	}
@@ -943,6 +1159,12 @@ static void php_io_ring_req_cancel(php_io_ring *ring, php_io_ring_req *req)
 		req->main_done = true;
 		return;
 	}
+	if (req->waiting) {
+		/* Never reached the backend: the record's multishot stays */
+		php_io_ring_waiter_settle(ring, req);
+		req->main_done = true;
+		return;
+	}
 	if (!req->main_done && !req->cancelled) {
 		req->cancelled = true;
 		if (!php_io_ring_submit_cancel(ring, req)) {
@@ -1001,6 +1223,9 @@ static void php_io_ring_req_cancel_or_forget(php_io_ring *ring, php_io_ring_req 
 	if (php_io_ring_foreign(ring)) {
 		if (req->backlogged) {
 			php_io_ring_backlog_remove(ring, req);
+		}
+		if (req->waiting) {
+			php_io_ring_waiter_settle(ring, req);
 		}
 		req->main_done = true;
 		req->lt_done = true;
@@ -1266,10 +1491,42 @@ static void php_io_ring_fold_all(php_io_ring *ring)
 	}
 }
 
-static void php_io_ring_process_cqe(php_io_ring *ring, uintptr_t data, int32_t res)
+/* A multishot poll's completion: an edge of its record, or its last one after a cancel, an error
+ * or a full completion queue, after which the record re-arms at the next wait and a possibly
+ * missed edge becomes at most one spurious wakeup */
+static void php_io_ring_multishot_cqe(php_io_ring *ring, php_io_ring_req *req, int32_t res, bool more)
+{
+	php_io_ring_reg *rec = req->reg;
+	if (more) {
+		if (rec && res > 0) {
+			php_io_ring_reg_edge(ring, rec, (uint32_t) res);
+		}
+		return;
+	}
+	req->main_done = true;
+	if (req->cancel_pending) {
+		req->cancel_pending = false;
+		ring->n_cancel_pending--;
+	}
+	if (rec) {
+		rec->poll = NULL;
+		req->reg = NULL;
+		php_io_ring_reg_edge(ring, rec, res > 0 ? (uint32_t) res : rec->poll_mask);
+	}
+	req->orphaned = true;
+	if (php_io_ring_req_settled(req)) {
+		php_io_ring_req_free(ring, req);
+	}
+}
+
+static void php_io_ring_process_cqe(php_io_ring *ring, uintptr_t data, int32_t res, bool more)
 {
 	php_io_ring_req *req = (php_io_ring_req *) (data & ~PHP_IO_RING_TAG_MASK);
 	if (!req) {
+		return;
+	}
+	if (req->multishot && (data & PHP_IO_RING_TAG_MASK) == 0) {
+		php_io_ring_multishot_cqe(ring, req, res, more);
 		return;
 	}
 	switch (data & PHP_IO_RING_TAG_MASK) {
@@ -1300,10 +1557,11 @@ static uint32_t php_io_ring_reap(php_io_ring *ring)
 		for (unsigned i = 0; i < n; i++) {
 			ring->batch[i].data = (uintptr_t) ior_cqe_get_data(ring->ctx, ring->cqes[i]);
 			ring->batch[i].res = ior_cqe_get_res(ring->ctx, ring->cqes[i]);
+			ring->batch[i].more = (ior_cqe_get_flags(ring->ctx, ring->cqes[i]) & IOR_CQE_F_MORE) != 0;
 		}
 		ior_cq_advance(ring->ctx, n);
 		for (unsigned i = 0; i < n; i++) {
-			php_io_ring_process_cqe(ring, ring->batch[i].data, ring->batch[i].res);
+			php_io_ring_process_cqe(ring, ring->batch[i].data, ring->batch[i].res, ring->batch[i].more);
 		}
 		total += n;
 	}
@@ -1320,9 +1578,9 @@ static void php_io_ring_progress(php_io_ring *ring)
 	php_io_ring_flush(ring);
 }
 
-/* Ops still in the backlog at their deadline time out here; returns the
- * next such deadline */
-static zend_hrtime_t php_io_ring_expire_backlog(php_io_ring *ring, zend_hrtime_t now)
+/* Ops still in the backlog or parked on a record at their deadline time out
+ * here, having no entry to link a timeout to; returns the next such deadline */
+static zend_hrtime_t php_io_ring_expire(php_io_ring *ring, zend_hrtime_t now)
 {
 	zend_hrtime_t next = ZEND_HRTIME_T_MAX;
 	php_io_ring_req *r = ring->bl_head;
@@ -1337,6 +1595,19 @@ static zend_hrtime_t php_io_ring_expire_backlog(php_io_ring *ring, zend_hrtime_t
 			}
 		}
 		r = bl_next;
+	}
+	r = ring->waiting;
+	while (r) {
+		php_io_ring_req *w_next = r->w_next;
+		if (!php_deadline_is_infinite(&r->deadline)) {
+			if (r->deadline.hrtime <= now) {
+				php_io_ring_waiter_settle(ring, r);
+				php_io_ring_req_main_cqe(ring, r, -ETIME);
+			} else if (r->deadline.hrtime < next) {
+				next = r->deadline.hrtime;
+			}
+		}
+		r = w_next;
 	}
 	php_io_ring_fold_all(ring);
 	return next;
@@ -1410,7 +1681,7 @@ PHPAPI int php_io_ring_wait(php_io_ring *ring, php_io_queue_completion *out, uin
 	zend_hrtime_t limit = dl ? dl->hrtime : ZEND_HRTIME_T_MAX;
 	/* Only orphans: once they settled there is nothing to report, as
 	 * count_pending() told */
-	bool orphans_only = ring->pending == 0 && ring->live;
+	bool orphans_only = ring->pending == 0 && php_io_ring_settling(ring);
 
 	if (max == 0) {
 		return 0;
@@ -1423,7 +1694,7 @@ PHPAPI int php_io_ring_wait(php_io_ring *ring, php_io_queue_completion *out, uin
 	for (;;) {
 		php_io_ring_progress(ring);
 		zend_hrtime_t now = zend_hrtime();
-		zend_hrtime_t next = php_io_ring_expire_backlog(ring, now);
+		zend_hrtime_t next = php_io_ring_expire(ring, now);
 		if (ring->n_ready) {
 			return (int) php_io_ring_deliver(ring, out, max);
 		}
@@ -1431,7 +1702,7 @@ PHPAPI int php_io_ring_wait(php_io_ring *ring, php_io_queue_completion *out, uin
 			return 0;
 		}
 		if (ring->pending == 0) {
-			if (ring->live) {
+			if (php_io_ring_settling(ring)) {
 				orphans_only = true;
 			} else if (orphans_only) {
 				return 0;
@@ -1472,6 +1743,16 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring)
 {
 	bool foreign = php_io_ring_foreign(ring);
 
+	/* The Edge records go first: their multishots settle like any entry */
+	php_io_ring_reg *rec;
+	ZEND_HASH_FOREACH_PTR(&ring->regs, rec) {
+		if (rec->poll) {
+			rec->poll->reg = NULL;
+		}
+		efree(rec);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(&ring->regs);
+
 	/* Nobody takes a completion any more: every op forgets its record, as
 	 * after a cancel, and every record is an orphan */
 	for (php_io_ring_req *r = ring->live; r; r = r->next) {
@@ -1483,6 +1764,10 @@ PHPAPI void php_io_ring_destroy(php_io_ring *ring)
 		}
 		if (r->backlogged) {
 			php_io_ring_backlog_remove(ring, r);
+			r->main_done = true;
+		}
+		if (r->waiting) {
+			php_io_ring_waiter_settle(ring, r);
 			r->main_done = true;
 		}
 		if (foreign) {

@@ -319,8 +319,9 @@ static void php_io_poll_req_arm(php_io_poll_queue *q, php_io_poll_req *req)
 
 	php_io_poll_fdreg *reg = php_io_poll_fdreg_get(q, (int) op->fd, true);
 
-	/* A readiness wait on an Edge pair: answered from the record when it can be */
-	bool edge_wait = op->type != PHP_IO_OP_POLL && op->registration && (reg->edge & events) == events;
+	/* A wait after a drain on an Edge pair: answered from the record when it can be */
+	bool edge_wait = (op->flags & PHP_IO_OP_F_AFTER_DRAIN) && op->registration
+			&& op->registration->trigger == PHP_IO_TRIGGER_EDGE && (reg->edge & events) == events;
 	if (edge_wait && (reg->hup || (reg->ready & events))) {
 		uint32_t revents = reg->hup ? (events | PHP_POLL_HUP) : (reg->ready & events);
 		reg->ready &= ~events;
