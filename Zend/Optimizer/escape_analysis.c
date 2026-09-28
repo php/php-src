@@ -173,6 +173,7 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 				 && !ce->destructor
 				 && !ce->__get
 				 && !ce->__set
+				 && !ce->__isset
 				 && !(ce->ce_flags & forbidden_flags)
 				 && (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 					return 1;
@@ -242,6 +243,7 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 				 && !ce->destructor
 				 && !ce->__get
 				 && !ce->__set
+				 && !ce->__isset
 				 && !ce->parent) {
 					return 1;
 				}
