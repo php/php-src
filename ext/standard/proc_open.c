@@ -300,13 +300,18 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	 * But if we're freeing the resource because of GC, don't wait. */
 #ifdef PHP_WIN32
 	if (FG(pclose_wait)) {
-		WaitForSingleObject(proc->childHandle, INFINITE);
-	}
-	GetExitCodeProcess(proc->childHandle, &wstatus);
-	if (wstatus == STILL_ACTIVE) {
-		FG(pclose_ret) = -1;
+		/* The wait is an op, served by a ring or waited for by the core; the handle the
+		 * resource holds keeps the pid valid until the completion arrives */
+		int status = 0;
+		php_deadline dl = php_io_deadline_infinite();
+		if (php_io_waitpid(NULL, (pid_t) proc->child, &status, 0, &dl) == (pid_t) proc->child) {
+			FG(pclose_ret) = status;
+		} else {
+			FG(pclose_ret) = -1;
+		}
 	} else {
-		FG(pclose_ret) = wstatus;
+		GetExitCodeProcess(proc->childHandle, &wstatus);
+		FG(pclose_ret) = wstatus == STILL_ACTIVE ? -1 : (int) wstatus;
 	}
 	CloseHandle(proc->childHandle);
 

@@ -1739,6 +1739,110 @@ PHPAPI int php_io_getnameinfo(const struct sockaddr *addr, socklen_t addrlen, in
 	return getnameinfo(addr, addrlen, host, hostlen, service, servicelen, flags);
 }
 
+#ifdef PHP_WIN32
+/* The synchronous wait: the process opened by id, WaitForSingleObject() up to the deadline, the
+ * exit code as the status. 0 when a non-blocking deadline finds it running, like WNOHANG. */
+static pid_t php_io_waitpid_sync(pid_t pid, int *status, php_deadline *dl)
+{
+	HANDLE process = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, (DWORD) pid);
+	if (!process) {
+		_set_errno(GetLastError() == ERROR_INVALID_PARAMETER ? ECHILD : EACCES);
+		return -1;
+	}
+	int remaining = dl ? php_deadline_to_timeout_ms(dl) : -1;
+	DWORD waited = WaitForSingleObject(process, remaining < 0 ? INFINITE : (DWORD) remaining);
+	pid_t ret;
+	if (waited == WAIT_OBJECT_0) {
+		DWORD code = 0;
+		if (GetExitCodeProcess(process, &code)) {
+			if (status) {
+				*status = (int) code;
+			}
+			ret = pid;
+		} else {
+			_set_errno(EACCES);
+			ret = -1;
+		}
+	} else if (waited == WAIT_TIMEOUT) {
+		if (dl && dl->hrtime == 0) {
+			ret = 0;
+		} else {
+			_set_errno(ETIMEDOUT);
+			ret = -1;
+		}
+	} else {
+		_set_errno(EACCES);
+		ret = -1;
+	}
+	CloseHandle(process);
+	return ret;
+}
+
+/* The wait is the provider's where there is one: a ring serves it from a process handle, the
+ * poll queue has no source for it and answers Unsupported, and the core waits itself then. pid
+ * names any process, not only a child, and options are ignored: a non-blocking deadline is the
+ * WNOHANG of this platform. */
+PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int options, php_deadline *dl)
+{
+	int recorded;
+	pid_t which = pid;
+	if (pid <= 0) {
+		_set_errno(ENOTSUP);
+		return -1;
+	}
+	if (php_io_child_take_reaped(&which, &recorded)) {
+		if (status) {
+			*status = recorded;
+		}
+		return which;
+	}
+
+	if (FG(io_hooks) && !(dl && dl->hrtime == 0)) {
+		php_io_op op;
+		php_io_op_result result;
+		pid_t ret;
+
+		for (;;) {
+			php_io_op_waitpid(&op, handle, pid, options, status, *dl);
+			if (php_io_run(&op, &result) == FAILURE) {
+				php_io_set_errno(ECANCELED);
+				ret = -1;
+				break;
+			}
+			if (result.status == PHP_IO_READY) {
+				/* A handle the provider watched: what it recorded, or the process asked without waiting */
+				which = pid;
+				if (php_io_child_take_reaped(&which, &recorded)) {
+					if (status) {
+						*status = recorded;
+					}
+					ret = which;
+					break;
+				}
+				php_deadline now;
+				php_deadline_init_nonblock(&now);
+				ret = php_io_waitpid_sync(pid, status, &now);
+				if (ret != 0) {
+					break;
+				}
+				continue;
+			}
+			if (result.status == PHP_IO_UNSUPPORTED) {
+				ret = php_io_waitpid_sync(pid, status, dl);
+				break;
+			}
+			ssize_t r;
+			php_io_data_result(&result, &r);
+			ret = (pid_t) r;
+			break;
+		}
+		return ret;
+	}
+
+	return php_io_waitpid_sync(pid, status, dl);
+}
+#endif
+
 #ifndef PHP_WIN32
 /* The wait is the provider's; after Ready the core takes what a handle recorded or asks the kernel
  * without waiting, and waits again when nothing changed yet. The op's descriptor is the process or

@@ -32,6 +32,7 @@
 #include <signal.h>
 #ifdef PHP_WIN32
 # include "win32/sockets.h"
+# include "win32/winutil.h"
 #endif
 #ifndef PHP_WIN32
 # include <sys/wait.h>
@@ -764,7 +765,28 @@ typedef struct {
 	bool reaped;
 	bool exited; /* reaped here or elsewhere */
 	int status;
+#ifdef PHP_WIN32
+	HANDLE process; /* the process object: keeps the pid valid and answers the exit code */
+#endif
 } php_io_poll_process_handle_data;
+
+#ifdef PHP_WIN32
+/* The process object answers at any time whether the process exited, and its exit code */
+static void php_io_poll_process_handle_probe(php_io_poll_process_handle_data *data)
+{
+	if (data->exited || !data->process) {
+		return;
+	}
+	if (WaitForSingleObject(data->process, 0) == WAIT_OBJECT_0) {
+		DWORD code = 0;
+		if (GetExitCodeProcess(data->process, &code)) {
+			data->status = (int) code;
+			data->reaped = true;
+		}
+		data->exited = true;
+	}
+}
+#endif
 
 static php_socket_t php_io_poll_process_handle_get_fd(php_poll_handle_object *handle)
 {
@@ -781,6 +803,11 @@ static void php_io_poll_process_handle_cleanup(php_poll_handle_object *handle)
 {
 	php_io_poll_process_handle_data *data = handle->handle_data;
 	if (data) {
+#ifdef PHP_WIN32
+		if (data->process) {
+			CloseHandle(data->process);
+		}
+#endif
 		if (data->fd >= 0) {
 			close(data->fd);
 		}
@@ -796,7 +823,9 @@ static bool php_io_poll_process_handle_fired(php_poll_handle_object *handle)
 	if (!data) {
 		return false;
 	}
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+	php_io_poll_process_handle_probe(data);
+#else
 	if (!data->exited) {
 		int status;
 		pid_t pid;
@@ -848,7 +877,17 @@ static zend_object *php_io_poll_process_handle_create_object(zend_class_entry *c
 static zend_result php_io_poll_process_handle_init(php_poll_handle_object *handle, pid_t pid, uint32_t arg_num)
 {
 	int fd = -1;
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+	HANDLE process = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, (DWORD) pid);
+	if (!process) {
+		if (arg_num) {
+			char *msg = php_win32_error_to_msg(GetLastError());
+			zend_argument_value_error(arg_num, "must be the id of a running process: %s", msg);
+			php_win32_error_msg_free(msg);
+		}
+		return FAILURE;
+	}
+#else
 	fd = php_poll_process_source_open(pid);
 	if (fd < 0 && errno != ENOSYS) {
 		if (arg_num) {
@@ -860,6 +899,9 @@ static zend_result php_io_poll_process_handle_init(php_poll_handle_object *handl
 	php_io_poll_process_handle_data *data = ecalloc(1, sizeof(*data));
 	data->pid = pid;
 	data->fd = fd;
+#ifdef PHP_WIN32
+	data->process = process;
+#endif
 	handle->handle_data = data;
 	return SUCCESS;
 }
@@ -883,6 +925,11 @@ PHPAPI bool php_io_poll_process_handle_status(zend_object *handle_obj, int *stat
 		return false;
 	}
 	php_io_poll_process_handle_data *data = handle->handle_data;
+#ifdef PHP_WIN32
+	if (data) {
+		php_io_poll_process_handle_probe(data);
+	}
+#endif
 	if (!data || !data->reaped) {
 		return false;
 	}
@@ -956,6 +1003,9 @@ PHP_METHOD(Io_Poll_ProcessHandle, getStatus)
 		zend_throw_error(NULL, "Io\\Poll\\ProcessHandle object is not constructed");
 		RETURN_THROWS();
 	}
+#ifdef PHP_WIN32
+	php_io_poll_process_handle_probe(data);
+#endif
 	if (!data->reaped) {
 		RETURN_NULL();
 	}

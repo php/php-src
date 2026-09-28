@@ -312,9 +312,11 @@ PHPAPI int php_io_getnameinfo(const struct sockaddr *addr, socklen_t addrlen, in
 		size_t hostlen, char *service, size_t servicelen, php_deadline *dl);
 /* FAILURE when cancelled; interrupted may be NULL */
 PHPAPI zend_result php_io_sleep(php_deadline dl, bool *interrupted);
-#ifndef PHP_WIN32
+/* On Windows pid names any process, options are ignored, a non-blocking deadline asks without
+ * waiting and status receives the exit code */
 PHPAPI pid_t php_io_waitpid(zend_object *handle, pid_t pid, int *status, int options,
 		php_deadline *dl);
+#ifndef PHP_WIN32
 /* A timed out wait fails with EAGAIN */
 PHPAPI int php_io_sigwait(zend_object *handle, const php_sigset_t *set, php_siginfo_t *info,
 		php_deadline *dl);
