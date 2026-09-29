@@ -135,6 +135,8 @@ PHP                                                                        NEWS
     "array given" regardless of the value passed. (Ilia Alshanetsky)
   . Fixed PDOStatement::bindParam() and bindColumn() leaking the driver
     options value. (Ilia Alshanetsky)
+  . Fixed PDOStatement not reporting its bound parameters and columns to the
+    cycle collector. (Ilia Alshanetsky)
 
 - PDO_DBLIB:
   . Fixed bug GH-23741 (segfault after a failed query inside a PDO
