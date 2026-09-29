@@ -9783,16 +9783,42 @@ static void zend_compile_implements(zend_ast *ast) /* {{{ */
 	uint32_t i;
 
 	interface_names = emalloc(sizeof(zend_class_name) * list->children);
+	zend_interface_delegation *interface_delegations = NULL;
+	uint32_t num_interface_delegations = 0;
+	if (list->children) {
+		interface_delegations = ecalloc(list->children, sizeof(zend_interface_delegation));
+	}
 
 	for (i = 0; i < list->children; ++i) {
-		zend_ast *class_ast = list->child[i];
+		zend_ast *item = list->child[i];
+		zend_ast *class_ast = item;
+		if (item->kind == ZEND_AST_INTERFACE_DELEGATION) {
+			zend_ast *interface_ast = item->child[0];
+			zend_ast *variable_ast = item->child[1];
+			const zval *variable_name;
+
+			class_ast = interface_ast;
+			variable_name = zend_ast_get_zval(variable_ast);
+			ZEND_ASSERT(Z_TYPE_P(variable_name) == IS_STRING);
+
+			interface_delegations[num_interface_delegations].interface_index = i;
+			interface_delegations[num_interface_delegations].property_name =
+				zend_string_copy(Z_STR_P(variable_name));
+
+			num_interface_delegations++;
+		}
 		interface_names[i].name =
 			zend_resolve_const_class_name_reference(class_ast, "interface name");
-		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
+
+		interface_names[i].lc_name =
+			zend_string_tolower(interface_names[i].name);
 	}
 
 	ce->num_interfaces = list->children;
 	ce->interface_names = interface_names;
+
+	ce->num_interface_delegations = num_interface_delegations;
+	ce->interface_delegations = interface_delegations;
 }
 /* }}} */
 

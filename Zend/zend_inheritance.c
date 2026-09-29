@@ -1241,6 +1241,127 @@ static inheritance_status do_inheritance_check_on_method(
 }
 /* }}} */
 
+static zend_string *zend_get_interface_delegation_property(  /* {{{ */
+zend_class_entry *ce,
+zend_class_entry *iface)
+{
+	for (uint32_t i = 0; i < ce->num_interface_delegations; i++) {
+		zend_interface_delegation *delegation =
+		&ce->interface_delegations[i];
+
+		if (ce->interfaces[delegation->interface_index] == iface) {
+			return delegation->property_name;
+		}
+	}
+
+	return NULL;
+}
+/* }}} */
+
+static void ZEND_FASTCALL zend_interface_delegation_handler(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+{
+	zval rv;
+	zend_class_entry *ce = Z_OBJCE_P(ZEND_THIS);
+	zend_class_entry *iface = execute_data->func->common.scope;
+
+	zend_string *property_name =
+		zend_get_interface_delegation_property(ce, iface);
+
+	if (!property_name) {
+		zend_throw_error(NULL, "Interface delegation property not found");
+		return;
+	}
+
+	zval *delegate = zend_read_property(
+		ce,
+		Z_OBJ_P(ZEND_THIS),
+		ZSTR_VAL(property_name),
+		ZSTR_LEN(property_name),
+		false,
+		&rv
+	);
+
+	zend_string *function_name = execute_data->func->common.function_name;
+
+	zend_function *func = zend_hash_find_ptr_lc(
+		&Z_OBJCE_P(delegate)->function_table,
+		function_name
+	);
+
+	if (!func) {
+		zend_throw_error(NULL, "Interface delegation method not found");
+		return;
+	}
+
+	zend_call_known_function(
+		func,
+		Z_OBJ_P(delegate),
+		Z_OBJCE_P(delegate),
+		return_value,
+		ZEND_NUM_ARGS(),
+		ZEND_CALL_ARG(execute_data, 1),
+		NULL
+	);
+}
+/* }}} */
+
+static void zend_generate_interface_delegation_methods_for_interface( /* {{{ */
+	zend_class_entry *ce,
+	zend_class_entry *iface)
+{
+	zend_function *method;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&iface->function_table, method) {
+		zend_string *method_name = method->common.function_name;
+
+		zend_function *existing =
+		zend_hash_find_ptr_lc(&ce->function_table, method_name);
+
+		if (existing && !(existing->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			continue;
+		}
+
+		zend_internal_function *generated =
+		emalloc(sizeof(zend_internal_function));
+
+		memset(generated, 0, sizeof(zend_internal_function));
+
+		generated->type = ZEND_INTERNAL_FUNCTION;
+		generated->fn_flags = method->common.fn_flags & ~ZEND_ACC_ABSTRACT;
+		generated->fn_flags |= ZEND_ACC_CALL_VIA_HANDLER;
+		generated->function_name = zend_string_copy(method_name);
+		generated->scope = iface;
+		generated->prototype = existing ? existing : method;
+		generated->num_args = method->common.num_args;
+		generated->required_num_args = method->common.required_num_args;
+		generated->arg_info = method->common.arg_info;
+		generated->attributes = NULL;
+		generated->doc_comment = NULL;
+		generated->handler = zend_interface_delegation_handler;
+
+		zend_hash_update_ptr(
+			&ce->function_table,
+			method_name,
+			generated
+		);
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+static void zend_generate_interface_delegation_methods(zend_class_entry *ce) /* {{{ */
+{
+	for (uint32_t i = 0; i < ce->num_interface_delegations; i++) {
+		zend_interface_delegation *delegation =
+		&ce->interface_delegations[i];
+
+		zend_class_entry *iface =
+		ce->interfaces[delegation->interface_index];
+
+		zend_generate_interface_delegation_methods_for_interface(ce,iface);
+	}
+}
+/* }}} */
+
 static void do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce, bool is_interface, uint32_t flags) /* {{{ */
 {
 	zval *child = zend_hash_find_known_hash(&ce->function_table, key);
@@ -3747,6 +3868,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		} else if (parent && parent->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent);
 		}
+		zend_generate_interface_delegation_methods(ce);
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT))
 			&& (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 				) {
