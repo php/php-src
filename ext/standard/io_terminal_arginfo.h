@@ -1,5 +1,5 @@
 /* This is a generated file, edit io_terminal.stub.php instead.
- * Stub hash: 4ee09e1e6eea30b57ca695b823fc64c8cfa62ee7
+ * Stub hash: 08c0a2c007b6991ce30979c5727ed83cf1728c8b
  * Has decl header: yes */
 
 #include "zend_enum.h"
