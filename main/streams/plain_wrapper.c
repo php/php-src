@@ -689,6 +689,7 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
+		case PHP_STREAM_AS_FD_FOR_POLL:
 			PHP_STDIOP_GET_FD(fd, data);
 			if (SOCK_ERR == fd) {
 				return FAILURE;

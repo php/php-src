@@ -130,6 +130,8 @@ PHP                                                                        NEWS
     output handler. (Ilia Alshanetsky)
   . Fixed proc_open() leaking descriptor zero when descriptor setup fails.
     (Ilia Alshanetsky)
+  . Fixed StreamPollHandle changing unread_bytes of a TLS stream when it is
+    added to an Io\Poll\Context. (Jakub Zelenka)
 
 - Tidy:
   . Fixed a use-after-free when a tidyNode is used after its document is
