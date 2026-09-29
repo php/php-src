@@ -335,7 +335,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 			}
 			size_t p1_length = p - p1 + 1;
 			/* convert to the encoding number and check encoding */
-			if (strncasecmp(p1, "auto", p1_length) == 0) {
+			if (p1_length == strlen("auto") && strncasecmp(p1, "auto", p1_length) == 0) {
 				if (!included_auto) {
 					const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
 					const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
