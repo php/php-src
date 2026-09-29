@@ -37,6 +37,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed stream_socket_enable_crypto() leaving the socket non-blocking
     after a handshake timeout. (Ilia Alshanetsky)
+  . Fix memory leak by doing early salt validation. (adapik)
 
 - PCNTL:
   . Fixed pcntl_signal_dispatch() dropping the queued signals when it runs while
