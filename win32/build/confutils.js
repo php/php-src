@@ -1309,18 +1309,20 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir, duplicate_so
 
 	if(is_pgo_desired(sapiname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
 		// Add compiler and link flags if PGO options are selected
-		if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
-			ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
-			ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG /GENPROFILE");
-			ADD_FLAG('LDFLAGS_' + SAPI, "/d2:-FuncCache1");
-		}
-		else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
-			ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
-			ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG /USEPROFILE");
-			ADD_FLAG('LDFLAGS_' + SAPI, "/d2:-FuncCache1");
-		}
+		if (VS_TOOLSET || ICC_TOOLSET) {
+			if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+				ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
+				ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG /GENPROFILE");
+				ADD_FLAG('LDFLAGS_' + SAPI, "/d2:-FuncCache1");
+			}
+			else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+				ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
+				ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG /USEPROFILE");
+				ADD_FLAG('LDFLAGS_' + SAPI, "/d2:-FuncCache1");
+			}
 
-		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
+			ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
+		}
 	}
 
 	if (MODE_PHPIZE) {
@@ -1525,18 +1527,20 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir, cxx_mod
 		ldflags = "";
 		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
 			// Add compiler and link flags if PGO options are selected
-			if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
-				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG /GENPROFILE");
-				ADD_FLAG('LDFLAGS_' + EXT, "/d2:-FuncCache1");
-			}
-			else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
-				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG /USEPROFILE");
-				ADD_FLAG('LDFLAGS_' + EXT, "/d2:-FuncCache1");
-			}
+			if (VS_TOOLSET || ICC_TOOLSET) {
+				if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+					ADD_FLAG('LDFLAGS_' + EXT, "/LTCG /GENPROFILE");
+					ADD_FLAG('LDFLAGS_' + EXT, "/d2:-FuncCache1");
+				}
+				else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+					ADD_FLAG('LDFLAGS_' + EXT, "/LTCG /USEPROFILE");
+					ADD_FLAG('LDFLAGS_' + EXT, "/d2:-FuncCache1");
+				}
 
-			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
+				ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
 
-			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
+				ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
+			}
 		}
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + libname + ": $(BUILD_DIR)\\" + dllname);
@@ -1569,14 +1573,16 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir, cxx_mod
 		ADD_FLAG("STATIC_EXT_CFLAGS", "$(CFLAGS_" + EXT + ")");
 		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
 			if (!static_pgo_enabled) {
-				if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
-					ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:PGINSTRUMENT");
-				}
-				else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
-					ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:PGUPDATE");
-				}
+				if (VS_TOOLSET || ICC_TOOLSET) {
+					if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+						ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:PGINSTRUMENT");
+					}
+					else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+						ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:PGUPDATE");
+					}
 
-				ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
+					ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
+				}
 				static_pgo_enabled = true;
 			}
 		}

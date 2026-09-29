@@ -41,9 +41,15 @@ if (PHP_DEBUG == "yes") {
 ARG_ENABLE('pgi', 'Generate PGO instrumented binaries', 'no');
 ARG_WITH('pgo', 'Compile optimized binaries using training data from folder', 'no');
 if (PHP_PGI == "yes" || PHP_PGO != "no") {
-	PGOMGR = PATH_PROG('pgomgr', WshShell.Environment("Process").Item("PATH"));
-	if (!PGOMGR) {
-		ERROR("--enable-pgi and --with-pgo options can only be used if PGO capable compiler is present.");
+	if (VS_TOOLSET || ICC_TOOLSET) {
+		PGOMGR = PATH_PROG('pgomgr', WshShell.Environment("Process").Item("PATH"));
+		if (!PGOMGR) {
+			ERROR("--enable-pgi and --with-pgo options can only be used if PGO capable compiler is present.");
+		}
+	} else if (CLANG_TOOLSET) {
+		if (!PATH_PROG('llvm-profdata', WshShell.Environment("Process").Item("PATH"))) {
+			ERROR("--enable-pgi and --with-pgo options can only be used if a PGO capable toolchain is present.");
+		}
 	}
 	if (PHP_PGI == "yes" && PHP_PGO != "no") {
 		ERROR("Use of both --enable-pgi and --with-pgo not allowed.");
@@ -106,11 +112,19 @@ setup_zts_stuff();
 // CFLAGS, LDFLAGS and BUILD_DIR are defined
 // Add compiler and link flags if PGO options are selected
 if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
-	ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
+	if (VS_TOOLSET || ICC_TOOLSET) {
+		ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
+	} else if (CLANG_TOOLSET) {
+		ADD_FLAG("CFLAGS", "-fprofile-generate");
+	}
 	DEFINE("PGOPGD_DIR", "$(BUILD_DIR)");
 }
 else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
-	ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
+	if (VS_TOOLSET || ICC_TOOLSET) {
+		ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
+	} else if (CLANG_TOOLSET) {
+		ADD_FLAG("CFLAGS", "-fprofile-use=" + ((PHP_PGO.length == 0 || PHP_PGO == "yes") ? "$(BUILD_DIR)" : PHP_PGO) + "/php.profdata");
+	}
 	DEFINE("PGOPGD_DIR", ((PHP_PGO.length == 0 || PHP_PGO == "yes") ? "$(BUILD_DIR)" : PHP_PGO));
 }
 
